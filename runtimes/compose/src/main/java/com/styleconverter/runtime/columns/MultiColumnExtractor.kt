@@ -42,6 +42,12 @@ object MultiColumnExtractor {
             }
         }
 
+        // Wave-47 lane Z2: ONE writing-mode read feeds both vertical flags
+        // below — the shared typography decoder, so the mode and its block
+        // direction can never disagree (and the scan runs once, not twice).
+        val wm = com.styleconverter.runtime.typography.text.TextExtractor
+            .extractWritingModeConfig(properties)
+
         return MultiColumnConfig(
             columnCount = columnCount,
             columnWidth = columnWidth,
@@ -54,13 +60,19 @@ object MultiColumnExtractor {
             // Wave-42: `continue: discard` rides the config into the
             // spanner-flow plan (see MultiColumnConfig.continueDiscard).
             continueDiscard = continueDiscard,
-            // The css-break-3 fragmentation pass is horizontal-tb only — flag
-            // vertical writing modes so MultiColumnLayout can bail (+log once)
-            // instead of slicing along the wrong axis. Delegates to the
-            // typography extractor that already owns the WritingMode IR
+            // Wave-47 lane Z2: vertical writing modes now have their OWN
+            // sole-child fragmentation pass (VerticalMulticolMeasure); this
+            // flag routes into it, and every shape that pass declines still
+            // bails (+log once) exactly as before. The shared `wm` read
+            // above is the typography decoder that owns the WritingMode IR
             // property (same properties list, so no extra plumbing upstream).
-            verticalWritingMode = com.styleconverter.runtime.typography.text.TextExtractor
-                .extractWritingModeConfig(properties).isVertical
+            verticalWritingMode = wm.isVertical,
+            // Wave-47 lane Z2: which way the vertical block axis runs
+            // (css-writing-modes-4 §6.4 — vertical-rl/sideways-rl walk
+            // right→left). Same shared read, so the flags cannot disagree.
+            verticalBlockRtl =
+                wm.writingMode == com.styleconverter.runtime.typography.text.WritingModeValue.VERTICAL_RL ||
+                    wm.writingMode == com.styleconverter.runtime.typography.text.WritingModeValue.SIDEWAYS_RL
         )
     }
 

@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
-import com.styleconverter.runtime.background.RepeatingGradientHelper
 // url() background layers: DataUri gates the scheme (only data: decodes
 // synchronously), SyncImageDecode owns the shared decode + LRU (the same
 // pipeline the wave-3 url() mask fix pinned), IRLog keeps the remote-url
@@ -56,7 +55,10 @@ import kotlin.math.sin
  * ## Limitations
  * - Remote (http/file/relative) image URLs: documented, once-logged no-op —
  *   async fetch cannot be capture-deterministic (first frame would race)
- * - Repeating conic gradients: Compose sweepGradient doesn't support TileMode
+ * - Repeating conic gradients: SweepGradient has no TileMode, so the
+ *   §3.4.4 copies are materialised as explicit stops (wave 47 — real
+ *   period, capped at GradientStopResolver.MAX_COPIES with the §3.3.3
+ *   average-solid degrade past the cap)
  *
  * Multiple background layers paint back-to-front per css-backgrounds-3 §2
  * (last source layer at the bottom, first on top), each with ITS OWN
@@ -276,20 +278,22 @@ object ColorApplier {
      * Build the Brush for a single background-image layer without any
      * sized-tile drawing. Used by the per-layer blend-mode path which
      * needs a brush per layer to feed into a saveLayer pipeline.
-     * Returns null for Url / None layers (no image loading wired up)
-     * and for repeating gradients that we don't currently re-tile in
-     * the blend pipeline (they need a size to bake the tile — the
-     * blend path always paints across the full draw rect anyway, so
-     * we approximate via the non-repeating branch's size-aware shader).
+     * Returns null for Url / None layers (no image loading wired up).
+     * Repeating gradients render their REAL §3.4.4 lattice here since
+     * wave 47 — the resolver materialises the copies inside the factory,
+     * so the blend path no longer approximates them as one clamp ramp.
      */
     private fun brushFor(image: BackgroundImageConfig): Brush? {
         return when (image) {
             // Gradient brushes take no background-position: position moves
             // the tile (css-backgrounds-3 §3.6), never the shader inside it.
+            // Wave 47: repeating flavours resolve their real §3.4.4 period
+            // inside the factories now, so the blend path composites the
+            // true lattice too (previously approximated as non-repeating).
             is BackgroundImageConfig.LinearGradient ->
-                createLinearGradientBrush(image, TileMode.Clamp)
+                createLinearGradientBrush(image)
             is BackgroundImageConfig.RadialGradient ->
-                createRadialGradientBrush(image, TileMode.Clamp)
+                createRadialGradientBrush(image)
             is BackgroundImageConfig.ConicGradient ->
                 createSweepGradientBrush(image)
             is BackgroundImageConfig.Url -> {
@@ -371,15 +375,13 @@ object ColorApplier {
      * @param config Full color config (position + shared fields)
      * @param layerSize THIS layer's background-size entry (§2.3 pairing)
      * @param layerRepeat THIS layer's two-axis background-repeat entry
-     * @param size Optional size for gradient calculations
      */
     private fun applyBackgroundImage(
         modifier: Modifier,
         image: BackgroundImageConfig,
         config: ColorConfig,
         layerSize: BackgroundSizeConfig = config.backgroundSize,
-        layerRepeat: BackgroundRepeatAxes = BackgroundRepeatAxes.from(config.backgroundRepeat),
-        size: Size = Size(500f, 500f)
+        layerRepeat: BackgroundRepeatAxes = BackgroundRepeatAxes.from(config.backgroundRepeat)
     ): Modifier {
         // url() layers take a dedicated bitmap-tile path (wave 9): the
         // brush pipeline below is gradient-only (shaders), while an image
@@ -397,48 +399,25 @@ object ColorApplier {
         if (image is BackgroundImageConfig.CrossFade) {
             return applyCrossFade(modifier, image)
         }
-        // For NON-repeating gradients we always want TileMode.Clamp regardless
-        // of background-repeat. CSS background-repeat only re-tiles a gradient
-        // when an explicit background-size makes the tile smaller than the
-        // box; that pathway is handled by the sized-tile drawBehind branch
-        // below (tile-pinned shader + BackgroundTileMath plans), so honouring
-        // `repeat` at the SHADER level too would double-tile the gradient and
-        // produce wrap-around colour bands rather than the single per-tile
-        // fill CSS specifies.
-        // The `repeating-linear-gradient(...)` form is handled by the
-        // dedicated RepeatingGradientHelper branch below and is unaffected.
-        val gradientTileMode = TileMode.Clamp
+        // Every gradient shader uses TileMode.Clamp: CSS background-repeat
+        // only re-tiles a gradient when an explicit background-size makes
+        // the tile smaller than the box — the sized-tile drawBehind branch
+        // below (tile-pinned shader + BackgroundTileMath plans) — and the
+        // `repeating-*-gradient()` FORM is materialised as explicit §3.4.4
+        // stop copies inside the brush factories themselves (wave 47,
+        // GradientStopResolver.expandRepeating), so no shader-level repeat
+        // mode is ever wanted; it would double-tile the ramp.
 
-        // Build the brush.
+        // Build the brush. All three flavours (plain AND repeating) route
+        // through the size-aware factories — the RepeatingGradientHelper
+        // dispatch is gone (wave 47): its fraction-range × diagonal period
+        // could never carry the px period of `…, white 30px` (the
+        // wave-46 gradient-border-box android-ref 0.646 defect) and its
+        // centre-phased lattice ignored the §3.4.1 line start.
         val brush: Brush? = when (image) {
-            is BackgroundImageConfig.LinearGradient -> {
-                if (image.repeating)
-                    RepeatingGradientHelper.createRepeatingLinearGradient(
-                        angle = image.angle, colorStops = image.colorStops, size = size)
-                else
-                    createLinearGradientBrush(image, gradientTileMode)
-            }
-            is BackgroundImageConfig.RadialGradient -> {
-                if (image.repeating)
-                    RepeatingGradientHelper.createRepeatingRadialGradient(
-                        // The repeating helper takes plain fractions —
-                        // resolve px centers against the size it is given.
-                        centerX = image.centerX.fraction(size.width),
-                        centerY = image.centerY.fraction(size.height),
-                        colorStops = image.colorStops, size = size)
-                else
-                    createRadialGradientBrush(image, gradientTileMode)
-            }
-            is BackgroundImageConfig.ConicGradient -> {
-                if (image.repeating)
-                    RepeatingGradientHelper.createRepeatingConicGradient(
-                        // Same fraction resolution as the radial branch.
-                        centerX = image.centerX.fraction(size.width),
-                        centerY = image.centerY.fraction(size.height),
-                        startAngle = image.angle, colorStops = image.colorStops, size = size)
-                else
-                    createSweepGradientBrush(image)
-            }
+            is BackgroundImageConfig.LinearGradient -> createLinearGradientBrush(image)
+            is BackgroundImageConfig.RadialGradient -> createRadialGradientBrush(image)
+            is BackgroundImageConfig.ConicGradient -> createSweepGradientBrush(image)
             // A bare <color> image — solid fill of the layer box.
             is BackgroundImageConfig.SolidColor ->
                 androidx.compose.ui.graphics.SolidColor(image.color)
@@ -472,25 +451,16 @@ object ColorApplier {
         // on Android while web/iOS wrapped the box-sized tile with a
         // visible seam at x=40 (wave-1 skeptic deferral, both lenses).
         val sized = layerSize as? BackgroundSizeConfig.Dimensions
-        // Repeating-gradient exclusion input (wave-1 skeptic finding): a
-        // `repeating-*-gradient` brush bakes FIXED pixel endpoints computed
-        // against a default 500x500 size (RepeatingGradientHelper), so
-        // pinShaderToTile cannot re-pin it — each tile would sample a
-        // near-constant slice of a ~707px ramp (solid first-stop colour
-        // instead of stripes). Until the repeating helpers accept a tile
-        // size, repeating gradients keep the full-box path (the pre-wave
-        // behavior); parity gap tracked in the wave-1 follow-ups.
-        val isRepeating = when (image) {
-            is BackgroundImageConfig.LinearGradient -> image.repeating
-            is BackgroundImageConfig.RadialGradient -> image.repeating
-            is BackgroundImageConfig.ConicGradient -> image.repeating
-            else -> false
-        }
         // Route through gradientNeedsGeometry so Compose and iOS agree on
         // WHEN tile geometry matters (explicit size, non-default position,
-        // or a non-`repeat` axis) — and on the repeating-gradient exclusion.
-        if (!gradientNeedsGeometry(layerSize, config.backgroundPosition,
-                                   layerRepeat, isRepeating)) {
+        // or a non-`repeat` axis). The old repeating-gradient exclusion is
+        // GONE (wave 47): its whole rationale was RepeatingGradientHelper's
+        // fixed 500×500 endpoints, which pinShaderToTile could not re-pin —
+        // the new resolver-backed brushes are fully size-aware (the §3.4.4
+        // copies re-materialise per createShader size), so a repeating
+        // gradient with an explicit background-size tiles correctly like
+        // the iOS predicate, which never had the exclusion.
+        if (!gradientNeedsGeometry(layerSize, config.backgroundPosition, layerRepeat)) {
             return modifier.background(nonNullBrush)
         }
         val pos = config.backgroundPosition
@@ -819,16 +789,14 @@ object ColorApplier {
     internal fun gradientNeedsGeometry(
         layerSize: BackgroundSizeConfig,
         position: BackgroundPositionConfig,
-        repeat: BackgroundRepeatAxes,
-        isRepeatingGradient: Boolean
+        repeat: BackgroundRepeatAxes
     ): Boolean {
-        // `repeating-*-gradient` exclusion (the wave-2 guard, checked
-        // FIRST so no knob can override it): the repeating helpers bake
-        // FIXED pixel endpoints against a default 500×500 size
-        // (RepeatingGradientHelper), so pinShaderToTile cannot re-pin
-        // them — each tile would sample a near-constant slice of the ramp.
-        // They keep the full-box path until the helpers take a tile size.
-        if (isRepeatingGradient) return false
+        // NOTE (wave 47): the former `isRepeatingGradient` exclusion is
+        // removed — the resolver-backed repeating brushes rebuild their
+        // §3.4.4 stop lattice per createShader size, so pinShaderToTile
+        // pins them like any other gradient. The predicate is now the
+        // exact mirror of iOS BackgroundImageApplier.gradientNeedsGeometry
+        // (which never excluded repeating flavours).
         // Explicit dimensions move the tile away from the box. The other
         // size flavors (auto/cover/contain) all resolve to the box for an
         // intrinsic-less gradient (css-backgrounds-3 §3.9) — exactly what
@@ -966,6 +934,13 @@ object ColorApplier {
      * `GradientApplier.resolveStops` already carries a one-stop list through
      * (`max(1, count - 1)` guards the even-spread divide) and
      * `srgbSubdivided` short-circuits on `count < 2`.
+     *
+     * Wave 47: the ColorApplier brush factories now widen inside
+     * GradientStopResolver.shaderStops (the same §3.4.4 rule, applied
+     * after the fixup pipeline); this function remains the widening for
+     * the background/RepeatingGradientHelper utility entry points
+     * (createStripesPattern / createCheckerboardApproximation), which sit
+     * outside the wave-47 pipeline.
      */
     internal fun paintableStops(stops: List<ColorStop>): List<ColorStop>? = when {
         // No stops at all — nothing the spec can tell us to paint.
@@ -999,22 +974,25 @@ object ColorApplier {
      * shift here double-applied the position — once in the tile translate,
      * once inside the shader — skewing the ramp for any non-0 position.
      *
+     * Wave 47 (lane Z1): stop resolution moved INSIDE createShader and
+     * behind GradientStopResolver — the §3.4.3 fixup needs the
+     * gradient-line LENGTH (|W·sinθ| + |H·cosθ|, §3.4.1) to resolve
+     * <length> stop positions, and that length only exists per draw
+     * size. `repeating` is handled HERE by materialising the §3.4.4
+     * expansion as explicit stops (replacing RepeatingGradientHelper's
+     * period-less fraction×diagonal approximation — the gradient-border-
+     * box 0.646 defect), so TileMode stays Clamp: the expanded list
+     * already covers [0, 1].
+     *
      * @param gradient LinearGradient configuration
-     * @param tileMode Tile mode for repeating
-     * @return Brush for the gradient, or null if invalid
+     * @return Brush for the gradient, or null if it has no stops at all
      */
     private fun createLinearGradientBrush(
-        gradient: BackgroundImageConfig.LinearGradient,
-        tileMode: TileMode = TileMode.Clamp
+        gradient: BackgroundImageConfig.LinearGradient
     ): Brush? {
-        // wave-36 lane M8: widen the degenerate one-stop ramp to a uniform
-        // fill; null still means "no stops at all" and keeps the early return.
-        val paintStops = paintableStops(gradient.colorStops) ?: return null
-
-        // Shader inputs are size-independent; hoist them out of the
-        // per-frame createShader call.
-        val colors = paintStops.map { it.color }
-        val stops = paintStops.map { it.position }
+        // No stops at all — genuinely unpaintable (the wave-36 M8 null
+        // contract; the one-stop widening now lives in shaderStops).
+        if (gradient.colorStops.isEmpty()) return null
         val angle = gradient.angle
 
         return object : ShaderBrush() {
@@ -1023,12 +1001,23 @@ object ColorApplier {
                 // so plain JVM tests can pin it (android.graphics shaders
                 // can't be built in non-instrumented tests).
                 val (from, to) = linearGradientPoints(angle, size)
+                // §3.4.1 gradient-line length — the quantity a <length>
+                // stop position divides by (iOS twin: lineLengthPx).
+                val lineLen = lineLengthPx(angle, size)
+                // Full §3.4.3 pipeline: fixup → repeat expansion → clip
+                // → interp subdivision. Empty only when colorStops was
+                // empty (guarded above), so the !! is contract-safe.
+                val (colors, stops) = GradientStopResolver.shaderStops(
+                    gradient.colorStops, lengthPx = lineLen,
+                    repeating = gradient.repeating, interp = gradient.interp)!!
                 return LinearGradientShader(
                     from = from,
                     to = to,
                     colors = colors,
                     colorStops = stops,
-                    tileMode = tileMode
+                    // Clamp even for repeating: the resolver materialises
+                    // the §3.4.4 copies across [0, 1] itself.
+                    tileMode = TileMode.Clamp
                 )
             }
         }
@@ -1056,7 +1045,7 @@ object ColorApplier {
         val dirY = -cos(cssRad)
         // §3.4.1 gradient-line length: |W·sinθ| + |H·cosθ| guarantees the
         // end perpendiculars touch the matching corners of the box.
-        val lineLen = abs(size.width * sin(cssRad)) + abs(size.height * cos(cssRad))
+        val lineLen = lineLengthPx(angleDeg, size)
         // Line centre = BOX centre, unconditionally (§3.4.1). Position
         // placement happens in the tile translate, never here.
         val cx = size.width / 2f
@@ -1067,6 +1056,19 @@ object ColorApplier {
     }
 
     /**
+     * css-images-3 §3.1.1 gradient-line LENGTH in px — the quantity a
+     * <length> stop position divides by. Single source of truth for the
+     * endpoint math above AND the resolver call in the linear factory
+     * (wave 47); byte-parallel with iOS GradientApplier.lineLengthPx.
+     * Internal so GradientStopResolverTest pins it on the JVM.
+     */
+    internal fun lineLengthPx(angleDeg: Float, size: Size): Float {
+        val rad = angleDeg * PI.toFloat() / 180f
+        // |W·sinθ| + |H·cosθ| — the perpendiculars touch the corners.
+        return abs(size.width * sin(rad)) + abs(size.height * cos(rad))
+    }
+
+    /**
      * Create a radial gradient Brush from configuration.
      *
      * background-position is NOT a parameter (same rationale as the linear
@@ -1074,17 +1076,20 @@ object ColorApplier {
      * (css-images-4 §3.2), resolved against the gradient box — background
      * -position only moves the tile, outside this brush.
      *
+     * Wave 47 (lane Z1): stop resolution goes through GradientStopResolver
+     * inside createShader — the ending-shape radius rMax is the length a
+     * <length> stop divides by, and `repeating` materialises §3.4.4
+     * copies as explicit stops (no more RepeatingGradientHelper detour).
+     *
      * @param gradient RadialGradient configuration
-     * @param tileMode Tile mode for repeating
-     * @return Brush for the gradient, or null if invalid
+     * @return Brush for the gradient, or null if it has no stops at all
      */
     private fun createRadialGradientBrush(
-        gradient: BackgroundImageConfig.RadialGradient,
-        tileMode: TileMode = TileMode.Clamp
+        gradient: BackgroundImageConfig.RadialGradient
     ): Brush? {
-        // wave-36 lane M8 — same one-stop widening as the linear factory;
-        // see [paintableStops] for the §3.4.4 rule and the eight cells.
-        val paintStops = paintableStops(gradient.colorStops) ?: return null
+        // No stops at all — genuinely unpaintable (wave-36 M8 contract;
+        // the one-stop widening now lives in the resolver's shaderStops).
+        if (gradient.colorStops.isEmpty()) return null
 
         // CSS radial gradients have two distinct radii (rx, ry) when the
         // ending shape is `ellipse` (the default), and a single radius
@@ -1094,8 +1099,6 @@ object ColorApplier {
         // extends. Compose's Brush.radialGradient is circular-only, so we
         // emit a custom RadialGradientShader and pre-stretch the bounds to
         // simulate the elliptical shape.
-        val colors = paintStops.map { it.color }
-        val stops = paintStops.map { it.position }
         val shape = gradient.shape ?: BackgroundImageConfig.RadialShape.ELLIPSE
         val sizeKw = gradient.size ?: BackgroundImageConfig.RadialSize.FARTHEST_CORNER
         // GradientCoord axes (A-RC8): FRACTION or PX — resolved against
@@ -1160,12 +1163,23 @@ object ColorApplier {
                 // squash can never invert again.
                 val rMax = kotlin.math.max(rx.coerceAtLeast(1e-3f), ry.coerceAtLeast(1e-3f))
                 val (sx, sy) = radialAxisScale(rx, ry)
+                // Wave 47: the radial gradient LINE runs from the centre
+                // to the ending shape (css-images-3 §3.5) — rMax is the
+                // px length a <length> stop divides by. The resolver also
+                // materialises `repeating-radial-gradient` copies across
+                // [0, rMax] (beyond rMax Skia's clamp holds the loc-1
+                // colour — same geometric limit as the iOS twin, visible
+                // only for sizes that end short of every corner).
+                val (colors, stops) = GradientStopResolver.shaderStops(
+                    gradient.colorStops, lengthPx = rMax,
+                    repeating = gradient.repeating, interp = gradient.interp)!!
                 val shader = RadialGradientShader(
                     center = Offset(cx, cy),
                     radius = rMax,
                     colors = colors,
                     colorStops = stops,
-                    tileMode = tileMode
+                    // Clamp even for repeating — the copies are explicit.
+                    tileMode = TileMode.Clamp
                 )
                 if (sx == 1f && sy == 1f) return shader
                 // Apply the axis squash around (cx,cy): translate the
@@ -1217,23 +1231,28 @@ object ColorApplier {
     /**
      * Create a sweep (conic) gradient Brush from configuration.
      *
-     * Note: Compose's sweepGradient does not support:
-     * - TileMode (repeating gradients)
-     * - Starting angle offset
-     *
      * background-position is NOT a parameter (same rationale as the linear
      * builder): the sweep centre comes from conic-gradient's own `at <pos>`
      * (css-images-4 §3.3) — background-position only moves the tile.
      *
+     * Wave 47 (lane Z1): stops resolve through GradientStopResolver.
+     * Conic stop positions are <angle-percentage> fractions of the full
+     * turn — a <length> never applies, so lengthPx is null (a px stop
+     * would breadcrumb + degrade to unpositioned, the iOS twin rule).
+     * `repeating-conic-gradient` materialises its §3.4.4 copies across
+     * the turn as explicit stops — replacing RepeatingGradientHelper's
+     * hand-rolled ≤10-repetition expansion (SweepGradient itself has no
+     * TileMode, so explicit copies are the only spec-shaped mechanism).
+     *
      * @param gradient ConicGradient configuration
-     * @return Brush for the gradient, or null if invalid
+     * @return Brush for the gradient, or null if it has no stops at all
      */
     private fun createSweepGradientBrush(
         gradient: BackgroundImageConfig.ConicGradient
     ): Brush? {
-        // wave-36 lane M8 — same one-stop widening as the linear factory;
-        // see [paintableStops] for the §3.4.4 rule and the eight cells.
-        val paintStops = paintableStops(gradient.colorStops) ?: return null
+        // No stops at all — genuinely unpaintable (wave-36 M8 contract;
+        // the one-stop widening now lives in the resolver's shaderStops).
+        if (gradient.colorStops.isEmpty()) return null
 
         // The previous implementation multiplied the centre fraction by
         // a hard-coded 500px and passed Offset(cx*500, cy*500) into
@@ -1247,8 +1266,12 @@ object ColorApplier {
         // GradientCoord axes (A-RC8) — resolved in createShader like radial.
         val coordX = gradient.centerX
         val coordY = gradient.centerY
-        val colors = paintStops.map { it.color }
-        val stops = paintStops.map { it.position }
+        // Angle-fraction stops are size-independent — resolve them once,
+        // outside the per-size createShader call (unlike linear/radial,
+        // whose <length> stops need the draw size).
+        val (colors, stops) = GradientStopResolver.shaderStops(
+            gradient.colorStops, lengthPx = null,
+            repeating = gradient.repeating, interp = gradient.interp)!!
         // CSS `from` angle, degrees. 0 when the author omitted `from …`.
         val fromDeg = gradient.angle
         return object : ShaderBrush() {

@@ -40,6 +40,18 @@ enum ColumnsApplier {
         /// (the default, every slice plan) = the child renders unchanged
         /// in every fragment, byte-identical to the wave-10 row.
         var cloneDeclaredHeightsPx: [CGFloat]? = nil
+        /// Wave-47 lane Z2 — true for a VERTICAL-writing-mode plan: the
+        /// column boxes stack vertically and the renderer consumes the
+        /// fragments as a VStack (multicolVerticalFragmentColumn), with
+        /// `columnWidthPx` the slot WIDTH (the fragmentainer block size W)
+        /// and `columnBlockSizePx` the slot HEIGHT (the used column inline
+        /// size colH). False — the default and every horizontal caller —
+        /// keeps the wave-10 HStack semantics byte-identical.
+        var vertical: Bool = false
+        /// Wave-47 lane Z2 — vertical-rl / sideways-rl: the child's bands
+        /// walk leftward and partial bands right-align (css-writing-modes-4
+        /// §6.4). Meaningful only when `vertical` is true.
+        var verticalBlockRtl: Bool = false
 
         /// The child to render in fragment `index`: under clone, its copy
         /// re-declared at that fragment's size (MulticolCloneDecoration.
@@ -103,7 +115,13 @@ enum ColumnsApplier {
                              childProperties: [IRProperty],
                              ctx: SpacingContext,
                              wptCaptureMode: Bool = false,
-                             childIsLeaf: Bool = false) -> FragmentPlan? {
+                             childIsLeaf: Bool = false,
+                             // Wave-47 lane Z2: vertical-rl / sideways-rl —
+                             // the vertical plan's band direction. Default
+                             // false keeps every legacy caller compiling
+                             // and byte-identical (only read when the
+                             // vertical branch below engages).
+                             verticalBlockRtl: Bool = false) -> FragmentPlan? {
         // §2 gate: only a multicol container (non-auto column-count or
         // column-width) establishes columns to fragment into.
         guard columns?.isMulticolContainer == true else { return nil }
@@ -116,15 +134,28 @@ enum ColumnsApplier {
                 && ValueExtractors.extractKeyword($0.data)?.uppercased() == "ALL" }) {
             return nil
         }
-        // Blocked-platform bail (contract: horizontal-tb only): a
-        // vertical writing mode flips the inline/block axes and this
-        // pass' geometry would be wrong on both — logOnce (repo
-        // no-silent-fallthrough rule) and keep the unfragmented path.
+        // Wave-47 lane Z2: VERTICAL writing modes now route into their own
+        // fragment plan (columns stacked vertically, bands sliced along the
+        // horizontal block axis — VerticalFragmentGeometry's V-table).
+        // Capture-gated like every wave-21+ plan branch; every shape the
+        // vertical builder declines keeps the honest logged bail below,
+        // byte-identical to the pre-wave-47 record.
         if verticalWritingMode {
+            if wptCaptureMode,
+               let plan = verticalFragmentPlan(columns: columns,
+                                               siblingCount: siblingCount,
+                                               contentWidthPx: contentWidthPx,
+                                               contentHeightPx: contentHeightPx,
+                                               gapPx: gapPx,
+                                               childProperties: childProperties,
+                                               ctx: ctx,
+                                               blockRtl: verticalBlockRtl) {
+                return plan
+            }
             PropertyTracker.logOnce(
                 key: "multicol-fragment-vertical-writing",
                 message: "multicol fragmentation: vertical writing-mode "
-                    + "is blocked-platform (horizontal-tb only) — child "
+                    + "shape outside the wave-47 sole-child contract — child "
                     + "renders unfragmented")
             return nil
         }

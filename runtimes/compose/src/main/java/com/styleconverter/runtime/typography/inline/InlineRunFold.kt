@@ -68,10 +68,27 @@ import com.styleconverter.runtime.typography.text.TextExtractor
  *     A PAINT-INERT one is dropped from the string as before, counted in
  *     [Outcome.Folded.droppedEmptyMembers] so the caller can leave a
  *     breadcrumb (its strut is still a stated loss — CSS 2.1 §10.8).
+ *   • wave 47 (lane Z6, the STYLED-SPAN RING): a STYLED glyph member — a
+ *     span/time/data/`u` member whose ink properties (Color, FontSize,
+ *     FontWeight, FontStyle, TextDecorationLine underline/line-through)
+ *     ride the fold as a per-range [Span] the seam overlays as SpanStyles
+ *     (admission rules + stated losses: [InlineSpanRing]'s banner). Its
+ *     one admitted nested shape is a {text, `<br>`} subtree, flattened by
+ *     [flattenNestedRuns];
+ *   • wave 47 (lane Z6, the BR RING): a `<br>` member (tag or the
+ *     extractor's `role: line-break`) folds to '\n' with css-text-3
+ *     §4.1.4 space removal on both sides — but ONLY alongside at least
+ *     one glyph member: a {text, `<br>`}*-only host's stacked fallback
+ *     already renders the forced-break line structure (one block per
+ *     run), so engaging there would move calibrated pixels for zero
+ *     fidelity gain ("br-stacked-equivalent"; the corpus-simulated rule
+ *     that keeps the wave-47 flip set to exactly the 4 styled victims).
  * Host-level bails: `text-transform` (a length-changing rewrite this fold
  * does not model), a vertical writing mode (the rotated branch's swapped
  * constraints are uncalibrated for merged runs), tabs (tab-size expansion
- * would shift member boundaries), and an empty merge result.
+ * would shift member boundaries), `font-variant-caps` when spans ride
+ * (the small-caps case rewrite is not always length-preserving, which
+ * would break the span alignment), and an empty merge result.
  *
  * ## Hyphens adoption (css-text-3 §6.1)
  * `hyphens` is the one policy the victims' spans DO declare. It governs
@@ -97,6 +114,22 @@ object InlineRunFold {
      *  turns into an InlineTextContent placeholder (InlineAtomContent). */
     data class Atom(val memberIndex: Int, val spec: InlineAtomRing.Spec)
 
+    /** One STYLED member's range in the merged text (wave 47, lane Z6 —
+     *  the STYLED-SPAN RING): [start]..[end] (exclusive) are offsets into
+     *  [Outcome.Folded.text] BEFORE the leaf pipeline's string surgery —
+     *  the seam maps them through [InlineSpanRing.alignment] onto the
+     *  final render string and overlays one SpanStyle per span.
+     *  [statedLossTypes] names box ink the ring consciously drops
+     *  (border longhands — see InlineSpanRing's banner) for the seam's
+     *  no-silent-fallthrough breadcrumb. */
+    data class Span(
+        val memberIndex: Int,
+        val start: Int,
+        val end: Int,
+        val style: InlineSpanRing.Style,
+        val statedLossTypes: List<String> = emptyList(),
+    )
+
     /** The fold decision — never silent: a bail always carries its reason. */
     sealed interface Outcome {
         /** The runs collapse into one faithful paragraph. */
@@ -113,6 +146,10 @@ object InlineRunFold {
             /** Wave 45 (lane X2): painted empty members, one per MARKER in
              *  [text], marker order. Empty for every pre-wave-45 shape. */
             val atoms: List<Atom> = emptyList(),
+            /** Wave 47 (lane Z6): styled-member ranges over [text], wire
+             *  order. Empty for every pre-wave-47 shape — the seam then
+             *  renders byte-identically to wave 45. */
+            val spans: List<Span> = emptyList(),
         ) : Outcome
 
         /** Unsupported shape — caller keeps the stacked fallback and logs. */
@@ -171,6 +208,12 @@ object InlineRunFold {
         "BorderTopWidth", "BorderRightWidth", "BorderBottomWidth", "BorderLeftWidth",
     )
 
+    // Wave 47 (lane Z6) — what a BR member (the forced-break ring) may
+    // carry: the converter measures the break's box and emits Width/Height
+    // on it (0×0 or 0×lineHeight — geometry the '\n' itself expresses),
+    // plus the zero-glyph inert set (nothing can paint on a break).
+    private val BR_MEMBER_TYPES = EMPTY_MEMBER_INERT_TYPES + setOf("Width", "Height")
+
     /** The SHOUTY keyword of a Hyphens property ("MANUAL"/"AUTO"/"NONE"). */
     private fun hyphensKeyword(prop: IRProperty): String? =
         ValueExtractors.extractKeyword(prop.data)?.uppercase()
@@ -182,12 +225,32 @@ object InlineRunFold {
      * atom) does not interrupt the chain — Chromium paints
      * inherit-computed-001's `… size <em></em> and …` as "size ▮and":
      * the space BEFORE the em survives, the one after it collapses.
+     * Wave 47 (lane Z6): a trailing '\n' (a folded `<br>`) answers true
+     * too — css-text-3 §4.1.4(3): collapsible spaces at the START of a
+     * line are removed, and everything after a forced break starts a
+     * line. '\n' never occurs in a pre-wave-47 merge, so the old
+     * decisions are untouched by construction.
      */
     private fun endsWithCollapsibleSpace(sb: StringBuilder): Boolean {
         // Walk back over markers (zero-glyph boxes) to the last real char.
         var i = sb.length - 1
         while (i >= 0 && sb[i] == InlineAtomRing.MARKER) i--
-        return i >= 0 && sb[i] == ' '
+        return i >= 0 && (sb[i] == ' ' || sb[i] == '\n')
+    }
+
+    /**
+     * Append one forced line break (a folded `<br>` member — HTML
+     * §4.5.27) to [sb]. css-text-3 §4.1.4(1): collapsible spaces at the
+     * END of a line are removed — everything before a forced break ends a
+     * line, so the trailing space run is dropped before the '\n' lands
+     * (block-ellipsis-004's `Line 2<br>` / ` Line 3` wire merges to
+     * "Line 2\nLine 3", exactly the two lines Chromium paints). The
+     * leading-space half of the rule lives in [endsWithCollapsibleSpace].
+     */
+    private fun appendBreak(sb: StringBuilder) {
+        // Drop the collapsible spaces that would otherwise end the line.
+        while (sb.isNotEmpty() && sb.last() == ' ') sb.deleteCharAt(sb.length - 1)
+        sb.append('\n')
     }
 
     /**
@@ -253,6 +316,39 @@ object InlineRunFold {
         var adopted: IRProperty? = null
         // The host's own declaration, if any — adoption never overrides it.
         val hostHyphensKw = hostProperties.firstOrNull { it.type == "Hyphens" }?.let { hyphensKeyword(it) }
+        // Wave 47 (lane Z6) — the STYLED-SPAN ring's collectors: member
+        // ranges over the merged text (wire order), plus the BR / glyph
+        // member counts the stacked-equivalence rule below reads.
+        val spans = mutableListOf<Span>()
+        var breakMembers = 0
+        var glyphMembers = 0
+        // The css-text-3 §6.1 adoption walk, shared by the EMPTY and the
+        // glyph member arms (a lambda so `adopted` threads through both).
+        // Returns the bail reason, or null when the member's declaration
+        // is compatible — the exact wave-44 rules, hoisted verbatim.
+        val adoptMemberHyphens: (IRComponent) -> String? = adopt@{ child ->
+            val memberHyphens = child.properties.firstOrNull { it.type == "Hyphens" }
+                ?: return@adopt null
+            // Member modes compare as keywords, not raw JSON.
+            val kw = hyphensKeyword(memberHyphens)
+            if (hostHyphensKw != null) {
+                // Host declared: a member may only AGREE with it.
+                if (kw != hostHyphensKw) return@adopt "hyphens-conflict"
+            } else if (adopted == null) {
+                // `auto` is dictionary-driven per language — adopt only
+                // when the member's language IS the paragraph's (a null
+                // member lang inherits the host's, trivially equal).
+                if (kw == "AUTO" && child.lang != null && child.lang != hostEffectiveLang) {
+                    return@adopt "hyphens-lang-divergence"
+                }
+                // First member declaration becomes the paragraph mode.
+                adopted = memberHyphens
+            } else if (hyphensKeyword(adopted!!) != kw) {
+                // Two members disagreeing: no single mode is faithful.
+                return@adopt "hyphens-conflict"
+            }
+            null
+        }
         // Walk the resolved entries in wire order.
         for (entry in entries) when (entry) {
             // Anonymous text run — verbatim content (spaces included).
@@ -273,95 +369,198 @@ object InlineRunFold {
                     ?: return Outcome.Bailed("member-index-out-of-range")
                 // Tag first: unknown/none is not an inline text tag.
                 val tag = child._tag?.lowercase() ?: return Outcome.Bailed("member-tag:none")
-                // Structure: a member with its own children, runs or
-                // decoration wire is a real inline subtree — out of scope.
-                if (!child.children.isNullOrEmpty()) return Outcome.Bailed("member-has-children")
-                if (!child.runs.isNullOrEmpty()) return Outcome.Bailed("member-has-runs")
-                if (!child.decorations.isNullOrEmpty()) return Outcome.Bailed("member-has-decorations")
-                // Empty vs text member decides the tag and property sets.
-                val text = child._text
-                val emptyMember = text.isNullOrEmpty()
-                // Tag admission per member family (see the two sets above).
-                if (tag !in (if (emptyMember) EMPTY_MEMBER_TAGS else TEXT_MEMBER_TAGS)) {
-                    return Outcome.Bailed("member-tag:$tag")
+                // ── Wave 47 (lane Z6) — the BR RING ─────────────────────
+                // `<br>` is a FORCED line break (HTML §4.5.27), i.e. '\n'
+                // in the merged paragraph — surrounding collapsible spaces
+                // fall per css-text-3 §4.1.4 (appendBreak's banner). The
+                // extractor tags it `role: line-break`, read alongside the
+                // tag so the two producers agree.
+                if (tag == "br" || child.role == "line-break") {
+                    // A break with structure is not a break we understand.
+                    if (!child.children.isNullOrEmpty() || !child.runs.isNullOrEmpty() ||
+                        !child.decorations.isNullOrEmpty()
+                    ) return Outcome.Bailed("br-member-structure")
+                    // Width/Height are the converter's measured break box —
+                    // geometry the '\n' expresses; anything else bails.
+                    val brOffending = child.properties.firstOrNull { it.type !in BR_MEMBER_TYPES }
+                    if (brOffending != null) return Outcome.Bailed("member-prop:${brOffending.type}")
+                    appendBreak(sb)
+                    breakMembers++
+                    continue
                 }
+                // The decoration / marker wire attaches to the member's
+                // OWN box; folding its glyphs would drop that ink.
+                if (!child.decorations.isNullOrEmpty()) return Outcome.Bailed("member-has-decorations")
+                // A member with its own children/runs is a nested inline
+                // tree — foldable (below) ONLY when every nested node is a
+                // BR member; EMPTY means no glyphs AND no structure.
+                val text = child._text
+                val hasNested = !child.children.isNullOrEmpty() || !child.runs.isNullOrEmpty()
+                val emptyMember = text.isNullOrEmpty() && !hasNested
                 // Alias guard (wave 45) — same as the Entry.Text gate.
                 if (text != null && text.indexOf(InlineAtomRing.MARKER) >= 0) {
                     return Outcome.Bailed("contains-object-replacement")
                 }
-                // Wave 45 (lane X2) — the ATOM RING gate: a PAINTED empty
-                // member (visible borders once the `border: inherit` wire
-                // dialect is decoded against the host — see InlineAtomRing's
-                // banner) becomes an inline placeholder instead of a drop.
-                // null == paint-inert → the wave-44 drop path, unchanged.
-                val atomSpec = if (emptyMember) InlineAtomRing.resolve(child.properties, hostProperties) else null
-                // Property admission — the first unsupported type names
-                // the bail so logcat can be audited per member. A painted
-                // empty member may additionally carry the box-paint
-                // longhands its ring renders (ATOM_MEMBER_TYPES).
-                val offending = child.properties.firstOrNull {
-                    it.type !in when {
-                        atomSpec != null -> ATOM_MEMBER_TYPES
-                        emptyMember -> EMPTY_MEMBER_INERT_TYPES
-                        else -> TEXT_MEMBER_TYPES
+                if (emptyMember) {
+                    // ── The wave-44/45 EMPTY / ATOM arm, unchanged ──────
+                    if (tag !in EMPTY_MEMBER_TAGS) return Outcome.Bailed("member-tag:$tag")
+                    // Wave 45 (lane X2) — the ATOM RING gate: a PAINTED
+                    // empty member (visible borders once the `border:
+                    // inherit` wire dialect is decoded against the host —
+                    // see InlineAtomRing's banner) becomes an inline
+                    // placeholder instead of a drop; null == paint-inert.
+                    val atomSpec = InlineAtomRing.resolve(child.properties, hostProperties)
+                    // Property admission — the first unsupported type
+                    // names the bail so logcat can be audited per member.
+                    val offending = child.properties.firstOrNull {
+                        it.type !in (if (atomSpec != null) ATOM_MEMBER_TYPES else EMPTY_MEMBER_INERT_TYPES)
                     }
-                }
-                if (offending != null) return Outcome.Bailed("member-prop:${offending.type}")
-                // Hyphens contribution (see the class banner's adoption rules).
-                val memberHyphens = child.properties.firstOrNull { it.type == "Hyphens" }
-                if (memberHyphens != null) {
-                    // Member modes compare as keywords, not raw JSON.
-                    val kw = hyphensKeyword(memberHyphens)
-                    if (hostHyphensKw != null) {
-                        // Host declared: a member may only AGREE with it.
-                        if (kw != hostHyphensKw) return Outcome.Bailed("hyphens-conflict")
-                    } else if (adopted == null) {
-                        // `auto` is dictionary-driven per language — adopt
-                        // only when the member's language IS the paragraph's
-                        // (a null member lang inherits the host's, which is
-                        // trivially equal).
-                        if (kw == "AUTO" && child.lang != null && child.lang != hostEffectiveLang) {
-                            return Outcome.Bailed("hyphens-lang-divergence")
-                        }
-                        // First member declaration becomes the paragraph mode.
-                        adopted = memberHyphens
-                    } else if (hyphensKeyword(adopted) != kw) {
-                        // Two members disagreeing: no single mode is faithful.
-                        return Outcome.Bailed("hyphens-conflict")
-                    }
-                }
-                // Contribute the member's glyphs — or its atom marker
-                // (wave 45: a painted empty member occupies real advance
-                // in the line, exactly one MARKER's placeholder) — or
-                // count the paint-inert drop.
-                when {
-                    atomSpec != null -> {
-                        // The marker the seam binds to this atom, k-th
-                        // marker ↔ atoms[k] (InlineAtomContent.annotate).
+                    if (offending != null) return Outcome.Bailed("member-prop:${offending.type}")
+                    // Hyphens contribution (class banner's adoption rules).
+                    adoptMemberHyphens(child)?.let { return Outcome.Bailed(it) }
+                    // Contribute the atom marker (a painted empty member
+                    // occupies real advance — one MARKER's placeholder,
+                    // k-th marker ↔ atoms[k]) or count the inert drop.
+                    if (atomSpec != null) {
                         sb.append(InlineAtomRing.MARKER)
                         atoms += Atom(entry.index, atomSpec)
+                    } else {
+                        dropped++
                     }
-                    emptyMember -> dropped++
-                    else -> appendCollapsed(sb, text!!)
+                } else {
+                    // ── Wave 47 (lane Z6) — the GLYPH member arm ────────
+                    // The styled tag ring (the wave-44 no-UA-ink trio plus
+                    // `u`, whose UA underline the span models).
+                    if (tag !in InlineSpanRing.STYLED_MEMBER_TAGS) return Outcome.Bailed("member-tag:$tag")
+                    // Property admission through the span ring — PLAIN
+                    // members (Hyphens / paint-inert colors only) pass
+                    // with no attribution, exactly the wave-44 gate.
+                    val admission = InlineSpanRing.admit(tag, child.properties, hostProperties)
+                    if (admission is InlineSpanRing.Admission.Refused) {
+                        return Outcome.Bailed(admission.reason)
+                    }
+                    val admitted = admission as InlineSpanRing.Admission.Admitted
+                    // Hyphens contribution (class banner's adoption rules).
+                    adoptMemberHyphens(child)?.let { return Outcome.Bailed(it) }
+                    // Contribute the member's glyphs — flattening a nested
+                    // {text, <br>} subtree (block-ellipsis-004's `<span>
+                    // Line 3<br>Line 4</span>`), or the flat text — and
+                    // record the span over exactly what landed.
+                    val start = sb.length
+                    if (hasNested) {
+                        flattenNestedRuns(child, sb)?.let { return Outcome.Bailed(it) }
+                    } else {
+                        appendCollapsed(sb, text!!)
+                    }
+                    glyphMembers++
+                    // Only a member with real attribution (or a stated
+                    // loss to report) emits a span — plain members render
+                    // byte-identically to wave 44.
+                    if (!admitted.style.isPlain || admitted.statedLossTypes.isNotEmpty()) {
+                        spans += Span(entry.index, start, sb.length, admitted.style, admitted.statedLossTypes)
+                    }
                 }
             }
+        }
+        // Wave 47 (lane Z6) — BR STACKED-EQUIVALENCE: a {text, <br>}*-only
+        // host needs no fold, because the stacked fallback ALREADY renders
+        // one block per anonymous run — exactly the forced-break line
+        // structure — and that rendering is the calibrated shape every
+        // committed capture of those hosts pins. Engaging would move
+        // pixels on passing tests for zero fidelity gain, so the break
+        // ring only rides alongside a glyph member (the corpus-simulated
+        // rule: exactly the 4 styled victims flip, nothing else).
+        if (breakMembers > 0 && glyphMembers == 0) {
+            return Outcome.Bailed("br-stacked-equivalent")
         }
         // Host gate 3 — tab-size expansion downstream rewrites '\t' into
         // spaces and would shift boundaries; no victim carries tabs.
         if (sb.indexOf("\t") >= 0) return Outcome.Bailed("contains-tab")
+        // Host gate 4 (wave 47) — small-caps synthesis rewrites the
+        // string's case downstream (synthesizeSmallCaps), and `uppercase()`
+        // is not always length-preserving (ß→SS), which would break the
+        // span alignment; no styled victim declares font-variant-caps.
+        if (spans.isNotEmpty() && hostProperties.any { it.type == "FontVariantCaps" }) {
+            return Outcome.Bailed("styled-host-font-variant")
+        }
         // An all-empty merge has nothing to paint — the stacked fallback's
         // empty boxes are the established rendering for that shape. A
-        // MARKER-only merge counts as empty too (wave 45): a glyph-less
-        // host keeps its established stacked rendering rather than
-        // routing a lone atom through the paragraph pipeline.
+        // MARKER-only (wave 45) or breaks-only merge counts as empty too:
+        // a glyph-less host keeps its established stacked rendering.
         val merged = sb.toString()
-        if (merged.none { it != InlineAtomRing.MARKER }) return Outcome.Bailed("empty-merge")
+        if (merged.none { it != InlineAtomRing.MARKER && it != '\n' }) return Outcome.Bailed("empty-merge")
         // The paragraph's property list: the host's, plus the adopted
         // member policy appended LAST (PlaceholderContent's own-list-first
         // Hyphens read finds it; an existing host declaration was never
         // overridden — adoption only happens when the host declared none).
         val properties = adopted?.let { hostProperties + it } ?: hostProperties
-        // The faithful fold (atoms in marker order — see Atom's contract).
-        return Outcome.Folded(merged, properties, adopted != null, dropped, atoms)
+        // The faithful fold (atoms in marker order — see Atom's contract;
+        // spans in wire order — see Span's contract).
+        return Outcome.Folded(merged, properties, adopted != null, dropped, atoms, spans)
+    }
+
+    /**
+     * Wave 47 (lane Z6) — flatten a glyph member's OWN `meta.runs` into
+     * [sb]: the one nested shape the ring admits is a {text, `<br>`}
+     * subtree (block-ellipsis-004's `<span>Line 3<br>Line 4</span>`),
+     * where every nested child is a BR member and the runs list claims
+     * all of them in order. The member's `_text` is the concatenation the
+     * runs were split FROM (spec 03 §4.1) and is deliberately ignored —
+     * the runs are authoritative. Anything else returns the named bail
+     * reason (nested member trees stay a wall, exactly as wave 44 left
+     * them, just with a finer-grained reason).
+     *
+     * @return the bail reason, or null when the subtree flattened.
+     */
+    private fun flattenNestedRuns(member: IRComponent, sb: StringBuilder): String? {
+        // Children without a runs order is a shape the wire never emits
+        // for text members — refuse with the wave-44 reason.
+        val runs = member.runs ?: return "member-has-children"
+        val kids = member.children.orEmpty()
+        // The child's AUTHORING KEY resolves `name` before `id` —
+        // InlineRunPlan.resolve's exact contract, first occurrence wins.
+        val byName = HashMap<String, Int>()
+        val byId = HashMap<String, Int>()
+        kids.forEachIndexed { i, k ->
+            if (k.name.isNotEmpty() && k.name !in byName) byName[k.name] = i
+            if (k.id.isNotEmpty() && k.id !in byId) byId[k.id] = i
+        }
+        // Strictly-increasing claim walk — a duplicate or out-of-order
+        // ref cannot be one forward paragraph (InlineRunPlan's proof).
+        var last = -1
+        var claimed = 0
+        for (run in runs) {
+            val text = run.text
+            if (text != null) {
+                // Alias guard — same as every other text-append site.
+                if (text.indexOf(InlineAtomRing.MARKER) >= 0) return "contains-object-replacement"
+                appendCollapsed(sb, text)
+                continue
+            }
+            // A both-nil entry is unreachable wire — skip defensively,
+            // mirroring InlineRunPlan.
+            val key = run.child ?: continue
+            val idx = byName[key] ?: byId[key] ?: return "nested-dangling"
+            if (idx <= last) return "nested-order"
+            last = idx
+            val kid = kids[idx]
+            val kidTag = kid._tag?.lowercase()
+            // Only BR members may nest — any other nested node keeps the
+            // nested-tree wall, with the tag named for the log.
+            if (kidTag != "br" && kid.role != "line-break") {
+                return "nested-member-tag:${kidTag ?: "none"}"
+            }
+            if (!kid.children.isNullOrEmpty() || !kid.runs.isNullOrEmpty() ||
+                !kid.decorations.isNullOrEmpty()
+            ) return "br-member-structure"
+            val offending = kid.properties.firstOrNull { it.type !in BR_MEMBER_TYPES }
+            if (offending != null) return "member-prop:${offending.type}"
+            appendBreak(sb)
+            claimed++
+        }
+        // Every nested child must be claimed — an unclaimed one would
+        // silently vanish (the outer fold consumes the whole member).
+        if (claimed != kids.size) return "nested-unclaimed"
+        return null
     }
 }

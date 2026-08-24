@@ -39,7 +39,21 @@ enum LineBoxMetrics {
     /// default design, the system font for generic-family signals
     /// (serif / monospaced / rounded map to SF variants whose vertical
     /// metrics match SF's).
-    static func contentHeight(fontSizePx: CGFloat, design: Font.Design) -> CGFloat {
+    static func contentHeight(fontSizePx: CGFloat, design: Font.Design,
+                              faceName: String? = nil) -> CGFloat {
+        // wave-47 lane Z4 (SEAM 2 of the monospace pin) — a document
+        // @font-face renders the label (PlaceholderLabel's fontFaceName
+        // branch outranks both Inter and the generic designs), so ITS
+        // ascent+|descent| is the content area the CSS leading splits
+        // around. Probing the design instead left the split on SF Mono's
+        // 1.178em while the pinned DejaVu (1.164em) painted — part of the
+        // wave-46 Y7 glyphs-sit-low regression on hyphens-auto-inline-010.
+        // Same UIFont probe as the Inter branch below; an unresolvable name
+        // (face-free document, cleared registry, unit-test bundle) falls
+        // through to the pre-wave-47 answer byte-for-byte.
+        if let name = faceName, let f = UIFont(name: name, size: fontSizePx) {
+            return f.lineHeight
+        }
         if design == .default {
             // Live probe of the registered Inter face (harness app);
             // UIFont.lineHeight = ascender − descender (+ leading).
@@ -65,11 +79,15 @@ enum LineBoxMetrics {
     /// fixtures byte-stable.
     static func leading(lineHeightPx: CGFloat?,
                         fontSizePx: CGFloat,
-                        design: Font.Design) -> (spacing: CGFloat, halfLeading: CGFloat) {
+                        design: Font.Design,
+                        faceName: String? = nil) -> (spacing: CGFloat, halfLeading: CGFloat) {
         // No declared line-height → natural metrics, nothing to add.
         guard let lh = lineHeightPx else { return (0, 0) }
-        // Leading = line box height − content area height (§10.8.1).
-        let leading = lh - contentHeight(fontSizePx: fontSizePx, design: design)
+        // Leading = line box height − content area height (§10.8.1); the
+        // content area is the RENDERED face's — the document face when the
+        // label paints one (wave-47 Z4, see contentHeight).
+        let leading = lh - contentHeight(fontSizePx: fontSizePx, design: design,
+                                         faceName: faceName)
         guard leading > 0 else { return (0, 0) }
         return (leading, leading / 2)
     }
@@ -184,11 +202,14 @@ enum LineBoxMetrics {
     /// caller logs it once). Pure — pinned by LineHeightWireTests.
     static func subNaturalOffset(lineHeightPx: CGFloat?,
                                  fontSizePx: CGFloat,
-                                 design: Font.Design) -> CGFloat {
+                                 design: Font.Design,
+                                 faceName: String? = nil) -> CGFloat {
         // No declared line-height → natural metrics, no shift.
         guard let lh = lineHeightPx else { return 0 }
-        // Signed half-leading: (L − contentHeight) / 2 (§10.8.1).
-        let half = (lh - contentHeight(fontSizePx: fontSizePx, design: design)) / 2
+        // Signed half-leading: (L − contentHeight) / 2 (§10.8.1), against the
+        // RENDERED face's content area (document face first — wave-47 Z4).
+        let half = (lh - contentHeight(fontSizePx: fontSizePx, design: design,
+                                       faceName: faceName)) / 2
         // Only the sub-natural (negative) case shifts — the positive
         // case is already handled by `leading`'s padding + lineSpacing.
         return half < 0 ? half : 0

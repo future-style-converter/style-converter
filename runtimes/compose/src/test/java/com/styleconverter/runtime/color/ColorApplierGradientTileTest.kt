@@ -250,7 +250,7 @@ class ColorApplierGradientTileTest {
         val pos = BackgroundPositionConfig(xOffset = 40.dp)
         assertTrue(ColorApplier.gradientNeedsGeometry(
             layerSize = BackgroundSizeConfig.Auto, position = pos,
-            repeat = defaultRepeat, isRepeatingGradient = false))
+            repeat = defaultRepeat))
     }
 
     @Test
@@ -259,7 +259,7 @@ class ColorApplierGradientTileTest {
         assertTrue(ColorApplier.gradientNeedsGeometry(
             layerSize = BackgroundSizeConfig.Auto,
             position = BackgroundPositionConfig.CENTER,
-            repeat = defaultRepeat, isRepeatingGradient = false))
+            repeat = defaultRepeat))
     }
 
     @Test
@@ -272,7 +272,7 @@ class ColorApplierGradientTileTest {
                             BackgroundSizeConfig.Contain)) {
             assertFalse("size=$size", ColorApplier.gradientNeedsGeometry(
                 layerSize = size, position = defaultPos,
-                repeat = defaultRepeat, isRepeatingGradient = false))
+                repeat = defaultRepeat))
         }
     }
 
@@ -281,7 +281,7 @@ class ColorApplierGradientTileTest {
         // The original sized-tile pathway must keep routing unchanged.
         assertTrue(ColorApplier.gradientNeedsGeometry(
             layerSize = BackgroundSizeConfig.Dimensions(width = 30.dp, height = 30.dp),
-            position = defaultPos, repeat = defaultRepeat, isRepeatingGradient = false))
+            position = defaultPos, repeat = defaultRepeat))
     }
 
     @Test
@@ -290,21 +290,21 @@ class ColorApplierGradientTileTest {
         // mirrors the iOS predicate's repeat clause axis-by-axis.
         assertTrue(ColorApplier.gradientNeedsGeometry(
             layerSize = BackgroundSizeConfig.Auto, position = defaultPos,
-            repeat = BackgroundRepeatAxes(AxisRepeat.NO_REPEAT, AxisRepeat.REPEAT),
-            isRepeatingGradient = false))
+            repeat = BackgroundRepeatAxes(AxisRepeat.NO_REPEAT, AxisRepeat.REPEAT)))
     }
 
     @Test
-    fun `repeating gradient never routes, even with knobs`() {
-        // The wave-2 exclusion outranks every knob: repeating-* brushes
-        // bake fixed 500×500 endpoints (RepeatingGradientHelper) that
-        // pinShaderToTile cannot re-pin — tiling them would render a
-        // near-constant slice per tile. Position AND size set here to
-        // prove the exclusion is checked first.
-        assertFalse(ColorApplier.gradientNeedsGeometry(
+    fun `repeating gradients route like any other when a knob is set`() {
+        // Wave 47 removed the wave-2 repeating exclusion: the resolver-
+        // backed brushes rebuild their §3.4.4 lattice per createShader
+        // size, so pinShaderToTile pins them like any other gradient and
+        // the predicate is the exact iOS mirror (which never excluded
+        // repeating flavours). Same knobs as the old exclusion pin —
+        // the expectation flips to routing.
+        assertTrue(ColorApplier.gradientNeedsGeometry(
             layerSize = BackgroundSizeConfig.Dimensions(width = 30.dp, height = 30.dp),
             position = BackgroundPositionConfig(xOffset = 40.dp),
-            repeat = defaultRepeat, isRepeatingGradient = true))
+            repeat = defaultRepeat))
     }
 
     @Test

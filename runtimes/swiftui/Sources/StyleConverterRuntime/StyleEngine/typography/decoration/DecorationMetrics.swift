@@ -66,11 +66,39 @@ enum DecorationMetrics {
         /// inter-line spacing, exactly what `.lineSpacing` makes
         /// TextKit lay out).
         let index: Int
-        /// The line's inked width — the measurer's intrinsic advance,
-        /// the same number the greedy fit test compared against.
+        /// The line's FULL inked width — the measurer's intrinsic
+        /// advance, the same number the greedy fit test compared
+        /// against. Still the alignment/frame extent: the overlay's
+        /// row frame keeps using it so horizontal placement of the
+        /// band frame is byte-identical to pre-wave-47 output.
         let width: CGFloat
         /// Decoration thickness (the empirical `auto` rule below).
         let thickness: CGFloat
+        /// Wave 47 (lane Z7) — css-text-decor-4 §2.6 skip-spaces. The
+        /// decorated INK starts this far into the line: the measured
+        /// advance of the line's leading spacer run (0 when the line
+        /// has none — every committed-baseline text, so the defaults
+        /// keep old constructions and old geometry byte-identical).
+        let inkLeadInset: CGFloat
+        /// …and spans this much: the measured advance of the line with
+        /// its edge spacer runs trimmed (== `width` when there are
+        /// none). The painter draws ops over [inkLeadInset,
+        /// inkLeadInset + inkWidth] inside the `width`-wide band frame.
+        let inkWidth: CGFloat
+
+        /// Memberwise-with-defaults: the two wave-47 fields default to
+        /// the no-spacer identity so every pre-wave-47 call site (and
+        /// the pinned test constructions) compile and compare
+        /// unchanged.
+        init(index: Int, width: CGFloat, thickness: CGFloat,
+             inkLeadInset: CGFloat = 0, inkWidth: CGFloat? = nil) {
+            self.index = index
+            self.width = width
+            self.thickness = thickness
+            self.inkLeadInset = inkLeadInset
+            // nil = "ink spans the whole line", the pre-wave-47 shape.
+            self.inkWidth = inkWidth ?? width
+        }
     }
 
     /// `text-decoration-thickness: auto`, Chromium-matched: round(F/11)
@@ -173,7 +201,31 @@ enum DecorationMetrics {
         return lines.enumerated().compactMap { i, line in
             // Empty visual line → no decoration (browser parity).
             let w = line.isEmpty ? 0 : measure(line)
-            return w > 0 ? Segment(index: i, width: w, thickness: t) : nil
+            guard w > 0 else { return nil }
+            // Wave 47 (lane Z7) — css-text-decor-4 §2.6 skip-spaces
+            // (`start end` is the INITIAL value): edge spacer runs of
+            // each LINE carry no decoration. WPT text-decoration-skip-
+            // spaces-001 is the pin — Chromium underlines only "ABCDEF"
+            // while both natives painted full-width bands across its
+            // wrapped spacer runs (see DecorationSkipSpaces header).
+            let (lead, core, trail) = DecorationSkipSpaces.split(line)
+            // A spacers-only line paints nothing at all — Chromium
+            // parity on -001's two spacers-only wrapped lines.
+            guard !core.isEmpty else { return nil }
+            // The dominant case — no edge spacers — reuses the already
+            // measured full width UNTOUCHED (no re-measure, no float
+            // drift), so every committed baseline stays byte-identical.
+            guard !lead.isEmpty || !trail.isEmpty else {
+                return Segment(index: i, width: w, thickness: t)
+            }
+            // Advance-additive model: prefix and core measured as their
+            // own runs. Exact for spacer boundaries (no kerning against
+            // a space; letter-spacing is per-character in the measurer),
+            // same assumption the greedy breaker's candidate strings
+            // already rely on.
+            return Segment(index: i, width: w, thickness: t,
+                           inkLeadInset: lead.isEmpty ? 0 : measure(String(lead)),
+                           inkWidth: measure(String(core)))
         }
     }
 }

@@ -193,24 +193,34 @@ final class InlineRunFlowTests: XCTestCase {
     func testBorderColorOnlyTextMemberIsPaintInert() {
         // border-*-color with NO border-*-style paints nothing
         // (css-backgrounds-3 §3.2 initial `border-style: none`) — a span
-        // carrying only colors folds; one carrying a STYLE bails.
+        // carrying only colors folds with nothing to report.
         let inert = member("a", text: "alpha",
                            props: [IRProperty(type: "BorderTopColor",
                                               data: .object(["original": .string("red")]))])
-        XCTAssertEqual(InlineRunFlow.fold(
+        let inertFold = InlineRunFlow.fold(
             runs: [IRRun(text: "x "), IRRun(child: "a")],
             children: [inert], totalChildCount: 1, containerProperties: [],
-            containerLang: nil)?.text, "x alpha")
-        // The style makes the border paint — a real box the fold erases.
+            containerLang: nil)
+        XCTAssertEqual(inertFold?.text, "x alpha")
+        XCTAssertEqual(inertFold?.spans.isEmpty, true)
+        // Wave 47 (lane Z6): a STYLE makes the border a real box — which
+        // the styled-span ring now folds as a STATED LOSS (the fold's
+        // paragraph geometry beats the stacked full-width block —
+        // block-ellipsis-004's measured margin), reported per member so
+        // the seam logs the dropped ink instead of refusing the fold.
         let styled = member("a", text: "alpha",
                             props: [IRProperty(type: "BorderTopColor",
                                                data: .object(["original": .string("red")])),
                                     IRProperty(type: "BorderTopStyle",
                                                data: .string("SOLID"))])
-        XCTAssertNil(InlineRunFlow.fold(
+        let styledFold = InlineRunFlow.fold(
             runs: [IRRun(text: "x "), IRRun(child: "a")],
             children: [styled], totalChildCount: 1, containerProperties: [],
-            containerLang: nil))
+            containerLang: nil)
+        XCTAssertEqual(styledFold?.text, "x alpha")
+        XCTAssertEqual(styledFold?.spans.count, 1)
+        XCTAssertEqual(styledFold?.spans.first?.statedLossTypes.first?
+            .hasPrefix("border-box-ink("), true)
     }
 
     func testCrossBoundarySpaceCollapse() {
@@ -456,10 +466,11 @@ final class InlineRunFlowTests: XCTestCase {
             containerLang: nil))
     }
 
-    func testMemberStyleAndDecorationWiresRefuse() {
-        // A TEXT member's own Color is the styled-span ring (folding would
-        // ink it with the parent's color); a member's own decoration wire
-        // attaches to a box the fold erases. Both refuse.
+    func testUnresolvedColorAndDecorationWiresStillRefuse() {
+        // Wave 47: a RESOLVED member Color now rides the styled-span ring
+        // (see the wave-47 pins below) — but an unresolvable color wire
+        // (a bare keyword the converter left raw) still refuses, and a
+        // member's own decoration wire attaches to a box the fold erases.
         let colored = member("a", text: "alpha",
                              props: [IRProperty(type: "Color",
                                                 data: .string("red"))])
@@ -502,11 +513,14 @@ final class InlineRunFlowTests: XCTestCase {
         XCTAssertEqual(folded?.text, "alpha beta")
     }
 
-    func testBrMemberRefusesOnItsOwnNamedWall() {
-        // `<br>` is a FORCED break, not an atom — a real "\n" candidate
-        // for a future ring, refused today (123 references at wave43-final
-        // are unstudied pixel-wise). This pin documents the wall so
-        // engaging it later is a deliberate flip, not drift.
+    func testBrOnlyHostStaysStackedEquivalent() {
+        // Wave 47 (lane Z6): `<br>` members fold to '\n' — but ONLY
+        // alongside a glyph member. A {text, <br>}*-only host's stacked
+        // fallback already renders one label per anonymous run — exactly
+        // the forced-break line structure — and those captures PASS today
+        // (block-ellipsis-002: android-ref 0.9884 / ios-ref 0.9813 at
+        // wave46-final), so the ring must not move their pixels
+        // ("br-stacked-equivalent" — the corpus-simulated rule).
         let br = member("a", tag: "br", text: nil)
         XCTAssertNil(InlineRunFlow.fold(
             runs: [IRRun(text: "x"), IRRun(child: "a"), IRRun(text: "y")],
@@ -537,6 +551,167 @@ final class InlineRunFlowTests: XCTestCase {
         XCTAssertNil(InlineRunFlow.fold(
             runs: [IRRun(child: "a")],
             children: [em], totalChildCount: 1, containerProperties: [],
+            containerLang: nil))
+    }
+
+    // MARK: - Wave 47 (lane Z6): the styled-span + br rings
+
+    /// The IR sRGB color leaf shorthand for the wave-47 pins.
+    private func srgb(_ r: Double, _ g: Double, _ b: Double) -> IRValue {
+        .object(["srgb": .object(["r": .double(r), "g": .double(g), "b": .double(b)])])
+    }
+
+    func testBlockEllipsis004ShapeFoldsWithBreaksAndOneStyledSpan() {
+        // The wave46-final victim's exact wire shape (ios-ref 0.8997):
+        // host runs [text, br, text, br, text, span], the span carrying
+        // purple/bold/italic/1.5em + a 2px solid blue border, its OWN
+        // runs nesting one more br. The converter emits measured
+        // Width/Height on each br (0×0 / 0×20 — the break's box).
+        let brProps = [IRProperty(type: "Width", data: .object(["px": .double(0)])),
+                       IRProperty(type: "Height", data: .object(["px": .double(20)]))]
+        let br0 = member("b0", tag: "br", text: nil, props: brProps)
+        let br1 = member("b1", tag: "br", text: nil, props: brProps)
+        let innerBr = member("s0", tag: "br", text: nil, props: brProps)
+        let span = member("s", text: "Line 3 Line 4",
+                          props: [
+                              IRProperty(type: "Color", data: srgb(0.5019607843137255, 0, 0.5019607843137255)),
+                              IRProperty(type: "FontWeight",
+                                         data: .object(["weight": .int(700)])),
+                              IRProperty(type: "FontStyle", data: .string("italic")),
+                              IRProperty(type: "FontSize",
+                                         data: .object(["original": .object([
+                                             "type": .string("length"),
+                                             "original": .object(["v": .double(1.5), "u": .string("EM")])])])),
+                              IRProperty(type: "BorderTopStyle", data: .string("SOLID")),
+                              IRProperty(type: "BorderTopWidth", data: .object(["px": .double(2)])),
+                              IRProperty(type: "BorderTopColor", data: srgb(0, 0, 1)),
+                          ],
+                          runs: [IRRun(text: "Line 3"), IRRun(child: "s0"), IRRun(text: " Line 4")],
+                          children: [innerBr])
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "Line 1"), IRRun(child: "b0"),
+                   IRRun(text: " Line 2"), IRRun(child: "b1"),
+                   IRRun(text: " "), IRRun(child: "s")],
+            children: [br0, br1, span], totalChildCount: 3,
+            containerProperties: [IRProperty(type: "Color", data: srgb(0, 0.5, 0.5))],
+            containerLang: nil)
+        // Four forced-break lines, every collapsible space around a break
+        // fallen (css-text-3 §4.1.4) — the exact lines Chromium paints.
+        XCTAssertEqual(folded?.text, "Line 1\nLine 2\nLine 3\nLine 4")
+        // ONE styled member covering its flattened {text, <br>} subtree.
+        XCTAssertEqual(folded?.spans.count, 1)
+        guard let span0 = folded?.spans.first, let text = folded?.text else { return }
+        let start = text.index(text.startIndex, offsetBy: span0.start)
+        let end = text.index(text.startIndex, offsetBy: span0.end)
+        XCTAssertEqual(String(text[start..<end]), "Line 3\nLine 4")
+        XCTAssertEqual(span0.style.fontWeight, 700)
+        XCTAssertTrue(span0.style.italic)
+        XCTAssertEqual(span0.style.fontSizeEm, 1.5)
+        XCTAssertEqual(span0.style.ink?.r ?? 0, 0.50196, accuracy: 1e-4)
+        // The border box is the ring's STATED loss — reported, never silent.
+        XCTAssertEqual(span0.statedLossTypes.count, 1)
+        XCTAssertTrue(span0.statedLossTypes[0].hasPrefix("border-box-ink("))
+    }
+
+    func testInset014ShapeUMemberFoldsWithUnderlineSpan() {
+        // text-decoration-inset-014's wire (ios-ref 0.9317): h1 runs
+        // ["the ", <u>, " fox"], the u carrying an ink-equal (black)
+        // TextDecorationColor + BoxDecorationBreak — with the MERGED host
+        // list carrying the inherited black `color` the seam passes.
+        let u = member("u1", tag: "u", text: "ultra-quick brown",
+                       props: [IRProperty(type: "TextDecorationColor", data: srgb(0, 0, 0)),
+                               IRProperty(type: "BoxDecorationBreak", data: .string("CLONE"))])
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "the "), IRRun(child: "u1"), IRRun(text: " fox")],
+            children: [u], totalChildCount: 1,
+            containerProperties: [IRProperty(type: "Color", data: srgb(0, 0, 0))],
+            containerLang: nil)
+        XCTAssertEqual(folded?.text, "the ultra-quick brown fox")
+        // The <u>'s UA underline (HTML rendering §15.3.3) over its range.
+        XCTAssertEqual(folded?.spans.count, 1)
+        XCTAssertEqual(folded?.spans.first?.style.underline, true)
+        XCTAssertEqual(folded?.spans.first?.start, 4)
+        XCTAssertEqual(folded?.spans.first?.end, 21)
+        // No border → no stated loss.
+        XCTAssertEqual(folded?.spans.first?.statedLossTypes.isEmpty, true)
+    }
+
+    func testDivergingDecorationColorRefusesTheFold() {
+        // inset-011's shape: a blue decoration over black text — the
+        // segment underline would paint the wrong color; the whole fold
+        // refuses (the member also carries TextUnderlineOffset there,
+        // a second named wall this ring does not model).
+        let u = member("u1", tag: "u", text: "phrase",
+                       props: [IRProperty(type: "TextDecorationColor", data: srgb(0, 0, 1))])
+        XCTAssertNil(InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "u1")],
+            children: [u], totalChildCount: 1,
+            containerProperties: [IRProperty(type: "Color", data: srgb(0, 0, 0))],
+            containerLang: nil))
+    }
+
+    func testBreakSpacesFallOnBothSides() {
+        // "a " loses its line-end space, " b " its line-start one
+        // (css-text-3 §4.1.4); the glyph member arms the break ring.
+        let br = member("b0", tag: "br", text: nil)
+        let span = member("s", text: "c")
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "a "), IRRun(child: "b0"),
+                   IRRun(text: " b "), IRRun(child: "s")],
+            children: [br, span], totalChildCount: 2, containerProperties: [],
+            containerLang: nil)
+        XCTAssertEqual(folded?.text, "a\nb c")
+        // A plain member carries no attribution — no span recorded.
+        XCTAssertEqual(folded?.spans.isEmpty, true)
+    }
+
+    func testSmallCapsHostRefusesStyledSpans() {
+        // Kept byte-parallel with the Compose twin, whose small-caps
+        // synthesis rewrites the string's case outside the alignment's
+        // op set (inert here — iOS small-caps is a font feature — but a
+        // shared gate keeps the two folds answering identically).
+        let span = member("s", text: "y",
+                          props: [IRProperty(type: "Color", data: srgb(1, 0, 0))])
+        XCTAssertNil(InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [span], totalChildCount: 1,
+            containerProperties: [IRProperty(type: "FontVariantCaps",
+                                             data: .string("SMALL_CAPS"))],
+            containerLang: nil))
+    }
+
+    func testEmptyRunsListMemberFoldsItsOwnText() {
+        // An empty-but-present nested runs list ([] survives decode) is
+        // NOT a nested tree: the member's own text is the content —
+        // routing [] through the flatten would vanish the glyphs.
+        let span = member("s", text: "y", runs: [])
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [span], totalChildCount: 1, containerProperties: [],
+            containerLang: nil)
+        XCTAssertEqual(folded?.text, "x y")
+    }
+
+    func testNestedNonBrMemberAndUnclaimedNestedChildRefuse() {
+        // Only {text, <br>} subtrees flatten — a nested glyph member is
+        // still the wall wave 44 named…
+        let inner = member("inner", text: "deep")
+        let nested = member("s", text: "y deep",
+                            runs: [IRRun(text: "y "), IRRun(child: "inner")],
+                            children: [inner])
+        XCTAssertNil(InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [nested], totalChildCount: 1, containerProperties: [],
+            containerLang: nil))
+        // …and an unclaimed nested child would silently vanish (the
+        // outer fold consumes the whole member) — refused.
+        let innerBr = member("b0", tag: "br", text: nil)
+        let unclaimed = member("s", text: "y",
+                               runs: [IRRun(text: "y")],
+                               children: [innerBr])
+        XCTAssertNil(InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [unclaimed], totalChildCount: 1, containerProperties: [],
             containerLang: nil))
     }
 }

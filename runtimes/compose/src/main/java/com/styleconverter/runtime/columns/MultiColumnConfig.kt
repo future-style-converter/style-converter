@@ -47,6 +47,14 @@ data class MultiColumnConfig(
      */
     val verticalWritingMode: Boolean = false,
     /**
+     * Wave-47 lane Z2 — true when the vertical writing mode's BLOCK axis
+     * runs right→left (`vertical-rl` / `sideways-rl`, css-writing-modes-4
+     * §6.4): the vertical fragmentation pass walks the child's physical
+     * bands leftward and right-aligns the partial one. Meaningful only
+     * when [verticalWritingMode] is true; false otherwise.
+     */
+    val verticalBlockRtl: Boolean = false,
+    /**
      * True when the container declares `continue: discard` (css-overflow-4
      * §3, the IR `Continue` keyword — wave-42 lane W4): content that lands
      * in an OVERFLOW column (css-multicol-1 §8.2), and everything after it

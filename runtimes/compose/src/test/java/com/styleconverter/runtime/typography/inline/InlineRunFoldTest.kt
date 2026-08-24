@@ -156,11 +156,55 @@ class InlineRunFoldTest {
     }
 
     @Test
-    fun `text-decoration-inset-014 - a u member bails on its UA-styled tag`() {
+    fun `text-decoration-inset-014 - the trimmed wire (no inherited Color) refuses on decoration-color divergence`() {
+        // Wave 47 (lane Z6): <u> now joins the styled tag ring — but this
+        // TRIMMED wire carries no host Color (the runtime seam passes the
+        // inheritance-MERGED list, where black arrives from the body), so
+        // the member's TextDecorationColor cannot be proven equal to the
+        // effective ink and the equality gate refuses (span decorations
+        // paint in the span's text color — a divergence would be a lie).
         val outcome = foldOf(root(INSET_014_HOST, 0))
-        // <u>'s UA underline never rides the wire, so folding its text
-        // flat would silently drop a visible decoration — tag-gated out.
-        assertEquals("member-tag:u", (outcome as InlineRunFold.Outcome.Bailed).reason)
+        assertEquals(
+            "member-prop:TextDecorationColor-divergence",
+            (outcome as InlineRunFold.Outcome.Bailed).reason
+        )
+    }
+
+    @Test
+    fun `text-decoration-inset-014 - with the runtime's merged host Color the u member folds with an underline span`() {
+        // The same wire, with the inherited Color the seam's merged list
+        // carries (body `color: black` → div → h1) appended — the exact
+        // shape the fold sees at runtime.
+        val host = root(INSET_014_HOST, 0)
+        val plan = InlineRunPlan.resolve(host.runs, host.children)
+        val outcome = InlineRunFold.fold(
+            entries = plan!!.entries,
+            children = host.children!!,
+            hostProperties = host.properties + IRProperty(
+                "Color",
+                kotlinx.serialization.json.Json.parseToJsonElement(
+                    """{"srgb":{"r":0,"g":0,"b":0},"original":"black"}"""
+                )
+            ),
+            hostEffectiveLang = host.lang,
+        )
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        // "the " + u text + " fox" — one flowing paragraph.
+        assertEquals("the ultra-quick brown fox", folded.text)
+        // Exactly one span: the <u>'s UA underline over its glyphs
+        // (HTML rendering §15.3.3), decoration color proven equal to the
+        // effective ink so the span-colored line is exact.
+        assertEquals(1, folded.spans.size)
+        val span = folded.spans[0]
+        assertEquals("ultra-quick brown", folded.text.substring(span.start, span.end))
+        assertTrue(span.style.underline)
+        // No other attribution rides: ink/size/weight all inherit.
+        assertEquals(null, span.style.ink)
+        assertEquals(null, span.style.fontSizePx)
+        assertEquals(null, span.style.fontWeight)
+        // BoxDecorationBreak is inert for a box this ring does not paint
+        // and the u has no border — no stated loss to report.
+        assertTrue(span.statedLossTypes.isEmpty())
     }
 
     // ── synthetic pins for each remaining gate rule ──────────────────────
@@ -385,9 +429,12 @@ class InlineRunFoldTest {
     }
 
     @Test
-    fun `member gates - a member carrying its own nested runs bails`() {
+    fun `member gates - a member with text-only nested runs flattens (wave 47)`() {
+        // Wave 44 bailed EVERY member with its own runs; the wave-47
+        // nested ring flattens the {text, <br>} shapes — a runs list of
+        // bare text entries is the degenerate (break-less) case and is
+        // exactly the member's own text, so the fold is faithful.
         val nested = member("span", "y").copy(
-            // A member with its own inline interleave is a real subtree.
             runs = listOf(com.styleconverter.runtime.core.ir.IRRun(text = "y")),
         )
         val outcome = InlineRunFold.fold(
@@ -396,7 +443,119 @@ class InlineRunFoldTest {
             hostProperties = emptyList(),
             hostEffectiveLang = null,
         )
-        assertEquals("member-has-runs", (outcome as InlineRunFold.Outcome.Bailed).reason)
+        assertEquals("x y", (outcome as InlineRunFold.Outcome.Folded).text)
+    }
+
+    // ── wave 47 (lane Z6) — the STYLED-SPAN + BR rings ───────────────────
+
+    @Test
+    fun `block-ellipsis-004 - brs fold to newlines and the styled span rides as one attributed range`() {
+        // Roots: [0] the line-clamp host (brs + the bold-italic-1.5em
+        // bordered span whose own runs nest one more br).
+        val outcome = foldOf(root(BLOCK_ELLIPSIS_004, 0))
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        // Four forced-break lines; every collapsible space around a break
+        // falls (css-text-3 §4.1.4) — the exact lines Chromium paints.
+        assertEquals("Line 1\nLine 2\nLine 3\nLine 4", folded.text)
+        // ONE styled member: the span, covering its flattened subtree.
+        assertEquals(1, folded.spans.size)
+        val span = folded.spans[0]
+        assertEquals("Line 3\nLine 4", folded.text.substring(span.start, span.end))
+        // The wire's purple / bold / italic / 1.5em, typed.
+        val ink = span.style.ink!!
+        assertEquals(0.5019608f, ink.r, 1e-4f)
+        assertEquals(0f, ink.g, 1e-4f)
+        assertEquals(0.5019608f, ink.b, 1e-4f)
+        assertEquals(1f, ink.a, 1e-4f)
+        assertEquals(700, span.style.fontWeight)
+        assertTrue(span.style.italic)
+        assertEquals(1.5f, span.style.fontSizeEm!!, 1e-6f)
+        assertEquals(null, span.style.fontSizePx)
+        // The 2px solid blue border box is the ring's STATED LOSS —
+        // reported, so the seam logs it (never silent).
+        assertEquals(1, span.statedLossTypes.size)
+        assertTrue(span.statedLossTypes[0].startsWith("border-box-ink("))
+    }
+
+    @Test
+    fun `block-ellipsis-002 - a text-and-br-only host stays stacked (br-stacked-equivalent)`() {
+        // The stacked fallback already renders one block per anonymous
+        // run — exactly the forced-break line structure — and this test
+        // PASSES on both natives today (wave46-final android-ref 0.9884 /
+        // ios-ref 0.9813): the ring must not move its calibrated pixels.
+        val outcome = foldOf(root(BLOCK_ELLIPSIS_002, 0))
+        assertEquals("br-stacked-equivalent", (outcome as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    @Test
+    fun `br ring - spaces around a folded break fall on both sides`() {
+        val outcome = InlineRunFold.fold(
+            entries = listOf(
+                InlineRunPlan.Entry.Text("a "),
+                InlineRunPlan.Entry.Child(0),   // <br>
+                InlineRunPlan.Entry.Text(" b "),
+                InlineRunPlan.Entry.Child(1),   // glyph member (arms the ring)
+            ),
+            children = listOf(member("br", null), member("span", "c")),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        // "a " loses its line-end space, " b " loses its line-start one
+        // (css-text-3 §4.1.4); the member boundary collapse is unchanged.
+        assertEquals("a\nb c", (outcome as InlineRunFold.Outcome.Folded).text)
+    }
+
+    @Test
+    fun `styled ring - a small-caps host refuses spans (case rewrite breaks alignment)`() {
+        val outcome = InlineRunFold.fold(
+            entries = entries("x "),
+            children = listOf(member("span", "y", listOf(
+                IRProperty("Color", kotlinx.serialization.json.Json.parseToJsonElement(
+                    """{"srgb":{"r":1,"g":0,"b":0}}"""))
+            ))),
+            hostProperties = listOf(IRProperty("FontVariantCaps", JsonPrimitive("SMALL_CAPS"))),
+            hostEffectiveLang = null,
+        )
+        assertEquals("styled-host-font-variant", (outcome as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    @Test
+    fun `nested ring - a nested non-br member keeps the nested-tree wall`() {
+        val inner = member("span", "z")
+        val nested = member("span", "y z").copy(
+            children = listOf(inner),
+            runs = listOf(
+                com.styleconverter.runtime.core.ir.IRRun(text = "y "),
+                com.styleconverter.runtime.core.ir.IRRun(child = "m"),
+            ),
+        )
+        val outcome = InlineRunFold.fold(
+            entries = entries("x "),
+            children = listOf(nested),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        // Only {text, <br>} subtrees flatten — a nested glyph member is
+        // still the wall wave 44 named, with a finer-grained reason.
+        assertEquals("nested-member-tag:span", (outcome as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    @Test
+    fun `nested ring - an unclaimed nested child refuses the flatten`() {
+        val innerBr = member("br", null)
+        val nested = member("span", "y").copy(
+            children = listOf(innerBr),
+            // The runs list never references the br — flattening would
+            // silently vanish it (the outer fold consumes the member).
+            runs = listOf(com.styleconverter.runtime.core.ir.IRRun(text = "y")),
+        )
+        val outcome = InlineRunFold.fold(
+            entries = entries("x "),
+            children = listOf(nested),
+            hostProperties = emptyList(),
+            hostEffectiveLang = null,
+        )
+        assertEquals("nested-unclaimed", (outcome as InlineRunFold.Outcome.Bailed).reason)
     }
 
     companion object {
@@ -423,5 +582,15 @@ class InlineRunFoldTest {
         // wpt__css-text-decor__text-decoration-inset-014.json — the runs host
         // and its <u> child, verbatim (host's dangling slot removed).
         private val INSET_014_HOST = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"text-decoration-inset-014__1__0-110","name":"text-decoration-inset-014__1__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"FontFamily","data":["monospace"]},{"type":"Width","data":{"type":"length","original":{"v":16,"u":"CH"}}}],"text":"the fox","meta":{"sourceTag":"h1","runs":[{"text":"the "},{"child":"text-decoration-inset-014__1__0__0"},{"text":" fox"}]}},{"id":"text-decoration-inset-014__1__0__0-111","name":"text-decoration-inset-014__1__0__0","properties":[{"type":"TextDecorationColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BoxDecorationBreak","data":"CLONE"}],"slot":{"parent":"text-decoration-inset-014__1__0-110"},"text":"ultra-quick brown","meta":{"sourceTag":"u"}}]}"""
+
+        // tools/titan/runs/wave46-final/sections/css-overflow/per-test-ir/
+        // wpt__css-overflow__line-clamp__block-ellipsis-004.json — verbatim
+        // (wave 47, lane Z6: the styled-span + br ring's measured victim).
+        private val BLOCK_ELLIPSIS_004 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-overflow__line-clamp__block-ellipsis-004__0-061","name":"wpt__css-overflow__line-clamp__block-ellipsis-004__0","properties":[{"type":"LineClamp","data":{"type":"lines","count":3}},{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0.5019607843137255},"original":"teal"}}],"text":"Line 1 Line 2","meta":{"runs":[{"text":"Line 1"},{"child":"line-clamp__block-ellipsis-004__0__0"},{"text":" Line 2"},{"child":"line-clamp__block-ellipsis-004__0__1"},{"text":" "},{"child":"line-clamp__block-ellipsis-004__0__2"}]}},{"id":"line-clamp__block-ellipsis-004__0__0-062","name":"line-clamp__block-ellipsis-004__0__0","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":0}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-004__0-061"},"meta":{"sourceTag":"br","role":"line-break"}},{"id":"line-clamp__block-ellipsis-004__0__1-063","name":"line-clamp__block-ellipsis-004__0__1","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":20}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-004__0-061"},"meta":{"sourceTag":"br","role":"line-break"}},{"id":"line-clamp__block-ellipsis-004__0__2-064","name":"line-clamp__block-ellipsis-004__0__2","properties":[{"type":"Color","data":{"srgb":{"r":0.5019607843137255,"g":0,"b":0.5019607843137255},"original":"purple"}},{"type":"FontWeight","data":{"weight":700,"original":"bold"}},{"type":"FontStyle","data":"italic"},{"type":"FontSize","data":{"original":{"type":"length","original":{"v":1.5,"u":"EM"}}}},{"type":"BorderTopWidth","data":{"px":2}},{"type":"BorderRightWidth","data":{"px":2}},{"type":"BorderBottomWidth","data":{"px":2}},{"type":"BorderLeftWidth","data":{"px":2}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-004__0-061"},"text":"Line 3 Line 4","meta":{"sourceTag":"span","runs":[{"text":"Line 3"},{"child":"line-clamp__block-ellipsis-004__0__2__0"},{"text":" Line 4"}]}},{"id":"line-clamp__block-ellipsis-004__0__2__0-065","name":"line-clamp__block-ellipsis-004__0__2__0","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":0}}],"slot":{"parent":"line-clamp__block-ellipsis-004__0__2-064"},"meta":{"sourceTag":"br","role":"line-break"}}]}"""
+
+        // …/wpt__css-overflow__line-clamp__block-ellipsis-002.json — verbatim
+        // (wave 47, lane Z6: the PASSING text-and-br-only shape the
+        // br-stacked-equivalent rule protects).
+        private val BLOCK_ELLIPSIS_002 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054","name":"wpt__css-overflow__line-clamp__block-ellipsis-002__0","properties":[{"type":"LineClamp","data":{"type":"lines","count":3}},{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0.5019607843137255},"original":"teal"}},{"type":"FontWeight","data":{"weight":700,"original":"bold"}},{"type":"FontStyle","data":"italic"}],"text":"Line 1 Line 2 Line 3 Line 4","meta":{"runs":[{"text":"Line 1"},{"child":"line-clamp__block-ellipsis-002__0__0"},{"text":" Line 2"},{"child":"line-clamp__block-ellipsis-002__0__1"},{"text":" Line 3"},{"child":"line-clamp__block-ellipsis-002__0__2"},{"text":" Line 4"}]}},{"id":"line-clamp__block-ellipsis-002__0__0-055","name":"line-clamp__block-ellipsis-002__0__0","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":0}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054"},"meta":{"sourceTag":"br","role":"line-break"}},{"id":"line-clamp__block-ellipsis-002__0__1-056","name":"line-clamp__block-ellipsis-002__0__1","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":20}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054"},"meta":{"sourceTag":"br","role":"line-break"}},{"id":"line-clamp__block-ellipsis-002__0__2-057","name":"line-clamp__block-ellipsis-002__0__2","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":20}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054"},"meta":{"sourceTag":"br","role":"line-break"}}]}"""
     }
 }

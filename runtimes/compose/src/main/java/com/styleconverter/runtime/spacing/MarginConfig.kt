@@ -40,6 +40,11 @@ data class MarginConfig(
     val blockEnd: MarginValue? = null,
     val inlineStart: MarginValue? = null,
     val inlineEnd: MarginValue? = null,
+    // Wave-47 lane Z2 — the css-writing-modes-4 §6.4 side mapping for THIS
+    // component's used writing mode, stored by MarginExtractor and null for
+    // every horizontal mode (see LogicalSides.verticalOrNull's blast-radius
+    // contract: null keeps resolve() byte-identical to the legacy path).
+    val logicalSides: LogicalSides? = null,
 ) {
     /** True if any side was specified. */
     val hasMargin: Boolean
@@ -59,6 +64,12 @@ data class MarginConfig(
 
     /** Resolve logical→physical the same way PaddingConfig does. */
     fun resolve(isRtl: Boolean): Resolved {
+        // Wave-47 lane Z2 — a stored VERTICAL mapping wins: under
+        // vertical-rl `margin-block-end` is a LEFT margin (css-writing-modes-4
+        // §6.4), which the legacy lines below would transpose to bottom.
+        // logicalSides is null for every horizontal mode (extractor contract),
+        // so all pre-existing content takes the legacy path byte-identically.
+        logicalSides?.let { return resolveWith(it) }
         val startLogical = if (isRtl) inlineEnd else inlineStart
         val endLogical = if (isRtl) inlineStart else inlineEnd
         return Resolved(
@@ -66,6 +77,29 @@ data class MarginConfig(
             right = right ?: endLogical,
             bottom = bottom ?: blockEnd,
             left = left ?: startLogical,
+        )
+    }
+
+    /**
+     * The table-driven resolve: each physical side takes its declared
+     * physical value first (CSS cascade — physical vs logical is a plain
+     * cascade tie the extractor already ordered), then whichever logical
+     * side §6.4 maps onto it. The mapping is a bijection, so exactly one
+     * logical slot can feed each physical side.
+     */
+    private fun resolveWith(sides: LogicalSides): Resolved {
+        // Which logical value lands on a given physical side under [sides].
+        fun logicalFor(side: PhysicalSide): MarginValue? = when (side) {
+            sides.blockStart -> blockStart
+            sides.blockEnd -> blockEnd
+            sides.inlineStart -> inlineStart
+            else -> inlineEnd
+        }
+        return Resolved(
+            top = top ?: logicalFor(PhysicalSide.TOP),
+            right = right ?: logicalFor(PhysicalSide.RIGHT),
+            bottom = bottom ?: logicalFor(PhysicalSide.BOTTOM),
+            left = left ?: logicalFor(PhysicalSide.LEFT),
         )
     }
 

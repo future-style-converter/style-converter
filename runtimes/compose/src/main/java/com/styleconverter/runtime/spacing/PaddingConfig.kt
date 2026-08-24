@@ -34,6 +34,11 @@ data class PaddingConfig(
     val blockEnd: LengthValue? = null,
     val inlineStart: LengthValue? = null,
     val inlineEnd: LengthValue? = null,
+    // Wave-47 lane Z2 — the css-writing-modes-4 §6.4 side mapping for THIS
+    // component's used writing mode, stored by PaddingExtractor and null
+    // for every horizontal mode (LogicalSides.verticalOrNull's contract:
+    // null keeps resolve() byte-identical to the legacy path below).
+    val logicalSides: LogicalSides? = null,
 ) {
     /** True if at least one side was specified (any physical or logical). */
     val hasPadding: Boolean
@@ -48,6 +53,13 @@ data class PaddingConfig(
      * logical directions.
      */
     fun resolve(isRtl: Boolean): Resolved {
+        // Wave-47 lane Z2 — a stored VERTICAL mapping wins: under
+        // vertical-lr `padding-block-start` is a LEFT padding
+        // (css-writing-modes-4 §6.4), which the legacy lines below would
+        // transpose to top. logicalSides is null for every horizontal mode
+        // (extractor contract), so all pre-existing content takes the
+        // legacy path byte-identically.
+        logicalSides?.let { return resolveWith(it) }
         // In LTR: inlineStart=left, inlineEnd=right. In RTL: flipped.
         val start = if (isRtl) right else left
         val end = if (isRtl) left else right
@@ -56,6 +68,28 @@ data class PaddingConfig(
             right = right ?: (if (isRtl) inlineStart else inlineEnd) ?: end,
             bottom = bottom ?: blockEnd,
             left = left ?: (if (isRtl) inlineEnd else inlineStart) ?: start,
+        )
+    }
+
+    /**
+     * The table-driven resolve (twin of MarginConfig.resolveWith): each
+     * physical side takes its declared physical value first, then whichever
+     * logical side §6.4 maps onto it — a bijection, so exactly one logical
+     * slot can feed each physical side.
+     */
+    private fun resolveWith(sides: LogicalSides): Resolved {
+        // Which logical value lands on a given physical side under [sides].
+        fun logicalFor(side: PhysicalSide): LengthValue? = when (side) {
+            sides.blockStart -> blockStart
+            sides.blockEnd -> blockEnd
+            sides.inlineStart -> inlineStart
+            else -> inlineEnd
+        }
+        return Resolved(
+            top = top ?: logicalFor(PhysicalSide.TOP),
+            right = right ?: logicalFor(PhysicalSide.RIGHT),
+            bottom = bottom ?: logicalFor(PhysicalSide.BOTTOM),
+            left = left ?: logicalFor(PhysicalSide.LEFT),
         )
     }
 

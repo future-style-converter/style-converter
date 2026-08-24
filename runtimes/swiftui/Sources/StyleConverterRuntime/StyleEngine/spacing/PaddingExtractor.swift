@@ -54,13 +54,34 @@ enum PaddingExtractor {
             default: break // not a physical padding longhand
             }
         }
-        // Second pass — logical longhands override the physical edge.
+        // Second pass — logical longhands override the physical edge they
+        // MAP to. Wave 47 (lane Z2): the target side comes from the
+        // css-writing-modes-4 §6.4 table under VERTICAL writing modes
+        // (`padding-block-start` on a vertical-lr box is a LEFT padding);
+        // `sides` is nil for every horizontal mode (LogicalSides
+        // .verticalOrNil's blast-radius contract), where the ?? defaults
+        // reproduce the legacy LTR-TB fold byte-identically. Twin of
+        // MarginExtractor's fold.
+        let sides = LogicalSides.verticalOrNil(properties)
+        // One side-targeted store, shared by all four logical longhands.
+        func assign(_ side: PhysicalSide, _ value: LengthValue) {
+            switch side {
+            case .top:    cfg.top = value
+            case .right:  cfg.right = value
+            case .bottom: cfg.bottom = value
+            case .left:   cfg.left = value
+            }
+        }
         for prop in properties {
             switch prop.type {
-            case "PaddingBlockStart":  cfg.top    = extractLengthPercentDefault(prop.data); touched = true
-            case "PaddingInlineEnd":   cfg.right  = extractLengthPercentDefault(prop.data); touched = true
-            case "PaddingBlockEnd":    cfg.bottom = extractLengthPercentDefault(prop.data); touched = true
-            case "PaddingInlineStart": cfg.left   = extractLengthPercentDefault(prop.data); touched = true
+            case "PaddingBlockStart":
+                assign(sides?.blockStart ?? .top, extractLengthPercentDefault(prop.data)); touched = true
+            case "PaddingInlineEnd":
+                assign(sides?.inlineEnd ?? .right, extractLengthPercentDefault(prop.data)); touched = true
+            case "PaddingBlockEnd":
+                assign(sides?.blockEnd ?? .bottom, extractLengthPercentDefault(prop.data)); touched = true
+            case "PaddingInlineStart":
+                assign(sides?.inlineStart ?? .left, extractLengthPercentDefault(prop.data)); touched = true
             default: break // not a logical padding longhand
             }
         }

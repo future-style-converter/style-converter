@@ -185,7 +185,11 @@ sealed interface BackgroundImageConfig {
     data class LinearGradient(
         val angle: Float,
         val colorStops: List<ColorStop>,
-        val repeating: Boolean = false
+        val repeating: Boolean = false,
+        // The authored <color-interpolation-method> (css-color-4 §12.4),
+        // parsed from the layer's optional `interp` wire key — wave 47.
+        // LEGACY = no clause = the historical Skia sRGB shader ramp.
+        val interp: GradientInterpolation = GradientInterpolation.LEGACY
     ) : BackgroundImageConfig
 
     /**
@@ -230,6 +234,8 @@ sealed interface BackgroundImageConfig {
         // CSS defaults).
         val shape: RadialShape? = null,
         val size: RadialSize? = null,
+        // Authored interpolation clause (see LinearGradient.interp).
+        val interp: GradientInterpolation = GradientInterpolation.LEGACY,
     ) : BackgroundImageConfig
 
     /**
@@ -250,7 +256,9 @@ sealed interface BackgroundImageConfig {
         val centerY: GradientCoord,
         val angle: Float,
         val colorStops: List<ColorStop>,
-        val repeating: Boolean = false
+        val repeating: Boolean = false,
+        // Authored interpolation clause (see LinearGradient.interp).
+        val interp: GradientInterpolation = GradientInterpolation.LEGACY
     ) : BackgroundImageConfig
 
     /**
@@ -297,15 +305,37 @@ sealed interface BackgroundImageConfig {
 /**
  * A color stop in a gradient.
  *
- * CSS: `red 25%` or `#ff0000 0.25`
- * Compose: Pair<Float, Color> for colorStops parameter
+ * CSS: `red 25%` or `red 30px` or bare `red` (unpositioned).
  *
- * @property color The color at this stop
- * @property position Position in the gradient (0.0-1.0)
+ * Wave 47 (lane Z1, the Android half of the wave-46 Y2 gradient
+ * pipeline): the css-images-4 §3.4.3 fixup needs to know which stops the
+ * author actually positioned — an unpositioned stop spreads between its
+ * POSITIONED neighbours, not over the whole count — and the wave-40
+ * `positionLength` px arm (the repeat period of `…, white 30px`) must
+ * survive extraction. [declaredPosition]/[positionPx] carry that;
+ * [position] keeps the historical "declared-or-even-spread" resolution
+ * because the unowned background/RepeatingGradientHelper (and its tests)
+ * still read a non-null fraction — the render pipeline itself no longer
+ * consumes it (GradientStopResolver reads the two new fields).
+ *
+ * @property color The color at this stop (resolved sRGB).
+ * @property position LEGACY resolved fraction (0..1): the declared
+ *   percent when present, else the pre-wave `i/(n−1)` even spread.
+ * @property declaredPosition The authored <percentage> as a 0..1
+ *   fraction, or null when the author left this stop unpositioned (or
+ *   positioned it with a <length>). Defaults to [position] so direct
+ *   constructions (tests, RepeatingGradientHelper's stripe utilities)
+ *   keep meaning "declared here".
+ * @property positionPx The authored <length> position in absolute CSS px
+ *   (wire `positionLength: {px: N}`), or null. Resolved against the
+ *   gradient-line length by GradientStopResolver.fixup — the applier is
+ *   the only place that length exists.
  */
 data class ColorStop(
     val color: Color,
-    val position: Float
+    val position: Float,
+    val declaredPosition: Float? = position,
+    val positionPx: Float? = null
 )
 
 /**

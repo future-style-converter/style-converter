@@ -51,6 +51,12 @@ public struct ComponentRenderer: View {
     // percent heights keep degrading to auto (the ScrollView rationale
     // documented in SizeApplier). See ContainingBlock.swift.
     @Environment(\.containingBlockHeight) private var containingBlockHeight
+    // Wave 47 (lane Z2) — true only inside a MODELED vertical flow (the
+    // block-flow seam's content / a vertical multicol fragment column);
+    // gates the vertical fill folds in the style closure so every frozen
+    // horizontal-tb path keeps its pre-Z2 fills (the key's doc in
+    // VerticalBlockFlowLayout.swift).
+    @Environment(\.verticalFlowScopeZ2) private var verticalFlowScopeZ2
 
     // Lane IOS-COLLAPSE — the CSS 2.1 §8.3.1 margin-collapse channel:
     // a BLOCK parent statically folds its children's vertical margins
@@ -1072,10 +1078,33 @@ public struct ComponentRenderer: View {
             // fill made iOS paint 35 800 (a 358×100 bar). box-shadow-001 and
             // extra-height-given-to-all-row-groups-00{1,2,5} are the same
             // three ink counts. See TableBoxTree.shrinkToFitBox.
+            // Wave 47 (lane Z2) — the component's used writing mode, read
+            // through the shared decoder on the SAME merged list every
+            // fold here consumes. Under a VERTICAL mode (css-writing-modes-4
+            // §7.3) the §10.3.3 stretch fit applies to the INLINE axis —
+            // the HEIGHT — and the block axis (width) NEVER stretches (an
+            // orthogonal box's auto block size hugs its content), so the
+            // width fill below is suppressed and a height fill added.
+            let verticalWmZ2 = WritingModeExtractor.extract(
+                from: displayProperties(now: now))?.isVertical == true
+            // The two vertical-fill inputs (Compose twin: ownDeclaresWm /
+            // LocalVerticalFlowScope): an OWN writing-mode declaration is
+            // an orthogonal boundary (§7.3.2 fit-content sizing), and the
+            // scope flag marks a flow this lane actually models — outside
+            // both, a vertical box keeps the FROZEN horizontal-tb fills
+            // (the available-size family passes on them today).
+            let ownDeclaresWmZ2 = component.properties.contains { $0.type == "WritingMode" }
             if wptCaptureMode, let w = wptBlockFlowFillWidth,
                s.size.width == nil, !Self.isOutOfFlow(component),
                s.layout.display != .inline,
                !Self.isInlineAtom(component),
+               // Wave 47 (lane Z2): a vertical box in a MODELED vertical
+               // flow — or an orthogonal vertical root — never takes the
+               // WIDTH fill: its width is the BLOCK size
+               // (content-hugging); filling it made the css-break .mc
+               // boxes canvas-wide. Un-modeled vertical boxes keep the
+               // frozen fill (see ownDeclaresWmZ2's doc).
+               !(verticalWmZ2 && (ownDeclaresWmZ2 || verticalFlowScopeZ2)),
                !RatioInlineSize.determinesInlineSize(s.size),
                !TableBoxTree.shrinkToFitBox(
                     TableBoxTree.roleOf(displayProperties(now: now),
@@ -1091,6 +1120,33 @@ public struct ComponentRenderer: View {
                 s.size.width = .exact(px: SizeApplierMath.declaredFromFrame(
                     w, inflate: StyleBuilder.contentBoxInflation(s).h))
             }
+            // Wave 47 (lane Z2) — the INLINE-axis (height) stretch fit for
+            // vertical boxes: css-writing-modes-4 §7.3 stretches an
+            // auto-inline-size box to its containing block's inline extent,
+            // which the parent publishes as containingBlockHeight (always
+            // re-written per level — the wave-9 reset discipline). Gated
+            // exactly like the width fill (capture, in-flow, block-level,
+            // no atom) so nothing outside vertical composed capture moves;
+            // the frame→declared conversion mirrors the width fold with
+            // the VERTICAL inflate band.
+            // ORTHOGONAL guard: the inline stretch belongs to a box whose
+            // parent flows the SAME vertical way — a box that DECLARES
+            // writing-mode on its own wire sits at an orthogonal boundary
+            // (horizontal parent), where §7.3.2 sizes an auto inline size
+            // to fit-content, never stretch (InheritedText merges the own
+            // declaration over the inherited one, so the RAW own list is
+            // the boundary signal; a same-value re-declaration
+            // conservatively hugs). Compose twin: the ownDeclaresWm guard
+            // on the fillMaxHeight fold.
+            if wptCaptureMode, verticalWmZ2, verticalFlowScopeZ2,
+               s.size.height == nil, !Self.isOutOfFlow(component),
+               s.layout.display != .inline,
+               !Self.isInlineAtom(component),
+               !ownDeclaresWmZ2,
+               let cbh = containingBlockHeight {
+                s.size.height = .exact(px: SizeApplierMath.declaredFromFrame(
+                    cbh, inflate: StyleBuilder.contentBoxInflation(s).v))
+            }
             // Fidelity wave 3 — multicol full-width default
             // (Columns_Decorated, 0.556 → worst wave-3 row). A multicol
             // container is a BLOCK container (css-multicol-1 §1) whose
@@ -1103,7 +1159,10 @@ public struct ComponentRenderer: View {
             // width in as the used width; an explicit CSS width always
             // wins. TODO: small-content multicol boxes (N × max-content
             // < canvas) would need static text measurement to hug.
-            if s.size.width == nil, let n = s.columns?.count, n >= 2 {
+            // Wave 47 (lane Z2): a VERTICAL multicol container's width is
+            // its BLOCK size (content-hugging §7.3) — the full-width
+            // default below is a horizontal-inline-axis rule only.
+            if !verticalWmZ2, s.size.width == nil, let n = s.columns?.count, n >= 2 {
                 // Wave 11: same frame→declared conversion as the folds
                 // above — the containing-block width is the multicol
                 // box's target FRAME extent (identity outside WPT mode).
@@ -1382,7 +1441,15 @@ public struct ComponentRenderer: View {
                 // path is unchanged; a declared center/space-* keyword
                 // now leaves the lines at their hypothetical cross size,
                 // matching the Compose lane's FlexWrapLines gate.
-                alignContent: layoutAgg.alignContent
+                alignContent: layoutAgg.alignContent,
+                // Wave 47 (lane Z7): §8.2 justify-content per wrapped
+                // line — the same keyword the nowrap path already
+                // honors, distributed by CSSFlexMath.mainOffsets.
+                justifyContent: layoutAgg.justifyContent,
+                // …and the definite-main signal that lets the Layout
+                // claim the declared width so the distribution sees the
+                // free space (same definiteness test as the cross axis).
+                definiteMain: style.size.width != nil
             ) {
                 contentOrPlaceholder(style: style)
             }
@@ -1647,6 +1714,34 @@ public struct ComponentRenderer: View {
                 // frozen corpus.
                 .environment(\.floatClearancePlan,
                              stripSeam?.zeroFlowPlan ?? clearanceScopePlan)
+            } else if let verticalBlockRtl = verticalBlockFlowZ2() {
+                // ── Wave 47 (lane Z2): the VERTICAL block-flow seam ─────
+                // css-writing-modes-4 §6: under vertical-rl/-lr the
+                // block-flow direction is HORIZONTAL, so this container's
+                // block-level children stack side-by-side (right→left for
+                // vertical-rl) via VerticalBlockFlowLayout instead of the
+                // VStack below. Every gate — WPT capture only (the
+                // wave-19+ dark-stage precedent), the container's USED
+                // writing mode vertical (inherited via resolvedProperties),
+                // NO inline-level child (inline-LEVEL boxes flow along the
+                // INLINE axis, i.e. exactly the VStack this replaces —
+                // css-position position-absolute-center-002's green box of
+                // inline-block spans IS the reference render), and no
+                // leading text (a text run's vertical flow is the
+                // VerticalTextFlowLayout lane's) — lives in
+                // verticalBlockFlowZ2, which also logs the one modeled
+                // gap (horizontal-axis §8.3.1 collapse) once. The Compose
+                // twin is ComponentRenderer.kt's Z2 seam.
+                VerticalBlockFlowLayout(blockRtl: verticalBlockRtl) {
+                    // Same content pass as every container — the sorted
+                    // in-flow children become the layout's subviews in
+                    // order (abspos children ride the overlay, not this).
+                    // The children ARE in a modeled vertical flow: unlock
+                    // the inline-axis fill / width-fill suppression for
+                    // them (verticalFlowScopeZ2's blast-radius doc).
+                    contentOrPlaceholder(style: style)
+                        .environment(\.verticalFlowScopeZ2, true)
+                }
             } else if let floatSegments = blockFloatSegments() {
                 // Wave-19 lane FLOAT — CSS 2.1 §9.5 float row packing,
                 // composed-WPT capture ONLY (pin P8; the gate lives in
@@ -3059,6 +3154,18 @@ public struct ComponentRenderer: View {
                             + "\(flow.droppedEmptyMembers) empty member(s) — "
                             + "component \(component.id)")
                     : false
+                // Wave 47 (lane Z6): a styled member's border box is the
+                // span ring's STATED LOSS (InlineSpanRing's banner — a
+                // character-style ring cannot paint a box) — named per
+                // host so a capture can be audited from the log alone.
+                let spanLosses = flow.spans.flatMap { $0.statedLossTypes }
+                let _ = spanLosses.isEmpty
+                    ? false
+                    : PropertyTracker.logOnce(
+                        key: "inline-span:stated-loss:\(component.id)",
+                        message: "styled-span fold STATED LOSS: "
+                            + spanLosses.joined(separator: ";")
+                            + " — component \(component.id)")
                 // X1: the paragraph's TextConfig — the host's, with an
                 // ADOPTED member `hyphens` injected (the fold only adopts
                 // when the host declared none, so this never overrides a
@@ -3111,7 +3218,15 @@ public struct ComponentRenderer: View {
                     // exactly the paragraph this label paints. Members
                     // with their OWN wire refused the fold upstream.
                     decorations: DecorationWire.decorationLines(
-                        from: component.meta?.decorations)
+                        from: component.meta?.decorations),
+                    // Wave 47 (lane Z6) — the STYLED-SPAN ring: the
+                    // fold's member ranges over `rawText`, rendered as a
+                    // per-segment Text concatenation inside the label
+                    // (the ranges must be mapped through the label's own
+                    // string surgery, so the split happens in there).
+                    // nil for every span-less fold keeps the label
+                    // byte-identical to wave 45.
+                    inlineSpans: flow.spans.isEmpty ? nil : flow.spans
                 )
             }
             if let t = component.text, !t.isEmpty, runPlan == nil,
@@ -3508,13 +3623,30 @@ public struct ComponentRenderer: View {
                     // (MulticolClonePlan's re-render trick) — the shared
                     // leaf predicate, computed here because the plan sees
                     // properties only.
-                    childIsLeaf: MulticolSpannerFlow.isLeafBox(child))
+                    childIsLeaf: MulticolSpannerFlow.isLeafBox(child),
+                    // Wave 47 (lane Z2): the vertical plan's band
+                    // direction — vertical-rl / sideways-rl walk the
+                    // child's physical bands leftward (css-writing-modes-4
+                    // §6.4). Same shared decoder as the verticalWritingMode
+                    // read above, so the two flags can never disagree.
+                    verticalBlockRtl: {
+                        let m = WritingModeExtractor.extract(
+                            from: resolvedProperties)?.mode
+                        return m == .verticalRl || m == .sidewaysRl
+                    }())
                 Group {
                     if let plan = fragPlan {
                         // Fragment pass — F clipped+translated clones of
                         // the child, one per column (multicolFragmentRow
                         // below documents the modifier-order argument).
-                        multicolFragmentRow(child: child, plan: plan)
+                        // Wave 47 (lane Z2): a VERTICAL plan's column
+                        // boxes stack vertically instead — the VStack
+                        // consumer (multicolVerticalFragmentColumn).
+                        if plan.vertical {
+                            multicolVerticalFragmentColumn(child: child, plan: plan)
+                        } else {
+                            multicolFragmentRow(child: child, plan: plan)
+                        }
                     } else if isMarkerRow {
                         // Wave 27 (lane NMARK, B-RC5 + B-RC6) + wave 28
                         // (lane MC). The synthesized marker box must not
@@ -3922,6 +4054,126 @@ public struct ComponentRenderer: View {
         }
     }
 
+    /// Wave 47 (lane Z2) — the VERTICAL twin of multicolFragmentRow: the
+    /// column boxes stack in a VStack (the multicol inline axis is
+    /// vertical), each slot W wide (`plan.columnWidthPx`, the fragmentainer
+    /// block size) × colH tall (`plan.columnBlockSizePx`). The child —
+    /// laid out once as its continuous C-wide box — is shifted per
+    /// fragment by the V-table's x-translation (VerticalFragmentGeometry:
+    /// left-aligned −i·W bands for vertical-lr, right-aligned W−C+i·W for
+    /// vertical-rl), then clipped to the slot; the VStack supplies the
+    /// vertical slot position, mirroring how the horizontal HStack ignores
+    /// translate.width.
+    private func multicolVerticalFragmentColumn(child: IRComponent,
+                                                plan: ColumnsApplier.FragmentPlan) -> some View {
+        // .leading alignment: every column box shares the container's
+        // block... left content edge; the band translation below owns any
+        // right-alignment (vertical-rl partial bands).
+        VStack(alignment: .leading, spacing: plan.gapPx) {
+            // columnIndex is unique by construction (0..<F) — a stable
+            // ForEach identity, same as the horizontal row.
+            ForEach(plan.fragments, id: \.columnIndex) { frag in
+                ComponentHost(component: child)
+                    // css-multicol-1 §2: the child's containing block is
+                    // the COLUMN box — W wide (block) × colH tall
+                    // (inline). The height channel feeds the wave-47
+                    // vertical inline fill (the child's stretch-fit
+                    // height), the width channel its percent bases, and
+                    // the scope flag unlocks that fill (the fragment
+                    // column IS a modeled vertical flow — a root-level
+                    // vertical multicol like css-break borders-006 has no
+                    // seam ancestor to inherit it from).
+                    .environment(\.containingBlockWidth, plan.columnWidthPx)
+                    .environment(\.containingBlockHeight, plan.columnBlockSizePx)
+                    .environment(\.verticalFlowScopeZ2, true)
+                    // The band shift (−i·W / W−C+i·W) — paint-only, so the
+                    // frame below still aligns the UNSHIFTED box.
+                    .offset(x: frag.translate.width)
+                    // The column rect as a fixed frame; topLeading pins
+                    // the child's (unshifted) top-left to the slot's,
+                    // making the offset the container-coordinate formula.
+                    .frame(width: plan.columnWidthPx,
+                           height: plan.columnBlockSizePx,
+                           alignment: .topLeading)
+                    // Clip to the column rect — the pass' clip step.
+                    .clipped()
+            }
+        }
+    }
+
+    /// Wave 47 (lane Z2) — the vertical block-flow decision for THIS
+    /// container: nil keeps every legacy branch; non-nil carries the
+    /// blockRtl flag for VerticalBlockFlowLayout. Gates (each named in the
+    /// call site's comment): WPT capture, a vertical USED writing mode
+    /// (inherited via resolvedProperties), in-flow children present, no
+    /// inline-level child (keyword set = the Compose
+    /// INLINE_LEVEL_DISPLAY_KEYWORDS twin, plus UA inline atoms), and no
+    /// leading text. Logs the one modeled gap once (no silent
+    /// fallthrough): §8.3.1 margin collapse along the horizontal block
+    /// axis is not built — exact anyway for single-sided margins, the
+    /// css-break wall's shape.
+    private func verticalBlockFlowZ2() -> Bool? {
+        // Dark-stage protection: the 327 corpus never sets capture mode.
+        guard wptCaptureMode else { return nil }
+        // The used writing mode, through the shared decoder.
+        guard let wm = WritingModeExtractor.extract(from: resolvedProperties),
+              wm.isVertical else { return nil }
+        // A text run's vertical flow belongs to VerticalTextFlowLayout.
+        guard component.text?.isEmpty != false else { return nil }
+        // Nothing to stack without in-flow children (an abspos-only
+        // container keeps the frozen VStack, whose static-position
+        // machinery already models vertical modes — the grid
+        // abspos-staticpos-vertWM family passes on it today).
+        guard !inFlowChildren.isEmpty else { return nil }
+        // TEXT-ONLY-LEAVES guard (wave-47 skeptic S3 D1): a container whose
+        // EVERY in-flow child is a text-only leaf with no Display wire is an
+        // anonymous inline formatting context (the select-appearance option
+        // list) — its children flow on the INLINE axis, which under vertical
+        // modes is the vertical axis the frozen VStack already models; the
+        // seam would re-stack them horizontally and break the 4 passing
+        // select-appearance-none-vertical cells.
+        let allTextOnlyLeaves = inFlowChildren.allSatisfy { child in
+            (child.children?.isEmpty ?? true)
+                && !(child.text ?? "").isEmpty
+                && !child.properties.contains(where: { $0.type == "Display" })
+        }
+        if allTextOnlyLeaves { return nil }
+        // Inline-LEVEL children flow along the INLINE axis — vertical,
+        // i.e. exactly the VStack this seam would replace (the
+        // position-absolute-center-002 protection).
+        let inlineLevel: Set<String> = ["INLINE", "INLINE_BLOCK", "INLINE_FLEX", "INLINE_GRID"]
+        for child in inFlowChildren {
+            // UA widget atoms are inline-level with no Display on the wire.
+            if Self.isInlineAtom(child) { return nil }
+            if let d = child.properties.first(where: { $0.type == "Display" })
+                .flatMap({ ValueExtractors.extractKeyword($0.data) })?
+                .uppercased().replacingOccurrences(of: "-", with: "_"),
+               inlineLevel.contains(d) { return nil }
+            // ORTHOGONAL child guard: a child declaring its own
+            // writing-mode sits at a flow boundary whose §7.3 orthogonal
+            // sizing this seam does not model — and the frozen VStack
+            // passes those tests today (css-contain contain-body-w-m,
+            // float-in-htb-in-vrl).
+            if child.properties.contains(where: { $0.type == "WritingMode" }) { return nil }
+            // BAKED-LAYOUT guard: post-load-extracted wires carry the
+            // browser's used physical Width+Height on every box — that
+            // layout already encodes vertical flow AND fragmentation, and
+            // the frozen VStack render of it passes today (the
+            // anchor-position-multicol family). Twin of the Compose
+            // seam's anyBakedChild / ChildSpec.bakedPhysicalSize gates.
+            if child.properties.contains(where: { $0.type == "Width" }),
+               child.properties.contains(where: { $0.type == "Height" }) { return nil }
+        }
+        // The seam owns this container — name its one modeled gap.
+        PropertyTracker.logOnce(
+            key: "vertical-block-flow-z2",
+            message: "vertical block flow: horizontal-axis CSS2 §8.3.1 "
+                + "margin collapse not modeled (single-sided block margins "
+                + "render exactly)")
+        // vertical-rl / sideways-rl walk right→left (§6.4).
+        return wm.mode == .verticalRl || wm.mode == .sidewaysRl
+    }
+
     /// The item's principal box as the marker branch renders it, with the
     /// legacy flexbox decoration a non-`CSSFlexLayout` parent still needs.
     /// Factored out (wave 28, lane MC) so the two placements below build
@@ -4181,6 +4433,22 @@ private struct PlaceholderLabel: View {
     // DecorationWire → here.
     var decorations: [DecorationColorOps.DecorationLine]? = nil
 
+    // Wave 47 (lane Z6) — the inline-fold STYLED-SPAN RING: the styled
+    // members of a folded runs host, each a CHARACTER range over
+    // `rawText` (the fold's merged string) plus its typed attribution
+    // (InlineRunFlow.Span / InlineSpanRing.Style). Rendered here as a
+    // per-segment Text CONCATENATION — `Text(a) + Text(b).underline()`
+    // flows as one paragraph with per-range attributes — because the
+    // label's whole modifier chain already hangs off one `Text` and
+    // concatenation keeps every downstream stage (line limit, pinned
+    // line boxes, decoration overlay) untouched. The ranges are mapped
+    // through this label's own string surgery (case fold is bailed
+    // upstream; shy strip + greedy pre-break are alignment-modeled —
+    // InlineSpanRing.alignment) right before the split. nil (every
+    // caller but the fold seam, and every span-less fold) keeps this
+    // label byte-identical to wave 45.
+    var inlineSpans: [InlineRunFlow.Span]? = nil
+
     // Wave 35 (lane B5) — non-nil ⇒ this run is an UPRIGHT vertical run
     // (css-writing-modes-4 §5.1) and the value is the side line 1 stacks on.
     // Decided ONCE at the call site by `VerticalUprightGate.stack`, which
@@ -4358,7 +4626,13 @@ private struct PlaceholderLabel: View {
         // Both are 0 when the effective line-height is nil.
         let leading = LineBoxMetrics.leading(lineHeightPx: effectiveLineHeight,
                                              fontSizePx: textConfig.fontSize ?? 16,
-                                             design: textConfig.fontDesign)
+                                             design: textConfig.fontDesign,
+                                             // wave-47 Z4: the leading splits
+                                             // around the RENDERED face — the
+                                             // document @font-face when one
+                                             // is declared (see
+                                             // LineBoxMetrics.contentHeight).
+                                             faceName: textConfig.fontFaceName)
         // TITAN Round 4 (GAP 1, height half) — single-line proxy for the
         // WPT line-box CAP below. A run with NO internal whitespace can never
         // wrap, so in composed WPT capture we can pin its box to EXACTLY one
@@ -4462,7 +4736,10 @@ private struct PlaceholderLabel: View {
             ? 0
             : LineBoxMetrics.subNaturalOffset(lineHeightPx: effectiveLineHeight,
                                               fontSizePx: textConfig.fontSize ?? 16,
-                                              design: textConfig.fontDesign)
+                                              design: textConfig.fontDesign,
+                                              // wave-47 Z4: same rendered-face
+                                              // basis as `leading` above.
+                                              faceName: textConfig.fontFaceName)
         // Multi-line sub-natural line boxes stay UNCOMPRESSED: SwiftUI's
         // `.lineSpacing` cannot go negative, so the per-line ADVANCE
         // remains the natural content height while a browser advances
@@ -4475,7 +4752,12 @@ private struct PlaceholderLabel: View {
                 message: "sub-natural line-height on multi-line text: " +
                     "placement compensated, advance stays natural " +
                     "(SwiftUI lineSpacing cannot be negative)")
-        let textView = wordSpacedText(displayText)
+        // Wave 47 (lane Z6): the styled-span split, or the plain run —
+        // `styledSpanText` is `wordSpacedText` verbatim when no spans
+        // ride (every pre-wave-47 caller). The outer `.font(font)` still
+        // paints every un-styled segment; a styled segment's own
+        // `.font(...)` wins for its range (nearest-modifier rule).
+        let textView = styledSpanText(displayText)
             .font(font)
         // SwiftUI's `.foregroundStyle` accepts ANY ShapeStyle including
         // LinearGradient, so when bg-clip:text is on we replace the
@@ -4697,7 +4979,12 @@ private struct PlaceholderLabel: View {
         }
     }
 
-    private var font: Font {
+    // Wave 47 (lane Z6) — the face build, parameterized by config so a
+    // STYLED SEGMENT (a member font-size/weight/italic override) resolves
+    // through the EXACT same ladder the paragraph face uses (declared
+    // @font-face → §5.2 Inter face pick → system design → weight/italic
+    // synthesis). `font` below keeps the historic property shape.
+    private func labelFont(for textConfig: TextConfig) -> Font {
         // Build via `.system(size:design:)` so generic-family signals
         // (`font-family: serif/monospace/ui-rounded`) survive — placing
         // `.font(...)` directly on Text overrides any container-level
@@ -4808,6 +5095,9 @@ private struct PlaceholderLabel: View {
         return f
     }
 
+    /// The label's own face — the parameterized build over its config.
+    private var font: Font { labelFont(for: textConfig) }
+
     // MARK: - Lane IOS-TEXT helpers
 
     /// The UIKit twin of `font` above — the EXACT face the label renders
@@ -4816,6 +5106,35 @@ private struct PlaceholderLabel: View {
     private var measurementUIFont: UIFont {
         // Same 16pt web-body default as `font`.
         let size = textConfig.fontSize ?? 16
+        // wave-47 lane Z4 (SEAM 2 of the monospace pin) — the document
+        // @font-face branch, mirroring `font`'s own declaredFace-first order.
+        // Without it a face-bearing document MEASURED with Inter/SF while the
+        // label PAINTED the declared file: under the wave-46 Y7 pin pilot the
+        // greedy pre-break and the line grid ran on SF Mono metrics (ascent
+        // 1980/2048) while DejaVu (1901/2048) painted, sitting every glyph
+        // run ~3px low and regressing hyphens-auto-inline-010 0.9528→0.9406.
+        // UIFont(name:) resolves the PostScript name CoreText reported at
+        // registration; a stale/unresolvable name falls through to the
+        // legacy branches — never a measurement the render can't share.
+        if let declaredFace = textConfig.fontFaceName,
+           let f = UIFont(name: declaredFace, size: size) {
+            // Italic mirror of `font`'s declared-face arm: there
+            // `interFaceName` stays nil so `.italic()` runs a symbolic-trait
+            // lookup that no-ops when the family ships no italic — same
+            // probe here, upright fallback, never the synthetic shear the
+            // render doesn't paint for declared faces.
+            if textConfig.fontItalic,
+               let italicDesc = f.fontDescriptor.withSymbolicTraits(.traitItalic) {
+                return UIFont(descriptor: italicDesc, size: size)
+            }
+            // Element `font-weight` on a declared face rides `.weight()`'s
+            // CoreText synthesis at render time (see `font`); synthetic
+            // emboldening thickens strokes without moving advances, and the
+            // wall's only bold-bearing document faces are monospace (equal
+            // advances by construction), so the base face is the honest
+            // measuring stand-in until a real weight-matched pick is funded.
+            return f
+        }
         if textConfig.fontDesign == .default {
             // §5.2 face pick first (fix 5), mirroring `font` exactly.
             if let n = textConfig.fontWeightNumeric,
@@ -4928,6 +5247,142 @@ private struct PlaceholderLabel: View {
         return Text(ScriptFallbackFonts.apply(to: attr,
                                               enabled: scriptFallback,
                                               size: size))
+    }
+
+    /// Wave 47 (lane Z6) — the STYLED-SPAN split: cut the display string
+    /// at the fold's (alignment-remapped) member boundaries and
+    /// concatenate one `wordSpacedText` piece per segment, styled
+    /// segments carrying their member attributes. `Text + Text` flows as
+    /// ONE paragraph with per-range attributes (the SwiftUI expression of
+    /// CSS 2.1 §9.4.2's shared inline formatting context), so every
+    /// downstream stage — line limit, pinned line boxes, the decoration
+    /// overlay — is untouched. Identity (`wordSpacedText(s)` verbatim)
+    /// whenever no spans ride, which is every pre-wave-47 caller.
+    private func styledSpanText(_ s: String) -> Text {
+        // No spans (the overwhelming common case) → the frozen build.
+        guard let spans = inlineSpans, !spans.isEmpty else { return wordSpacedText(s) }
+        // The fold's coordinate space is `rawText` (the merged string);
+        // map its offsets through this label's own string surgery (shy
+        // strip + greedy pre-break — InlineSpanRing.alignment's op set).
+        // An unalignable rewrite renders the fold UN-styled: degraded
+        // style, never wrong glyphs — and never silent (breadcrumb).
+        guard let original = rawText,
+              let map = InlineSpanRing.alignment(original: original, transformed: s) else {
+            _ = PropertyTracker.logOnce(
+                key: "inline-span:align-failed",
+                message: "styled-span overlay: alignment failed — rendering "
+                    + "the fold un-styled (glyphs exact, member styles dropped)")
+            return wordSpacedText(s)
+        }
+        // HONEST LIMITATION, logged once (repo no-silent-fallthrough):
+        // the greedy pre-break measured this paragraph with the HOST
+        // face, so a member font-size/weight changes advances the fit
+        // test did not see. Every wave-47 victim's member lines are
+        // hard-broken (`<br>`) or same-metric, so no corpus break moves;
+        // a future soft-wrapping styled member is where this surfaces.
+        let _ = spans.contains {
+            $0.style.fontSizePx != nil || $0.style.fontSizeEm != nil
+                || $0.style.fontWeight != nil || $0.style.italic
+        } && PropertyTracker.logOnce(
+            key: "inline-span:host-face-measure",
+            message: "styled-span fold: pre-break measured with the host "
+                + "face; member font metrics differ (stated approximation)")
+        // Cut the display string at the remapped boundaries. Spans are
+        // wire-ordered and non-overlapping by construction (the fold
+        // records them along one forward walk); guards keep a defect
+        // degrading to un-styled pieces instead of crashing.
+        let chars = Array(s)
+        var pieces: [(Range<Int>, InlineSpanRing.Style?)] = []
+        var cursor = 0
+        for span in spans {
+            // Defensive range checks (fold emits 0 ≤ start ≤ end ≤ count).
+            guard span.start >= 0, span.end <= original.count, span.start <= span.end
+            else { continue }
+            let a = map[span.start]
+            let b = map[span.end]
+            // A range fully consumed by the surgery styles nothing.
+            guard a >= cursor, b > a else { continue }
+            // The unstyled gap before this member, then the member.
+            if a > cursor { pieces.append((cursor..<a, nil)) }
+            pieces.append((a..<b, span.style))
+            cursor = b
+        }
+        // The unstyled tail after the last member.
+        if cursor < chars.count { pieces.append((cursor..<chars.count, nil)) }
+        // Concatenate: each piece rides the SAME kern/script build the
+        // whole run used (wordSpacedText is per-piece exact — kerns
+        // attach per character), styled pieces adding their attributes.
+        var result = Text(verbatim: "")
+        for (range, style) in pieces {
+            let piece = String(chars[range])
+            var t = wordSpacedText(piece)
+            if let style {
+                // The member's own ink (css-color-4 §3.1) — inner
+                // foregroundColor wins over the label's outer one.
+                if let ink = style.ink {
+                    t = t.foregroundColor(Color(.sRGB, red: ink.r, green: ink.g,
+                                                blue: ink.b, opacity: ink.a))
+                }
+                // A member face override rebuilds through the SAME
+                // ladder the paragraph face used (labelFont) over a
+                // config copy — em resolves against the paragraph size
+                // (css-values-4 §5.1.1: the fold host is the parent).
+                if style.fontSizePx != nil || style.fontSizeEm != nil
+                    || style.fontWeight != nil || style.italic {
+                    t = t.font(labelFont(for: segmentConfig(for: style)))
+                }
+                // css-text-decor-3 §2.1 lines — the ring only admitted
+                // solid, ink-equal decorations, so the built-ins are
+                // exact here (color nil = the segment's text color).
+                if style.underline { t = t.underline() }
+                if style.lineThrough { t = t.strikethrough() }
+            }
+            result = result + t
+        }
+        return result
+    }
+
+    /// The TextConfig copy a styled segment's face is built from: the
+    /// paragraph's config with the member's font attributes folded in.
+    private func segmentConfig(for style: InlineSpanRing.Style) -> TextConfig {
+        var cfg = textConfig
+        // Member size: absolute px, or the em/% factor against the
+        // paragraph's resolved size (16 = the web-body default the whole
+        // label assumes for a size-less run).
+        if let px = style.fontSizePx {
+            cfg.fontSize = px
+        } else if let em = style.fontSizeEm {
+            cfg.fontSize = (textConfig.fontSize ?? 16) * em
+        }
+        // Member weight: both channels, like the host extractor — the
+        // numeric drives the §5.2 Inter face pick, the bucket is the
+        // system-font fallback (FontWeightExtractor's exact ladder).
+        if let w = style.fontWeight {
+            cfg.fontWeightNumeric = w
+            cfg.fontWeight = PlaceholderLabel.bucketWeight(w)
+        }
+        // Member italic composes onto the picked face (synthetic oblique
+        // for Inter — labelFont's wave-6 branch).
+        if style.italic { cfg.fontItalic = true }
+        return cfg
+    }
+
+    /// Numeric CSS weight → SwiftUI's 9-step ladder — the EXACT bucket
+    /// boundaries of FontWeightExtractor.bucket (private there; a
+    /// diverging copy would pick a different face than the host path
+    /// for the same wire number).
+    private static func bucketWeight(_ n: Int) -> Font.Weight {
+        switch n {
+        case ..<200: return .ultraLight
+        case ..<300: return .thin
+        case ..<400: return .light
+        case ..<500: return .regular
+        case ..<600: return .medium
+        case ..<700: return .semibold
+        case ..<800: return .bold
+        case ..<900: return .heavy
+        default:     return .black
+        }
     }
 
     /// Wave 21 (lane TEXTDECOR, B-RC8) — the pure op emitter's style
@@ -5180,10 +5635,15 @@ private struct PlaceholderLabel: View {
     private func decorationRow(_ seg: DecorationMetrics.Segment,
                                style: DecorationOps.LineStyle,
                                color: Color, y: CGFloat) -> some View {
-        // Band-local ops: left=0/top=0 → the emitter's midY lands at
-        // ~thickness/2 inside a (width × thickness) canvas.
-        let ops = DecorationOps.styleOps(left: 0, top: 0,
-                                         width: seg.width,
+        // Band-local ops: top=0 → the emitter's midY lands at
+        // ~thickness/2 inside a (width × thickness) canvas. Wave 47
+        // (lane Z7, css-text-decor-4 §2.6 skip-spaces): the ink starts
+        // at the segment's lead inset and spans only its trimmed core —
+        // both are the 0/full-width identity for every line without
+        // edge spacers (DecorationMetrics.segments' fast path), so the
+        // committed corpus paints byte-identically.
+        let ops = DecorationOps.styleOps(left: seg.inkLeadInset, top: 0,
+                                         width: seg.inkWidth,
                                          thicknessPx: seg.thickness,
                                          style: style)
         // SwiftUI Canvas (iOS 16 floor, matches Package.swift): fill

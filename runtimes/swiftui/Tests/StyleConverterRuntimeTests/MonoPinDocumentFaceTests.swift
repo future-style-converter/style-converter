@@ -86,8 +86,10 @@ final class MonoPinDocumentFaceTests: XCTestCase {
         let style = StyleBuilder.build(from: props([("FontFamily", bareMonospace)]))
         // Rule 1: the declared face reaches the label (PlaceholderLabel's
         // `.custom(fontFaceName)` branch), ahead of the generic design — which
-        // is STILL recorded, because the generic flag is what ChUnitMetrics
-        // and measurementUIFont key on (the two seams the pilot names).
+        // is STILL recorded, as the fallback ChUnitMetrics and
+        // measurementUIFont measure when no document face resolves (wave-47
+        // Z4 closed the pilot's two seams: with a registered face both now
+        // measure the face itself — DocumentFaceMetricsTests pins that).
         XCTAssertEqual(style.text.fontFaceName, DocumentFontRegistry.shared.resolvedName(for: "monospace"))
         XCTAssertEqual(style.text.fontDesign, .monospaced)
         // Rule 2: no font-size + first family is the generic ⇒ 13px, pin or no

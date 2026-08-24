@@ -154,6 +154,10 @@ object DocumentFontRegistry {
         if (faces.isNullOrEmpty()) {
             families = emptyMap()
             lastReport = Report()
+            // wave-47 lane Z4: drop the previous document's measuring handles
+            // with the families — a stale handle would let ChUnitMetrics
+            // measure a face this document can no longer even resolve.
+            DocumentFontTypefaces.rebuild(emptyMap())
             return 0
         }
         // Group by family first: css-fonts-4 §4.1 lets one family be declared
@@ -161,6 +165,11 @@ object DocumentFontRegistry {
         // that as ONE FontFamily holding several Fonts. Building one family
         // per entry would make the last entry win and drop the other weights.
         val byFamily = LinkedHashMap<String, MutableList<Font>>()
+        // wave-47 lane Z4 (SEAM 1): the same grouping, but keeping the FILE +
+        // parsed descriptors — the measuring handle DocumentFontTypefaces
+        // needs, which the Compose Font above hides (its Typeface is internal
+        // to ui-text, the S5-adjudicated reason the handle lives here).
+        val byFamilyFaces = LinkedHashMap<String, MutableList<DocumentFontTypefaces.Face>>()
         val declined = mutableListOf<String>()
         for (face in faces) {
             val file = baseDir?.let { File(it, face.src) }
@@ -183,6 +192,10 @@ object DocumentFontRegistry {
                 declined += face.family
                 continue
             }
+            // Parse the §4.4/§4.5 descriptors ONCE — the Compose Font and the
+            // wave-47 measuring handle below must agree on weight/style.
+            val weight = parseWeight(face.weight)
+            val style = parseStyle(face.style)
             val loaded = try {
                 // androidx.compose.ui.text.font.Font(File, …) — the Compose
                 // API for a face that is not an app resource. Weight/style
@@ -190,7 +203,7 @@ object DocumentFontRegistry {
                 // because §4.4/§4.5 make the descriptor authoritative for
                 // matching (a "bold" descriptor on a regular file must still
                 // answer bold requests).
-                fontLoader(file, parseWeight(face.weight), parseStyle(face.style))
+                fontLoader(file, weight, style)
             } catch (e: Exception) {
                 // Compose throws when the file is not a font Android can parse
                 // (Typeface.createFromFile rejects it).
@@ -199,9 +212,19 @@ object DocumentFontRegistry {
                 continue
             }
             byFamily.getOrPut(familyKey(face.family)) { mutableListOf() } += loaded
+            // wave-47 lane Z4: an ADMITTED face also records its measuring
+            // handle — same key, same order, so the two tables cannot skew.
+            byFamilyFaces.getOrPut(familyKey(face.family)) { mutableListOf() } +=
+                DocumentFontTypefaces.Face(file, weight, style)
         }
         val built = byFamily.mapValues { (_, fonts) -> FontFamily(fonts) }
         families = built
+        // wave-47 lane Z4: hand DocumentFontTypefaces the same face lists,
+        // re-keyed by the BUILT FontFamily instances (the instances resolve()
+        // answers and ChUnitMetrics will be handed), before publishing the
+        // report — one register call, one consistent handle generation.
+        DocumentFontTypefaces.rebuild(
+            built.entries.associate { (key, family) -> family to byFamilyFaces[key].orEmpty() })
         lastReport = Report(declared = faces.size, registered = built.size, declined = declined)
         if (built.isNotEmpty()) {
             logi("registered ${built.size} @font-face famil${if (built.size == 1) "y" else "ies"}: " +
@@ -216,6 +239,10 @@ object DocumentFontRegistry {
     fun clear() {
         families = emptyMap()
         lastReport = Report()
+        // wave-47 lane Z4: the measuring handles are document state exactly
+        // like the families — cleared together, bumping the generation so
+        // ChUnitMetrics' memoized advances for this document expire with it.
+        DocumentFontTypefaces.rebuild(emptyMap())
     }
 
     /**

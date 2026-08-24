@@ -16,14 +16,17 @@ package com.styleconverter.runtime.spacing
 // suite exercises the fallback lane deterministically.
 
 import androidx.compose.ui.text.font.FontFamily
+import com.styleconverter.runtime.typography.font.DocumentFontTypefaces
 
 object ChUnitMetrics {
 
-    // Measured advances keyed by (generic family, font size). StyleApplier
+    // Measured advances keyed by (family cache name, font size). StyleApplier
     // calls measure() once per applyConfig pass; a component tree re-renders
     // often, so we memoize to avoid a Paint allocation + text measurement on
     // every recomposition. Bounded in practice: the corpus uses a handful of
-    // generic families × font sizes.
+    // generic families × font sizes, plus (wave-47) a few document faces per
+    // document — those keys carry the registry generation so they simply
+    // retire when the next document registers.
     private val cache = HashMap<Pair<String, Float>, Float?>()
 
     /**
@@ -33,27 +36,36 @@ object ChUnitMetrics {
      * as "use the 0.5em spec fallback" — never as zero.
      */
     fun measure(fontFamily: FontFamily?, fontSizePx: Float): Float? {
-        // Cache key: the generic-family name (Compose FontFamily instances
-        // for the generic families are singletons with stable toString) +
-        // the size. Custom font-file families all map to DEFAULT below, so
-        // collapsing them into one key is consistent with the measurement.
-        val key = genericName(fontFamily) to fontSizePx
+        // Cache key: see [cacheName] — generic singletons by name, document
+        // families by generation-stamped file, everything else "default".
+        val key = cacheName(fontFamily) to fontSizePx
         synchronized(cache) { if (cache.containsKey(key)) return cache[key] }
         val advance = measureUncached(fontFamily, fontSizePx)
         synchronized(cache) { cache[key] = advance }
         return advance
     }
 
-    /** Stable name for the cache key — see [measure]. */
-    private fun genericName(fontFamily: FontFamily?): String = when (fontFamily) {
+    /** Stable name for the cache key — see [measure]. Internal (not private)
+     *  so the unit suite can pin the document-face keying without a device. */
+    internal fun cacheName(fontFamily: FontFamily?): String = when (fontFamily) {
         // The five CSS generic families Compose models as singletons.
         FontFamily.Monospace -> "monospace"
         FontFamily.Serif -> "serif"
         FontFamily.SansSerif -> "sans-serif"
         FontFamily.Cursive -> "cursive"
-        // null (no font-family declared) and custom families both render
-        // through the platform default in this measurement.
-        else -> "default"
+        else -> {
+            // wave-47 lane Z4 (SEAM 1): a registered document family measures
+            // ITS OWN face below, so it must not share the "default" key. The
+            // key is the measuring face's file path (unique per family within
+            // a document) stamped with the registry generation, so document
+            // N's advance can never answer for document N+1's same-named
+            // family after the wholesale re-register.
+            val face = DocumentFontTypefaces.measuringFace(fontFamily)
+            if (face != null) "doc:${DocumentFontTypefaces.generation}:${face.file.path}"
+            // null (no font-family declared) and unregistered custom families
+            // both render through the platform default in this measurement.
+            else "default"
+        }
     }
 
     /** The actual platform measurement — isolated so measure() can memoize. */
@@ -69,7 +81,15 @@ object ChUnitMetrics {
             // system family of that name (falls back to default safely).
             FontFamily.Cursive ->
                 android.graphics.Typeface.create("cursive", android.graphics.Typeface.NORMAL)
-            else -> android.graphics.Typeface.DEFAULT
+            // wave-47 lane Z4 (SEAM 1): a document @font-face family measures
+            // THE REGISTERED face — the same file the label paints (wave-46
+            // Y7 measured the old DEFAULT fallthrough as a 184px `10ch` box
+            // against the pinned face's 197px). Recovered via
+            // DocumentFontTypefaces because Compose's Font hides its
+            // Typeface; null (unparseable file, JVM tests, or simply not a
+            // document family) keeps the historical DEFAULT measurement.
+            else -> DocumentFontTypefaces.typefaceFor(fontFamily)
+                ?: android.graphics.Typeface.DEFAULT
         }
         // Paint.measureText returns the x-advance of the run — exactly the
         // css-values-4 "advance measure" of the glyph, in px because

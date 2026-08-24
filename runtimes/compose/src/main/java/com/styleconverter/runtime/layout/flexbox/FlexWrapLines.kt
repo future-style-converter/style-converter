@@ -109,4 +109,70 @@ object FlexWrapLines {
         val remainder = (leftover % base.size).toInt()
         return IntArray(base.size) { base[it] + share + if (it < remainder) 1 else 0 }
     }
+
+    /**
+     * Wave 47 (lane Z7) — the §9.6 POSITIONING keywords stretchLines'
+     * gate deliberately excludes: css-align-3 §5.3 says every keyword
+     * except `normal`/`stretch` leaves the leftover cross space FREE and
+     * places the line block inside it. The twin of the iOS runtime's
+     * CSSFlexMath.mainOffsets cross-axis call (FlowLayout.placeSubviews).
+     */
+    enum class CrossDistribution { START, END, CENTER, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY }
+
+    /**
+     * §9.6 — each line's cross-axis START offset, in px.
+     *
+     * @param lineCross per-line cross sizes (post-stretch, though under a
+     *        positioning keyword stretch never fired).
+     * @param containerCross the definite cross size to distribute inside,
+     *        or null when the container hugs (packed offsets — the
+     *        pre-wave-47 accumulation, bit for bit).
+     * @param gap `row-gap` between lines — always preserved; the
+     *        distributed extra ADDS to it (css-align-3 §8.3).
+     * @param distribution the keyword, or null for packed (normal/
+     *        stretch — their leftover is zero after stretchLines anyway).
+     *
+     * WPT flex-gap-decorations-047…049 are the pins: 3×40px lines in a
+     * 200px box under space-between/around/evenly put the Chromium row
+     * rules centred in the DISTRIBUTED gaps (frozen refs: rule bands at
+     * y 74-78/154-158, 80-84/147-151, 85-89/145-149 respectively).
+     * Fractions accumulate in Float and round per line so the offsets
+     * match the browser's subpixel layout to ≤0.5px.
+     */
+    fun lineCrossOffsets(
+        lineCross: IntArray,
+        containerCross: Int?,
+        gap: Int,
+        distribution: CrossDistribution?
+    ): IntArray {
+        if (lineCross.isEmpty()) return IntArray(0)
+        // Content extent: lines plus their gaps.
+        val content = lineCross.sumOf { it.toLong() } + gap.toLong() * (lineCross.size - 1)
+        // Free space only exists inside a definite container; overflow
+        // (negative free) packs, like the browser.
+        val free = ((containerCross?.toLong() ?: content) - content).coerceAtLeast(0L).toFloat()
+        val n = lineCross.size
+        // Leading inset and extra between-line spacing per keyword —
+        // the css-align-3 <content-distribution> table, same arms as the
+        // iOS twin's mainOffsets.
+        var lead = 0f
+        var between = 0f
+        when (distribution) {
+            CrossDistribution.END -> lead = free
+            CrossDistribution.CENTER -> lead = free / 2f
+            CrossDistribution.SPACE_BETWEEN -> if (n > 1) between = free / (n - 1)
+            CrossDistribution.SPACE_AROUND -> { between = free / n; lead = free / (2f * n) }
+            CrossDistribution.SPACE_EVENLY -> { between = free / (n + 1); lead = between }
+            // START and null both pack at the cross start.
+            CrossDistribution.START, null -> {}
+        }
+        // Accumulate fractionally, round per line (browser subpixel).
+        val out = IntArray(n)
+        var cursor = lead
+        for (i in 0 until n) {
+            out[i] = Math.round(cursor)
+            cursor += lineCross[i] + gap + between
+        }
+        return out
+    }
 }

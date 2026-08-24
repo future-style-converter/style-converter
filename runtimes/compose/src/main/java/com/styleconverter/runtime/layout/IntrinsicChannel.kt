@@ -158,6 +158,43 @@ object IntrinsicChannel {
     }
 
     /**
+     * The largest FINITE size the sized axis may carry alongside
+     * [otherAxisMax] without violating Constraints' 31-bit packing —
+     * androidx packs the two axes into four focus configurations whose
+     * paired capacities are (8190↔262142), (32766↔65534), (65534↔32766),
+     * (262142↔8190). The wave-47 gate crashed on exactly this
+     * (width 98311 + height 32769: the 18-bit width config leaves 13
+     * bits = 8190 max height; the height band was Infinity so coerceIn
+     * passed 32769 straight into copy()). Capping mis-sizes ONE box —
+     * the same trade [probe]'s refusal philosophy already makes — where
+     * the throw killed the whole capture composition (the wave-39/42/46
+     * crash family; see MulticolLineSnap.clampedProbeWidthPx).
+     * Constraints.Infinity on the other axis encodes without consuming
+     * the paired budget, so it maps to the largest cap.
+     */
+    fun packableCap(otherAxisMax: Int): Int = when {
+        otherAxisMax == androidx.compose.ui.unit.Constraints.Infinity -> 262142
+        otherAxisMax <= 8190 -> 262142
+        otherAxisMax <= 32766 -> 65534
+        otherAxisMax <= 65534 -> 32766
+        otherAxisMax <= 262142 -> 8190
+        else -> 8190
+    }
+
+    /**
+     * [fixedBand] with the packing cap applied against the other axis —
+     * the four modifier lambdas below route through this so an intrinsic
+     * answer can never produce an unrepresentable Constraints copy. A
+     * capped band is logged through the probe channel's logger by the
+     * caller (not silent).
+     */
+    fun fixedBandPackable(intrinsic: Int?, min: Int, max: Int, otherAxisMax: Int): Pair<Int, Int> {
+        val (a, b) = fixedBand(intrinsic, min, max)
+        val cap = packableCap(otherAxisMax)
+        return a.coerceAtMost(cap) to b.coerceAtMost(cap)
+    }
+
+    /**
      * `Modifier.width(IntrinsicSize.Max)` with the intrinsic read guarded.
      *
      * Member extension (call via `with(IntrinsicChannel) { … }`) — the
@@ -178,7 +215,7 @@ object IntrinsicChannel {
             // The pinned decision: fixed-at-intrinsic when answered,
             // incoming band when refused. Height band untouched either way
             // (see the exactness contract above).
-            val (minW, maxW) = fixedBand(intrinsic, constraints.minWidth, constraints.maxWidth)
+            val (minW, maxW) = fixedBandPackable(intrinsic, constraints.minWidth, constraints.maxWidth, constraints.maxHeight)
             val placeable = measurable.measure(
                 constraints.copy(minWidth = minW, maxWidth = maxW)
             )
@@ -204,7 +241,7 @@ object IntrinsicChannel {
                 measurable.minIntrinsicHeight(constraints.maxWidth)
             }
             // Same pinned decision, height axis; width band untouched.
-            val (minH, maxH) = fixedBand(intrinsic, constraints.minHeight, constraints.maxHeight)
+            val (minH, maxH) = fixedBandPackable(intrinsic, constraints.minHeight, constraints.maxHeight, constraints.maxWidth)
             val placeable = measurable.measure(
                 constraints.copy(minHeight = minH, maxHeight = maxH)
             )
@@ -233,7 +270,7 @@ object IntrinsicChannel {
             }
             // Same pinned decision as the Max twin: fixed-at-intrinsic when
             // answered, incoming band when refused; height band untouched.
-            val (minW, maxW) = fixedBand(intrinsic, constraints.minWidth, constraints.maxWidth)
+            val (minW, maxW) = fixedBandPackable(intrinsic, constraints.minWidth, constraints.maxWidth, constraints.maxHeight)
             val placeable = measurable.measure(
                 constraints.copy(minWidth = minW, maxWidth = maxW)
             )
@@ -259,7 +296,7 @@ object IntrinsicChannel {
                 measurable.maxIntrinsicHeight(constraints.maxWidth)
             }
             // Same pinned decision, height axis; width band untouched.
-            val (minH, maxH) = fixedBand(intrinsic, constraints.minHeight, constraints.maxHeight)
+            val (minH, maxH) = fixedBandPackable(intrinsic, constraints.minHeight, constraints.maxHeight, constraints.maxWidth)
             val placeable = measurable.measure(
                 constraints.copy(minHeight = minH, maxHeight = maxH)
             )

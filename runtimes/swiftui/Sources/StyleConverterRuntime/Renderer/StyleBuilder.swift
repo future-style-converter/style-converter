@@ -377,7 +377,21 @@ enum StyleBuilder {
                 rounded: s.typography?.fontFamilyRounded ?? false,
                 monospaced: s.typography?.fontFamilyMonospace ?? false,
                 serif: s.typography?.fontFamilySerif ?? false,
-                sizePx: s.spacing.context.fontSizePx)
+                sizePx: s.spacing.context.fontSizePx,
+                // wave-47 lane Z4 (SEAM 2 of the monospace pin) — the SAME
+                // css-fonts-4 §5.2 registry walk the label bridge below runs
+                // for `text.fontFaceName`: when this document registered a
+                // face for a name in the list, the label PAINTS that face, so
+                // the ch basis must measure it too. wave-46 Y7 measured the
+                // design-only basis holding a pinned `width: 10ch` box at SF
+                // Mono's 202px against the frozen Menlo ref's (and the
+                // painted DejaVu's) 197px. nil for every face-free document —
+                // the mapping is empty, the walk is a no-op, the design
+                // branch above stays byte-identical.
+                documentFaceName: s.typography?.fontFamilyNames
+                    .lazy
+                    .compactMap { DocumentFontRegistry.shared.resolvedName(for: $0) }
+                    .first)
         }
 
         // Phase 7 step 2 — layout aggregate (flexbox sub-step). The

@@ -79,13 +79,29 @@
 //      (inherit-computed-001's "… size <em></em> and …" must merge to
 //      "size and", one space, exactly as the Chromium ref paints it).
 //
+//  WAVE 47 (lane Z6) — THE STYLED-SPAN + BR RINGS. Styled glyph members
+//  (span/time/data/`u` with Color / FontSize / FontWeight / FontStyle /
+//  TextDecorationLine underline+line-through) now FOLD, each recorded as
+//  a `Span` range over the merged text that PlaceholderLabel renders as
+//  a per-segment Text concatenation (admission + walls: InlineSpanRing's
+//  banner). `<br>` members fold to '\n' with css-text-3 §4.1.4 space
+//  removal — but ONLY alongside a glyph member: a {text, <br>}*-only
+//  host's stacked fallback already renders the forced-break line
+//  structure, so engaging there would move calibrated passing pixels for
+//  zero gain ("br-stacked-equivalent"; the corpus-simulated rule that
+//  keeps the wave-47 flip set to exactly the 4 styled victims —
+//  block-ellipsis-004/005/006 + text-decoration-inset-014, all failing
+//  on both natives at wave46-final). The one admitted nested shape is a
+//  {text, <br>} subtree (`flattenNestedRuns`).
+//
 //  HONEST SCOPE — every refusal is a LOGGED bail to the wave-32 stacked
 //  path (no silent fallthrough), so an engaged fold can never render less
 //  than the plan did. Still deferred, each behind its own named wall:
-//  paint-styled TEXT members (own Color etc. — need per-segment
-//  attribution through the pre-break), atoms with GLYPHS or painted boxes,
-//  `<br>` forced breaks, block-level members, nested member trees, and
-//  out-of-flow siblings (float/abspos static position).
+//  atoms with GLYPHS or painted boxes, block-level members, nested
+//  member trees beyond {text, <br>}, out-of-flow siblings (float/abspos
+//  static position), member TextUnderlineOffset / text-decoration-inset
+//  (inset-011's offset underlines), and whitespace-only pre-wrap members
+//  with background (block-ellipsis-032's hanging-whitespace ring).
 //
 //  Twin: runtimes/compose/.../typography/inline/InlineRunFold.kt — the
 //  shared contract is "fold to one paragraph, reuse the platform's pinned
@@ -98,6 +114,20 @@
 import Foundation
 
 enum InlineRunFlow {
+
+    /// Wave 47 (lane Z6) — one STYLED member's range in the merged text:
+    /// `start`..<`end` are CHARACTER offsets into `Folded.text` BEFORE
+    /// the label's string surgery — PlaceholderLabel maps them through
+    /// `InlineSpanRing.alignment` onto its final display string and
+    /// builds the per-segment Text concatenation. `statedLossTypes`
+    /// names box ink the ring consciously drops (border longhands — see
+    /// InlineSpanRing's banner) for the seam's breadcrumb.
+    struct Span: Equatable {
+        let start: Int
+        let end: Int
+        let style: InlineSpanRing.Style
+        let statedLossTypes: [String]
+    }
 
     /// An engaged fold — the paragraph and what the gate decided on the
     /// way. nil from `fold` is the ONLY refusal shape (logged inside).
@@ -114,6 +144,11 @@ enum InlineRunFlow {
         /// Admitted EMPTY members dropped from the string (zero glyphs —
         /// see the banner's stated-loss note). Reported, never silent.
         let droppedEmptyMembers: Int
+        /// Wave 47 (lane Z6): styled-member ranges over `text`, wire
+        /// order. Empty for every pre-wave-47 shape — the label then
+        /// renders byte-identically to wave 45. Defaulted so every
+        /// wave-44/45 construction site (tests included) compiles as-is.
+        var spans: [Span] = []
     }
 
     /// TEXT-member tag ring: only tags whose UA stylesheet adds NO visual
@@ -157,10 +192,21 @@ enum InlineRunFlow {
         "Color", "TextDecorationLine", "TextDecorationColor", "TextDecorationStyle",
     ])
 
+    /// Wave 47 (lane Z6) — what a BR member (the forced-break ring) may
+    /// carry: the converter measures the break's box and emits
+    /// Width/Height on it (0×0 or 0×lineHeight — geometry the '\n'
+    /// itself expresses), plus the zero-glyph inert set (nothing can
+    /// paint on a break). Twin: InlineRunFold.BR_MEMBER_TYPES.
+    private static let brMemberTypes = emptyMemberInertTypes.union(["Width", "Height"])
+
     /// One admitted member's contribution to the paragraph walk.
     private enum MemberOutcome {
-        /// A TEXT member's glyphs, appended with boundary collapsing.
-        case contributes(String)
+        /// A glyph member — flat text or a {text, <br>} subtree the walk
+        /// flattens — carrying its wave-47 span attribution (a PLAIN
+        /// style + no losses is the wave-44 text member exactly).
+        case glyphs(InlineSpanRing.Style, statedLossTypes: [String])
+        /// Wave 47 (lane Z6): a `<br>` member — one forced '\n'.
+        case forcedBreak
         /// An admitted EMPTY member — no glyphs, counted and reported.
         case droppedEmpty
         /// Outside the ring — the named wall was already logged.
@@ -174,14 +220,32 @@ enum InlineRunFlow {
     /// is handled: the producer already collapsed runs of source
     /// whitespace to single spaces inside each text node. Twin:
     /// InlineRunFold.appendCollapsed.
+    /// Wave 47 (lane Z6): a trailing '\n' (a folded `<br>`) collapses the
+    /// next segment's leading spaces too — css-text-3 §4.1.4(3) removes
+    /// collapsible spaces at the START of a line, and everything after a
+    /// forced break starts one. '\n' never occurs in a pre-wave-47 merge,
+    /// so the old decisions are untouched by construction.
     private static func appendCollapsed(_ out: inout String, _ segment: String) {
         // Drop the incoming segment's leading spaces when the merged text
         // already ends in one — the cross-boundary collapse. Everything
         // else is verbatim content (soft hyphens included — rule A / the
         // manual-mode materialization live downstream in the label).
-        out += out.hasSuffix(" ")
+        out += (out.hasSuffix(" ") || out.hasSuffix("\n"))
             ? String(segment.drop(while: { $0 == " " }))
             : segment
+    }
+
+    /// Wave 47 (lane Z6) — append one forced line break (a folded `<br>`
+    /// member, HTML §4.5.27). css-text-3 §4.1.4(1): collapsible spaces at
+    /// the END of a line are removed — everything before a forced break
+    /// ends one, so the trailing space run falls before the '\n' lands
+    /// (block-ellipsis-004's `Line 2<br>` / ` Line 3` merges to
+    /// "Line 2\nLine 3", the exact lines Chromium paints). The
+    /// leading-space half of the rule lives in `appendCollapsed` above.
+    /// Twin: InlineRunFold.appendBreak.
+    private static func appendBreak(_ out: inout String) {
+        while out.hasSuffix(" ") { out.removeLast() }
+        out += "\n"
     }
 
     /// Fold `runs` into ONE paragraph, or nil = "keep the stacked
@@ -259,6 +323,12 @@ enum InlineRunFlow {
         // The member-adopted hyphens keyword (first declaration wins; a
         // later DIFFERENT one bails inside the member gate).
         var adopted: String? = nil
+        // Wave 47 (lane Z6) — the styled-span collectors: member ranges
+        // (wire order) plus the BR / glyph counts the stacked-equivalence
+        // rule below reads.
+        var spans: [Span] = []
+        var breakMembers = 0
+        var glyphMembers = 0
         for run in runs {
             // A text entry: zero-length contributes no glyphs and no box.
             if let text = run.text {
@@ -283,11 +353,40 @@ enum InlineRunFlow {
             lastIndex = index
             // The member gate (tag ring, structure, property admission,
             // hyphens adoption) — refusals are logged inside.
-            switch classify(children[index], hostHyphens: hostHyphens,
-                            containerLang: containerLang, adopted: &adopted) {
-            case .contributes(let text):
-                // The member's glyphs, boundary-collapsed like run text.
-                appendCollapsed(&out, text)
+            let member = children[index]
+            switch classify(member, hostHyphens: hostHyphens,
+                            containerLang: containerLang,
+                            containerProperties: containerProperties,
+                            adopted: &adopted) {
+            case .glyphs(let style, let losses):
+                // The member's glyphs — a nested {text, <br>} subtree
+                // flattens (block-ellipsis-004's `<span>Line 3<br>Line 4
+                // </span>`), flat text appends with boundary collapsing —
+                // and the span records exactly what landed (wave 47).
+                let start = out.count
+                // Empty-but-present runs ([] survives decode) are NOT a
+                // nested tree — the member's own text is the content
+                // (matches the Compose twin's isNullOrEmpty predicate;
+                // routing [] through the flatten would vanish the glyphs).
+                if member.children?.isEmpty == false || member.meta?.runs?.isEmpty == false {
+                    guard flattenNestedRuns(member, into: &out) else { return nil }
+                } else {
+                    appendCollapsed(&out, member.text ?? "")
+                }
+                glyphMembers += 1
+                // Only real attribution (or a stated loss to report)
+                // emits a span — plain members render byte-identically
+                // to wave 44.
+                if !style.isPlain || !losses.isEmpty {
+                    spans.append(Span(start: start, end: out.count,
+                                      style: style, statedLossTypes: losses))
+                }
+                claimed += 1
+            case .forcedBreak:
+                // Wave 47 (lane Z6): '\n', spaces falling on both sides
+                // (css-text-3 §4.1.4 — appendBreak's banner).
+                appendBreak(&out)
+                breakMembers += 1
                 claimed += 1
             case .droppedEmpty:
                 // No glyphs; the slot is still consumed by the plan.
@@ -304,20 +403,119 @@ enum InlineRunFlow {
             return bail("unclaimed", "plan claims \(claimed) of " +
                 "\(children.count) in-flow / \(totalChildCount) total children")
         }
+        // Wave 47 (lane Z6) — BR STACKED-EQUIVALENCE: a {text, <br>}*-only
+        // host needs no fold: the stacked fallback ALREADY renders one
+        // label per anonymous run — exactly the forced-break line
+        // structure — and that shape is what every committed capture of
+        // those hosts pins (block-ellipsis-002 passes on both natives
+        // today). The break ring therefore only rides alongside a glyph
+        // member — the corpus-simulated rule that keeps the wave-47 flip
+        // set to exactly the 4 styled victims.
+        if breakMembers > 0, glyphMembers == 0 {
+            return bail("br-stacked-equivalent",
+                        "text-and-br-only host — the stacked fallback already " +
+                        "renders the forced-break line structure")
+        }
         // Wave 45 (X1) host gate, from the Compose twin: tab-size
         // expansion downstream rewrites '\t' into spaces and would shift
         // member boundaries; no corpus runs host carries a tab today.
         guard !out.contains("\t") else {
             return bail("contains-tab", "tab in merged text — tab-size expansion unmodelled")
         }
+        // Wave 47 (lane Z6) host gate, kept byte-parallel with the twin:
+        // small-caps case synthesis is a string rewrite outside the span
+        // alignment's op set (Compose's synthesizeSmallCaps; inert here —
+        // iOS small-caps is a font feature — but a shared gate keeps the
+        // two folds answering identically for every host).
+        if !spans.isEmpty,
+           containerProperties.contains(where: { $0.type == "FontVariantCaps" }) {
+            return bail("styled-host-font-variant",
+                        "font-variant-caps host — span alignment unmodelled")
+        }
         // A glyphless fold says nothing the empty container does not —
-        // the stacked fallback's empty boxes are the established shape.
-        guard !out.isEmpty else {
+        // the stacked fallback's empty boxes are the established shape
+        // (breaks-only counts as glyphless too, wave 47).
+        guard out.contains(where: { $0 != "\n" }) else {
             return bail("empty-merge", "merged paragraph is empty")
         }
-        // The faithful fold.
+        // The faithful fold (spans in wire order — see Span's contract).
         return Folded(text: out, adoptedHyphensMode: adopted,
-                      droppedEmptyMembers: dropped)
+                      droppedEmptyMembers: dropped, spans: spans)
+    }
+
+    /// Wave 47 (lane Z6) — flatten a glyph member's OWN `meta.runs` into
+    /// `out`: the one nested shape the ring admits is a {text, `<br>`}
+    /// subtree, where every nested child is a BR member and the runs list
+    /// claims all of them in strictly increasing order. The member's
+    /// `text` is the concatenation the runs were split FROM (spec 03
+    /// §4.1) and is deliberately ignored — the runs are authoritative.
+    /// Returns false after logging the named wall (the caller refuses the
+    /// whole fold, exactly like every other member refusal). Twin:
+    /// InlineRunFold.flattenNestedRuns.
+    private static func flattenNestedRuns(_ member: IRComponent,
+                                          into out: inout String) -> Bool {
+        // Children without a runs order is a shape the wire never emits
+        // for text members — refuse with the wave-44 reason.
+        guard let runs = member.meta?.runs else {
+            _ = bail("nested-member", "member carries children without runs")
+            return false
+        }
+        let kids = member.children ?? []
+        // The child's AUTHORING KEY resolves `name` before `id` —
+        // InlineRunPlan's exact contract, first occurrence wins.
+        var byName: [String: Int] = [:]
+        var byId: [String: Int] = [:]
+        for (i, kid) in kids.enumerated() {
+            if !kid.name.isEmpty, byName[kid.name] == nil { byName[kid.name] = i }
+            if !kid.id.isEmpty, byId[kid.id] == nil { byId[kid.id] = i }
+        }
+        // Strictly-increasing claim walk — a duplicate or out-of-order
+        // ref cannot be one forward paragraph (InlineRunPlan's proof).
+        var last = -1
+        var claimed = 0
+        for run in runs {
+            if let text = run.text {
+                if !text.isEmpty { appendCollapsed(&out, text) }
+                continue
+            }
+            // A both-nil entry is unreachable wire — skip defensively.
+            guard let key = run.child else { continue }
+            guard let idx = byName[key] ?? byId[key] else {
+                _ = bail("nested-dangling", "nested child ref '\(key)' unresolved")
+                return false
+            }
+            guard idx > last else {
+                _ = bail("nested-order", "nested child refs out of order")
+                return false
+            }
+            last = idx
+            let kid = kids[idx]
+            let kidTag = (kid.meta?.sourceTag ?? "").lowercased()
+            // Only BR members may nest — any other nested node keeps the
+            // nested-tree wall, with the tag named for the log.
+            guard kidTag == "br" || kid.meta?.role == "line-break" else {
+                _ = bail("nested-member", "nested member tag '\(kidTag)' — only <br> may nest")
+                return false
+            }
+            guard kid.children?.isEmpty != false, kid.meta?.runs == nil,
+                  kid.meta?.decorations == nil else {
+                _ = bail("br-member-structure", "nested <br> carries structure")
+                return false
+            }
+            if let offending = kid.properties.first(where: { !brMemberTypes.contains($0.type) }) {
+                _ = bail("member-prop", "nested <br> declares '\(offending.type)'")
+                return false
+            }
+            appendBreak(&out)
+            claimed += 1
+        }
+        // Every nested child must be claimed — an unclaimed one would
+        // silently vanish (the outer fold consumes the whole member).
+        guard claimed == kids.count else {
+            _ = bail("nested-unclaimed", "nested runs claim \(claimed) of \(kids.count) children")
+            return false
+        }
+        return true
     }
 
     /// One member through the widened gate: TEXT ring, EMPTY ring, or a
@@ -327,27 +525,35 @@ enum InlineRunFlow {
     private static func classify(_ member: IRComponent,
                                  hostHyphens: String?,
                                  containerLang: String?,
+                                 containerProperties: [IRProperty],
                                  adopted: inout String?) -> MemberOutcome {
-        // `<br>` is a FORCED line break (HTML §4.5.27), not an atom — a
-        // real candidate for "\n" in a future ring, but its reference
-        // population is unstudied pixel-wise, so it keeps its own named
-        // wall instead of riding the generic tag bail.
+        // ── Wave 47 (lane Z6) — the BR RING ─────────────────────────────
+        // `<br>` is a FORCED line break (HTML §4.5.27), i.e. '\n' in the
+        // merged paragraph, spaces falling on both sides (css-text-3
+        // §4.1.4 — appendBreak's banner). The extractor tags it
+        // `role: line-break`, read alongside the tag so both producers
+        // agree. Note the fold-level stacked-equivalence rule: a break
+        // only engages alongside a glyph member.
         let tag = (member.meta?.sourceTag ?? "").lowercased()
-        if tag == "br" {
-            _ = bail("br-member", "<br> forced break member — deferred ring")
-            return .refused
+        if tag == "br" || member.meta?.role == "line-break" {
+            // A break with structure is not a break we understand.
+            guard member.children?.isEmpty != false, member.meta?.runs == nil,
+                  member.meta?.decorations == nil else {
+                _ = bail("br-member-structure", "<br> member carries structure")
+                return .refused
+            }
+            // Width/Height are the converter's measured break box —
+            // geometry the '\n' expresses; anything else refuses.
+            if let offending = member.properties.first(where: { !brMemberTypes.contains($0.type) }) {
+                _ = bail("member-prop", "<br> member declares '\(offending.type)'")
+                return .refused
+            }
+            return .forcedBreak
         }
         // A tagless member is not a known inline text element — refuse
         // (mirrors the twin's `member-tag:none`).
         if tag.isEmpty {
             _ = bail("member-tag", "unsupported member tag 'none'")
-            return .refused
-        }
-        // A member with its own children or its own runs is a nested
-        // inline TREE; flattening it here would guess an order the wire
-        // spells out one level down — deferred until the fold recurses.
-        guard member.children?.isEmpty != false, member.meta?.runs == nil else {
-            _ = bail("nested-member", "member carries its own children/runs")
             return .refused
         }
         // The decoration / marker wires attach to the member's OWN box;
@@ -357,62 +563,108 @@ enum InlineRunFlow {
             _ = bail("decorated-member", "member carries decoration/marker wire")
             return .refused
         }
-        // Empty vs text member decides the tag ring and property set
-        // (empty string is "extracted, was empty" — same zero glyphs).
+        // Wave 47 (lane Z6): a member with its own children/runs is a
+        // nested inline TREE — foldable ONLY as a glyph member whose
+        // nested nodes are all BR members ({text, <br>} — validated by
+        // `flattenNestedRuns` at the walk). EMPTY means no glyphs AND no
+        // structure, exactly like the Compose twin.
+        // Empty-but-present runs ([] survives decode) are NOT a nested
+        // tree (the Compose twin's isNullOrEmpty predicate, mirrored).
+        let hasNested = member.children?.isEmpty == false || member.meta?.runs?.isEmpty == false
         let text = member.text
-        let isEmpty = text?.isEmpty != false
-        // Tag admission per member family (see the two rings above).
-        guard (isEmpty ? emptyMemberTags : textMemberTags).contains(tag) else {
-            _ = bail("member-tag", "unsupported member tag '\(tag)'")
-            return .refused
-        }
-        // Property admission — the first unsupported type names the bail
-        // so the log can be audited per member (twin: `member-prop:`).
-        let allowed = isEmpty ? emptyMemberInertTypes : textMemberTypes
-        if let offending = member.properties.first(where: { !allowed.contains($0.type) }) {
-            _ = bail("member-prop", "member declares '\(offending.type)' — " +
-                     "styled-span / atom ring deferred")
-            return .refused
-        }
-        // Hyphens contribution (the banner's adoption rules; css-text-3
-        // §6.1). The keyword is lowercased exactly like HyphensExtractor
-        // lowercases the container's, so the two compare in one spelling.
-        if let memberProp = member.properties.first(where: { $0.type == "Hyphens" }) {
-            // The member's declared mode (nil for unparsable wire — then
-            // treated like the twin's null keyword: it participates as
-            // "no recognisable declaration", conflicting with nothing).
-            let mode = ValueExtractors.extractKeyword(memberProp.data)?.lowercased()
-            if let host = hostHyphens {
-                // Host declared: a member may only AGREE with it — a
-                // different mode has no single faithful paragraph mode.
-                if mode != host {
-                    _ = bail("hyphens-conflict",
-                             "member hyphens '\(mode ?? "?")' vs host '\(host)'")
-                    return .refused
-                }
-            } else if adopted == nil {
-                // `auto` is dictionary-driven per language — adopt only
-                // when the member's language IS the paragraph's (a nil
-                // member lang inherits the host's, trivially equal;
-                // §6.1 "appropriate to the language of the text").
-                if mode == "auto", let memberLang = member.meta?.lang,
-                   memberLang != containerLang {
-                    _ = bail("hyphens-lang-divergence",
-                             "member lang '\(memberLang)' vs paragraph " +
-                             "'\(containerLang ?? "nil")' — no single dictionary")
-                    return .refused
-                }
-                // First member declaration becomes the paragraph mode.
-                adopted = mode
-            } else if adopted != mode {
-                // Two members disagreeing: no single mode is faithful.
-                _ = bail("hyphens-conflict",
-                         "members disagree: '\(adopted ?? "?")' vs '\(mode ?? "?")'")
+        let isEmpty = text?.isEmpty != false && !hasNested
+        if isEmpty {
+            // ── The wave-44/45 EMPTY arm, unchanged ─────────────────────
+            guard emptyMemberTags.contains(tag) else {
+                _ = bail("member-tag", "unsupported member tag '\(tag)'")
                 return .refused
             }
+            if let offending = member.properties.first(where: { !emptyMemberInertTypes.contains($0.type) }) {
+                _ = bail("member-prop", "member declares '\(offending.type)' — " +
+                         "styled-span / atom ring deferred")
+                return .refused
+            }
+        } else {
+            // ── Wave 47 (lane Z6) — the GLYPH member arm ────────────────
+            // The styled tag ring (the wave-44 no-UA-ink trio plus `u`,
+            // whose UA underline the span models).
+            guard InlineSpanRing.styledMemberTags.contains(tag) else {
+                _ = bail("member-tag", "unsupported member tag '\(tag)'")
+                return .refused
+            }
+            // Property admission through the span ring — PLAIN members
+            // (Hyphens / paint-inert colors only) pass with no
+            // attribution, exactly the wave-44 gate. The container's
+            // property list is the effective-ink base for the
+            // TextDecorationColor equality gate (the seam passes the
+            // MERGED list, where an inherited `color` arrives).
+            switch InlineSpanRing.admit(tag: tag, properties: member.properties,
+                                        hostProperties: containerProperties) {
+            case .refused(let reason):
+                _ = bail("member-prop", reason)
+                return .refused
+            case .admitted(let style, let losses):
+                // Hyphens contribution (shared with the empty arm below)
+                // — a conflict refuses before anything is appended.
+                guard adoptHyphens(member, hostHyphens: hostHyphens,
+                                   containerLang: containerLang,
+                                   adopted: &adopted) else { return .refused }
+                return .glyphs(style, statedLossTypes: losses)
+            }
         }
-        // Every gate passed: glyphs for the paragraph, or a counted drop.
-        return isEmpty ? .droppedEmpty : .contributes(text ?? "")
+        // The EMPTY arm's Hyphens contribution (banner's adoption rules).
+        guard adoptHyphens(member, hostHyphens: hostHyphens,
+                           containerLang: containerLang,
+                           adopted: &adopted) else { return .refused }
+        // Every gate passed: a counted drop (glyph members returned above).
+        return .droppedEmpty
+    }
+
+    /// The css-text-3 §6.1 hyphens ADOPTION walk, shared by the EMPTY and
+    /// glyph member arms (hoisted verbatim from the wave-45 classify).
+    /// Returns false after logging when no single paragraph mode is
+    /// faithful; `adopted` carries the winner across members.
+    private static func adoptHyphens(_ member: IRComponent,
+                                     hostHyphens: String?,
+                                     containerLang: String?,
+                                     adopted: inout String?) -> Bool {
+        // No declaration — nothing to adopt, nothing to conflict with.
+        guard let memberProp = member.properties.first(where: { $0.type == "Hyphens" }) else {
+            return true
+        }
+        // The member's declared mode (nil for unparsable wire — then
+        // treated like the twin's null keyword: it participates as
+        // "no recognisable declaration", conflicting with nothing).
+        let mode = ValueExtractors.extractKeyword(memberProp.data)?.lowercased()
+        if let host = hostHyphens {
+            // Host declared: a member may only AGREE with it — a
+            // different mode has no single faithful paragraph mode.
+            if mode != host {
+                _ = bail("hyphens-conflict",
+                         "member hyphens '\(mode ?? "?")' vs host '\(host)'")
+                return false
+            }
+        } else if adopted == nil {
+            // `auto` is dictionary-driven per language — adopt only
+            // when the member's language IS the paragraph's (a nil
+            // member lang inherits the host's, trivially equal;
+            // §6.1 "appropriate to the language of the text").
+            if mode == "auto", let memberLang = member.meta?.lang,
+               memberLang != containerLang {
+                _ = bail("hyphens-lang-divergence",
+                         "member lang '\(memberLang)' vs paragraph " +
+                         "'\(containerLang ?? "nil")' — no single dictionary")
+                return false
+            }
+            // First member declaration becomes the paragraph mode.
+            adopted = mode
+        } else if adopted != mode {
+            // Two members disagreeing: no single mode is faithful.
+            _ = bail("hyphens-conflict",
+                     "members disagree: '\(adopted ?? "?")' vs '\(mode ?? "?")'")
+            return false
+        }
+        return true
     }
 
     /// Log the named wall once per process and refuse. Returning through
