@@ -11,6 +11,188 @@
   "expectations": [
     {
       "fixture": "composition-test.json",
+      "component": "000_Blend_Multiply_OverGradient.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9298,
+        "pixelPct": 4.624,
+        "labDeltaEP95": 28.722,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "000_Blend_Multiply_OverGradient.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9199,
+        "pixelPct": 4.756,
+        "labDeltaEP95": 28.722,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "004_Blend_Screen_OverGradient.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9419,
+        "pixelPct": 5.265,
+        "labDeltaEP95": 25.595,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "004_Blend_Screen_OverGradient.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9416,
+        "pixelPct": 5.259,
+        "labDeltaEP95": 25.496,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "005_layer.png",
+      "pair": "Android-web",
+      "reason": "Same Android blend-extent truncation as the parent component, seen on the standalone child capture. NOTE these `*_layer.png` rows are an artefact of the web harness's flatten() walk, which emits separate captures for descendants - the repo's own comment calls this 'contaminating the comparator with un-contextualised paint' (CaptureGallery.tsx). A blend child captured alone has no backdrop to blend against, so the row is weak evidence either way; it is listed for completeness, not as an independent signal.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9479,
+        "pixelPct": 3.846,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "005_layer.png",
+      "pair": "iOS-Android",
+      "reason": "Same Android blend-extent truncation as the parent component, seen on the standalone child capture. NOTE these `*_layer.png` rows are an artefact of the web harness's flatten() walk, which emits separate captures for descendants - the repo's own comment calls this 'contaminating the comparator with un-contextualised paint' (CaptureGallery.tsx). A blend child captured alone has no backdrop to blend against, so the row is weak evidence either way; it is listed for completeness, not as an independent signal.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9479,
+        "pixelPct": 3.846,
+        "labDeltaEP95": 0.401,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "006_Blend_Difference_OverGradient.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.943,
+        "pixelPct": 3.268,
+        "labDeltaEP95": 34.426,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "006_Blend_Difference_OverGradient.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9268,
+        "pixelPct": 3.43,
+        "labDeltaEP95": 34.836,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "007_layer.png",
+      "pair": "Android-web",
+      "reason": "Same Android blend-extent truncation as the parent component, seen on the standalone child capture. NOTE these `*_layer.png` rows are an artefact of the web harness's flatten() walk, which emits separate captures for descendants - the repo's own comment calls this 'contaminating the comparator with un-contextualised paint' (CaptureGallery.tsx). A blend child captured alone has no backdrop to blend against, so the row is weak evidence either way; it is listed for completeness, not as an independent signal.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9511,
+        "pixelPct": 3.846,
+        "labDeltaEP95": 0,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "007_layer.png",
+      "pair": "iOS-Android",
+      "reason": "Same Android blend-extent truncation as the parent component, seen on the standalone child capture. NOTE these `*_layer.png` rows are an artefact of the web harness's flatten() walk, which emits separate captures for descendants - the repo's own comment calls this 'contaminating the comparator with un-contextualised paint' (CaptureGallery.tsx). A blend child captured alone has no backdrop to blend against, so the row is weak evidence either way; it is listed for completeness, not as an independent signal.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.94,
+        "pixelPct": 4.327,
+        "labDeltaEP95": 0,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "008_Blend_Overlay_OverGradient.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9542,
+        "pixelPct": 4.538,
+        "labDeltaEP95": 37.766,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "008_Blend_Overlay_OverGradient.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (Android) \u2014 a child carrying mix-blend-mode is painted at (width - left) x (height - top) instead of its authored size. Measured on all four blend modes: authored 140x50 at left:40 top:20, Android paints 100x30; the ORIGIN is correct (x56,y36) so only the extent is wrong. Blend-specific: in Blend_Normal_OverGradient_Control Android paints the full 140x50. The blend maths itself is right - sampled multiply results match child*backdrop/255 to within rounding inside the painted region on all three platforms. iOS and web agree with each other exactly here.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9537,
+        "pixelPct": 4.536,
+        "labDeltaEP95": 37.542,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "010_Backdrop_Blur_OverStripes.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG \u2014 backdrop-filter: blur() is silently dropped on ANDROID too, not just iOS. Proven by the control: Android renders Backdrop_Blur_OverStripes 0 px different from Backdrop_None_OverStripes_Control while web differs by 8000 px. saturate(4) IS implemented on Android (4000 px vs its control), so the gap is specifically blur(). Both natives drop it, which is why iOS-Android does NOT diverge on this row - they agree on the wrong answer. That is the correlated-failure mode a three-way comparison cannot detect on its own.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.8718,
+        "pixelPct": 0.328,
+        "labDeltaEP95": 20.129,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
       "component": "010_Backdrop_Blur_OverStripes.png",
       "pair": "iOS-web",
       "reason": "REAL BUG \u2014 backdrop-filter: blur() is SILENTLY DROPPED on iOS. Proven by the paired control, not inferred: iOS renders Backdrop_Blur_OverStripes pixel-identical to Backdrop_None_OverStripes_Control (0 px difference) while web differs by 8000 px. backdrop-filter: saturate(4) IS implemented on iOS (4000 px vs its control), so the gap is specifically blur(). This is why visual-test.json's Glass_Effect has always passed: it blurs a UNIFORM field, where the correct result and the dropped result are the same image.",
@@ -21,6 +203,20 @@
         "pixelPct": 0.336,
         "labDeltaEP95": 20.128,
         "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "037_Nested_OpacityGroup.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (iOS) \u2014 iOS applies parent opacity per child instead of compositing the subtree as a group; Android agrees with web here, so iOS is the lone outlier. Arithmetic: blue child #2980b9 = (41,128,185) over page (26,26,46) - web/Android give (33,77,116) = 0.5*child + 0.5*page (group, correct); iOS gives (90,134,168) = 0.5*child + 0.5*(140,140,151), the child faded individually over the already-faded parent. Max per-channel divergence 80.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9355,
+        "pixelPct": 0,
+        "labDeltaEP95": 20.931,
+        "divergence": "mixed"
       }
     },
     {
