@@ -839,6 +839,27 @@ async function runPhaseBDriftCheck(rows) {
     console.warn(`  [phase-b] could not parse ${statsPath}: ${e.message ?? e}`);
     return;
   }
+
+  // Fixture-scope check. The lookup below is keyed on `${component}__${pair}`
+  // and silently `continue`s on a key it cannot find, so a stats file
+  // recorded from a DIFFERENT fixture disables the entire check while
+  // leaving it looking healthy — no warning, no output, nothing to notice.
+  //
+  // That is not hypothetical: the committed baseline-stats.json was a 6-pair
+  // `examples/wpt/css-color/color-003.json` snapshot from 2026-07-08, and
+  // ZERO of the 327 visual-test pairs matched any of its keys. The drift
+  // check had been a complete no-op for every visual-test run since.
+  //
+  // Log-only, matching the rest of Phase B — but loud, because a check that
+  // measures nothing is worse than one that is absent.
+  if (prior.inputLabel && inputLabel && prior.inputLabel !== inputLabel) {
+    console.warn(
+      `  [phase-b] SKIPPED — baseline-stats.json was recorded from ` +
+      `"${prior.inputLabel}" but this run is "${inputLabel}". Regenerate it ` +
+      `with \`node tools/visual/baseline-stats.mjs\` after a run of this fixture.`,
+    );
+    return;
+  }
   // Severity ordering used for "downgrade" detection — must match
   // classify-divergence.mjs's SEVERITY_RANK so signal interpretation is
   // consistent across modules.
@@ -852,13 +873,17 @@ async function runPhaseBDriftCheck(rows) {
     'structural-divergence': 7,
   };
   let downgrades = 0;
+  let comparable = 0;    // pairs present in BOTH this run and the stats file
+  let seen = 0;          // pairs present in this run at all
   for (const r of rows) {
     for (const [pairKey, pair] of Object.entries(r.pairs ?? {})) {
       if (!pair) continue;
+      seen += 1;
       const key = `${r.name}__${pairKey}`;
       const priorLabel = prior.perPair?.[key];
       const currentLabel = pair.divergence;
       if (!priorLabel || !currentLabel) continue;
+      comparable += 1;
       // Downgrade = current rank > prior rank (i.e. moved toward
       // structural). Equal-rank or improvement is fine.
       const priorRank = rank[priorLabel] ?? rank.unknown;
@@ -869,8 +894,21 @@ async function runPhaseBDriftCheck(rows) {
       }
     }
   }
-  if (downgrades > 0) {
-    console.warn(`  [phase-b] ${downgrades} label downgrade(s) vs ${statsPath} (log-only — Phase C will gate)`);
+  // Coverage check — the second half of the same defence. Even with a
+  // matching inputLabel, a renamed component or a partial stats file can
+  // leave the check comparing almost nothing, and the `continue` above makes
+  // that indistinguishable from "everything is fine". Always state the
+  // denominator so the reader can tell a clean run from an empty one.
+  if (comparable === 0) {
+    console.warn(
+      `  [phase-b] covered 0 of ${seen} pair(s) — no key in baseline-stats.json ` +
+      `matched this run, so nothing was actually checked. Regenerate it with ` +
+      `\`node tools/visual/baseline-stats.mjs\`.`,
+    );
+  } else if (downgrades > 0) {
+    console.warn(`  [phase-b] ${downgrades} label downgrade(s) across ${comparable}/${seen} comparable pair(s) vs ${statsPath} (log-only — Phase C will gate)`);
+  } else {
+    console.log(`· phase-b drift: ${comparable}/${seen} pair(s) comparable · 0 downgrades`);
   }
 }
 
