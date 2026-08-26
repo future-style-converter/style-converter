@@ -160,7 +160,17 @@ object KeyframeTimeline {
                 // jump-start/start: the first jump happens AT 0.
                 "start", "jump-start" -> (floor(clamped * n) + 1.0).coerceAtMost(n.toDouble()) / n
                 // jump-both: n+1 jumps, both endpoints jump.
-                "jump-both" -> (floor(clamped * n) + 1.0).coerceAtMost(n.toDouble()) / (n + 1.0)
+                //
+                // The clamp is to JUMPS (n+1), not to the step count. The
+                // spec's step algorithm reads "if input progress value ≤ 1
+                // and current step > jumps, decrement current step by one",
+                // and for jump-both jumps = n + 1. Clamping to n instead
+                // capped the output at n/(n+1), so a jump-both animation
+                // never reached its end state — steps(2, jump-both) sat at
+                // 0.667 at t=1 instead of 1.0, and stuck there under
+                // animation-fill-mode: forwards. Caught by
+                // EasingReferenceTest against the css-easing-1 table.
+                "jump-both" -> (floor(clamped * n) + 1.0).coerceAtMost(n + 1.0) / (n + 1.0)
                 // jump-none: n-1 interior jumps, endpoints held.
                 "jump-none" ->
                     if (n <= 1) clamped // degenerate steps(1, jump-none): identity hold

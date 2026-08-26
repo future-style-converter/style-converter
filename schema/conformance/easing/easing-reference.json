@@ -1,0 +1,2393 @@
+{
+  "version": 1,
+  "generator": "schema/conformance/easing/gen-easing-reference.mjs",
+  "spec": "https://www.w3.org/TR/css-easing-1/",
+  "note": "Cross-runtime easing reference. Every expected value is computed FROM THE SPEC by the generator, never by running a runtime — generating it from an implementation would encode that implementation's bugs as the standard. Compose, SwiftUI and web each assert their own evaluator against this table in their own unit-test suite, so a divergence is attributable to a named easing function at a named input without a device, an emulator or a screenshot.",
+  "tolerance": {
+    "cubicBezier": 0.0001,
+    "note": "cubic-bezier is compared with an absolute tolerance because implementations legitimately differ in solver iteration count and float width (Compose evaluates in Float via androidx CubicBezierEasing). 1e-4 is WPT assert_matrix_equals's epsilon and is orders of magnitude below anything renderable. steps() and linear() are exact rational arithmetic and are compared with a much tighter 1e-9 — a difference there is a logic bug, not float noise.",
+    "stepsAndLinear": 1e-9
+  },
+  "caseCount": 36,
+  "sampleCount": 476,
+  "cases": [
+    {
+      "id": "keyword-linear",
+      "kind": "cubic-bezier",
+      "css": "linear",
+      "note": "CSS keyword \"linear\" normalises to cubic-bezier(0, 0, 1, 1) — css-easing-1 §3.1.",
+      "cubicBezier": {
+        "x1": 0,
+        "y1": 0,
+        "x2": 1,
+        "y2": 1
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 0.0001
+        },
+        {
+          "t": 0.001,
+          "expected": 0.001
+        },
+        {
+          "t": 0.01,
+          "expected": 0.01
+        },
+        {
+          "t": 0.05,
+          "expected": 0.05
+        },
+        {
+          "t": 0.1,
+          "expected": 0.1
+        },
+        {
+          "t": 0.2,
+          "expected": 0.2
+        },
+        {
+          "t": 0.25,
+          "expected": 0.25
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.4,
+          "expected": 0.4
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.6,
+          "expected": 0.6
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.75,
+          "expected": 0.75
+        },
+        {
+          "t": 0.8,
+          "expected": 0.8
+        },
+        {
+          "t": 0.9,
+          "expected": 0.9
+        },
+        {
+          "t": 0.95,
+          "expected": 0.95
+        },
+        {
+          "t": 0.99,
+          "expected": 0.99
+        },
+        {
+          "t": 0.999,
+          "expected": 0.999
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.9999
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "keyword-ease",
+      "kind": "cubic-bezier",
+      "css": "ease",
+      "note": "CSS keyword \"ease\" normalises to cubic-bezier(0.25, 0.1, 0.25, 1) — css-easing-1 §3.1.",
+      "cubicBezier": {
+        "x1": 0.25,
+        "y1": 0.1,
+        "x2": 0.25,
+        "y2": 1
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 0.000040048008
+        },
+        {
+          "t": 0.001,
+          "expected": 0.000404807822
+        },
+        {
+          "t": 0.01,
+          "expected": 0.004487815208
+        },
+        {
+          "t": 0.05,
+          "expected": 0.032951541306
+        },
+        {
+          "t": 0.1,
+          "expected": 0.094796305716
+        },
+        {
+          "t": 0.2,
+          "expected": 0.295244334268
+        },
+        {
+          "t": 0.25,
+          "expected": 0.408510591355
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.575862317578
+        },
+        {
+          "t": 0.4,
+          "expected": 0.682540505978
+        },
+        {
+          "t": 0.5,
+          "expected": 0.802403387585
+        },
+        {
+          "t": 0.6,
+          "expected": 0.885229309876
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.924824011884
+        },
+        {
+          "t": 0.75,
+          "expected": 0.960458978349
+        },
+        {
+          "t": 0.8,
+          "expected": 0.975625355624
+        },
+        {
+          "t": 0.9,
+          "expected": 0.994316477485
+        },
+        {
+          "t": 0.95,
+          "expected": 0.99862454145
+        },
+        {
+          "t": 0.99,
+          "expected": 0.999946339479
+        },
+        {
+          "t": 0.999,
+          "expected": 0.999999466342
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.999999994666
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "keyword-ease-in",
+      "kind": "cubic-bezier",
+      "css": "ease-in",
+      "note": "CSS keyword \"ease-in\" normalises to cubic-bezier(0.42, 0, 1, 1) — css-easing-1 §3.1.",
+      "cubicBezier": {
+        "x1": 0.42,
+        "y1": 0,
+        "x2": 1,
+        "y2": 1
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 1.8894e-8
+        },
+        {
+          "t": 0.001,
+          "expected": 0.000001887505
+        },
+        {
+          "t": 0.01,
+          "expected": 0.000186853195
+        },
+        {
+          "t": 0.05,
+          "expected": 0.004474615296
+        },
+        {
+          "t": 0.1,
+          "expected": 0.017026609652
+        },
+        {
+          "t": 0.2,
+          "expected": 0.062282000137
+        },
+        {
+          "t": 0.25,
+          "expected": 0.093464650719
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.156163920993
+        },
+        {
+          "t": 0.4,
+          "expected": 0.214860938753
+        },
+        {
+          "t": 0.5,
+          "expected": 0.315356812573
+        },
+        {
+          "t": 0.6,
+          "expected": 0.429119769296
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.51165099729
+        },
+        {
+          "t": 0.75,
+          "expected": 0.621861869175
+        },
+        {
+          "t": 0.8,
+          "expected": 0.691633933319
+        },
+        {
+          "t": 0.9,
+          "expected": 0.839427845762
+        },
+        {
+          "t": 0.95,
+          "expected": 0.917757795958
+        },
+        {
+          "t": 0.99,
+          "expected": 0.983090294666
+        },
+        {
+          "t": 0.999,
+          "expected": 0.998285994366
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.99982790324
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "keyword-ease-out",
+      "kind": "cubic-bezier",
+      "css": "ease-out",
+      "note": "CSS keyword \"ease-out\" normalises to cubic-bezier(0, 0, 0.58, 1) — css-easing-1 §3.1.",
+      "cubicBezier": {
+        "x1": 0,
+        "y1": 0,
+        "x2": 0.58,
+        "y2": 1
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 0.00017209676
+        },
+        {
+          "t": 0.001,
+          "expected": 0.001714005634
+        },
+        {
+          "t": 0.01,
+          "expected": 0.016909705334
+        },
+        {
+          "t": 0.05,
+          "expected": 0.082242204042
+        },
+        {
+          "t": 0.1,
+          "expected": 0.160572154238
+        },
+        {
+          "t": 0.2,
+          "expected": 0.308366066681
+        },
+        {
+          "t": 0.25,
+          "expected": 0.378138130825
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.48834900271
+        },
+        {
+          "t": 0.4,
+          "expected": 0.570880230704
+        },
+        {
+          "t": 0.5,
+          "expected": 0.684643187427
+        },
+        {
+          "t": 0.6,
+          "expected": 0.785139061247
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.843836079007
+        },
+        {
+          "t": 0.75,
+          "expected": 0.906535349281
+        },
+        {
+          "t": 0.8,
+          "expected": 0.937717999863
+        },
+        {
+          "t": 0.9,
+          "expected": 0.982973390348
+        },
+        {
+          "t": 0.95,
+          "expected": 0.995525384704
+        },
+        {
+          "t": 0.99,
+          "expected": 0.999813146805
+        },
+        {
+          "t": 0.999,
+          "expected": 0.999998112495
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.999999981106
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "keyword-ease-in-out",
+      "kind": "cubic-bezier",
+      "css": "ease-in-out",
+      "note": "CSS keyword \"ease-in-out\" normalises to cubic-bezier(0.42, 0, 0.58, 1) — css-easing-1 §3.1.",
+      "cubicBezier": {
+        "x1": 0.42,
+        "y1": 0,
+        "x2": 0.58,
+        "y2": 1
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 1.8897e-8
+        },
+        {
+          "t": 0.001,
+          "expected": 0.000001890502
+        },
+        {
+          "t": 0.01,
+          "expected": 0.000189819585
+        },
+        {
+          "t": 0.05,
+          "expected": 0.004829749668
+        },
+        {
+          "t": 0.1,
+          "expected": 0.019722453548
+        },
+        {
+          "t": 0.2,
+          "expected": 0.081659856266
+        },
+        {
+          "t": 0.25,
+          "expected": 0.129161931047
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.231774816303
+        },
+        {
+          "t": 0.4,
+          "expected": 0.331883870098
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.6,
+          "expected": 0.668116129902
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.768225183697
+        },
+        {
+          "t": 0.75,
+          "expected": 0.870838068953
+        },
+        {
+          "t": 0.8,
+          "expected": 0.918340143734
+        },
+        {
+          "t": 0.9,
+          "expected": 0.980277546452
+        },
+        {
+          "t": 0.95,
+          "expected": 0.995170250332
+        },
+        {
+          "t": 0.99,
+          "expected": 0.999810180415
+        },
+        {
+          "t": 0.999,
+          "expected": 0.999998109498
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.999999981103
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "custom-symmetric",
+      "kind": "cubic-bezier",
+      "css": "cubic-bezier(0.5, 0, 0.5, 1)",
+      "note": "Ordinary symmetric ease-in-out-ish curve.",
+      "cubicBezier": {
+        "x1": 0.5,
+        "y1": 0,
+        "x2": 0.5,
+        "y2": 1
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 1.3335e-8
+        },
+        {
+          "t": 0.001,
+          "expected": 0.00000133452
+        },
+        {
+          "t": 0.01,
+          "expected": 0.000134528447
+        },
+        {
+          "t": 0.05,
+          "expected": 0.003487810755
+        },
+        {
+          "t": 0.1,
+          "expected": 0.014621885964
+        },
+        {
+          "t": 0.2,
+          "expected": 0.064495032393
+        },
+        {
+          "t": 0.25,
+          "expected": 0.105892543025
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.203654110399
+        },
+        {
+          "t": 0.4,
+          "expected": 0.308864952723
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.6,
+          "expected": 0.691135047277
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.796345889601
+        },
+        {
+          "t": 0.75,
+          "expected": 0.894107456975
+        },
+        {
+          "t": 0.8,
+          "expected": 0.935504967607
+        },
+        {
+          "t": 0.9,
+          "expected": 0.985378114036
+        },
+        {
+          "t": 0.95,
+          "expected": 0.996512189245
+        },
+        {
+          "t": 0.99,
+          "expected": 0.999865471553
+        },
+        {
+          "t": 0.999,
+          "expected": 0.99999866548
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.999999986665
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "custom-overshoot",
+      "kind": "cubic-bezier",
+      "css": "cubic-bezier(0.68, -0.55, 0.265, 1.55)",
+      "note": "Back-ease. y1 < 0 and y2 > 1, so output leaves [0,1] mid-curve — an implementation that clamps output progress fails here.",
+      "cubicBezier": {
+        "x1": 0.68,
+        "y1": -0.55,
+        "x2": 0.265,
+        "y2": 1.55
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": -0.000080869633
+        },
+        {
+          "t": 0.001,
+          "expected": -0.000807550059
+        },
+        {
+          "t": 0.01,
+          "expected": -0.007959427215
+        },
+        {
+          "t": 0.05,
+          "expected": -0.037046101916
+        },
+        {
+          "t": 0.1,
+          "expected": -0.066291477334
+        },
+        {
+          "t": 0.2,
+          "expected": -0.092701694823
+        },
+        {
+          "t": 0.25,
+          "expected": -0.082807108828
+        },
+        {
+          "t": 0.333333333333,
+          "expected": -0.008501713288
+        },
+        {
+          "t": 0.4,
+          "expected": 0.142922970124
+        },
+        {
+          "t": 0.5,
+          "expected": 0.606679897224
+        },
+        {
+          "t": 0.6,
+          "expected": 0.947542443517
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 1.043436466859
+        },
+        {
+          "t": 0.75,
+          "expected": 1.089165774813
+        },
+        {
+          "t": 0.8,
+          "expected": 1.09209042321
+        },
+        {
+          "t": 0.9,
+          "expected": 1.062373195166
+        },
+        {
+          "t": 0.95,
+          "expected": 1.03449020529
+        },
+        {
+          "t": 0.99,
+          "expected": 1.00737133347
+        },
+        {
+          "t": 0.999,
+          "expected": 1.000747193947
+        },
+        {
+          "t": 0.9999,
+          "expected": 1.000074818889
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-1-jump-start",
+      "kind": "steps",
+      "css": "steps(1, jump-start)",
+      "note": "jumps = count = 1.",
+      "steps": {
+        "count": 1,
+        "position": "jump-start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 1
+        },
+        {
+          "t": 0.000001,
+          "expected": 1
+        },
+        {
+          "t": 0.5,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-2-jump-start",
+      "kind": "steps",
+      "css": "steps(2, jump-start)",
+      "note": "jumps = count = 2.",
+      "steps": {
+        "count": 2,
+        "position": "jump-start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.5
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.5
+        },
+        {
+          "t": 0.499999,
+          "expected": 0.5
+        },
+        {
+          "t": 0.5,
+          "expected": 1
+        },
+        {
+          "t": 0.500001,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-3-jump-start",
+      "kind": "steps",
+      "css": "steps(3, jump-start)",
+      "note": "jumps = count = 3.",
+      "steps": {
+        "count": 3,
+        "position": "jump-start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.333332333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.333334333333,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.5,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.666665666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 1
+        },
+        {
+          "t": 0.666667666667,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-5-jump-start",
+      "kind": "steps",
+      "css": "steps(5, jump-start)",
+      "note": "jumps = count = 5.",
+      "steps": {
+        "count": 5,
+        "position": "jump-start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.2
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.2
+        },
+        {
+          "t": 0.199999,
+          "expected": 0.2
+        },
+        {
+          "t": 0.2,
+          "expected": 0.4
+        },
+        {
+          "t": 0.200001,
+          "expected": 0.4
+        },
+        {
+          "t": 0.399999,
+          "expected": 0.4
+        },
+        {
+          "t": 0.4,
+          "expected": 0.6
+        },
+        {
+          "t": 0.400001,
+          "expected": 0.6
+        },
+        {
+          "t": 0.5,
+          "expected": 0.6
+        },
+        {
+          "t": 0.599999,
+          "expected": 0.6
+        },
+        {
+          "t": 0.6,
+          "expected": 0.8
+        },
+        {
+          "t": 0.600001,
+          "expected": 0.8
+        },
+        {
+          "t": 0.799999,
+          "expected": 0.8
+        },
+        {
+          "t": 0.8,
+          "expected": 1
+        },
+        {
+          "t": 0.800001,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-1-jump-end",
+      "kind": "steps",
+      "css": "steps(1, jump-end)",
+      "note": "jumps = count = 1.",
+      "steps": {
+        "count": 1,
+        "position": "jump-end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.5,
+          "expected": 0
+        },
+        {
+          "t": 0.999999,
+          "expected": 0
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-2-jump-end",
+      "kind": "steps",
+      "css": "steps(2, jump-end)",
+      "note": "jumps = count = 2.",
+      "steps": {
+        "count": 2,
+        "position": "jump-end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.499999,
+          "expected": 0
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.500001,
+          "expected": 0.5
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.5
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-3-jump-end",
+      "kind": "steps",
+      "css": "steps(3, jump-end)",
+      "note": "jumps = count = 3.",
+      "steps": {
+        "count": 3,
+        "position": "jump-end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.333332333333,
+          "expected": 0
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0
+        },
+        {
+          "t": 0.333334333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.5,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.666665666667,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.666667666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-5-jump-end",
+      "kind": "steps",
+      "css": "steps(5, jump-end)",
+      "note": "jumps = count = 5.",
+      "steps": {
+        "count": 5,
+        "position": "jump-end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.199999,
+          "expected": 0
+        },
+        {
+          "t": 0.2,
+          "expected": 0.2
+        },
+        {
+          "t": 0.200001,
+          "expected": 0.2
+        },
+        {
+          "t": 0.399999,
+          "expected": 0.2
+        },
+        {
+          "t": 0.4,
+          "expected": 0.4
+        },
+        {
+          "t": 0.400001,
+          "expected": 0.4
+        },
+        {
+          "t": 0.5,
+          "expected": 0.4
+        },
+        {
+          "t": 0.599999,
+          "expected": 0.4
+        },
+        {
+          "t": 0.6,
+          "expected": 0.6
+        },
+        {
+          "t": 0.600001,
+          "expected": 0.6
+        },
+        {
+          "t": 0.799999,
+          "expected": 0.6
+        },
+        {
+          "t": 0.8,
+          "expected": 0.8
+        },
+        {
+          "t": 0.800001,
+          "expected": 0.8
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.8
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-2-jump-none",
+      "kind": "steps",
+      "css": "steps(2, jump-none)",
+      "note": "jumps = count - 1 = 1. Endpoints are held, so there are 1 interior jumps.",
+      "steps": {
+        "count": 2,
+        "position": "jump-none"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.499999,
+          "expected": 0
+        },
+        {
+          "t": 0.5,
+          "expected": 1
+        },
+        {
+          "t": 0.500001,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-3-jump-none",
+      "kind": "steps",
+      "css": "steps(3, jump-none)",
+      "note": "jumps = count - 1 = 2. Endpoints are held, so there are 2 interior jumps.",
+      "steps": {
+        "count": 3,
+        "position": "jump-none"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.333332333333,
+          "expected": 0
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0
+        },
+        {
+          "t": 0.333334333333,
+          "expected": 0.5
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.666665666667,
+          "expected": 0.5
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 1
+        },
+        {
+          "t": 0.666667666667,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-5-jump-none",
+      "kind": "steps",
+      "css": "steps(5, jump-none)",
+      "note": "jumps = count - 1 = 4. Endpoints are held, so there are 4 interior jumps.",
+      "steps": {
+        "count": 5,
+        "position": "jump-none"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.199999,
+          "expected": 0
+        },
+        {
+          "t": 0.2,
+          "expected": 0.25
+        },
+        {
+          "t": 0.200001,
+          "expected": 0.25
+        },
+        {
+          "t": 0.399999,
+          "expected": 0.25
+        },
+        {
+          "t": 0.4,
+          "expected": 0.5
+        },
+        {
+          "t": 0.400001,
+          "expected": 0.5
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.599999,
+          "expected": 0.5
+        },
+        {
+          "t": 0.6,
+          "expected": 0.75
+        },
+        {
+          "t": 0.600001,
+          "expected": 0.75
+        },
+        {
+          "t": 0.799999,
+          "expected": 0.75
+        },
+        {
+          "t": 0.8,
+          "expected": 1
+        },
+        {
+          "t": 0.800001,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-1-jump-both",
+      "kind": "steps",
+      "css": "steps(1, jump-both)",
+      "note": "jumps = count + 1 = 2. The spec clamps current step to JUMPS, not to the step count — clamping to 1 yields 1/2 at input 1 instead of 1.",
+      "steps": {
+        "count": 1,
+        "position": "jump-both"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.5
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.5
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.5
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-2-jump-both",
+      "kind": "steps",
+      "css": "steps(2, jump-both)",
+      "note": "jumps = count + 1 = 3. The spec clamps current step to JUMPS, not to the step count — clamping to 2 yields 2/3 at input 1 instead of 1.",
+      "steps": {
+        "count": 2,
+        "position": "jump-both"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.499999,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.5,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.500001,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-3-jump-both",
+      "kind": "steps",
+      "css": "steps(3, jump-both)",
+      "note": "jumps = count + 1 = 4. The spec clamps current step to JUMPS, not to the step count — clamping to 3 yields 3/4 at input 1 instead of 1.",
+      "steps": {
+        "count": 3,
+        "position": "jump-both"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.25
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.25
+        },
+        {
+          "t": 0.333332333333,
+          "expected": 0.25
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.25
+        },
+        {
+          "t": 0.333334333333,
+          "expected": 0.5
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.666665666667,
+          "expected": 0.5
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.75
+        },
+        {
+          "t": 0.666667666667,
+          "expected": 0.75
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.75
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-5-jump-both",
+      "kind": "steps",
+      "css": "steps(5, jump-both)",
+      "note": "jumps = count + 1 = 6. The spec clamps current step to JUMPS, not to the step count — clamping to 5 yields 5/6 at input 1 instead of 1.",
+      "steps": {
+        "count": 5,
+        "position": "jump-both"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.166666666667
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.166666666667
+        },
+        {
+          "t": 0.199999,
+          "expected": 0.166666666667
+        },
+        {
+          "t": 0.2,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.200001,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.399999,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.4,
+          "expected": 0.5
+        },
+        {
+          "t": 0.400001,
+          "expected": 0.5
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.599999,
+          "expected": 0.5
+        },
+        {
+          "t": 0.6,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.600001,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.799999,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.8,
+          "expected": 0.833333333333
+        },
+        {
+          "t": 0.800001,
+          "expected": 0.833333333333
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.833333333333
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-1-start",
+      "kind": "steps",
+      "css": "steps(1, start)",
+      "note": "jumps = count = 1.",
+      "steps": {
+        "count": 1,
+        "position": "start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 1
+        },
+        {
+          "t": 0.000001,
+          "expected": 1
+        },
+        {
+          "t": 0.5,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-2-start",
+      "kind": "steps",
+      "css": "steps(2, start)",
+      "note": "jumps = count = 2.",
+      "steps": {
+        "count": 2,
+        "position": "start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.5
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.5
+        },
+        {
+          "t": 0.499999,
+          "expected": 0.5
+        },
+        {
+          "t": 0.5,
+          "expected": 1
+        },
+        {
+          "t": 0.500001,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-3-start",
+      "kind": "steps",
+      "css": "steps(3, start)",
+      "note": "jumps = count = 3.",
+      "steps": {
+        "count": 3,
+        "position": "start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.333332333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.333334333333,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.5,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.666665666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 1
+        },
+        {
+          "t": 0.666667666667,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-5-start",
+      "kind": "steps",
+      "css": "steps(5, start)",
+      "note": "jumps = count = 5.",
+      "steps": {
+        "count": 5,
+        "position": "start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0.2
+        },
+        {
+          "t": 0.000001,
+          "expected": 0.2
+        },
+        {
+          "t": 0.199999,
+          "expected": 0.2
+        },
+        {
+          "t": 0.2,
+          "expected": 0.4
+        },
+        {
+          "t": 0.200001,
+          "expected": 0.4
+        },
+        {
+          "t": 0.399999,
+          "expected": 0.4
+        },
+        {
+          "t": 0.4,
+          "expected": 0.6
+        },
+        {
+          "t": 0.400001,
+          "expected": 0.6
+        },
+        {
+          "t": 0.5,
+          "expected": 0.6
+        },
+        {
+          "t": 0.599999,
+          "expected": 0.6
+        },
+        {
+          "t": 0.6,
+          "expected": 0.8
+        },
+        {
+          "t": 0.600001,
+          "expected": 0.8
+        },
+        {
+          "t": 0.799999,
+          "expected": 0.8
+        },
+        {
+          "t": 0.8,
+          "expected": 1
+        },
+        {
+          "t": 0.800001,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-1-end",
+      "kind": "steps",
+      "css": "steps(1, end)",
+      "note": "jumps = count = 1.",
+      "steps": {
+        "count": 1,
+        "position": "end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.5,
+          "expected": 0
+        },
+        {
+          "t": 0.999999,
+          "expected": 0
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-2-end",
+      "kind": "steps",
+      "css": "steps(2, end)",
+      "note": "jumps = count = 2.",
+      "steps": {
+        "count": 2,
+        "position": "end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.499999,
+          "expected": 0
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.500001,
+          "expected": 0.5
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.5
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-3-end",
+      "kind": "steps",
+      "css": "steps(3, end)",
+      "note": "jumps = count = 3.",
+      "steps": {
+        "count": 3,
+        "position": "end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.333332333333,
+          "expected": 0
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0
+        },
+        {
+          "t": 0.333334333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.5,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.666665666667,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.666667666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "steps-5-end",
+      "kind": "steps",
+      "css": "steps(5, end)",
+      "note": "jumps = count = 5.",
+      "steps": {
+        "count": 5,
+        "position": "end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.199999,
+          "expected": 0
+        },
+        {
+          "t": 0.2,
+          "expected": 0.2
+        },
+        {
+          "t": 0.200001,
+          "expected": 0.2
+        },
+        {
+          "t": 0.399999,
+          "expected": 0.2
+        },
+        {
+          "t": 0.4,
+          "expected": 0.4
+        },
+        {
+          "t": 0.400001,
+          "expected": 0.4
+        },
+        {
+          "t": 0.5,
+          "expected": 0.4
+        },
+        {
+          "t": 0.599999,
+          "expected": 0.4
+        },
+        {
+          "t": 0.6,
+          "expected": 0.6
+        },
+        {
+          "t": 0.600001,
+          "expected": 0.6
+        },
+        {
+          "t": 0.799999,
+          "expected": 0.6
+        },
+        {
+          "t": 0.8,
+          "expected": 0.8
+        },
+        {
+          "t": 0.800001,
+          "expected": 0.8
+        },
+        {
+          "t": 0.999999,
+          "expected": 0.8
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "keyword-step-start",
+      "kind": "steps",
+      "css": "step-start",
+      "note": "CSS keyword \"step-start\" is steps(1, start) — css-easing-1 §3.1.",
+      "steps": {
+        "count": 1,
+        "position": "start"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 1
+        },
+        {
+          "t": 0.000001,
+          "expected": 1
+        },
+        {
+          "t": 0.5,
+          "expected": 1
+        },
+        {
+          "t": 0.999999,
+          "expected": 1
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "keyword-step-end",
+      "kind": "steps",
+      "css": "step-end",
+      "note": "CSS keyword \"step-end\" is steps(1, end) — css-easing-1 §3.1.",
+      "steps": {
+        "count": 1,
+        "position": "end"
+      },
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.000001,
+          "expected": 0
+        },
+        {
+          "t": 0.5,
+          "expected": 0
+        },
+        {
+          "t": 0.999999,
+          "expected": 0
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "linear-identity",
+      "kind": "linear",
+      "css": "linear(0, 1)",
+      "note": "The two-stop identity — must equal input exactly.",
+      "linearStops": [
+        {
+          "value": 0
+        },
+        {
+          "value": 1
+        }
+      ],
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 0.0001
+        },
+        {
+          "t": 0.001,
+          "expected": 0.001
+        },
+        {
+          "t": 0.01,
+          "expected": 0.01
+        },
+        {
+          "t": 0.05,
+          "expected": 0.05
+        },
+        {
+          "t": 0.1,
+          "expected": 0.1
+        },
+        {
+          "t": 0.2,
+          "expected": 0.2
+        },
+        {
+          "t": 0.25,
+          "expected": 0.25
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.333333333333
+        },
+        {
+          "t": 0.4,
+          "expected": 0.4
+        },
+        {
+          "t": 0.5,
+          "expected": 0.5
+        },
+        {
+          "t": 0.6,
+          "expected": 0.6
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.75,
+          "expected": 0.75
+        },
+        {
+          "t": 0.8,
+          "expected": 0.8
+        },
+        {
+          "t": 0.9,
+          "expected": 0.9
+        },
+        {
+          "t": 0.95,
+          "expected": 0.95
+        },
+        {
+          "t": 0.99,
+          "expected": 0.99
+        },
+        {
+          "t": 0.999,
+          "expected": 0.999
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.9999
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "linear-three-even",
+      "kind": "linear",
+      "css": "linear(0, 0.25, 1)",
+      "note": "Interior stop with no position: fills to 50%, NOT to its value. A runtime that spreads by index over n-1 gets this right; one that uses the value as the position does not.",
+      "linearStops": [
+        {
+          "value": 0
+        },
+        {
+          "value": 0.25
+        },
+        {
+          "value": 1
+        }
+      ],
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 0.00005
+        },
+        {
+          "t": 0.001,
+          "expected": 0.0005
+        },
+        {
+          "t": 0.01,
+          "expected": 0.005
+        },
+        {
+          "t": 0.05,
+          "expected": 0.025
+        },
+        {
+          "t": 0.1,
+          "expected": 0.05
+        },
+        {
+          "t": 0.2,
+          "expected": 0.1
+        },
+        {
+          "t": 0.25,
+          "expected": 0.125
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.166666666667
+        },
+        {
+          "t": 0.4,
+          "expected": 0.2
+        },
+        {
+          "t": 0.5,
+          "expected": 0.25
+        },
+        {
+          "t": 0.6,
+          "expected": 0.4
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.5
+        },
+        {
+          "t": 0.75,
+          "expected": 0.625
+        },
+        {
+          "t": 0.8,
+          "expected": 0.7
+        },
+        {
+          "t": 0.9,
+          "expected": 0.85
+        },
+        {
+          "t": 0.95,
+          "expected": 0.925
+        },
+        {
+          "t": 0.99,
+          "expected": 0.985
+        },
+        {
+          "t": 0.999,
+          "expected": 0.9985
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.99985
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "linear-positioned",
+      "kind": "linear",
+      "css": "linear(0 0%, 0.8 20%, 1 100%)",
+      "note": "Explicit positions — a steep first segment then a shallow one.",
+      "linearStops": [
+        {
+          "value": 0,
+          "position": 0
+        },
+        {
+          "value": 0.8,
+          "position": 0.2
+        },
+        {
+          "value": 1,
+          "position": 1
+        }
+      ],
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 0.0004
+        },
+        {
+          "t": 0.001,
+          "expected": 0.004
+        },
+        {
+          "t": 0.01,
+          "expected": 0.04
+        },
+        {
+          "t": 0.05,
+          "expected": 0.2
+        },
+        {
+          "t": 0.1,
+          "expected": 0.4
+        },
+        {
+          "t": 0.2,
+          "expected": 0.8
+        },
+        {
+          "t": 0.25,
+          "expected": 0.8125
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.833333333333
+        },
+        {
+          "t": 0.4,
+          "expected": 0.85
+        },
+        {
+          "t": 0.5,
+          "expected": 0.875
+        },
+        {
+          "t": 0.6,
+          "expected": 0.9
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.916666666667
+        },
+        {
+          "t": 0.75,
+          "expected": 0.9375
+        },
+        {
+          "t": 0.8,
+          "expected": 0.95
+        },
+        {
+          "t": 0.9,
+          "expected": 0.975
+        },
+        {
+          "t": 0.95,
+          "expected": 0.9875
+        },
+        {
+          "t": 0.99,
+          "expected": 0.9975
+        },
+        {
+          "t": 0.999,
+          "expected": 0.99975
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.999975
+        },
+        {
+          "t": 1,
+          "expected": 1
+        }
+      ]
+    },
+    {
+      "id": "linear-nonmonotonic",
+      "kind": "linear",
+      "css": "linear(0, 1, 0.5)",
+      "note": "Output may decrease; linear() constrains positions, not values.",
+      "linearStops": [
+        {
+          "value": 0
+        },
+        {
+          "value": 1
+        },
+        {
+          "value": 0.5
+        }
+      ],
+      "samples": [
+        {
+          "t": 0,
+          "expected": 0
+        },
+        {
+          "t": 0.0001,
+          "expected": 0.0002
+        },
+        {
+          "t": 0.001,
+          "expected": 0.002
+        },
+        {
+          "t": 0.01,
+          "expected": 0.02
+        },
+        {
+          "t": 0.05,
+          "expected": 0.1
+        },
+        {
+          "t": 0.1,
+          "expected": 0.2
+        },
+        {
+          "t": 0.2,
+          "expected": 0.4
+        },
+        {
+          "t": 0.25,
+          "expected": 0.5
+        },
+        {
+          "t": 0.333333333333,
+          "expected": 0.666666666667
+        },
+        {
+          "t": 0.4,
+          "expected": 0.8
+        },
+        {
+          "t": 0.5,
+          "expected": 1
+        },
+        {
+          "t": 0.6,
+          "expected": 0.9
+        },
+        {
+          "t": 0.666666666667,
+          "expected": 0.833333333333
+        },
+        {
+          "t": 0.75,
+          "expected": 0.75
+        },
+        {
+          "t": 0.8,
+          "expected": 0.7
+        },
+        {
+          "t": 0.9,
+          "expected": 0.6
+        },
+        {
+          "t": 0.95,
+          "expected": 0.55
+        },
+        {
+          "t": 0.99,
+          "expected": 0.51
+        },
+        {
+          "t": 0.999,
+          "expected": 0.501
+        },
+        {
+          "t": 0.9999,
+          "expected": 0.5001
+        },
+        {
+          "t": 1,
+          "expected": 0.5
+        }
+      ]
+    }
+  ]
+}
