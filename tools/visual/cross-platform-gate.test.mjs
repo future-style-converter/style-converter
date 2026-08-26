@@ -164,7 +164,7 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // Hardcoded deliberately: the count is the thing that must not drift
   // unnoticed. Changing it should require editing this line, which is a
   // review prompt.
-  assert.equal(led.expectations.length, 23, 'seeded from the live 3-platform run: 23 of 327 pairs');
+  assert.equal(led.expectations.length, 25, 'seeded from the live 3-platform run (23 on visual-test) + 2 iOS bugs found on composition-test');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);

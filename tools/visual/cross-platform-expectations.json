@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "note": "Known cross-platform divergences on fixtures/visual-test.json, seeded from a live three-platform run (327 pairs, 23 failing at SSIM<0.95 || dpx>2%). A LEDGER, not a tolerance: each line names one divergence, why it is believed benign or why it is a bug, who owns it, and when it must be re-reviewed. Deleting a line is how a fix gets recorded. READ THIS: 6 of these entries are REAL SIZE BUGS surfaced for the first time by the magenta pad sentinel - before that fix a short render was padded with the capture background and scored a perfect diff. They carry a short expiry because they need fixing, not excusing. Of the remainder, almost all fail on SSIM alone with dpx well under the 2% budget and deltaE95 = 0.00 - the colours are exact and SSIM is scoring curve/transform anti-aliasing. That is evidence about the METRIC, not the runtimes, and most of those lines should evaporate when the gate moves off SSIM.",
+  "note": "Known cross-platform divergences on fixtures/visual-test.json, seeded from a live three-platform run (327 pairs, 23 failing at SSIM<0.95 || dpx>2%). A LEDGER, not a tolerance: each line names one divergence, why it is believed benign or why it is a bug, who owns it, and when it must be re-reviewed. Deleting a line is how a fix gets recorded. READ THIS: 6 of these entries are REAL SIZE BUGS surfaced for the first time by the magenta pad sentinel - before that fix a short render was padded with the capture background and scored a perfect diff. They carry a short expiry because they need fixing, not excusing. Of the remainder, almost all fail on SSIM alone with dpx well under the 2% budget and deltaE95 = 0.00 - the colours are exact and SSIM is scoring curve/transform anti-aliasing. That is evidence about the METRIC, not the runtimes, and most of those lines should evaporate when the gate moves off SSIM. ALSO measured on composition-test.json (2026-08-26): pixelmatch at threshold 0.25 reported pixelMismatchedPct 0.00 for 037_Nested_OpacityGroup while 36.63% of pixels differ by up to 80 per channel. Its YIQ budget is 0.25*35215 = 8803.8, and a PURE LIGHTNESS shift must exceed 132/255 to be counted \u2014 so black (0,0,0) vs mid-grey (130,130,130) is reported as identical. The 2% pixel gate therefore cannot fire on any uniform lightness error smaller than half the dynamic range. Only SSIM (0.9355) and deltaE95 (20.94) caught this row.",
   "seededFrom": {
     "run": "2026-08-26T14:52:07.252Z",
     "inputLabel": "fixtures/visual-test.json",
@@ -9,6 +9,34 @@
     "totalPairs": 327
   },
   "expectations": [
+    {
+      "fixture": "composition-test.json",
+      "component": "010_Backdrop_Blur_OverStripes.png",
+      "pair": "iOS-web",
+      "reason": "REAL BUG \u2014 backdrop-filter: blur() is SILENTLY DROPPED on iOS. Proven by the paired control, not inferred: iOS renders Backdrop_Blur_OverStripes pixel-identical to Backdrop_None_OverStripes_Control (0 px difference) while web differs by 8000 px. backdrop-filter: saturate(4) IS implemented on iOS (4000 px vs its control), so the gap is specifically blur(). This is why visual-test.json's Glass_Effect has always passed: it blurs a UNIFORM field, where the correct result and the dropped result are the same image.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.8718,
+        "pixelPct": 0.336,
+        "labDeltaEP95": 20.128,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "037_Nested_OpacityGroup.png",
+      "pair": "iOS-web",
+      "reason": "REAL BUG \u2014 iOS applies parent opacity PER CHILD instead of compositing the subtree as a group. css-color-4: opacity on an element creates a stacking context and the whole subtree is rendered as a group, then composited once. The arithmetic pins it exactly: for the blue child #2980b9 = (41,128,185) over page background (26,26,46), web gives (33,77,116) = 0.5*child + 0.5*page (group-composited, CORRECT); iOS gives (90,134,168) = 0.5*child + 0.5*(140,140,151), i.e. the child faded individually over the already-faded parent background. Max per-channel divergence 80. Also note pixelmatch reports pixelMismatchedPct 0.00 here while 36.63%% of pixels actually differ \u2014 see the metric note below.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9355,
+        "pixelPct": 0,
+        "labDeltaEP95": 20.938,
+        "divergence": "mixed"
+      }
+    },
     {
       "fixture": "visual-test.json",
       "component": "019_BorderRadius_Uniform.png",
