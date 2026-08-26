@@ -656,8 +656,38 @@ mkdir -p "$REPORT_DIR"
   WEB_SCREENSHOTS_DIR="$WEB_SHOTS_DIR" \
   REPORT_DIR="$REPORT_DIR" \
   MANIFEST_OUT="$MANIFEST_OUT" \
-  node compare-screenshots.mjs --input "$REL_INPUT"
-) >"$COMPARE_LOG" 2>&1 || warn "compare-screenshots exited non-zero — see $COMPARE_LOG"
+  node compare-screenshots.mjs --input "$REL_INPUT" --no-cross-platform-gate
+) >"$COMPARE_LOG" 2>&1 || COMPARE_EXIT=$?
+COMPARE_EXIT="${COMPARE_EXIT:-0}"
+
+# The cross-platform gate is EXPLICITLY OFF here, and the explicit flag
+# matters more than the behaviour.
+#
+# TITAN scores the WPT corpus against frozen browser references; its
+# runtime-vs-runtime pairs are informational, hundreds of them legitimately
+# diverge (the runtimes sit well under 100% WPT conformance), and
+# tools/visual/cross-platform-expectations.json covers the fixture corpus,
+# not WPT. Gating here would be noise.
+#
+# Without the flag the gate would still RUN and still exit 4, and the `||`
+# below would quietly downgrade that to a warning — so the gate would look
+# like it covered TITAN runs while being inert. Opting out in the open is
+# the honest version of the same outcome.
+#
+# Exit 3 is NOT downgraded: it means a capture is not untagged-sRGB, so the
+# pixels were decoded in the wrong colour space and every number this run
+# produces — including the WPT conformance scores — is untrustworthy. That
+# is worse for a scoring harness than for a gate, so the section ABORTS with
+# exit 2, this file's existing convention for "cannot produce valid output"
+# (see the preflight exits above). Continuing would write a manifest full of
+# numbers computed from the wrong colour space, which is the degenerate-pass
+# shape: a result that looks like a measurement and is not one.
+if [[ "$COMPARE_EXIT" -eq 3 ]]; then
+    err "compare-screenshots exited 3 — a capture is not untagged-sRGB, so this section's numbers would be invalid (see $COMPARE_LOG)"
+    exit 2
+elif [[ "$COMPARE_EXIT" -ne 0 ]]; then
+    warn "compare-screenshots exited $COMPARE_EXIT — see $COMPARE_LOG"
+fi
 
 if [[ ! -f "$MANIFEST_OUT" ]]; then
   err "compare-screenshots did not write $MANIFEST_OUT"
