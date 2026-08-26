@@ -92,6 +92,7 @@ ${BASE_CSS}
     · SSIM threshold ${opts.ssimThreshold} · pixel threshold ${opts.pixelThreshold}%
   </p>
   <p class="meta legend">Divergence labels: ${legendHtml}</p>
+  ${renderCrossPlatformGate(opts.crossPlatformGate)}
   <!-- Metric caveats, stated where the numbers are actually read. Both are
        properties of ssim.js's defaults, not of this harness's inputs, and
        both cause honest misreadings of the column beside them. -->
@@ -202,6 +203,44 @@ ${rowsHtml}
 // the top of the report. Returns empty string when probes weren't run
 // (probeBlock is null/undefined) so the existing report layout doesn't
 // gain a "no data" bar that would only ever appear during the rollout.
+
+/**
+ * Cross-platform gate summary (Wave 1).
+ *
+ * The open expectation count belongs in the HEADLINE, not buried in a file.
+ * An expectation ledger only stays honest while its size is visible: the
+ * documented failure mode (Chromium's own, about layout-tree baselines) is
+ * that expectations accumulate because nobody is confronted with how many
+ * there are. Printing the number where the results are read is the cheapest
+ * possible defence.
+ */
+function renderCrossPlatformGate(g) {
+  if (!g) return '';                                    // gate not evaluated (older manifest)
+  if (g.skipped) {
+    return `<p class="meta xgate">Cross-platform gate: <em>skipped</em> — ${escape(g.reason ?? '')}</p>`;
+  }
+  const cls = g.unexpected?.length ? 'bad' : 'ok';
+  const staleBit = g.stale?.length
+    ? ` · <span class="warn">${g.stale.length} stale</span>` : '';
+  const expiredBit = g.expired?.length
+    ? ` · <span class="warn">${g.expired.length} past expiry</span>` : '';
+  // Size disagreements are called out separately because they are bugs to
+  // fix, not divergences to live with — and because they were undetectable
+  // until the pad sentinel landed, so their count is a new signal.
+  const sizeBugs = (g.expected ?? []).filter((r) => r.entry?.observed?.sizes).length;
+  const sizeBit = sizeBugs
+    ? ` · <span class="warn">${sizeBugs} size mismatch(es) — real bugs, short expiry</span>` : '';
+  return `
+  <p class="meta xgate">
+    Cross-platform gate: <span class="${cls}">${g.unexpected?.length ?? 0} unexpected</span>
+    · ${g.expected?.length ?? 0} known divergence(s) of ${g.checked} pair(s)${sizeBit}${staleBit}${expiredBit}
+    <br><span style="opacity:.75; font-size:11px;">
+      Known divergences are enumerated in
+      <code>tools/visual/cross-platform-expectations.json</code> with a reason,
+      an owner and an expiry — deleting a line is how a fix gets recorded.
+    </span>
+  </p>`;
+}
 
 function renderTypographyProbes(probeBlock) {
   // No probe data → render nothing. This is the v3-graceful behaviour

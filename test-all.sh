@@ -883,7 +883,14 @@ fi
 # is empty (default mode — no baseline flags).
 # `--input` threads the IR filename into the HTML report headline so you can
 # tell at a glance which test case the report was generated from.
-( cd "$TOOLS_VISUAL_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" )
+# Capture the exit code instead of letting `set -e` abort here. The
+# comparator now has four distinct failure modes (1 baseline regression ·
+# 2 IO/empty · 3 non-sRGB capture · 4 unexpected cross-platform divergence),
+# and every one of them is easier to act on WITH the summary and the report
+# path in front of you. We re-raise the exact code at the very end so
+# callers and CI see no change in behaviour.
+COMPARE_EXIT=0
+( cd "$TOOLS_VISUAL_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" ) || COMPARE_EXIT=$?
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 # Close out whatever stage was running, then print the summary without
@@ -919,4 +926,20 @@ if [[ "${UPDATE_BASELINE:-0}" != "1" ]] && [[ -f "$REPORT_PATH" ]]; then
     if command -v open &>/dev/null && [[ "${OPEN_REPORT:-0}" == "1" ]] && [[ "${NO_OPEN:-0}" != "1" ]]; then
         open "$REPORT_PATH"
     fi
+fi
+
+# Re-raise the comparator's verdict, now that the summary and the report
+# path have been printed. Naming the code matters: a bare "exit 4" sends
+# people digging through the comparator source.
+if [[ "$COMPARE_EXIT" -ne 0 ]]; then
+    echo
+    case "$COMPARE_EXIT" in
+        1) echo -e "  ${Y}✗ comparison failed: a platform regressed against its committed baseline${N}" ;;
+        2) echo -e "  ${Y}✗ comparison failed: script/IO error, or baseline mode ran zero comparisons${N}" ;;
+        3) echo -e "  ${Y}✗ comparison failed: a capture is not untagged-sRGB — see tools/visual/png-color-space.mjs${N}" ;;
+        4) echo -e "  ${Y}✗ comparison failed: unexpected cross-platform divergence${N}"
+           echo -e "     Fix it, or record it in ${B}tools/visual/cross-platform-expectations.json${N} with a reason and an owner." ;;
+        *) echo -e "  ${Y}✗ comparison failed with exit $COMPARE_EXIT${N}" ;;
+    esac
+    exit "$COMPARE_EXIT"
 fi

@@ -91,6 +91,14 @@ import { classifyDivergence } from './classify-divergence.mjs';
 // See png-color-space.mjs for the full failure analysis.
 import { assertSrgbOrUntagged } from './png-color-space.mjs';
 import { padToCanvas } from './pad-canvas.mjs';
+// Wave 1 — the cross-platform pairs finally gate something. Evaluation logic
+// lives in a sibling module so the ledger semantics (expected / unexpected /
+// stale / orphaned) are unit-testable without booting the pipeline.
+import {
+  evaluateCrossPlatformGate,
+  formatRecord,
+  EXIT_UNEXPECTED_DIVERGENCE,
+} from './cross-platform-gate.mjs';
 // COMPARE_METRICS Section 5 / item 9 — HTML report extracted into a
 // sibling module to keep this file under the per-file size budget.
 import { renderHTML } from './compare-screenshots-html.mjs';
@@ -134,6 +142,13 @@ const inputLabel     = getArg('--input') ?? process.env.TEST_INPUT ?? '';
 // into pixel-accurate scoring for one-off accuracy runs (~40s extra on the
 // 327-pair baseline).
 const fullLab        = args.includes('--full-lab');
+// Cross-platform gate (Wave 1). ON by default — the three-way comparison is
+// the product thesis, and leaving it opt-in is how it never gets turned on.
+// It self-skips when fewer than two platforms were captured, which is what
+// keeps CI's one-platform-per-job visual workflow untouched without anyone
+// having to remember a flag. `--no-cross-platform-gate` is the escape hatch
+// for a deliberate report-only run.
+const crossPlatformGate = !args.includes('--no-cross-platform-gate');
 
 function getArg(name) {
   const i = args.indexOf(name);
@@ -220,7 +235,27 @@ async function main() {
   // keys as ignorable; the bump is informational. Tests that probe for
   // `manifest.wpt !== undefined` need the explicit-null sentinel here so
   // they can branch on "field absent" vs "field present but no data" cleanly.
+  // ── Cross-platform gate (Wave 1) ─────────────────────────────────────────
+  // Evaluated HERE, before the report is written, so the result can be
+  // rendered into the headline and the manifest. The console output and the
+  // non-zero exit happen after the report is on disk — a gate that fails
+  // without leaving you the artifact to diagnose it is a worse gate.
+  const xGate = crossPlatformGate
+    ? evaluateCrossPlatformGate(rows, loadCrossPlatformLedger(), {
+        ssimThreshold, pixelThreshold, inputLabel,
+      })
+    : { skipped: true, reason: 'disabled via --no-cross-platform-gate', checked: 0,
+        unexpected: [], expected: [], stale: [], expired: [] };
+
   const manifest = {
+    // NOT bumped to 5 for the `crossPlatformGate` key below, deliberately.
+    // The three previous bumps assumed this writer is the last word on the
+    // version, but two post-processors already overwrite it —
+    // compute-text-metrics.mjs sets 3 and inject-wpt-block.mjs sets 4 — so a
+    // 5 emitted here would be clobbered by either and would signal nothing.
+    // The graceful-rollout contract documented above (unknown top-level keys
+    // are ignorable, the field is explicitly null when absent) is what
+    // actually carries the compatibility guarantee, and it holds unchanged.
     manifestVersion: 4,
     generatedAt: new Date().toISOString(),
     inputLabel,
@@ -247,6 +282,11 @@ async function main() {
     // Kept explicit so v4 readers can detect "WPT pipeline didn't run"
     // via `manifest.wpt === null` rather than `'wpt' in manifest`.
     wpt: null,
+    // Wave 1 — cross-platform gate outcome. Always present (never null):
+    // when the gate is skipped the object says so and why, which is more
+    // useful to a reader than an absent key that could mean either "old
+    // manifest" or "single-platform run".
+    crossPlatformGate: xGate,
     rows,
   };
   // MANIFEST_OUT lets the TITAN section-runner write the per-section manifest
@@ -269,6 +309,9 @@ async function main() {
       // run yet"; the renderer returns an empty string in that case so
       // the existing report layout is unaffected.
       perPlatformProbes: manifest.perPlatformProbes,
+      // Wave 1 — so the open-expectation count lands in the headline. An
+      // expectation ledger only stays honest while its size is visible.
+      crossPlatformGate: xGate,
     })
   );
 
@@ -292,6 +335,37 @@ async function main() {
     console.error(`✗ ${colorSpaceViolations.length} capture(s) are not untagged-sRGB:`);
     for (const m of colorSpaceViolations) console.error(`  · ${m}`);
     process.exit(3);
+  }
+
+  // ── Cross-platform gate verdict ──────────────────────────────────────────
+  // Evaluated above (before the report was written); reported and enforced
+  // here, BEFORE the baseline gate, so "the three runtimes disagree" is
+  // surfaced on its own terms rather than being masked by, or confused with,
+  // "this platform changed since its last capture".
+  if (xGate.skipped) {
+    console.log(`· cross-platform gate skipped — ${xGate.reason}`);
+  } else {
+    console.log(
+      `· cross-platform gate: ${xGate.checked} pair(s) · ` +
+      `${xGate.expected.length} known divergence(s) · ${xGate.unexpected.length} unexpected`,
+    );
+    // Stale + expired are LOUD but non-fatal. See cross-platform-gate.mjs for
+    // why: the harness's own A/A noise floor is unmeasured, so a pair sitting
+    // at 0.9499 may flap and a stale-expectation failure would be
+    // indistinguishable from a real fix. Promote after the noise-floor study.
+    for (const r of xGate.stale) {
+      console.warn(`  ⚠ stale expectation (now passing — delete the line): ${formatRecord(r)}`);
+    }
+    for (const r of xGate.expired) {
+      console.warn(`  ⚠ expectation past its expiry (${r.entry.expires}) — re-review: ${formatRecord(r)}`);
+    }
+    if (xGate.unexpected.length > 0) {
+      console.error(`✗ ${xGate.unexpected.length} unexpected cross-platform divergence(s):`);
+      for (const r of xGate.unexpected) console.error(`  · ${formatRecord(r)}`);
+      console.error('  Either fix the divergence, or add it to');
+      console.error('  tools/visual/cross-platform-expectations.json with a reason and an owner.');
+      process.exit(EXIT_UNEXPECTED_DIVERGENCE);
+    }
   }
 
   if (useBaseline) {
@@ -458,6 +532,26 @@ async function analyzeComponent(name, captures) {
  * baseline regression (1) or an empty run (2).
  */
 const colorSpaceViolations = [];
+
+/**
+ * Load the cross-platform expectation ledger. A missing file is NOT an
+ * error — a fixture with no known divergences legitimately has no ledger,
+ * and in that case every failure is unexpected, which is the correct strict
+ * default. A malformed file IS an error: silently treating unparseable JSON
+ * as "no expectations" would flip the gate to maximally strict at the exact
+ * moment someone fat-fingered a comma, and the resulting wall of failures
+ * would look like a regression rather than a typo.
+ */
+function loadCrossPlatformLedger() {
+  const path = resolve(__dirname, 'cross-platform-expectations.json');
+  if (!existsSync(path)) return { expectations: [] };
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch (e) {
+    console.error(`✗ cross-platform-expectations.json is unreadable: ${e.message}`);
+    process.exit(2);
+  }
+}
 
 async function loadPng(path) {
   const buf = readFileSync(path);
