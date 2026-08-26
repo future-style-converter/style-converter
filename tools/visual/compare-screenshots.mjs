@@ -29,7 +29,21 @@
 // Exit codes:
 //   0 — success or no baseline
 //   1 — at least one component regressed beyond thresholds
-//   2 — script / IO error
+//   2 — script / IO error (including "baseline mode requested but 0 comparisons ran")
+//   3 — a capture is not untagged-sRGB. Distinct from 1 because it means the
+//       NUMBERS are untrustworthy, not that the render changed: pngjs
+//       discards colour profiles without applying them, so a tagged capture
+//       is compared as if it were sRGB. See png-color-space.mjs.
+//
+// ⚠ SSIM caveat — `ssim.js` runs with `downsample: 'original'`, which
+// box-filters and decimates by `f = round(min(W, H) / 256)` whenever f > 1.
+// Measured: a 390×132 capture scores at 1×, a 390×432 capture scores at
+// 195×216, while pixelmatch / ΔE / pHash all stay at 1×. A 1px hairline
+// difference is therefore attenuated ~4× on tall components and not at all
+// on short ones, so SSIM values are NOT comparable across components of
+// different heights and the single 0.95 gate is a different sensitivity per
+// row. Do not "fix" this by flipping `downsample` — that invalidates every
+// committed SSIM figure. The fix is to stop gating on SSIM.
 //
 // Usage:
 //     node compare-screenshots.mjs [options]
@@ -52,7 +66,8 @@ import { readdirSync, existsSync, mkdirSync, rmSync, copyFileSync, readFileSync,
 import { resolve, dirname, basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
-import sharp from 'sharp';
+// (sharp is no longer imported here — the only use was canvas padding,
+// which moved to pad-canvas.mjs so its invariants can be unit-tested.)
 import pixelmatchDefault from 'pixelmatch';
 import { ssim as computeSsim } from 'ssim.js';
 // COMPARE_METRICS Section 7 items 1–6 — new per-pair metrics, extracted
@@ -70,6 +85,12 @@ import {
 // function over a metric block; lives in a separate module so it can be
 // unit-tested without booting the whole comparison pipeline.
 import { classifyDivergence } from './classify-divergence.mjs';
+// Colour-space tripwire. Nothing in this pipeline is colour-managed and
+// pngjs discards profile chunks without applying them, so a non-sRGB
+// capture would be compared as if it were sRGB — wrong numbers, no error.
+// See png-color-space.mjs for the full failure analysis.
+import { assertSrgbOrUntagged } from './png-color-space.mjs';
+import { padToCanvas } from './pad-canvas.mjs';
 // COMPARE_METRICS Section 5 / item 9 — HTML report extracted into a
 // sibling module to keep this file under the per-file size budget.
 import { renderHTML } from './compare-screenshots-html.mjs';
@@ -263,6 +284,16 @@ async function main() {
   // `node tools/visual/baseline-stats.mjs`).
   await runPhaseBDriftCheck(rows);
 
+  // Colour-space tripwire — checked BEFORE the baseline gate so a capture in
+  // the wrong colour space fails on its own terms instead of surfacing as a
+  // mysterious similarity regression. Exit 3 is distinct from 1 (regression)
+  // and 2 (empty run) so CI can tell the three apart at a glance.
+  if (colorSpaceViolations.length > 0) {
+    console.error(`✗ ${colorSpaceViolations.length} capture(s) are not untagged-sRGB:`);
+    for (const m of colorSpaceViolations) console.error(`  · ${m}`);
+    process.exit(3);
+  }
+
   if (useBaseline) {
     // Count how many baseline comparisons actually ran. A row only counts
     // if its .baseline.platforms contained at least one pair of {current,
@@ -418,33 +449,33 @@ async function analyzeComponent(name, captures) {
   return { name, canvasW, canvasH, platforms, pairs, baseline };
 }
 
+/**
+ * Every colour-space violation seen this run. Recorded as well as thrown,
+ * because the per-platform loader catches loader errors into a `decode
+ * error` report cell — visible, but NOT build-failing. A capture in the
+ * wrong colour space must be loud, so `main()` turns a non-empty list into
+ * a distinct non-zero exit (3) that can't be confused with either a
+ * baseline regression (1) or an empty run (2).
+ */
+const colorSpaceViolations = [];
+
 async function loadPng(path) {
   const buf = readFileSync(path);
+  // Assert BEFORE decoding: pngjs would silently drop the offending chunk,
+  // after which there is no way to tell the pixels are in the wrong space.
+  try {
+    assertSrgbOrUntagged(buf, path);
+  } catch (e) {
+    colorSpaceViolations.push(e.message ?? String(e));
+    throw e;
+  }
   return PNG.sync.read(buf);
 }
 
-/**
- * Pad `img` (width × height) onto a (W × H) canvas filled with the standard
- * capture background (#1A1A2E) — no stretching, no resampling. Keeps the
- * component pixel-aligned even when one platform produced a taller image
- * than another.
- */
-async function padToCanvas(img, W, H) {
-  if (img.width === W && img.height === H) return img;
-
-  const padded = await sharp(PNG.sync.write(img))
-    .extend({
-      top: 0,
-      bottom: Math.max(0, H - img.height),
-      left: 0,
-      right: Math.max(0, W - img.width),
-      background: { r: 0x1A, g: 0x1A, b: 0x2E, alpha: 1 },
-    })
-    .png()
-    .toBuffer();
-
-  return PNG.sync.read(padded);
-}
+// Canvas normalization (PAD_SENTINEL + padToCanvas) lives in
+// pad-canvas.mjs so the "under-sized output must not be invisible"
+// invariant is unit-testable — this file is a script and cannot be
+// imported without running main().
 
 /**
  * Pixel-diff via pixelmatch + SSIM via ssim.js, plus the six COMPARE_METRICS
@@ -458,12 +489,30 @@ async function padToCanvas(img, W, H) {
  */
 async function diffPair(a, b, W, H, diffFilename) {
   const diff = new PNG({ width: W, height: H });
-  // `threshold` controls per-pixel color-delta tolerance. 0.25 is generous
-  // enough that cross-platform font AA doesn't flag entire glyph edges as
-  // mismatches, but still catches real changes (colors shifting, borders
-  // appearing / disappearing, shadows moving).
-  // `includeAA: true` skips AA pixels entirely — usually desirable for this
-  // kind of cross-renderer comparison.
+  // `threshold` controls per-pixel color-delta tolerance in pixelmatch's
+  // YIQ space. 0.25 is generous — see below for why it HAS to be.
+  //
+  // ⚠ `includeAA: true` does the OPPOSITE of what this comment used to
+  // claim. pixelmatch's own JSDoc reads "includeAA: Whether to SKIP
+  // anti-aliasing detection", and the source gate is:
+  //
+  //     isExcludedAA = !includeAA && (antialiased(img1,…) || antialiased(img2,…))
+  //
+  // With `includeAA: true` that is `!true` → false, so AA detection NEVER
+  // RUNS and every anti-aliased pixel is counted as an ordinary difference.
+  // (Verified in node_modules/pixelmatch/index.js:12,74.)
+  //
+  // Consequence: this comparison has NO anti-aliasing suppression at all,
+  // and `threshold: 0.25` is not a colour tolerance — it is the only thing
+  // absorbing cross-rasterizer AA (Skia vs Core Graphics vs Blink). The 2 %
+  // pixel budget absorbs the residue. Both numbers are compensating for
+  // this, not expressing a deliberate tolerance.
+  //
+  // The behaviour is deliberately LEFT AS-IS here. Flipping the flag would
+  // make the comparison strictly more lenient (AA pixels stop counting),
+  // which moves every recorded number and could mask a real regression, so
+  // it belongs behind the edge-masking + threshold-derivation work, not in
+  // a comment fix. Correcting the comment is the safe half.
   const mismatched = pixelmatch(a.data, b.data, diff.data, W, H, {
     threshold: 0.25,
     includeAA: true,
@@ -535,6 +584,23 @@ async function diffPair(a, b, W, H, diffFilename) {
   return metrics;
 }
 
+/**
+ * SSIM via ssim.js. Two properties of this number are easy to misread and
+ * both are load-bearing when interpreting a report:
+ *
+ * 1. **It is GRAYSCALE.** ssim.js converts RGB→gray with Matlab's integer
+ *    Rec.601 weights `(77R + 150G + 29B + 128) >> 8` before any SSIM math,
+ *    and discards alpha. Two colours with matched luminance but different
+ *    hue score ~1.0. For a CSS colour engine that is a structural blind
+ *    spot, not a tuning problem — the ΔE metric exists to cover it.
+ *
+ * 2. **It is computed at a per-component resolution.** Defaults include
+ *    `downsample: 'original'` + `maxSize: 256`, which box-filters and
+ *    decimates by `f = round(min(W, H) / 256)` when f > 1. Only `ssim:
+ *    'fast'` is overridden here. So a short capture is scored at 1× and a
+ *    tall one at 1/2×, while every other metric stays at 1×. SSIM is not
+ *    comparable across component heights.
+ */
 async function safeSsim(a, b) {
   // ssim.js expects ImageData-like objects (data: Uint8ClampedArray, width, height)
   try {

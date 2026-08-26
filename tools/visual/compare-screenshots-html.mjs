@@ -92,6 +92,16 @@ ${BASE_CSS}
     · SSIM threshold ${opts.ssimThreshold} · pixel threshold ${opts.pixelThreshold}%
   </p>
   <p class="meta legend">Divergence labels: ${legendHtml}</p>
+  <!-- Metric caveats, stated where the numbers are actually read. Both are
+       properties of ssim.js's defaults, not of this harness's inputs, and
+       both cause honest misreadings of the column beside them. -->
+  <p class="meta caveat">
+    ⚠ <b>Reading SSIM:</b> it is computed on <b>luminance only</b> (Rec.601
+    grayscale), so a hue change at matched luminance scores ~1.0 — check the
+    ΔE column for colour. It is also <b>downsampled by <code>round(min(W,H)/256)</code></b>,
+    so tall components are scored at half resolution while pixelmatch and ΔE
+    stay at 1× — SSIM is <b>not comparable across components of different heights</b>.
+  </p>
   <p class="meta">
     Generated ${new Date().toLocaleString()}
   </p>
@@ -584,6 +594,10 @@ main { padding: 16px 24px; }
 }
 .top .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .top .legend .badge.divergence { font-size: 10px; }
+/* Metric caveats — visible enough to be read before the numbers are
+   trusted, quiet enough not to compete with the headline counts. */
+.top .caveat { max-width: 90ch; line-height: 1.5; opacity: .85; }
+.top .caveat code { font-size: 11px; }
 
 .min-ssim {
   font-family: -apple-system, system-ui, sans-serif;

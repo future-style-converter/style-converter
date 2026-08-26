@@ -20,6 +20,12 @@
 import { readdirSync, readFileSync, writeFileSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 import { PNG } from 'pngjs';
+// This script's whole job is to DROP ancillary chunks. That is correct for
+// timestamps and software strings, and catastrophic for a colour profile:
+// stripping `iCCP`/`cICP` turns a Display-P3 capture into bytes that every
+// downstream metric reads as sRGB, with no error anywhere. Assert first, so
+// the profile is refused rather than quietly discarded.
+import { assertSrgbOrUntagged } from './png-color-space.mjs';
 
 const dirs = process.argv.slice(2);
 if (dirs.length === 0) {
@@ -28,6 +34,10 @@ if (dirs.length === 0) {
 }
 
 let rewritten = 0, skipped = 0, failed = 0;
+// Colour-space refusals are counted separately from decode failures: a
+// decode failure is a broken file, this is a correct file we must not
+// silently degrade. They get their own exit code so the two never blur.
+const colorSpaceViolations = [];
 
 for (const dir of dirs) {
   if (!statSync(dir, { throwIfNoEntry: false })?.isDirectory()) {
@@ -39,6 +49,15 @@ for (const dir of dirs) {
     const path = join(dir, f);
     try {
       const src = readFileSync(path);
+      // Refuse to normalize a profile away. Recorded rather than thrown so
+      // one bad file lists every other bad file in the same run instead of
+      // making the operator re-run once per offender.
+      try {
+        assertSrgbOrUntagged(src, path);
+      } catch (e) {
+        colorSpaceViolations.push(e.message ?? String(e));
+        continue;
+      }
       const decoded = PNG.sync.read(src);
       // Re-encode with fixed compression level. pngjs doesn't copy source
       // ancillary chunks, so the output has ONLY IHDR / IDAT / IEND.
@@ -62,4 +81,13 @@ for (const dir of dirs) {
 }
 
 console.log(`✓ normalized PNGs: ${rewritten} rewritten, ${skipped} unchanged, ${failed} failed`);
+
+// Colour-space refusal outranks a decode failure: exit 3 (matching
+// compare-screenshots.mjs) so CI can distinguish "a file is broken" from
+// "a capture is in the wrong colour space and we refused to hide it".
+if (colorSpaceViolations.length > 0) {
+  console.error(`✗ ${colorSpaceViolations.length} capture(s) refused — not untagged-sRGB:`);
+  for (const m of colorSpaceViolations) console.error(`  · ${m}`);
+  process.exit(3);
+}
 if (failed > 0) process.exit(1);

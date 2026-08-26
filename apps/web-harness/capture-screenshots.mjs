@@ -143,6 +143,18 @@ const browser = await puppeteer.launch({
     // better for SSIM. Verified: composed css-color captures went from 20s+
     // timeout → 13ms with this flag.
     '--disable-gpu',
+    // Pin the capture colour space. Nothing downstream is colour-managed:
+    // pngjs discards `iCCP`/`cICP` without applying them, so whatever
+    // profile Chrome tags becomes wrong numbers rather than an error.
+    //
+    // Measured on Chrome for Testing 151.0.7922.47 headless: the default,
+    // `srgb` and `display-p3` all emit byte-identical UNTAGGED sRGB — so
+    // this is a no-op today. But `--force-color-profile=generic-rgb` shifts
+    // #ff6b6b → (252,82,88) (ΔE00 4.63) AND embeds a 277-byte `iCCP` chunk
+    // that pngjs ignores, meaning the harness would compare converted
+    // values as if untouched. Pinning removes the accidental dependence on
+    // whatever the headless default happens to be in the next Chrome.
+    '--force-color-profile=srgb',
     '--disable-background-timer-throttling',
     '--disable-renderer-backgrounding',
     '--disable-backgrounding-occluded-windows',
