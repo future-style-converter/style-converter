@@ -230,6 +230,28 @@ function renderTypographyProbes(probeBlock) {
   // inside <details> by default to keep the section compact.
   const detailRows = renderProbeBreakdown(b8, b9, b10);
 
+  // Provenance warning — the three platforms do NOT produce the 4× probe
+  // buffer the same way, and B8/B9/B10 are sub-pixel measurements, so the
+  // difference is not cosmetic. iOS re-renders natively at
+  // ImageRenderer.scale = 4.0 and web re-renders via
+  // capture-screenshots-hires.mjs, but Android upscales an already-laid-out
+  // 1× bitmap with Bitmap.createScaledBitmap(..., filter=true)
+  // (ScreenshotManager.kt:401 — its own comment concedes the hinting loss).
+  // Bilinear interpolation manufactures the intermediate samples that B8's
+  // baseline-column scan, B9's AA-strategy FFT and B10's glyph-edge
+  // projection are reading, so an Android probe row measures the resampler,
+  // not the renderer. Say so where the numbers are read rather than
+  // trusting anyone to remember it.
+  const androidCaveat = `
+    <p style="margin:8px 0 0; font-size:12px; line-height:1.5; opacity:.9;">
+      ⚠ <strong>Android probe rows are not renderer-comparable.</strong>
+      iOS and web re-render natively at 4×; Android bilinearly upscales a 1×
+      bitmap (<code>ScreenshotManager.kt:401</code>). Any B8/B9/B10 pair
+      involving Android is partly measuring that interpolation. Treat
+      iOS↔web as the only sub-pixel-trustworthy pair until Android renders
+      at true 4×.
+    </p>`;
+
   return `
 <section class="typography-probes" style="margin: 16px; padding: 16px; border: 1px solid #444; border-radius: 6px; background: #1f1f2a; color: #eee;">
   <header style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
@@ -242,6 +264,7 @@ function renderTypographyProbes(probeBlock) {
     <div>${b9Line}</div>
     <div>${b10Line}</div>
   </div>
+  ${androidCaveat}
   <details style="margin-top:8px;">
     <summary style="cursor:pointer; font-size:12px; opacity:0.85;">Per-platform breakdown</summary>
     ${detailRows}
