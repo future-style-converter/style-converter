@@ -1070,6 +1070,27 @@ dirs + WPT corpus are gitignored):
   1187/1379 (86.1%), iOS 1038/1351 (76.8%), Android 1029/1349
   (76.3%)**.
 
+## Known-broken: iOS harness cold build
+
+`xcodebuild -target StyleConverterTest -sdk iphonesimulator -arch arm64` fails
+from a COLD build directory with a swift-frontend crash (Swift 6.3.3):
+
+```
+While evaluating ASTLoweringRequest (Lowering AST to SIL for StyleConverterRuntime)
+While silgen emitFunction for 'styledContent(now:)'
+  at runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:835:13
+```
+
+Release config (`-O -enable-default-cmo`); the stack dump shows a very deep
+nested `struct_type` chain of Applier types — the SwiftUI modifier-chain type
+blowup tipping the optimizer over.
+
+It is **pre-existing** (reproduces at ba92a4e3 with no local changes) and
+**latent**: warm incremental builds do not hit it, which is why local runs and
+this doc's iOS numbers were produced normally. A fresh clone or a CI runner
+will hit it. Do not read a green local iOS run as evidence the build is
+healthy — check that the `build/` directory was actually cold.
+
 ## Test suites
 
 | suite | command | tests |
