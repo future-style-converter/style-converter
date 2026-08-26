@@ -367,3 +367,103 @@ describe('CaptureGallery — WPT_MODE viewport canvas (swarm-003 Bug 2)', () => 
       .toBeLessThan(html.indexOf('data-component-id="clipped-child"'));
   });
 });
+
+// ── dependsOnBackdrop: the mirror rule ─────────────────────────────────────
+//
+// `parentCreatesContext` asks "does this node's paint context own how its
+// CHILDREN compose?" and suppresses the children when it does. That misses
+// the mirror case: a child can be backdrop-dependent all by itself, under a
+// perfectly ordinary parent.
+//
+// Found on fixtures/composition-test.json — `Blend_Multiply_OverGradient` has
+// a plain `position:relative` parent, so the parent predicate does not fire,
+// and its mix-blend-mode child was emitted standalone as `005_layer.png`.
+// Composited against the bare capture canvas instead of the gradient it was
+// authored over, it produced 4 divergent cross-platform pairs of pure noise.
+//
+// MUST stay identical to `dependsOnBackdrop` in iOS ScreenshotCaptureView.swift
+// and Android ScreenshotCaptureScreen.kt — capture indices are positional, so
+// a rule firing on one platform only silently misaligns every component after
+// it in the comparison.
+
+describe('dependsOnBackdrop — predicate', () => {
+  it('fires on backdrop-filter (the filter has nothing to filter alone)', async () => {
+    const { dependsOnBackdrop } = await import('../../src/ui/CaptureGallery');
+    expect(dependsOnBackdrop(makeComp({ properties: [prop('BackdropFilter', [{ blur: 8 }])] }))).toBe(true);
+  });
+
+  it('fires on a non-normal mix-blend-mode', async () => {
+    const { dependsOnBackdrop } = await import('../../src/ui/CaptureGallery');
+    for (const v of ['multiply', 'screen', 'difference', 'overlay']) {
+      expect(dependsOnBackdrop(makeComp({ properties: [prop('MixBlendMode', v)] })), v).toBe(true);
+    }
+  });
+
+  it('accepts the Kotlin uppercase enum shape and the {value} wrapper', async () => {
+    // Same UPPER/lower + bare-string/{value} variance parentCreatesContext
+    // documents; a predicate that handled only one shape would fire on some
+    // platforms and not others, which is the misalignment this must avoid.
+    const { dependsOnBackdrop } = await import('../../src/ui/CaptureGallery');
+    expect(dependsOnBackdrop(makeComp({ properties: [prop('MixBlendMode', 'MULTIPLY')] }))).toBe(true);
+    expect(dependsOnBackdrop(makeComp({ properties: [prop('MixBlendMode', { value: 'SCREEN' })] }))).toBe(true);
+  });
+
+  it('does NOT fire on mix-blend-mode:normal', async () => {
+    // The control component in composition-test.json. If this fired, the
+    // control would be suppressed and the case/control pair — the whole
+    // mechanism for telling "implemented" from "silently dropped" — is lost.
+    const { dependsOnBackdrop } = await import('../../src/ui/CaptureGallery');
+    expect(dependsOnBackdrop(makeComp({ properties: [prop('MixBlendMode', 'normal')] }))).toBe(false);
+    expect(dependsOnBackdrop(makeComp({ properties: [prop('MixBlendMode', 'NORMAL')] }))).toBe(false);
+  });
+
+  it('does NOT fire on ordinary paint properties', async () => {
+    const { dependsOnBackdrop } = await import('../../src/ui/CaptureGallery');
+    expect(dependsOnBackdrop(makeComp({
+      properties: [prop('BackgroundColor', '#fff'), prop('Width', 100), prop('Position', 'absolute')],
+    }))).toBe(false);
+    expect(dependsOnBackdrop(makeComp({ properties: [] }))).toBe(false);
+  });
+
+  it('does NOT fire on Filter (that is a parent-context property, not backdrop-dependent)', async () => {
+    // `filter` transforms the element's OWN paint; it renders identically with
+    // or without a backdrop, so suppressing it standalone would lose coverage.
+    const { dependsOnBackdrop } = await import('../../src/ui/CaptureGallery');
+    expect(dependsOnBackdrop(makeComp({ properties: [prop('Filter', [{ blur: 4 }])] }))).toBe(false);
+  });
+});
+
+describe('dependsOnBackdrop — observable effect on the capture list', () => {
+  it('suppresses a blend child under an ordinary parent, keeps the parent', async () => {
+    const doc = makeDoc([
+      makeComp({ id: 'p', name: 'Parent', properties: [prop('Position', 'relative')] }),
+      slotted('p', { id: 'c', name: 'Layer', properties: [prop('MixBlendMode', 'multiply')] }),
+    ]);
+    const html = await renderGalleryWithSearch('?mode=capture', doc);
+    // Parent still captured; the un-contextualised child is not.
+    expect((html.match(/data-capture-canvas/g) || []).length).toBe(1);
+  });
+
+  it('keeps a NORMAL-blend child, so case and control stay comparable', async () => {
+    const doc = makeDoc([
+      makeComp({ id: 'p', name: 'Parent', properties: [prop('Position', 'relative')] }),
+      slotted('p', { id: 'c', name: 'Layer', properties: [prop('MixBlendMode', 'normal')] }),
+    ]);
+    const html = await renderGalleryWithSearch('?mode=capture', doc);
+    expect((html.match(/data-capture-canvas/g) || []).length).toBe(2);
+  });
+
+  it('leaves a zero-children document untouched — the 327-pair backstop', async () => {
+    // fixtures/visual-test.json has 0 components with children, so this rule
+    // provably cannot alter the legacy flow or its 363 committed baselines.
+    const doc = makeDoc([
+      makeComp({ id: 'a', name: 'A', properties: [prop('MixBlendMode', 'multiply')] }),
+      makeComp({ id: 'b', name: 'B', properties: [prop('BackdropFilter', [{ blur: 10 }])] }),
+      makeComp({ id: 'c', name: 'C', properties: [] }),
+    ]);
+    const html = await renderGalleryWithSearch('?mode=capture', doc);
+    // All three are ROOTS. The rule only suppresses CHILDREN, never a root —
+    // otherwise visual-test's BlendMode_* and Glass_Effect would vanish.
+    expect((html.match(/data-capture-canvas/g) || []).length).toBe(3);
+  });
+});

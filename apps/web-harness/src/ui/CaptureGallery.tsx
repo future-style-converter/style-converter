@@ -301,6 +301,47 @@ export function parentCreatesContext(parent: IRComponent): boolean {
  * rule applies on every platform so capture indices stay aligned across
  * iOS/Android/web for the inject-wpt-block diff matching.
  */
+/**
+ * Does this component's OWN render depend on what is painted behind it?
+ *
+ * `parentCreatesContext` above asks the question in the parent direction —
+ * "does this node's paint context own how its children compose?" — and
+ * suppresses the children when it does. That misses the mirror case: a child
+ * can be backdrop-dependent all by itself, with a perfectly ordinary parent.
+ *
+ * `mix-blend-mode` and `backdrop-filter` are exactly that. Both are DEFINED
+ * as functions of the backdrop, so capturing such a component standalone
+ * composites it against the bare capture canvas and yields an image that
+ * answers no question — the comparator then reports cross-platform
+ * divergence on a render that never occurs in the real composition.
+ *
+ * Observed concretely on fixtures/composition-test.json: `005_layer.png` and
+ * `007_layer.png` (blend children of ordinary `position:relative` parents)
+ * produced 4 divergent pairs of pure noise.
+ *
+ * MUST stay identical to `dependsOnBackdrop` in iOS ScreenshotCaptureView.swift
+ * and Android ScreenshotCaptureScreen.kt — capture indices are positional and
+ * a rule that fires on one platform only would silently misalign every
+ * subsequent component in the comparison.
+ */
+export function dependsOnBackdrop(component: IRComponent): boolean {
+  if (!component.properties || component.properties.length === 0) return false;
+  for (const p of component.properties) {
+    if (!p || typeof p.type !== 'string') continue;
+    // backdrop-filter filters the backdrop by definition — nothing behind it
+    // means nothing to filter, so a standalone capture is the identity.
+    if (p.type === 'BackdropFilter') return true;
+    if (p.type === 'MixBlendMode') {
+      // Same UPPER/lower variance the predicate above documents: the Kotlin
+      // enum serializer uppercases, the spec-grade parser lowercases.
+      const raw = typeof p.data === 'string' ? p.data : (p.data as { value?: string } | null)?.value;
+      const v = typeof raw === 'string' ? raw.toLowerCase() : null;
+      if (v && v !== 'normal') return true;
+    }
+  }
+  return false;
+}
+
 function flatten(roots: ComposedNode[]): ComposedNode[] {
   const out: ComposedNode[] = [];
   // Walker over the COMPOSED tree (slot refs → nodes, Composer.ts). The
@@ -316,7 +357,10 @@ function flatten(roots: ComposedNode[]): ComposedNode[] {
     // dependent on the parent wrapper. Emitting them standalone leaks an
     // un-contextualised render into the comparator → drop them.
     if (parentCreatesContext(n.component)) return;
-    n.children.forEach(walk);
+    // Mirror rule: skip a child that is itself backdrop-dependent. See
+    // dependsOnBackdrop — a standalone mix-blend-mode / backdrop-filter
+    // capture composites against the bare canvas and answers no question.
+    n.children.forEach((c) => { if (!dependsOnBackdrop(c.component)) walk(c); });
   };
   roots.forEach(walk);
   return out;

@@ -2052,6 +2052,45 @@ private fun tryOpacityValue(el: JsonElement): Double? {
  * correctly inside the parent's canvas; emitting it standalone leaks an
  * un-contextualised render into the comparator. Mirrored on iOS + web.
  */
+/**
+ * Does this component's OWN render depend on what is painted behind it?
+ *
+ * `parentCreatesContext` asks the question in the parent direction and
+ * suppresses children when the parent's paint context owns their composition.
+ * That misses the mirror case: a child can be backdrop-dependent by itself,
+ * under a perfectly ordinary parent.
+ *
+ * `mix-blend-mode` and `backdrop-filter` are exactly that — both are DEFINED
+ * as functions of the backdrop, so a standalone capture composites against
+ * the bare canvas and answers no question. The comparator then reports
+ * cross-platform divergence on a render that never occurs in the real
+ * composition (observed on fixtures/composition-test.json: `005_layer.png`
+ * and `007_layer.png` produced 4 divergent pairs of pure noise).
+ *
+ * MUST stay identical to `dependsOnBackdrop` in web CaptureGallery.tsx and
+ * iOS ScreenshotCaptureView.swift — capture indices are positional, so a rule
+ * firing on one platform only would silently misalign every subsequent
+ * component in the comparison.
+ */
+internal fun dependsOnBackdrop(component: IRComponent): Boolean {
+    // Same cheap guard and single-pass shape as parentCreatesContext above.
+    if (component.properties.isEmpty()) return false
+    for (p in component.properties) {
+        when (p.type) {
+            // backdrop-filter filters the backdrop by definition — with
+            // nothing behind it the filter is the identity.
+            "BackdropFilter" -> return true
+            // Same UPPER/lower variance parentCreatesContext documents; reuse
+            // the same tryStringValue helper so both read the IR alike.
+            "MixBlendMode" -> {
+                val v = tryStringValue(p.data)?.lowercase()
+                if (v != null && v != "normal") return true
+            }
+        }
+    }
+    return false
+}
+
 internal fun flattenComponents(components: List<IRComponent>): List<IRComponent> {
     val out = mutableListOf<IRComponent>()
     // Recursive walker — append the node, then descend into its children
@@ -2061,7 +2100,8 @@ internal fun flattenComponents(components: List<IRComponent>): List<IRComponent>
         val kids = c.children ?: return
         if (kids.isEmpty()) return
         if (parentCreatesContext(c)) return
-        kids.forEach(::walk)
+        // Mirror rule: skip a child that is itself backdrop-dependent.
+        kids.forEach { if (!dependsOnBackdrop(it)) walk(it) }
     }
     components.forEach(::walk)
     return out
