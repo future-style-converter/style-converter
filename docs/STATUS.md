@@ -1091,6 +1091,31 @@ this doc's iOS numbers were produced normally. A fresh clone or a CI runner
 will hit it. Do not read a green local iOS run as evidence the build is
 healthy — check that the `build/` directory was actually cold.
 
+## Known: iOS renders out-of-range filters into Display P3
+
+The colour-space tripwire added in the measurement campaign fired on its
+first large run. Of 359 iOS captures, exactly ONE carries colour chunks:
+
+```
+088_Filter_Brightness.png  ->  iCCP "kCGColorSpaceDisplayP3" + cICP(primaries=12)
+```
+
+All 358 others are bare IHDR/IDAT/IEND. The trigger is narrow and specific:
+`filter: brightness(1.5)`. Blur, grayscale, sepia and contrast+saturate all
+stay sRGB — only the filter whose result exceeds 1.0 promotes the render to an
+extended-range wide-gamut context, which ImageIO then tags.
+
+This matters because nothing downstream is colour-managed: pngjs discards
+profile chunks without applying them, so those pixels would have been compared
+as sRGB. `normalize-pngs.mjs` now REFUSES the file instead of silently
+stripping the tag, and the comparator exits 3.
+
+**It does NOT explain the Filter_Brightness divergence.** Converting the iOS
+capture P3 -> sRGB before scoring moves deltaE95 only 18.697 -> 17.385, while
+Android-vs-web on the same component is 0.373 mean / 0.000 p95. So iOS is the
+lone outlier on the filter maths itself; the P3 tag is a separate, smaller
+defect that happens to share a trigger. Both are real; neither is the other.
+
 ## Test suites
 
 | suite | command | tests |
