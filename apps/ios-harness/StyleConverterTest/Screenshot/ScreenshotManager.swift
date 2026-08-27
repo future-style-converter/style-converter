@@ -102,7 +102,14 @@ enum ScreenshotManager {
     static func render<V: View>(_ view: V) -> UIImage? {
         let renderer = ImageRenderer(content: view)
         renderer.scale = 1.0
-        return renderer.uiImage
+        // NOT `renderer.uiImage` directly: the framework promotes a render
+        // whose result leaves [0,1] to a wide-gamut context, and ImageIO
+        // then tags the PNG with `iCCP`/`cICP` — chunks the host pipeline
+        // discards rather than honours, so the pixels would be scored as
+        // sRGB. `CaptureColorSpace.capture` returns `uiImage`'s own raster
+        // untouched unless that promotion happened. See
+        // Renderer/CaptureColorSpace.swift for the measurements behind it.
+        return CaptureColorSpace.capture(renderer, scale: 1.0)
     }
 
     /// Lane BF-I — the TWO-PASS backdrop render.
@@ -168,7 +175,13 @@ enum ScreenshotManager {
         // because the B8/B9/B10 metric helpers expect exactly 4× and the
         // unit conversion (4× px → 1× px = divide by 4) is baked in there.
         renderer.scale = 4.0
-        return renderer.uiImage
+        // Same colour-space gate as `render` — see
+        // Renderer/CaptureColorSpace.swift. The probe path is not wired
+        // into the iOS pipeline yet, so this is not fixing an observed
+        // failure; it keeps the two capture entry points from drifting into
+        // different colour policies, which is exactly how the tag reached a
+        // committed run unnoticed.
+        return CaptureColorSpace.capture(renderer, scale: 4.0)
     }
 
     /// Returns true when a component ID belongs to the B-EXT typography

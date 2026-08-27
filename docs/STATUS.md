@@ -1085,16 +1085,34 @@ Release config (`-O -enable-default-cmo`); the stack dump shows a very deep
 nested `struct_type` chain of Applier types — the SwiftUI modifier-chain type
 blowup tipping the optimizer over.
 
-It is **pre-existing** (reproduces at ba92a4e3 with no local changes) and
-**latent**: warm incremental builds do not hit it, which is why local runs and
-this doc's iOS numbers were produced normally. A fresh clone or a CI runner
-will hit it. Do not read a green local iOS run as evidence the build is
-healthy — check that the `build/` directory was actually cold.
+It is **pre-existing** (reproduces at ba92a4e3 with no local changes) and it
+is **configuration-specific, not warmth-specific**. Corrected 2026-08-27 —
+the earlier note here said warm incremental builds were why local runs
+survived. They are not: `test-all.sh` does `rm -rf StyleConverterTest.xcodeproj
+build` at the top of every iOS phase, so every harness run is already COLD.
 
-## Known: iOS renders out-of-range filters into Display P3
+What actually separates the two is the optimiser. Measured on Swift 6.3.3,
+both from a cold `build/` and a cold generated project:
+
+| invocation | flags | result |
+|---|---|---|
+| `xcodebuild -target StyleConverterTest -sdk iphonesimulator -arch arm64` | `-O -enable-default-cmo` (Release, the default) | swift-frontend crash |
+| the same plus `-configuration Debug` (what `test-all.sh` passes) | `-Onone -disable-cmo` | builds, ~20 s |
+
+So the capture pipeline is not blocked by this, and never was; a CI runner
+hits it only if it builds Release. The crash is real and still unfixed — the
+deep nested `struct_type` chain of Applier types tips the optimizer over — but
+scope it as "Release builds of the runtime are broken", not "the harness
+cannot be built".
+
+## Fixed: iOS rendered out-of-range filters into Display P3
+
+**Fixed 2026-08-27** in `runtimes/swiftui/.../Renderer/CaptureColorSpace.swift`;
+the history below is kept because the negative result at the end is still
+load-bearing.
 
 The colour-space tripwire added in the measurement campaign fired on its
-first large run. Of 359 iOS captures, exactly ONE carries colour chunks:
+first large run. Of 359 iOS captures, exactly ONE carried colour chunks:
 
 ```
 088_Filter_Brightness.png  ->  iCCP "kCGColorSpaceDisplayP3" + cICP(primaries=12)
@@ -1115,6 +1133,40 @@ capture P3 -> sRGB before scoring moves deltaE95 only 18.697 -> 17.385, while
 Android-vs-web on the same component is 0.373 mean / 0.000 p95. So iOS is the
 lone outlier on the filter maths itself; the P3 tag is a separate, smaller
 defect that happens to share a trigger. Both are real; neither is the other.
+**The filter-arithmetic half remains open** — SwiftUI's `.brightness(_:)` is
+an additive shift where CSS `brightness()` is multiplicative
+(`StyleEngine/effects/filter/FilterApplier.swift` maps `pct` to
+`(pct - 100) / 100`), which is the likely root cause and is still unverified.
+
+### The fix
+
+`ImageRenderer.uiImage` chooses its destination colour space from the
+CONTENT: sRGB while the render stays inside [0,1], and a wide-gamut
+extended-range space once it does not (Display P3 on the simulator,
+extended sRGB under Mac Catalyst). `CaptureColorSpace.capture` now checks
+that choice — `isWideGamutRGB` — and re-renders through an explicit sRGB
+`CGContext` only when the framework promoted.
+
+The gate is narrow on purpose. Re-rendering EVERY capture through a
+constructed sRGB context also satisfies the tripwire, but it is a different
+rasterisation: measured on this fixture it moved **355 of 359** captures,
+mostly 1-2 LSB on antialiased edges but up to 202/255 on gradients, shadows
+and blends, and it shortened five captures by 1 px (its context rounded to
+nearest where `uiImage` ceils). The harness is byte-deterministic — two runs
+of identical code gave 359/359 pixel-identical captures — so that drift would
+have been a real regression against every committed baseline.
+
+Measured result of the shipped fix on `fixtures/visual-test-controls.json`:
+**358 of 359 captures byte-identical** to the pre-fix run, the 359th being
+`088_Filter_Brightness.png` itself, which now encodes as
+`IHDR sRGB eXIf pHYs iDOT IDAT IEND` like every other capture and scores
+SSIM 0.96 / 0.95 / 0.97 across the three pairs. Pinned by
+`CaptureColorSpaceTests` in the swiftui runtime suite (6 tests; the two
+defect tests fail against the pre-fix code).
+
+One correction to the original report: the `eXIf` and `iDOT` chunks are NOT
+specific to the offending capture — every iOS capture carries them before
+normalization. Only `iCCP`/`cICP` were ever the signal.
 
 ## Test suites
 
@@ -1123,7 +1175,7 @@ defect that happens to share a trigger. Both are real; neither is the other.
 | converter (Kotlin) | `./gradlew :converter:test` | 368 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2761 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1789 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1795 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1724 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
