@@ -1168,6 +1168,55 @@ One correction to the original report: the `eXIf` and `iDOT` chunks are NOT
 specific to the offending capture — every iOS capture carries them before
 normalization. Only `iCCP`/`cICP` were ever the signal.
 
+## Control-fixture findings (3-platform, 2026-08-27)
+
+`tools/visual/gen-control-fixture.mjs` derives `X__no_<decl>` controls from
+`fixtures/visual-test.json` — each is X with exactly one declaration removed,
+so case and control differ if and only if that declaration has a visible
+effect on the platform that rendered them. **Zero difference is the finding.**
+359 components captured on all three platforms; numbers below are differing
+pixels, case vs its own control, within one platform.
+
+### Runtime gaps
+
+| declaration | iOS | Android | web | reading |
+|---|---:|---:|---:|---|
+| `backdrop-filter: blur(10px)` (Glass_Effect) | **0** | **0** | 264 | dropped on BOTH natives |
+| `perspective: 500px` (Perspective_Rotate) | 2209 | **0** | 2097 | dropped on Android only |
+| `transform: rotateY(30deg)` (same component) | 3082 | 2709 | 2840 | applied everywhere |
+
+`backdrop-filter` independently reproduces the composition-test result on a
+second fixture. Because both natives drop it they AGREE, so no cross-platform
+pair diverges — the control is the only thing that sees it.
+
+`perspective` is new: Android applies the rotation but ignores the perspective,
+so a 3D transform renders flat (orthographic) instead of foreshortened.
+
+### A divergence in the other direction
+
+`vertical-align: sub` / `super` is set on a BLOCK-level component. Per CSS it
+applies to inline-level and table-cell boxes, so it should do nothing. web does
+nothing. Both natives grow the box, and disagree about how much:
+
+    Typography_Subscript    iOS 390x81  ·  Android 390x85  ·  control 390x77
+    Typography_Superscript  iOS 390x81  ·  Android 390x83  ·  control 390x77
+
+web is correct; both natives apply it, by different amounts.
+
+### Fixture weaknesses, now measured rather than asserted
+
+`overflow` / `text-overflow` / `white-space` on TextOverflow_Ellipsis are 0 on
+ALL three — the text does not overflow its 150px box, so none of the three
+declarations can do anything. `z-index: 10` sits on a lone component with no
+sibling to stack against. 6 of 24 `font-size` declarations set 16px, the
+initial value. `border-top-right-radius: 0` and `border-bottom-left-radius: 0`
+are likewise the initial value. `font-stretch` is inert on all three by
+design — its web applier is an explicit parity no-op.
+
+Run control fixtures with `NO_CROSS_PLATFORM_GATE=1`: case and control are
+*supposed* to differ, so scoring their cross-platform pairs against the
+conformance ledger asks the wrong question.
+
 ## Test suites
 
 | suite | command | tests |

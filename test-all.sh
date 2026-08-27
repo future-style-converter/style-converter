@@ -25,6 +25,9 @@
 #
 # Environment overrides:
 #     SKIP_IOS=1 SKIP_ANDROID=1 SKIP_WEB=1    skip a platform
+#     NO_CROSS_PLATFORM_GATE=1                 don't gate the 3-way pairs (for
+#                                                control fixtures, whose pairs
+#                                                are intentionally divergent)
 #     UPDATE_BASELINE=1                        copy captures → tools/visual/baseline/
 #     BASELINE=1                               compare vs baseline, fail on regression
 #     SIM_DEVICE="iPhone 17 Pro"               force a specific iOS simulator (by name)
@@ -895,6 +898,14 @@ if [[ ! -d "$PROJECT_ROOT/node_modules/pngjs" ]]; then
 fi
 
 COMPARE_ARGS=()
+# Escape hatch for fixtures whose cross-platform pairs are not a conformance
+# question. A control fixture (tools/visual/gen-control-fixture.mjs) is the
+# motivating case: case and control are SUPPOSED to differ, so scoring their
+# pairs against the ledger reports every intended difference as an unexpected
+# divergence. The generated fixture's own header says to use this.
+if [[ "${NO_CROSS_PLATFORM_GATE:-0}" == "1" ]]; then
+    COMPARE_ARGS+=(--no-cross-platform-gate)
+fi
 if [[ "${UPDATE_BASELINE:-0}" == "1" ]]; then
     COMPARE_ARGS+=(--update-baseline)
 elif [[ "${BASELINE:-0}" == "1" ]]; then
