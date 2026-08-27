@@ -717,7 +717,19 @@ else
         LAST_COUNT=-1
         STUCK_FOR=0
         STUCK_LIMIT=10   # 10 × 2 s = 20 s with no progress
-        for i in $(seq 1 60); do
+        # The ceiling SCALES with the fixture. It used to be a flat 60 polls
+        # (120 s) regardless of size, which silently truncated any large
+        # fixture: measured on the 359-component control fixture, Android was
+        # still capturing when the loop ran out and the run pulled 185 of 359
+        # with no warning — the loop had no exhaustion branch, so it fell
+        # straight through to the pull and reported "pulled 185" as success.
+        #
+        # A generous ceiling is safe because it is NOT what bounds a hang:
+        # STUCK_LIMIT does, at 20 s with no progress. This budget only ever
+        # matters while captures are actively landing.
+        MAX_POLLS=$(( 60 + COMPONENT_COUNT ))
+        POLL_EXHAUSTED=1
+        for i in $(seq 1 "$MAX_POLLS"); do
             # Same pipefail guard rationale as count_glob above — adb shell
             # ls of a missing/empty directory exits non-zero under pipefail.
             # Strip ALL whitespace (incl newlines) — `wc -l || echo 0` can
@@ -729,6 +741,7 @@ else
             COUNT=$((10#${COUNT:-0}))
             echo "  $COUNT / $COMPONENT_COUNT captured…"
             if [[ "$COUNT" -ge "$COMPONENT_COUNT" ]]; then
+                POLL_EXHAUSTED=0
                 break
             fi
             if [[ "$COUNT" == "$LAST_COUNT" ]]; then
@@ -736,6 +749,7 @@ else
                 if [[ $STUCK_FOR -ge $STUCK_LIMIT ]]; then
                     warn "Android count has been stuck at $COUNT for $(( STUCK_FOR * 2 ))s"
                     warn "app may have crashed — check: $ADB logcat | grep com.styleconverter.test"
+                    POLL_EXHAUSTED=0   # reported by the stall branch, not a silent timeout
                     break
                 fi
             else
@@ -744,6 +758,14 @@ else
             fi
             sleep 2
         done
+
+        # The branch that did not exist: the loop can END while captures are
+        # still arriving. Without this, a truncated run is indistinguishable
+        # from a complete one — it just pulls fewer PNGs and says "pulled N".
+        if [[ "$POLL_EXHAUSTED" == "1" ]]; then
+            warn "Android capture poll exhausted after $(( MAX_POLLS * 2 ))s at $COUNT / $COMPONENT_COUNT — the capture was TRUNCATED, not finished"
+            warn "every component past $COUNT is missing from this run's Android column"
+        fi
 
         rm -rf "$ANDROID_DIR/screenshots"
         mkdir -p "$ANDROID_DIR/screenshots"
@@ -926,6 +948,35 @@ step_end
 echo -e "\n${B}━━━ Done ━━━${N}"
 SCRIPT_TOTAL=$(( $(date +%s) - SCRIPT_START ))
 echo
+# Capture-count agreement. All three platforms render the SAME IR, so their
+# capture counts must match exactly; any difference means a platform's column
+# is short and the comparison silently covered less than it appears to.
+#
+# These counts were already collected and printed — nothing compared them. A
+# run that captured 359 on web and 185 on Android printed both numbers side by
+# side and said nothing, which is the same shape as every other degenerate pass
+# this harness has had: a result that looks like a measurement and is not one.
+# Platforms with 0 are excluded, since that is a deliberate SKIP_*.
+_counts=""
+for _pi in "iOS:$CAPTURED_IOS" "Android:$CAPTURED_ANDROID" "web:$CAPTURED_WEB"; do
+    _n="${_pi##*:}"
+    [[ -n "$_n" && "$_n" -gt 0 ]] && _counts="$_counts ${_pi}"
+done
+if [[ -n "$_counts" ]]; then
+    _max=0; _min=999999
+    for _pi in $_counts; do
+        _n="${_pi##*:}"
+        (( _n > _max )) && _max=$_n
+        (( _n < _min )) && _min=$_n
+    done
+    if [[ "$_max" -ne "$_min" ]]; then
+        echo
+        warn "capture counts DISAGREE across platforms:$_counts"
+        warn "all platforms render the same IR, so a short column means that capture was TRUNCATED"
+        warn "every component the short platform missed is absent from its side of every pair"
+    fi
+fi
+
 for platform_info in "iOS:$CAPTURED_IOS" "Android:$CAPTURED_ANDROID" "web:$CAPTURED_WEB"; do
     p="${platform_info%%:*}"
     n="${platform_info##*:}"
