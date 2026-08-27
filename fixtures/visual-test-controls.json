@@ -1,0 +1,3268 @@
+{
+  "_note": "Generated from fixtures/visual-test.json by tools/visual/gen-control-fixture.mjs — do not hand-edit.\n\nEach `X__no_<decl>` component is X with exactly one declaration removed.\nCase and control differ if and only if that declaration has a visible\neffect on the platform that rendered them. ZERO difference is the finding:\nit means the property was dropped, or is inert on that corpus.\n\nThis is a SIBLING of the source fixture. The source is never edited, so\nits committed baselines and ledger entries are untouched.\n\ncases 109 · controls 250 · 175 geometry declarations skipped (--all to include)",
+  "components": {
+    "Sizing_Fixed": {
+      "properties": {
+        "width": "200px",
+        "height": "100px",
+        "background-color": "#3498db"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Sizing_Fixed__no_background_color": {
+      "properties": {
+        "width": "200px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Sizing_Fixed\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Sizing_MinMax": {
+      "properties": {
+        "min-width": "100px",
+        "max-width": "300px",
+        "min-height": "50px",
+        "background-color": "#9b59b6"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Sizing_MinMax__no_background_color": {
+      "properties": {
+        "min-width": "100px",
+        "max-width": "300px",
+        "min-height": "50px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Sizing_MinMax\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Sizing_AspectRatio": {
+      "properties": {
+        "width": "150px",
+        "aspect-ratio": "16/9",
+        "background-color": "#e74c3c"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Sizing_AspectRatio__no_background_color": {
+      "properties": {
+        "width": "150px",
+        "aspect-ratio": "16/9"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Sizing_AspectRatio\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Sizing_PercentWidth": {
+      "properties": {
+        "width": "50%",
+        "height": "60px",
+        "background-color": "#27ae60"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Sizing_PercentWidth__no_background_color": {
+      "properties": {
+        "width": "50%",
+        "height": "60px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Sizing_PercentWidth\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Sizing_MaxWidthPercent": {
+      "properties": {
+        "max-width": "80%",
+        "height": "50px",
+        "background-color": "#8e44ad"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Sizing_MaxWidthPercent__no_background_color": {
+      "properties": {
+        "max-width": "80%",
+        "height": "50px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Sizing_MaxWidthPercent\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Sizing_HeightPercent": {
+      "properties": {
+        "width": "120px",
+        "height": "50%",
+        "background-color": "#d35400"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Sizing_HeightPercent__no_background_color": {
+      "properties": {
+        "width": "120px",
+        "height": "50%"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Sizing_HeightPercent\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Padding_All": {
+      "properties": {
+        "padding": "20px",
+        "background-color": "#2ecc71"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Padding_All__no_background_color": {
+      "properties": {
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Padding_All\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Padding_Mixed": {
+      "properties": {
+        "padding-top": "10px",
+        "padding-right": "20px",
+        "padding-bottom": "30px",
+        "padding-left": "40px",
+        "background-color": "#f39c12"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Padding_Mixed__no_background_color": {
+      "properties": {
+        "padding-top": "10px",
+        "padding-right": "20px",
+        "padding-bottom": "30px",
+        "padding-left": "40px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Padding_Mixed\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Margin_Offset": {
+      "properties": {
+        "margin-top": "20px",
+        "margin-left": "30px",
+        "width": "100px",
+        "height": "50px",
+        "background-color": "#1abc9c"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Margin_Offset__no_background_color": {
+      "properties": {
+        "margin-top": "20px",
+        "margin-left": "30px",
+        "width": "100px",
+        "height": "50px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Margin_Offset\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Color_Hex": {
+      "properties": {
+        "background-color": "#ff6b6b",
+        "color": "#ffffff",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Color_Hex__no_background_color": {
+      "properties": {
+        "color": "#ffffff",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_Hex\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Color_Hex__no_color": {
+      "properties": {
+        "background-color": "#ff6b6b",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_Hex\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Color_RGB": {
+      "properties": {
+        "background-color": "rgb(52, 152, 219)",
+        "color": "rgb(255, 255, 255)",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Color_RGB__no_background_color": {
+      "properties": {
+        "color": "rgb(255, 255, 255)",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_RGB\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Color_RGB__no_color": {
+      "properties": {
+        "background-color": "rgb(52, 152, 219)",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_RGB\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Color_RGBA": {
+      "properties": {
+        "background-color": "rgba(155, 89, 182, 0.7)",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Color_RGBA__no_background_color": {
+      "properties": {
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_RGBA\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Color_HSL": {
+      "properties": {
+        "background-color": "hsl(120, 60%, 50%)",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Color_HSL__no_background_color": {
+      "properties": {
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_HSL\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Color_Named": {
+      "properties": {
+        "background-color": "coral",
+        "color": "navy",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Color_Named__no_background_color": {
+      "properties": {
+        "color": "navy",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_Named\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Color_Named__no_color": {
+      "properties": {
+        "background-color": "coral",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Color_Named\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Opacity_Half": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "opacity": "0.5",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Opacity_Half__no_background_color": {
+      "properties": {
+        "opacity": "0.5",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Opacity_Half\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Opacity_Half__no_opacity": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Opacity_Half\" — identical except `opacity` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `opacity`."
+    },
+    "Opacity_Quarter": {
+      "properties": {
+        "background-color": "#3498db",
+        "opacity": "0.25",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Opacity_Quarter__no_background_color": {
+      "properties": {
+        "opacity": "0.25",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Opacity_Quarter\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Opacity_Quarter__no_opacity": {
+      "properties": {
+        "background-color": "#3498db",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Opacity_Quarter\" — identical except `opacity` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `opacity`."
+    },
+    "Border_Solid": {
+      "properties": {
+        "border": "3px solid #2c3e50",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Border_Solid__no_border": {
+      "properties": {
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Border_Solid\" — identical except `border` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border`."
+    },
+    "Border_Dashed": {
+      "properties": {
+        "border": "2px dashed #e74c3c",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Border_Dashed__no_border": {
+      "properties": {
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Border_Dashed\" — identical except `border` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border`."
+    },
+    "Border_Mixed": {
+      "properties": {
+        "border-top": "4px solid red",
+        "border-right": "2px dashed green",
+        "border-bottom": "4px solid blue",
+        "border-left": "2px dotted orange",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Border_Mixed__no_border_top": {
+      "properties": {
+        "border-right": "2px dashed green",
+        "border-bottom": "4px solid blue",
+        "border-left": "2px dotted orange",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Border_Mixed\" — identical except `border-top` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-top`."
+    },
+    "Border_Mixed__no_border_right": {
+      "properties": {
+        "border-top": "4px solid red",
+        "border-bottom": "4px solid blue",
+        "border-left": "2px dotted orange",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Border_Mixed\" — identical except `border-right` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-right`."
+    },
+    "Border_Mixed__no_border_bottom": {
+      "properties": {
+        "border-top": "4px solid red",
+        "border-right": "2px dashed green",
+        "border-left": "2px dotted orange",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Border_Mixed\" — identical except `border-bottom` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-bottom`."
+    },
+    "Border_Mixed__no_border_left": {
+      "properties": {
+        "border-top": "4px solid red",
+        "border-right": "2px dashed green",
+        "border-bottom": "4px solid blue",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Border_Mixed\" — identical except `border-left` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-left`."
+    },
+    "BorderRadius_Uniform": {
+      "properties": {
+        "border-radius": "10px",
+        "background-color": "#9b59b6",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "BorderRadius_Uniform__no_border_radius": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Uniform\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "BorderRadius_Uniform__no_background_color": {
+      "properties": {
+        "border-radius": "10px",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Uniform\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "BorderRadius_Pill": {
+      "properties": {
+        "border-radius": "50px",
+        "background-color": "#1abc9c",
+        "padding": "15px 30px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "BorderRadius_Pill__no_border_radius": {
+      "properties": {
+        "background-color": "#1abc9c",
+        "padding": "15px 30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Pill\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "BorderRadius_Pill__no_background_color": {
+      "properties": {
+        "border-radius": "50px",
+        "padding": "15px 30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Pill\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "BorderRadius_Circle": {
+      "properties": {
+        "border-radius": "50%",
+        "width": "80px",
+        "height": "80px",
+        "background-color": "#e67e22"
+      },
+      "_text": "Hamburg 123"
+    },
+    "BorderRadius_Circle__no_border_radius": {
+      "properties": {
+        "width": "80px",
+        "height": "80px",
+        "background-color": "#e67e22"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Circle\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "BorderRadius_Circle__no_background_color": {
+      "properties": {
+        "border-radius": "50%",
+        "width": "80px",
+        "height": "80px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Circle\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "BorderRadius_Mixed": {
+      "properties": {
+        "border-top-left-radius": "20px",
+        "border-top-right-radius": "0",
+        "border-bottom-right-radius": "20px",
+        "border-bottom-left-radius": "0",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "BorderRadius_Mixed__no_border_top_left_radius": {
+      "properties": {
+        "border-top-right-radius": "0",
+        "border-bottom-right-radius": "20px",
+        "border-bottom-left-radius": "0",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Mixed\" — identical except `border-top-left-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-top-left-radius`."
+    },
+    "BorderRadius_Mixed__no_border_top_right_radius": {
+      "properties": {
+        "border-top-left-radius": "20px",
+        "border-bottom-right-radius": "20px",
+        "border-bottom-left-radius": "0",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Mixed\" — identical except `border-top-right-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-top-right-radius`."
+    },
+    "BorderRadius_Mixed__no_border_bottom_right_radius": {
+      "properties": {
+        "border-top-left-radius": "20px",
+        "border-top-right-radius": "0",
+        "border-bottom-left-radius": "0",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Mixed\" — identical except `border-bottom-right-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-bottom-right-radius`."
+    },
+    "BorderRadius_Mixed__no_border_bottom_left_radius": {
+      "properties": {
+        "border-top-left-radius": "20px",
+        "border-top-right-radius": "0",
+        "border-bottom-right-radius": "20px",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Mixed\" — identical except `border-bottom-left-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-bottom-left-radius`."
+    },
+    "BorderRadius_Mixed__no_background_color": {
+      "properties": {
+        "border-top-left-radius": "20px",
+        "border-top-right-radius": "0",
+        "border-bottom-right-radius": "20px",
+        "border-bottom-left-radius": "0",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BorderRadius_Mixed\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Shadow_Simple": {
+      "properties": {
+        "box-shadow": "5px 5px 10px rgba(0,0,0,0.3)",
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Shadow_Simple__no_box_shadow": {
+      "properties": {
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Simple\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Shadow_Simple__no_background_color": {
+      "properties": {
+        "box-shadow": "5px 5px 10px rgba(0,0,0,0.3)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Simple\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Shadow_Colored": {
+      "properties": {
+        "box-shadow": "0 4px 15px rgba(52, 152, 219, 0.5)",
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Shadow_Colored__no_box_shadow": {
+      "properties": {
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Colored\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Shadow_Colored__no_background_color": {
+      "properties": {
+        "box-shadow": "0 4px 15px rgba(52, 152, 219, 0.5)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Colored\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Shadow_Multiple": {
+      "properties": {
+        "box-shadow": "0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.2)",
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Shadow_Multiple__no_box_shadow": {
+      "properties": {
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Multiple\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Shadow_Multiple__no_background_color": {
+      "properties": {
+        "box-shadow": "0 2px 4px rgba(0,0,0,0.1), 0 8px 16px rgba(0,0,0,0.2)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Multiple\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Shadow_Inset": {
+      "properties": {
+        "box-shadow": "inset 0 2px 10px rgba(0,0,0,0.3)",
+        "background-color": "#ecf0f1",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Shadow_Inset__no_box_shadow": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Inset\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Shadow_Inset__no_background_color": {
+      "properties": {
+        "box-shadow": "inset 0 2px 10px rgba(0,0,0,0.3)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Inset\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Shadow_Spread": {
+      "properties": {
+        "box-shadow": "0 0 0 4px #3498db",
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Shadow_Spread__no_box_shadow": {
+      "properties": {
+        "background-color": "white",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Spread\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Shadow_Spread__no_background_color": {
+      "properties": {
+        "box-shadow": "0 0 0 4px #3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Shadow_Spread\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Gradient_Linear": {
+      "properties": {
+        "background-image": "linear-gradient(135deg, #667eea, #764ba2)",
+        "padding": "30px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Gradient_Linear__no_background_image": {
+      "properties": {
+        "padding": "30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Gradient_Linear\" — identical except `background-image` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-image`."
+    },
+    "Gradient_Radial": {
+      "properties": {
+        "background-image": "radial-gradient(circle, #f093fb, #f5576c)",
+        "padding": "30px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Gradient_Radial__no_background_image": {
+      "properties": {
+        "padding": "30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Gradient_Radial\" — identical except `background-image` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-image`."
+    },
+    "Gradient_Conic": {
+      "properties": {
+        "background-image": "conic-gradient(from 0deg, red, yellow, green, blue, red)",
+        "width": "100px",
+        "height": "100px",
+        "border-radius": "50%"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Gradient_Conic__no_background_image": {
+      "properties": {
+        "width": "100px",
+        "height": "100px",
+        "border-radius": "50%"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Gradient_Conic\" — identical except `background-image` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-image`."
+    },
+    "Gradient_Conic__no_border_radius": {
+      "properties": {
+        "background-image": "conic-gradient(from 0deg, red, yellow, green, blue, red)",
+        "width": "100px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Gradient_Conic\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Gradient_MultiStop": {
+      "properties": {
+        "background-image": "linear-gradient(to right, #ee0979, #ff6a00, #ffd200)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Gradient_MultiStop__no_background_image": {
+      "properties": {
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Gradient_MultiStop\" — identical except `background-image` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-image`."
+    },
+    "Filter_Blur": {
+      "properties": {
+        "filter": "blur(3px)",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Filter_Blur__no_filter": {
+      "properties": {
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Blur\" — identical except `filter` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `filter`."
+    },
+    "Filter_Blur__no_background_color": {
+      "properties": {
+        "filter": "blur(3px)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Blur\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Filter_Brightness": {
+      "properties": {
+        "filter": "brightness(1.5)",
+        "background-color": "#2ecc71",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Filter_Brightness__no_filter": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Brightness\" — identical except `filter` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `filter`."
+    },
+    "Filter_Brightness__no_background_color": {
+      "properties": {
+        "filter": "brightness(1.5)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Brightness\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Filter_Grayscale": {
+      "properties": {
+        "filter": "grayscale(100%)",
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Filter_Grayscale__no_filter": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Grayscale\" — identical except `filter` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `filter`."
+    },
+    "Filter_Grayscale__no_background_color": {
+      "properties": {
+        "filter": "grayscale(100%)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Grayscale\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Filter_Sepia": {
+      "properties": {
+        "filter": "sepia(80%)",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Filter_Sepia__no_filter": {
+      "properties": {
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Sepia\" — identical except `filter` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `filter`."
+    },
+    "Filter_Sepia__no_background_color": {
+      "properties": {
+        "filter": "sepia(80%)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Sepia\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Filter_Combined": {
+      "properties": {
+        "filter": "contrast(1.2) saturate(1.5)",
+        "background-color": "#9b59b6",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Filter_Combined__no_filter": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Combined\" — identical except `filter` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `filter`."
+    },
+    "Filter_Combined__no_background_color": {
+      "properties": {
+        "filter": "contrast(1.2) saturate(1.5)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Filter_Combined\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Transform_Rotate": {
+      "properties": {
+        "transform": "rotate(15deg)",
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Transform_Rotate__no_transform": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Rotate\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Transform_Rotate__no_background_color": {
+      "properties": {
+        "transform": "rotate(15deg)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Rotate\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Transform_Scale": {
+      "properties": {
+        "transform": "scale(1.2)",
+        "background-color": "#3498db",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Transform_Scale__no_transform": {
+      "properties": {
+        "background-color": "#3498db",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Scale\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Transform_Scale__no_background_color": {
+      "properties": {
+        "transform": "scale(1.2)",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Scale\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Transform_Translate": {
+      "properties": {
+        "transform": "translate(20px, 10px)",
+        "background-color": "#2ecc71",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Transform_Translate__no_transform": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Translate\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Transform_Translate__no_background_color": {
+      "properties": {
+        "transform": "translate(20px, 10px)",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Translate\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Transform_Skew": {
+      "properties": {
+        "transform": "skewX(10deg)",
+        "background-color": "#f39c12",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Transform_Skew__no_transform": {
+      "properties": {
+        "background-color": "#f39c12",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Skew\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Transform_Skew__no_background_color": {
+      "properties": {
+        "transform": "skewX(10deg)",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Skew\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Transform_Combined": {
+      "properties": {
+        "transform": "rotate(5deg) scale(1.1) translateX(10px)",
+        "background-color": "#9b59b6",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Transform_Combined__no_transform": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Combined\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Transform_Combined__no_background_color": {
+      "properties": {
+        "transform": "rotate(5deg) scale(1.1) translateX(10px)",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Combined\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Transform_Origin": {
+      "properties": {
+        "transform": "rotate(45deg)",
+        "transform-origin": "top left",
+        "background-color": "#1abc9c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Transform_Origin__no_transform": {
+      "properties": {
+        "transform-origin": "top left",
+        "background-color": "#1abc9c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Origin\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Transform_Origin__no_transform_origin": {
+      "properties": {
+        "transform": "rotate(45deg)",
+        "background-color": "#1abc9c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Origin\" — identical except `transform-origin` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform-origin`."
+    },
+    "Transform_Origin__no_background_color": {
+      "properties": {
+        "transform": "rotate(45deg)",
+        "transform-origin": "top left",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Transform_Origin\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Zoom_150": {
+      "properties": {
+        "zoom": "1.5",
+        "background-color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Zoom_150__no_zoom": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Zoom_150\" — identical except `zoom` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `zoom`."
+    },
+    "Zoom_150__no_background_color": {
+      "properties": {
+        "zoom": "1.5",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Zoom_150\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Zoom_75": {
+      "properties": {
+        "zoom": "0.75",
+        "background-color": "#3498db",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Zoom_75__no_zoom": {
+      "properties": {
+        "background-color": "#3498db",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Zoom_75\" — identical except `zoom` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `zoom`."
+    },
+    "Zoom_75__no_background_color": {
+      "properties": {
+        "zoom": "0.75",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Zoom_75\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Zoom_200": {
+      "properties": {
+        "zoom": "2",
+        "background-color": "#2ecc71",
+        "padding": "8px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Zoom_200__no_zoom": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "padding": "8px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Zoom_200\" — identical except `zoom` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `zoom`."
+    },
+    "Zoom_200__no_background_color": {
+      "properties": {
+        "zoom": "2",
+        "padding": "8px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Zoom_200\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Perspective_Rotate": {
+      "properties": {
+        "perspective": "500px",
+        "transform": "rotateY(30deg)",
+        "background-color": "#9b59b6",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Perspective_Rotate__no_perspective": {
+      "properties": {
+        "transform": "rotateY(30deg)",
+        "background-color": "#9b59b6",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Perspective_Rotate\" — identical except `perspective` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `perspective`."
+    },
+    "Perspective_Rotate__no_transform": {
+      "properties": {
+        "perspective": "500px",
+        "background-color": "#9b59b6",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Perspective_Rotate\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Perspective_Rotate__no_background_color": {
+      "properties": {
+        "perspective": "500px",
+        "transform": "rotateY(30deg)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Perspective_Rotate\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "ClipPath_Circle": {
+      "properties": {
+        "clip-path": "circle(50%)",
+        "background-color": "#e74c3c",
+        "width": "100px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "ClipPath_Circle__no_clip_path": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "width": "100px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Circle\" — identical except `clip-path` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `clip-path`."
+    },
+    "ClipPath_Circle__no_background_color": {
+      "properties": {
+        "clip-path": "circle(50%)",
+        "width": "100px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Circle\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "ClipPath_Ellipse": {
+      "properties": {
+        "clip-path": "ellipse(40% 30% at 50% 50%)",
+        "background-color": "#3498db",
+        "width": "120px",
+        "height": "80px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "ClipPath_Ellipse__no_clip_path": {
+      "properties": {
+        "background-color": "#3498db",
+        "width": "120px",
+        "height": "80px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Ellipse\" — identical except `clip-path` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `clip-path`."
+    },
+    "ClipPath_Ellipse__no_background_color": {
+      "properties": {
+        "clip-path": "ellipse(40% 30% at 50% 50%)",
+        "width": "120px",
+        "height": "80px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Ellipse\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "ClipPath_Polygon": {
+      "properties": {
+        "clip-path": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+        "background-color": "#2ecc71",
+        "width": "100px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "ClipPath_Polygon__no_clip_path": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "width": "100px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Polygon\" — identical except `clip-path` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `clip-path`."
+    },
+    "ClipPath_Polygon__no_background_color": {
+      "properties": {
+        "clip-path": "polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%)",
+        "width": "100px",
+        "height": "100px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Polygon\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "ClipPath_Inset": {
+      "properties": {
+        "clip-path": "inset(10px 20px 10px 20px round 10px)",
+        "background-color": "#9b59b6",
+        "padding": "30px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "ClipPath_Inset__no_clip_path": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "padding": "30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Inset\" — identical except `clip-path` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `clip-path`."
+    },
+    "ClipPath_Inset__no_background_color": {
+      "properties": {
+        "clip-path": "inset(10px 20px 10px 20px round 10px)",
+        "padding": "30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ClipPath_Inset\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Flex_Row": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "row",
+        "gap": "10px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Flex_Row__no_background_color": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "row",
+        "gap": "10px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Flex_Row\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Flex_Column": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "column",
+        "gap": "8px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Flex_Column__no_background_color": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "column",
+        "gap": "8px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Flex_Column\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Flex_JustifyCenter": {
+      "properties": {
+        "display": "flex",
+        "justify-content": "center",
+        "background-color": "#bdc3c7",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Flex_JustifyCenter__no_background_color": {
+      "properties": {
+        "display": "flex",
+        "justify-content": "center",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Flex_JustifyCenter\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Flex_SpaceBetween": {
+      "properties": {
+        "display": "flex",
+        "justify-content": "space-between",
+        "background-color": "#bdc3c7",
+        "padding": "15px",
+        "width": "250px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Flex_SpaceBetween__no_background_color": {
+      "properties": {
+        "display": "flex",
+        "justify-content": "space-between",
+        "padding": "15px",
+        "width": "250px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Flex_SpaceBetween\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Flex_AlignCenter": {
+      "properties": {
+        "display": "flex",
+        "align-items": "center",
+        "height": "80px",
+        "background-color": "#bdc3c7",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Flex_AlignCenter__no_background_color": {
+      "properties": {
+        "display": "flex",
+        "align-items": "center",
+        "height": "80px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Flex_AlignCenter\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Flex_Wrap": {
+      "properties": {
+        "display": "flex",
+        "flex-wrap": "wrap",
+        "gap": "10px",
+        "width": "200px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Flex_Wrap__no_background_color": {
+      "properties": {
+        "display": "flex",
+        "flex-wrap": "wrap",
+        "gap": "10px",
+        "width": "200px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Flex_Wrap\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Grid_Simple": {
+      "properties": {
+        "display": "grid",
+        "grid-template-columns": "1fr 1fr",
+        "gap": "10px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Grid_Simple__no_background_color": {
+      "properties": {
+        "display": "grid",
+        "grid-template-columns": "1fr 1fr",
+        "gap": "10px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Grid_Simple\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Grid_ThreeCol": {
+      "properties": {
+        "display": "grid",
+        "grid-template-columns": "1fr 2fr 1fr",
+        "gap": "8px",
+        "background-color": "#bdc3c7",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Grid_ThreeCol__no_background_color": {
+      "properties": {
+        "display": "grid",
+        "grid-template-columns": "1fr 2fr 1fr",
+        "gap": "8px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Grid_ThreeCol\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Grid_FixedTracks": {
+      "properties": {
+        "display": "grid",
+        "grid-template-columns": "100px 150px",
+        "grid-template-rows": "50px 50px",
+        "gap": "5px",
+        "background-color": "#ecf0f1",
+        "padding": "5px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Grid_FixedTracks__no_background_color": {
+      "properties": {
+        "display": "grid",
+        "grid-template-columns": "100px 150px",
+        "grid-template-rows": "50px 50px",
+        "gap": "5px",
+        "padding": "5px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Grid_FixedTracks\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_Size": {
+      "properties": {
+        "font-size": "24px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Size__no_font_size": {
+      "properties": {
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Size\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Size__no_color": {
+      "properties": {
+        "font-size": "24px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Size\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_Weight": {
+      "properties": {
+        "font-weight": "bold",
+        "font-size": "18px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Weight__no_font_weight": {
+      "properties": {
+        "font-size": "18px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Weight\" — identical except `font-weight` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-weight`."
+    },
+    "Typography_Weight__no_font_size": {
+      "properties": {
+        "font-weight": "bold",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Weight\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Weight__no_color": {
+      "properties": {
+        "font-weight": "bold",
+        "font-size": "18px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Weight\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_Italic": {
+      "properties": {
+        "font-style": "italic",
+        "font-size": "16px",
+        "color": "#7f8c8d",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Italic__no_font_style": {
+      "properties": {
+        "font-size": "16px",
+        "color": "#7f8c8d",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Italic\" — identical except `font-style` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-style`."
+    },
+    "Typography_Italic__no_font_size": {
+      "properties": {
+        "font-style": "italic",
+        "color": "#7f8c8d",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Italic\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Italic__no_color": {
+      "properties": {
+        "font-style": "italic",
+        "font-size": "16px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Italic\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_LineHeight": {
+      "properties": {
+        "line-height": "2",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_LineHeight__no_line_height": {
+      "properties": {
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_LineHeight\" — identical except `line-height` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `line-height`."
+    },
+    "Typography_LineHeight__no_font_size": {
+      "properties": {
+        "line-height": "2",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_LineHeight\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_LineHeight__no_color": {
+      "properties": {
+        "line-height": "2",
+        "font-size": "14px",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_LineHeight\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_LineHeight__no_background_color": {
+      "properties": {
+        "line-height": "2",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_LineHeight\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_LetterSpacing": {
+      "properties": {
+        "letter-spacing": "3px",
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_LetterSpacing__no_letter_spacing": {
+      "properties": {
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_LetterSpacing\" — identical except `letter-spacing` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `letter-spacing`."
+    },
+    "Typography_LetterSpacing__no_font_size": {
+      "properties": {
+        "letter-spacing": "3px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_LetterSpacing\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_LetterSpacing__no_color": {
+      "properties": {
+        "letter-spacing": "3px",
+        "font-size": "16px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_LetterSpacing\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_Uppercase": {
+      "properties": {
+        "text-transform": "uppercase",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Uppercase__no_text_transform": {
+      "properties": {
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Uppercase\" — identical except `text-transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-transform`."
+    },
+    "Typography_Uppercase__no_font_size": {
+      "properties": {
+        "text-transform": "uppercase",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Uppercase\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Uppercase__no_color": {
+      "properties": {
+        "text-transform": "uppercase",
+        "font-size": "14px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Uppercase\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_Underline": {
+      "properties": {
+        "text-decoration": "underline",
+        "font-size": "16px",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Underline__no_text_decoration": {
+      "properties": {
+        "font-size": "16px",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Underline\" — identical except `text-decoration` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-decoration`."
+    },
+    "Typography_Underline__no_font_size": {
+      "properties": {
+        "text-decoration": "underline",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Underline\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Underline__no_color": {
+      "properties": {
+        "text-decoration": "underline",
+        "font-size": "16px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Underline\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_Strikethrough": {
+      "properties": {
+        "text-decoration": "line-through",
+        "font-size": "16px",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Strikethrough__no_text_decoration": {
+      "properties": {
+        "font-size": "16px",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Strikethrough\" — identical except `text-decoration` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-decoration`."
+    },
+    "Typography_Strikethrough__no_font_size": {
+      "properties": {
+        "text-decoration": "line-through",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Strikethrough\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Strikethrough__no_color": {
+      "properties": {
+        "text-decoration": "line-through",
+        "font-size": "16px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Strikethrough\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_TextIndent": {
+      "properties": {
+        "text-indent": "30px",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_TextIndent__no_text_indent": {
+      "properties": {
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_TextIndent\" — identical except `text-indent` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-indent`."
+    },
+    "Typography_TextIndent__no_font_size": {
+      "properties": {
+        "text-indent": "30px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_TextIndent\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_TextIndent__no_color": {
+      "properties": {
+        "text-indent": "30px",
+        "font-size": "14px",
+        "padding": "10px",
+        "background-color": "#ecf0f1",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_TextIndent\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_TextIndent__no_background_color": {
+      "properties": {
+        "text-indent": "30px",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_TextIndent\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_FontMono": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_FontMono__no_font_family": {
+      "properties": {
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontMono\" — identical except `font-family` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-family`."
+    },
+    "Typography_FontMono__no_font_size": {
+      "properties": {
+        "font-family": "monospace",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontMono\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_FontMono__no_color": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "14px",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontMono\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_FontMono__no_background_color": {
+      "properties": {
+        "font-family": "monospace",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontMono\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_FontSerif": {
+      "properties": {
+        "font-family": "serif",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_FontSerif__no_font_family": {
+      "properties": {
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontSerif\" — identical except `font-family` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-family`."
+    },
+    "Typography_FontSerif__no_font_size": {
+      "properties": {
+        "font-family": "serif",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontSerif\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_FontSerif__no_color": {
+      "properties": {
+        "font-family": "serif",
+        "font-size": "14px",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontSerif\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_FontSerif__no_background_color": {
+      "properties": {
+        "font-family": "serif",
+        "font-size": "14px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontSerif\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_Subscript": {
+      "properties": {
+        "vertical-align": "sub",
+        "font-size": "14px",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Subscript__no_vertical_align": {
+      "properties": {
+        "font-size": "14px",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Subscript\" — identical except `vertical-align` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `vertical-align`."
+    },
+    "Typography_Subscript__no_font_size": {
+      "properties": {
+        "vertical-align": "sub",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Subscript\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Subscript__no_color": {
+      "properties": {
+        "vertical-align": "sub",
+        "font-size": "14px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Subscript\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_Superscript": {
+      "properties": {
+        "vertical-align": "super",
+        "font-size": "14px",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_Superscript__no_vertical_align": {
+      "properties": {
+        "font-size": "14px",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Superscript\" — identical except `vertical-align` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `vertical-align`."
+    },
+    "Typography_Superscript__no_font_size": {
+      "properties": {
+        "vertical-align": "super",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Superscript\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_Superscript__no_color": {
+      "properties": {
+        "vertical-align": "super",
+        "font-size": "14px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_Superscript\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_FontCondensed": {
+      "properties": {
+        "font-stretch": "condensed",
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_FontCondensed__no_font_stretch": {
+      "properties": {
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontCondensed\" — identical except `font-stretch` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-stretch`."
+    },
+    "Typography_FontCondensed__no_font_size": {
+      "properties": {
+        "font-stretch": "condensed",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontCondensed\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_FontCondensed__no_color": {
+      "properties": {
+        "font-stretch": "condensed",
+        "font-size": "16px",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontCondensed\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_FontCondensed__no_background_color": {
+      "properties": {
+        "font-stretch": "condensed",
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontCondensed\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_FontExpanded": {
+      "properties": {
+        "font-stretch": "expanded",
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_FontExpanded__no_font_stretch": {
+      "properties": {
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontExpanded\" — identical except `font-stretch` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-stretch`."
+    },
+    "Typography_FontExpanded__no_font_size": {
+      "properties": {
+        "font-stretch": "expanded",
+        "color": "#2c3e50",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontExpanded\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_FontExpanded__no_color": {
+      "properties": {
+        "font-stretch": "expanded",
+        "font-size": "16px",
+        "padding": "10px",
+        "background-color": "#ecf0f1"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontExpanded\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_FontExpanded__no_background_color": {
+      "properties": {
+        "font-stretch": "expanded",
+        "font-size": "16px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontExpanded\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_FontUltraCondensed": {
+      "properties": {
+        "font-stretch": "ultra-condensed",
+        "font-size": "18px",
+        "color": "#e74c3c",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_FontUltraCondensed__no_font_stretch": {
+      "properties": {
+        "font-size": "18px",
+        "color": "#e74c3c",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraCondensed\" — identical except `font-stretch` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-stretch`."
+    },
+    "Typography_FontUltraCondensed__no_font_size": {
+      "properties": {
+        "font-stretch": "ultra-condensed",
+        "color": "#e74c3c",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraCondensed\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_FontUltraCondensed__no_color": {
+      "properties": {
+        "font-stretch": "ultra-condensed",
+        "font-size": "18px",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraCondensed\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_FontUltraCondensed__no_background_color": {
+      "properties": {
+        "font-stretch": "ultra-condensed",
+        "font-size": "18px",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraCondensed\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Typography_FontUltraExpanded": {
+      "properties": {
+        "font-stretch": "ultra-expanded",
+        "font-size": "18px",
+        "color": "#3498db",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Typography_FontUltraExpanded__no_font_stretch": {
+      "properties": {
+        "font-size": "18px",
+        "color": "#3498db",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraExpanded\" — identical except `font-stretch` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-stretch`."
+    },
+    "Typography_FontUltraExpanded__no_font_size": {
+      "properties": {
+        "font-stretch": "ultra-expanded",
+        "color": "#3498db",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraExpanded\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Typography_FontUltraExpanded__no_color": {
+      "properties": {
+        "font-stretch": "ultra-expanded",
+        "font-size": "18px",
+        "padding": "10px",
+        "background-color": "#f0f0f0"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraExpanded\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Typography_FontUltraExpanded__no_background_color": {
+      "properties": {
+        "font-stretch": "ultra-expanded",
+        "font-size": "18px",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Typography_FontUltraExpanded\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "TextShadow_Simple": {
+      "properties": {
+        "text-shadow": "2px 2px 4px rgba(0,0,0,0.3)",
+        "font-size": "20px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "TextShadow_Simple__no_text_shadow": {
+      "properties": {
+        "font-size": "20px",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextShadow_Simple\" — identical except `text-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-shadow`."
+    },
+    "TextShadow_Simple__no_font_size": {
+      "properties": {
+        "text-shadow": "2px 2px 4px rgba(0,0,0,0.3)",
+        "color": "#2c3e50",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextShadow_Simple\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "TextShadow_Simple__no_color": {
+      "properties": {
+        "text-shadow": "2px 2px 4px rgba(0,0,0,0.3)",
+        "font-size": "20px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextShadow_Simple\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "TextShadow_Glow": {
+      "properties": {
+        "text-shadow": "0 0 10px #3498db",
+        "font-size": "20px",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "TextShadow_Glow__no_text_shadow": {
+      "properties": {
+        "font-size": "20px",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextShadow_Glow\" — identical except `text-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-shadow`."
+    },
+    "TextShadow_Glow__no_font_size": {
+      "properties": {
+        "text-shadow": "0 0 10px #3498db",
+        "color": "#3498db",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextShadow_Glow\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "TextShadow_Glow__no_color": {
+      "properties": {
+        "text-shadow": "0 0 10px #3498db",
+        "font-size": "20px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextShadow_Glow\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "TextAlign_Center": {
+      "properties": {
+        "text-align": "center",
+        "width": "200px",
+        "background-color": "#ecf0f1",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "TextAlign_Center__no_text_align": {
+      "properties": {
+        "width": "200px",
+        "background-color": "#ecf0f1",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextAlign_Center\" — identical except `text-align` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-align`."
+    },
+    "TextAlign_Center__no_background_color": {
+      "properties": {
+        "text-align": "center",
+        "width": "200px",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextAlign_Center\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "TextOverflow_Ellipsis": {
+      "properties": {
+        "text-overflow": "ellipsis",
+        "overflow": "hidden",
+        "white-space": "nowrap",
+        "width": "150px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "TextOverflow_Ellipsis__no_text_overflow": {
+      "properties": {
+        "overflow": "hidden",
+        "white-space": "nowrap",
+        "width": "150px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextOverflow_Ellipsis\" — identical except `text-overflow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `text-overflow`."
+    },
+    "TextOverflow_Ellipsis__no_overflow": {
+      "properties": {
+        "text-overflow": "ellipsis",
+        "white-space": "nowrap",
+        "width": "150px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextOverflow_Ellipsis\" — identical except `overflow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `overflow`."
+    },
+    "TextOverflow_Ellipsis__no_white_space": {
+      "properties": {
+        "text-overflow": "ellipsis",
+        "overflow": "hidden",
+        "width": "150px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextOverflow_Ellipsis\" — identical except `white-space` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `white-space`."
+    },
+    "TextOverflow_Ellipsis__no_background_color": {
+      "properties": {
+        "text-overflow": "ellipsis",
+        "overflow": "hidden",
+        "white-space": "nowrap",
+        "width": "150px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"TextOverflow_Ellipsis\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Outline_Solid": {
+      "properties": {
+        "outline": "3px solid #e74c3c",
+        "outline-offset": "5px",
+        "padding": "15px",
+        "background-color": "white"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Outline_Solid__no_outline": {
+      "properties": {
+        "outline-offset": "5px",
+        "padding": "15px",
+        "background-color": "white"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Outline_Solid\" — identical except `outline` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `outline`."
+    },
+    "Outline_Solid__no_outline_offset": {
+      "properties": {
+        "outline": "3px solid #e74c3c",
+        "padding": "15px",
+        "background-color": "white"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Outline_Solid\" — identical except `outline-offset` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `outline-offset`."
+    },
+    "Outline_Solid__no_background_color": {
+      "properties": {
+        "outline": "3px solid #e74c3c",
+        "outline-offset": "5px",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Outline_Solid\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Outline_Dashed": {
+      "properties": {
+        "outline": "2px dashed #3498db",
+        "outline-offset": "3px",
+        "padding": "15px",
+        "background-color": "white"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Outline_Dashed__no_outline": {
+      "properties": {
+        "outline-offset": "3px",
+        "padding": "15px",
+        "background-color": "white"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Outline_Dashed\" — identical except `outline` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `outline`."
+    },
+    "Outline_Dashed__no_outline_offset": {
+      "properties": {
+        "outline": "2px dashed #3498db",
+        "padding": "15px",
+        "background-color": "white"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Outline_Dashed\" — identical except `outline-offset` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `outline-offset`."
+    },
+    "Outline_Dashed__no_background_color": {
+      "properties": {
+        "outline": "2px dashed #3498db",
+        "outline-offset": "3px",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Outline_Dashed\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "ZIndex_Stacking": {
+      "properties": {
+        "z-index": "10",
+        "position": "relative",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "ZIndex_Stacking__no_z_index": {
+      "properties": {
+        "position": "relative",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ZIndex_Stacking\" — identical except `z-index` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `z-index`."
+    },
+    "ZIndex_Stacking__no_background_color": {
+      "properties": {
+        "z-index": "10",
+        "position": "relative",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"ZIndex_Stacking\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Visibility_Hidden": {
+      "properties": {
+        "visibility": "hidden",
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Visibility_Hidden__no_visibility": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Visibility_Hidden\" — identical except `visibility` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `visibility`."
+    },
+    "Visibility_Hidden__no_background_color": {
+      "properties": {
+        "visibility": "hidden",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Visibility_Hidden\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Overflow_Hidden": {
+      "properties": {
+        "overflow": "hidden",
+        "width": "100px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Overflow_Hidden__no_overflow": {
+      "properties": {
+        "width": "100px",
+        "height": "50px",
+        "background-color": "#ecf0f1",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Overflow_Hidden\" — identical except `overflow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `overflow`."
+    },
+    "Overflow_Hidden__no_background_color": {
+      "properties": {
+        "overflow": "hidden",
+        "width": "100px",
+        "height": "50px",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Overflow_Hidden\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Position_Relative": {
+      "properties": {
+        "position": "relative",
+        "top": "10px",
+        "left": "20px",
+        "background-color": "#9b59b6",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Position_Relative__no_background_color": {
+      "properties": {
+        "position": "relative",
+        "top": "10px",
+        "left": "20px",
+        "padding": "15px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Position_Relative\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "BlendMode_Multiply": {
+      "properties": {
+        "mix-blend-mode": "multiply",
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "BlendMode_Multiply__no_mix_blend_mode": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BlendMode_Multiply\" — identical except `mix-blend-mode` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `mix-blend-mode`."
+    },
+    "BlendMode_Multiply__no_background_color": {
+      "properties": {
+        "mix-blend-mode": "multiply",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BlendMode_Multiply\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "BlendMode_Screen": {
+      "properties": {
+        "mix-blend-mode": "screen",
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "BlendMode_Screen__no_mix_blend_mode": {
+      "properties": {
+        "background-color": "#3498db",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BlendMode_Screen\" — identical except `mix-blend-mode` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `mix-blend-mode`."
+    },
+    "BlendMode_Screen__no_background_color": {
+      "properties": {
+        "mix-blend-mode": "screen",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"BlendMode_Screen\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Card_Complete": {
+      "properties": {
+        "background-color": "white",
+        "border-radius": "12px",
+        "box-shadow": "0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08)",
+        "padding": "20px",
+        "width": "250px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Card_Complete__no_background_color": {
+      "properties": {
+        "border-radius": "12px",
+        "box-shadow": "0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08)",
+        "padding": "20px",
+        "width": "250px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Card_Complete\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Card_Complete__no_border_radius": {
+      "properties": {
+        "background-color": "white",
+        "box-shadow": "0 4px 6px rgba(0,0,0,0.1), 0 1px 3px rgba(0,0,0,0.08)",
+        "padding": "20px",
+        "width": "250px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Card_Complete\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Card_Complete__no_box_shadow": {
+      "properties": {
+        "background-color": "white",
+        "border-radius": "12px",
+        "padding": "20px",
+        "width": "250px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Card_Complete\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Button_Primary": {
+      "properties": {
+        "background-color": "#3498db",
+        "color": "white",
+        "border-radius": "8px",
+        "padding": "12px 24px",
+        "font-weight": "600"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Button_Primary__no_background_color": {
+      "properties": {
+        "color": "white",
+        "border-radius": "8px",
+        "padding": "12px 24px",
+        "font-weight": "600"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Primary\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Button_Primary__no_color": {
+      "properties": {
+        "background-color": "#3498db",
+        "border-radius": "8px",
+        "padding": "12px 24px",
+        "font-weight": "600"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Primary\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Button_Primary__no_border_radius": {
+      "properties": {
+        "background-color": "#3498db",
+        "color": "white",
+        "padding": "12px 24px",
+        "font-weight": "600"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Primary\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Button_Primary__no_font_weight": {
+      "properties": {
+        "background-color": "#3498db",
+        "color": "white",
+        "border-radius": "8px",
+        "padding": "12px 24px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Primary\" — identical except `font-weight` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-weight`."
+    },
+    "Button_Outline": {
+      "properties": {
+        "background-color": "transparent",
+        "border": "2px solid #3498db",
+        "color": "#3498db",
+        "border-radius": "8px",
+        "padding": "10px 22px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Button_Outline__no_background_color": {
+      "properties": {
+        "border": "2px solid #3498db",
+        "color": "#3498db",
+        "border-radius": "8px",
+        "padding": "10px 22px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Outline\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Button_Outline__no_border": {
+      "properties": {
+        "background-color": "transparent",
+        "color": "#3498db",
+        "border-radius": "8px",
+        "padding": "10px 22px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Outline\" — identical except `border` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border`."
+    },
+    "Button_Outline__no_color": {
+      "properties": {
+        "background-color": "transparent",
+        "border": "2px solid #3498db",
+        "border-radius": "8px",
+        "padding": "10px 22px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Outline\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Button_Outline__no_border_radius": {
+      "properties": {
+        "background-color": "transparent",
+        "border": "2px solid #3498db",
+        "color": "#3498db",
+        "padding": "10px 22px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Button_Outline\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Badge_Success": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "color": "white",
+        "border-radius": "12px",
+        "padding": "4px 12px",
+        "font-size": "12px",
+        "font-weight": "bold"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Badge_Success__no_background_color": {
+      "properties": {
+        "color": "white",
+        "border-radius": "12px",
+        "padding": "4px 12px",
+        "font-size": "12px",
+        "font-weight": "bold"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Badge_Success\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Badge_Success__no_color": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "border-radius": "12px",
+        "padding": "4px 12px",
+        "font-size": "12px",
+        "font-weight": "bold"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Badge_Success\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Badge_Success__no_border_radius": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "color": "white",
+        "padding": "4px 12px",
+        "font-size": "12px",
+        "font-weight": "bold"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Badge_Success\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Badge_Success__no_font_size": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "color": "white",
+        "border-radius": "12px",
+        "padding": "4px 12px",
+        "font-weight": "bold"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Badge_Success\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Badge_Success__no_font_weight": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "color": "white",
+        "border-radius": "12px",
+        "padding": "4px 12px",
+        "font-size": "12px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Badge_Success\" — identical except `font-weight` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-weight`."
+    },
+    "Avatar_Circle": {
+      "properties": {
+        "width": "60px",
+        "height": "60px",
+        "border-radius": "50%",
+        "background-color": "#9b59b6",
+        "border": "3px solid white",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.15)"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Avatar_Circle__no_border_radius": {
+      "properties": {
+        "width": "60px",
+        "height": "60px",
+        "background-color": "#9b59b6",
+        "border": "3px solid white",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.15)"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Avatar_Circle\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Avatar_Circle__no_background_color": {
+      "properties": {
+        "width": "60px",
+        "height": "60px",
+        "border-radius": "50%",
+        "border": "3px solid white",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.15)"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Avatar_Circle\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Avatar_Circle__no_border": {
+      "properties": {
+        "width": "60px",
+        "height": "60px",
+        "border-radius": "50%",
+        "background-color": "#9b59b6",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.15)"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Avatar_Circle\" — identical except `border` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border`."
+    },
+    "Avatar_Circle__no_box_shadow": {
+      "properties": {
+        "width": "60px",
+        "height": "60px",
+        "border-radius": "50%",
+        "background-color": "#9b59b6",
+        "border": "3px solid white"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Avatar_Circle\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Input_Field": {
+      "properties": {
+        "border": "1px solid #bdc3c7",
+        "border-radius": "6px",
+        "padding": "12px 16px",
+        "background-color": "white",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Input_Field__no_border": {
+      "properties": {
+        "border-radius": "6px",
+        "padding": "12px 16px",
+        "background-color": "white",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Input_Field\" — identical except `border` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border`."
+    },
+    "Input_Field__no_border_radius": {
+      "properties": {
+        "border": "1px solid #bdc3c7",
+        "padding": "12px 16px",
+        "background-color": "white",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Input_Field\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Input_Field__no_background_color": {
+      "properties": {
+        "border": "1px solid #bdc3c7",
+        "border-radius": "6px",
+        "padding": "12px 16px",
+        "width": "200px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Input_Field\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Tag_Chip": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "color": "#2c3e50",
+        "border-radius": "16px",
+        "padding": "6px 14px",
+        "font-size": "13px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Tag_Chip__no_background_color": {
+      "properties": {
+        "color": "#2c3e50",
+        "border-radius": "16px",
+        "padding": "6px 14px",
+        "font-size": "13px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tag_Chip\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Tag_Chip__no_color": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "border-radius": "16px",
+        "padding": "6px 14px",
+        "font-size": "13px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tag_Chip\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Tag_Chip__no_border_radius": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "color": "#2c3e50",
+        "padding": "6px 14px",
+        "font-size": "13px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tag_Chip\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Tag_Chip__no_font_size": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "color": "#2c3e50",
+        "border-radius": "16px",
+        "padding": "6px 14px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tag_Chip\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Tooltip_Style": {
+      "properties": {
+        "background-color": "#2c3e50",
+        "color": "white",
+        "border-radius": "6px",
+        "padding": "8px 12px",
+        "font-size": "12px",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.2)"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Tooltip_Style__no_background_color": {
+      "properties": {
+        "color": "white",
+        "border-radius": "6px",
+        "padding": "8px 12px",
+        "font-size": "12px",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.2)"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tooltip_Style\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Tooltip_Style__no_color": {
+      "properties": {
+        "background-color": "#2c3e50",
+        "border-radius": "6px",
+        "padding": "8px 12px",
+        "font-size": "12px",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.2)"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tooltip_Style\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Tooltip_Style__no_border_radius": {
+      "properties": {
+        "background-color": "#2c3e50",
+        "color": "white",
+        "padding": "8px 12px",
+        "font-size": "12px",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.2)"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tooltip_Style\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Tooltip_Style__no_font_size": {
+      "properties": {
+        "background-color": "#2c3e50",
+        "color": "white",
+        "border-radius": "6px",
+        "padding": "8px 12px",
+        "box-shadow": "0 2px 8px rgba(0,0,0,0.2)"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tooltip_Style\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Tooltip_Style__no_box_shadow": {
+      "properties": {
+        "background-color": "#2c3e50",
+        "color": "white",
+        "border-radius": "6px",
+        "padding": "8px 12px",
+        "font-size": "12px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Tooltip_Style\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Glass_Effect": {
+      "properties": {
+        "background-color": "rgba(255,255,255,0.2)",
+        "backdrop-filter": "blur(10px)",
+        "border-radius": "16px",
+        "border": "1px solid rgba(255,255,255,0.3)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Glass_Effect__no_background_color": {
+      "properties": {
+        "backdrop-filter": "blur(10px)",
+        "border-radius": "16px",
+        "border": "1px solid rgba(255,255,255,0.3)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Glass_Effect\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Glass_Effect__no_backdrop_filter": {
+      "properties": {
+        "background-color": "rgba(255,255,255,0.2)",
+        "border-radius": "16px",
+        "border": "1px solid rgba(255,255,255,0.3)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Glass_Effect\" — identical except `backdrop-filter` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `backdrop-filter`."
+    },
+    "Glass_Effect__no_border_radius": {
+      "properties": {
+        "background-color": "rgba(255,255,255,0.2)",
+        "backdrop-filter": "blur(10px)",
+        "border": "1px solid rgba(255,255,255,0.3)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Glass_Effect\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Glass_Effect__no_border": {
+      "properties": {
+        "background-color": "rgba(255,255,255,0.2)",
+        "backdrop-filter": "blur(10px)",
+        "border-radius": "16px",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Glass_Effect\" — identical except `border` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border`."
+    },
+    "Neumorphic_Light": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "border-radius": "20px",
+        "box-shadow": "8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Neumorphic_Light__no_background_color": {
+      "properties": {
+        "border-radius": "20px",
+        "box-shadow": "8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Neumorphic_Light\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Neumorphic_Light__no_border_radius": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "box-shadow": "8px 8px 16px #d1d9e6, -8px -8px 16px #ffffff",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Neumorphic_Light\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Neumorphic_Light__no_box_shadow": {
+      "properties": {
+        "background-color": "#ecf0f1",
+        "border-radius": "20px",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Neumorphic_Light\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Edge_NegativeOffset": {
+      "properties": {
+        "position": "relative",
+        "top": "-5px",
+        "left": "-10px",
+        "background-color": "#e74c3c",
+        "padding": "15px",
+        "width": "100px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_NegativeOffset__no_background_color": {
+      "properties": {
+        "position": "relative",
+        "top": "-5px",
+        "left": "-10px",
+        "padding": "15px",
+        "width": "100px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_NegativeOffset\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Edge_PercentRadius": {
+      "properties": {
+        "border-radius": "25%",
+        "background-color": "#3498db",
+        "width": "120px",
+        "height": "80px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_PercentRadius__no_border_radius": {
+      "properties": {
+        "background-color": "#3498db",
+        "width": "120px",
+        "height": "80px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_PercentRadius\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Edge_PercentRadius__no_background_color": {
+      "properties": {
+        "border-radius": "25%",
+        "width": "120px",
+        "height": "80px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_PercentRadius\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Edge_VeryLargeRadius": {
+      "properties": {
+        "border-radius": "9999px",
+        "background-color": "#9b59b6",
+        "padding": "15px 30px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_VeryLargeRadius__no_border_radius": {
+      "properties": {
+        "background-color": "#9b59b6",
+        "padding": "15px 30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_VeryLargeRadius\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Edge_VeryLargeRadius__no_background_color": {
+      "properties": {
+        "border-radius": "9999px",
+        "padding": "15px 30px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_VeryLargeRadius\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Edge_ZeroOpacity": {
+      "properties": {
+        "opacity": "0",
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_ZeroOpacity__no_opacity": {
+      "properties": {
+        "background-color": "#e74c3c",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_ZeroOpacity\" — identical except `opacity` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `opacity`."
+    },
+    "Edge_ZeroOpacity__no_background_color": {
+      "properties": {
+        "opacity": "0",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_ZeroOpacity\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Edge_TinyText": {
+      "properties": {
+        "font-size": "8px",
+        "color": "#2c3e50",
+        "padding": "5px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_TinyText__no_font_size": {
+      "properties": {
+        "color": "#2c3e50",
+        "padding": "5px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_TinyText\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Edge_TinyText__no_color": {
+      "properties": {
+        "font-size": "8px",
+        "padding": "5px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_TinyText\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Edge_HugeText": {
+      "properties": {
+        "font-size": "48px",
+        "font-weight": "900",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_HugeText__no_font_size": {
+      "properties": {
+        "font-weight": "900",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_HugeText\" — identical except `font-size` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-size`."
+    },
+    "Edge_HugeText__no_font_weight": {
+      "properties": {
+        "font-size": "48px",
+        "color": "#e74c3c",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_HugeText\" — identical except `font-weight` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `font-weight`."
+    },
+    "Edge_HugeText__no_color": {
+      "properties": {
+        "font-size": "48px",
+        "font-weight": "900",
+        "padding": "10px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_HugeText\" — identical except `color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `color`."
+    },
+    "Edge_DeepNesting": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "column",
+        "gap": "5px",
+        "padding": "10px",
+        "background-color": "#f0f0f0",
+        "border": "2px solid #333",
+        "border-radius": "8px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_DeepNesting__no_background_color": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "column",
+        "gap": "5px",
+        "padding": "10px",
+        "border": "2px solid #333",
+        "border-radius": "8px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_DeepNesting\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Edge_DeepNesting__no_border": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "column",
+        "gap": "5px",
+        "padding": "10px",
+        "background-color": "#f0f0f0",
+        "border-radius": "8px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_DeepNesting\" — identical except `border` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border`."
+    },
+    "Edge_DeepNesting__no_border_radius": {
+      "properties": {
+        "display": "flex",
+        "flex-direction": "column",
+        "gap": "5px",
+        "padding": "10px",
+        "background-color": "#f0f0f0",
+        "border": "2px solid #333"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_DeepNesting\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Edge_MultiTransform": {
+      "properties": {
+        "transform": "rotate(10deg) scale(0.9) translateX(5px) skewX(5deg)",
+        "background-color": "#2ecc71",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_MultiTransform__no_transform": {
+      "properties": {
+        "background-color": "#2ecc71",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_MultiTransform\" — identical except `transform` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `transform`."
+    },
+    "Edge_MultiTransform__no_background_color": {
+      "properties": {
+        "transform": "rotate(10deg) scale(0.9) translateX(5px) skewX(5deg)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_MultiTransform\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Edge_InsetRoundShadow": {
+      "properties": {
+        "box-shadow": "inset 0 0 20px rgba(0,0,0,0.5)",
+        "border-radius": "20px",
+        "background-color": "#f39c12",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_InsetRoundShadow__no_box_shadow": {
+      "properties": {
+        "border-radius": "20px",
+        "background-color": "#f39c12",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_InsetRoundShadow\" — identical except `box-shadow` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `box-shadow`."
+    },
+    "Edge_InsetRoundShadow__no_border_radius": {
+      "properties": {
+        "box-shadow": "inset 0 0 20px rgba(0,0,0,0.5)",
+        "background-color": "#f39c12",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_InsetRoundShadow\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    },
+    "Edge_InsetRoundShadow__no_background_color": {
+      "properties": {
+        "box-shadow": "inset 0 0 20px rgba(0,0,0,0.5)",
+        "border-radius": "20px",
+        "padding": "25px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_InsetRoundShadow\" — identical except `background-color` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-color`."
+    },
+    "Edge_GradientWithRadius": {
+      "properties": {
+        "background-image": "linear-gradient(45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)",
+        "border-radius": "15px",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123"
+    },
+    "Edge_GradientWithRadius__no_background_image": {
+      "properties": {
+        "border-radius": "15px",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_GradientWithRadius\" — identical except `background-image` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `background-image`."
+    },
+    "Edge_GradientWithRadius__no_border_radius": {
+      "properties": {
+        "background-image": "linear-gradient(45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab)",
+        "padding": "20px"
+      },
+      "_text": "Hamburg 123",
+      "_note": "CONTROL for \"Edge_GradientWithRadius\" — identical except `border-radius` is removed. If this renders the same as its case on a platform, that platform applied no visible effect for `border-radius`."
+    }
+  }
+}

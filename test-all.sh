@@ -890,7 +890,34 @@ fi
 # path in front of you. We re-raise the exact code at the very end so
 # callers and CI see no change in behaviour.
 COMPARE_EXIT=0
+# A SKIPPED platform's capture directory still holds whatever the LAST run
+# left there — quite possibly a different fixture entirely. The comparator
+# unions component names across all three directories, so those stale PNGs
+# come back as phantom rows: components that are not in this fixture, with
+# only the skipped platforms present.
+#
+# Measured: `SKIP_IOS=1 SKIP_ANDROID=1 ./test-all.sh visual-test-controls.json`
+# produced 397 rows — 359 real (web) plus 38 left over from a previous
+# composition-test.json run. The cross-platform gate then evaluated 38 pairs
+# belonging to a different fixture and reported 7 "unexpected divergences"
+# that were pure cross-fixture contamination.
+#
+# Fix: point a skipped platform at an empty directory, which is exactly what
+# tools/titan/section-runner.sh already does for out-of-scope platforms. This
+# uses the same env overrides the comparator already honours, so nothing is
+# deleted — the previous captures stay on disk, they just stop being read as
+# though they belonged to this run.
+# NOTE: deliberately NOT registered with `trap ... EXIT` — this script already
+# owns an EXIT trap chain for emulator teardown and lock release (see the top
+# of the file), and a second EXIT trap would replace it, leaking the emulator
+# and the run lock. Cleaned up inline instead.
+COMPARE_EMPTY_DIR="$(mktemp -d)"
+[[ "${SKIP_IOS:-0}"     == "1" ]] && export IOS_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+[[ "${SKIP_ANDROID:-0}" == "1" ]] && export ANDROID_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+[[ "${SKIP_WEB:-0}"     == "1" ]] && export WEB_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+
 ( cd "$TOOLS_VISUAL_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" ) || COMPARE_EXIT=$?
+rmdir "$COMPARE_EMPTY_DIR" 2>/dev/null || true
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 # Close out whatever stage was running, then print the summary without
