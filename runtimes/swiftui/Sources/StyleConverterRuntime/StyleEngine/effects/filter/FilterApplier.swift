@@ -15,7 +15,9 @@
 //    hue-rotate(deg)    → .hueRotation(.degrees(deg))
 //    invert(100)        → .colorInvert()        (partial invert is lossy)
 //    opacity(pct)       → .opacity(pct/100)
-//    sepia              → approximate with .saturation + hue shift (no native API)
+//    sepia(pct)         → §8.5 matrix to within a quantisation step, via
+//                         SepiaMatrix's rank-1 factorisation (reweight →
+//                         .grayscale → tint, additively blended)
 //    drop-shadow        → .shadow(color:, radius:, x:, y:)
 //
 //  BackdropFilter has no first-class SwiftUI API. Since lane BF-I it is
@@ -152,11 +154,60 @@ struct FilterApplier: ViewModifier {
             // CSS grayscale amount in 0–100; SwiftUI expects 0–1.
             v.grayscale(pct / 100)
         case .sepia(let pct):
-            // No native sepia filter. Approximate by desaturating and
-            // tinting with a warm overlay. Amount in 0–1.
-            v.saturation(1 - pct / 200)
-                .colorMultiply(Color(red: 1.0, green: 0.9, blue: 0.7)
-                               .opacity(pct / 100))
+            // filter-effects-1 §8.5's colour matrix, via the least-squares
+            // rank-1 factorisation in SepiaMatrix (see that file for the
+            // derivation, the platform facts it rests on, and why a real
+            // colour matrix was declined):
+            //
+            //     M(a)·c ≈ (1-a)·c + a·(w·c)·t
+            //
+            // `.grayscale(1)` sums with Rec.709 weights, so a per-channel
+            // REWEIGHT first makes it sum in sepia's basis instead.
+            //
+            // The two layers are composited the way CrossFadeApplier does
+            // it, and for the same reason: COMPLEMENTARY OPACITIES plus
+            // `.plusLighter` (component-wise premultiplied ADD) inside a
+            // `.compositingGroup()`.
+            //
+            // The obvious construction — draw the sepia layer over the
+            // original at `.opacity(a)` with ordinary source-over — is
+            // WRONG for anything not fully opaque, and this file had it
+            // that way first. Source-over multiplies the top layer's alpha,
+            // so for coverage α the result carries α·a + (1-α·a)·α, not α.
+            // Computed for `rgba(52,152,219,0.5)` under `sepia(80%)` over
+            // the #1a1a2e page:
+            //
+            //     spec / web / Android   (90, 92, 95)   out_alpha 0.50
+            //     src-over ZStack        (95,117,129)   out_alpha 0.70
+            //     this construction      (90, 92, 95)   out_alpha 0.50
+            //
+            // That is every translucent background, every `opacity` on a
+            // filtered element, and every antialiased edge — CrossFadeApplier
+            // already documents the identical trap for weighted image
+            // layers ("sequential src-over stacking would give 1−0.9⁶").
+            //
+            // Additive layers sum to the lerp with alpha untouched:
+            //     (1-a)·α·c + a·α·s   carries alpha (1-a)·α + a·α = α.
+            let sepiaAmount = SepiaMatrix.amount(pct)
+            if sepiaAmount <= 0 {
+                // amount 0 is the identity — no group, no second render.
+                v
+            } else {
+                ZStack {
+                    // The (1-a)·c term, pre-scaled for the additive sum.
+                    v.opacity(1 - sepiaAmount)
+                        .blendMode(.plusLighter)
+                    // The a·(w·c)·t term.
+                    v.colorMultiply(SepiaMatrix.reweightColor)  // → sepia's basis
+                        .grayscale(1.0)                          // → w·c, broadcast
+                        .colorMultiply(SepiaMatrix.tintColor)    // → × t
+                        .opacity(sepiaAmount)
+                        .blendMode(.plusLighter)
+                }
+                // Isolate: without the group, plusLighter would add into
+                // whatever the page already painted below this element.
+                .compositingGroup()
+            }
         case .invert(let pct):
             // SwiftUI has a boolean colorInvert; we only invert at 100%.
             if pct >= 50 { v.colorInvert() } else { v }

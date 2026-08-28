@@ -1,0 +1,9 @@
+{
+  "_comment": "Reads SwiftUI's .grayscale luminance basis directly off the render. filter: grayscale(100%) on a pure primary outputs that channel's weight x 255, so these four components DISCRIMINATE between the candidate bases rather than merely agreeing with one: Rec.709-gamma predicts 54/182/18/75, Rec.601-gamma predicts 76/150/29/79, and a linear-space sum predicts 127/220/76/82. Measured on iOS: 54/182/18/75 (Rec.709 gamma, exact on all four). SepiaMatrix.swift depends on this fact, so it is pinned here where anyone can re-measure it.",
+  "components": {
+    "GrayBasis_Red":   { "properties": { "width": "120px", "height": "40px", "background-color": "#ff0000", "filter": "grayscale(100%)" } },
+    "GrayBasis_Green": { "properties": { "width": "120px", "height": "40px", "background-color": "#00ff00", "filter": "grayscale(100%)" } },
+    "GrayBasis_Blue":  { "properties": { "width": "120px", "height": "40px", "background-color": "#0000ff", "filter": "grayscale(100%)" } },
+    "GrayBasis_Mixed": { "properties": { "width": "120px", "height": "40px", "background-color": "#804020", "filter": "grayscale(100%)" } }
+  }
+}

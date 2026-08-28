@@ -202,7 +202,7 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // Hardcoded deliberately: the count is the thing that must not drift
   // unnoticed. Changing it should require editing this line, which is a
   // review prompt.
-  assert.equal(led.expectations.length, 30, '22 on visual-test + 2 on composition-test; opacity-group entries went stale when the iOS compositingGroup fix landed');
+  assert.equal(led.expectations.length, 28, '22 on visual-test + 2 on composition-test; opacity-group entries went stale when the iOS compositingGroup fix landed');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);

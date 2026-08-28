@@ -1521,6 +1521,105 @@ the property under test is entirely unexercised.** No 3-way comparison
 can ever see it; only the temporal check can. Implementing the
 mid-capture flip on three harnesses is follow-up work.
 
+## iOS sepia() was an eyeballed approximation (2026-08-28)
+
+Found by the ΔE gate the same day it was added — it scored ΔE95 23.35
+while SSIM 0.957 and Δpx 0.57% both passed, and the divergence classifier
+had already labelled the iOS-web pair `color-drift`. The report knew; the
+gate did not.
+
+`filter: sepia(80%)` over `#3498db` = (52,152,219): filter-effects-1 §8.5
+gives **(153,158,143)**, which Android and web both render exactly. iOS
+rendered **(74,110,113)** — RGB distance 97, and *cool* where sepia must
+be warm. The cause was an approximation the file admitted to in its own
+header: `saturation(1 - pct/200)` followed by a `colorMultiply` by a warm
+colour **at `pct/100` alpha**; multiplying by an 80%-alpha colour darkens
+everything, which was most of the error.
+
+Scope check first: sepia was the **only** broken filter. Measured against
+the spec on the same corpus, `grayscale(100%)`, `brightness(1.5)` and
+`contrast(1.2) saturate(1.5)` all land exactly on the CSS value on all
+three platforms.
+
+### The fix, and why not a real colour matrix
+
+SwiftUI has no *public view-level* colour-matrix modifier — a distinction
+worth stating precisely, because the alternatives exist and were declined
+rather than being unavailable:
+
+- `View._colorMatrix(_:)` is SPI (underscored); nothing else in the
+  runtime depends on underscored SwiftUI API.
+- `GraphicsContext.Filter.colorMatrix` is public (iOS 15) but lives inside
+  `Canvas`, so it means rasterising the subtree.
+- `.colorEffect` (Metal) is iOS 17+, above the package's iOS 16 floor —
+  **and not buildable here at all**: the Metal toolchain is a separately
+  downloaded Xcode component, absent on this machine, so adding a `.metal`
+  source would break every iOS build including CI.
+
+Instead, the spec matrix `S` is *nearly* rank-1, so
+`M(a)·c ≈ (1-a)·c + a·(w·c)·t` — a blend of the original with a tinted
+luminance. The luminance needs sepia's own weights, and `.grayscale(1)`
+sums with Rec.709. The lever is that a channel **reweight** before the
+grayscale changes the basis: `grayscale(colorMultiply(c, k)) = Σ w709ᵢ·kᵢ·cᵢ`,
+so `kᵢ = wᵢ/w709ᵢ` makes it sum in sepia's basis. `t` is least-squares
+fitted rather than read off an arbitrary column (worst-case gamut residual
+0.83 → 0.42 per 255).
+
+### Two platform facts, pinned by fixtures rather than asserted
+
+Both are undocumented, so both now have fixtures anyone can re-measure:
+
+- **`fixtures/properties/effects/filter-grayscale-basis.json`** puts pure
+  primaries through `grayscale(100%)`, reading the basis off directly. It
+  *discriminates* rather than merely agreeing: Rec.709-gamma predicts
+  54/182/18/75, Rec.601 predicts 76/150/29/79, linear-space predicts
+  127/220/76/82. Measured on all three platforms: **54/182/18/75.**
+- **`fixtures/properties/effects/filter-sepia-amounts.json`** covers the
+  amount range plus the two cases the old corpus could not see — an
+  extended-range case (the reweight drives blue ×2.618, so a clamp before
+  the grayscale would show here) and a translucent one.
+
+### The alpha bug the first attempt shipped
+
+The obvious construction — draw the sepia layer over the original at
+`.opacity(a)` with ordinary source-over — is **wrong for anything not
+fully opaque**, and the first version of this fix had it that way. Source-over
+multiplies the top layer's alpha, so coverage α comes out as
+`α·a + (1-α·a)·α`, not α. For `rgba(52,152,219,0.5)` under `sepia(80%)`:
+
+| | result | out_alpha |
+|---|---|---|
+| spec / web / Android | (90, 92, 95) | 0.50 |
+| src-over ZStack | (95,117,129) | 0.70 |
+| shipped (additive) | (89, 92, 95) | 0.50 |
+
+That is every translucent background, every `opacity` on a filtered
+element, every antialiased edge — and **no fixture in the repo could see
+it**, because every sepia fixture was an opaque box. The same
+degenerate-corpus pattern recorded elsewhere in this file.
+
+The fix uses complementary opacities with `.plusLighter` inside a
+`.compositingGroup()`, since `(1-a)·α·c + a·α·s` carries alpha
+`(1-a)·α + a·α = α`. `CrossFadeApplier` already documents this exact trap
+for weighted image layers ("sequential src-over stacking would give
+1−0.9⁶ ≈ 0.47 — wrong"); the idiom is reused rather than reinvented.
+
+### Result
+
+All 8 sepia cases and all 4 grayscale cases pass on all three platforms,
+gate clean. Worst channel distance from the CSS value: **iOS 1, Android 0,
+web 0** — five of eight exact on iOS. The fixture pair's ΔE95 went
+23.35 → 0.69, the two ledger entries went stale, and the gate promoted
+earlier that day reported them with `EXIT_STALE_EXPECTATION`. Ledger
+30 → 28.
+
+The residual 1 is not the matrix: it is per-layer 8-bit quantisation in
+the additive composite. For the fixture's green,
+`round(0.2×152) + round(0.8×round(159.26)) = 30 + 127 = 157` against an
+unquantised 157.81. Both candidate tints render 157, so the
+least-squares fit's benefit here is analytic, not visible — recorded that
+way rather than as a pixel win it did not deliver.
+
 ## Test suites
 
 | suite | command | tests |
@@ -1528,7 +1627,7 @@ mid-capture flip on three harnesses is follow-up work.
 | converter (Kotlin) | `./gradlew :converter:test` | 368 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2761 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1802 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1811 |
 | tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1738 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 

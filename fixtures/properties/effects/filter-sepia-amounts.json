@@ -1,0 +1,13 @@
+{
+  "_comment": "sepia() across its amount range plus the two cases the old opaque-box-only corpus could not see. Sepia_ExtendedRange drives blue x2.618 through the reweight, so a clamp before .grayscale would show up here. Sepia_Translucent is the alpha case: source-over compositing of the two layers gets both alpha AND colour wrong for anything not fully opaque, and no previous sepia fixture was translucent. Expected (CSS filter-effects-1 8.5, matching web and Android): 80% on #3498db -> (153,158,143); 100% -> (179,159,124); 50% on #ff0000 -> (178,44,35); 100% on #0000ff -> (48,43,33); 100% on white -> (255,255,239); 0% is the identity.",
+  "components": {
+    "Sepia_Zero":          { "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "sepia(0%)" } },
+    "Sepia_Half":          { "properties": { "width": "120px", "height": "40px", "background-color": "#ff0000", "filter": "sepia(50%)" } },
+    "Sepia_Fixture":       { "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "sepia(80%)" } },
+    "Sepia_Full":          { "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "sepia(100%)" } },
+    "Sepia_ExtendedRange": { "properties": { "width": "120px", "height": "40px", "background-color": "#0000ff", "filter": "sepia(100%)" } },
+    "Sepia_White":         { "properties": { "width": "120px", "height": "40px", "background-color": "#ffffff", "filter": "sepia(100%)" } },
+    "Sepia_Translucent":   { "properties": { "width": "120px", "height": "40px", "background-color": "rgba(52,152,219,0.5)", "filter": "sepia(80%)" } },
+    "Sepia_OverClamp":     { "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "sepia(300%)" } }
+  }
+}
