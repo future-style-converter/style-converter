@@ -396,6 +396,40 @@ try {
     new Promise((r) => setTimeout(r, 50))
   );
 
+  // Post-paint forced-state FLIP (spec 07 §4). Only when a clock is also
+  // pinned: with `animationTime` set, ComponentRenderer.tsx deliberately
+  // mounts WITHOUT the force class, so the element's first computed style
+  // is the base style. Adding the class here is a real style change, which
+  // is the only way the browser creates a CSSTransition object — a
+  // transition's timeline zero IS the flip.
+  //
+  // Two forced reflows, not requestAnimationFrame: this file already
+  // documents (above) that headless Chrome throttles rAF and the evaluate
+  // hangs to protocol timeout. A transition needs a style CHANGE EVENT,
+  // not a frame; reading offsetHeight flushes style/layout synchronously,
+  // which pins the before-change style and then commits the after-change
+  // one. Deterministic, and no clock involved.
+  //
+  // The class goes on every [data-component-id], matching what
+  // NodeRenderer puts there on a mount-time forced run, and RuleBuilder
+  // already emits the twin selector `.cls:hover, .cls.force-hover`.
+  if (forceState && animationTime !== undefined) {
+    const flipped = await page.evaluate((state) => {
+      void document.body.offsetHeight;                 // pin before-change style
+      const els = document.querySelectorAll('[data-component-id]');
+      for (const el of els) el.classList.add(`force-${state}`);
+      void document.body.offsetHeight;                 // the style change event
+      return els.length;
+    }, forceState);
+    if (flipped === 0) {
+      throw new Error(
+        `CAPTURE_FORCE_STATE=${forceState} with CAPTURE_ANIMATION_TIME set, but no ` +
+        `[data-component-id] elements were found to flip — the capture would have ` +
+        `rendered base state at every t and looked like a dead transition.`);
+    }
+    console.log(`  forced-state flip applied post-paint to ${flipped} element(s) → force-${forceState}`);
+  }
+
   // Deterministic animation seize (spec 07 §5). The capture page already
   // seized on mount (CaptureGallery's `?animationTime=` effect — the
   // reference implementation); this RE-seize catches animations created
@@ -416,6 +450,17 @@ try {
       els.every((el) => el.getAttribute('data-animation-time') !== null));
     if (!marked) {
       throw new Error('CAPTURE_ANIMATION_TIME set but canvases carry no data-animation-time marker — seize did not run');
+    }
+    // A seize that paused NOTHING is not a success when a state was also
+    // forced: it means the flip produced no transition, i.e. the capture
+    // is a static frame wearing a motion run's name. iOS and Android both
+    // hard-fail their equivalent; web printed "(0 animation(s) paused)"
+    // and carried on.
+    if (forceState && seized === 0) {
+      throw new Error(
+        `CAPTURE_FORCE_STATE=${forceState} + CAPTURE_ANIMATION_TIME=${animationTime} but ` +
+        `the seize paused 0 animations — no transition was created by the flip, so every ` +
+        `sampled t would render the same static frame.`);
     }
     console.log(`  animation clock seized at t=${animationTime}s (${seized} animation(s) paused)`);
   }

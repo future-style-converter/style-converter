@@ -1127,7 +1127,7 @@ object ComponentRenderer {
         //    covered property's effective value, animate old → new per
         //    transition-*. Identity-preserving without transition-* props.
         val transitionedProperties = com.styleconverter.runtime.animations.TransitionDriver
-            .apply(dynResolution.properties)
+            .apply(dynResolution.properties, component.id)
         // 2. Keyframe animations (§1–§3): overlay the interpolated wire-
         //    keyframe values for the current clock (live frame loop, or the
         //    CAPTURE_ANIMATION_TIME forced instant, §5) BEFORE extraction —

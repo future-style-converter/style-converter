@@ -8,13 +8,15 @@ package com.styleconverter.runtime.animations
 // `transition-property` (or `all`), the old value animates to the new one
 // over transition-duration + delay + timing-function.
 //
-// Capture posture (docs/DYNAMIC_CAPTURE.md §4 honest note): forced states
-// apply at FIRST PAINT on this platform too, so under a capture run there
-// is no post-paint flip and no transition ever starts — the fixture gates
-// its two deterministic ENDPOINT states. Accordingly, when
-// CAPTURE_ANIMATION_TIME is set the driver snaps to the resolved target
-// outright (endpoint state, byte-stable), and the live flight machinery
-// below only serves real interactive input (hover/press/focus on device).
+// Capture posture (docs/DYNAMIC_CAPTURE.md §4): the harness now performs a
+// real post-paint flip — ScreenshotCaptureScreen mounts in BASE state and
+// applies the forced set one painted frame later, but ONLY when a clock is
+// pinned. So under `CAPTURE_ANIMATION_TIME` this driver presents the blend
+// at the pinned t (the flip is timeline zero, §4), and under a forced run
+// with no clock the forced set still applies at mount, so settled-appearance
+// captures are unchanged. Measured on transitions.json at t=0.4s:
+// MT_BgFade renders (153,107,102) on all three platforms — the spec value —
+// where every t previously rendered the endpoint (192,57,43).
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -160,7 +162,7 @@ object TransitionDriver {
      * properties (the overwhelmingly common case).
      */
     @Composable
-    fun apply(resolved: List<IRProperty>): List<IRProperty> {
+    fun apply(resolved: List<IRProperty>, componentId: String = ""): List<IRProperty> {
         // Cheap pre-gate: no transition-* declarations → no driver at all.
         val hasTransitionProps = resolved.any { it.type.startsWith("Transition") }
         if (!hasTransitionProps) return resolved
@@ -170,19 +172,57 @@ object TransitionDriver {
         }
         if (!config.hasTransitions) return resolved
 
-        // Deterministic capture (§5 + DYNAMIC_CAPTURE §4 honest note):
-        // forced runs have no post-paint flip, so transitions resolve to
-        // their ENDPOINT state — return the resolved target unchanged.
-        if (KeyframeAnimationDriver.LocalForcedAnimationTime.current != null) return resolved
-
         // Shared frame clock for this component's flights.
-        var nowMs by remember { mutableDoubleStateOf(0.0) }
-        var flights by remember { mutableStateOf(listOf<Flight>()) }
+        //
+        // KEYED ON componentId, and that is load-bearing rather than
+        // tidiness. The Android capture loop renders every component
+        // through ONE composition slot (ScreenshotCaptureScreen's
+        // `CaptureView(component = flat[currentIndex], …)`, with no
+        // `key(...)` anywhere in the file), so an unkeyed `remember` here
+        // SURVIVES the switch from component N-1 to component N. That was
+        // harmless only while the forced-clock branch below bailed out;
+        // the moment transitions present under capture, component N would
+        // start flights from component N-1's committed values — e.g.
+        // MT_WidthGrow animating from MT_BgFade's background colour.
+        //
+        // Keyed here rather than by wrapping the call site in `key()`:
+        // that would change composition identity for the whole committed
+        // 327-baseline corpus, which is not inert by construction.
+        var nowMs by remember(componentId) { mutableDoubleStateOf(0.0) }
+        var flights by remember(componentId) { mutableStateOf(listOf<Flight>()) }
         // The last target list we committed — flips are detected as
         // value inequality against it. Initialized to the FIRST resolved
         // list, so first paint never transitions (matches web: the
         // element mounts already in its initial state).
-        var committed by remember { mutableStateOf(resolved) }
+        var committed by remember(componentId) { mutableStateOf(resolved) }
+
+        // Deterministic capture (§5): present the blend at the PINNED t.
+        //
+        // This used to bail — "forced runs have no post-paint flip, so
+        // transitions resolve to their ENDPOINT state" — which was an
+        // accurate description of the harness at the time and is what
+        // docs/DYNAMIC_CAPTURE.md §4 recorded as deferred platform-lane
+        // work. The harness now performs that flip (ScreenshotCaptureScreen
+        // applies the forced set one painted frame after mount), so the
+        // bail would discard the very flight the flip exists to create.
+        //
+        // The flip IS timeline zero (spec 07 §4), so flights start at 0.0
+        // and present at `forcedT`; no frame clock runs at all, which is
+        // the same construction that makes the keyframe lane byte-stable
+        // under capture. `transition-delay` counts inside t, exactly as
+        // §5 requires ("as if wall-clock time t had elapsed").
+        val forcedT = KeyframeAnimationDriver.LocalForcedAnimationTime.current
+        if (forcedT != null) {
+            if (committed != resolved) {
+                flights = startFlights(committed, resolved, config, 0.0)
+                committed = resolved
+            }
+            // Unforced seized runs (the whole static corpus, and
+            // keyframes-basic) never flip, so `flights` stays empty and
+            // `presented` returns the SAME list instance the old bail
+            // returned — inert by construction, not by argument.
+            return presented(resolved, flights, forcedT * 1000.0)
+        }
 
         if (committed != resolved) {
             // A bucket flip landed: launch flights FROM the currently

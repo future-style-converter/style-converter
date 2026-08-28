@@ -875,10 +875,39 @@ private fun CaptureCanvas(
     onPositioned: (androidx.compose.ui.geometry.Offset, Float, Float) -> Unit,
     onRendered: () -> Unit
 ) {
+    // Post-paint forced-state FLIP (spec 07 §4).
+    //
+    // A transition's timeline zero is the base→forced flip, and
+    // TransitionDriver detects a flip as value inequality against the
+    // list it committed on first composition. Providing the forced set at
+    // mount means the FIRST resolution is already the forced one, so
+    // nothing ever changes and no flight is ever created — which is why
+    // transitions.json rendered its endpoint at every t.
+    //
+    // Only deferred when a clock is also pinned. Without `animationTime`
+    // the forced set is applied at mount exactly as before, so
+    // settled-appearance runs (interaction-states.mjs and friends) keep
+    // capturing the resting forced state rather than a mid-flight frame
+    // at some racy wall-clock instant.
+    //
+    // `withFrameNanos { }` — not a delay — is the guarantee that a frame
+    // was actually PAINTED with the base list, so the driver has
+    // committed it before the write lands. Nothing downstream reads wall
+    // time (the seized lane presents at the pinned t), so this only has
+    // to happen once, with no timing precision required of it.
+    val deferForcedState = forceState != null && animationTime != null
+    var appliedForceState by remember(component.id) {
+        mutableStateOf(if (deferForcedState) null else forceState)
+    }
+
     // Give Compose a frame to settle, then tell the caller we're ready.
     // The delay is conservatively larger for components with complex
     // sub-trees (grids, transforms) where layout may span multiple frames.
     LaunchedEffect(component.id) {
+        if (deferForcedState) {
+            withFrameNanos { }          // one painted frame in BASE state
+            appliedForceState = forceState
+        }
         delay(150)
         onRendered()
     }
@@ -939,7 +968,7 @@ private fun CaptureCanvas(
             // Forced-state set (spec 06 §6): one condition per capture run,
             // resolved as active on every component under this canvas.
             com.styleconverter.runtime.core.states.DynamicStyleResolver.LocalForcedStates provides
-                (forceState?.let { setOf(it) } ?: emptySet()),
+                (appliedForceState?.let { setOf(it) } ?: emptySet()),
             // Document keyframes channel (spec 07 §1.2): @keyframes are
             // document-scoped, the harness owns the document — same
             // division of labor as the web harness's useKeyframeRules.

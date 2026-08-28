@@ -1503,23 +1503,75 @@ but not for `forceState`. The asymmetry *was* the hiding place.
 variable. With the transport fixed, the gate is clean at every sampled
 time.
 
-### Open: transitions never actually run
+### Transitions now actually run (fixed 2026-08-28)
 
-With `forceState` correctly applied on all three platforms, all 12
-platform-component series on `motion/transitions.json` are still
-byte-identical at t=0 and t=0.5. The harnesses mount **directly in** the
-forced end-state, so no property ever changes and no transition starts.
+For the record: this was **not** an undiscovered bug. `DYNAMIC_CAPTURE.md`
+§4 described it precisely — "the forced-state class is applied at first
+paint, so the element mounts already IN the forced state and no
+transition runs… wiring that post-paint flip is platform-lane work on all
+three platforms" — and Android's `TransitionDriver` bailed out explicitly,
+citing that note. The animation sweep re-measured a documented, deliberate
+deferral. What it added was the *number*: all 12 series byte-identical at
+every sampled t, on all three platforms.
 
-Spec 07 §4 is explicit that this should not be the case: "the forced-state
-hook is the deterministic trigger: forcing a state **mid-capture** starts
-the transition exactly like real input would." A mid-capture *flip* is
-required; a static forced-state mount is not the same thing.
+It is still worth stating as the correlated-failure mode in its purest
+form: **the cross-platform gate was clean — all three runtimes agreed
+perfectly — while the property under test was entirely unexercised.** No
+3-way comparison can see that; only a temporal check can.
 
-This is the correlated-failure mode in its purest form: **the
-cross-platform gate is clean — all three runtimes agree perfectly — while
-the property under test is entirely unexercised.** No 3-way comparison
-can ever see it; only the temporal check can. Implementing the
-mid-capture flip on three harnesses is follow-up work.
+**The reframe that made it small.** iOS *re-mounts per capture*:
+`ImageRenderer` is one synchronous layout+draw over a freshly built view
+graph per component, so `@State` re-initialises and `.onChange` can never
+fire. A real flip there is not hard, it is unrepresentable. So the
+contract is not "all three flip" but:
+
+> All three must **present the transition's value at pinned t**, with
+> timeline zero at the base→forced flip. How each gets there is platform
+> business.
+
+| platform | mechanism |
+|---|---|
+| web | **real DOM flip** — the renderer defers the force class when a clock is pinned; `capture-screenshots.mjs` adds it post-paint between two forced reflows (a style *change event*, the only thing that creates a `CSSTransition`), then the existing seize seeks it |
+| Android | **real recomposition flip** — `CaptureCanvas` mounts in base state and writes the forced set after `withFrameNanos {}`; `TransitionDriver` presents the blend at the pinned t |
+| iOS | **declared flip** — the renderer computes the pre-flip list as `effective(for:)` minus the forced set (`StateResolver` is pure, so it is exactly reproducible) and blends at t |
+
+**Engages only when both knobs are set.** With `CAPTURE_FORCE_STATE` but
+no clock, the state still applies at mount — so `interaction-states.mjs`,
+which captures forced states as a *settled* appearance, keeps doing
+exactly that instead of grabbing a mid-flight frame at a racy wall-clock
+instant. That also makes the whole static corpus inert by construction.
+
+**The hazard that would have produced silent garbage.** Android's capture
+loop renders every component through **one composition slot** (no `key(`
+anywhere in the file), while `TransitionDriver`'s `flights`/`committed`
+were unkeyed `remember`s. Harmless only while the driver bailed under
+capture; the moment transitions present, component *N* would start
+flights from component *N−1*'s committed values — `MT_WidthGrow`
+animating from `MT_BgFade`'s background colour. Fixed inside the driver
+(`remember(componentId)`) rather than by wrapping the call site in
+`key()`, which would change composition identity for the whole
+327-baseline corpus and so would not be inert.
+
+### Verification
+
+| check | result |
+|---|---|
+| `MT_BgFade` at t=0.4s — spec lerp `#7f8c8d`→`#c0392b` | **(153,107,102) exact on all three** (was (192,57,43), the endpoint, at every t) |
+| `MT_WidthGrow` at t=0.5s — geometric, rounding-free | **exactly 120px on all three** (base 80, target 160 — a width no static state produces) |
+| `MT_Delayed` at t=0.25s with `delay: 0.5s` | **base `#f1c40f` on all three** — delay counts inside t |
+| bucket scoping — the 3 components without an `:active` bucket, in an `active` run | **byte-identical to their unforced captures**, all 9 |
+| inertness — `BASELINE=1` visual-test | no regressions (327 comparisons) |
+| inertness — composition-test, keyframes sweep | gates clean, all 24 series still move |
+
+Sample times are deliberately **tie-free**. t=0.5 on `MT_BgFade` lands on
+(159.5, 98.5, 92.0) — two exact .5 ties, precisely where three
+independent float→byte roundings are entitled to disagree by 1 and
+manufacture a fake cross-platform divergence.
+
+**Honest limit:** on iOS the declared fold exercises the *blend*, not the
+live flip-*detection* path (`.onChange` / `transitionSnapshot`). Recorded
+here and in `DYNAMIC_CAPTURE.md` rather than left for a green row to
+imply otherwise.
 
 ## iOS sepia() was an eyeballed approximation (2026-08-28)
 
