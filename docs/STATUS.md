@@ -1809,7 +1809,7 @@ refutes a finding.
 
 | finding | where |
 |---|---|
-| CSS `perspective` → Compose `cameraDistance` conversion is **~72× too large**, and divides by density where it should multiply. Android renders 3D at the wrong depth. (The *dropped-perspective* bug fixed earlier today was a different defect in the same lane — the value now arrives, and is then converted wrongly.) | `runtimes/compose/…/transforms/` |
+| ~~Compose perspective conversion wrong~~ **FIXED** — the real defect was not the cameraDistance scale but `depthScaleFactor` computing `1 + z/P`, the first-order Taylor expansion of `1/(1 − z/P)`. See "perspective + translateZ was wrong on both natives" above. | `runtimes/compose/…/transforms/` |
 | iOS composes the CSS transform function list in **reverse order** — the first function is applied innermost instead of outermost, so `translate() rotate()` and `rotate() translate()` swap meanings | `runtimes/swiftui/…/transforms/` |
 | iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely | `runtimes/swiftui/…/effects/blend/` |
 | `border` / `border-*` shorthand silently drops every CSS Color 4/5 colour function — `oklch()`, `lab()`, `lch()`, `hwb()`, `color()`, `color-mix()` | converter shorthand expander |
@@ -1819,6 +1819,7 @@ refutes a finding.
 
 | finding | where |
 |---|---|
+| ~~iOS drops translateZ~~ **FIXED** in the same pass — iOS applied no depth response at all under a perspective; see the section above. | `runtimes/swiftui/…/transforms/` |
 | iOS drops **negative** `box-shadow` spread on outset layers — the silhouette is never contracted. Tailwind's entire default shadow scale uses negative spread | `runtimes/swiftui/…/effects/shadow/` |
 | In the skew path the perspective scale is inverted — `d/(d + tz)` instead of `d/(d − tz)` — so `translateZ` toward the viewer *shrinks* the element | `runtimes/compose/…/transforms/` |
 | iOS applies the overflow clip **outside** the transform, so a rotated or skewed element is clipped by its un-transformed axis-aligned frame | `runtimes/swiftui/…/` |
