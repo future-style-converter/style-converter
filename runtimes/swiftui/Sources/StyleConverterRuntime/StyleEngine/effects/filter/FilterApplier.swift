@@ -8,7 +8,7 @@
 //  APIs:
 //
 //    blur(radius)       → .blur(radius: CGFloat × 0.5 for CSS parity)
-//    brightness(pct)    → .brightness((pct-100)/100)
+//    brightness(pct)    → .colorMultiply(white: pct/100)   MULTIPLIER, not additive
 //    contrast(pct)      → .contrast(pct/100)
 //    grayscale(pct)     → .grayscale(pct/100)
 //    saturate(pct)      → .saturation(pct/100)
@@ -98,6 +98,18 @@ struct FilterApplier: ViewModifier {
         return v
     }
 
+    /// CSS `brightness(pct)` -> the multiplicative factor `.colorMultiply`
+    /// needs. Split out of `applyOne` purely so the decision that was wrong
+    /// is unit-testable without rendering: the old code computed
+    /// `(pct - 100) / 100`, which is SwiftUI's ADDITIVE brightness parameter,
+    /// not the CSS multiplier. See FilterBrightnessTests.
+    ///
+    /// filter-effects-1 gives no upper bound, so values above 1 are returned
+    /// as-is and ride an extended-range colour; the sRGB capture context
+    /// clamps at the end, which is where CSS clamps too. Negative amounts are
+    /// invalid CSS and clamp to 0 (black) rather than inverting the image.
+    static func brightnessFactor(_ pct: Double) -> Double { max(0, pct / 100) }
+
     // One filter function → one SwiftUI modifier.
     @ViewBuilder
     private func applyOne(_ fn: FilterFn, to v: AnyView) -> some View {
@@ -106,10 +118,34 @@ struct FilterApplier: ViewModifier {
             // CSS blur radius ≈ 2× SwiftUI's internal radius; divide by 2.
             v.blur(radius: r / 2, opaque: false)
         case .brightness(let pct):
-            // SwiftUI `.brightness` is additive in [-1,1]; CSS is
-            // multiplicative on the colour (0 ≡ black, 100 ≡ identity).
-            // Map by `(pct-100)/100` so 100 → 0, 150 → +0.5, 50 → -0.5.
-            v.brightness((pct - 100) / 100)
+            // filter-effects-1 §2.2: brightness() is a linear MULTIPLIER on
+            // the colour channels — 100 is identity, 150 scales each channel
+            // by 1.5, 0 is black. SwiftUI's `.brightness(_:)` is an ADDITIVE
+            // shift in [-1, 1]: a different operation that only coincides
+            // with CSS at the identity point.
+            //
+            // The old mapping `(pct - 100) / 100` implemented the additive
+            // one. Measured on Filter_Brightness (#2ecc71 = (46,204,113),
+            // brightness(150)) across the three runtimes:
+            //
+            //   multiplicative  (46,204,113) x 1.5      -> (69, 255, 170)
+            //   additive        (46,204,113) + 0.5*255  -> (174, 255, 240)
+            //
+            //   web      (69, 255, 170)   correct
+            //   Android  (69, 255, 170)   correct
+            //   iOS      (174, 255, 241)  the additive result
+            //
+            // `.colorMultiply` is the multiplicative operator (already used
+            // by the sepia case below). Amounts above 100 need a colour
+            // component greater than 1, which sRGB carries as extended
+            // range; the capture context clamps to [0,1] afterwards, and
+            // clamping at the END is what CSS specifies — brightness(150)
+            // on a channel already at 204 is meant to saturate at 255.
+            //
+            // Negative amounts are invalid CSS; clamp at 0 (black) rather
+            // than letting a negative multiplier invert the image.
+            let factor = FilterApplier.brightnessFactor(pct)
+            v.colorMultiply(Color(.sRGB, red: factor, green: factor, blue: factor, opacity: 1))
         case .contrast(let pct):
             v.contrast(pct / 100)
         case .grayscale(let pct):

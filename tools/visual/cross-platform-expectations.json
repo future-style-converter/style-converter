@@ -319,20 +319,6 @@
     },
     {
       "fixture": "visual-test.json",
-      "component": "033_Filter_Brightness.png",
-      "pair": "iOS-Android",
-      "reason": "Genuine colour divergence: deltaE95 18.7 is far above any perceptual tolerance, so this is a real filter/colour-pipeline difference, not anti-aliasing. Treat as a bug.",
-      "owner": "unassigned",
-      "expires": "2026-11-30",
-      "observed": {
-        "ssim": 0.9419,
-        "pixelPct": 0.698,
-        "labDeltaEP95": 18.697,
-        "divergence": "mixed"
-      }
-    },
-    {
-      "fixture": "visual-test.json",
       "component": "041_Transform_Combined.png",
       "pair": "Android-web",
       "reason": "Transform rasterisation: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
