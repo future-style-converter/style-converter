@@ -65,9 +65,45 @@ function indexLedger(entries, inputLabel) {
     // Scope check: an entry pinned to another fixture must not silently
     // excuse a failure in this one.
     if (e.fixture && inputLabel && !inputLabel.includes(e.fixture)) continue;
-    byKey.set(`${e.component}\u0000${e.pair}`, e);
+    const k = `${componentKey(e.component)}\u0000${e.pair}`;
+    // Collision guard. Component NAMES are unique per parent, not per
+    // document: two children called `layer` under different parents flatten
+    // to the same capture name once the position index is stripped. A plain
+    // Map.set would silently drop one entry, so the divergence it excused
+    // would come back as an unexpected failure with no hint why.
+    if (byKey.has(k)) {
+      throw new Error(
+        `cross-platform-expectations.json: two entries collide on ` +
+        `"${componentKey(e.component)}" / ${e.pair}. Component names are only ` +
+        `unique within a parent, so two same-named children flatten to one ` +
+        `key. Rename one of the fixture components, or qualify the entry.`,
+      );
+    }
+    byKey.set(k, e);
   }
   return byKey;
+}
+
+/**
+ * Strip the capture index from a component filename.
+ *
+ * Captures are named `{NNN}_{Name}.png`, where NNN is the component's
+ * POSITION in the flattened capture list. That index is not stable: adding,
+ * removing or suppressing any component renumbers every component after it.
+ *
+ * Keying the ledger on the raw filename made every entry position-dependent,
+ * and it failed in the worst direction. Measured when the backdrop-dependent
+ * child suppression landed and the composition-test capture set went 38 -> 32:
+ * every entry past the first suppression was reported "orphaned" (a warning)
+ * while the divergence it was supposed to excuse came back "unexpected" (a
+ * hard failure). A ledger that silently unbinds itself when the corpus shifts
+ * is worse than no ledger.
+ *
+ * The NAME is stable — it is the component's key in the fixture JSON, and
+ * unique within a document. Key on that.
+ */
+export function componentKey(name) {
+  return String(name).replace(/^\d+_/, '');
 }
 
 /** True when `entry.expires` is a date in the past. Absent expiry never expires. */
@@ -118,7 +154,7 @@ export function evaluateCrossPlatformGate(rows, ledger, opts) {
       if (!pair) continue;                                   // platform missing on one side
       checked += 1;
 
-      const key = `${row.name}\u0000${pairKey}`;
+      const key = `${componentKey(row.name)}\u0000${pairKey}`;
       const entry = byKey.get(key);
       const failed = pairRegressed(pair, { ssimThreshold, pixelThreshold });
 

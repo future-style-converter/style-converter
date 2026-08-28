@@ -164,7 +164,7 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // Hardcoded deliberately: the count is the thing that must not drift
   // unnoticed. Changing it should require editing this line, which is a
   // review prompt.
-  assert.equal(led.expectations.length, 38, '22 on visual-test + 16 on composition-test; Filter_Brightness iOS-Android deleted when the multiplicative fix landed');
+  assert.equal(led.expectations.length, 26, '22 on visual-test + 4 on composition-test; the 8 blend entries went stale when the Android saveLayer-bounds fix landed');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);
@@ -188,7 +188,7 @@ test('the ledger separates real size bugs from rasterisation noise', () => {
   assert.equal(sizeBugs.length, 6, 'three components × two affected pairs each');
   const components = [...new Set(sizeBugs.map((e) => e.component))].sort();
   assert.deepEqual(components,
-    ['091_Button_Outline.png', '094_Input_Field.png', '105_Edge_DeepNesting.png']);
+    ['Button_Outline.png', 'Edge_DeepNesting.png', 'Input_Field.png']);
   for (const e of sizeBugs) {
     assert.match(e.reason, /REAL BUG/, `${e.component} must not be filed as benign`);
     // Android is the outlier in all three; iOS and web agree.
