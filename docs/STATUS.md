@@ -1711,6 +1711,52 @@ t={0, 0.5}, where `MK_FillBoth`'s 0.5s delay means it correctly cannot
 move yet and the check reports it, exactly as the two-point caveat in the
 script header says it should.
 
+## Which metric actually catches things (2026-08-28)
+
+The SSIM caveat in `compare-screenshots.mjs` ended with a recommendation:
+*"the fix is to stop gating on SSIM."* Measuring what each metric
+contributes shows that advice is backwards, and following it would have
+blinded the gate to its largest catch class.
+
+Over the 327 visual-test pairs, 26 fail at least one threshold. Counting
+the **unique** catches — failures no other metric sees:
+
+| metric | fails | catches nothing else does |
+|---|---:|---:|
+| SSIM < 0.95 | 22 | **14** |
+| ΔE95 > 5 | 10 | 4 |
+| Δpx > 2% | 8 | **0** |
+
+The 14 SSIM-only rows are `BorderRadius_Uniform`, `BorderRadius_Pill`,
+`BorderRadius_Mixed`, `Edge_VeryLargeRadius`, `Edge_MultiTransform`,
+`Edge_InsetRoundShadow` — **antialiased curve divergence**, where ΔE95
+reads 0.00 (the 95th-percentile pixel is identical; only a thin AA band
+differs) and Δpx reads under 1.4%. SSIM is the only metric that sees
+structure.
+
+`pixelmatch` contributes **no unique signal at all** on this corpus — and
+it is separately blind to any uniform lightness shift below 132/255. It is
+kept (it costs nothing and may catch more on taller composed captures),
+but it is not what is holding the gate up.
+
+### The caveat that motivated the bad advice fires on one component
+
+Captures are 390 wide, so `min(W,H)` is the height, and `ssim.js`
+downsamples only when `f = round(min(W,H)/256) > 1` — i.e. a component
+≥ ~384px tall. Across **all 399 committed baselines exactly three are
+downsampled**: the three platforms of `003_AR_Half` at 390×432. Every
+other capture (visual-test heights are 32–132) is already scored at 1×.
+
+And on that one component it changes nothing measurable: scoring at 1×
+moves iOS-Android from 0.9978 to 0.9969, with **zero verdict flips** on
+any of its three pairs. Control: two non-downsampled rows score
+identically both ways (0.9406 → 0.9406), confirming the flag does what it
+claims rather than being silently ignored.
+
+So the caveat is real, narrow, and inert. It is not grounds for removing
+the metric doing most of the work. The source comment now carries these
+numbers and the recipe to re-derive them.
+
 ## Test suites
 
 | suite | command | tests |

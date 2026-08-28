@@ -37,13 +37,45 @@
 //
 // ⚠ SSIM caveat — `ssim.js` runs with `downsample: 'original'`, which
 // box-filters and decimates by `f = round(min(W, H) / 256)` whenever f > 1.
-// Measured: a 390×132 capture scores at 1×, a 390×432 capture scores at
-// 195×216, while pixelmatch / ΔE / pHash all stay at 1×. A 1px hairline
-// difference is therefore attenuated ~4× on tall components and not at all
-// on short ones, so SSIM values are NOT comparable across components of
-// different heights and the single 0.95 gate is a different sensitivity per
-// row. Do not "fix" this by flipping `downsample` — that invalidates every
-// committed SSIM figure. The fix is to stop gating on SSIM.
+// So in principle SSIM is not comparable across component heights, and the
+// single 0.95 gate would be a different sensitivity per row.
+//
+// MEASURED 2026-08-28, and the scope is much narrower than that reads.
+// Captures are 390 wide, so min(W,H) is the HEIGHT and f > 1 needs a
+// component ≥ ~384px tall. Across all 399 committed baselines exactly
+// THREE are downsampled — the three platforms of one component,
+// `003_AR_Half` at 390×432. Every other capture (heights 32–132 on
+// visual-test) is already scored at 1×.
+//
+// And on that one component it changes nothing: SSIM moves 0.9978 → 0.9969
+// (iOS-Android) when scored at 1×, with ZERO verdict flips on any of its
+// three pairs. Control: two non-downsampled rows score identically both
+// ways (0.9406 → 0.9406), confirming the flag does what it claims.
+//
+// Do not "fix" this by flipping `downsample` — it would move a committed
+// figure for no verdict change.
+//
+// The old text ended "the fix is to stop gating on SSIM." That advice is
+// CONTRADICTED by measuring what each metric actually contributes. Over
+// the 327 visual-test pairs, 26 fail at least one threshold, and the
+// UNIQUE catches — failures no other metric sees — are:
+//
+//     SSIM alone : 14      (border radii, large radii, multi-transform,
+//                           inset round shadow — antialiased CURVE
+//                           divergence, where ΔE95 reads 0.00 and Δpx
+//                           reads under 1.4%)
+//     ΔE alone   :  4      (the iOS sepia bug; Neumorphic shadow)
+//     Δpx alone  :  0
+//
+// SSIM is the LARGEST unique contributor and the only metric that sees
+// antialiased-curve structure. `pixelmatch` is the one contributing no
+// unique signal here — and it is separately blind to any uniform lightness
+// shift below 132/255 (see the threshold note at its call site). Removing
+// SSIM on the strength of a caveat that fires on one component and flips
+// no verdict would blind the gate to its largest catch class.
+//
+// Re-derive with: score both corpora, then per pair compare
+// (ssim < 0.95), (pixelPct > 2), (ΔE95 > 5) and count the singletons.
 //
 // Usage:
 //     node compare-screenshots.mjs [options]
