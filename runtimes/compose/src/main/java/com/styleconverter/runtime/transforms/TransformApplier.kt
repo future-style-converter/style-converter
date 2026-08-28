@@ -469,6 +469,33 @@ object TransformApplier {
             config.scaleY?.let { totalScaleY *= it }
             config.scaleZ?.let { totalScaleZ *= it }
 
+            // Standalone `perspective:` PROPERTY (css-transforms-2 §3).
+            //
+            // The perspective() FUNCTION is folded in by the loop above, but
+            // the property was not — and this branch is the one taken
+            // whenever `config.functions` is non-empty. So a component with
+            // both `perspective: 500px` and `transform: rotateY(30deg)`
+            // rendered with no foreshortening at all. That pairing is the
+            // ONLY way the property is useful, since on its own it
+            // establishes a perspective for children this element does not
+            // have. The other branch, applyWithGraphicsLayer, did read
+            // config.perspective — it just never runs when a transform list
+            // is present.
+            //
+            // Measured, case vs its no-perspective control:
+            //   iOS 2209 px · web 2097 px · Android 0 px
+            // while `transform: rotateY(30deg)` itself was applied on all
+            // three (Android 2709 px), so the rotation worked and only the
+            // projection was missing.
+            //
+            // A perspective() function wins if both are present: it is part
+            // of `transform`, so it composes with the other functions in
+            // declared order, while the property applies to the element as a
+            // whole.
+            if (perspectiveDistance <= 0f) {
+                config.perspective?.let { perspectiveDistance = it.toPx() }
+            }
+
             // Calculate camera distance from perspective
             // Compose's cameraDistance is in dp relative to screen density
             val effectivePerspective = if (perspectiveDistance > 0) {

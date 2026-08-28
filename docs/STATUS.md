@@ -1182,15 +1182,25 @@ pixels, case vs its own control, within one platform.
 | declaration | iOS | Android | web | reading |
 |---|---:|---:|---:|---|
 | `backdrop-filter: blur(10px)` (Glass_Effect) | **0** | **0** | 264 | dropped on BOTH natives |
-| `perspective: 500px` (Perspective_Rotate) | 2209 | **0** | 2097 | dropped on Android only |
+| `perspective: 500px` (Perspective_Rotate) | 2209 | ~~**0**~~ **1802** | 2097 | FIXED 2026-08-28 — was dropped on Android |
 | `transform: rotateY(30deg)` (same component) | 3082 | 2709 | 2840 | applied everywhere |
 
 `backdrop-filter` independently reproduces the composition-test result on a
 second fixture. Because both natives drop it they AGREE, so no cross-platform
 pair diverges — the control is the only thing that sees it.
 
-`perspective` is new: Android applies the rotation but ignores the perspective,
-so a 3D transform renders flat (orthographic) instead of foreshortened.
+`perspective` is FIXED. Android applied the rotation but ignored the
+perspective, so 3D transforms rendered flat. `applyTransformFunctions` --
+the branch taken whenever a transform list is present -- sourced perspective
+only from the `transform: perspective()` FUNCTION and never read the
+standalone property; the branch that did read it only runs when there are no
+transform functions, i.e. exactly when perspective cannot matter.
+
+Worth keeping for the pattern: the extractor was already unit-tested and
+green (`Perspective {px:500}` -> `config.perspective == 500f`), and the
+cross-platform gate never flagged the component -- it scores SSIM 0.9558 /
+0.9979 / 0.9563 and was above threshold before the fix too. A passing unit
+test plus a passing similarity gate, and only the control saw it.
 
 ### A divergence in the other direction
 
