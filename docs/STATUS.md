@@ -1227,6 +1227,31 @@ Run control fixtures with `NO_CROSS_PLATFORM_GATE=1`: case and control are
 *supposed* to differ, so scoring their cross-platform pairs against the
 conformance ledger asks the wrong question.
 
+### The three Android under-size components are a floor bug, not a box-model bug
+
+`Button_Outline`, `Input_Field` and `Edge_DeepNesting` render 2x(border-width)
+shorter on Android than on iOS/web. First recorded as an under-size bug; two
+measurements narrow it considerably.
+
+With real text pinned (the control fixture), removing the border changes the
+Android box by EXACTLY twice its width — Input_Field 54 -> 52 at 1px,
+Edge_DeepNesting 52 -> 48 at 2px. So the border box is computed correctly
+whenever CONTENT determines the size. And Input_Field's explicit
+`width: 200px` is exact on all three platforms; only its unconstrained,
+floor-driven height is short.
+
+The defect is therefore in `StyleApplier.placeholderFloorMinSize` /
+`borderBoxFloorMins`, which converts web's border-box `minHeight: 30px` into a
+Compose content-box `defaultMinSize` by subtracting padding and the border
+band. That floor exists ONLY because `fixtures/visual-test.json` has no text —
+it is harness scaffolding matching web's scaffolding, not product behaviour.
+Components with borders but no floor-driven height (Border_Solid 3px,
+Border_Dashed 2px, Border_Mixed per-side, Button_Primary) are all exact.
+
+Handle with care: the same arithmetic produced +2px regressions twice before,
+in wave 1 (Input_Field / Glass_Effect) and wave 4 (every Decorated row). Change
+it with a measured before/after, not by reasoning about the model.
+
 ## Test suites
 
 | suite | command | tests |
