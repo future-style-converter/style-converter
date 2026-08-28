@@ -1028,6 +1028,9 @@ if [[ "$COMPARE_EXIT" -ne 0 ]]; then
         3) echo -e "  ${Y}✗ comparison failed: a capture is not untagged-sRGB — see tools/visual/png-color-space.mjs${N}" ;;
         4) echo -e "  ${Y}✗ comparison failed: unexpected cross-platform divergence${N}"
            echo -e "     Fix it, or record it in ${B}tools/visual/cross-platform-expectations.json${N} with a reason and an owner." ;;
+        5) echo -e "  ${Y}✗ comparison failed: stale cross-platform expectation(s)${N}"
+           echo -e "     A ledger entry now passes, or names a component that no longer exists."
+           echo -e "     Delete the listed lines from ${B}tools/visual/cross-platform-expectations.json${N}." ;;
         *) echo -e "  ${Y}✗ comparison failed with exit $COMPARE_EXIT${N}" ;;
     esac
     exit "$COMPARE_EXIT"

@@ -98,6 +98,7 @@ import {
   evaluateCrossPlatformGate,
   formatRecord,
   EXIT_UNEXPECTED_DIVERGENCE,
+  EXIT_STALE_EXPECTATION,
 } from './cross-platform-gate.mjs';
 // COMPARE_METRICS Section 5 / item 9 — HTML report extracted into a
 // sibling module to keep this file under the per-file size budget.
@@ -349,22 +350,39 @@ async function main() {
       `· cross-platform gate: ${xGate.checked} pair(s) · ` +
       `${xGate.expected.length} known divergence(s) · ${xGate.unexpected.length} unexpected`,
     );
-    // Stale + expired are LOUD but non-fatal. See cross-platform-gate.mjs for
-    // why: the harness's own A/A noise floor is unmeasured, so a pair sitting
-    // at 0.9499 may flap and a stale-expectation failure would be
-    // indistinguishable from a real fix. Promote after the noise-floor study.
-    for (const r of xGate.stale) {
-      console.warn(`  ⚠ stale expectation (now passing — delete the line): ${formatRecord(r)}`);
-    }
+    // Expiry stays a WARNING: it fires on a calendar rollover with no code
+    // change, so failing on it would redden a build nobody touched.
     for (const r of xGate.expired) {
       console.warn(`  ⚠ expectation past its expiry (${r.entry.expires}) — re-review: ${formatRecord(r)}`);
     }
+
+    // Unexpected divergence is checked FIRST. When both conditions are
+    // present, "the runtimes disagree" is the one worth surfacing — a stale
+    // line is bookkeeping, a new divergence is a product regression.
     if (xGate.unexpected.length > 0) {
       console.error(`✗ ${xGate.unexpected.length} unexpected cross-platform divergence(s):`);
       for (const r of xGate.unexpected) console.error(`  · ${formatRecord(r)}`);
       console.error('  Either fix the divergence, or add it to');
       console.error('  tools/visual/cross-platform-expectations.json with a reason and an owner.');
       process.exit(EXIT_UNEXPECTED_DIVERGENCE);
+    }
+
+    // Stale entries now FAIL. This was a warning while the harness's A/A
+    // noise floor was unmeasured — the fear being that a pair at 0.9499
+    // would flap and the failure would be indistinguishable from a real fix.
+    // tools/visual/noise-floor.sh measured it: captures are BIT-FOR-BIT
+    // identical across independent full runs (423 captures over two
+    // fixtures), so a metric cannot flap run-to-run and the fear does not
+    // apply. See cross-platform-gate.mjs for the full result and its scope.
+    if (xGate.stale.length > 0) {
+      const orphans = xGate.stale.filter((r) => r.orphaned);
+      const fixed   = xGate.stale.filter((r) => !r.orphaned);
+      console.error(`✗ ${xGate.stale.length} stale expectation(s) — the ledger no longer matches reality:`);
+      for (const r of fixed) console.error(`  · now passing, delete the line: ${formatRecord(r)}`);
+      for (const r of orphans) console.error(`  · no such component: ${formatRecord(r)}`);
+      console.error('  Delete them from tools/visual/cross-platform-expectations.json.');
+      console.error('  An expectation that outlives the divergence it excused is how the ledger rots.');
+      process.exit(EXIT_STALE_EXPECTATION);
     }
   }
 
@@ -543,7 +561,18 @@ const colorSpaceViolations = [];
  * would look like a regression rather than a typo.
  */
 function loadCrossPlatformLedger() {
-  const path = resolve(__dirname, 'cross-platform-expectations.json');
+  // CROSS_PLATFORM_EXPECTATIONS repoints the ledger. This exists so the gate
+  // can be tested END TO END — asserting it really exits 4/5 rather than
+  // trusting that the exported constants are wired up — which matters more
+  // than usual for a gate whose entire job is to not be theatre.
+  //
+  // It is not a new way to weaken the gate: `--no-cross-platform-gate`
+  // already disables it outright, so anyone wanting to dodge it has a
+  // shorter path. Runs that set this are visible in the report headline
+  // because the ledger path is echoed with the verdict.
+  const path = process.env.CROSS_PLATFORM_EXPECTATIONS
+    ? resolve(process.env.CROSS_PLATFORM_EXPECTATIONS)
+    : resolve(__dirname, 'cross-platform-expectations.json');
   if (!existsSync(path)) return { expectations: [] };
   try {
     return JSON.parse(readFileSync(path, 'utf8'));

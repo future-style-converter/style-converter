@@ -22,26 +22,62 @@
 // invisibly. Chromium's `TestExpectations` is the canonical shape: known
 // failures keyed by test + configuration, each with a bug reference.
 //
-// ## Two-sided, deliberately incompletely
+// ## Two-sided, and now enforced
 //
 // WPT's `fuzzy` annotation is a two-sided range: a reftest that becomes TOO
 // CLEAN also fails, forcing the tolerance to be re-derived rather than left
 // stale. The same discipline applies here — an expectation whose pair now
-// passes is stale and should be deleted.
+// passes is stale and must be deleted.
 //
-// We report stale/expired entries but do NOT fail on them yet, and the
-// reason is honest rather than squeamish: the A/A noise floor of this
-// harness has never been measured. A pair sitting at 0.9499 may flap across
-// the 0.95 line run-to-run, and a stale-expectation failure would then be
-// flaky in a way nobody could distinguish from a real fix. Promote stale to
-// failing once the noise-floor study lands and the thresholds sit outside
-// P99.9. Until then: loud in the report, silent at the exit code.
+// This used to be a warning. The stated reason was that the harness's A/A
+// noise floor had never been measured, so a pair sitting at 0.9499 might
+// flap across the 0.95 line run-to-run and a stale-expectation failure
+// would be indistinguishable from a real fix.
+//
+// That study has now run (`tools/visual/noise-floor.sh`) and the premise was
+// false. Across independent full runs — fresh convert, fresh iOS build
+// (test-all.sh rm -rf's the xcodeproj and build dir), fresh emulator boot
+// (-no-snapshot), fresh install, fresh capture — every capture is
+// BIT-FOR-BIT identical:
+//
+//     fixtures/visual-test.json        327 captures  identical  (N=2, web N=3)
+//     fixtures/composition-test.json    96 captures  identical  (N=2)
+//
+// A metric computed from identical bytes is identical, so run-to-run
+// flapping is not merely rare here, it is impossible. SSIM = 1.0000,
+// Δpx = 0.00%, ΔE = 0 between any two runs, by construction. There is no
+// distance between the noise floor and the thresholds to worry about
+// because the floor is zero.
+//
+// So stale entries now FAIL (EXIT_STALE_EXPECTATION). A fix that makes a
+// pair pass is not allowed to leave its excuse behind.
+//
+// SCOPE, honestly: this measures SAME-MACHINE determinism. Cross-machine
+// variance (a different runner, Xcode version, or emulator image) is
+// unmeasured, and CLAUDE.md records that device-level visual jobs are
+// local-only today — so same-machine is currently the whole population.
+// Re-run noise-floor.sh before these jobs move to CI; if captures stop
+// being byte-identical there, this promotion is the first thing to revisit.
+//
+// `expired` stays a WARNING, and that is a separate judgement, not an
+// oversight: expiry fires on a calendar rollover with no code change at
+// all, so failing on it would redden a build nobody touched. That is the
+// booby trap the old comment was right to avoid — it just was not the
+// property that applied to stale.
 
 /** Pair keys the comparator produces, in report order. */
 export const PAIR_KEYS = ['iOS-Android', 'iOS-web', 'Android-web'];
 
 /** Exit code for "a cross-platform pair diverged and nothing said it would". */
 export const EXIT_UNEXPECTED_DIVERGENCE = 4;
+
+/**
+ * Exit code for "the ledger is stale — an entry passes, or names a component
+ * that no longer exists". Distinct from 4 so a caller can tell "the runtimes
+ * disagree" (a product problem) from "the ledger needs a line deleted" (a
+ * bookkeeping problem). Both are failures; only one means something broke.
+ */
+export const EXIT_STALE_EXPECTATION = 5;
 
 /**
  * Does one pair's metric block breach the thresholds?

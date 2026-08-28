@@ -1268,6 +1268,81 @@ Handle with care: the same arithmetic produced +2px regressions twice before,
 in wave 1 (Input_Field / Glass_Effect) and wave 4 (every Decorated row). Change
 it with a measured before/after, not by reasoning about the model.
 
+## The harness's A/A noise floor is zero (2026-08-28)
+
+Every threshold in the visual pipeline — SSIM ≥ 0.95, Δpx ≤ 2% — was
+picked by eye, and both gates that use them carried the same caveat in
+their source: the harness's own run-to-run variance had never been
+measured. That caveat was load-bearing. It was the stated reason the
+cross-platform gate reported stale expectations as *warnings* rather
+than failing on them.
+
+`tools/visual/noise-floor.sh` measures it. The method is an A/A study:
+run the same code against the same fixture more than once and compare
+the runs. Anything that differs is pure harness noise, because nothing
+else changed. Each run is a full `test-all.sh` — fresh convert, fresh
+iOS build (it `rm -rf`s the xcodeproj and build dir), fresh emulator
+boot (`-no-snapshot`), fresh install, fresh capture — so the
+independence matches what a human re-running the suite actually gets.
+
+Result:
+
+| fixture | captures | runs | outcome |
+|---|---:|---:|---|
+| `fixtures/visual-test.json` | 327 | 2 (web 3) | byte-identical |
+| `fixtures/composition-test.json` | 96 | 2 | byte-identical |
+
+**423 captures, bit-for-bit identical across independent runs, on all
+three platforms.** Not "small noise" — zero. SSIM = 1.0000, Δpx = 0.00%,
+ΔE = 0 between any two runs, by construction.
+
+### What it licenses, and what it does not
+
+It licenses promoting stale expectations from warning to failure
+(exit 5, `EXIT_STALE_EXPECTATION`). The fear was that a pair sitting at
+0.9499 would flap across the line run-to-run and a stale failure would be
+indistinguishable from a real fix. A metric computed from identical bytes
+is identical, so that flapping is not rare here — it is impossible.
+
+It does **not** license loosening anything, and it does not mean the
+metrics are well-calibrated. Two separate limits stand:
+
+- **Scope is same-machine.** Cross-machine variance — a different
+  runner, Xcode version, or emulator image — is unmeasured. Device-level
+  visual jobs are local-only today (see CLAUDE.md), so same-machine is
+  currently the whole population. Re-run `noise-floor.sh` before those
+  jobs move to CI; if captures stop being byte-identical there, the
+  stale-fails-the-build promotion is the first thing to revisit.
+- **A zero floor makes the *tolerances* harder to justify, not easier.**
+  With no noise to absorb, every point of slack below SSIM 1.0 is pure
+  tolerance for real change. The baseline gate is in effect an
+  exact-match check spelled as a similarity threshold, and a regression
+  that shifts many pixels slightly — a 1px baseline move, a small
+  uniform colour shift — still sails through at SSIM 0.999. That is the
+  same degenerate-pass family already recorded elsewhere in this file,
+  and the noise-floor result removes the last excuse for it. Tightening
+  is follow-up work, deliberately not bundled with the promotion.
+
+### Reproducing
+
+```bash
+bash tools/visual/noise-floor.sh                          # visual-test, 2 runs (~6 min)
+bash tools/visual/noise-floor.sh fixtures/composition-test.json 3
+```
+
+Exits 0 when captures are byte-identical. When they are not, it scores
+each platform's run-1-vs-run-2 captures through the *shipping* metric
+code (by mapping the two runs onto two of the comparator's platform
+slots) and prints the spread, so the number is directly comparable to
+the thresholds it is meant to justify.
+
+The script excludes any platform that wrote no captures during a run,
+via an mtime guard against a reference file stamped before the run. That
+guard is not incidental: without it a `SKIP_IOS=1` run would copy the
+*previous* run's stale iOS PNGs, compare them against themselves, and
+report a perfect noise floor for a platform that never executed — a
+study that cannot fail is worth nothing.
+
 ## Test suites
 
 | suite | command | tests |
@@ -1276,7 +1351,7 @@ it with a measured before/after, not by reasoning about the model.
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2761 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1802 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1725 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1733 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap
