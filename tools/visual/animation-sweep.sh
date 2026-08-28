@@ -31,6 +31,23 @@
 # sweep? A component that is byte-identical at every sampled time either
 # has no animation, or has one nobody is running.
 #
+# ## Forced-state runs: which components are EXPECTED to move
+#
+# With `CAPTURE_FORCE_STATE` set, only components carrying a selector
+# bucket for that state can transition — the rest are correctly static,
+# and flagging them would be a WRONG red. On
+# fixtures/fidelity/motion/transitions.json with `active`, 3 of 4
+# components have no `:active` bucket, so a state-blind check fails 9 of
+# 12 series while everything is working perfectly. The natural response to
+# a wrong red is to weaken the check, which is how a working detector gets
+# blunted; so the expected set is DERIVED FROM THE FIXTURE rather than
+# hand-maintained (it cannot drift from the components it describes).
+#
+# That derivation also buys the inverse assertion for free, and it is the
+# stronger half: components WITHOUT the forced bucket must be byte-identical
+# across the whole sweep. If one of them moves, the forced state is leaking
+# past the selector fold — a bug no "did anything animate?" check could see.
+#
 # ## Why a sweep and not two points
 #
 # Measured while building this. `MK_FillBoth` (`animation-delay: 0.5s`,
@@ -148,32 +165,66 @@ done
 # component: is it byte-identical at EVERY sampled time?
 echo
 echo "=== motion check — did anything actually animate? ==="
-node -e '
-const fs = require("fs"), path = require("path");
-const work = process.argv[1], times = process.argv[2].split(",");
-let dead = [], checked = 0;
+node --input-type=module -e '
+import { readFileSync, readdirSync, existsSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { eligibleToMove, componentNameOf } from "./tools/visual/animation-eligibility.mjs";
+
+const [work, timesArg, fixturePath, forcedRaw] = process.argv.slice(1);
+const times = timesArg.split(",");
+const forcedState = (forcedRaw || "").trim();
+
+// Which component NAMES may legitimately move this run. The rule lives in
+// animation-eligibility.mjs so it can be unit-tested without booting three
+// harnesses; see that file for the two measured wrong-reds it encodes.
+const doc = JSON.parse(readFileSync(resolve(fixturePath), "utf8"));
+const mayMove = eligibleToMove(doc, forcedState);
+if (mayMove !== null) {
+  console.log(`  forced state "${forcedState}" -> ${mayMove.size} of ` +
+              `${Object.keys(doc.components ?? {}).length} component(s) may move: ` +
+              `${[...mayMove].join(", ") || "(none)"}`);
+}
+
+let dead = [], leaked = [], checked = 0;
 for (const p of ["ios", "android", "web"]) {
-  const dirs = times.map(t => path.join(work, `t-${t}`, p)).filter(d => fs.existsSync(d));
+  const dirs = times.map(t => join(work, `t-${t}`, p)).filter(d => existsSync(d));
   if (dirs.length < 2) continue;
-  for (const f of fs.readdirSync(dirs[0]).filter(f => f.endsWith(".png"))) {
-    const bufs = dirs.map(d => { try { return fs.readFileSync(path.join(d, f)); } catch { return null; } })
+  for (const f of readdirSync(dirs[0]).filter(f => f.endsWith(".png"))) {
+    const bufs = dirs.map(d => { try { return readFileSync(join(d, f)); } catch { return null; } })
                      .filter(Boolean);
     if (bufs.length < 2) continue;
     checked++;
     // Byte equality is the right test: the noise floor is zero (see
     // noise-floor.sh), so identical bytes across two times means the
     // renderer produced the same frame, not that a metric rounded away.
-    if (bufs.every(b => b.equals(bufs[0]))) dead.push(`${p}/${f}`);
+    const moved = !bufs.every(b => b.equals(bufs[0]));
+    const expected = mayMove === null || mayMove.has(componentNameOf(f));
+    if (expected && !moved) dead.push(`${p}/${f}`);
+    // The inverse, and the stronger half: a component with no bucket for
+    // the forced state must not move at all.
+    if (!expected && moved) leaked.push(`${p}/${f}`);
   }
 }
 console.log(`  ${checked} platform-component series checked across ${times.length} time point(s)`);
-if (!dead.length) { console.log("  ✓ every component changed somewhere in the sweep"); process.exit(0); }
-console.log(`  ✗ ${dead.length} never changed at any sampled time:`);
-for (const d of dead) console.log(`      ${d}`);
-console.log("  Either the animation is unimplemented on that platform, or the sweep");
-console.log("  never sampled its active window (check delay + duration).");
+if (!dead.length && !leaked.length) {
+  console.log(mayMove === null
+    ? "  \u2713 every component changed somewhere in the sweep"
+    : "  \u2713 every eligible component moved, and no ineligible one did");
+  process.exit(0);
+}
+if (dead.length) {
+  console.log(`  \u2717 ${dead.length} expected to move but never changed at any sampled time:`);
+  for (const d of dead) console.log(`      ${d}`);
+  console.log("  Either the animation is unimplemented on that platform, or the sweep");
+  console.log("  never sampled its active window (check delay + duration).");
+}
+if (leaked.length) {
+  console.log(`  \u2717 ${leaked.length} moved despite having no "${forcedState}" bucket:`);
+  for (const d of leaked) console.log(`      ${d}`);
+  console.log("  The forced state is leaking past the selector fold.");
+}
 process.exit(1);
-' "$WORK" "$TIMES" || MOTION_FAILED=1
+' "$WORK" "$TIMES" "$FIXTURE" "${CAPTURE_FORCE_STATE:-}" || MOTION_FAILED=1
 
 echo
 if [[ "$GATE_FAILURES" -gt 0 ]]; then

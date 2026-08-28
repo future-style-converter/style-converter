@@ -1672,6 +1672,45 @@ unquantised 157.81. Both candidate tints render 157, so the
 least-squares fit's benefit here is analytic, not visible — recorded that
 way rather than as a pixel win it did not deliver.
 
+## The sweep's motion check is state-aware (2026-08-28)
+
+`animation-sweep.sh`'s motion check asks "did the pixels change across the
+sweep?" — the question a 3-way comparison structurally cannot ask. Pointed
+at a *transition* fixture it would have been wrong in a way that destroys
+the detector.
+
+With `CAPTURE_FORCE_STATE=active`, only `MT_WidthGrow` carries an
+`:active` bucket. A state-blind check flags the other **9 of 12 series as
+dead while everything works perfectly** — and the natural response to a
+wrong red is to weaken the check.
+
+So the expected set is **derived from the fixture** rather than
+hand-maintained: a component may move if it declares a selector bucket for
+the forced state, *or* declares a keyframe animation (those move
+regardless — `keyframes-basic.json` has no selectors at all, so a
+state-only rule would report all 8 components as ineligible while all 8
+correctly animate: 24 false "leak" rows, the same wrong-red in the other
+direction).
+
+The derivation buys the **inverse assertion** for free, and it is the
+stronger half: a component *without* a bucket for the forced state must be
+byte-identical across the whole sweep. If one moves, the forced state is
+leaking past the selector fold — a bug no "did anything animate?" check
+could ever see.
+
+The rule lives in `tools/visual/animation-eligibility.mjs` (9 unit tests)
+rather than inline in the shell script, for the same reason `pad-canvas`
+and `cross-platform-gate` were extracted: it is small, entirely made of
+ways to be wrong, and both of its failure modes were measured rather than
+imagined.
+
+Verified in all four combinations: transitions + `active` (1 of 4 eligible,
+clean), keyframes + `hover` (8 of 8 eligible, clean), keyframes unforced
+(no restriction, clean), and the failing arm — keyframes + `hover` at only
+t={0, 0.5}, where `MK_FillBoth`'s 0.5s delay means it correctly cannot
+move yet and the check reports it, exactly as the two-point caveat in the
+script header says it should.
+
 ## Test suites
 
 | suite | command | tests |
@@ -1680,7 +1719,7 @@ way rather than as a pixel win it did not deliver.
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2761 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1811 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1738 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1747 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap
