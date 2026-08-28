@@ -1792,6 +1792,59 @@ still blind to blatant recolours — and worse than recorded, since a pure
 blue shift of 197/255 is invisible where the old figure implied 132. What
 changes is that the number in the argument is now the one that reproduces.
 
+## Open backlog from the 2026-08-28 audit sweep
+
+Two parallel agent sweeps (6 improvement lanes + 8 bug-hunt lenses, every
+candidate put through an independent refuter) produced **22 findings that
+survived verification, 0 refuted**. Four runtime bugs and three
+degenerate passes were fixed the same day (see the sections above). The
+rest are recorded here with enough detail to act on without re-deriving.
+
+Each was checked against `docs/`, the source comments and
+`cross-platform-expectations.json` before being reported — the sweep's
+refuters were explicitly instructed that a documented deliberate decision
+refutes a finding.
+
+### High
+
+| finding | where |
+|---|---|
+| CSS `perspective` → Compose `cameraDistance` conversion is **~72× too large**, and divides by density where it should multiply. Android renders 3D at the wrong depth. (The *dropped-perspective* bug fixed earlier today was a different defect in the same lane — the value now arrives, and is then converted wrongly.) | `runtimes/compose/…/transforms/` |
+| iOS composes the CSS transform function list in **reverse order** — the first function is applied innermost instead of outermost, so `translate() rotate()` and `rotate() translate()` swap meanings | `runtimes/swiftui/…/transforms/` |
+| iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely | `runtimes/swiftui/…/effects/blend/` |
+| `border` / `border-*` shorthand silently drops every CSS Color 4/5 colour function — `oklch()`, `lab()`, `lch()`, `hwb()`, `color()`, `color-mix()` | converter shorthand expander |
+| `border` shorthand loses the `<line-width>` for `thin\|medium\|thick`, uppercase units, `Q`, and leading-dot lengths — and files the keyword forms onto the wrong longhand | converter shorthand expander |
+
+### Medium
+
+| finding | where |
+|---|---|
+| iOS drops **negative** `box-shadow` spread on outset layers — the silhouette is never contracted. Tailwind's entire default shadow scale uses negative spread | `runtimes/swiftui/…/effects/shadow/` |
+| In the skew path the perspective scale is inverted — `d/(d + tz)` instead of `d/(d − tz)` — so `translateZ` toward the viewer *shrinks* the element | `runtimes/compose/…/transforms/` |
+| iOS applies the overflow clip **outside** the transform, so a rotated or skewed element is clipped by its un-transformed axis-aligned frame | `runtimes/swiftui/…/` |
+| `hwb()` / `lch()` / `oklch()` hue still uses a `[\d.]+(?:deg)?` pattern, so angle units, negative hues, `none` and uppercase make the whole declaration fail | converter primitive parsers |
+| `flex: <number>` does not reset `flex-basis` to 0%, and `flex: .5` is misrouted onto `flex-basis` and then dropped | converter shorthand expander |
+| `computeEdgeSsim` is **dead**: it returns exactly 1 for every input, including a hard edge against a flat field. `sharp.convolve` defaults `scale` to the kernel sum, and a Sobel kernel sums to zero, so the convolution divides by zero and yields an all-zero buffer — two of which are perfectly similar. Left pinned rather than half-fixed: `scale: 1` with offset 0 clamps the negative lobe and offset 128 saturates, so the repair needs sharp's convolve semantics established properly. Not gating, but displayed in the report as a signal | `tools/visual/compare-screenshots-metrics.mjs` |
+| `SkepticFontShorthandLh`'s `font: inherit` case asserts only `not.toBe('normal')` — a total drop satisfies it, and a total drop is what the engine does | web runtime tests |
+
+### Low
+
+| finding | where |
+|---|---|
+| `visibility: collapse` removes layout space on non-table elements; CSS 2.2 §11.2 requires it to behave exactly like `hidden` there | `runtimes/swiftui/…/` |
+| `visibility: hidden` is implemented as `opacity(0)` on both natives, so a descendant's `visibility: visible` cannot re-show itself | both native runtimes |
+| The HTML report headline counts rows with no cross-platform pair as "identical", so a one-platform run reads N/N identical | `tools/visual/compare-screenshots-html.mjs` |
+| The `protocolTimeout` regression-prevention check is satisfied by a code *comment*, so deleting the fix it guards leaves it green | `tools/visual/` |
+
+### One meta-finding worth keeping
+
+Three of the confirmed defects were **mine, shipped the same day** — the
+dropped `--delta-e-threshold`, and zero-comparison success paths in both
+`noise-floor.sh` and `animation-sweep.sh`. The tools built to find checks
+that cannot fail contained two fresh ones. That is the argument for an
+independent adversarial pass over one's own work, not just over inherited
+code.
+
 ## Test suites
 
 | suite | command | tests |
