@@ -374,6 +374,90 @@
         "labDeltaEP95": 0.278,
         "divergence": "structural-divergence"
       }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "035_Filter_Sepia.png",
+      "pair": "iOS-Android",
+      "reason": "REAL iOS RUNTIME BUG, found the moment \u0394E95 started gating (it scored 23.35 while SSIM 0.957 and \u0394px 0.57% both passed; the divergence classifier had already labelled the iOS-web pair 'color-drift' \u2014 the report knew, the gate did not). filter-effects-1 \u00a78.5 defines sepia() as a colour matrix interpolated toward identity by the amount. On `sepia(80%)` over #3498db = (52,152,219) the spec value is (153,158,143); Android and web both render EXACTLY that, iOS renders (74,110,113) \u2014 same 1954-px box, wrong colour, and cool where sepia must be warm. Cause: FilterApplier.swift implements sepia as an eyeballed approximation, `v.saturation(1 - pct/200).colorMultiply(Color(1.0,0.9,0.7).opacity(pct/100))`; the file header admits it ('approximate with .saturation + hue shift (no native API)'). Multiplying by an 80%-alpha colour darkens everything, which is the bulk of the error. FIX IS NON-TRIVIAL, hence this entry rather than a same-commit fix: the sepia matrix is rank-1, M(a)\u00b7c = (1-a)\u00b7c + a\u00b7(w\u00b7c)\u00b7t with w=(0.393,0.769,0.189) and t=(1,0.888,0.692), so it needs luminance in sepia's OWN basis \u2014 SwiftUI's .grayscale is Rec.709 and cannot express it, and iOS 16 (the package target) has no .colorEffect shader. Needs a CoreImage colour-matrix path in the inline filter chain. Tracked as the next change.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9573,
+        "pixelPct": 0.57,
+        "labDeltaEP95": 23.35,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "035_Filter_Sepia.png",
+      "pair": "iOS-web",
+      "reason": "REAL iOS RUNTIME BUG, found the moment \u0394E95 started gating (it scored 23.35 while SSIM 0.957 and \u0394px 0.57% both passed; the divergence classifier had already labelled the iOS-web pair 'color-drift' \u2014 the report knew, the gate did not). filter-effects-1 \u00a78.5 defines sepia() as a colour matrix interpolated toward identity by the amount. On `sepia(80%)` over #3498db = (52,152,219) the spec value is (153,158,143); Android and web both render EXACTLY that, iOS renders (74,110,113) \u2014 same 1954-px box, wrong colour, and cool where sepia must be warm. Cause: FilterApplier.swift implements sepia as an eyeballed approximation, `v.saturation(1 - pct/200).colorMultiply(Color(1.0,0.9,0.7).opacity(pct/100))`; the file header admits it ('approximate with .saturation + hue shift (no native API)'). Multiplying by an 80%-alpha colour darkens everything, which is the bulk of the error. FIX IS NON-TRIVIAL, hence this entry rather than a same-commit fix: the sepia matrix is rank-1, M(a)\u00b7c = (1-a)\u00b7c + a\u00b7(w\u00b7c)\u00b7t with w=(0.393,0.769,0.189) and t=(1,0.888,0.692), so it needs luminance in sepia's OWN basis \u2014 SwiftUI's .grayscale is Rec.709 and cannot express it, and iOS 16 (the package target) has no .colorEffect shader. Needs a CoreImage colour-matrix path in the inline filter chain. Tracked as the next change.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9814,
+        "pixelPct": 0.16,
+        "labDeltaEP95": 23.35,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "098_Neumorphic_Light.png",
+      "pair": "iOS-Android",
+      "reason": "iOS box-shadow penumbra falloff differs from Android and web, which agree with each other. Measured iOS-vs-web: 5159 of 31980 px differ (16.1%), and they are concentrated in the rows above and below the card (y=14,15 and y=66-70 of an 82px image) \u2014 the soft-shadow gradient, not the card face, whose fill (236,240,241) and the page ground (26,26,46) are byte-identical on all three. This is the known blur-radius-to-Gaussian-sigma convention difference between CoreGraphics and Skia rather than a wrong value. It sits just over the line (\u0394E95 5.34 / 5.59 vs a 5.0 threshold), so it is recorded rather than waved through \u2014 but it is the weakest of the entries here and is the first to re-examine if the sigma mapping is ever unified.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9558,
+        "pixelPct": 0.47,
+        "labDeltaEP95": 5.34,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "098_Neumorphic_Light.png",
+      "pair": "iOS-web",
+      "reason": "iOS box-shadow penumbra falloff differs from Android and web, which agree with each other. Measured iOS-vs-web: 5159 of 31980 px differ (16.1%), and they are concentrated in the rows above and below the card (y=14,15 and y=66-70 of an 82px image) \u2014 the soft-shadow gradient, not the card face, whose fill (236,240,241) and the page ground (26,26,46) are byte-identical on all three. This is the known blur-radius-to-Gaussian-sigma convention difference between CoreGraphics and Skia rather than a wrong value. It sits just over the line (\u0394E95 5.34 / 5.59 vs a 5.0 threshold), so it is recorded rather than waved through \u2014 but it is the weakest of the entries here and is the first to re-examine if the sigma mapping is ever unified.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9554,
+        "pixelPct": 0.47,
+        "labDeltaEP95": 5.59,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "Backdrop_Saturate_OverStripes.png",
+      "pair": "iOS-web",
+      "reason": "SAME ROOT CAUSE as the Backdrop_Blur_OverStripes entries above \u2014 see those for the full write-up. backdrop-filter IS implemented on both natives; the two-pass path arms only on the COMPOSED capture path and is deliberately disarmed on the per-component path this fixture runs through, so the natives render the element with no backdrop filter while web applies saturate(4). NOT a runtime gap; the gap is that test-all.sh has no way to arm composed capture. Worth noting how this one surfaced: it was invisible until \u0394E95 gated. It scored \u0394E95 24.92 at \u0394px 0.00% and SSIM 0.978, so the blur variant sat in the ledger while its saturate sibling \u2014 same fixture, same cause \u2014 passed silently. Adding the metric found a hole in the LEDGER, not just in the runtimes.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9778,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 24.92,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "Backdrop_Saturate_OverStripes.png",
+      "pair": "Android-web",
+      "reason": "SAME ROOT CAUSE as the Backdrop_Blur_OverStripes entries above \u2014 see those for the full write-up. backdrop-filter IS implemented on both natives; the two-pass path arms only on the COMPOSED capture path and is deliberately disarmed on the per-component path this fixture runs through, so the natives render the element with no backdrop filter while web applies saturate(4). NOT a runtime gap; the gap is that test-all.sh has no way to arm composed capture. Worth noting how this one surfaced: it was invisible until \u0394E95 gated. It scored \u0394E95 24.92 at \u0394px 0.00% and SSIM 0.978, so the blur variant sat in the ledger while its saturate sibling \u2014 same fixture, same cause \u2014 passed silently. Adding the metric found a hole in the LEDGER, not just in the runtimes.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9783,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 24.92,
+        "divergence": "color-drift"
+      }
     }
   ]
 }

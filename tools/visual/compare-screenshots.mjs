@@ -96,9 +96,11 @@ import { padToCanvas } from './pad-canvas.mjs';
 // stale / orphaned) are unit-testable without booting the pipeline.
 import {
   evaluateCrossPlatformGate,
+  pairRegressed,
   formatRecord,
   EXIT_UNEXPECTED_DIVERGENCE,
   EXIT_STALE_EXPECTATION,
+  DEFAULT_DELTA_E_THRESHOLD,
 } from './cross-platform-gate.mjs';
 // COMPARE_METRICS Section 5 / item 9 — HTML report extracted into a
 // sibling module to keep this file under the per-file size budget.
@@ -135,6 +137,9 @@ const useBaseline    = args.includes('--baseline');
 const updateBaseline = args.includes('--update-baseline');
 const ssimThreshold  = Number(getArg('--ssim-threshold') ?? 0.95);
 const pixelThreshold = Number(getArg('--pixel-threshold') ?? 2);
+// ΔE95 ceiling. Defaults to the classifier's own "clearly different"
+// boundary rather than a fresh guess — see DEFAULT_DELTA_E_THRESHOLD.
+const deltaEThreshold = Number(getArg('--delta-e-threshold') ?? DEFAULT_DELTA_E_THRESHOLD);
 // Optional label (e.g. the input IR filename) so the report headline says
 // which test case it was generated from. Populated by test-all.sh.
 const inputLabel     = getArg('--input') ?? process.env.TEST_INPUT ?? '';
@@ -243,7 +248,7 @@ async function main() {
   // without leaving you the artifact to diagnose it is a worse gate.
   const xGate = crossPlatformGate
     ? evaluateCrossPlatformGate(rows, loadCrossPlatformLedger(), {
-        ssimThreshold, pixelThreshold, inputLabel,
+        ssimThreshold, pixelThreshold, deltaEThreshold, inputLabel,
       })
     : { skipped: true, reason: 'disabled via --no-cross-platform-gate', checked: 0,
         unexpected: [], expected: [], stale: [], expired: [] };
@@ -778,12 +783,21 @@ async function compareBaseline(name, normalized, canvasW, canvasH) {
       pairH,
       `${name.replace(/\.png$/, '')}__baseline-${p}.png`
     );
-    // Phase A gate (CI-blocking, unchanged). Spec Section 6:
-    // "Phase A — keep the existing `regressed = ssim < threshold ||
-    // pixelPct > threshold` gate." This is what gates `--baseline` exit 1.
-    const regressed =
-      pair.pixelMismatchedPct > pixelThreshold ||
-      (pair.ssim !== null && pair.ssim < ssimThreshold);
+    // Phase A gate (CI-blocking). This is what gates `--baseline` exit 1.
+    //
+    // Delegates to pairRegressed so the baseline gate and the
+    // cross-platform gate cannot drift apart in meaning — same metrics,
+    // same comparisons, different subject. cross-platform-gate.test.mjs
+    // asserts they agree; this call is what makes that true by
+    // construction rather than by two expressions being kept in sync by
+    // hand.
+    //
+    // ΔE joined the expression with the cross-platform promotion: it was
+    // computed on every pair and gated nothing, while pixelmatch cannot
+    // fire on a uniform lightness shift below 132/255 and SSIM barely
+    // moves when a shape is repainted in the wrong colour. See
+    // cross-platform-gate.mjs for the measured rows that motivated it.
+    const regressed = pairRegressed(pair, { ssimThreshold, pixelThreshold, deltaEThreshold });
     if (regressed) result.regressed = true;
 
     // Phase B (LOG-ONLY, not gating). Spec Section 6:

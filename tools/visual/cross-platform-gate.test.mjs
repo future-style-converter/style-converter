@@ -25,6 +25,7 @@ import {
   formatRecord,
   PAIR_KEYS,
   EXIT_UNEXPECTED_DIVERGENCE,
+  DEFAULT_DELTA_E_THRESHOLD,
 } from './cross-platform-gate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -52,6 +53,43 @@ test('pairRegressed mirrors the baseline gate expression', () => {
   assert.equal(pairRegressed({ ssim: 0.99, pixelMismatchedPct: 2.1 }, OPTS), true, 'pixel above threshold');
   assert.equal(pairRegressed({ ssim: null, pixelMismatchedPct: 0 }, OPTS), false, 'null ssim never fails alone');
   assert.equal(pairRegressed(null, OPTS), false, 'absent pair is not a failure');
+});
+
+test('a large colour error fails even when SSIM and pixel%% are clean', () => {
+  // The hole this metric closes. Measured on the live corpus:
+  // 009_Backdrop_Saturate_OverStripes scored ΔE95 24.92 at SSIM 0.9778 and
+  // Δpx 0.00% — a blatant recolour that both other metrics waved through,
+  // because pixelmatch's YIQ budget cannot fire on a lightness shift below
+  // 132/255 and SSIM is structural.
+  assert.equal(
+    pairRegressed({ ssim: 0.9778, pixelMismatchedPct: 0, labDeltaE: { p95: 24.92 } }, OPTS),
+    true,
+  );
+});
+
+test('the ΔE threshold is exclusive at the boundary', () => {
+  assert.equal(pairRegressed({ ssim: 1, pixelMismatchedPct: 0, labDeltaE: { p95: 5.0 } }, OPTS), false);
+  assert.equal(pairRegressed({ ssim: 1, pixelMismatchedPct: 0, labDeltaE: { p95: 5.01 } }, OPTS), true);
+});
+
+test('an absent ΔE never fails alone', () => {
+  // Same rule as ssim: a metric that did not compute must not manufacture a
+  // failure. Treating a missing ΔE as 0 would be the mirror mistake — it
+  // would manufacture a PASS.
+  assert.equal(pairRegressed({ ssim: 1, pixelMismatchedPct: 0 }, OPTS), false);
+  assert.equal(pairRegressed({ ssim: 1, pixelMismatchedPct: 0, labDeltaE: {} }, OPTS), false);
+  assert.equal(pairRegressed({ ssim: 1, pixelMismatchedPct: 0, labDeltaE: { p95: null } }, OPTS), false);
+});
+
+test('the ΔE threshold is overridable', () => {
+  const loose = { ...OPTS, deltaEThreshold: 30 };
+  assert.equal(pairRegressed({ ssim: 1, pixelMismatchedPct: 0, labDeltaE: { p95: 24.92 } }, loose), false);
+});
+
+test('the default ΔE threshold is the classifier\'s "clearly different" boundary', () => {
+  // If these drift apart, the report would label a row "clearly different"
+  // while the gate passed it — the exact mismatch this change removes.
+  assert.equal(DEFAULT_DELTA_E_THRESHOLD, 5.0);
 });
 
 test('the SSIM threshold is exclusive at the boundary', () => {
@@ -164,7 +202,7 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // Hardcoded deliberately: the count is the thing that must not drift
   // unnoticed. Changing it should require editing this line, which is a
   // review prompt.
-  assert.equal(led.expectations.length, 24, '22 on visual-test + 2 on composition-test; opacity-group entries went stale when the iOS compositingGroup fix landed');
+  assert.equal(led.expectations.length, 30, '22 on visual-test + 2 on composition-test; opacity-group entries went stale when the iOS compositingGroup fix landed');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);
@@ -210,8 +248,17 @@ test('every seeded entry actually breaches the threshold it claims', () => {
   // the ledger excuse things that were never failing.
   const led = JSON.parse(readFileSync(resolve(__dirname, 'cross-platform-expectations.json'), 'utf8'));
   for (const e of led.expectations) {
+    // Reconstruct the FULL metric block, ΔE included. Passing only
+    // ssim+pixelPct here would quietly forbid an entry that breaches on
+    // colour alone — which is most of what ΔE was added to catch, so the
+    // guard would have blocked exactly the rows it should be protecting.
+    const pair = {
+      ssim: e.observed.ssim,
+      pixelMismatchedPct: e.observed.pixelPct,
+      labDeltaE: { p95: e.observed.labDeltaEP95 },
+    };
     assert.equal(
-      pairRegressed({ ssim: e.observed.ssim, pixelMismatchedPct: e.observed.pixelPct }, OPTS),
+      pairRegressed(pair, OPTS),
       true,
       `${e.component} ${e.pair} was listed but its recorded metrics pass`,
     );

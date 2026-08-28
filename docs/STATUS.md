@@ -1343,6 +1343,100 @@ guard is not incidental: without it a `SKIP_IOS=1` run would copy the
 report a perfect noise floor for a platform that never executed — a
 study that cannot fail is worth nothing.
 
+## ΔE was computed on every pair and gated nothing (2026-08-28)
+
+Both gates — per-platform-vs-baseline and cross-platform — tested only
+SSIM and pixel-mismatch percentage. CIEDE2000 ΔE was computed on every
+pair, printed in the report, and recorded in every ledger row, but never
+appeared in a pass/fail expression. Neither gating metric sees colour
+the way a person does:
+
+- **pixelmatch** at `threshold: 0.25` cannot fire on a uniform lightness
+  shift below **132/255** (measured: black vs mid-grey scores as
+  IDENTICAL), so Δpx routinely reads 0.00% on a blatant recolour.
+- **SSIM** is structural. Repaint a shape in the wrong colour without
+  moving an edge and it barely moves.
+
+That is not hypothetical. Passing the SSIM+pixel gate at the moment ΔE
+was added:
+
+| row | ΔE95 | SSIM | Δpx |
+|---|---:|---:|---:|
+| `035_Filter_Sepia` · iOS-Android | 23.35 | 0.9573 | 0.57% |
+| `035_Filter_Sepia` · iOS-web | 23.35 | 0.9814 | 0.16% |
+| `009_Backdrop_Saturate_OverStripes` · iOS-web | 24.92 | 0.9778 | **0.00%** |
+| `009_Backdrop_Saturate_OverStripes` · Android-web | 24.92 | 0.9783 | **0.00%** |
+
+The divergence classifier had already labelled the sepia iOS-web pair
+`color-drift`. The report knew; the gate did not.
+
+ΔE95 now gates at **5.0** — not a fresh guess, but the boundary the
+classifier already calls "clearly different" (ΔE ≈ 1 is the
+just-noticeable difference, 2–3 noticeable in context, >5 simply wrong).
+Both gates delegate to the same `pairRegressed`, so they cannot drift
+apart in meaning. Override with `--delta-e-threshold`.
+
+### What it found immediately
+
+**A real iOS bug.** `filter: sepia(80%)` over `#3498db` = (52,152,219):
+the CSS matrix (filter-effects-1 §8.5, interpolated toward identity by
+the amount) gives **(153,158,143)**. Android and web both render exactly
+that. iOS renders **(74,110,113)** — same 1954-px box, wrong colour, and
+*cool* where sepia must be warm. `FilterApplier.swift` implements it as
+an eyeballed approximation, `saturation(1 - pct/200)` then
+`colorMultiply` by a warm colour *at `pct/100` alpha*; multiplying by an
+80%-alpha colour darkens everything, which is most of the error. The
+file header admits the approximation.
+
+The exact fix is non-trivial, so it is ledgered rather than bundled. The
+sepia matrix is rank-1 — `M(a)·c = (1-a)·c + a·(w·c)·t` with
+`w = (0.393, 0.769, 0.189)` and `t = (1, 0.888, 0.692)` — so it needs
+luminance in sepia's *own* basis. SwiftUI's `.grayscale` is Rec.709 and
+cannot express it, and iOS 16 (the package target) has no `.colorEffect`
+shader, so a correct implementation needs a CoreImage colour-matrix path
+in the inline filter chain.
+
+**A hole in the ledger, not just the runtimes.**
+`Backdrop_Saturate_OverStripes` has the same root cause as
+`Backdrop_Blur_OverStripes` (the two-pass backdrop path is deliberately
+disarmed on the per-component capture path) — but only the blur variant
+was listed. Its saturate sibling passed silently at ΔE95 24.92 / Δpx
+0.00% because no gating metric could see it.
+
+**A stale baseline hiding a landed fix.** With ΔE in the baseline gate,
+`BASELINE=1` immediately failed on `033_Filter_Brightness`: the
+committed iOS baseline still held **(191,253,241)**, the *old additive*
+brightness result from before that bug was fixed earlier the same day,
+while the current capture is the corrected **(69,255,169)** matching
+Android/web and the spec to 1 LSB. The old gate had passed that stale
+baseline without complaint. The stale capture even carried the
+Display-P3-promoted ground (26,26,**45**) that the fix also removed.
+
+Ledger 24 → 30 (`035_Filter_Sepia` ×2, `098_Neumorphic_Light` ×2,
+`Backdrop_Saturate_OverStripes` ×2). `098_Neumorphic_Light` is the
+weakest of the six and is flagged as such in its own entry: iOS's
+box-shadow penumbra falloff diverges from Android and web (which agree),
+5159/31980 px concentrated in the shadow rows above and below the card
+while the card face and page ground are byte-identical — the known
+CoreGraphics-vs-Skia blur-sigma convention difference, landing just over
+the line at ΔE95 5.34/5.59.
+
+### Baseline refresh
+
+Six baselines changed, each accounted for rather than accepted:
+
+| baseline | cause |
+|---|---|
+| `iOS__033_Filter_Brightness` | the brightness fix; **the gate caught this one** |
+| `iOS__014/015_Opacity_*` | the `compositingGroup` fix, via edge-AA compositing (71 px, sub-threshold) |
+| `Android__046_Perspective_Rotate` | the perspective fix |
+| `Android__014/015_Opacity_*` | **inherited stale from the base branch** — last written in `ea142784`, and provably not caused by any commit here: the only compose change that could touch a leaf is an additive `\|\| config.effects.blendMode.hasBlendMode` on an OR chain, which is false for a component with no blend mode |
+
+The last row is worth keeping: those two baselines were stale by 1 LSB
+plus ~80 antialiasing pixels — under every threshold, so nothing ever
+flagged them. A byte-level refresh surfaces that class; a threshold gate
+never will.
+
 ## Test suites
 
 | suite | command | tests |
@@ -1351,7 +1445,7 @@ study that cannot fail is worth nothing.
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2761 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1802 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1733 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1738 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

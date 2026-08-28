@@ -80,13 +80,51 @@ export const EXIT_UNEXPECTED_DIVERGENCE = 4;
 export const EXIT_STALE_EXPECTATION = 5;
 
 /**
+ * Default ΔE95 above which a pair counts as regressed.
+ *
+ * 5.0 is not a fresh guess — it is the boundary this repo already calls
+ * "clearly different" in the divergence classifier. CIEDE2000 ΔE ≈ 1 is the
+ * just-noticeable difference under ideal viewing, 2–3 is noticeable in
+ * context, and >5 is a colour a person would describe as simply wrong.
+ */
+export const DEFAULT_DELTA_E_THRESHOLD = 5.0;
+
+/**
  * Does one pair's metric block breach the thresholds?
  * Mirrors the baseline gate's expression exactly so the two gates cannot
  * drift apart in meaning — same metrics, same comparisons, different subject.
+ *
+ * ## Why ΔE is in here
+ *
+ * It was computed on every pair, printed in the report, recorded in every
+ * ledger row — and gated nothing. Both gates tested only SSIM and pixel%,
+ * and neither of those sees colour the way a person does:
+ *
+ *   · pixelmatch's YIQ budget at threshold 0.25 cannot fire on a uniform
+ *     lightness shift below 132/255 (measured: black vs mid-grey scores as
+ *     IDENTICAL), so Δpx routinely reads 0.00% on a blatant recolour.
+ *   · SSIM is structural. Repaint a shape in the wrong colour without
+ *     moving an edge and SSIM barely notices.
+ *
+ * That is not hypothetical. Measured on the live corpus, passing the
+ * SSIM+pixel gate at the moment ΔE was added:
+ *
+ *     035_Filter_Sepia            ΔE95 23.35  SSIM 0.9573  Δpx 0.57%
+ *     009_Backdrop_Saturate…      ΔE95 24.92  SSIM 0.9778  Δpx 0.00%
+ *
+ * The sepia row is a real iOS bug (it renders (74,110,113) where the CSS
+ * matrix gives (153,158,143), which Android and web both hit exactly). A
+ * gate that passes a 23-ΔE recolour at 0.00% pixel difference is measuring
+ * the wrong thing.
  */
-export function pairRegressed(pair, { ssimThreshold, pixelThreshold }) {
+export function pairRegressed(pair, { ssimThreshold, pixelThreshold, deltaEThreshold = DEFAULT_DELTA_E_THRESHOLD }) {
   if (!pair) return false;                                   // absent pair is not a failure
   if (pair.pixelMismatchedPct > pixelThreshold) return true;
+  // Absent ΔE (older manifest, or a pair the metric bailed on) never fails
+  // alone — same rule as ssim, so a missing metric cannot manufacture a
+  // failure the way a zero would.
+  const de = pair.labDeltaE?.p95;
+  if (de !== null && de !== undefined && de > deltaEThreshold) return true;
   return pair.ssim !== null && pair.ssim !== undefined && pair.ssim < ssimThreshold;
 }
 
