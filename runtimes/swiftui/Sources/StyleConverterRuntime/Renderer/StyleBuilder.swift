@@ -1238,6 +1238,10 @@ extension View {
             // backgrounds) so it must come after the paint chain.
             // `.compositingGroup` and `.opacity` follow so blending
             // composites into the isolated buffer before fading.
+            // `.engineOpacity` carries its OWN compositing group for
+            // alpha < 1 (css-color-4 §2.1 composites the subtree as a
+            // group); it does not rely on `isolation` having emitted one,
+            // because the default `auto` emits nothing.
             .engineBlendMode(style.blend)
             .engineIsolation(style.isolation)
             .engineOpacity(style.opacity)

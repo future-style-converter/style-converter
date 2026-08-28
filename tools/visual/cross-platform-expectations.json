@@ -38,34 +38,6 @@
       }
     },
     {
-      "fixture": "composition-test.json",
-      "component": "Nested_OpacityGroup.png",
-      "pair": "iOS-Android",
-      "reason": "REAL BUG (iOS) \u2014 iOS applies parent opacity per child instead of compositing the subtree as a group; Android agrees with web here, so iOS is the lone outlier. Arithmetic: blue child #2980b9 = (41,128,185) over page (26,26,46) - web/Android give (33,77,116) = 0.5*child + 0.5*page (group, correct); iOS gives (90,134,168) = 0.5*child + 0.5*(140,140,151), the child faded individually over the already-faded parent. Max per-channel divergence 80.",
-      "owner": "unassigned",
-      "expires": "2026-09-30",
-      "observed": {
-        "ssim": 0.9355,
-        "pixelPct": 0,
-        "labDeltaEP95": 20.931,
-        "divergence": "mixed"
-      }
-    },
-    {
-      "fixture": "composition-test.json",
-      "component": "Nested_OpacityGroup.png",
-      "pair": "iOS-web",
-      "reason": "REAL BUG \u2014 iOS applies parent opacity PER CHILD instead of compositing the subtree as a group. css-color-4: opacity on an element creates a stacking context and the whole subtree is rendered as a group, then composited once. The arithmetic pins it exactly: for the blue child #2980b9 = (41,128,185) over page background (26,26,46), web gives (33,77,116) = 0.5*child + 0.5*page (group-composited, CORRECT); iOS gives (90,134,168) = 0.5*child + 0.5*(140,140,151), i.e. the child faded individually over the already-faded parent background. Max per-channel divergence 80. Also note pixelmatch reports pixelMismatchedPct 0.00 here while 36.63%% of pixels actually differ \u2014 see the metric note below.",
-      "owner": "unassigned",
-      "expires": "2026-09-30",
-      "observed": {
-        "ssim": 0.9355,
-        "pixelPct": 0,
-        "labDeltaEP95": 20.938,
-        "divergence": "mixed"
-      }
-    },
-    {
       "fixture": "visual-test.json",
       "component": "BorderRadius_Uniform.png",
       "pair": "iOS-Android",
