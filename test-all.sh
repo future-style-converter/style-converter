@@ -478,6 +478,40 @@ print('Unknown')")
                     log "verified: iOS capture ran with animationTime=${CAPTURE_ANIMATION_TIME}"
                 fi
 
+                # The same gate for forceState, which did NOT have one --
+                # and the asymmetry is exactly why the gap survived.
+                # Android's forceState has had a "silently ran base-state"
+                # check since wave 8; iOS had one for animationTime only.
+                # So CAPTURE_FORCE_STATE was honoured on Android and web
+                # and silently ignored on iOS, and nothing said so.
+                #
+                # MEASURED before this was added, on
+                # fixtures/fidelity/motion/transitions.json with
+                # CAPTURE_FORCE_STATE=hover: Android and web captures both
+                # differed from their base-state run, iOS's was
+                # BYTE-IDENTICAL to base. The cross-platform gate then
+                # reported 000_MT_BgFade diverging on iOS-Android and
+                # iOS-web (SSIM 0.974, Δpx 21.11%, ΔE95 35.23) while
+                # Android-web agreed — a pure harness artefact that reads
+                # exactly like an iOS styling bug.
+                #
+                # THE TRAP IS THE NAME. iOS reads `FORCE_STATE`
+                # (CaptureOverrides.swift: knob(argument: "forceState",
+                # env: "FORCE_STATE")), so the transport variable is
+                # SIMCTL_CHILD_FORCE_STATE -- NOT
+                # SIMCTL_CHILD_CAPTURE_FORCE_STATE, which is the name the
+                # animationTime knob's symmetry would lead you to write.
+                # Verified: with SIMCTL_CHILD_FORCE_STATE=hover the iOS
+                # capture differs from base, i.e. the state applies.
+                if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
+                    IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
+                    if ! grep -q "\"forceState\":\"${CAPTURE_FORCE_STATE}\"" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
+                        err "CAPTURE_FORCE_STATE=${CAPTURE_FORCE_STATE} was set but the iOS harness config marker is missing/mismatched ($IOS_CAPTURE_CONFIG) — the capture silently ran BASE state. Export SIMCTL_CHILD_FORCE_STATE=${CAPTURE_FORCE_STATE} (note: FORCE_STATE, not CAPTURE_FORCE_STATE — that is the env name the iOS harness reads) so simctl forwards it."
+                        exit 1
+                    fi
+                    log "verified: iOS capture ran with forceState=${CAPTURE_FORCE_STATE}"
+                fi
+
                 # iOS's UIImage.pngData() embeds non-deterministic metadata
                 # (timestamps etc.), so pixel-identical runs produce different
                 # MD5 hashes. Strip the ancillary chunks so captures are byte-

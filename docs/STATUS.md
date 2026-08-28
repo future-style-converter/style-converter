@@ -1437,6 +1437,90 @@ plus ~80 antialiasing pixels — under every threshold, so nothing ever
 flagged them. A byte-level refresh surfaces that class; a threshold gate
 never will.
 
+## Animation: the seek worked, nothing used it (2026-08-28)
+
+Every piece of the deterministic animation-capture contract already
+existed and worked. `CAPTURE_ANIMATION_TIME` seizes the clock on all
+three platforms (`schema/spec/07-animations.md` §5); each platform
+verifies its own seize loudly; `fixtures/fidelity/motion/*` is
+purpose-built for it, with every duration at 1s so one clock value is
+mid-run for the whole surface.
+
+What did not exist was anything that *used* it. No automated run ever
+set the variable, so an animation divergence could not be caught by the
+pipeline. `tools/visual/animation-sweep.sh` closes that.
+
+```bash
+bash tools/visual/animation-sweep.sh                                  # keyframes, t=0…1
+bash tools/visual/animation-sweep.sh fixtures/fidelity/motion/transitions.json "0,0.5"
+CAPTURE_FORCE_STATE=hover bash tools/visual/animation-sweep.sh …      # transitions
+```
+
+It runs the cross-platform gate at each sampled time **and** asks a
+second question the 3-way comparison structurally cannot: for each
+platform and component, did the pixels change across the sweep? A static
+capture is the easiest thing in the world for three runtimes to agree
+on — a runtime that rendered the t=0 frame regardless of the requested
+time would pass every gate perfectly.
+
+First run, `motion/keyframes-basic.json` at t ∈ {0, 0.5, 1}: **all three
+gates clean and all 24 platform-component series moved** — the first
+automated evidence that the runtimes agree on *animated* frames, not
+just static ones. Per-component motion percentages match across
+platforms to the digit (18.46% / 20.07% / 26.11%).
+
+### Why a sweep, not two points
+
+`MK_FillBoth` (`animation-delay: 0.5s`, `duration: 1s`,
+`fill-mode: both`, opacity 0→1) is byte-identical at t=0 and t=0.5 on
+all three platforms — and that is **correct**: at t=0 it backwards-fills
+at opacity 0, and at t=0.5 the animation is just starting, also 0. At
+t=1.0 it moves 22.22% on all three. A two-point check would have called
+a spec-correct render a dead animation.
+
+### `CAPTURE_FORCE_STATE` was silently ignored on iOS
+
+Found by the sweep. Android and web honoured it; iOS ran base-state.
+Measured on `motion/transitions.json` with `CAPTURE_FORCE_STATE=hover`:
+Android and web captures both differed from their base-state run, iOS's
+was **byte-identical to base**. The cross-platform gate then reported
+`000_MT_BgFade` diverging on iOS-Android and iOS-web (SSIM 0.974,
+Δpx 21.11%, ΔE95 35.23) while Android-web agreed — a pure harness
+artefact that reads exactly like an iOS styling bug.
+
+**The trap is the name.** iOS reads the env `FORCE_STATE`
+(`CaptureOverrides.swift`: `knob(argument: "forceState", env:
+"FORCE_STATE")`), so the transport is `SIMCTL_CHILD_FORCE_STATE` — *not*
+`SIMCTL_CHILD_CAPTURE_FORCE_STATE`, which is the name the animationTime
+knob's symmetry leads you to write. (I wrote the wrong one first; the
+new gate caught me.)
+
+Why it survived: Android's forceState has had a "silently ran
+base-state" check since wave 8, and iOS had one for `animationTime` —
+but not for `forceState`. The asymmetry *was* the hiding place.
+`test-all.sh` now verifies iOS forceState against the same
+`capture-config.json` marker, with an error that names the correct
+variable. With the transport fixed, the gate is clean at every sampled
+time.
+
+### Open: transitions never actually run
+
+With `forceState` correctly applied on all three platforms, all 12
+platform-component series on `motion/transitions.json` are still
+byte-identical at t=0 and t=0.5. The harnesses mount **directly in** the
+forced end-state, so no property ever changes and no transition starts.
+
+Spec 07 §4 is explicit that this should not be the case: "the forced-state
+hook is the deterministic trigger: forcing a state **mid-capture** starts
+the transition exactly like real input would." A mid-capture *flip* is
+required; a static forced-state mount is not the same thing.
+
+This is the correlated-failure mode in its purest form: **the
+cross-platform gate is clean — all three runtimes agree perfectly — while
+the property under test is entirely unexercised.** No 3-way comparison
+can ever see it; only the temporal check can. Implementing the
+mid-capture flip on three harnesses is follow-up work.
+
 ## Test suites
 
 | suite | command | tests |

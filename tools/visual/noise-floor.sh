@@ -51,6 +51,10 @@ FIXTURE="${1:-fixtures/visual-test.json}"
 RUNS="${2:-2}"
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 WORK="${NOISE_FLOOR_WORK:-$(mktemp -d)}"
+# mkdir -p, not just mktemp: the env override is a caller-supplied
+# path that need not exist yet, and without this the first touch
+# died under `set -e` with a bare "No such file or directory".
+mkdir -p "$WORK"
 
 cd "$ROOT"
 
