@@ -233,3 +233,21 @@ test('EXIT_UNEXPECTED_DIVERGENCE is distinct from the other exit codes', () => {
   // 1 = baseline regression · 2 = IO/empty · 3 = colour space · 4 = this.
   assert.equal(EXIT_UNEXPECTED_DIVERGENCE, 4);
 });
+
+test('a skipped platform does not orphan its expectations', () => {
+  // SKIP_ANDROID=1 means no iOS-Android and no Android-web pair exists at
+  // all. Reporting every Android expectation as "orphaned — delete the line"
+  // is noise dressed as a finding, and it trains people to ignore the
+  // warning that matters. Only iOS-web is evaluable here.
+  const ledger = { expectations: [
+    { component: 'A.png', pair: 'iOS-Android', reason: 'r', owner: 'x' },
+    { component: 'A.png', pair: 'Android-web', reason: 'r', owner: 'x' },
+    { component: 'GONE.png', pair: 'iOS-web', reason: 'r', owner: 'x' },
+  ] };
+  const rows = [row('A.png', { 'iOS-web': ok() }, { iOS: {}, Android: { present: false }, web: {} })];
+  const r = evaluateCrossPlatformGate(rows, ledger, OPTS);
+  assert.equal(r.skipped, false, 'iOS + web is still two platforms');
+  // The genuinely orphaned iOS-web entry IS reported; the two Android ones are not.
+  const orphans = r.stale.filter((s) => s.orphaned).map((s) => `${s.component} ${s.pair}`);
+  assert.deepEqual(orphans, ['GONE.png iOS-web']);
+});
