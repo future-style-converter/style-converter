@@ -1845,6 +1845,49 @@ that cannot fail contained two fresh ones. That is the argument for an
 independent adversarial pass over one's own work, not just over inherited
 code.
 
+## perspective + translateZ was wrong on both natives (2026-08-28)
+
+Two of the audit backlog's transform findings, diagnosed by measurement
+and fixed. `perspective(P) translateZ(z)` is a pure uniform scale of
+`P/(P − z)` (css-transforms-2 §3) — arithmetic-clean, so it reads
+straight off a bounding box.
+
+Measured on a 60×20 box under `perspective(500px)`, with web exact on
+every row:
+
+| translateZ | correct | iOS before | Android before | both after |
+|---|---|---|---|---|
+| 100px | 74×24 | **60×20** | 74×24* | 74×24 |
+| 166px | 90×30 | **60×20** | 80×26 | 90×30 |
+| 250px | 120×40 | **60×20** | 90×30 | 120×40 |
+| −500px | 30×10 | **60×20** | **6×2** | 30×10 |
+
+\* Android's error was small at low z and grew; see below.
+
+**iOS applied no depth response at all** — 60×20 for every z. The Z
+component was discarded with the comment "SwiftUI has no Z-translate on a
+non-3D view; documented limitation". True of a *general* 3D translate,
+and beside the point for the case that occurs: under a perspective,
+translateZ is not a translation but a uniform scale, which
+`.scaleEffect` expresses exactly. The scale is applied only when a
+perspective is in scope — without one CSS projects orthographically and
+translateZ genuinely does nothing, which is also what keeps every 2D
+baseline byte-identical.
+
+**Compose computed `1 + z/P`** — the first-order Taylor expansion of
+`1/(1 − z/P)`. The two agree for small `z/P` and diverge fast: 1.50 where
+2.00 was wanted at z/P = 0.5. The −500 row is the clearest tell — the
+expansion evaluates to exactly 0 there and was rescued only by a
+`coerceIn(0.1f, 10f)` clamp, so an element pushed one perspective-length
+away rendered at a *tenth* of its size instead of half.
+
+After: **5 of 5 rows byte-identical across all three platforms.**
+
+Both were found by the audit sweep's cross-runtime lens. Neither was in
+the ledger, and neither was reachable by the existing corpus — no fixture
+combined `perspective()` with `translateZ`, which is exactly why a
+platform rendering no depth at all went unnoticed.
+
 ## Test suites
 
 | suite | command | tests |
