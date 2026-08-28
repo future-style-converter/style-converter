@@ -1181,13 +1181,29 @@ pixels, case vs its own control, within one platform.
 
 | declaration | iOS | Android | web | reading |
 |---|---:|---:|---:|---|
-| `backdrop-filter: blur(10px)` (Glass_Effect) | **0** | **0** | 264 | dropped on BOTH natives |
+| `backdrop-filter: blur(10px)` (Glass_Effect) | 0 | 0 | 264 | NOT a gap — capture-mode gated, see below |
 | `perspective: 500px` (Perspective_Rotate) | 2209 | ~~**0**~~ **1802** | 2097 | FIXED 2026-08-28 — was dropped on Android |
 | `transform: rotateY(30deg)` (same component) | 3082 | 2709 | 2840 | applied everywhere |
 
-`backdrop-filter` independently reproduces the composition-test result on a
-second fixture. Because both natives drop it they AGREE, so no cross-platform
-pair diverges — the control is the only thing that sees it.
+**CORRECTED 2026-08-28.** `backdrop-filter` is NOT dropped. It is implemented on
+both natives (wave 26 above: two-pass controlled-canvas model, iOS validated
+against browser refs at 0.966 / 0.978 / 0.999). What the control measured is a
+CAPTURE-MODE gate: the two-pass path arms only on the COMPOSED capture path and
+is deliberately disarmed on the per-component path these runs used, to keep the
+committed 327-pair baselines byte-identical. Android gates on
+`composedMode && documentDeclaresBackdropFilter` (ScreenshotCaptureScreen.kt:309);
+iOS says so outright in ScreenshotCaptureView.
+
+The real gap is in the HARNESS, not the runtimes: composition-test.json was
+authored precisely so backdrop-filter has a non-uniform backdrop, and test-all.sh
+has no way to arm composed capture — so the ordinary fixture pipeline cannot
+exercise the property on either native. Worth closing, but it is a capture-path
+gap, not a missing applier.
+
+Also worth keeping: this is the second finding this campaign that looked like a
+native gap and was not (the other being the under-size trio, which is placeholder
+scaffolding). A control proves a property had NO VISIBLE EFFECT on a platform; it
+does not prove WHY, and the why has been different every time.
 
 `perspective` is FIXED. Android applied the rotation but ignored the
 perspective, so 3D transforms rendered flat. `applyTransformFunctions` --
