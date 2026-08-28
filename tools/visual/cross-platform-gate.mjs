@@ -101,7 +101,7 @@ export const DEFAULT_DELTA_E_THRESHOLD = 5.0;
  * and neither of those sees colour the way a person does:
  *
  *   · pixelmatch's YIQ budget at threshold 0.25 cannot fire on a uniform
- *     lightness shift below 132/255 (measured: black vs mid-grey scores as
+ *     lightness shift below 66/255 (measured: black vs mid-grey scores as
  *     IDENTICAL), so Δpx routinely reads 0.00% on a blatant recolour.
  *   · SSIM is structural. Repaint a shape in the wrong colour without
  *     moving an edge and SSIM barely notices.
@@ -197,7 +197,16 @@ function isExpired(entry, now) {
  *            expected:object[], stale:object[], expired:object[]}}
  */
 export function evaluateCrossPlatformGate(rows, ledger, opts) {
-  const { ssimThreshold, pixelThreshold, inputLabel = '', now = new Date() } = opts;
+  // deltaEThreshold is destructured and FORWARDED explicitly. It was
+  // omitted here at first, so the cross-platform gate silently fell back to
+  // pairRegressed's default while --delta-e-threshold appeared to work —
+  // the two gates drifted apart in meaning, which is precisely what
+  // delegating to one pairRegressed was supposed to make impossible.
+  const {
+    ssimThreshold, pixelThreshold,
+    deltaEThreshold = DEFAULT_DELTA_E_THRESHOLD,
+    inputLabel = '', now = new Date(),
+  } = opts;
 
   // A run that captured fewer than two platforms has no cross-platform pair
   // to judge. CI deliberately runs one platform per job (SKIP_IOS=1 etc.),
@@ -230,7 +239,7 @@ export function evaluateCrossPlatformGate(rows, ledger, opts) {
 
       const key = `${componentKey(row.name)}\u0000${pairKey}`;
       const entry = byKey.get(key);
-      const failed = pairRegressed(pair, { ssimThreshold, pixelThreshold });
+      const failed = pairRegressed(pair, { ssimThreshold, pixelThreshold, deltaEThreshold });
 
       // Snapshot enough metrics that a reviewer can judge the row without
       // opening the report. ΔE is the discriminator that matters most: a

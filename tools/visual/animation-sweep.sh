@@ -206,6 +206,14 @@ for (const p of ["ios", "android", "web"]) {
   }
 }
 console.log(`  ${checked} platform-component series checked across ${times.length} time point(s)`);
+// Zero series checked is not success — it means no platform produced two
+// comparable captures, so the motion question was never asked. Reporting
+// "every component changed" there is a check that cannot fail.
+if (checked === 0) {
+  console.log("  \u2717 NO series were compared — the sweep captured nothing to compare.");
+  console.log("  Every platform was skipped, or fewer than two time points produced captures.");
+  process.exit(1);
+}
 if (!dead.length && !leaked.length) {
   console.log(mayMove === null
     ? "  \u2713 every component changed somewhere in the sweep"

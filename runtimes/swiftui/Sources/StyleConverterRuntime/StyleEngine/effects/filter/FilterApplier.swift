@@ -7,13 +7,14 @@
 //  previous one — so we reduce in declared order. Equivalent SwiftUI
 //  APIs:
 //
-//    blur(radius)       → .blur(radius: CGFloat × 0.5 for CSS parity)
+//    blur(sigma)        → .blur(radius: sigma)   §8.2: the CSS
+//                         parameter IS σ, and SwiftUI's radius ≈ σ
 //    brightness(pct)    → .colorMultiply(white: pct/100)   MULTIPLIER, not additive
 //    contrast(pct)      → .contrast(pct/100)
 //    grayscale(pct)     → .grayscale(pct/100)
 //    saturate(pct)      → .saturation(pct/100)
 //    hue-rotate(deg)    → .hueRotation(.degrees(deg))
-//    invert(100)        → .colorInvert()        (partial invert is lossy)
+//    invert(a)          → lerp to .colorInvert() at opacity a   §8.6
 //    opacity(pct)       → .opacity(pct/100)
 //    sepia(pct)         → §8.5 matrix to within a quantisation step, via
 //                         SepiaMatrix's rank-1 factorisation (reweight →
@@ -117,8 +118,28 @@ struct FilterApplier: ViewModifier {
     private func applyOne(_ fn: FilterFn, to v: AnyView) -> some View {
         switch fn {
         case .blur(let r):
-            // CSS blur radius ≈ 2× SwiftUI's internal radius; divide by 2.
-            v.blur(radius: r / 2, opaque: false)
+            // filter-effects-1 §8.2: the parameter of blur() IS the Gaussian
+            // STANDARD DEVIATION — "the parameter defines the value of the
+            // standard deviation to the Gaussian function". It is NOT a
+            // radius, and it is NOT the box-shadow/drop-shadow convention
+            // (css-backgrounds-3, filter-effects-1 §10.1) where a blur
+            // radius r means σ = r/2. Conflating the two is the bug this
+            // line had: it halved σ on every blur.
+            //
+            // MEASURED with the same step-edge estimator BackdropBlur pins
+            // `ciRadiusPerSigma` with (the derivative of a blurred step edge
+            // IS the Gaussian, so its second moment is σ). Across four
+            // radii, iOS/web σ ratio was a constant ~0.48:
+            //
+            //     blur(R)     R=1     R=2     R=4     R=8
+            //     web σ      1.080   1.991   3.835   6.815   (≈ R, correct)
+            //     iOS σ      0.455   0.954   1.845   3.624   (≈ R/2)
+            //
+            // The constant ratio is the signature of a scale error, and it
+            // also tells us SwiftUI's `.blur(radius:)` parameter is itself
+            // ≈ σ — passing R/2 produced σ ≈ R/2 at every radius. So the
+            // correct call passes R unchanged.
+            v.blur(radius: r, opaque: false)
         case .brightness(let pct):
             // filter-effects-1 §2.2: brightness() is a linear MULTIPLIER on
             // the colour channels — 100 is identity, 150 scales each channel
@@ -164,53 +185,96 @@ struct FilterApplier: ViewModifier {
             // `.grayscale(1)` sums with Rec.709 weights, so a per-channel
             // REWEIGHT first makes it sum in sepia's basis instead.
             //
-            // The two layers are composited the way CrossFadeApplier does
-            // it, and for the same reason: COMPLEMENTARY OPACITIES plus
-            // `.plusLighter` (component-wise premultiplied ADD) inside a
-            // `.compositingGroup()`.
+            // COMPOSITING: plain source-over, and the reason is measured
+            // rather than assumed — the "more correct" alternative was tried
+            // and reverted.
             //
-            // The obvious construction — draw the sepia layer over the
-            // original at `.opacity(a)` with ordinary source-over — is
-            // WRONG for anything not fully opaque, and this file had it
-            // that way first. Source-over multiplies the top layer's alpha,
-            // so for coverage α the result carries α·a + (1-α·a)·α, not α.
-            // Computed for `rgba(52,152,219,0.5)` under `sepia(80%)` over
-            // the #1a1a2e page:
+            // Source-over of the sepia layer at .opacity(a) gives exactly
+            // a*s + (1-a)*c when the content is OPAQUE, which is every case
+            // in the fixture suite bar one. It is wrong when the content's
+            // own alpha < 1, because .opacity(a) multiplies the top layer's
+            // alpha: coverage A comes out as A*a + (1-A*a)*A, not A.
             //
-            //     spec / web / Android   (90, 92, 95)   out_alpha 0.50
-            //     src-over ZStack        (95,117,129)   out_alpha 0.70
-            //     this construction      (90, 92, 95)   out_alpha 0.50
+            // The textbook fix is complementary opacities with .plusLighter
+            // inside a .compositingGroup (the idiom CrossFadeApplier uses).
+            // It fixes the translucent case and BREAKS SOMETHING WORSE:
+            // SwiftUI Text stops being filtered at all. Measured on white
+            // text under sepia(80%), where the spec and both other runtimes
+            // give (255,255,242):
             //
-            // That is every translucent background, every `opacity` on a
-            // filtered element, and every antialiased edge — CrossFadeApplier
-            // already documents the identical trap for weighted image
-            // layers ("sequential src-over stacking would give 1−0.9⁶").
+            //     construction   opaque box   text          translucent bg
+            //     src-over       7/8 EXACT    (255,255,242) dist 42
+            //     plusLighter    1 LSB off    (255,255,255) dist 1
+            //                                  ^ unfiltered
             //
-            // Additive layers sum to the lerp with alpha untouched:
-            //     (1-a)·α·c + a·α·s   carries alpha (1-a)·α + a·α = α.
+            // Text inside a filtered element is far more common than a
+            // translucent filtered background, and src-over also recovers
+            // the green LSB on the solid box (158 vs 157, matching Android
+            // and web exactly). So src-over wins on the evidence.
+            //
+            // The translucent case is therefore a KNOWN iOS divergence,
+            // carried in cross-platform-expectations.json rather than
+            // silently traded away. Fixing both needs a compositing route
+            // that preserves alpha WITHOUT flattening text — no SwiftUI
+            // primitive combination found so far does that.
             let sepiaAmount = SepiaMatrix.amount(pct)
             if sepiaAmount <= 0 {
-                // amount 0 is the identity — no group, no second render.
+                // amount 0 is the identity — no stack, no second render.
                 v
             } else {
                 ZStack {
-                    // The (1-a)·c term, pre-scaled for the additive sum.
-                    v.opacity(1 - sepiaAmount)
-                        .blendMode(.plusLighter)
-                    // The a·(w·c)·t term.
-                    v.colorMultiply(SepiaMatrix.reweightColor)  // → sepia's basis
-                        .grayscale(1.0)                          // → w·c, broadcast
-                        .colorMultiply(SepiaMatrix.tintColor)    // → × t
+                    // The (1-a)*c term: the unfiltered element.
+                    v
+                    // The a*(w.c)*t term, composited over it at the amount.
+                    v.colorMultiply(SepiaMatrix.reweightColor)  // -> sepia's basis
+                        .grayscale(1.0)                          // -> w.c, broadcast
+                        .colorMultiply(SepiaMatrix.tintColor)    // -> x t
                         .opacity(sepiaAmount)
-                        .blendMode(.plusLighter)
                 }
-                // Isolate: without the group, plusLighter would add into
-                // whatever the page already painted below this element.
-                .compositingGroup()
             }
         case .invert(let pct):
-            // SwiftUI has a boolean colorInvert; we only invert at 100%.
-            if pct >= 50 { v.colorInvert() } else { v }
+            // filter-effects-1 §8.6: invert(a) is a per-channel LINEAR
+            // transfer — feFuncR type="table" tableValues="a 1-a" — i.e.
+            //
+            //     out = (1-a)·c + a·(1-c)
+            //
+            // exact at a=0 and a=1 and a straight lerp between. It is NOT a
+            // threshold.
+            //
+            // The old code was `if pct >= 50 { v.colorInvert() } else { v }`,
+            // which snapped to whichever endpoint was nearer, and its comment
+            // ("we only invert at 100%") did not even describe that. Measured
+            // on the committed fixture fixtures/properties/color/filter.json,
+            // component F_invert = #3b82f6 (59,130,246) under invert(0.5):
+            //
+            //     spec / web / Android   (128,128,128)   flat mid-grey
+            //     old iOS                (196,125, 9)    a FULL inversion
+            //
+            // RGB distance 137 — larger than the 97 that condemned sepia.
+            // The discontinuity cut both ways: invert(49%) rendered the
+            // original untouched.
+            //
+            // This runtime already had the correct formula: BackdropImageOps
+            // .invertByte computes `c + (255 - 2c)·amount` with this same
+            // §8.6 citation, for the BACKDROP path. Only the foreground
+            // filter lane was missing it.
+            //
+            // Composited src-over at .opacity(a), matching the sepia case in
+            // this file — see its comment for why source-over rather than an
+            // additive stack (the additive form stops SwiftUI Text being
+            // filtered at all). The alpha caveat is identical and shared.
+            let invertAmount = SepiaMatrix.amount(pct)   // reuse: clamp pct/100 to 0…1
+            if invertAmount <= 0 {
+                v
+            } else if invertAmount >= 1 {
+                // Full inversion needs no second layer.
+                v.colorInvert()
+            } else {
+                ZStack {
+                    v
+                    v.colorInvert().opacity(invertAmount)
+                }
+            }
         case .saturate(let pct):
             v.saturation(pct / 100)
         case .opacity(let pct):

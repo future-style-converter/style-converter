@@ -1,0 +1,9 @@
+{
+  "_comment": "A CSS filter applies to the element's whole rendered content, TEXT INCLUDED (filter-effects-1 2.1: the filter operates on the element as a group). Every previous filter fixture was a solid box, so a filter that silently skipped text was invisible to the corpus — and one did: an iOS sepia compositing change left text unfiltered while the background filtered correctly. Expected, all three platforms: FT_SepiaText renders white #ffffff text under sepia(80%) as (255,255,242) — the CSS matrix on white, clamped; FT_PlainText is the unfiltered control and renders (255,255,255); FT_GrayscaleText renders white text under grayscale(100%) as (255,255,255) (white is achromatic, so grayscale is the identity on it) over a (108,108,108) box; FT_BrightnessText renders white text under brightness(150%) as (255,255,255) (already clamped) over a (69,255,170) box. The CONTROL pair matters more than any single value: FT_SepiaText and FT_PlainText must differ in their text pixels, or the filter is not reaching the text at all.",
+  "components": {
+    "FT_SepiaText":      { "_text": "Hamburg 123", "properties": { "width": "200px", "height": "60px", "background-color": "#3498db", "color": "#ffffff", "font-size": "20px", "filter": "sepia(80%)" } },
+    "FT_PlainText":      { "_text": "Hamburg 123", "properties": { "width": "200px", "height": "60px", "background-color": "#3498db", "color": "#ffffff", "font-size": "20px" } },
+    "FT_GrayscaleText":  { "_text": "Hamburg 123", "properties": { "width": "200px", "height": "60px", "background-color": "#e74c3c", "color": "#ffffff", "font-size": "20px", "filter": "grayscale(100%)" } },
+    "FT_BrightnessText": { "_text": "Hamburg 123", "properties": { "width": "200px", "height": "60px", "background-color": "#2ecc71", "color": "#ffffff", "font-size": "20px", "filter": "brightness(150%)" } }
+  }
+}

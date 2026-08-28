@@ -114,6 +114,18 @@ done
 echo
 
 # ── Byte identity ────────────────────────────────────────────────────────
+# A study that compared NOTHING must not report a perfect noise floor.
+# Without this, a run where every platform was skipped (or crashed) leaves
+# two empty hash lists, `diff` succeeds, and the script prints
+# "BYTE-IDENTICAL (0 captures)" and exits 0 — a check that cannot fail,
+# which is the exact class of defect this harness keeps finding elsewhere.
+CAPTURE_COUNT=$(wc -l < "$WORK/run-1.sha256" | tr -d ' ')
+if [[ "$CAPTURE_COUNT" -eq 0 ]]; then
+    echo "✗ run 1 captured NOTHING — there is no noise floor to report."
+    echo "  Every platform was skipped or failed; see $WORK/run-1.log"
+    exit 2
+fi
+
 DRIFT=0
 for i in $(seq 2 "$RUNS"); do
     if diff -q "$WORK/run-1.sha256" "$WORK/run-$i.sha256" >/dev/null; then

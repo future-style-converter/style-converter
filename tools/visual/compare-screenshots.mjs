@@ -70,7 +70,7 @@
 // SSIM is the LARGEST unique contributor and the only metric that sees
 // antialiased-curve structure. `pixelmatch` is the one contributing no
 // unique signal here — and it is separately blind to any uniform lightness
-// shift below 132/255 (see the threshold note at its call site). Removing
+// shift below 66/255 (see the threshold note at its call site). Removing
 // SSIM on the strength of a caveat that fires on one component and flips
 // no verdict would blind the gate to its largest catch class.
 //
@@ -826,7 +826,7 @@ async function compareBaseline(name, normalized, canvasW, canvasH) {
     //
     // ΔE joined the expression with the cross-platform promotion: it was
     // computed on every pair and gated nothing, while pixelmatch cannot
-    // fire on a uniform lightness shift below 132/255 and SSIM barely
+    // fire on a uniform lightness shift below 66/255 and SSIM barely
     // moves when a shape is repainted in the wrong colour. See
     // cross-platform-gate.mjs for the measured rows that motivated it.
     const regressed = pairRegressed(pair, { ssimThreshold, pixelThreshold, deltaEThreshold });

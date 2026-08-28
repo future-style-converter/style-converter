@@ -1,6 +1,7 @@
 package com.styleconverter.runtime.effects.filter
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.draw.BlurredEdgeTreatment
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
@@ -114,7 +115,16 @@ object FilterApplier {
         // (filter-functions 002_Filter_BlurLarge: web soft halo vs Android
         // sharp rect, Android-web SSIM 0.85).
         blurFilters.forEach { blur ->
-            result = result.blur(blur.radius, BlurredEdgeTreatment.Unbounded)
+            // filter-effects-1 §8.2: blur()'s parameter IS the Gaussian
+            // STANDARD DEVIATION, not a radius — so it cannot be handed
+            // straight to Modifier.blur, whose parameter Skia converts with
+            // σ = radius·0.57735 + 0.5 (the same legacy formula this file
+            // already inverts for drop-shadow, see dropShadowMaskRadius).
+            // Passing the CSS length through unconverted under-blurred
+            // everything, and by a VARYING factor because the relation is
+            // affine rather than a scale.
+            result = result.blur(Dp(blurSigmaToSkiaRadius(blur.radius.value)),
+                                 BlurredEdgeTreatment.Unbounded)
         }
 
         // Apply drop shadows
@@ -384,6 +394,32 @@ object FilterApplier {
      * at a tiny positive value because BlurMaskFilter throws on radius ≤ 0.
      * Pure function — pinned by FilterDropShadowMathTest on the JVM.
      */
+    /**
+     * Convert a CSS `blur(<length>)` σ into the radius Skia needs.
+     *
+     * filter-effects-1 §8.2: the parameter of blur() IS the standard
+     * deviation. Skia (via RenderEffect.createBlurEffect, which backs
+     * Modifier.blur) maps its radius input to σ ≈ radius·0.57735 + 0.5 —
+     * the same relation [dropShadowMaskRadius] inverts — so we invert it
+     * here too. The only difference between the two helpers is the σ the
+     * spec asks for: drop-shadow's <blur-radius> r means σ = r/2
+     * (§10.1), while blur()'s parameter is σ itself.
+     *
+     * MEASURED before and after, with the step-edge estimator (the
+     * derivative of a blurred step edge IS the Gaussian, so its second
+     * moment is σ). Passing the raw CSS length gave a ratio to web that
+     * DRIFTED with radius — 0.93, 0.75, 0.68, 0.68 at R = 1, 2, 4, 8 —
+     * which is the signature of an affine relation being treated as an
+     * identity, and Skia's formula predicted every measurement.
+     *
+     * Floors at 0: σ below 0.5 is unreachable through this API (Skia's
+     * +0.5 offset), so a sub-half-pixel blur renders as no blur rather
+     * than as a negative radius. That is a platform limit, logged here
+     * rather than silently clamped somewhere deeper.
+     */
+    internal fun blurSigmaToSkiaRadius(sigmaPx: Float): Float =
+        ((sigmaPx - 0.5f) / 0.57735f).coerceAtLeast(0f)
+
     internal fun dropShadowMaskRadius(blurPx: Float): Float =
         (((blurPx / 2f) - 0.5f) / 0.57735f).coerceAtLeast(0.1f)
 

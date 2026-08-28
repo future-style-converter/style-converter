@@ -60,7 +60,7 @@ test('a large colour error fails even when SSIM and pixel%% are clean', () => {
   // 009_Backdrop_Saturate_OverStripes scored ΔE95 24.92 at SSIM 0.9778 and
   // Δpx 0.00% — a blatant recolour that both other metrics waved through,
   // because pixelmatch's YIQ budget cannot fire on a lightness shift below
-  // 132/255 and SSIM is structural.
+  // 66/255 and SSIM is structural.
   assert.equal(
     pairRegressed({ ssim: 0.9778, pixelMismatchedPct: 0, labDeltaE: { p95: 24.92 } }, OPTS),
     true,
@@ -84,6 +84,23 @@ test('an absent ΔE never fails alone', () => {
 test('the ΔE threshold is overridable', () => {
   const loose = { ...OPTS, deltaEThreshold: 30 };
   assert.equal(pairRegressed({ ssim: 1, pixelMismatchedPct: 0, labDeltaE: { p95: 24.92 } }, loose), false);
+});
+
+test('evaluateCrossPlatformGate FORWARDS the ΔE threshold', () => {
+  // Regression pin. pairRegressed took deltaEThreshold from the start, but
+  // evaluateCrossPlatformGate neither destructured nor forwarded it, so the
+  // cross-platform gate silently used the 5.0 default while
+  // --delta-e-threshold appeared to work. The two gates drifted apart in
+  // meaning — exactly what routing both through one pairRegressed was meant
+  // to prevent. Testing pairRegressed alone could never catch that.
+  const row = { name: 'A.png', platforms: { iOS: {}, Android: {}, web: {} },
+                pairs: { 'iOS-Android': { ssim: 1, pixelMismatchedPct: 0, labDeltaE: { p95: 12 } },
+                         'iOS-web': null, 'Android-web': null } };
+  const strict = evaluateCrossPlatformGate([row], { expectations: [] }, { ...OPTS, deltaEThreshold: 5 });
+  assert.equal(strict.unexpected.length, 1, 'ΔE95 12 must fail at a threshold of 5');
+
+  const loose = evaluateCrossPlatformGate([row], { expectations: [] }, { ...OPTS, deltaEThreshold: 30 });
+  assert.equal(loose.unexpected.length, 0, 'the SAME row must pass at 30 — proving the option is read');
 });
 
 test('the default ΔE threshold is the classifier\'s "clearly different" boundary', () => {
@@ -202,7 +219,7 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // Hardcoded deliberately: the count is the thing that must not drift
   // unnoticed. Changing it should require editing this line, which is a
   // review prompt.
-  assert.equal(led.expectations.length, 28, '22 on visual-test + 2 on composition-test; opacity-group entries went stale when the iOS compositingGroup fix landed');
+  assert.equal(led.expectations.length, 30, '22 on visual-test + 2 on composition-test; opacity-group entries went stale when the iOS compositingGroup fix landed');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);

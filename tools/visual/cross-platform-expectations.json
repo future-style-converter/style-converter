@@ -430,6 +430,34 @@
         "labDeltaEP95": 24.92,
         "divergence": "color-drift"
       }
+    },
+    {
+      "fixture": "filter-sepia-amounts.json",
+      "component": "Sepia_Translucent.png",
+      "pair": "iOS-web",
+      "reason": "KNOWN iOS LIMITATION, trade accepted on measurement 2026-08-28. FilterApplier composites the sepia layer with plain source-over at .opacity(a). That is EXACT for opaque content \u2014 7 of 8 cases in this fixture land on the CSS value \u2014 but wrong when the element's own alpha < 1, because source-over multiplies the top layer's alpha: coverage A comes out as A*a + (1-A*a)*A rather than A. Measured here: iOS (95,117,129) against the spec's (90,92,95), RGB distance 42. THE ALTERNATIVE WAS TRIED AND REVERTED. Complementary opacities with .plusLighter inside a .compositingGroup (the CrossFadeApplier idiom) fixes this row and BREAKS SOMETHING WORSE: SwiftUI Text stops being filtered at all \u2014 white text under sepia(80%) rendered (255,255,255) where the spec and both other runtimes give (255,255,242) \u2014 and it also cost the green LSB on every solid box (157 vs 158). Text inside a filtered element is far more common than a translucent filtered background, so the trade was taken the other way. fixtures/properties/effects/filter-on-text.json now pins the text behaviour so the swap cannot be made again unnoticed. Fixing BOTH needs a compositing route that preserves alpha without flattening text; no SwiftUI primitive combination found so far does that.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.95,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 20.0,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "filter-sepia-amounts.json",
+      "component": "Sepia_Translucent.png",
+      "pair": "iOS-Android",
+      "reason": "KNOWN iOS LIMITATION, trade accepted on measurement 2026-08-28. FilterApplier composites the sepia layer with plain source-over at .opacity(a). That is EXACT for opaque content \u2014 7 of 8 cases in this fixture land on the CSS value \u2014 but wrong when the element's own alpha < 1, because source-over multiplies the top layer's alpha: coverage A comes out as A*a + (1-A*a)*A rather than A. Measured here: iOS (95,117,129) against the spec's (90,92,95), RGB distance 42. THE ALTERNATIVE WAS TRIED AND REVERTED. Complementary opacities with .plusLighter inside a .compositingGroup (the CrossFadeApplier idiom) fixes this row and BREAKS SOMETHING WORSE: SwiftUI Text stops being filtered at all \u2014 white text under sepia(80%) rendered (255,255,255) where the spec and both other runtimes give (255,255,242) \u2014 and it also cost the green LSB on every solid box (157 vs 158). Text inside a filtered element is far more common than a translucent filtered background, so the trade was taken the other way. fixtures/properties/effects/filter-on-text.json now pins the text behaviour so the swap cannot be made again unnoticed. Fixing BOTH needs a compositing route that preserves alpha without flattening text; no SwiftUI primitive combination found so far does that.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.95,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 20.0,
+        "divergence": "color-drift"
+      }
     }
   ]
 }

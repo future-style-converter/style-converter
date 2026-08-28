@@ -99,27 +99,34 @@ final class SepiaMatrixTests: XCTestCase {
         for i in 0..<3 { XCTAssertEqual(spec[i].rounded(), out[i].rounded()) }
     }
 
-    /// The additive two-layer construction in FilterApplier preserves alpha;
-    /// the source-over one it replaced did not. The view chain itself needs
-    /// a render, but the arithmetic that decides it does not.
+    /// The alpha trade-off the applier deliberately accepts, pinned so it
+    /// cannot be forgotten or "fixed" without re-measuring.
     ///
-    /// For coverage α and amount a:
-    ///   src-over   → α·a + (1-α·a)·α    (≠ α unless α ∈ {0,1})
-    ///   additive   → (1-a)·α + a·α = α  ✓
-    func testAdditiveCompositingPreservesAlphaWhereSourceOverDoesNot() {
-        for alpha in [0.25, 0.5, 0.75] {
-            for a in [0.2, 0.8, 1.0] {
-                let additive = (1 - a) * alpha + a * alpha
-                XCTAssertEqual(additive, alpha, accuracy: 1e-12)
+    /// FilterApplier composites the sepia layer with plain SOURCE-OVER at
+    /// .opacity(a). That is exact for OPAQUE content and wrong for
+    /// translucent content, because source-over multiplies the top layer's
+    /// alpha. The additive alternative fixes the alpha and stops SwiftUI
+    /// Text being filtered at all (measured: white text under sepia(80%)
+    /// renders (255,255,255) instead of the spec's (255,255,242)), so the
+    /// trade was taken the other way — see FilterApplier's comment and the
+    /// Sepia_Translucent ledger entry.
+    func testSourceOverIsExactForOpaqueAndWrongForTranslucent() {
+        for a in [0.2, 0.8, 1.0] {
+            // Opaque: source-over reproduces the lerp exactly.
+            let opaque = 1.0 * a + (1 - 1.0 * a) * 1.0
+            XCTAssertEqual(opaque, 1.0, accuracy: 1e-12, "opaque coverage must survive")
 
-                let srcOver = alpha * a + (1 - alpha * a) * alpha
-                XCTAssertNotEqual(srcOver, alpha, accuracy: 1e-6,
-                                  "src-over must visibly break alpha — that was the bug")
+            // Translucent: it does not, and the error grows with the amount.
+            for alpha in [0.25, 0.5, 0.75] {
+                let out = alpha * a + (1 - alpha * a) * alpha
+                XCTAssertNotEqual(out, alpha, accuracy: 1e-6,
+                                  "the known translucent error must stay visible")
+                XCTAssertGreaterThan(out, alpha, "source-over over-accumulates alpha")
             }
         }
     }
 
-    /// Amount 0 is the identity — the applier fast-paths it, so the maths
+    /// Amount 0 is the identity    /// Amount 0 is the identity — the applier fast-paths it, so the maths
     /// must agree that there is nothing to do.
     func testAmountZeroIsIdentity() {
         let c = [52.0, 152.0, 219.0]

@@ -121,3 +121,61 @@ test('PAD_SENTINEL is frozen and opaque', async () => {
   assert.ok(Object.isFrozen(PAD_SENTINEL));
   assert.equal(PAD_SENTINEL.alpha, 1);
 });
+
+// ── Contract gaps the tests above leave open ────────────────────────────────
+
+test('an OVER-sized image is returned untouched, never cropped or resampled', async () => {
+  // `extend` only grows, so the negative deltas are clamped to 0 and the
+  // image comes back at its ORIGINAL size — not the requested canvas. That
+  // is the right choice (cropping would destroy content, resizing would
+  // destroy pixel alignment and every geometry conclusion drawn from it),
+  // but it means the caller owns computing a canvas that is the max over
+  // BOTH sides. compare-screenshots.mjs:800 does exactly that for the
+  // baseline pair; a caller that forgets gets two differently-shaped
+  // buffers, and every metric helper then bails to null rather than
+  // reporting a wrong number.
+  //
+  // Pinning it here so a future "just make it always return W×H" — via
+  // sharp's `resize` — cannot land quietly: that would stretch one platform
+  // onto another's canvas and make a size divergence score as a match,
+  // which is the exact failure the pad sentinel exists to expose.
+  const out = await padToCanvas(solid(20, 20, CAPTURE_BG), 10, 10);
+  assert.equal(out.width, 20, 'must not crop to the requested canvas');
+  assert.equal(out.height, 20, 'must not resample to the requested canvas');
+});
+
+test('every live padToCanvas call site awaits it', async () => {
+  // padToCanvas is async, and an un-awaited call hands a Promise to a
+  // metric helper. Every helper is wrapped in try/catch and returns null on
+  // a throw, so the symptom is not a stack trace — it is a whole run of
+  // blank or NaN metric cells that looks like a decode problem. That
+  // happened once already during this wave's measurement work.
+  //
+  // A control row with a known answer is the primary defence (see
+  // semantic-presence.test.mjs). This is the cheap structural backstop: it
+  // fails the moment a new call site is added without `await`, instead of
+  // waiting for someone to notice the numbers are missing.
+  const { readdirSync, statSync, readFileSync } = await import('node:fs');
+  const { join, resolve, dirname } = await import('node:path');
+  const { fileURLToPath } = await import('node:url');
+  const toolsDir = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+
+  const offenders = [];
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir)) {
+      if (entry === 'node_modules') continue;                 // vendored code is not ours
+      const p = join(dir, entry);
+      if (statSync(p).isDirectory()) { walk(p); continue; }
+      // Only non-test source: tests legitimately reference the name in prose.
+      if (!entry.endsWith('.mjs') || entry.endsWith('.test.mjs')) continue;
+      readFileSync(p, 'utf8').split('\n').forEach((line, i) => {
+        if (!/padToCanvas\s*\(/.test(line)) return;           // not a call
+        if (/function\s+padToCanvas/.test(line)) return;      // the definition itself
+        if (/^\s*(\/\/|\*)/.test(line)) return;               // a comment mentioning it
+        if (!/await\s+padToCanvas\s*\(/.test(line)) offenders.push(`${p}:${i + 1} ${line.trim()}`);
+      });
+    }
+  };
+  walk(toolsDir);
+  assert.deepEqual(offenders, [], 'un-awaited padToCanvas call site(s)');
+});

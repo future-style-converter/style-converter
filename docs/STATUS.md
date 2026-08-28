@@ -1352,7 +1352,7 @@ appeared in a pass/fail expression. Neither gating metric sees colour
 the way a person does:
 
 - **pixelmatch** at `threshold: 0.25` cannot fire on a uniform lightness
-  shift below **132/255** (measured: black vs mid-grey scores as
+  shift below **66/255** (measured: black vs mid-grey scores as
   IDENTICAL), so Δpx routinely reads 0.00% on a blatant recolour.
 - **SSIM** is structural. Repaint a shape in the wrong colour without
   moving an edge and it barely moves.
@@ -1735,7 +1735,7 @@ differs) and Δpx reads under 1.4%. SSIM is the only metric that sees
 structure.
 
 `pixelmatch` contributes **no unique signal at all** on this corpus — and
-it is separately blind to any uniform lightness shift below 132/255. It is
+it is separately blind to any uniform lightness shift below 66/255. It is
 kept (it costs nothing and may catch more on taller composed captures),
 but it is not what is holding the gate up.
 
@@ -1757,15 +1757,50 @@ So the caveat is real, narrow, and inert. It is not grounds for removing
 the metric doing most of the work. The source comment now carries these
 numbers and the recipe to re-derive them.
 
+## Correction: pixelmatch's blind spot is 66/255, not 132 — and blue is 198 (2026-08-28)
+
+A number this file has repeated, and used as a load-bearing argument, was
+wrong by exactly 2×. Found by an independent audit, then reproduced here
+before propagating.
+
+`pixelmatch` counts a pixel when its YIQ delta exceeds
+`maxDelta = 35215 · threshold²` = 2200.94 at the shipped `threshold: 0.25`.
+For a **uniform** shift the two chroma rows cancel, leaving
+`0.5053·d² > 2200.94`, i.e. `d > 66.0`.
+
+Measured directly on opaque 8×8 fields with the production option set:
+
+| shift | silent up to | fires at |
+|---|---:|---:|
+| uniform grey | 65 | 66 |
+| red only | 117 | 118 |
+| green only | 93 | 94 |
+| **blue only** | **197** | **198** |
+
+**The worked example was also wrong.** This file claimed black (0,0,0) vs
+mid-grey (130,130,130) "scores 8539.6 → reported IDENTICAL". It does not:
+black vs (128,128,128) scores **64 of 64 pixels different**.
+
+How the wrong figure was almost certainly produced: `colorDelta`'s
+alpha-blend branch computes `dr = (r1·a1 − r2·a2 − rb·da)/255`, so with
+`a1 = a2 = 0` every term vanishes and *any* colour pair scores zero.
+Reproduced: the same black-vs-grey comparison at **alpha 0** does score
+0/64. The original probe was built on transparent pixels.
+
+**The conclusion is unchanged and now better supported.** pixelmatch is
+still blind to blatant recolours — and worse than recorded, since a pure
+blue shift of 197/255 is invisible where the old figure implied 132. What
+changes is that the number in the argument is now the one that reproduces.
+
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 368 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2761 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1811 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1747 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2765 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1821 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1774 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap
