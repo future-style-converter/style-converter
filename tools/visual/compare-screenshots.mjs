@@ -683,11 +683,27 @@ async function analyzeComponent(name, captures) {
       pairs[key] = null;
       continue;
     }
+    // PAIRWISE canvas, not the 3-way union. Padding a pair to the union
+    // meant that when the THIRD platform was the largest, both members of
+    // this pair carried an identical magenta-sentinel region — and
+    // identical regions AGREE, so every mean-based metric (SSIM, pixel %,
+    // ΔE) was diluted toward similarity by area belonging to neither
+    // image. The pipeline hunt measured a full verdict flip from this on
+    // a synthetic trio. On the pairwise canvas a sentinel pixel can only
+    // ever face REAL pixels from the other side, which is the sentinel's
+    // entire design (pad-canvas.mjs: under-size must read as DIFFERENT).
+    // When the pair's max equals the union (the common case — most rows
+    // have all three platforms the same size), the pre-padded images are
+    // reused and the bytes are identical to the old path.
+    const pw = Math.max(loaded[a].width, loaded[b].width);
+    const ph = Math.max(loaded[a].height, loaded[b].height);
+    const A = (pw === canvasW && ph === canvasH) ? normalized[a] : await padToCanvas(loaded[a], pw, ph);
+    const B = (pw === canvasW && ph === canvasH) ? normalized[b] : await padToCanvas(loaded[b], pw, ph);
     pairs[key] = await diffPair(
-      normalized[a],
-      normalized[b],
-      canvasW,
-      canvasH,
+      A,
+      B,
+      pw,
+      ph,
       `${name.replace(/\.png$/, '')}__${key}.png`
     );
   }

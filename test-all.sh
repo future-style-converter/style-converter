@@ -524,6 +524,27 @@ print('Unknown')")
                 # animationTime knob's symmetry would lead you to write.
                 # Verified: with SIMCTL_CHILD_FORCE_STATE=hover the iOS
                 # capture differs from base, i.e. the state applies.
+                # Same silently-ignored-knob gate for width and scheme.
+                # The forceState transport bug survived precisely because
+                # its knob was RECORDED but never VERIFIED — these two were
+                # in the identical state (capture-config.json carries
+                # "width" and "scheme"; nothing read them back).
+                if [[ -n "${CAPTURE_WIDTH:-}" ]]; then
+                    IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
+                    if ! grep -q "\"width\":${CAPTURE_WIDTH}" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
+                        err "CAPTURE_WIDTH=${CAPTURE_WIDTH} was set but the iOS harness config marker is missing/mismatched — the capture silently ran at the default width. Export SIMCTL_CHILD_CAPTURE_WIDTH=${CAPTURE_WIDTH} so simctl forwards it."
+                        exit 1
+                    fi
+                    log "verified: iOS capture ran with width=${CAPTURE_WIDTH}"
+                fi
+                if [[ "${CAPTURE_DARK:-0}" == "1" ]]; then
+                    IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
+                    if ! grep -q "\"scheme\":\"dark\"" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
+                        err "CAPTURE_DARK=1 was set but the iOS harness captured in LIGHT scheme. Export SIMCTL_CHILD_CAPTURE_DARK=1 so simctl forwards it."
+                        exit 1
+                    fi
+                    log "verified: iOS capture ran in dark scheme"
+                fi
                 if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
                     IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
                     if ! grep -q "\"forceState\":\"${CAPTURE_FORCE_STATE}\"" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
@@ -765,6 +786,9 @@ else
         if [[ -n "${CAPTURE_ANIMATION_TIME:-}" ]]; then
             AM_EXTRAS+=(--es animationTime "$CAPTURE_ANIMATION_TIME")
         fi
+        if [[ -n "${CAPTURE_WIDTH:-}" ]]; then
+            AM_EXTRAS+=(--ei captureWidth "$CAPTURE_WIDTH")
+        fi
         if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
             AM_EXTRAS+=(--es forceState "$CAPTURE_FORCE_STATE")
         fi
@@ -857,6 +881,13 @@ else
                 exit 1
             fi
             log "verified: Android capture ran with animationTime=${CAPTURE_ANIMATION_TIME}"
+        fi
+        if [[ -n "${CAPTURE_WIDTH:-}" ]]; then
+            if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "captureWidth=${CAPTURE_WIDTH}"; then
+                err "CAPTURE_WIDTH=${CAPTURE_WIDTH} was set but the Android harness never logged that width — the capture silently ran at the default 390"
+                exit 1
+            fi
+            log "verified: Android capture ran with captureWidth=${CAPTURE_WIDTH}"
         fi
         if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
             if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "forceState=${CAPTURE_FORCE_STATE}"; then
