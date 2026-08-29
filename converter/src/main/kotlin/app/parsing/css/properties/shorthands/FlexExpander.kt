@@ -36,22 +36,42 @@ object FlexExpander : ShorthandExpander {
                 val parts = splitPreservingFunctions(value.trim())
                 val result = mutableMapOf<String, String>()
 
+                // css-flexbox-1 §7.1.1 is explicit about the omitted
+                // components, and they are NOT the longhand initials:
+                //   · flex-shrink, when omitted from the shorthand, is 1
+                //   · flex-basis, when omitted from the shorthand, is 0%
+                //     ("flex: <positive-number> — equivalent to
+                //      flex: <positive-number> 1 0%")
+                //   · flex-grow, when only a basis is given, is 1
+                // The old code emitted ONLY the components that appeared, so
+                // `flex: 1` left flex-basis at its cascade value (`auto`) —
+                // content-sized distribution where the spec demands
+                // zero-based distribution. That is a different layout, not a
+                // rounding error.
                 when (parts.size) {
                     1 -> {
-                        // Single value: could be grow or basis
                         val v = parts[0]
-                        if (v.matches("""^\d+(\.\d+)?$""".toRegex())) {
+                        if (NUMBER.matches(v)) {
+                            // flex: <number>  ≡  <number> 1 0%
                             result["flex-grow"] = v
+                            result["flex-shrink"] = "1"
+                            result["flex-basis"] = "0%"
                         } else {
+                            // flex: <width>  ≡  1 1 <width>
+                            result["flex-grow"] = "1"
+                            result["flex-shrink"] = "1"
                             result["flex-basis"] = v
                         }
                     }
                     2 -> {
                         result["flex-grow"] = parts[0]
-                        // Second could be shrink or basis
-                        if (parts[1].matches("""^\d+(\.\d+)?$""".toRegex())) {
+                        if (NUMBER.matches(parts[1])) {
+                            // <number> <number>  ≡  grow shrink 0%
                             result["flex-shrink"] = parts[1]
+                            result["flex-basis"] = "0%"
                         } else {
+                            // <number> <width>  ≡  grow 1 basis
+                            result["flex-shrink"] = "1"
                             result["flex-basis"] = parts[1]
                         }
                     }
@@ -66,6 +86,14 @@ object FlexExpander : ShorthandExpander {
             }
         }
     }
+
+    /**
+     * A CSS <number>. The old pattern was `^\d+(\.\d+)?$`, which requires a
+     * leading digit — so `flex: .5` failed the number test, was routed onto
+     * flex-basis (where `.5` is not a valid width), and the declaration was
+     * effectively dropped. `.5` is a valid <number> per css-values-4 §5.
+     */
+    private val NUMBER = """^(?:\d+\.?\d*|\.\d+)$""".toRegex()
 
     private fun splitPreservingFunctions(value: String): List<String> {
         val result = mutableListOf<String>()

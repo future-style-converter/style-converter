@@ -50,20 +50,33 @@ object ColorParser {
     // Modern space-separated HSL: hsl(120deg 100% 50%) or hsl(120 100% 50% / 50%) - supports 'none' keyword + angle-unit/sci-notation hue
     private val hslSpaceRegex = """^hsla?\s*\(\s*($HUE|none)\s+([\d.]+|none)%?\s+([\d.]+|none)%?\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
-    // HWB: hwb(120 0% 0%) or hwb(120deg 0% 0% / 50%)
-    private val hwbRegex = """^hwb\s*\(\s*([\d.]+)(?:deg)?\s+([\d.]+)%\s+([\d.]+)%\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex()
+    // HWB: hwb(120 0% 0%) or hwb(120deg 0% 0% / 50%).
+    // The hue group is $HUE — the same one hsl adopted — so angle units
+    // (grad/rad/turn), negative hues and scientific notation match; the old
+    // group `[\d.]+(?:deg)?` failed every one of those and nulled the whole
+    // colour. `none` is a valid component for all three channels
+    // (css-color-4 §4.1: a missing component behaves as 0), and the parse is
+    // case-insensitive like every other colour function here — HWB(...) was
+    // silently rejected before.
+    private val hwbRegex = """^hwb\s*\(\s*($HUE|none)\s+([\d.]+%|none)\s+([\d.]+%|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
     // Lab: lab(50% 25 -25) or lab(50% 25 -25 / 50%) - supports 'none' keyword
     private val labRegex = """^lab\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+|none)\s+(-?[\d.]+|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
-    // LCH: lch(50% 25 180) or lch(50% 25 180deg / 50%) - supports 'none' keyword
-    private val lchRegex = """^lch\s*\(\s*([\d.]+%?|none)\s+([\d.]+|none)\s+([\d.]+|none)(?:deg)?\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // LCH: lch(50% 25 180) or lch(50% 25 180deg / 50%) - supports 'none' keyword.
+    // The hue is a full <hue> ($HUE, unit INSIDE the group so parseHslHue can
+    // normalise grad/rad/turn to degrees). The old `([\d.]+|none)(?:deg)?`
+    // form nulled the whole colour for `-90deg`, `200grad`, `1.5rad` and
+    // `0.25turn` — the unit sat OUTSIDE the capture, so any unit other than
+    // a literal `deg` made the regex fail entirely.
+    private val lchRegex = """^lch\s*\(\s*([\d.]+%?|none)\s+([\d.]+|none)\s+($HUE|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
     // OKLab: oklab(0.7 -0.1 0.15) or oklab(70% -0.1 0.15 / 50%) - supports 'none' keyword
     private val oklabRegex = """^oklab\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+|none)\s+(-?[\d.]+|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
-    // OKLCH: oklch(0.7 0.15 180) or oklch(70% 0.15 180deg / 50%) - supports 'none' keyword
-    private val oklchRegex = """^oklch\s*\(\s*([\d.]+%?|none)\s+([\d.]+|none)\s+([\d.]+|none)(?:deg)?\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // OKLCH: oklch(0.7 0.15 180) or oklch(70% 0.15 180deg / 50%) - supports
+    // 'none'. Hue is a full <hue> for the same reason as lchRegex above.
+    private val oklchRegex = """^oklch\s*\(\s*([\d.]+%?|none)\s+([\d.]+|none)\s+($HUE|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
     // color-mix: color-mix(in srgb, red 50%, blue)
     private val colorMixRegex = """^color-mix\s*\(\s*in\s+(\w+)\s*,\s*(.+)\s*\)$""".toRegex()
@@ -110,9 +123,13 @@ object ColorParser {
 
         // Check for HWB
         hwbRegex.find(trimmed)?.let { match ->
-            val h = match.groupValues[1].toDoubleOrNull() ?: return null
-            val w = match.groupValues[2].toDoubleOrNull() ?: return null
-            val b = match.groupValues[3].toDoubleOrNull() ?: return null
+            // Hue through the shared <hue> normaliser (units → degrees,
+            // none → 0); whiteness/blackness are percentages, so the
+            // regex keeps the % sign and parseLabValue strips it
+            // (none → 0 there too, css-color-4 §4.1).
+            val h = parseHslHue(match.groupValues[1])
+            val w = parseLabValue(match.groupValues[2]) ?: return null
+            val b = parseLabValue(match.groupValues[3]) ?: return null
             val alpha = parseAlpha(match.groupValues.getOrNull(4))
             val repr = IRColor.ColorRepresentation.HWB(h = h, w = w, b = b, alpha = alpha)
             val srgb = ColorConversion.hwbToSrgb(h, w, b, alpha)
@@ -140,7 +157,8 @@ object ColorParser {
             val hStr = match.groupValues[3]
             val l = parseLabValue(lStr) ?: return null
             val c = parseLabValue(cStr) ?: return null
-            val h = parseLabValue(hStr) ?: return null
+            // Hue is an <angle>: normalise units to degrees like hsl does.
+            val h = parseHslHue(hStr)
             val alpha = parseAlpha(match.groupValues.getOrNull(4))
             val repr = IRColor.ColorRepresentation.LCH(l = l, c = c, h = h, alpha = alpha)
             val srgb = ColorConversion.lchToSrgb(l, c, h, alpha).clamped()
@@ -168,7 +186,8 @@ object ColorParser {
             val hStr = match.groupValues[3]
             val l = parseLabValue(lStr) ?: return null
             val c = parseLabValue(cStr) ?: return null
-            val h = parseLabValue(hStr) ?: return null
+            // Hue is an <angle> — same normalisation as lch above.
+            val h = parseHslHue(hStr)
             val alpha = parseAlpha(match.groupValues.getOrNull(4))
             val repr = IRColor.ColorRepresentation.OKLCH(l = l, c = c, h = h, alpha = alpha)
             val srgb = ColorConversion.oklchToSrgb(l, c, h, alpha).clamped()
