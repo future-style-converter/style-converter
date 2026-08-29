@@ -1991,3 +1991,135 @@ unblock the accessibility criteria above. The **flat-IR v2** wire already
 shipped (PR #30) — it is the current default, with the slot/placement
 children contract frozen in `schema/spec/03-children.md` +
 `05-versioning.md` and the known v1 wire defects repaired at that freeze.
+
+## Deriving the thresholds: 0.95 / 2% / 5.0 were eyeballed — here is what the data says (2026-08-29)
+
+The three gate thresholds were picked by eye, and the zero A/A noise floor
+(see 2026-08-28) removed the last excuse for that: with no run-to-run
+noise to absorb, every point of slack is pure tolerance for real change.
+`tools/visual/threshold-derivation.mjs` is the derivation, as a rerunnable
+study (`node tools/visual/threshold-derivation.mjs`, ~3 min;
+`threshold-derivation.test.mjs` pins its maths on hand-computable synthetic
+controls). It scores two measured populations with the *shipping* metric
+code — same `padToCanvas`, same `computeLabDeltaE` stride, same pixelmatch
+options — plus one new variant:
+
+- **HEALTHY** — all 399 formable pairs of the committed baselines
+  (133 components × 3 pairs), minus the 24 pairs the expectation ledger
+  excuses (4 of the 28 ledger entries reference composition-test captures
+  that have no committed baselines). 375 pairs, all passing today.
+- **BUGGY** — the calibration set: this session's real bugs *at the moment
+  they were alive*, reconstructed byte-exactly from the pre-fix baselines
+  still in git (`git show <fix-commit>^:tools/visual/baseline/…`), and
+  verified against the numbers recorded in STATUS/commit messages before
+  being used. Sepia reproduces to the digit (ΔE95 23.35, SSIM 0.9573,
+  Δpx 0.57%); brightness to 18.697 vs the recorded 18.7; blur within 0.08
+  ΔE of the recorded live-run readings. One recorded number did NOT
+  reproduce and is flagged rather than reused: the brightness pair's
+  "SSIM 0.9419" — the committed pre-fix bytes score 0.9887, so 0.9419
+  evidently described some other reading; the load-bearing number (ΔE95
+  18.7) reproduces exactly.
+- **dpxStrict** — the pixelmatch variant the pixelmatch lane motivated:
+  `threshold: 0.02` with AA detection ON (`includeAA: false` — the flag
+  means "skip detection"). The inverse trade of the shipping options:
+  a ~5/255 colour budget instead of 66/255, with rasterizer edge pixels
+  excused by structure instead of by a colour budget wide enough to hide
+  a recolour.
+
+### The healthy envelope vs the shipped thresholds
+
+375 unledgered pairs (min / p95 / p99 / max):
+
+| metric | healthy envelope | shipped gate | dead slack |
+|---|---|---|---|
+| SSIM | 0.9510 / 1.0 / 1.0 / 1.0 (min) | ≥ 0.95 | **0.001** — accidentally correct |
+| Δpx (shipping) | 0 / 0.60 / 0.73 / **0.855**% | ≤ 2% | 1.14 points |
+| ΔE95 | 0 / 0.34 / 0.77 / **1.093** | ≤ 5.0 | **3.9 points** |
+| dpxStrict | 0 / 0.92 / 1.38 / **2.927**% | not gated | — |
+
+The healthy ΔE95 max (1.093, `Edge_InsetRoundShadow` Android-web) and the
+weakest live-bug pair that must fire (blur iOS-Android at 2.287) do not
+overlap: **the gap (1.09, 2.29) is a clean separation the 5.0 threshold
+threw away.** Same shape on dpxStrict: healthy max 2.927 vs buggy minima
+5.25 (blur), 7.5 (sepia), 7.6 (brightness) — gap (2.93, 5.25).
+
+### Catch/cost table
+
+Bug caught = at least one of its live pairs fails. Cost = healthy pairs
+newly failing (each one was individually inspected via the edge/flat split
+of its strict diff mask — edge-dominated ≥ 0.8 means rasterizer AA).
+
+| candidate | thresholds (SSIM / Δpx / ΔE95 / dpxStrict) | catches | new healthy fails |
+|---|---|---|---:|
+| C0 current | .95 / 2 / 5 / — | sepia · brightness · transform ×2 · neumorphic · backdrop-sat | 0 |
+| C1 | .95 / 2 / **2** / — | + **blur (all 3 pairs)** | **0** |
+| C2 | .95 / 2 / 3 / — | + blur (2 of 3 pairs) | 0 |
+| C3 | .95 / **1** / 2 / — | same as C1 | 0 |
+| **C4 proposal** | .95 / 1 / 2 / **3.5** | same as C1, blur caught by two independent metrics | **0** |
+| C5 | **.96** / 1 / 2 / 3.5 | same as C4 | 15 (all edge-class AA) |
+
+The C5 row is the demonstrator for why SSIM stays at 0.95: the healthy
+population reaches down to 0.9510 (filters, buttons, blend modes,
+perspective — all edge-class AA divergence), so even 0.96 buys 15 false
+reds and still catches nothing new.
+
+### PROPOSAL (not flipped here — every recorded number moves)
+
+**SSIM ≥ 0.95 (keep) · Δpx ≤ 1% (from 2) · ΔE95 ≤ 2.0 (from 5) ·
+dpxStrict ≤ 3.5% (new fourth gate).** Margins: ΔE95 has 45% headroom
+above the healthy max and fires on all three blur pairs (2.29/3.27/3.89);
+dpxStrict has 16% headroom above healthy max and 33% below the weakest
+bug reading. Cost on the current corpus: **zero new failures, zero stale
+entries** (tightening cannot make a failing ledgered pair pass). Anything
+in ΔE95 1.5–3.0 and dpxStrict 3.0–4.0 is defensible on today's data; 2.0
+and 3.5 sit mid-gap. The blur acid test passes: replaying the pre-fix
+blur bytes under C4 fails 3 pairs on ΔE95 and all 3 on dpxStrict, where
+the shipped gate passed all three. The parent flips the defaults after a
+device run confirms the committed baselines equal live captures
+(noise-floor says they must, but the flip is the wrong moment to lean on
+"must").
+
+Risk band to watch after the flip — the healthy pairs nearest each new
+boundary, all inspected: `Edge_InsetRoundShadow` Android-web (ΔE95 1.093,
+dpxStrict 2.927 — penumbra falloff, flat-class, sibling pairs already
+ledgered), the fixed `Filter_Blur` iOS-Android / Android-web (dpxStrict
+2.34/2.43 — residual soft-halo, flat-class), `Sizing_AspectRatio`
+iOS-Android/iOS-web (Δpx 0.855 — label AA). A future healthy component in
+these families could land in the gap; the answer is a ledger entry with a
+reason, not a wider gate.
+
+### What no threshold can catch (measured, not conjectured)
+
+1. **Sub-AA geometric drift.** The pre-fix perspective-drop bug
+   (`046_Perspective_Rotate` Android-web: perspective foreshortening
+   entirely absent) read SSIM 0.9884 / Δpx 0.16% / ΔE95 0 / dpxStrict
+   0.862% — every reading *inside* the healthy envelope, and its diff is
+   100% edge-class. Catching it by SSIM needs ≥ 0.99, which fails 55
+   healthy pairs. The fixed component's own iOS-Android AA (dpxStrict
+   1.375) is larger than the bug's signal was. Only a spec oracle
+   (predicted geometry) sees this class.
+2. **Small-element divergence — the dilution floor.** ΔE95 is structurally
+   zero whenever < 5% of sampled pixels differ, and every %-metric is
+   diluted by the identical page ground (the component box is a minority
+   of the 390×H canvas). Live demonstration: the ledgered
+   `Sepia_Translucent` iOS divergence — a real, documented wrong-alpha
+   composite — reads ΔE95 0.574 / SSIM 0.9986 / Δpx 0 / dpxStrict 0.858
+   on the committed bytes. **No candidate threshold set fails it**, which
+   also means the gate should currently report those two ledger entries
+   as STALE on a `filter-sepia-amounts.json` run (exit 5) — worth a
+   device-run check; if confirmed, the honest fix is content-cropped
+   metrics (crop to the union bounding box of non-ground pixels before
+   scoring), which would raise every metric's sensitivity ~3–5× and is
+   the natural follow-up to this study.
+3. **Correlated wrongness.** All-three-agree-while-wrong: a converter bug
+   renders identically wrong on every platform (pairwise readings all
+   perfect); the transitions case (2026-08-28) was byte-identical across
+   platforms while the property never ran; a capture-mode gap disarmed on
+   all platforms is invisible the same way. Pairwise comparison is
+   structurally blind here — blur was one platform away from being this
+   class. Spec/temporal oracles only.
+
+The one-line summary: **tightening ΔE95 5→2 and adding dpxStrict ≤ 3.5 is
+free on this corpus and catches the blur class twice over; the remaining
+misses are not threshold problems at all** — they need the spec oracle
+(class 1, 3) and content-cropped metrics (class 2).
