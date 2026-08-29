@@ -619,9 +619,24 @@ try {
     document.documentElement.scrollHeight,
     document.body?.scrollHeight ?? 0,
   ));
-  await page.setViewport({ width: captureWidth, height: pageHeight, deviceScaleFactor: 1 });
-  // Give layout one tick to settle into the new viewport.
-  await page.evaluate(() => new Promise((r) => setTimeout(r, 50)));
+  // THE VIEWPORT IS NOT RESIZED. It used to be — `setViewport(width,
+  // pageHeight)` before the shot — and that silently re-resolved every
+  // viewport-relative unit on the page against the DOCUMENT height:
+  // measured, a `width: 10vh` box laid out at 84.39px under the pinned
+  // 390×844 viewport (the value both natives pin: Compose
+  // viewportHeightPx = 844f, SwiftUI ctx.viewportHeight ?? 844) and then
+  // PAINTED at 256px once the viewport became 2560 tall — a 3× error
+  // charged to the web runtime as divergence, and on height-growing
+  // fixtures (Height_100vh) it also re-flowed the page AFTER the crop
+  // manifest was measured, shifting every later component off its
+  // pre-measured crop rows. Deterministic, so the A/A noise-floor study
+  // could never see it.
+  //
+  // Instead the screenshot below uses `clip` + `captureBeyondViewport`,
+  // which renders content below the viewport WITHOUT changing the layout
+  // viewport — verified empirically: all non-vh captures stay
+  // byte-identical to the committed baselines, and a 10vh probe now
+  // paints 84px on web exactly as it does on both natives.
 
   // Chrome/Chromium silently caps a SINGLE screenshot at 16384 px tall
   // (SCREENSHOT_CAP — the 2^14 max-texture limit; confirmed on the WPT
@@ -657,10 +672,15 @@ try {
 
   let fullPng;
   if (pageHeight <= SCREENSHOT_CAP) {
-    // Fits in one screenshot → identical bytes to the historical path. This
-    // is the branch every committed-baseline capture takes.
-    console.log(`  capturing ${manifest.length} canvases via ${captureWidth}×${pageHeight} screenshot → ${outDir}`);
-    fullPng = await page.screenshot({ type: 'png' });
+    // Fits in one screenshot. Clip to the document rect from the PINNED
+    // viewport (see the vh note above) — `captureBeyondViewport` renders
+    // the part below 844px without a resize.
+    console.log(`  capturing ${manifest.length} canvases via ${captureWidth}×${pageHeight} clip → ${outDir}`);
+    fullPng = await page.screenshot({
+      type: 'png',
+      clip: { x: 0, y: 0, width: captureWidth, height: pageHeight },
+      captureBeyondViewport: true,
+    });
   } else {
     // Page exceeds the cap. Grab it in vertical bands and composite them
     // back into one full-height PNG at their captured offsets.

@@ -109,7 +109,57 @@ enum ScreenshotManager {
         // sRGB. `CaptureColorSpace.capture` returns `uiImage`'s own raster
         // untouched unless that promotion happened. See
         // Renderer/CaptureColorSpace.swift for the measurements behind it.
-        return CaptureColorSpace.capture(renderer, scale: 1.0)
+        guard let image = CaptureColorSpace.capture(renderer, scale: 1.0) else { return nil }
+        return trimFabricatedRows(image)
+    }
+
+    /// Remove the phantom row ImageRenderer fabricates on fractional heights.
+    ///
+    /// ImageRenderer allocates its bitmap by CEILING a fractional layout
+    /// height but paints only the fractional extent, so a 116.4pt-tall
+    /// canvas yields a 117px image whose bottom row is fully transparent
+    /// black — pixels no renderer produced. Measured on the committed
+    /// baselines: iOS__002_Sizing_AspectRatio was 390×117 against Android
+    /// and web's 390×116, with the entire row 116 at (0,0,0,0); same on
+    /// 006_AR_3x2 and 008_AR_Decimal. That breaks both halves of the
+    /// capture contract (same pixel dimensions across platforms; every
+    /// pixel an opaque painted value — the stage background is solid
+    /// #1A1A2E, so alpha 0 cannot occur legitimately anywhere).
+    ///
+    /// Trimming is gated on the STRICTEST possible predicate — every pixel
+    /// of the row at alpha exactly 0 — so a genuinely painted row can never
+    /// be eaten: any real row contains the opaque stage ground at minimum.
+    /// The ceil can fabricate at most one row, but the loop is bounded by
+    /// evidence rather than by that assumption.
+    @MainActor
+    private static func trimFabricatedRows(_ image: UIImage) -> UIImage {
+        guard var cg = image.cgImage else { return image }
+        var height = cg.height
+        while height > 1, rowIsFullyTransparent(cg, width: cg.width, height: height) {
+            guard let cropped = cg.cropping(to: CGRect(x: 0, y: 0,
+                                                       width: cg.width, height: height - 1)) else { break }
+            cg = cropped
+            height -= 1
+        }
+        return height == image.cgImage?.height ? image
+            : UIImage(cgImage: cg, scale: image.scale, orientation: image.imageOrientation)
+    }
+
+    /// Is the BOTTOM row of `cg` fully transparent? Sampled by drawing into
+    /// a 1-px-tall RGBA context — pixel-format independent, unlike poking
+    /// the data provider, whose layout varies with the source format.
+    private static func rowIsFullyTransparent(_ cg: CGImage, width: Int, height: Int) -> Bool {
+        var buf = [UInt8](repeating: 0, count: width * 4)
+        guard let ctx = CGContext(data: &buf, width: width, height: 1,
+                                  bitsPerComponent: 8, bytesPerRow: width * 4,
+                                  space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        else { return false }                       // cannot sample → do not trim
+        // CG origin is bottom-left: drawing the full image at y=0 puts its
+        // BOTTOM row inside this 1-px window.
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: CGFloat(width), height: CGFloat(height)))
+        for x in 0..<width where buf[x * 4 + 3] != 0 { return false }
+        return true
     }
 
     /// Lane BF-I — the TWO-PASS backdrop render.
