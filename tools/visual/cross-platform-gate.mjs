@@ -101,7 +101,10 @@ export const DEFAULT_DELTA_E_THRESHOLD = 5.0;
  * and neither of those sees colour the way a person does:
  *
  *   · pixelmatch's YIQ budget at threshold 0.25 cannot fire on a uniform
- *     lightness shift below 66/255 (measured: black vs mid-grey scores as
+ *     lightness shift below 66/255 UNDER THE PRE-2026-08-29 SETTINGS
+ *     (threshold 0.25, AA detection off; since the flip to 0.02 + AA-on
+ *     the blind spot is ~6/255 uniform, ~17/255 pure blue) — measured
+ *     then: black vs mid-grey scored as
  *     IDENTICAL), so Δpx routinely reads 0.00% on a blatant recolour.
  *   · SSIM is structural. Repaint a shape in the wrong colour without
  *     moving an edge and SSIM barely notices.

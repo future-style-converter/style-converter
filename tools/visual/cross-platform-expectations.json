@@ -430,6 +430,48 @@
         "labDeltaEP95": 0.78,
         "divergence": "structural-divergence"
       }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Filter_Blur.png",
+      "pair": "iOS-Android",
+      "reason": "Surfaced by the 2026-08-29 pixelmatch flip (0.25/AA-off -> 0.02/AA-on), not by a code change: the post-fix blur falloff residual. Both natives now implement the spec sigma (the r/2 and Skia-affine bugs are fixed; fills are exact and dE95 <= 0.83 here), but the falloff BAND's per-pixel values differ by a few LSB across ~60px of gradient \u2014 Skia, CoreImage and Blink genuinely quantise a Gaussian differently at small radii. Under the old threshold these pixels were invisible (blind spot 66/255); at 0.02 the band registers as ~2.4% of the canvas. Not a wrong value; a rasteriser texture difference. Revisit only if the step-edge sigma estimator shows the ratio drifting from ~1.0.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9844,
+        "pixelPct": 2.34,
+        "labDeltaEP95": 0.58,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Filter_Blur.png",
+      "pair": "Android-web",
+      "reason": "Surfaced by the 2026-08-29 pixelmatch flip (0.25/AA-off -> 0.02/AA-on), not by a code change: the post-fix blur falloff residual. Both natives now implement the spec sigma (the r/2 and Skia-affine bugs are fixed; fills are exact and dE95 <= 0.83 here), but the falloff BAND's per-pixel values differ by a few LSB across ~60px of gradient \u2014 Skia, CoreImage and Blink genuinely quantise a Gaussian differently at small radii. Under the old threshold these pixels were invisible (blind spot 66/255); at 0.02 the band registers as ~2.4% of the canvas. Not a wrong value; a rasteriser texture difference. Revisit only if the step-edge sigma estimator shows the ratio drifting from ~1.0.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9854,
+        "pixelPct": 2.43,
+        "labDeltaEP95": 0.83,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_InsetRoundShadow.png",
+      "pair": "Android-web",
+      "reason": "Surfaced by the 2026-08-29 pixelmatch flip. This component's iOS-Android and iOS-web pairs were ledgered on 2026-08-28 (CoreGraphics-vs-Skia shadow falloff); the Android-web pair sat just under the old loose threshold \u2014 the exact 'ledgered sibling, unledgered twin' hole the threshold-derivation lane measured (71% of its differing pixels are in flat/smoothly-graded fill, not on edges). Same root cause as its siblings: blur-sigma convention differences in the inset shadow band. dE95 1.06.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9966,
+        "pixelPct": 2.93,
+        "labDeltaEP95": 1.06,
+        "divergence": "mixed"
+      }
     }
   ]
 }

@@ -1972,6 +1972,36 @@ only the shorthand's tokenizer was discarding them.
 An unrecognised component now logs instead of vanishing — the silent
 fallthrough is what let both bugs live.
 
+## The threshold flip landed (2026-08-29)
+
+The derivation study's proposal is now the shipped configuration:
+pixelmatch `threshold: 0.02` with AA detection ON (`includeAA: false` —
+the flag's sense is inverted in pixelmatch's API). The old pair
+(0.25 / detection off) had the two knobs compensating for each other:
+the loose threshold was the only thing absorbing cross-rasteriser AA,
+at the price of a colour blind spot of 66/255 uniform (198/255 pure
+blue) — the hole the blur bug shipped through at Δpx 0.00%.
+
+New blind spot: ~6/255 uniform, ~17/255 pure blue. The AA detector now
+absorbs the antialiasing the loose threshold used to.
+
+Cost, exactly as the derivation predicted: **three newly-failing pairs**,
+all in the flat/smooth-region population, each ledgered with its reason —
+`Filter_Blur` iOS-Android and Android-web (the post-fix falloff-band
+texture: fills exact, ΔE95 ≤ 0.83, but the three rasterisers quantise a
+small-radius Gaussian differently across ~60px of gradient), and
+`Edge_InsetRoundShadow` Android-web (the "ledgered sibling, unledgered
+twin" the study called out — its other two pairs were already ledgered
+for the same shadow-falloff cause). Ledger 28 → 31.
+
+The baseline gate is untouched **by construction**: the zero A/A noise
+floor means byte-identical baseline pairs score 0 mismatches at any
+threshold — verified, `BASELINE=1` clean on all 327.
+
+Residual risk, carried forward honestly: pixelmatch's AA detector can
+also suppress a genuine 1px hairline shift. SSIM remains the backstop
+for that class — it is SSIM's largest unique-catch category.
+
 ## Test suites
 
 | suite | command | tests |

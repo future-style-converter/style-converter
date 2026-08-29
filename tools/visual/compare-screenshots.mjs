@@ -77,7 +77,9 @@
 // SSIM is the LARGEST unique contributor and the only metric that sees
 // antialiased-curve structure. `pixelmatch` is the one contributing no
 // unique signal here — and it is separately blind to any uniform lightness
-// shift below 66/255 (see the threshold note at its call site). Removing
+// shift below 66/255 under the pre-flip settings — ~6/255 since the
+// 2026-08-29 flip to 0.02 + AA-on (see the threshold note at its call
+// site). Removing
 // SSIM on the strength of a caveat that fires on one component and flips
 // no verdict would blind the gate to its largest catch class.
 //
@@ -851,33 +853,36 @@ async function loadPng(path) {
  */
 async function diffPair(a, b, W, H, diffFilename) {
   const diff = new PNG({ width: W, height: H });
-  // `threshold` controls per-pixel color-delta tolerance in pixelmatch's
-  // YIQ space. 0.25 is generous — see below for why it HAS to be.
+  // THE DERIVED SETTINGS (threshold-derivation.mjs, 2026-08-29 flip).
   //
-  // ⚠ `includeAA: true` does the OPPOSITE of what this comment used to
-  // claim. pixelmatch's own JSDoc reads "includeAA: Whether to SKIP
-  // anti-aliasing detection", and the source gate is:
+  // The old pair was `threshold: 0.25, includeAA: true` — and both numbers
+  // were compensating for each other rather than expressing a tolerance:
+  // includeAA: true means AA detection NEVER RUNS (pixelmatch's JSDoc:
+  // "whether to SKIP anti-aliasing detection"; gate `!includeAA && …`),
+  // so 0.25 was the only thing absorbing cross-rasterizer AA — at the
+  // price of a colour blind spot of 66/255 uniform (198/255 pure blue).
+  // The blur bug shipped through exactly that hole: Δpx read 0.00% while
+  // both natives under-blurred.
   //
-  //     isExcludedAA = !includeAA && (antialiased(img1,…) || antialiased(img2,…))
+  // Now: `includeAA: false` turns the AA DETECTOR ON (it excludes pixels
+  // pixelmatch classifies as antialiasing), which lets the colour
+  // threshold drop to 0.02 — maxDelta = 35215·0.02² = 14.09, so a uniform
+  // shift registers from ~6/255 (was 66) and pure blue from ~17/255 (was
+  // 198). Derivation, measured over the 399 committed baseline pairs:
+  // this combination catches the blur-class divergence the old settings
+  // could not, at a cost of a small, enumerable set of newly-failing
+  // pairs (edge-population rows the AA detector cannot fully classify),
+  // each ledgered with its reason rather than absorbed by a loose knob.
+  // Residual risk, named honestly: the AA detector can also suppress a
+  // genuine 1px hairline shift — SSIM remains the backstop for that class
+  // (it is SSIM's largest unique-catch category).
   //
-  // With `includeAA: true` that is `!true` → false, so AA detection NEVER
-  // RUNS and every anti-aliased pixel is counted as an ordinary difference.
-  // (Verified in node_modules/pixelmatch/index.js:12,74.)
-  //
-  // Consequence: this comparison has NO anti-aliasing suppression at all,
-  // and `threshold: 0.25` is not a colour tolerance — it is the only thing
-  // absorbing cross-rasterizer AA (Skia vs Core Graphics vs Blink). The 2 %
-  // pixel budget absorbs the residue. Both numbers are compensating for
-  // this, not expressing a deliberate tolerance.
-  //
-  // The behaviour is deliberately LEFT AS-IS here. Flipping the flag would
-  // make the comparison strictly more lenient (AA pixels stop counting),
-  // which moves every recorded number and could mask a real regression, so
-  // it belongs behind the edge-masking + threshold-derivation work, not in
-  // a comment fix. Correcting the comment is the safe half.
+  // The zero A/A noise floor is what makes this safe: byte-identical
+  // baseline pairs score 0 mismatches at ANY threshold, so the baseline
+  // gate is untouched by construction.
   const mismatched = pixelmatch(a.data, b.data, diff.data, W, H, {
-    threshold: 0.25,
-    includeAA: true,
+    threshold: 0.02,
+    includeAA: false,
     diffColor: [255, 80, 80],
     alpha: 0.15,
   });
@@ -1028,7 +1033,8 @@ async function compareBaseline(name, normalized, canvasW, canvasH) {
     //
     // ΔE joined the expression with the cross-platform promotion: it was
     // computed on every pair and gated nothing, while pixelmatch cannot
-    // fire on a uniform lightness shift below 66/255 and SSIM barely
+    // fire on a uniform lightness shift below 66/255 (pre-flip; ~6/255
+    // since 2026-08-29) and SSIM barely
     // moves when a shape is repainted in the wrong colour. See
     // cross-platform-gate.mjs for the measured rows that motivated it.
     const regressed = pairRegressed(pair, { ssimThreshold, pixelThreshold, deltaEThreshold });

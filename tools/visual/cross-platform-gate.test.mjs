@@ -242,8 +242,8 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // resolved three ledgered divergences (Transform_Combined iOS-web,
   // Edge_MultiTransform iOS-web and iOS-Android) and added one for Compose's
   // order-insensitivity (Transform_Combined iOS-Android).
-  assert.equal(led.expectations.length, 28,
-    '22 visual-test + 4 composition-test + 2 filter-sepia-amounts');
+  assert.equal(led.expectations.length, 31,
+    '25 visual-test + 4 composition-test + 2 filter-sepia-amounts — the 2026-08-29 threshold flip added Filter_Blur x2 + InsetRoundShadow Android-web');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);
