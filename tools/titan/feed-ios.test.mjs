@@ -276,3 +276,28 @@ test('feed-ios serialises the mono-pinned doc AFTER the corpus font hop read the
   // the runtime resolves `fontFaces[].src` against.
   assert.match(src, /join\(fontsDir, MONO_PIN_SANDBOX_DIR\)/);
 });
+
+
+// Wave-48 intake pin: the iOS feeder's flatten must mirror the device-side
+// backdrop-dependence suppression (ScreenshotCaptureView.swift) exactly as
+// feed-android mirrors ScreenshotCaptureScreen.kt via feed-lib — the intake
+// audit found the device rule landed WITHOUT this mirror, so per-component
+// manifests listed phantom PNGs and misaligned every later positional index.
+// The predicate is imported from feed-lib so the two feeders cannot drift.
+test('flattenComponents suppresses backdrop-dependent children like the device', () => {
+  const doc = [{
+    id: 'p', name: 'p', properties: [],
+    children: [
+      { id: 'a', name: 'a', properties: [{ type: 'BackdropFilter', data: [{ fn: 'blur', px: 4 }] }], children: [] },
+      { id: 'b', name: 'b', properties: [{ type: 'MixBlendMode', data: 'MULTIPLY' }], children: [] },
+      { id: 'c', name: 'c', properties: [{ type: 'MixBlendMode', data: 'NORMAL' }], children: [] },
+      { id: 'd', name: 'd', properties: [], children: [] },
+    ],
+  }];
+  const flat = flattenComponents(doc);
+  const names = flat.map((c) => c.name);
+  // a (backdrop-filter) and b (non-normal blend) are suppressed standalone;
+  // c (normal blend) and d (plain) still capture — and the POSITIONS of the
+  // survivors are contiguous, which is the half the phantom bug broke.
+  assert.deepEqual(names, ['p', 'c', 'd']);
+});

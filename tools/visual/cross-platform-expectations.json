@@ -335,7 +335,7 @@
     },
     {
       "fixture": "visual-test.json",
-      "component": "098_Neumorphic_Light.png",
+      "component": "Neumorphic_Light.png",
       "pair": "iOS-Android",
       "reason": "iOS box-shadow penumbra falloff differs from Android and web, which agree with each other. Measured iOS-vs-web: 5159 of 31980 px differ (16.1%), and they are concentrated in the rows above and below the card (y=14,15 and y=66-70 of an 82px image) \u2014 the soft-shadow gradient, not the card face, whose fill (236,240,241) and the page ground (26,26,46) are byte-identical on all three. This is the known blur-radius-to-Gaussian-sigma convention difference between CoreGraphics and Skia rather than a wrong value. It sits just over the line (\u0394E95 5.34 / 5.59 vs a 5.0 threshold), so it is recorded rather than waved through \u2014 but it is the weakest of the entries here and is the first to re-examine if the sigma mapping is ever unified.",
       "owner": "unassigned",
@@ -349,7 +349,7 @@
     },
     {
       "fixture": "visual-test.json",
-      "component": "098_Neumorphic_Light.png",
+      "component": "Neumorphic_Light.png",
       "pair": "iOS-web",
       "reason": "iOS box-shadow penumbra falloff differs from Android and web, which agree with each other. Measured iOS-vs-web: 5159 of 31980 px differ (16.1%), and they are concentrated in the rows above and below the card (y=14,15 and y=66-70 of an 82px image) \u2014 the soft-shadow gradient, not the card face, whose fill (236,240,241) and the page ground (26,26,46) are byte-identical on all three. This is the known blur-radius-to-Gaussian-sigma convention difference between CoreGraphics and Skia rather than a wrong value. It sits just over the line (\u0394E95 5.34 / 5.59 vs a 5.0 threshold), so it is recorded rather than waved through \u2014 but it is the weakest of the entries here and is the first to re-examine if the sigma mapping is ever unified.",
       "owner": "unassigned",

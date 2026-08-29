@@ -44,7 +44,8 @@ import { safe } from './safe-name.mjs';
 import { documentFontSrcs, resolveFontFile,
          // wave-39 lane A2: the replaced-element image hop, likewise shared
          // byte-for-byte with feed-android.mjs.
-         documentReplacedSrcs, resolveReplacedImageFile } from './feed-lib.mjs';
+         documentReplacedSrcs, resolveReplacedImageFile,
+         dependsOnBackdrop } from './feed-lib.mjs';
 // wave-40 lane T5: the SVG PRE-RASTER pre-pass. iOS ships no SVG file decoder
 // (asset catalogs only), so the vector is rasterised on the HOST and this
 // document's copy of the wire is re-pointed at the PNG sibling BEFORE the
@@ -206,7 +207,18 @@ export function flattenComponents(components) {
     const kids = c.children;
     if (!kids || kids.length === 0) return;
     if (parentCreatesContext(c)) return;
-    kids.forEach(walk);
+    // Backdrop-dependent children (BackdropFilter, or a non-normal
+    // MixBlendMode) are suppressed standalone on every device harness —
+    // this branch added the rule to ScreenshotCaptureView.swift (line
+    // ~414) but the iOS feeder's local flatten missed the mirror while
+    // feed-android picked it up via feed-lib.flattenComponents. Without
+    // it, the manifest lists PNGs the device never writes, the poll waits
+    // on phantoms, and — names being POSITIONAL — every entry after the
+    // first suppressed child is misaligned (the round-4 Android bug,
+    // found live on this path by the wave-48 intake audit). The shared
+    // predicate is feed-lib's, imported below, so the two feeders cannot
+    // drift again.
+    kids.forEach((k) => { if (!dependsOnBackdrop(k)) walk(k); });
   };
   (components || []).forEach(walk);
   return out;
