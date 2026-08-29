@@ -169,6 +169,23 @@ test('an expectation for a component that no longer exists is reported orphaned'
   assert.equal(r.stale[0].component, 'GONE.png');
 });
 
+test('a missing PAIR on an existing component is unexercised, not orphaned', () => {
+  // The misdiagnosis this pins: one platform's capture of one component
+  // fails, its pair never forms, and the old loop reported the ledger
+  // entry as "no such component — delete the line" (fatal via exit 5).
+  // Deleting a valid entry on that evidence would un-excuse a real
+  // divergence. Seen live during a stale-Android flake.
+  const ledger = { expectations: [{ component: 'A.png', pair: 'iOS-Android', reason: 'r', owner: 'x' }] };
+  // Row A exists (so the component is alive) but only the iOS-web pair
+  // formed; iOS-Android is null.
+  const r = evaluateCrossPlatformGate(
+    [row('A.png', { 'iOS-web': ok() })], ledger, OPTS);
+  assert.equal(r.stale.length, 0, 'must NOT be a deletion order');
+  assert.equal(r.unexercised.length, 1);
+  assert.equal(r.unexercised[0].component, 'A.png');
+  assert.equal(r.unexercised[0].pair, 'iOS-Android');
+});
+
 test('an expired expectation still excuses, but is flagged', () => {
   // Expiry is a review prompt, not a booby trap that reddens the build on a
   // date rollover — an expired entry that still fails is still known.

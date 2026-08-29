@@ -280,15 +280,33 @@ export function evaluateCrossPlatformGate(rows, ledger, opts) {
   // a finding, and it teaches people to skim past the warning that matters.
   // An expectation is orphaned only when BOTH its platforms were captured
   // and it still matched nothing.
+  // Two different situations used to collapse into one fatal "orphaned —
+  // delete the line" verdict, and only one of them deserves it:
+  //   · NO ROW carries the component's name → the component was renamed or
+  //     deleted; the entry is genuinely orphaned (fatal via the stale path).
+  //   · a row EXISTS but this pair was absent from it → one platform's
+  //     capture of this one component failed or was skipped this run. The
+  //     entry may be perfectly valid; deleting it on that evidence would
+  //     un-excuse a real divergence. Misdiagnosed live during a stale-
+  //     Android flake: valid Backdrop entries were reported as "no such
+  //     component" because Android's captures were from the wrong fixture.
+  const rowNames = new Set(rows.map((r) => componentKey(r.name)));
+  const unexercised = [];
   for (const [key, entry] of byKey) {
     if (seen.has(key)) continue;
     const [component, pair] = key.split('\u0000');
     const [a, b] = pair.split('-');
     if (!platformsSeen.has(a) || !platformsSeen.has(b)) continue;
+    if (rowNames.has(component)) {
+      // The component rendered; the PAIR did not form. A warning, not a
+      // deletion order.
+      unexercised.push({ component, pair, entry });
+      continue;
+    }
     stale.push({ component, pair, observed: null, entry, orphaned: true });
   }
 
-  return { skipped: false, checked, unexpected, expected, stale, expired };
+  return { skipped: false, checked, unexpected, expected, stale, expired, unexercised };
 }
 
 /** Human-readable one-liner per record, shared by the console and the report. */

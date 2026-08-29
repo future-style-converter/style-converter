@@ -458,6 +458,13 @@ async function main() {
     for (const r of xGate.expired) {
       console.warn(`  ⚠ expectation past its expiry (${r.entry.expires}) — re-review: ${formatRecord(r)}`);
     }
+    // A ledger entry whose component rendered but whose PAIR did not form
+    // this run (one platform's capture of that component failed): warned,
+    // never fatal — deleting the line on that evidence would un-excuse a
+    // real divergence the next healthy run.
+    for (const u of xGate.unexercised ?? []) {
+      console.warn(`  ⚠ ledger pair not exercised this run (capture missing on one side): ${u.component} · ${u.pair}`);
+    }
 
     // Unexpected divergence is checked FIRST. When both conditions are
     // present, "the runtimes disagree" is the one worth surfacing — a stale

@@ -304,32 +304,65 @@ export function computeLabDeltaE(a, b, stride = 4) {
     const toLab = converter('lab65');
     const dE = differenceCiede2000();
     const deltas = [];
-    // Step 4 bytes per pixel × `stride` pixels at a time.
-    const pixelStride = 4 * stride;
-    for (let i = 0; i < a.data.length; i += pixelStride) {
+    // SAMPLING PHASE — rotated per row, and that rotation is load-bearing.
+    // The old loop strode the LINEAR buffer by 4 pixels, so the sampled
+    // columns depended on width mod stride: at the corpus's 390px width
+    // (390 = 4·97 + 2) each row's phase shifted by 2, alternating between
+    // x ≡ 0 and x ≡ 2 (mod 4) — ODD columns were never examined on any
+    // row of any 390-wide capture. A 1px vertical hairline at an odd x
+    // was deterministically invisible to the gating ΔE95, on every run,
+    // forever (the zero noise floor made the blindness perfectly stable).
+    // Rotating the phase by row (row % stride) covers every residue class
+    // within each stride-sized row band while keeping the sample count,
+    // and therefore the ~30ms/pair cost, identical.
+    const width = a.width;
+    if (!width) {
+      // No geometry (defensive: every real caller passes padToCanvas
+      // output, which carries width) — fall back to the linear walk
+      // rather than guessing one.
+      const pixelStride = 4 * stride;
+      for (let i = 0; i < a.data.length; i += pixelStride) {
+        if (a.data[i + 3] === 0 || b.data[i + 3] === 0) continue;
+        const ca = toLab({ mode: 'rgb', r: a.data[i] / 255, g: a.data[i + 1] / 255, b: a.data[i + 2] / 255 });
+        const cb = toLab({ mode: 'rgb', r: b.data[i] / 255, g: b.data[i + 1] / 255, b: b.data[i + 2] / 255 });
+        deltas.push(dE(ca, cb));
+      }
+      return summarizeDeltas(deltas);
+    }
+    const height = Math.floor(a.data.length / 4 / width);
+    for (let y = 0; y < height; y++) {
+      const phase = y % stride;
+      for (let x = phase; x < width; x += stride) {
+        const i = (y * width + x) * 4;
       // Skip pixels where EITHER side is fully transparent — the colour
       // beneath is undefined and would skew the distribution.
-      if (a.data[i + 3] === 0 || b.data[i + 3] === 0) continue;
-      const ca = toLab({ mode: 'rgb', r: a.data[i] / 255, g: a.data[i + 1] / 255, b: a.data[i + 2] / 255 });
-      const cb = toLab({ mode: 'rgb', r: b.data[i] / 255, g: b.data[i + 1] / 255, b: b.data[i + 2] / 255 });
-      deltas.push(dE(ca, cb));
+        if (a.data[i + 3] === 0 || b.data[i + 3] === 0) continue;
+        const ca = toLab({ mode: 'rgb', r: a.data[i] / 255, g: a.data[i + 1] / 255, b: a.data[i + 2] / 255 });
+        const cb = toLab({ mode: 'rgb', r: b.data[i] / 255, g: b.data[i + 1] / 255, b: b.data[i + 2] / 255 });
+        deltas.push(dE(ca, cb));
+      }
     }
-    if (deltas.length === 0) return null;
-    // Sort once for both max + p95. p95 picks the 95th percentile via
-    // index = floor(0.95 × (n-1)) — robust to single-pixel outliers.
-    deltas.sort((x, y) => x - y);
-    const sum = deltas.reduce((s, v) => s + v, 0);
-    const mean = sum / deltas.length;
-    const max = deltas[deltas.length - 1];
-    const p95 = deltas[Math.floor(0.95 * (deltas.length - 1))];
-    return {
-      mean: +mean.toFixed(3),
-      max: +max.toFixed(3),
-      p95: +p95.toFixed(3),
-    };
+    return summarizeDeltas(deltas);
   } catch (e) {
     return null;
   }
+}
+
+/** Shared summary for both sampling paths (phased and linear-fallback). */
+function summarizeDeltas(deltas) {
+  if (deltas.length === 0) return null;
+  // Sort once for both max + p95. p95 picks the 95th percentile via
+  // index = floor(0.95 × (n-1)) — robust to single-pixel outliers.
+  deltas.sort((x, y) => x - y);
+  const sum = deltas.reduce((s, v) => s + v, 0);
+  const mean = sum / deltas.length;
+  const max = deltas[deltas.length - 1];
+  const p95 = deltas[Math.floor(0.95 * (deltas.length - 1))];
+  return {
+    mean: +mean.toFixed(3),
+    max: +max.toFixed(3),
+    p95: +p95.toFixed(3),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────

@@ -345,3 +345,27 @@ test('computeHistogramKL is asymmetric — argument order is load-bearing', () =
   assert.equal(computeHistogramKL(black, half).r, 0.1828);
   assert.notEqual(computeHistogramKL(black, half).r, computeHistogramKL(half, black).r);
 });
+
+// ── computeLabDeltaE sampling phase ─────────────────────────────────────────
+
+test('computeLabDeltaE sees a 1px hairline at an ODD column of a 390-wide image', () => {
+  // The old linear stride's phase shifted by (width mod stride) per row —
+  // at the corpus width 390 (≡ 2 mod 4) sampled columns alternated between
+  // x ≡ 0 and x ≡ 2 (mod 4), so ODD columns were never examined and a 1px
+  // vertical hairline there was deterministically invisible to the gating
+  // ΔE95, on every run (the zero noise floor made the blindness stable).
+  // The per-row phase rotation covers every residue class.
+  const W = 390, H = 40;
+  const mk = (hair) => {
+    const d = Buffer.alloc(W * H * 4);
+    for (let i = 0; i < W * H; i++) { d[i*4] = 26; d[i*4+1] = 26; d[i*4+2] = 46; d[i*4+3] = 255; }
+    if (hair) for (let y = 0; y < H; y++) { const i = (y*W + 201) * 4; d[i] = 255; d[i+1] = 0; d[i+2] = 0; }
+    return { data: d, width: W, height: H };
+  };
+  const r = computeLabDeltaE(mk(false), mk(true), 4);
+  assert.ok(r !== null && r.max > 10, `odd-column hairline must register (got ${JSON.stringify(r)})`);
+  // Identity stays exactly zero — the phase rotation must not manufacture
+  // deltas out of sampling asymmetry.
+  const same = computeLabDeltaE(mk(true), mk(true), 4);
+  assert.deepEqual(same, { mean: 0, max: 0, p95: 0 });
+});

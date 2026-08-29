@@ -426,7 +426,14 @@ print('Unknown')")
             IOS_LAST_COUNT=-1
             IOS_STUCK_FOR=0
             IOS_STUCK_LIMIT=10   # 10 × 1 s = 10 s with no progress → give up
-            for i in $(seq 1 60); do
+            # Ceiling scales with the component count — the Android poll got
+            # this fix (a flat ceiling silently truncated a 359-component
+            # run at whatever had rendered by timeout and reported success);
+            # the iOS poll kept the flat 60 until the pipeline hunt flagged
+            # the asymmetry. Exhaustion is reported, never silent.
+            IOS_MAX_POLLS=$(( 60 + COMPONENT_COUNT ))
+            IOS_POLL_EXHAUSTED=1
+            for i in $(seq 1 "$IOS_MAX_POLLS"); do
                 # `get_app_container` can race with install; tolerate nulls.
                 if [[ -z "$APP_CONTAINER" ]]; then
                     APP_CONTAINER=$(xcrun simctl get_app_container "$SIM_UDID" "$IOS_BUNDLE" data 2>/dev/null || echo "")
@@ -441,12 +448,14 @@ print('Unknown')")
                 COUNT=$((10#${COUNT:-0}))
                 echo "  $COUNT / $COMPONENT_COUNT captured…"
                 if [[ "$COUNT" -ge "$COMPONENT_COUNT" ]]; then
+                    IOS_POLL_EXHAUSTED=0
                     break
                 fi
                 if [[ "$COUNT" == "$IOS_LAST_COUNT" ]]; then
                     IOS_STUCK_FOR=$(( IOS_STUCK_FOR + 1 ))
                     if [[ $IOS_STUCK_FOR -ge $IOS_STUCK_LIMIT ]]; then
                         warn "iOS count stuck at $COUNT for $(( IOS_STUCK_FOR ))s — app may have crashed"
+                        IOS_POLL_EXHAUSTED=0   # reported by the stall branch, not a silent timeout
                         break
                     fi
                 else
@@ -455,6 +464,9 @@ print('Unknown')")
                 fi
                 sleep 1
             done
+            if [[ "$IOS_POLL_EXHAUSTED" == "1" ]]; then
+                warn "iOS capture poll exhausted after ${IOS_MAX_POLLS}s with progress still being made — captures may be truncated"
+            fi
 
             rm -rf "$IOS_DIR/screenshots"
             mkdir -p "$IOS_DIR/screenshots"
@@ -725,6 +737,16 @@ else
         # would exit instantly without waiting for THIS run's captures.
         SCREENSHOT_DIR_DEVICE="/sdcard/Android/data/$ANDROID_PACKAGE/files/test_screenshots"
         "$ADB" shell rm -rf "$SCREENSHOT_DIR_DEVICE" 2>/dev/null || true
+        # POST-CONDITION on the wipe: if the rm silently failed (adb hiccup,
+        # permission wobble), the poll below would count the PREVIOUS run's
+        # PNGs, finish instantly, and pull stale captures as this run's —
+        # the documented instant-exit flake. An unverified rm is not a wipe.
+        LEFTOVER=$("$ADB" shell ls "$SCREENSHOT_DIR_DEVICE" 2>/dev/null | grep -c png || true)
+        LEFTOVER=$((10#${LEFTOVER:-0}))
+        if [[ "$LEFTOVER" -ne 0 ]]; then
+            err "Android device screenshot dir still holds $LEFTOVER PNG(s) after the wipe — refusing to run against stale captures"
+            exit 1
+        fi
         # Dynamic-capture hooks (docs/DYNAMIC_CAPTURE.md): the SAME env
         # vars the web capture path reads become intent extras here, so one
         # spelled invocation drives both platforms deterministically.
@@ -978,10 +1000,19 @@ COMPARE_EXIT=0
 # owns an EXIT trap chain for emulator teardown and lock release (see the top
 # of the file), and a second EXIT trap would replace it, leaking the emulator
 # and the run lock. Cleaned up inline instead.
+# Keyed on CAPTURED_* — "did THIS run produce captures for the platform" —
+# rather than on the explicit SKIP_* env. The SKIP_* form left every
+# AUTO-skip path uncovered (no simulator found, adb missing, no AVD,
+# xcodegen absent, …): the stage warned and moved on, the harness dir
+# still held the PREVIOUS run's PNGs, and the comparator read them as this
+# run's — the exact cross-fixture contamination this block exists to stop,
+# minus the one trigger someone thought of. CAPTURED_* is set by each
+# stage after a real pull/copy, so it covers both trigger classes without
+# either having to be enumerated.
 COMPARE_EMPTY_DIR="$(mktemp -d)"
-[[ "${SKIP_IOS:-0}"     == "1" ]] && export IOS_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
-[[ "${SKIP_ANDROID:-0}" == "1" ]] && export ANDROID_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
-[[ "${SKIP_WEB:-0}"     == "1" ]] && export WEB_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+[[ -z "${CAPTURED_IOS:-}"     ]] && export IOS_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+[[ -z "${CAPTURED_ANDROID:-}" ]] && export ANDROID_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+[[ -z "${CAPTURED_WEB:-}"     ]] && export WEB_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
 
 ( cd "$TOOLS_VISUAL_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" ) || COMPARE_EXIT=$?
 rmdir "$COMPARE_EMPTY_DIR" 2>/dev/null || true
