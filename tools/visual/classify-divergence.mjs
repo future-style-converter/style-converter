@@ -294,6 +294,14 @@ export function classifyDivergence(metrics) {
     pHashHamming > STRUCTURAL_PHASH_MIN &&
     ssim >= GLYPH_NOISE_SSIM_MIN &&
     labMean < GLYPH_NOISE_LAB_MEAN_MAX &&
+    // labP95 guard — the mean alone is blind to a LOCALISED colour error:
+    // a divergence confined to a narrow band (a shadow penumbra, a border
+    // ring) keeps labMean tiny while ΔE95 sails past the colour gate. The
+    // Neumorphic penumbra was labelled glyph-metric-noise at ΔE95 5.34
+    // because of exactly this hole, and downstream readers treat the label
+    // as "benign text jitter". A pair that would co-trigger COLOR-DRIFT
+    // must never be absorbed into a noise label.
+    (labP95 == null || labP95 <= COLOR_LAB_P95_MIN) &&
     edgeSsim >= GLYPH_NOISE_EDGE_MIN &&
     pixelPct != null &&
     pixelPct < GLYPH_NOISE_PIXEL_PCT_MAX;
@@ -411,7 +419,7 @@ export function classifyDivergence(metrics) {
 //   identical (1) < sub-pixel-noise (2) < unknown (3) <
 //   glyph-metric-noise (4) < mixed (5) < edge-shift (6) < color-drift (7) <
 //   structural-divergence (8) < no-content (9) < test-not-applicable (10).
-const SEVERITY_RANK = {
+export const SEVERITY_RANK = {
   identical: 1,
   'sub-pixel-noise': 2,
   unknown: 3,

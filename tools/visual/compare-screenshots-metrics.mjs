@@ -443,6 +443,25 @@ function foregroundCoverage(data, tolerance, bg = CANONICAL_BG) {
   let total = 0;
   // Stride 4 = RGBA; we only read R/G/B.
   for (let i = 0; i < data.length; i += 4) {
+    // PAD SENTINEL EXCLUSION — from numerator AND denominator, so the
+    // metric reads "ink density of the actually-captured region".
+    //
+    // Two verified requirements collide on this pixel class and this is
+    // the only accounting that satisfies both:
+    //   · An under-sized BLANK capture must still classify no-content
+    //     (counting the sentinel as ink made a broken half-height blank
+    //     read as 50% covered, voiding no-content for exactly the
+    //     captures most likely to be broken — the pipeline hunt's
+    //     finding).
+    //   · An under-sized INKED capture must not read as coverage-alike
+    //     with its full-height pair (Lane E's integration control: the
+    //     10×5 ink half must read 100% against the full capture's 50%).
+    // Skipping the sentinel entirely gives blank-short 0/real = 0% (first
+    // requirement) and ink-short real-ink/real = 100% vs 50% (second).
+    // The under-size itself stays loudly visible to ΔE and pixelmatch —
+    // that is the sentinel's actual job; coverage's job is the
+    // no-content gate.
+    if (data[i] === 0xFF && data[i + 1] === 0x00 && data[i + 2] === 0xFF) continue;
     total++;
     const dr = Math.abs(data[i]     - bg.r);
     const dg = Math.abs(data[i + 1] - bg.g);

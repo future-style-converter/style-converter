@@ -55,8 +55,18 @@ err()  { echo -e "${R}[smoke]${N} $*" >&2; }
 VITE_PID=""
 start_vite() {
     log "starting vite on :3000…"
-    ( cd apps/web-harness && npm run dev > /tmp/smoke-vite.log 2>&1 ) &
+    # `set -m` + `exec` so VITE_PID is a PROCESS-GROUP leader running vite
+    # itself, exactly as test-all.sh does. The old form backgrounded a
+    # subshell running `npm run dev`; killing that subshell left npm's vite
+    # child orphaned to PID 1, and `pkill -P $VITE_PID` matched nothing
+    # because the child had already reparented — the dev server survived
+    # every "teardown" (empirically reproduced: :3000 stayed bound after
+    # stop_vite). Group-kill takes npm, vite and its esbuild helpers down
+    # together no matter who forked whom.
+    set -m
+    ( cd apps/web-harness && exec npm run dev > /tmp/smoke-vite.log 2>&1 ) &
     VITE_PID=$!
+    set +m
     # Poll until vite responds or 30s elapses. Faster than a fixed sleep,
     # avoids the "vite not ready yet" race that the per-harness pre-flight
     # would also catch but with a less actionable error message.
@@ -76,10 +86,11 @@ start_vite() {
 
 stop_vite() {
     if [[ -n "$VITE_PID" ]]; then
-        log "stopping vite (pid=$VITE_PID)"
-        kill "$VITE_PID" 2>/dev/null || true
-        # Also kill any vite child processes (npm run dev forks one).
-        pkill -P "$VITE_PID" 2>/dev/null || true
+        log "stopping vite (pgid=$VITE_PID)"
+        # Negative PID = the whole process group (see start_vite) — npm,
+        # vite and the esbuild helpers go down together, including any
+        # child that already reparented.
+        kill -TERM -"$VITE_PID" 2>/dev/null || kill "$VITE_PID" 2>/dev/null || true
         VITE_PID=""
     fi
 }

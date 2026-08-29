@@ -699,3 +699,21 @@ test('CLASSIFIER_VERSION is a positive integer', () => {
   // classifier change is detectable post-hoc.
   assert.ok(Number.isInteger(CLASSIFIER_VERSION) && CLASSIFIER_VERSION > 0);
 });
+
+test('glyph-metric-noise must not absorb a colour-gate co-trigger', () => {
+  // The Neumorphic hole: divergence confined to a narrow band keeps
+  // labMean tiny while dE95 exceeds the colour gate. Without the labP95
+  // guard this classified as benign "glyph-metric-noise"; it must surface
+  // the colour signal instead (color-drift, or mixed when structure also
+  // fires — anything but a noise label).
+  const label = classifyDivergence({
+    ssim: 0.9554, pixelMismatchedPct: 0.47,
+    labDeltaE: { mean: 0.4, p95: 5.4, max: 21 },
+    pHashHamming: 12, edgeSsim: 0.97,
+    perChannelSsim: { r: 0.99, g: 0.99, b: 0.99 },
+    histogramKL: 0.01, dssim: 0.02,
+  });
+  assert.notEqual(label, 'glyph-metric-noise');
+  assert.notEqual(label, 'sub-pixel-noise');
+  assert.notEqual(label, 'identical');
+});

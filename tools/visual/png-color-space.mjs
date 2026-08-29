@@ -52,10 +52,48 @@ const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0
  *   cICP — coding-independent code points (Apple ImageIO on wide gamut)
  *
  * `sRGB` is deliberately NOT here: it asserts the very thing we want.
- * `gAMA`/`sBIT`/`pHYs` are not colour-space claims and pngjs either reads
- * gAMA or ignores them harmlessly.
+ * `sBIT`/`pHYs` are not colour-space claims and are ignored harmlessly.
+ *
+ * `gAMA` and `cHRM` used to be dismissed here as "not colour-space
+ * claims" — factually wrong, as the pipeline hunt pointed out. gAMA
+ * DEFINES the transfer function of the stored bytes: a capture tagged
+ * gAMA 1.0 (linear light) scored as sRGB is off by ~127/255 at mid-grey,
+ * and cHRM redefines the primaries the RGB triples mean. Both are
+ * therefore VALUE-checked in assertSrgbOrUntagged below: the one benign
+ * spelling each has (the sRGB-compatible value some encoders write
+ * alongside an sRGB chunk) passes; anything else is the same hard error
+ * as an ICC profile.
  */
 export const DISQUALIFYING_COLOR_CHUNKS = Object.freeze(['iCCP', 'cICP']);
+
+/** gAMA payload for sRGB-compatible 1/2.2 encoding: 45455 (per the PNG
+ *  spec's own example for sRGB-ish gamma). Stored as a 4-byte BE uint of
+ *  gamma × 100000. */
+export const SRGB_COMPATIBLE_GAMA = 45455;
+
+/** cHRM payload for the sRGB/BT.709 primaries + D65 white point, in the
+ *  chunk's ×100000 fixed-point encoding, field order per the PNG spec:
+ *  wx, wy, rx, ry, gx, gy, bx, by. */
+export const SRGB_COMPATIBLE_CHRM = Object.freeze([31270, 32900, 64000, 33000, 30000, 60000, 15000, 6000]);
+
+/**
+ * Read one chunk's payload bytes, or null when absent/corrupt. Shares the
+ * walk logic's bounds discipline with readPngChunkTypes.
+ */
+export function readPngChunkData(buf, wanted) {
+  if (buf.length < 8 || !buf.subarray(0, 8).equals(PNG_SIGNATURE)) return null;
+  let offset = 8;
+  while (offset + 12 <= buf.length) {
+    const length = buf.readUInt32BE(offset);
+    const type = buf.toString('latin1', offset + 4, offset + 8);
+    const next = offset + 12 + length;
+    if (next <= offset || next > buf.length) return null;
+    if (type === wanted) return buf.subarray(offset + 8, offset + 8 + length);
+    if (type === 'IEND') return null;
+    offset = next;
+  }
+  return null;
+}
 
 /**
  * Walk a PNG buffer's chunk table and return the chunk type strings in
@@ -110,6 +148,23 @@ export function readPngChunkTypes(buf) {
 export function assertSrgbOrUntagged(buf, label) {
   const types = readPngChunkTypes(buf);
   const offenders = types.filter((t) => DISQUALIFYING_COLOR_CHUNKS.includes(t));
+  // gAMA / cHRM: benign ONLY at their sRGB-compatible values (see the
+  // constants above). A non-sRGB transfer function or primary set is the
+  // same "pixels would be scored as sRGB" hazard as an ICC profile.
+  if (types.includes('gAMA')) {
+    const d = readPngChunkData(buf, 'gAMA');
+    const gamma = d && d.length >= 4 ? d.readUInt32BE(0) : null;
+    if (gamma !== SRGB_COMPATIBLE_GAMA) {
+      offenders.push(`gAMA(${gamma ?? 'corrupt'} ≠ ${SRGB_COMPATIBLE_GAMA})`);
+    }
+  }
+  if (types.includes('cHRM')) {
+    const d = readPngChunkData(buf, 'cHRM');
+    const vals = d && d.length >= 32
+      ? Array.from({ length: 8 }, (_, i) => d.readUInt32BE(i * 4)) : null;
+    const ok = vals && vals.every((v, i) => v === SRGB_COMPATIBLE_CHRM[i]);
+    if (!ok) offenders.push(`cHRM(${vals ? vals.join(',') : 'corrupt'} ≠ sRGB primaries)`);
+  }
   if (offenders.length > 0) {
     throw new Error(
       `${label}: PNG carries ${offenders.join(' + ')} colour chunk(s). ` +

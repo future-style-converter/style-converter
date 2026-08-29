@@ -97,13 +97,40 @@ test('assertSrgbOrUntagged: an explicit sRGB chunk passes', () => {
   assert.doesNotThrow(() => assertSrgbOrUntagged(buf, 'android.png'));
 });
 
-test('assertSrgbOrUntagged: pHYs / sBIT / gAMA are not colour-space claims', () => {
+test('assertSrgbOrUntagged: pHYs / sBIT are not colour-space claims', () => {
   // web captures carry pHYs; Android carries sBIT. Neither says anything
   // about colour space, and flagging them would be a false positive.
-  for (const t of ['pHYs', 'sBIT', 'gAMA']) {
+  for (const t of ['pHYs', 'sBIT']) {
     const buf = injectChunk(tinyPng(), t, Buffer.from([0, 0, 0, 1]));
     assert.doesNotThrow(() => assertSrgbOrUntagged(buf, `${t}.png`), `${t} must pass`);
   }
+});
+
+test('assertSrgbOrUntagged: gAMA is a colour claim — only the sRGB value passes', () => {
+  // The PREVIOUS version of this test asserted that ANY gAMA passes —
+  // with a payload of gamma 0.00001, no less — encoding the exact wrong
+  // premise the pipeline hunt flagged: gAMA defines the transfer function
+  // of the stored bytes, and a linear-gamma capture scored as sRGB is off
+  // by ~127/255 at mid-grey. Only the sRGB-compatible 45455 is benign.
+  const gama = (v) => {
+    const d = Buffer.alloc(4); d.writeUInt32BE(v, 0);
+    return injectChunk(tinyPng(), 'gAMA', d);
+  };
+  assert.doesNotThrow(() => assertSrgbOrUntagged(gama(45455), 'srgb-gamma.png'));
+  assert.throws(() => assertSrgbOrUntagged(gama(100000), 'linear.png'), /gAMA\(100000/);
+  assert.throws(() => assertSrgbOrUntagged(gama(55556), 'gamma18.png'), /gAMA/);
+});
+
+test('assertSrgbOrUntagged: cHRM passes only at the sRGB primaries', () => {
+  const chrm = (vals) => {
+    const d = Buffer.alloc(32);
+    vals.forEach((v, i) => d.writeUInt32BE(v, i * 4));
+    return injectChunk(tinyPng(), 'cHRM', d);
+  };
+  const srgb = [31270, 32900, 64000, 33000, 30000, 60000, 15000, 6000];
+  assert.doesNotThrow(() => assertSrgbOrUntagged(chrm(srgb), 'srgb-chrm.png'));
+  const p3 = [...srgb]; p3[2] = 68000;              // red x nudged toward P3
+  assert.throws(() => assertSrgbOrUntagged(chrm(p3), 'p3-chrm.png'), /cHRM/);
 });
 
 test('assertSrgbOrUntagged: an embedded ICC profile throws', () => {

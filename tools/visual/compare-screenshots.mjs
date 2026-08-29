@@ -127,7 +127,7 @@ import {
 // COMPARE_METRICS Section 7 item 7 — divergence classifier (B-3). Pure
 // function over a metric block; lives in a separate module so it can be
 // unit-tested without booting the whole comparison pipeline.
-import { classifyDivergence } from './classify-divergence.mjs';
+import { classifyDivergence, SEVERITY_RANK } from './classify-divergence.mjs';
 // Colour-space tripwire. Nothing in this pipeline is colour-managed and
 // pngjs discards profile chunks without applying them, so a non-sRGB
 // capture would be compared as if it were sRGB — wrong numbers, no error.
@@ -1121,18 +1121,16 @@ async function runPhaseBDriftCheck(rows) {
     );
     return;
   }
-  // Severity ordering used for "downgrade" detection — must match
-  // classify-divergence.mjs's SEVERITY_RANK so signal interpretation is
-  // consistent across modules.
-  const rank = {
-    identical: 1,
-    'sub-pixel-noise': 2,
-    unknown: 3,
-    mixed: 4,
-    'edge-shift': 5,
-    'color-drift': 6,
-    'structural-divergence': 7,
-  };
+  // Severity ordering used for "downgrade" detection — the CANONICAL
+  // SEVERITY_RANK, imported. This used to be an inline copy that claimed
+  // to "match classify-divergence.mjs's SEVERITY_RANK" and had silently
+  // drifted: it lacked glyph-metric-noise, no-content and
+  // test-not-applicable entirely (all three fell through to unknown = 3),
+  // so a pair degrading from structural-divergence to NO-CONTENT — the
+  // pipeline producing nothing comparable at all — ranked as an
+  // IMPROVEMENT and the drift check stayed quiet. A comment promising two
+  // tables agree is not a mechanism; an import is.
+  const rank = SEVERITY_RANK;
   let downgrades = 0;
   let comparable = 0;    // pairs present in BOTH this run and the stats file
   let seen = 0;          // pairs present in this run at all
