@@ -254,7 +254,7 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 368 |
+| converter (Kotlin) | `./gradlew :converter:test` | 379 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2765 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1821 |

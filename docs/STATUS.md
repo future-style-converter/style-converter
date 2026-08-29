@@ -1813,8 +1813,7 @@ refutes a finding.
 | ~~iOS composes transforms in reverse order~~ **FIXED** — see "transform order" below. | `runtimes/swiftui/…/transforms/` |
 | **NEW (not from the sweep): Compose does not compose the transform list at all.** It accumulates each kind into a separate scalar (`translateX +=`, `rotation +=`, `scaleX *=`) and hands them to `graphicsLayer`, which applies a fixed scale→rotate→translate order — so `scale(2) translate(30px)` renders identically to `translate(30px) scale(2)`. Measured: web (156,96) vs Android (126,96). Ledgered as `Transform_Combined` iOS-Android with the fix route (compose to a matrix in CSS order, reuse the existing `decomposeMatrix2D`) | `runtimes/compose/…/transforms/` |
 | iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely | `runtimes/swiftui/…/effects/blend/` |
-| `border` / `border-*` shorthand silently drops every CSS Color 4/5 colour function — `oklch()`, `lab()`, `lch()`, `hwb()`, `color()`, `color-mix()` | converter shorthand expander |
-| `border` shorthand loses the `<line-width>` for `thin\|medium\|thick`, uppercase units, `Q`, and leading-dot lengths — and files the keyword forms onto the wrong longhand | converter shorthand expander |
+| ~~`border` shorthand drops colour functions / loses `<line-width>` forms~~ **BOTH FIXED** — and the fix uncovered a third defect: a duplicated implementation meant fixing the shared function reached only 1 of the 5 shorthands. See "the border shorthand had two implementations" below. | converter shorthand expander |
 
 ### Medium
 
@@ -1925,11 +1924,57 @@ iOS-web, `Edge_MultiTransform` iOS-web and iOS-Android) and created one
 (`Transform_Combined` iOS-Android, now that iOS is right and Android is
 not). Two baselines moved, both iOS multi-function transforms.
 
+## The border shorthand had two implementations (2026-08-28)
+
+Two audit findings, and a third defect found while fixing them.
+
+**Colour functions were dropped.** The classifier was
+`startsWith("#") || startsWith("rgb") || startsWith("hsl") || ^[a-zA-Z]+$`,
+so every CSS Color 4/5 function matched nothing — and `parseBorderValue`'s
+`when` had no `else`, so the token silently vanished and the border
+rendered with no colour. Measured through the converter: `oklch()`,
+`lab()`, `lch()`, `oklab()`, `hwb()`, `color()` and `color-mix()` all
+produced no `border-*-color` at all.
+
+**`<line-width>` forms were dropped, and the keywords mis-filed.** The
+length pattern had no `IGNORE_CASE`, required a leading digit, and omitted
+units, so `2PX`, `.5px` and `3Q` vanished. Worse, `thin|medium|thick` are
+bare idents, so they matched the *colour* test — `border: thin solid`
+produced no width and a colour of `"thin"`.
+
+### The third defect: fixing the shared function reached 1 of 5 shorthands
+
+`BorderTopExpander` and its three siblings all call
+`BorderExpander.parseBorderValue(...)`. That member was `private`, and a
+file-level **extension function of the same name** sat at the bottom of
+the file — added with the comment *"make parseBorderValue and tokenizer
+accessible to side expanders"* — carrying a second, older copy of the
+classification logic. Because the member was private, every call from the
+four side objects resolved to the **extension**.
+
+So after fixing the member, `border:` was correct and `border-top:`,
+`-right:`, `-bottom:`, `-left:` were still broken, with nothing to say so.
+It only surfaced because the per-side path was probed separately.
+
+The duplicate is deleted and the member is `internal`. That is enforced by
+the compiler rather than by a test: with the duplicate gone, making the
+member `private` again **fails to compile** at all four call sites, so the
+shadowing cannot silently return.
+
+All five shorthands now produce complete width/style/colour triples, with
+correct values — `oklch(0.7 0.15 200)` → sRGB (0, 0.724, 0.764),
+`hwb(200 20% 10%)` → (0.2, 0.667, 0.9), `thin` → 1px, `thick` → 5px,
+`.5px` → 0.5px, `2PX` → 2px. The longhand parsers always handled these;
+only the shorthand's tokenizer was discarding them.
+
+An unrecognised component now logs instead of vanishing — the silent
+fallthrough is what let both bugs live.
+
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 368 |
+| converter (Kotlin) | `./gradlew :converter:test` | 379 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
 | compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2765 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1821 |
