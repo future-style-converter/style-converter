@@ -1,0 +1,126 @@
+{
+  "_comment": "invert() across its amount range on one saturated base, #3b82f6 = (59,130,246). Per filter-effects-1 8.5, invert(a) is feComponentTransfer with table values (a, 1-a) per channel, which is linear: out = a*255 + (1-2a)*c = c + (255-2c)*a on gamma-encoded sRGB. The channel deltas for this base are R +137, G -5, B -237 per unit amount, so the three channels move at wildly different rates \u2014 an implementation that inverts a single luminance, swaps a pivot, or applies the amount to the wrong operand cannot match more than one amount. The 49/50 pair is the sharpest probe: invert(50%) collapses EVERY input colour to exactly 127.5 per channel (c + 127.5 - c), a flat mid-grey independent of the base, while invert(49%) sits just off the collapse and must keep the R<G<B ordering at (126,128,130). 0% is the identity control and 100% is the exact integer complement (255-c) \u2014 both admit zero tolerance.",
+  "_expect_comment": "_expect schema v1 (inert to rendering; enforced by the spec oracle): fill.rgb = dominant non-page-background capture colour (ground is rgb(26,26,46)); fill.tol = per-channel absolute tolerance (0 = exact, licensed by the zero A/A noise floor; 1 only where quantisation is ambiguous); box = declared CSS px (1 CSS px = 1 capture px everywhere; boxes are well under the 390px canvas). Arithmetic, each amount recomputed from out = c + (255-2c)*a: 0% -> identity (59,130,246), tol 0. 25% -> R 59+137*0.25 = 93.25 -> 93; G 130-5*0.25 = 128.75 -> 129 (floor would give 128, hence tol 1); B 246-237*0.25 = 186.75 -> 187 -> (93,129,187). 49% -> R 59+67.13 = 126.13 -> 126; G 130-2.45 = 127.55 -> 128; B 246-116.13 = 129.87 -> 130 -> (126,128,130), tol 1 for the .55/.87 floor-vs-round straddles. 50% -> all three channels exactly 127.5, an exact half-tie; encoded round-half-up as (128,128,128) with tol 1 so both faithful roundings {127,128} pass. 75% -> R 59+102.75 = 161.75 -> 162; G 130-3.75 = 126.25 -> 126; B 246-177.75 = 68.25 -> 68 -> (162,126,68), tol 1. 100% -> (255-59, 255-130, 255-246) = (196,125,9), exact integers, tol 0. All six agree with the numbers circulated from the 2026-08-28 invert fix; each was recomputed independently here rather than copied.",
+  "components": {
+    "Invert_0": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3b82f6",
+        "filter": "invert(0%)"
+      },
+      "_expect": {
+        "fill": [
+          59,
+          130,
+          246
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Invert_25": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3b82f6",
+        "filter": "invert(25%)"
+      },
+      "_expect": {
+        "fill": [
+          93,
+          129,
+          187
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Invert_49": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3b82f6",
+        "filter": "invert(49%)"
+      },
+      "_expect": {
+        "fill": [
+          126,
+          128,
+          130
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Invert_50": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3b82f6",
+        "filter": "invert(50%)"
+      },
+      "_expect": {
+        "fill": [
+          128,
+          128,
+          128
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Invert_75": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3b82f6",
+        "filter": "invert(75%)"
+      },
+      "_expect": {
+        "fill": [
+          162,
+          126,
+          68
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Invert_100": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3b82f6",
+        "filter": "invert(100%)"
+      },
+      "_expect": {
+        "fill": [
+          196,
+          125,
+          9
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ]
+      }
+    }
+  }
+}

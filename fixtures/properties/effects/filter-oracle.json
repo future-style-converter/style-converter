@@ -1,0 +1,25 @@
+{
+  "_comment": "Lane A: the oracle-eats-its-own-cooking fixture. Five filter cases whose expected values are DERIVED FROM THE CSS SPEC (filter-effects-1: the shortcut filter functions defined via feColorMatrix / feComponentTransfer), not from any platform — each component carries _expect, so compare-screenshots.mjs judges every platform ALONE against the spec value and exits 6 on violation, with zero cross-platform comparison involved. Had this fixture existed before 2026-08-28, the sepia, brightness and invert bugs (wrong on BOTH natives while every pairwise gate passed — docs/STATUS.md) would have failed on their first run. Derivations, all reproduced by hand before committing: sepia(80%) is M = 0.2*I + 0.8*S over #3498db=(52,152,219) -> (153.4,157.8,143.0) -> (153,158,143); grayscale(100%) is the luminanceToAlpha-basis matrix 0.2126/0.7152/0.0722 over #e74c3c=(231,76,60) -> 107.8 -> (108,108,108) (basis pinned empirically by filter-grayscale-basis.json); brightness(1.5) is feComponentTransfer linear slope 1.5 over #2ecc71=(46,204,113) -> (69, 306 clamped to 255, 169.5) -> (69,255,170) with the .5 rounding tie covered by the default fill tolerance of 2; invert(0.5) maps EVERY channel to 0.5 -> (128,128,128) regardless of input, here #3b82f6; contrast(1.2) is slope 1.2 intercept -0.1 and saturate(1.5) the 0.213/0.715/0.072 saturation matrix, composed left-to-right over #9b59b6=(155,89,182) -> (187.7,68.8,236.3) -> (188,69,236). box = declared width x height, so a platform that drops the filter AND mis-sizes the element fails both fields independently.",
+  "components": {
+    "FO_Sepia80": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "sepia(80%)" },
+      "_expect": { "fill": [153, 158, 143], "box": [120, 40], "note": "filter-effects-1 §8.5 sepia matrix interpolated 80% toward identity over #3498db: (153.4,157.8,143.0)" }
+    },
+    "FO_Grayscale100": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#e74c3c", "filter": "grayscale(100%)" },
+      "_expect": { "fill": [108, 108, 108], "box": [120, 40], "note": "filter-effects-1 grayscale matrix (0.2126,0.7152,0.0722 basis, pinned by filter-grayscale-basis.json) over #e74c3c: 107.8" }
+    },
+    "FO_Brightness150": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#2ecc71", "filter": "brightness(1.5)" },
+      "_expect": { "fill": [69, 255, 170], "box": [120, 40], "note": "filter-effects-1 brightness = linear transfer slope 1.5 over #2ecc71: (69, 306→255, 169.5) — the 169/170 rounding tie is inside the ±2 tolerance" }
+    },
+    "FO_Invert50": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#3b82f6", "filter": "invert(0.5)" },
+      "_expect": { "fill": [128, 128, 128], "box": [120, 40], "note": "filter-effects-1 invert(0.5) maps every channel to exactly 0.5 — mid-grey for ANY input, so a pass-through render of #3b82f6 cannot sneak by" }
+    },
+    "FO_ContrastSaturate": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#9b59b6", "filter": "contrast(1.2) saturate(1.5)" },
+      "_expect": { "fill": [188, 69, 236], "box": [120, 40], "note": "filter-effects-1 contrast(1.2) (slope 1.2, intercept −0.1) then saturate(1.5) (0.213/0.715/0.072 matrix) over #9b59b6: (187.7,68.8,236.3) — a list, so it also pins left-to-right composition order" }
+    }
+  }
+}

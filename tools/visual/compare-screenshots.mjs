@@ -34,6 +34,13 @@
 //       NUMBERS are untrustworthy, not that the render changed: pngjs
 //       discards colour profiles without applying them, so a tagged capture
 //       is compared as if it were sRGB. See png-color-space.mjs.
+//   4 — unexpected cross-platform divergence (see cross-platform-gate.mjs).
+//   5 — stale cross-platform expectation (see cross-platform-gate.mjs).
+//   6 — spec-oracle violation: a platform's render disagrees with a
+//       spec-derived `_expect` declared in the input fixture. Distinct from
+//       4 because no cross-platform comparison is involved — each platform
+//       is judged ALONE, so all three agreeing on the wrong value still
+//       fails. See spec-oracle.mjs.
 //
 // ⚠ SSIM caveat — `ssim.js` runs with `downsample: 'original'`, which
 // box-filters and decimates by `f = round(min(W, H) / 256)` whenever f > 1.
@@ -92,6 +99,10 @@
 //     --full-lab                Disable LAB ΔE stride sampling. Default
 //                               samples 1-in-4 pixels (~30 ms/pair). Full
 //                               sampling adds ~90 ms/pair (~40s on baseline).
+//     --no-spec-oracle          Skip the spec oracle even when the input
+//                               fixture declares `_expect` blocks. Mirrors
+//                               --no-cross-platform-gate: a deliberate
+//                               report-only run, visible in the manifest.
 //
 
 import { readdirSync, existsSync, mkdirSync, rmSync, copyFileSync, readFileSync, writeFileSync } from 'node:fs';
@@ -137,6 +148,18 @@ import {
 // COMPARE_METRICS Section 5 / item 9 — HTML report extracted into a
 // sibling module to keep this file under the per-file size budget.
 import { renderHTML } from './compare-screenshots-html.mjs';
+// Lane A — the spec oracle. The cross-platform gate above can only catch the
+// runtimes DISAGREEING; 2026-08-28 proved they can all be wrong together
+// (filter blur/invert wrong on both natives while every pairwise gate
+// passed). A fixture component may carry `_expect` with SPEC-DERIVED values,
+// and each platform is judged ALONE against them — see spec-oracle.mjs.
+import {
+  parseExpectations,
+  evaluateOracle,
+  formatViolation,
+  formatMissing,
+  EXIT_SPEC_ORACLE_VIOLATION,
+} from './spec-oracle.mjs';
 
 const pixelmatch = pixelmatchDefault.default ?? pixelmatchDefault;
 
@@ -187,6 +210,12 @@ const fullLab        = args.includes('--full-lab');
 // having to remember a flag. `--no-cross-platform-gate` is the escape hatch
 // for a deliberate report-only run.
 const crossPlatformGate = !args.includes('--no-cross-platform-gate');
+// Spec oracle (Lane A). ON by default for the same reason as the gate above:
+// leaving a correctness check opt-in is how it never gets turned on. It
+// self-skips when the input fixture declares no `_expect` (which is every
+// pre-existing fixture, so the 327-pair corpus is untouched by construction).
+// `--no-spec-oracle` is the escape hatch, mirroring --no-cross-platform-gate.
+const specOracle = !args.includes('--no-spec-oracle');
 
 function getArg(name) {
   const i = args.indexOf(name);
@@ -285,6 +314,33 @@ async function main() {
     : { skipped: true, reason: 'disabled via --no-cross-platform-gate', checked: 0,
         unexpected: [], expected: [], stale: [], expired: [] };
 
+  // ── Spec oracle (Lane A) ─────────────────────────────────────────────────
+  // Evaluated here (like the gate above: before the report/manifest are
+  // written, enforced after they are on disk). `null` when the fixture
+  // declares no `_expect` — the common case, and the inert one.
+  const oracleExpectations = loadSpecOracleExpectations();
+  const xOracle = oracleExpectations === null
+    ? null
+    : !specOracle
+      // The escape hatch still records that it was used: a manifest that
+      // said nothing would make a deliberately-skipped oracle look like a
+      // fixture with no expectations at all.
+      ? { skipped: true, reason: 'disabled via --no-spec-oracle', checked: 0, violations: [], missing: [] }
+      : evaluateOracle(rows, oracleExpectations, {
+          // Re-read the raw (unpadded) capture from disk: the oracle judges
+          // what the platform actually wrote, not the padded comparison
+          // canvas (whose PAD_SENTINEL magenta would enter the histogram).
+          // Plain PNG.sync.read, NOT loadPng: the colour-space tripwire
+          // already ran over every capture in analyzeComponent, and a
+          // second assert here would push duplicate violations into the
+          // exit-3 listing. A capture that failed that assert has
+          // present:false and is reported as missing, never re-read.
+          getPng: (platform, name) => {
+            const path = captures[platform]?.[name];
+            return path ? PNG.sync.read(readFileSync(path)) : null;
+          },
+        });
+
   const manifest = {
     // NOT bumped to 5 for the `crossPlatformGate` key below, deliberately.
     // The three previous bumps assumed this writer is the last word on the
@@ -325,6 +381,16 @@ async function main() {
     // useful to a reader than an absent key that could mean either "old
     // manifest" or "single-platform run".
     crossPlatformGate: xGate,
+    // Lane A — spec-oracle outcome. Present ONLY when the input fixture
+    // declares `_expect` (evaluated or deliberately disabled). This is the
+    // opposite of crossPlatformGate's always-present rule, on purpose:
+    // inertness for the no-expectation corpus is non-negotiable (the
+    // 327-pair manifest must stay byte-identical), and an absent key
+    // already has an unambiguous meaning here — "this fixture declares no
+    // spec expectations" — unlike the gate, where absence could mean
+    // "single-platform run". Unknown-top-level-key tolerance is the same
+    // documented contract the previous manifest additions rode.
+    ...(xOracle !== null ? { specOracle: xOracle } : {}),
     rows,
   };
   // MANIFEST_OUT lets the TITAN section-runner write the per-section manifest
@@ -403,7 +469,76 @@ async function main() {
       console.error('  tools/visual/cross-platform-expectations.json with a reason and an owner.');
       process.exit(EXIT_UNEXPECTED_DIVERGENCE);
     }
+  }
 
+  // ── Spec-oracle verdict (Lane A) ─────────────────────────────────────────
+  // ORDERING, decided rather than accidental: exit 4 > exit 6 > exit 5.
+  //   · Unexpected divergence (4) stays first — when the runtimes disagree
+  //     AND one is spec-wrong, the disagreement is the richer signal (it
+  //     names which platform diverged from the others) and the established
+  //     one; the oracle violation will still be there on the next run.
+  //   · The oracle (6) outranks stale expectations (5) — a platform
+  //     rendering the wrong colour is a product defect; a ledger line that
+  //     now passes is bookkeeping. Spec wrongness must not queue behind a
+  //     tidy-up chore, or the tidy-up commit "fixes" the build while the
+  //     render is still wrong.
+  // The oracle runs even when the gate self-skipped (single-platform run):
+  // each platform is judged ALONE, so one platform is exactly enough.
+  if (xOracle !== null) {
+    if (xOracle.skipped) {
+      console.log(`· spec oracle skipped — ${xOracle.reason}`);
+    } else {
+      console.log(
+        `· spec oracle: ${xOracle.checked} platform-component check(s) · ` +
+        `${xOracle.violations.length} violation(s)` +
+        ((xOracle.waived?.length ?? 0) > 0 ? ` · ${xOracle.waived.length} waived` : ''),
+      );
+      // Waived violations: excused per-platform divergences (_expect.waive),
+      // the oracle's analogue of the cross-platform ledger. Loud, with the
+      // reason inline, never fatal — the excuse travels with the warning.
+      for (const w of xOracle.waived ?? []) {
+        console.warn(`  ⚠ waived: ${formatViolation(w)}`);
+        console.warn(`      waiver: ${w.waiveReason}`);
+      }
+      // Missing measurements are warnings, not violations: a SKIP_* run
+      // legitimately captures fewer platforms, and the decode/capture-count
+      // guards own those failure classes. But they must be VISIBLE, or the
+      // oracle silently narrows its own coverage.
+      for (const m of xOracle.missing) console.warn(`  ⚠ oracle skipped: ${formatMissing(m)}`);
+
+      if (xOracle.violations.length > 0) {
+        console.error(`✗ ${xOracle.violations.length} spec-oracle violation(s) — a render disagrees with the CSS spec:`);
+        for (const v of xOracle.violations) console.error(`  · ${formatViolation(v)}`);
+        console.error('  The expected values are spec-derived (_expect in the fixture), so the platforms');
+        console.error('  agreeing with EACH OTHER does not excuse this. Fix the platform(s) — or, if the');
+        console.error('  derivation itself is wrong, correct the fixture and cite the spec in _expect.note.');
+        process.exit(EXIT_SPEC_ORACLE_VIOLATION);
+      }
+      // A waiver whose platform now PASSES has outlived the divergence it
+      // excused. Same two-sided rule (and same exit code) as the ledger's
+      // stale entries: the fix is a one-line fixture edit, and leaving the
+      // waiver in place would silently re-excuse the next real regression.
+      if ((xOracle.stale?.length ?? 0) > 0) {
+        console.error(`✗ ${xOracle.stale.length} stale oracle waiver(s) — the platform now passes; delete the waiver:`);
+        for (const st of xOracle.stale) {
+          console.error(`  · ${st.platform} · ${st.component} — waived as: ${st.reason}`);
+        }
+        process.exit(EXIT_STALE_EXPECTATION);
+      }
+      // An oracle that measured NOTHING must not read as green — the same
+      // "check that cannot fail" doctrine behind the zero-comparison guard
+      // in baseline mode. Every expectation unbound (renamed components,
+      // empty run) lands here rather than in a quiet pass.
+      if (xOracle.checked === 0) {
+        console.error('✗ spec oracle: the fixture declares _expect but ZERO checks ran —');
+        console.error('  no expectation matched any captured component (see the ⚠ lines above).');
+        console.error('  A declared oracle that measures nothing must not pass.');
+        process.exit(EXIT_SPEC_ORACLE_VIOLATION);
+      }
+    }
+  }
+
+  if (!xGate.skipped) {
     // Stale entries now FAIL. This was a warning while the harness's A/A
     // noise floor was unmeasured — the fear being that a pair at 0.9499
     // would flap and the failure would be indistinguishable from a real fix.
@@ -617,6 +752,50 @@ function loadCrossPlatformLedger() {
     console.error(`✗ cross-platform-expectations.json is unreadable: ${e.message}`);
     process.exit(2);
   }
+}
+
+/**
+ * Load the input fixture's `_expect` declarations (Lane A spec oracle).
+ *
+ * The comparator only knows the input as a LABEL (--input, threaded through
+ * by test-all.sh), so the original fixture JSON is resolved relative to the
+ * repo root — the same base every fixture path in this repo is written
+ * against. `resolve` passes an absolute label through unchanged, which is
+ * what the e2e tests use.
+ *
+ * Absence is tolerated in both senses: no label (bare comparator run) and a
+ * label that is not a file on disk (TITAN section labels) both mean "no
+ * oracle", returning null. A file that EXISTS but does not parse is an
+ * error (exit 2), for the same reason as the ledger above: silently reading
+ * unparseable JSON as "no expectations" would switch the oracle off at the
+ * exact moment someone fat-fingered the fixture. Authoring errors inside
+ * `_expect` (parseExpectations throws) are also exit 2 — the check's own
+ * setup is broken, which is a different failure from a render being wrong.
+ *
+ * Returns the parsed Map, or null when the fixture declares no `_expect`
+ * anywhere — the common, inert case.
+ */
+function loadSpecOracleExpectations() {
+  if (!inputLabel) return null;
+  const path = resolve(__dirname, '../..', inputLabel);
+  if (!existsSync(path)) return null;
+  let doc;
+  try {
+    doc = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (e) {
+    console.error(`✗ spec oracle: input fixture ${path} is unreadable: ${e.message}`);
+    process.exit(2);
+  }
+  let expectations;
+  try {
+    expectations = parseExpectations(doc);
+  } catch (e) {
+    console.error(`✗ spec oracle: ${e.message}`);
+    console.error('  Fix the _expect block in the fixture — an oracle with a broken declaration');
+    console.error('  must not run at all, or its silence would read as a pass.');
+    process.exit(2);
+  }
+  return expectations.size > 0 ? expectations : null;
 }
 
 async function loadPng(path) {

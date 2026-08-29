@@ -1,9 +1,86 @@
 {
   "_comment": "Reads SwiftUI's .grayscale luminance basis directly off the render. filter: grayscale(100%) on a pure primary outputs that channel's weight x 255, so these four components DISCRIMINATE between the candidate bases rather than merely agreeing with one: Rec.709-gamma predicts 54/182/18/75, Rec.601-gamma predicts 76/150/29/79, and a linear-space sum predicts 127/220/76/82. Measured on iOS: 54/182/18/75 (Rec.709 gamma, exact on all four). SepiaMatrix.swift depends on this fact, so it is pinned here where anyone can re-measure it.",
+  "_expect_comment": "_expect schema v1 (inert to rendering; enforced by the spec oracle): fill.rgb = dominant non-page-background capture colour (ground is rgb(26,26,46)); fill.tol = per-channel absolute tolerance; box = declared CSS px (1 CSS px = 1 capture px everywhere). Derivation, recomputed from filter-effects-1 8.5: grayscale(100%) collapses every channel to 0.2126R + 0.7152G + 0.0722B on gamma-encoded sRGB. Red: 0.2126*255 = 54.213 -> 54. Green: 0.7152*255 = 182.376 -> 182. Blue: 0.0722*255 = 18.411 -> 18. Mixed #804020 = (128,64,32): 27.213 + 45.773 + 2.310 = 75.296 -> 75. tol is 0 on all four DELIBERATELY: floor and round agree on every value (no fractional part near .5), the committed baselines are exact on all three platforms, the A/A noise floor is zero, and the fixture's whole purpose is discriminating bases 20+ steps apart \u2014 any slack would only dilute that.",
   "components": {
-    "GrayBasis_Red":   { "properties": { "width": "120px", "height": "40px", "background-color": "#ff0000", "filter": "grayscale(100%)" } },
-    "GrayBasis_Green": { "properties": { "width": "120px", "height": "40px", "background-color": "#00ff00", "filter": "grayscale(100%)" } },
-    "GrayBasis_Blue":  { "properties": { "width": "120px", "height": "40px", "background-color": "#0000ff", "filter": "grayscale(100%)" } },
-    "GrayBasis_Mixed": { "properties": { "width": "120px", "height": "40px", "background-color": "#804020", "filter": "grayscale(100%)" } }
+    "GrayBasis_Red": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#ff0000",
+        "filter": "grayscale(100%)"
+      },
+      "_expect": {
+        "fill": [
+          54,
+          54,
+          54
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "GrayBasis_Green": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#00ff00",
+        "filter": "grayscale(100%)"
+      },
+      "_expect": {
+        "fill": [
+          182,
+          182,
+          182
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "GrayBasis_Blue": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#0000ff",
+        "filter": "grayscale(100%)"
+      },
+      "_expect": {
+        "fill": [
+          18,
+          18,
+          18
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "GrayBasis_Mixed": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#804020",
+        "filter": "grayscale(100%)"
+      },
+      "_expect": {
+        "fill": [
+          75,
+          75,
+          75
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ]
+      }
+    }
   }
 }

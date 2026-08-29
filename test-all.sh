@@ -1065,6 +1065,9 @@ if [[ "$COMPARE_EXIT" -ne 0 ]]; then
         5) echo -e "  ${Y}✗ comparison failed: stale cross-platform expectation(s)${N}"
            echo -e "     A ledger entry now passes, or names a component that no longer exists."
            echo -e "     Delete the listed lines from ${B}tools/visual/cross-platform-expectations.json${N}." ;;
+        6) echo -e "  ${Y}✗ comparison failed: spec-oracle violation — a render disagrees with the CSS spec${N}"
+           echo -e "     The fixture's ${B}_expect${N} block carries the spec-derived value; the violation lines above"
+           echo -e "     print expected vs measured vs Δ. Platforms agreeing with each other does not excuse this." ;;
         *) echo -e "  ${Y}✗ comparison failed with exit $COMPARE_EXIT${N}" ;;
     esac
     exit "$COMPARE_EXIT"
