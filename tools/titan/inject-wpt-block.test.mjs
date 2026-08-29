@@ -179,17 +179,32 @@ test('computeWptPass: a real failure (low ssim, no/failed fuzzy) is false', () =
 
 test('checkFuzzyMatch → computeWptPass: within-tolerance fuzzy flips a sub-0.95 ssim to pass', () => {
   // Fuzzy shape from extract-fixture.mjs: { maxDifference:{min,max}, totalPixels:{min,max} }.
-  // A diff of 40 mismatched pixels and a max ΔE of 3 fits inside 50px / ΔE 5.
+  // WPT-NATIVE quantities (the 2026-08-29 rewire): the budget is checked
+  // against the RAW differing-pixel count and the MAX PER-CHANNEL delta
+  // (0–255) — not pixelmatch's thresholded count, not CIEDE2000. The old
+  // substitution understated the diff (400 pixels at channel delta 135
+  // read as pixelmatch count 0) and rescued out-of-budget pairs.
   const fuzzy = { maxDifference: { min: 0, max: 5 }, totalPixels: { min: 0, max: 50 } };
-  const metrics = { ssim: 0.82, pixelMismatchedCount: 40, labDeltaE: { max: 3 } };
+  const metrics = { ssim: 0.82, fuzzyDifferingPixels: 40, fuzzyMaxChannelDelta: 3 };
   const fuzzyMatch = checkFuzzyMatch(metrics, fuzzy);
   assert.equal(fuzzyMatch, true);
   assert.equal(computeWptPass(metrics.ssim, fuzzyMatch), true);
 
   // A diff that BUSTS the pixel budget is not a pass (ssim still < 0.95).
-  const overBudget = { ssim: 0.82, pixelMismatchedCount: 999, labDeltaE: { max: 3 } };
+  const overBudget = { ssim: 0.82, fuzzyDifferingPixels: 999, fuzzyMaxChannelDelta: 3 };
   const noMatch = checkFuzzyMatch(overBudget, fuzzy);
   assert.equal(noMatch, false);
+
+  // A diff that busts the PER-CHANNEL budget is not a pass either — the
+  // half the old substitution could never enforce (labDeltaE.max is in
+  // CIEDE2000 units, not channel units).
+  const overDelta = { ssim: 0.82, fuzzyDifferingPixels: 40, fuzzyMaxChannelDelta: 6 };
+  assert.equal(checkFuzzyMatch(overDelta, fuzzy), false);
+
+  // A manifest predating the native quantities FAILS CLOSED: absent
+  // evidence can never rescue a pair into a pass.
+  const legacy = { ssim: 0.82, pixelMismatchedCount: 40, labDeltaE: { max: 3 } };
+  assert.equal(checkFuzzyMatch(legacy, fuzzy), false);
   assert.equal(computeWptPass(overBudget.ssim, noMatch), false);
 });
 

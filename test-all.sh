@@ -282,7 +282,16 @@ log "out/tmpOutput.json written"
 # would produce a two-line "0\n?" value. Count IDs in the IR safely by
 # running grep inside a pipe to `wc -l` and guarding the pipeline so it
 # always emits a numeric string, even for empty / malformed input.
-COMPONENT_COUNT=$(grep -o '"id"' "$OUTPUT_DIR/tmpOutput.json" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+# Expected CAPTURE count — NOT the raw component count. The devices flatten
+# with suppression (children under a context-creating parent render inside
+# the parent only; backdrop-dependent children are suppressed standalone),
+# so the old `grep -c '"id"'` over-counted on every nested fixture: the
+# poll waited for captures the devices will never produce and finished
+# through the stuck-counter branch, 10s late, with a scary "app may have
+# crashed" warning on a perfectly healthy run (composition-test: "32 / 42
+# captured…" every time). expected-captures.mjs mirrors the device rules;
+# the grep stays only as a last-resort fallback if node is unavailable.
+COMPONENT_COUNT=$(node "$TOOLS_VISUAL_DIR/expected-captures.mjs" "$OUTPUT_DIR/tmpOutput.json" 2>/dev/null     || grep -o '"id"' "$OUTPUT_DIR/tmpOutput.json" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
 log "$COMPONENT_COUNT components"
 
 # ── Step 2: Sync IR into every bundle ────────────────────────────────────────

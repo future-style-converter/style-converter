@@ -401,10 +401,34 @@ export function flattenComponents(roots) {
     const kids = c.children;
     if (!kids || kids.length === 0) return;
     if (parentCreatesContext(c)) return;
-    kids.forEach(walk);
+    // Mirror rule (ScreenshotCaptureScreen.kt flattenComponents): a child
+    // that DEPENDS ON ITS BACKDROP is suppressed standalone on every
+    // device — with nothing behind it, backdrop-filter is the identity and
+    // a blend mode composites against noise. This walk omitted the rule,
+    // so on any fixture with such children the feeder's manifest listed
+    // PNGs the devices never write: the poll waited for phantoms AND, the
+    // names being POSITIONAL, every entry after the first suppressed child
+    // was misaligned against the device's numbering.
+    kids.forEach((k) => { if (!dependsOnBackdrop(k)) walk(k); });
   };
   (roots ?? []).forEach(walk);
   return out;
+}
+
+/**
+ * Byte-for-byte mirror of dependsOnBackdrop in ScreenshotCaptureScreen.kt
+ * (and its twins in web CaptureGallery.tsx / iOS ScreenshotCaptureView) —
+ * the other half of the suppression contract the walk above enforces.
+ */
+export function dependsOnBackdrop(component) {
+  for (const p of component?.properties ?? []) {
+    if (p.type === 'BackdropFilter') return true;
+    if (p.type === 'MixBlendMode') {
+      const v = tryStringValue(p.data)?.toLowerCase();
+      if (v != null && v !== 'normal') return true;
+    }
+  }
+  return false;
 }
 
 /**
