@@ -1,0 +1,156 @@
+{
+  "_comment": "overflow:hidden (+ border-radius) clipping TRANSFORMED content. Spec: the overflow clip is applied in the CLIPPER's coordinate space to descendants' final painted geometry \u2014 i.e. AFTER their transforms (css-overflow-3 \u00a73 with css-transforms-1 \u00a76: a transformed descendant is painted, then the ancestor's clip applies); and an element's own transform maps its already-clipped content into the parent space (clip INSIDE the transform, css-transforms-1 \u00a76). ARITHMETIC \u2014 ROT_SquareClip_TranslatedChild: parent 120x80 #f1c40f=(241,196,15), child 100x72 at (10,4) translated +40x -> occupies x[50,150], clipped by parent x<=120 -> visible red 70x72 (5040 px red vs 9600-5040=4560 px yellow ring, red dominant). If the clip were wrongly applied PRE-transform, the pre-clipped child translates out whole -> red bbox [100,72] painting past the parent. ROT_RadiusClip_TranslatedChild: parent 120x80 radius 24, child fills the parent (120x80 at 0,0) translated +30x -> red = translated rect INTERSECT rounded-rect: leftmost x=30 (>r=24 so full height there), rightmost x=120 at the middle rows -> bbox [90,80]; red area ~ roundedRect(9106) - leftStrip(2153) = 6953 > yellow 2153, red dominant. Pre-transform clip instead rounds the child FIRST and translates the rounded shape out whole -> bbox [120,80]. ROT_RadiusClip_NoTransform control: both clip models agree -> red fills the rounded rect, bbox [120,80]. ROT_SelfRotate_ClippedChild: parent 80x60 overflow hidden rotate(45deg), oversized child (120x100 at (-20,-20)) covers it entirely -> correct = clip child to the 80x60 box THEN rotate the whole element: red diamond bbox (80+60)*cos45 = 98.99 -> [99,99]. Clip OUTSIDE the transform (the iOS audit-backlog bug: 'clipped by its un-transformed axis-aligned frame') leaves an axis-aligned 80x60 red rect -> [80,60]. KNOWN RED (iOS, backlog Medium): ROT_SelfRotate_ClippedChild. The two translated-child rows exercise the parent-clips-child path and may also be red on iOS \u2014 possible, not predicted. GEOMETRY NOTE: the uniform margin keeps transform-escaped paint inside the overflow:hidden 390x(layout+32) capture canvas (CaptureGallery.tsx canvasStyle) \u2014 without it a CORRECT renderer clips at the canvas edge and the box expectation reads false-red on every platform. Do not 'simplify' the margin away.",
+  "components": {
+    "ROT_SquareClip_TranslatedChild": {
+      "properties": {
+        "width": "120px",
+        "height": "80px",
+        "background-color": "#f1c40f",
+        "overflow": "hidden",
+        "position": "relative",
+        "margin": "24px"
+      },
+      "children": {
+        "mover": {
+          "properties": {
+            "position": "absolute",
+            "left": "10px",
+            "top": "4px",
+            "width": "100px",
+            "height": "72px",
+            "background-color": "#e74c3c",
+            "transform": "translate(40px, 0px)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          70,
+          72
+        ],
+        "boxTolerance": 1,
+        "note": "clip post-transform: child x[50,150] cut at parent edge 120 -> 70 wide; pre-transform bug reads [100,72]"
+      }
+    },
+    "ROT_RadiusClip_TranslatedChild": {
+      "properties": {
+        "width": "120px",
+        "height": "80px",
+        "background-color": "#f1c40f",
+        "overflow": "hidden",
+        "border-radius": "24px",
+        "position": "relative",
+        "margin": "24px"
+      },
+      "children": {
+        "mover": {
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "0px",
+            "width": "120px",
+            "height": "80px",
+            "background-color": "#e74c3c",
+            "transform": "translate(30px, 0px)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          90,
+          80
+        ],
+        "boxTolerance": 2,
+        "note": "rounded clip post-transform: red x[30,120] (arc apex at mid rows), full height at x in [24,96] -> [90,80]; pre-transform bug carries the rounded shape out -> [120,80]"
+      }
+    },
+    "ROT_RadiusClip_NoTransform": {
+      "properties": {
+        "width": "120px",
+        "height": "80px",
+        "background-color": "#f1c40f",
+        "overflow": "hidden",
+        "border-radius": "24px",
+        "position": "relative",
+        "margin": "24px"
+      },
+      "children": {
+        "mover": {
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "0px",
+            "width": "120px",
+            "height": "80px",
+            "background-color": "#e74c3c"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          80
+        ],
+        "boxTolerance": 2,
+        "note": "control \u2014 no transform, both clip models agree: red fills the rounded rect, bbox = parent box"
+      }
+    },
+    "ROT_SelfRotate_ClippedChild": {
+      "properties": {
+        "width": "80px",
+        "height": "60px",
+        "overflow": "hidden",
+        "transform": "rotate(45deg)",
+        "position": "relative",
+        "margin": "24px"
+      },
+      "children": {
+        "bleed": {
+          "properties": {
+            "position": "absolute",
+            "left": "-20px",
+            "top": "-20px",
+            "width": "120px",
+            "height": "100px",
+            "background-color": "#e74c3c"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          99,
+          99
+        ],
+        "boxTolerance": 6,
+        "note": "css-transforms-1 \u00a76: clip inside the transform \u2014 80x60 clipped content rotates to a (80+60)*cos45=98.99 diamond. RED on iOS today: clip outside the transform reads [80,60] MEASUREMENT NOTE: box is the bbox of fill-band pixels, and a rotated diamond's tips are heavily antialiased, so the strict-colour bbox under-reads the geometric extent by up to ~5px (worst under scaleX(2): web itself measures 108x54 against the geometric 113x57). boxTolerance 6 absorbs that while keeping the bug renders (deltas 25-31px) unmistakable.",
+        "waive": {
+          "iOS": "OPEN BACKLOG BUG (docs/STATUS.md 2026-08-28 audit, Medium): iOS applies the overflow clip OUTSIDE the transform, so the rotated element is clipped by its un-transformed axis-aligned frame and measures the unrotated 80x60 instead of the ~99x99 diamond. This waiver is the red test that the fix turns stale."
+        }
+      }
+    }
+  }
+}

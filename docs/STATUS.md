@@ -1819,13 +1819,15 @@ refutes a finding.
 
 | finding | where |
 |---|---|
+| **NEW (spec-oracle first contact, 2026-08-29): Android clips a transformed child's paint vertically.** The no-parent-transform control (child `rotate(45deg)` alone in a 160×80 parent) measures 55×47 against the 57×57 diamond; nested rows lose 10–30px of height while iOS and web measure the full extent. Clip follows the child's layout slot. Waived-with-reason in `fixtures/combinations/nested-transforms.json` so the fix turns the waivers stale. | `runtimes/compose/…` child transform path |
 | ~~iOS drops translateZ~~ **FIXED** in the same pass — iOS applied no depth response at all under a perspective; see the section above. | `runtimes/swiftui/…/transforms/` |
-| iOS drops **negative** `box-shadow` spread on outset layers — the silhouette is never contracted. Tailwind's entire default shadow scale uses negative spread | `runtimes/swiftui/…/effects/shadow/` |
+| ~~iOS drops negative box-shadow spread~~ **FIXED 2026-08-28** — the spread-path guard was `> 0`; `.inset(by:)` contracts for both signs. iOS now matches web exactly on a 4-case probe (bottom shadow rows 93/101/109/90). | `runtimes/swiftui/…/effects/shadow/` |
+| **NEW: Android over-blurs box-shadow by ~2.4×** — reach 123/131/131/120 rows vs web's 93/101/109/90 on the same probe, clipping at the canvas edge. `MultipleShadowApplier.kt` passes raw CSS blur into `BlurMaskFilter` with no radius→σ conversion (its sibling `ShadowApplier.kt` documents the right one), but the magnitude exceeds that error alone — needs real diagnosis, not a guessed constant. (This row was clobbered by a concurrent doc write on 2026-08-28 and restored from the commit message of `07f75ec9`.) | `runtimes/compose/…/effects/shadow/` |
 | In the skew path the perspective scale is inverted — `d/(d + tz)` instead of `d/(d − tz)` — so `translateZ` toward the viewer *shrinks* the element | `runtimes/compose/…/transforms/` |
 | iOS applies the overflow clip **outside** the transform, so a rotated or skewed element is clipped by its un-transformed axis-aligned frame | `runtimes/swiftui/…/` |
 | `hwb()` / `lch()` / `oklch()` hue still uses a `[\d.]+(?:deg)?` pattern, so angle units, negative hues, `none` and uppercase make the whole declaration fail | converter primitive parsers |
 | `flex: <number>` does not reset `flex-basis` to 0%, and `flex: .5` is misrouted onto `flex-basis` and then dropped | converter shorthand expander |
-| `computeEdgeSsim` is **dead**: it returns exactly 1 for every input, including a hard edge against a flat field. `sharp.convolve` defaults `scale` to the kernel sum, and a Sobel kernel sums to zero, so the convolution divides by zero and yields an all-zero buffer — two of which are perfectly similar. Left pinned rather than half-fixed: `scale: 1` with offset 0 clamps the negative lobe and offset 128 saturates, so the repair needs sharp's convolve semantics established properly. Not gating, but displayed in the report as a signal | `tools/visual/compare-screenshots-metrics.mjs` |
+| ~~`computeEdgeSsim` is dead~~ **FIXED 2026-08-29** — replaced the sharp Sobel (whose `scale` defaulted to the zero kernel-sum: divide-by-zero, all-zero buffer, eternal 1.0) with a pure-JS both-axis Sobel; sharp's documented `scale`/`offset` semantics turned out not to be implemented by libvips at all (measured: scale 8 + offset 128 returned all-255). Acceptance matrix now discriminates: edge-vs-flat 0.82, 1px-shift 0.84, 8px-shift 0.68, identity exactly 1.0, both axes. 0.5 ms per 390×132 image. | `tools/visual/compare-screenshots-metrics.mjs` |
 | `SkepticFontShorthandLh`'s `font: inherit` case asserts only `not.toBe('normal')` — a total drop satisfies it, and a total drop is what the engine does | web runtime tests |
 
 ### Low
@@ -1974,11 +1976,11 @@ fallthrough is what let both bugs live.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 379 |
+| converter (Kotlin) | `./gradlew :converter:test` | 393 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2765 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2769 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1821 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1774 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1833 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

@@ -1,0 +1,21 @@
+{
+  "_comment": "Filter chain ORDER (filter-effects-1 §2: 'The filter functions are applied in the order provided' — the output of each is the input to the next, left to right). Base colour #3498db = (52,152,219) on a 120x40 box. The repo's measured grayscale basis is Rec.709 weights on gamma-encoded sRGB (fixtures/properties/effects/filter-grayscale-basis.json: 54/182/18): gray(c) = 0.2126R + 0.7152G + 0.0722B. sepia(1) matrix (filter-effects-1 §8.5): R'=.393R+.769G+.189B; G'=.349R+.686G+.168B; B'=.272R+.534G+.131B. ARITHMETIC — gray(52,152,219) = 11.055+108.710+15.812 = 135.58 -> (135.58,135.58,135.58). CASE A 'grayscale(1) sepia(1)' (gray first): sepia on the grey: R'=135.58*(.393+.769+.189)=135.58*1.351=183.2; G'=135.58*1.203=163.1; B'=135.58*0.937=127.0 -> (183,163,127); with 8-bit inter-stage quantisation (gray->136): (183.7,163.6,127.4) -> at most 1 off, inside tolerance. CASE B 'sepia(1) grayscale(1)' (sepia first): sepia(52,152,219) = (178.7,159.2,124.0) (the value STATUS pins for sepia 100%); gray of that = 0.2126*178.7+0.7152*159.2+0.0722*124.0 = 38.00+113.87+8.95 = 160.8 -> (161,161,161). The two orders differ by (22,2,-34) — far beyond tolerance 2 — and each single-stage control equals what a stage-dropping runtime would produce: apply-first-only gives (136,136,136)/(179,159,124), apply-last-only gives (179,159,124)/(136,136,136), all distinct from both correct answers by >=3 in some channel. box asserted only on the non-grey fills: the two grey results ((161,161,161) and (136,136,136)) sit on the greyscale axis where harness-label antialiasing pixels could pollute a bbox, so those assert fill only. No predicted red — this closes the order hole that no fixture exercised; sepia itself was fixed on iOS 2026-08-28 and stays pinned by filter-sepia-amounts.json.",
+  "components": {
+    "FCO_GrayThenSepia": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "grayscale(1) sepia(1)" },
+      "_expect": { "fill": [183, 163, 127], "fillTolerance": 2, "box": [120, 40], "boxTolerance": 1, "note": "filter-effects-1 §2: gray first (135.58 grey), then sepia rows sum x1.351/1.203/0.937" }
+    },
+    "FCO_SepiaThenGray": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "sepia(1) grayscale(1)" },
+      "_expect": { "fill": [161, 161, 161], "fillTolerance": 2, "note": "filter-effects-1 §2: sepia first -> (178.7,159.2,124.0), then Rec.709-gamma luma = 160.8; grey fill, so box deliberately unasserted (label-AA risk)" }
+    },
+    "FCO_SepiaOnly_Control": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "sepia(1)" },
+      "_expect": { "fill": [179, 159, 124], "fillTolerance": 2, "box": [120, 40], "boxTolerance": 1, "note": "filter-effects-1 §8.5 sepia on (52,152,219) = (178.7,159.2,124.0) — what a runtime that drops the OTHER stage of either chain renders" }
+    },
+    "FCO_GrayOnly_Control": {
+      "properties": { "width": "120px", "height": "40px", "background-color": "#3498db", "filter": "grayscale(1)" },
+      "_expect": { "fill": [136, 136, 136], "fillTolerance": 2, "note": "Rec.709-gamma luma of (52,152,219) = 135.58 — the single-stage control; grey fill, box unasserted (label-AA risk)" }
+    }
+  }
+}

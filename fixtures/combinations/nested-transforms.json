@@ -1,0 +1,153 @@
+{
+  "_comment": "Parent transform x child transform: a child's transform operates in the PARENT's transformed coordinate system (css-transforms-1 \u00a76 \u2014 transforms nest via matrix multiplication, parent matrix on the left), so parentFn on an element and childFn on its child must render exactly like the single list 'parentFn childFn'. Parents here carry NO background (only the red child paints, so fill/dominance is unambiguous) and children are centered so pivot arithmetic stays clean. ARITHMETIC (child 40x40 #e74c3c=(231,76,60); rotated bbox of w x h is (w|cos|+h|sin|) x (w|sin|+h|cos|)) \u2014 NT_Control_ChildRotate: child rotate(45deg) alone -> 40*sqrt(2) = 56.57 -> [57,57]. NT_ParentScaleX_ChildRotate: child rotates first IN THE PARENT FRAME (56.57 diamond), parent scaleX(2) then doubles screen width -> 113.14 x 56.57 -> [113,57]; a runtime that flattens the hierarchy into per-kind scalars (the Compose transform-LIST failure mode, applied cross-node) would render the fixed-order [85,85] instead. NT_ParentRotate_ChildScaleX: child scaleX(2) in the parent frame -> 80x40, parent rotate(45deg) then turns it -> (80+40)*cos45 = 84.85 square -> [85,85]; the flattened wrong answer is [113,57]. NT_ParentRotate90_ChildTranslate: parent rotate(90deg) maps the child's +x axis onto screen +y (positive CSS angles are clockwise with y-down), so translate(30px,0) moves the child 30px DOWN on screen; bbox stays [40,40] \u2014 v1 _expect cannot see the position, recorded for the v2 bbox field; the component stays for the pairwise gates and the ledger. Layout: parent 160x80, child at (60,20) = centered; content bboxes (<=113 x <=85) stay inside/near the layout box so no capture-canvas clipping is in play. No predicted red \u2014 nesting goes through separate per-node layers on all three runtimes and is expected green; the fixture exists because NOTHING exercised it, which is exactly how the transform-list hole survived.",
+  "components": {
+    "NT_Control_ChildRotate": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "position": "relative"
+      },
+      "children": {
+        "box": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "transform": "rotate(45deg)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          57,
+          57
+        ],
+        "boxTolerance": 6,
+        "note": "no parent transform: 40x40 rotated 45deg -> 56.57 square diamond MEASUREMENT NOTE: box is the bbox of fill-band pixels, and a rotated diamond's tips are heavily antialiased, so the strict-colour bbox under-reads the geometric extent by up to ~5px (worst under scaleX(2): web itself measures 108x54 against the geometric 113x57). boxTolerance 6 absorbs that while keeping the bug renders (deltas 25-31px) unmistakable.",
+        "waive": {
+          "Android": "NEW OPEN BUG, found by this fixture's first device run (2026-08-29): Android clips a transformed child's paint vertically \u2014 even the no-parent-transform control (child rotate(45deg) alone) measures 55x47 against the 57x57 diamond, and the nested rows lose 10-30px of height (88x47 vs 113x57; 82x55 vs 85x85) while iOS and web measure the full extent. The clip follows the child's LAYOUT slot, so the hypothesis is a clip-to-bounds somewhere in the Compose child wrapper or transform draw path; not diagnosed yet. Recorded in docs/STATUS.md backlog. This waiver is the red test that the fix turns stale."
+        }
+      }
+    },
+    "NT_ParentScaleX_ChildRotate": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "transform": "scaleX(2)",
+        "position": "relative"
+      },
+      "children": {
+        "box": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "transform": "rotate(45deg)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          113,
+          57
+        ],
+        "boxTolerance": 6,
+        "note": "css-transforms-1 \u00a76: child rotates in the parent frame (56.57 diamond), parent scaleX(2) doubles its screen width -> 113.14x56.57; hierarchy-flattening reads [85,85] MEASUREMENT NOTE: box is the bbox of fill-band pixels, and a rotated diamond's tips are heavily antialiased, so the strict-colour bbox under-reads the geometric extent by up to ~5px (worst under scaleX(2): web itself measures 108x54 against the geometric 113x57). boxTolerance 6 absorbs that while keeping the bug renders (deltas 25-31px) unmistakable.",
+        "waive": {
+          "Android": "NEW OPEN BUG, found by this fixture's first device run (2026-08-29): Android clips a transformed child's paint vertically \u2014 even the no-parent-transform control (child rotate(45deg) alone) measures 55x47 against the 57x57 diamond, and the nested rows lose 10-30px of height (88x47 vs 113x57; 82x55 vs 85x85) while iOS and web measure the full extent. The clip follows the child's LAYOUT slot, so the hypothesis is a clip-to-bounds somewhere in the Compose child wrapper or transform draw path; not diagnosed yet. Recorded in docs/STATUS.md backlog. This waiver is the red test that the fix turns stale."
+        }
+      }
+    },
+    "NT_ParentRotate_ChildScaleX": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "transform": "rotate(45deg)",
+        "position": "relative"
+      },
+      "children": {
+        "box": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "transform": "scaleX(2)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          85,
+          85
+        ],
+        "boxTolerance": 6,
+        "note": "child scaleX first (80x40 in parent frame), parent rotate(45deg) after -> (80+40)*cos45 = 84.85 square; flattening reads [113,57] MEASUREMENT NOTE: box is the bbox of fill-band pixels, and a rotated diamond's tips are heavily antialiased, so the strict-colour bbox under-reads the geometric extent by up to ~5px (worst under scaleX(2): web itself measures 108x54 against the geometric 113x57). boxTolerance 6 absorbs that while keeping the bug renders (deltas 25-31px) unmistakable.",
+        "waive": {
+          "Android": "NEW OPEN BUG, found by this fixture's first device run (2026-08-29): Android clips a transformed child's paint vertically \u2014 even the no-parent-transform control (child rotate(45deg) alone) measures 55x47 against the 57x57 diamond, and the nested rows lose 10-30px of height (88x47 vs 113x57; 82x55 vs 85x85) while iOS and web measure the full extent. The clip follows the child's LAYOUT slot, so the hypothesis is a clip-to-bounds somewhere in the Compose child wrapper or transform draw path; not diagnosed yet. Recorded in docs/STATUS.md backlog. This waiver is the red test that the fix turns stale."
+        }
+      }
+    },
+    "NT_ParentRotate90_ChildTranslate": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "transform": "rotate(90deg)",
+        "position": "relative"
+      },
+      "children": {
+        "box": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "transform": "translate(30px, 0px)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          40,
+          40
+        ],
+        "boxTolerance": 2,
+        "note": "child +30x in the parent's 90deg-rotated frame = 30px DOWN on screen; size-invariant, so the divergence is position-only \u2014 needs the v2 bbox field"
+      }
+    }
+  }
+}

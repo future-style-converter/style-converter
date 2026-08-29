@@ -1,0 +1,89 @@
+{
+  "_comment": "Hard gradient stops at NON-midpoint positions (css-images-3 \u00a73.4.1: two stops at the same or crossing positions produce an abrupt transition; between stops at p1 < p2 the colour interpolates, so equal-position stops leave ZERO interpolation region). Every component degenerates its gradient to two solid regions so the v1 _expect fill/box model applies: the fill is the DOMINANT (larger) half and its bbox width reads the stop position directly off the pixels \u2014 an off-by-N stop-position resolution or a smeared hard stop (a runtime interpolating across some span, e.g. through a dithering ramp or a wrong premultiplied blend at the seam) shrinks or shifts the pure-fill bbox. Boxes are 160x40. ARITHMETIC \u2014 GSI_HardStop_RB: linear-gradient(90deg, #ff0000 60%, #0000ff 60%): red spans x[0,96) (0.60*160 = 96), blue x[96,160): red 3840 px > blue 2560 px -> fill red, box [96,40]. GSI_HardStop_Hue: #ff0000 55% -> #ffff00 55%: 0.55*160 = 88 -> red box [88,40]; red->yellow crosses a hue boundary, so a runtime wrongly synthesising an interpolation region (HSL/oklab smear) erodes the pure-red bbox at the seam. GSI_TwoSegment: 3 stops '#ff0000 0%, #ff0000 65%, #00ff00 65%' (explicit two-segment encoding of the same geometry \u2014 exercises stop-list normalisation rather than the 2-stop shortcut): 0.65*160 = 104 -> red box [104,40]. GSI_Control_Solid: solid red, box [160,40] \u2014 pins the canvas/AA behaviour of an unclipped 160-wide box so gradient rows are read against a measured control, not an assumption. boxTolerance 2 allows one AA column at the seam (a half-pixel seam position renders one blended column, excluded from the pure-fill bbox). Interpolation-SPACE questions (sRGB vs oklab midpoints) are deliberately out of scope for v1 \u2014 no single fill exists mid-ramp; that needs the v2 probe-points field (README). No predicted red.",
+  "components": {
+    "GSI_HardStop_RB": {
+      "properties": {
+        "width": "160px",
+        "height": "40px",
+        "background-image": "linear-gradient(90deg, #ff0000 60%, #0000ff 60%)"
+      },
+      "_expect": {
+        "fill": [
+          255,
+          0,
+          0
+        ],
+        "fillTolerance": 2,
+        "box": [
+          96,
+          40
+        ],
+        "boxTolerance": 2,
+        "note": "css-images-3 \u00a73.4.1 equal-position stops: hard seam at 0.60*160 = 96px; dominant red half asserted"
+      }
+    },
+    "GSI_HardStop_Hue": {
+      "properties": {
+        "width": "160px",
+        "height": "40px",
+        "background-image": "linear-gradient(90deg, #ff0000 55%, #ffff00 55%)"
+      },
+      "_expect": {
+        "fill": [
+          255,
+          0,
+          0
+        ],
+        "fillTolerance": 2,
+        "box": [
+          88,
+          40
+        ],
+        "boxTolerance": 2,
+        "note": "hard stop across a hue boundary at 0.55*160 = 88px \u2014 a synthesised interpolation span erodes the pure-red bbox"
+      }
+    },
+    "GSI_TwoSegment": {
+      "properties": {
+        "width": "160px",
+        "height": "40px",
+        "background-image": "linear-gradient(90deg, #ff0000 0%, #ff0000 65%, #00ff00 65%)"
+      },
+      "_expect": {
+        "fill": [
+          255,
+          0,
+          0
+        ],
+        "fillTolerance": 2,
+        "box": [
+          104,
+          40
+        ],
+        "boxTolerance": 2,
+        "note": "4-stop normalisation path, same hard-seam geometry: 0.65*160 = 104px"
+      }
+    },
+    "GSI_Control_Solid": {
+      "properties": {
+        "width": "160px",
+        "height": "40px",
+        "background-color": "#ff0000"
+      },
+      "_expect": {
+        "fill": [
+          255,
+          0,
+          0
+        ],
+        "fillTolerance": 2,
+        "box": [
+          160,
+          40
+        ],
+        "boxTolerance": 1,
+        "note": "solid control \u2014 pins full-width bbox reading so the gradient rows are judged against a measured canvas behaviour"
+      }
+    }
+  }
+}

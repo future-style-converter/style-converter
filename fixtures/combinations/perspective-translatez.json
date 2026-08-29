@@ -1,0 +1,120 @@
+{
+  "_comment": "perspective() x translateZ() \u2014 the regression pin for the 2026-08-28 both-natives fix (docs/STATUS.md 'perspective + translateZ was wrong on both natives', commit 278d23a1). css-transforms-2 \u00a73: under perspective(P), a point at depth z projects with scale P/(P-z), so 'perspective(P) translateZ(z)' on a flat element is a PURE UNIFORM SCALE of P/(P-z) about the transform origin \u2014 arithmetic-clean, so it reads straight off the bbox. This combination had ZERO fixture coverage when iOS shipped no depth response at all (60x20 at every z) and Compose shipped the first-order Taylor expansion 1+z/P (0.5x rendered as 0.1x via a clamp at z=-P); a hole this fixture permanently closes. Base box 60x20 #2ecc71=(46,204,113) for the growth rows; the shrink row uses a 120x40 base so its result (1200 px of pure fill) still dominates the harness name label. ARITHMETIC \u2014 PTZ_Z0_Control: scale 500/(500-0) = 1.0 -> [60,20] (also pins that perspective alone is the identity on a flat, unrotated element). PTZ_Z100: 500/400 = 1.25 -> 60*1.25 x 20*1.25 = [75,25]. PTZ_Z166: 500/334 = 1.4970 -> 89.82 x 29.94 -> [90,30] (the row where the Taylor expansion 1+166/500 = 1.332 visibly diverges: it would read [80,27]). PTZ_Z250: 500/250 = 2.0 -> [120,40] (Taylor reads 1.5 -> [90,30]). PTZ_ZNeg500: 500/1000 = 0.5 on the 120x40 base -> [60,20] (the clearest tell: the expansion evaluates to 1+(-500/500) = 0 and was only rescued by a 0.1 clamp -> [12,4]; a no-depth-response runtime reads [120,40]). All five rows were byte-identical across the three platforms after the fix \u2014 this fixture must stay green, and any future red here is a regression, not a new finding. GEOMETRY NOTE: the uniform margin keeps transform-escaped paint inside the overflow:hidden 390x(layout+32) capture canvas (CaptureGallery.tsx canvasStyle) \u2014 without it a CORRECT renderer clips at the canvas edge and the box expectation reads false-red on every platform. Do not 'simplify' the margin away.",
+  "components": {
+    "PTZ_Z0_Control": {
+      "properties": {
+        "width": "60px",
+        "height": "20px",
+        "background-color": "#2ecc71",
+        "transform": "perspective(500px) translateZ(0px)",
+        "margin": "32px"
+      },
+      "_expect": {
+        "fill": [
+          46,
+          204,
+          113
+        ],
+        "fillTolerance": 2,
+        "box": [
+          60,
+          20
+        ],
+        "boxTolerance": 2,
+        "note": "css-transforms-2 \u00a73: scale 500/(500-0) = 1 \u2014 perspective alone is the identity on a flat element"
+      }
+    },
+    "PTZ_Z100": {
+      "properties": {
+        "width": "60px",
+        "height": "20px",
+        "background-color": "#2ecc71",
+        "transform": "perspective(500px) translateZ(100px)",
+        "margin": "32px"
+      },
+      "_expect": {
+        "fill": [
+          46,
+          204,
+          113
+        ],
+        "fillTolerance": 2,
+        "box": [
+          75,
+          25
+        ],
+        "boxTolerance": 2,
+        "note": "scale 500/400 = 1.25 -> 75x25 (STATUS measured 74x24 pure-fill after edge AA \u2014 inside tolerance)"
+      }
+    },
+    "PTZ_Z166": {
+      "properties": {
+        "width": "60px",
+        "height": "20px",
+        "background-color": "#2ecc71",
+        "transform": "perspective(500px) translateZ(166px)",
+        "margin": "32px"
+      },
+      "_expect": {
+        "fill": [
+          46,
+          204,
+          113
+        ],
+        "fillTolerance": 2,
+        "box": [
+          90,
+          30
+        ],
+        "boxTolerance": 2,
+        "note": "scale 500/334 = 1.497 -> 89.8x29.9; the Taylor-expansion bug (1.332) reads [80,27]"
+      }
+    },
+    "PTZ_Z250": {
+      "properties": {
+        "width": "60px",
+        "height": "20px",
+        "background-color": "#2ecc71",
+        "transform": "perspective(500px) translateZ(250px)",
+        "margin": "32px"
+      },
+      "_expect": {
+        "fill": [
+          46,
+          204,
+          113
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ],
+        "boxTolerance": 2,
+        "note": "scale 500/250 = 2.0 -> 120x40; Taylor reads 1.5 -> [90,30], no-depth reads [60,20]"
+      }
+    },
+    "PTZ_ZNeg500": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#2ecc71",
+        "transform": "perspective(500px) translateZ(-500px)",
+        "margin": "32px"
+      },
+      "_expect": {
+        "fill": [
+          46,
+          204,
+          113
+        ],
+        "fillTolerance": 2,
+        "box": [
+          60,
+          20
+        ],
+        "boxTolerance": 2,
+        "note": "scale 500/1000 = 0.5 on a 120x40 base -> 60x20; the clamped-Taylor bug read a TENTH (12x4), no-depth reads [120,40]"
+      }
+    }
+  }
+}
