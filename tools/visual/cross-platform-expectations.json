@@ -1,0 +1,477 @@
+{
+  "version": 1,
+  "note": "Known cross-platform divergences on fixtures/visual-test.json, seeded from a live three-platform run (327 pairs, 23 failing at SSIM<0.95 || dpx>2%). A LEDGER, not a tolerance: each line names one divergence, why it is believed benign or why it is a bug, who owns it, and when it must be re-reviewed. Deleting a line is how a fix gets recorded. READ THIS: 6 of these entries are REAL SIZE BUGS surfaced for the first time by the magenta pad sentinel - before that fix a short render was padded with the capture background and scored a perfect diff. They carry a short expiry because they need fixing, not excusing. Of the remainder, almost all fail on SSIM alone with dpx well under the 2% budget and deltaE95 = 0.00 - the colours are exact and SSIM is scoring curve/transform anti-aliasing. That is evidence about the METRIC, not the runtimes, and most of those lines should evaporate when the gate moves off SSIM. ALSO measured on composition-test.json (2026-08-26): pixelmatch at threshold 0.25 reported pixelMismatchedPct 0.00 for 037_Nested_OpacityGroup while 36.63% of pixels differ by up to 80 per channel. Its YIQ budget is 0.25*35215 = 8803.8, and a PURE LIGHTNESS shift must exceed 132/255 to be counted \u2014 so black (0,0,0) vs mid-grey (130,130,130) is reported as identical. The 2% pixel gate therefore cannot fire on any uniform lightness error smaller than half the dynamic range. Only SSIM (0.9355) and deltaE95 (20.94) caught this row. KEYS ARE INDEX-FREE: entries store the component NAME without the capture's {NNN}_ prefix, because that prefix is a position in the flattened capture list and renumbers whenever the corpus changes.",
+  "seededFrom": {
+    "run": "2026-08-26T14:52:07.252Z",
+    "inputLabel": "fixtures/visual-test.json",
+    "ssimThreshold": 0.95,
+    "pixelThreshold": 2.0,
+    "totalPairs": 327
+  },
+  "expectations": [
+    {
+      "fixture": "composition-test.json",
+      "component": "Backdrop_Blur_OverStripes.png",
+      "pair": "Android-web",
+      "reason": "NOT a runtime gap \u2014 CORRECTED 2026-08-28. backdrop-filter IS implemented on both natives (docs/STATUS.md wave 26: a two-pass controlled-canvas model, validated on iOS against browser refs at 0.966 / 0.978 / 0.999, edge model later corrected against Chrome). What the control measured is a CAPTURE-MODE gate, not a missing applier: the two-pass path arms only on the COMPOSED capture path and is deliberately disarmed on the per-component path this fixture runs through. Android: `wantsBackdropPass = composedMode && documentDeclaresBackdropFilter(composed)` (ScreenshotCaptureScreen.kt:309). iOS: ScreenshotCaptureView states it outright \u2014 'Lane BF-I deliberately does NOT two-pass here... the WPT paths below, where a backdrop element actually has neighbours, are where the two-pass runs.' Both disarm to keep the committed 327-pair baselines byte-identical. THE REAL GAP: composition-test.json was authored precisely so backdrop-filter has a non-uniform backdrop, and test-all.sh has no way to arm composed capture, so the ordinary fixture pipeline cannot exercise the property on either native. That is a harness gap to close, not a runtime bug to fix. NOTE this correction was made from source comments and the STATUS wave-26 record; I did not re-run composed mode to confirm it end to end.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.8718,
+        "pixelPct": 0.328,
+        "labDeltaEP95": 20.129,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "Backdrop_Blur_OverStripes.png",
+      "pair": "iOS-web",
+      "reason": "NOT a runtime gap \u2014 CORRECTED 2026-08-28. backdrop-filter IS implemented on both natives (docs/STATUS.md wave 26: a two-pass controlled-canvas model, validated on iOS against browser refs at 0.966 / 0.978 / 0.999, edge model later corrected against Chrome). What the control measured is a CAPTURE-MODE gate, not a missing applier: the two-pass path arms only on the COMPOSED capture path and is deliberately disarmed on the per-component path this fixture runs through. Android: `wantsBackdropPass = composedMode && documentDeclaresBackdropFilter(composed)` (ScreenshotCaptureScreen.kt:309). iOS: ScreenshotCaptureView states it outright \u2014 'Lane BF-I deliberately does NOT two-pass here... the WPT paths below, where a backdrop element actually has neighbours, are where the two-pass runs.' Both disarm to keep the committed 327-pair baselines byte-identical. THE REAL GAP: composition-test.json was authored precisely so backdrop-filter has a non-uniform backdrop, and test-all.sh has no way to arm composed capture, so the ordinary fixture pipeline cannot exercise the property on either native. That is a harness gap to close, not a runtime bug to fix. NOTE this correction was made from source comments and the STATUS wave-26 record; I did not re-run composed mode to confirm it end to end.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.8718,
+        "pixelPct": 0.336,
+        "labDeltaEP95": 20.128,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "BorderRadius_Uniform.png",
+      "pair": "iOS-Android",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9406,
+        "pixelPct": 0.873,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "BorderRadius_Uniform.png",
+      "pair": "iOS-web",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9416,
+        "pixelPct": 0.873,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "BorderRadius_Pill.png",
+      "pair": "iOS-Android",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9404,
+        "pixelPct": 0.802,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "BorderRadius_Pill.png",
+      "pair": "iOS-web",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9411,
+        "pixelPct": 0.802,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "BorderRadius_Mixed.png",
+      "pair": "iOS-Android",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9464,
+        "pixelPct": 0.783,
+        "labDeltaEP95": 0,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "BorderRadius_Mixed.png",
+      "pair": "iOS-web",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9465,
+        "pixelPct": 0.783,
+        "labDeltaEP95": 0,
+        "divergence": "mixed"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Transform_Combined.png",
+      "pair": "Android-web",
+      "reason": "Transform rasterisation: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.8971,
+        "pixelPct": 2.258,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Button_Outline.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG (Android), and narrower than first recorded \u2014 it is the PLACEHOLDER FLOOR, not the box model. Android renders this component 2x(border-width) shorter than iOS/web: Button_Outline and Edge_DeepNesting (border 2px) are 4px short, Input_Field (border 1px) is 2px short, and Button_Primary / Border_Solid / Border_Dashed / Border_Mixed \u2014 borders without a floor-driven height \u2014 are all exact. Two measurements narrow it: (a) with real text pinned (fixtures/visual-test-controls.json) removing the border changes the Android box by EXACTLY 2x its width (Input_Field 54->52 at 1px, Edge_DeepNesting 52->48 at 2px), so the border box is computed correctly when content determines the size; (b) Input_Field's EXPLICIT width:200px is exact on all three while only its unconstrained, floor-driven height is short. So the defect is in StyleApplier.placeholderFloorMinSize / borderBoxFloorMins, which converts web's border-box minHeight:30px into a Compose content-box defaultMinSize by subtracting padding + band. That floor exists ONLY because visual-test.json has no text; it is harness scaffolding matching web's scaffolding, not product behaviour. Note the area's history: the same arithmetic caused +2px regressions in wave-1 (Input_Field/Glass_Effect) and wave-4 (every Decorated row), so change it with a measured before/after, not by reasoning.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9138,
+        "pixelPct": 7.597,
+        "labDeltaEP95": 49.707,
+        "divergence": "no-content",
+        "sizes": {
+          "iOS": "390x62",
+          "Android": "390x58",
+          "web": "390x62"
+        }
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Button_Outline.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (Android), and narrower than first recorded \u2014 it is the PLACEHOLDER FLOOR, not the box model. Android renders this component 2x(border-width) shorter than iOS/web: Button_Outline and Edge_DeepNesting (border 2px) are 4px short, Input_Field (border 1px) is 2px short, and Button_Primary / Border_Solid / Border_Dashed / Border_Mixed \u2014 borders without a floor-driven height \u2014 are all exact. Two measurements narrow it: (a) with real text pinned (fixtures/visual-test-controls.json) removing the border changes the Android box by EXACTLY 2x its width (Input_Field 54->52 at 1px, Edge_DeepNesting 52->48 at 2px), so the border box is computed correctly when content determines the size; (b) Input_Field's EXPLICIT width:200px is exact on all three while only its unconstrained, floor-driven height is short. So the defect is in StyleApplier.placeholderFloorMinSize / borderBoxFloorMins, which converts web's border-box minHeight:30px into a Compose content-box defaultMinSize by subtracting padding + band. That floor exists ONLY because visual-test.json has no text; it is harness scaffolding matching web's scaffolding, not product behaviour. Note the area's history: the same arithmetic caused +2px regressions in wave-1 (Input_Field/Glass_Effect) and wave-4 (every Decorated row), so change it with a measured before/after, not by reasoning.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.8671,
+        "pixelPct": 8.184,
+        "labDeltaEP95": 49.707,
+        "divergence": "no-content",
+        "sizes": {
+          "iOS": "390x62",
+          "Android": "390x58",
+          "web": "390x62"
+        }
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Input_Field.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG (Android), and narrower than first recorded \u2014 it is the PLACEHOLDER FLOOR, not the box model. Android renders this component 2x(border-width) shorter than iOS/web: Button_Outline and Edge_DeepNesting (border 2px) are 4px short, Input_Field (border 1px) is 2px short, and Button_Primary / Border_Solid / Border_Dashed / Border_Mixed \u2014 borders without a floor-driven height \u2014 are all exact. Two measurements narrow it: (a) with real text pinned (fixtures/visual-test-controls.json) removing the border changes the Android box by EXACTLY 2x its width (Input_Field 54->52 at 1px, Edge_DeepNesting 52->48 at 2px), so the border box is computed correctly when content determines the size; (b) Input_Field's EXPLICIT width:200px is exact on all three while only its unconstrained, floor-driven height is short. So the defect is in StyleApplier.placeholderFloorMinSize / borderBoxFloorMins, which converts web's border-box minHeight:30px into a Compose content-box defaultMinSize by subtracting padding + band. That floor exists ONLY because visual-test.json has no text; it is harness scaffolding matching web's scaffolding, not product behaviour. Note the area's history: the same arithmetic caused +2px regressions in wave-1 (Input_Field/Glass_Effect) and wave-4 (every Decorated row), so change it with a measured before/after, not by reasoning.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.899,
+        "pixelPct": 4.888,
+        "labDeltaEP95": 13.955,
+        "divergence": "mixed",
+        "sizes": {
+          "iOS": "390x62",
+          "Android": "390x60",
+          "web": "390x62"
+        }
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Input_Field.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (Android), and narrower than first recorded \u2014 it is the PLACEHOLDER FLOOR, not the box model. Android renders this component 2x(border-width) shorter than iOS/web: Button_Outline and Edge_DeepNesting (border 2px) are 4px short, Input_Field (border 1px) is 2px short, and Button_Primary / Border_Solid / Border_Dashed / Border_Mixed \u2014 borders without a floor-driven height \u2014 are all exact. Two measurements narrow it: (a) with real text pinned (fixtures/visual-test-controls.json) removing the border changes the Android box by EXACTLY 2x its width (Input_Field 54->52 at 1px, Edge_DeepNesting 52->48 at 2px), so the border box is computed correctly when content determines the size; (b) Input_Field's EXPLICIT width:200px is exact on all three while only its unconstrained, floor-driven height is short. So the defect is in StyleApplier.placeholderFloorMinSize / borderBoxFloorMins, which converts web's border-box minHeight:30px into a Compose content-box defaultMinSize by subtracting padding + band. That floor exists ONLY because visual-test.json has no text; it is harness scaffolding matching web's scaffolding, not product behaviour. Note the area's history: the same arithmetic caused +2px regressions in wave-1 (Input_Field/Glass_Effect) and wave-4 (every Decorated row), so change it with a measured before/after, not by reasoning.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.8987,
+        "pixelPct": 4.888,
+        "labDeltaEP95": 13.955,
+        "divergence": "mixed",
+        "sizes": {
+          "iOS": "390x62",
+          "Android": "390x60",
+          "web": "390x62"
+        }
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_VeryLargeRadius.png",
+      "pair": "iOS-Android",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9268,
+        "pixelPct": 1.042,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_VeryLargeRadius.png",
+      "pair": "iOS-web",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9275,
+        "pixelPct": 1.042,
+        "labDeltaEP95": 0,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_DeepNesting.png",
+      "pair": "Android-web",
+      "reason": "REAL BUG (Android), and narrower than first recorded \u2014 it is the PLACEHOLDER FLOOR, not the box model. Android renders this component 2x(border-width) shorter than iOS/web: Button_Outline and Edge_DeepNesting (border 2px) are 4px short, Input_Field (border 1px) is 2px short, and Button_Primary / Border_Solid / Border_Dashed / Border_Mixed \u2014 borders without a floor-driven height \u2014 are all exact. Two measurements narrow it: (a) with real text pinned (fixtures/visual-test-controls.json) removing the border changes the Android box by EXACTLY 2x its width (Input_Field 54->52 at 1px, Edge_DeepNesting 52->48 at 2px), so the border box is computed correctly when content determines the size; (b) Input_Field's EXPLICIT width:200px is exact on all three while only its unconstrained, floor-driven height is short. So the defect is in StyleApplier.placeholderFloorMinSize / borderBoxFloorMins, which converts web's border-box minHeight:30px into a Compose content-box defaultMinSize by subtracting padding + band. That floor exists ONLY because visual-test.json has no text; it is harness scaffolding matching web's scaffolding, not product behaviour. Note the area's history: the same arithmetic caused +2px regressions in wave-1 (Input_Field/Glass_Effect) and wave-4 (every Decorated row), so change it with a measured before/after, not by reasoning.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9137,
+        "pixelPct": 7.601,
+        "labDeltaEP95": 49.707,
+        "divergence": "color-drift",
+        "sizes": {
+          "iOS": "390x62",
+          "Android": "390x58",
+          "web": "390x62"
+        }
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_DeepNesting.png",
+      "pair": "iOS-Android",
+      "reason": "REAL BUG (Android), and narrower than first recorded \u2014 it is the PLACEHOLDER FLOOR, not the box model. Android renders this component 2x(border-width) shorter than iOS/web: Button_Outline and Edge_DeepNesting (border 2px) are 4px short, Input_Field (border 1px) is 2px short, and Button_Primary / Border_Solid / Border_Dashed / Border_Mixed \u2014 borders without a floor-driven height \u2014 are all exact. Two measurements narrow it: (a) with real text pinned (fixtures/visual-test-controls.json) removing the border changes the Android box by EXACTLY 2x its width (Input_Field 54->52 at 1px, Edge_DeepNesting 52->48 at 2px), so the border box is computed correctly when content determines the size; (b) Input_Field's EXPLICIT width:200px is exact on all three while only its unconstrained, floor-driven height is short. So the defect is in StyleApplier.placeholderFloorMinSize / borderBoxFloorMins, which converts web's border-box minHeight:30px into a Compose content-box defaultMinSize by subtracting padding + band. That floor exists ONLY because visual-test.json has no text; it is harness scaffolding matching web's scaffolding, not product behaviour. Note the area's history: the same arithmetic caused +2px regressions in wave-1 (Input_Field/Glass_Effect) and wave-4 (every Decorated row), so change it with a measured before/after, not by reasoning.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.8644,
+        "pixelPct": 8.325,
+        "labDeltaEP95": 49.707,
+        "divergence": "mixed",
+        "sizes": {
+          "iOS": "390x62",
+          "Android": "390x58",
+          "web": "390x62"
+        }
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_InsetRoundShadow.png",
+      "pair": "iOS-Android",
+      "reason": "Boundary rasterisation: colours are exact (deltaE95 0.85, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9403,
+        "pixelPct": 0.866,
+        "labDeltaEP95": 0.853,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_InsetRoundShadow.png",
+      "pair": "iOS-web",
+      "reason": "Boundary rasterisation: colours are exact (deltaE95 0.39, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9414,
+        "pixelPct": 0.872,
+        "labDeltaEP95": 0.389,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_GradientWithRadius.png",
+      "pair": "Android-web",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.29, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9313,
+        "pixelPct": 1.011,
+        "labDeltaEP95": 0.287,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_GradientWithRadius.png",
+      "pair": "iOS-web",
+      "reason": "Corner AA on rounded boundaries: colours are exact (deltaE95 0.28, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9312,
+        "pixelPct": 1.011,
+        "labDeltaEP95": 0.278,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Neumorphic_Light.png",
+      "pair": "iOS-Android",
+      "reason": "iOS box-shadow penumbra falloff differs from Android and web, which agree with each other. Measured iOS-vs-web: 5159 of 31980 px differ (16.1%), and they are concentrated in the rows above and below the card (y=14,15 and y=66-70 of an 82px image) \u2014 the soft-shadow gradient, not the card face, whose fill (236,240,241) and the page ground (26,26,46) are byte-identical on all three. This is the known blur-radius-to-Gaussian-sigma convention difference between CoreGraphics and Skia rather than a wrong value. It sits just over the line (\u0394E95 5.34 / 5.59 vs a 5.0 threshold), so it is recorded rather than waved through \u2014 but it is the weakest of the entries here and is the first to re-examine if the sigma mapping is ever unified.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9558,
+        "pixelPct": 0.47,
+        "labDeltaEP95": 5.34,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Neumorphic_Light.png",
+      "pair": "iOS-web",
+      "reason": "iOS box-shadow penumbra falloff differs from Android and web, which agree with each other. Measured iOS-vs-web: 5159 of 31980 px differ (16.1%), and they are concentrated in the rows above and below the card (y=14,15 and y=66-70 of an 82px image) \u2014 the soft-shadow gradient, not the card face, whose fill (236,240,241) and the page ground (26,26,46) are byte-identical on all three. This is the known blur-radius-to-Gaussian-sigma convention difference between CoreGraphics and Skia rather than a wrong value. It sits just over the line (\u0394E95 5.34 / 5.59 vs a 5.0 threshold), so it is recorded rather than waved through \u2014 but it is the weakest of the entries here and is the first to re-examine if the sigma mapping is ever unified.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9554,
+        "pixelPct": 0.47,
+        "labDeltaEP95": 5.59,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "Backdrop_Saturate_OverStripes.png",
+      "pair": "iOS-web",
+      "reason": "SAME ROOT CAUSE as the Backdrop_Blur_OverStripes entries above \u2014 see those for the full write-up. backdrop-filter IS implemented on both natives; the two-pass path arms only on the COMPOSED capture path and is deliberately disarmed on the per-component path this fixture runs through, so the natives render the element with no backdrop filter while web applies saturate(4). NOT a runtime gap; the gap is that test-all.sh has no way to arm composed capture. Worth noting how this one surfaced: it was invisible until \u0394E95 gated. It scored \u0394E95 24.92 at \u0394px 0.00% and SSIM 0.978, so the blur variant sat in the ledger while its saturate sibling \u2014 same fixture, same cause \u2014 passed silently. Adding the metric found a hole in the LEDGER, not just in the runtimes.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9778,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 24.92,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "composition-test.json",
+      "component": "Backdrop_Saturate_OverStripes.png",
+      "pair": "Android-web",
+      "reason": "SAME ROOT CAUSE as the Backdrop_Blur_OverStripes entries above \u2014 see those for the full write-up. backdrop-filter IS implemented on both natives; the two-pass path arms only on the COMPOSED capture path and is deliberately disarmed on the per-component path this fixture runs through, so the natives render the element with no backdrop filter while web applies saturate(4). NOT a runtime gap; the gap is that test-all.sh has no way to arm composed capture. Worth noting how this one surfaced: it was invisible until \u0394E95 gated. It scored \u0394E95 24.92 at \u0394px 0.00% and SSIM 0.978, so the blur variant sat in the ledger while its saturate sibling \u2014 same fixture, same cause \u2014 passed silently. Adding the metric found a hole in the LEDGER, not just in the runtimes.",
+      "owner": "unassigned",
+      "expires": "2026-09-30",
+      "observed": {
+        "ssim": 0.9783,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 24.92,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "filter-sepia-amounts.json",
+      "component": "Sepia_Translucent.png",
+      "pair": "iOS-web",
+      "reason": "KNOWN iOS LIMITATION, trade accepted on measurement 2026-08-28. FilterApplier composites the sepia layer with plain source-over at .opacity(a). That is EXACT for opaque content \u2014 7 of 8 cases in this fixture land on the CSS value \u2014 but wrong when the element's own alpha < 1, because source-over multiplies the top layer's alpha: coverage A comes out as A*a + (1-A*a)*A rather than A. Measured here: iOS (95,117,129) against the spec's (90,92,95), RGB distance 42. THE ALTERNATIVE WAS TRIED AND REVERTED. Complementary opacities with .plusLighter inside a .compositingGroup (the CrossFadeApplier idiom) fixes this row and BREAKS SOMETHING WORSE: SwiftUI Text stops being filtered at all \u2014 white text under sepia(80%) rendered (255,255,255) where the spec and both other runtimes give (255,255,242) \u2014 and it also cost the green LSB on every solid box (157 vs 158). Text inside a filtered element is far more common than a translucent filtered background, so the trade was taken the other way. fixtures/properties/effects/filter-on-text.json now pins the text behaviour so the swap cannot be made again unnoticed. Fixing BOTH needs a compositing route that preserves alpha without flattening text; no SwiftUI primitive combination found so far does that.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.95,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 20.0,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "filter-sepia-amounts.json",
+      "component": "Sepia_Translucent.png",
+      "pair": "iOS-Android",
+      "reason": "KNOWN iOS LIMITATION, trade accepted on measurement 2026-08-28. FilterApplier composites the sepia layer with plain source-over at .opacity(a). That is EXACT for opaque content \u2014 7 of 8 cases in this fixture land on the CSS value \u2014 but wrong when the element's own alpha < 1, because source-over multiplies the top layer's alpha: coverage A comes out as A*a + (1-A*a)*A rather than A. Measured here: iOS (95,117,129) against the spec's (90,92,95), RGB distance 42. THE ALTERNATIVE WAS TRIED AND REVERTED. Complementary opacities with .plusLighter inside a .compositingGroup (the CrossFadeApplier idiom) fixes this row and BREAKS SOMETHING WORSE: SwiftUI Text stops being filtered at all \u2014 white text under sepia(80%) rendered (255,255,255) where the spec and both other runtimes give (255,255,242) \u2014 and it also cost the green LSB on every solid box (157 vs 158). Text inside a filtered element is far more common than a translucent filtered background, so the trade was taken the other way. fixtures/properties/effects/filter-on-text.json now pins the text behaviour so the swap cannot be made again unnoticed. Fixing BOTH needs a compositing route that preserves alpha without flattening text; no SwiftUI primitive combination found so far does that.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.95,
+        "pixelPct": 0.0,
+        "labDeltaEP95": 20.0,
+        "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Transform_Combined.png",
+      "pair": "iOS-Android",
+      "reason": "ANDROID IS WRONG, iOS IS NOW RIGHT \u2014 recorded 2026-08-28 when the iOS transform-order fix landed. css-transforms-1 \u00a711: `transform: A B` is the matrix product A\u00b7B, so B maps the point first. Transform_Combined is `rotate(5deg) scale(1.1) translateX(10px)`, so the 10px translate must be scaled by 1.1 and then rotated by 5deg. Compose does not compose the function list at all: TransformApplier accumulates each kind into a separate scalar (translateX += \u2026, rotation += \u2026, scaleX *= \u2026) and hands them to graphicsLayer, which applies a FIXED scale\u2192rotate\u2192translate order. The list order is therefore discarded, and `scale(2) translate(30px)` renders identically to `translate(30px) scale(2)`. MEASURED on a 40x40 box (centroid, base (96,96)): `scale(2) translate(30px,0)` gives web (156,96) and Android (126,96); `rotate(45deg) translate(60px,0)` gives web (137,138) and Android (155,96) \u2014 Android returns the SAME answer for both orderings in each pair, which is the signature of order-insensitivity rather than of a reversed composition (iOS had the latter, and returned exactly the swapped answer in all four cases; that is fixed). Current pair readings confirm the direction: iOS-web SSIM 0.9849, Android-web 0.8971. FIX ROUTE: compose the function list into a single matrix in CSS order and reuse the existing decomposeMatrix2D before feeding graphicsLayer, rather than accumulating per-kind scalars. Not attempted in the same pass because TransformApplier is load-bearing for the whole 327-pair corpus and a botched decomposition would move far more than this one row.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9044,
+        "pixelPct": 1.77,
+        "labDeltaEP95": 0.78,
+        "divergence": "structural-divergence"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Filter_Blur.png",
+      "pair": "iOS-Android",
+      "reason": "Surfaced by the 2026-08-29 pixelmatch flip (0.25/AA-off -> 0.02/AA-on), not by a code change: the post-fix blur falloff residual. Both natives now implement the spec sigma (the r/2 and Skia-affine bugs are fixed; fills are exact and dE95 <= 0.83 here), but the falloff BAND's per-pixel values differ by a few LSB across ~60px of gradient \u2014 Skia, CoreImage and Blink genuinely quantise a Gaussian differently at small radii. Under the old threshold these pixels were invisible (blind spot 66/255); at 0.02 the band registers as ~2.4% of the canvas. Not a wrong value; a rasteriser texture difference. Revisit only if the step-edge sigma estimator shows the ratio drifting from ~1.0.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9844,
+        "pixelPct": 2.34,
+        "labDeltaEP95": 0.58,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Filter_Blur.png",
+      "pair": "Android-web",
+      "reason": "Surfaced by the 2026-08-29 pixelmatch flip (0.25/AA-off -> 0.02/AA-on), not by a code change: the post-fix blur falloff residual. Both natives now implement the spec sigma (the r/2 and Skia-affine bugs are fixed; fills are exact and dE95 <= 0.83 here), but the falloff BAND's per-pixel values differ by a few LSB across ~60px of gradient \u2014 Skia, CoreImage and Blink genuinely quantise a Gaussian differently at small radii. Under the old threshold these pixels were invisible (blind spot 66/255); at 0.02 the band registers as ~2.4% of the canvas. Not a wrong value; a rasteriser texture difference. Revisit only if the step-edge sigma estimator shows the ratio drifting from ~1.0.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9854,
+        "pixelPct": 2.43,
+        "labDeltaEP95": 0.83,
+        "divergence": "glyph-metric-noise"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Edge_InsetRoundShadow.png",
+      "pair": "Android-web",
+      "reason": "Surfaced by the 2026-08-29 pixelmatch flip. This component's iOS-Android and iOS-web pairs were ledgered on 2026-08-28 (CoreGraphics-vs-Skia shadow falloff); the Android-web pair sat just under the old loose threshold \u2014 the exact 'ledgered sibling, unledgered twin' hole the threshold-derivation lane measured (71% of its differing pixels are in flat/smoothly-graded fill, not on edges). Same root cause as its siblings: blur-sigma convention differences in the inset shadow band. dE95 1.06.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9966,
+        "pixelPct": 2.93,
+        "labDeltaEP95": 1.06,
+        "divergence": "mixed"
+      }
+    }
+  ]
+}

@@ -55,7 +55,20 @@ struct BoxShadowApplier: ViewModifier {
             let colour = layer.color ?? .black.opacity(0.25)
             // CSS blur ≈ 2× SwiftUI radius.
             let radius = layer.blur / 2
-            if layer.spread > 0 {
+            if layer.spread != 0 {
+                // NEGATIVE spread contracts the silhouette
+                // (css-backgrounds-3 §7.1: "Negative values cause the
+                // shadow to shrink") — Tailwind's entire default scale
+                // uses it (`0 4px 6px -1px`, `0 2px 4px -2px`, …). The
+                // old guard was `spread > 0`, so negative spreads fell
+                // through to the plain `.shadow` path and rendered as
+                // UNCONTRACTED shadows: larger and darker than every
+                // other platform. `.inset(by: -spread)` handles both
+                // signs — inset by a positive amount IS the contraction.
+                // A spread negative enough to swallow the whole box
+                // produces an empty silhouette and paints nothing, which
+                // is what §7.1 specifies for that case.
+
                 // Spread path — SwiftUI's `.shadow(...)` doesn't take a
                 // spread argument, so the only-spread case (`box-shadow:
                 // 0 0 0 4px blue`) used to render nothing on iOS while

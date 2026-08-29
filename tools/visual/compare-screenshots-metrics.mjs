@@ -32,7 +32,6 @@
 // where `data` is RGBA, 4 bytes per pixel.
 
 import { PNG } from 'pngjs';
-import sharp from 'sharp';
 import { ssim as computeSsim } from 'ssim.js';
 import phashDefault from 'sharp-phash';
 import { converter, differenceCiede2000 } from 'culori';
@@ -175,51 +174,106 @@ export async function computePHash(a, b) {
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// B3 — Edge-map SSIM (Sobel-3)
+// B3 — Edge-map SSIM (Sobel-3, pure-JS gradient magnitude)
 // ─────────────────────────────────────────────────────────────────────────────
 //
-// Section 1 / B3 — apply 3×3 Sobel-X to greyscaled images, then SSIM the
-// edge maps. Catches AA-only differences without conflating fill diffs.
-// Section 8 decision 4 — Sobel-3 (fast) over Scharr-5 (accurate). The
-// kernel is exactly the one specified in the spec:
+// Section 1 / B3 — extract an edge map from each greyscaled image, then SSIM
+// the edge maps. Catches AA-only differences without conflating fill diffs.
+// Section 8 decision 4 — Sobel-3 (fast) over Scharr-5 (accurate) still holds:
+// the kernels below are the standard 3×3 Sobel pair.
 //
-//     -1  0  1
-//     -2  0  2
-//     -1  0  1
+// REPAIRED 2026-08-29. The original implementation ran sharp's `convolve`
+// with the zero-sum Sobel-X kernel and no `scale`/`offset`; sharp defaults
+// `scale` to the kernel sum, so it divided by zero and produced an all-zero
+// edge map for EVERY input — two of which are perfectly similar, hence the
+// metric read exactly 1.0 on all 327 pairs (docs/STATUS.md 2026-08-28).
+// The repair drops sharp entirely and computes Sobel in plain JS, chosen by
+// measurement over the "fix sharp's scale/offset" route:
+//   · sharp with `scale: 8, offset: 128` (arithmetic says gx/8+128 fits
+//     0..255 exactly) measured ALL-255 output even in flat regions where
+//     gx = 0 must map to 128 — libvips' convolve semantics do not match the
+//     documented sum/scale+offset formula, so any fix built on them rests on
+//     behaviour we cannot predict. `scale: 1` clamps the negative lobe at 0
+//     (half the edge signal lost) and plain `offset: 128` saturates strong
+//     edges. Measured 2026-08-29, probe preserved in the lane report.
+//   · pure JS is EXACT (verified: a 0→255 vertical step yields nonzero
+//     response only in the two edge-adjacent columns, peak 4·255/8) and
+//     measured 0.50 ms per 390×132 capture vs 3.63 ms for the sharp
+//     pipeline — the PNG re-encode round-trip alone cost more than the
+//     whole JS convolution.
+//
+// Two semantic upgrades over the pre-repair code, both deliberate:
+//   · BOTH Sobel directions, not Sobel-X alone. An X-only map is blind to
+//     horizontal edges — i.e. the top/bottom borders of every component box
+//     in these captures — which would leave a whole edge class ungated.
+//   · L1 gradient magnitude (|gx|+|gy|) scaled by 1/8: the theoretical
+//     maximum 8·255 maps exactly onto the 0..255 byte range, so NO value
+//     can clip — the saturation trap that sank the sharp routes is
+//     structurally impossible here.
 //
 // Section 1 / B3 explicitly says NOT to fall back to RGB SSIM on failure
-// — that would defeat the purpose. Return null instead.
+// — that would defeat the purpose. Return null instead. (The flat-vs-flat
+// unit control enforces this: gradient maps of two flat fields are equal →
+// 1.0, where an RGB-SSIM fallback would read ≈0.29.)
 
+// Kept async: every call site already awaits it, and keeping the signature
+// stable means the repair changes values, not plumbing.
 export async function computeEdgeSsim(a, b) {
   try {
-    const aEdges = await sobelEdges(a);
-    const bEdges = await sobelEdges(b);
+    // Pure-JS edge extraction — synchronous, exact, no encode round-trip.
+    const aEdges = sobelEdges(a);
+    const bEdges = sobelEdges(b);
     if (!aEdges || !bEdges) return null;
+    // Final step per Section 1 / B3: SSIM over the two edge maps, same
+    // ssim.js configuration as the base metric so scores are comparable.
     const r = computeSsim(aEdges, bEdges, { ssim: 'fast' });
     return +r.mssim.toFixed(4);
   } catch (e) {
+    // safeXxx contract (file header): swallow, return null, never fabricate.
     return null;
   }
 }
 
-async function sobelEdges(img) {
-  // sharp ingests an encoded PNG; we re-serialize the in-memory image.
-  // greyscale → Sobel-3 convolve → raw single-channel buffer.
-  const buf = PNG.sync.write(img);
-  const { data: greyEdges, info } = await sharp(buf)
-    .greyscale()
-    .convolve({ width: 3, height: 3, kernel: [-1, 0, 1, -2, 0, 2, -1, 0, 1] })
-    .raw()
-    .toBuffer({ resolveWithObject: true });
-  // Marshal the single-channel buffer into RGBA (R=G=B=value, A=255) for
-  // ssim.js. Single-channel input would force ssim.js into a code path
-  // that's less battle-tested across versions.
-  const W = info.width, H = info.height;
+function sobelEdges(img) {
+  const W = img.width, H = img.height;
+  // Greyscale via ITU-R BT.601 luma (0.299 R + 0.587 G + 0.114 B) — the
+  // classic image-processing weighting; the exact standard is immaterial
+  // for edge detection as long as both images get the same one. Alpha is
+  // ignored: the capture pipeline emits fully opaque pixels (padToCanvas
+  // extends with opaque background), so premultiplication is a non-issue.
+  const grey = new Uint8ClampedArray(W * H);
+  for (let p = 0, i = 0; p < W * H; p += 1, i += 4) {
+    grey[p] = 0.299 * img.data[i] + 0.587 * img.data[i + 1] + 0.114 * img.data[i + 2];
+  }
+  // Clamped-coordinate lookup = replicate border padding, matching libvips'
+  // default extend-copy behaviour the old pipeline used. Replication means
+  // the outermost pixel ring produces no artificial "frame" edge — a border
+  // artefact would add identical bright rectangles to BOTH maps and inflate
+  // their similarity everywhere.
+  const at = (x, y) => grey[(y < 0 ? 0 : y >= H ? H - 1 : y) * W + (x < 0 ? 0 : x >= W ? W - 1 : x)];
+  // Output straight into RGBA (R=G=B=magnitude, A=255) for ssim.js — its
+  // greyscale conversion becomes a no-op, same marshalling rationale as the
+  // per-channel helper above.
   const rgba = new Uint8ClampedArray(W * H * 4);
-  for (let i = 0, j = 0; i < greyEdges.length; i++, j += 4) {
-    const v = greyEdges[i];
-    rgba[j] = rgba[j + 1] = rgba[j + 2] = v;
-    rgba[j + 3] = 255;
+  for (let y = 0; y < H; y += 1) {
+    for (let x = 0; x < W; x += 1) {
+      // Standard 3×3 Sobel pair. gx: [-1 0 1; -2 0 2; -1 0 1] — right
+      // column minus left column, centre row double-weighted. gy is its
+      // transpose. Each is a signed response in [-1020, 1020] (4·255).
+      const tl = at(x - 1, y - 1), tc = at(x, y - 1), tr = at(x + 1, y - 1);
+      const ml = at(x - 1, y),                         mr = at(x + 1, y);
+      const bl = at(x - 1, y + 1), bc = at(x, y + 1), br = at(x + 1, y + 1);
+      const gx = (tr + 2 * mr + br) - (tl + 2 * ml + bl);
+      const gy = (bl + 2 * bc + br) - (tl + 2 * tc + tr);
+      // L1 magnitude / 8: |gx|+|gy| ≤ 2040, so the division maps the full
+      // response range onto 0..255 with zero clipping (see header). The
+      // Uint8ClampedArray write rounds to nearest — deterministic, so the
+      // A/A floor stays byte-zero.
+      const mag = (Math.abs(gx) + Math.abs(gy)) / 8;
+      const j = (y * W + x) * 4;
+      rgba[j] = rgba[j + 1] = rgba[j + 2] = mag;
+      rgba[j + 3] = 255;
+    }
   }
   return { data: rgba, width: W, height: H };
 }
@@ -250,32 +304,65 @@ export function computeLabDeltaE(a, b, stride = 4) {
     const toLab = converter('lab65');
     const dE = differenceCiede2000();
     const deltas = [];
-    // Step 4 bytes per pixel × `stride` pixels at a time.
-    const pixelStride = 4 * stride;
-    for (let i = 0; i < a.data.length; i += pixelStride) {
+    // SAMPLING PHASE — rotated per row, and that rotation is load-bearing.
+    // The old loop strode the LINEAR buffer by 4 pixels, so the sampled
+    // columns depended on width mod stride: at the corpus's 390px width
+    // (390 = 4·97 + 2) each row's phase shifted by 2, alternating between
+    // x ≡ 0 and x ≡ 2 (mod 4) — ODD columns were never examined on any
+    // row of any 390-wide capture. A 1px vertical hairline at an odd x
+    // was deterministically invisible to the gating ΔE95, on every run,
+    // forever (the zero noise floor made the blindness perfectly stable).
+    // Rotating the phase by row (row % stride) covers every residue class
+    // within each stride-sized row band while keeping the sample count,
+    // and therefore the ~30ms/pair cost, identical.
+    const width = a.width;
+    if (!width) {
+      // No geometry (defensive: every real caller passes padToCanvas
+      // output, which carries width) — fall back to the linear walk
+      // rather than guessing one.
+      const pixelStride = 4 * stride;
+      for (let i = 0; i < a.data.length; i += pixelStride) {
+        if (a.data[i + 3] === 0 || b.data[i + 3] === 0) continue;
+        const ca = toLab({ mode: 'rgb', r: a.data[i] / 255, g: a.data[i + 1] / 255, b: a.data[i + 2] / 255 });
+        const cb = toLab({ mode: 'rgb', r: b.data[i] / 255, g: b.data[i + 1] / 255, b: b.data[i + 2] / 255 });
+        deltas.push(dE(ca, cb));
+      }
+      return summarizeDeltas(deltas);
+    }
+    const height = Math.floor(a.data.length / 4 / width);
+    for (let y = 0; y < height; y++) {
+      const phase = y % stride;
+      for (let x = phase; x < width; x += stride) {
+        const i = (y * width + x) * 4;
       // Skip pixels where EITHER side is fully transparent — the colour
       // beneath is undefined and would skew the distribution.
-      if (a.data[i + 3] === 0 || b.data[i + 3] === 0) continue;
-      const ca = toLab({ mode: 'rgb', r: a.data[i] / 255, g: a.data[i + 1] / 255, b: a.data[i + 2] / 255 });
-      const cb = toLab({ mode: 'rgb', r: b.data[i] / 255, g: b.data[i + 1] / 255, b: b.data[i + 2] / 255 });
-      deltas.push(dE(ca, cb));
+        if (a.data[i + 3] === 0 || b.data[i + 3] === 0) continue;
+        const ca = toLab({ mode: 'rgb', r: a.data[i] / 255, g: a.data[i + 1] / 255, b: a.data[i + 2] / 255 });
+        const cb = toLab({ mode: 'rgb', r: b.data[i] / 255, g: b.data[i + 1] / 255, b: b.data[i + 2] / 255 });
+        deltas.push(dE(ca, cb));
+      }
     }
-    if (deltas.length === 0) return null;
-    // Sort once for both max + p95. p95 picks the 95th percentile via
-    // index = floor(0.95 × (n-1)) — robust to single-pixel outliers.
-    deltas.sort((x, y) => x - y);
-    const sum = deltas.reduce((s, v) => s + v, 0);
-    const mean = sum / deltas.length;
-    const max = deltas[deltas.length - 1];
-    const p95 = deltas[Math.floor(0.95 * (deltas.length - 1))];
-    return {
-      mean: +mean.toFixed(3),
-      max: +max.toFixed(3),
-      p95: +p95.toFixed(3),
-    };
+    return summarizeDeltas(deltas);
   } catch (e) {
     return null;
   }
+}
+
+/** Shared summary for both sampling paths (phased and linear-fallback). */
+function summarizeDeltas(deltas) {
+  if (deltas.length === 0) return null;
+  // Sort once for both max + p95. p95 picks the 95th percentile via
+  // index = floor(0.95 × (n-1)) — robust to single-pixel outliers.
+  deltas.sort((x, y) => x - y);
+  const sum = deltas.reduce((s, v) => s + v, 0);
+  const mean = sum / deltas.length;
+  const max = deltas[deltas.length - 1];
+  const p95 = deltas[Math.floor(0.95 * (deltas.length - 1))];
+  return {
+    mean: +mean.toFixed(3),
+    max: +max.toFixed(3),
+    p95: +p95.toFixed(3),
+  };
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -356,6 +443,25 @@ function foregroundCoverage(data, tolerance, bg = CANONICAL_BG) {
   let total = 0;
   // Stride 4 = RGBA; we only read R/G/B.
   for (let i = 0; i < data.length; i += 4) {
+    // PAD SENTINEL EXCLUSION — from numerator AND denominator, so the
+    // metric reads "ink density of the actually-captured region".
+    //
+    // Two verified requirements collide on this pixel class and this is
+    // the only accounting that satisfies both:
+    //   · An under-sized BLANK capture must still classify no-content
+    //     (counting the sentinel as ink made a broken half-height blank
+    //     read as 50% covered, voiding no-content for exactly the
+    //     captures most likely to be broken — the pipeline hunt's
+    //     finding).
+    //   · An under-sized INKED capture must not read as coverage-alike
+    //     with its full-height pair (Lane E's integration control: the
+    //     10×5 ink half must read 100% against the full capture's 50%).
+    // Skipping the sentinel entirely gives blank-short 0/real = 0% (first
+    // requirement) and ink-short real-ink/real = 100% vs 50% (second).
+    // The under-size itself stays loudly visible to ΔE and pixelmatch —
+    // that is the sentinel's actual job; coverage's job is the
+    // no-content gate.
+    if (data[i] === 0xFF && data[i + 1] === 0x00 && data[i + 2] === 0xFF) continue;
     total++;
     const dr = Math.abs(data[i]     - bg.r);
     const dg = Math.abs(data[i + 1] - bg.g);

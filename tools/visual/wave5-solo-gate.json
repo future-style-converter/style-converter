@@ -1,129 +1,129 @@
 {
- "_snapshot": "wave5-solo-gate",
- "_note": "Wave-5 device gate record: SOLO test-all.sh per fixture (not the combined-fixture reverify method — solo removes combined-context layout noise), pooled fleet ANDROID_SERIAL=emulator-5554, min SSIM across all variants x all 3 platform pairs. preWave numbers are the wave-5 diagnosis archive solo runs at dev ea142784 pre-change. The Android-web ~0.87 band on 22px real-text fixtures is the documented rasterization wall (edgeSsim 1.0, identical extents): identical glyphs at identical positions, AA/stem-weight divergence only. 000_BISl_5 scored 0.8075 once via a cold-start first-component capture race and 1.0000 on deterministic re-run (recorded here as 1.0).",
- "devSha": "ea142784",
- "date": "2026-07-18",
- "preWave": {
-  "text-transform": 0.777,
-  "text-decoration-line": 0.763,
-  "word-spacing": 0.763,
-  "letter-spacing": 0.789,
-  "font-size": 0.786,
-  "font-weight": 0.785,
-  "color": 0.839,
-  "border-image-slice": 0.866
- },
- "postWave": {
-  "text-transform": {
-   "min": 0.8453,
-   "variants": {
-    "000_TextTransform_None": 0.8695,
-    "001_TextTransform_Uppercase": 0.8453,
-    "002_TextTransform_Lowercase": 0.9034,
-    "003_TextTransform_Capitalize": 0.8629,
-    "004_TextTransform_FullWidth": 0.8695,
-    "005_TextTransform_FullSizeKana": 0.8695
-   }
+  "_snapshot": "wave5-solo-gate",
+  "_note": "Wave-5 device gate record: SOLO test-all.sh per fixture (not the combined-fixture reverify method \u2014 solo removes combined-context layout noise), pooled fleet ANDROID_SERIAL=emulator-5554, min SSIM across all variants x all 3 platform pairs. preWave numbers are the wave-5 diagnosis archive solo runs at dev ea142784 pre-change. The Android-web ~0.87 band on 22px real-text fixtures is the documented rasterization wall (recorded as \u201cedgeSsim 1.0\u201d when that metric was degenerate \u2014 computeEdgeSsim returned 1.0 for EVERY input until its 2026-08-29 repair, so that reading carried no information; the identical-extents half of the evidence stands): identical glyphs at identical positions, AA/stem-weight divergence only. 000_BISl_5 scored 0.8075 once via a cold-start first-component capture race and 1.0000 on deterministic re-run (recorded here as 1.0).",
+  "devSha": "ea142784",
+  "date": "2026-07-18",
+  "preWave": {
+    "text-transform": 0.777,
+    "text-decoration-line": 0.763,
+    "word-spacing": 0.763,
+    "letter-spacing": 0.789,
+    "font-size": 0.786,
+    "font-weight": 0.785,
+    "color": 0.839,
+    "border-image-slice": 0.866
   },
-  "text-decoration-line": {
-   "min": 0.8641,
-   "variants": {
-    "000_TextDecorationLine_None": 0.8695,
-    "001_TextDecorationLine_Underline": 0.881,
-    "002_TextDecorationLine_Overline": 0.8641,
-    "003_TextDecorationLine_LineThrough": 0.8846,
-    "004_TextDecorationLine_Blink": 0.8695,
-    "005_TextDecorationLine_UnderOver": 0.8778,
-    "006_TextDecorationLine_Triple": 0.8928
-   }
-  },
-  "word-spacing": {
-   "min": 0.8684,
-   "variants": {
-    "000_WordSpacing_Normal": 0.8695,
-    "001_WordSpacing_Px_4": 0.8684,
-    "002_WordSpacing_Px_12": 0.8684,
-    "003_WordSpacing_Em_0_5": 0.8684,
-    "004_WordSpacing_Rem_1": 0.8684,
-    "005_WordSpacing_Negative": 0.871
-   }
-  },
-  "letter-spacing": {
-   "min": 0.8539,
-   "variants": {
-    "000_LetterSpacing_Normal": 0.8695,
-    "001_LetterSpacing_Zero": 0.8695,
-    "002_LetterSpacing_Px_1": 0.8628,
-    "003_LetterSpacing_Px_4": 0.8719,
-    "004_LetterSpacing_Em_0_1": 0.8541,
-    "005_LetterSpacing_Rem_0_25": 0.8719,
-    "006_LetterSpacing_Negative_Px_1": 0.8539,
-    "007_LetterSpacing_Negative_Em": 0.8561
-   }
-  },
-  "font-size": {
-   "min": 0.8601,
-   "variants": {
-    "000_FontSize_XxSmall": 0.973,
-    "001_FontSize_XSmall": 0.9654,
-    "002_FontSize_Small": 0.9231,
-    "003_FontSize_Medium": 0.9108,
-    "004_FontSize_Large": 0.9554,
-    "005_FontSize_XLarge": 0.9612,
-    "006_FontSize_XxLarge": 0.9714,
-    "007_FontSize_XxxLarge": 0.9263,
-    "008_FontSize_Smaller": 0.9112,
-    "009_FontSize_Larger": 0.8696,
-    "010_FontSize_Px_12": 0.9313,
-    "011_FontSize_Px_24": 0.9585,
-    "012_FontSize_Pt_14": 0.8601,
-    "013_FontSize_Em_2": 0.9714,
-    "014_FontSize_Rem_1_5": 0.9585,
-    "015_FontSize_Percent_120": 0.8696,
-    "016_FontSize_Calc": 0.9554
-   }
-  },
-  "font-weight": {
-   "min": 0.8695,
-   "variants": {
-    "000_FontWeight_Normal": 0.8695,
-    "001_FontWeight_Bold": 0.925,
-    "002_FontWeight_Bolder": 0.925,
-    "003_FontWeight_Lighter": 0.8695,
-    "004_FontWeight_100": 0.8695,
-    "005_FontWeight_200": 0.8695,
-    "006_FontWeight_300": 0.8695,
-    "007_FontWeight_350_Variable": 0.8695,
-    "008_FontWeight_400": 0.8695,
-    "009_FontWeight_500": 0.8891,
-    "010_FontWeight_600": 0.925,
-    "011_FontWeight_700": 0.925,
-    "012_FontWeight_800": 0.9471,
-    "013_FontWeight_900": 0.9471
-   }
-  },
-  "color": {
-   "min": 0.8639,
-   "variants": {
-    "000_Color_Hex6": 0.8805,
-    "001_Color_Hex3": 0.8813,
-    "002_Color_Rgb": 0.8817,
-    "003_Color_Rgba": 0.8933,
-    "004_Color_Hsl": 0.8786,
-    "005_Color_Hsla": 0.8864,
-    "006_Color_Named": 0.8759,
-    "007_Color_CurrentColor": 0.8639
-   }
-  },
-  "border-image-slice": {
-   "min": 0.8081,
-   "variants": {
-    "000_BISl_5": 1,
-    "001_BISl_10": 1,
-    "002_BISl_Pct": 1,
-    "003_BISl_Fill": 0.9863,
-    "004_V_svg_source_blocked_native_no_svg_decode": 0.8081
-   }
+  "postWave": {
+    "text-transform": {
+      "min": 0.8453,
+      "variants": {
+        "000_TextTransform_None": 0.8695,
+        "001_TextTransform_Uppercase": 0.8453,
+        "002_TextTransform_Lowercase": 0.9034,
+        "003_TextTransform_Capitalize": 0.8629,
+        "004_TextTransform_FullWidth": 0.8695,
+        "005_TextTransform_FullSizeKana": 0.8695
+      }
+    },
+    "text-decoration-line": {
+      "min": 0.8641,
+      "variants": {
+        "000_TextDecorationLine_None": 0.8695,
+        "001_TextDecorationLine_Underline": 0.881,
+        "002_TextDecorationLine_Overline": 0.8641,
+        "003_TextDecorationLine_LineThrough": 0.8846,
+        "004_TextDecorationLine_Blink": 0.8695,
+        "005_TextDecorationLine_UnderOver": 0.8778,
+        "006_TextDecorationLine_Triple": 0.8928
+      }
+    },
+    "word-spacing": {
+      "min": 0.8684,
+      "variants": {
+        "000_WordSpacing_Normal": 0.8695,
+        "001_WordSpacing_Px_4": 0.8684,
+        "002_WordSpacing_Px_12": 0.8684,
+        "003_WordSpacing_Em_0_5": 0.8684,
+        "004_WordSpacing_Rem_1": 0.8684,
+        "005_WordSpacing_Negative": 0.871
+      }
+    },
+    "letter-spacing": {
+      "min": 0.8539,
+      "variants": {
+        "000_LetterSpacing_Normal": 0.8695,
+        "001_LetterSpacing_Zero": 0.8695,
+        "002_LetterSpacing_Px_1": 0.8628,
+        "003_LetterSpacing_Px_4": 0.8719,
+        "004_LetterSpacing_Em_0_1": 0.8541,
+        "005_LetterSpacing_Rem_0_25": 0.8719,
+        "006_LetterSpacing_Negative_Px_1": 0.8539,
+        "007_LetterSpacing_Negative_Em": 0.8561
+      }
+    },
+    "font-size": {
+      "min": 0.8601,
+      "variants": {
+        "000_FontSize_XxSmall": 0.973,
+        "001_FontSize_XSmall": 0.9654,
+        "002_FontSize_Small": 0.9231,
+        "003_FontSize_Medium": 0.9108,
+        "004_FontSize_Large": 0.9554,
+        "005_FontSize_XLarge": 0.9612,
+        "006_FontSize_XxLarge": 0.9714,
+        "007_FontSize_XxxLarge": 0.9263,
+        "008_FontSize_Smaller": 0.9112,
+        "009_FontSize_Larger": 0.8696,
+        "010_FontSize_Px_12": 0.9313,
+        "011_FontSize_Px_24": 0.9585,
+        "012_FontSize_Pt_14": 0.8601,
+        "013_FontSize_Em_2": 0.9714,
+        "014_FontSize_Rem_1_5": 0.9585,
+        "015_FontSize_Percent_120": 0.8696,
+        "016_FontSize_Calc": 0.9554
+      }
+    },
+    "font-weight": {
+      "min": 0.8695,
+      "variants": {
+        "000_FontWeight_Normal": 0.8695,
+        "001_FontWeight_Bold": 0.925,
+        "002_FontWeight_Bolder": 0.925,
+        "003_FontWeight_Lighter": 0.8695,
+        "004_FontWeight_100": 0.8695,
+        "005_FontWeight_200": 0.8695,
+        "006_FontWeight_300": 0.8695,
+        "007_FontWeight_350_Variable": 0.8695,
+        "008_FontWeight_400": 0.8695,
+        "009_FontWeight_500": 0.8891,
+        "010_FontWeight_600": 0.925,
+        "011_FontWeight_700": 0.925,
+        "012_FontWeight_800": 0.9471,
+        "013_FontWeight_900": 0.9471
+      }
+    },
+    "color": {
+      "min": 0.8639,
+      "variants": {
+        "000_Color_Hex6": 0.8805,
+        "001_Color_Hex3": 0.8813,
+        "002_Color_Rgb": 0.8817,
+        "003_Color_Rgba": 0.8933,
+        "004_Color_Hsl": 0.8786,
+        "005_Color_Hsla": 0.8864,
+        "006_Color_Named": 0.8759,
+        "007_Color_CurrentColor": 0.8639
+      }
+    },
+    "border-image-slice": {
+      "min": 0.8081,
+      "variants": {
+        "000_BISl_5": 1,
+        "001_BISl_10": 1,
+        "002_BISl_Pct": 1,
+        "003_BISl_Fill": 0.9863,
+        "004_V_svg_source_blocked_native_no_svg_decode": 0.8081
+      }
+    }
   }
- }
 }

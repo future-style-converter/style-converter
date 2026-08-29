@@ -231,6 +231,40 @@ public struct ComponentRenderer: View {
     /// (no motion clock — the whole static corpus) short-circuits to the
     /// plain effective list, allocation-identical to pre-wave-8.
     private func motionEffectiveProperties(now: Date?) -> [IRProperty] {
+        // DECLARED mid-capture flip (spec 07 §4 + §5).
+        //
+        // A transition's timeline zero is the base→forced flip. On iOS
+        // that flip cannot be OBSERVED during a capture: ImageRenderer is
+        // one synchronous layout+draw over a freshly built view graph per
+        // component (ScreenshotManager.render → ImageRenderer(content:)),
+        // so `@State` re-initialises, `transitionSnapshot` is nil, and
+        // `.onChange(of: componentState)` can never fire. Rendering base
+        // then forced in two passes does not help — pass B is a new tree
+        // that mounts already-forced, which is the same bug twice.
+        //
+        // So the origin is DECLARED rather than observed: with a pinned
+        // clock and a forced state, the pre-flip list is exactly
+        // `effective(for:)` with the forced set removed. StateResolver is
+        // pure (see effective(for:) above), so that list is reproducible
+        // without having rendered it.
+        //
+        // This mirrors the keyframe rule at :413 — a pinned t wins over
+        // any wall clock — and reuses the same TransitionResolver.blend
+        // the live path calls, so the interpolation maths is shared and
+        // already unit-pinned.
+        //
+        // HONEST LIMIT: the live TRIGGER path (transitionSnapshot +
+        // .onChange) stays unexercised by capture. The blend is covered;
+        // the flip DETECTION is not. Recorded in docs/DYNAMIC_CAPTURE.md
+        // rather than left for a green row to imply otherwise.
+        if !forcedStyleStates.isEmpty, let captureT = animationCaptureTime {
+            var origin = componentState
+            origin.forced = []
+            return TransitionResolver.blend(from: effective(for: origin),
+                                            to: effectiveProperties,
+                                            elapsedSeconds: captureT,
+                                            componentName: component.name).properties
+        }
         guard let now = now, let snap = transitionSnapshot else {
             return effectiveProperties
         }

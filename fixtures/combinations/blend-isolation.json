@@ -1,0 +1,41 @@
+{
+  "_comment": "mix-blend-mode x isolation (compositing-1 §3: 'isolation: isolate' forces a stacking context that becomes an ISOLATED group — descendants blend only against the group's own backdrop, which starts transparent black; with 'auto' and no other group-inducing property, the blend reaches down to everything painted below). Three layers: outer 200x80 solid #ffcc00=(255,204,0); middle wrapper covering the outer exactly (the ONLY variable — isolation isolate/auto — and carrying no paint of its own); inner 188x68 #66ccff=(102,204,255) with mix-blend-mode:multiply (12784 px, dominating the 3216 px yellow ring -> fill reads the inner). ARITHMETIC — BI_Auto: the transparent middle does not isolate, so the inner's backdrop is the outer's opaque yellow: multiply = (255*102, 204*204, 0*255)/255 = (102, 163.2, 0) -> (102,163,0). BI_Isolate: the middle is an isolated group whose internal backdrop is transparent black (alpha 0), and compositing-1 §5.1 with alpha_b = 0 reduces co = alpha_s * Cs — the blend term vanishes — so the inner paints UNCHANGED (102,204,255) and the finished group then composites source-over onto the yellow. BI_NoBlend_Control: blend normal, isolation auto -> also (102,204,255); it renders byte-identically to BI_Isolate (that EQUALITY is the isolation semantics) while differing from BI_Auto — so a runtime that drops `isolation` makes Isolate==Auto (both green-ish (102,163,0)), and a runtime that drops the BLEND makes Auto==Control (both (102,204,255)); the triple separates the two failure modes. PROBE, not a prediction: `isolation` on the natives' canonical trees is unverified (the pre-Phase-0 Android status listed it, the rewrite may not carry it), so BI_Isolate may be red on either native; the two other rows reuse the opacity-blend.json multiply path and should hold.",
+  "components": {
+    "BI_Auto": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffcc00", "position": "relative" },
+      "children": {
+        "wrapper": {
+          "properties": { "position": "absolute", "left": "0px", "top": "0px", "width": "200px", "height": "80px", "isolation": "auto" },
+          "children": {
+            "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#66ccff", "mix-blend-mode": "multiply" } }
+          }
+        }
+      },
+      "_expect": { "fill": [102, 163, 0], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "compositing-1 §3: non-isolated -> blend reaches the outer yellow: multiply (255,204,0)x(102,204,255)/255 = (102,163.2,0)" }
+    },
+    "BI_Isolate": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffcc00", "position": "relative" },
+      "children": {
+        "wrapper": {
+          "properties": { "position": "absolute", "left": "0px", "top": "0px", "width": "200px", "height": "80px", "isolation": "isolate" },
+          "children": {
+            "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#66ccff", "mix-blend-mode": "multiply" } }
+          }
+        }
+      },
+      "_expect": { "fill": [102, 204, 255], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "compositing-1 §3+§5.1: isolated group backdrop is transparent (alpha_b=0 -> blend term vanishes), inner paints unchanged, group composites src-over onto yellow" }
+    },
+    "BI_NoBlend_Control": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffcc00", "position": "relative" },
+      "children": {
+        "wrapper": {
+          "properties": { "position": "absolute", "left": "0px", "top": "0px", "width": "200px", "height": "80px", "isolation": "auto" },
+          "children": {
+            "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#66ccff", "mix-blend-mode": "normal" } }
+          }
+        }
+      },
+      "_expect": { "fill": [102, 204, 255], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "blend-normal control: must equal BI_Isolate (that equality IS isolation's contract) and differ from BI_Auto" }
+    }
+  }
+}

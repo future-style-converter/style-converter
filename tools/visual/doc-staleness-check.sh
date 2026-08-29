@@ -220,17 +220,26 @@ else
 fi
 
 # Pattern 10 (protocolTimeout drop): all puppeteer.launch calls must
-# explicitly set protocolTimeout. Otherwise the recent puppeteer default
-# is too low and per-state CDP round-trips fail mid-harness.
-for f in tools/visual/interaction-states.mjs tools/visual/a11y-audit.mjs; do
-    if grep -q "puppeteer.*launch" "$f" 2>/dev/null; then
-        if grep -q "protocolTimeout" "$f"; then
-            log "✓ $f passes protocolTimeout to puppeteer.launch — round 75 fix preserved"
-        else
-            err "$f calls puppeteer.launch without protocolTimeout — round 75 caught this is now too low by default"
-        fi
-    fi
-done
+# explicitly set protocolTimeout ≥ 5*60*1000 ms. Otherwise the recent
+# puppeteer default is too low and per-state CDP round-trips fail
+# mid-harness.
+#
+# LANE E hardening (2026-08-29): the old `grep -q protocolTimeout` here was
+# satisfied by the fix's own explanatory COMMENT — deleting the actual
+# launch option left this check green (verified by mutation: strip
+# `protocolTimeout: 5 * 60 * 1000` from the launch call, keep the round-75
+# comment, grep still matches). Delegate to check-protocol-timeout.mjs,
+# which blanks comments/strings, walks each launch() call's balanced-paren
+# argument list, and statically evaluates the configured value against the
+# 5-minute floor. --expect-launch makes a vanished launch() call fail too
+# (these files' whole job is to drive puppeteer), so the guard cannot be
+# dodged by moving the call. Pinned by check-protocol-timeout.test.mjs.
+if PT_OUT=$(node tools/visual/check-protocol-timeout.mjs --expect-launch \
+        tools/visual/interaction-states.mjs tools/visual/a11y-audit.mjs 2>&1); then
+    log "✓ puppeteer.launch protocolTimeout verified in-call (≥ 5 min) — round 75 fix preserved"
+else
+    err "puppeteer.launch protocolTimeout check failed — round 75 regression: ${PT_OUT}"
+fi
 
 # ── Verified-coverage consistency (docs/STATUS.md vs README/CLAUDE) ─────────
 #

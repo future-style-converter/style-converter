@@ -26,11 +26,30 @@ const PLATFORMS = ['iOS', 'Android', 'web'];
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function renderHTML(rows, opts) {
+  // A row is only COMPARED when at least one cross-platform pair produced a
+  // scoreable SSIM. compare-screenshots.mjs sets `pairs[key] = null` when
+  // either side's capture is missing, so a one-platform run yields three
+  // null pairs on every row — and the old `.every()` over the EMPTY filtered
+  // array was vacuously true, making a web-only run read "N/N identical".
+  // That is the report-honesty failure recorded in docs/STATUS.md
+  // (2026-08-28): the system must not be able to pass while wrong. Rows
+  // with nothing to compare now land in their own headline bucket.
+  const isCompared = (r) =>
+    Object.values(r.pairs).some((p) => p && p.ssim !== null);
+
   // "Identical" threshold: SSIM >= 0.97 across every pair. SSIM is
   // perceptually-grounded and handles font AA naturally. Raw pixel diffs
   // are dominated by subpixel AA differences and aren't a useful summary
   // metric, but they're still shown per-pair for drill-down.
+  //
+  // Two honesty guards on top of the threshold:
+  //  1. the row must be compared at all (see isCompared — kills the
+  //     vacuous-truth path), and
+  //  2. every PRESENT pair must carry a non-null SSIM — a pair whose SSIM
+  //     computation failed (safeSsim returns null on decode/compute error)
+  //     blocks the identical verdict instead of being skipped.
   const isIdentical = (r) =>
+    isCompared(r) &&
     Object.values(r.pairs)
       .filter(Boolean)
       .every((p) => p.ssim !== null && p.ssim >= 0.97);
@@ -41,6 +60,10 @@ export function renderHTML(rows, opts) {
       ? rows.filter((r) => r.baseline?.regressed).length
       : 0,
     identical: rows.filter(isIdentical).length,
+    // Rows with no scoreable cross-platform pair. Printed in the headline
+    // unconditionally (even "0 not compared") so the bucket's absence can
+    // never be mistaken for the bucket being empty.
+    notCompared: rows.filter((r) => !isCompared(r)).length,
   };
 
   const rowsHtml = rows.map((r) => renderRow(r, opts)).join('\n');
@@ -88,10 +111,22 @@ ${BASE_CSS}
   <h1>Cross-platform capture report${labelHtml}</h1>
   <p class="meta">
     ${totals.components} components · ${totals.identical} identical (SSIM &ge; 0.97)
+    · <span class="${totals.notCompared > 0 ? 'warn' : 'ok'}">${totals.notCompared} not compared</span>
     ${opts.useBaseline ? ` · <span class="${totals.regressions > 0 ? 'bad' : 'ok'}">${totals.regressions} regressions</span>` : ''}
     · SSIM threshold ${opts.ssimThreshold} · pixel threshold ${opts.pixelThreshold}%
   </p>
   <p class="meta legend">Divergence labels: ${legendHtml}</p>
+  ${renderCrossPlatformGate(opts.crossPlatformGate)}
+  <!-- Metric caveats, stated where the numbers are actually read. Both are
+       properties of ssim.js's defaults, not of this harness's inputs, and
+       both cause honest misreadings of the column beside them. -->
+  <p class="meta caveat">
+    ⚠ <b>Reading SSIM:</b> it is computed on <b>luminance only</b> (Rec.601
+    grayscale), so a hue change at matched luminance scores ~1.0 — check the
+    ΔE column for colour. It is also <b>downsampled by <code>round(min(W,H)/256)</code></b>,
+    so tall components are scored at half resolution while pixelmatch and ΔE
+    stay at 1× — SSIM is <b>not comparable across components of different heights</b>.
+  </p>
   <p class="meta">
     Generated ${new Date().toLocaleString()}
   </p>
@@ -150,7 +185,10 @@ ${rowsHtml}
     let visible = 0;
     for (const r of ordered) {
       const matches = !q || r.dataset.name.toLowerCase().includes(q);
-      const diffOk = !diffsOnly || r.classList.contains('has-diff') || r.classList.contains('regressed');
+      // "diffs only" keeps not-compared rows visible: a row with no
+      // scoreable pair is unresolved, not clean — filtering it out would
+      // let a broken capture read as "no diffs".
+      const diffOk = !diffsOnly || r.classList.contains('has-diff') || r.classList.contains('regressed') || r.classList.contains('not-compared');
       if (matches && diffOk) {
         r.style.display = '';
         visible++;
@@ -193,6 +231,52 @@ ${rowsHtml}
 // (probeBlock is null/undefined) so the existing report layout doesn't
 // gain a "no data" bar that would only ever appear during the rollout.
 
+/**
+ * Cross-platform gate summary (Wave 1).
+ *
+ * The open expectation count belongs in the HEADLINE, not buried in a file.
+ * An expectation ledger only stays honest while its size is visible: the
+ * documented failure mode (Chromium's own, about layout-tree baselines) is
+ * that expectations accumulate because nobody is confronted with how many
+ * there are. Printing the number where the results are read is the cheapest
+ * possible defence.
+ */
+function renderCrossPlatformGate(g) {
+  if (!g) return '';                                    // gate not evaluated (older manifest)
+  if (g.skipped) {
+    return `<p class="meta xgate">Cross-platform gate: <em>skipped</em> — ${escape(g.reason ?? '')}</p>`;
+  }
+  // Zero-denominator honesty: "0 unexpected of 0 pairs" is a vacuous pass —
+  // nothing was checked, so nothing could fail. Render the unexpected count
+  // amber (not green) and say so explicitly, mirroring the vacuous-identical
+  // fix in renderHTML's headline. `g.checked ?? 0` also stops an absent
+  // field from printing the literal string "undefined pair(s)".
+  const checked = g.checked ?? 0;
+  const cls = g.unexpected?.length ? 'bad' : checked === 0 ? 'warn' : 'ok';
+  const vacuousBit = checked === 0
+    ? ` · <span class="warn">0 pairs compared — gate is vacuous, not passing</span>` : '';
+  const staleBit = g.stale?.length
+    ? ` · <span class="warn">${g.stale.length} stale</span>` : '';
+  const expiredBit = g.expired?.length
+    ? ` · <span class="warn">${g.expired.length} past expiry</span>` : '';
+  // Size disagreements are called out separately because they are bugs to
+  // fix, not divergences to live with — and because they were undetectable
+  // until the pad sentinel landed, so their count is a new signal.
+  const sizeBugs = (g.expected ?? []).filter((r) => r.entry?.observed?.sizes).length;
+  const sizeBit = sizeBugs
+    ? ` · <span class="warn">${sizeBugs} size mismatch(es) — real bugs, short expiry</span>` : '';
+  return `
+  <p class="meta xgate">
+    Cross-platform gate: <span class="${cls}">${g.unexpected?.length ?? 0} unexpected</span>
+    · ${g.expected?.length ?? 0} known divergence(s) of ${checked} pair(s)${vacuousBit}${sizeBit}${staleBit}${expiredBit}
+    <br><span style="opacity:.75; font-size:11px;">
+      Known divergences are enumerated in
+      <code>tools/visual/cross-platform-expectations.json</code> with a reason,
+      an owner and an expiry — deleting a line is how a fix gets recorded.
+    </span>
+  </p>`;
+}
+
 function renderTypographyProbes(probeBlock) {
   // No probe data → render nothing. This is the v3-graceful behaviour
   // (Section 8 q8): the section disappears entirely when the probe
@@ -220,6 +304,28 @@ function renderTypographyProbes(probeBlock) {
   // inside <details> by default to keep the section compact.
   const detailRows = renderProbeBreakdown(b8, b9, b10);
 
+  // Provenance warning — the three platforms do NOT produce the 4× probe
+  // buffer the same way, and B8/B9/B10 are sub-pixel measurements, so the
+  // difference is not cosmetic. iOS re-renders natively at
+  // ImageRenderer.scale = 4.0 and web re-renders via
+  // capture-screenshots-hires.mjs, but Android upscales an already-laid-out
+  // 1× bitmap with Bitmap.createScaledBitmap(..., filter=true)
+  // (ScreenshotManager.kt:401 — its own comment concedes the hinting loss).
+  // Bilinear interpolation manufactures the intermediate samples that B8's
+  // baseline-column scan, B9's AA-strategy FFT and B10's glyph-edge
+  // projection are reading, so an Android probe row measures the resampler,
+  // not the renderer. Say so where the numbers are read rather than
+  // trusting anyone to remember it.
+  const androidCaveat = `
+    <p style="margin:8px 0 0; font-size:12px; line-height:1.5; opacity:.9;">
+      ⚠ <strong>Android probe rows are not renderer-comparable.</strong>
+      iOS and web re-render natively at 4×; Android bilinearly upscales a 1×
+      bitmap (<code>ScreenshotManager.kt:401</code>). Any B8/B9/B10 pair
+      involving Android is partly measuring that interpolation. Treat
+      iOS↔web as the only sub-pixel-trustworthy pair until Android renders
+      at true 4×.
+    </p>`;
+
   return `
 <section class="typography-probes" style="margin: 16px; padding: 16px; border: 1px solid #444; border-radius: 6px; background: #1f1f2a; color: #eee;">
   <header style="display:flex; align-items:center; gap:12px; margin-bottom:8px;">
@@ -232,6 +338,7 @@ function renderTypographyProbes(probeBlock) {
     <div>${b9Line}</div>
     <div>${b10Line}</div>
   </div>
+  ${androidCaveat}
   <details style="margin-top:8px;">
     <summary style="cursor:pointer; font-size:12px; opacity:0.85;">Per-platform breakdown</summary>
     ${detailRows}
@@ -311,17 +418,31 @@ function renderRow(r, opts) {
 
   // Lowest SSIM across every pair. Used by the client-side "sort by worst"
   // option. 1.0 means perfect parity; 0.0 means "nothing in common".
+  // A row with NO scoreable pair gets null, not '1' — the old fallback
+  // rendered "SSIM 1.000" on rows that were never compared, which is a
+  // fabricated perfect score. The client-side sorter's own NaN fallback
+  // (data-min-ssim="" → parseFloat NaN → 1) still parks these rows at the
+  // "best" end of sorts, but nothing DISPLAYS a number that was never
+  // measured.
   const ssims = Object.values(r.pairs)
     .filter((p) => p && p.ssim !== null)
     .map((p) => p.ssim);
-  const minSsim = ssims.length ? Math.min(...ssims).toFixed(4) : '1';
+  const minSsim = ssims.length ? Math.min(...ssims).toFixed(4) : null;
 
   // Index from the filename prefix (NNN_Foo.png) — client uses it to
   // restore the default "index" sort order after filtering.
   const indexMatch = r.name.match(/^(\d+)_/);
   const index = indexMatch ? Number(indexMatch[1]) : 0;
 
-  const cls = [hasDiff ? 'has-diff' : '', r.baseline?.regressed ? 'regressed' : ''].filter(Boolean).join(' ');
+  // `not-compared` rows join the "diffs only" filter (client-side `apply()`)
+  // deliberately: a row the pipeline could not score is a problem to look
+  // at, not a pass to hide — hiding it repeats the vacuous-identical lie at
+  // the filter level.
+  const cls = [
+    hasDiff ? 'has-diff' : '',
+    minSsim === null ? 'not-compared' : '',
+    r.baseline?.regressed ? 'regressed' : '',
+  ].filter(Boolean).join(' ');
 
   // Section 5 — row-level "headline divergence" badge: pick the worst
   // divergence label across the row's three cross-platform pairs so the
@@ -336,13 +457,15 @@ function renderRow(r, opts) {
 
   return `<section class="row ${cls}"
       data-has-diff="${hasDiff}"
-      data-min-ssim="${minSsim}"
+      data-min-ssim="${minSsim ?? ''}"
       data-index="${index}"
       data-name="${escape(r.name)}">
     <h2>
       ${escape(r.name)}
       ${headlineBadge}
-      <span class="min-ssim" title="lowest SSIM across pairs">SSIM ${Number(minSsim).toFixed(3)}</span>
+      ${minSsim !== null
+        ? `<span class="min-ssim" title="lowest SSIM across pairs">SSIM ${Number(minSsim).toFixed(3)}</span>`
+        : `<span class="badge warn" title="no cross-platform pair produced a score — needs at least two platform captures">not compared</span>`}
       ${dimsOk ? '' : '<span class="badge warn">size mismatch</span>'}
       ${r.baseline?.regressed ? '<span class="badge bad">regressed</span>' : ''}
     </h2>
@@ -453,7 +576,10 @@ function renderBaseline(baseline) {
   const cells = PLATFORMS.map((p) => {
     const b = baseline.platforms[p];
     if (!b?.present) return `<div class="pair missing"><div class="ptitle">${p} vs baseline</div><div class="pimg muted">n/a</div></div>`;
-    const sev = b.regressed ? 'bad' : b.pixelMismatchedPct > 0.5 ? 'warn' : 'ok';
+    // A null SSIM (safeSsim compute failure) must not tint the cell green:
+    // "metric missing" is a warning state, not a pass. Checked before the
+    // pixel tier so the green branch is only reachable with a real score.
+    const sev = b.regressed ? 'bad' : b.ssim == null ? 'warn' : b.pixelMismatchedPct > 0.5 ? 'warn' : 'ok';
     return `<div class="pair ${sev}">
       <div class="ptitle">${p} vs baseline ${b.regressed ? '⚠️' : ''}</div>
       <div class="metrics">
@@ -584,6 +710,10 @@ main { padding: 16px 24px; }
 }
 .top .legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; }
 .top .legend .badge.divergence { font-size: 10px; }
+/* Metric caveats — visible enough to be read before the numbers are
+   trusted, quiet enough not to compete with the headline counts. */
+.top .caveat { max-width: 90ch; line-height: 1.5; opacity: .85; }
+.top .caveat code { font-size: 11px; }
 
 .min-ssim {
   font-family: -apple-system, system-ui, sans-serif;
@@ -637,6 +767,10 @@ main { padding: 16px 24px; }
 
 .ok  { color: #6c6; }
 .bad { color: #f99; }
+/* Bare .warn (headline "not compared" bucket, gate stale/expiry/vacuous
+   notes) previously had NO rule, so warnings rendered in the meta grey and
+   were invisible as warnings. Amber to match the .badge.warn family. */
+.warn { color: #fc6; }
 
 /* (Client-side JS handles diff-only filtering via row.style.display now —
    the old CSS-based .filter-diffs toggle is no longer used.) */

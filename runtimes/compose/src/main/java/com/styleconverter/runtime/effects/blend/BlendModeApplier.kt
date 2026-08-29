@@ -44,13 +44,21 @@ object BlendModeApplier {
      * @param config BlendModeConfig
      * @return Modified Modifier with blend mode applied
      */
-    fun applyBlendMode(modifier: Modifier, config: BlendModeConfig): Modifier {
+    fun applyBlendMode(
+        modifier: Modifier,
+        config: BlendModeConfig,
+        // Forwarded to the value overload so the saveLayer bounds can cover
+        // an absolutely-positioned element's OFFSET box. Defaulted so the
+        // non-engine callers that pass only a config keep compiling.
+        positionOffset: androidx.compose.ui.unit.DpOffset =
+            androidx.compose.ui.unit.DpOffset.Zero,
+    ): Modifier {
         // No blend mode, or SrcOver (normal) — return as-is. hasBlendMode already
         // filters SrcOver, but we double-check for safety.
         if (!config.hasBlendMode || config.blendMode == null) {
             return modifier
         }
-        return applyBlendMode(modifier, config.blendMode)
+        return applyBlendMode(modifier, config.blendMode, positionOffset)
     }
 
     /**
@@ -60,7 +68,12 @@ object BlendModeApplier {
      * @param blendMode BlendMode to apply
      * @return Modified Modifier
      */
-    fun applyBlendMode(modifier: Modifier, blendMode: BlendMode?): Modifier {
+    fun applyBlendMode(
+        modifier: Modifier,
+        blendMode: BlendMode?,
+        positionOffset: androidx.compose.ui.unit.DpOffset =
+            androidx.compose.ui.unit.DpOffset.Zero,
+    ): Modifier {
         // SrcOver (which CSS "normal" maps to) is Compose's default — skip.
         if (blendMode == null || blendMode == BlendMode.SrcOver) {
             return modifier
@@ -96,13 +109,35 @@ object BlendModeApplier {
                 val paint = Paint().apply { this.blendMode = blendMode }
                 // saveLayer pushes a buffer covering this element's bounds.
                 // A matching restore() is issued below to pop the layer.
+                // Bounds must cover the un-offset node box AND the
+                // position-offset box. They used to be Rect(0, 0, width,
+                // height) — the element's box anchored at the DRAW NODE's
+                // origin, which for an absolutely-positioned child is its
+                // un-offset layout slot, not where it actually paints. The
+                // layer then clipped the paint to the intersection of the two
+                // rectangles.
+                //
+                // Measured on fixtures/composition-test.json: a child
+                // authored 140x50 at left:40 top:20 painted 100x30 on
+                // Android — exactly (width - left) x (height - top) — with a
+                // correct ORIGIN and a truncated extent, on all four blend
+                // modes. iOS and web painted the full 140x50.
+                //
+                // This is the SAME defect StyleApplier already documents for
+                // FilterApplier.applyGroupColorFilters ("saveLayer bounds
+                // must cover the offset box or the flagless layer clips the
+                // positioned paint"), found on WPT
+                // css-color/composited-filters-under-opacity. The blend lane
+                // never got the same fix; it reuses that lane's helper now so
+                // the two cannot drift.
                 canvas.saveLayer(
-                    bounds = androidx.compose.ui.geometry.Rect(
-                        left = 0f,
-                        top = 0f,
-                        right = size.width,
-                        bottom = size.height
-                    ),
+                    bounds = com.styleconverter.runtime.effects.filter.FilterGroupGeometry
+                        .groupLayerBounds(
+                            widthPx = size.width,
+                            heightPx = size.height,
+                            positionOffsetXPx = positionOffset.x.toPx(),
+                            positionOffsetYPx = positionOffset.y.toPx(),
+                        ),
                     paint = paint
                 )
                 // Draw child content (bg, border, children) into the layer.

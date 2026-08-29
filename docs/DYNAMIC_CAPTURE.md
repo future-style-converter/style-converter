@@ -187,13 +187,40 @@ done
 
 # transitions (fixtures/fidelity/motion/transitions.json): force the state
 # that triggers the transition AND freeze mid-flight — one variable pair
-# per run. NOTE (web): the forced-state class is applied at first paint,
-# so the element mounts already IN the forced state and no transition
-# runs — the state flip must happen after first paint for a transition
-# Animation object to exist. Wiring that post-paint flip into the forced-
-# state hook is platform-lane work on all three platforms; until then the
-# transitions fixture gates the two ENDPOINT states (base capture vs
-# forced capture at t past the duration), which are deterministic today.
+# per run. The post-paint flip LANDED 2026-08-28 on all three platforms,
+# so this now captures the genuine mid-flight value, not the endpoint.
+#
+# The flip engages only when BOTH knobs are set. A forced run with no
+# pinned clock still applies the state at mount, so settled-appearance
+# captures (tools/visual/interaction-states.mjs) keep capturing the
+# resting state rather than a mid-flight frame at a racy wall-clock
+# instant — and the whole static corpus stays byte-identical.
+#
+# How each platform gets there differs, and only the VALUE is contractual:
+#   web     — real DOM flip. ComponentRenderer defers the force class when
+#             a clock is pinned; capture-screenshots.mjs adds it post-paint
+#             between two forced reflows (a style CHANGE event, which is
+#             the only thing that creates a CSSTransition). __seizeAnimations
+#             then seeks it like any other animation.
+#   Android — real recomposition flip. CaptureCanvas mounts in base state
+#             and writes the forced set after `withFrameNanos {}`;
+#             TransitionDriver presents the blend at the pinned t.
+#   iOS     — DECLARED flip. ImageRenderer is one synchronous pass over a
+#             fresh graph per component, so no flip can be observed; the
+#             renderer instead computes the pre-flip list as `effective(for:)`
+#             minus the forced set (StateResolver is pure) and blends at t.
+#             HONEST LIMIT: this exercises the blend, not the live flip
+#             DETECTION path (.onChange / transitionSnapshot).
+#
+# Verified on all three at t=0.4s: MT_BgFade = rgb(153,107,102), the spec
+# lerp of #7f8c8d→#c0392b. Geometry pin at t=0.5s: MT_WidthGrow is exactly
+# 120px wide (base 80, target 160) — a width no static state produces.
+# Delay pin: MT_Delayed (delay 0.5s) is still base at t=0.25s.
+#
+# Pick TIE-FREE sample times. t=0.5 on MT_BgFade lands on (159.5, 98.5,
+# 92.0) — two exact .5 ties, exactly where three independent float→byte
+# roundings are entitled to disagree by 1 and manufacture a fake
+# cross-platform divergence.
 CAPTURE_FORCE_STATE=hover CAPTURE_ANIMATION_TIME=0.5 \
   node capture-screenshots.mjs --url http://localhost:3000 --out screenshots-hover-mid
 ```

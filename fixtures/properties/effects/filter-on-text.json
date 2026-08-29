@@ -1,0 +1,97 @@
+{
+  "_comment": "A CSS filter applies to the element's whole rendered content, TEXT INCLUDED (filter-effects-1 2.1: the filter operates on the element as a group). Every previous filter fixture was a solid box, so a filter that silently skipped text was invisible to the corpus \u2014 and one did: an iOS sepia compositing change left text unfiltered while the background filtered correctly. Expected, all three platforms: FT_SepiaText renders white #ffffff text under sepia(80%) as (255,255,242) \u2014 the CSS matrix on white, clamped; FT_PlainText is the unfiltered control and renders (255,255,255); FT_GrayscaleText renders white text under grayscale(100%) as (255,255,255) (white is achromatic, so grayscale is the identity on it) over a (108,108,108) box; FT_BrightnessText renders white text under brightness(150%) as (255,255,255) (already clamped) over a box whose blue channel is EXACTLY 169.5 unrounded (113*1.5) \u2014 an earlier revision of this comment said 170, but that is one side of a half-tie, and all three platforms measure 169 on the identical input elsewhere in the corpus (Filter_Brightness), so the encoded expectation is (69,255,169) with tol 1. The CONTROL pair matters more than any single value: FT_SepiaText and FT_PlainText must differ in their text pixels, or the filter is not reaching the text at all.",
+  "_expect_comment": "_expect schema v1 (inert to rendering; enforced by the spec oracle): fill.rgb = dominant non-page-background capture colour (ground is rgb(26,26,46)), which for these components is the BOX colour \u2014 the text glyphs are a small pixel minority; fill.tol = per-channel absolute tolerance; box = declared CSS px (1 CSS px = 1 capture px everywhere). Box derivations, recomputed from filter-effects-1 8.5 on gamma-encoded sRGB: sepia(80%) on #3498db=(52,152,219) -> (153.372, 157.770, 143.001) -> (153,158,143), tol 1 for iOS per-layer quantisation (renders G 157); #3498db unfiltered is exact, tol 0; grayscale(100%) on #e74c3c=(231,76,60) -> 0.2126*231 + 0.7152*76 + 0.0722*60 = 107.798 -> (108,108,108), tol 1 because floor-vs-round straddles .798's neighbours across implementations that truncate; brightness(150%) on #2ecc71=(46,204,113) -> (69, 306->255 clamped, 169.5) -> (69,255,169), tol 1 covering the exact half-tie {169,170}. V1 LIMITATION, recorded rather than forced: the four TEXT-pixel expectations \u2014 sepia on white text (255,255,242), the grayscale and brightness identities on white text (255,255,255), and above all the FT_SepiaText-vs-FT_PlainText text-pixels-must-differ control \u2014 CANNOT be expressed as fill/box, because the dominant-colour fill measurement is exactly the statistic that ignores glyph pixels. v2 probe points needed: (a) a glyph-pixel sampler (e.g. brightest-cluster colour inside the box, or a fixed probe coordinate on a glyph stem) to assert text colour, and (b) a cross-component differ/same assertion between two components' glyph pixels for the control pair.",
+  "components": {
+    "FT_SepiaText": {
+      "_text": "Hamburg 123",
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "background-color": "#3498db",
+        "color": "#ffffff",
+        "font-size": "20px",
+        "filter": "sepia(80%)"
+      },
+      "_expect": {
+        "fill": [
+          153,
+          158,
+          143
+        ],
+        "fillTolerance": 1,
+        "box": [
+          200,
+          60
+        ]
+      }
+    },
+    "FT_PlainText": {
+      "_text": "Hamburg 123",
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "background-color": "#3498db",
+        "color": "#ffffff",
+        "font-size": "20px"
+      },
+      "_expect": {
+        "fill": [
+          52,
+          152,
+          219
+        ],
+        "fillTolerance": 2,
+        "box": [
+          200,
+          60
+        ]
+      }
+    },
+    "FT_GrayscaleText": {
+      "_text": "Hamburg 123",
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "background-color": "#e74c3c",
+        "color": "#ffffff",
+        "font-size": "20px",
+        "filter": "grayscale(100%)"
+      },
+      "_expect": {
+        "fill": [
+          108,
+          108,
+          108
+        ],
+        "fillTolerance": 1,
+        "box": [
+          200,
+          60
+        ]
+      }
+    },
+    "FT_BrightnessText": {
+      "_text": "Hamburg 123",
+      "properties": {
+        "width": "200px",
+        "height": "60px",
+        "background-color": "#2ecc71",
+        "color": "#ffffff",
+        "font-size": "20px",
+        "filter": "brightness(150%)"
+      },
+      "_expect": {
+        "fill": [
+          69,
+          255,
+          169
+        ],
+        "fillTolerance": 1,
+        "box": [
+          200,
+          60
+        ]
+      }
+    }
+  }
+}

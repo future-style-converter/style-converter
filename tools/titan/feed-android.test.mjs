@@ -588,3 +588,24 @@ test('feed-android re-pushes the mono-pin faces after EVERY relaunch (the runtim
   // from what the runtime joins onto its fonts root.
   assert.match(src, /const remote = `\$\{FONTS_DIR\}\/\$\{MONO_PIN_SANDBOX_DIR\}`/);
 });
+
+// ── The dependsOnBackdrop suppression mirror ────────────────────────────────
+
+test('expectedPngNames suppresses backdrop-dependent children like the devices do', () => {
+  // ScreenshotCaptureScreen.kt (and its web/iOS twins) skip a child whose
+  // appearance depends on its backdrop (backdrop-filter; non-normal
+  // mix-blend-mode) — a standalone render of it composites against noise.
+  // The feeder's manifest omitted that rule, so it listed PNGs the devices
+  // never write: the poll waited for phantoms and, names being POSITIONAL,
+  // every entry after the first suppressed child was misaligned.
+  const doc = { components: [
+    { id: 'p', name: 'Parent', properties: [] },
+    { id: 'blend', name: 'blendchild', properties: [{ type: 'MixBlendMode', data: 'multiply' }], slot: { parent: 'p' } },
+    { id: 'plain', name: 'plainchild', properties: [], slot: { parent: 'p' } },
+  ] };
+  const names = expectedPngNames(doc);
+  assert.deepEqual(names.map((n) => n.name), ['Parent', 'plainchild'],
+    'the blend child must be suppressed; the plain child keeps the NEXT index');
+  assert.equal(names[1].deviceFile.startsWith('001_'), true,
+    'positional numbering must match the device (no gap for the suppressed child)');
+});

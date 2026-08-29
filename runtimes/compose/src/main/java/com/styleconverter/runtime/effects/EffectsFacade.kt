@@ -138,7 +138,7 @@ object EffectsFacade {
         var result = modifier
 
         // Apply blend mode first (affects layer compositing)
-        result = BlendModeApplier.applyBlendMode(result, config.blendMode)
+        result = BlendModeApplier.applyBlendMode(result, config.blendMode, positionOffset)
 
         // Apply clip path (determines visible region). The collapse
         // override rides along so the clip's reference box subtracts the

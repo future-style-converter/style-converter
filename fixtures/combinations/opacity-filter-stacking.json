@@ -1,0 +1,33 @@
+{
+  "_comment": "filter x opacity ORDER on one element. Spec (filter-effects-1 §2 + CSS painting order): the filter applies to the element as a group FIRST, and the element's opacity then applies to the FILTERED result at composite time — filter-then-fade, never fade-then-filter. For the nonlinear invert() the two orders give different pixels against a known backdrop, so the composite exposes the order. Structure: parent 200x80 solid #ffffff backdrop, child inset 6px (188x68 = 12784 px vs 3216 px white ring — child dominates). invert(a) per filter-effects-1 §8.5: c' = c*(1-a) + (255-c)*a. ARITHMETIC — OFS_InvertOpaque: invert(1) on #ff0000 -> (0,255,255), opaque: fill (0,255,255). OFS_InvertHalfOpacity: spec order = invert first -> (0,255,255), THEN opacity 0.5 composites over white: 0.5*(0,255,255)+0.5*(255,255,255) = (127.5,255,255) -> (128,255,255)+-1. The fade-then-filter wrong order — inverting the already-backdrop-blended colour — gives invert(0.5*(255,0,0)+0.5*white) = invert(255,127.5,127.5) = (0,127.5,127.5) -> (0,128,128): 128 apart in R, unmissable. Dropping the filter gives (255,128,128); dropping the opacity gives (0,255,255); every failure mode is >=127 from the spec value in some channel. OFS_InvertHalfAmount: invert(0.5) maps EVERY channel to 0.5c+0.5(255-c) = 127.5 -> (128,128,128) regardless of input — an amount-vs-opacity confusion probe (a runtime treating invert's amount as post-filter alpha renders (128,255,255) here instead); grey fill sits on the label-AA axis so box is deliberately unasserted. OFS_NoFilter_Op50_Control: 0.5*(255,0,0)+0.5*white = (255,127.5,127.5) -> (255,128,128) — what a filter-dropping runtime renders for OFS_InvertHalfOpacity. No predicted red: the 2026-08-28 sepia translucency fix (.plusLighter composite) covered filter x alpha on iOS for sepia; this fixture extends the class to invert, where no coverage exists.",
+  "components": {
+    "OFS_InvertOpaque": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffffff", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#ff0000", "filter": "invert(1)" } }
+      },
+      "_expect": { "fill": [0, 255, 255], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "filter-effects-1 §8.5: invert(1) on (255,0,0) = (0,255,255); opaque control for the half-opacity case" }
+    },
+    "OFS_InvertHalfOpacity": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffffff", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#ff0000", "filter": "invert(1)", "opacity": "0.5" } }
+      },
+      "_expect": { "fill": [128, 255, 255], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "filter FIRST then group opacity (filter-effects-1 §2): 0.5*(0,255,255)+0.5*white = (127.5,255,255); fade-then-filter would read (0,128,128)" }
+    },
+    "OFS_InvertHalfAmount": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffffff", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#ff0000", "filter": "invert(0.5)" } }
+      },
+      "_expect": { "fill": [128, 128, 128], "fillTolerance": 2, "note": "invert(0.5) is the constant map c -> 127.5 on every channel; grey fill, so box unasserted (label-AA risk)" }
+    },
+    "OFS_NoFilter_Op50_Control": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffffff", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#ff0000", "opacity": "0.5" } }
+      },
+      "_expect": { "fill": [255, 128, 128], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "opacity-only control: 0.5*(255,0,0)+0.5*white = (255,127.5,127.5) — the value a filter-dropping runtime produces for OFS_InvertHalfOpacity" }
+    }
+  }
+}

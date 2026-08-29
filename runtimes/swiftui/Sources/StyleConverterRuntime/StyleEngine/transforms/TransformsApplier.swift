@@ -58,7 +58,31 @@ struct TransformsApplier: ViewModifier {
         // runtimes (convergence decision; strict spec would only
         // project the children). A perspective() FUNCTION in the list
         // overrides the seed below.
+        //
+        // ORDER. css-transforms-1 §11: `transform: A B` is the matrix
+        // product A·B, so B maps the point FIRST and A last. SwiftUI
+        // composes the other way round — in `v.modA().modB()`, modB wraps
+        // modA, so modA reaches the content first and the result is B·A·p.
+        // Emitting the list front-to-back therefore rendered every
+        // multi-function transform REVERSED.
+        //
+        // MEASURED on a 40×40 box (centroid, base at (95.6, 95.8)):
+        //
+        //     transform                        web / spec   iOS before
+        //     translate(60px,0) rotate(45deg)  (155,  96)   (137, 138)
+        //     rotate(45deg) translate(60px,0)  (137, 138)   (155,  96)
+        //     scale(2) translate(30px,0)       (155,  96)   (125,  96)
+        //     translate(30px,0) scale(2)       (125,  96)   (155,  96)
+        //
+        // Exactly the swapped answer in all four — the signature of a
+        // reversed composition, not of an arithmetic slip.
+        //
+        // The perspective SEED still has to be resolved FRONT-TO-BACK: a
+        // `perspective()` function primes the rotation that FOLLOWS it in
+        // CSS order. So pair each function with its governing distance in
+        // list order first, then emit the pairs in reverse.
         var pendingPerspective: CGFloat? = (c.perspective?.distancePx).map { CGFloat($0) }
+        var ordered: [(fn: TransformFn, perspectivePx: CGFloat?)] = []
         for fn in c.functions {
             if case .perspective(let d) = fn {
                 // Stash for the following 3D rotation; nothing to draw
@@ -66,8 +90,11 @@ struct TransformsApplier: ViewModifier {
                 pendingPerspective = d
                 continue
             }
-            v = AnyView(applyFunction(fn, to: v, anchor: anchor,
-                                      perspectivePx: pendingPerspective))
+            ordered.append((fn, pendingPerspective))
+        }
+        for entry in ordered.reversed() {
+            v = AnyView(applyFunction(entry.fn, to: v, anchor: anchor,
+                                      perspectivePx: entry.perspectivePx))
         }
 
         // Step 2 — longhand overrides, in CSS spec order: translate,
@@ -77,9 +104,13 @@ struct TransformsApplier: ViewModifier {
         // function string (_dispatch.ts gates on a 3D function inside
         // it) — the browser renders `rotate: 1 1 0 45deg` next to a
         // `perspective:` declaration orthographically.
-        if let t = c.translate { v = AnyView(applyFunction(t, to: v, anchor: anchor)) }
-        if let r = c.rotate    { v = AnyView(applyFunction(r, to: v, anchor: anchor)) }
+        // Emitted in REVERSE spec order for the same reason as the
+        // function list above: css-transforms-2 §3 composes the individual
+        // properties as translate · rotate · scale, so `scale` maps the
+        // point first and must be the INNERMOST SwiftUI modifier.
         if let s = c.scale     { v = AnyView(applyFunction(s, to: v, anchor: anchor)) }
+        if let r = c.rotate    { v = AnyView(applyFunction(r, to: v, anchor: anchor)) }
+        if let t = c.translate { v = AnyView(applyFunction(t, to: v, anchor: anchor)) }
 
         // Step 2b — NON-INVERTIBLE used transform (wave 35, lane B1).
         // css-transforms-1 §3: "If the transform is not invertible, the
@@ -168,10 +199,34 @@ struct TransformsApplier: ViewModifier {
                                anchor: UnitPoint,
                                perspectivePx: CGFloat? = nil) -> some View {
         switch fn {
-        case .translate(let x, let y, _, let xFrac, let yFrac):
+        case .translate(let x, let y, let z, let xFrac, let yFrac):
             // `.offset(x:y:)` reproduces CSS translate exactly in 2D.
-            // Z-component is dropped — SwiftUI has no Z-translate on a
-            // non-3D view; documented limitation.
+            //
+            // The Z component used to be dropped outright, on the grounds
+            // that "SwiftUI has no Z-translate on a non-3D view". That is
+            // true of a GENERAL 3D translate and beside the point for the
+            // case that actually occurs: under a perspective, translateZ
+            // is not a translation at all — css-transforms-2 §3 makes it a
+            // UNIFORM SCALE of P/(P − z), which `.scaleEffect` expresses
+            // exactly.
+            //
+            // MEASURED before the change, a 60x20 box under
+            // perspective(500px), against web (exact on every row):
+            //
+            //     translateZ    web        iOS was    iOS now
+            //       100px       74x24      60x20      74x24
+            //       166px       90x30      60x20      90x30
+            //       250px      120x40      60x20     120x40
+            //      -500px       30x10      60x20      30x10
+            //
+            // iOS rendered NO depth response at all. Compose had the same
+            // scale but computed it as `1 + z/P`, the first-order Taylor
+            // expansion, and was fixed in the same pass.
+            //
+            // Without a perspective the CSS projection is orthographic and
+            // translateZ genuinely has no visible effect, so the scale is
+            // applied ONLY when a perspective is in scope — which is also
+            // what keeps every existing 2D baseline byte-identical.
             // CSS percentage translates resolve against the element's
             // OWN border box (css-transforms-1 §6, transform-box on a
             // non-SVG element = border-box). Wave 5: the old
@@ -182,10 +237,19 @@ struct TransformsApplier: ViewModifier {
             // is a GeometryEffect like SkewEffect: SwiftUI hands it the
             // element's LAID-OUT size without letting it participate in
             // layout, so fractions resolve against the box itself.
+            // z >= P puts the element at or behind the camera, where CSS
+            // stops painting it; guard the divide rather than emitting a
+            // negative or infinite scale.
+            let depthScale: CGFloat? = {
+                guard z != 0, let p = perspectivePx, p - CGFloat(z) > 0 else { return nil }
+                return p / (p - CGFloat(z))
+            }()
             if xFrac != 0 || yFrac != 0 {
                 v.modifier(TranslateEffect(x: x, y: y, xFrac: xFrac, yFrac: yFrac))
+                    .scaleEffect(depthScale ?? 1, anchor: anchor)
             } else {
                 v.offset(x: x, y: y)
+                    .scaleEffect(depthScale ?? 1, anchor: anchor)
             }
         case .scale(let x, let y, _):
             // SwiftUI `.scaleEffect(x:y:anchor:)` honours the same

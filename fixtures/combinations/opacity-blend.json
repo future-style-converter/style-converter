@@ -1,0 +1,40 @@
+{
+  "_comment": "mix-blend-mode WITH opacity on the same element (compositing-1 §5.1: with an opaque backdrop, co = alpha_s * B(Cb, Cs) + (1 - alpha_s) * Cb — the blend is computed at FULL strength and the element's group opacity then mixes the blended result with the backdrop; opacity must never disable the blend). Structure: parent 200x80 solid backdrop, child inset 6px (188x68 = 12784 px, dominating the 3216 px parent ring, so _expect.fill reads the CHILD). ARITHMETIC — multiply pair: backdrop #ffcc00=(255,204,0), source #66ccff=(102,204,255). multiply B=Cb*Cs/255 per channel: R 255*102/255=102, G 204*204/255=163.2, B 0*255/255=0 -> (102,163,0). At opacity 0.5: 0.5*(102,163.2,0)+0.5*(255,204,0) = (178.5,183.6,0) -> (179,184,0) +-1 for rounding-mode. screen pair: backdrop #663399=(102,51,153), source #336633=(51,102,51). screen B=Cb+Cs-Cb*Cs/255: R 153-20.4=132.6, G 153-20.4=132.6, B 204-30.6=173.4 -> (133,133,173). At opacity 0.5: 0.5*(132.6,132.6,173.4)+0.5*(102,51,153) = (117.3,91.8,163.2) -> (117,92,163). Control: blend-mode normal at opacity 0.5 over the multiply backdrop: 0.5*(102,204,255)+0.5*(255,204,0) = (178.5,204,127.5) -> (179,204,128). KNOWN RED (iOS, audit backlog High): mix-blend-mode is applied INSIDE the opacity compositing group, so the two *_Op50 blend components render the blend-normal value instead — OB_Multiply_Op50 as (179,204,128) (byte-equal to OB_Normal_Op50_Control, which is why that control exists) and OB_Screen_Op50 as 0.5*(51,102,51)+0.5*(102,51,153) = (77,77,102). The two NoOpacity components must stay green — they pin that the failure is the opacity INTERACTION, not blending itself.",
+  "components": {
+    "OB_Multiply_NoOpacity": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffcc00", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#66ccff", "mix-blend-mode": "multiply" } }
+      },
+      "_expect": { "fill": [102, 163, 0], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "compositing-1 §10.2 multiply: (255,204,0)x(102,204,255)/255 = (102,163.2,0)" }
+    },
+    "OB_Multiply_Op50": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffcc00", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#66ccff", "mix-blend-mode": "multiply", "opacity": "0.5" } }
+      },
+      "_expect": { "fill": [179, 184, 0], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "compositing-1 §5.1: 0.5*multiply + 0.5*backdrop = (178.5,183.6,0). RED on iOS today: blend neutralised inside the opacity group -> (179,204,128)" }
+    },
+    "OB_Screen_NoOpacity": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#663399", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#336633", "mix-blend-mode": "screen" } }
+      },
+      "_expect": { "fill": [133, 133, 173], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "compositing-1 §10.2 screen: Cb+Cs-CbCs/255 over (102,51,153) = (132.6,132.6,173.4)" }
+    },
+    "OB_Screen_Op50": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#663399", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#336633", "mix-blend-mode": "screen", "opacity": "0.5" } }
+      },
+      "_expect": { "fill": [117, 92, 163], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "compositing-1 §5.1: 0.5*screen + 0.5*backdrop = (117.3,91.8,163.2). RED on iOS today: renders blend-normal (77,77,102)" }
+    },
+    "OB_Normal_Op50_Control": {
+      "properties": { "width": "200px", "height": "80px", "background-color": "#ffcc00", "position": "relative" },
+      "children": {
+        "layer": { "properties": { "position": "absolute", "left": "6px", "top": "6px", "width": "188px", "height": "68px", "background-color": "#66ccff", "mix-blend-mode": "normal", "opacity": "0.5" } }
+      },
+      "_expect": { "fill": [179, 204, 128], "fillTolerance": 2, "box": [188, 68], "boxTolerance": 1, "note": "plain source-over at 0.5: 0.5*(102,204,255)+0.5*(255,204,0) = (178.5,204,127.5) — the value a blend-dropping runtime wrongly produces for OB_Multiply_Op50" }
+    }
+  }
+}

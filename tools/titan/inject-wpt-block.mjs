@@ -437,6 +437,30 @@ async function diffWebVsRef(webPath, refPath) {
     };
   } catch { /* leave null */ }
 
+  // WPT-NATIVE fuzzy quantities, in the units the <meta fuzzy> budget is
+  // written in. The budget's maxDifference bounds the MAX PER-CHANNEL RGB
+  // DELTA (0–255) over every differing pixel, and totalPixels bounds the
+  // COUNT of pixels that differ AT ALL. checkFuzzyMatch used to substitute
+  // (a) labDeltaE.max — CIEDE2000 units on a 0–100-ish scale, computed on a
+  // 1-in-4 subsample — for the per-channel budget, and (b) pixelmatch's
+  // YIQ-thresholded count (threshold 0.25, blind to uniform shifts up to
+  // 66/255 luma) for the raw count. Both substitutions understate the
+  // diff, so out-of-budget pairs were rescued into wptPass. Measured while
+  // verifying: 400 pixels differing by channel delta 135 read as
+  // pixelmatch count 0. One exact pass, no thresholds, no sampling.
+  let fuzzyDifferingPixels = 0;
+  let fuzzyMaxChannelDelta = 0;
+  for (let i = 0; i < A.data.length; i += 4) {
+    const dr = Math.abs(A.data[i] - B.data[i]);
+    const dg = Math.abs(A.data[i + 1] - B.data[i + 1]);
+    const db = Math.abs(A.data[i + 2] - B.data[i + 2]);
+    const d = dr > dg ? (dr > db ? dr : db) : (dg > db ? dg : db);
+    if (d > 0) {
+      fuzzyDifferingPixels++;
+      if (d > fuzzyMaxChannelDelta) fuzzyMaxChannelDelta = d;
+    }
+  }
+
   const dssim = computeDssim(ssimScore);
   const histogramKL = computeHistogramKL(A, B);
   const perChannelSsim = await computePerChannelSsim(A, B);
@@ -446,6 +470,10 @@ async function diffWebVsRef(webPath, refPath) {
 
   const metrics = {
     pixelMismatchedCount: mismatched,
+    // The WPT-native diff quantities (see the pass above) — what
+    // checkFuzzyMatch actually consumes.
+    fuzzyDifferingPixels,
+    fuzzyMaxChannelDelta,
     pixelMismatchedPct: +pixelPct.toFixed(3),
     ssim: ssimScore,
     // wave-22 HONEST-FRAME provenance: frame geometry + pre-fold ref-frame
@@ -491,8 +519,12 @@ async function diffWebVsRef(webPath, refPath) {
  *  wptPass verdict below. */
 function checkFuzzyMatch(metrics, fuzzy) {
   if (!fuzzy) return null;
-  const px = metrics.pixelMismatchedCount ?? Infinity;
-  const maxDelta = metrics.labDeltaE?.max ?? Infinity;
+  // WPT-native quantities ONLY (see their computation above). The ??
+  // Infinity fallback means a manifest predating them can never be
+  // rescued into a pass by the fuzzy budget — absent evidence fails
+  // closed, the same direction every other gate here fails.
+  const px = metrics.fuzzyDifferingPixels ?? Infinity;
+  const maxDelta = metrics.fuzzyMaxChannelDelta ?? Infinity;
   return (px <= fuzzy.totalPixels.max && maxDelta <= fuzzy.maxDifference.max);
 }
 

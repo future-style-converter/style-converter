@@ -469,6 +469,33 @@ object TransformApplier {
             config.scaleY?.let { totalScaleY *= it }
             config.scaleZ?.let { totalScaleZ *= it }
 
+            // Standalone `perspective:` PROPERTY (css-transforms-2 §3).
+            //
+            // The perspective() FUNCTION is folded in by the loop above, but
+            // the property was not — and this branch is the one taken
+            // whenever `config.functions` is non-empty. So a component with
+            // both `perspective: 500px` and `transform: rotateY(30deg)`
+            // rendered with no foreshortening at all. That pairing is the
+            // ONLY way the property is useful, since on its own it
+            // establishes a perspective for children this element does not
+            // have. The other branch, applyWithGraphicsLayer, did read
+            // config.perspective — it just never runs when a transform list
+            // is present.
+            //
+            // Measured, case vs its no-perspective control:
+            //   iOS 2209 px · web 2097 px · Android 0 px
+            // while `transform: rotateY(30deg)` itself was applied on all
+            // three (Android 2709 px), so the rotation worked and only the
+            // projection was missing.
+            //
+            // A perspective() function wins if both are present: it is part
+            // of `transform`, so it composes with the other functions in
+            // declared order, while the property applies to the element as a
+            // whole.
+            if (perspectiveDistance <= 0f) {
+                config.perspective?.let { perspectiveDistance = it.toPx() }
+            }
+
             // Calculate camera distance from perspective
             // Compose's cameraDistance is in dp relative to screen density
             val effectivePerspective = if (perspectiveDistance > 0) {
@@ -481,14 +508,35 @@ object TransformApplier {
                 8f * density
             }
 
-            // Calculate depth-based scale adjustment from translateZ
-            // Positive Z = toward viewer = larger, Negative Z = away = smaller
-            val depthScaleFactor = if (perspectiveDistance > 0 && totalTranslationZ != 0f) {
-                val factor = 1f + (totalTranslationZ / perspectiveDistance)
-                factor.coerceIn(0.1f, 10f)
-            } else if (totalTranslationZ != 0f) {
-                // Use default perspective for calculation
-                val factor = 1f + (totalTranslationZ / DEFAULT_PERSPECTIVE)
+            // Depth-based scale from translateZ under a perspective.
+            //
+            // css-transforms-2 §3: perspective is a PROJECTIVE divide, not a
+            // linear one. A point at depth z under perspective P is scaled by
+            //
+            //     P / (P - z)        equivalently  1 / (1 - z/P)
+            //
+            // This was `1 + z/P` — the first-order Taylor expansion of that.
+            // The two agree only for small z/P and diverge fast. MEASURED on
+            // a 60x20 box under perspective(500px), against web (which is
+            // exact on every row):
+            //
+            //     translateZ    correct   was      now
+            //       100px        1.250    1.20     1.25
+            //       166px        1.497    1.33     1.50
+            //       250px        2.000    1.50     2.00
+            //      -500px        0.500    0.10     0.50
+            //
+            // The -500 row is the clearest tell: `1 + z/P` evaluates to
+            // exactly 0 there and was rescued only by the 0.1 clamp below,
+            // so an element pushed one perspective-length away rendered at
+            // a tenth of its size instead of half.
+            val depthScaleFactor = if (totalTranslationZ != 0f) {
+                val p = if (perspectiveDistance > 0) perspectiveDistance else DEFAULT_PERSPECTIVE
+                val denom = p - totalTranslationZ
+                // z >= P puts the element AT or BEHIND the camera. CSS stops
+                // painting it; there is no finite scale, so cap rather than
+                // divide by zero or flip sign. The clamp below is the cap.
+                val factor = if (denom > 0f) p / denom else Float.MAX_VALUE
                 factor.coerceIn(0.1f, 10f)
             } else {
                 1f

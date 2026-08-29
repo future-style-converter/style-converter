@@ -1070,15 +1070,947 @@ dirs + WPT corpus are gitignored):
   1187/1379 (86.1%), iOS 1038/1351 (76.8%), Android 1029/1349
   (76.3%)**.
 
+## Known-broken: iOS harness cold build
+
+`xcodebuild -target StyleConverterTest -sdk iphonesimulator -arch arm64` fails
+from a COLD build directory with a swift-frontend crash (Swift 6.3.3):
+
+```
+While evaluating ASTLoweringRequest (Lowering AST to SIL for StyleConverterRuntime)
+While silgen emitFunction for 'styledContent(now:)'
+  at runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:835:13
+```
+
+Release config (`-O -enable-default-cmo`); the stack dump shows a very deep
+nested `struct_type` chain of Applier types — the SwiftUI modifier-chain type
+blowup tipping the optimizer over.
+
+It is **pre-existing** (reproduces at ba92a4e3 with no local changes) and it
+is **configuration-specific, not warmth-specific**. Corrected 2026-08-27 —
+the earlier note here said warm incremental builds were why local runs
+survived. They are not: `test-all.sh` does `rm -rf StyleConverterTest.xcodeproj
+build` at the top of every iOS phase, so every harness run is already COLD.
+
+What actually separates the two is the optimiser. Measured on Swift 6.3.3,
+both from a cold `build/` and a cold generated project:
+
+| invocation | flags | result |
+|---|---|---|
+| `xcodebuild -target StyleConverterTest -sdk iphonesimulator -arch arm64` | `-O -enable-default-cmo` (Release, the default) | swift-frontend crash |
+| the same plus `-configuration Debug` (what `test-all.sh` passes) | `-Onone -disable-cmo` | builds, ~20 s |
+
+So the capture pipeline is not blocked by this, and never was; a CI runner
+hits it only if it builds Release. The crash is real and still unfixed — the
+deep nested `struct_type` chain of Applier types tips the optimizer over — but
+scope it as "Release builds of the runtime are broken", not "the harness
+cannot be built".
+
+## Fixed: iOS rendered out-of-range filters into Display P3
+
+**Fixed 2026-08-27** in `runtimes/swiftui/.../Renderer/CaptureColorSpace.swift`;
+the history below is kept because the negative result at the end is still
+load-bearing.
+
+The colour-space tripwire added in the measurement campaign fired on its
+first large run. Of 359 iOS captures, exactly ONE carried colour chunks:
+
+```
+088_Filter_Brightness.png  ->  iCCP "kCGColorSpaceDisplayP3" + cICP(primaries=12)
+```
+
+All 358 others are bare IHDR/IDAT/IEND. The trigger is narrow and specific:
+`filter: brightness(1.5)`. Blur, grayscale, sepia and contrast+saturate all
+stay sRGB — only the filter whose result exceeds 1.0 promotes the render to an
+extended-range wide-gamut context, which ImageIO then tags.
+
+This matters because nothing downstream is colour-managed: pngjs discards
+profile chunks without applying them, so those pixels would have been compared
+as sRGB. `normalize-pngs.mjs` now REFUSES the file instead of silently
+stripping the tag, and the comparator exits 3.
+
+**It does NOT explain the Filter_Brightness divergence.** Converting the iOS
+capture P3 -> sRGB before scoring moves deltaE95 only 18.697 -> 17.385, while
+Android-vs-web on the same component is 0.373 mean / 0.000 p95. So iOS is the
+lone outlier on the filter maths itself; the P3 tag is a separate, smaller
+defect that happens to share a trigger. Both are real; neither is the other.
+**The filter-arithmetic half remains open** — SwiftUI's `.brightness(_:)` is
+an additive shift where CSS `brightness()` is multiplicative
+(`StyleEngine/effects/filter/FilterApplier.swift` maps `pct` to
+`(pct - 100) / 100`), which is the likely root cause and is still unverified.
+
+### The fix
+
+`ImageRenderer.uiImage` chooses its destination colour space from the
+CONTENT: sRGB while the render stays inside [0,1], and a wide-gamut
+extended-range space once it does not (Display P3 on the simulator,
+extended sRGB under Mac Catalyst). `CaptureColorSpace.capture` now checks
+that choice — `isWideGamutRGB` — and re-renders through an explicit sRGB
+`CGContext` only when the framework promoted.
+
+The gate is narrow on purpose. Re-rendering EVERY capture through a
+constructed sRGB context also satisfies the tripwire, but it is a different
+rasterisation: measured on this fixture it moved **355 of 359** captures,
+mostly 1-2 LSB on antialiased edges but up to 202/255 on gradients, shadows
+and blends, and it shortened five captures by 1 px (its context rounded to
+nearest where `uiImage` ceils). The harness is byte-deterministic — two runs
+of identical code gave 359/359 pixel-identical captures — so that drift would
+have been a real regression against every committed baseline.
+
+Measured result of the shipped fix on `fixtures/visual-test-controls.json`:
+**358 of 359 captures byte-identical** to the pre-fix run, the 359th being
+`088_Filter_Brightness.png` itself, which now encodes as
+`IHDR sRGB eXIf pHYs iDOT IDAT IEND` like every other capture and scores
+SSIM 0.96 / 0.95 / 0.97 across the three pairs. Pinned by
+`CaptureColorSpaceTests` in the swiftui runtime suite (6 tests; the two
+defect tests fail against the pre-fix code).
+
+One correction to the original report: the `eXIf` and `iDOT` chunks are NOT
+specific to the offending capture — every iOS capture carries them before
+normalization. Only `iCCP`/`cICP` were ever the signal.
+
+## Control-fixture findings (3-platform, 2026-08-27)
+
+`tools/visual/gen-control-fixture.mjs` derives `X__no_<decl>` controls from
+`fixtures/visual-test.json` — each is X with exactly one declaration removed,
+so case and control differ if and only if that declaration has a visible
+effect on the platform that rendered them. **Zero difference is the finding.**
+359 components captured on all three platforms; numbers below are differing
+pixels, case vs its own control, within one platform.
+
+### Runtime gaps
+
+| declaration | iOS | Android | web | reading |
+|---|---:|---:|---:|---|
+| `backdrop-filter: blur(10px)` (Glass_Effect) | 0 | 0 | 264 | NOT a gap — capture-mode gated, see below |
+| `perspective: 500px` (Perspective_Rotate) | 2209 | ~~**0**~~ **1802** | 2097 | FIXED 2026-08-28 — was dropped on Android |
+| `transform: rotateY(30deg)` (same component) | 3082 | 2709 | 2840 | applied everywhere |
+
+**CORRECTED 2026-08-28.** `backdrop-filter` is NOT dropped. It is implemented on
+both natives (wave 26 above: two-pass controlled-canvas model, iOS validated
+against browser refs at 0.966 / 0.978 / 0.999). What the control measured is a
+CAPTURE-MODE gate: the two-pass path arms only on the COMPOSED capture path and
+is deliberately disarmed on the per-component path these runs used, to keep the
+committed 327-pair baselines byte-identical. Android gates on
+`composedMode && documentDeclaresBackdropFilter` (ScreenshotCaptureScreen.kt:309);
+iOS says so outright in ScreenshotCaptureView.
+
+The real gap is in the HARNESS, not the runtimes: composition-test.json was
+authored precisely so backdrop-filter has a non-uniform backdrop, and test-all.sh
+has no way to arm composed capture — so the ordinary fixture pipeline cannot
+exercise the property on either native. Worth closing, but it is a capture-path
+gap, not a missing applier.
+
+Also worth keeping: this is the second finding this campaign that looked like a
+native gap and was not (the other being the under-size trio, which is placeholder
+scaffolding). A control proves a property had NO VISIBLE EFFECT on a platform; it
+does not prove WHY, and the why has been different every time.
+
+`perspective` is FIXED. Android applied the rotation but ignored the
+perspective, so 3D transforms rendered flat. `applyTransformFunctions` --
+the branch taken whenever a transform list is present -- sourced perspective
+only from the `transform: perspective()` FUNCTION and never read the
+standalone property; the branch that did read it only runs when there are no
+transform functions, i.e. exactly when perspective cannot matter.
+
+Worth keeping for the pattern: the extractor was already unit-tested and
+green (`Perspective {px:500}` -> `config.perspective == 500f`), and the
+cross-platform gate never flagged the component -- it scores SSIM 0.9558 /
+0.9979 / 0.9563 and was above threshold before the fix too. A passing unit
+test plus a passing similarity gate, and only the control saw it.
+
+### A divergence in the other direction
+
+`vertical-align: sub` / `super` is set on a BLOCK-level component. Per CSS it
+applies to inline-level and table-cell boxes, so it should do nothing. web does
+nothing. Both natives grow the box, and disagree about how much:
+
+    Typography_Subscript    iOS 390x81  ·  Android 390x85  ·  control 390x77
+    Typography_Superscript  iOS 390x81  ·  Android 390x83  ·  control 390x77
+
+web is correct; both natives apply it, by different amounts.
+
+### Fixture weaknesses, now measured rather than asserted
+
+`overflow` / `text-overflow` / `white-space` on TextOverflow_Ellipsis are 0 on
+ALL three — the text does not overflow its 150px box, so none of the three
+declarations can do anything. `z-index: 10` sits on a lone component with no
+sibling to stack against. 6 of 24 `font-size` declarations set 16px, the
+initial value. `border-top-right-radius: 0` and `border-bottom-left-radius: 0`
+are likewise the initial value. `font-stretch` is inert on all three by
+design — its web applier is an explicit parity no-op.
+
+Run control fixtures with `NO_CROSS_PLATFORM_GATE=1`: case and control are
+*supposed* to differ, so scoring their cross-platform pairs against the
+conformance ledger asks the wrong question.
+
+### The three Android under-size components are a floor bug, not a box-model bug
+
+`Button_Outline`, `Input_Field` and `Edge_DeepNesting` render 2x(border-width)
+shorter on Android than on iOS/web. First recorded as an under-size bug; two
+measurements narrow it considerably.
+
+With real text pinned (the control fixture), removing the border changes the
+Android box by EXACTLY twice its width — Input_Field 54 -> 52 at 1px,
+Edge_DeepNesting 52 -> 48 at 2px. So the border box is computed correctly
+whenever CONTENT determines the size. And Input_Field's explicit
+`width: 200px` is exact on all three platforms; only its unconstrained,
+floor-driven height is short.
+
+The defect is therefore in `StyleApplier.placeholderFloorMinSize` /
+`borderBoxFloorMins`, which converts web's border-box `minHeight: 30px` into a
+Compose content-box `defaultMinSize` by subtracting padding and the border
+band. That floor exists ONLY because `fixtures/visual-test.json` has no text —
+it is harness scaffolding matching web's scaffolding, not product behaviour.
+Components with borders but no floor-driven height (Border_Solid 3px,
+Border_Dashed 2px, Border_Mixed per-side, Button_Primary) are all exact.
+
+Handle with care: the same arithmetic produced +2px regressions twice before,
+in wave 1 (Input_Field / Glass_Effect) and wave 4 (every Decorated row). Change
+it with a measured before/after, not by reasoning about the model.
+
+## The harness's A/A noise floor is zero (2026-08-28)
+
+Every threshold in the visual pipeline — SSIM ≥ 0.95, Δpx ≤ 2% — was
+picked by eye, and both gates that use them carried the same caveat in
+their source: the harness's own run-to-run variance had never been
+measured. That caveat was load-bearing. It was the stated reason the
+cross-platform gate reported stale expectations as *warnings* rather
+than failing on them.
+
+`tools/visual/noise-floor.sh` measures it. The method is an A/A study:
+run the same code against the same fixture more than once and compare
+the runs. Anything that differs is pure harness noise, because nothing
+else changed. Each run is a full `test-all.sh` — fresh convert, fresh
+iOS build (it `rm -rf`s the xcodeproj and build dir), fresh emulator
+boot (`-no-snapshot`), fresh install, fresh capture — so the
+independence matches what a human re-running the suite actually gets.
+
+Result:
+
+| fixture | captures | runs | outcome |
+|---|---:|---:|---|
+| `fixtures/visual-test.json` | 327 | 2 (web 3) | byte-identical |
+| `fixtures/composition-test.json` | 96 | 2 | byte-identical |
+
+**423 captures, bit-for-bit identical across independent runs, on all
+three platforms.** Not "small noise" — zero. SSIM = 1.0000, Δpx = 0.00%,
+ΔE = 0 between any two runs, by construction.
+
+### What it licenses, and what it does not
+
+It licenses promoting stale expectations from warning to failure
+(exit 5, `EXIT_STALE_EXPECTATION`). The fear was that a pair sitting at
+0.9499 would flap across the line run-to-run and a stale failure would be
+indistinguishable from a real fix. A metric computed from identical bytes
+is identical, so that flapping is not rare here — it is impossible.
+
+It does **not** license loosening anything, and it does not mean the
+metrics are well-calibrated. Two separate limits stand:
+
+- **Scope is same-machine.** Cross-machine variance — a different
+  runner, Xcode version, or emulator image — is unmeasured. Device-level
+  visual jobs are local-only today (see CLAUDE.md), so same-machine is
+  currently the whole population. Re-run `noise-floor.sh` before those
+  jobs move to CI; if captures stop being byte-identical there, the
+  stale-fails-the-build promotion is the first thing to revisit.
+- **A zero floor makes the *tolerances* harder to justify, not easier.**
+  With no noise to absorb, every point of slack below SSIM 1.0 is pure
+  tolerance for real change. The baseline gate is in effect an
+  exact-match check spelled as a similarity threshold, and a regression
+  that shifts many pixels slightly — a 1px baseline move, a small
+  uniform colour shift — still sails through at SSIM 0.999. That is the
+  same degenerate-pass family already recorded elsewhere in this file,
+  and the noise-floor result removes the last excuse for it. Tightening
+  is follow-up work, deliberately not bundled with the promotion.
+
+### Reproducing
+
+```bash
+bash tools/visual/noise-floor.sh                          # visual-test, 2 runs (~6 min)
+bash tools/visual/noise-floor.sh fixtures/composition-test.json 3
+```
+
+Exits 0 when captures are byte-identical. When they are not, it scores
+each platform's run-1-vs-run-2 captures through the *shipping* metric
+code (by mapping the two runs onto two of the comparator's platform
+slots) and prints the spread, so the number is directly comparable to
+the thresholds it is meant to justify.
+
+The script excludes any platform that wrote no captures during a run,
+via an mtime guard against a reference file stamped before the run. That
+guard is not incidental: without it a `SKIP_IOS=1` run would copy the
+*previous* run's stale iOS PNGs, compare them against themselves, and
+report a perfect noise floor for a platform that never executed — a
+study that cannot fail is worth nothing.
+
+## ΔE was computed on every pair and gated nothing (2026-08-28)
+
+Both gates — per-platform-vs-baseline and cross-platform — tested only
+SSIM and pixel-mismatch percentage. CIEDE2000 ΔE was computed on every
+pair, printed in the report, and recorded in every ledger row, but never
+appeared in a pass/fail expression. Neither gating metric sees colour
+the way a person does:
+
+- **pixelmatch** at `threshold: 0.25` cannot fire on a uniform lightness
+  shift below **66/255** (measured: black vs mid-grey scores as
+  IDENTICAL), so Δpx routinely reads 0.00% on a blatant recolour.
+- **SSIM** is structural. Repaint a shape in the wrong colour without
+  moving an edge and it barely moves.
+
+That is not hypothetical. Passing the SSIM+pixel gate at the moment ΔE
+was added:
+
+| row | ΔE95 | SSIM | Δpx |
+|---|---:|---:|---:|
+| `035_Filter_Sepia` · iOS-Android | 23.35 | 0.9573 | 0.57% |
+| `035_Filter_Sepia` · iOS-web | 23.35 | 0.9814 | 0.16% |
+| `009_Backdrop_Saturate_OverStripes` · iOS-web | 24.92 | 0.9778 | **0.00%** |
+| `009_Backdrop_Saturate_OverStripes` · Android-web | 24.92 | 0.9783 | **0.00%** |
+
+The divergence classifier had already labelled the sepia iOS-web pair
+`color-drift`. The report knew; the gate did not.
+
+ΔE95 now gates at **5.0** — not a fresh guess, but the boundary the
+classifier already calls "clearly different" (ΔE ≈ 1 is the
+just-noticeable difference, 2–3 noticeable in context, >5 simply wrong).
+Both gates delegate to the same `pairRegressed`, so they cannot drift
+apart in meaning. Override with `--delta-e-threshold`.
+
+### What it found immediately
+
+**A real iOS bug.** `filter: sepia(80%)` over `#3498db` = (52,152,219):
+the CSS matrix (filter-effects-1 §8.5, interpolated toward identity by
+the amount) gives **(153,158,143)**. Android and web both render exactly
+that. iOS renders **(74,110,113)** — same 1954-px box, wrong colour, and
+*cool* where sepia must be warm. `FilterApplier.swift` implements it as
+an eyeballed approximation, `saturation(1 - pct/200)` then
+`colorMultiply` by a warm colour *at `pct/100` alpha*; multiplying by an
+80%-alpha colour darkens everything, which is most of the error. The
+file header admits the approximation.
+
+The exact fix is non-trivial, so it is ledgered rather than bundled. The
+sepia matrix is rank-1 — `M(a)·c = (1-a)·c + a·(w·c)·t` with
+`w = (0.393, 0.769, 0.189)` and `t = (1, 0.888, 0.692)` — so it needs
+luminance in sepia's *own* basis. SwiftUI's `.grayscale` is Rec.709 and
+cannot express it, and iOS 16 (the package target) has no `.colorEffect`
+shader, so a correct implementation needs a CoreImage colour-matrix path
+in the inline filter chain.
+
+**A hole in the ledger, not just the runtimes.**
+`Backdrop_Saturate_OverStripes` has the same root cause as
+`Backdrop_Blur_OverStripes` (the two-pass backdrop path is deliberately
+disarmed on the per-component capture path) — but only the blur variant
+was listed. Its saturate sibling passed silently at ΔE95 24.92 / Δpx
+0.00% because no gating metric could see it.
+
+**A stale baseline hiding a landed fix.** With ΔE in the baseline gate,
+`BASELINE=1` immediately failed on `033_Filter_Brightness`: the
+committed iOS baseline still held **(191,253,241)**, the *old additive*
+brightness result from before that bug was fixed earlier the same day,
+while the current capture is the corrected **(69,255,169)** matching
+Android/web and the spec to 1 LSB. The old gate had passed that stale
+baseline without complaint. The stale capture even carried the
+Display-P3-promoted ground (26,26,**45**) that the fix also removed.
+
+Ledger 24 → 30 (`035_Filter_Sepia` ×2, `098_Neumorphic_Light` ×2,
+`Backdrop_Saturate_OverStripes` ×2). `098_Neumorphic_Light` is the
+weakest of the six and is flagged as such in its own entry: iOS's
+box-shadow penumbra falloff diverges from Android and web (which agree),
+5159/31980 px concentrated in the shadow rows above and below the card
+while the card face and page ground are byte-identical — the known
+CoreGraphics-vs-Skia blur-sigma convention difference, landing just over
+the line at ΔE95 5.34/5.59.
+
+### Baseline refresh
+
+Six baselines changed, each accounted for rather than accepted:
+
+| baseline | cause |
+|---|---|
+| `iOS__033_Filter_Brightness` | the brightness fix; **the gate caught this one** |
+| `iOS__014/015_Opacity_*` | the `compositingGroup` fix, via edge-AA compositing (71 px, sub-threshold) |
+| `Android__046_Perspective_Rotate` | the perspective fix |
+| `Android__014/015_Opacity_*` | **inherited stale from the base branch** — last written in `ea142784`, and provably not caused by any commit here: the only compose change that could touch a leaf is an additive `\|\| config.effects.blendMode.hasBlendMode` on an OR chain, which is false for a component with no blend mode |
+
+The last row is worth keeping: those two baselines were stale by 1 LSB
+plus ~80 antialiasing pixels — under every threshold, so nothing ever
+flagged them. A byte-level refresh surfaces that class; a threshold gate
+never will.
+
+## Animation: the seek worked, nothing used it (2026-08-28)
+
+Every piece of the deterministic animation-capture contract already
+existed and worked. `CAPTURE_ANIMATION_TIME` seizes the clock on all
+three platforms (`schema/spec/07-animations.md` §5); each platform
+verifies its own seize loudly; `fixtures/fidelity/motion/*` is
+purpose-built for it, with every duration at 1s so one clock value is
+mid-run for the whole surface.
+
+What did not exist was anything that *used* it. No automated run ever
+set the variable, so an animation divergence could not be caught by the
+pipeline. `tools/visual/animation-sweep.sh` closes that.
+
+```bash
+bash tools/visual/animation-sweep.sh                                  # keyframes, t=0…1
+bash tools/visual/animation-sweep.sh fixtures/fidelity/motion/transitions.json "0,0.5"
+CAPTURE_FORCE_STATE=hover bash tools/visual/animation-sweep.sh …      # transitions
+```
+
+It runs the cross-platform gate at each sampled time **and** asks a
+second question the 3-way comparison structurally cannot: for each
+platform and component, did the pixels change across the sweep? A static
+capture is the easiest thing in the world for three runtimes to agree
+on — a runtime that rendered the t=0 frame regardless of the requested
+time would pass every gate perfectly.
+
+First run, `motion/keyframes-basic.json` at t ∈ {0, 0.5, 1}: **all three
+gates clean and all 24 platform-component series moved** — the first
+automated evidence that the runtimes agree on *animated* frames, not
+just static ones. Per-component motion percentages match across
+platforms to the digit (18.46% / 20.07% / 26.11%).
+
+### Why a sweep, not two points
+
+`MK_FillBoth` (`animation-delay: 0.5s`, `duration: 1s`,
+`fill-mode: both`, opacity 0→1) is byte-identical at t=0 and t=0.5 on
+all three platforms — and that is **correct**: at t=0 it backwards-fills
+at opacity 0, and at t=0.5 the animation is just starting, also 0. At
+t=1.0 it moves 22.22% on all three. A two-point check would have called
+a spec-correct render a dead animation.
+
+### `CAPTURE_FORCE_STATE` was silently ignored on iOS
+
+Found by the sweep. Android and web honoured it; iOS ran base-state.
+Measured on `motion/transitions.json` with `CAPTURE_FORCE_STATE=hover`:
+Android and web captures both differed from their base-state run, iOS's
+was **byte-identical to base**. The cross-platform gate then reported
+`000_MT_BgFade` diverging on iOS-Android and iOS-web (SSIM 0.974,
+Δpx 21.11%, ΔE95 35.23) while Android-web agreed — a pure harness
+artefact that reads exactly like an iOS styling bug.
+
+**The trap is the name.** iOS reads the env `FORCE_STATE`
+(`CaptureOverrides.swift`: `knob(argument: "forceState", env:
+"FORCE_STATE")`), so the transport is `SIMCTL_CHILD_FORCE_STATE` — *not*
+`SIMCTL_CHILD_CAPTURE_FORCE_STATE`, which is the name the animationTime
+knob's symmetry leads you to write. (I wrote the wrong one first; the
+new gate caught me.)
+
+Why it survived: Android's forceState has had a "silently ran
+base-state" check since wave 8, and iOS had one for `animationTime` —
+but not for `forceState`. The asymmetry *was* the hiding place.
+`test-all.sh` now verifies iOS forceState against the same
+`capture-config.json` marker, with an error that names the correct
+variable. With the transport fixed, the gate is clean at every sampled
+time.
+
+### Transitions now actually run (fixed 2026-08-28)
+
+For the record: this was **not** an undiscovered bug. `DYNAMIC_CAPTURE.md`
+§4 described it precisely — "the forced-state class is applied at first
+paint, so the element mounts already IN the forced state and no
+transition runs… wiring that post-paint flip is platform-lane work on all
+three platforms" — and Android's `TransitionDriver` bailed out explicitly,
+citing that note. The animation sweep re-measured a documented, deliberate
+deferral. What it added was the *number*: all 12 series byte-identical at
+every sampled t, on all three platforms.
+
+It is still worth stating as the correlated-failure mode in its purest
+form: **the cross-platform gate was clean — all three runtimes agreed
+perfectly — while the property under test was entirely unexercised.** No
+3-way comparison can see that; only a temporal check can.
+
+**The reframe that made it small.** iOS *re-mounts per capture*:
+`ImageRenderer` is one synchronous layout+draw over a freshly built view
+graph per component, so `@State` re-initialises and `.onChange` can never
+fire. A real flip there is not hard, it is unrepresentable. So the
+contract is not "all three flip" but:
+
+> All three must **present the transition's value at pinned t**, with
+> timeline zero at the base→forced flip. How each gets there is platform
+> business.
+
+| platform | mechanism |
+|---|---|
+| web | **real DOM flip** — the renderer defers the force class when a clock is pinned; `capture-screenshots.mjs` adds it post-paint between two forced reflows (a style *change event*, the only thing that creates a `CSSTransition`), then the existing seize seeks it |
+| Android | **real recomposition flip** — `CaptureCanvas` mounts in base state and writes the forced set after `withFrameNanos {}`; `TransitionDriver` presents the blend at the pinned t |
+| iOS | **declared flip** — the renderer computes the pre-flip list as `effective(for:)` minus the forced set (`StateResolver` is pure, so it is exactly reproducible) and blends at t |
+
+**Engages only when both knobs are set.** With `CAPTURE_FORCE_STATE` but
+no clock, the state still applies at mount — so `interaction-states.mjs`,
+which captures forced states as a *settled* appearance, keeps doing
+exactly that instead of grabbing a mid-flight frame at a racy wall-clock
+instant. That also makes the whole static corpus inert by construction.
+
+**The hazard that would have produced silent garbage.** Android's capture
+loop renders every component through **one composition slot** (no `key(`
+anywhere in the file), while `TransitionDriver`'s `flights`/`committed`
+were unkeyed `remember`s. Harmless only while the driver bailed under
+capture; the moment transitions present, component *N* would start
+flights from component *N−1*'s committed values — `MT_WidthGrow`
+animating from `MT_BgFade`'s background colour. Fixed inside the driver
+(`remember(componentId)`) rather than by wrapping the call site in
+`key()`, which would change composition identity for the whole
+327-baseline corpus and so would not be inert.
+
+### Verification
+
+| check | result |
+|---|---|
+| `MT_BgFade` at t=0.4s — spec lerp `#7f8c8d`→`#c0392b` | **(153,107,102) exact on all three** (was (192,57,43), the endpoint, at every t) |
+| `MT_WidthGrow` at t=0.5s — geometric, rounding-free | **exactly 120px on all three** (base 80, target 160 — a width no static state produces) |
+| `MT_Delayed` at t=0.25s with `delay: 0.5s` | **base `#f1c40f` on all three** — delay counts inside t |
+| bucket scoping — the 3 components without an `:active` bucket, in an `active` run | **byte-identical to their unforced captures**, all 9 |
+| inertness — `BASELINE=1` visual-test | no regressions (327 comparisons) |
+| inertness — composition-test, keyframes sweep | gates clean, all 24 series still move |
+
+Sample times are deliberately **tie-free**. t=0.5 on `MT_BgFade` lands on
+(159.5, 98.5, 92.0) — two exact .5 ties, precisely where three
+independent float→byte roundings are entitled to disagree by 1 and
+manufacture a fake cross-platform divergence.
+
+**Honest limit:** on iOS the declared fold exercises the *blend*, not the
+live flip-*detection* path (`.onChange` / `transitionSnapshot`). Recorded
+here and in `DYNAMIC_CAPTURE.md` rather than left for a green row to
+imply otherwise.
+
+## iOS sepia() was an eyeballed approximation (2026-08-28)
+
+Found by the ΔE gate the same day it was added — it scored ΔE95 23.35
+while SSIM 0.957 and Δpx 0.57% both passed, and the divergence classifier
+had already labelled the iOS-web pair `color-drift`. The report knew; the
+gate did not.
+
+`filter: sepia(80%)` over `#3498db` = (52,152,219): filter-effects-1 §8.5
+gives **(153,158,143)**, which Android and web both render exactly. iOS
+rendered **(74,110,113)** — RGB distance 97, and *cool* where sepia must
+be warm. The cause was an approximation the file admitted to in its own
+header: `saturation(1 - pct/200)` followed by a `colorMultiply` by a warm
+colour **at `pct/100` alpha**; multiplying by an 80%-alpha colour darkens
+everything, which was most of the error.
+
+Scope check first: sepia was the **only** broken filter. Measured against
+the spec on the same corpus, `grayscale(100%)`, `brightness(1.5)` and
+`contrast(1.2) saturate(1.5)` all land exactly on the CSS value on all
+three platforms.
+
+### The fix, and why not a real colour matrix
+
+SwiftUI has no *public view-level* colour-matrix modifier — a distinction
+worth stating precisely, because the alternatives exist and were declined
+rather than being unavailable:
+
+- `View._colorMatrix(_:)` is SPI (underscored); nothing else in the
+  runtime depends on underscored SwiftUI API.
+- `GraphicsContext.Filter.colorMatrix` is public (iOS 15) but lives inside
+  `Canvas`, so it means rasterising the subtree.
+- `.colorEffect` (Metal) is iOS 17+, above the package's iOS 16 floor —
+  **and not buildable here at all**: the Metal toolchain is a separately
+  downloaded Xcode component, absent on this machine, so adding a `.metal`
+  source would break every iOS build including CI.
+
+Instead, the spec matrix `S` is *nearly* rank-1, so
+`M(a)·c ≈ (1-a)·c + a·(w·c)·t` — a blend of the original with a tinted
+luminance. The luminance needs sepia's own weights, and `.grayscale(1)`
+sums with Rec.709. The lever is that a channel **reweight** before the
+grayscale changes the basis: `grayscale(colorMultiply(c, k)) = Σ w709ᵢ·kᵢ·cᵢ`,
+so `kᵢ = wᵢ/w709ᵢ` makes it sum in sepia's basis. `t` is least-squares
+fitted rather than read off an arbitrary column (worst-case gamut residual
+0.83 → 0.42 per 255).
+
+### Two platform facts, pinned by fixtures rather than asserted
+
+Both are undocumented, so both now have fixtures anyone can re-measure:
+
+- **`fixtures/properties/effects/filter-grayscale-basis.json`** puts pure
+  primaries through `grayscale(100%)`, reading the basis off directly. It
+  *discriminates* rather than merely agreeing: Rec.709-gamma predicts
+  54/182/18/75, Rec.601 predicts 76/150/29/79, linear-space predicts
+  127/220/76/82. Measured on all three platforms: **54/182/18/75.**
+- **`fixtures/properties/effects/filter-sepia-amounts.json`** covers the
+  amount range plus the two cases the old corpus could not see — an
+  extended-range case (the reweight drives blue ×2.618, so a clamp before
+  the grayscale would show here) and a translucent one.
+
+### The alpha bug the first attempt shipped
+
+The obvious construction — draw the sepia layer over the original at
+`.opacity(a)` with ordinary source-over — is **wrong for anything not
+fully opaque**, and the first version of this fix had it that way. Source-over
+multiplies the top layer's alpha, so coverage α comes out as
+`α·a + (1-α·a)·α`, not α. For `rgba(52,152,219,0.5)` under `sepia(80%)`:
+
+| | result | out_alpha |
+|---|---|---|
+| spec / web / Android | (90, 92, 95) | 0.50 |
+| src-over ZStack | (95,117,129) | 0.70 |
+| shipped (additive) | (89, 92, 95) | 0.50 |
+
+That is every translucent background, every `opacity` on a filtered
+element, every antialiased edge — and **no fixture in the repo could see
+it**, because every sepia fixture was an opaque box. The same
+degenerate-corpus pattern recorded elsewhere in this file.
+
+The fix uses complementary opacities with `.plusLighter` inside a
+`.compositingGroup()`, since `(1-a)·α·c + a·α·s` carries alpha
+`(1-a)·α + a·α = α`. `CrossFadeApplier` already documents this exact trap
+for weighted image layers ("sequential src-over stacking would give
+1−0.9⁶ ≈ 0.47 — wrong"); the idiom is reused rather than reinvented.
+
+### Result
+
+All 8 sepia cases and all 4 grayscale cases pass on all three platforms,
+gate clean. Worst channel distance from the CSS value: **iOS 1, Android 0,
+web 0** — five of eight exact on iOS. The fixture pair's ΔE95 went
+23.35 → 0.69, the two ledger entries went stale, and the gate promoted
+earlier that day reported them with `EXIT_STALE_EXPECTATION`. Ledger
+30 → 28.
+
+The residual 1 is not the matrix: it is per-layer 8-bit quantisation in
+the additive composite. For the fixture's green,
+`round(0.2×152) + round(0.8×round(159.26)) = 30 + 127 = 157` against an
+unquantised 157.81. Both candidate tints render 157, so the
+least-squares fit's benefit here is analytic, not visible — recorded that
+way rather than as a pixel win it did not deliver.
+
+## The sweep's motion check is state-aware (2026-08-28)
+
+`animation-sweep.sh`'s motion check asks "did the pixels change across the
+sweep?" — the question a 3-way comparison structurally cannot ask. Pointed
+at a *transition* fixture it would have been wrong in a way that destroys
+the detector.
+
+With `CAPTURE_FORCE_STATE=active`, only `MT_WidthGrow` carries an
+`:active` bucket. A state-blind check flags the other **9 of 12 series as
+dead while everything works perfectly** — and the natural response to a
+wrong red is to weaken the check.
+
+So the expected set is **derived from the fixture** rather than
+hand-maintained: a component may move if it declares a selector bucket for
+the forced state, *or* declares a keyframe animation (those move
+regardless — `keyframes-basic.json` has no selectors at all, so a
+state-only rule would report all 8 components as ineligible while all 8
+correctly animate: 24 false "leak" rows, the same wrong-red in the other
+direction).
+
+The derivation buys the **inverse assertion** for free, and it is the
+stronger half: a component *without* a bucket for the forced state must be
+byte-identical across the whole sweep. If one moves, the forced state is
+leaking past the selector fold — a bug no "did anything animate?" check
+could ever see.
+
+The rule lives in `tools/visual/animation-eligibility.mjs` (9 unit tests)
+rather than inline in the shell script, for the same reason `pad-canvas`
+and `cross-platform-gate` were extracted: it is small, entirely made of
+ways to be wrong, and both of its failure modes were measured rather than
+imagined.
+
+Verified in all four combinations: transitions + `active` (1 of 4 eligible,
+clean), keyframes + `hover` (8 of 8 eligible, clean), keyframes unforced
+(no restriction, clean), and the failing arm — keyframes + `hover` at only
+t={0, 0.5}, where `MK_FillBoth`'s 0.5s delay means it correctly cannot
+move yet and the check reports it, exactly as the two-point caveat in the
+script header says it should.
+
+## Which metric actually catches things (2026-08-28)
+
+The SSIM caveat in `compare-screenshots.mjs` ended with a recommendation:
+*"the fix is to stop gating on SSIM."* Measuring what each metric
+contributes shows that advice is backwards, and following it would have
+blinded the gate to its largest catch class.
+
+Over the 327 visual-test pairs, 26 fail at least one threshold. Counting
+the **unique** catches — failures no other metric sees:
+
+| metric | fails | catches nothing else does |
+|---|---:|---:|
+| SSIM < 0.95 | 22 | **14** |
+| ΔE95 > 5 | 10 | 4 |
+| Δpx > 2% | 8 | **0** |
+
+The 14 SSIM-only rows are `BorderRadius_Uniform`, `BorderRadius_Pill`,
+`BorderRadius_Mixed`, `Edge_VeryLargeRadius`, `Edge_MultiTransform`,
+`Edge_InsetRoundShadow` — **antialiased curve divergence**, where ΔE95
+reads 0.00 (the 95th-percentile pixel is identical; only a thin AA band
+differs) and Δpx reads under 1.4%. SSIM is the only metric that sees
+structure.
+
+`pixelmatch` contributes **no unique signal at all** on this corpus — and
+it is separately blind to any uniform lightness shift below 66/255. It is
+kept (it costs nothing and may catch more on taller composed captures),
+but it is not what is holding the gate up.
+
+### The caveat that motivated the bad advice fires on one component
+
+Captures are 390 wide, so `min(W,H)` is the height, and `ssim.js`
+downsamples only when `f = round(min(W,H)/256) > 1` — i.e. a component
+≥ ~384px tall. Across **all 399 committed baselines exactly three are
+downsampled**: the three platforms of `003_AR_Half` at 390×432. Every
+other capture (visual-test heights are 32–132) is already scored at 1×.
+
+And on that one component it changes nothing measurable: scoring at 1×
+moves iOS-Android from 0.9978 to 0.9969, with **zero verdict flips** on
+any of its three pairs. Control: two non-downsampled rows score
+identically both ways (0.9406 → 0.9406), confirming the flag does what it
+claims rather than being silently ignored.
+
+So the caveat is real, narrow, and inert. It is not grounds for removing
+the metric doing most of the work. The source comment now carries these
+numbers and the recipe to re-derive them.
+
+## Correction: pixelmatch's blind spot is 66/255, not 132 — and blue is 198 (2026-08-28)
+
+A number this file has repeated, and used as a load-bearing argument, was
+wrong by exactly 2×. Found by an independent audit, then reproduced here
+before propagating.
+
+`pixelmatch` counts a pixel when its YIQ delta exceeds
+`maxDelta = 35215 · threshold²` = 2200.94 at the shipped `threshold: 0.25`.
+For a **uniform** shift the two chroma rows cancel, leaving
+`0.5053·d² > 2200.94`, i.e. `d > 66.0`.
+
+Measured directly on opaque 8×8 fields with the production option set:
+
+| shift | silent up to | fires at |
+|---|---:|---:|
+| uniform grey | 65 | 66 |
+| red only | 117 | 118 |
+| green only | 93 | 94 |
+| **blue only** | **197** | **198** |
+
+**The worked example was also wrong.** This file claimed black (0,0,0) vs
+mid-grey (130,130,130) "scores 8539.6 → reported IDENTICAL". It does not:
+black vs (128,128,128) scores **64 of 64 pixels different**.
+
+How the wrong figure was almost certainly produced: `colorDelta`'s
+alpha-blend branch computes `dr = (r1·a1 − r2·a2 − rb·da)/255`, so with
+`a1 = a2 = 0` every term vanishes and *any* colour pair scores zero.
+Reproduced: the same black-vs-grey comparison at **alpha 0** does score
+0/64. The original probe was built on transparent pixels.
+
+**The conclusion is unchanged and now better supported.** pixelmatch is
+still blind to blatant recolours — and worse than recorded, since a pure
+blue shift of 197/255 is invisible where the old figure implied 132. What
+changes is that the number in the argument is now the one that reproduces.
+
+## Open backlog from the 2026-08-28 audit sweep
+
+Two parallel agent sweeps (6 improvement lanes + 8 bug-hunt lenses, every
+candidate put through an independent refuter) produced **22 findings that
+survived verification, 0 refuted**. Four runtime bugs and three
+degenerate passes were fixed the same day (see the sections above). The
+rest are recorded here with enough detail to act on without re-deriving.
+
+Each was checked against `docs/`, the source comments and
+`cross-platform-expectations.json` before being reported — the sweep's
+refuters were explicitly instructed that a documented deliberate decision
+refutes a finding.
+
+### High
+
+| finding | where |
+|---|---|
+| ~~Compose perspective conversion wrong~~ **FIXED** — the real defect was not the cameraDistance scale but `depthScaleFactor` computing `1 + z/P`, the first-order Taylor expansion of `1/(1 − z/P)`. See "perspective + translateZ was wrong on both natives" above. | `runtimes/compose/…/transforms/` |
+| ~~iOS composes transforms in reverse order~~ **FIXED** — see "transform order" below. | `runtimes/swiftui/…/transforms/` |
+| **NEW (not from the sweep): Compose does not compose the transform list at all.** It accumulates each kind into a separate scalar (`translateX +=`, `rotation +=`, `scaleX *=`) and hands them to `graphicsLayer`, which applies a fixed scale→rotate→translate order — so `scale(2) translate(30px)` renders identically to `translate(30px) scale(2)`. Measured: web (156,96) vs Android (126,96). Ledgered as `Transform_Combined` iOS-Android with the fix route (compose to a matrix in CSS order, reuse the existing `decomposeMatrix2D`) | `runtimes/compose/…/transforms/` |
+| iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely | `runtimes/swiftui/…/effects/blend/` |
+| ~~`border` shorthand drops colour functions / loses `<line-width>` forms~~ **BOTH FIXED** — and the fix uncovered a third defect: a duplicated implementation meant fixing the shared function reached only 1 of the 5 shorthands. See "the border shorthand had two implementations" below. | converter shorthand expander |
+
+### Medium
+
+| finding | where |
+|---|---|
+| **NEW (spec-oracle first contact, 2026-08-29): Android clips a transformed child's paint vertically.** The no-parent-transform control (child `rotate(45deg)` alone in a 160×80 parent) measures 55×47 against the 57×57 diamond; nested rows lose 10–30px of height while iOS and web measure the full extent. Clip follows the child's layout slot. Waived-with-reason in `fixtures/combinations/nested-transforms.json` so the fix turns the waivers stale. | `runtimes/compose/…` child transform path |
+| ~~iOS drops translateZ~~ **FIXED** in the same pass — iOS applied no depth response at all under a perspective; see the section above. | `runtimes/swiftui/…/transforms/` |
+| ~~iOS drops negative box-shadow spread~~ **FIXED 2026-08-28** — the spread-path guard was `> 0`; `.inset(by:)` contracts for both signs. iOS now matches web exactly on a 4-case probe (bottom shadow rows 93/101/109/90). | `runtimes/swiftui/…/effects/shadow/` |
+| **NEW: Android over-blurs box-shadow by ~2.4×** — reach 123/131/131/120 rows vs web's 93/101/109/90 on the same probe, clipping at the canvas edge. `MultipleShadowApplier.kt` passes raw CSS blur into `BlurMaskFilter` with no radius→σ conversion (its sibling `ShadowApplier.kt` documents the right one), but the magnitude exceeds that error alone — needs real diagnosis, not a guessed constant. (This row was clobbered by a concurrent doc write on 2026-08-28 and restored from the commit message of `07f75ec9`.) | `runtimes/compose/…/effects/shadow/` |
+| In the skew path the perspective scale is inverted — `d/(d + tz)` instead of `d/(d − tz)` — so `translateZ` toward the viewer *shrinks* the element | `runtimes/compose/…/transforms/` |
+| iOS applies the overflow clip **outside** the transform, so a rotated or skewed element is clipped by its un-transformed axis-aligned frame | `runtimes/swiftui/…/` |
+| `hwb()` / `lch()` / `oklch()` hue still uses a `[\d.]+(?:deg)?` pattern, so angle units, negative hues, `none` and uppercase make the whole declaration fail | converter primitive parsers |
+| `flex: <number>` does not reset `flex-basis` to 0%, and `flex: .5` is misrouted onto `flex-basis` and then dropped | converter shorthand expander |
+| ~~`computeEdgeSsim` is dead~~ **FIXED 2026-08-29** — replaced the sharp Sobel (whose `scale` defaulted to the zero kernel-sum: divide-by-zero, all-zero buffer, eternal 1.0) with a pure-JS both-axis Sobel; sharp's documented `scale`/`offset` semantics turned out not to be implemented by libvips at all (measured: scale 8 + offset 128 returned all-255). Acceptance matrix now discriminates: edge-vs-flat 0.82, 1px-shift 0.84, 8px-shift 0.68, identity exactly 1.0, both axes. 0.5 ms per 390×132 image. | `tools/visual/compare-screenshots-metrics.mjs` |
+| `SkepticFontShorthandLh`'s `font: inherit` case asserts only `not.toBe('normal')` — a total drop satisfies it, and a total drop is what the engine does | web runtime tests |
+
+### Low
+
+| finding | where |
+|---|---|
+| `visibility: collapse` removes layout space on non-table elements; CSS 2.2 §11.2 requires it to behave exactly like `hidden` there | `runtimes/swiftui/…/` |
+| `visibility: hidden` is implemented as `opacity(0)` on both natives, so a descendant's `visibility: visible` cannot re-show itself | both native runtimes |
+| The HTML report headline counts rows with no cross-platform pair as "identical", so a one-platform run reads N/N identical | `tools/visual/compare-screenshots-html.mjs` |
+| The `protocolTimeout` regression-prevention check is satisfied by a code *comment*, so deleting the fix it guards leaves it green | `tools/visual/` |
+
+### One meta-finding worth keeping
+
+Three of the confirmed defects were **mine, shipped the same day** — the
+dropped `--delta-e-threshold`, and zero-comparison success paths in both
+`noise-floor.sh` and `animation-sweep.sh`. The tools built to find checks
+that cannot fail contained two fresh ones. That is the argument for an
+independent adversarial pass over one's own work, not just over inherited
+code.
+
+## perspective + translateZ was wrong on both natives (2026-08-28)
+
+Two of the audit backlog's transform findings, diagnosed by measurement
+and fixed. `perspective(P) translateZ(z)` is a pure uniform scale of
+`P/(P − z)` (css-transforms-2 §3) — arithmetic-clean, so it reads
+straight off a bounding box.
+
+Measured on a 60×20 box under `perspective(500px)`, with web exact on
+every row:
+
+| translateZ | correct | iOS before | Android before | both after |
+|---|---|---|---|---|
+| 100px | 74×24 | **60×20** | 74×24* | 74×24 |
+| 166px | 90×30 | **60×20** | 80×26 | 90×30 |
+| 250px | 120×40 | **60×20** | 90×30 | 120×40 |
+| −500px | 30×10 | **60×20** | **6×2** | 30×10 |
+
+\* Android's error was small at low z and grew; see below.
+
+**iOS applied no depth response at all** — 60×20 for every z. The Z
+component was discarded with the comment "SwiftUI has no Z-translate on a
+non-3D view; documented limitation". True of a *general* 3D translate,
+and beside the point for the case that occurs: under a perspective,
+translateZ is not a translation but a uniform scale, which
+`.scaleEffect` expresses exactly. The scale is applied only when a
+perspective is in scope — without one CSS projects orthographically and
+translateZ genuinely does nothing, which is also what keeps every 2D
+baseline byte-identical.
+
+**Compose computed `1 + z/P`** — the first-order Taylor expansion of
+`1/(1 − z/P)`. The two agree for small `z/P` and diverge fast: 1.50 where
+2.00 was wanted at z/P = 0.5. The −500 row is the clearest tell — the
+expansion evaluates to exactly 0 there and was rescued only by a
+`coerceIn(0.1f, 10f)` clamp, so an element pushed one perspective-length
+away rendered at a *tenth* of its size instead of half.
+
+After: **5 of 5 rows byte-identical across all three platforms.**
+
+Both were found by the audit sweep's cross-runtime lens. Neither was in
+the ledger, and neither was reachable by the existing corpus — no fixture
+combined `perspective()` with `translateZ`, which is exactly why a
+platform rendering no depth at all went unnoticed.
+
+## Transform order (2026-08-28)
+
+css-transforms-1 §11: `transform: A B` is the matrix product A·B, so **B
+maps the point first**. SwiftUI composes the other way — in
+`v.modA().modB()`, modB wraps modA, so modA reaches the content first and
+the result is B·A·p. Emitting the CSS list front-to-back therefore
+rendered every multi-function transform reversed.
+
+Measured on a 40×40 box, centroid, base at (96,96):
+
+| transform | spec / web | iOS before | Android |
+|---|---|---|---|
+| `translate(60px,0) rotate(45deg)` | (155, 96) | **(137,138)** | (155, 96) ✓ |
+| `rotate(45deg) translate(60px,0)` | (137,138) | **(155, 96)** | **(155, 96)** |
+| `scale(2) translate(30px,0)` | (155, 96) | **(125, 96)** | **(125, 96)** |
+| `translate(30px,0) scale(2)` | (125, 96) | **(155, 96)** | (125, 96) ✓ |
+
+**iOS returned exactly the swapped answer in all four** — the signature of
+a reversed composition rather than an arithmetic slip. Fixed by resolving
+each function's governing perspective front-to-back (a `perspective()`
+primes the rotation that *follows* it) and then emitting the pairs in
+reverse. The individual `translate`/`rotate`/`scale` longhands had the
+same inversion and were reordered too. iOS now matches web on 5 of 5.
+
+**Android returns the SAME answer for both orderings in each pair.** That
+is a different bug: Compose does not compose the list at all. It is
+ledgered rather than fixed in the same pass — `TransformApplier` is
+load-bearing for the whole 327-pair corpus, and a botched decomposition
+would move far more than the one row.
+
+The fix resolved **three** ledgered divergences (`Transform_Combined`
+iOS-web, `Edge_MultiTransform` iOS-web and iOS-Android) and created one
+(`Transform_Combined` iOS-Android, now that iOS is right and Android is
+not). Two baselines moved, both iOS multi-function transforms.
+
+## The border shorthand had two implementations (2026-08-28)
+
+Two audit findings, and a third defect found while fixing them.
+
+**Colour functions were dropped.** The classifier was
+`startsWith("#") || startsWith("rgb") || startsWith("hsl") || ^[a-zA-Z]+$`,
+so every CSS Color 4/5 function matched nothing — and `parseBorderValue`'s
+`when` had no `else`, so the token silently vanished and the border
+rendered with no colour. Measured through the converter: `oklch()`,
+`lab()`, `lch()`, `oklab()`, `hwb()`, `color()` and `color-mix()` all
+produced no `border-*-color` at all.
+
+**`<line-width>` forms were dropped, and the keywords mis-filed.** The
+length pattern had no `IGNORE_CASE`, required a leading digit, and omitted
+units, so `2PX`, `.5px` and `3Q` vanished. Worse, `thin|medium|thick` are
+bare idents, so they matched the *colour* test — `border: thin solid`
+produced no width and a colour of `"thin"`.
+
+### The third defect: fixing the shared function reached 1 of 5 shorthands
+
+`BorderTopExpander` and its three siblings all call
+`BorderExpander.parseBorderValue(...)`. That member was `private`, and a
+file-level **extension function of the same name** sat at the bottom of
+the file — added with the comment *"make parseBorderValue and tokenizer
+accessible to side expanders"* — carrying a second, older copy of the
+classification logic. Because the member was private, every call from the
+four side objects resolved to the **extension**.
+
+So after fixing the member, `border:` was correct and `border-top:`,
+`-right:`, `-bottom:`, `-left:` were still broken, with nothing to say so.
+It only surfaced because the per-side path was probed separately.
+
+The duplicate is deleted and the member is `internal`. That is enforced by
+the compiler rather than by a test: with the duplicate gone, making the
+member `private` again **fails to compile** at all four call sites, so the
+shadowing cannot silently return.
+
+All five shorthands now produce complete width/style/colour triples, with
+correct values — `oklch(0.7 0.15 200)` → sRGB (0, 0.724, 0.764),
+`hwb(200 20% 10%)` → (0.2, 0.667, 0.9), `thin` → 1px, `thick` → 5px,
+`.5px` → 0.5px, `2PX` → 2px. The longhand parsers always handled these;
+only the shorthand's tokenizer was discarding them.
+
+An unrecognised component now logs instead of vanishing — the silent
+fallthrough is what let both bugs live.
+
+## The threshold flip landed (2026-08-29)
+
+The derivation study's proposal is now the shipped configuration:
+pixelmatch `threshold: 0.02` with AA detection ON (`includeAA: false` —
+the flag's sense is inverted in pixelmatch's API). The old pair
+(0.25 / detection off) had the two knobs compensating for each other:
+the loose threshold was the only thing absorbing cross-rasteriser AA,
+at the price of a colour blind spot of 66/255 uniform (198/255 pure
+blue) — the hole the blur bug shipped through at Δpx 0.00%.
+
+New blind spot: ~6/255 uniform, ~17/255 pure blue. The AA detector now
+absorbs the antialiasing the loose threshold used to.
+
+Cost, exactly as the derivation predicted: **three newly-failing pairs**,
+all in the flat/smooth-region population, each ledgered with its reason —
+`Filter_Blur` iOS-Android and Android-web (the post-fix falloff-band
+texture: fills exact, ΔE95 ≤ 0.83, but the three rasterisers quantise a
+small-radius Gaussian differently across ~60px of gradient), and
+`Edge_InsetRoundShadow` Android-web (the "ledgered sibling, unledgered
+twin" the study called out — its other two pairs were already ledgered
+for the same shadow-falloff cause). Ledger 28 → 31.
+
+The baseline gate is untouched **by construction**: the zero A/A noise
+floor means byte-identical baseline pairs score 0 mismatches at any
+threshold — verified, `BASELINE=1` clean on all 327.
+
+Residual risk, carried forward honestly: pixelmatch's AA detector can
+also suppress a genuine 1px hairline shift. SSIM remains the backstop
+for that class — it is SSIM's largest unique-catch category.
+
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 368 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1265 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2757 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1785 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1685 |
+| converter (Kotlin) | `./gradlew :converter:test` | 393 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2769 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1821 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1844 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap
@@ -1091,3 +2023,135 @@ unblock the accessibility criteria above. The **flat-IR v2** wire already
 shipped (PR #30) — it is the current default, with the slot/placement
 children contract frozen in `schema/spec/03-children.md` +
 `05-versioning.md` and the known v1 wire defects repaired at that freeze.
+
+## Deriving the thresholds: 0.95 / 2% / 5.0 were eyeballed — here is what the data says (2026-08-29)
+
+The three gate thresholds were picked by eye, and the zero A/A noise floor
+(see 2026-08-28) removed the last excuse for that: with no run-to-run
+noise to absorb, every point of slack is pure tolerance for real change.
+`tools/visual/threshold-derivation.mjs` is the derivation, as a rerunnable
+study (`node tools/visual/threshold-derivation.mjs`, ~3 min;
+`threshold-derivation.test.mjs` pins its maths on hand-computable synthetic
+controls). It scores two measured populations with the *shipping* metric
+code — same `padToCanvas`, same `computeLabDeltaE` stride, same pixelmatch
+options — plus one new variant:
+
+- **HEALTHY** — all 399 formable pairs of the committed baselines
+  (133 components × 3 pairs), minus the 24 pairs the expectation ledger
+  excuses (4 of the 28 ledger entries reference composition-test captures
+  that have no committed baselines). 375 pairs, all passing today.
+- **BUGGY** — the calibration set: this session's real bugs *at the moment
+  they were alive*, reconstructed byte-exactly from the pre-fix baselines
+  still in git (`git show <fix-commit>^:tools/visual/baseline/…`), and
+  verified against the numbers recorded in STATUS/commit messages before
+  being used. Sepia reproduces to the digit (ΔE95 23.35, SSIM 0.9573,
+  Δpx 0.57%); brightness to 18.697 vs the recorded 18.7; blur within 0.08
+  ΔE of the recorded live-run readings. One recorded number did NOT
+  reproduce and is flagged rather than reused: the brightness pair's
+  "SSIM 0.9419" — the committed pre-fix bytes score 0.9887, so 0.9419
+  evidently described some other reading; the load-bearing number (ΔE95
+  18.7) reproduces exactly.
+- **dpxStrict** — the pixelmatch variant the pixelmatch lane motivated:
+  `threshold: 0.02` with AA detection ON (`includeAA: false` — the flag
+  means "skip detection"). The inverse trade of the shipping options:
+  a ~5/255 colour budget instead of 66/255, with rasterizer edge pixels
+  excused by structure instead of by a colour budget wide enough to hide
+  a recolour.
+
+### The healthy envelope vs the shipped thresholds
+
+375 unledgered pairs (min / p95 / p99 / max):
+
+| metric | healthy envelope | shipped gate | dead slack |
+|---|---|---|---|
+| SSIM | 0.9510 / 1.0 / 1.0 / 1.0 (min) | ≥ 0.95 | **0.001** — accidentally correct |
+| Δpx (shipping) | 0 / 0.60 / 0.73 / **0.855**% | ≤ 2% | 1.14 points |
+| ΔE95 | 0 / 0.34 / 0.77 / **1.093** | ≤ 5.0 | **3.9 points** |
+| dpxStrict | 0 / 0.92 / 1.38 / **2.927**% | not gated | — |
+
+The healthy ΔE95 max (1.093, `Edge_InsetRoundShadow` Android-web) and the
+weakest live-bug pair that must fire (blur iOS-Android at 2.287) do not
+overlap: **the gap (1.09, 2.29) is a clean separation the 5.0 threshold
+threw away.** Same shape on dpxStrict: healthy max 2.927 vs buggy minima
+5.25 (blur), 7.5 (sepia), 7.6 (brightness) — gap (2.93, 5.25).
+
+### Catch/cost table
+
+Bug caught = at least one of its live pairs fails. Cost = healthy pairs
+newly failing (each one was individually inspected via the edge/flat split
+of its strict diff mask — edge-dominated ≥ 0.8 means rasterizer AA).
+
+| candidate | thresholds (SSIM / Δpx / ΔE95 / dpxStrict) | catches | new healthy fails |
+|---|---|---|---:|
+| C0 current | .95 / 2 / 5 / — | sepia · brightness · transform ×2 · neumorphic · backdrop-sat | 0 |
+| C1 | .95 / 2 / **2** / — | + **blur (all 3 pairs)** | **0** |
+| C2 | .95 / 2 / 3 / — | + blur (2 of 3 pairs) | 0 |
+| C3 | .95 / **1** / 2 / — | same as C1 | 0 |
+| **C4 proposal** | .95 / 1 / 2 / **3.5** | same as C1, blur caught by two independent metrics | **0** |
+| C5 | **.96** / 1 / 2 / 3.5 | same as C4 | 15 (all edge-class AA) |
+
+The C5 row is the demonstrator for why SSIM stays at 0.95: the healthy
+population reaches down to 0.9510 (filters, buttons, blend modes,
+perspective — all edge-class AA divergence), so even 0.96 buys 15 false
+reds and still catches nothing new.
+
+### PROPOSAL (not flipped here — every recorded number moves)
+
+**SSIM ≥ 0.95 (keep) · Δpx ≤ 1% (from 2) · ΔE95 ≤ 2.0 (from 5) ·
+dpxStrict ≤ 3.5% (new fourth gate).** Margins: ΔE95 has 45% headroom
+above the healthy max and fires on all three blur pairs (2.29/3.27/3.89);
+dpxStrict has 16% headroom above healthy max and 33% below the weakest
+bug reading. Cost on the current corpus: **zero new failures, zero stale
+entries** (tightening cannot make a failing ledgered pair pass). Anything
+in ΔE95 1.5–3.0 and dpxStrict 3.0–4.0 is defensible on today's data; 2.0
+and 3.5 sit mid-gap. The blur acid test passes: replaying the pre-fix
+blur bytes under C4 fails 3 pairs on ΔE95 and all 3 on dpxStrict, where
+the shipped gate passed all three. The parent flips the defaults after a
+device run confirms the committed baselines equal live captures
+(noise-floor says they must, but the flip is the wrong moment to lean on
+"must").
+
+Risk band to watch after the flip — the healthy pairs nearest each new
+boundary, all inspected: `Edge_InsetRoundShadow` Android-web (ΔE95 1.093,
+dpxStrict 2.927 — penumbra falloff, flat-class, sibling pairs already
+ledgered), the fixed `Filter_Blur` iOS-Android / Android-web (dpxStrict
+2.34/2.43 — residual soft-halo, flat-class), `Sizing_AspectRatio`
+iOS-Android/iOS-web (Δpx 0.855 — label AA). A future healthy component in
+these families could land in the gap; the answer is a ledger entry with a
+reason, not a wider gate.
+
+### What no threshold can catch (measured, not conjectured)
+
+1. **Sub-AA geometric drift.** The pre-fix perspective-drop bug
+   (`046_Perspective_Rotate` Android-web: perspective foreshortening
+   entirely absent) read SSIM 0.9884 / Δpx 0.16% / ΔE95 0 / dpxStrict
+   0.862% — every reading *inside* the healthy envelope, and its diff is
+   100% edge-class. Catching it by SSIM needs ≥ 0.99, which fails 55
+   healthy pairs. The fixed component's own iOS-Android AA (dpxStrict
+   1.375) is larger than the bug's signal was. Only a spec oracle
+   (predicted geometry) sees this class.
+2. **Small-element divergence — the dilution floor.** ΔE95 is structurally
+   zero whenever < 5% of sampled pixels differ, and every %-metric is
+   diluted by the identical page ground (the component box is a minority
+   of the 390×H canvas). Live demonstration: the ledgered
+   `Sepia_Translucent` iOS divergence — a real, documented wrong-alpha
+   composite — reads ΔE95 0.574 / SSIM 0.9986 / Δpx 0 / dpxStrict 0.858
+   on the committed bytes. **No candidate threshold set fails it**, which
+   also means the gate should currently report those two ledger entries
+   as STALE on a `filter-sepia-amounts.json` run (exit 5) — worth a
+   device-run check; if confirmed, the honest fix is content-cropped
+   metrics (crop to the union bounding box of non-ground pixels before
+   scoring), which would raise every metric's sensitivity ~3–5× and is
+   the natural follow-up to this study.
+3. **Correlated wrongness.** All-three-agree-while-wrong: a converter bug
+   renders identically wrong on every platform (pairwise readings all
+   perfect); the transitions case (2026-08-28) was byte-identical across
+   platforms while the property never ran; a capture-mode gap disarmed on
+   all platforms is invisible the same way. Pairwise comparison is
+   structurally blind here — blur was one platform away from being this
+   class. Spec/temporal oracles only.
+
+The one-line summary: **tightening ΔE95 5→2 and adding dpxStrict ≤ 3.5 is
+free on this corpus and catches the blur class twice over; the remaining
+misses are not threshold problems at all** — they need the spec oracle
+(class 1, 3) and content-cropped metrics (class 2).

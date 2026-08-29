@@ -18,11 +18,14 @@
 //  the endpoint-or-midpoint choice; endpoint matches how the old value
 //  keeps applying until the flip completes) and are logged once.
 //
-//  Capture posture (docs/DYNAMIC_CAPTURE.md §4, honest note): forced
-//  states apply at FIRST RESOLUTION on iOS exactly like the web's
-//  first-paint class, so a forced capture run never flips mid-run —
-//  transitions.json gates the two deterministic ENDPOINT states until
-//  the post-paint flip lands on all three platforms.
+//  Capture posture (docs/DYNAMIC_CAPTURE.md §4): iOS cannot OBSERVE a
+//  mid-capture flip — ImageRenderer is one synchronous pass over a fresh
+//  view graph per component — so ComponentRenderer.motionEffectiveProperties
+//  DECLARES the origin instead: under a pinned clock with a forced state it
+//  calls this blend with `from:` = the same effective fold minus the forced
+//  set. StateResolver is pure, so that pre-flip list is exactly reproducible
+//  without having rendered it, and the interpolation below is shared with
+//  the live path unchanged.
 //
 
 import Foundation

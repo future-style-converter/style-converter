@@ -363,6 +363,44 @@ func captureComposedDocument(_ document: IRDocument, pngName: String) {
 /// Stays file-private (ComponentGallery.swift declares its own private
 /// `flatten`); the TITAN inbox loop reuses this rule THROUGH the internal
 /// captureAllComponents above rather than calling flatten directly.
+/// Does this component's OWN render depend on what is painted behind it?
+///
+/// `parentCreatesContext` asks the question in the parent direction and
+/// suppresses children when the parent's paint context owns their
+/// composition. That misses the mirror case: a child can be backdrop-
+/// dependent by itself, under a perfectly ordinary parent.
+///
+/// `mix-blend-mode` and `backdrop-filter` are exactly that — both are DEFINED
+/// as functions of the backdrop, so a standalone capture composites against
+/// the bare canvas and answers no question. The comparator then reports
+/// cross-platform divergence on a render that never occurs in the real
+/// composition (observed on fixtures/composition-test.json: `005_layer.png`
+/// and `007_layer.png` produced 4 divergent pairs of pure noise).
+///
+/// MUST stay identical to `dependsOnBackdrop` in web CaptureGallery.tsx and
+/// Android ScreenshotCaptureScreen.kt — capture indices are positional, so a
+/// rule firing on one platform only would silently misalign every subsequent
+/// component in the comparison.
+func dependsOnBackdrop(_ component: IRComponent) -> Bool {
+    // Same cheap guard and single-pass shape as parentCreatesContext above.
+    if component.properties.isEmpty { return false }
+    for p in component.properties {
+        switch p.type {
+        // backdrop-filter filters the backdrop by definition — with nothing
+        // behind it the filter is the identity.
+        case "BackdropFilter":
+            return true
+        // Same UPPER/lower variance parentCreatesContext documents; reuse the
+        // same tryStringValue helper so both predicates read the IR alike.
+        case "MixBlendMode":
+            if let v = tryStringValue(p.data)?.lowercased(), v != "normal" { return true }
+        default:
+            break
+        }
+    }
+    return false
+}
+
 private func flatten(_ components: [IRComponent]) -> [IRComponent] {
     var out: [IRComponent] = []
     func walk(_ c: IRComponent) {
@@ -372,7 +410,8 @@ private func flatten(_ components: [IRComponent]) -> [IRComponent] {
         // governs how the child is visually composed; the child is already
         // captured visually-correctly inside the parent's canvas.
         if parentCreatesContext(c) { return }
-        kids.forEach(walk)
+        // Mirror rule: skip a child that is itself backdrop-dependent.
+        kids.forEach { if !dependsOnBackdrop($0) { walk($0) } }
     }
     components.forEach(walk)
     return out

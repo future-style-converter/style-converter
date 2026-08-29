@@ -29,7 +29,62 @@
 // Exit codes:
 //   0 — success or no baseline
 //   1 — at least one component regressed beyond thresholds
-//   2 — script / IO error
+//   2 — script / IO error (including "baseline mode requested but 0 comparisons ran")
+//   3 — a capture is not untagged-sRGB. Distinct from 1 because it means the
+//       NUMBERS are untrustworthy, not that the render changed: pngjs
+//       discards colour profiles without applying them, so a tagged capture
+//       is compared as if it were sRGB. See png-color-space.mjs.
+//   4 — unexpected cross-platform divergence (see cross-platform-gate.mjs).
+//   5 — stale cross-platform expectation (see cross-platform-gate.mjs).
+//   6 — spec-oracle violation: a platform's render disagrees with a
+//       spec-derived `_expect` declared in the input fixture. Distinct from
+//       4 because no cross-platform comparison is involved — each platform
+//       is judged ALONE, so all three agreeing on the wrong value still
+//       fails. See spec-oracle.mjs.
+//
+// ⚠ SSIM caveat — `ssim.js` runs with `downsample: 'original'`, which
+// box-filters and decimates by `f = round(min(W, H) / 256)` whenever f > 1.
+// So in principle SSIM is not comparable across component heights, and the
+// single 0.95 gate would be a different sensitivity per row.
+//
+// MEASURED 2026-08-28, and the scope is much narrower than that reads.
+// Captures are 390 wide, so min(W,H) is the HEIGHT and f > 1 needs a
+// component ≥ ~384px tall. Across all 399 committed baselines exactly
+// THREE are downsampled — the three platforms of one component,
+// `003_AR_Half` at 390×432. Every other capture (heights 32–132 on
+// visual-test) is already scored at 1×.
+//
+// And on that one component it changes nothing: SSIM moves 0.9978 → 0.9969
+// (iOS-Android) when scored at 1×, with ZERO verdict flips on any of its
+// three pairs. Control: two non-downsampled rows score identically both
+// ways (0.9406 → 0.9406), confirming the flag does what it claims.
+//
+// Do not "fix" this by flipping `downsample` — it would move a committed
+// figure for no verdict change.
+//
+// The old text ended "the fix is to stop gating on SSIM." That advice is
+// CONTRADICTED by measuring what each metric actually contributes. Over
+// the 327 visual-test pairs, 26 fail at least one threshold, and the
+// UNIQUE catches — failures no other metric sees — are:
+//
+//     SSIM alone : 14      (border radii, large radii, multi-transform,
+//                           inset round shadow — antialiased CURVE
+//                           divergence, where ΔE95 reads 0.00 and Δpx
+//                           reads under 1.4%)
+//     ΔE alone   :  4      (the iOS sepia bug; Neumorphic shadow)
+//     Δpx alone  :  0
+//
+// SSIM is the LARGEST unique contributor and the only metric that sees
+// antialiased-curve structure. `pixelmatch` is the one contributing no
+// unique signal here — and it is separately blind to any uniform lightness
+// shift below 66/255 under the pre-flip settings — ~6/255 since the
+// 2026-08-29 flip to 0.02 + AA-on (see the threshold note at its call
+// site). Removing
+// SSIM on the strength of a caveat that fires on one component and flips
+// no verdict would blind the gate to its largest catch class.
+//
+// Re-derive with: score both corpora, then per pair compare
+// (ssim < 0.95), (pixelPct > 2), (ΔE95 > 5) and count the singletons.
 //
 // Usage:
 //     node compare-screenshots.mjs [options]
@@ -46,13 +101,18 @@
 //     --full-lab                Disable LAB ΔE stride sampling. Default
 //                               samples 1-in-4 pixels (~30 ms/pair). Full
 //                               sampling adds ~90 ms/pair (~40s on baseline).
+//     --no-spec-oracle          Skip the spec oracle even when the input
+//                               fixture declares `_expect` blocks. Mirrors
+//                               --no-cross-platform-gate: a deliberate
+//                               report-only run, visible in the manifest.
 //
 
 import { readdirSync, existsSync, mkdirSync, rmSync, copyFileSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve, dirname, basename, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { PNG } from 'pngjs';
-import sharp from 'sharp';
+// (sharp is no longer imported here — the only use was canvas padding,
+// which moved to pad-canvas.mjs so its invariants can be unit-tested.)
 import pixelmatchDefault from 'pixelmatch';
 import { ssim as computeSsim } from 'ssim.js';
 // COMPARE_METRICS Section 7 items 1–6 — new per-pair metrics, extracted
@@ -69,10 +129,39 @@ import {
 // COMPARE_METRICS Section 7 item 7 — divergence classifier (B-3). Pure
 // function over a metric block; lives in a separate module so it can be
 // unit-tested without booting the whole comparison pipeline.
-import { classifyDivergence } from './classify-divergence.mjs';
+import { classifyDivergence, SEVERITY_RANK } from './classify-divergence.mjs';
+// Colour-space tripwire. Nothing in this pipeline is colour-managed and
+// pngjs discards profile chunks without applying them, so a non-sRGB
+// capture would be compared as if it were sRGB — wrong numbers, no error.
+// See png-color-space.mjs for the full failure analysis.
+import { assertSrgbOrUntagged } from './png-color-space.mjs';
+import { padToCanvas } from './pad-canvas.mjs';
+// Wave 1 — the cross-platform pairs finally gate something. Evaluation logic
+// lives in a sibling module so the ledger semantics (expected / unexpected /
+// stale / orphaned) are unit-testable without booting the pipeline.
+import {
+  evaluateCrossPlatformGate,
+  pairRegressed,
+  formatRecord,
+  EXIT_UNEXPECTED_DIVERGENCE,
+  EXIT_STALE_EXPECTATION,
+  DEFAULT_DELTA_E_THRESHOLD,
+} from './cross-platform-gate.mjs';
 // COMPARE_METRICS Section 5 / item 9 — HTML report extracted into a
 // sibling module to keep this file under the per-file size budget.
 import { renderHTML } from './compare-screenshots-html.mjs';
+// Lane A — the spec oracle. The cross-platform gate above can only catch the
+// runtimes DISAGREEING; 2026-08-28 proved they can all be wrong together
+// (filter blur/invert wrong on both natives while every pairwise gate
+// passed). A fixture component may carry `_expect` with SPEC-DERIVED values,
+// and each platform is judged ALONE against them — see spec-oracle.mjs.
+import {
+  parseExpectations,
+  evaluateOracle,
+  formatViolation,
+  formatMissing,
+  EXIT_SPEC_ORACLE_VIOLATION,
+} from './spec-oracle.mjs';
 
 const pixelmatch = pixelmatchDefault.default ?? pixelmatchDefault;
 
@@ -105,6 +194,9 @@ const useBaseline    = args.includes('--baseline');
 const updateBaseline = args.includes('--update-baseline');
 const ssimThreshold  = Number(getArg('--ssim-threshold') ?? 0.95);
 const pixelThreshold = Number(getArg('--pixel-threshold') ?? 2);
+// ΔE95 ceiling. Defaults to the classifier's own "clearly different"
+// boundary rather than a fresh guess — see DEFAULT_DELTA_E_THRESHOLD.
+const deltaEThreshold = Number(getArg('--delta-e-threshold') ?? DEFAULT_DELTA_E_THRESHOLD);
 // Optional label (e.g. the input IR filename) so the report headline says
 // which test case it was generated from. Populated by test-all.sh.
 const inputLabel     = getArg('--input') ?? process.env.TEST_INPUT ?? '';
@@ -113,6 +205,19 @@ const inputLabel     = getArg('--input') ?? process.env.TEST_INPUT ?? '';
 // into pixel-accurate scoring for one-off accuracy runs (~40s extra on the
 // 327-pair baseline).
 const fullLab        = args.includes('--full-lab');
+// Cross-platform gate (Wave 1). ON by default — the three-way comparison is
+// the product thesis, and leaving it opt-in is how it never gets turned on.
+// It self-skips when fewer than two platforms were captured, which is what
+// keeps CI's one-platform-per-job visual workflow untouched without anyone
+// having to remember a flag. `--no-cross-platform-gate` is the escape hatch
+// for a deliberate report-only run.
+const crossPlatformGate = !args.includes('--no-cross-platform-gate');
+// Spec oracle (Lane A). ON by default for the same reason as the gate above:
+// leaving a correctness check opt-in is how it never gets turned on. It
+// self-skips when the input fixture declares no `_expect` (which is every
+// pre-existing fixture, so the 327-pair corpus is untouched by construction).
+// `--no-spec-oracle` is the escape hatch, mirroring --no-cross-platform-gate.
+const specOracle = !args.includes('--no-spec-oracle');
 
 function getArg(name) {
   const i = args.indexOf(name);
@@ -199,7 +304,54 @@ async function main() {
   // keys as ignorable; the bump is informational. Tests that probe for
   // `manifest.wpt !== undefined` need the explicit-null sentinel here so
   // they can branch on "field absent" vs "field present but no data" cleanly.
+  // ── Cross-platform gate (Wave 1) ─────────────────────────────────────────
+  // Evaluated HERE, before the report is written, so the result can be
+  // rendered into the headline and the manifest. The console output and the
+  // non-zero exit happen after the report is on disk — a gate that fails
+  // without leaving you the artifact to diagnose it is a worse gate.
+  const xGate = crossPlatformGate
+    ? evaluateCrossPlatformGate(rows, loadCrossPlatformLedger(), {
+        ssimThreshold, pixelThreshold, deltaEThreshold, inputLabel,
+      })
+    : { skipped: true, reason: 'disabled via --no-cross-platform-gate', checked: 0,
+        unexpected: [], expected: [], stale: [], expired: [] };
+
+  // ── Spec oracle (Lane A) ─────────────────────────────────────────────────
+  // Evaluated here (like the gate above: before the report/manifest are
+  // written, enforced after they are on disk). `null` when the fixture
+  // declares no `_expect` — the common case, and the inert one.
+  const oracleExpectations = loadSpecOracleExpectations();
+  const xOracle = oracleExpectations === null
+    ? null
+    : !specOracle
+      // The escape hatch still records that it was used: a manifest that
+      // said nothing would make a deliberately-skipped oracle look like a
+      // fixture with no expectations at all.
+      ? { skipped: true, reason: 'disabled via --no-spec-oracle', checked: 0, violations: [], missing: [] }
+      : evaluateOracle(rows, oracleExpectations, {
+          // Re-read the raw (unpadded) capture from disk: the oracle judges
+          // what the platform actually wrote, not the padded comparison
+          // canvas (whose PAD_SENTINEL magenta would enter the histogram).
+          // Plain PNG.sync.read, NOT loadPng: the colour-space tripwire
+          // already ran over every capture in analyzeComponent, and a
+          // second assert here would push duplicate violations into the
+          // exit-3 listing. A capture that failed that assert has
+          // present:false and is reported as missing, never re-read.
+          getPng: (platform, name) => {
+            const path = captures[platform]?.[name];
+            return path ? PNG.sync.read(readFileSync(path)) : null;
+          },
+        });
+
   const manifest = {
+    // NOT bumped to 5 for the `crossPlatformGate` key below, deliberately.
+    // The three previous bumps assumed this writer is the last word on the
+    // version, but two post-processors already overwrite it —
+    // compute-text-metrics.mjs sets 3 and inject-wpt-block.mjs sets 4 — so a
+    // 5 emitted here would be clobbered by either and would signal nothing.
+    // The graceful-rollout contract documented above (unknown top-level keys
+    // are ignorable, the field is explicitly null when absent) is what
+    // actually carries the compatibility guarantee, and it holds unchanged.
     manifestVersion: 4,
     generatedAt: new Date().toISOString(),
     inputLabel,
@@ -226,6 +378,21 @@ async function main() {
     // Kept explicit so v4 readers can detect "WPT pipeline didn't run"
     // via `manifest.wpt === null` rather than `'wpt' in manifest`.
     wpt: null,
+    // Wave 1 — cross-platform gate outcome. Always present (never null):
+    // when the gate is skipped the object says so and why, which is more
+    // useful to a reader than an absent key that could mean either "old
+    // manifest" or "single-platform run".
+    crossPlatformGate: xGate,
+    // Lane A — spec-oracle outcome. Present ONLY when the input fixture
+    // declares `_expect` (evaluated or deliberately disabled). This is the
+    // opposite of crossPlatformGate's always-present rule, on purpose:
+    // inertness for the no-expectation corpus is non-negotiable (the
+    // 327-pair manifest must stay byte-identical), and an absent key
+    // already has an unambiguous meaning here — "this fixture declares no
+    // spec expectations" — unlike the gate, where absence could mean
+    // "single-platform run". Unknown-top-level-key tolerance is the same
+    // documented contract the previous manifest additions rode.
+    ...(xOracle !== null ? { specOracle: xOracle } : {}),
     rows,
   };
   // MANIFEST_OUT lets the TITAN section-runner write the per-section manifest
@@ -248,6 +415,9 @@ async function main() {
       // run yet"; the renderer returns an empty string in that case so
       // the existing report layout is unaffected.
       perPlatformProbes: manifest.perPlatformProbes,
+      // Wave 1 — so the open-expectation count lands in the headline. An
+      // expectation ledger only stays honest while its size is visible.
+      crossPlatformGate: xGate,
     })
   );
 
@@ -262,6 +432,140 @@ async function main() {
   // (first run has no recorded baseline yet — generate one with
   // `node tools/visual/baseline-stats.mjs`).
   await runPhaseBDriftCheck(rows);
+
+  // Colour-space tripwire — checked BEFORE the baseline gate so a capture in
+  // the wrong colour space fails on its own terms instead of surfacing as a
+  // mysterious similarity regression. Exit 3 is distinct from 1 (regression)
+  // and 2 (empty run) so CI can tell the three apart at a glance.
+  if (colorSpaceViolations.length > 0) {
+    console.error(`✗ ${colorSpaceViolations.length} capture(s) are not untagged-sRGB:`);
+    for (const m of colorSpaceViolations) console.error(`  · ${m}`);
+    process.exit(3);
+  }
+
+  // ── Cross-platform gate verdict ──────────────────────────────────────────
+  // Evaluated above (before the report was written); reported and enforced
+  // here, BEFORE the baseline gate, so "the three runtimes disagree" is
+  // surfaced on its own terms rather than being masked by, or confused with,
+  // "this platform changed since its last capture".
+  if (xGate.skipped) {
+    console.log(`· cross-platform gate skipped — ${xGate.reason}`);
+  } else {
+    console.log(
+      `· cross-platform gate: ${xGate.checked} pair(s) · ` +
+      `${xGate.expected.length} known divergence(s) · ${xGate.unexpected.length} unexpected`,
+    );
+    // Expiry stays a WARNING: it fires on a calendar rollover with no code
+    // change, so failing on it would redden a build nobody touched.
+    for (const r of xGate.expired) {
+      console.warn(`  ⚠ expectation past its expiry (${r.entry.expires}) — re-review: ${formatRecord(r)}`);
+    }
+    // A ledger entry whose component rendered but whose PAIR did not form
+    // this run (one platform's capture of that component failed): warned,
+    // never fatal — deleting the line on that evidence would un-excuse a
+    // real divergence the next healthy run.
+    for (const u of xGate.unexercised ?? []) {
+      console.warn(`  ⚠ ledger pair not exercised this run (capture missing on one side): ${u.component} · ${u.pair}`);
+    }
+
+    // Unexpected divergence is checked FIRST. When both conditions are
+    // present, "the runtimes disagree" is the one worth surfacing — a stale
+    // line is bookkeeping, a new divergence is a product regression.
+    if (xGate.unexpected.length > 0) {
+      console.error(`✗ ${xGate.unexpected.length} unexpected cross-platform divergence(s):`);
+      for (const r of xGate.unexpected) console.error(`  · ${formatRecord(r)}`);
+      console.error('  Either fix the divergence, or add it to');
+      console.error('  tools/visual/cross-platform-expectations.json with a reason and an owner.');
+      process.exit(EXIT_UNEXPECTED_DIVERGENCE);
+    }
+  }
+
+  // ── Spec-oracle verdict (Lane A) ─────────────────────────────────────────
+  // ORDERING, decided rather than accidental: exit 4 > exit 6 > exit 5.
+  //   · Unexpected divergence (4) stays first — when the runtimes disagree
+  //     AND one is spec-wrong, the disagreement is the richer signal (it
+  //     names which platform diverged from the others) and the established
+  //     one; the oracle violation will still be there on the next run.
+  //   · The oracle (6) outranks stale expectations (5) — a platform
+  //     rendering the wrong colour is a product defect; a ledger line that
+  //     now passes is bookkeeping. Spec wrongness must not queue behind a
+  //     tidy-up chore, or the tidy-up commit "fixes" the build while the
+  //     render is still wrong.
+  // The oracle runs even when the gate self-skipped (single-platform run):
+  // each platform is judged ALONE, so one platform is exactly enough.
+  if (xOracle !== null) {
+    if (xOracle.skipped) {
+      console.log(`· spec oracle skipped — ${xOracle.reason}`);
+    } else {
+      console.log(
+        `· spec oracle: ${xOracle.checked} platform-component check(s) · ` +
+        `${xOracle.violations.length} violation(s)` +
+        ((xOracle.waived?.length ?? 0) > 0 ? ` · ${xOracle.waived.length} waived` : ''),
+      );
+      // Waived violations: excused per-platform divergences (_expect.waive),
+      // the oracle's analogue of the cross-platform ledger. Loud, with the
+      // reason inline, never fatal — the excuse travels with the warning.
+      for (const w of xOracle.waived ?? []) {
+        console.warn(`  ⚠ waived: ${formatViolation(w)}`);
+        console.warn(`      waiver: ${w.waiveReason}`);
+      }
+      // Missing measurements are warnings, not violations: a SKIP_* run
+      // legitimately captures fewer platforms, and the decode/capture-count
+      // guards own those failure classes. But they must be VISIBLE, or the
+      // oracle silently narrows its own coverage.
+      for (const m of xOracle.missing) console.warn(`  ⚠ oracle skipped: ${formatMissing(m)}`);
+
+      if (xOracle.violations.length > 0) {
+        console.error(`✗ ${xOracle.violations.length} spec-oracle violation(s) — a render disagrees with the CSS spec:`);
+        for (const v of xOracle.violations) console.error(`  · ${formatViolation(v)}`);
+        console.error('  The expected values are spec-derived (_expect in the fixture), so the platforms');
+        console.error('  agreeing with EACH OTHER does not excuse this. Fix the platform(s) — or, if the');
+        console.error('  derivation itself is wrong, correct the fixture and cite the spec in _expect.note.');
+        process.exit(EXIT_SPEC_ORACLE_VIOLATION);
+      }
+      // A waiver whose platform now PASSES has outlived the divergence it
+      // excused. Same two-sided rule (and same exit code) as the ledger's
+      // stale entries: the fix is a one-line fixture edit, and leaving the
+      // waiver in place would silently re-excuse the next real regression.
+      if ((xOracle.stale?.length ?? 0) > 0) {
+        console.error(`✗ ${xOracle.stale.length} stale oracle waiver(s) — the platform now passes; delete the waiver:`);
+        for (const st of xOracle.stale) {
+          console.error(`  · ${st.platform} · ${st.component} — waived as: ${st.reason}`);
+        }
+        process.exit(EXIT_STALE_EXPECTATION);
+      }
+      // An oracle that measured NOTHING must not read as green — the same
+      // "check that cannot fail" doctrine behind the zero-comparison guard
+      // in baseline mode. Every expectation unbound (renamed components,
+      // empty run) lands here rather than in a quiet pass.
+      if (xOracle.checked === 0) {
+        console.error('✗ spec oracle: the fixture declares _expect but ZERO checks ran —');
+        console.error('  no expectation matched any captured component (see the ⚠ lines above).');
+        console.error('  A declared oracle that measures nothing must not pass.');
+        process.exit(EXIT_SPEC_ORACLE_VIOLATION);
+      }
+    }
+  }
+
+  if (!xGate.skipped) {
+    // Stale entries now FAIL. This was a warning while the harness's A/A
+    // noise floor was unmeasured — the fear being that a pair at 0.9499
+    // would flap and the failure would be indistinguishable from a real fix.
+    // tools/visual/noise-floor.sh measured it: captures are BIT-FOR-BIT
+    // identical across independent full runs (423 captures over two
+    // fixtures), so a metric cannot flap run-to-run and the fear does not
+    // apply. See cross-platform-gate.mjs for the full result and its scope.
+    if (xGate.stale.length > 0) {
+      const orphans = xGate.stale.filter((r) => r.orphaned);
+      const fixed   = xGate.stale.filter((r) => !r.orphaned);
+      console.error(`✗ ${xGate.stale.length} stale expectation(s) — the ledger no longer matches reality:`);
+      for (const r of fixed) console.error(`  · now passing, delete the line: ${formatRecord(r)}`);
+      for (const r of orphans) console.error(`  · no such component: ${formatRecord(r)}`);
+      console.error('  Delete them from tools/visual/cross-platform-expectations.json.');
+      console.error('  An expectation that outlives the divergence it excused is how the ledger rots.');
+      process.exit(EXIT_STALE_EXPECTATION);
+    }
+  }
 
   if (useBaseline) {
     // Count how many baseline comparisons actually ran. A row only counts
@@ -381,11 +685,27 @@ async function analyzeComponent(name, captures) {
       pairs[key] = null;
       continue;
     }
+    // PAIRWISE canvas, not the 3-way union. Padding a pair to the union
+    // meant that when the THIRD platform was the largest, both members of
+    // this pair carried an identical magenta-sentinel region — and
+    // identical regions AGREE, so every mean-based metric (SSIM, pixel %,
+    // ΔE) was diluted toward similarity by area belonging to neither
+    // image. The pipeline hunt measured a full verdict flip from this on
+    // a synthetic trio. On the pairwise canvas a sentinel pixel can only
+    // ever face REAL pixels from the other side, which is the sentinel's
+    // entire design (pad-canvas.mjs: under-size must read as DIFFERENT).
+    // When the pair's max equals the union (the common case — most rows
+    // have all three platforms the same size), the pre-padded images are
+    // reused and the bytes are identical to the old path.
+    const pw = Math.max(loaded[a].width, loaded[b].width);
+    const ph = Math.max(loaded[a].height, loaded[b].height);
+    const A = (pw === canvasW && ph === canvasH) ? normalized[a] : await padToCanvas(loaded[a], pw, ph);
+    const B = (pw === canvasW && ph === canvasH) ? normalized[b] : await padToCanvas(loaded[b], pw, ph);
     pairs[key] = await diffPair(
-      normalized[a],
-      normalized[b],
-      canvasW,
-      canvasH,
+      A,
+      B,
+      pw,
+      ph,
       `${name.replace(/\.png$/, '')}__${key}.png`
     );
   }
@@ -418,33 +738,108 @@ async function analyzeComponent(name, captures) {
   return { name, canvasW, canvasH, platforms, pairs, baseline };
 }
 
-async function loadPng(path) {
-  const buf = readFileSync(path);
-  return PNG.sync.read(buf);
+/**
+ * Every colour-space violation seen this run. Recorded as well as thrown,
+ * because the per-platform loader catches loader errors into a `decode
+ * error` report cell — visible, but NOT build-failing. A capture in the
+ * wrong colour space must be loud, so `main()` turns a non-empty list into
+ * a distinct non-zero exit (3) that can't be confused with either a
+ * baseline regression (1) or an empty run (2).
+ */
+const colorSpaceViolations = [];
+
+/**
+ * Load the cross-platform expectation ledger. A missing file is NOT an
+ * error — a fixture with no known divergences legitimately has no ledger,
+ * and in that case every failure is unexpected, which is the correct strict
+ * default. A malformed file IS an error: silently treating unparseable JSON
+ * as "no expectations" would flip the gate to maximally strict at the exact
+ * moment someone fat-fingered a comma, and the resulting wall of failures
+ * would look like a regression rather than a typo.
+ */
+function loadCrossPlatformLedger() {
+  // CROSS_PLATFORM_EXPECTATIONS repoints the ledger. This exists so the gate
+  // can be tested END TO END — asserting it really exits 4/5 rather than
+  // trusting that the exported constants are wired up — which matters more
+  // than usual for a gate whose entire job is to not be theatre.
+  //
+  // It is not a new way to weaken the gate: `--no-cross-platform-gate`
+  // already disables it outright, so anyone wanting to dodge it has a
+  // shorter path. Runs that set this are visible in the report headline
+  // because the ledger path is echoed with the verdict.
+  const path = process.env.CROSS_PLATFORM_EXPECTATIONS
+    ? resolve(process.env.CROSS_PLATFORM_EXPECTATIONS)
+    : resolve(__dirname, 'cross-platform-expectations.json');
+  if (!existsSync(path)) return { expectations: [] };
+  try {
+    return JSON.parse(readFileSync(path, 'utf8'));
+  } catch (e) {
+    console.error(`✗ cross-platform-expectations.json is unreadable: ${e.message}`);
+    process.exit(2);
+  }
 }
 
 /**
- * Pad `img` (width × height) onto a (W × H) canvas filled with the standard
- * capture background (#1A1A2E) — no stretching, no resampling. Keeps the
- * component pixel-aligned even when one platform produced a taller image
- * than another.
+ * Load the input fixture's `_expect` declarations (Lane A spec oracle).
+ *
+ * The comparator only knows the input as a LABEL (--input, threaded through
+ * by test-all.sh), so the original fixture JSON is resolved relative to the
+ * repo root — the same base every fixture path in this repo is written
+ * against. `resolve` passes an absolute label through unchanged, which is
+ * what the e2e tests use.
+ *
+ * Absence is tolerated in both senses: no label (bare comparator run) and a
+ * label that is not a file on disk (TITAN section labels) both mean "no
+ * oracle", returning null. A file that EXISTS but does not parse is an
+ * error (exit 2), for the same reason as the ledger above: silently reading
+ * unparseable JSON as "no expectations" would switch the oracle off at the
+ * exact moment someone fat-fingered the fixture. Authoring errors inside
+ * `_expect` (parseExpectations throws) are also exit 2 — the check's own
+ * setup is broken, which is a different failure from a render being wrong.
+ *
+ * Returns the parsed Map, or null when the fixture declares no `_expect`
+ * anywhere — the common, inert case.
  */
-async function padToCanvas(img, W, H) {
-  if (img.width === W && img.height === H) return img;
-
-  const padded = await sharp(PNG.sync.write(img))
-    .extend({
-      top: 0,
-      bottom: Math.max(0, H - img.height),
-      left: 0,
-      right: Math.max(0, W - img.width),
-      background: { r: 0x1A, g: 0x1A, b: 0x2E, alpha: 1 },
-    })
-    .png()
-    .toBuffer();
-
-  return PNG.sync.read(padded);
+function loadSpecOracleExpectations() {
+  if (!inputLabel) return null;
+  const path = resolve(__dirname, '../..', inputLabel);
+  if (!existsSync(path)) return null;
+  let doc;
+  try {
+    doc = JSON.parse(readFileSync(path, 'utf8'));
+  } catch (e) {
+    console.error(`✗ spec oracle: input fixture ${path} is unreadable: ${e.message}`);
+    process.exit(2);
+  }
+  let expectations;
+  try {
+    expectations = parseExpectations(doc);
+  } catch (e) {
+    console.error(`✗ spec oracle: ${e.message}`);
+    console.error('  Fix the _expect block in the fixture — an oracle with a broken declaration');
+    console.error('  must not run at all, or its silence would read as a pass.');
+    process.exit(2);
+  }
+  return expectations.size > 0 ? expectations : null;
 }
+
+async function loadPng(path) {
+  const buf = readFileSync(path);
+  // Assert BEFORE decoding: pngjs would silently drop the offending chunk,
+  // after which there is no way to tell the pixels are in the wrong space.
+  try {
+    assertSrgbOrUntagged(buf, path);
+  } catch (e) {
+    colorSpaceViolations.push(e.message ?? String(e));
+    throw e;
+  }
+  return PNG.sync.read(buf);
+}
+
+// Canvas normalization (PAD_SENTINEL + padToCanvas) lives in
+// pad-canvas.mjs so the "under-sized output must not be invisible"
+// invariant is unit-testable — this file is a script and cannot be
+// imported without running main().
 
 /**
  * Pixel-diff via pixelmatch + SSIM via ssim.js, plus the six COMPARE_METRICS
@@ -458,15 +853,36 @@ async function padToCanvas(img, W, H) {
  */
 async function diffPair(a, b, W, H, diffFilename) {
   const diff = new PNG({ width: W, height: H });
-  // `threshold` controls per-pixel color-delta tolerance. 0.25 is generous
-  // enough that cross-platform font AA doesn't flag entire glyph edges as
-  // mismatches, but still catches real changes (colors shifting, borders
-  // appearing / disappearing, shadows moving).
-  // `includeAA: true` skips AA pixels entirely — usually desirable for this
-  // kind of cross-renderer comparison.
+  // THE DERIVED SETTINGS (threshold-derivation.mjs, 2026-08-29 flip).
+  //
+  // The old pair was `threshold: 0.25, includeAA: true` — and both numbers
+  // were compensating for each other rather than expressing a tolerance:
+  // includeAA: true means AA detection NEVER RUNS (pixelmatch's JSDoc:
+  // "whether to SKIP anti-aliasing detection"; gate `!includeAA && …`),
+  // so 0.25 was the only thing absorbing cross-rasterizer AA — at the
+  // price of a colour blind spot of 66/255 uniform (198/255 pure blue).
+  // The blur bug shipped through exactly that hole: Δpx read 0.00% while
+  // both natives under-blurred.
+  //
+  // Now: `includeAA: false` turns the AA DETECTOR ON (it excludes pixels
+  // pixelmatch classifies as antialiasing), which lets the colour
+  // threshold drop to 0.02 — maxDelta = 35215·0.02² = 14.09, so a uniform
+  // shift registers from ~6/255 (was 66) and pure blue from ~17/255 (was
+  // 198). Derivation, measured over the 399 committed baseline pairs:
+  // this combination catches the blur-class divergence the old settings
+  // could not, at a cost of a small, enumerable set of newly-failing
+  // pairs (edge-population rows the AA detector cannot fully classify),
+  // each ledgered with its reason rather than absorbed by a loose knob.
+  // Residual risk, named honestly: the AA detector can also suppress a
+  // genuine 1px hairline shift — SSIM remains the backstop for that class
+  // (it is SSIM's largest unique-catch category).
+  //
+  // The zero A/A noise floor is what makes this safe: byte-identical
+  // baseline pairs score 0 mismatches at ANY threshold, so the baseline
+  // gate is untouched by construction.
   const mismatched = pixelmatch(a.data, b.data, diff.data, W, H, {
-    threshold: 0.25,
-    includeAA: true,
+    threshold: 0.02,
+    includeAA: false,
     diffColor: [255, 80, 80],
     alpha: 0.15,
   });
@@ -535,6 +951,23 @@ async function diffPair(a, b, W, H, diffFilename) {
   return metrics;
 }
 
+/**
+ * SSIM via ssim.js. Two properties of this number are easy to misread and
+ * both are load-bearing when interpreting a report:
+ *
+ * 1. **It is GRAYSCALE.** ssim.js converts RGB→gray with Matlab's integer
+ *    Rec.601 weights `(77R + 150G + 29B + 128) >> 8` before any SSIM math,
+ *    and discards alpha. Two colours with matched luminance but different
+ *    hue score ~1.0. For a CSS colour engine that is a structural blind
+ *    spot, not a tuning problem — the ΔE metric exists to cover it.
+ *
+ * 2. **It is computed at a per-component resolution.** Defaults include
+ *    `downsample: 'original'` + `maxSize: 256`, which box-filters and
+ *    decimates by `f = round(min(W, H) / 256)` when f > 1. Only `ssim:
+ *    'fast'` is overridden here. So a short capture is scored at 1× and a
+ *    tall one at 1/2×, while every other metric stays at 1×. SSIM is not
+ *    comparable across component heights.
+ */
 async function safeSsim(a, b) {
   // ssim.js expects ImageData-like objects (data: Uint8ClampedArray, width, height)
   try {
@@ -589,12 +1022,22 @@ async function compareBaseline(name, normalized, canvasW, canvasH) {
       pairH,
       `${name.replace(/\.png$/, '')}__baseline-${p}.png`
     );
-    // Phase A gate (CI-blocking, unchanged). Spec Section 6:
-    // "Phase A — keep the existing `regressed = ssim < threshold ||
-    // pixelPct > threshold` gate." This is what gates `--baseline` exit 1.
-    const regressed =
-      pair.pixelMismatchedPct > pixelThreshold ||
-      (pair.ssim !== null && pair.ssim < ssimThreshold);
+    // Phase A gate (CI-blocking). This is what gates `--baseline` exit 1.
+    //
+    // Delegates to pairRegressed so the baseline gate and the
+    // cross-platform gate cannot drift apart in meaning — same metrics,
+    // same comparisons, different subject. cross-platform-gate.test.mjs
+    // asserts they agree; this call is what makes that true by
+    // construction rather than by two expressions being kept in sync by
+    // hand.
+    //
+    // ΔE joined the expression with the cross-platform promotion: it was
+    // computed on every pair and gated nothing, while pixelmatch cannot
+    // fire on a uniform lightness shift below 66/255 (pre-flip; ~6/255
+    // since 2026-08-29) and SSIM barely
+    // moves when a shape is repainted in the wrong colour. See
+    // cross-platform-gate.mjs for the measured rows that motivated it.
+    const regressed = pairRegressed(pair, { ssimThreshold, pixelThreshold, deltaEThreshold });
     if (regressed) result.regressed = true;
 
     // Phase B (LOG-ONLY, not gating). Spec Section 6:
@@ -679,26 +1122,49 @@ async function runPhaseBDriftCheck(rows) {
     console.warn(`  [phase-b] could not parse ${statsPath}: ${e.message ?? e}`);
     return;
   }
-  // Severity ordering used for "downgrade" detection — must match
-  // classify-divergence.mjs's SEVERITY_RANK so signal interpretation is
-  // consistent across modules.
-  const rank = {
-    identical: 1,
-    'sub-pixel-noise': 2,
-    unknown: 3,
-    mixed: 4,
-    'edge-shift': 5,
-    'color-drift': 6,
-    'structural-divergence': 7,
-  };
+
+  // Fixture-scope check. The lookup below is keyed on `${component}__${pair}`
+  // and silently `continue`s on a key it cannot find, so a stats file
+  // recorded from a DIFFERENT fixture disables the entire check while
+  // leaving it looking healthy — no warning, no output, nothing to notice.
+  //
+  // That is not hypothetical: the committed baseline-stats.json was a 6-pair
+  // `examples/wpt/css-color/color-003.json` snapshot from 2026-07-08, and
+  // ZERO of the 327 visual-test pairs matched any of its keys. The drift
+  // check had been a complete no-op for every visual-test run since.
+  //
+  // Log-only, matching the rest of Phase B — but loud, because a check that
+  // measures nothing is worse than one that is absent.
+  if (prior.inputLabel && inputLabel && prior.inputLabel !== inputLabel) {
+    console.warn(
+      `  [phase-b] SKIPPED — baseline-stats.json was recorded from ` +
+      `"${prior.inputLabel}" but this run is "${inputLabel}". Regenerate it ` +
+      `with \`node tools/visual/baseline-stats.mjs\` after a run of this fixture.`,
+    );
+    return;
+  }
+  // Severity ordering used for "downgrade" detection — the CANONICAL
+  // SEVERITY_RANK, imported. This used to be an inline copy that claimed
+  // to "match classify-divergence.mjs's SEVERITY_RANK" and had silently
+  // drifted: it lacked glyph-metric-noise, no-content and
+  // test-not-applicable entirely (all three fell through to unknown = 3),
+  // so a pair degrading from structural-divergence to NO-CONTENT — the
+  // pipeline producing nothing comparable at all — ranked as an
+  // IMPROVEMENT and the drift check stayed quiet. A comment promising two
+  // tables agree is not a mechanism; an import is.
+  const rank = SEVERITY_RANK;
   let downgrades = 0;
+  let comparable = 0;    // pairs present in BOTH this run and the stats file
+  let seen = 0;          // pairs present in this run at all
   for (const r of rows) {
     for (const [pairKey, pair] of Object.entries(r.pairs ?? {})) {
       if (!pair) continue;
+      seen += 1;
       const key = `${r.name}__${pairKey}`;
       const priorLabel = prior.perPair?.[key];
       const currentLabel = pair.divergence;
       if (!priorLabel || !currentLabel) continue;
+      comparable += 1;
       // Downgrade = current rank > prior rank (i.e. moved toward
       // structural). Equal-rank or improvement is fine.
       const priorRank = rank[priorLabel] ?? rank.unknown;
@@ -709,8 +1175,21 @@ async function runPhaseBDriftCheck(rows) {
       }
     }
   }
-  if (downgrades > 0) {
-    console.warn(`  [phase-b] ${downgrades} label downgrade(s) vs ${statsPath} (log-only — Phase C will gate)`);
+  // Coverage check — the second half of the same defence. Even with a
+  // matching inputLabel, a renamed component or a partial stats file can
+  // leave the check comparing almost nothing, and the `continue` above makes
+  // that indistinguishable from "everything is fine". Always state the
+  // denominator so the reader can tell a clean run from an empty one.
+  if (comparable === 0) {
+    console.warn(
+      `  [phase-b] covered 0 of ${seen} pair(s) — no key in baseline-stats.json ` +
+      `matched this run, so nothing was actually checked. Regenerate it with ` +
+      `\`node tools/visual/baseline-stats.mjs\`.`,
+    );
+  } else if (downgrades > 0) {
+    console.warn(`  [phase-b] ${downgrades} label downgrade(s) across ${comparable}/${seen} comparable pair(s) vs ${statsPath} (log-only — Phase C will gate)`);
+  } else {
+    console.log(`· phase-b drift: ${comparable}/${seen} pair(s) comparable · 0 downgrades`);
   }
 }
 

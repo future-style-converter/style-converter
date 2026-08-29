@@ -132,6 +132,17 @@ const WPT_COMPOSED_MODE: boolean = (() => {
  * fall back to null (base-state render) — capture-screenshots.mjs's env
  * validation is the loud gate.
  */
+/// `?animationTime=<s>` — read here only to decide whether the forced-state
+/// class is applied at mount or deferred to a post-paint flip (see
+/// HARNESS_OPTIONS.forceState). The seize itself lives in CaptureGallery.
+const CAPTURE_ANIMATION_TIME: number | null = (() => {
+  if (typeof window === 'undefined') return null;
+  const raw = new URLSearchParams(window.location.search).get('animationTime');
+  if (raw === null || raw.trim() === '') return null;
+  const parsed = Number(raw);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed : null;
+})();
+
 const FORCE_STATE = (() => {
   if (typeof window === 'undefined') return null;                    // SSR — never forced
   const raw = new URLSearchParams(window.location.search).get('forceState');
@@ -924,7 +935,22 @@ const HARNESS_OPTIONS: RendererOptions = {
   // harness routing knowledge.
   resolveImageSource: (ctx) => wptImageSrc(ctx.component) ?? PLACEHOLDER_IMG_SRC,
   // Forced-state capture hook (spec 06 §6) — validated URL param.
-  forceState: FORCE_STATE,
+  //
+  // DEFERRED when a clock is also pinned (spec 07 §4). A transition's
+  // timeline zero is the base→forced flip, and the browser only creates a
+  // CSSTransition object during a style recalc that CHANGES a value. Baking
+  // `force-<state>` into the first className means the element's first-ever
+  // computed style IS the forced style — there is no before-value, so
+  // `document.getAnimations()` returns nothing and seizeAnimations has
+  // nothing to seek. Measured: transitions.json rendered its END state at
+  // every t on all three platforms.
+  //
+  // With a time pinned, mount in BASE state instead; capture-screenshots.mjs
+  // adds the class post-paint, which is a real style change event. Without
+  // `animationTime` the class stays mount-time, so every existing run —
+  // including interaction-states.mjs, which captures forced states as a
+  // SETTLED appearance and pins no clock — is byte-identical.
+  forceState: (FORCE_STATE !== null && CAPTURE_ANIMATION_TIME !== null) ? null : FORCE_STATE,
   // Wave-19 lane FLOAT — CSS 2.1 §9.5 float-run grouping, WPT capture
   // ONLY (pin P8; the legacy 327-pair flow never sets `?wpt=1`, so its
   // DOM stays byte-identical). Each run of ≥2 consecutive left-floating

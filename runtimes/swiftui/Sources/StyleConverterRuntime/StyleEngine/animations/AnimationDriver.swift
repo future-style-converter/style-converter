@@ -141,13 +141,26 @@ enum AnimationDriver {
     /// fraction — the between-keyframes application of css-animations-1
     /// §4.4 (KeyframeInterpolator calls this per segment) and the
     /// whole-window application for transitions (a transition IS one
-    /// segment). Clamped to [0, 1] (v1 — overshoot extrapolation is not
-    /// implemented in the interpolator).
+    /// segment).
+    ///
+    /// INPUT progress is clamped to [0, 1]; OUTPUT progress is not, and
+    /// must not be. css-easing-1 §2.1 constrains x1/x2 to [0, 1] but
+    /// leaves y1/y2 free, which is exactly what makes back-ease curves
+    /// like cubic-bezier(0.68, -0.55, 0.265, 1.55) overshoot both ends.
+    /// This used to clamp the output "because overshoot extrapolation is
+    /// not implemented in the interpolator" — but it is: both callers
+    /// (KeyframeInterpolator and TransitionResolver) feed the result
+    /// straight into KeyframeInterpolator.lerp, which is `x + (y - x) * u`
+    /// with no clamp and therefore extrapolates correctly. The clamp
+    /// flattened every overshoot curve to a plain ease, and since Compose
+    /// does NOT clamp, the same CSS animated differently on the two
+    /// platforms. Caught by EasingReferenceTests against the css-easing-1
+    /// table (14 samples of the back-ease case).
     static func ease(_ p: Double, with fn: AnimationTimingFn?) -> Double {
         let clamped = min(1, max(0, p))
         switch fn ?? easeDefault {
         case .cubicBezier(let x1, let y1, let x2, let y2):
-            return min(1, max(0, bezier(clamped, x1: x1, y1: y1, x2: x2, y2: y2)))
+            return bezier(clamped, x1: x1, y1: y1, x2: x2, y2: y2)
         case .steps(let count, let position):
             return step(clamped, count: count, position: position)
         case .linearStops(let stops):

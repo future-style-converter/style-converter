@@ -596,7 +596,10 @@ object StyleApplier {
             // ignore the value, and the resolve is a cheap value read.
             positionOffset = if (config.effects.filters.hasBackdropFilters ||
                 config.effects.filters.hasFilters ||
-                config.effects.shadows.hasShadow)
+                config.effects.shadows.hasShadow ||
+                // FOURTH consumer: the mix-blend-mode saveLayer has the same
+                // offset-box requirement as the color-matrix group above.
+                config.effects.blendMode.hasBlendMode)
                 com.styleconverter.runtime.layout.position.PositionApplier
                     .resolvedOffset(config.layout.position)
             else androidx.compose.ui.unit.DpOffset.Zero,

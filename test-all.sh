@@ -25,6 +25,9 @@
 #
 # Environment overrides:
 #     SKIP_IOS=1 SKIP_ANDROID=1 SKIP_WEB=1    skip a platform
+#     NO_CROSS_PLATFORM_GATE=1                 don't gate the 3-way pairs (for
+#                                                control fixtures, whose pairs
+#                                                are intentionally divergent)
 #     UPDATE_BASELINE=1                        copy captures → tools/visual/baseline/
 #     BASELINE=1                               compare vs baseline, fail on regression
 #     SIM_DEVICE="iPhone 17 Pro"               force a specific iOS simulator (by name)
@@ -279,7 +282,16 @@ log "out/tmpOutput.json written"
 # would produce a two-line "0\n?" value. Count IDs in the IR safely by
 # running grep inside a pipe to `wc -l` and guarding the pipeline so it
 # always emits a numeric string, even for empty / malformed input.
-COMPONENT_COUNT=$(grep -o '"id"' "$OUTPUT_DIR/tmpOutput.json" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
+# Expected CAPTURE count — NOT the raw component count. The devices flatten
+# with suppression (children under a context-creating parent render inside
+# the parent only; backdrop-dependent children are suppressed standalone),
+# so the old `grep -c '"id"'` over-counted on every nested fixture: the
+# poll waited for captures the devices will never produce and finished
+# through the stuck-counter branch, 10s late, with a scary "app may have
+# crashed" warning on a perfectly healthy run (composition-test: "32 / 42
+# captured…" every time). expected-captures.mjs mirrors the device rules;
+# the grep stays only as a last-resort fallback if node is unavailable.
+COMPONENT_COUNT=$(node "$TOOLS_VISUAL_DIR/expected-captures.mjs" "$OUTPUT_DIR/tmpOutput.json" 2>/dev/null     || grep -o '"id"' "$OUTPUT_DIR/tmpOutput.json" 2>/dev/null | wc -l | tr -d ' ' || echo 0)
 log "$COMPONENT_COUNT components"
 
 # ── Step 2: Sync IR into every bundle ────────────────────────────────────────
@@ -423,7 +435,14 @@ print('Unknown')")
             IOS_LAST_COUNT=-1
             IOS_STUCK_FOR=0
             IOS_STUCK_LIMIT=10   # 10 × 1 s = 10 s with no progress → give up
-            for i in $(seq 1 60); do
+            # Ceiling scales with the component count — the Android poll got
+            # this fix (a flat ceiling silently truncated a 359-component
+            # run at whatever had rendered by timeout and reported success);
+            # the iOS poll kept the flat 60 until the pipeline hunt flagged
+            # the asymmetry. Exhaustion is reported, never silent.
+            IOS_MAX_POLLS=$(( 60 + COMPONENT_COUNT ))
+            IOS_POLL_EXHAUSTED=1
+            for i in $(seq 1 "$IOS_MAX_POLLS"); do
                 # `get_app_container` can race with install; tolerate nulls.
                 if [[ -z "$APP_CONTAINER" ]]; then
                     APP_CONTAINER=$(xcrun simctl get_app_container "$SIM_UDID" "$IOS_BUNDLE" data 2>/dev/null || echo "")
@@ -438,12 +457,14 @@ print('Unknown')")
                 COUNT=$((10#${COUNT:-0}))
                 echo "  $COUNT / $COMPONENT_COUNT captured…"
                 if [[ "$COUNT" -ge "$COMPONENT_COUNT" ]]; then
+                    IOS_POLL_EXHAUSTED=0
                     break
                 fi
                 if [[ "$COUNT" == "$IOS_LAST_COUNT" ]]; then
                     IOS_STUCK_FOR=$(( IOS_STUCK_FOR + 1 ))
                     if [[ $IOS_STUCK_FOR -ge $IOS_STUCK_LIMIT ]]; then
                         warn "iOS count stuck at $COUNT for $(( IOS_STUCK_FOR ))s — app may have crashed"
+                        IOS_POLL_EXHAUSTED=0   # reported by the stall branch, not a silent timeout
                         break
                     fi
                 else
@@ -452,6 +473,9 @@ print('Unknown')")
                 fi
                 sleep 1
             done
+            if [[ "$IOS_POLL_EXHAUSTED" == "1" ]]; then
+                warn "iOS capture poll exhausted after ${IOS_MAX_POLLS}s with progress still being made — captures may be truncated"
+            fi
 
             rm -rf "$IOS_DIR/screenshots"
             mkdir -p "$IOS_DIR/screenshots"
@@ -473,6 +497,61 @@ print('Unknown')")
                         exit 1
                     fi
                     log "verified: iOS capture ran with animationTime=${CAPTURE_ANIMATION_TIME}"
+                fi
+
+                # The same gate for forceState, which did NOT have one --
+                # and the asymmetry is exactly why the gap survived.
+                # Android's forceState has had a "silently ran base-state"
+                # check since wave 8; iOS had one for animationTime only.
+                # So CAPTURE_FORCE_STATE was honoured on Android and web
+                # and silently ignored on iOS, and nothing said so.
+                #
+                # MEASURED before this was added, on
+                # fixtures/fidelity/motion/transitions.json with
+                # CAPTURE_FORCE_STATE=hover: Android and web captures both
+                # differed from their base-state run, iOS's was
+                # BYTE-IDENTICAL to base. The cross-platform gate then
+                # reported 000_MT_BgFade diverging on iOS-Android and
+                # iOS-web (SSIM 0.974, Δpx 21.11%, ΔE95 35.23) while
+                # Android-web agreed — a pure harness artefact that reads
+                # exactly like an iOS styling bug.
+                #
+                # THE TRAP IS THE NAME. iOS reads `FORCE_STATE`
+                # (CaptureOverrides.swift: knob(argument: "forceState",
+                # env: "FORCE_STATE")), so the transport variable is
+                # SIMCTL_CHILD_FORCE_STATE -- NOT
+                # SIMCTL_CHILD_CAPTURE_FORCE_STATE, which is the name the
+                # animationTime knob's symmetry would lead you to write.
+                # Verified: with SIMCTL_CHILD_FORCE_STATE=hover the iOS
+                # capture differs from base, i.e. the state applies.
+                # Same silently-ignored-knob gate for width and scheme.
+                # The forceState transport bug survived precisely because
+                # its knob was RECORDED but never VERIFIED — these two were
+                # in the identical state (capture-config.json carries
+                # "width" and "scheme"; nothing read them back).
+                if [[ -n "${CAPTURE_WIDTH:-}" ]]; then
+                    IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
+                    if ! grep -q "\"width\":${CAPTURE_WIDTH}" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
+                        err "CAPTURE_WIDTH=${CAPTURE_WIDTH} was set but the iOS harness config marker is missing/mismatched — the capture silently ran at the default width. Export SIMCTL_CHILD_CAPTURE_WIDTH=${CAPTURE_WIDTH} so simctl forwards it."
+                        exit 1
+                    fi
+                    log "verified: iOS capture ran with width=${CAPTURE_WIDTH}"
+                fi
+                if [[ "${CAPTURE_DARK:-0}" == "1" ]]; then
+                    IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
+                    if ! grep -q "\"scheme\":\"dark\"" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
+                        err "CAPTURE_DARK=1 was set but the iOS harness captured in LIGHT scheme. Export SIMCTL_CHILD_CAPTURE_DARK=1 so simctl forwards it."
+                        exit 1
+                    fi
+                    log "verified: iOS capture ran in dark scheme"
+                fi
+                if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
+                    IOS_CAPTURE_CONFIG="$APP_CONTAINER/Documents/test_screenshots/capture-config.json"
+                    if ! grep -q "\"forceState\":\"${CAPTURE_FORCE_STATE}\"" "$IOS_CAPTURE_CONFIG" 2>/dev/null; then
+                        err "CAPTURE_FORCE_STATE=${CAPTURE_FORCE_STATE} was set but the iOS harness config marker is missing/mismatched ($IOS_CAPTURE_CONFIG) — the capture silently ran BASE state. Export SIMCTL_CHILD_FORCE_STATE=${CAPTURE_FORCE_STATE} (note: FORCE_STATE, not CAPTURE_FORCE_STATE — that is the env name the iOS harness reads) so simctl forwards it."
+                        exit 1
+                    fi
+                    log "verified: iOS capture ran with forceState=${CAPTURE_FORCE_STATE}"
                 fi
 
                 # iOS's UIImage.pngData() embeds non-deterministic metadata
@@ -688,6 +767,16 @@ else
         # would exit instantly without waiting for THIS run's captures.
         SCREENSHOT_DIR_DEVICE="/sdcard/Android/data/$ANDROID_PACKAGE/files/test_screenshots"
         "$ADB" shell rm -rf "$SCREENSHOT_DIR_DEVICE" 2>/dev/null || true
+        # POST-CONDITION on the wipe: if the rm silently failed (adb hiccup,
+        # permission wobble), the poll below would count the PREVIOUS run's
+        # PNGs, finish instantly, and pull stale captures as this run's —
+        # the documented instant-exit flake. An unverified rm is not a wipe.
+        LEFTOVER=$("$ADB" shell ls "$SCREENSHOT_DIR_DEVICE" 2>/dev/null | grep -c png || true)
+        LEFTOVER=$((10#${LEFTOVER:-0}))
+        if [[ "$LEFTOVER" -ne 0 ]]; then
+            err "Android device screenshot dir still holds $LEFTOVER PNG(s) after the wipe — refusing to run against stale captures"
+            exit 1
+        fi
         # Dynamic-capture hooks (docs/DYNAMIC_CAPTURE.md): the SAME env
         # vars the web capture path reads become intent extras here, so one
         # spelled invocation drives both platforms deterministically.
@@ -696,6 +785,9 @@ else
         AM_EXTRAS=()
         if [[ -n "${CAPTURE_ANIMATION_TIME:-}" ]]; then
             AM_EXTRAS+=(--es animationTime "$CAPTURE_ANIMATION_TIME")
+        fi
+        if [[ -n "${CAPTURE_WIDTH:-}" ]]; then
+            AM_EXTRAS+=(--ei captureWidth "$CAPTURE_WIDTH")
         fi
         if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
             AM_EXTRAS+=(--es forceState "$CAPTURE_FORCE_STATE")
@@ -717,7 +809,19 @@ else
         LAST_COUNT=-1
         STUCK_FOR=0
         STUCK_LIMIT=10   # 10 × 2 s = 20 s with no progress
-        for i in $(seq 1 60); do
+        # The ceiling SCALES with the fixture. It used to be a flat 60 polls
+        # (120 s) regardless of size, which silently truncated any large
+        # fixture: measured on the 359-component control fixture, Android was
+        # still capturing when the loop ran out and the run pulled 185 of 359
+        # with no warning — the loop had no exhaustion branch, so it fell
+        # straight through to the pull and reported "pulled 185" as success.
+        #
+        # A generous ceiling is safe because it is NOT what bounds a hang:
+        # STUCK_LIMIT does, at 20 s with no progress. This budget only ever
+        # matters while captures are actively landing.
+        MAX_POLLS=$(( 60 + COMPONENT_COUNT ))
+        POLL_EXHAUSTED=1
+        for i in $(seq 1 "$MAX_POLLS"); do
             # Same pipefail guard rationale as count_glob above — adb shell
             # ls of a missing/empty directory exits non-zero under pipefail.
             # Strip ALL whitespace (incl newlines) — `wc -l || echo 0` can
@@ -729,6 +833,7 @@ else
             COUNT=$((10#${COUNT:-0}))
             echo "  $COUNT / $COMPONENT_COUNT captured…"
             if [[ "$COUNT" -ge "$COMPONENT_COUNT" ]]; then
+                POLL_EXHAUSTED=0
                 break
             fi
             if [[ "$COUNT" == "$LAST_COUNT" ]]; then
@@ -736,6 +841,7 @@ else
                 if [[ $STUCK_FOR -ge $STUCK_LIMIT ]]; then
                     warn "Android count has been stuck at $COUNT for $(( STUCK_FOR * 2 ))s"
                     warn "app may have crashed — check: $ADB logcat | grep com.styleconverter.test"
+                    POLL_EXHAUSTED=0   # reported by the stall branch, not a silent timeout
                     break
                 fi
             else
@@ -744,6 +850,14 @@ else
             fi
             sleep 2
         done
+
+        # The branch that did not exist: the loop can END while captures are
+        # still arriving. Without this, a truncated run is indistinguishable
+        # from a complete one — it just pulls fewer PNGs and says "pulled N".
+        if [[ "$POLL_EXHAUSTED" == "1" ]]; then
+            warn "Android capture poll exhausted after $(( MAX_POLLS * 2 ))s at $COUNT / $COMPONENT_COUNT — the capture was TRUNCATED, not finished"
+            warn "every component past $COUNT is missing from this run's Android column"
+        fi
 
         rm -rf "$ANDROID_DIR/screenshots"
         mkdir -p "$ANDROID_DIR/screenshots"
@@ -767,6 +881,13 @@ else
                 exit 1
             fi
             log "verified: Android capture ran with animationTime=${CAPTURE_ANIMATION_TIME}"
+        fi
+        if [[ -n "${CAPTURE_WIDTH:-}" ]]; then
+            if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "captureWidth=${CAPTURE_WIDTH}"; then
+                err "CAPTURE_WIDTH=${CAPTURE_WIDTH} was set but the Android harness never logged that width — the capture silently ran at the default 390"
+                exit 1
+            fi
+            log "verified: Android capture ran with captureWidth=${CAPTURE_WIDTH}"
         fi
         if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
             if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "forceState=${CAPTURE_FORCE_STATE}"; then
@@ -873,6 +994,14 @@ if [[ ! -d "$PROJECT_ROOT/node_modules/pngjs" ]]; then
 fi
 
 COMPARE_ARGS=()
+# Escape hatch for fixtures whose cross-platform pairs are not a conformance
+# question. A control fixture (tools/visual/gen-control-fixture.mjs) is the
+# motivating case: case and control are SUPPOSED to differ, so scoring their
+# pairs against the ledger reports every intended difference as an unexpected
+# divergence. The generated fixture's own header says to use this.
+if [[ "${NO_CROSS_PLATFORM_GATE:-0}" == "1" ]]; then
+    COMPARE_ARGS+=(--no-cross-platform-gate)
+fi
 if [[ "${UPDATE_BASELINE:-0}" == "1" ]]; then
     COMPARE_ARGS+=(--update-baseline)
 elif [[ "${BASELINE:-0}" == "1" ]]; then
@@ -883,7 +1012,50 @@ fi
 # is empty (default mode — no baseline flags).
 # `--input` threads the IR filename into the HTML report headline so you can
 # tell at a glance which test case the report was generated from.
-( cd "$TOOLS_VISUAL_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" )
+# Capture the exit code instead of letting `set -e` abort here. The
+# comparator now has four distinct failure modes (1 baseline regression ·
+# 2 IO/empty · 3 non-sRGB capture · 4 unexpected cross-platform divergence),
+# and every one of them is easier to act on WITH the summary and the report
+# path in front of you. We re-raise the exact code at the very end so
+# callers and CI see no change in behaviour.
+COMPARE_EXIT=0
+# A SKIPPED platform's capture directory still holds whatever the LAST run
+# left there — quite possibly a different fixture entirely. The comparator
+# unions component names across all three directories, so those stale PNGs
+# come back as phantom rows: components that are not in this fixture, with
+# only the skipped platforms present.
+#
+# Measured: `SKIP_IOS=1 SKIP_ANDROID=1 ./test-all.sh visual-test-controls.json`
+# produced 397 rows — 359 real (web) plus 38 left over from a previous
+# composition-test.json run. The cross-platform gate then evaluated 38 pairs
+# belonging to a different fixture and reported 7 "unexpected divergences"
+# that were pure cross-fixture contamination.
+#
+# Fix: point a skipped platform at an empty directory, which is exactly what
+# tools/titan/section-runner.sh already does for out-of-scope platforms. This
+# uses the same env overrides the comparator already honours, so nothing is
+# deleted — the previous captures stay on disk, they just stop being read as
+# though they belonged to this run.
+# NOTE: deliberately NOT registered with `trap ... EXIT` — this script already
+# owns an EXIT trap chain for emulator teardown and lock release (see the top
+# of the file), and a second EXIT trap would replace it, leaking the emulator
+# and the run lock. Cleaned up inline instead.
+# Keyed on CAPTURED_* — "did THIS run produce captures for the platform" —
+# rather than on the explicit SKIP_* env. The SKIP_* form left every
+# AUTO-skip path uncovered (no simulator found, adb missing, no AVD,
+# xcodegen absent, …): the stage warned and moved on, the harness dir
+# still held the PREVIOUS run's PNGs, and the comparator read them as this
+# run's — the exact cross-fixture contamination this block exists to stop,
+# minus the one trigger someone thought of. CAPTURED_* is set by each
+# stage after a real pull/copy, so it covers both trigger classes without
+# either having to be enumerated.
+COMPARE_EMPTY_DIR="$(mktemp -d)"
+[[ -z "${CAPTURED_IOS:-}"     ]] && export IOS_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+[[ -z "${CAPTURED_ANDROID:-}" ]] && export ANDROID_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+[[ -z "${CAPTURED_WEB:-}"     ]] && export WEB_SCREENSHOTS_DIR="$COMPARE_EMPTY_DIR"
+
+( cd "$TOOLS_VISUAL_DIR" && node compare-screenshots.mjs --input "$INPUT_JSON" "${COMPARE_ARGS[@]:-}" ) || COMPARE_EXIT=$?
+rmdir "$COMPARE_EMPTY_DIR" 2>/dev/null || true
 
 # ── Summary ──────────────────────────────────────────────────────────────────
 # Close out whatever stage was running, then print the summary without
@@ -892,6 +1064,35 @@ step_end
 echo -e "\n${B}━━━ Done ━━━${N}"
 SCRIPT_TOTAL=$(( $(date +%s) - SCRIPT_START ))
 echo
+# Capture-count agreement. All three platforms render the SAME IR, so their
+# capture counts must match exactly; any difference means a platform's column
+# is short and the comparison silently covered less than it appears to.
+#
+# These counts were already collected and printed — nothing compared them. A
+# run that captured 359 on web and 185 on Android printed both numbers side by
+# side and said nothing, which is the same shape as every other degenerate pass
+# this harness has had: a result that looks like a measurement and is not one.
+# Platforms with 0 are excluded, since that is a deliberate SKIP_*.
+_counts=""
+for _pi in "iOS:$CAPTURED_IOS" "Android:$CAPTURED_ANDROID" "web:$CAPTURED_WEB"; do
+    _n="${_pi##*:}"
+    [[ -n "$_n" && "$_n" -gt 0 ]] && _counts="$_counts ${_pi}"
+done
+if [[ -n "$_counts" ]]; then
+    _max=0; _min=999999
+    for _pi in $_counts; do
+        _n="${_pi##*:}"
+        (( _n > _max )) && _max=$_n
+        (( _n < _min )) && _min=$_n
+    done
+    if [[ "$_max" -ne "$_min" ]]; then
+        echo
+        warn "capture counts DISAGREE across platforms:$_counts"
+        warn "all platforms render the same IR, so a short column means that capture was TRUNCATED"
+        warn "every component the short platform missed is absent from its side of every pair"
+    fi
+fi
+
 for platform_info in "iOS:$CAPTURED_IOS" "Android:$CAPTURED_ANDROID" "web:$CAPTURED_WEB"; do
     p="${platform_info%%:*}"
     n="${platform_info##*:}"
@@ -919,4 +1120,26 @@ if [[ "${UPDATE_BASELINE:-0}" != "1" ]] && [[ -f "$REPORT_PATH" ]]; then
     if command -v open &>/dev/null && [[ "${OPEN_REPORT:-0}" == "1" ]] && [[ "${NO_OPEN:-0}" != "1" ]]; then
         open "$REPORT_PATH"
     fi
+fi
+
+# Re-raise the comparator's verdict, now that the summary and the report
+# path have been printed. Naming the code matters: a bare "exit 4" sends
+# people digging through the comparator source.
+if [[ "$COMPARE_EXIT" -ne 0 ]]; then
+    echo
+    case "$COMPARE_EXIT" in
+        1) echo -e "  ${Y}✗ comparison failed: a platform regressed against its committed baseline${N}" ;;
+        2) echo -e "  ${Y}✗ comparison failed: script/IO error, or baseline mode ran zero comparisons${N}" ;;
+        3) echo -e "  ${Y}✗ comparison failed: a capture is not untagged-sRGB — see tools/visual/png-color-space.mjs${N}" ;;
+        4) echo -e "  ${Y}✗ comparison failed: unexpected cross-platform divergence${N}"
+           echo -e "     Fix it, or record it in ${B}tools/visual/cross-platform-expectations.json${N} with a reason and an owner." ;;
+        5) echo -e "  ${Y}✗ comparison failed: stale cross-platform expectation(s)${N}"
+           echo -e "     A ledger entry now passes, or names a component that no longer exists."
+           echo -e "     Delete the listed lines from ${B}tools/visual/cross-platform-expectations.json${N}." ;;
+        6) echo -e "  ${Y}✗ comparison failed: spec-oracle violation — a render disagrees with the CSS spec${N}"
+           echo -e "     The fixture's ${B}_expect${N} block carries the spec-derived value; the violation lines above"
+           echo -e "     print expected vs measured vs Δ. Platforms agreeing with each other does not excuse this." ;;
+        *) echo -e "  ${Y}✗ comparison failed with exit $COMPARE_EXIT${N}" ;;
+    esac
+    exit "$COMPARE_EXIT"
 fi

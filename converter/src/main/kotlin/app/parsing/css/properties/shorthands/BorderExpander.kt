@@ -46,42 +46,122 @@ object BorderExpander : ShorthandExpander {
     /**
      * Parse border shorthand value into width, style, and color components.
      */
-    private fun parseBorderValue(value: String): Map<String, String> {
+    /**
+     * Shared by [BorderTopExpander] and friends, so INTERNAL rather than
+     * private.
+     *
+     * It used to be private, and a file-level EXTENSION function of the same
+     * name sat at the bottom of this file carrying a second, older copy of
+     * the classification logic — added with the comment "make
+     * parseBorderValue and tokenizer accessible to side expanders". Because
+     * the member was private, every `BorderExpander.parseBorderValue(...)`
+     * call from the four side objects resolved to that EXTENSION instead, so
+     * `border-top` / `-right` / `-bottom` / `-left` ran the old code while
+     * `border` ran this one. Fixing this function alone left four of the five
+     * shorthands unfixed, and nothing said so — the two copies had drifted
+     * silently.
+     */
+    internal fun parseBorderValue(value: String): Map<String, String> {
         // Use smart tokenizer that respects parentheses in color functions
         val tokens = tokenizeBorderValue(value.trim())
         val result = mutableMapOf<String, String>()
 
-        val borderStyles = setOf("none", "hidden", "dotted", "dashed", "solid", "double",
-                                 "groove", "ridge", "inset", "outset")
-
         for (token in tokens) {
+            val lower = token.lowercase()
+            // Function name for a `name(...)` token; "" when there is no paren.
+            val fn = if (token.contains('(')) lower.substringBefore('(') else ""
             when {
-                // Check if it's a border style
-                token.lowercase() in borderStyles -> {
-                    result["style"] = token
-                }
-                // Check if it's a length (width)
-                token.matches("""^\d+\.?\d*(px|em|rem|%|pt|cm|mm|in|pc|ex|ch|vw|vh|vmin|vmax|fr)?$""".toRegex()) -> {
-                    result["width"] = token
-                }
-                // Check if it's a color (hex, rgb, named)
-                token.startsWith("#") ||
-                token.startsWith("rgb") ||
-                token.startsWith("hsl") ||
-                token.matches("""^[a-zA-Z]+$""".toRegex()) -> {
-                    result["color"] = token
-                }
+                // <line-style> first: `none` and `hidden` are styles, and
+                // would otherwise be swallowed by the bare-ident color branch.
+                lower in BORDER_STYLES -> result["style"] = token
+
+                // <line-width> keywords. These are bare idents, so WITHOUT
+                // this branch they matched the `^[a-zA-Z]+$` color test and
+                // were filed as border-*-color — the width was lost and a
+                // colour was invented. Measured: `border: thin solid red`
+                // produced no width at all.
+                lower in WIDTH_KEYWORDS -> result["width"] = token
+
+                // <length>. The old pattern was
+                //   ^\d+\.?\d*(px|em|rem|%|pt|cm|mm|in|pc|ex|ch|vw|vh|vmin|vmax|fr)?$
+                // which dropped, silently, every one of:
+                //   .5px      (no leading digit)
+                //   2PX       (no IGNORE_CASE)
+                //   3Q        (unit absent from the list)
+                // A dropped token hits no branch and the `when` had no else,
+                // so the declaration simply lost its width.
+                LENGTH.matches(token) -> result["width"] = token
+
+                // Math functions resolve to a length here, not a colour.
+                // Checked before the colour-function branch so `calc(...)`
+                // is not mistaken for one.
+                fn in MATH_FUNCTIONS -> result["width"] = token
+
+                token.startsWith("#") -> result["color"] = token
+
+                // css-color-4/5 colour functions. The old test was
+                // `startsWith("rgb") || startsWith("hsl")`, so oklch(), lab(),
+                // lch(), oklab(), hwb(), color() and color-mix() matched
+                // nothing and were dropped — the border silently rendered
+                // with no colour at all. Measured on all six.
+                fn in COLOR_FUNCTIONS -> result["color"] = token
+
+                // Named colours, `currentcolor`, `transparent`.
+                token.matches(BARE_IDENT) -> result["color"] = token
+
+                // No silent fallthrough: an unrecognised token means the
+                // shorthand was parsed incompletely, which is exactly how
+                // the bugs above stayed invisible.
+                else -> println(
+                    "[CSS Parser] border shorthand: unrecognised component '$token' in '$value' — ignored"
+                )
             }
         }
 
         return result
     }
 
+    /** css-backgrounds-3 §4.2 <line-style>. */
+    private val BORDER_STYLES = setOf(
+        "none", "hidden", "dotted", "dashed", "solid", "double",
+        "groove", "ridge", "inset", "outset"
+    )
+
+    /** css-backgrounds-3 §4.1 <line-width> keywords. */
+    private val WIDTH_KEYWORDS = setOf("thin", "medium", "thick")
+
+    /**
+     * <length> for a border width. Case-insensitive (CSS units are), accepts a
+     * leading dot (`.5px` is a valid <number>), and carries the css-values-4
+     * unit set rather than a partial list. `%` and `fr` are kept only because
+     * the previous pattern accepted them; neither is valid for border-width,
+     * and narrowing that is a separate change from fixing the drops.
+     */
+    private val LENGTH = (
+        """^(?:\d+\.?\d*|\.\d+)""" +
+        """(?:px|em|rem|ex|rex|ch|rch|cap|ic|lh|rlh|""" +
+        """vw|vh|vi|vb|vmin|vmax|svw|svh|lvw|lvh|dvw|dvh|""" +
+        """cm|mm|q|in|pt|pc|%|fr)?$"""
+        ).toRegex(RegexOption.IGNORE_CASE)
+
+    /** css-color-4/5 colour functions, by function name. */
+    private val COLOR_FUNCTIONS = setOf(
+        "rgb", "rgba", "hsl", "hsla", "hwb",
+        "lab", "lch", "oklab", "oklch",
+        "color", "color-mix", "light-dark", "device-cmyk"
+    )
+
+    /** css-values-4 math functions — these resolve to the <length> slot. */
+    private val MATH_FUNCTIONS = setOf("calc", "min", "max", "clamp", "round", "mod", "rem", "abs", "sign")
+
+    /** A bare identifier: named colours, `currentcolor`, `transparent`. */
+    private val BARE_IDENT = """^[a-zA-Z][a-zA-Z-]*$""".toRegex()
+
     /**
      * Tokenize border value, respecting parentheses in color functions.
      * Example: "1px solid rgba(255, 255, 255, 0.2)" → ["1px", "solid", "rgba(255, 255, 255, 0.2)"]
      */
-    private fun tokenizeBorderValue(value: String): List<String> {
+    internal fun tokenizeBorderValue(value: String): List<String> {
         val tokens = mutableListOf<String>()
         var current = StringBuilder()
         var parenDepth = 0
@@ -167,55 +247,4 @@ object BorderLeftExpander : ShorthandExpander {
 
         return result
     }
-}
-
-// Make parseBorderValue and tokenizer accessible to side expanders
-private fun BorderExpander.parseBorderValue(value: String): Map<String, String> {
-    val tokens = tokenizeBorderValue(value.trim())
-    val result = mutableMapOf<String, String>()
-
-    val borderStyles = setOf("none", "hidden", "dotted", "dashed", "solid", "double",
-                             "groove", "ridge", "inset", "outset")
-
-    for (token in tokens) {
-        when {
-            token.lowercase() in borderStyles -> result["style"] = token
-            token.matches("""^\d+\.?\d*(px|em|rem|%|pt|cm|mm|in|pc|ex|ch|vw|vh|vmin|vmax|fr)?$""".toRegex()) -> result["width"] = token
-            token.startsWith("#") || token.startsWith("rgb") || token.startsWith("hsl") || token.matches("""^[a-zA-Z]+$""".toRegex()) -> result["color"] = token
-        }
-    }
-
-    return result
-}
-
-private fun tokenizeBorderValue(value: String): List<String> {
-    val tokens = mutableListOf<String>()
-    var current = StringBuilder()
-    var parenDepth = 0
-
-    for (char in value) {
-        when {
-            char == '(' -> {
-                parenDepth++
-                current.append(char)
-            }
-            char == ')' -> {
-                parenDepth--
-                current.append(char)
-            }
-            char.isWhitespace() && parenDepth == 0 -> {
-                if (current.isNotEmpty()) {
-                    tokens.add(current.toString())
-                    current = StringBuilder()
-                }
-            }
-            else -> current.append(char)
-        }
-    }
-
-    if (current.isNotEmpty()) {
-        tokens.add(current.toString())
-    }
-
-    return tokens
 }

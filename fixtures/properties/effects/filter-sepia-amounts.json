@@ -1,0 +1,169 @@
+{
+  "_comment": "sepia() across its amount range plus the two cases the old opaque-box-only corpus could not see. Sepia_ExtendedRange drives blue x2.618 through the reweight, so a clamp before .grayscale would show up here. Sepia_Translucent is the alpha case: source-over compositing of the two layers gets both alpha AND colour wrong for anything not fully opaque, and no previous sepia fixture was translucent. Expected (CSS filter-effects-1 8.5, matching web and Android): 80% on #3498db -> (153,158,143); 100% -> (179,159,124); 50% on #ff0000 -> (178,44,35); 100% on #0000ff -> (48,43,33); 100% on white -> (255,255,239); 0% is the identity.",
+  "_expect_comment": "_expect schema v1 (inert to rendering; enforced by the spec oracle, not the renderers): fill.rgb is the DOMINANT non-page-background (page ground is rgb(26,26,46)) 8-bit sRGB colour of the capture \u2014 the component box fill; fill.tol is the per-channel absolute tolerance (0 = exact, licensed by the measured zero A/A noise floor; 1 only where the unrounded spec value quantises ambiguously between floor and round, or where iOS's per-layer 8-bit additive composite introduces 1 LSB \u2014 measured worst case is 1). box is the declared CSS px size; 1 CSS px = 1 capture px on all three platforms (iOS 1pt=1px, 390px canvas). Derivation, recomputed from filter-effects-1 8.5 sepia matrix M(a) = (1-a)I + a*[.393 .769 .189; .349 .686 .168; .272 .534 .131] applied on gamma-encoded sRGB (shorthand filters interpolate in sRGB): 80% on (52,152,219) -> (153.372, 157.770, 143.001) -> (153,158,143), iOS layer-quantises G to 157 so tol 1; 50% on (255,0,0) -> (177.608, 44.498, 34.680) -> (178,44,35), iOS measured G 45, tol 1; 100% on (52,152,219) -> (178.715, 159.212, 124.001) -> (179,159,124), R floor-vs-round straddles .715 so tol 1; 100% on (0,0,255) -> (48.195, 42.840, 33.405) -> (48,43,33), G .840 straddles, tol 1; 100% on white -> (344.5, 306.8, 238.935) clamped -> (255,255,239), B .935 straddles, tol 1; 300% clamps to 100% (filter-effects-1: amounts over 100% clamp to 1) -> same (179,159,124); translucent: the matrix runs on un-premultiplied colour with alpha untouched, so rgba(52,152,219,.5) filters to (153.372,157.770,143.001) at a=.5 and the CAPTURE composites it over the page ground: .5*filtered + .5*(26,26,46) = (89.686, 91.885, 94.500) -> (90,92,95), iOS additive path renders R 89, tol 1. All eight values verified against the committed baselines (web/Android exact; iOS within 1).",
+  "components": {
+    "Sepia_Zero": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3498db",
+        "filter": "sepia(0%)"
+      },
+      "_expect": {
+        "fill": [
+          52,
+          152,
+          219
+        ],
+        "fillTolerance": 2,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Sepia_Half": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#ff0000",
+        "filter": "sepia(50%)"
+      },
+      "_expect": {
+        "fill": [
+          178,
+          44,
+          35
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Sepia_Fixture": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3498db",
+        "filter": "sepia(80%)"
+      },
+      "_expect": {
+        "fill": [
+          153,
+          158,
+          143
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Sepia_Full": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3498db",
+        "filter": "sepia(100%)"
+      },
+      "_expect": {
+        "fill": [
+          179,
+          159,
+          124
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Sepia_ExtendedRange": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#0000ff",
+        "filter": "sepia(100%)"
+      },
+      "_expect": {
+        "fill": [
+          48,
+          43,
+          33
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Sepia_White": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#ffffff",
+        "filter": "sepia(100%)"
+      },
+      "_expect": {
+        "fill": [
+          255,
+          255,
+          239
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    },
+    "Sepia_Translucent": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "rgba(52,152,219,0.5)",
+        "filter": "sepia(80%)"
+      },
+      "_expect": {
+        "fill": [
+          90,
+          92,
+          95
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ],
+        "waive": {
+          "iOS": "ledgered 2026-08-28: iOS composites the sepia layer src-over, which is exact for opaque content and wrong for translucent (coverage A comes out A*a+(1-A*a)*A). The additive alternative was tried and reverted because it stops SwiftUI Text being filtered at all. iOS renders (95,117,129) vs the spec's (90,92,95). See cross-platform-expectations.json Sepia_Translucent and FilterApplier.swift's sepia comment."
+        }
+      }
+    },
+    "Sepia_OverClamp": {
+      "properties": {
+        "width": "120px",
+        "height": "40px",
+        "background-color": "#3498db",
+        "filter": "sepia(300%)"
+      },
+      "_expect": {
+        "fill": [
+          179,
+          159,
+          124
+        ],
+        "fillTolerance": 1,
+        "box": [
+          120,
+          40
+        ]
+      }
+    }
+  }
+}

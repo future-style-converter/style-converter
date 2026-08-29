@@ -875,10 +875,39 @@ private fun CaptureCanvas(
     onPositioned: (androidx.compose.ui.geometry.Offset, Float, Float) -> Unit,
     onRendered: () -> Unit
 ) {
+    // Post-paint forced-state FLIP (spec 07 §4).
+    //
+    // A transition's timeline zero is the base→forced flip, and
+    // TransitionDriver detects a flip as value inequality against the
+    // list it committed on first composition. Providing the forced set at
+    // mount means the FIRST resolution is already the forced one, so
+    // nothing ever changes and no flight is ever created — which is why
+    // transitions.json rendered its endpoint at every t.
+    //
+    // Only deferred when a clock is also pinned. Without `animationTime`
+    // the forced set is applied at mount exactly as before, so
+    // settled-appearance runs (interaction-states.mjs and friends) keep
+    // capturing the resting forced state rather than a mid-flight frame
+    // at some racy wall-clock instant.
+    //
+    // `withFrameNanos { }` — not a delay — is the guarantee that a frame
+    // was actually PAINTED with the base list, so the driver has
+    // committed it before the write lands. Nothing downstream reads wall
+    // time (the seized lane presents at the pinned t), so this only has
+    // to happen once, with no timing precision required of it.
+    val deferForcedState = forceState != null && animationTime != null
+    var appliedForceState by remember(component.id) {
+        mutableStateOf(if (deferForcedState) null else forceState)
+    }
+
     // Give Compose a frame to settle, then tell the caller we're ready.
     // The delay is conservatively larger for components with complex
     // sub-trees (grids, transforms) where layout may span multiple frames.
     LaunchedEffect(component.id) {
+        if (deferForcedState) {
+            withFrameNanos { }          // one painted frame in BASE state
+            appliedForceState = forceState
+        }
         delay(150)
         onRendered()
     }
@@ -939,7 +968,7 @@ private fun CaptureCanvas(
             // Forced-state set (spec 06 §6): one condition per capture run,
             // resolved as active on every component under this canvas.
             com.styleconverter.runtime.core.states.DynamicStyleResolver.LocalForcedStates provides
-                (forceState?.let { setOf(it) } ?: emptySet()),
+                (appliedForceState?.let { setOf(it) } ?: emptySet()),
             // Document keyframes channel (spec 07 §1.2): @keyframes are
             // document-scoped, the harness owns the document — same
             // division of labor as the web harness's useKeyframeRules.
@@ -2052,6 +2081,45 @@ private fun tryOpacityValue(el: JsonElement): Double? {
  * correctly inside the parent's canvas; emitting it standalone leaks an
  * un-contextualised render into the comparator. Mirrored on iOS + web.
  */
+/**
+ * Does this component's OWN render depend on what is painted behind it?
+ *
+ * `parentCreatesContext` asks the question in the parent direction and
+ * suppresses children when the parent's paint context owns their composition.
+ * That misses the mirror case: a child can be backdrop-dependent by itself,
+ * under a perfectly ordinary parent.
+ *
+ * `mix-blend-mode` and `backdrop-filter` are exactly that — both are DEFINED
+ * as functions of the backdrop, so a standalone capture composites against
+ * the bare canvas and answers no question. The comparator then reports
+ * cross-platform divergence on a render that never occurs in the real
+ * composition (observed on fixtures/composition-test.json: `005_layer.png`
+ * and `007_layer.png` produced 4 divergent pairs of pure noise).
+ *
+ * MUST stay identical to `dependsOnBackdrop` in web CaptureGallery.tsx and
+ * iOS ScreenshotCaptureView.swift — capture indices are positional, so a rule
+ * firing on one platform only would silently misalign every subsequent
+ * component in the comparison.
+ */
+internal fun dependsOnBackdrop(component: IRComponent): Boolean {
+    // Same cheap guard and single-pass shape as parentCreatesContext above.
+    if (component.properties.isEmpty()) return false
+    for (p in component.properties) {
+        when (p.type) {
+            // backdrop-filter filters the backdrop by definition — with
+            // nothing behind it the filter is the identity.
+            "BackdropFilter" -> return true
+            // Same UPPER/lower variance parentCreatesContext documents; reuse
+            // the same tryStringValue helper so both read the IR alike.
+            "MixBlendMode" -> {
+                val v = tryStringValue(p.data)?.lowercase()
+                if (v != null && v != "normal") return true
+            }
+        }
+    }
+    return false
+}
+
 internal fun flattenComponents(components: List<IRComponent>): List<IRComponent> {
     val out = mutableListOf<IRComponent>()
     // Recursive walker — append the node, then descend into its children
@@ -2061,7 +2129,8 @@ internal fun flattenComponents(components: List<IRComponent>): List<IRComponent>
         val kids = c.children ?: return
         if (kids.isEmpty()) return
         if (parentCreatesContext(c)) return
-        kids.forEach(::walk)
+        // Mirror rule: skip a child that is itself backdrop-dependent.
+        kids.forEach { if (!dependsOnBackdrop(it)) walk(it) }
     }
     components.forEach(::walk)
     return out
