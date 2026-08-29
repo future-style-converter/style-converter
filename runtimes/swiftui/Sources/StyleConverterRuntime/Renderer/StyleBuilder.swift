@@ -1233,18 +1233,38 @@ extension View {
     @ViewBuilder
     func applyGroupEffects(_ style: ComponentStyle) -> some View {
         self
-            // Phase 4 — blend / isolation / opacity. `.blendMode`
-            // applies to the whole element (including already-painted
-            // backgrounds) so it must come after the paint chain.
-            // `.compositingGroup` and `.opacity` follow so blending
-            // composites into the isolated buffer before fading.
-            // `.engineOpacity` carries its OWN compositing group for
-            // alpha < 1 (css-color-4 §2.1 composites the subtree as a
-            // group); it does not rely on `isolation` having emitted one,
-            // because the default `auto` emits nothing.
-            .engineBlendMode(style.blend)
+            // Phase 4 — isolation / opacity / blend, in that order, and
+            // the order IS the semantics (later modifier = outer wrapper):
+            //
+            //   1. `.engineIsolation` groups the element's own children so
+            //      THEIR blend modes stop at this element (isolation:
+            //      isolate; the default auto emits nothing).
+            //   2. `.engineOpacity` carries its OWN compositing group for
+            //      alpha < 1 (css-color-4 §2.1: the subtree is composited
+            //      as a group, then faded).
+            //   3. `.engineBlendMode` is OUTERMOST: compositing-1 §5.1
+            //      blends the element's finished GROUP into the parent's
+            //      backdrop, so it must wrap the opacity group, not sit
+            //      inside it.
+            //
+            // The old order had blend FIRST (innermost). That was harmless
+            // while opacity was a bare `.opacity()` — SwiftUI kept the
+            // blend attribute through it — but the moment opacity gained
+            // its (spec-required) `.compositingGroup()`, the group
+            // flattened the blended content into a private buffer with
+            // normal compositing, and the blend never reached the page.
+            // MEASURED on multiply over #3498db with the chip at
+            // opacity 0.5 (spec/web/Android (50,98,135)):
+            //
+            //     blend inside the group    iOS (141,114,139)  = blend LOST
+            //     blend outside the group   iOS matches
+            //
+            // With no opacity declared, engineOpacity is the identity and
+            // this reorder changes nothing — which is what keeps every
+            // blend-only and opacity-only baseline byte-identical.
             .engineIsolation(style.isolation)
             .engineOpacity(style.opacity)
+            .engineBlendMode(style.blend)
             // Phase 4 — accent/caret tint. Accent tints descendant
             // controls; caret is a stub. Both happily go anywhere.
             .engineAccentColor(style.accentColor)
