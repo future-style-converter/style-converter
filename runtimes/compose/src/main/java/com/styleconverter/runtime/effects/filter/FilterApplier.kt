@@ -477,15 +477,37 @@ object FilterApplier {
         var matrix: ColorMatrix? = null
 
         filters.forEach { filter ->
-            matrix = when (filter) {
-                is FilterFunction.Brightness -> applyBrightness(matrix, filter.amount)
-                is FilterFunction.Contrast -> applyContrast(matrix, filter.amount)
-                is FilterFunction.Grayscale -> applyGrayscale(matrix, filter.amount)
-                is FilterFunction.HueRotate -> applyHueRotate(matrix, filter.degrees)
-                is FilterFunction.Saturate -> applySaturate(matrix, filter.amount)
-                is FilterFunction.Sepia -> applySepia(matrix, filter.amount)
-                is FilterFunction.Invert -> applyInvert(matrix, filter.amount)
-                else -> matrix
+            // Each apply* is called with `null` so it returns the PURE step
+            // matrix for this one function (identity ⋅ step = step).
+            val step = when (filter) {
+                is FilterFunction.Brightness -> applyBrightness(null, filter.amount)
+                is FilterFunction.Contrast -> applyContrast(null, filter.amount)
+                is FilterFunction.Grayscale -> applyGrayscale(null, filter.amount)
+                is FilterFunction.HueRotate -> applyHueRotate(null, filter.degrees)
+                is FilterFunction.Saturate -> applySaturate(null, filter.amount)
+                is FilterFunction.Sepia -> applySepia(null, filter.amount)
+                is FilterFunction.Invert -> applyInvert(null, filter.amount)
+                else -> null
+            } ?: return@forEach
+
+            // COMPOSITION DIRECTION — this is the whole bug. The ColorFilter
+            // applies M·c, and filter-effects-1 §2 chains left to right: in
+            // `filter: F1 F2`, F2 acts on F1's OUTPUT, so the total must be
+            // M2·M1. The old fold did `acc.timesAssign(step)` (= acc × step),
+            // which builds M1·M2 — the SECOND function reached the pixel
+            // first, i.e. every multi-function filter chain ran REVERSED.
+            //
+            // Caught by the spec oracle on its first contact with
+            // fixtures/combinations/filter-chain-order.json: Android measured
+            // each chain's value as exactly the OTHER chain's expectation —
+            // GrayThenSepia read (161,161,161) [sepia-then-gray's spec value]
+            // and SepiaThenGray read (183,163,127) [gray-then-sepia's] — the
+            // unmistakable signature of a swapped composition, while iOS and
+            // web passed both. Same defect family as the iOS transform-list
+            // reversal fixed earlier the same day, in the other runtime.
+            matrix = when (val acc = matrix) {
+                null -> step
+                else -> step.also { it.timesAssign(acc) }   // step × acc = M_new·M_old
             }
         }
 
