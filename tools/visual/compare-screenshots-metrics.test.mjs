@@ -26,6 +26,14 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+// The B3 real-pair control loads two committed baseline PNGs (no capture run
+// needed) and contrasts edge SSIM against plain SSIM of the same pair, so it
+// needs the PNG decoder, file access, and ssim.js itself.
+import { readFileSync } from 'node:fs';
+import { resolve, dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { PNG } from 'pngjs';
+import { ssim as computeSsim } from 'ssim.js';
 
 import {
   computeLabDeltaE,
@@ -151,53 +159,138 @@ test('computeLabDeltaE: a shape mismatch returns null, never a partial score', (
   assert.equal(computeLabDeltaE(solid(4, 1, BLACK), solid(5, 1, BLACK), 1), null);
 });
 
-// ── B3 · edge SSIM — CURRENTLY DEGENERATE (bug pin) ─────────────────────────
+// ── B3 · edge SSIM — acceptance controls for the repaired Sobel path ────────
+//
+// History: until 2026-08-29 `computeEdgeSsim` returned exactly 1 for EVERY
+// input. sharp's `convolve` defaults `scale` to the kernel sum, a Sobel
+// kernel sums to zero, and the resulting divide-by-zero yielded an all-zero
+// edge map on both sides — two of which are perfectly similar. Every test
+// below except the two "exactly 1.0" controls failed against that
+// implementation (verified before the fix landed); together they make a
+// return-to-degeneracy impossible to miss.
 
-test('computeEdgeSsim is DEGENERATE today — BUG PIN, delete when B3 is fixed', async () => {
-  // THIS TEST ASSERTS BROKEN BEHAVIOUR ON PURPOSE. Do not "fix" it by
-  // relaxing anything; fix compare-screenshots-metrics.mjs and delete it.
-  //
-  // `sobelEdges` runs sharp's `convolve` with the zero-sum Sobel-X kernel
-  // and no `scale`/`offset`. On a uchar image libvips clamps the signed
-  // response, and the output comes back ALL ZERO for every input — verified
-  // directly (max = 0, non-zero count = 0 on a 64×64 hard vertical edge;
-  // adding `offset: 128` makes the response appear, proving the kernel and
-  // the plumbing are fine and the clamp is the cause).
-  //
-  // So B3 compares an all-zero buffer against an all-zero buffer and returns
-  // 1.0 for EVERYTHING. Confirmed on live data: all 24 cross-platform pairs
-  // in tools/visual/report/manifest.json read exactly 1, and six baseline
-  // pairs of entirely unrelated components (ΔE95 up to 49.7) also read 1.
-  //
-  // Blast radius — every consumer is deciding on a constant:
-  //   · classify-divergence.mjs `edge-shift` needs edgeSsim < 0.85, so that
-  //     label is UNREACHABLE in production (its unit tests inject synthetic
-  //     metrics and therefore pass).
-  //   · the edge FLOORS guarding color-drift / sub-pixel-noise /
-  //     glyph-metric-noise are always satisfied, so they no longer
-  //     discriminate.
-  //   · compare-screenshots.mjs's phase-B `edgeSsim < 0.95` warning can
-  //     never fire.
-  //   · docs/STATUS.md cites "edgeSsim 1.0" as evidence that the Android-web
-  //     ~0.87 wall is AA-only — evidence that is vacuous while every pair
-  //     reads 1.0.
-  const flat = solid(64, 64, [50, 50, 50]);
-  const hardEdge = img(64, 64, (x) => (x < 32 ? [20, 20, 20] : [230, 230, 230]));
-  assert.equal(
-    await computeEdgeSsim(flat, hardEdge),
-    1,
-    'if this now differs from 1, B3 has been repaired — delete this test and un-todo the next one',
-  );
+// Path to the committed baseline captures — real render output, so the
+// real-pair control below cannot be satisfied by anything tuned only to
+// synthetic step edges.
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const BASELINE = resolve(__dirname, 'baseline');
+
+/** Decode one committed baseline PNG into the `{ data, width, height }`
+ *  shape the metric helpers consume. pngjs only — no sharp, so the loader
+ *  shares zero code with the implementation under test. */
+const loadBaseline = (name) => PNG.sync.read(readFileSync(resolve(BASELINE, name)));
+
+test('computeEdgeSsim: identical images → exactly 1.0', async () => {
+  // Identity control: same buffer twice must produce identical edge maps,
+  // and SSIM of identical images is exactly 1 (numerator equals denominator
+  // term-for-term). Anything below 1 here means the edge extraction is
+  // non-deterministic; null means the pipeline broke on a trivial input.
+  // Legitimate as an EXACT assertion because the harness A/A noise floor is
+  // byte-zero (docs/STATUS.md 2026-08-28).
+  const edge = img(64, 64, (x) => (x < 32 ? [20, 20, 20] : [230, 230, 230]));
+  assert.equal(await computeEdgeSsim(edge, edge), 1);
 });
 
-test('computeEdgeSsim distinguishes a hard edge from a flat field', { todo: 'B3 Sobel output is identically zero — see the bug pin above' }, async () => {
-  // The behaviour B3 is supposed to have, kept executable so the fix has a
-  // target. A flat field has no Sobel-X response; a mid-image vertical step
-  // has a strong one. Their edge maps cannot be similar.
+test('computeEdgeSsim distinguishes a hard edge from a flat field', async () => {
+  // The core discrimination the metric exists for. A flat field has zero
+  // gradient everywhere; a mid-image vertical step has a strong 2px-wide
+  // Sobel response band. Their edge maps cannot be similar — the ~13 of 54
+  // window columns that overlap the band collapse toward 0 while the rest
+  // score 1, and the measured aggregate is 0.8224.
+  //
+  // The 0.85 ceiling is load-bearing beyond "well below 0.9": it pins that
+  // classify-divergence.mjs's `edge-shift` label (edgeSsim < 0.85) is
+  // REACHABLE on a physically real edge difference — under the degenerate
+  // always-1 implementation that label was dead code in production.
   const flat = solid(64, 64, [50, 50, 50]);
   const hardEdge = img(64, 64, (x) => (x < 32 ? [20, 20, 20] : [230, 230, 230]));
   const e = await computeEdgeSsim(flat, hardEdge);
   assert.ok(e !== null && e < 0.85, `expected an edge-shift-grade score, got ${e}`);
+});
+
+test('computeEdgeSsim grades edge displacement — 1px above absence, 8px well below 1', async () => {
+  // Measured behaviour of SSIM over Sobel magnitude maps (2026-08-29 probe):
+  //   flat vs edge@32          0.8224   (absence of the edge)
+  //   edge@32 vs edge@33 (1px) 0.8438   (AA-jitter-scale displacement)
+  //   edge@32 vs edge@40 (8px) 0.6759   (gross displacement)
+  //
+  // Two properties are pinned. (1) A 1px displacement — the cross-platform
+  // AA-rounding case this metric exists to tolerate — ranks ABOVE total
+  // absence of the edge. (2) A displacement is never mistaken for identity.
+  //
+  // Deliberately NOT pinned: "8px shift ranks above absence". SSIM cannot
+  // deliver that ordering — in windows containing both band positions the
+  // two maps are ANTI-correlated (edge here vs edge there → negative
+  // structure term), which SSIM scores as worse than band-vs-nothing (zero
+  // covariance), and the shifted pair damages ~2× the window area. Any
+  // implementation whose final step is SSIM over edge maps ranks a large
+  // shift below absence; the classifier recovers the distinction through
+  // pHash (edge-shift = low edgeSsim + LOW hamming; see
+  // classify-divergence.mjs Section 4 rule 4).
+  const flat = solid(64, 64, [50, 50, 50]);
+  const edgeAt = (c) => img(64, 64, (x) => (x < c ? [20, 20, 20] : [230, 230, 230]));
+  const absence = await computeEdgeSsim(flat, edgeAt(32));
+  const shift1 = await computeEdgeSsim(edgeAt(32), edgeAt(33));
+  const shift8 = await computeEdgeSsim(edgeAt(32), edgeAt(40));
+  assert.ok(shift1 > absence, `1px displacement (${shift1}) must rank above edge absence (${absence})`);
+  assert.ok(shift1 < 1, `1px displacement must not read as identity, got ${shift1}`);
+  assert.ok(shift8 !== null && shift8 < 0.9, `8px displacement must score clearly below 1, got ${shift8}`);
+});
+
+test('computeEdgeSsim sees HORIZONTAL edges — the axis the old X-only Sobel was blind to', async () => {
+  // Adversarial-review requirement. The repair computes BOTH Sobel
+  // directions; an X-only kernel scores gy = 0 everywhere, so a horizontal
+  // edge (the top/bottom border of every component box) would compare as
+  // FLAT — i.e. horizontal-edge-vs-flat would read 1.0, quietly restoring
+  // half of the original degeneracy. This is the same control as the
+  // vertical case, rotated 90°, and must produce the same discrimination.
+  const flat = img(64, 64, () => [50, 50, 50]);
+  const hEdge = img(64, 64, (x, y) => (y < 32 ? [20, 20, 20] : [230, 230, 230]));
+  const score = await computeEdgeSsim(hEdge, flat);
+  assert.ok(score !== null && score < 0.9,
+    `horizontal edge vs flat must discriminate, got ${score}`);
+  // And identity still holds on the rotated input.
+  assert.equal(await computeEdgeSsim(hEdge, hEdge), 1);
+});
+
+test('computeEdgeSsim: flat vs flat in different colours → exactly 1.0', async () => {
+  // CORRECT by design, not a blind spot: an edge metric measures edge
+  // structure and nothing else. Two flat fields both have identically-zero
+  // gradient maps — equal maps, SSIM exactly 1 — regardless of fill colour.
+  // Colour divergence is ΔE's (B7) and the histogram's (B4) job; keeping B3
+  // colour-blind is what lets the classifier separate "recoloured" from
+  // "moved" (color-drift requires a HIGH edge floor precisely because a
+  // recolour leaves edges alone).
+  //
+  // This is also the control that kills the forbidden fallback: plain RGB
+  // SSIM on these two fields reads ≈0.29 (luminance term), so a silent
+  // "fall back to image SSIM on failure" — explicitly banned by the B3 spec
+  // note — fails here instead of hiding.
+  const greyFlat = solid(64, 64, [50, 50, 50]);
+  const redFlat = solid(64, 64, [200, 30, 30]);
+  assert.equal(await computeEdgeSsim(greyFlat, redFlat), 1);
+});
+
+test('computeEdgeSsim on a real baseline pair is finite, in (0,1], and is not plain SSIM', async () => {
+  // Real-data control on two committed captures of the same component from
+  // different platforms — iOS vs Android 000_AR_Single1, both 390×232 (equal
+  // dims by construction of this pair, so no padding step can distort the
+  // comparison), 1080 genuinely differing pixels.
+  //
+  // Three pins: (a) the metric survives real render output (no null); (b) a
+  // pair with real pixel differences must NOT read exactly 1 — under the
+  // degenerate implementation every real pair read exactly 1, so this line
+  // alone would have caught it; (c) the edge score differs from plain SSIM
+  // of the same pair, proving B3 measures the gradient structure rather
+  // than repackaging the base metric.
+  const a = loadBaseline('iOS__000_AR_Single1.png');
+  const b = loadBaseline('Android__000_AR_Single1.png');
+  const e = await computeEdgeSsim(a, b);
+  assert.ok(e !== null && Number.isFinite(e), `expected a finite score, got ${e}`);
+  assert.ok(e > 0 && e <= 1, `edge SSIM out of (0,1]: ${e}`);
+  assert.ok(e < 1, `a pair with 1080 differing pixels must not score exactly 1, got ${e}`);
+  const plain = +computeSsim(a, b, { ssim: 'fast' }).mssim.toFixed(4);
+  assert.notEqual(e, plain, `edge SSIM (${e}) must not equal plain SSIM (${plain}) on a real pair`);
 });
 
 // ── B2 · per-channel SSIM — the channel index is the whole point ────────────
