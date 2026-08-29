@@ -137,20 +137,6 @@
     },
     {
       "fixture": "visual-test.json",
-      "component": "Transform_Combined.png",
-      "pair": "iOS-web",
-      "reason": "Transform rasterisation: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
-      "owner": "unassigned",
-      "expires": "2026-11-30",
-      "observed": {
-        "ssim": 0.8973,
-        "pixelPct": 2.233,
-        "labDeltaEP95": 0,
-        "divergence": "mixed"
-      }
-    },
-    {
-      "fixture": "visual-test.json",
       "component": "Button_Outline.png",
       "pair": "Android-web",
       "reason": "REAL BUG (Android), and narrower than first recorded \u2014 it is the PLACEHOLDER FLOOR, not the box model. Android renders this component 2x(border-width) shorter than iOS/web: Button_Outline and Edge_DeepNesting (border 2px) are 4px short, Input_Field (border 1px) is 2px short, and Button_Primary / Border_Solid / Border_Dashed / Border_Mixed \u2014 borders without a floor-driven height \u2014 are all exact. Two measurements narrow it: (a) with real text pinned (fixtures/visual-test-controls.json) removing the border changes the Android box by EXACTLY 2x its width (Input_Field 54->52 at 1px, Edge_DeepNesting 52->48 at 2px), so the border box is computed correctly when content determines the size; (b) Input_Field's EXPLICIT width:200px is exact on all three while only its unconstrained, floor-driven height is short. So the defect is in StyleApplier.placeholderFloorMinSize / borderBoxFloorMins, which converts web's border-box minHeight:30px into a Compose content-box defaultMinSize by subtracting padding + band. That floor exists ONLY because visual-test.json has no text; it is harness scaffolding matching web's scaffolding, not product behaviour. Note the area's history: the same arithmetic caused +2px regressions in wave-1 (Input_Field/Glass_Effect) and wave-4 (every Decorated row), so change it with a measured before/after, not by reasoning.",
@@ -293,34 +279,6 @@
     },
     {
       "fixture": "visual-test.json",
-      "component": "Edge_MultiTransform.png",
-      "pair": "iOS-Android",
-      "reason": "Transform rasterisation: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
-      "owner": "unassigned",
-      "expires": "2026-11-30",
-      "observed": {
-        "ssim": 0.9323,
-        "pixelPct": 1.147,
-        "labDeltaEP95": 0,
-        "divergence": "mixed"
-      }
-    },
-    {
-      "fixture": "visual-test.json",
-      "component": "Edge_MultiTransform.png",
-      "pair": "iOS-web",
-      "reason": "Transform rasterisation: colours are exact (deltaE95 0.00, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
-      "owner": "unassigned",
-      "expires": "2026-11-30",
-      "observed": {
-        "ssim": 0.9294,
-        "pixelPct": 1.378,
-        "labDeltaEP95": 0,
-        "divergence": "mixed"
-      }
-    },
-    {
-      "fixture": "visual-test.json",
       "component": "Edge_InsetRoundShadow.png",
       "pair": "iOS-Android",
       "reason": "Boundary rasterisation: colours are exact (deltaE95 0.85, edgeSSIM 1.00), so SSIM is scoring anti-aliasing on the boundary rather than a style error.",
@@ -457,6 +415,20 @@
         "pixelPct": 0.0,
         "labDeltaEP95": 20.0,
         "divergence": "color-drift"
+      }
+    },
+    {
+      "fixture": "visual-test.json",
+      "component": "Transform_Combined.png",
+      "pair": "iOS-Android",
+      "reason": "ANDROID IS WRONG, iOS IS NOW RIGHT \u2014 recorded 2026-08-28 when the iOS transform-order fix landed. css-transforms-1 \u00a711: `transform: A B` is the matrix product A\u00b7B, so B maps the point first. Transform_Combined is `rotate(5deg) scale(1.1) translateX(10px)`, so the 10px translate must be scaled by 1.1 and then rotated by 5deg. Compose does not compose the function list at all: TransformApplier accumulates each kind into a separate scalar (translateX += \u2026, rotation += \u2026, scaleX *= \u2026) and hands them to graphicsLayer, which applies a FIXED scale\u2192rotate\u2192translate order. The list order is therefore discarded, and `scale(2) translate(30px)` renders identically to `translate(30px) scale(2)`. MEASURED on a 40x40 box (centroid, base (96,96)): `scale(2) translate(30px,0)` gives web (156,96) and Android (126,96); `rotate(45deg) translate(60px,0)` gives web (137,138) and Android (155,96) \u2014 Android returns the SAME answer for both orderings in each pair, which is the signature of order-insensitivity rather than of a reversed composition (iOS had the latter, and returned exactly the swapped answer in all four cases; that is fixed). Current pair readings confirm the direction: iOS-web SSIM 0.9849, Android-web 0.8971. FIX ROUTE: compose the function list into a single matrix in CSS order and reuse the existing decomposeMatrix2D before feeding graphicsLayer, rather than accumulating per-kind scalars. Not attempted in the same pass because TransformApplier is load-bearing for the whole 327-pair corpus and a botched decomposition would move far more than this one row.",
+      "owner": "unassigned",
+      "expires": "2026-11-30",
+      "observed": {
+        "ssim": 0.9044,
+        "pixelPct": 1.77,
+        "labDeltaEP95": 0.78,
+        "divergence": "structural-divergence"
       }
     }
   ]

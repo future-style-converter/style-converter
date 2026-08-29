@@ -1810,7 +1810,8 @@ refutes a finding.
 | finding | where |
 |---|---|
 | ~~Compose perspective conversion wrong~~ **FIXED** — the real defect was not the cameraDistance scale but `depthScaleFactor` computing `1 + z/P`, the first-order Taylor expansion of `1/(1 − z/P)`. See "perspective + translateZ was wrong on both natives" above. | `runtimes/compose/…/transforms/` |
-| iOS composes the CSS transform function list in **reverse order** — the first function is applied innermost instead of outermost, so `translate() rotate()` and `rotate() translate()` swap meanings | `runtimes/swiftui/…/transforms/` |
+| ~~iOS composes transforms in reverse order~~ **FIXED** — see "transform order" below. | `runtimes/swiftui/…/transforms/` |
+| **NEW (not from the sweep): Compose does not compose the transform list at all.** It accumulates each kind into a separate scalar (`translateX +=`, `rotation +=`, `scaleX *=`) and hands them to `graphicsLayer`, which applies a fixed scale→rotate→translate order — so `scale(2) translate(30px)` renders identically to `translate(30px) scale(2)`. Measured: web (156,96) vs Android (126,96). Ledgered as `Transform_Combined` iOS-Android with the fix route (compose to a matrix in CSS order, reuse the existing `decomposeMatrix2D`) | `runtimes/compose/…/transforms/` |
 | iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely | `runtimes/swiftui/…/effects/blend/` |
 | `border` / `border-*` shorthand silently drops every CSS Color 4/5 colour function — `oklch()`, `lab()`, `lch()`, `hwb()`, `color()`, `color-mix()` | converter shorthand expander |
 | `border` shorthand loses the `<line-width>` for `thin\|medium\|thick`, uppercase units, `Q`, and leading-dot lengths — and files the keyword forms onto the wrong longhand | converter shorthand expander |
@@ -1888,6 +1889,41 @@ Both were found by the audit sweep's cross-runtime lens. Neither was in
 the ledger, and neither was reachable by the existing corpus — no fixture
 combined `perspective()` with `translateZ`, which is exactly why a
 platform rendering no depth at all went unnoticed.
+
+## Transform order (2026-08-28)
+
+css-transforms-1 §11: `transform: A B` is the matrix product A·B, so **B
+maps the point first**. SwiftUI composes the other way — in
+`v.modA().modB()`, modB wraps modA, so modA reaches the content first and
+the result is B·A·p. Emitting the CSS list front-to-back therefore
+rendered every multi-function transform reversed.
+
+Measured on a 40×40 box, centroid, base at (96,96):
+
+| transform | spec / web | iOS before | Android |
+|---|---|---|---|
+| `translate(60px,0) rotate(45deg)` | (155, 96) | **(137,138)** | (155, 96) ✓ |
+| `rotate(45deg) translate(60px,0)` | (137,138) | **(155, 96)** | **(155, 96)** |
+| `scale(2) translate(30px,0)` | (155, 96) | **(125, 96)** | **(125, 96)** |
+| `translate(30px,0) scale(2)` | (125, 96) | **(155, 96)** | (125, 96) ✓ |
+
+**iOS returned exactly the swapped answer in all four** — the signature of
+a reversed composition rather than an arithmetic slip. Fixed by resolving
+each function's governing perspective front-to-back (a `perspective()`
+primes the rotation that *follows* it) and then emitting the pairs in
+reverse. The individual `translate`/`rotate`/`scale` longhands had the
+same inversion and were reordered too. iOS now matches web on 5 of 5.
+
+**Android returns the SAME answer for both orderings in each pair.** That
+is a different bug: Compose does not compose the list at all. It is
+ledgered rather than fixed in the same pass — `TransformApplier` is
+load-bearing for the whole 327-pair corpus, and a botched decomposition
+would move far more than the one row.
+
+The fix resolved **three** ledgered divergences (`Transform_Combined`
+iOS-web, `Edge_MultiTransform` iOS-web and iOS-Android) and created one
+(`Transform_Combined` iOS-Android, now that iOS is right and Android is
+not). Two baselines moved, both iOS multi-function transforms.
 
 ## Test suites
 
