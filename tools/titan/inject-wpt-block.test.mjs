@@ -1859,3 +1859,167 @@ test('wave37 W5: the at-HEAD verification runs lost no cells and only strengthen
     < art.decisions['css-view-transitions'].precisionOfWholeTagExclusion,
     'a better extractor must weaken the exclusion case, not strengthen it');
 });
+
+// ── wave-49 NOVEL-INK wiring + BACKLOG #5 column presence ──────────────────
+//
+// novel-ink.mjs owns the metric and carries its own suite; these pins cover
+// only what THIS module does with it: stamp it on every diff, keep it OUT of
+// wptPass unless the operator opts in, and refuse to report a run that lost a
+// whole platform column.
+
+import {
+  NOVEL_INK_VETO_ENABLED, novelInkVetoActive,
+  assertPlatformColumns, PLATFORM_COLUMN_KEYS,
+} from './inject-wpt-block.mjs';
+
+test('novel-ink veto is OFF unless TITAN_NOVEL_INK_VETO=1', () => {
+  // The wave-49 calibration cleared the false-positive bar (0 fires on 51
+  // hand-verified correct renders) but MISSED the recall bar (12/18 on the
+  // census-SELECTED defect set, 2/12 on an unbiased one, vs 95 % required), so
+  // the campaign rule says ship it dark. This suite runs without the env var
+  // set, so the switch must read false and the gate helper must swallow even a
+  // true stamp.
+  assert.equal(NOVEL_INK_VETO_ENABLED, process.env.TITAN_NOVEL_INK_VETO === '1');
+  if (!NOVEL_INK_VETO_ENABLED) {
+    assert.equal(novelInkVetoActive(true), false, 'a true stamp must not veto while dark');
+  }
+  // Non-true stamps never veto, in either mode.
+  assert.equal(novelInkVetoActive(false), false);
+  assert.equal(novelInkVetoActive(undefined), false);
+});
+
+test('computeWptPass: the sixth argument is a real unconditional veto', () => {
+  // Proves the wiring point itself can fail — a switch nobody can flip is not
+  // a switch. A pixel-perfect pair (ssim 1) is a pass until the novel-ink veto
+  // is handed in, then it is a fail regardless of ssim or fuzzy.
+  assert.equal(computeWptPass(1, null, false, false, false, false), true);
+  assert.equal(computeWptPass(1, null, false, false, false, true), false);
+  // A declared fuzzy match cannot rescue it either (same stance as the other
+  // three vetoes above it).
+  assert.equal(computeWptPass(0.1, true, false, false, false, true), false);
+  // Omitting the argument keeps every legacy five-argument call shape passing.
+  assert.equal(computeWptPass(1, null, false, false, false), true);
+});
+
+test('assertPlatformColumns: a silently-empty column is a failure, a declared skip is not', () => {
+  // BACKLOG #5. The 327-net once went green with the whole Android column
+  // missing; "no rows" read as "no failures". The eligibility idiom used here
+  // is the scorer's own: numeric ssim and not scoreExcluded.
+  const scored = (ssim) => ({ ssim });
+  const results = {
+    t1: { browserRef: { diffs: { 'web-ref': scored(0.99), 'ios-ref': scored(0.98) } } },
+    t2: { browserRef: { diffs: { 'web-ref': scored(0.97), 'ios-ref': scored(0.96) } } },
+  };
+  const bad = assertPlatformColumns(results, {});
+  assert.deepEqual(bad.counts, { 'web-ref': 2, 'ios-ref': 2, 'android-ref': 0 });
+  assert.deepEqual(bad.missing, ['android-ref'], 'the empty column must be named');
+  // Declaring the skip makes the same manifest honest.
+  const declared = assertPlatformColumns(results, { SKIP_ANDROID: '1' });
+  assert.deepEqual(declared.missing, []);
+  // Every switch name must match the ones test-all.sh reads, or the escape
+  // hatch silently does nothing.
+  assert.deepEqual(PLATFORM_COLUMN_KEYS,
+    { 'web-ref': 'SKIP_WEB', 'ios-ref': 'SKIP_IOS', 'android-ref': 'SKIP_ANDROID' });
+});
+
+test('column presence: fatal only on opt-in, so --web-only sections keep running', async () => {
+  // section-runner --web-only invokes inject with empty native dirs, does NOT
+  // declare SKIP_IOS/SKIP_ANDROID, and runs under `set -e`. A bare non-zero
+  // exit would abort every web-only section, so the assertion warns by default
+  // and only bites under TITAN_REQUIRE_ALL_COLUMNS=1. Pinned against the
+  // module source because the branch lives inside main()'s tail.
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /TITAN_REQUIRE_ALL_COLUMNS === '1'/, 'opt-in switch missing');
+  assert.match(src, /if \(fatal\) process\.exitCode = 3;/, 'exit must be gated on the switch');
+  // The warning itself is unconditional — that is the part that would have
+  // caught the silently-Android-less 327-net.
+  assert.match(src, /produced ZERO scored browser-ref diffs/, 'the signal must always be emitted');
+});
+
+test('assertPlatformColumns: excluded and error cells do not prop a column up', () => {
+  // A column whose only rows are score-excluded (not-applicable gate) or
+  // error-shaped carries no evidence — it must still register as missing,
+  // otherwise the assertion is defeated by exactly the rows it should ignore.
+  const results = {
+    t1: {
+      browserRef: {
+        diffs: {
+          'web-ref': { ssim: 0.99 },
+          'ios-ref': { ssim: 0.99, scoreExcluded: true },
+          'android-ref': { error: 'boom' },
+        },
+      },
+    },
+  };
+  const r = assertPlatformColumns(results, {});
+  assert.deepEqual(r.counts, { 'web-ref': 1, 'ios-ref': 0, 'android-ref': 0 });
+  assert.deepEqual(r.missing.sort(), ['android-ref', 'ios-ref']);
+  // All-empty is a DIFFERENT failure (nothing captured at all) and must not be
+  // reported as three missing columns — that would fire on every dry run.
+  assert.deepEqual(assertPlatformColumns({}, {}).missing, []);
+});
+
+test('diffComposedVsRef stamps novelInk + novelInkFailed on every diff', async () => {
+  // The block must ride along for triage even while the veto is dark, so a
+  // manifest row can be queried for the wrong-answer signal without re-running
+  // the metrics. Identical composed capture vs ref → zero novel ink.
+  const dir = await tmpDir('novelink-composed');
+  const refDir = await tmpDir('novelink-ref');
+  const testKey = 'wpt__css-color__t-049';
+  await writePng(dir, `${safe(testKey)}.png`, 40, 40, [0, 128, 0, 255]);
+  const refPng = await writePng(refDir, 'ref.png', 40, 40, [0, 128, 0, 255]);
+  const diff = await diffComposedVsRef({ platformDir: dir, testKey, refPng, fuzzy: null });
+  assert.ok(diff.novelInk, 'novelInk block must be stamped');
+  assert.equal(diff.novelInk.divergentPx, 0);
+  assert.equal(diff.novelInkFailed, false);
+  assert.equal(diff.wptPass, true);
+});
+
+test('EXECUTED REPRO: the wave-48 hole, and that the switch closes it', async () => {
+  // Reproduces css-view-transitions/hit-test-unrelated-element's geometry
+  // exactly: a 390x600 white canvas, a 100x100 blue block at (216,16) and a
+  // 100x100 GREEN block at (216,316); the capture is identical except the
+  // green block is pure RED. That is the shape whose real corpus cell scored
+  // ssim 1.0000 / colorDivergent FALSE / wptPass TRUE on all three platforms.
+  const dir = await tmpDir('wave48-hole');
+  const mk = (fill) => {
+    const p = new PNG({ width: 390, height: 600 });
+    p.data.fill(0xFF);
+    const paint = (x0, y0, w, h, c) => {
+      for (let y = y0; y < y0 + h; y++) for (let x = x0; x < x0 + w; x++) {
+        const i = (y * 390 + x) * 4;
+        p.data[i] = c[0]; p.data[i + 1] = c[1]; p.data[i + 2] = c[2]; p.data[i + 3] = 255;
+      }
+    };
+    paint(216, 16, 100, 100, [0, 0, 255]);
+    paint(216, 316, 100, 100, fill);
+    return p;
+  };
+  const testKey = 'wpt__css-view-transitions__hole-repro';
+  await fs.writeFile(join(dir, `${safe(testKey)}.png`), PNG.sync.write(mk([255, 0, 0])));
+  const refPng = join(dir, 'ref.png');
+  await fs.writeFile(refPng, PNG.sync.write(mk([0, 128, 0])));
+  const diff = await diffComposedVsRef({ platformDir: dir, testKey, refPng, fuzzy: null });
+
+  // The hole, measured: structure is perfect and the colour veto sleeps
+  // because whole-canvas histogram KL is coverage-weighted and the swap covers
+  // only 4.27 % of the frame.
+  assert.equal(diff.ssim, 1, 'SSIM is blind to hue');
+  assert.equal(diff.colorDivergent, false, 'histogram KL stays under its bar');
+  assert.equal(diff.colorFailed, false, 'so the wave-25 colour veto never arms');
+  // The instrument DOES know: 10 000 pixels at a full 255 channel delta.
+  assert.equal(diff.fuzzyDifferingPixels, 100 * 100);
+  assert.equal(diff.fuzzyMaxChannelDelta, 255);
+  // The wave-49 measurement names it, area-normalized on the divergence.
+  assert.equal(diff.novelInkFailed, true);
+  assert.equal(diff.novelInk.novelFractionOfDivergentInk, 1);
+  // And, with the veto dark (this suite's environment), the pair STILL passes.
+  // That is the honest state of the gate as shipped, pinned so nobody reads
+  // the presence of novel-ink code as the hole being closed.
+  if (!NOVEL_INK_VETO_ENABLED) {
+    assert.equal(diff.wptPass, true, 'veto is off by default — the hole is open');
+  }
+  // Flipping the switch is what closes it: same inputs, opposite verdict.
+  assert.equal(computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
+    diff.colorFailed, diff.coverageRatioFailed, true), false);
+});

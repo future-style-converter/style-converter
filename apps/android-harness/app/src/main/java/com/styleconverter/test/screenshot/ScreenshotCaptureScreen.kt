@@ -59,7 +59,7 @@ import com.styleconverter.runtime.core.renderer.composedIcbExtentDp
 // blended source-over onto the white WPT canvas; see resolveComposedCanvasBackground).
 import com.styleconverter.runtime.core.renderer.composedCanvasBackground
 // wave-27 A-RC1 — the shared containment gate on body→canvas background
-// propagation (css-contain-2 §3.5); see resolveComposedCanvasBackground.
+// propagation (css-contain-2 §2); see resolveComposedCanvasBackground.
 import com.styleconverter.runtime.core.renderer.containmentBlocksCanvasPropagation
 import com.styleconverter.runtime.core.renderer.captureCanvasBackground
 import com.styleconverter.runtime.core.types.ValueExtractors
@@ -1591,7 +1591,35 @@ private fun ComposedCaptureCanvas(
                 graphicsLayer.record { this@drawWithContent.drawContent() }
                 drawLayer(graphicsLayer)
             }
-            .background(canvasBackground)
+            // wave-49 lane A4 — the DOCUMENT-ELEMENT clip (css-masking-1 §5).
+            // Normally this is one `.background(canvasBackground)`: the
+            // propagated root background painted on the framed surface
+            // (FIX 3 above). When the document element declares a
+            // `clip-path`, that background is INSIDE the root's clip — the
+            // fxtf compositing §rootgroup/§pagebackdrop chain the WPT test
+            // links, and its assert says so outright ("Clip-path on the
+            // document element applies to the root background"). So the
+            // chain splits in three: the WPT canvas default paints the page
+            // backdrop UNCLIPPED, the clip layer follows, and the propagated
+            // background lands inside it — as does every root the content
+            // lambda composes, since a Compose clip layer clips the node's
+            // whole draw pass. `rootCanvasClipShape` translates the shape by
+            // the canvas frame because the clip's lengths are measured from
+            // the ROOT's border box, i.e. the ICB, not the framed image.
+            // Null for every document whose root declares no clip — 1433 of
+            // the corpus's 1435 — and then this is the byte-identical
+            // single `.background(canvasBackground)` of wave 48.
+            .then(
+                com.styleconverter.runtime.effects.clip
+                    .rootCanvasClipShape(roots, CaptureCanvasFrame)
+                    ?.let { shape ->
+                        Modifier
+                            .background(WPT_CANVAS_BACKGROUND)
+                            .clip(shape)
+                            .background(canvasBackground)
+                    }
+                    ?: Modifier.background(canvasBackground)
+            )
             .testTag("composed-capture-canvas")
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()

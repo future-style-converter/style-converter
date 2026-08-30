@@ -4,12 +4,14 @@ import app.irmodels.IRProperty
 import app.parsing.css.CssPropertyValue
 import app.parsing.css.properties.shorthands.ShorthandRegistry
 import app.parsing.css.properties.longhands.PropertyParserRegistry
+import app.parsing.css.properties.primitiveParsers.AttrNotationResolver
 
 /**
  * Main orchestrator for CSS property parsing.
  *
  * Process:
  * 1. Validate properties (filter invalid CSS property names)
+ * 1.5 Resolve decidable attr() notations; drop declarations proven invalid
  * 2. Expand shorthands to longhands (padding: 10px → padding-top/right/bottom/left)
  * 3. Parse each longhand into specific IRProperty (background-color → BackgroundColorProperty)
  * 4. Fallback to GenericProperty for properties without specific parsers
@@ -120,10 +122,52 @@ object PropertiesParser {
             println("[CSS Parser] Removed invalid properties: ${invalidProperties.joinToString(", ")}")
         }
 
+        // Step 1.5: resolve the `attr()` notation where css-values-5 §8.7
+        // makes the answer decidable without the DOM (a malformed <attr-name>
+        // → the declaration matches no grammar and is ignored per css-syntax-3
+        // §2.2 "Error Handling"; a namespace-PREFIXED name → nothing
+        // downstream can resolve it, so §8.7.1's FAILURE path applies). Runs
+        // BEFORE shorthand expansion so a substituted
+        // `background: attr(ns|x, green)` expands as the plain
+        // `background: green` it now is — and so an INVALID shorthand takes
+        // all of its longhands down with it, which is what "the whole
+        // declaration is invalid" means. Every other attr() shape is passed
+        // through untouched; see AttrNotationResolver for the abstention rules
+        // and for why the prefixed case is decidable at all.
+        val substitutedProperties = LinkedHashMap<String, CssPropertyValue>(validProperties.size)
+        for ((name, cssValue) in validProperties) {
+            when (val outcome = AttrNotationResolver.resolve(cssValue.value)) {
+                is AttrNotationResolver.Outcome.Invalid -> {
+                    // Dropped, never silent: the convert log is the audit trail
+                    // for every declaration the cascade loses.
+                    println("[CSS Parser] Dropped invalid declaration '$name: ${cssValue.value}' — ${outcome.reason} (css-syntax-3 §2.2)")
+                }
+                is AttrNotationResolver.Outcome.InvalidAtComputedValueTime -> {
+                    // NOT the same event as the drop above, so it does not
+                    // share its log line: css-values-5 Appendix A ("Invalid
+                    // Substitution") makes the property compute as if `unset`
+                    // were specified (css-cascade-5 §7.3.3). Omitting the
+                    // declaration encodes exactly that HERE, because this
+                    // function's input is a Map keyed by property name — there
+                    // is no earlier declaration for a drop to expose, and an
+                    // absent property already resolves to inherited-or-initial
+                    // on all three runtimes. Anything that gives this parser a
+                    // real cascade must revisit this line.
+                    println("[CSS Parser] '$name: ${cssValue.value}' is invalid at computed-value time — computes to `unset` — ${outcome.reason}")
+                }
+                is AttrNotationResolver.Outcome.Substituted -> {
+                    substitutedProperties[name] = CssPropertyValue(outcome.value)
+                    println("[CSS Parser] Substituted attr() in '$name': '${cssValue.value}' → '${outcome.value}' — ${outcome.reason}")
+                }
+                // NotAttr / Unresolvable: byte-for-byte passthrough.
+                else -> substitutedProperties[name] = cssValue
+            }
+        }
+
         // Step 2: Expand shorthands to longhands
         val expandedProperties = mutableMapOf<String, String>()
 
-        for ((name, cssValue) in validProperties) {
+        for ((name, cssValue) in substitutedProperties) {
             val value = cssValue.value
             // Property names are already normalized by camelToKebab
 
@@ -168,13 +212,28 @@ object PropertiesParser {
         for ((name, value) in resolvedProperties) {
             val property = PropertyParserRegistry.parse(name, value)
 
-            if (property != null) {
+            when {
+                // The parser PROVED the value is not CSS (not merely "a shape I
+                // don't model"): css-syntax-3 §2.2 ("Error Handling") and CSS
+                // 2.2 §4.2 ("Rules for handling parsing errors") say an
+                // invalid declaration is ignored, leaving the previously
+                // declared value in force. Emitting a passthrough instead would
+                // shadow that earlier value with bytes no runtime can render.
+                // Opt-in per parser — see InvalidDeclaration for why the two
+                // failure modes must not share the `null` channel.
+                property === InvalidDeclaration ->
+                    println("[CSS Parser] Dropped invalid declaration '$name: $value' (css-syntax-3 §2.2)")
+
                 // Successfully parsed to specific property class
-                result.add(property)
-            } else {
-                // Fallback: create generic property wrapper
-                result.add(GenericProperty(name, value))
-                println("[CSS Parser] No parser for '$name', using GenericProperty")
+                property != null -> result.add(property)
+
+                // Fallback: valid-but-unmodelled CSS keeps its author bytes on
+                // the wire (`_unmapped: true`) so a runtime that understands
+                // them can still act. Unchanged behaviour.
+                else -> {
+                    result.add(GenericProperty(name, value))
+                    println("[CSS Parser] No parser for '$name', using GenericProperty")
+                }
             }
         }
 

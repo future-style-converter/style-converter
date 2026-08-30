@@ -146,10 +146,75 @@ class PseudoBucketExtractorTest {
     }
 
     @Test
-    fun `a block display declaration stacks the wrapper`() {
-        // css-display-3 §2: a block-level pseudo flips the Row to a Column.
+    fun `a paintable block-level bucket now belongs to the generated-box path`() {
+        // Wave-49 lane A2 ownership split, pinned on the ONE corpus carrier:
+        // css-pseudo/before-as-flex-container component __0-020, VERBATIM
+        // from tools/titan/runs/wave48-final/sections/css-pseudo/per-test-ir/
+        // wpt__css-pseudo__before-as-flex-container.json. Until this lane a
+        // block-level pseudo merely flipped THIS wrapper's Row to a Column —
+        // which still placed the generated box OUTSIDE the originating
+        // element's border box, where it can never cover the element's own
+        // background (the measured divergence: android-ref 0.9626, the red
+        // 200x100 div still red). CSS 2.1 §12.1 / css-pseudo-4 §4.1 put the
+        // box INSIDE, as the element's first child, so PseudoBoxFold splices
+        // it in as a real child component and this extractor must decline —
+        // otherwise the same content paints twice.
         val p = pseudos(
-            """{"before": {"properties": {"content": "\"x\"", "display": "block"}, "_text": "x"}}"""
+            """{"before": {"properties": {"content": "\"A B\"", "display": "flex", "justify-content": "space-between", "width": "200px", "height": "100px", "background": "green"}, "_text": "A B", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
+        )
+        assertNull(PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null))
+        // …and the box path is what took it (the shared claim function), so
+        // the bucket is re-homed rather than dropped. PseudoBoxFoldTest pins
+        // the spliced child; ComponentRendererPseudoBoxSeamTest pins that the
+        // renderer's own entry point is what calls the fold.
+        assertNotNull(PseudoGeneratedBox.claim(
+            (p["before"] as JsonObject), role = "before", hostRole = null))
+    }
+
+    @Test
+    fun `the display-contents family is refused at the box path's display gate`() {
+        // The complement of the split, on the family's REAL corpus shape:
+        // css-display/display-contents-before-after-002 component __2-020,
+        // VERBATIM from tools/titan/runs/wave48-final/sections/css-display/
+        // per-test-ir/wpt__css-display__display-contents-before-after-002.json.
+        // Both buckets declare `display: contents`, which css-display-3 §2.5
+        // ("Box Generation: the none and contents keywords") replaces with
+        // the element's contents in the box tree — no box of its own — so
+        // PseudoGeneratedBox refuses at its FIRST gate (the block-level
+        // display scan), never reaching the `border` refusal. This wrapper
+        // therefore keeps its pre-wave-49 behaviour verbatim and the family's
+        // "PASS" render must not move.
+        val p = pseudos(
+            """{"before": {"properties": {"display": "contents", "border": "100px solid red", "content": "\"P\""}, "_text": "P", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}, "after": {"properties": {"display": "contents", "border": "100px solid red", "content": "\"S\""}, "_text": "S", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
+        )
+        // Gate 1 refuses BOTH sides — no generated box is claimed.
+        assertNull(PseudoGeneratedBox.claim(
+            (p["before"] as JsonObject), role = "before", hostRole = null))
+        assertNull(PseudoGeneratedBox.claim(
+            (p["after"] as JsonObject), role = "after", hostRole = null))
+        // …so the inline wrapper still renders the baked P…S around "AS".
+        val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null)
+        assertEquals("P", textOf(cfg?.before))
+        assertEquals("S", textOf(cfg?.after))
+        // `contents` is not a block-level keyword (isBlockDisplay scans for
+        // block/list-item/flow-root), so the wrapper stays a Row — exactly
+        // what it did before wave 49.
+        assertTrue(cfg!!.isInline)
+    }
+
+    @Test
+    fun `a block-level bucket the box path REFUSES still stacks the wrapper`() {
+        // The other half of the complement, kept as a targeted probe of the
+        // GATE-2 refusal itself (no corpus carrier: censused over all 1435
+        // wave48-final per-test-ir documents, all 10 border-declaring pseudo
+        // buckets are `display: contents`, and the 18 block-level buckets
+        // declare no border). `border` is beyond the generated-box
+        // bridge — named via the tracker, never silently typed — so the claim
+        // is refused and this wrapper keeps its pre-wave-49 behaviour: a
+        // block-level pseudo flips the Row to a Column (css-display-3 §2.1,
+        // the `block` outer display role).
+        val p = pseudos(
+            """{"before": {"properties": {"content": "\"x\"", "display": "block", "border": "100px solid red"}, "_text": "x"}}"""
         )
         val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null)
         assertEquals("x", textOf(cfg?.before))
@@ -159,7 +224,7 @@ class PseudoBucketExtractorTest {
     @Test
     fun `a display none bucket generates no box`() {
         // css-pseudo/before-dynamic-display-none: the ::before declares its
-        // OWN `display: none`, so css-display-3 §2.4 generates NO boxes for
+        // OWN `display: none`, so css-display-3 §2.5 generates NO boxes for
         // it — Android used to read `none` as "not block" = inline and paint
         // the literal word FAIL (web/iOS already refuse the bucket).
         val p = pseudos(

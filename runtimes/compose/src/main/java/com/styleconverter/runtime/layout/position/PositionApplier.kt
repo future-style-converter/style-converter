@@ -65,6 +65,27 @@ object PositionApplier {
     fun applyPosition(modifier: Modifier, config: PositionConfig): Modifier {
         if (!config.hasPosition) return modifier
 
+        // Wave 49 (lane A7) — the PERCENTAGE-INSET lane. A percentage inset
+        // resolves against the containing block's corresponding dimension
+        // (CSS 2.1 §9.4.3), a number only composition can see: it rides
+        // `LocalContainingBlock`, which this static chain cannot read. The
+        // composed detour therefore lives in its own file (the per-file size
+        // rule) — [percentInsetPositioned] — and is entered ONLY when a side
+        // was actually declared as a percentage, so every px-inset component
+        // keeps the pre-wave-49 modifier chain exactly.
+        val pct = config.percent
+        if (pct != null && pct.any) return modifier.percentInsetPositioned(config)
+
+        return applyResolvedPosition(modifier, config)
+    }
+
+    /**
+     * The z-index + offset chain for a config whose insets are already
+     * absolute Dp values. Split out of [applyPosition] so the percentage
+     * lane above can run the identical chain on its resolved copy — the
+     * two can never drift apart.
+     */
+    internal fun applyResolvedPosition(modifier: Modifier, config: PositionConfig): Modifier {
         var result = modifier
 
         // Apply z-index for stacking order
@@ -142,6 +163,20 @@ object PositionApplier {
      * the backdrop node and the layout chain can never disagree about how far
      * the box moved. Zero for a static (or offsetless) element, which is the
      * overwhelming majority and costs them nothing.
+     *
+     * KNOWN LIMIT (wave 49, lane A7) — stated rather than hidden, and the
+     * exact shape MarginApplier.resolvedInsets already documents for its own
+     * percent lane: a PERCENTAGE inset ([PositionConfig.percent]) is resolved
+     * only inside [percentInsetPositioned]'s composed lane, which this plain
+     * function cannot reproduce (it has no CompositionLocal scope). A percentage-inset
+     * element that ALSO carries backdrop-filter / filter / box-shadow /
+     * mix-blend-mode would therefore have its effect painted at the legacy
+     * number-as-pixels offset while its own paint sits at the resolved one.
+     * No corpus test combines the two: the only bare-number (percentage)
+     * insets in all 30 frozen wave-48 sections are css-position/
+     * position-relative-001…006 and -008, none of which declare an effect.
+     * The fix when one arrives is to thread the resolved offset out of the
+     * composed lane, exactly as the margin note prescribes.
      */
     fun resolvedOffset(config: PositionConfig): DpOffset {
         // Gate 1 — mirrors applyPosition's own first line: no positioning

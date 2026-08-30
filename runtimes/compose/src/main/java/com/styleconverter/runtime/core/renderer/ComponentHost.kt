@@ -31,13 +31,25 @@ object ComponentHost {
      */
     @Composable
     fun Render(component: IRComponent) {
+        // css-cascade-5 §7.3.2 ("Explicit Inheritance: the inherit
+        // keyword") makes `background-color: inherit` compute to the
+        // INHERITED VALUE, which §7.2 defines as the computed value of the
+        // property on the parent element — something no extractor can see
+        // (it is handed one component's declarations). Resolve it here, once, over the whole
+        // composed subtree — this shim is the single root entry point, and
+        // the renderer walks the children off the component it is given, so
+        // one pass covers the tree. Identity pass-through for any tree that
+        // does not use the keyword. See BackgroundColorInheritance.
+        val prepared = remember(component) {
+            com.styleconverter.runtime.color.BackgroundColorInheritance.resolve(component)
+        }
         // Extract once per component identity — the claims are pure
         // functions of the IR properties.
-        val placement = remember(component) {
-            ItemPlacementExtractor.extract(component.properties)
+        val placement = remember(prepared) {
+            ItemPlacementExtractor.extract(prepared.properties)
         }
         ComponentRenderer.RenderComponent(
-            component,
+            prepared,
             // itemModifier is prepended OUTERMOST in RenderComponent's
             // style chain, so the parent-data lands on the component's
             // root layout node — the measurable its container sees.

@@ -445,7 +445,7 @@ struct ComposedCaptureCanvas: View {
     /// twinned by Compose's composedCanvasBackground).
     ///
     /// wave-27 A-RC1: the propagation is now GATED on containment.
-    /// css-contain-2 §3.5 removes a contained root/body from
+    /// css-contain-2 §2 removes a contained root/body from
     /// css-backgrounds-3 §2.11.2's propagation path, so the canvas keeps the
     /// UA white and the body-root paints its own box (contain-body-bg-001..004
     /// flooded red at ~0.63 before this). The decision itself is the runtime's
@@ -784,6 +784,27 @@ struct ComposedCaptureCanvas: View {
         // canvasBackground reads document.components UNSPLIT on purpose —
         // its background must paint even if that root were ever hoisted.)
         .background(canvasBackground)
+        // wave-49 lane A4 — the DOCUMENT-ELEMENT clip (css-masking-1 §5).
+        // Attached HERE, immediately after the propagated root background,
+        // because the group the root's clip-path clips is exactly "the root
+        // element and its descendants" — which on this canvas is the root
+        // forest plus that background, and nothing further out. The modifier
+        // paints the WPT canvas default behind the clip as the page backdrop,
+        // so everything outside the clipped region reads white like the ref;
+        // it also carries the frame inset, because the clip's lengths are
+        // measured from the root's border box (the ICB at (16,16)), not from
+        // this framed surface's corner. Identity — no clip layer, no extra
+        // background — for every document whose root declares no clip-path,
+        // which is 1433 of the corpus's 1435. Components are read UNSPLIT for
+        // the same reason canvasBackground reads them unsplit.
+        //
+        // KNOWN LIMIT, named rather than hidden: the out-of-flow overlay
+        // below is attached OUTSIDE this clip, so a hoisted box under a
+        // clipping ROOT would escape it. No corpus document combines the two
+        // (the census over all 1435 per-test IRs found the only root clips on
+        // clip-path-document-element[-will-change], neither of which has an
+        // out-of-flow box).
+        .rootCanvasClip(document.components, frame: Self.padding)
         // Wave 17 (F1/F2) — the canvas-root out-of-flow overlay: attached
         // HERE, after the full-width frame chain and OUTSIDE the `.padding`
         // above, so it sees the WHOLE capture surface and applies its own

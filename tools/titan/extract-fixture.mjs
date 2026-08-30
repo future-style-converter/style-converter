@@ -277,7 +277,7 @@ export function extractLinkedStylesheets(html) {
 export const MQ_VIEWPORT_WIDTH_PX = 358;
 export const MQ_VIEWPORT_HEIGHT_PX = 568;
 
-// css-values-4 §5.2 absolute length units, in px. `em`/`rem` in a media
+// css-values-4 §6.2 absolute length units, in px. `em`/`rem` in a media
 // query resolve against the INITIAL font size (MQ-4 §1.3: the initial value,
 // never the root element's used value), which is Chromium's 16px default.
 const MQ_ABSOLUTE_UNITS_PX = { px: 1, in: 96, cm: 96 / 2.54, mm: 96 / 25.4, q: 96 / 101.6, pt: 96 / 72, pc: 16 };
@@ -7182,6 +7182,15 @@ function urlPayloadOutOfScope(p) {
 export async function inlineUrlsInValue(value, baseDir) {
   let inlined = 0;
   let unresolved = 0;
+  // wave-49 lane A3: image()'s <image-src> candidates may be BARE STRINGS
+  // (css-images-4 §2.5: `<url> | <string>`, equivalent), which URL_TOKEN_RE
+  // cannot see. Lower the inlinable ones to url(data:…) FIRST so the pass
+  // below finds them as ordinary — and already out-of-scope, hence untouched
+  // and uncounted — data: tokens. See inlineImageNotationSrcs for the
+  // deliberate asymmetry in how the two passes report undeliverables.
+  const notation = await inlineImageNotationSrcs(value, baseDir);
+  value = notation.value;
+  inlined += notation.inlined;
   // Collect matches first (regex is stateful/global), then rebuild the
   // string with replacements — async work inside a .replace callback
   // isn't possible, so we do a manual splice pass.
@@ -7197,30 +7206,13 @@ export async function inlineUrlsInValue(value, baseDir) {
       out += m[0]; // out of scope — keep the author's original token
       continue;
     }
-    // Resolve relative to the test file's dir; a leading '/' is
-    // WPT-server-root-relative (same convention extractFixture uses for
-    // rel="match" and <link rel=stylesheet> hrefs).
-    const abs = payload.startsWith('/')
-      ? join(WPT_DIR, payload.slice(1))
-      : resolve(baseDir, payload);
-    // Only raster formats are inlined; the extension drives the mime type.
-    const ext = /\.([A-Za-z0-9]+)$/.exec(abs)?.[1]?.toLowerCase();
-    const mime = ext ? RASTER_MIME[ext] : null;
-    if (!mime) {
+    // Resolve + read + size-gate through the shared helper (wave-49 lane
+    // A3 extracted it so the image() pass below applies the SAME rules).
+    // A null answer is "not inlinable": non-raster, missing, or ≥ 8 KB.
+    const dataUri = await inlinableAssetDataUri(payload, baseDir);
+    if (dataUri === null) {
       out += m[0];
-      unresolved++; // non-raster (svg/font/css/…) — undeliverable as-is
-      continue;
-    }
-    // Read + size-gate the asset. Missing file or ≥ 8 KB → lossy marker.
-    let bytes = null;
-    try {
-      bytes = await fs.readFile(abs);
-    } catch {
-      bytes = null; // asset not present under tools/wpt/ — unresolvable
-    }
-    if (!bytes || bytes.length >= MAX_INLINE_ASSET_BYTES) {
-      out += m[0];
-      unresolved++;
+      unresolved++; // undeliverable as-is → the caller's lossy marker
       continue;
     }
     // Emit an UNQUOTED url() so whitespace-tokenising value parsers (e.g.
@@ -7229,11 +7221,192 @@ export async function inlineUrlsInValue(value, baseDir) {
     // parens, or commas. The single mandatory data-URI comma (RFC 2397)
     // sits inside the url() parens, which paren-aware top-level-comma
     // splitters already protect.
-    out += `url(data:${mime},${percentEncodeBytes(bytes)})`;
+    out += `url(${dataUri})`;
     inlined++;
   }
   out += value.slice(cursor);
   return { value: out, inlined, unresolved };
+}
+
+/** Cheap pre-filter for "does this declaration value reference an asset at
+ *  all". A url() token, or the bare `image(` function whose <image-src>
+ *  candidates may be quoted strings with no url() around them (css-images-4
+ *  §2.5). NOT global — `.test()` on a /g regex is stateful and would skip
+ *  every other value. */
+const ASSET_REF_GATE = /url\(|(?<![\w-])image\s*\(/i;
+
+// ── image() candidate inlining (wave-49 lane A3) ─────────────────────────────
+//
+// THE MEASURED GAP. css-images-4 §2.5 lets an <image-src> be a bare STRING as
+// well as a url(): `background-image: image("support/1x1-green.png")`. The
+// wave-8 inliner above only ever saw url() tokens, so those strings reached
+// the IR as raw author-relative paths — which the WEB harness rescues at
+// render time through its /wpt-image/ route (CorpusAssetRoute.ts) but NO
+// native can, because a device cannot reach the host's corpus at all. Result
+// at the wave-48 gate: WPT css-image-fallbacks-and-annotations 002/003/004
+// painted the `background-color: red` those tests forbid on BOTH natives
+// (iOS 0.9990 / Android 0.9981, `colorFailed`; 17% of the canvas pure red
+// against a `green` reference) while web scored a clean 1.0000.
+//
+// WHY THIS PASS AND NOT A FEEDER HOP. The wire's image() candidates are
+// TEST-relative (`support/1x1-green.png`), unlike the replaced-element
+// `meta.attrs.src` lane, whose paths resolveReplacedSrc already rewrites to
+// corpus-ROOT-relative before the feeders copy files onto a device. Inlining
+// re-uses the proven wave-8 channel instead of inventing a second delivery
+// contract, and it works identically on all three platforms with no per-
+// platform code at all: every runtime already decodes a data: payload.
+//
+// WHY IT NEVER MARKS A COMPONENT LOSSY — the deliberate asymmetry, stated.
+// A url() whose asset we cannot deliver is a real HARNESS gap: the reference
+// browser fetched the file and we did not, so our render diverges and the
+// component must say so ('requires-bundled-asset'). An image() CANDIDATE that
+// cannot be delivered is not that. The notation exists precisely to declare a
+// fallback chain, and 003/004's leading `1x1-green.svg` is missing FOR THE
+// REFERENCE BROWSER TOO — that is the thing those tests assert. Counting it
+// as unresolved would (a) claim a divergence that does not exist and (b) be a
+// SCORED-SET change dressed as an asset note, because 'requires-bundled-asset'
+// is score-EXCLUDING once wpt-not-applicable Rule 20's textual tag corroborates
+// it (see the roll-up note in inlineFixtureAssets) — it would drop 001, which
+// passes on all three platforms today, out of the denominator. So this pass
+// only ever ADDS deliverability: it inlines what it can and leaves every other
+// candidate byte-for-byte as the author wrote it, for the runtimes' own §2.1
+// walk to decline (Compose images/ImageCandidateChain.kt, SwiftUI
+// StyleEngine/images/ImageCandidateChain.swift).
+
+/** Split `content` on TOP-LEVEL commas, honouring nesting and quotes, and
+ *  return each item's absolute [start,end) range inside `content`. Ranges
+ *  rather than substrings because the caller splices replacements back into
+ *  the original value and needs the offsets. */
+function topLevelCommaRanges(content) {
+  const ranges = [];
+  let depth = 0;
+  let quote = null;
+  let start = 0;
+  for (let i = 0; i < content.length; i++) {
+    const ch = content[i];
+    if (quote) { if (ch === quote) quote = null; continue; }
+    if (ch === '"' || ch === "'") { quote = ch; continue; }
+    if (ch === '(') depth++;
+    else if (ch === ')') depth--;
+    else if (ch === ',' && depth === 0) { ranges.push([start, i]); start = i + 1; }
+  }
+  ranges.push([start, content.length]);
+  return ranges;
+}
+
+/** Index just past the `)` that closes the `(` at `openIdx`, or -1 when the
+ *  value is unbalanced (a truncated declaration — left alone, never guessed
+ *  at). Quote-aware for the same reason topLevelCommaRanges is: a `)` inside
+ *  a quoted src is not a closer. */
+function matchingParen(value, openIdx) {
+  let depth = 0;
+  let quote = null;
+  for (let i = openIdx; i < value.length; i++) {
+    const ch = value[i];
+    if (quote) { if (ch === quote) quote = null; continue; }
+    if (ch === '"' || ch === "'") { quote = ch; continue; }
+    if (ch === '(') depth++;
+    else if (ch === ')') { depth--; if (depth === 0) return i + 1; }
+  }
+  return -1;
+}
+
+/**
+ * Rewrite every inlinable BARE-STRING `<image-src>` inside every `image()`
+ * function of one CSS value into a `url(data:…)` token.
+ *
+ * Returns `{ value, inlined }` — no `unresolved` counter BY DESIGN (see the
+ * banner above). Candidates that are already `url(...)` are left for the
+ * url() pass, and candidates that cannot be inlined keep the author's exact
+ * bytes so the runtimes' §2.1 walk sees the same list the author wrote.
+ *
+ * Exported for unit tests.
+ */
+export async function inlineImageNotationSrcs(value, baseDir) {
+  let inlined = 0;
+  // Cheap reject. The lookbehind excludes `image-set(` / `-webkit-image-set(`
+  // (css-images-4 §2.4 — a different grammar this pass does not model) and
+  // any custom `--foo-image(`; only the bare `image(` function matches.
+  const re = /(?<![\w-])image\s*\(/gi;
+  if (!re.test(value)) return { value, inlined };
+  re.lastIndex = 0;
+  // Collect edits as absolute [start,end,replacement) triples first: the
+  // regex walk and the disk reads are both easier to reason about when the
+  // string is not mutating underneath them.
+  const edits = [];
+  let m;
+  while ((m = re.exec(value)) !== null) {
+    const open = m.index + m[0].length - 1;        // the '(' the match ended on
+    const close = matchingParen(value, open);      // index just past its ')'
+    if (close < 0) break;                          // unbalanced — leave the value alone
+    const content = value.slice(open + 1, close - 1);
+    const base = open + 1;                         // content offset → value offset
+    for (const [s, e] of topLevelCommaRanges(content)) {
+      const raw = content.slice(s, e);
+      const trimmed = raw.trim();
+      // Only the bare-string form. url() candidates ride the url() pass;
+      // a <color> or an <image-tags> prefix is not a source at all.
+      if (trimmed.length < 2) continue;
+      const q = trimmed[0];
+      if ((q !== '"' && q !== "'") || trimmed[trimmed.length - 1] !== q) continue;
+      const payload = trimmed.slice(1, -1).trim();
+      if (!payload || urlPayloadOutOfScope(payload)) continue;  // already self-contained / remote
+      const dataUri = await inlinableAssetDataUri(payload, baseDir);
+      if (dataUri === null) continue;              // undeliverable — author bytes stay
+      // Absolute range of the TRIMMED item (keep the author's surrounding
+      // whitespace so the rest of the declaration is byte-identical).
+      const lead = raw.length - raw.trimStart().length;
+      const itemStart = base + s + lead;
+      edits.push([itemStart, itemStart + trimmed.length, `url(${dataUri})`]);
+      inlined++;
+    }
+    // Continue scanning AFTER this call so a nested image() inside it is not
+    // visited twice (its candidates were already handled by the split above
+    // only if they were top-level; nested ones are out of §2.1's grammar).
+    re.lastIndex = close;
+  }
+  if (edits.length === 0) return { value, inlined };
+  // Splice right-to-left so earlier offsets stay valid.
+  let out = value;
+  for (let i = edits.length - 1; i >= 0; i--) {
+    const [s, e, text] = edits[i];
+    out = out.slice(0, s) + text + out.slice(e);
+  }
+  return { value: out, inlined };
+}
+
+/**
+ * Resolve ONE author-written, IN-SCOPE asset reference against the corpus and
+ * return the `data:` URI it inlines to, or null when it cannot be inlined
+ * (non-raster extension, file not on disk, or ≥ MAX_INLINE_ASSET_BYTES).
+ *
+ * Factored out of inlineUrlsInValue by wave-49 lane A3 so that the `image()`
+ * pass below inlines by EXACTLY the same rules — same base-dir convention
+ * (a leading '/' is WPT-server-root-relative, matching rel="match",
+ * <link rel=stylesheet> and resolveFontFaces), same closed RASTER_MIME table,
+ * same size cap. Two copies of an asset-delivery rule is how the two halves
+ * would drift. Callers must have applied urlPayloadOutOfScope themselves:
+ * out-of-scope (data:/http(s)/protocol-relative/#frag/{{…}}) is a DIFFERENT
+ * outcome from un-inlinable and the two count differently upstream.
+ *
+ * Exported for unit tests.
+ */
+export async function inlinableAssetDataUri(payload, baseDir) {
+  const abs = payload.startsWith('/')
+    ? join(WPT_DIR, payload.slice(1))
+    : resolve(baseDir, payload);
+  // Only raster formats are inlined; the extension drives the mime type.
+  const ext = /\.([A-Za-z0-9]+)$/.exec(abs)?.[1]?.toLowerCase();
+  const mime = ext ? RASTER_MIME[ext] : null;
+  if (!mime) return null;              // non-raster (svg/font/css/…)
+  let bytes = null;
+  try {
+    bytes = await fs.readFile(abs);
+  } catch {
+    return null;                        // asset not present under tools/wpt/
+  }
+  if (!bytes || bytes.length >= MAX_INLINE_ASSET_BYTES) return null;
+  return `data:${mime},${percentEncodeBytes(bytes)}`;
 }
 
 /**
@@ -7269,7 +7442,11 @@ export async function inlineFixtureAssets(fixture, baseDir) {
     let unresolvedHere = 0;
     if (cmp.properties && typeof cmp.properties === 'object') {
       for (const [k, v] of Object.entries(cmp.properties)) {
-        if (typeof v !== 'string' || !/url\(/i.test(v)) continue;
+        // wave-49 lane A3 widened this gate: image()'s <image-src> may be a
+        // bare STRING (css-images-4 §2.5), so a value can need inlining with
+        // no url() token in it at all — `background-image:
+        // image("support/1x1-green.png")` was skipped here entirely.
+        if (typeof v !== 'string' || !ASSET_REF_GATE.test(v)) continue;
         const r = await inlineUrlsInValue(v, baseDir);
         cmp.properties[k] = r.value;
         totalInlined += r.inlined;
@@ -7283,7 +7460,7 @@ export async function inlineFixtureAssets(fixture, baseDir) {
       for (const pe of Object.values(cmp._pseudo)) {
         if (!pe?.properties) continue;
         for (const [k, v] of Object.entries(pe.properties)) {
-          if (typeof v !== 'string' || !/url\(/i.test(v)) continue;
+          if (typeof v !== 'string' || !ASSET_REF_GATE.test(v)) continue;
           const r = await inlineUrlsInValue(v, baseDir);
           pe.properties[k] = r.value;
           totalInlined += r.inlined;
@@ -8435,12 +8612,12 @@ const ROOT_INHERITED_TRIGGER_PROPS = [
   'font-family',     // CSS Fonts 4 §3.1
   'font-weight',     // CSS Fonts 4 §3.2
   'font-style',      // CSS Fonts 4 §3.4
-  'color',           // CSS Color 4 §3.1
+  'color',           // CSS Color 4 §3.2
   'line-height',     // CSS Inline 3 §4.1
   'direction',       // CSS Writing Modes 4 §2.1 (see note above)
   'caret-color',     // CSS UI 4 §7.1
-  'letter-spacing',  // CSS Text 4 §8.1
-  'word-spacing',    // CSS Text 4 §8.2
+  'letter-spacing',  // CSS Text 4 §8.2
+  'word-spacing',    // CSS Text 4 §8.1
   'text-align',      // CSS Text 4 §7.1
   'visibility',      // CSS Display / CSS 2.2 §11.2
   // wave-36 lane M3: `quotes` (css-content-3 §2.2 — inherited, initial

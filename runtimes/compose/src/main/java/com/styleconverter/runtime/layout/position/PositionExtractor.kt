@@ -23,8 +23,34 @@ object PositionExtractor {
      */
     fun extractPositionConfig(properties: List<Pair<String, JsonElement?>>): PositionConfig {
         var config = PositionConfig()
+        // Wave 49 (lane A7) — percentage insets are collected ALONGSIDE the
+        // Dp slots, never instead of them: the Dp read below stays exactly
+        // what it was (the bare percentage number taken as pixels), so any
+        // consumer that cannot see a containing block keeps its frozen
+        // geometry. PositionApplier upgrades these where the channel is
+        // available. See PercentInsetResolve for the CSS citation.
+        var pct = PercentInsets()
 
         properties.forEach { (type, data) ->
+            // Record the percentage magnitude first — `percentOf` answers
+            // null for every non-percentage wire shape, so this is a no-op
+            // for the `{"px":N}` insets that make up the whole corpus bar
+            // seven tests.
+            PercentInsetResolve.percentOf(data)?.let { p ->
+                pct = when (type) {
+                    "Top" -> pct.copy(top = p)
+                    "Right" -> pct.copy(right = p)
+                    "Bottom" -> pct.copy(bottom = p)
+                    "Left" -> pct.copy(left = p)
+                    "InsetBlockStart" -> pct.copy(insetBlockStart = p)
+                    "InsetBlockEnd" -> pct.copy(insetBlockEnd = p)
+                    "InsetInlineStart" -> pct.copy(insetInlineStart = p)
+                    "InsetInlineEnd" -> pct.copy(insetInlineEnd = p)
+                    // ZIndex is also a bare number on the wire but is not an
+                    // inset — it must never enter the percentage channel.
+                    else -> pct
+                }
+            }
             config = when (type) {
                 // Position type
                 "Position" -> config.copy(type = parsePositionType(ValueExtractors.extractKeyword(data)))
@@ -48,7 +74,11 @@ object PositionExtractor {
             }
         }
 
-        return config
+        // Attach the percentage side-channel only when something was
+        // actually declared as a percentage: a null keeps PositionConfig's
+        // equality (and therefore every existing unit test's expected
+        // config) unchanged for the px-only corpus.
+        return if (pct.any) config.copy(percent = pct) else config
     }
 
     /**

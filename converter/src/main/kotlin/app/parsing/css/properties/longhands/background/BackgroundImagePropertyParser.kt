@@ -2,6 +2,7 @@ package app.parsing.css.properties.longhands.background
 
 import app.irmodels.*
 import app.irmodels.properties.background.BackgroundImageProperty
+import app.parsing.css.properties.InvalidDeclaration
 import app.parsing.css.properties.longhands.PropertyParser
 import app.parsing.css.properties.primitiveParsers.AngleParser
 import app.parsing.css.properties.primitiveParsers.UrlParser
@@ -17,8 +18,8 @@ import app.parsing.css.properties.primitiveParsers.TokenizationUtils
  * - none: No background image
  * - url(): Image from URL or data URI
  * - linear-gradient() / repeating-linear-gradient() (css-images-3 §3.1)
- * - radial-gradient() / repeating-radial-gradient() (css-images-3 §3.5)
- * - conic-gradient() / repeating-conic-gradient() (css-images-4 §3.4.4)
+ * - radial-gradient() / repeating-radial-gradient() (css-images-3 §3.2)
+ * - conic-gradient() / repeating-conic-gradient() (css-images-4 §3.3.1)
  * - cross-fade(): modern n-ary + legacy two-arg syntax (css-images-4 §2.6.2)
  *
  * Multiple images can be specified as comma-separated values.
@@ -30,8 +31,8 @@ import app.parsing.css.properties.primitiveParsers.TokenizationUtils
  */
 object BackgroundImagePropertyParser : PropertyParser {
 
-    // The six gradient function heads of css-images-3 §3.1/§3.5 and
-    // css-images-4 §3.4.4 (plus their repeating- variants). Only a layer
+    // The six gradient function heads of css-images-3 §3.1/§3.2 and
+    // css-images-4 §3.3.1 (plus their repeating- variants — §3.4). Only a layer
     // that BEGINS with one of these may be fed to DegenerateCalcRewriter:
     // a gradient body is built purely of case-insensitive CSS tokens
     // (colors, lengths, angles, keywords — the grammar has no <string> or
@@ -133,10 +134,36 @@ object BackgroundImagePropertyParser : PropertyParser {
             return BackgroundImageProperty(listOf(BackgroundImageProperty.BackgroundImage.Raw(trimmed)))
         }
 
-        // Unparseable layers fall back to Raw with the ORIGINAL layer bytes
-        // (previously the lowered bytes leaked into Raw too). Layers were
-        // trimmed when the list was built, so no re-trim is needed here.
-        val images = layers.map { parseImage(it) ?: BackgroundImageProperty.BackgroundImage.Raw(it) }
+        // Unparseable layers take one of TWO routes (wave-49 lane A1) — the
+        // distinction the `null` channel of parseImage cannot express on its
+        // own, so GradientPrefixGuard is asked to adjudicate:
+        //
+        //  * PROVABLY INVALID (`linear-gradient(0.25turns, …)` — `turns` is not
+        //    in the css-values-4 §7.1 angle-unit table): the layer matches no
+        //    production of `<image>`, so `background-image: <bg-image>#` cannot
+        //    match either — one bad item invalidates the whole comma list.
+        //    css-syntax-3 §2.2 / CSS 2.2 §4.2 then DROP the declaration, leaving
+        //    whatever was declared before it in force. Emitting Raw here
+        //    shadowed that earlier declaration with bytes no runtime paints.
+        //  * MERELY UNPARSEABLE (an unknown function head, a colour notation
+        //    ColorParser declines to model, a var()-bearing value): keep the
+        //    historic Raw fallback with the ORIGINAL layer bytes, which the web
+        //    runtime re-emits verbatim so the browser decides.
+        //
+        // Layers were trimmed when the list was built, so no re-trim is needed.
+        val images = ArrayList<BackgroundImageProperty.BackgroundImage>(layers.size)
+        for (layer in layers) {
+            val parsed = parseImage(layer)
+            if (parsed != null) {
+                images.add(parsed)
+                continue
+            }
+            if (GradientPrefixGuard.isInvalidGradientLayer(layer)) {
+                // Sentinel — PropertiesParser drops the declaration and logs it.
+                return InvalidDeclaration
+            }
+            images.add(BackgroundImageProperty.BackgroundImage.Raw(layer))
+        }
 
         return BackgroundImageProperty(images)
     }
@@ -157,7 +184,7 @@ object BackgroundImagePropertyParser : PropertyParser {
             // url(): parse from the ORIGINAL bytes — UrlParser matches the
             // function name case-insensitively but returns the raw payload.
             lower.startsWith("url(") -> parseUrl(value)
-            // image() notation (wave-48 lane W5, css-images-4 §2.1) — from
+            // image() notation (wave-48 lane W5, css-images-4 §2.5) — from
             // ORIGINAL bytes too, since url/string payloads are case-
             // sensitive. Grammar lives in ImageNotationParser (≤200-line
             // rule); a refusal there falls to the Raw route as before.
@@ -214,7 +241,14 @@ object BackgroundImagePropertyParser : PropertyParser {
             colorStopStart = 1
         } ?: run {
             // Try parsing as direction keyword (to right, to bottom, to top left, etc.)
-            if (firstPart.startsWith("to ")) {
+            // Gated on the HEAD TOKEN, not a `"to "` string prefix: a legal
+            // `to\tright` or `to  right` is the same two tokens per
+            // css-syntax-3 §4.3.1 ("Consume a token" folds a whitespace run
+            // into one <whitespace-token>), and the old prefix test let those
+            // spellings past the direction branch entirely — the segment then
+            // fell through to the colour-stop loop, which silently contributed
+            // no stop and left the gradient pointing at the default `to bottom`.
+            if (TokenizationUtils.tokenizeByWhitespace(firstPart).firstOrNull() == "to") {
                 angle = GradientValueParsers.directionToAngle(firstPart)
                 if (angle != null) {
                     colorStopStart = 1
@@ -247,7 +281,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         val funcName = if (repeating) "repeating-radial-gradient" else "radial-gradient"
         val content = TokenizationUtils.extractFunctionContent(value, funcName) ?: return null
 
-        // CSS Images Module 3 §3.5: the optional first comma-separated part
+        // CSS Images Module 3 §3.2: the optional first comma-separated part
         // is a "<radial-gradient-syntax>" prefix carrying any of:
         //   <ending-shape> (circle | ellipse)
         //   <ending-shape-size> (closest-side | closest-corner | farthest-side
@@ -268,7 +302,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         var stopStart = 0
 
         // Peel any <color-interpolation-method> off the candidate prefix
-        // (§3.5's `||` combinator, same rationale as the linear case) —
+        // (§3.2's `||` combinator, same rationale as the linear case) —
         // its presence alone marks the segment as the prefix.
         val rawRadialFirst = parts[0].trim()
         val strippedRadialFirst = GradientValueParsers.stripInterpolationMethod(rawRadialFirst)
@@ -345,7 +379,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         var position: BackgroundImageProperty.Position? = null
         var colorStopStart = 0
         // Peel any <color-interpolation-method> off the prefix segment
-        // (§3.4.4's `||` combinator — `from 45deg in oklch` must not lose
+        // (§3.3.1's `||` combinator — `from 45deg in oklch` must not lose
         // its from-angle); method presence alone marks the prefix.
         val rawConicFirst = parts[0].trim()
         val strippedConicFirst = GradientValueParsers.stripInterpolationMethod(rawConicFirst)
@@ -355,14 +389,14 @@ object BackgroundImagePropertyParser : PropertyParser {
 
         // Pull out the "at <pos>" tail (if any) and the "from <angle>"
         // head. Either part may be missing, but they always appear in
-        // this order per CSS Images Module 4 §3.4.4.
+        // this order per CSS Images Module 4 §3.3.1.
         if (firstPart.startsWith("from ")) {
             val afterFrom = firstPart.removePrefix("from ").trim()
             val atIndex = afterFrom.indexOf(" at ")
             val anglePart = if (atIndex >= 0) afterFrom.substring(0, atIndex).trim() else afterFrom
             fromAngle = AngleParser.parse(anglePart)
             // Same strictness as the linear case, same reason: css-images-4
-            // §3.4.4 types this slot as `from <angle>` and nothing else, so a
+            // §3.3.1 types this slot as `from <angle>` and nothing else, so a
             // unit outside the css-values-4 §7.1 table (`from 0.25turns`)
             // makes the whole function — and therefore the declaration —
             // invalid. We used to drop just the angle and paint from 0deg.

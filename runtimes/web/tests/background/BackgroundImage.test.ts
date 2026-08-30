@@ -190,7 +190,7 @@ describe('BackgroundImage', () => {
       'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
   });
 
-  it('drops a hue method riding a RECTANGULAR space (css-color-4 §12.4)', () => {
+  it('drops a hue method riding a RECTANGULAR space (css-color-4 §13.2)', () => {
     // `in oklab longer hue` does not parse — re-emitting it would delete the
     // whole declaration, so the clause is dropped and the ramp survives.
     const cfg = extractBackgroundImage([
@@ -498,5 +498,43 @@ describe('BackgroundImage', () => {
     ]);
     expect(applyBackgroundImage(cfg).backgroundImage).toBe(
       'linear-gradient(rgba(0, 0, 255, 0.5), rgba(0, 0, 255, 0.5)), url("support/1x1-green.png")');
+  });
+
+  // ---- wave-49 lane A3: the wire shape the corpus now DELIVERS ---------
+  //
+  // The three tests above pin the wire as it stood when the lowering shipped:
+  // candidates as bare author-relative strings. That is no longer what web
+  // receives. tools/titan/extract-fixture.mjs now lowers every inlinable
+  // bare-string <image-src> to `url(data:…)` before the converter sees it —
+  // the delivery channel the NATIVES need (a device cannot reach the host's
+  // corpus), and the converter's UrlParser turns each one into the OBJECT
+  // form of IRUrl, `{url, data:true}`, rather than a bare string.
+  //
+  // So this is a NEW live shape on the web path, and web is the platform
+  // currently scoring 1.0000 on these tests: the pin exists so a change that
+  // improves the natives cannot silently regress web on the same wire.
+  //
+  // PAYLOAD PROVENANCE — verbatim, not invented: the exact
+  // `converter/build` output of
+  // fixtures/wpt/css-images/css-image-fallbacks-and-annotations003.json
+  // (`:converter:run --from css --to ir`), truncated here ONLY in the middle
+  // of the two percent-encoded bodies, which this lowering never inspects.
+  it('stacks object-form data: candidates from the inlined corpus wire', () => {
+    const PNG = 'data:image/png,%89%50%4e%47%0d%0a%1a%0a%00%00%00%0d%49%48%44%52';
+    const GIF = 'data:image/gif,%47%49%46%38%39%61%01%00%01%00%80%00%00%00%7f';
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'image',
+        // Candidate 1 stayed a bare string: `1x1-green.svg` is not on disk
+        // beside the test (which is precisely what 003 asserts) and SVG is
+        // not in the inliner's raster table, so nothing rewrote it.
+        srcs: ['1x1-green.svg', { url: PNG, data: true }, { url: GIF, data: true }],
+      }]),
+    ]);
+    // Author order preserved, object form unwrapped to the same url() token
+    // a bare string produces: §2.1's try-order is the CSS layer order, and
+    // the browser paints the first candidate that loads.
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      `url("1x1-green.svg"), url("${PNG}"), url("${GIF}")`);
   });
 });

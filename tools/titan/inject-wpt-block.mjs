@@ -78,6 +78,12 @@ import {
 // component keys, capture-browser-ref's cache paths) derived, or a nested
 // test would glob for captures/refs under a name nobody wrote.
 import { safe, fixtureStem } from './safe-name.mjs';
+// wave-49 NOVEL-INK: the area-normalized wrong-answer detector. Stamped on
+// EVERY browser-ref diff for triage; it only becomes a wptPass VETO when
+// TITAN_NOVEL_INK_VETO is set (see NOVEL_INK_VETO_ENABLED below) because its
+// wave-49 calibration MISSED the recall bar (it clears the false-positive bar
+// and the mutation test) — full numbers at NOVEL_INK_VETO_ENABLED.
+import { computeNovelInk, computeNovelInkFailed } from './novel-ink.mjs';
 
 const pixelmatch = pixelmatchDefault.default ?? pixelmatchDefault;
 
@@ -508,6 +514,15 @@ async function diffWebVsRef(webPath, refPath) {
   // ssim 0.963 with ~90 % of both images white and the content in the wrong
   // place). Triage colour only — feeds neither wptPass nor scoreExcluded.
   metrics.lowContentDensity = computeLowContentDensity(metrics.semanticPresence);
+  // wave-49 NOVEL-INK block: of the pixels where the two images disagree, how
+  // much of the CAPTURE's paint is in a colour the reference never uses. This
+  // is the area-normalized measurement histogramKL cannot make (KL is
+  // coverage-weighted over the whole canvas, so a total hue swap confined to a
+  // small patch cannot move it — measured: css-view-transitions/
+  // hit-test-unrelated-element paints the ref's green square pure red on all
+  // three platforms at ssim 1.0000 and histogramKL max 0.0591, under the 0.1
+  // bar). Computed on the SAME padded pair every other metric sees.
+  metrics.novelInk = computeNovelInk(A, B);
   return metrics;
 }
 
@@ -569,7 +584,8 @@ function checkFuzzyMatch(metrics, fuzzy) {
  *  Both are VETOES, exactly like the presence gate: a failing pair cannot be
  *  rescued by SSIM or by a declared fuzzy budget. */
 function computeWptPass(ssim, fuzzyMatch, presenceFailed = false,
-                        colorFailed = false, coverageRatioFailed = false) {
+                        colorFailed = false, coverageRatioFailed = false,
+                        novelInkVeto = false) {
   // The presence veto runs FIRST: a capture that renders none of the ref's
   // ink can never be a pass, whatever the whole-canvas metrics say.
   if (presenceFailed === true) return false;
@@ -577,8 +593,66 @@ function computeWptPass(ssim, fuzzyMatch, presenceFailed = false,
   if (colorFailed === true) return false;
   // Ink-mass-asymmetry veto (CAL-RC6): right colours, wrong amount of them.
   if (coverageRatioFailed === true) return false;
+  // wave-49 NOVEL-INK veto: the capture's disagreement is mostly paint in a
+  // colour the reference never uses. Callers pass `false` unless
+  // TITAN_NOVEL_INK_VETO is set — the wave-49 calibration cleared the
+  // false-positive bar (0 fires on 51 hand-verified correct renders) but
+  // MISSED the recall bar (12/18 on the census-selected defect set, and only
+  // 2/12 on an unbiased one, against the 95 % required), so it ships OFF by
+  // default rather than as a half-calibrated gate. Numbers below.
+  if (novelInkVeto === true) return false;
   const ssimPass = typeof ssim === 'number' && ssim >= 0.95;
   return ssimPass || fuzzyMatch === true;
+}
+
+// ── wave-49 NOVEL-INK: the veto's OFF-by-default switch ──────────────────────
+//
+// DECISION RULE, fixed BEFORE measuring: the check ships ON only if it fires
+// on ≥95 % of a hand-verified true-defect set AND on ≤2 % of ≥40 hand-verified
+// correct renders, AND a mutation test proves it can fail. Measured once on
+// wave48-final (4111 scored browser-ref cells, 3312 of them passing):
+//
+//   • MUTATION TEST                       ← PASSES (novel-ink.test.mjs bottom:
+//     identical pair silent, one repainted 100x100 region trips the check)
+//   • false positives   0 / 51  = 0.0 %   ← CLEARS the 2 % bar
+//       78 randomly-drawn currently-passing cells were opened as REF|CAPTURE
+//       pairs (two disjoint samples, seeds 4902 and 4904). 51 were confirmed
+//       correct renders; the other 27 were themselves visibly wrong (see the
+//       note below). The check fired twice in all 78, both on cells
+//       hand-verified as DEFECTS — so zero false positives on the 51.
+//   • recall           12 / 18  = 66.7 %  ← MISSES the 95 % bar
+//       …and that 66.7 % is the OPTIMISTIC figure. Those 18 were drawn from
+//       the wave-49 red-square census, whose rule requires capRedPct > 0.5 —
+//       i.e. the set was selected for a LARGE wrong-coloured area, which is
+//       the very quantity this check's novelPct bar measures. On the 12
+//       wrong-colour defects that turned up unselected in the 78-cell random
+//       sample, recall is 2/12 = 16.7 %. Both numbers miss the bar; the
+//       honest one is the second.
+//
+// The dominant miss mechanism is measured, not guessed: when a render is BOTH
+// wrong-coloured AND displaced, the divergent region fills with the
+// reference's OWN palette (the displaced original) alongside the novel paint,
+// so novelFractionOfDivergentInk falls under 0.5. The second mechanism is
+// small marks — a recoloured underline or a 1px stripe clears the fraction bar
+// but not the 0.1 %-of-frame mass bar.
+//
+// So the block is stamped on every diff (free triage signal, and the honest
+// per-cell record) but does NOT feed wptPass unless an operator opts in. One
+// env var, read once at module load so a run cannot change gate semantics
+// halfway through.
+//
+// SIDE FINDING, recorded because it is larger than the thing this lane fixed:
+// 27 of those 78 randomly-drawn PASSING cells (35 %) are visibly wrong renders
+// — wrong colour, wrong position, wrong line breaking, missing glyphs. The
+// red-square class this check targets is one visible slice of a much wider
+// degeneracy in the pass column, and no colour-based check can reach the rest.
+const NOVEL_INK_VETO_ENABLED = process.env.TITAN_NOVEL_INK_VETO === '1';
+
+/** Gate the novel-ink stamp behind the opt-in switch. Kept as a named helper
+ *  (rather than inlining the `&&`) so both diff paths provably apply the SAME
+ *  rule and a unit test can pin it. */
+function novelInkVetoActive(novelInkFailed) {
+  return NOVEL_INK_VETO_ENABLED && novelInkFailed === true;
 }
 
 /** The WPT capture canvas background — WHITE, the corpus-v4 boundary
@@ -1610,13 +1684,16 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
     // the metrics. See computeWptPass for what each one means.
     diff.colorFailed = computeColorFailed(diff.colorDivergent, diff.labDeltaE);
     diff.coverageRatioFailed = computeCoverageRatioFailed(diff.semanticPresence);
+    // wave-49: the novel-ink verdict is ALWAYS stamped (honest per-cell record
+    // + triage), and only reaches wptPass when the operator opted in.
+    diff.novelInkFailed = computeNovelInkFailed(diff.novelInk);
     // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy
     // tolerance — VETOED by the semantic-presence gate (corpus-v4.3: a blank
     // capture can no longer "pass" a mostly-blank ref, see computeWptPass)
     // and by the two wave-25 honesty vetoes above.
     // Raw `diff.ssim` is left untouched so downstream can honour all bars.
     diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
-      diff.colorFailed, diff.coverageRatioFailed);
+      diff.colorFailed, diff.coverageRatioFailed, novelInkVetoActive(diff.novelInkFailed));
     diff.stitchedComponents = matched.length;
     return diff;
   } catch (err) {
@@ -1663,10 +1740,14 @@ async function diffComposedVsRef({ platformDir, testKey, refPng, fuzzy }) {
     // deficit) came through THIS composed path.
     diff.colorFailed = computeColorFailed(diff.colorDivergent, diff.labDeltaE);
     diff.coverageRatioFailed = computeCoverageRatioFailed(diff.semanticPresence);
+    // wave-49 novel-ink: same always-stamp / opt-in-veto contract as the
+    // stitch path above. BOTH measured wave-48 wrong-colour lies (the
+    // css-view-transitions red squares) came through THIS composed path.
+    diff.novelInkFailed = computeNovelInkFailed(diff.novelInk);
     // WPT-native pass: raw SSIM ≥ 0.95 OR within fuzzy — presence-, colour-
     // and coverage-ratio-vetoed.
     diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
-      diff.colorFailed, diff.coverageRatioFailed);
+      diff.colorFailed, diff.coverageRatioFailed, novelInkVetoActive(diff.novelInkFailed));
     diff.composed = true;                                    // provenance marker
     return diff;
   } catch (err) {
@@ -1972,6 +2053,53 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
 // imported). Cheap helper that wraps statSync via a require trick is overkill;
 // just import existsSync.
 import { existsSync as _existsSync } from 'node:fs';
+// ── wave-49 / BACKLOG #5: the column-presence assertion ──────────────────────
+//
+// WHY: the 327-pair net once went green with the ENTIRE Android column
+// silently skipped — every Android capture was missing, so every Android diff
+// was simply absent, and "no rows" read as "no failures". The same hole exists
+// here: diffPlatformVsRef/diffComposedVsRef return `null` when a platform dir
+// has no matching PNG, so a run where one harness never captured produces a
+// manifest whose remaining columns look perfectly healthy.
+//
+// THE ASSERTION: a platform column is PRESENT when at least one scored
+// browser-ref diff exists for it. A run in which some columns are present and
+// another is entirely empty is a DELIVERY FAILURE, not a result — unless the
+// operator declared that platform skipped (SKIP_IOS / SKIP_ANDROID / SKIP_WEB,
+// the same switches test-all.sh reads). Deliberately NOT "3 × N or fail": a
+// per-test column can legitimately be missing (an extraction miss, a
+// not-applicable test), and demanding equal N would fail honest runs. What
+// cannot be legitimate is a whole column at zero while its siblings have data.
+const PLATFORM_COLUMN_KEYS = Object.freeze({
+  'web-ref': 'SKIP_WEB', 'ios-ref': 'SKIP_IOS', 'android-ref': 'SKIP_ANDROID',
+});
+
+/** Pure + exported for unit pins. `results` is the buildResults map; `env` is
+ *  the environment to read the SKIP_* declarations from. Returns
+ *  `{ counts, missing }` — `missing` lists the platform keys that produced
+ *  ZERO scored diffs while at least one sibling produced some and the operator
+ *  did NOT declare them skipped. An empty `missing` means the run is honest. */
+function assertPlatformColumns(results, env = process.env) {
+  const counts = {};
+  for (const key of Object.keys(PLATFORM_COLUMN_KEYS)) counts[key] = 0;
+  for (const r of Object.values(results ?? {})) {
+    const diffs = r?.browserRef?.diffs;
+    if (!diffs) continue;
+    for (const key of Object.keys(PLATFORM_COLUMN_KEYS)) {
+      const d = diffs[key];
+      // The scorer's own eligibility idiom — a cell counts only when it
+      // carries a numeric ssim and was not score-excluded.
+      if (d && typeof d.ssim === 'number' && !d.scoreExcluded) counts[key]++;
+    }
+  }
+  const present = Object.values(counts).filter((n) => n > 0).length;
+  const missing = present === 0 ? []   // nothing captured at all: a different failure, not this one
+    : Object.entries(counts)
+      .filter(([key, n]) => n === 0 && env[PLATFORM_COLUMN_KEYS[key]] !== '1')
+      .map(([key]) => key);
+  return { counts, missing };
+}
+
 function await_fs_exists_sync(p) { return _existsSync(p); }
 
 function relativeFromRepo(p) {
@@ -2100,10 +2228,34 @@ async function main() {
   await fs.writeFile(tmp, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
   await fs.rename(tmp, MANIFEST_PATH);
 
+  // BACKLOG #5 column-presence assertion. Runs AFTER the manifest is written
+  // so an investigator still gets the artefact to look at, then fails the
+  // process so no downstream aggregate can quote a silently-one-platform-short
+  // run as a result. See assertPlatformColumns' banner for why this is
+  // "column at zero while siblings have data", not "3 × N".
+  const columns = assertPlatformColumns(results);
   process.stderr.write(
     `inject-wpt-block: wrote v4 manifest (totalTests=${tests.length} ` +
-    `A=${totals.A} B=${totals.B} C=${totals.C})\n`
+    `A=${totals.A} B=${totals.B} C=${totals.C}) scored-cells ` +
+    Object.entries(columns.counts).map(([k, n]) => `${k}=${n}`).join(' ') + '\n'
   );
+  if (columns.missing.length > 0) {
+    // WARN by default, FATAL on opt-in. Why not fatal outright: section-runner
+    // --web-only legitimately runs inject with empty native dirs and does NOT
+    // declare SKIP_IOS/SKIP_ANDROID, and it runs under `set -e` — a bare
+    // non-zero exit here would abort every web-only section. The signal is
+    // still emitted unconditionally (that alone would have caught the
+    // silently-Android-less 327-net); TITAN_REQUIRE_ALL_COLUMNS=1 is what a
+    // three-platform gate run sets to make it bite.
+    const fatal = process.env.TITAN_REQUIRE_ALL_COLUMNS === '1';
+    process.stderr.write(
+      `inject-wpt-block: ${fatal ? 'FATAL' : 'WARNING'} — platform column(s) ` +
+      `[${columns.missing.join(', ')}] produced ZERO scored browser-ref diffs while other ` +
+      'columns did. That is a capture/delivery failure, not a result. Declare the matching ' +
+      'SKIP_* env var if the platform was intentionally not run.\n'
+    );
+    if (fatal) process.exitCode = 3;   // distinct from the usage (1) / IO (2) codes above
+  }
 }
 
 // Only invoke main() when this file is the entry point (node ...mjs ...);
@@ -2132,4 +2284,10 @@ export {
   // calibration (and the refutation of the bare-colorDivergent rule) without
   // re-deriving coverage or ΔE.
   WPT_COLOR_FAIL_DELTA_E_MIN, WPT_COVERAGE_RATIO_MAX,
+  // wave-49 NOVEL-INK boundary: the opt-in switch's state and the helper that
+  // applies it, exported so the unit pins can prove the veto is OFF by default
+  // and that computeWptPass's sixth argument is a real veto when it is ON.
+  NOVEL_INK_VETO_ENABLED, novelInkVetoActive,
+  // wave-49 / BACKLOG #5 column-presence assertion (see its banner).
+  assertPlatformColumns, PLATFORM_COLUMN_KEYS,
 };

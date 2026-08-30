@@ -76,7 +76,15 @@ public struct IRDocument: Decodable {
             fontFaces = envelope.fontFaces
             // Composition is a COMPOSER concern (spec 03): rebuild the
             // preview tree from slot refs; dangling parents become roots.
-            components = IRComposer.compose(envelope.components)
+            // The `background-color: inherit` pass runs immediately after,
+            // on the composed shape: css-cascade-5 §7.3.2 computes the
+            // `inherit` keyword to the inherited value, which §7.2 defines
+            // as the PARENT's computed value — and that only exists once
+            // the parent link does, while no style extractor ever sees a
+            // parent. Identity pass-through for a document without the
+            // keyword.
+            components = BackgroundColorInheritance.resolveAll(
+                IRComposer.compose(envelope.components))
         } else {
             // v1 window — the legacy tolerant decode, unchanged behavior
             // (unknown keys ignored), plus a loud deprecation warning so
@@ -92,7 +100,11 @@ public struct IRDocument: Decodable {
             // serializer never learned the field, so a v1 document carrying
             // one would be a forgery, not a face.
             fontFaces = nil
-            components = try c.decode([IRComponent].self, forKey: IRAnyKey("components"))
+            // v1 documents carry their tree already nested, so the same
+            // css-cascade-5 §7.3.2/§7.2 pass applies directly to the
+            // decoded roots.
+            components = BackgroundColorInheritance.resolveAll(
+                try c.decode([IRComponent].self, forKey: IRAnyKey("components")))
         }
     }
 }

@@ -505,7 +505,7 @@ object ComponentRenderer {
             // matching extractDisplayConfig's keyword table).
             val display = child.properties.firstOrNull { it.type == "Display" }
                 ?.data?.let { ValueExtractors.extractKeyword(it)?.uppercase()?.replace('-', '_') }
-            // B1: a display:none child generates NO box (css-display-3 §2.4)
+            // B1: a display:none child generates NO box (css-display-3 §2.5)
             // — its margins must not participate at all. The legacy path
             // renders it size-0 in place; folding its margins into visible
             // siblings would be WORSE than legacy, so bail.
@@ -880,6 +880,17 @@ object ComponentRenderer {
         // interception below sees one consistent ancestry frame.
         val hoistHasTransformedAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
             .LocalHasTransformedAncestor.current
+        // Wave 49 (lane A4) — the THIRD ancestry channel (css-masking-1 §5):
+        // an ancestor's `clip-path` clips the element AND its descendants
+        // with no containing-block escape (contrast CSS 2.1 §11.1.1, which
+        // DOES let a positioned descendant escape an `overflow` clip). The
+        // canvas-root overlay is a SIBLING of that ancestor in the Compose
+        // tree, so hoisting there drops the clip — measured as 10 000 px of
+        // unclipped red on WPT css-masking/clip-path/clip-path-blending-
+        // offset (android-ref 0.9566 vs web/iOS 1.0000). Read next to the
+        // other two so the interception below sees one ancestry frame.
+        val hoistHasClippingAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
+            .LocalHasClippingAncestor.current
         if (com.styleconverter.runtime.layout.position.CanvasRootHoist.interceptsInFlow(
                 component,
                 hostActive = hoistHostActive,
@@ -887,6 +898,7 @@ object ComponentRenderer {
                 bypass = com.styleconverter.runtime.layout.position.CanvasRootHoist
                     .LocalBypass.current,
                 hasTransformedAncestor = hoistHasTransformedAncestor,
+                hasClippingAncestor = hoistHasClippingAncestor,
             )
         ) {
             return
@@ -905,7 +917,19 @@ object ComponentRenderer {
         val itemModifier =
             if (hoistHostActive &&
                 com.styleconverter.runtime.layout.position.CanvasRootHoist
-                    .rendersInFlowAsStaticPosition(component.properties, hoistHasPositionedAncestor)
+                    .rendersInFlowAsStaticPosition(
+                        component.properties,
+                        hoistHasPositionedAncestor,
+                        // Wave 49 (lane A4): the two extra flags let this
+                        // branch also claim the box the clip veto pulled
+                        // back out of the overlay — it needs the SAME
+                        // zero-flow, in-slot mount (an out-of-flow box
+                        // reserves no space, css-position-3 §2.1) so its own
+                        // PositionApplier offset places it inside the
+                        // ancestor's `Modifier.clip`.
+                        hoistHasTransformedAncestor,
+                        hoistHasClippingAncestor,
+                    )
             ) {
                 // Outermost slot, exactly like the overlay's canvasAnchor.
                 // Wave 42 (lane W8): the CSS2 §10.3.7 shrink-to-fit spec
@@ -937,7 +961,29 @@ object ComponentRenderer {
         // so remember{} keys and frozen baselines are untouched.
         @Suppress("NAME_SHADOWING")
         val component = androidx.compose.runtime.remember(component) {
-            ContentsUnboxing.resolve(component)
+            // ── Wave-49 lane A2: the ordinary-element generated-BOX seam ──
+            // CSS 2.1 §12.1 / css-pseudo-4 §4.1 ("Generated Content
+            // Pseudo-elements: ::before and ::after", a TREE-ABIDING
+            // pseudo-element per §4) put a `::before` box INSIDE the
+            // originating element, as its first child (web spells
+            // exactly that — NodeRenderer emits the pseudo span as a
+            // positional child). ContentApplier's wrapper composes it
+            // OUTSIDE the host's border box instead, where it can never
+            // cover the host's own background: measured on WPT
+            // css-pseudo/before-as-flex-container, whose green 200x100
+            // ::before should hide the div's red background and did not
+            // (android-ref 0.9626, wptPass false, colorFailed true).
+            // PseudoBoxFold splices a block-level, fully-typeable bucket in
+            // as a REAL child component so the host's own layout branch
+            // places it and StyleApplier paints it with zero further
+            // plumbing. Identity for every component without a claimed
+            // bucket — the committed fixture corpus carries no `pseudos` at
+            // all, and a replay of the claim rules over all 30 frozen
+            // wave48 sections claims exactly ONE component. Runs after
+            // unboxing so the fold sees the final composed child list.
+            com.styleconverter.runtime.content.PseudoBoxFold.resolve(
+                ContentsUnboxing.resolve(component)
+            )
         }
         // ── Wave-7 dynamic-styling resolution (schema/spec/06-dynamic-styling.md)
         // Fold ACTIVE media buckets (§4) then ACTIVE selector buckets (§2)
@@ -1611,7 +1657,7 @@ object ComponentRenderer {
         // LEGACY v1/fixture fallback, byte-identical when no bucket
         // resolves. Gated on the engine's display answer because a
         // `display: none` originating element generates NO boxes at all,
-        // pseudo boxes included (css-display-3 §2.4) — the suppression
+        // pseudo boxes included (css-display-3 §2.5) — the suppression
         // inside RenderComponentContent sits INSIDE this wrapper and could
         // not veto it. Body-root buckets stay with RootPseudoBox (the
         // extractor's own role gate — see its banner).
@@ -1780,11 +1826,38 @@ object ComponentRenderer {
         // agree byte-for-byte or a box is dropped from flow with no overlay
         // slot (bucket-flipped Position values are out of scope on BOTH
         // sides, same conservatism as collapse-plan bail B6).
-        val childHasPositionedAncestor =
+        // Wave-49 (lane A7) — the multicol channel this decision now reads:
+        // the positioned-ancestor state that was in force at the nearest
+        // MULTI-COLUMN CONTAINER, or null outside one. css-multicol-1 §6.1
+        // says each spanner "acts as a block-level box that establishes an
+        // independent formatting context" — it is laid out against the
+        // multi-column container, not against the boxes it was nested in, so
+        // those boxes do not contain it and cannot be its out-of-flow
+        // descendants' containing block.
+        val positionedAtMulticol =
             com.styleconverter.runtime.layout.position.CanvasRootHoist
-                .LocalHasPositionedAncestor.current ||
-                com.styleconverter.runtime.layout.position.CanvasRootHoist
-                    .establishesContainingBlock(component.properties)
+                .LocalPositionedAncestorAtMulticol.current
+        // The OR-accumulation above now runs through the shared helper, which
+        // keeps it byte-identical everywhere except below a spanner. The pure
+        // walks in CanvasRootHoist.collectCanvasHoisted / anyOutOfFlowBox call
+        // the SAME function, so composition and walk cannot disagree.
+        val childHasPositionedAncestor = com.styleconverter.runtime.columns
+            .MulticolSpannerContainingBlock.childPositionedAncestor(
+                ancestorPositioned = com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalHasPositionedAncestor.current,
+                positionedAtMulticol = positionedAtMulticol,
+                properties = component.properties,
+            )
+        // The stamp this component publishes for its own subtree: a multicol
+        // container stamps its own chain state, everything else passes the
+        // ancestor's stamp through (so a spanner nested several levels down
+        // still restarts from its own container).
+        val childPositionedAtMulticol = com.styleconverter.runtime.columns
+            .MulticolSpannerContainingBlock.childPositionedAtMulticol(
+                positionedAtMulticol = positionedAtMulticol,
+                childPositionedAncestor = childHasPositionedAncestor,
+                properties = component.properties,
+            )
         // Wave-35 (lane B1) — the TRANSFORM half of the same channel
         // (css-transforms-1 §3 / css-transforms-2 §6). Kept separate from the
         // positioned flag because the two claim different descendant classes:
@@ -1796,6 +1869,18 @@ object ComponentRenderer {
                 .LocalHasTransformedAncestor.current ||
                 com.styleconverter.runtime.layout.position.CanvasRootHoist
                     .establishesTransformContainingBlock(component.properties)
+        // Wave-49 (lane A4) — the CLIP half of the same channel
+        // (css-masking-1 §5). Kept separate from the two flags above because
+        // it answers a different question: not "who is the containing block"
+        // but "which clip can this subtree not escape". Same OR-accumulating
+        // rule (a clip-path never un-clips a subtree) and the same raw-
+        // declaration basis, so it mirrors CanvasRootHoist
+        // .collectCanvasHoisted's third flag exactly.
+        val childHasClippingAncestor =
+            com.styleconverter.runtime.layout.position.CanvasRootHoist
+                .LocalHasClippingAncestor.current ||
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .establishesUnescapableClip(component.properties)
         val inheritanceWrappedContent: @Composable () -> Unit = {
             CompositionLocalProvider(
                 LocalInheritedProperties provides inheritableForChildren,
@@ -1835,11 +1920,23 @@ object ComponentRenderer {
                 // providing it costs no layout node.
                 com.styleconverter.runtime.layout.position.CanvasRootHoist
                     .LocalHasPositionedAncestor provides childHasPositionedAncestor,
+                // Wave-49 (lane A7): the multicol stamp that the spanner
+                // chain-restart above reads. Provided unconditionally for the
+                // same reason as its two neighbours — outside a host it is
+                // never read past the LocalActive gate, and providing it
+                // costs no layout node.
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalPositionedAncestorAtMulticol provides childPositionedAtMulticol,
                 // Wave-35 (lane B1): the transform-CB twin of the line above.
                 // Provided unconditionally for the same reason — outside a
                 // host it is never read past the LocalActive gate.
                 com.styleconverter.runtime.layout.position.CanvasRootHoist
-                    .LocalHasTransformedAncestor provides childHasTransformedAncestor
+                    .LocalHasTransformedAncestor provides childHasTransformedAncestor,
+                // Wave-49 (lane A4): the unescapable-clip twin of the two
+                // lines above. Provided unconditionally for the same reason —
+                // outside a host it is never read past the LocalActive gate.
+                com.styleconverter.runtime.layout.position.CanvasRootHoist
+                    .LocalHasClippingAncestor provides childHasClippingAncestor
             ) {
                 wrappedContent()
             }
@@ -2211,7 +2308,7 @@ object ComponentRenderer {
                             modifier = modifier,
                             mainArrangement = axes.mainVertical,
                             // Item gap of a column container = row-gap;
-                            // line gap = column-gap (css-align-3 §8.1).
+                            // line gap = column-gap (css-align-3 §8).
                             mainGap = axes.rowGap,
                             crossGap = axes.columnGap,
                             cross = colStretchPlan,
@@ -2417,7 +2514,7 @@ object ComponentRenderer {
                 val columnConfig = MultiColumnExtractor.extractMultiColumnConfig(
                     component.properties.map { it.type to it.data }
                 )
-                // ── Wave-35 lane B3: css-multicol-1 §6.2 DESCENDANT spanner
+                // ── Wave-35 lane B3: css-multicol-1 §6.1 DESCENDANT spanner
                 // promotion (columns/MulticolDescendantSpanner.kt). A
                 // `column-span: all` element one level down was classified as
                 // an ordinary column item, and its ink-free wrapper carries
@@ -2876,7 +2973,7 @@ object ComponentRenderer {
         rootPseudoSpecFor(component, "before")?.let { spec ->
             RootPseudoBox(
                 spec = spec,
-                // css-contain-1 §3.1: a contained body does not propagate its
+                // css-contain-1 §2: a contained body does not propagate its
                 // direction to the viewport, so the root-owned box keeps the
                 // root's own `ltr` and sits physically left.
                 pinInlineStart = containmentBlocksDirectionPropagation(containKeywordsOf(component)),

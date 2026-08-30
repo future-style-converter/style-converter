@@ -2043,15 +2043,61 @@ Swift gradient monotonicity and image() precedence. Harness lesson: the
 (post-watchdog reprovision left two emulators; adb ambiguity + an app
 crash) — re-run full; a column-presence check is queued.
 
+**Wave 49 (2026-08-30) — the red-square hole.** corpus-v6.15: web
+1205/1379 87.4%, iOS 1081/1366 79.1%, Android 1058/1366 77.5%; **32
+cells gained, ZERO lost** over 4111 scored cells with exact column
+parity. 24 of 25 predicted flips hit, plus 8 unpredicted. The wave's
+headline is a MEASUREMENT, not a fix: the colour veto is gated on
+`colorDivergent` = whole-canvas per-channel histogram KL, which is
+coverage-weighted and so cannot see a total hue swap confined to a
+small area. **179 currently-passing cells paint WPT's red FAIL square
+where the reference has none** (web 26, iOS 67, Android 86, over 102
+tests); 89 failing cells share the signature. Canonical instance
+`css-view-transitions/hit-test-unrelated-element`: ssim 1.0000,
+wptPass TRUE, yet fuzzyDifferingPixels 10000 at maxChannelDelta 255.
+Lane I1 reproduced the census independently with zero set difference
+and corrected the orchestrator's honest-fail count 101→89 (12 rows are
+scoreExcluded). Its novel-ink veto **ships DISARMED** behind
+`TITAN_NOVEL_INK_VETO=1`: the decision rule was fixed before measuring
+and recall MISSED it (66.7% on the census-selected set, 16.7% on an
+unbiased sample, against a 95% bar), so the check was not tuned until
+it looked good. Larger side finding: **27 of 78 randomly-sampled
+PASSING cells (35%) are visibly wrong renders** — the red-square class
+is one slice of a wider degeneracy no colour check reaches. Fixes:
+clip-path on the document element went 0.5367 → **byte-identical to
+the reference** on all three platforms (verified by ink geometry —
+7500 px, bbox [66,66]-[165,165] — because a bounding-box clip would
+have passed at 0.9838 while being wrong); **obligation #3 discharged**
+(clip-path-blending-offset Android 0.9566→1.0000, PR #126's bounds fix
+verified NOT reverted); currentcolor + static color-mix claimed 2
+cells and moved 8; the image() candidate chain fixed 6; invalid
+declarations are now dropped rather than emitted as a raw passthrough
+(full-corpus differential 1432 identical / 3 changed, 440 non-WPT
+fixtures byte-identical). **SSIM is blind to this whole class in both
+directions** — repairs landed with the metric frozen, and one
+(before-as-flex-container iOS) went 0.9990→0.9986 while flipping fail
+→ PASS. The one prediction miss is diagnosed and is A7 being right:
+Compose's PercentInsetResolve declines when the ancestor publishes no
+containing block, unable to distinguish CSS-indefinite from a channel
+gap. Skeptics caught a GATE-CRITICAL composition crash that would have
+killed the css-masking Android column, an INERT lane whose module had
+no call site, converter false positives dropping valid CSS, and 300
+wrong spec citations including two fabricated quotes. Harness lesson
+closed: the wave-48 column-presence gap is now checked in two places
+(`assertPlatformColumns` + a gate-script guard), and both were
+exercised for real when the first wave-49 attempt lost its Android
+column to host-disk exhaustion and was caught after ONE section.
+
+
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 419 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1326 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2821 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1849 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1848 |
+| converter (Kotlin) | `./gradlew :converter:test` | 463 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1340 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2974 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1941 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1877 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

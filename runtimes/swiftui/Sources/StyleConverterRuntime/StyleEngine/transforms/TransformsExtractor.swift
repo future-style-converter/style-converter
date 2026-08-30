@@ -65,6 +65,40 @@ enum TransformsExtractor {
         if case .object(let o0) = data, o0["type"]?.stringValue == "none" {
             agg.touched = true; return
         }
+        // Variant 1b: a CSS-WIDE KEYWORD, wired as
+        // `{"type":"keyword","keyword":"inherit"}` by the converter's
+        // TransformPropertyParser. VERBATIM corpus carrier:
+        // tools/titan/runs/wave48-final/sections/css-transforms/
+        // per-test-ir/wpt__css-transforms__css-transform-inherit-scale.json,
+        // component `css-transform-inherit-scale__1__1__0`. Before this
+        // the Variant-2 guard below rejected the shape and the whole
+        // property vanished — the child kept only its ancestor's scale
+        // and rendered a 100x100 green square where the ref (and web)
+        // paint 200x200, leaving 30000 px of red FAIL square visible.
+        if case .object(let o1) = data, o1["type"]?.stringValue == "keyword",
+           let kw = o1["keyword"]?.stringValue?.lowercased() {
+            switch kw {
+            case "inherit":
+                // css-cascade-4 §7.3.2 — take the parent's computed value.
+                // The applier resolves it from the ambient channel.
+                agg.transformInherits = true
+                agg.touched = true
+            case "initial", "unset", "revert", "revert-layer":
+                // §7.1/§7.3: `transform` is NOT an inherited property, so
+                // `unset` acts as `initial`, and `initial` is `none`
+                // (css-transforms-1 §3). Same effect as Variant 1: touched
+                // with an empty list. `revert`/`revert-layer` roll back to
+                // the UA sheet, which declares no transform — also none.
+                agg.touched = true
+            default:
+                // Not a CSS-wide keyword: fall through to Variant 2 so an
+                // unrecognised shape is refused there rather than silently
+                // absorbed here.
+                break
+            }
+            if kw == "inherit" || kw == "initial" || kw == "unset" ||
+                kw == "revert" || kw == "revert-layer" { return }
+        }
         // Variant 2: `{ "type": "functions", "list": […] }`.
         guard case .object(let o) = data,
               let list = o["list"]?.arrayValue else { return }

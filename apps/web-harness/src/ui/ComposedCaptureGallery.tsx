@@ -58,6 +58,11 @@ import { RootErrorBoundary } from '@style-converter/web/renderer/RootErrorBounda
 // background color byte-identically to how it would render, so the composed
 // canvas honors a page-level background exactly as the runtime paints it.
 import { buildStyles } from '@style-converter/web/core/renderer/StyleBuilder';
+// wave-49 lane A4 — the DOCUMENT-ELEMENT clip (css-masking-1 §5). The
+// resolver lives in the runtime's clip category next to the extractor it
+// hops through; this canvas only decides WHERE to spend it. See
+// RootClipPathResolver's banner for the measurement.
+import { resolveRootClipPath } from '@style-converter/web/engine/effects/clip/RootClipPathResolver';
 import { composeTree } from '../sdui/Composer';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 
@@ -98,7 +103,7 @@ const CANVAS_BG_DEFAULT = '#FFFFFF';
  * wave-27 A-RC1 — THE CONTAINMENT GATE. The propagation above was
  * UNCONDITIONAL, and css-backgrounds-3 §2.11.2 says it must not be: the
  * root/body background is propagated to the canvas only while that element is
- * ON the propagation path, and css-contain-2 §3.5 removes it from that path
+ * ON the propagation path, and css-contain-2 §2 removes it from that path
  * the moment it has ANY containment ("The background of the root element or
  * the body element … is not propagated if [it] has containment"). A contained
  * body paints its background on its OWN box and the canvas keeps the UA
@@ -139,7 +144,7 @@ export function resolveCanvasBackground(doc: IRDocument): string {
  * `extractContainValues` already tolerates for this leaf.
  *
  * TRUE iff at least one token is a real containment keyword, i.e. anything
- * except `NONE`. css-contain-2 §3.5 does not grade by containment KIND: the
+ * except `NONE`. css-contain-2 §2 does not grade by containment KIND: the
  * WPT family proves it, since layout / paint / size / style each block
  * propagation on their own (contain-body-bg-001..004 all match the SAME
  * all-white reference). An empty or absent list is NOT containment.
@@ -301,17 +306,19 @@ const DIRECTION_KEYWORDS = new Set(['ltr', 'rtl']);
  * by Blink's own bidi/alignment pass. Nothing is re-implemented here.
  *
  * THE CONTAINMENT GATE is not an analogy this time, it is the spec's own
- * wording: css-contain-1 §3.1 says that for a contained element "if this is
- * the body element, the used values of writing-mode, direction and
- * text-orientation are NOT propagated to the viewport" — direction is named
- * alongside writing-mode in the same clause. WPT states it in the test TITLES:
+ * wording: css-contain-1 §2 says that when `contain` on html or body is
+ * anything but `none`, "propagation of properties from the body element to
+ * the initial containing block, the viewport, or the canvas background, is
+ * disabled. Notably, this affects: writing-mode, direction, and
+ * text-orientation" — direction is named alongside writing-mode in the same
+ * clause. WPT states it in the test TITLES:
  * css-contain/contain-body-dir-001..004 and contain-html-dir-001..004 read
  * "layout|paint|size|style containment on body|html prevents direction
  * propagation", all eight matching ONE reference whose orange square sits in
  * the upper-LEFT (the viewport stayed `ltr`). We therefore reuse
  * [bodyRootHasContainment] — the identical predicate the background and
  * writing-mode propagations gate on, inheriting its merged html+body caveat
- * verbatim — and, like §3.1, do not grade by containment KIND.
+ * verbatim — and, like §2, do not grade by containment KIND.
  *
  * Returns `undefined` when there is no body-root, when it declares no
  * direction, when the declared value is the initial `ltr` (which is what the
@@ -325,7 +332,7 @@ export function resolveCanvasDirection(doc: IRDocument): string | undefined {
   // synthetic bag for it.
   const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
   if (!bodyRoot) return undefined;
-  // css-contain-1 §3.1 names `direction` in the same clause as `writing-mode`.
+  // css-contain-1 §2 names `direction` in the same clause as `writing-mode`.
   if (bodyRootHasContainment(bodyRoot)) return undefined;
   // Resolve through the SAME engine the renderer uses (DirectionApplier), so
   // the canvas can never disagree with what a component would have got.
@@ -685,6 +692,11 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // wave-38 N6: the body's own `text-align`, consulted ONLY when the line above
   // reversed the inline axis (resolveCanvasTextAlign gates on it internally).
   const canvasTextAlign = React.useMemo(() => resolveCanvasTextAlign(doc), [doc]);
+  // wave-49 A4: the DOCUMENT ELEMENT's own `clip-path`. `undefined` for every
+  // document whose merged root declares none — 1433 of the corpus's 1435 —
+  // which is what keeps the rest of the corpus byte-identical: no style key
+  // is written and the background stays exactly where wave-25 put it.
+  const canvasClipPath = React.useMemo(() => resolveRootClipPath(doc), [doc]);
   return (
     <div
       data-capture-canvas
@@ -704,7 +716,20 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
       // depend on key order).
       style={{
         ...composedCanvasStyle,
-        background: canvasBackground,
+        // wave-49 A4 — WHERE the propagated root background is painted.
+        // Normally it is HERE, on the framed outer surface (wave-24 B-RC5).
+        // But when the document element carries a `clip-path`, css-masking-1
+        // §5 puts that background INSIDE the root's clip — the fxtf
+        // compositing §rootgroup/§pagebackdrop chain the WPT test links, and
+        // its assert states it outright ("Clip-path on the document element
+        // applies to the root background"). The clip's coordinates are the
+        // ROOT element's border box, i.e. the ICB div below, so the
+        // background moves onto that same box and is clipped with it; this
+        // outer surface then paints the page backdrop, which is the canvas
+        // default. MEASURED: with the background left here the frame band
+        // would keep painting red outside the clip, where the Chromium ref
+        // (clip-path-document-element[-will-change]) is pure white.
+        background: canvasClipPath ? CANVAS_BG_DEFAULT : canvasBackground,
         paddingTop: `${CANVAS_FRAME_PX}px`,
         paddingRight: `${CANVAS_FRAME_PX}px`,
         paddingBottom: `${CANVAS_FRAME_PX}px`,
@@ -758,6 +783,20 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
           // Never written on its own: the resolver is silent unless the
           // direction fired, so no LTR capture can move.
           ...(canvasTextAlign ? { textAlign: canvasTextAlign as React.CSSProperties['textAlign'] } : {}),
+          // wave-49 A4 — the DOCUMENT-ELEMENT clip rides the ICB for the
+          // same reason the writing mode and direction do: this div IS the
+          // root element's rendering surface (the ref's render viewport), so
+          // its BORDER BOX is the reference box `clip-path`'s lengths are
+          // measured from — polygon(50px 50px …) lands at image (66,66),
+          // exactly where the Chromium ref draws it. The root background
+          // travels with it (see the outer div above) so the one clip covers
+          // the background AND the whole root forest, which in the flat v2
+          // wire lives inside this div as the root's siblings-turned-
+          // children. Spread LAST and conditionally, so a document with no
+          // root clip writes no key at all and stays byte-identical.
+          ...(canvasClipPath
+            ? { background: canvasBackground, clipPath: canvasClipPath }
+            : {}),
         }}
       >
         {roots.map((root, i) => (

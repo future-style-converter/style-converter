@@ -130,6 +130,17 @@ struct BackgroundImageApplier: ViewModifier {
         }
         let sizeLayer = slice(size?.layers)
         let repeatLayer = slice(repeatCfg?.layers)
+        // image() collapses to the candidate that actually paints BEFORE any
+        // of the routing below runs (css-images-4 §2.5, wave-49 lane A3).
+        // Re-entering with the resolved layer — rather than duplicating the
+        // url/colour routing here — is what keeps the §2.1 winner subject to
+        // the very same background-size / -position / -repeat geometry an
+        // author-written url() gets, at the SAME stack index.
+        if case .imageNotation(let srcs, let fallback) = layer {
+            return render(
+                BackgroundImageLayer.resolveImageNotation(srcs: srcs, fallback: fallback),
+                index: index)
+        }
         if case .url(let urlString) = layer {
             // Decode (cached). Remote/undecodable → the browser's
             // failed-load visual: nothing painted (resolver logged it).

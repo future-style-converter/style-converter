@@ -30,9 +30,21 @@ struct TransformsApplier: ViewModifier {
     // context above; publishing/reset happens in Step 4 below.
     @Environment(\.transforms3DAccumulated) private var inherited3D: CATransform3D
 
+    // Wave 49 (lane A6) — the nearest transformed ancestor's computed
+    // `transform` list, for `transform: inherit` (css-cascade-4 §7.3.2).
+    // Empty default = no transform above. TransformInheritance.swift
+    // carries the measured defect and the channel's contract.
+    @Environment(\.cssInheritedTransform) private var inheritedTransform: [TransformFn]
+
     func body(content: Content) -> some View {
         // Short-circuit: nothing to do, return content as-is.
-        guard let c = config, c.touched else { return AnyView(content) }
+        guard let raw = config, raw.touched else { return AnyView(content) }
+        // Resolve `transform: inherit` BEFORE anything reads `functions`
+        // — Step 1's emission, Step 2b's singularity test and Step 4's
+        // backface accumulation must all see the same list the element
+        // actually paints, otherwise an inheriting element would be
+        // culled or collapsed on the wrong matrix.
+        let c = TransformInheritance.resolve(raw, inherited: inheritedTransform)
 
         // Pre-compute the effective anchor for rotate/scale. SwiftUI
         // defaults these to `.center`; we override when TransformOrigin
@@ -177,6 +189,14 @@ struct TransformsApplier: ViewModifier {
                     inherited: inherited3D)
                 : CATransform3DIdentity))
 
+        // Step 4c — publish this element's COMPUTED `transform` so a
+        // descendant with `transform: inherit` can read it (css-cascade-4
+        // §7.3.2). For an element that itself inherited, `c.functions` is
+        // already the resolved list, so a chain of `inherit` propagates
+        // the same value — which is exactly what §7.3.2 specifies.
+        v = AnyView(v.environment(\.cssInheritedTransform,
+                                  TransformInheritance.published(c)))
+
         // Step 5 — the `perspective` PROPERTY (css-transforms-2 §6).
         // Wave 5: consumed as the pendingPerspective SEED in Step 1
         // (web-reference convergence: the co-located length projects
@@ -254,8 +274,22 @@ struct TransformsApplier: ViewModifier {
         case .scale(let x, let y, _):
             // SwiftUI `.scaleEffect(x:y:anchor:)` honours the same
             // fractional anchor CSS uses, so anchor-aware scaling is
-            // accurate.
-            v.scaleEffect(x: x, y: y, anchor: anchor)
+            // accurate — for keyword/percentage origins. A LENGTH origin
+            // (`transform-origin: 0 0`) has no fractional form at extract
+            // time and rides the aggregate as origin.xPx/yPx, which
+            // scaleEffect cannot take: it scaled about the CENTRE and
+            // displaced css-transform-scale-002 by (−50,−50), leaving the
+            // red FAIL marker visible (i-ref 0.8863 vs web/Android
+            // 1.0000/0.9977). AnchoredEffects.swift carries the closed
+            // form, the measured boxes, and why a GeometryEffect is the
+            // right vehicle for a size-dependent anchor.
+            if config?.origin?.xPx != nil || config?.origin?.yPx != nil {
+                v.modifier(AnchoredScaleEffect(sx: x, sy: y, anchor: anchor,
+                                               anchorXPx: config?.origin?.xPx,
+                                               anchorYPx: config?.origin?.yPx))
+            } else {
+                v.scaleEffect(x: x, y: y, anchor: anchor)
+            }
         case .rotate(let x, let y, let z, let deg):
             // Wave 5 — TRUE 3D rotation for axes with an X/Y component.
             // CSS renders a bare rotateY/rotateX ORTHOGRAPHICALLY (the
@@ -273,6 +307,18 @@ struct TransformsApplier: ViewModifier {
                                           anchor: anchor,
                                           anchorXPx: config?.origin?.xPx,
                                           anchorYPx: config?.origin?.yPx))
+            } else if config?.origin?.xPx != nil || config?.origin?.yPx != nil {
+                // Pure Z axis about a LENGTH origin. Same gap as `.scale`
+                // above — `.rotation3DEffect` takes only a fractional
+                // UnitPoint, so a px origin rotated about the centre.
+                // No wave-48 corpus test carries this shape (the census
+                // over all 30 sections found length origins only on
+                // scale/matrix carriers), so this closes the hole by
+                // symmetry with scale rather than to move a cell; it is
+                // pinned by TransformsTests instead of by a capture.
+                v.modifier(AnchoredRotateEffect(deg: deg, anchor: anchor,
+                                                anchorXPx: config?.origin?.xPx,
+                                                anchorYPx: config?.origin?.yPx))
             } else {
                 // Pure Z axis — plain 2D rotation, no projection at all.
                 v.rotation3DEffect(.degrees(deg),
@@ -292,7 +338,7 @@ struct TransformsApplier: ViewModifier {
             // SwiftUI has no first-class skew, and a bare
             // `.projectionEffect` applies its matrix about the view's
             // TOP-LEADING corner. CSS composes every transform function
-            // about `transform-origin` (css-transforms-1 §8: translate
+            // about `transform-origin` (css-transforms-1 §2: translate
             // by origin · function · translate by −origin), default
             // 50% 50%. Shearing about the top edge instead of the
             // vertical centre displaced skewX(θ) content by a constant

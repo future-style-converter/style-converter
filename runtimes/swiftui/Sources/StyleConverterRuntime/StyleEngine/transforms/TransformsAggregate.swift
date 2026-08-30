@@ -121,6 +121,15 @@ struct TransformsAggregate: Equatable {
     // to self as a best-effort since our gallery items don't nest).
     var perspective: PerspectiveValue? = nil
 
+    // CSS-wide keyword `inherit` on the `transform` property itself
+    // (css-cascade-4 §7.3.2: the computed value IS the parent's computed
+    // value of the same property). `transform` is NOT an inherited
+    // property, so this only ever happens when the author writes it out —
+    // `functions` is empty here and the applier fills it from the
+    // ambient parent transform (TransformInheritance.swift) before
+    // rendering, culling or singularity testing.
+    var transformInherits: Bool = false
+
     // Touch flag — set true the moment any extractor contributes to the
     // aggregate so the applier can short-circuit.
     var touched: Bool = false
