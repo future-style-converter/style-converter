@@ -39,7 +39,7 @@ export { styleFromRawDeclarations } from './PseudoNodeRenderer';
 // wave-28 lane PG: root-scope (`html::before`) generated boxes are placed
 // by the ROOT's inline direction, not the contained body's — see
 // RootPseudoPlacement.ts for the measured divergence and the spec chain.
-import { rootPseudoPlacementStyle } from './RootPseudoPlacement';
+import { rootPseudoPlacementStyle, rootWritingModeSuppression } from './RootPseudoPlacement';
 // wave-32 lane R: the wire `meta.runs` → an ordered render plan over the
 // composed children (the inline anonymous-run box) — see InlineRuns.ts.
 import { resolveRuns } from './InlineRuns';
@@ -90,11 +90,22 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
   // and DOM stay byte-identical.
   const decorations = component.meta?.decorations;
   const hostDecoration = decorationHostStyle(decorations);
+  // wave-48 lane W5: a CONTAINED body-root's vertical writing-mode must not
+  // reach the root flow (css-contain-1 §3.1 blocks the css-writing-modes-4
+  // §3.2 body→viewport propagation, and the merged body-root element IS the
+  // root flow here) — see rootWritingModeSuppression for the spec chain and
+  // the wave48-cal measurements. Null for every other component, so their
+  // style objects stay byte-identical.
+  const rootWmOverride = rootWritingModeSuppression(component);
   // Variables merge LAST — `--name` keys are disjoint from every regular
   // CSS key, so this can never clobber a declaration. The decoration host
   // override rides with them: it only ever sets `text-decoration-line`,
-  // which the wrappers are about to re-declare per entry.
-  const styleProp = { ...decorated, ...variableStyles, ...hostDecoration } as CSSProperties;
+  // which the wrappers are about to re-declare per entry. The root
+  // writing-mode override merges after the engine styles ON PURPOSE — its
+  // whole job is to beat the emitted `writing-mode: vertical-rl`.
+  const styleProp = {
+    ...decorated, ...variableStyles, ...hostDecoration, ...(rootWmOverride ?? {}),
+  } as CSSProperties;
 
   // Element choice: lowercase the trusted wire tag, then let the skin
   // (or the production default policy) map it to an element name.

@@ -217,7 +217,27 @@ internal object GradientStopResolver {
             }
             out.add(s)
         }
-        if (out.isEmpty()) return emptyList()
+        // Wave 48 (lane W1): EVERY stop past one end of the line — the loop
+        // above finds no in-range stop and no crossing pair, so `out` is
+        // empty. §3.4.3's padding rule still defines the rendering: the
+        // ramp "before the first stop" is the first stop's colour and
+        // "after the last stop" the last's, so a line that ends before its
+        // first stop paints the FIRST colour everywhere, and one that
+        // starts after its last stop paints the LAST colour everywhere.
+        // Returning emptyList() here instead was a live crash: WPT
+        // css-break/background-image-006 clones `linear-gradient(green
+        // 80px, red 140px)` into fragments whose gradient line is shorter
+        // than 80px (its ref is all-green for exactly that reason), both
+        // px stops resolved past 1.0, shaderStops returned null, and
+        // ColorApplier's contract-`!!` NPE'd every draw — the app crashed
+        // per frame and the css-break cell shipped unmeasured (feeder
+        // TIMEOUT). Uniform fill = the same colour at both ends, the
+        // §3.4.4 idiom the one-stop widening already uses.
+        if (out.isEmpty()) {
+            // All stops above 1 ⇒ [0,1] lies before the first stop.
+            val pad = if (first.loc > 1f) first else last
+            return listOf(pad.copy(loc = 0f), pad.copy(loc = 1f))
+        }
         // §3.4.3 padding: the first stop's colour before it, the last
         // stop's after it — as boundary stops so Skia's clamp shows them.
         if (out[0].loc > 0f) out.add(0, out[0].copy(loc = 0f))

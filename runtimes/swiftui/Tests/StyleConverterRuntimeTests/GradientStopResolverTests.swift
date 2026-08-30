@@ -113,6 +113,34 @@ final class GradientStopResolverTests: XCTestCase {
         XCTAssertEqual(tiled.map { $0.loc }, tiled.map { $0.loc }.sorted())
     }
 
+    func testRepeatingLatticeStaysMonotonicDespiteOneUlpFloatDrift() {
+        // Wave 48, lane F3 (S4 defect 1) — the twin of Kotlin's wave-47
+        // monotonicity pin (GradientStopResolverTest.kt, the sorted-locs
+        // assert): copy k's LAST stop and copy k+1's FIRST stop compute
+        // through two different Double paths (`last.loc + k·p` vs
+        // `first.loc + (k+1)·p`) that can land one ulp apart in either
+        // order. S4's executed sweep misordered 6023 of 23275 rational
+        // lattices; this shape — period 1/5, anchor 0.13 — emits
+        // …0.93000000000000016 then 0.93000000000000005 (and again at
+        // 1.13) WITHOUT the clamp, so this pin fails on the pre-fix
+        // expansion (prove-can-fail: drop the clamp loop and watch the
+        // sorted-equality assert below break).
+        let base = GradientStopResolver.fixup(
+            [stop(0, 1, 0, pos: 0.13), stop(1, 0, 0, pos: 0.13 + 1.0 / 5.0)], lengthPx: nil)
+        let expanded = GradientStopResolver.expandRepeating(base)
+        // The raw materialised lattice must already be non-decreasing —
+        // SwiftUI's Gradient treats unordered stop locations as
+        // undefined input, and the clip step must never see them either.
+        XCTAssertEqual(expanded.map { $0.loc }, expanded.map { $0.loc }.sorted(),
+                       "expandRepeating handed SwiftUI a non-monotonic lattice")
+        // And the clamp is a one-ulp repair, not a reshuffle: the clipped
+        // ramp still spans the whole line with the expected stop count.
+        let tiled = GradientStopResolver.clipToUnit(expanded, interp: .legacy)
+        XCTAssertEqual(tiled.first?.loc, 0)
+        XCTAssertEqual(tiled.last?.loc, 1)
+        XCTAssertEqual(tiled.map { $0.loc }, tiled.map { $0.loc }.sorted())
+    }
+
     func testZeroPeriodRepeatingIsTheAverageSolid() {
         let base = GradientStopResolver.fixup(
             [stop(1, 0, 0, pos: 0.5), stop(0, 0, 1, pos: 0.5)], lengthPx: nil)
@@ -191,6 +219,56 @@ final class GradientStopResolverTests: XCTestCase {
         XCTAssertEqual(out.first?.loc, 0)
         XCTAssertEqual(out.last?.loc, 1)
         XCTAssertTrue(out.allSatisfy { $0.g == 1 && $0.r < 1e-6 })
+    }
+
+    // ── Wave 48 (lane W1 twin): every stop past one end of the line ─────
+    // Byte-parallel pins with GradientStopResolverTest.kt: the VERBATIM
+    // css-break/background-image-006 clone shape, `linear-gradient(green
+    // 80px, red 140px)` on a fragment line SHORTER than 80px (the WPT ref
+    // is a green square precisely because the 80px stop sits past every
+    // fragment's padding box). clipToUnit used to answer [] for the
+    // all-outside shape, leaving the ramp unpaintable — §3.4.3's padding
+    // rule says the first stop's colour fills everything before it.
+
+    func testAllStopsBeyondTheLineEndPaintTheFirstColourUniformly() {
+        // 80/45 and 140/45 both land past 1.0 on a 45px line (a measured
+        // failing fragment size from the Android device diagnosis).
+        let base = GradientStopResolver.fixup(
+            [stop(0, 0.5019607843137255, 0, px: 80), stop(1, 0, 0, px: 140)],
+            lengthPx: 45)
+        let out = GradientStopResolver.clipToUnit(base, interp: .legacy)
+        // Uniform fill = the §3.4.4 two-identical-stops idiom, never [].
+        XCTAssertEqual(out.count, 2)
+        XCTAssertEqual(out.first?.loc, 0)
+        XCTAssertEqual(out.last?.loc, 1)
+        XCTAssertTrue(out.allSatisfy { $0.g == 0.5019607843137255 && $0.r < 1e-6 },
+                      "the whole [0,1] range must be corpus-green")
+    }
+
+    func testAllStopsBeforeTheLineStartPaintTheLastColourUniformly() {
+        // The mirrored case (negative px stops): [0,1] lies entirely after
+        // the last stop, which owns the padding colour per §3.4.3.
+        let base = GradientStopResolver.fixup(
+            [stop(0, 0.5019607843137255, 0, px: -140), stop(1, 0, 0, px: -80)],
+            lengthPx: 45)
+        let out = GradientStopResolver.clipToUnit(base, interp: .legacy)
+        XCTAssertEqual(out.count, 2)
+        XCTAssertTrue(out.allSatisfy { $0.r == 1 && $0.g < 1e-6 },
+                      "the whole [0,1] range must be corpus-red")
+    }
+
+    func testAStopExactlyAtTheLineEndKeepsTheInRangePath() {
+        // The reference-intended geometry: an 80px padding box puts the
+        // green stop AT 1.0 (in range) — the fix must not disturb it: a
+        // green §3.4.3 pad at 0, green kept at its declared 1.0.
+        let base = GradientStopResolver.fixup(
+            [stop(0, 0.5019607843137255, 0, px: 80), stop(1, 0, 0, px: 140)],
+            lengthPx: 80)
+        let out = GradientStopResolver.clipToUnit(base, interp: .legacy)
+        XCTAssertEqual(out.first?.loc, 0)
+        XCTAssertEqual(out.first?.g, 0.5019607843137255)
+        XCTAssertTrue(out.contains { $0.loc == 1 && $0.g == 0.5019607843137255 },
+                      "green must still sit at its declared 1.0")
     }
 
     // MARK: - Interpolation clause

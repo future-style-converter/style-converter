@@ -1458,6 +1458,17 @@ public struct ComponentRenderer: View {
         } else if let layoutAgg = style.layout7,
            layoutAgg.display == .flex,
            layoutAgg.flexWrap == .wrap || layoutAgg.flexWrap == .wrapReverse {
+            // Wave 48 (lane W7) — column-direction wrap: `flex-flow:
+            // column wrap` lays its lines side by side HORIZONTALLY
+            // (css-flexbox-1 §9.3 with a block main axis), which the
+            // row-only FlowLayout could not express — WPT css-gaps
+            // flex-gap-decorations-043/045 rendered as stacked rows.
+            // Gated to plain `.wrap`: FlowLayout implements no reverse
+            // line ordering (its named TODO), and both wave48-cal
+            // wrap-reverse column tests pass on the row behaviour today.
+            let verticalWrap = layoutAgg.flexWrap == .wrap
+                && (layoutAgg.flexDirection == .column
+                    || layoutAgg.flexDirection == .columnReverse)
             FlowLayout(
                 horizontalSpacing: gap.column,
                 verticalSpacing: gap.row,
@@ -1468,8 +1479,12 @@ public struct ComponentRenderer: View {
                 alignItems: layoutAgg.alignItems,
                 // Only an explicit CSS cross size creates leftover space
                 // for align-content to distribute — the same definiteness
-                // test CSSFlexLayout applies on the nowrap path.
-                definiteCross: style.size.height != nil,
+                // test CSSFlexLayout applies on the nowrap path. Wave 48:
+                // the cross axis of a COLUMN container is inline, so the
+                // signal swaps to the declared width there.
+                definiteCross: verticalWrap
+                    ? style.size.width != nil
+                    : style.size.height != nil,
                 // …and §9.6 distributes only under normal/stretch. Nil
                 // (undeclared) is the initial `normal`, so the default
                 // path is unchanged; a declared center/space-* keyword
@@ -1481,9 +1496,14 @@ public struct ComponentRenderer: View {
                 // honors, distributed by CSSFlexMath.mainOffsets.
                 justifyContent: layoutAgg.justifyContent,
                 // …and the definite-main signal that lets the Layout
-                // claim the declared width so the distribution sees the
-                // free space (same definiteness test as the cross axis).
-                definiteMain: style.size.width != nil
+                // claim the declared main size so the distribution sees
+                // the free space (wave 48: the main axis of a column
+                // container is block, so the signal swaps to height).
+                definiteMain: verticalWrap
+                    ? style.size.height != nil
+                    : style.size.width != nil,
+                // Wave 48: transpose every step onto the column axis.
+                vertical: verticalWrap
             ) {
                 contentOrPlaceholder(style: style)
             }
@@ -1670,18 +1690,20 @@ public struct ComponentRenderer: View {
                         children: FlexboxApplier.sorted(inFlowChildren),
                         leadingText: component.text?.isEmpty == false)
                     : nil
-                // The composition-time used-column count for the N>1 gate,
-                // through the SAME MulticolMath + gap lane the layout
-                // itself resolves with (the declared content-box width is
-                // the layout's proposed width in the composed canvas).
-                let stripUsedCount: Int = flexContentSize(style: style, vertical: false)
+                // The composition-time used-column GEOMETRY (count for the
+                // N>1 gate, width for the W3 slice row below), through the
+                // SAME MulticolMath + gap lane the layout itself resolves
+                // with (the declared content-box width is the layout's
+                // proposed width in the composed canvas).
+                let stripUsed: MulticolMath.UsedColumns? =
+                    flexContentSize(style: style, vertical: false)
                     .flatMap {
                         MulticolMath.usedColumns(
                             availableWidthPx: Double($0),
                             requestedCount: style.columns?.count,
                             requestedWidthPx: style.columns?.widthPx,
-                            gapPx: Double(multicolUsedGapPx(style: style)))?.count
-                    } ?? 1
+                            gapPx: Double(multicolUsedGapPx(style: style)))
+                    }
                 // The ONE engagement decision (columns tree owns the
                 // gates): definite block-size, N>1, horizontal-tb, proven
                 // specs + the shared pre-measure predicate. The definite
@@ -1695,59 +1717,109 @@ public struct ComponentRenderer: View {
                     definiteColumnBlockSizePx: ContainingBlockBasis
                         .definiteBorderBox(style: style, vertical: true)
                         .map(Double.init),
-                    usedColumnCount: stripUsedCount,
+                    usedColumnCount: stripUsed?.count ?? 1,
                     horizontalWritingMode: WritingModeExtractor.extract(
                         from: resolvedProperties)?.isVertical != true)
-                MulticolGreedyLayout(
-                    // The §3 inputs, straight from the typed config — the
-                    // same fields MulticolMath consumes everywhere else.
-                    requestedCount: style.columns?.count,
-                    requestedWidthPx: style.columns?.widthPx,
-                    // The used gap through the single shared resolver, so
-                    // slots, fill basis and fragment plan agree.
-                    gapPx: multicolUsedGapPx(style: style),
-                    // Wave-21 wiring hook (lane MULTICOL): per-subview
-                    // spanner-flow roles in contentOrPlaceholder order
-                    // (leading text first) — capture only; nil keeps the
-                    // dark-stage greedy layout byte-identical.
-                    roles: wptCaptureMode
-                        ? MulticolSpannerFlow.rolesFor(
-                            children: FlexboxApplier.sorted(inFlowChildren),
-                            leadingText: component.text?.isEmpty == false)
-                        : nil,
-                    // Wave-43 lane V6 — css-overflow-4 §3 `continue:
-                    // discard`, from the typed columns config (the
-                    // "Continue" IR property, DISCARD keyword). Threaded
-                    // unconditionally because only the roles-gated
-                    // spanner-flow branch above consumes it — roles are
-                    // nil outside capture, so the dark stage stays
-                    // byte-identical (Compose threads the same flag via
-                    // MultiColumnConfig.continueDiscard).
-                    discardOverflow: style.columns?.continueDiscard ?? false,
-                    // X3 (wave 45): the strip seam — nil (dark stage and
-                    // every non-engaged container) keeps every existing
-                    // plan branch byte-identical.
-                    floatStrip: stripSeam
-                ) {
-                    // Same content pass as every container: leading text
-                    // (if any) and the sorted in-flow children become the
-                    // layout's subviews IN ORDER — exactly the measurables
-                    // Android's RenderContent hands its distribution
-                    // layout (leading text included).
-                    contentOrPlaceholder(style: style)
+                if let stripSeam, let stripUsed {
+                    // ── W3 (wave 48): the css-break-3 §4 SLICE REPLAY ───
+                    // The measure half the X3 seam still lacked: placing
+                    // each child once in its anchor column left float ink
+                    // taller than one column overflowing below it
+                    // (wave48-cal iOS: aqua rows 111–360 vs the refs'
+                    // sliced 111–210 on all 8 floats-clear-multicol
+                    // cells). iOS fragments via renderer-composed clones
+                    // (the wave-10 multicolFragmentRow precedent), so the
+                    // row composes ONE clone of the whole strip content
+                    // per used column; each MulticolFloatStripSliceLayout
+                    // measures the clone under the zero-flow plan
+                    // published below, builds the shared FS geometry, and
+                    // shifts by −band·h behind .clipped() — exactly
+                    // Compose's drawWithContent clip+translate replay,
+                    // re-composed instead of re-drawn. Engagement (and
+                    // EVERY strip decline, incl. the §7.1 C==0 balance
+                    // case) was decided pre-measure by engagedStrip above
+                    // — the Compose decline discipline's composition-time
+                    // mapping (see MulticolFloatStripSlice.swift).
+                    HStack(alignment: .top, spacing: multicolUsedGapPx(style: style)) {
+                        // One slice window per used column — a band past
+                        // the strip's ink shows an empty column, and the
+                        // N-cap clip (css-overflow-3 §2) is structural.
+                        ForEach(0..<stripUsed.count, id: \.self) { band in
+                            MulticolFloatStripSliceLayout(
+                                specs: stripSeam.specs,
+                                columnFillAuto: stripSeam.columnFillAuto,
+                                bandIndex: band,
+                                columnCount: stripUsed.count,
+                                columnWidthPx: stripUsed.widthPx,
+                                columnGapPx: Double(multicolUsedGapPx(style: style))
+                            ) {
+                                // The SAME content pass as every container
+                                // — the sorted in-flow children, cloned
+                                // per column exactly like the wave-10
+                                // fragment row clones its single child.
+                                contentOrPlaceholder(style: style)
+                            }
+                            // The slice window: the layout claims exactly
+                            // (W, h), so clipping to bounds IS clipping to
+                            // the css-break-3 §4 column band.
+                            .clipped()
+                        }
+                    }
+                    // css-multicol-1 §2: the children's containing block
+                    // is the COLUMN box — the same per-clone override the
+                    // wave-10 fragment row publishes, so percent widths
+                    // resolve against W, not the container width.
+                    .environment(\.containingBlockWidth, CGFloat(stripUsed.widthPx))
+                    // X3 (wave 45): the paint half — the engaged strip's
+                    // §9.5.2 zero-flow plan (floats report zero flow
+                    // height at their slot; ClearanceZeroFlow consumes it
+                    // in the clones' block child loops). One decision,
+                    // two consumers: the same engagement that composed
+                    // this row published this plan.
+                    .environment(\.floatClearancePlan, stripSeam.zeroFlowPlan)
+                } else {
+                    MulticolGreedyLayout(
+                        // The §3 inputs, straight from the typed config —
+                        // the same fields MulticolMath consumes everywhere.
+                        requestedCount: style.columns?.count,
+                        requestedWidthPx: style.columns?.widthPx,
+                        // The used gap through the single shared resolver,
+                        // so slots, fill basis and fragment plan agree.
+                        gapPx: multicolUsedGapPx(style: style),
+                        // Wave-21 wiring hook (lane MULTICOL): per-subview
+                        // spanner-flow roles in contentOrPlaceholder order
+                        // (leading text first) — capture only; nil keeps
+                        // the dark-stage greedy layout byte-identical.
+                        roles: wptCaptureMode
+                            ? MulticolSpannerFlow.rolesFor(
+                                children: FlexboxApplier.sorted(inFlowChildren),
+                                leadingText: component.text?.isEmpty == false)
+                            : nil,
+                        // Wave-43 lane V6 — css-overflow-4 §3 `continue:
+                        // discard`, from the typed columns config (the
+                        // "Continue" IR property, DISCARD keyword).
+                        // Threaded unconditionally because only the
+                        // roles-gated spanner-flow branch consumes it —
+                        // roles are nil outside capture, so the dark
+                        // stage stays byte-identical (Compose threads the
+                        // same flag via MultiColumnConfig.continueDiscard).
+                        discardOverflow: style.columns?.continueDiscard ?? false
+                    ) {
+                        // Same content pass as every container: leading
+                        // text (if any) and the sorted in-flow children
+                        // become the layout's subviews IN ORDER — exactly
+                        // the measurables Android's RenderContent hands
+                        // its distribution layout (leading text included).
+                        contentOrPlaceholder(style: style)
+                    }
+                    // X3 (wave 45): the clearance scope plan the
+                    // plain-VStack branch publishes (wave-42 W5) — this
+                    // branch simply never delivered it before X3. Outside
+                    // capture it reduces to the inherited ambient value
+                    // (clearanceScopePlan's wptCaptureMode guard), so the
+                    // re-publish is the identity for the frozen corpus.
+                    .environment(\.floatClearancePlan, clearanceScopePlan)
                 }
-                // X3 (wave 45): the paint half — the engaged strip's
-                // §9.5.2 zero-flow plan (floats report zero flow height
-                // at their slot; ClearanceZeroFlow consumes it in the
-                // descendants' block child loops), else the same
-                // clearance scope plan the plain-VStack branch publishes
-                // (wave-42 W5) — this branch simply never delivered it.
-                // Outside capture BOTH terms reduce to the inherited
-                // ambient value (clearanceScopePlan's wptCaptureMode
-                // guard), so the re-publish is the identity for the
-                // frozen corpus.
-                .environment(\.floatClearancePlan,
-                             stripSeam?.zeroFlowPlan ?? clearanceScopePlan)
             } else if let verticalBlockRtl = verticalBlockFlowZ2() {
                 // ── Wave 47 (lane Z2): the VERTICAL block-flow seam ─────
                 // css-writing-modes-4 §6: under vertical-rl/-lr the
@@ -2454,10 +2526,18 @@ public struct ComponentRenderer: View {
     /// the Layout does not place it at would be worse than the wave-24
     /// hug, so nothing is guessed.
     ///
-    /// Returns nil for column-direction containers on purpose: FlowLayout
-    /// lays out ROWS whatever `flex-direction` says (see its header), so
-    /// there is no column line geometry to stretch into — injecting the
-    /// inline-axis twin here would contradict the placement.
+    /// Returns nil for column-direction containers on purpose. Wave 48
+    /// (lane W7) UPDATE to the rationale: FlowLayout now lays out real
+    /// columns (`vertical: true`), so the old "there is no column line
+    /// geometry" argument is gone — but the injection channel for a
+    /// column line's cross size is the INLINE axis (flexStretchWidth),
+    /// not this plan's gridStretchHeight, and no wave48-cal column-wrap
+    /// test has a stretching item (043/045's items all declare widths).
+    /// The inline-axis twin stays unimplemented and NAMED here rather
+    /// than half-wired: a column container with a genuinely stretching
+    /// item still gets correct PLACEMENT and line geometry from
+    /// FlowLayout, while the item's own paint hugs — the wave-24
+    /// behaviour, scoped to that one case.
     private func flexWrapStretchPlan(style: ComponentStyle,
                                      children: [IRComponent],
                                      column: Bool) -> [Int: CGFloat]? {
@@ -2505,8 +2585,21 @@ public struct ComponentRenderer: View {
             // 50pt tall inside a 110pt band. Refuse the container instead.
             guard agg.display != DisplayKeyword.none,
                   agg.display != DisplayKeyword.contents else { return nil }
+            // Wave 48 (lane W7) — the basis is adopted ONLY for an
+            // inflexible item (`flex-grow: 0`), mirroring FlowLayout's
+            // measure-time rule EXACTLY (see its header, item 2): the
+            // wrap paths run no §9.7 resolution, so a basis that grow
+            // would rewrite must not feed the line breaking either —
+            // otherwise this plan and the Layout would break lines at
+            // different indices. Percent bases resolve against the
+            // definite main the guard above already demanded
+            // (css-flexbox-1 §7.2.3), same clamp as the Layout's.
             let basisPx: CGFloat? = {
-                if case .px(let p)? = agg.flexBasis { return p }
+                guard (agg.flexGrow ?? 0) == 0 else { return nil }
+                if case .px(let p)? = agg.flexBasis { return min(p, mainAvail) }
+                if case .percent(let pct)? = agg.flexBasis {
+                    return min(mainAvail * pct / 100, mainAvail)
+                }
                 return nil
             }()
             // Main size: percent widths resolve against THIS container's
@@ -2579,6 +2672,67 @@ public struct ComponentRenderer: View {
                 // would turn a `minHeight` floor into an exact frame on
                 // boxes the committed corpus renders today.
                 if lineCross[li] > crosses[i] { plan[i] = lineCross[li] }
+            }
+        }
+        return plan.isEmpty ? nil : plan
+    }
+
+    /// Wave 48 (lane W7) — the MAIN-size twin of [flexWrapStretchPlan]:
+    /// the forced main (inline, row direction) size a wrap item's own
+    /// paint chain must adopt when its `flex-basis` resolves statically.
+    /// FlowLayout now SIZES such an item at its basis (its header, item
+    /// 2), but a SwiftUI proposal is advisory and an IR child ignores it
+    /// — without this fold WPT flex-gap-decorations-025's
+    /// `flex-basis: 100%` items are PLACED on their own 390pt lines while
+    /// their teal backgrounds still paint at intrinsic 0pt width.
+    ///
+    /// Same adoption rule as the Layout, by construction: inflexible
+    /// items only (`flex-grow: 0` — the wrap paths run no §9.7, so a
+    /// grow-rewritten basis must not be painted either), px bases
+    /// directly, percent bases against the container's definite main
+    /// content size (css-flexbox-1 §7.2.3), clamped to it. Items with
+    /// padding/border/margin are refused ([declaresBoxBands]) — the
+    /// basis-to-frame conversion depends on box-sizing, and a wrong
+    /// frame is worse than the hug. Row direction only: a column
+    /// container's main is the BLOCK axis whose injection channel
+    /// (gridStretchHeight) is owned by other plans, and no wave48-cal
+    /// column-wrap test carries a flex basis — named, not wired.
+    private func flexWrapMainPlan(style: ComponentStyle,
+                                  children: [IRComponent],
+                                  column: Bool) -> [Int: CGFloat]? {
+        // Row-direction wrap containers only (see the doc note above).
+        guard !column, !children.isEmpty else { return nil }
+        // A leading text placeholder shifts the 1:1 index map — bail
+        // honestly (same rule as flexWrapStretchPlan / flexMainPlan).
+        guard component.text?.isEmpty != false else { return nil }
+        // The percent base: this container's definite main CONTENT size.
+        // Indefinite → a percent basis behaves as auto (§7.2.3) and a px
+        // basis still resolves (no base needed).
+        let mainAvail = flexContentSize(style: style, vertical: false)
+        var plan: [Int: CGFloat] = [:]
+        for (i, child) in children.enumerated() {
+            var agg = LayoutAggregate()
+            FlexboxExtractor.extract(from: child.properties, into: &agg)
+            // display:none / contents children break the plan-to-subview
+            // index map — refuse the whole container, exactly like the
+            // stretch plan (its SKEPTIC note has the measured symptom).
+            guard agg.display != DisplayKeyword.none,
+                  agg.display != DisplayKeyword.contents else { return nil }
+            // Inflexible items only — the Layout's identical gate.
+            guard (agg.flexGrow ?? 0) == 0 else { continue }
+            // Padding/border/margin: the basis-to-frame conversion needs
+            // the effective box-sizing — refuse rather than guess (the
+            // stretch plan's declaresBoxBands rationale, main-axis).
+            guard !Self.declaresBoxBands(child) else { continue }
+            switch agg.flexBasis {
+            case .px(let p)?:
+                // Clamped like the Layout (Compose KNOWN-GAP parity).
+                plan[i] = mainAvail.map { min(p, $0) } ?? p
+            case .percent(let pct)?:
+                // Percent needs the definite base; indefinite → auto.
+                if let avail = mainAvail { plan[i] = min(avail * pct / 100, avail) }
+            default:
+                break // auto/content/absent — measured size, no fold.
             }
         }
         return plan.isEmpty ? nil : plan
@@ -3384,6 +3538,18 @@ public struct ComponentRenderer: View {
                 ? flexWrapStretchPlan(style: style, children: children,
                                       column: isColumn)
                 : nil
+            // Wave 48 (lane W7) — the wrap path's MAIN-size fold: a
+            // statically-resolved `flex-basis` (px, or percent of a
+            // definite container main) must reach the item's own paint
+            // chain, because FlowLayout only PROPOSES the basis size and
+            // an IR child ignores proposals (flex-gap-decorations-025:
+            // 100%-basis items placed on their own lines but painting at
+            // intrinsic 0pt). Nil for every container without such a
+            // basis claim — the whole committed corpus.
+            let flexWrapMain: [Int: CGFloat]? = isWrapFlex
+                ? flexWrapMainPlan(style: style, children: children,
+                                   column: isColumn)
+                : nil
             // Fidelity wave 3 — containing-block publication
             // (css-sizing-3 §5.1): children resolve percent widths
             // against THIS box's content width. Definite only when our
@@ -3761,7 +3927,17 @@ public struct ComponentRenderer: View {
                                 // line actually grew.
                                 ?? flexWrapStretch?[index])
                 .environment(\.flexStretchWidth,
-                             isColumn ? flexStretch : flexMainSizes?[index])
+                             (isColumn ? flexStretch : flexMainSizes?[index])
+                                // Wave 48 (lane W7) — wrap-flex MAIN size
+                                // (row direction ⇒ the inline axis, so
+                                // this channel): the statically-resolved
+                                // flex-basis fold (flexWrapMainPlan). Nil
+                                // for every container without a static
+                                // basis claim — the whole committed
+                                // corpus — so the channel is unchanged
+                                // outside flex-gap-decorations-025-class
+                                // containers.
+                                ?? flexWrapMain?[index])
                 // Wave 9 (extending Round 4): the block-fill channel is
                 // still ALWAYS written (reset discipline), but a BLOCK
                 // container in WPT capture now re-publishes its own
@@ -5370,6 +5546,23 @@ private struct PlaceholderLabel: View {
                 // exact here (color nil = the segment's text color).
                 if style.underline { t = t.underline() }
                 if style.lineThrough { t = t.strikethrough() }
+                // Wave 48 (lane W4 seam) — the sup/sub UA baseline shift.
+                // Blink resolves the super/sub keywords as PIXELS off the
+                // PARENT's computed font-size (LayoutBoxModelObject::
+                // VerticalPosition: super raises size/3+1, sub lowers
+                // size/5+1 — ref-verified in InlineSpanRing.VerticalShift's
+                // banner); the parent size arrives px-or-paragraph-factor
+                // encoded, and Text.baselineOffset takes points directly
+                // (positive raises), so the mapping is exact. Fix lane F5:
+                // the px rule itself now lives in the pinned twin helper
+                // InlineSpanRing.shiftPx (unit rows on BOTH platforms —
+                // this seam previously inlined it with zero coverage);
+                // 16 is the web-body default the whole label assumes for
+                // a size-less run (segmentConfig's same fallback).
+                if let shift = style.shift {
+                    t = t.baselineOffset(InlineSpanRing.shiftPx(
+                        shift, paragraphFontSizePx: textConfig.fontSize ?? 16))
+                }
             }
             result = result + t
         }

@@ -40,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
-import androidx.compose.ui.unit.Constraints
 import com.styleconverter.runtime.typography.text.GlyphOrientation
 import com.styleconverter.runtime.typography.text.LineStack
 import com.styleconverter.runtime.typography.text.VerticalTextFlow
@@ -87,30 +86,23 @@ internal fun VerticalRotatedTextRun(
     modifier: Modifier = Modifier,
     run: @Composable () -> Unit,
 ) {
-    Layout(modifier = modifier, content = run) { measurables, constraints ->
-        // Swap the axes: the text's inline axis runs along the box's block
-        // axis, so its wrap width is the incoming HEIGHT budget (unbounded →
-        // let it be a single line).
-        val swapped = Constraints(
-            minWidth = 0,
-            maxWidth = if (constraints.hasBoundedHeight) constraints.maxHeight else Constraints.Infinity,
-            minHeight = 0,
-            maxHeight = if (constraints.hasBoundedWidth) constraints.maxWidth else Constraints.Infinity,
-        )
-        val placeable = measurables.first().measure(swapped)
-        // Report the rotated footprint (width↔height swapped).
-        val w = placeable.height.coerceIn(constraints.minWidth, constraints.maxWidth)
-        val h = placeable.width.coerceIn(constraints.minHeight, constraints.maxHeight)
-        layout(w, h) {
-            // Center-rotate: place the child so its center lands at the
-            // wrapper's center, then spin it about that center.
-            val x = (w - placeable.width) / 2
-            val y = (h - placeable.height) / 2
-            placeable.placeWithLayer(x, y) {
-                rotationZ = rotationDegrees
-            }
-        }
-    }
+    // Wave 48 (lane W1): the measure moved VERBATIM into
+    // rotatedRunMeasurePolicy so the policy can carry EXPLICIT transposed
+    // intrinsics. The trailing-lambda overload inherited the DEFAULT
+    // intrinsics, whose fake placeables substitute LargeDimension (32767)
+    // for an unbounded axis — and this layout's axis swap then reported
+    // that sentinel as real perpendicular geometry (each rotated <td>
+    // answered a 32769 max-content width, the table summed 98311, the
+    // row's capped §17.5.3 height became 8190, and every vertical root
+    // composed 8264 px tall — the direction-upright-002 unmeasured cell).
+    // Full measured chain + the transposition table: VerticalRunIntrinsics.
+    Layout(
+        modifier = modifier,
+        content = run,
+        measurePolicy = remember(rotationDegrees) {
+            rotatedRunMeasurePolicy(rotationDegrees)
+        },
+    )
 }
 
 /**
@@ -149,79 +141,36 @@ internal fun VerticalUprightTextFlow(
     // indices address. Memoised on the string so recomposition of an
     // unchanged run does not rebuild the list.
     val glyphs = remember(text) { VerticalTextFlow.codePointsOf(text) }
+    // Wave 48 (lane W1): the measure moved VERBATIM into
+    // uprightFlowMeasurePolicy so the policy carries EXPLICIT glyph-based
+    // intrinsics — the default lambda-replay intrinsics were poisoned by
+    // the same LargeDimension (32767) fakes as the rotated run's (this
+    // flow's slot 0 IS a rotated run, and each glyph fake answered 32767
+    // on its unbounded axis). See VerticalRunIntrinsics for the measured
+    // chain and the css-sizing-3 §4 min/max-content model the overrides
+    // implement. The decline breadcrumb stays here (the composable owns
+    // the log channel; the policy stays log-free and JVM-testable).
     Layout(
         modifier = modifier,
         content = {
             rotatedRun()                          // slot 0 — decline fallback
             glyphs.forEach { uprightGlyph(it) }   // slots 1 … n
         },
-    ) { measurables, constraints ->
-        // EVERY measurable is measured exactly once, on BOTH paths — including
-        // the fallback the plan path never places. A `Measurable` may be
-        // measured at most once per pass, and leaving one unmeasured is the
-        // kind of half-initialised layout node that only misbehaves on a
-        // device; measuring it costs one text layout and paints nothing,
-        // because an unPLACED placeable is never drawn.
-        val fallback = measurables.first().measure(constraints)
-        // Every glyph measures FREE: an upright glyph is its own line box and
-        // is never squeezed by the run's box (CSS overflows instead).
-        val free = Constraints()
-        val glyphPlaceables = measurables.drop(1).map { it.measure(free) }
-        // The advance along the vertical inline axis = one line box's height.
-        val advance = glyphPlaceables.firstOrNull()?.height?.toDouble() ?: 0.0
-        // The wrap budget IS the incoming height constraint — null when the
-        // block axis is unbounded, which the planner declines on.
-        val budget = if (constraints.hasBoundedHeight) constraints.maxHeight.toDouble() else null
-        val plan = VerticalTextFlow.uprightColumnIndices(glyphs, advance, budget)
-
-        if (plan == null) {
-            // No silent fallthrough: the GATE already said this run is
-            // upright, so a decline here is a real, named gap and not a
-            // routine "not our case". Logged once per process — the Swift
-            // twin logs the same key through PropertyTracker.logOnce.
-            if (uprightDeclineLogged.compareAndSet(false, true)) {
-                android.util.Log.i(
-                    "ComponentRenderer",
-                    "writing-mode:upright-vertical-budget — upright vertical run " +
-                        "declined: no finite block-axis budget " +
-                        "(hasBoundedHeight=${constraints.hasBoundedHeight}, " +
-                        "advance=$advance); run kept on the rotated path",
-                )
-            }
-            // DECLINE — hand the frame back to the frozen sideways path. The
-            // fallback was measured against the ORIGINAL constraints, so this
-            // is the byte-identical wave-5 result.
-            layout(fallback.width, fallback.height) { fallback.place(0, 0) }
-        } else {
-            // Per-line cross extent (the line box's width) and main extent
-            // (the sum of its glyph advances).
-            val lineW = plan.map { line -> line.maxOf { glyphPlaceables[it].width } }
-            val lineH = plan.map { line -> line.sumOf { glyphPlaceables[it].height } }
-            val totalW = lineW.sum()
-            val totalH = lineH.maxOrNull() ?: 0
-            val w = totalW.coerceIn(constraints.minWidth, constraints.maxWidth)
-            val h = totalH.coerceIn(constraints.minHeight, constraints.maxHeight)
-            layout(w, h) {
-                // `vertical-rl` puts line 1 at the RIGHT edge and walks left;
-                // `vertical-lr` starts at the left edge and walks right. Both
-                // walk the plan in LOGICAL order — only the anchor differs.
-                var x = if (stack == LineStack.RIGHT_TO_LEFT) totalW else 0
-                plan.forEachIndexed { index, line ->
-                    if (stack == LineStack.RIGHT_TO_LEFT) x -= lineW[index]
-                    var y = 0
-                    for (glyphIndex in line) {
-                        val p = glyphPlaceables[glyphIndex]
-                        // Centre the glyph across its line box — the vertical
-                        // typesetting equivalent of a baseline-centred glyph
-                        // in a horizontal line box. A no-op when every glyph
-                        // in the line has the same advance (the CJK/fullwidth
-                        // case, i.e. every upright run).
-                        p.place(x + (lineW[index] - p.width) / 2, y)
-                        y += p.height
-                    }
-                    if (stack == LineStack.LEFT_TO_RIGHT) x += lineW[index]
+        measurePolicy = remember(glyphs, stack) {
+            uprightFlowMeasurePolicy(glyphs, stack, onDecline = {
+                // No silent fallthrough: the GATE already said this run is
+                // upright, so a decline is a real, named gap and not a
+                // routine "not our case". Logged once per process — the
+                // Swift twin logs the same key via PropertyTracker.logOnce.
+                if (uprightDeclineLogged.compareAndSet(false, true)) {
+                    android.util.Log.i(
+                        "ComponentRenderer",
+                        "writing-mode:upright-vertical-budget — upright vertical run " +
+                            "declined: no finite block-axis budget; " +
+                            "run kept on the rotated path",
+                    )
                 }
-            }
-        }
-    }
+            })
+        },
+    )
 }

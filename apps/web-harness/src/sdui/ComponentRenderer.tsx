@@ -65,6 +65,10 @@ import {
   segmentFloatRuns,
 } from '@style-converter/web/engine/layout/FloatRowPacking';
 import type { ComposedNode } from './Composer';
+// wave-48 lane W5: corpus-relative background-image urls → /wpt-image/ route
+// (the harness half of the image()/url() background asset story — see the
+// module banner for the measured 002-fallbacks case).
+import { routeCorpusAssetStyles } from './CorpusAssetRoute';
 
 /**
  * WPT-mode detector — reads the `?wpt=1` query parameter once per module load.
@@ -759,8 +763,14 @@ const HARNESS_OPTIONS: RendererOptions = {
   // component must never contribute a capture canvas or bleed paint
   // into a neighbour's screenshot crop.
   shouldRender: ({ component }) => detectDisplayType(component.properties) !== 'none',
-  // Divergence #2: the sizing calibration (see calibrateStyles).
-  decorateStyles: calibrateStyles,
+  // Divergence #2: the sizing calibration (see calibrateStyles), composed
+  // with the wave-48 W5 corpus-asset url router: a WPT component's
+  // background-image urls are test-relative author bytes, and only the
+  // harness knows the /wpt-image/ corpus route that serves them (see
+  // CorpusAssetRoute.ts for the measured 002-fallbacks case). Identity for
+  // every non-WPT component, so the legacy path is byte-identical.
+  decorateStyles: (styles, ctx) =>
+    routeCorpusAssetStyles(calibrateStyles(styles, ctx), ctx.component.name),
   // Divergence #3: allowlist mapping — except `img`, which bypasses the
   // allowlist into the core's void-element branch (issue #36 web slice:
   // replaced-element CSS needs a REAL <img> box even on captures), and —

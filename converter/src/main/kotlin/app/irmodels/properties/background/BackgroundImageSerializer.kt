@@ -74,6 +74,16 @@ object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.Backgroun
             put("type", "color")
             put("color", json.encodeToJsonElement(IRColor.serializer(), value.color))
         }
+        // image() notation (wave-48 lane W5, css-images-4 §2.1). ADDITIVE
+        // shape: a brand-new discriminator, so no existing wire bytes move;
+        // readers that predate it fall into their unknown-type branch and
+        // paint nothing — exactly what they painted when this was Raw.
+        is BackgroundImageProperty.BackgroundImage.ImageNotation -> buildJsonObject {
+            put("type", "image")
+            put("srcs", JsonArray(value.srcs.map { json.encodeToJsonElement(IRUrl.serializer(), it) }))
+            // Fallback colour omitted when the author wrote none.
+            value.color?.let { put("color", json.encodeToJsonElement(IRColor.serializer(), it)) }
+        }
         is BackgroundImageProperty.BackgroundImage.CrossFade -> buildJsonObject {
             put("type", "cross-fade")
             // Each arg: authored weight (omitted key = omitted percentage —
@@ -136,6 +146,10 @@ object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.Backgroun
                     // the layer object itself decodes in the flat case).
                     type == "color" -> BackgroundImageProperty.BackgroundImage.ColorLayer(
                         json.decodeFromJsonElement(IRColor.serializer(), element["color"] ?: element))
+                    // image() notation round-trip (wave-48 lane W5).
+                    type == "image" -> BackgroundImageProperty.BackgroundImage.ImageNotation(
+                        (element["srcs"] as? JsonArray)?.map { json.decodeFromJsonElement(IRUrl.serializer(), it) } ?: emptyList(),
+                        element["color"]?.let { json.decodeFromJsonElement(IRColor.serializer(), it) })
                     type == "cross-fade" -> BackgroundImageProperty.BackgroundImage.CrossFade(
                         // Recursively decode each image arg via fromJson.
                         (element["args"] as? JsonArray)?.map { argEl ->

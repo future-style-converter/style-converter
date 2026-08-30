@@ -127,6 +127,22 @@ enum GradientStopResolver {
             let shift = Double(k) * period
             for s in stops { out.append(Stop(r: s.r, g: s.g, b: s.b, a: s.a, loc: s.loc + shift)) }
         }
+        // Monotonicity repair (wave 48, F3 — the Kotlin twin's wave-47
+        // clamp, GradientStopResolver.kt): copy k's LAST stop and copy
+        // k+1's FIRST stop are meant to coincide at first.loc +
+        // (k+1)·period, but the two float paths (`last.loc + k·p` vs
+        // `first.loc + (k+1)·p`) can land one ulp apart in either order
+        // (S4's executed Double sweep misordered 6023 of 23275 rational
+        // lattices — e.g. period 1/5, anchor 0.13 emits
+        // …0.93000000000000016, 0.93000000000000005… — a NON-monotonic
+        // list, which SwiftUI's Gradient treats as undefined stop order).
+        // Clamp forward to the running max — the same §3.4.3 rule-2
+        // clamp, applied to the materialised lattice; a one-ulp shift is
+        // invisible, an unordered gradient input is not.
+        var run = out[0].loc
+        for idx in 1..<out.count {
+            if out[idx].loc < run { out[idx].loc = run } else { run = out[idx].loc }
+        }
         return out
     }
 
@@ -168,7 +184,24 @@ enum GradientStopResolver {
             }
             out.append(s)
         }
-        if out.isEmpty { return [] }
+        // Wave 48 (lane W1), byte-parallel with the Kotlin twin: EVERY
+        // stop past one end of the line leaves the loop with no in-range
+        // stop and no crossing pair — but §3.4.3's padding rule still
+        // defines the rendering: everything before the first stop takes
+        // the first stop's colour, everything after the last stop the
+        // last's. A line ending before its first stop therefore paints
+        // the FIRST colour uniformly; one starting after its last stop
+        // the LAST colour. Returning [] here made the ramp unpaintable
+        // for the css-break/background-image-006 clone shape
+        // (`linear-gradient(green 80px, red 140px)` on a fragment line
+        // shorter than 80px — the ref is all-green for exactly that
+        // reason); on Android the same shape was a per-frame draw NPE
+        // that shipped the cell unmeasured (wave-48 W1, device-proven).
+        if out.isEmpty {
+            // All stops above 1 ⇒ [0,1] lies before the first stop.
+            let pad = first.loc > 1 ? first : last
+            return [withLoc(pad, 0), withLoc(pad, 1)]
+        }
         if out[0].loc > 0 { out.insert(withLoc(out[0], 0), at: 0) }
         if out[out.count - 1].loc < 1 { out.append(withLoc(out[out.count - 1], 1)) }
         return out

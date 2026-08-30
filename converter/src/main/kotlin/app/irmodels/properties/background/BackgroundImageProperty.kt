@@ -35,6 +35,20 @@ data class BackgroundImageProperty(
         // && [ <image> | <color> ]`); modelled as a layer so CrossFade args
         // stay a homogeneous list of BackgroundImage values.
         @Serializable data class ColorLayer(val color: IRColor) : BackgroundImage
+        // image() notation with sources and/or a fallback colour
+        // (css-images-4 §2.1 `image( <image-tags>? [<image-src># ]? [, <color>]? )`;
+        // the multi-src form is the legacy css-images-3 grammar WPT
+        // css-image-fallbacks-and-annotations003/004 still exercise).
+        // `srcs` are the candidate sources IN AUTHOR ORDER — the first that
+        // loads paints; `color` paints when no source can be displayed
+        // (which for a src-less `image(<color>)` makes a plain solid-colour
+        // image). Kept distinct from ColorLayer so the runtimes can tell
+        // "author wrote image()" from a cross-fade colour argument. Added
+        // wave-48 lane W5: all five WPT css-image-fallbacks-and-annotations
+        // tests fell to Raw before — Chromium does not implement image(),
+        // so even the web dropped the declaration and every platform painted
+        // the red background-color the tests forbid (all three F, wave48-cal).
+        @Serializable data class ImageNotation(val srcs: List<IRUrl>, val color: IRColor?) : BackgroundImage
         // cross-fade() — css-images-4 §2.6.2. `args` keeps the AUTHORED
         // per-image weights (null = omitted); the spec's normalization
         // (fill omitted from the 100% remainder, scale down if the sum

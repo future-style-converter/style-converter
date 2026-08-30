@@ -119,9 +119,9 @@ enum MulticolSpannerFlow {
         /// any wire on this child is outside that lane's proven scope
         /// (MulticolFloatStrip.factsFor's strict-bail contract). A single
         /// nil fact disables the whole container's strip. Twin of the
-        /// Kotlin ChildSpec.floatStrip; consumed on Android today, kept
-        /// here for byte-parallel specs until the iOS renderer seams land
-        /// (MulticolFloatStrip.swift's CONSUMPTION STATUS banner).
+        /// Kotlin ChildSpec.floatStrip; consumed on BOTH natives — see
+        /// MulticolFloatStrip.swift's CONSUMPTION STATUS banner (iOS:
+        /// the X3 engagement + the wave-48 slice-replay measure half).
         var floatStrip: MulticolFloatStrip.ChildFacts? = nil
     }
 

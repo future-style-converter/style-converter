@@ -17,8 +17,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.sp
+// Wave 48 (lane W4): the registered face's ascent ratio — the sup/sub
+// baseline shift converts px → BaselineShift through it (see spanStyle).
+import com.styleconverter.runtime.typography.HalfLeadingBaseline
 
 /**
  * InlineSpanContent — overlay the fold's member [InlineRunFold.Span]s
@@ -85,6 +89,46 @@ object InlineSpanContent {
         // Member font-size: absolute px, or the em/% factor against the
         // paragraph's resolved size (px == sp in the density-1 harness).
         val sizePx = style.fontSizePx ?: style.fontSizeEm?.let { it * paragraphFontSizePx }
+        // Wave 48 (lane W4) — the sup/sub UA shift. Blink resolves the
+        // super/sub keywords as PIXELS off the PARENT's computed size
+        // (LayoutBoxModelObject::VerticalPosition: super raises size/3+1,
+        // sub lowers size/5+1 — ref-verified in VerticalShift's banner).
+        // Compose's BaselineShiftSpan applies `ceil(ascent × multiplier)`
+        // to TextPaint.baselineShift, ascent being the SPAN face's signed
+        // ascent (−ASCENT_EM × span size for the registered Inter —
+        // HalfLeadingBaseline's pinned 1984/2048), so the px shift maps to
+        // multiplier = shiftPx / (ASCENT_EM × spanSizePx); the span's ceil
+        // rounds within 1px, the same granularity Blink's LayoutUnit snap
+        // leaves. Positive multiplier raises (BaselineShift.Superscript
+        // is +0.5), so `up` keeps the sign and sub negates it.
+        val baselineShift = style.shift?.let { s ->
+            // The pixel rule lives in ONE pinned helper (fix lane F5 —
+            // InlineSpanRing.shiftPx: parentPx ?? parentEm × paragraph,
+            // then super parent/3+1 / sub −(parent/5+1)), shared with the
+            // iOS twin so the two seams cannot drift.
+            val shiftPx = InlineSpanRing.shiftPx(s, paragraphFontSizePx)
+            // NAMED LIMITATION (fix lane F5): the px → multiplier
+            // conversion below hard-codes the registered Inter face's
+            // ascent ratio (HalfLeadingBaseline.ASCENT_EM = 1984/2048 —
+            // the same repo-pinned constant DecorationOps and
+            // TextStyleApplier's decoration math already assume). If the
+            // paragraph resolves to a DIFFERENT face — a host
+            // `font-family: monospace/serif` through CssFontFamilyResolver,
+            // a document @font-face via DocumentFontRegistry, or a
+            // script-fallback face over these glyphs — the realized px is
+            // off by the ratio of that face's real ascent to Inter's.
+            // Why no PropertyTracker breadcrumb here: this seam receives
+            // only the resolved paragraph SIZE — the face is picked in the
+            // renderer's TextStyle (ComponentRenderer/TextStyleApplier),
+            // outside overlay's inputs, so the divergence is not
+            // detectable from this module without a cross-module signature
+            // change (and Compose's PropertyTracker has no logOnce; this
+            // file also runs under plain-JVM tests where android.util.Log
+            // throws). Stated here instead — not silent.
+            // The span renders at ITS resolved size — that face's ascent
+            // is the multiplier's base.
+            BaselineShift(shiftPx / (HalfLeadingBaseline.ASCENT_EM * (sizePx ?: paragraphFontSizePx)))
+        }
         // underline / line-through per css-text-decor-3 §2.1; Compose
         // paints them in the span's text color (the ring's admission gate
         // only let an equal decoration color through, so this is exact).
@@ -102,6 +146,9 @@ object InlineSpanContent {
             fontSize = sizePx?.sp ?: androidx.compose.ui.unit.TextUnit.Unspecified,
             fontWeight = style.fontWeight?.let { FontWeight(it) },
             fontStyle = if (style.italic) FontStyle.Italic else null,
+            // Wave 48 (lane W4): null for every shift-less span keeps the
+            // pre-wave-48 SpanStyle byte-identical.
+            baselineShift = baselineShift,
             textDecoration = decoration,
         )
     }

@@ -315,6 +315,32 @@ object ColorExtractor {
                 // fixture). extractColor reads `srgb` either way.
                 "color" -> ValueExtractors.extractColor(obj["color"] ?: obj)
                     ?.let { BackgroundImageConfig.SolidColor(it) }
+                // image() notation (wave-48 lane W5, css-images-4 §2.1).
+                // Wire (BackgroundImageSerializer.kt): {"type":"image",
+                // "srcs":[<IRUrl>…], "color":{…IRColor…}?} — candidate
+                // sources in author try-order plus an optional fallback
+                // colour. §2.1: the first source that loads paints; if none
+                // can be displayed, the colour paints. This extractor cannot
+                // probe loadability, so the FALLBACK COLOUR wins whenever it
+                // is present (in the corpus values that carry one — WPT
+                // css-image-fallbacks-and-annotations — 001 pairs it with a
+                // deliberately missing source, 005 declares the colour
+                // alone: in both cases the colour IS the §2.1 outcome);
+                // with no colour the first source rides the existing Url
+                // pipeline (002's support/1x1-green.png). An UNPARSEABLE
+                // colour (extractColor → null) falls through the `?:` to
+                // srcs too — the iOS twin mirrors this exact rule (wave-48
+                // F3; before that it painted clear on the same wire).
+                // A loadable-src-plus-colour value would mis-paint the
+                // colour — no corpus test has one; noted, not silent.
+                "image" -> obj["color"]
+                    ?.let { c -> ValueExtractors.extractColor(c)?.let { BackgroundImageConfig.SolidColor(it) } }
+                    ?: (obj["srcs"] as? JsonArray)?.firstOrNull()?.let { first ->
+                        // IRUrl wire: bare string, or {url, data:true} for data URIs.
+                        val u = (first as? JsonPrimitive)?.contentOrNull
+                            ?: (first as? JsonObject)?.get("url")?.jsonPrimitive?.contentOrNull
+                        u?.let { BackgroundImageConfig.Url(it) }
+                    }
                 // Untagged object carrying a "url" key — the data-URI layer
                 // shape above (the "data": true flag just records that the
                 // converter recognised the scheme; the url string is

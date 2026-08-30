@@ -119,11 +119,14 @@ export function containmentBlocksDirectionPropagation(
  * the pin on a detected author `margin-left: auto` would be branching
  * with zero evidence behind it. Revisit if a fixture ever needs it.
  *
- * NOT YET COVERED — the block axis. `contain-body-w-m-001..004` declare
+ * THE BLOCK AXIS (wave-48 lane W5) — `contain-body-w-m-001..004` declare
  * `writing-mode: vertical-rl` on the body instead of `direction: rtl`;
  * neutralising THAT needs the containing block's block-flow direction to
  * change, which no style on the generated box can express (the same
- * §10.3.3 reason above, one axis over).
+ * §10.3.3 reason above, one axis over). It is therefore handled on the
+ * CONTAINING element instead: rootWritingModeSuppression below overrides
+ * the contained body-root's own emitted `writing-mode` back to the root's
+ * un-propagated `horizontal-tb`.
  *
  * MEASURED (wave-28 skeptic, full 280-test css-contain web run): all 8
  * w-m tests (contain-{body,html}-w-m-001..004) still paint their orange
@@ -159,4 +162,76 @@ export function rootPseudoPlacementStyle(component: IRComponent): CSSProperties 
   if (!containmentBlocksDirectionPropagation(component.properties)) return null;
   // Contained ⇒ pin to the physical inline-start of the root box.
   return { marginRight: 'auto' };
+}
+
+/**
+ * The vertical writing-mode wire values (css-writing-modes-4 §3.1) whose
+ * block axis is HORIZONTAL — the axis the marginRight pin above cannot
+ * reach. Uppercase enum spellings are what WritingModeProperty serializes
+ * (`"VERTICAL_RL"` — see the corpus IR for contain-body-w-m-001); the
+ * lowercase kebab forms are tolerated defensively like the Contain leaf's
+ * bare-string shape.
+ */
+const VERTICAL_WRITING_MODES = new Set([
+  'VERTICAL_RL', 'VERTICAL_LR', 'SIDEWAYS_RL', 'SIDEWAYS_LR',
+  'vertical-rl', 'vertical-lr', 'sideways-rl', 'sideways-lr',
+]);
+
+/**
+ * The writing-mode override a CONTAINED body-root element must carry, or
+ * `null` for every other component (their emitted styles do not move).
+ *
+ * THE SPEC RULE (wave-48 lane W5, closing the block-axis gap named above):
+ * css-writing-modes-4 §3.2 propagates the BODY's used `writing-mode` to
+ * the viewport's principal writing mode, and css-contain-1 §3.1 removes a
+ * contained body from that channel — same chain, one property over from
+ * the `direction` case rootPseudoPlacementStyle handles. The WPT extractor
+ * merges html + body into ONE body-root component, so that component's
+ * element plays BOTH roles: its `writing-mode: vertical-rl` governs the
+ * flow the root-scope `html::before` box stacks in, which is exactly the
+ * propagation §3.1 forbids. Overriding the element back to the initial
+ * `horizontal-tb` is the propagation-suppressed rendering.
+ *
+ * MEASURED (wave48-cal, css-contain; bbox re-measured pixel-exact by the
+ * wave-48 skeptic — an earlier draft claimed [118,16]-[216,115], a
+ * 99px-wide box that cannot hold the 100×100 square): all 8 w-m cells
+ * (contain-{body,html}-w-m-001..004) paint the orange square at
+ * [116,16]-[215,115] on web — 116−16 = 100, exactly one box width right
+ * of the ref's [16,16]-[115,115], the clean signature of vertical-rl
+ * stacking the first block child from the RIGHT edge; web-ref
+ * 0.9101–0.9109.
+ * Both NATIVE twins already render the suppressed semantics for free —
+ * a Compose Column / SwiftUI VStack stacks top-to-bottom regardless of
+ * WritingMode — and score 0.9984/0.9992 on the same cells, which is the
+ * measured proof that the horizontal-tb rendering matches the reference.
+ *
+ * KNOWN APPROXIMATION, stated: in a real browser the body's OWN interior
+ * keeps vertical-rl (only the propagation to the viewport is suppressed);
+ * this override flattens the interior too. For the corpus family that is
+ * visually equivalent — the only body child is a `writing-mode:
+ * horizontal-tb` <p> whose used inline size fills the body's 200px either
+ * way — and the honest fix for the residue is the extractor-side html/body
+ * split already named in the merged-caveat banner above.
+ *
+ * VERIFIED (wave-48 W5, full section-runner web re-capture, run
+ * w48-w5-verify2): all 8 w-m cells flip 0.9101–0.9109 F → 1.0000 P; every
+ * other css-contain cell byte-stable (section 37/48 → 46/48, the 9th flip
+ * being the sibling contain-intrinsic fix — see
+ * engine/performance/_containIntrinsic.ts).
+ */
+export function rootWritingModeSuppression(component: IRComponent): CSSProperties | null {
+  // Same scope gate as the placement pin: only the merged body-root plays
+  // the viewport's role; every other element's writing-mode is its own.
+  if (component.meta?.role !== 'body-root') return null;
+  // Same containment gate: an UNCONTAINED body's writing-mode really does
+  // propagate (css-writing-modes-4 §3.2), so today's emission stands.
+  if (!containmentBlocksDirectionPropagation(component.properties)) return null;
+  // Only a VERTICAL mode mis-stacks the root flow; horizontal-tb (or no
+  // WritingMode leaf at all) needs no override — and returning null keeps
+  // the 8 dir-family cells' DOM byte-identical to wave 28.
+  const wm = (component.properties as Array<{ type: string; data?: unknown }> | undefined)
+    ?.find((p) => p.type === 'WritingMode');
+  if (!wm || typeof wm.data !== 'string' || !VERTICAL_WRITING_MODES.has(wm.data.trim())) return null;
+  // Contained + vertical ⇒ the root's un-propagated initial value wins.
+  return { writingMode: 'horizontal-tb' };
 }

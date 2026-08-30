@@ -218,7 +218,14 @@ enum FlexboxExtractor {
 
     /// FlexBasis IR shapes: plain "auto"/"content" strings, or
     /// `{value: {px: N}, normalizedPixels: N}` for lengths, or
-    /// `{keyword: "auto"}` via the parser-shell fallback.
+    /// `{keyword: "auto"}` via the parser-shell fallback, or — wave 48
+    /// (lane W7) — a BARE NUMBER for percentages: the converter's
+    /// FlexBasisSerializer writes FlexBasis.PercentageValue through
+    /// IRPercentage's serializer, which emits the raw percent as a JSON
+    /// number (`flex-basis: 100%` → `"FlexBasis": 100`). The web engine
+    /// reads the identical shape as a percentage (layoutLength's
+    /// "bare number → percentage" rule) — mirrored here so the three
+    /// runtimes agree on the wire.
     private static func extractFlexBasis(_ v: IRValue) -> FlexBasisValue? {
         // String-form shortcut — fixtures use this for `auto` and `content`.
         if case .string(let s) = v {
@@ -228,6 +235,9 @@ enum FlexboxExtractor {
             default:        return nil
             }
         }
+        // Bare-number form: IRPercentage on the wire (see doc above).
+        if case .double(let d) = v { return .percent(CGFloat(d)) }
+        if case .int(let i) = v { return .percent(CGFloat(i)) }
         // Object form — check for length first, then keyword.
         if case .object(let o) = v {
             // Normalized-pixels is populated for absolute lengths.

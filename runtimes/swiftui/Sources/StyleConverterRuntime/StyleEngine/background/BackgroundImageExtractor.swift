@@ -155,6 +155,43 @@ enum BackgroundImageExtractor {
             // premultiplied-alpha fixture). extractColor reads `srgb`
             // either way, so the flattened form passes the object itself.
             return .color(extractColor(o["color"] ?? .object(o)))
+        case "image":
+            // image() notation (wave-48 lane W5, css-images-4 §2.1).
+            // Wire (BackgroundImageSerializer.kt): {"type":"image",
+            // "srcs":[<IRUrl>…], "color":{…IRColor…}?} — candidate sources
+            // in author try-order plus an optional fallback colour. §2.1:
+            // the first source that loads paints; if none can be displayed
+            // the colour paints. Loadability is unknowable here, so the
+            // FALLBACK COLOUR wins when present (in the corpus values that
+            // carry one — WPT css-image-fallbacks-and-annotations — 001
+            // pairs it with a deliberately missing source, 005 declares
+            // the colour alone: in both cases the colour IS the §2.1
+            // outcome); with no colour the first source rides the existing
+            // url pipeline. A loadable-src-plus-colour value would
+            // mis-paint the colour — no corpus test has one; noted, not silent.
+            if let c = o["color"] {
+                // Wave-48 F3 twin alignment: an UNPARSEABLE colour must not
+                // eat the sources. Kotlin's ValueExtractors.extractColor
+                // returns null on garbage and its `?:` falls through to
+                // srcs; here the same failure is the `.unknown` sentinel
+                // (ColorValue.swift — "garbage input, never nil"), and
+                // returning .color(.unknown) painted CLEAR while Android
+                // painted the first source (S4 defect 2, executed twin
+                // probe: {color:{garbage}} → Swift clear vs Kotlin
+                // Url(x.png)). Dynamic colours (currentColor/var()) are
+                // NOT unknown — they stay on the colour path, where the
+                // applier can still resolve them against live context.
+                let parsed = extractColor(c)
+                if parsed != .unknown { return .color(parsed) }
+                // .unknown falls through to the srcs branch below —
+                // byte-parallel with the Kotlin `?:` fallthrough.
+            }
+            if let first = o["srcs"]?.arrayValue?.first {
+                // IRUrl wire: bare string, or {url, data:true} for data URIs.
+                if let s = first.stringValue { return .url(s) }
+                if let u = first.objectValue?["url"]?.stringValue { return .url(u) }
+            }
+            return nil
         default:
             return nil
         }

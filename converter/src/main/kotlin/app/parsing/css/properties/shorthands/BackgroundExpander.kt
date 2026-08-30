@@ -98,6 +98,12 @@ object BackgroundExpander : ShorthandExpander {
     private fun isGradientOrImage(value: String): Boolean {
         val lower = value.lowercase()
         return lower.startsWith("url(") ||
+               // image() notation (wave-48 lane W5, css-images-4 §2.1) —
+               // WPT css-image-fallbacks-and-annotations declares it through
+               // the `background:` shorthand; without this membership the
+               // whole declaration fell into the complex-background token
+               // walk and the layer was lost.
+               lower.startsWith("image(") ||
                lower.startsWith("linear-gradient(") ||
                lower.startsWith("radial-gradient(") ||
                lower.startsWith("conic-gradient(") ||

@@ -236,14 +236,15 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // Hardcoded deliberately: the count is the thing that must not drift
   // unnoticed. Changing it should require editing this line, which is a
   // review prompt.
-  // 22 visual-test + 4 composition-test + 2 filter-sepia-amounts. The count
+  // 23 visual-test + 4 composition-test + 2 filter-sepia-amounts. The count
   // is asserted so a silent add or drop shows up as a test change, not as a
-  // quiet loosening of the gate. Last moved when the iOS transform-order fix
-  // resolved three ledgered divergences (Transform_Combined iOS-web,
-  // Edge_MultiTransform iOS-web and iOS-Android) and added one for Compose's
-  // order-insensitivity (Transform_Combined iOS-Android).
-  assert.equal(led.expectations.length, 31,
-    '25 visual-test + 4 composition-test + 2 filter-sepia-amounts — the 2026-08-29 threshold flip added Filter_Blur x2 + InsetRoundShadow Android-web');
+  // quiet loosening of the gate. Last moved when the wave-48 Compose
+  // transform-order fix (TransformListComposer — the function list now
+  // composes in css-transforms-1 §11 order) DELETED both Transform_Combined
+  // lines (iOS-Android and Android-web) per the exit-5 contract: the
+  // recorded cause, per-kind scalar accumulation, is gone.
+  assert.equal(led.expectations.length, 29,
+    '23 visual-test + 4 composition-test + 2 filter-sepia-amounts — wave 48 deleted Transform_Combined x2 (Compose order fix)');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);

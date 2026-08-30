@@ -3,29 +3,24 @@
 //  StyleEngine/columns — wave-45 lane X3 (the consumption half).
 //
 //  The iOS CONSUMPTION of the wave-44 float-strip twin: everything the
-//  ComponentRenderer multicol-branch seam (tagged X3 there) and
-//  MulticolGreedyLayout's strip branch need, mirrored from the Kotlin
-//  consumers (MulticolFloatStrip.zeroFlowPlan in MulticolFloatStrip.kt,
-//  MulticolFloatStripPlan.engagesPreMeasure/provableStripInkPx in
-//  MulticolFloatStripPlan.kt). This closes seam 1 of the CONSUMPTION
-//  STATUS banner in MulticolFloatStrip.swift: the §9.5.2 zero-flow plan
-//  now reaches the float container's child loop (as an environment value
-//  the renderer attaches AROUND the layout — a SwiftUI Layout itself
-//  cannot inject environment into its subviews, which is why the strip
-//  geometry additionally rides INTO the layout as a parameter).
+//  ComponentRenderer multicol-branch seam (tagged X3 there) needs,
+//  mirrored from the Kotlin consumers (MulticolFloatStrip.zeroFlowPlan
+//  in MulticolFloatStrip.kt, MulticolFloatStripPlan.engagesPreMeasure/
+//  provableStripInkPx in MulticolFloatStripPlan.kt). This closed seam 1
+//  of the CONSUMPTION STATUS banner in MulticolFloatStrip.swift: the
+//  §9.5.2 zero-flow plan reaches the float container's child loop as an
+//  environment value the renderer attaches AROUND the strip content.
 //
-//  Seam 2 — the css-break-3 §4 clip+translate slice REPLAY (Compose:
-//  drawWithContent over the whole strip; iOS single-child precedent:
-//  the renderer-composed multicolFragmentRow clone row) — remains
-//  renderer-owned and is NOT built here: MulticolGreedyLayout places
-//  each child ONCE in the column its strip offset starts in
-//  (columnSlot below), so float ink taller than one column stays in its
-//  anchor column instead of slicing across. That approximation is
-//  logged at the layout (repo no-silent-fallthrough rule) and stated in
-//  the wave-45 lane report.
+//  Seam 2 — the css-break-3 §4 clip+translate slice REPLAY — closed in
+//  wave 48 (lane W3): the renderer composes one clone of the whole strip
+//  content per used column and MulticolFloatStripSliceLayout (the
+//  measure half, MulticolFloatStripSlice.swift) shows each clone's
+//  column band — so the engagement decided HERE now feeds the replay
+//  row, not a per-child anchor-column placement. The wave-45 columnSlot
+//  whole-child mapping this file used to carry left with that placement.
 //
 
-// Foundation for floor(); the module is view-free and XCTest-pinnable.
+// Foundation for the numeric helpers; view-free and XCTest-pinnable.
 import Foundation
 
 extension MulticolFloatStrip {
@@ -110,35 +105,14 @@ extension MulticolFloatStrip {
                 uniquingKeysWith: { a, _ in a }))
     }
 
-    /// The whole-child COLUMN mapping for the layout's strip placement:
-    /// a child whose strip offset is y starts in column ⌊y/h⌋ at local
-    /// offset y − column·h (css-break-3 §4 slice coordinates — the same
-    /// arithmetic FragmentGeometry slices with, reduced to the child's
-    /// START point because iOS places each child once; see the seam-2
-    /// note in the file banner). The column index caps at N−1: content
-    /// past the last column overflows it downward, the wave-10
-    /// fill-cap / css-overflow-3 §2 overflow semantic (no §8.2 overflow
-    /// columns for the strip — Compose's replay clips there too).
-    static func columnSlot(yOffsetPx: Double,
-                           columnBlockSizePx: Double,
-                           columnCount: Int) -> (column: Int, localYPx: Double) {
-        // Degenerate inputs: a plan never produces them (h > 0 and
-        // N > 1 are its gates) — answer totally as "column 0, as-is".
-        guard columnBlockSizePx > 0, columnCount > 0 else { return (0, yOffsetPx) }
-        // ⌊y/h⌋, clamped into [0, N−1] (negative y cannot come out of
-        // the strip walk — cursor and ledgers are non-negative — but
-        // the clamp keeps the pure function total).
-        let raw = Int(floor(yOffsetPx / columnBlockSizePx))
-        let column = min(max(raw, 0), columnCount - 1)
-        return (column, yOffsetPx - Double(column) * columnBlockSizePx)
-    }
-
-    /// Everything the wave-45 X3 renderer seam threads into
-    /// MulticolGreedyLayout when the strip owns a container's layout:
-    /// the proven specs, the fill mode, and the zero-flow plan the
-    /// renderer ALSO publishes on the floatClearancePlan environment —
-    /// one decision, two consumers (the Compose MultiColumnApplier
-    /// principle), so paint and layout can never half-engage.
+    /// Everything the X3 renderer seam threads into the strip's layout
+    /// half (since wave 48: the slice-replay row's
+    /// MulticolFloatStripSliceLayout windows) when the strip owns a
+    /// container's layout: the proven specs, the fill mode, and the
+    /// zero-flow plan the renderer ALSO publishes on the
+    /// floatClearancePlan environment — one decision, two consumers (the
+    /// Compose MultiColumnApplier principle), so paint and layout can
+    /// never half-engage.
     struct EngagedStrip {
         /// Per-subview specs, in contentOrPlaceholder order (leading
         /// text first) — every floatStrip fact proven non-nil.
@@ -159,12 +133,14 @@ extension MulticolFloatStrip {
     /// keeps the overflow-not-clip legacy semantics), horizontal-tb only
     /// (a vertical writing mode remaps the axes the strip's y-math
     /// assumes — css-writing-modes-4 §3), and the shared pre-measure
-    /// predicate via zeroFlowPlan. The used-column count is resolved by
-    /// the CALLER from the container's declared width through the same
-    /// MulticolMath lane the layout itself resolves with; when the two
-    /// disagree (declared vs actual width — no fixture in the family
-    /// does), the layout's own alignment guard bails loudly rather than
-    /// place with stale geometry.
+    /// predicate via zeroFlowPlan. The used-column geometry is resolved
+    /// by the CALLER from the container's declared width through the
+    /// same MulticolMath lane the greedy layout resolves with, and the
+    /// slice row composes with THAT geometry; a live width that
+    /// disagreed with the declared one (no fixture in the proven family
+    /// does) would render the composed columns against the live box —
+    /// the same committed-geometry semantics as Compose's post-engage
+    /// measure pass, stated in MulticolFloatStripSlice.swift.
     static func engagedStrip(specs: [MulticolSpannerFlow.ChildSpec]?,
                              columnFillAuto: Bool,
                              definiteColumnBlockSizePx: Double?,
