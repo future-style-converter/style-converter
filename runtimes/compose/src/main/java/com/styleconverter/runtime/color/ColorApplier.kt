@@ -12,6 +12,10 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ImageBitmap
+// ImageShader + ShaderBrush give a dense plain-repeat raster lattice the
+// GPU-side infinite grid iOS already uses (wave-49 lane A3) — see the
+// runaway-lattice guard in applyUrlBackground.
+import androidx.compose.ui.graphics.ImageShader
 import androidx.compose.ui.graphics.LinearGradientShader
 import androidx.compose.ui.graphics.RadialGradientShader
 import androidx.compose.ui.graphics.toArgb
@@ -286,7 +290,7 @@ object ColorApplier {
     private fun brushFor(image: BackgroundImageConfig): Brush? {
         return when (image) {
             // Gradient brushes take no background-position: position moves
-            // the tile (css-backgrounds-3 §3.6), never the shader inside it.
+            // the tile (css-backgrounds-3 §2.6), never the shader inside it.
             // Wave 47: repeating flavours resolve their real §3.4.4 period
             // inside the factories now, so the blend path composites the
             // true lattice too (previously approximated as non-repeating).
@@ -318,10 +322,74 @@ object ColorApplier {
                     "not yet composited in the background-blend-mode path — layer skipped")
                 null
             }
-            // `none` IS the rendered result per css-backgrounds-3 §3.1
+            // image(): resolve the §2.1 candidate chain FIRST, then take the
+            // winner's own arm (a decoded candidate is a Url — no brush, as
+            // above; an all-declined chain with a colour is a SolidColor
+            // brush). Resolving here rather than declaring image() brushless
+            // keeps the blend path's behaviour identical to the plain path's.
+            is BackgroundImageConfig.ImageNotation -> brushFor(resolveImageNotation(image))
+            // `none` IS the rendered result per css-backgrounds-3 §2.3
             // (an image layer that draws nothing) — not a fallthrough.
             is BackgroundImageConfig.None -> null
         }
+    }
+
+    /**
+     * Collapse an `image()` value to the layer that actually paints —
+     * css-images-4 §2.5, wave-49 lane A3.
+     *
+     * The walk itself lives in the platform-free
+     * [com.styleconverter.runtime.images.ImageCandidateChain] (twin of the
+     * Swift `ImageCandidateChain.swift`); this method supplies the PROBE and
+     * turns the outcome back into an ordinary [BackgroundImageConfig] so every
+     * downstream path — tile geometry, blend-mode brushes, cross-fade
+     * arguments — keeps working with no image()-specific branch at all.
+     *
+     * The probe is [SyncImageDecode.decodeDataUri], i.e. the runtime's REAL
+     * background raster decoder, which is also its documented capability
+     * boundary: a Compose background layer paints only from a `data:` payload,
+     * because an async fetch cannot be capture-deterministic (see
+     * [applyUrlBackground]). So "can be displayed" here means exactly what this
+     * runtime can display, not a guess. The decoder caches, so probing a
+     * candidate and then painting it costs ONE decode.
+     *
+     * Outcomes, all three §2.1 branches, none silent:
+     *  - a candidate decodes  → [BackgroundImageConfig.Url] of that candidate;
+     *  - all declined + colour → [BackgroundImageConfig.SolidColor] (the same
+     *    config the pre-wave-49 extractor produced for `image(<src>, <color>)`,
+     *    so those baselines stay byte-identical);
+     *  - all declined, no colour → [BackgroundImageConfig.None], the browser's
+     *    failed-load visual (nothing painted, background-color shows through).
+     */
+    internal fun resolveImageNotation(
+        image: BackgroundImageConfig.ImageNotation
+    ): BackgroundImageConfig {
+        val outcome = com.styleconverter.runtime.images.ImageCandidateChain
+            .firstPaintable(image.srcs) { src ->
+                // Non-data schemes are this runtime's documented no-op, so
+                // they are a DECLINE (null), never a silent paint of nothing.
+                if (DataUri.isDataUri(src)) SyncImageDecode.decodeDataUri(src) else null
+            }
+        // Loud, once per distinct candidate list: name what was refused and
+        // what replaced it, so an investigator can tell "the host never
+        // delivered this asset" from "this platform cannot decode it".
+        if (outcome.declined.isNotEmpty()) {
+            warnOnce(
+                "image():" + outcome.declined.joinToString(","),
+                "background-image: image() declined ${outcome.declined.size} candidate(s) " +
+                    "[${outcome.declined.joinToString(", ")}] — a Compose background layer " +
+                    "paints only from a data: payload (async fetch is capture-nondeterministic); " +
+                    "css-images-4 §2.5 falls through to " +
+                    (outcome.src?.let { "the next candidate '$it'" }
+                        ?: image.fallbackColor?.let { "the fallback <color>" }
+                        ?: "nothing (no fallback <color> on the wire)")
+            )
+        }
+        val winner = outcome.src
+        if (winner != null) return BackgroundImageConfig.Url(winner)
+        val fallback = image.fallbackColor
+        if (fallback != null) return BackgroundImageConfig.SolidColor(fallback)
+        return BackgroundImageConfig.None
     }
 
     /**
@@ -383,6 +451,16 @@ object ColorApplier {
         layerSize: BackgroundSizeConfig = config.backgroundSize,
         layerRepeat: BackgroundRepeatAxes = BackgroundRepeatAxes.from(config.backgroundRepeat)
     ): Modifier {
+        // image() layers collapse to the candidate that actually paints
+        // BEFORE any of the routing below runs (css-images-4 §2.5, wave-49
+        // lane A3). Re-entering with the resolved layer — rather than
+        // duplicating the url/colour routing here — is what keeps the
+        // §2.1 winner subject to the very same background-size / -position /
+        // -repeat geometry an author-written url() gets.
+        if (image is BackgroundImageConfig.ImageNotation) {
+            return applyBackgroundImage(
+                modifier, resolveImageNotation(image), config, layerSize, layerRepeat)
+        }
         // url() layers take a dedicated bitmap-tile path (wave 9): the
         // brush pipeline below is gradient-only (shaders), while an image
         // layer draws decoded pixels through the SAME BackgroundTileMath
@@ -427,7 +505,11 @@ object ColorApplier {
             // Unreachable: cross-fade() returned through applyCrossFade
             // above; the arm exists only for `when` exhaustiveness.
             is BackgroundImageConfig.CrossFade -> null
-            // `none` draws nothing by definition (css-backgrounds-3 §3.1).
+            // Unreachable: image() re-entered this function with its
+            // resolved §2.1 winner above; the arm exists only for `when`
+            // exhaustiveness.
+            is BackgroundImageConfig.ImageNotation -> null
+            // `none` draws nothing by definition (css-backgrounds-3 §2.3).
             is BackgroundImageConfig.None -> null
         }
         if (brush == null) return modifier
@@ -445,7 +527,7 @@ object ColorApplier {
         // the pre-wave behavior so knob-less gradient baselines never move.
         // When a knob is set WITHOUT an explicit size (sized == null), the
         // tile is the BOX: gradients have no intrinsic dimensions, so auto
-        // (and cover/contain) resolve to the box — css-backgrounds-3 §3.9.
+        // (and cover/contain) resolve to the box — css-backgrounds-3 §2.9.
         // Previously this gate required explicit Dimensions, so
         // `background-position: 40px 0` without a size rendered UNSHIFTED
         // on Android while web/iOS wrapped the box-sized tile with a
@@ -587,13 +669,42 @@ object ColorApplier {
     }
 
     /**
+     * Can a lattice that blew past the 4096-origin cap be painted by a
+     * REPEATING SHADER instead of enumerated tiles? (wave-49 lane A3)
+     *
+     * Pure and `internal` so the JVM suite can pin the routing without a
+     * draw scope — `android.graphics` is a throwing stub off-device, so the
+     * shader call itself is untestable here and the DECISION is the part
+     * that must not drift. Same discipline as iOS's
+     * `BackgroundImageApplier.gradientNeedsGeometry`.
+     *
+     * Both conditions are load-bearing, and both come from
+     * css-backgrounds-3 §2.4 + the shader's own semantics:
+     *  - PLAIN `repeat` on BOTH axes: `no-repeat` is not a grid at all,
+     *    while `space` inserts gaps and `round` rescales the tile per
+     *    lattice — a `TileMode.Repeated` shader paints an unbroken,
+     *    uniformly-scaled grid and would be WRONG for all three.
+     *  - UNIFORM scale: one shader local matrix carries a single scale
+     *    pair; the guard is the iOS twin's `abs(sx - sy) < 0.0001`
+     *    (BackgroundURLImage.swift), kept identical so the two platforms
+     *    route the same inputs the same way.
+     */
+    internal fun denseRepeatIsShadeable(
+        repeat: BackgroundRepeatAxes,
+        scaleX: Float,
+        scaleY: Float
+    ): Boolean =
+        repeat.x == AxisRepeat.REPEAT && repeat.y == AxisRepeat.REPEAT &&
+            abs(scaleX - scaleY) < 0.0001f
+
+    /**
      * Apply ONE `background-image: url(...)` layer — the wave-9 mirror of
      * the wave-3 url() MASK fix, in the LIVE background path.
      *
      * data: URIs decode synchronously through [SyncImageDecode] (the
      * shared DataUri → BitmapFactory → LRU pipeline) and draw as a tile
      * lattice via the EXISTING [planTilePass]/BackgroundTileMath plans:
-     * tile size per css-backgrounds-3 §3.9 (auto = the image's natural
+     * tile size per css-backgrounds-3 §2.9 (auto = the image's natural
      * px), anchor per §3.6 background-position (free-space × fraction +
      * px offset — including the new shorthand parse), lattice per §3.7
      * background-repeat (default `repeat`, both axes), clipped to the
@@ -665,10 +776,53 @@ object ColorApplier {
             // Empty origin list = degenerate plan (nothing to draw).
             if (pass.origins.isEmpty()) return@drawBehind
             // Runaway-lattice guard (mirrors the gradient path's 4096 cap
-            // and iOS's tileCap): past the cap draw ONE anchored tile —
-            // bounded work, visibly wrong in a debuggable way, never a
-            // multi-second per-frame stall.
+            // and iOS's tileCap). Past the cap there are two outcomes, and
+            // wave-49 lane A3 added the FIRST of them — the missing twin of
+            // iOS's `.tiledImage` shading branch (BackgroundURLImage.swift).
             if (pass.origins.size > 4096) {
+                // A dense PLAIN-repeat lattice at uniform scale is exactly
+                // what a repeating shader draws — an infinite grid with no
+                // gaps and no per-tile rescale — so the cap need not bite at
+                // all: one shader-filled rect replaces N drawImage calls and
+                // paints the SAME picture, at bounded cost.
+                //
+                // MEASURED: the corpus's smallest raster is
+                // css-images/support/1x1-green.png (1×1) over a 200×200 box
+                // = 40,000 origins. The old degrade below painted ONE 1×1
+                // green pixel and left the rest of the box showing the
+                // `background-color: red` WPT css-image-fallbacks-and-
+                // annotations forbids — while iOS, which has had this
+                // branch since wave 8, tiled it correctly. A pure
+                // twin-divergence, and the reason Android could not have
+                // reached green even with the candidate walk in place.
+                val sx = tile.width / image.width.toFloat()
+                val sy = tile.height / image.height.toFloat()
+                if (denseRepeatIsShadeable(layerRepeat, sx, sy)) {
+                    // TileMode.Repeated on BOTH axes = §3.7 `repeat repeat`.
+                    // The local matrix carries the §3.9 scale and the §3.6
+                    // anchor phase, which is what makes the shader's tile
+                    // grid land where the enumerated origins would have.
+                    val shader = ImageShader(image, TileMode.Repeated, TileMode.Repeated)
+                    shader.setLocalMatrix(android.graphics.Matrix().apply {
+                        setScale(sx, sy)
+                        postTranslate(anchor.x, anchor.y)
+                    })
+                    // §2.2 painting area: `pass.clip` IS the border box (the
+                    // planner's `clip = box`), so the shader's infinite grid
+                    // is bounded by exactly the rectangle the clipRect below
+                    // bounds the enumerated lattice with — one shared bound,
+                    // not two that can drift.
+                    drawRect(brush = ShaderBrush(shader), size = pass.clip)
+                    return@drawBehind
+                }
+                // Anything else past the cap (space/round gaps, per-axis
+                // repeat, non-uniform explicit sizes) is NOT an infinite
+                // grid, so a repeating shader would paint the wrong picture.
+                // Keep the pre-existing degrade: ONE anchored tile — bounded
+                // work, visibly wrong in a debuggable way, never a
+                // multi-second per-frame stall. iOS truncates its lattice at
+                // the cap instead; both are documented approximations of the
+                // same pathological input, and neither has a corpus carrier.
                 drawImage(
                     image = image,
                     dstOffset = IntOffset(anchor.x.roundToInt(), anchor.y.roundToInt()),
@@ -700,7 +854,7 @@ object ColorApplier {
     }
 
     /**
-     * css-backgrounds-3 §3.9 concrete-size resolution for a RASTER image
+     * css-backgrounds-3 §2.9 concrete-size resolution for a RASTER image
      * layer (a tile WITH intrinsic dimensions — unlike gradients):
      *   auto            → the natural size (imageW × imageH)
      *   cover / contain → uniform scale by the max/min box-to-image ratio
@@ -752,7 +906,7 @@ object ColorApplier {
     }
 
     /**
-     * css-backgrounds-3 §3.6 first-tile anchor: percent positions place
+     * css-backgrounds-3 §2.6 first-tile anchor: percent positions place
      * the tile at fraction × (box − tile) FREE space — so 100%/100%
      * (`right bottom`) end-aligns the tile — plus any absolute px offset.
      * Deliberately UNCLAMPED: negative free space (tile larger than box)
@@ -799,7 +953,7 @@ object ColorApplier {
         // (which never excluded repeating flavours).
         // Explicit dimensions move the tile away from the box. The other
         // size flavors (auto/cover/contain) all resolve to the box for an
-        // intrinsic-less gradient (css-backgrounds-3 §3.9) — exactly what
+        // intrinsic-less gradient (css-backgrounds-3 §2.9) — exactly what
         // the full-box fill already paints, so they don't route alone.
         if (layerSize is BackgroundSizeConfig.Dimensions) return true
         // Non-default position: a percent/px offset shifts even a
@@ -858,7 +1012,7 @@ object ColorApplier {
         val planX = BackgroundTileMath.axisPlan(box.width, tileW, anchorX, repeat.x)
         val planY = BackgroundTileMath.axisPlan(box.height, tileH, anchorY, repeat.y)
         // Cartesian product: every X origin pairs with every Y origin
-        // (background tiling is a rectangular grid, css-backgrounds-3 §3.7).
+        // (background tiling is a rectangular grid, css-backgrounds-3 §2.4).
         // Origin and drawn extent are built together so index i of both
         // lists describes the same tile — the drawn extent is the axis
         // plan's [start, end) segment, NOT the uniform tileSize (round /
@@ -904,7 +1058,8 @@ object ColorApplier {
     /**
      * The paintable stop list for a gradient — wave-36 lane M8.
      *
-     * css-images-3 §3.4.4 (and §3.4.1's "premultiplied ramp") define the
+     * css-images-3 §3.4.2 ("Coloring the Gradient Line" — premultiplied RGBA
+     * space, plus the before-first / after-last stop colour) defines the
      * degenerate ONE-stop gradient: `linear-gradient(green)`,
      * `linear-gradient(to right, green 90%)` and
      * `repeating-linear-gradient(green 50px)` all paint the gradient box
@@ -967,7 +1122,7 @@ object ColorApplier {
      * - Compose: Uses start/end offsets
      *
      * NOTE: background-position is deliberately NOT a parameter. Per
-     * css-backgrounds-3 §3.6 position places the background-image TILE
+     * css-backgrounds-3 §2.6 position places the background-image TILE
      * inside the box; it never shifts the gradient geometry INSIDE its
      * own tile (css-images-4 §3.4.1 centres the gradient line on the
      * gradient box unconditionally). The previous posX·w / posY·h centre
@@ -1164,7 +1319,7 @@ object ColorApplier {
                 val rMax = kotlin.math.max(rx.coerceAtLeast(1e-3f), ry.coerceAtLeast(1e-3f))
                 val (sx, sy) = radialAxisScale(rx, ry)
                 // Wave 47: the radial gradient LINE runs from the centre
-                // to the ending shape (css-images-3 §3.5) — rMax is the
+                // to the ending shape (css-images-3 §3.2) — rMax is the
                 // px length a <length> stop divides by. The resolver also
                 // materialises `repeating-radial-gradient` copies across
                 // [0, rMax] (beyond rMax Skia's clamp holds the loc-1

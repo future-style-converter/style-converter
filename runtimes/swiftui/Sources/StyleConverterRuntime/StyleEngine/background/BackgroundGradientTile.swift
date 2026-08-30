@@ -8,7 +8,7 @@
 //  from BackgroundImageGeometry — the SAME placement math url() raster
 //  layers use — filling each tile rect with a GraphicsContext.Shading
 //  gradient whose endpoints are computed against the TILE size and
-//  translated per rect (css-backgrounds-3 §3.6/§3.7: the image is sized
+//  translated per rect (css-backgrounds-3 §2.6/§2.4: the image is sized
 //  and positioned first, then tiled; each copy is a full gradient).
 //
 //  Colour fidelity: stops go through GradientApplier.toGradient — the
@@ -122,12 +122,15 @@ struct BackgroundGradientTileView: View {
                 context.fill(Path(rect), with: .color(
                     Color(red: r, green: g, blue: b, opacity: a)))
             }
-        case .none, .url, .crossFade:
+        case .none, .url, .crossFade, .imageNotation:
             // Unreachable: BackgroundImageApplier routes url() to the
-            // raster path, never geometry-routes `none`, and renders
+            // raster path, never geometry-routes `none`, renders
             // cross-fade() through GradientApplier's compositor (the
-            // multi-image additive stack has no single-tile fill). Leave
-            // a breadcrumb rather than fall through silently.
+            // multi-image additive stack has no single-tile fill), and
+            // resolves image() to its §2.1 winner BEFORE any geometry
+            // routing (wave-49 lane A3), so a raw `.imageNotation` can
+            // never reach a tile fill either. Leave a breadcrumb rather
+            // than fall through silently.
             PropertyTracker.logOnce(
                 key: "bg-gradient-tile-kind",
                 message: "BackgroundImageApplier received a non-gradient layer — painting nothing (applier routing bug)")
@@ -164,7 +167,7 @@ struct BackgroundGradientTileView: View {
     }
 
     /// Radial fill. `circle` uses the half-diagonal (≈ the CSS
-    /// `farthest-corner` default, css-images-3 §3.5) exactly like
+    /// `farthest-corner` default, css-images-3 §3.2) exactly like
     /// GradientApplier.radial; the default `ellipse` mirrors that view
     /// path's render-circular-then-squash trick with Canvas transforms.
     private func fillRadial(_ rect: CGRect, shaderSize: CGSize, in context: GraphicsContext,
@@ -207,7 +210,7 @@ struct BackgroundGradientTileView: View {
             c.scaleBy(x: w / m, y: h / m)
             // Centre in the pre-scale square: UnitPoint(cx, cy) of an
             // m×m frame measured from its midpoint. endRadius carries
-            // the √2 farthest-CORNER factor (css-images-3 §3.5 — see
+            // the √2 farthest-CORNER factor (css-images-3 §3.2 — see
             // GradientApplier.ellipseEndRadius): after the (w/m, h/m)
             // squash the ellipse radii land on (√2·w/2, √2·h/2), exactly
             // the view path / Compose / Chromium geometry; the old m/2

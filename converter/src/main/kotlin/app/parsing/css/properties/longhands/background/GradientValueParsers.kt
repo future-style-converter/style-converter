@@ -90,7 +90,7 @@ internal object GradientValueParsers {
     }
 
     // `at <position>` for radial + conic gradients. Each axis is a full
-    // <length-percentage> per css-images-3 §3.5 / css-values-4 §5.4:
+    // <length-percentage> per css-images-3 §3.2 / css-values-4 §5.4:
     //   keywords  → their percentage equivalents (left=0%, center=50%, …)
     //   <percent> → Percentage (legacy raw-number wire form)
     //   <length>  → Length: absolute units normalize to px; runtime-
@@ -169,7 +169,7 @@ internal object GradientValueParsers {
     }
 
     // The <rectangular-color-space> / <polar-color-space> idents a
-    // <color-interpolation-method> may name (css-color-4 §12.1) — the
+    // <color-interpolation-method> may name (css-color-4 §13.2) — the
     // closed keyword set guards stripInterpolationMethod against eating
     // an `in` that is NOT an interpolation method.
     private val INTERPOLATION_COLORSPACES = setOf(
@@ -190,11 +190,11 @@ internal object GradientValueParsers {
     // measured alongside `a98-rgb-linear` / `prophoto-rgb-linear` /
     // `rec2020-linear` / `rec2100-*`, which it REJECTS and which are
     // therefore deliberately absent here.
-    // The four <hue-interpolation-method> heads (css-color-4 §12.4);
+    // The four <hue-interpolation-method> heads (css-color-4 §13.5);
     // each must be followed by the literal `hue` to form the production.
     private val HUE_METHODS = setOf("shorter", "longer", "increasing", "decreasing")
 
-    // css-images-4 §3.1 / §3.4.4: every gradient's syntax prefix may carry
+    // css-images-4 §3.1 / §3.3.1: every gradient's syntax prefix may carry
     // a <color-interpolation-method> — `in <colorspace> [<hue-method> hue]?`
     // — in ANY order relative to the angle/direction (`||` combinator).
     // The IR has no interpolation-method field (all engines interpolate in
@@ -266,11 +266,26 @@ internal object GradientValueParsers {
 
     /**
      * Convert "to right", "to bottom", etc. to the equivalent angle
-     * (css-images-3 §3.1 corner/side keywords; corners use the 45°
-     * simplification this converter has always applied).
+     * (`<side-or-corner> = [left | right] || [top | bottom]`, css-images-4
+     * §3.1; corners use the 45° simplification this converter has always
+     * applied).
+     *
+     * wave-49 (skeptic S4): the lookup used to run against the RAW string, so
+     * any legal spelling with more than one whitespace character between the
+     * tokens — `to  right`, `to\tright`, `to  right top` — missed the table
+     * and returned null. That is not a CSS distinction: css-syntax-3 §4.3.1
+     * ("Consume a token") consumes a whole run of whitespace as ONE
+     * `<whitespace-token>`, and the capture browser (Chrome 151) computes
+     * `linear-gradient(to  right, red, blue)` to `to right`. The miss cost
+     * the direction twice over — the gradient silently rendered
+     * top-to-bottom, and after wave-49 lane A1 the layer was adjudicated
+     * INVALID and the declaration deleted. So: tokenize first (paren-aware,
+     * so nothing inside a function argument list can be split), then match
+     * the canonical single-space spelling.
      */
     internal fun directionToAngle(direction: String): IRAngle? {
-        return when (direction.lowercase()) {
+        val normalized = TokenizationUtils.tokenizeByWhitespace(direction).joinToString(" ")
+        return when (normalized.lowercase()) {
             "to top" -> IRAngle.fromDegrees(0.0)
             "to top right", "to right top" -> IRAngle.fromDegrees(45.0)
             "to right" -> IRAngle.fromDegrees(90.0)

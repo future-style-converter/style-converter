@@ -221,16 +221,49 @@ class TransformListComposerTest {
     }
 
     @Test
-    fun `3D-bearing list stays on the legacy path`() {
-        // Verbatim corpus payload (wave48-cal css-transforms
-        // css-rotate-2d-3d-001 component __2): rotate3d(1,0,0,60deg)
-        // extracts to RotateX -> has3DTransform -> ineligible. This is the
-        // ONLY multi-function list in the whole 30-section corpus, and it
-        // must not change paths.
+    fun `depth-bearing list stays on the legacy path`() {
+        // Verbatim corpus payload (wave48-final css-transforms
+        // 3d-rendering-context-and-abspos, component __1__0__0): a
+        // translateZ carries real depth the 2D composer cannot represent,
+        // so it must keep the legacy depth-scale route.
+        val cfg = config(
+            "Transform" to """{"type":"functions","list":[{"fn":"translateZ","z":{"px":20}}]}""",
+        )
+        assertNull(TransformListComposer.stepsFor(cfg))
+    }
+
+    @Test
+    fun `orthographic 3D-bearing list now composes in declared order`() {
+        // Verbatim corpus payload (wave48-final css-transforms
+        // css-rotate-2d-3d-001 component __2). WAVE 49 (lane A6) changed
+        // this deliberately: rotate3d(1,0,0,60deg) has NO perspective and
+        // no depth, so css-transforms-2 §4.1 flattens it EXACTLY to
+        // scaleY(cos 60°) = scaleY(0.5) and the ordered composer can own
+        // it. This is still the only multi-function 3D list in the
+        // 30-section corpus.
+        //
+        // The route changed; the MATRIX did not. The legacy accumulator
+        // fed graphicsLayer rotationZ = 90 with scaleY = 0.5, and
+        // graphicsLayer composes scale innermost, i.e. R(90)·S(1, 0.5) —
+        // exactly the product the composer builds for this order. Asserted
+        // below so the swap is proven delta-free rather than assumed.
         val cfg = config(
             "Transform" to """{"type":"functions","list":[{"fn":"rotate","a":{"deg":90}},{"fn":"rotate3d","x":1,"y":0,"z":0,"a":{"deg":60}}]}""",
         )
-        assertNull(TransformListComposer.stepsFor(cfg))
+        val steps = TransformListComposer.stepsFor(cfg)
+        assertNotNull("orthographic 3D list must reach the ordered composer", steps)
+        val m = TransformListComposer.linearOf(steps!!)
+        // R(90)·diag(1, 0.5): (1,0) -> (0,1) and (0,1) -> (-0.5,0).
+        assertEquals(0f, m.a, 1e-4f)
+        assertEquals(1f, m.b, 1e-4f)
+        assertEquals(-0.5f, m.c, 1e-4f)
+        assertEquals(0f, m.d, 1e-4f)
+        // The test box is 100x200 and the frozen ref a 100x100 SQUARE:
+        // half-extents (50,100) map to a half-diagonal of (50,50).
+        val (hx, hy) = map(m, 50f, 100f)
+        assertEquals(50f, kotlin.math.abs(hx), 1e-3f)
+        assertEquals(50f, kotlin.math.abs(hy), 1e-3f)
+        assertEquals(2, steps.size)
     }
 
     // ------------------------------------------------------------------

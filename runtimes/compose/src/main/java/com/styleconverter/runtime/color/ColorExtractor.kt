@@ -79,7 +79,17 @@ object ColorExtractor {
 
         properties.forEach { (type, data) ->
             when (type) {
-                "BackgroundColor" -> backgroundColor = ValueExtractors.extractColor(data)
+                // css-color-4 §6.4: `background-color: currentcolor` resolves
+                // to THIS element's computed `color`. The static decoder
+                // returns null for the keyword (it has no element context), so
+                // route through CurrentColorBackground, which delegates every
+                // statically-decodable payload straight back to
+                // ValueExtractors.extractColor — only the previously-null
+                // keyword case changes. `properties` is the MERGED list
+                // (own declarations over the inherited channel), which is what
+                // "the same element's computed color" means after the cascade.
+                "BackgroundColor" -> backgroundColor =
+                    CurrentColorBackground.resolve(data, properties)
                 "Opacity" -> opacity = extractOpacity(data)
                 // Font context threads through for lh/em gradient centers
                 // (`at 1lh 50px`) — font metrics live HERE, on the
@@ -143,7 +153,7 @@ object ColorExtractor {
         }
 
         // Resolve `background-clip: padding-box | content-box` into edge
-        // insets from the border-box (css-backgrounds-3 §3.11):
+        // insets from the border-box (css-backgrounds-3 §2.7):
         //   padding-box → inset by the computed border widths;
         //   content-box → border widths + padding.
         // The web reference paints exactly this: Background_BoxModel's
@@ -283,7 +293,7 @@ object ColorExtractor {
             if (element is JsonPrimitive) {
                 val s = element.contentOrNull ?: return@run null
                 // `none` as a bare keyword = an image layer that draws
-                // nothing (css-backgrounds-3 §3.1).
+                // nothing (css-backgrounds-3 §2.3).
                 return@run if (s.equals("none", ignoreCase = true)) {
                     BackgroundImageConfig.None
                 } else {
@@ -315,32 +325,46 @@ object ColorExtractor {
                 // fixture). extractColor reads `srgb` either way.
                 "color" -> ValueExtractors.extractColor(obj["color"] ?: obj)
                     ?.let { BackgroundImageConfig.SolidColor(it) }
-                // image() notation (wave-48 lane W5, css-images-4 §2.1).
+                // image() notation (wave-48 lane W5, css-images-4 §2.5;
+                // candidate walk wave-49 lane A3).
                 // Wire (BackgroundImageSerializer.kt): {"type":"image",
                 // "srcs":[<IRUrl>…], "color":{…IRColor…}?} — candidate
                 // sources in author try-order plus an optional fallback
-                // colour. §2.1: the first source that loads paints; if none
-                // can be displayed, the colour paints. This extractor cannot
-                // probe loadability, so the FALLBACK COLOUR wins whenever it
-                // is present (in the corpus values that carry one — WPT
-                // css-image-fallbacks-and-annotations — 001 pairs it with a
-                // deliberately missing source, 005 declares the colour
-                // alone: in both cases the colour IS the §2.1 outcome);
-                // with no colour the first source rides the existing Url
-                // pipeline (002's support/1x1-green.png). An UNPARSEABLE
-                // colour (extractColor → null) falls through the `?:` to
-                // srcs too — the iOS twin mirrors this exact rule (wave-48
-                // F3; before that it painted clear on the same wire).
-                // A loadable-src-plus-colour value would mis-paint the
-                // colour — no corpus test has one; noted, not silent.
-                "image" -> obj["color"]
-                    ?.let { c -> ValueExtractors.extractColor(c)?.let { BackgroundImageConfig.SolidColor(it) } }
-                    ?: (obj["srcs"] as? JsonArray)?.firstOrNull()?.let { first ->
-                        // IRUrl wire: bare string, or {url, data:true} for data URIs.
-                        val u = (first as? JsonPrimitive)?.contentOrNull
-                            ?: (first as? JsonObject)?.get("url")?.jsonPrimitive?.contentOrNull
-                        u?.let { BackgroundImageConfig.Url(it) }
+                // colour. §2.1: the FIRST source that can be displayed
+                // paints; only if none can does the colour paint.
+                //
+                // Both halves of that rule now survive to the paint path.
+                // This arm used to COLLAPSE the value here — colour if
+                // present, else Url(srcs[0]) — which threw candidates 2..n
+                // away and made WPT css-image-fallbacks-and-annotations
+                // 003/004 unwinnable (their first candidate `1x1-green.svg`
+                // does not exist beside the test, so the only paintable
+                // sources were the ones being discarded). The ordering
+                // decision belongs to ColorApplier, which is the only place
+                // that can attempt a decode; see ImageCandidateChain for why
+                // that is a MOVE of the wave-48 precedence note rather than
+                // a reversal of it.
+                //
+                // An UNPARSEABLE colour (extractColor → null) yields a null
+                // fallbackColor and leaves the sources intact — the same
+                // "garbage colour must not eat the srcs" rule wave-48 F3
+                // aligned the twins on, now expressed as an absent fallback.
+                "image" -> {
+                    // IRUrl wire per candidate: bare string, or {url,
+                    // data:true} for data URIs. A candidate in neither shape
+                    // is a malformed wire entry — dropped from the list, not
+                    // silently promoted to a paintable src.
+                    val srcs = (obj["srcs"] as? JsonArray).orEmpty().mapNotNull { entry ->
+                        (entry as? JsonPrimitive)?.contentOrNull
+                            ?: (entry as? JsonObject)?.get("url")?.jsonPrimitive?.contentOrNull
                     }
+                    val fallback = obj["color"]?.let { ValueExtractors.extractColor(it) }
+                    // Nothing paintable at all (`image()` with neither srcs
+                    // nor a usable colour) → null, so the caller's mapNotNull
+                    // drops the layer instead of emitting a phantom clear one.
+                    if (srcs.isEmpty() && fallback == null) null
+                    else BackgroundImageConfig.ImageNotation(srcs, fallback)
+                }
                 // Untagged object carrying a "url" key — the data-URI layer
                 // shape above (the "data": true flag just records that the
                 // converter recognised the scheme; the url string is
@@ -496,7 +520,7 @@ object ColorExtractor {
      *     back to CENTER with the fallthrough documented here — they
      *     cannot be resolved without a viewport, and the CSS default
      *     center is the least-wrong visible answer.
-     * Absent axis → CENTER (the CSS `at` default, css-images-3 §3.5).
+     * Absent axis → CENTER (the CSS `at` default, css-images-3 §3.2).
      */
     internal fun extractGradientCoord(el: JsonElement?, fontCtx: FontContext): GradientCoord {
         if (el == null) return GradientCoord.CENTER
@@ -518,7 +542,7 @@ object ColorExtractor {
                 // context here we use the CSS-initial 16px × 1.2 — the
                 // same lockstep ratio SpacingResolve applies.
                 "RLH" -> GradientCoord.px(v * 19.2f)
-                // em/rem — font-relative (css-values-4 §5.2).
+                // em/rem — font-relative (css-values-4 §6.1.1).
                 "EM" -> GradientCoord.px(v * fontCtx.fontSizePx)
                 "REM" -> GradientCoord.px(v * 16f)
                 // Viewport/other units need context this engine doesn't
@@ -665,7 +689,7 @@ object ColorExtractor {
                         else -> BackgroundPositionConfig(fraction, fraction)
                     }
                 }
-                // Absolute px position (css-backgrounds-3 §3.6: a <length>
+                // Absolute px position (css-backgrounds-3 §2.6: a <length>
                 // offsets the tile edge from the box edge, independent of
                 // the box size). Carried as a Dp offset with fraction 0 —
                 // ColorApplier adds `xOffset/yOffset` to the free-space ×
@@ -725,7 +749,7 @@ object ColorExtractor {
             }
             "keyword" -> {
                 // One-keyword form: the named axis takes the keyword, the
-                // OTHER axis defaults to center (css-backgrounds-3 §3.6).
+                // OTHER axis defaults to center (css-backgrounds-3 §2.6).
                 when (obj["keyword"]?.jsonPrimitive?.contentOrNull?.lowercase()) {
                     "top" -> BackgroundPositionConfig(0.5f, 0f)
                     "bottom" -> BackgroundPositionConfig(0.5f, 1f)

@@ -81,7 +81,7 @@ object TransformListComposer {
     fun scale(sx: Float, sy: Float): Affine2D = Affine2D(sx, 0f, 0f, sy, 0f, 0f)
 
     /**
-     * Conjugate by transform-origin — css-transforms-1 §8: the full
+     * Conjugate by transform-origin — css-transforms-1 §2: the full
      * transform is translate(origin) · M · translate(-origin). The linear
      * part is untouched; only the translation moves, which is why the
      * graphicsLayer route can decompose the linear part BEFORE the origin
@@ -103,6 +103,52 @@ object TransformListComposer {
         data class Rotate(val deg: Float) : Step
         /** axis scale (uniform scale arrives with sx == sy). */
         data class Scale(val sx: Float, val sy: Float) : Step
+    }
+
+    /**
+     * True when the ONLY thing making [TransformConfig.has3DTransform]
+     * true is a set of function-list rotateX/rotateY members that
+     * css-transforms-2 §4.1 flattens EXACTLY to 2D scales.
+     *
+     * Every clause is a refusal with a reason:
+     * - a `perspective` property or `perspective()` function puts a real
+     *   m34 in the matrix, so the projection is projective, not parallel
+     *   (css-transforms-2 §8) — the legacy camera path owns that;
+     * - translateZ / scaleZ / a z-bearing translate3d or scale3d carries
+     *   depth the 2D composer cannot represent;
+     * - the STANDALONE `rotate` longhand's axis-angle X/Y forms
+     *   (config.rotateX / config.rotateY) are refused because css-transforms-2 §5 fixes
+     *   their slot in the translate·rotate·scale order and splitting one
+     *   axis-angle rotation across a Rotate step and a Scale step would
+     *   need an ordering decision this composer has no spec text for;
+     * - two axes at once leaves a sin·sin shear that no pair of Scale
+     *   steps carries (OrthographicFlatten.shearResidual).
+     */
+    fun isOrthographicRotationOnly(config: TransformConfig): Boolean {
+        // Perspective in any form → projective, not parallel.
+        if (config.perspective != null) return false
+        if (config.functions.any { it is TransformFunction.Perspective }) return false
+        // Depth in any form → the depth-scale path owns it.
+        if (config.translateZ != null || config.scaleZ != null) return false
+        if (config.functions.any {
+                it is TransformFunction.TranslateZ ||
+                    it is TransformFunction.ScaleZ ||
+                    (it is TransformFunction.Translate && it.z.value != 0f) ||
+                    (it is TransformFunction.Scale && it.z != 1f)
+            }
+        ) {
+            return false
+        }
+        // Standalone axis-angle rotations stay on the legacy route.
+        if (config.rotateX != null || config.rotateY != null) return false
+        // Sum the list's X and Y rotations; a shear residue disqualifies.
+        var rotX = 0f
+        var rotY = 0f
+        for (fn in config.functions) {
+            if (fn is TransformFunction.RotateX) rotX += fn.degrees
+            if (fn is TransformFunction.RotateY) rotY += fn.degrees
+        }
+        return OrthographicFlatten.shearResidual(rotX, rotY) == 0f
     }
 
     /**
@@ -131,7 +177,13 @@ object TransformListComposer {
         // as a plain RotateZ(θ) and rides the ordered path as a Z
         // rotation (an approximation of the true diagonal-axis rotation,
         // inherited — not introduced — by this composer).
-        if (config.has3DTransform) return null
+        // WAVE 49 refinement. `has3DTransform` is still the gate, but a
+        // rotateX/rotateY in the FUNCTION LIST no longer forces the legacy
+        // route when the projection is orthographic: css-transforms-2 §4.1
+        // flattens such a rotation to an exact cos scale (OrthographicFlatten),
+        // and a scale is something this composer already orders correctly.
+        // Everything genuinely projective or depth-bearing still bails.
+        if (config.has3DTransform && !isOrthographicRotationOnly(config)) return null
 
         val steps = mutableListOf<Step>()
 
@@ -160,7 +212,7 @@ object TransformListComposer {
         if (sx != 1f || sy != 1f) steps += Step.Scale(sx, sy)
         val standaloneCount = steps.size                   // for the churn guard below
 
-        // The `transform` function list, in declared order (§11).
+        // The `transform` function list, in declared order (css-transforms-1 §8).
         for (fn in config.functions) {
             when (fn) {
                 // z components are guaranteed 0/1 here by the 3D gate.
@@ -169,6 +221,19 @@ object TransformListComposer {
                 is TransformFunction.TranslateY -> steps += Step.Translate(0f, fn.y.value, 0f, 0f)
                 is TransformFunction.Rotate -> steps += Step.Rotate(fn.degrees)
                 is TransformFunction.RotateZ -> steps += Step.Rotate(fn.degrees)
+                // css-transforms-2 §4.1, orthographic flattening: with no
+                // perspective in the accumulation (guaranteed by
+                // isOrthographicRotationOnly above) rotateY(θ) IS
+                // scaleX(cos θ) and rotateX(θ) IS scaleY(cos θ) — exact,
+                // not an approximation. Admitting them as Scale steps is
+                // what lets `rotateX(60deg) rotate(90deg)` and
+                // `rotate(90deg) rotateX(60deg)` compose to the two
+                // DIFFERENT matrices css-transforms-1 §8 says they are; the legacy
+                // accumulator collapsed both to the same one.
+                is TransformFunction.RotateX ->
+                    steps += Step.Scale(1f, OrthographicFlatten.of(fn.degrees, 0f).scaleY)
+                is TransformFunction.RotateY ->
+                    steps += Step.Scale(OrthographicFlatten.of(0f, fn.degrees).scaleX, 1f)
                 is TransformFunction.Scale -> steps += Step.Scale(fn.x, fn.y)
                 is TransformFunction.ScaleX -> steps += Step.Scale(fn.x, 1f)
                 is TransformFunction.ScaleY -> steps += Step.Scale(1f, fn.y)

@@ -12,7 +12,7 @@
 import Foundation
 import SwiftUI
 
-// One gradient-center axis (`at <position>`, css-images-3 §3.5 /
+// One gradient-center axis (`at <position>`, css-images-3 §3.2 /
 // css-images-4 §3.4.4). CSS allows a full <length-percentage> per axis;
 // the IR wire carries percents as raw numbers and lengths as objects
 // (IRLengthPercentageSerializer). The extractor resolves runtime-dependent
@@ -77,6 +77,10 @@ enum BackgroundImageLayer: Equatable {
             return lk == rk && la == ra && ls == rs
         // <color>-as-image (cross-fade argument, css-images-4 §2.6.2).
         case let (.color(a), .color(b)): return a == b
+        // image() held unresolved (§2.1) — candidate ORDER is semantic, so
+        // the arrays compare element-wise, not as sets.
+        case let (.imageNotation(ls, lf), .imageNotation(rs, rf)):
+            return ls == rs && lf == rf
         // cross-fade() — arg lists compare element-wise.
         case let (.crossFade(a), .crossFade(b)): return a == b
         default: return false
@@ -114,6 +118,28 @@ enum BackgroundImageLayer: Equatable {
     // SUM of the argument images — the applier composites via opacity ×
     // .plusLighter inside a compositing group (see GradientApplier).
     case crossFade([CrossFadeArg])
+    // image() notation (css-images-4 §2.5 / the css-images-3 candidate-list
+    // form) held UNRESOLVED — wave-49 lane A3.
+    //
+    // §2.1's value is not one source: it is an ORDERED CANDIDATE LIST plus an
+    // optional <color>, and the UA paints the first candidate it can display,
+    // falling back to the colour only when every candidate fails. Which
+    // candidate that is cannot be known by an extractor — it depends on a
+    // decode the paint path performs — so the whole value travels intact and
+    // the appliers resolve it through ImageCandidateChain at render time.
+    //
+    // Before this case the extractor collapsed the value immediately: colour
+    // if present, else .url(srcs[0]). That threw candidates 2..n away, which
+    // is why WPT css-image-fallbacks-and-annotations 003/004 — whose first
+    // candidate `1x1-green.svg` does not exist beside the test — could only
+    // ever paint the forbidden `background-color: red` (wave-48 gate: iOS
+    // 0.9990 colorFailed).
+    //
+    // `srcs` may be EMPTY: image(<color>) is a valid solid-colour image.
+    // `fallback` is nil when the author wrote no colour, or wrote one this
+    // runtime cannot resolve (the wave-48 F3 "garbage colour must not eat the
+    // srcs" rule, now expressed as an absent fallback).
+    case imageNotation(srcs: [String], fallback: ColorValue?)
 
     enum RepeatingKind: Equatable { case linear, radial, conic }
 }

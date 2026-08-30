@@ -29,8 +29,33 @@ enum PositionExtractor {
         var rect = agg.inset ?? InsetRect()
         var logical = LogicalInsets()
         var touched = false
+        // Wave 49 (lane A7) — percentage magnitudes are collected ALONGSIDE
+        // the point slots, never instead of them: `extractPx` keeps its
+        // pre-wave-49 reading (the bare percentage number taken as points)
+        // so anything that cannot see a containing block is untouched, and
+        // PositionApplier upgrades them where the environment is readable.
+        // See PercentInsetResolve.swift for the CSS citation and the guard.
+        var pct = agg.percentInsets ?? InsetPercents()
 
         for prop in properties {
+            // Record the percentage first. `percentOf` answers nil for every
+            // non-percentage wire shape, so this is a no-op for the
+            // `{"px":N}` insets that make up the whole corpus bar 7 tests.
+            if let p = PercentInsetResolve.percentOf(prop.data) {
+                switch prop.type {
+                case "Top": pct.top = p
+                case "Right": pct.right = p
+                case "Bottom": pct.bottom = p
+                case "Left": pct.left = p
+                case "InsetBlockStart": pct.blockStart = p
+                case "InsetBlockEnd": pct.blockEnd = p
+                case "InsetInlineStart": pct.inlineStart = p
+                case "InsetInlineEnd": pct.inlineEnd = p
+                // ZIndex shares the bare-number wire but is not an inset —
+                // it must never enter the percentage channel.
+                default: break
+                }
+            }
             switch prop.type {
             case "Position":
                 if let pos = parsePosition(prop.data) {
@@ -85,6 +110,11 @@ enum PositionExtractor {
         if rect != InsetRect() {
             agg.inset = rect
         }
+        // Attach the percentage side-channel only when something really was
+        // a percentage: nil keeps LayoutAggregate's Equatable value (and
+        // therefore every existing test's expected aggregate) unchanged for
+        // the px-only corpus.
+        if pct.any { agg.percentInsets = pct }
         if touched { agg.touched = true }
     }
 

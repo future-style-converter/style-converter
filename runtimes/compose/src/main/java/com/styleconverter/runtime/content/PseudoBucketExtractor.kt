@@ -59,8 +59,21 @@ object PseudoBucketExtractor {
         // marker string rides `meta.markerText` into RenderListItemMarker
         // (wave-27 lane CBAKE), so the marker bucket is that channel's
         // source metadata, not a second render instruction.
-        val before = pseudoElementConfig(pseudos["before"] as? JsonObject, "before")
-        val after = pseudoElementConfig(pseudos["after"] as? JsonObject, "after")
+        // Wave-49 lane A2 — a bucket that generates a BLOCK-LEVEL BOX is
+        // owned by PseudoBoxFold, which splices it in as a real child
+        // component (CSS 2.1 §12.1: the generated box lives INSIDE the
+        // originating element). Rendering it here as well would paint the
+        // same content twice, once inside the host box and once beside it —
+        // so the two consumers read the SAME claim function rather than
+        // each deciding for itself. Null claim = this path is unchanged,
+        // which is every pre-wave-49 bucket (the corpus census counts one
+        // block-level generated box: css-pseudo/before-as-flex-container).
+        val before = (pseudos["before"] as? JsonObject)
+            ?.takeIf { PseudoGeneratedBox.claim(it, "before", role) == null }
+            .let { pseudoElementConfig(it, "before") }
+        val after = (pseudos["after"] as? JsonObject)
+            ?.takeIf { PseudoGeneratedBox.claim(it, "after", role) == null }
+            .let { pseudoElementConfig(it, "after") }
         // Neither side produced renderable content → hand the seam back
         // to the legacy channel rather than an inert wrapper.
         if (before == null && after == null) return null
@@ -99,7 +112,7 @@ object PseudoBucketExtractor {
         // css-display-3 §2: the pseudo box is inline unless declared
         // block-level. Baked buckets rarely carry `display`; default inline.
         var isInline = true
-        // css-display-3 §2.4: `display: none` generates NO boxes at all —
+        // css-display-3 §2.5: `display: none` generates NO boxes at all —
         // the element AND its pseudo-elements. Tracked separately from the
         // inline/block fold because it suppresses the WHOLE bucket instead
         // of re-stacking it; without it the old `isInline = !isBlockDisplay`
@@ -126,7 +139,7 @@ object PseudoBucketExtractor {
             when (prop.trim().lowercase()) {
                 // Consumed above (baked `_text` wins; literal fallback).
                 "content" -> {}
-                // css-display-3 §2.4 first, then §2: `none` kills the box
+                // css-display-3 §2.5 first, then §2: `none` kills the box
                 // outright, otherwise a block-level pseudo stacks vertically.
                 "display" ->
                     if (isNoneDisplay(value)) suppressed = true
@@ -196,7 +209,7 @@ object PseudoBucketExtractor {
 
     /**
      * Does this `display` value suppress the box entirely (css-display-3
-     * §2.4: `none` generates no boxes, pseudo-elements included)? A token
+     * §2.5: `none` generates no boxes, pseudo-elements included)? A token
      * scan rather than equality — raw declarations reach this bridge
      * unparsed, so `none !important` must match too — and `none` is
      * exclusive in the display grammar (it can never pair with a

@@ -156,42 +156,48 @@ enum BackgroundImageExtractor {
             // either way, so the flattened form passes the object itself.
             return .color(extractColor(o["color"] ?? .object(o)))
         case "image":
-            // image() notation (wave-48 lane W5, css-images-4 §2.1).
+            // image() notation (wave-48 lane W5, css-images-4 §2.5;
+            // candidate walk wave-49 lane A3).
             // Wire (BackgroundImageSerializer.kt): {"type":"image",
             // "srcs":[<IRUrl>…], "color":{…IRColor…}?} — candidate sources
             // in author try-order plus an optional fallback colour. §2.1:
-            // the first source that loads paints; if none can be displayed
-            // the colour paints. Loadability is unknowable here, so the
-            // FALLBACK COLOUR wins when present (in the corpus values that
-            // carry one — WPT css-image-fallbacks-and-annotations — 001
-            // pairs it with a deliberately missing source, 005 declares
-            // the colour alone: in both cases the colour IS the §2.1
-            // outcome); with no colour the first source rides the existing
-            // url pipeline. A loadable-src-plus-colour value would
-            // mis-paint the colour — no corpus test has one; noted, not silent.
+            // the FIRST source that can be displayed paints; only if none
+            // can does the colour paint.
+            //
+            // Both halves of that rule now survive to the paint path. This
+            // case used to COLLAPSE the value here — colour if present, else
+            // .url(srcs[0]) — which threw candidates 2..n away and made WPT
+            // css-image-fallbacks-and-annotations 003/004 unwinnable (their
+            // first candidate `1x1-green.svg` does not exist beside the
+            // test, so the only paintable sources were the ones being
+            // discarded). The ordering decision belongs to
+            // BackgroundImageApplier, the only place that can attempt a
+            // decode; see ImageCandidateChain.swift for why that is a MOVE
+            // of the wave-48 precedence note rather than a reversal of it.
+            //
+            // IRUrl wire per candidate: bare string, or {url, data:true} for
+            // data URIs. A candidate in neither shape is a malformed wire
+            // entry — dropped from the list, not silently promoted.
+            let srcs: [String] = (o["srcs"]?.arrayValue ?? []).compactMap {
+                $0.stringValue ?? $0.objectValue?["url"]?.stringValue
+            }
+            // Wave-48 F3 twin alignment: an UNPARSEABLE colour must not eat
+            // the sources. Kotlin's ValueExtractors.extractColor returns null
+            // on garbage; here the same failure is the `.unknown` sentinel
+            // (ColorValue.swift — "garbage input, never nil"), which becomes
+            // an ABSENT fallback so the candidate walk still runs. Dynamic
+            // colours (currentColor/var()) are NOT unknown — they stay a real
+            // fallback, resolvable against live context by the applier.
+            var fallback: ColorValue? = nil
             if let c = o["color"] {
-                // Wave-48 F3 twin alignment: an UNPARSEABLE colour must not
-                // eat the sources. Kotlin's ValueExtractors.extractColor
-                // returns null on garbage and its `?:` falls through to
-                // srcs; here the same failure is the `.unknown` sentinel
-                // (ColorValue.swift — "garbage input, never nil"), and
-                // returning .color(.unknown) painted CLEAR while Android
-                // painted the first source (S4 defect 2, executed twin
-                // probe: {color:{garbage}} → Swift clear vs Kotlin
-                // Url(x.png)). Dynamic colours (currentColor/var()) are
-                // NOT unknown — they stay on the colour path, where the
-                // applier can still resolve them against live context.
                 let parsed = extractColor(c)
-                if parsed != .unknown { return .color(parsed) }
-                // .unknown falls through to the srcs branch below —
-                // byte-parallel with the Kotlin `?:` fallthrough.
+                if parsed != .unknown { fallback = parsed }
             }
-            if let first = o["srcs"]?.arrayValue?.first {
-                // IRUrl wire: bare string, or {url, data:true} for data URIs.
-                if let s = first.stringValue { return .url(s) }
-                if let u = first.objectValue?["url"]?.stringValue { return .url(u) }
-            }
-            return nil
+            // Nothing paintable at all (`image()` with neither srcs nor a
+            // usable colour) → nil, so compactMap drops the layer instead of
+            // emitting a phantom clear one.
+            if srcs.isEmpty && fallback == nil { return nil }
+            return .imageNotation(srcs: srcs, fallback: fallback)
         default:
             return nil
         }
@@ -225,7 +231,7 @@ enum BackgroundImageExtractor {
     ///     Unsupported units (vw/ch/…) fall back to `.center` with the
     ///     fallthrough documented here — they cannot resolve without a
     ///     viewport, and the CSS default center is the least-wrong answer.
-    /// Absent axis → `.center` (the CSS `at` default, css-images-3 §3.5).
+    /// Absent axis → `.center` (the CSS `at` default, css-images-3 §3.2).
     static func readCoord(_ v: IRValue?, ctx: FontContext) -> GradientCoord {
         guard let v = v else { return .center }
         // Raw number = percent (legacy wire; also the keyword mappings).
@@ -246,7 +252,7 @@ enum BackgroundImageExtractor {
             // here we use the CSS-initial 16px × 1.2 — the same lockstep
             // ratio SpacingResolver applies.
             case "RLH": return .px(val * 19.2)
-            // em/rem — font-relative (css-values-4 §5.2).
+            // em/rem — font-relative (css-values-4 §6.1.1).
             case "EM": return .px(val * ctx.fontSizePx)
             case "REM": return .px(val * 16)
             // Viewport/other units need context this engine doesn't

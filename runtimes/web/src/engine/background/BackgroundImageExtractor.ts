@@ -180,7 +180,7 @@ function stopsToCss(stops: IRStop[]): string {
 // The value is a CLOSED grammar on the producing side (GradientValueParsers'
 // INTERPOLATION_COLORSPACES × HUE_METHODS), but it arrives as wire text, so it
 // is re-validated here rather than trusted into a declaration.
-// css-color-4 §12.4 splits the spaces in two, and the split is LOAD-BEARING:
+// css-color-4 §13.2 splits the spaces in two, and the split is LOAD-BEARING:
 //   <color-interpolation-method> = in [ <rectangular-color-space>
 //                                     | <polar-color-space> <hue-interpolation-method>? ]
 // A hue method on a rectangular space does not parse. Measured on the capture
@@ -322,7 +322,7 @@ function conicGradientCss(obj: Record<string, unknown>, repeating: boolean): str
 const PASSTHROUGH_IMAGE_FNS = [
   'image-set(', '-webkit-image-set(',                                  // css-images-4 §2.4
   'linear-gradient(', 'repeating-linear-gradient(',                    // css-images-3 §3.1
-  'radial-gradient(', 'repeating-radial-gradient(',                    // css-images-3 §3.5
+  'radial-gradient(', 'repeating-radial-gradient(',                    // css-images-3 §3.2
   'conic-gradient(', 'repeating-conic-gradient(',                      // css-images-4 §3.4.4
 ];
 
@@ -378,7 +378,7 @@ export function layerCss(entry: unknown): string | null {
     case 'repeating-conic-gradient':  return conicGradientCss(obj, true);
     case 'cross-fade':                return crossFadeCss(obj);        // css-images-4 §2.6.2 (A-RC2)
     case 'color':                     return colorLayerCss(obj);       // <color> as image (cross-fade arg)
-    case 'image':                     return imageNotationCss(obj);    // image() notation (css-images-4 §2.1)
+    case 'image':                     return imageNotationCss(obj);    // image() notation (css-images-4 §2.5)
     default:                           return null;                    // unknown -> drop
   }
 }
@@ -399,16 +399,30 @@ export function layerCss(entry: unknown): string | null {
 // replaces rather than underlays — no corpus test combines translucent
 // sources with a fallback colour.
 //
-// CROSS-PLATFORM SEAM, stated (wave-48 S6): the NATIVE twins resolve the
-// notation the other way round — fallback-COLOUR-first (Compose
-// color/ColorExtractor.kt `"image"` arm, SwiftUI background/
-// BackgroundImageExtractor.swift `"image"` case), because whether a url
-// will load is unknowable at their extraction time — while web's url stack
-// lets a loadable src win because the browser resolves loading itself. The
-// two answers differ ONLY for image(<loadable-src>, <color>), a
-// combination no corpus test carries; if one ever does, the natives'
-// colour would mis-paint over the loaded source and this seam is where to
-// look first.
+// CROSS-PLATFORM SEAM — CLOSED in wave 49 (lane A3); the note is kept
+// because the seam it describes is the thing this stack has to keep
+// agreeing with. Wave-48 S6 recorded a real divergence: the natives
+// resolved the notation fallback-COLOUR-first, because whether a url would
+// load is unknowable at THEIR EXTRACTION time, while web's url stack let a
+// loadable src win because the browser resolves loading itself. That
+// asymmetry is gone: both natives now keep the whole candidate list on the
+// config (Compose color/ColorConfig.kt `ImageNotation`, SwiftUI
+// background/BackgroundImageConfig.swift `.imageNotation`) and walk it at
+// PAINT time with their real decoder (Compose images/ImageCandidateChain.kt
+// via ColorApplier.resolveImageNotation, SwiftUI images/
+// ImageCandidateChain.swift via BackgroundImageLayer.resolveImageNotation),
+// so all three now implement one rule — css-images-4 §2.5's "first source
+// that can be displayed, else the <color>". The colour-first note was never
+// a spec reading, only a statement about where the decision was taken; the
+// decision MOVED one layer down rather than being reversed.
+//
+// What still differs is only WHO answers "can be displayed": the browser
+// (any scheme it can fetch) versus each runtime's documented decode
+// boundary (data: on Compose; data:/file:/bundle resources on SwiftUI). A
+// candidate the browser fetches over http(s) is therefore still web-only —
+// which is why the corpus delivers image() candidates as inlined data URIs
+// (tools/titan/extract-fixture.mjs `inlineImageNotationSrcs`) rather than
+// leaving the three stacks to disagree about reachability.
 //
 // VERIFIED (w48-w5-verify2 vs wave48-cal, css-images web-ref) — honest
 // net: fallbacks-and-annotations 001–004 flip 0.9999 F → 1.0000 P (the

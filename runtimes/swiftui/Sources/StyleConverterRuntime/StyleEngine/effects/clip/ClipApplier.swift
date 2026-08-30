@@ -12,6 +12,16 @@ import SwiftUI
 struct ClipApplier: ViewModifier {
     // Optional — nil means no clip applied.
     let config: ClipConfig?
+    /// wave-49 lane A4 — how far INSIDE the rect `.clipShape` hands the
+    /// shape the reference box actually starts, in points. Zero for every
+    /// element clip (the rect `.clipShape` receives IS the element's border
+    /// box, which is what the whole reference-box chain assumes), non-zero
+    /// only for the DOCUMENT-ELEMENT clip: there the modifier rides the
+    /// framed capture surface while the root element's border box is the
+    /// INITIAL CONTAINING BLOCK inside that frame. Defaulted so every
+    /// pre-wave-49 call site is byte-identical (`insetBy(dx: 0, dy: 0)` is
+    /// the identity on CGRect). See RootCanvasClip.swift.
+    var outerInset: CGFloat = 0
 
     func body(content: Content) -> some View {
         // Short-circuit when nothing was written.
@@ -27,7 +37,7 @@ struct ClipApplier: ViewModifier {
         // Shape derives the box from its border-box rect at draw time
         // (ClipReferenceBox). With no keyword and no metrics that IS the
         // rect — the pre-wave-46 arithmetic, byte for byte.
-        let ref = ClipRef(box: cfg.geometryBox, metrics: cfg.box)
+        let ref = ClipRef(box: cfg.geometryBox, metrics: cfg.box, outerInset: outerInset)
         if let shape = cfg.shape {
             switch shape {
             case .none:
@@ -104,7 +114,17 @@ extension View {
 struct ClipRef: Equatable {
     let box: ClipGeometryBox
     let metrics: ClipBoxMetrics
+    /// wave-49 lane A4 — the uniform inset from the rect `.clipShape`
+    /// delivers to the box the clip's lengths are actually measured from.
+    /// Zero (and therefore the identity) for every element clip; see
+    /// ClipApplier.outerInset for the one caller that sets it.
+    var outerInset: CGFloat = 0
     func frame(in rect: CGRect) -> ClipReferenceFrame {
-        ClipReferenceBox.resolve(box, metrics: metrics, in: rect)
+        // `insetBy` moves the origin AND shrinks the extent by the same
+        // amount on each side, which is exactly the border-box → ICB
+        // relationship inside a framed capture surface. dx/dy of 0 returns
+        // `rect` unchanged, so nothing pre-wave-49 moves.
+        ClipReferenceBox.resolve(box, metrics: metrics,
+                                 in: rect.insetBy(dx: outerInset, dy: outerInset))
     }
 }

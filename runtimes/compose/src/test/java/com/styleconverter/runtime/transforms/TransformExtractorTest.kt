@@ -115,6 +115,28 @@ class TransformExtractorTest {
     }
 
     @Test
+    fun `CSS-wide keyword on transform yields no functions`() {
+        // VERBATIM corpus payload: tools/titan/runs/wave48-final/sections/
+        // css-transforms/per-test-ir/wpt__css-transforms__css-transform-
+        // inherit-scale.json, component css-transform-inherit-scale__1__1__0.
+        // The keyword shape used to fall out of the `list` lookup as an
+        // empty list — same OUTPUT, but by accident. It is now an explicit
+        // branch: `initial`/`unset`/`revert` genuinely compute to `none`
+        // (css-cascade-4 §7.3 + css-transforms-1 §3, `transform` is not
+        // inherited), while `inherit` is reported through PropertyTracker
+        // because Compose cannot resolve a parent value from a Modifier.
+        for (keyword in listOf("inherit", "initial", "unset", "revert", "revert-layer")) {
+            val cfg = TransformExtractor.extractTransformConfig(
+                listOf(pair("Transform", """{"type":"keyword","keyword":"$keyword"}""")),
+            )
+            assertTrue("$keyword must not fabricate functions", cfg.functions.isEmpty())
+            // No accidental routing change: an empty list keeps the config
+            // out of every graphicsLayer path exactly as before.
+            assertTrue("$keyword must not claim a transform", !cfg.hasTransform)
+        }
+    }
+
+    @Test
     fun `Transform3D preserve-3d keyword parses`() {
         val cfg = Transform3DExtractor.extractTransform3DConfig(
             listOf(pair("TransformStyle", "\"preserve-3d\""))

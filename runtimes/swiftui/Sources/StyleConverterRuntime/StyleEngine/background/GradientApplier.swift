@@ -11,7 +11,7 @@
 //    1. COLOUR SPACE — SwiftUI interpolates Gradient colours in a
 //       perceptual space (red→blue passes washed pink); CSS legacy
 //       gradients interpolate in plain sRGB (dark purple midtones,
-//       css-images-3 §3.4.3 / css-color-4 §12: legacy srgb space). We
+//       css-images-3 §3.4.3 / css-color-4 §13: legacy srgb space). We
 //       pre-subdivide every stop pair with sRGB-lerped micro-stops so
 //       SwiftUI's own ramp is pinned to the sRGB line.
 //    2. ANGLE GEOMETRY — endpoints were computed on a UNIT SQUARE, so
@@ -38,7 +38,7 @@
 //       `repeating-linear-gradient(…, white, black, white 30px)` paints
 //       30px stripes instead of one ramp (gradient-border-box 0.645).
 //    6. INTERPOLATION SPACE — `interp` (in hsl longer hue / in oklab /
-//       …) is honoured through GradientRamp (css-color-4 §12:
+//       …) is honoured through GradientRamp (css-color-4 §13:
 //       premultiplied, hue arcs, powerless-hue carry). Clause-less
 //       gradients keep note-1's sRGB subdivision BYTE-IDENTICAL.
 //
@@ -85,6 +85,14 @@ enum GradientApplier {
             // cross-fade() — weighted premultiplied SUM (§2.6.2).
             // Implementation in CrossFadeApplier.swift (file split).
             return AnyView(crossFade(args))
+        case .imageNotation(let srcs, let fallback):
+            // image() (§2.1) reaches this renderer whenever it is NOT the
+            // top-level background layer — a cross-fade() argument, or the
+            // knob-less path BackgroundImageApplier hands straight through.
+            // Resolve the candidate chain with the SAME resolver the applier
+            // uses (one rule, two entry points) and render the winner.
+            return render(
+                BackgroundImageLayer.resolveImageNotation(srcs: srcs, fallback: fallback))
         }
     }
 
@@ -134,7 +142,7 @@ enum GradientApplier {
 
     /// Pre-squash radius of the DEFAULT ellipse ending shape, evaluated
     /// on the max(w,h) square the render-circular-then-stretch trick
-    /// shades. css-images-3 §3.5: the default size is `farthest-corner`,
+    /// shades. css-images-3 §3.2: the default size is `farthest-corner`,
     /// whose ellipse "has the same aspect ratio [as] `farthest-side`"
     /// but is scaled to pass THROUGH the farthest corner. For a centred
     /// gradient the farthest-side aspect is (w/2 : h/2); putting the
@@ -154,7 +162,7 @@ enum GradientApplier {
         max(size.width, size.height) / 2 * CGFloat(2.0.squareRoot())
     }
 
-    // Radial fills from the centre out. Per CSS Images Module 3 §3.5
+    // Radial fills from the centre out. Per CSS Images Module 3 §3.2
     // the default ending shape is `ellipse` and the default sizing is
     // `farthest-corner`. GeometryReader reads the actual bounds; for
     // `circle` a single radius (half-diagonal ≈ farthest-corner), for

@@ -225,7 +225,7 @@ object ClipPathExtractor {
         // (percent-only by design) ignores. Surface them separately so the
         // applier can prefer the definite px coordinates (CSS Shapes 1
         // §3.1 <position> takes any <length-percentage>).
-        val pos = json["pos"] as? JsonObject
+        val pos = positionObject(json)
         val centerXDp = pos?.get("x")?.let { ValueExtractors.extractDp(it) }
         val centerYDp = pos?.get("y")?.let { ValueExtractors.extractDp(it) }
         return ClipShape.Circle(
@@ -280,7 +280,7 @@ object ClipPathExtractor {
         // Same absolute-length and far-edge treatment as extractCircle —
         // `ellipse(40px 60px at right 60px top 40px)` is as legal as the
         // circle spelling and used to lose its whole `at` clause at parse.
-        val pos = json["pos"] as? JsonObject
+        val pos = positionObject(json)
         return ClipShape.Ellipse(
             radiusX, radiusY, centerX, centerY,
             centerXDp = pos?.get("x")?.let { ValueExtractors.extractDp(it) },
@@ -390,15 +390,78 @@ object ClipPathExtractor {
      * That's an existing limitation, not introduced here.
      */
     private fun readCenterPercent(json: JsonObject): Pair<Float, Float> {
-        val pos = json["pos"] as? JsonObject
+        // One `<position>` bag for the whole shape — wrapped or flattened.
+        val pos = positionObject(json)
         if (pos != null) {
             val cx = (pos["x"] as? JsonObject)?.let { readPercentValue(it) } ?: 50f
             val cy = (pos["y"] as? JsonObject)?.let { readPercentValue(it) } ?: 50f
             return cx to cy
         }
-        val cx = json["x"]?.jsonPrimitive?.floatOrNull ?: 50f
-        val cy = json["y"]?.jsonPrimitive?.floatOrNull ?: 50f
+        // Legacy hand-written fixtures spell the centre as BARE NUMBERS
+        // (`{type:"circle", x: 30, y: 70}`), which no serializer emits but
+        // some pre-canonical test JSON still carries. `as? JsonPrimitive`
+        // rather than `.jsonPrimitive`: the latter THROWS on a JsonObject,
+        // and an object-valued `x` reaches this line whenever the canonical
+        // flattened form is somehow not recognised — an extractor that
+        // throws takes the whole composition down with it (measured: the
+        // wave-49 skeptic walk over all 1435 corpus documents died on
+        // `circle(closest-corner at 150px 200px)` here).
+        val cx = (json["x"] as? JsonPrimitive)?.floatOrNull ?: 50f
+        val cy = (json["y"] as? JsonPrimitive)?.floatOrNull ?: 50f
         return cx to cy
+    }
+
+    /**
+     * The shape's `<position>` bag — the `at` clause of a circle / ellipse
+     * (CSS Shapes 1 §3.1) — or null when the shape declares none.
+     *
+     * TWO wire forms reach here, both from `ClipPathShapeSerializer` after
+     * the generic `IRPropertySerializer.deepFlatten` pass:
+     *
+     *  • WRAPPED — `{type:"circle", r:…, pos:{x,y[,xEdge,yEdge]}}`. Two
+     *    non-type fields, so deepFlatten does not fire and `pos` survives.
+     *  • FLATTENED — `{type:"circle", x:{px:150}, y:{px:200}}`. When the
+     *    only non-type field is `pos` (a radius KEYWORD such as
+     *    `closest-corner` is not serialized as a field at all), deepFlatten
+     *    inlines that one object and the `pos` wrapper disappears. Reading
+     *    only `json["pos"]` therefore lost the whole `at` clause and the
+     *    shape silently re-centred on the box — and, because the legacy
+     *    numeric fallback below then hit an OBJECT, threw.
+     *
+     * Mirrors the web runtime's `positionOf`
+     * (runtimes/web/src/engine/effects/clip/ClipPathExtractor.ts:69-73), which
+     * already reads both forms, so the runtimes cannot disagree about where a
+     * flattened `at` clause lives. The one deliberate difference: this
+     * version requires BOTH axes to be JSON OBJECTS, where the TS only
+     * requires them to be defined — the extra type test is what keeps the
+     * legacy bare-number spelling (`{x: 30, y: 70}`) on its own branch below.
+     *
+     * MEASURED carriers, all three failing the browser ref on every platform
+     * at the wave-48 gate (tools/titan/runs/wave48-final/sections/css-masking/
+     * manifest.json → `wpt.results[…].browserRef.diffs`, `wptPass:false` on
+     * all nine cells): WPT css-masking/clip-path/clip-path-circle-closest-corner
+     * (`circle(closest-corner at 150px 200px)` →
+     * `{type:"circle",x:{px:150},y:{px:200}}`), its `-farthest-corner` twin,
+     * and clip-path-ellipse-closest-farthest-corner.
+     *
+     * Unambiguous by construction: the flattened RADIUS form inlines an
+     * IRLength, whose keys are `px` / `original`, never `x` / `y`; and the
+     * `xywh()` shape, which does use `x`/`y`, never reaches this helper
+     * (extractXywh owns it).
+     */
+    private fun positionObject(json: JsonObject): JsonObject? {
+        // Wrapped form first — it is the canonical one and the only one a
+        // multi-field shape can produce.
+        (json["pos"] as? JsonObject)?.let { return it }
+        // Flattened form: `x` AND `y` sit next to `type` as IRLength
+        // objects, and so do `xEdge` / `yEdge` when the author used the
+        // css-values-4 far-edge arm — so the shape JSON IS the position bag.
+        // Both axes are required: the serializer always writes the pair, and
+        // demanding both keeps a stray single key from being mistaken for a
+        // centre.
+        if (json["x"] is JsonObject && json["y"] is JsonObject) return json
+        // No `at` clause — the caller falls back to the spec default centre.
+        return null
     }
 
     /**

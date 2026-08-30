@@ -110,6 +110,54 @@ object CanvasRootHoist {
     internal val LocalHasTransformedAncestor = compositionLocalOf { false }
 
     /**
+     * Wave 49 (lane A7) — the positioned-ancestor state that was in force at
+     * the nearest MULTI-COLUMN CONTAINER ancestor, or null when there is no
+     * multicol ancestor at all.
+     *
+     * Read only by
+     * [com.styleconverter.runtime.columns.MulticolSpannerContainingBlock
+     * .childPositionedAncestor], which restarts the §10.1 chain there for the
+     * descendants of a `column-span: all` box: css-multicol-1 §6.1 lays a
+     * spanner out as a block of the multi-column container, so the boxes
+     * between the container and the spanner do not contain it and cannot be
+     * its descendants' containing block. A THIRD channel rather than a
+     * widening of [LocalHasPositionedAncestor] because the two answer
+     * different questions ("is there a positioned ancestor HERE" vs "…at the
+     * multicol"), and because null — "no multicol ancestor" — has to be
+     * distinguishable from false so the rule stays inert outside multicol.
+     *
+     * Provided by ComponentRenderer for every subtree, exactly mirroring the
+     * pure walks in [collectCanvasHoisted] / [anyOutOfFlowBox]; the two MUST
+     * agree or a box is intercepted in flow with no overlay slot.
+     */
+    internal val LocalPositionedAncestorAtMulticol = compositionLocalOf<Boolean?> { null }
+
+    /**
+     * Wave 49 (lane A4) — true when ANY ancestor in the composition paints a
+     * `clip-path` (css-masking-1 §5). A THIRD ancestry channel, and for a
+     * different reason than the two above: this one is not about the
+     * containing block at all, it is about a clip the spec gives NO escape
+     * from. `clip-path` clips "the element and its descendants"; contrast
+     * CSS 2.1 §11.1.1, which explicitly lets a positioned descendant escape
+     * an `overflow` clip when its containing block is outside the clipping
+     * box — the escape the canvas-root hoist reproduces correctly.
+     *
+     * Compose expresses subtree clipping only through the COMPOSITION tree
+     * (`Modifier.clip` clips the node and everything its children draw), so a
+     * box lifted into the canvas-root overlay becomes a SIBLING of the
+     * clipping ancestor and leaves the clip behind. MEASURED on the wave-48
+     * gate: WPT css-masking/clip-path/clip-path-blending-offset paints a
+     * 100×100 red square at image [56,66]-[155,165] that the Chromium ref
+     * (and web, and iOS) clip away entirely — android-ref 0.9566 vs 1.0000.
+     *
+     * Provided by ComponentRenderer for every clip-path component's subtree,
+     * exactly mirroring the pure walk in [collectCanvasHoisted]. See
+     * [com.styleconverter.runtime.effects.clip.establishesUnescapableClip]
+     * for the predicate and the named cost of vetoing the hoist.
+     */
+    internal val LocalHasClippingAncestor = compositionLocalOf { false }
+
+    /**
      * The component's resolved position keyword, via the same
      * PositionExtractor the live style chain uses — one decoder for the
      * wire keyword, so the hoist decision can never disagree with the
@@ -141,6 +189,45 @@ object CanvasRootHoist {
      */
     internal fun establishesTransformContainingBlock(properties: List<IRProperty>): Boolean =
         TransformContainingBlock.establishes(properties)
+
+    /**
+     * Wave 49 (lane A4) — css-masking-1 §5: does this box paint a
+     * `clip-path`, i.e. a clip its whole subtree is inside with no
+     * containing-block escape? Delegates the entire decision to the clip
+     * category's own predicate (which reads the SAME ClipPathExtractor the
+     * live style chain runs), so the hoist veto and the emitted
+     * `Modifier.clip` can never disagree about whether a clip exists.
+     * Threaded down the composition as [LocalHasClippingAncestor] and down
+     * the pure walk as `ancestorClipped`, exactly like the two flags above.
+     *
+     * TOTAL BY CONSTRUCTION (wave 49 lane F1). This is the ONE choke point
+     * every clip-ancestry consumer routes through — [collectCanvasHoisted],
+     * [anyOutOfFlowBox] and ComponentRenderer's `childHasClippingAncestor`
+     * alike — and the two pure walks reach it for EVERY node with no early
+     * return. `Host` evaluates `remember(roots) { collectCanvasHoisted(roots) }`
+     * during composition and the Android harness has no error boundary, so an
+     * escaping decode throw is a dead capture Activity, not a dropped
+     * property. Measured pre-guard: 3 of the 1435 wave-48 corpus documents
+     * threw here. See [com.styleconverter.runtime.effects.clip.clipDecodeOrElse]
+     * for why `false` is the CORRECT answer and not merely the safe one.
+     *
+     * The guard also removes an undocumented ordering dependency: [hostActivates]
+     * happened to survive those three documents only because its activation
+     * test returns true BEFORE it computes the child clip flag, while
+     * [collectCanvasHoisted] always computes it. Nothing in the code pinned
+     * that ordering, so it was one refactor away from crashing too; a total
+     * predicate makes the ordering irrelevant.
+     */
+    internal fun establishesUnescapableClip(properties: List<IRProperty>): Boolean =
+        com.styleconverter.runtime.effects.clip.clipDecodeOrElse(
+            where = "CanvasRootHoist.establishesUnescapableClip",
+            // No readable clip ⇒ no `Modifier.clip` is emitted by the applier
+            // that shares this decoder ⇒ there is nothing for an out-of-flow
+            // descendant to escape, which is exactly what `false` asserts.
+            fallback = false,
+        ) {
+            com.styleconverter.runtime.effects.clip.establishesUnescapableClip(properties)
+        }
 
     /**
      * Wave 18 (RC1) — does the declaration list carry ANY inset that
@@ -200,7 +287,16 @@ object CanvasRootHoist {
         // descendants alike. Defaulted false so every pre-wave-35 call site
         // (and every hostless path) keeps the exact wave-17/18 truth table.
         hasTransformedAncestor: Boolean = false,
-    ): Boolean = when (positionTypeOf(properties)) {
+        // Wave 49 (lane A4) — does an ancestor paint a `clip-path`? Not a
+        // containing-block question: css-masking-1 §5 clips the element AND
+        // its descendants with no escape clause, while the overlay this
+        // decision feeds is a SIBLING of that ancestor in the Compose tree,
+        // so a hoisted box would leave the clip behind. Vetoes BOTH classes
+        // (an unescapable clip does not grade by `position`). Defaulted
+        // false so every pre-wave-49 call site — and every hostless path —
+        // keeps the exact wave-17/18/35 truth table.
+        hasClippingAncestor: Boolean = false,
+    ): Boolean = if (hasClippingAncestor) false else when (positionTypeOf(properties)) {
         // Viewport-anchored (F1) UNLESS a transformed ancestor has taken over
         // the containing block — css-transforms-2 §6 is the one rule that
         // pulls a fixed box back out of the viewport. Chromium-measured
@@ -237,9 +333,58 @@ object CanvasRootHoist {
     fun rendersInFlowAsStaticPosition(
         properties: List<IRProperty>,
         hasPositionedAncestor: Boolean,
-    ): Boolean = positionTypeOf(properties) == PositionType.ABSOLUTE &&
-        !hasPositionedAncestor &&
-        !hasAnyInset(properties)
+        // Wave 49 (lane A4) — the two ancestry flags the clip veto needs to
+        // reconstruct "would this box have hoisted?". Defaulted so every
+        // pre-wave-49 caller (the harness's §8.3.1 gap fold asks only about
+        // ROOT components, which have no ancestor of any kind) keeps the
+        // exact wave-18 RC1 truth table.
+        hasTransformedAncestor: Boolean = false,
+        hasClippingAncestor: Boolean = false,
+    ): Boolean =
+        // Wave-18 RC1, verbatim: an all-auto-inset absolute box with no
+        // positioned ancestor paints at its STATIC position, not the canvas
+        // origin (css-position-3 §3.1).
+        (
+            positionTypeOf(properties) == PositionType.ABSOLUTE &&
+                !hasPositionedAncestor &&
+                !hasAnyInset(properties)
+            ) ||
+            // Wave-49 A4: the box the clip veto pulled back out of the
+            // overlay. It must land in the SAME in-slot, zero-flow-footprint
+            // mount RC1 owns — an out-of-flow box still reserves no space
+            // (css-position-3 §2.1) — and its own PositionApplier offset then
+            // places it from that slot. Gated on the hoist it WOULD have
+            // taken (clip flag deliberately false in the probe), so a box
+            // that already renders through the positioned-parent machinery
+            // (RenderAbsoluteChild — it has a positioned ancestor, so it was
+            // never a hoist candidate) is untouched.
+            //
+            // BLAST RADIUS, RE-DERIVED BY EXECUTION (wave 49 lane F1; the
+            // wave-49 skeptic walk over all 1435 wave-48 per-test IR
+            // documents, pinned here by ClipHoistCorpusCrashTest): the veto
+            // changes the hoist/static decision on EXACTLY 2 of 1435
+            // documents — clip-path-blending-offset and
+            // clip-path-on-fixed-position-scroll (the latter scoreExcluded).
+            // A4's census claimed the three css-masking corner tests
+            // (circle-closest-corner, circle-farthest-corner,
+            // ellipse-closest-farthest-corner) "have a positioned ancestor,
+            // so were never hoist candidates". That is WRONG about which box
+            // it describes: in all three the clip-path CARRIER is itself an
+            // absolutely positioned root with insets and no positioned
+            // ancestor, so it DOES hoist; it is the carrier's inner child
+            // that has the positioned ancestor. Their decisions are unchanged
+            // for a different reason — a box's own clip never feeds its own
+            // ancestry flag — but they DO newly enter the clip predicate,
+            // which is precisely where the wave-49 crash lived.
+            (
+                hasClippingAncestor &&
+                    shouldHoistToCanvasRoot(
+                        properties,
+                        hasPositionedAncestor,
+                        hasTransformedAncestor,
+                        hasClippingAncestor = false,
+                    )
+                )
 
     /**
      * The in-flow interception decision ComponentRenderer applies at the top
@@ -256,10 +401,15 @@ object CanvasRootHoist {
         // Wave 35 (lane B1) — the transform-CB ancestry, defaulted so every
         // pre-wave-35 caller keeps the exact wave-17 truth table.
         hasTransformedAncestor: Boolean = false,
+        // Wave 49 (lane A4) — the unescapable-clip ancestry; same defaulting
+        // rule, and it can only ever REMOVE an interception (the overlay's
+        // mirror walk applies the identical veto).
+        hasClippingAncestor: Boolean = false,
     ): Boolean = hostActive &&
         bypass !== component &&
         shouldHoistToCanvasRoot(
             component.properties, hasPositionedAncestor, hasTransformedAncestor,
+            hasClippingAncestor,
         )
 
     /**
@@ -279,27 +429,69 @@ object CanvasRootHoist {
         // Wave 35 (lane B1) — the transform-CB half of the ancestry; see
         // [LocalHasTransformedAncestor] for why it is a SECOND flag.
         hasTransformedAncestor: Boolean = false,
+        // Wave 49 (lane A4) — the THIRD ancestry flag; see
+        // [LocalHasClippingAncestor]. Same defaulting rule as the second.
+        hasClippingAncestor: Boolean = false,
     ): List<IRComponent> {
         // Accumulator in visit order (document order).
         val out = mutableListOf<IRComponent>()
-        // Local recursion carrying BOTH ancestry flags per level.
-        fun walk(node: IRComponent, ancestorPositioned: Boolean, ancestorTransformed: Boolean) {
+        // Local recursion carrying ALL THREE ancestry flags per level, plus
+        // the wave-49 (lane A7) multicol channel — null at the roots, because
+        // a document root has no multi-column ancestor and the spanner rule
+        // is inert until one appears.
+        fun walk(
+            node: IRComponent,
+            ancestorPositioned: Boolean,
+            ancestorTransformed: Boolean,
+            ancestorClipped: Boolean,
+            positionedAtMulticol: Boolean?,
+        ) {
             // Collect the node itself when the shared decision says hoist.
-            if (shouldHoistToCanvasRoot(node.properties, ancestorPositioned, ancestorTransformed)) {
+            if (shouldHoistToCanvasRoot(
+                    node.properties, ancestorPositioned, ancestorTransformed, ancestorClipped,
+                )
+            ) {
                 out += node
             }
             // Children see a positioned ancestor if one already existed OR
-            // this node is itself positioned (CSS 2.1 §10.1)…
-            val childPositioned = ancestorPositioned || establishesContainingBlock(node.properties)
+            // this node is itself positioned (CSS 2.1 §10.1) — EXCEPT below a
+            // `column-span: all` box, where css-multicol-1 §6.1 restarts the
+            // chain at the multi-column container (wave 49, lane A7). The
+            // whole decision is delegated so ComponentRenderer's composition
+            // channel reads the identical function and the two can never
+            // disagree about where the chain breaks.
+            val childPositioned = com.styleconverter.runtime.columns
+                .MulticolSpannerContainingBlock.childPositionedAncestor(
+                    ancestorPositioned, positionedAtMulticol, node.properties,
+                )
             // …and a transformed ancestor on the same OR-accumulating rule
             // (css-transforms-1 §3 — a used transform never un-establishes).
+            // Deliberately NOT restarted at a spanner — see
+            // MulticolSpannerContainingBlock.TRANSFORM_CHAIN_RESTART_UNIMPLEMENTED
+            // for the measured reason (no corpus witness).
             val childTransformed =
                 ancestorTransformed || establishesTransformContainingBlock(node.properties)
+            // …and a clipping ancestor on the same OR-accumulating rule
+            // (css-masking-1 §5 — a clip-path never un-clips a subtree).
+            val childClipped =
+                ancestorClipped || establishesUnescapableClip(node.properties)
+            // A multi-column container stamps its own chain state here; every
+            // other box passes the stamp through, so a spanner nested several
+            // levels down still restarts from its own container.
+            val childAtMulticol = com.styleconverter.runtime.columns
+                .MulticolSpannerContainingBlock.childPositionedAtMulticol(
+                    positionedAtMulticol, childPositioned, node.properties,
+                )
             // Recurse in document order (children may be null on leaves).
-            node.children?.forEach { walk(it, childPositioned, childTransformed) }
+            node.children?.forEach {
+                walk(it, childPositioned, childTransformed, childClipped, childAtMulticol)
+            }
         }
-        // Roots start from the caller's ancestry context (canvas root: false).
-        roots.forEach { walk(it, hasPositionedAncestor, hasTransformedAncestor) }
+        // Roots start from the caller's ancestry context (canvas root: false)
+        // and outside any multicol (null — the spanner rule cannot fire yet).
+        roots.forEach {
+            walk(it, hasPositionedAncestor, hasTransformedAncestor, hasClippingAncestor, null)
+        }
         return out
     }
 
@@ -322,31 +514,73 @@ object CanvasRootHoist {
         // the two walks MUST stay one-for-one or activation and the overlay
         // list disagree.
         hasTransformedAncestor: Boolean = false,
+        // Wave 49 (lane A4) — the third ancestry flag; the two walks MUST
+        // stay one-for-one on it too, or a clip-vetoed box loses the host
+        // that gives it its zero-flow anchor.
+        hasClippingAncestor: Boolean = false,
     ): Boolean {
-        // Local recursion carrying both ancestry flags per level — the same
-        // threading as collectCanvasHoisted's walk.
-        fun walk(node: IRComponent, ancestorPositioned: Boolean, ancestorTransformed: Boolean): Boolean {
+        // Local recursion carrying all three ancestry flags per level plus
+        // the wave-49 (lane A7) multicol channel — the same threading as
+        // collectCanvasHoisted's walk, one-for-one.
+        fun walk(
+            node: IRComponent,
+            ancestorPositioned: Boolean,
+            ancestorTransformed: Boolean,
+            ancestorClipped: Boolean,
+            positionedAtMulticol: Boolean?,
+        ): Boolean {
             // Either out-of-flow class counts (see kdoc): hoisted overlay…
-            if (shouldHoistToCanvasRoot(node.properties, ancestorPositioned, ancestorTransformed)) {
+            if (shouldHoistToCanvasRoot(
+                    node.properties, ancestorPositioned, ancestorTransformed, ancestorClipped,
+                )
+            ) {
                 return true
             }
             // …or the in-slot zero-flow static-position class. Deliberately
-            // NOT gated on the transform flag: a no-inset absolute box sits
-            // at its static position whichever ancestor is its containing
-            // block (css-position-3 §3.1), so the zero-flow anchor is right
-            // either way and the wave-21 activation breadth is unchanged.
-            if (rendersInFlowAsStaticPosition(node.properties, ancestorPositioned)) return true
+            // NOT gated on the transform flag for the wave-18 RC1 clause: a
+            // no-inset absolute box sits at its static position whichever
+            // ancestor is its containing block (css-position-3 §3.1), so the
+            // zero-flow anchor is right either way and the wave-21 activation
+            // breadth is unchanged. The wave-49 clip clause DOES read both
+            // extra flags, because it reconstructs the hoist it vetoed.
+            if (rendersInFlowAsStaticPosition(
+                    node.properties, ancestorPositioned, ancestorTransformed, ancestorClipped,
+                )
+            ) {
+                return true
+            }
             // Children see a positioned ancestor if one already existed OR
-            // this node is itself positioned (CSS 2.1 §10.1); likewise for
-            // the transform-CB flag (css-transforms-1 §3).
-            val childPositioned = ancestorPositioned || establishesContainingBlock(node.properties)
+            // this node is itself positioned (CSS 2.1 §10.1) — through the
+            // shared wave-49 helper, so the `column-span: all` chain restart
+            // (css-multicol-1 §6.1) applies to the ACTIVATION walk exactly as
+            // it does to the collect walk. If the two ever diverged, a box
+            // could hoist with no host to anchor it.
+            val childPositioned = com.styleconverter.runtime.columns
+                .MulticolSpannerContainingBlock.childPositionedAncestor(
+                    ancestorPositioned, positionedAtMulticol, node.properties,
+                )
+            // Likewise for the transform-CB flag (css-transforms-1 §3) and
+            // the clip flag (css-masking-1 §5) — both keep the plain
+            // OR-accumulation (see the collect walk for why).
             val childTransformed =
                 ancestorTransformed || establishesTransformContainingBlock(node.properties)
+            val childClipped =
+                ancestorClipped || establishesUnescapableClip(node.properties)
+            // The multicol stamp, published identically to the collect walk.
+            val childAtMulticol = com.styleconverter.runtime.columns
+                .MulticolSpannerContainingBlock.childPositionedAtMulticol(
+                    positionedAtMulticol, childPositioned, node.properties,
+                )
             // Recurse in document order (children may be null on leaves).
-            return node.children?.any { walk(it, childPositioned, childTransformed) } ?: false
+            return node.children?.any {
+                walk(it, childPositioned, childTransformed, childClipped, childAtMulticol)
+            } ?: false
         }
-        // Roots start from the caller's ancestry context (canvas root: false).
-        return roots.any { walk(it, hasPositionedAncestor, hasTransformedAncestor) }
+        // Roots start from the caller's ancestry context (canvas root: false)
+        // and outside any multicol (null — the spanner rule cannot fire yet).
+        return roots.any {
+            walk(it, hasPositionedAncestor, hasTransformedAncestor, hasClippingAncestor, null)
+        }
     }
 
     /**

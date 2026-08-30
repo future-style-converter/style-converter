@@ -16,6 +16,7 @@ import app.irmodels.IRLengthPercentage
 import app.irmodels.IRLength
 import app.irmodels.properties.background.BackgroundImageProperty
 import app.irmodels.properties.background.BackgroundImageSerializer
+import app.parsing.css.properties.InvalidDeclaration
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.double
 import kotlinx.serialization.json.jsonArray
@@ -25,6 +26,7 @@ import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 import kotlin.test.assertNull
+import kotlin.test.assertSame
 import kotlin.test.assertTrue
 
 class BackgroundImagePropertyParserTest {
@@ -422,14 +424,24 @@ class BackgroundImagePropertyParserTest {
     // css-values/angle-units-001's four "invalid; <valid form> is valid"
     // comments; the capture browser drops all four
     // (CSS.supports('background-image', …) === false, measured), and so
-    // must we — as Raw author bytes, not an invented ramp.
+    // must we — never as an invented ramp.
+    //
+    // WAVE-49 LANE A1 CHANGED THE OUTCOME, NOT THE VERDICT: wave 40 could
+    // only express its refusal as a `Raw` author-bytes layer, because
+    // `parse` had no channel for "this is not CSS" distinct from "I cannot
+    // read this". It now returns the InvalidDeclaration sentinel and
+    // PropertiesParser DROPS the declaration, which is what css-syntax-3
+    // §2.2 / CSS 2.2 §4.2 actually require — a passthrough would shadow the
+    // earlier valid declaration these tests exist to protect. The pixels are
+    // unchanged (no runtime painted the Raw layer either); the wire is now
+    // honest. See InvalidDeclarationDropTest for the declaration-level pins.
 
     @Test
     fun `plural turn unit invalidates the whole gradient`() {
-        val prop = BackgroundImagePropertyParser.parse("linear-gradient(0.25turns, red, red)") as BackgroundImageProperty
-        val raw = assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
-        // Author bytes preserved verbatim for the web runtime's passthrough.
-        assertEquals("linear-gradient(0.25turns, red, red)", raw.value)
+        assertSame(
+            InvalidDeclaration,
+            BackgroundImagePropertyParser.parse("linear-gradient(0.25turns, red, red)")
+        )
     }
 
     @Test
@@ -439,8 +451,7 @@ class BackgroundImagePropertyParserTest {
             "linear-gradient(100gradian, red, red)",
             "linear-gradient(1.57radian, red, red)",
         )) {
-            val prop = BackgroundImagePropertyParser.parse(css) as BackgroundImageProperty
-            assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0], css)
+            assertSame(InvalidDeclaration, BackgroundImagePropertyParser.parse(css), css)
         }
     }
 
@@ -465,22 +476,28 @@ class BackgroundImagePropertyParserTest {
         // `to bottom left top` names two vertical sides — no <side-or-corner>
         // production matches, so the function is invalid (it used to render
         // as a default top-to-bottom ramp of the remaining stops).
-        val prop = BackgroundImagePropertyParser.parse("linear-gradient(to bottom left top, red, blue)") as BackgroundImageProperty
-        assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+        assertSame(
+            InvalidDeclaration,
+            BackgroundImagePropertyParser.parse("linear-gradient(to bottom left top, red, blue)")
+        )
     }
 
     @Test
     fun `bad angle riding beside a valid interpolation method invalidates too`() {
         // The method is recognised and peeled, but the leftover is neither an
         // angle nor a direction — §3.1's `||` combinator allows nothing else.
-        val prop = BackgroundImagePropertyParser.parse("linear-gradient(0.25turns in srgb, red, blue)") as BackgroundImageProperty
-        assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+        assertSame(
+            InvalidDeclaration,
+            BackgroundImagePropertyParser.parse("linear-gradient(0.25turns in srgb, red, blue)")
+        )
     }
 
     @Test
     fun `conic from-angle with an invalid unit invalidates the whole gradient`() {
-        val prop = BackgroundImagePropertyParser.parse("conic-gradient(from 0.25turns, red, blue)") as BackgroundImageProperty
-        assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+        assertSame(
+            InvalidDeclaration,
+            BackgroundImagePropertyParser.parse("conic-gradient(from 0.25turns, red, blue)")
+        )
     }
 
     @Test

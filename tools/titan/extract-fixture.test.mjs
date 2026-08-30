@@ -54,6 +54,9 @@ import {
   inlineUrlsInValue,
   inlineFixtureAssets,
   MAX_INLINE_ASSET_BYTES,
+  // wave-49 A3: image()'s bare-STRING <image-src> candidates.
+  inlineImageNotationSrcs,
+  inlinableAssetDataUri,
   // wave-13 KEYFRAMES-SAMPLER: static @keyframes sampling.
   parseKeyframes,
   parseTimingFunction,
@@ -6336,4 +6339,133 @@ test('U5: a caller-supplied ctx.bodyAttrs wins over harvesting (injection contra
   assert.equal(out['ci__0'].properties.color, 'red');
   // The caller's ctx object was not mutated by the rungs.
   assert.deepEqual(ctx, { bodyAttrs: null });
+});
+
+// ── wave-49 lane A3: image()'s bare-STRING <image-src> candidates ──────────
+//
+// THE MEASURED GAP these pin. css-images-4 §2.5 lets an <image-src> be a bare
+// quoted STRING as well as a url(), and the wave-8 inliner only ever saw
+// url() tokens — so `background-image: image("support/1x1-green.png")` reached
+// the IR as a raw author-relative path. The WEB harness rescues that through
+// its /wpt-image/ route; no native can, because a device cannot reach the
+// host's corpus. At the wave-48 gate WPT css-image-fallbacks-and-annotations
+// 002/003/004 therefore painted the `background-color: red` those tests forbid
+// on BOTH natives (iOS 0.9990 / Android 0.9981, colorFailed) while web scored
+// 1.0000. Inlining the candidates closes it with no per-platform code: every
+// runtime already decodes a data: payload.
+
+test('wave49-A3: image() bare-string candidates inline to url(data:…)', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave49-image-'));
+  await fsp.mkdir(path.join(dir, 'support'));
+  const bytes = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x00, 0x41]);
+  await fsp.writeFile(path.join(dir, 'support', '1x1-green.png'), bytes);
+  // The 002 shape: a lone string src with no url() token anywhere in the value.
+  const r = await inlineUrlsInValue('image("support/1x1-green.png")', dir);
+  assert.equal(r.inlined, 1);
+  assert.equal(r.unresolved, 0);
+  assert.equal(r.value, 'image(url(data:image/png,%89%50%4e%47%00%41))');
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('wave49-A3: only the deliverable candidates change; the rest stay author bytes', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave49-image-'));
+  await fsp.mkdir(path.join(dir, 'support'));
+  await fsp.writeFile(path.join(dir, 'support', '1x1-green.gif'), Buffer.from([0x47, 0x49, 0x46]));
+  // The 004 shape: two missing leading candidates, the third deliverable.
+  // A first-src-only reader can never reach the one that works — which is
+  // exactly why the runtimes now walk the whole list.
+  const r = await inlineUrlsInValue(
+    'image("1x1-green.svg", "1x1-green.png", "support/1x1-green.gif")', dir);
+  assert.equal(r.inlined, 1);
+  // NO unresolved count — an image() candidate that cannot be delivered is
+  // not a harness gap (the reference browser fails to fetch it too), and
+  // counting it would mark the component 'requires-bundled-asset', a
+  // SCORE-EXCLUDING tag. See the banner over inlineImageNotationSrcs.
+  assert.equal(r.unresolved, 0);
+  assert.equal(
+    r.value,
+    'image("1x1-green.svg", "1x1-green.png", url(data:image/gif,%47%49%46))');
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('wave49-A3: image-set() and -webkit-image-set() are NOT image()', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave49-image-'));
+  await fsp.writeFile(path.join(dir, 'a.png'), Buffer.from([0x89]));
+  // A different grammar (css-images-4 §2.4) this pass deliberately does not
+  // model — the lookbehind in the matcher is what keeps it out.
+  for (const v of ['image-set("a.png" 1x)', '-webkit-image-set("a.png" 1x)']) {
+    const r = await inlineImageNotationSrcs(v, dir);
+    assert.equal(r.value, v, `should be untouched: ${v}`);
+    assert.equal(r.inlined, 0);
+  }
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('wave49-A3: a <color> argument and an unbalanced image() are left alone', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave49-image-'));
+  await fsp.writeFile(path.join(dir, 'a.png'), Buffer.from([0x89]));
+  // The 001/005 shapes: the trailing <color> is not a source, and rgba()'s
+  // internal commas must not be split as candidate separators.
+  const colour = await inlineImageNotationSrcs('image(rgba(0,0,255,0.5))', dir);
+  assert.equal(colour.value, 'image(rgba(0,0,255,0.5))');
+  assert.equal(colour.inlined, 0);
+  // A truncated declaration is left byte-identical rather than guessed at.
+  const broken = await inlineImageNotationSrcs('image("a.png"', dir);
+  assert.equal(broken.value, 'image("a.png"');
+  assert.equal(broken.inlined, 0);
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('wave49-A3: inlinableAssetDataUri applies the SAME gates as the url() pass', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave49-image-'));
+  await fsp.writeFile(path.join(dir, 'ok.png'), Buffer.from([0x01, 0x02]));
+  await fsp.writeFile(path.join(dir, 'big.png'), Buffer.alloc(MAX_INLINE_ASSET_BYTES));
+  await fsp.writeFile(path.join(dir, 'vector.svg'), '<svg/>');
+  // Deliverable raster under the cap.
+  assert.equal(await inlinableAssetDataUri('ok.png', dir), 'data:image/png,%01%02');
+  // At the cap → declined (the gate is strictly-less-than).
+  assert.equal(await inlinableAssetDataUri('big.png', dir), null);
+  // Non-raster extension → declined (SVG is text, not in RASTER_MIME).
+  assert.equal(await inlinableAssetDataUri('vector.svg', dir), null);
+  // Absent file → declined.
+  assert.equal(await inlinableAssetDataUri('missing.png', dir), null);
+  await fsp.rm(dir, { recursive: true, force: true });
+});
+
+test('wave49-A3: an image()-only value is no longer skipped by the fixture walk', async () => {
+  const os = await import('node:os');
+  const path = await import('node:path');
+  const { promises: fsp } = await import('node:fs');
+  const dir = await fsp.mkdtemp(path.join(os.tmpdir(), 'wave49-image-'));
+  await fsp.writeFile(path.join(dir, 'g.png'), Buffer.from([0x89, 0x50]));
+  // The gate that skipped these values entirely was `/url\(/i.test(v)`; the
+  // component below has no url() token at all, so before this lane it never
+  // reached the inliner.
+  const fixture = {
+    components: {
+      square: { id: 'square', properties: { 'background-image': 'image("g.png")' } },
+    },
+  };
+  const totals = await inlineFixtureAssets(fixture, dir);
+  assert.equal(totals.inlined, 1);
+  assert.equal(fixture.components.square.properties['background-image'],
+               'image(url(data:image/png,%89%50))');
+  // And it stays out of the lossy roll-up — the scored set must not move.
+  assert.equal(fixture.components.square._lossy, undefined);
+  await fsp.rm(dir, { recursive: true, force: true });
 });

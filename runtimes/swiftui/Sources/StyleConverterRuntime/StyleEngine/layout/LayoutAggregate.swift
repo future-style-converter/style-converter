@@ -329,6 +329,17 @@ struct LayoutAggregate: Equatable {
     var position: PositionKind? = nil
     /// Resolved inset rect from top/right/bottom/left + logical insets.
     var inset: InsetRect? = nil
+    /// Wave 49 (lane A7) — the PERCENTAGE magnitudes of whichever inset
+    /// longhands the IR wrote as a bare number (the converter's
+    /// `InsetValue.PercentageValue` wire). A side channel, never a
+    /// replacement for `inset`: the `inset` slots keep the pre-wave-49
+    /// number-as-points reading so nothing that cannot see a containing
+    /// block changes, and `PositionApplier` upgrades them only where the
+    /// `containingBlockWidth`/`Height` environment is readable. Nil for
+    /// every component whose insets are the `{"px":N}` object shape —
+    /// which is all but seven tests in the whole frozen corpus. See
+    /// `StyleEngine/layout/position/PercentInsetResolve.swift`.
+    var percentInsets: InsetPercents? = nil
     /// `z-index` — nil encodes CSS `auto` (default paint order).
     var zIndex: Double? = nil
 

@@ -57,7 +57,17 @@ enum ColorExtractor {
             }
         }
 
+        // css-color-4 §6.4: `background-color: currentcolor` takes the value
+        // of `color` on the SAME element — and so does a `currentcolor`
+        // sitting inside a `color-mix()` (css-color-5 §3 mixes the USED
+        // colours). Resolved AFTER the loop, never inside it, because the IR
+        // may list BackgroundColor before Color (it does on
+        // css-color/currentcolor-002's outer div) — only the completed config
+        // knows both channels. Everything else — static sRGB, light-dark(),
+        // relative colours, var() — comes back untouched.
+        let resolved = CurrentColorBackground.resolved(cfg)
+
         // `nil` signals "no ColorApplier modifier needed" to StyleBuilder.
-        return touched ? cfg : nil
+        return touched ? resolved : nil
     }
 }

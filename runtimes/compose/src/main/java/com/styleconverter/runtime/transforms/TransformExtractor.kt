@@ -346,6 +346,34 @@ object TransformExtractor {
             return listOf(TransformFunction.None)
         }
 
+        // CSS-WIDE KEYWORDS, wired as {"type":"keyword","keyword":"…"} by
+        // the converter's TransformPropertyParser. Handled explicitly so
+        // the shape is REFUSED with a reason instead of falling out of the
+        // `obj["list"]` lookup below as an empty list (a silent drop).
+        //
+        // `initial` / `unset` / `revert` / `revert-layer`: `transform` is
+        // not an inherited property, so css-cascade-4 §7.3 makes `unset`
+        // act as `initial`, and css-transforms-1 §3's initial value is
+        // `none`. An empty list renders exactly that, so these need no
+        // further work — returning empty here is the right answer, not a
+        // fallthrough.
+        //
+        // `inherit` (css-cascade-4 §7.3.2 — the parent's computed value)
+        // CANNOT be resolved from here: a Modifier is parents-ignorant and
+        // Compose's provider would have to live in
+        // core/renderer/ComponentRenderer.kt. The iOS twin resolves it
+        // through an ambient channel the transforms folder owns outright
+        // (StyleEngine/transforms/TransformInheritance.swift, wave 49);
+        // Compose has no equivalent without that renderer seam. Sole
+        // corpus carrier: css-transforms/css-transform-inherit-scale.
+        if (type == "keyword") {
+            val keyword = obj["keyword"]?.jsonPrimitive?.contentOrNull?.lowercase()
+            if (keyword == "inherit") {
+                com.styleconverter.runtime.PropertyTracker.markUnhandled("Transform")
+            }
+            return emptyList()
+        }
+
         // Extract list of functions
         val listData = obj["list"] as? JsonArray ?: return emptyList()
 

@@ -55,7 +55,45 @@ enum PositionApplier {
         // appliers in the project that chain into a single return path.
         var out = view
 
-        switch agg.position ?? .staticPos {
+        // Wave 49 (lane A7) — the PERCENTAGE-INSET lane. A percentage inset
+        // resolves against the containing block's corresponding dimension
+        // (CSS 2.1 §9.4.3), a number only the SwiftUI Environment carries
+        // (`containingBlockWidth` / `containingBlockHeight`), which this
+        // static func cannot read. A ViewModifier can — the same trick
+        // BorderSideApplier uses for its own `@Environment(\.wptCaptureMode)`
+        // read — so the geometry switch below moves into [insetGeometry] and
+        // the percentage case routes through it from inside composition.
+        // Entered ONLY when a side really was declared as a percentage, so
+        // every px-inset component keeps the pre-wave-49 view tree exactly.
+        if let pct = agg.percentInsets, pct.any {
+            out = AnyView(view.modifier(PercentInsetPositioned(
+                kind: agg.position ?? .staticPos,
+                legacyRect: rect,
+                percents: pct.resolved(isRTL: isRTL))))
+            if let z = agg.zIndex { out = AnyView(out.zIndex(z)) }
+            return out
+        }
+
+        out = insetGeometry(view, kind: agg.position ?? .staticPos, rect: rect)
+
+        // zIndex applies regardless of positioning scheme — CSS allows
+        // z-index on any positioned element, and SwiftUI's .zIndex works
+        // on any view (paint-order tie-breaker at the parent stack).
+        if let z = agg.zIndex {
+            out = AnyView(out.zIndex(z))
+        }
+
+        return out
+    }
+
+    /// The position-scheme geometry, split out of [apply] (wave 49) so the
+    /// percentage lane can run the IDENTICAL switch on its resolved rect —
+    /// the two can never drift apart.
+    fileprivate static func insetGeometry(_ view: AnyView,
+                                          kind: PositionKind,
+                                          rect: InsetRect?) -> AnyView {
+        var out = view
+        switch kind {
         case .staticPos:
             // No offset. Identity (zIndex handled below).
             break
@@ -107,13 +145,6 @@ enum PositionApplier {
             // identity so the rest of the test suite still passes.
             // TODO: integrate with the sticky-header TOC PR once it lands.
             break
-        }
-
-        // zIndex applies regardless of positioning scheme — CSS allows
-        // z-index on any positioned element, and SwiftUI's .zIndex works
-        // on any view (paint-order tie-breaker at the parent stack).
-        if let z = agg.zIndex {
-            out = AnyView(out.zIndex(z))
         }
 
         return out
@@ -182,5 +213,44 @@ enum PositionApplier {
             if p == .absolute || p == .fixed { return true }
         }
         return false
+    }
+
+    /// Wave 49 (lane A7) — the composed half of the percentage-inset lane.
+    ///
+    /// A `ViewModifier` is the only place in this engine that can read the
+    /// containing-block environment channels, because `PositionApplier.apply`
+    /// is a static function called from `ComponentRenderer`'s body and gets
+    /// no Environment of its own. Same pattern as `BorderSideApplier`'s
+    /// `@Environment(\.wptCaptureMode)` read.
+    ///
+    /// WPT-capture gated for the reason the spacing appliers gate: the
+    /// committed baselines contain percent insets too
+    /// (fixtures/properties/layout/position-top-left.json,
+    /// inset-logical.json, fidelity/layout.combos.json) and were frozen
+    /// against the number-as-points reading. Outside WPT capture the legacy
+    /// rect is used verbatim, so those baselines are byte-identical by
+    /// construction.
+    fileprivate struct PercentInsetPositioned: ViewModifier {
+        /// The parent-published containing-block content width; nil when the
+        /// ancestor's inline size is not statically definite.
+        @Environment(\.containingBlockWidth) private var cbWidth
+        /// Block-axis twin. Nil means indefinite (Renderer/ContainingBlock).
+        @Environment(\.containingBlockHeight) private var cbHeight
+        /// Only the WPT capture lane takes the resolved value (see above).
+        @Environment(\.wptCaptureMode) private var wptCaptureMode
+
+        let kind: PositionKind
+        let legacyRect: InsetRect?
+        let percents: InsetPercents
+
+        func body(content: Content) -> some View {
+            let rect = wptCaptureMode
+                ? PercentInsetResolve.resolve(legacy: legacyRect,
+                                              percents: percents,
+                                              cbWidth: cbWidth,
+                                              cbHeight: cbHeight)
+                : legacyRect
+            return PositionApplier.insetGeometry(AnyView(content), kind: kind, rect: rect)
+        }
     }
 }

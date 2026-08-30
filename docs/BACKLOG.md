@@ -12,11 +12,11 @@ this file is incomplete.
 
 Corpus history and per-wave findings live in `docs/STATUS.md` (one dated
 paragraph per wave) and `tools/titan/results/corpus-v*.json` (one snapshot
-per wave, `_note` carries the full story). Current: **corpus-v6.14**
-(wave 48 — web 1201/1379 87.1%, iOS 1066/1366 78.0%, Android 1045/1366
-76.5%; 61 cells gained, zero lost vs the v6.13-cal calibration opener).
-All deltas attribute against the most recent snapshot, never across the
-PR-#126 instrument change.
+per wave, `_note` carries the full story). Current: **corpus-v6.15**
+(wave 49 — web 1205/1379 87.4%, iOS 1081/1366 79.1%, Android 1058/1366
+77.5%; 32 cells gained, zero lost, 4111 scored cells with exact column
+parity). All deltas attribute against the most recent snapshot, never
+across the PR-#126 instrument change.
 
 ---
 
@@ -51,32 +51,96 @@ PR-#126 instrument change.
   skeptics. Fix/skeptic lanes run focused tests only; the orchestrator
   runs one sequential full sweep afterwards.
 
-## Next-wave obligations (wave 49 opens with these)
+## Next-wave obligations (wave 50 opens with these)
 
-1. **Deltas attribute against corpus-v6.14** (the wave-48 gate).
+1. **Deltas attribute against corpus-v6.15** (the wave-49 gate).
 2. The 327-net's fatal exit classes stay in force: exit 3 (non-sRGB
    capture), exit 4 (unledgered divergence), exit 5 (**stale
    ledger/waiver — the action is always DELETE the named line, never
-   re-add**), exit 6 (spec oracle, dormant until fixtures gain
-   `_expect`). The ledger (`tools/visual/cross-platform-expectations
-   .json`, now 29 entries after the wave-48 Transform_Combined ×2
-   deletion) is co-maintained by every wave that touches rendering.
-3. **Chase the unmasked Android ancestor-clip gap** (wave-48 W8
-   adjudication of the one real calibration shift,
-   clip-path-blending-offset 0.9818→0.9566): PR #126's BlendModeApplier
-   saveLayer-bounds fix was CORRECT and un-hid a pre-existing defect —
-   Android never applies an ancestor's clip-path to an absolutely-
-   positioned/blended child (sibling of open bug 6b below). Do NOT
-   revert the bounds fix.
-4. ~~Regenerate `tools/visual/baseline-stats.json`~~ DONE at the wave-48
-   gate (129 rows refreshed after the `041_Transform_Combined` Android
-   baseline moved). Keep regenerating whenever a baseline is refreshed.
-5. **Harness check worth adding**: the 327-net once PASSED with the
-   whole Android column silently skipped (test-all's per-platform skip
-   on capture failure) — a column-presence assertion (3 platforms × 109
-   or fail) would have caught it. Wave-48 gate log has the repro.
+   re-add**), exit 6 (spec oracle). The ledger
+   (`tools/visual/cross-platform-expectations.json`) is co-maintained by
+   every wave that touches rendering.
+3. **The pass column is ~35% degenerate and that is now the campaign's
+   biggest known problem.** Wave-49 lane I1 opened 78 randomly-drawn
+   PASSING cells by eye: 27 are visibly wrong renders (wrong colour,
+   wrong position, wrong line breaking, missing glyphs — "PASS" rendered
+   "ASS", "A. B. C." rendered "0. 1. 2."). The 179-cell red-square class
+   is one visible slice. **No colour-based check reaches the rest**, so
+   the next instrument step is NOT another colour veto. Evidence:
+   `scratchpad/wave49-i1/handverdicts.json` (per-cell verdicts) and the
+   census in the wave-49 PR.
+4. **The novel-ink veto is SHIPPED DISARMED** (`TITAN_NOVEL_INK_VETO=1`
+   to arm; stamped on every diff for triage regardless). It missed its
+   pre-registered 95% recall bar — 66.7% on the census-selected defect
+   set, **16.7% on an unbiased sample**. Do NOT arm it by lowering the
+   threshold. The two measured miss mechanisms are (a) wrong-colour-AND-
+   displaced renders, whose divergent region fills with the reference's
+   own palette, and (b) small marks that clear the fraction bar but not
+   the mass bar. The named successor is a **displacement-aware
+   denominator** (exclude divergent pixels explained by a rigid
+   translation of reference ink before computing the ratio) — a
+   redesign needing its own pre-registered decision rule, and a fresh
+   hand-verified defect set NOT selected by any rule correlated with the
+   check's own bars.
+5. ~~Column-presence check~~ DONE (wave 49): `assertPlatformColumns` in
+   `inject-wpt-block.mjs` (warns by default, fatal under
+   `TITAN_REQUIRE_ALL_COLUMNS=1`) plus a per-section guard in the gate
+   script that reprovisions and retries once, then aborts. Both were
+   exercised for real at the wave-49 gate.
+6. **Mid-run disk is now a gate abort (<8G).** The first wave-49 gate
+   attempt lost its Android column when the HOST hit 94% and
+   destabilised the emulator into an adb "Broken pipe" during
+   `:app:installDebug`. Start-only `df` is not enough. Pre-gate pruning
+   recipe that worked: `xcrun simctl delete unavailable` + delete every
+   Shutdown sim except the seed (81 sims → 5, CoreSimulator 38G → 11G),
+   then `tmutil thinlocalsnapshots / 21474836480 4` — APFS holds freed
+   space in local snapshots, so `df` barely moves until you thin them.
 
-## Ranked queue (wave 49+)
+## Ranked queue (wave 50+)
+
+0. **Wave-49 discoveries, ranked above the older queue:**
+   (a) **`tools/titan/extract-fixture.mjs` collapses competing
+   declarations last-wins with no validity oracle** (a bare
+   `props[k] = v` around line 830). This is why
+   `css-values/angle-units-001` cannot be fixed in the converter: all
+   five competing `background-image` declarations are gone before
+   conversion, so the four INVALID ones cannot be dropped in favour of
+   the valid green one. Lane A1 proved it and refused to claim the flip;
+   a prepared patch sits at `scratchpad/seam-A1-1.patch` (+148) with its
+   test at `seam-A1-2.patch`, **deliberately deferred** — corpus-wide
+   capture-pipeline blast radius for 3 cells, unaudited, and a second
+   unowned change to a file lane A3 had already modified. Take it only
+   with a differential re-extraction over the full corpus.
+   (b) **Compose `LocalContainingBlock` should republish for
+   non-block-container ancestors** (CSS 2.1 §10.1). `PercentInsetResolve`
+   correctly declines when both axes are null because it cannot tell
+   CSS-indefinite from a channel gap; the iOS twin flips because
+   SwiftUI's `LayoutAggregate` publishes one. Blocks
+   `css-position/position-relative-006` (android) — the wave's only
+   prediction miss — and any percentage inset under such an ancestor.
+   TODO is in place at `PercentInsetResolve.kt`.
+   (c) **`css-transform-3d-transform-style` (android) passes at 0.9577
+   against iOS's 0.9574 and is FRAGILE.** `OrthographicFlatten` does not
+   read `transform-style`; it converges on iOS's known-wrong render and
+   is labelled an approximation. Real preserve-3d compositing on Compose
+   is the actual fix; treat the cell as a candidate to lose.
+   (d) `clip-path-contentBox-1d/1e` still fail on Android (0.8775,
+   0.8875) despite the wave-49 extractor repair — the crash is fixed and
+   the centre now decodes correctly, but the rendered shape still
+   diverges from the browser ref.
+   (e) Scientific-notation angles (`1e2deg`) survive as a Raw
+   passthrough because `AngleParser.angleRegex` has no exponent branch.
+   Zero corpus carriers today (grep over `tools/wpt/css/` finds none),
+   so it is documented as a modelling limitation rather than treated as
+   invalidity. Widening AngleParser touches transforms, colour hue
+   channels, conic prefixes and gradient stops — wider than one lane.
+   (f) **Pre-existing wrong spec citations outside the wave-49 diff**,
+   found but deliberately not touched: `PseudoTextFold.swift:21`,
+   `PseudoBucketExtractor.kt:115,142`, `GradientValueParsers.kt:21,31`,
+   `BackgroundImagePropertyParser.kt:21,273`,
+   `MaskImagePropertyParser.kt:63`, `GradientRamp.kt`. A citation sweep
+   of the pre-wave-49 tree is a cheap standalone lane.
+
 
 1. **Vertical-wedge residuals** (the wave-47 wedges are FIXED as
    mechanisms — W1 wave 48 — but the cells still fail): (a)
@@ -147,10 +211,15 @@ PR-#126 instrument change.
    color-mix in lch needs a static mixer (srgb→lch in ColorConversion);
    (g) contain-content-004/html-overflow-002: all three paint blue-
    FILLED blocks where the ref wants blue-BORDERED hollow cells; (h)
-   native image() carries only the FIRST src, so fallbacks-003/004 are
-   permanently unwinnable on natives (first candidate `1x1-green.svg`
-   does not exist at corpus root — only `support/` has it); full-srcs
-   candidate list is the fix; (i) **mask-image wire gaps** (wave-48 F1/
+   ~~native image() carries only the FIRST src~~ **FIXED wave 49** (A3,
+   `ImageCandidateChain` on both natives + the bare-STRING `<image-src>`
+   inlining `extract-fixture.mjs` was missing): fallbacks-and-annotations
+   002/003/004 flipped on iOS AND Android, 6 cells, and the 001 triple
+   was verified not to regress. Note 004's winning candidate
+   `support/1x1-green.gif` has a global colour table of (0,127,0) where
+   the ref paints (0,128,0) — one step off, still passing. `005` remains
+   unwinnable-as-scored (BACKLOG 5d). (i) **mask-image wire gaps**
+   (wave-48 F1/
    S6 probes): `MaskImageValue.ColorStop` drops `positionLength`
    (every px-positioned mask gradient stop), and ImageNotation is absent
    from `mapToMask` so `mask-image: image(...)` drops the whole property.
@@ -163,9 +232,11 @@ PR-#126 instrument change.
    (pinned; no corpus carrier); 3D-bearing lists keep legacy
    approximations; the extractor's largest-axis rotate3d heuristic
    admits `rotate3d(1,1,1,θ)` as planar (inherited, now documented).
-   (b) Android clips a transformed child's paint to its layout slot —
-   PLUS the wave-49 obligation #3 sibling (ancestor clip-path on
-   abspos/blended children). (c) Android box-shadow ~2.4× over-blur
+   (b) Android clips a transformed child's paint to its layout slot.
+   The wave-49 obligation #3 sibling (ancestor clip-path on abspos/
+   blended children) is **FIXED wave 49** — clip-path-blending-offset
+   Android 0.9566→1.0000, PR #126's BlendModeApplier bounds fix verified
+   NOT reverted; the transformed-child clip remains open. (c) Android box-shadow ~2.4× over-blur
    (`MultipleShadowApplier.kt`). (d) iOS overflow clip applied OUTSIDE
    the transform.
 7. **css-gaps residuals** (W7 wave 48 built column-wrap on both natives +

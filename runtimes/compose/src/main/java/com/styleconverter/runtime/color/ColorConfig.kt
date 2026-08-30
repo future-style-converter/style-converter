@@ -49,7 +49,7 @@ data class ColorConfig(
     /**
      * PER-LAYER, PER-AXIS repeat modes in source order. Unlike the single
      * [backgroundRepeat] enum this shape can express two-axis values like
-     * `background-repeat: space round` (css-backgrounds-3 §3.7 two-value
+     * `background-repeat: space round` (css-backgrounds-3 §2.4 two-value
      * syntax). Empty = fall back to the single field. Cycles like sizes.
      */
     val backgroundRepeats: List<BackgroundRepeatAxes> = emptyList(),
@@ -78,7 +78,7 @@ data class ColorConfig(
     val backgroundBlendModes: List<androidx.compose.ui.graphics.BlendMode> = emptyList(),
     /**
      * Paint-area insets for CSS `background-clip: padding-box | content-box`
-     * (css-backgrounds-3 §3.11: the background painting area shrinks to the
+     * (css-backgrounds-3 §2.7: the background painting area shrinks to the
      * padding box / content box). Null = border-box (the initial value) —
      * paint the whole box as before. When non-null, ColorApplier insets the
      * background-color / gradient fill by these edge amounts instead of
@@ -106,7 +106,7 @@ data class ColorConfig(
 }
 
 /**
- * One gradient-center axis (`at <position>`, css-images-3 §3.5 /
+ * One gradient-center axis (`at <position>`, css-images-3 §3.2 /
  * css-images-4 §3.4.4). CSS allows a full <length-percentage> per axis;
  * the IR wire carries percents as raw numbers and lengths as objects
  * (IRLengthPercentageSerializer). The extractor resolves runtime-dependent
@@ -146,7 +146,7 @@ data class GradientCoord(val kind: Kind, val value: Float) {
 
 /**
  * Edge insets (border-box → painting-area) for CSS `background-clip:
- * padding-box | content-box` (css-backgrounds-3 §3.11). For padding-box the
+ * padding-box | content-box` (css-backgrounds-3 §2.7). For padding-box the
  * insets are the computed border widths; for content-box they additionally
  * include the padding. All four zero ≡ border-box (no clip).
  */
@@ -186,7 +186,7 @@ sealed interface BackgroundImageConfig {
         val angle: Float,
         val colorStops: List<ColorStop>,
         val repeating: Boolean = false,
-        // The authored <color-interpolation-method> (css-color-4 §12.4),
+        // The authored <color-interpolation-method> (css-color-4 §13.2),
         // parsed from the layer's optional `interp` wire key — wave 47.
         // LEGACY = no clause = the historical Skia sRGB shader ramp.
         val interp: GradientInterpolation = GradientInterpolation.LEGACY
@@ -204,7 +204,7 @@ sealed interface BackgroundImageConfig {
      * @property repeating Whether this is a repeating gradient
      */
     /**
-     * Ending shape of a CSS radial gradient (Images Module 3 §3.5):
+     * Ending shape of a CSS radial gradient (Images Module 3 §3.2):
      *   ellipse: distinct horizontal / vertical radii (default)
      *   circle:  single radius — both axes match
      */
@@ -293,6 +293,36 @@ sealed interface BackgroundImageConfig {
      * @property url The URL or path to the image
      */
     data class Url(val url: String) : BackgroundImageConfig
+
+    /**
+     * `image()` notation (css-images-4 §2.5 / the css-images-3 candidate-list
+     * form) held UNRESOLVED — wave-49 lane A3.
+     *
+     * §2.1's value is not one source: it is an ORDERED CANDIDATE LIST plus an
+     * optional `<color>`, and the UA paints the first candidate it can display,
+     * falling back to the colour only when every candidate fails. Which
+     * candidate that is cannot be known by an extractor — it depends on a
+     * decode the paint path performs — so the whole value travels here intact
+     * and [ColorApplier] resolves it through
+     * [com.styleconverter.runtime.images.ImageCandidateChain] at draw time.
+     *
+     * Before this variant the extractor collapsed the value immediately: colour
+     * if present, else `Url(srcs[0])`. That threw candidates 2..n away, which
+     * is why WPT css-image-fallbacks-and-annotations 003/004 — whose first
+     * candidate `1x1-green.svg` does not exist beside the test — could only
+     * ever paint the forbidden `background-color: red` (wave-48 gate: Android
+     * 0.9981 `colorFailed`).
+     *
+     * @property srcs         candidate sources in AUTHOR order (may be empty:
+     *                        `image(<color>)` is a valid solid-colour image)
+     * @property fallbackColor the optional `<color>`, painted only when every
+     *                        candidate is declined; null when the author wrote
+     *                        none (or wrote one this runtime cannot resolve)
+     */
+    data class ImageNotation(
+        val srcs: List<String>,
+        val fallbackColor: Color?,
+    ) : BackgroundImageConfig
 
     /**
      * No background image.
@@ -386,7 +416,7 @@ sealed interface BackgroundSizeConfig {
     /**
      * Explicit dimensions. Exactly one of (width, widthPercent) is set per
      * axis; both null = that axis is `auto` (resolves to the container axis
-     * for gradients, which have no intrinsic size — css-backgrounds-3 §3.9).
+     * for gradients, which have no intrinsic size — css-backgrounds-3 §2.9).
      * The *Percent fields are 0..1 FRACTIONS of the positioning area (the
      * extractor divides the CSS 0..100 percentage by 100) — pinned by
      * ColorExtractorTest and consumed as fractions by ColorApplier's tile
@@ -421,7 +451,7 @@ enum class BackgroundRepeatConfig {
 }
 
 /**
- * One AXIS of a background-repeat value (css-backgrounds-3 §3.7
+ * One AXIS of a background-repeat value (css-backgrounds-3 §2.4
  * <repeat-style>). The single-keyword forms expand per spec: `repeat-x` ≡
  * `repeat no-repeat`, `space` ≡ `space space`, etc. — see
  * [BackgroundRepeatAxes.from].

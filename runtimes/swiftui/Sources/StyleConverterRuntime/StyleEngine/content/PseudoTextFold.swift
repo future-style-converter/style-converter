@@ -79,10 +79,23 @@ enum PseudoTextFold {
         // wave-43 corpus produces: contain-content-011's host is bare).
         let emBasePx = component.properties.last { $0.type == "FontSize" }
             .flatMap { ValueExtractors.extractPx($0.data) }.map(Double.init) ?? 16.0
+        // ── Wave-49 lane A2: the generated-BOX path claims FIRST ─────────
+        // A bucket declaring a block-level box is not an inline run at all
+        // (CSS 2.1 §12.1 generates it INSIDE the element as its first/last
+        // child), so PseudoBoxBridge takes it and the text bridge below must
+        // not also see it — one claim function, two consumers, so the same
+        // content can never render twice. nil for every bucket the box
+        // bridge does not own, which is every wave-48 payload except
+        // css-pseudo/before-as-flex-container's `display: flex` ::before.
+        let hostRole = component.meta?.role
+        let beforeBox = PseudoBoxBridge.claim(
+            bucket: pseudos["before"], role: "before", hostRole: hostRole)
+        let afterBox = PseudoBoxBridge.claim(
+            bucket: pseudos["after"], role: "after", hostRole: hostRole)
         // ::before — always foldable as the LEADING run: web renders its
         // span first, then the element's own text, whether or not real
         // children follow (NodeRenderer's positional order).
-        var before = PseudoTextBridge.inlineRun(
+        var before = beforeBox != nil ? nil : PseudoTextBridge.inlineRun(
             bucket: pseudos["before"], role: "before", emBasePx: emBasePx)
         // ::after — foldable only on a CHILDLESS component: with composed
         // children, web paints the after-span BEHIND them (text, children,
@@ -90,7 +103,7 @@ enum PseudoTextFold {
         var after: PseudoTextBridge.PseudoInlineRun? = nil
         // Bucket presence checked first so the refusal log fires only for
         // components that actually carry an ::after payload.
-        if let afterBucket = pseudos["after"] {
+        if let afterBucket = pseudos["after"], afterBox == nil {
             // nil/empty children = the leaf shape (never [], per the
             // IRComponent decode contract) — the safe append position.
             if component.children?.isEmpty ?? true {
@@ -130,8 +143,11 @@ enum PseudoTextFold {
             after = nil
         }
         // Nothing survived the gates → identity, so the view tree of every
-        // non-foldable component is untouched.
-        guard before != nil || after != nil else { return component }
+        // non-foldable component is untouched. Wave-49 lane A2: a claimed
+        // BOX counts as something to fold even when no text run does.
+        guard before != nil || after != nil || beforeBox != nil || afterBox != nil else {
+            return component
+        }
         // The fold itself: before + own text + after, in CSS 2.1 §12.1
         // order. `_text` bakes its own separators ("1 " / " 1"), so plain
         // concatenation is the whole job — non-empty by construction
@@ -141,6 +157,11 @@ enum PseudoTextFold {
         // appended AFTER the host's properties so the pseudo's own
         // declarations win the extractors' last-wins cascade.
         let styling = (before?.styling ?? []) + (after?.styling ?? [])
+        // Wave-49 lane A2: when ONLY a box was claimed no text run folded,
+        // so the host's own `text` must ride through VERBATIM — nil and ""
+        // are different values in the decode contract ("absent" vs
+        // "extracted, was empty"), and `folded` would flatten nil to "".
+        let resolvedText = (before == nil && after == nil) ? component.text : folded
         // Field-for-field copy with `text` rewritten and the typed styling
         // appended. `pseudos` is KEPT on the copy: ContentsUnboxing's
         // eligibility gate reads it (a pseudos-carrying component never
@@ -150,11 +171,58 @@ enum PseudoTextFold {
                            properties: component.properties + styling,
                            selectors: component.selectors,
                            media: component.media,
-                           children: component.children,
+                           children: splicedChildren(component, beforeBox, afterBox),
                            slot: component.slot,
-                           text: folded,
+                           text: resolvedText,
                            pseudos: component.pseudos,
                            meta: component.meta,
                            variables: component.variables)
+    }
+
+    /// The child list with the claimed generated boxes spliced in — CSS 2.1
+    /// §12.1 order: ::before, the element's own children, ::after. Returns
+    /// the ORIGINAL array (nil included) when no box was claimed, so the
+    /// text-only fold stays byte-identical to wave 48.
+    private static func splicedChildren(
+        _ host: IRComponent,
+        _ beforeBox: PseudoBoxBridge.BoxClaim?,
+        _ afterBox: PseudoBoxBridge.BoxClaim?
+    ) -> [IRComponent]? {
+        guard beforeBox != nil || afterBox != nil else { return host.children }
+        var kids: [IRComponent] = []
+        if let b = beforeBox { kids.append(boxComponent(host, "before", b)) }
+        kids.append(contentsOf: host.children ?? [])
+        if let a = afterBox { kids.append(boxComponent(host, "after", a)) }
+        return kids
+    }
+
+    /// One generated box as a synthetic child component.
+    ///
+    /// Making it a REAL child is the whole fix: the host's own layout
+    /// branch (block flow here, flex/grid elsewhere) then places it as the
+    /// first/last in-flow child exactly like an authored child, and
+    /// StyleBuilder paints its typed declarations through the one existing
+    /// pipeline — no view-tree plumbing anywhere else.
+    ///
+    /// `slot` is nil on purpose: it is COMPOSER input (spec 03 — only a
+    /// composer reads it, and composition has already happened by the time
+    /// this fold runs). `pseudos` is nil too — a generated box has no
+    /// generated content of its own, which also makes the fold structurally
+    /// non-recursive.
+    private static func boxComponent(
+        _ host: IRComponent, _ role: String, _ claim: PseudoBoxBridge.BoxClaim
+    ) -> IRComponent {
+        IRComponent(
+            // Stable, collision-free identity: the CSS selector spelling of
+            // the box. SwiftUI keys the ForEach by it, so it must not move
+            // between renders of the same host.
+            id: "\(host.id)::\(role)", name: "\(host.name)::\(role)",
+            properties: claim.properties,
+            selectors: nil, media: nil, children: nil, slot: nil,
+            // The literal/baked content string; nil rather than "" so the
+            // renderer's has-text tests read the same as an authored empty
+            // leaf (`content: ""` boxes paint their background only).
+            text: claim.text.isEmpty ? nil : claim.text,
+            pseudos: nil, meta: nil)
     }
 }

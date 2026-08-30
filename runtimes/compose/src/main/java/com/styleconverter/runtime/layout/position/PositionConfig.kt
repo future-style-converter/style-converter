@@ -34,7 +34,24 @@ data class PositionConfig(
     val insetBlockEnd: Dp? = null,
     val insetInlineStart: Dp? = null,
     val insetInlineEnd: Dp? = null,
-    val zIndex: Float = 0f
+    val zIndex: Float = 0f,
+    /**
+     * Wave 49 (lane A7) — the PERCENTAGE magnitudes of whichever inset
+     * longhands the IR wrote as a bare number (the converter's
+     * `InsetValue.PercentageValue` wire). Null for the overwhelming
+     * majority of components, whose insets are all `{"px":N}` objects.
+     *
+     * Deliberately a SIDE CHANNEL rather than a replacement for the Dp
+     * slots above: the Dp slots keep the pre-wave-49 value (the raw
+     * percentage number read as pixels — the historical behaviour), so
+     * every consumer that cannot resolve a containing block
+     * (`resolvedOffset`'s backdrop lane, the anchor slots, the whole
+     * non-WPT path) renders byte-identically to the frozen baselines.
+     * `PositionApplier` is the one reader that upgrades them, and only
+     * where it can read [com.styleconverter.runtime.core.variables.LocalContainingBlock];
+     * see [PercentInsetResolve] for the CSS citation and the guard.
+     */
+    val percent: PercentInsets? = null
 ) {
     /**
      * Returns true if any positioning property is defined.
