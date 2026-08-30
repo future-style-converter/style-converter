@@ -24,9 +24,17 @@ background work runs. Stop the loop and report when the wave ships.
    constraints): `git fetch neworigin dev && git checkout -f -B
    campaign/applier-campaign neworigin/dev`; verify the tip is the last
    wave's merge commit and `git status --short` is empty.
-2. Fresh-worktree conveniences if missing: `local.properties` with
-   `sdk.dir=$HOME/Library/Android/sdk` (root + apps/android-harness),
-   `node_modules` symlinked from the workspace root.
+2. Fresh-worktree provisioning if missing — follow BACKLOG "Operational
+   recipes → Fresh-worktree provisioning" exactly: `local.properties`
+   with `sdk.dir=$HOME/Library/Android/sdk` (root + apps/android-
+   harness); the WPT mirror (`tools/wpt/`); the iOS xcodeproj
+   (`xcodegen generate`); and `node_modules` as a DIRECTORY of
+   per-entry symlinks whose three workspace packages
+   (`@style-converter/web`, `web-harness`, `style-converter-tools`)
+   link into THIS tree. **Never symlink the whole `node_modules` dir
+   from another worktree** — its relative workspace links silently
+   serve that tree's web runtime to every vite capture (proven wave
+   48). Clear `apps/web-harness/node_modules/.vite*` after repointing.
 3. **Disk** ≥ 10G free (`df -g /System/Volumes/Data`); if low, prune old
    `tools/titan/runs/*` (keep current + previous gate + wave35-webmap),
    erase shutdown simulators, DerivedData, sibling worktree build dirs.
