@@ -1,13 +1,16 @@
 //
 //  MulticolFloatStripSeamTests.swift
-//  Wave-45 lane X3 — the float-strip CONSUMPTION pins (FS-Z rows).
+//  Wave-45 lane X3 + wave-48 lane W3 — the float-strip CONSUMPTION pins
+//  (FS-Z rows).
 //
-//  Pins MulticolFloatStripSeam.swift: the zero-flow plan (now the true
-//  twin of Kotlin FS-B1 — wave 44 could only pin engagement because
-//  zeroFlowPlan did not exist on iOS), the shared pre-measure predicate,
-//  the whole-child column mapping the layout places with, and the
-//  composition-time EngagedStrip gate. Geometry rows are hand-derived
-//  from the same frozen Chromium refs as MulticolFloatStripTests
+//  Pins MulticolFloatStripSeam.swift + MulticolFloatStripSlice.swift:
+//  the zero-flow plan (the true twin of Kotlin FS-B1 — wave 44 could
+//  only pin engagement because zeroFlowPlan did not exist on iOS), the
+//  shared pre-measure predicate, the slice-replay measure geometry the
+//  wave-48 row places with (sliceGeometry — it replaced wave-45's
+//  whole-child columnSlot mapping), and the composition-time
+//  EngagedStrip gate. Geometry rows are hand-derived from the same
+//  frozen Chromium refs as MulticolFloatStripTests
 //  (tools/wpt/refs/9b5435…/CSS2/floats-clear__floats-clear-multicol-*).
 //
 
@@ -124,40 +127,90 @@ final class MulticolFloatStripSeamTests: XCTestCase {
         XCTAssertFalse(MulticolFloatStrip.engagesPreMeasure(nil, columnFillAuto: true))
     }
 
-    // MARK: - FS-Z4: the whole-child column mapping (columnSlot)
+    // MARK: - FS-Z4: the slice-replay measure geometry (wave 48, lane W3)
 
-    /// FS-Z4 — ⌊y/h⌋ + local remainder, capped at N−1. Rows are the
-    /// live fixture positions: the cleared box at strip 250 lands in
-    /// column 2 at local 50 under fill (H=100 — ref orange rows 161-163
-    /// = content 50-52 of column 3) and at local 80 under balance
-    /// (h=85 — ref orange rows 171-175 = content 80-84).
-    func testFSZ4ColumnSlotMapping() {
-        // The float container anchors at strip 0 → column 0, local 0.
-        XCTAssertEqual(MulticolFloatStrip.columnSlot(
-            yOffsetPx: 0, columnBlockSizePx: 100, columnCount: 3).column, 0)
-        // Fill 002: cleared box strip 250 → column 2, local 50.
-        let fill = MulticolFloatStrip.columnSlot(
-            yOffsetPx: 250, columnBlockSizePx: 100, columnCount: 3)
-        XCTAssertEqual(fill.column, 2)
-        XCTAssertEqual(fill.localYPx, 50)
-        // Balance 002: h=85 → column 2, local 80.
-        let bal = MulticolFloatStrip.columnSlot(
-            yOffsetPx: 250, columnBlockSizePx: 85, columnCount: 3)
-        XCTAssertEqual(bal.column, 2)
-        XCTAssertEqual(bal.localYPx, 80)
-        // 003's step-displaced container: strip 10 → column 0, local 10.
-        XCTAssertEqual(MulticolFloatStrip.columnSlot(
-            yOffsetPx: 10, columnBlockSizePx: 100, columnCount: 3).localYPx, 10)
-        // Past the last column: capped at N−1, overflowing downward
-        // (css-overflow-3 §2 / the wave-10 fill cap — no §8.2 overflow
-        // columns for the strip).
-        let over = MulticolFloatStrip.columnSlot(
-            yOffsetPx: 350, columnBlockSizePx: 100, columnCount: 3)
-        XCTAssertEqual(over.column, 2)
-        XCTAssertEqual(over.localYPx, 150)
-        // Degenerate inputs answer totally (a plan never produces them).
-        XCTAssertEqual(MulticolFloatStrip.columnSlot(
-            yOffsetPx: 7, columnBlockSizePx: 0, columnCount: 3).localYPx, 7)
+    /// The -balancing-002 `.clear` (clear:left; 5px orange border-bottom
+    /// — the wire the per-test IR carries: BorderBottomWidth {"px":5}).
+    private var clearBalancing002: IRComponent {
+        component("clear", [IRProperty(type: "Clear", data: .string("LEFT")),
+                            IRProperty(type: "BorderBottomStyle", data: .string("SOLID")),
+                            IRProperty(type: "BorderBottomWidth",
+                                       data: .object(["px": .double(5)]))])
+    }
+
+    /// FS-Z4 — sliceGeometry (the measure half's one shared resolver)
+    /// on the live -002 / -balancing-002 shapes with the zero-flow
+    /// measured heights the slice layout produces (float container 0 —
+    /// all content out of flow — and the cleared box's border band).
+    /// The band arithmetic y − band·h reproduces the fixture positions
+    /// the refs pin: fill orange at column-2 local 50 (ref rows 161-163
+    /// = content 50-52 of column 3), balance at local 80 (rows 171-175
+    /// = content 80-84) — the same rows the deleted wave-45 columnSlot
+    /// table carried, now expressed through the replay's own shift.
+    func testFSZ4SliceGeometry() {
+        // 002 under §7.2 fill (H=100): offsets [0, 250], h stays 100,
+        // C = 250 + the 3px medium border band = 253, three slices
+        // (ceil(253/100)) — the refs' 100+100+50(+3) aqua/orange split.
+        let fill = MulticolFloatStrip.sliceGeometry(
+            specs: specs002(), measuredHeightsPx: [0, 3],
+            proposedBlockSizePx: 100, columnFillAuto: true,
+            columnWidthPx: 100, columnGapPx: 0, columnCount: 3)
+        XCTAssertEqual(fill?.yOffsetsPx, [0, 250])
+        XCTAssertEqual(fill?.columnBlockSizePx, 100)
+        XCTAssertEqual(fill?.stripInkPx, 253)
+        XCTAssertEqual(fill?.fragments.count, 3)
+        // Band 2's replay shift puts the cleared box at local 50 — the
+        // ref's orange, immediately after the 250px aqua (161-163).
+        XCTAssertEqual(fill.map { $0.yOffsetsPx[1] - 2 * $0.columnBlockSizePx }, 50)
+        // -balancing-002 (initial §7.1 balance, declared H=100): the 5px
+        // band makes C = 255 and the strip balances to h = ceil(255/3)
+        // = 85 — the refs keep the 100px box with 85px columns.
+        let bal = MulticolFloatStrip.sliceGeometry(
+            specs: MulticolSpannerFlow.specsFor(children: [container(), clearBalancing002]),
+            measuredHeightsPx: [0, 5],
+            proposedBlockSizePx: 100, columnFillAuto: false,
+            columnWidthPx: 100, columnGapPx: 0, columnCount: 3)
+        XCTAssertEqual(bal?.columnBlockSizePx, 85)
+        XCTAssertEqual(bal?.stripInkPx, 255)
+        // Band 2's shift: 250 − 170 = 80 — the ref's orange rows 171-175.
+        XCTAssertEqual(bal.map { $0.yOffsetsPx[1] - 2 * $0.columnBlockSizePx }, 80)
+        // The place pass re-derives from the GRANTED height (h, not H) —
+        // a fixed point: balance with H := 85 answers the same 85.
+        XCTAssertEqual(MulticolFloatStrip.sliceGeometry(
+            specs: MulticolSpannerFlow.specsFor(children: [container(), clearBalancing002]),
+            measuredHeightsPx: [0, 5],
+            proposedBlockSizePx: 85, columnFillAuto: false,
+            columnWidthPx: 100, columnGapPx: 0, columnCount: 3)?.columnBlockSizePx, 85)
+    }
+
+    /// FS-Z4b — the probe branch (nil / non-finite proposal: SwiftUI's
+    /// ideal and max probes, or an auto-height chain): no fragmentainer,
+    /// so the spec-true auto-height answer — columns exactly as tall as
+    /// the content: h = C under fill (§7.2), ceil(C/N) under balance
+    /// (§7.1). The min probe (0) has no geometry at all.
+    func testFSZ4bProbeBranch() {
+        // Fill: the auto-height column IS the whole strip (C = 253).
+        XCTAssertEqual(MulticolFloatStrip.sliceGeometry(
+            specs: specs002(), measuredHeightsPx: [0, 3],
+            proposedBlockSizePx: nil, columnFillAuto: true,
+            columnWidthPx: 100, columnGapPx: 0, columnCount: 3)?.columnBlockSizePx, 253)
+        // Balance: ceil(253/3) = 85 (the 3px-band variant's balanced h).
+        XCTAssertEqual(MulticolFloatStrip.sliceGeometry(
+            specs: specs002(), measuredHeightsPx: [0, 3],
+            proposedBlockSizePx: nil, columnFillAuto: false,
+            columnWidthPx: 100, columnGapPx: 0, columnCount: 3)?.columnBlockSizePx, 85)
+        // The min probe (an explicit 0) has no fragmentainer — nil, and
+        // the layout answers the probe with a zero-height claim.
+        XCTAssertNil(MulticolFloatStrip.sliceGeometry(
+            specs: specs002(), measuredHeightsPx: [0, 3],
+            proposedBlockSizePx: 0, columnFillAuto: true,
+            columnWidthPx: 100, columnGapPx: 0, columnCount: 3))
+        // Desynced inputs (specs vs measured heights) decline through the
+        // plan's defensive re-gate — the slice's flush-stack fallback.
+        XCTAssertNil(MulticolFloatStrip.sliceGeometry(
+            specs: specs002(), measuredHeightsPx: [0],
+            proposedBlockSizePx: 100, columnFillAuto: true,
+            columnWidthPx: 100, columnGapPx: 0, columnCount: 3))
     }
 
     // MARK: - FS-Z5: the composition-time EngagedStrip gate
@@ -241,38 +294,46 @@ final class MulticolFloatStripSeamTests: XCTestCase {
         throw XCTSkip("repo root not found for \(relative)")
     }
 
-    /// The renderer's multicol branch (X3 hunk) threads the seam into
-    /// the layout AND publishes the matching zero-flow plan on the
-    /// floatClearancePlan environment — the two-consumer contract.
+    /// The renderer's multicol branch (X3 hunk; W3 since wave 48)
+    /// composes the slice-replay row for an engaged strip AND publishes
+    /// the matching zero-flow plan on the floatClearancePlan environment
+    /// — the two-consumer contract — while the non-engaged arm keeps the
+    /// greedy layout with the wave-42 clearance scope plan.
     func testRendererMulticolBranchDeliversBothHalves() throws {
         let src = try String(contentsOfFile: Self.repoPath(
             "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift"),
             encoding: .utf8)
-        // The layout parameter (the strip's geometry consumer).
-        XCTAssertTrue(src.contains("floatStrip: stripSeam"),
-                      "the multicol branch must thread the strip seam into MulticolGreedyLayout")
-        // The environment publication (the zero-flow paint consumer) —
-        // with the wave-42 clearance scope plan as the non-strip term.
-        XCTAssertTrue(src.contains("stripSeam?.zeroFlowPlan ?? clearanceScopePlan"),
-                      "the multicol branch must publish the zero-flow plan on floatClearancePlan")
+        // The replay row (the strip's layout consumer since wave 48).
+        XCTAssertTrue(src.contains("MulticolFloatStripSliceLayout("),
+                      "the multicol branch must compose the slice-replay row for engaged strips")
+        // The environment publication (the zero-flow paint consumer) on
+        // the SAME engagement that composed the row.
+        XCTAssertTrue(src.contains(".environment(\\.floatClearancePlan, stripSeam.zeroFlowPlan)"),
+                      "the strip arm must publish the engaged zero-flow plan on floatClearancePlan")
+        // The non-strip arm keeps the wave-42 clearance scope plan.
+        XCTAssertTrue(src.contains(".environment(\\.floatClearancePlan, clearanceScopePlan)"),
+                      "the greedy arm must keep publishing the clearance scope plan")
+        // The wave-45 per-child anchor-column placement is GONE — the
+        // greedy layout no longer carries a strip parameter (the seam-2
+        // gap this replaced: float ink stacked in one overflowing column).
+        XCTAssertFalse(src.contains("floatStrip: stripSeam"),
+                       "the superseded greedy-layout strip parameter must not come back")
     }
 
-    /// MulticolGreedyLayout declares the seam parameter (defaulted nil —
-    /// the dark-stage identity); its strip branch (split into
-    /// MulticolGreedyLayoutStrip.swift by the file-size rule) consumes
-    /// the shared FS geometry + the column mapping.
-    func testGreedyLayoutConsumesTheSeam() throws {
-        let host = try String(contentsOfFile: Self.repoPath(
-            "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/MulticolGreedyLayout.swift"),
+    /// The slice layout (the measure half) consumes the shared FS
+    /// geometry through sliceGeometry and clips each clone to its
+    /// css-break-3 §4 band via the −band·h shift.
+    func testSliceLayoutConsumesTheSharedGeometry() throws {
+        let slice = try String(contentsOfFile: Self.repoPath(
+            "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/MulticolFloatStripSlice.swift"),
             encoding: .utf8)
-        XCTAssertTrue(host.contains("var floatStrip: MulticolFloatStrip.EngagedStrip? = nil"),
-                      "MulticolGreedyLayout must carry the seam, defaulted nil")
-        let strip = try String(contentsOfFile: Self.repoPath(
-            "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/MulticolGreedyLayoutStrip.swift"),
-            encoding: .utf8)
-        XCTAssertTrue(strip.contains("MulticolFloatStrip.plan("),
-                      "the strip branch must build the shared FS geometry")
-        XCTAssertTrue(strip.contains("MulticolFloatStrip.columnSlot("),
-                      "the strip placement must map offsets through columnSlot")
+        XCTAssertTrue(slice.contains("MulticolFloatStrip.sliceGeometry("),
+                      "the slice layout must resolve through the one shared geometry resolver")
+        XCTAssertTrue(slice.contains("Double(bandIndex) * sp.columnBlockSizePx"),
+                      "the slice placement must shift by the band's replay translate")
+        // The resolver itself delegates to the FS-table plan — the one
+        // geometry owner (no parallel strip walk anywhere on iOS).
+        XCTAssertTrue(slice.contains("return plan(specs: specs"),
+                      "sliceGeometry must delegate to MulticolFloatStrip.plan")
     }
 }

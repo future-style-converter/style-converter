@@ -94,14 +94,26 @@
 //  on both natives at wave46-final). The one admitted nested shape is a
 //  {text, <br>} subtree (`flattenNestedRuns`).
 //
+//  WAVE 48 (lane W4) — THE UA-STYLED + NESTED-GLYPH RINGS. The styled
+//  tag ring widens with the UA-italic family (i/em/cite/var/dfn) and the
+//  UA-shifted pair (sup/sub — `font-size: smaller` + the super/sub
+//  baseline shift, Blink's parent/3+1 / parent/5+1 px rule), modeled
+//  from the HTML rendering stylesheet exactly like `u`'s underline; and
+//  `flattenNestedRuns` admits ONE-level nested glyph members with
+//  per-piece composed spans (subelements-002's `<i>e = mc<sup>2</sup>
+//  </i>` — android-ref 0.7649 / ios-ref 0.7272 at wave48-cal, ten
+//  stacked blocks where Chromium flows two lines).
+//
 //  HONEST SCOPE — every refusal is a LOGGED bail to the wave-32 stacked
 //  path (no silent fallthrough), so an engaged fold can never render less
 //  than the plan did. Still deferred, each behind its own named wall:
 //  atoms with GLYPHS or painted boxes, block-level members, nested
-//  member trees beyond {text, <br>}, out-of-flow siblings (float/abspos
-//  static position), member TextUnderlineOffset / text-decoration-inset
-//  (inset-011's offset underlines), and whitespace-only pre-wrap members
-//  with background (block-ellipsis-032's hanging-whitespace ring).
+//  member trees at depth 2+ or outside the span ring, compound sup/sub
+//  shifts, b/strong (`font-weight: bolder` is inherited-relative),
+//  out-of-flow siblings (float/abspos static position), member
+//  TextUnderlineOffset / text-decoration-inset (inset-011's offset
+//  underlines), and whitespace-only pre-wrap members with background
+//  (block-ellipsis-032's hanging-whitespace ring).
 //
 //  Twin: runtimes/compose/.../typography/inline/InlineRunFold.kt — the
 //  shared contract is "fold to one paragraph, reuse the platform's pinned
@@ -359,28 +371,48 @@ enum InlineRunFlow {
                             containerProperties: containerProperties,
                             adopted: &adopted) {
             case .glyphs(let style, let losses):
-                // The member's glyphs — a nested {text, <br>} subtree
-                // flattens (block-ellipsis-004's `<span>Line 3<br>Line 4
-                // </span>`), flat text appends with boundary collapsing —
-                // and the span records exactly what landed (wave 47).
+                // The member's glyphs — a nested subtree flattens
+                // ({text, <br>} since wave 47; wave 48/W4 adds one-level
+                // nested GLYPH members, subelements-002's `<i>e = mc<sup>
+                // 2</sup></i>`), flat text appends with boundary
+                // collapsing — and the span(s) record exactly what landed.
                 let start = out.count
                 // Empty-but-present runs ([] survives decode) are NOT a
                 // nested tree — the member's own text is the content
                 // (matches the Compose twin's isNullOrEmpty predicate;
                 // routing [] through the flatten would vanish the glyphs).
                 if member.children?.isEmpty == false || member.meta?.runs?.isEmpty == false {
-                    guard flattenNestedRuns(member, into: &out) else { return nil }
+                    switch flattenNestedRuns(member, outerStyle: style,
+                                             outerLosses: losses,
+                                             hostProperties: containerProperties,
+                                             into: &out, spans: &spans) {
+                    // A named wall — the whole fold refuses, as ever.
+                    case .bail: return nil
+                    // Wave 48 (lane W4): a nested glyph member rode — the
+                    // flatten emitted PER-PIECE spans (outer style over
+                    // the member's own text, composed style over each
+                    // nested member) so ranges carry distinct attribution.
+                    case .spansEmitted: break
+                    // {text, <br>}-only subtree: the wave-47 single
+                    // whole-range span below, BYTE-IDENTICALLY (its '\n'
+                    // coverage pins the passing block-ellipsis captures).
+                    case .noNestedGlyphs:
+                        if !style.isPlain || !losses.isEmpty {
+                            spans.append(Span(start: start, end: out.count,
+                                              style: style, statedLossTypes: losses))
+                        }
+                    }
                 } else {
                     appendCollapsed(&out, member.text ?? "")
+                    // Only real attribution (or a stated loss to report)
+                    // emits a span — plain members render byte-identically
+                    // to wave 44.
+                    if !style.isPlain || !losses.isEmpty {
+                        spans.append(Span(start: start, end: out.count,
+                                          style: style, statedLossTypes: losses))
+                    }
                 }
                 glyphMembers += 1
-                // Only real attribution (or a stated loss to report)
-                // emits a span — plain members render byte-identically
-                // to wave 44.
-                if !style.isPlain || !losses.isEmpty {
-                    spans.append(Span(start: start, end: out.count,
-                                      style: style, statedLossTypes: losses))
-                }
                 claimed += 1
             case .forcedBreak:
                 // Wave 47 (lane Z6): '\n', spaces falling on both sides
@@ -411,6 +443,11 @@ enum InlineRunFlow {
         // today). The break ring therefore only rides alongside a glyph
         // member — the corpus-simulated rule that keeps the wave-47 flip
         // set to exactly the 4 styled victims.
+        // Wave 48 (lane W4) RE-MEASURED the rule over wave48-cal before
+        // keeping it: lifting it flips 29 host decisions across 27
+        // tests, ~16 of them PASSING, while the failing rest fail on
+        // defects a fold cannot touch — the rule stands on evidence
+        // (the Compose twin carries the per-test enumeration).
         if breakMembers > 0, glyphMembers == 0 {
             return bail("br-stacked-equivalent",
                         "text-and-br-only host — the stacked fallback already " +
@@ -443,22 +480,49 @@ enum InlineRunFlow {
                       droppedEmptyMembers: dropped, spans: spans)
     }
 
-    /// Wave 47 (lane Z6) — flatten a glyph member's OWN `meta.runs` into
-    /// `out`: the one nested shape the ring admits is a {text, `<br>`}
-    /// subtree, where every nested child is a BR member and the runs list
-    /// claims all of them in strictly increasing order. The member's
-    /// `text` is the concatenation the runs were split FROM (spec 03
-    /// §4.1) and is deliberately ignored — the runs are authoritative.
-    /// Returns false after logging the named wall (the caller refuses the
-    /// whole fold, exactly like every other member refusal). Twin:
-    /// InlineRunFold.flattenNestedRuns.
+    /// The nested-flatten verdict (wave 48, lane W4). `noNestedGlyphs`
+    /// keeps the caller's wave-47 single whole-range span — that span
+    /// COVERS the flattened '\n's, and re-emitting {text, <br>} shapes
+    /// per-piece could move the PASSING block-ellipsis-004/005/006
+    /// captures (the Compose twin's fontSize-over-'\n' line-height
+    /// participation; mirrored here so the two folds emit identical span
+    /// lists); `spansEmitted` says a nested glyph member rode and the
+    /// flatten emitted per-piece spans itself.
+    private enum Flattened {
+        case bail
+        case noNestedGlyphs
+        case spansEmitted
+    }
+
+    /// Flatten a glyph member's OWN `meta.runs` into `out`. Two nested
+    /// shapes are admitted, every nested child claimed in strictly
+    /// increasing order (the member's `text` is the concatenation the
+    /// runs were split FROM — spec 03 §4.1 — and is deliberately
+    /// ignored; the runs are authoritative):
+    ///   • wave 47 (lane Z6): BR members ({text, `<br>`} —
+    ///     block-ellipsis-004's `<span>Line 3<br>Line 4</span>`);
+    ///   • wave 48 (lane W4): ONE-LEVEL nested GLYPH members admitted by
+    ///     the span ring (subelements-002's `<i>e = mc<sup>2</sup></i>`,
+    ///     inset-005's `<u>ultra-<sup>quick</sup> b<sub>row</sub>n</u>`),
+    ///     each folded with `InlineSpanRing.composeNested`'s composition
+    ///     of the outer member's style — deeper nesting stays a wall.
+    /// When a nested glyph member rides, the flatten emits PER-PIECE
+    /// spans into `spans` (outer style over the member's own text
+    /// pieces, composed style over each nested member's) and answers
+    /// `.spansEmitted`; otherwise `.noNestedGlyphs` and the caller keeps
+    /// the wave-47 whole-range emission byte-identically. Named walls
+    /// log and answer `.bail`. Twin: InlineRunFold.flattenNestedRuns.
     private static func flattenNestedRuns(_ member: IRComponent,
-                                          into out: inout String) -> Bool {
+                                          outerStyle: InlineSpanRing.Style,
+                                          outerLosses: [String],
+                                          hostProperties: [IRProperty],
+                                          into out: inout String,
+                                          spans: inout [Span]) -> Flattened {
         // Children without a runs order is a shape the wire never emits
         // for text members — refuse with the wave-44 reason.
         guard let runs = member.meta?.runs else {
             _ = bail("nested-member", "member carries children without runs")
-            return false
+            return .bail
         }
         let kids = member.children ?? []
         // The child's AUTHORING KEY resolves `name` before `id` —
@@ -469,53 +533,125 @@ enum InlineRunFlow {
             if !kid.name.isEmpty, byName[kid.name] == nil { byName[kid.name] = i }
             if !kid.id.isEmpty, byId[kid.id] == nil { byId[kid.id] = i }
         }
+        // The per-piece attributions, collected over the walk — emitted
+        // into `spans` only when a nested glyph member makes the member's
+        // attribution non-uniform (see `Flattened`'s banner).
+        var pieces: [(start: Int, end: Int, style: InlineSpanRing.Style, losses: [String])] = []
+        var sawNestedGlyph = false
         // Strictly-increasing claim walk — a duplicate or out-of-order
         // ref cannot be one forward paragraph (InlineRunPlan's proof).
         var last = -1
         var claimed = 0
         for run in runs {
             if let text = run.text {
+                // The member's own glyphs carry the OUTER style.
+                let a = out.count
                 if !text.isEmpty { appendCollapsed(&out, text) }
+                pieces.append((a, out.count, outerStyle, outerLosses))
                 continue
             }
             // A both-nil entry is unreachable wire — skip defensively.
             guard let key = run.child else { continue }
             guard let idx = byName[key] ?? byId[key] else {
                 _ = bail("nested-dangling", "nested child ref '\(key)' unresolved")
-                return false
+                return .bail
             }
             guard idx > last else {
                 _ = bail("nested-order", "nested child refs out of order")
-                return false
+                return .bail
             }
             last = idx
             let kid = kids[idx]
             let kidTag = (kid.meta?.sourceTag ?? "").lowercased()
-            // Only BR members may nest — any other nested node keeps the
+            // ── wave 47: a nested BR member — one forced '\n' ───────────
+            // Fix lane F5 (S5 twin hygiene): `runs?.isEmpty != false`
+            // admits an empty-but-present [] exactly like the Kotlin
+            // twin's `isNullOrEmpty` (InlineRunFold's nested-BR arm) —
+            // the previous `== nil` bailed on [] where Compose folded.
+            // Zero corpus components carry []; alignment, not behavior.
+            if kidTag == "br" || kid.meta?.role == "line-break" {
+                guard kid.children?.isEmpty != false, kid.meta?.runs?.isEmpty != false,
+                      kid.meta?.decorations == nil else {
+                    _ = bail("br-member-structure", "nested <br> carries structure")
+                    return .bail
+                }
+                if let offending = kid.properties.first(where: { !brMemberTypes.contains($0.type) }) {
+                    _ = bail("member-prop", "nested <br> declares '\(offending.type)'")
+                    return .bail
+                }
+                appendBreak(&out)
+                claimed += 1
+                continue
+            }
+            // ── wave 48 (lane W4): a nested GLYPH member ────────────────
+            // Only span-ring tags may nest; anything else keeps the
             // nested-tree wall, with the tag named for the log.
-            guard kidTag == "br" || kid.meta?.role == "line-break" else {
-                _ = bail("nested-member", "nested member tag '\(kidTag)' — only <br> may nest")
-                return false
+            guard !kidTag.isEmpty, InlineSpanRing.styledMemberTags.contains(kidTag) else {
+                _ = bail("nested-member",
+                         "nested member tag '\(kidTag.isEmpty ? "none" : kidTag)' outside the span ring")
+                return .bail
             }
-            guard kid.children?.isEmpty != false, kid.meta?.runs == nil,
+            // ONE level only: a nested member with its own structure is
+            // the depth-2 wall (no corpus shape needs it — refusing keeps
+            // decorating-box-001-class trees on their frozen stacked path).
+            // Fix lane F5 (S5 twin hygiene): `runs?.isEmpty != false`
+            // treats an empty-but-present [] as NO structure, exactly the
+            // Kotlin twin's `isNullOrEmpty` depth-2 guard — `== nil`
+            // walled [] where Compose admitted. Zero corpus presence.
+            guard kid.children?.isEmpty != false, kid.meta?.runs?.isEmpty != false,
                   kid.meta?.decorations == nil else {
-                _ = bail("br-member-structure", "nested <br> carries structure")
-                return false
+                _ = bail("nested-member-depth", "nested member carries structure — depth-2 wall")
+                return .bail
             }
-            if let offending = kid.properties.first(where: { !brMemberTypes.contains($0.type) }) {
-                _ = bail("member-prop", "nested <br> declares '\(offending.type)'")
-                return false
+            // A nested Hyphens declaration would need the adoption walk
+            // this flatten does not run (admit() skips the type) — refuse
+            // rather than drop a policy silently; zero corpus presence.
+            guard !kid.properties.contains(where: { $0.type == "Hyphens" }) else {
+                _ = bail("nested-member-hyphens", "nested member declares hyphens")
+                return .bail
             }
-            appendBreak(&out)
-            claimed += 1
+            // Admission through the ring. The effective-ink chain for the
+            // TextDecorationColor gate is nested → OUTER member → host,
+            // so the outer's list is consulted before the host's.
+            switch InlineSpanRing.admit(tag: kidTag, properties: kid.properties,
+                                        hostProperties: member.properties + hostProperties) {
+            case .refused(let reason):
+                _ = bail("member-prop", reason)
+                return .bail
+            case .admitted(let kidStyle, let kidLosses):
+                // Compose the nested style onto the outer's — nil is the
+                // compound-shift wall (composeNested's banner).
+                guard let composed = InlineSpanRing.composeNested(outer: outerStyle,
+                                                                  nested: kidStyle) else {
+                    _ = bail("nested-vertical-align-compound",
+                             "nested sup/sub inside a shifted member — flat spans cannot add shifts")
+                    return .bail
+                }
+                // The nested member's glyphs, boundary-collapsed like all.
+                let a = out.count
+                if let kidText = kid.text, !kidText.isEmpty { appendCollapsed(&out, kidText) }
+                pieces.append((a, out.count, composed, outerLosses + kidLosses))
+                sawNestedGlyph = true
+                claimed += 1
+            }
         }
         // Every nested child must be claimed — an unclaimed one would
         // silently vanish (the outer fold consumes the whole member).
         guard claimed == kids.count else {
             _ = bail("nested-unclaimed", "nested runs claim \(claimed) of \(kids.count) children")
-            return false
+            return .bail
         }
-        return true
+        // {text, <br>}-only: the caller's wave-47 whole-range span stands.
+        guard sawNestedGlyph else { return .noNestedGlyphs }
+        // Per-piece emission — one span per attributed piece, in string
+        // order (plain, loss-less pieces emit nothing, the wave-44 rule).
+        for piece in pieces where piece.start < piece.end {
+            if !piece.style.isPlain || !piece.losses.isEmpty {
+                spans.append(Span(start: piece.start, end: piece.end,
+                                  style: piece.style, statedLossTypes: piece.losses))
+            }
+        }
+        return .spansEmitted
     }
 
     /// One member through the widened gate: TEXT ring, EMPTY ring, or a
@@ -537,7 +673,11 @@ enum InlineRunFlow {
         let tag = (member.meta?.sourceTag ?? "").lowercased()
         if tag == "br" || member.meta?.role == "line-break" {
             // A break with structure is not a break we understand.
-            guard member.children?.isEmpty != false, member.meta?.runs == nil,
+            // Fix lane F5 (S5 twin hygiene, same defect class as the two
+            // flatten-walk sites): `runs?.isEmpty != false` admits an
+            // empty-but-present [] like the Kotlin twin's `isNullOrEmpty`
+            // (InlineRunFold.fold's BR arm) — `== nil` refused [] here.
+            guard member.children?.isEmpty != false, member.meta?.runs?.isEmpty != false,
                   member.meta?.decorations == nil else {
                 _ = bail("br-member-structure", "<br> member carries structure")
                 return .refused
@@ -551,7 +691,17 @@ enum InlineRunFlow {
             return .forcedBreak
         }
         // A tagless member is not a known inline text element — refuse
-        // (mirrors the twin's `member-tag:none`).
+        // (mirrors the twin's `member-tag:none`). Wave 48 (lane W4)
+        // MEASURED this wall before keeping it: the converter omits
+        // sourceTag exactly for `<div>`s, so the corpus's 75 tagless
+        // members are BLOCK boxes whose stacked anonymous-block rendering
+        // is the correct CSS 2.1 §9.2.1.1 structure. Simulation semantics
+        // (S5-corrected, fix lane F5): admitting a tagless glyph member
+        // THROUGH THE RING AS A SPAN (the strict reading — property
+        // admission included, not just plain text) flips TWO fold
+        // decisions over wave48-cal — display-contents-flex-001 AND
+        // block-ellipsis-003, both PASSERS — so the wall stands on
+        // evidence, not caution.
         if tag.isEmpty {
             _ = bail("member-tag", "unsupported member tag 'none'")
             return .refused

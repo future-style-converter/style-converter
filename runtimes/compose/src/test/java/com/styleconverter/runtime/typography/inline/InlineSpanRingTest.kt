@@ -142,6 +142,126 @@ class InlineSpanRingTest {
         assertEquals("member-prop:WhiteSpace", (ws as InlineSpanRing.Admission.Refused).reason)
     }
 
+    // ── wave 48 (lane W4): the UA-styled tag rings ───────────────────────
+
+    @Test
+    fun `sup and sub seed the UA smaller factor and their vertical shifts`() {
+        // HTML rendering §15.3.4: `sub, sup { font-size: smaller }` plus
+        // the super/sub vertical-align keywords (VerticalShift's banner
+        // derives Blink's px rule; parent = the paragraph for a direct
+        // member, factor 1).
+        val sup = admit("sup") as InlineSpanRing.Admission.Admitted
+        assertEquals(1f / 1.2f, sup.style.fontSizeEm!!, 1e-6f)
+        assertEquals(InlineSpanRing.VerticalShift(up = true, parentPx = null, parentEm = 1f), sup.style.shift)
+        val sub = admit("sub") as InlineSpanRing.Admission.Admitted
+        assertEquals(InlineSpanRing.VerticalShift(up = false, parentPx = null, parentEm = 1f), sub.style.shift)
+        // A shifted member is never plain — the span must be emitted.
+        assertTrue(!sup.style.isPlain && !sub.style.isPlain)
+    }
+
+    @Test
+    fun `a declared font-size beats the sup UA smaller seed (author over UA)`() {
+        // css-cascade-4 §6.1 origin order: the author's 24px wins over
+        // the UA `smaller`; the shift itself still rides.
+        val sized = admit("sup", prop("FontSize", """{"px":24,"original":{"type":"length","px":24}}"""))
+            as InlineSpanRing.Admission.Admitted
+        assertEquals(24f, sized.style.fontSizePx!!, 1e-6f)
+        assertNull(sized.style.fontSizeEm)
+        assertTrue(sized.style.shift!!.up)
+    }
+
+    @Test
+    fun `the italic family seeds the UA slant and a declared normal resets it`() {
+        // §15.3.4: `cite, dfn, em, i, var { font-style: italic }`.
+        for (tag in listOf("i", "em", "cite", "var", "dfn")) {
+            val ua = admit(tag) as InlineSpanRing.Admission.Admitted
+            assertTrue("$tag must seed italic", ua.style.italic)
+        }
+        // An author `font-style: normal` beats the UA rule (§6.1) — the
+        // member then folds as PLAIN text, exactly like a bare span.
+        val reset = admit("i", prop("FontStyle", "\"normal\""))
+            as InlineSpanRing.Admission.Admitted
+        assertTrue(reset.style.isPlain)
+    }
+
+    @Test
+    fun `composeNested - a sup inside an i inherits the slant and rebases its shift parent`() {
+        val outer = (admit("i") as InlineSpanRing.Admission.Admitted).style
+        val nested = (admit("sup") as InlineSpanRing.Admission.Admitted).style
+        // Size-less outer: the sup keeps paragraph-relative smaller and
+        // its shift parent stays the paragraph (factor 1).
+        val composed = InlineSpanRing.composeNested(outer, nested)!!
+        assertTrue(composed.italic)
+        assertEquals(1f / 1.2f, composed.fontSizeEm!!, 1e-6f)
+        assertEquals(InlineSpanRing.VerticalShift(up = true, parentPx = null, parentEm = 1f), composed.shift)
+        // A 1.5em outer: factors multiply (css-values-4 §5.1.1 — the
+        // sup's parent is the i) and the shift parent rebases to 1.5.
+        val bigOuter = outer.copy(fontSizeEm = 1.5f)
+        val rebased = InlineSpanRing.composeNested(bigOuter, nested)!!
+        assertEquals(1.5f / 1.2f, rebased.fontSizeEm!!, 1e-5f)
+        assertEquals(InlineSpanRing.VerticalShift(up = true, parentPx = null, parentEm = 1.5f), rebased.shift)
+        // A px outer: the nested factor resolves absolute.
+        val pxOuter = outer.copy(fontSizePx = 30f)
+        val absolute = InlineSpanRing.composeNested(pxOuter, nested)!!
+        assertEquals(25f, absolute.fontSizePx!!, 1e-4f)
+        assertEquals(InlineSpanRing.VerticalShift(up = true, parentPx = 30f, parentEm = 1f), absolute.shift)
+    }
+
+    @Test
+    fun `composeNested - decorations propagate down and a compound shift refuses`() {
+        // css-text-decor-3 §2.1: an outer underline paints over the
+        // nested descendant — the composed piece keeps it.
+        val outerU = (admit("u") as InlineSpanRing.Admission.Admitted).style
+        val nestedSup = (admit("sup") as InlineSpanRing.Admission.Admitted).style
+        assertTrue(InlineSpanRing.composeNested(outerU, nestedSup)!!.underline)
+        // sup-in-sub (offsets ADD box-by-box) has no flat expression —
+        // the named wall answers null and the fold bails.
+        val outerSub = (admit("sub") as InlineSpanRing.Admission.Admitted).style
+        assertNull(InlineSpanRing.composeNested(outerSub, nestedSup))
+    }
+
+    // ── wave 48 (fix lane F5): the sup/sub PIXEL rule, pinned ────────────
+    // S5 must-fix 4: the parent/3+1 / −(parent/5+1) resolution had ZERO
+    // coverage (mutating /3+1 → /3 passed all 4644 native tests). These
+    // rows pin InlineSpanRing.shiftPx — the ONE Compose resolution site —
+    // and the SAME rows are pinned on the iOS twin (InlineSpanRingTests),
+    // so the two seams cannot drift apart silently again.
+
+    @Test
+    fun `shiftPx - the super rows pin Blink's parent-over-3-plus-1 at every probe size`() {
+        // Direct sup members (parent = the paragraph, factor 1) — the
+        // S5 probe's exact paragraph sizes and expected px
+        // (16/3+1, 32/3+1, 48/3+1, 96/3+1).
+        val sup = (admit("sup") as InlineSpanRing.Admission.Admitted).style.shift!!
+        assertEquals(6.3333f, InlineSpanRing.shiftPx(sup, 16f), 1e-3f)
+        assertEquals(11.6667f, InlineSpanRing.shiftPx(sup, 32f), 1e-3f)
+        assertEquals(17.0f, InlineSpanRing.shiftPx(sup, 48f), 1e-3f)
+        assertEquals(33.0f, InlineSpanRing.shiftPx(sup, 96f), 1e-3f)
+    }
+
+    @Test
+    fun `shiftPx - the sub rows pin minus parent-over-5-plus-1 at every probe size`() {
+        // Direct sub members — lowering is NEGATIVE px
+        // (−(16/5+1), −(32/5+1), −(96/5+1)).
+        val sub = (admit("sub") as InlineSpanRing.Admission.Admitted).style.shift!!
+        assertEquals(-4.2f, InlineSpanRing.shiftPx(sub, 16f), 1e-3f)
+        assertEquals(-7.4f, InlineSpanRing.shiftPx(sub, 32f), 1e-3f)
+        assertEquals(-20.2f, InlineSpanRing.shiftPx(sub, 96f), 1e-3f)
+    }
+
+    @Test
+    fun `shiftPx - a sup nested under a 30px outer resolves off the OUTER size`() {
+        // composeNested rewrites the shift parent to the outer's px
+        // encoding (subelements-002's `<i>…<sup>…` shape with a sized
+        // outer): parent 30 → 30/3+1 = 11, regardless of the paragraph.
+        val outer = (admit("i") as InlineSpanRing.Admission.Admitted).style.copy(fontSizePx = 30f)
+        val nested = (admit("sup") as InlineSpanRing.Admission.Admitted).style
+        val shift = InlineSpanRing.composeNested(outer, nested)!!.shift!!
+        assertEquals(11.0f, InlineSpanRing.shiftPx(shift, 16f), 1e-3f)
+        // The paragraph size is irrelevant once the parent is absolute.
+        assertEquals(11.0f, InlineSpanRing.shiftPx(shift, 96f), 1e-3f)
+    }
+
     // ── the range alignment through the pipeline's string surgery ────────
 
     @Test

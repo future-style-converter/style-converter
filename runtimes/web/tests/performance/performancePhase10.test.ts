@@ -62,3 +62,46 @@ describe('will-change list wire (wave-40 T1)', () => {
     expect(wc({ type: 'property-name', name: 'transform' })).toEqual({ willChange: 'transform' });
   });
 });
+
+// ── wave-48 lane W5: the contain-intrinsic-* LENGTH wire ─────────────────────
+// ContainIntrinsicValue (css-sizing-4 §4.4) serialises its length arms as
+// {"type":"length","px":N} / {"type":"auto-length","px":N}, which the generic
+// keywordOrRaw fold read as "no value" — every contain-intrinsic declaration
+// with a length was dropped. Measured on wave48-cal css-contain/
+// contain-inline-size-intrinsic: with the intrinsic size gone, a
+// contain:inline-size box's fit-content resolves to 0 and the whole capture
+// has zero green ink (web 0.9549 coverage-vetoed; both natives pass 0.969).
+describe('contain-intrinsic length wire (wave-48 W5)', () => {
+  const one = (type: string, data: unknown) => applyPerformancePhase10([{ type, data }]);
+
+  it('VERBATIM contain-inline-size-intrinsic wires reach the browser', () => {
+    // The two divs of the WPT test (wave48-cal per-test-ir).
+    expect(one('ContainIntrinsicInlineSize', { type: 'length', px: 100 }))
+      .toEqual({ containIntrinsicInlineSize: '100px' });
+    expect(one('ContainIntrinsicInlineSize', { type: 'length', px: 50 }))
+      .toEqual({ containIntrinsicInlineSize: '50px' });
+  });
+
+  it('auto-length carries both tokens (§4.4 last-remembered-size form)', () => {
+    expect(one('ContainIntrinsicWidth', { type: 'auto-length', px: 300 }))
+      .toEqual({ containIntrinsicWidth: 'auto 300px' });
+  });
+
+  it('keyword variants keep their pre-fix output byte-identically', () => {
+    expect(one('ContainIntrinsicBlockSize', { type: 'none' }))
+      .toEqual({ containIntrinsicBlockSize: 'none' });
+    expect(one('ContainIntrinsicHeight', { type: 'auto' }))
+      .toEqual({ containIntrinsicHeight: 'auto' });
+  });
+
+  it('two-axis contain-intrinsic-size wire and its flattened single-axis twin', () => {
+    // {"width","height"} — the css-sizing abspos-014 shape…
+    expect(one('ContainIntrinsicSize', {
+      width: { type: 'length', px: 500 }, height: { type: 'length', px: 50 },
+    })).toEqual({ containIntrinsicSize: '500px 50px' });
+    // …and the deepFlatten-inlined lone-width shape the wave48-cal
+    // css-view-transitions content-visibility IR carries.
+    expect(one('ContainIntrinsicSize', { type: 'length', px: 500 }))
+      .toEqual({ containIntrinsicSize: '500px' });
+  });
+});

@@ -5,6 +5,7 @@ import app.irmodels.properties.background.BackgroundImageProperty
 import app.parsing.css.properties.longhands.PropertyParser
 import app.parsing.css.properties.primitiveParsers.AngleParser
 import app.parsing.css.properties.primitiveParsers.UrlParser
+import app.parsing.css.properties.primitiveParsers.DegenerateCalcRewriter
 import app.parsing.css.properties.primitiveParsers.ExpressionDetector
 import app.parsing.css.properties.primitiveParsers.GlobalKeywords
 import app.parsing.css.properties.primitiveParsers.TokenizationUtils
@@ -28,8 +29,73 @@ import app.parsing.css.properties.primitiveParsers.TokenizationUtils
  * from/at prefix handling and mis-parsed `from 45deg` as a color stop).
  */
 object BackgroundImagePropertyParser : PropertyParser {
+
+    // The six gradient function heads of css-images-3 §3.1/§3.5 and
+    // css-images-4 §3.4.4 (plus their repeating- variants). Only a layer
+    // that BEGINS with one of these may be fed to DegenerateCalcRewriter:
+    // a gradient body is built purely of case-insensitive CSS tokens
+    // (colors, lengths, angles, keywords — the grammar has no <string> or
+    // <url> production), so folding a calc() span inside one can never
+    // touch case-/byte-sensitive author payload bytes.
+    private val GRADIENT_FUNCTION_PREFIXES = listOf(
+        "linear-gradient(", "repeating-linear-gradient(",
+        "radial-gradient(", "repeating-radial-gradient(",
+        "conic-gradient(", "repeating-conic-gradient(",
+    )
+
     override fun parse(value: String): IRProperty? {
-        val trimmed = value.trim()
+        val rawTrimmed = value.trim()
+        // wave-48 lane W5 (scope repaired by S6 must-fix 1): fold
+        // DEGENERATE-INFINITE calc() lengths (`calc(1px / 0)`,
+        // `calc(Infinity * 1px)` — css-values-4 §10.9 says they are VALID
+        // and clamp at used-value time) to their clamp value BEFORE the
+        // expression gate below, so the gradients of WPT
+        // gradient-infinity-001/002 take the typed path all three runtimes
+        // render instead of the Raw fallback only the web can resolve.
+        //
+        // SCOPE (S6 must-fix 1): the first W5 cut ran the rewriter over the
+        // WHOLE declaration, which rewrote bytes inside url() payloads,
+        // quoted strings and data URIs (executed proof: url('calc(1px /
+        // 0).png') → IR ["33554400px.png"]) — violating the CASE-PRESERVATION
+        // CONTRACT below, whose whole point is that url()/string payloads are
+        // untouchable author bytes. So: split the ORIGINAL bytes into layers
+        // FIRST (splitByComma is paren-aware, so commas inside url(...) or
+        // gradient bodies never split a layer) and rewrite ONLY layers that
+        // begin with a gradient function head, where no byte-sensitive
+        // payload can exist (see GRADIENT_FUNCTION_PREFIXES).
+        val rawLayers = TokenizationUtils.splitByComma(rawTrimmed)
+        // Tracks whether any gradient layer actually folded — when none did,
+        // downstream must see the EXACT author bytes (no re-join drift).
+        var rewroteAny = false
+        // Per-layer fold: each element is the layer's trimmed ORIGINAL bytes,
+        // or its folded form when it is a gradient with a degenerate calc().
+        val layers = rawLayers.map { layer ->
+            // Leading/trailing whitespace around a comma is insignificant
+            // (CSS Syntax L3 §5) — trim before both matching and parsing.
+            val t = layer.trim()
+            // Function names are ASCII case-insensitive (CSS Syntax L3 §4.3):
+            // match the head on a lowered COPY, rewrite the ORIGINAL bytes.
+            if (GRADIENT_FUNCTION_PREFIXES.any { t.lowercase().startsWith(it) }) {
+                // Per-layer all-or-nothing, exactly as the rewriter's banner
+                // demands: a gradient with any OTHER calc() (finite math,
+                // var(), nesting) comes back null and its author bytes
+                // proceed untouched into the expression gate below.
+                DegenerateCalcRewriter.rewrite(t)?.also { rewroteAny = true } ?: t
+            } else {
+                // NON-gradient layer (url()/image()/cross-fade()/keyword/…):
+                // NEVER rewritten — its bytes may be case- and byte-sensitive
+                // payload (data URIs, quoted strings, server paths).
+                t
+            }
+        }
+        // The whole-declaration form the keyword/expression gates below run
+        // on. When nothing folded this is EXACTLY rawTrimmed — byte-verbatim
+        // author input, preserving the historic Raw-route bytes. When a
+        // gradient folded, the layers re-join with the canonical ", ":
+        // inter-layer whitespace is insignificant per CSS Syntax L3 §5, and
+        // this form only reaches the wire through the Raw route as valid,
+        // pixel-identical CSS (non-gradient layer bytes survive verbatim).
+        val trimmed = if (rewroteAny) layers.joinToString(", ") else rawTrimmed
         // CASE-PRESERVATION CONTRACT: CSS keywords/function names are ASCII
         // case-insensitive (CSS Syntax L3 §4.3), but url() PAYLOADS are
         // case-sensitive author bytes (base64 data URIs, case-sensitive
@@ -50,23 +116,27 @@ object BackgroundImagePropertyParser : PropertyParser {
         }
 
         // Check for var() or other complex expressions - use Raw. Detection
-        // runs on the lowered copy (function names are case-insensitive)
-        // but Raw carries the ORIGINAL bytes for the runtimes to resolve.
+        // runs on the lowered copy of the REWRITTEN form (S6 must-fix 1: a
+        // degenerate calc() folded above no longer trips this gate, while a
+        // calc() surviving anywhere — including inside a url() payload the
+        // rewriter must not touch — still routes the whole value to Raw,
+        // which carries those bytes for the web runtime to resolve).
         if (ExpressionDetector.containsExpression(lowered)) {
             return BackgroundImageProperty(listOf(BackgroundImageProperty.BackgroundImage.Raw(trimmed)))
         }
 
-        // Split by comma for multiple background images — split the ORIGINAL
-        // bytes (splitByComma is paren-aware and case-agnostic) so each
-        // layer still carries the author's casing into parseImage.
-        val imageStrings = TokenizationUtils.splitByComma(trimmed)
-        if (imageStrings.isEmpty()) {
+        // Multiple background images: the layer list was already split from
+        // the ORIGINAL bytes above (splitByComma is paren-aware and
+        // case-agnostic), so each layer still carries the author's casing —
+        // and its verbatim payload bytes — into parseImage.
+        if (layers.isEmpty()) {
             return BackgroundImageProperty(listOf(BackgroundImageProperty.BackgroundImage.Raw(trimmed)))
         }
 
         // Unparseable layers fall back to Raw with the ORIGINAL layer bytes
-        // (previously the lowered bytes leaked into Raw too).
-        val images = imageStrings.map { parseImage(it.trim()) ?: BackgroundImageProperty.BackgroundImage.Raw(it.trim()) }
+        // (previously the lowered bytes leaked into Raw too). Layers were
+        // trimmed when the list was built, so no re-trim is needed here.
+        val images = layers.map { parseImage(it) ?: BackgroundImageProperty.BackgroundImage.Raw(it) }
 
         return BackgroundImageProperty(images)
     }
@@ -87,6 +157,11 @@ object BackgroundImagePropertyParser : PropertyParser {
             // url(): parse from the ORIGINAL bytes — UrlParser matches the
             // function name case-insensitively but returns the raw payload.
             lower.startsWith("url(") -> parseUrl(value)
+            // image() notation (wave-48 lane W5, css-images-4 §2.1) — from
+            // ORIGINAL bytes too, since url/string payloads are case-
+            // sensitive. Grammar lives in ImageNotationParser (≤200-line
+            // rule); a refusal there falls to the Raw route as before.
+            lower.startsWith("image(") -> ImageNotationParser.parse(value)
             lower.startsWith("linear-gradient(") -> parseLinearGradient(lower, repeating = false)
             lower.startsWith("repeating-linear-gradient(") -> parseLinearGradient(lower, repeating = true)
             lower.startsWith("radial-gradient(") -> parseRadialGradient(lower, repeating = false)

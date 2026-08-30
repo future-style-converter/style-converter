@@ -2064,13 +2064,36 @@ object ComponentRenderer {
                         // keep the wave-25 stretch-only routing.
                         else -> null
                     }
+                    // Wave 48 (lane W7) — §9.4 step 8 moves LINE cross
+                    // positions even when no ITEM stretches: a definite
+                    // container cross size under `align-content: normal |
+                    // stretch` grows the lines, which FlowRow never does
+                    // (WPT flex-gap-decorations-046: Chromium's second and
+                    // third rows sit at y 61.7/123.3 in the 180px box,
+                    // Android packed them at 55/110 — the row rules land
+                    // in the wrong gaps). The shared JVM-pinned gate keeps
+                    // wrap-reverse on the frozen FlowRow path (no reverse
+                    // ordering in FlexWrapRow — its named TODO).
+                    val rowLineStretchRoute = com.styleconverter.runtime.layout.flexbox
+                        .FlexWrapLines.routesForLineStretch(
+                            plainWrap = displayConfig.flexWrap == FlexWrap.WRAP,
+                            alignContentStretches =
+                                displayConfig.alignContent == AlignContent.STRETCH,
+                            // Row container ⇒ the cross axis is BLOCK, so
+                            // the definite-cross signal is a px Height.
+                            hasDefiniteCross =
+                                hasDefiniteSize(component.properties, widthAxis = false)
+                        )
                     val stretchPlan = wrapRowStretchPlan(
                         component, displayConfig,
                         // A positioning keyword needs the wrap layout for
                         // its LINES even when no ITEM stretches; the
                         // guard clauses inside still refuse containers
-                        // the wrap layout cannot render.
-                        requireStretch = crossDistribution == null
+                        // the wrap layout cannot render. Wave 48: the
+                        // line-stretch route needs the LINES too, for the
+                        // same reason — its containers take the plan even
+                        // when every placement is non-stretch.
+                        requireStretch = crossDistribution == null && !rowLineStretchRoute
                     )
                     if (stretchPlan != null) {
                         com.styleconverter.runtime.layout.flexbox.FlexWrapRow(
@@ -2120,18 +2143,108 @@ object ComponentRenderer {
                     return
                 }
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.FlowColumn -> {
-                    // NOT a silent fallthrough: the column flavour keeps
-                    // FlowColumn deliberately. Its cross axis is INLINE,
-                    // and the web reference this platform is compared
-                    // against gives every unsized child `width:
+                    // Wave 48 (lane W7) — the column twin of the FlowRow
+                    // branch above: `flex-flow: column wrap` finally gets
+                    // real LINE geometry (css-flexbox-1 §9.4 step 8 line
+                    // stretch + §9.6 line positioning on the INLINE
+                    // axis). FlowColumn never runs step 8, so WPT
+                    // flex-gap-decorations-045 (120px container, two
+                    // 50px columns, column-gap 5, align-content stretch)
+                    // packed its second column at x=55 where Chromium
+                    // stretches the lines to 57.5px and places it at
+                    // x=62.5 (Android-web 0.9232 at wave48-cal).
+                    //
+                    // ROUTING mirrors the row branch exactly: an explicit
+                    // §9.6 positioning keyword, an item that stretches,
+                    // or the shared line-stretch gate (plain wrap +
+                    // stretching align-content + definite WIDTH — the
+                    // cross axis of a column container is inline).
+                    // wrap-reverse stays on FlowColumn below (no reverse
+                    // ordering in FlexWrapColumn — its named TODO; both
+                    // wave48-cal wrap-reverse column tests pass there).
+                    val colCrossDistribution = when (displayConfig.alignContent) {
+                        AlignContent.FLEX_END ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.END
+                        AlignContent.CENTER ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.CENTER
+                        AlignContent.SPACE_BETWEEN ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.SPACE_BETWEEN
+                        AlignContent.SPACE_AROUND ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.SPACE_AROUND
+                        AlignContent.SPACE_EVENLY ->
+                            com.styleconverter.runtime.layout.flexbox.FlexWrapLines.CrossDistribution.SPACE_EVENLY
+                        // STRETCH (the normal/absent fold) and FLEX_START
+                        // keep the stretch-or-line-stretch routing arms.
+                        else -> null
+                    }
+                    val colLineStretchRoute = com.styleconverter.runtime.layout.flexbox
+                        .FlexWrapLines.routesForLineStretch(
+                            plainWrap = displayConfig.flexWrap == FlexWrap.WRAP,
+                            alignContentStretches =
+                                displayConfig.alignContent == AlignContent.STRETCH,
+                            // Column container ⇒ the cross axis is INLINE,
+                            // so the definite-cross signal is a px Width.
+                            hasDefiniteCross =
+                                hasDefiniteSize(component.properties, widthAxis = true)
+                        )
+                    val colStretchPlan =
+                        // Plain wrap only (wrap-reverse: frozen FlowColumn
+                        // path), and only when the MAIN axis (block) is
+                        // definite: with an indefinite height §9.3 has an
+                        // unbounded budget, every item lands on ONE line,
+                        // and the wrap layout degenerates to the plain
+                        // column FlowColumn already renders — both
+                        // wave48-cal single-line column-wrap cells
+                        // (css-flexbox align-content-wrap-004, css-values
+                        // calc-size-flex-008) PASS on that path today, so
+                        // routing them would be all risk and no fix.
+                        if (displayConfig.flexWrap == FlexWrap.WRAP &&
+                            hasDefiniteSize(component.properties, widthAxis = false))
+                            wrapColumnStretchPlan(
+                                component, displayConfig,
+                                requireStretch =
+                                    colCrossDistribution == null && !colLineStretchRoute
+                            )
+                        else null
+                    if (colStretchPlan != null) {
+                        com.styleconverter.runtime.layout.flexbox.FlexWrapColumn(
+                            modifier = modifier,
+                            mainArrangement = axes.mainVertical,
+                            // Item gap of a column container = row-gap;
+                            // line gap = column-gap (css-align-3 §8.1).
+                            mainGap = axes.rowGap,
+                            crossGap = axes.columnGap,
+                            cross = colStretchPlan,
+                            containerCross = flexDecision.horizontalAlignment,
+                            // §9.4 step 8 fires only under normal/stretch
+                            // (extractDisplayConfig folds normal/absent
+                            // into STRETCH) — same gate as the row twin.
+                            alignContentStretches =
+                                displayConfig.alignContent == AlignContent.STRETCH,
+                            crossDistribution = colCrossDistribution
+                        ) {
+                            // One measurable per flex item, index-aligned
+                            // with the plan — identical child emission to
+                            // the FlexWrapRow branch (the gap-decoration
+                            // probes ride each child's own id-keyed
+                            // modifier inside RenderComponent, so the
+                            // painter keeps working here).
+                            sortByOrder(component.children!!).forEach { child ->
+                                Box(propagateMinConstraints = true) {
+                                    RenderComponent(child, Modifier)
+                                }
+                            }
+                        }
+                        return
+                    }
+                    // Pre-wave-48 rationale for keeping FlowColumn when no
+                    // routing arm fires: its cross axis is INLINE, and the
+                    // web reference gives every unsized child `width:
                     // fit-content` (apps/web-harness ComponentRenderer.tsx)
                     // — a definite cross size, so §8.3 stretch degrades to
                     // flex-start there too. That is the same rationale
                     // columnCrossPlacements already carries for the
-                    // non-wrapping column path; implementing wrap-stretch
-                    // here would make Android the ONLY platform that
-                    // stretches. TODO(wave26): revisit together with the
-                    // harness's fit-content calibration.
+                    // non-wrapping column path.
                     FlowColumn(
                         modifier = modifier,
                         // CAL-RC2: was flexDecision.verticalArrangement —
@@ -5473,6 +5586,64 @@ object ComponentRenderer {
         return plan.takeIf {
             // Wave 47: a positioning-keyword caller takes the plan as-is
             // (its LINES need the wrap layout, stretch or not).
+            !requireStretch ||
+                it.contains(com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH)
+        }
+    }
+
+    /**
+     * Wave 48 (lane W7) — the COLUMN twin of [wrapRowStretchPlan]: the
+     * cross axis of a column container is INLINE, so "cross auto" is an
+     * undeclared WIDTH and stretch fills the line's width band
+     * (css-flexbox-1 §8.3/§8.4 on the transposed axis). Identical guard
+     * clauses — the four RenderContent features FlexWrapColumn's content
+     * lambda does not reproduce (leading `_text`, list markers,
+     * non-static children, no children) refuse the container instead of
+     * silently dropping a behaviour.
+     *
+     * Same [requireStretch] contract as the row twin: false lets a §9.6
+     * positioning keyword or the line-stretch route (wave 48 — see
+     * FlexWrapLines.routesForLineStretch) take the placements even when
+     * nothing stretches, because their LINE geometry still needs the
+     * real wrap layout.
+     */
+    private fun wrapColumnStretchPlan(
+        component: IRComponent,
+        displayConfig: DisplayConfig,
+        requireStretch: Boolean = true
+    ): List<com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement>? {
+        val children = component.children
+        if (children.isNullOrEmpty()) return null
+        if (!component._text.isNullOrEmpty()) return null
+        if (ListStyleExtractor.uaMarkerDefault(component._tag?.lowercase()) != null) return null
+        if (children.any { extractPositionType(it.properties) != PositionType.STATIC }) return null
+        // `normal` and `stretch` both arrive here as STRETCH — see the
+        // extractDisplayConfig AlignItems mapping's `else` arm.
+        val containerStretches = displayConfig.alignItems == AlignItems.STRETCH
+        val plan = sortByOrder(children).map { child ->
+            val alignSelf = com.styleconverter.runtime.core.placement
+                .ItemPlacementExtractor.extract(child.properties).alignSelf
+            // A declared WIDTH makes the item's cross size definite on
+            // this axis, and §8.3 then degrades stretch to flex-start.
+            val crossAuto = !hasDefiniteSize(child.properties, widthAxis = true)
+            when (alignSelf) {
+                AlignSelf.FLEX_START -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                AlignSelf.FLEX_END -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.END
+                AlignSelf.CENTER -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.CENTER
+                // Baseline has no Compose cross-axis equivalent — the same
+                // flex-start approximation FlexboxApplier documents.
+                AlignSelf.BASELINE -> com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                AlignSelf.STRETCH ->
+                    if (crossAuto) com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH
+                    else com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.START
+                // AUTO → inherit the container's align-items.
+                AlignSelf.AUTO ->
+                    if (containerStretches && crossAuto)
+                        com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH
+                    else com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.DEFAULT
+            }
+        }
+        return plan.takeIf {
             !requireStretch ||
                 it.contains(com.styleconverter.runtime.layout.flexbox.FlexCrossPlacement.STRETCH)
         }

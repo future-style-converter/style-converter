@@ -1423,30 +1423,93 @@ test('wave29 S-RC3: a plain capability tag still scores (denominator intact)', (
 // The pins hold the asymmetry itself — web untouched, natives neutralised,
 // `scoreEligible` unaffected — because a refactor that folded this into
 // applyNaScoreGate would silently drop the one honest column in the family.
+//
+// wave-48 W2: the gate became PER-TEST. The tag still arms it, but it fires
+// only for members of NATIVE_FONT_PARITY_REFUSED_TESTS — the 13 cells the
+// wave48-w2 re-measure (both natives re-fed on the current tree; every score
+// reproduced wave48-cal to 4 decimals) showed still font-bounded. The pins
+// below therefore split into three families of their own: the refusal list's
+// exact membership (a silent widening re-hides honest measurements, a silent
+// shrink floods the corpus with font noise), the fire path for a LISTED
+// test, and the decline path for an UNLISTED tagged test — the 15 cells the
+// re-measure unexcluded.
 
 import {
   applyNativeFontParityGate, NATIVE_FONT_PARITY_TAGS,
   NATIVE_FONT_PARITY_PLATFORMS, NATIVE_FONT_PARITY_STAMP,
+  NATIVE_FONT_PARITY_REFUSED_TESTS,
 } from './inject-wpt-block.mjs';
 
 test('wave30 B4b: the family and its platform list are exactly pinned', () => {
   // Membership is blast radius: each tag removes BOTH natives from the
-  // denominator for every test carrying it.
+  // denominator for every listed test carrying it.
   assert.deepEqual([...NATIVE_FONT_PARITY_TAGS], ['requires-non-latin-font-parity']);
   // 'web-ref' being ABSENT is the whole contract of this family.
   assert.deepEqual([...NATIVE_FONT_PARITY_PLATFORMS], ['ios-ref', 'android-ref']);
   assert.equal(NATIVE_FONT_PARITY_STAMP, 'native-font-parity');
 });
 
+test('wave48 W2: the refusal list is exactly pinned — no silent widening or shrink', () => {
+  // The full membership, sorted, straight from the wave48-w2 measurement
+  // table (each retained line's scores are commented in the module). Any
+  // membership change MUST re-run the measurement and update this pin.
+  assert.deepEqual([...NATIVE_FONT_PARITY_REFUSED_TESTS].sort(), [
+    'css/css-counter-styles/arabic-indic/css3-counter-styles-102.html',
+    'css/css-counter-styles/armenian/css3-counter-styles-007.html',
+    'css/css-counter-styles/armenian/css3-counter-styles-008.html',
+    'css/css-counter-styles/bengali/css3-counter-styles-117.html',
+    'css/css-counter-styles/cambodian/css3-counter-styles-159.html',
+    'css/css-counter-styles/cjk-decimal/css3-counter-styles-001.html',
+    'css/css-counter-styles/cjk-decimal/css3-counter-styles-004.html',
+    'css/css-counter-styles/cjk-earthly-branch/css3-counter-styles-201.html',
+    'css/css-counter-styles/cjk-earthly-branch/css3-counter-styles-202.html',
+    'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
+    'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
+    'css/css-counter-styles/counter-suffix.html',
+    'css/css-lists/counter-004.html',
+  ]);
+  // The 15 unexcluded tests must NEVER quietly re-enter: each was measured
+  // clear of the font boundary at wave48-w2 (13 with both natives ≥0.95;
+  // name-case-sensitivity failing only the shared coverage veto web fails
+  // too; counter-cjk-decimal an Android blank-paint bug, not a face).
+  for (const t of [
+    'css/css-counter-styles/arabic-indic/css3-counter-styles-101.html',
+    'css/css-counter-styles/arabic-indic/css3-counter-styles-103.html',
+    'css/css-counter-styles/armenian/css3-counter-styles-006.html',
+    'css/css-counter-styles/armenian/css3-counter-styles-009.html',
+    'css/css-counter-styles/bengali/css3-counter-styles-116.html',
+    'css/css-counter-styles/bengali/css3-counter-styles-118.html',
+    'css/css-counter-styles/cambodian/css3-counter-styles-158.html',
+    'css/css-counter-styles/cambodian/css3-counter-styles-160.html',
+    'css/css-counter-styles/cjk-decimal/counter-cjk-decimal.html',
+    'css/css-counter-styles/cjk-decimal/css3-counter-styles-005.html',
+    'css/css-counter-styles/cjk-earthly-branch/css3-counter-styles-203.html',
+    'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-206.html',
+    'css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html',
+    'css/css-lists/content-property/marker-text-matches-armenian.html',
+    'css/css-lists/content-property/marker-text-matches-georgian.html',
+  ]) {
+    assert.equal(NATIVE_FONT_PARITY_REFUSED_TESTS.has(t), false,
+      `${t} was unexcluded at wave48-w2 — re-adding it needs a new measurement`);
+  }
+});
+
+// Shorthand: a LISTED member (arabic-indic 102) and an UNLISTED tagged test
+// (arabic-indic 103, unexcluded at wave48-w2) — the pair every fire/decline
+// pin below is built from.
+const LISTED = 'css/css-counter-styles/arabic-indic/css3-counter-styles-102.html';
+const UNLISTED = 'css/css-counter-styles/arabic-indic/css3-counter-styles-103.html';
+
 test('wave30 B4b: natives are neutralised, web-ref is untouched', () => {
-  // The measured arabic-indic 102 row: web 0.9791 pass, ios 0.8807 fail,
-  // android 0.7791 fail. After the gate the two native verdicts are gone and
-  // the web verdict — the one that measures our counter algorithm — remains.
+  // The measured arabic-indic 102 row (wave48-w2): web 0.9791 pass, ios
+  // 0.9688 pass, android 0.8230 fail. After the gate the two native verdicts
+  // are gone and the web verdict — the one that measures our counter
+  // algorithm — remains.
   const web = { ssim: 0.9791, wptPass: true };
-  const ios = { ssim: 0.8807, wptPass: false };
-  const android = { ssim: 0.7791, wptPass: false };
+  const ios = { ssim: 0.9688, wptPass: true };
+  const android = { ssim: 0.8230, wptPass: false };
   const stamped = applyNativeFontParityGate(['requires-non-latin-font-parity'],
-    { 'web-ref': web, 'ios-ref': ios, 'android-ref': android });
+    { 'web-ref': web, 'ios-ref': ios, 'android-ref': android }, LISTED);
   assert.deepEqual(stamped, ['ios-ref', 'android-ref']);
   assert.equal(web.wptPass, true);
   assert.equal(web.scoreExcluded, undefined);
@@ -1456,27 +1519,52 @@ test('wave30 B4b: natives are neutralised, web-ref is untouched', () => {
   assert.equal(android.scoreExcluded, 'native-font-parity');
 });
 
-test('wave30 B4b: PASSING native diffs are excluded too — the boundary cuts both ways', () => {
-  // arabic-indic 103: ios 0.9917 T, android 0.9658 T. Keeping these would be
-  // the dishonest half-measure — whether a member of this family clears 0.95
-  // is decided by how many fallback glyphs it paints, not by runtime
-  // correctness, so a pass is the same measurement as a failure.
-  const ios = { ssim: 0.9917, wptPass: true };
-  const android = { ssim: 0.9658, wptPass: true };
+test('wave30 B4b: a PASSING native diff of a LISTED test is excluded too', () => {
+  // arabic-indic 102's ios cell measures 0.9688 T while its android sibling
+  // is font-bound at 0.8230 — the cut is per-TEST, so the pass leaves the
+  // denominator with the failure: whether THIS cell clears 0.95 is decided
+  // by how many fallback glyphs it paints, not by runtime correctness.
+  const ios = { ssim: 0.9688, wptPass: true };
   applyNativeFontParityGate(['requires-non-latin-font-parity'],
-    { 'ios-ref': ios, 'android-ref': android });
+    { 'ios-ref': ios }, LISTED);
   assert.equal(ios.wptPass, null);
-  assert.equal(android.wptPass, null);
   assert.equal(ios.scoreExcluded, 'native-font-parity');
+});
+
+test('wave48 W2: an UNLISTED tagged test is SCORED — the unexclusion itself', () => {
+  // arabic-indic 103 (wave48-w2: ios 0.9978 T, android 0.9913 T) carries the
+  // tag but left the refusal list. The gate must not touch it: this is the
+  // pin that fails if the blanket per-tag behavior ever returns.
+  const ios = { ssim: 0.9978, wptPass: true };
+  const android = { ssim: 0.9913, wptPass: true };
+  const stamped = applyNativeFontParityGate(['requires-non-latin-font-parity'],
+    { 'ios-ref': ios, 'android-ref': android }, UNLISTED);
+  assert.deepEqual(stamped, []);
+  assert.equal(ios.wptPass, true);
+  assert.equal(ios.scoreExcluded, undefined);
+  assert.equal(android.wptPass, true);
+  assert.equal(android.scoreExcluded, undefined);
+});
+
+test('wave48 W2: no testRel ⇒ decline on unknown — the gate never fires blind', () => {
+  // A caller that cannot say WHICH test cannot prove the test still-bounded,
+  // and an over-fire costs a measurement we can never get back (the wave-30
+  // fix-T4 stance). Tag present, diffs present, test unknown → no-op.
+  const ios = { ssim: 0.8513, wptPass: false };
+  assert.deepEqual(applyNativeFontParityGate(['requires-non-latin-font-parity'],
+    { 'ios-ref': ios }), []);
+  assert.equal(ios.wptPass, false);
+  assert.equal(ios.scoreExcluded, undefined);
 });
 
 test('wave30 B4b: raw metrics survive on every platform', () => {
   // Only the SCORING fields are neutralised — an investigator asking "how far
   // off was the fallback face?" must still be able to read the number. Same
-  // stance as applyNaScoreGate.
-  const ios = { ssim: 0.8040, pixelMismatchedPct: 4.2, pHash: 11, wptPass: false };
-  applyNativeFontParityGate(['requires-non-latin-font-parity'], { 'ios-ref': ios });
-  assert.equal(ios.ssim, 0.8040);
+  // stance as applyNaScoreGate. armenian 007's wave48-w2 ios cell.
+  const ios = { ssim: 0.8513, pixelMismatchedPct: 4.2, pHash: 11, wptPass: false };
+  applyNativeFontParityGate(['requires-non-latin-font-parity'], { 'ios-ref': ios },
+    'css/css-counter-styles/armenian/css3-counter-styles-007.html');
+  assert.equal(ios.ssim, 0.8513);
   assert.equal(ios.pixelMismatchedPct, 4.2);
   assert.equal(ios.pHash, 11);
 });
@@ -1487,18 +1575,20 @@ test('wave30 B4b: absent platforms and error-shaped diffs are skipped', () => {
   // neither may throw.
   const err = { error: 'ref missing' };
   const stamped = applyNativeFontParityGate(['requires-non-latin-font-parity'],
-    { 'web-ref': null, 'ios-ref': null, 'android-ref': err });
+    { 'web-ref': null, 'ios-ref': null, 'android-ref': err }, LISTED);
   assert.deepEqual(stamped, []);
   assert.equal(err.scoreExcluded, undefined);
   // …and a missing diffs bag at all is a no-op, not a crash.
-  assert.deepEqual(applyNativeFontParityGate(['requires-non-latin-font-parity'], undefined), []);
+  assert.deepEqual(applyNativeFontParityGate(['requires-non-latin-font-parity'], undefined, LISTED), []);
 });
 
 test('wave30 B4b: an untagged test (or no tags at all) is never touched', () => {
+  // Even a LISTED test needs the tag to arm the gate — the refusal list
+  // narrows the tag's match set, it never replaces the tag.
   const ios = { ssim: 0.80, wptPass: false };
-  assert.deepEqual(applyNativeFontParityGate(['requires-form-control-rendering'], { 'ios-ref': ios }), []);
-  assert.deepEqual(applyNativeFontParityGate(undefined, { 'ios-ref': ios }), []);
-  assert.deepEqual(applyNativeFontParityGate([], { 'ios-ref': ios }), []);
+  assert.deepEqual(applyNativeFontParityGate(['requires-form-control-rendering'], { 'ios-ref': ios }, LISTED), []);
+  assert.deepEqual(applyNativeFontParityGate(undefined, { 'ios-ref': ios }, LISTED), []);
+  assert.deepEqual(applyNativeFontParityGate([], { 'ios-ref': ios }, LISTED), []);
   assert.equal(ios.wptPass, false);
   assert.equal(ios.scoreExcluded, undefined);
 });
@@ -1523,8 +1613,10 @@ test('wave30 B4b: the stamp is TRUTHY so every existing aggregator filter holds'
   // (d.scoreExcluded)`. The string keeps them byte-for-byte correct while
   // recording WHY one platform left a denominator its sibling stayed in —
   // `true` would make a font boundary indistinguishable from a delivery gap.
-  const ios = { ssim: 0.8365, wptPass: false };
-  applyNativeFontParityGate(['requires-non-latin-font-parity'], { 'ios-ref': ios });
+  // cambodian 159's wave48-w2 ios cell — a retained refusal-list member.
+  const ios = { ssim: 0.8758, wptPass: false };
+  applyNativeFontParityGate(['requires-non-latin-font-parity'], { 'ios-ref': ios },
+    'css/css-counter-styles/cambodian/css3-counter-styles-159.html');
   assert.ok(ios.scoreExcluded, 'stamp must be truthy for the existing filters');
   assert.notEqual(ios.scoreExcluded, true, 'the reason must be readable off the diff');
 });
@@ -1548,6 +1640,10 @@ test('wave30 B4b: buildResults source carries the CALLER CONTRACT + the result f
   const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
   assert.match(src, /const fontParityExcluded = isNa \? \[\] : applyNativeFontParityGate\(naTags, \{/,
     'the per-platform gate must run ONLY when the whole-test gate did not fire');
+  // wave-48 W2: the pipeline must hand the gate the test identity, or the
+  // decline-on-unknown default silently turns the whole family off.
+  assert.match(src, /\}, testRel\);\s+\/\/ wave-48 W2/,
+    'the call site must pass testRel — the gate is per-test now');
   // …and the per-test result must surface which platforms it stamped, or a
   // manifest reader sees `scoreEligible: true` with no way to learn that two
   // of the three columns left the denominator.

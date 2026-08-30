@@ -6,7 +6,6 @@ import android.os.Build
 import android.os.Environment
 import android.util.Log
 import java.io.File
-import java.io.FileOutputStream
 
 /**
  * Manages screenshot capture and storage for component testing.
@@ -24,6 +23,30 @@ class ScreenshotManager(private val context: Context) {
     companion object {
         private const val TAG = "ScreenshotManager"
         private const val SCREENSHOT_DIR = "test_screenshots"
+
+        /**
+         * Composed-canvas dimension past which the capture is logged as
+         * DEGENERATE before encoding (wave-48 W1; margin re-measured by
+         * the wave-48 S6 audit). 8192 px sits 1.16× above the tallest
+         * HONEST composed document in the corpus —
+         * css-view-transitions/far-away-capture at 7042 px, a height
+         * all three platforms agree on — so legitimate tall documents
+         * stay under the line, if only just. (The figure this comment
+         * previously cited was wrong twice over:
+         * attachment-fixed-inside-transform-1 measures 4232 px, not
+         * 5132, and was never the corpus ceiling, so the claimed ~2.9×
+         * headroom never existed.) Above the line the warning names
+         * real Android layout blow-ups — direction-upright-002's
+         * 66404 px vertical-mode defect, and a second true positive S6
+         * measured: css-text-decor/text-decoration-inset-025 composes
+         * 9470 px on Android where web lays out 750 px and iOS 600 px
+         * (ssim 0) — a real, previously unreported Android divergence
+         * this breadcrumb is the first to flag. The margin is thin, not
+         * comfortable: a future honest document past 8192 px would draw
+         * a false warning — a log line only, never a clamp or failure,
+         * so the cost is noise, not a lost capture.
+         */
+        internal const val DEGENERATE_CANVAS_PX = 8192
     }
 
     private val screenshotDir: File by lazy {
@@ -51,7 +74,14 @@ class ScreenshotManager(private val context: Context) {
         try {
             if (screenshotDir.exists()) {
                 screenshotDir.listFiles()?.forEach { file ->
-                    if (file.isFile && (file.extension == "png" || file.extension == "jpg")) {
+                    // Finished captures (png/jpg) AND stranded `.part`
+                    // in-progress encodes (a crash between encode and the
+                    // atomic rename leaves one — see AtomicPng) both go:
+                    // a stale partial surviving into a later run would be
+                    // the same truncated-bytes hazard the atomic publish
+                    // exists to close.
+                    if (file.isFile && (file.extension == "png" || file.extension == "jpg" ||
+                            AtomicPng.isTempArtifact(file.name))) {
                         if (file.delete()) {
                             deletedCount++
                         }
@@ -85,8 +115,18 @@ class ScreenshotManager(private val context: Context) {
             val filename = String.format("%03d_%s.png", index, safeName)
             val file = File(screenshotDir, filename)
 
-            FileOutputStream(file).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            // Atomic publish (wave-48 W1): encode into a `.part` sibling,
+            // rename onto the final name only when compress reports the
+            // encode COMPLETE — pullers that key on the final name (the
+            // feeder poll, the baseline adb pull) can never see a
+            // truncated file, and a failed compress (previously an
+            // IGNORED Boolean behind a "Saved" log) now returns null so
+            // the capture loop counts it as the failure it is.
+            if (!AtomicPng.writeAtomically(
+                    file,
+                    { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) },
+                    { msg -> Log.e(TAG, msg) })) {
+                return null
             }
 
             Log.i(TAG, "Saved screenshot: ${file.absolutePath}")
@@ -120,8 +160,30 @@ class ScreenshotManager(private val context: Context) {
             }
             val filename = TitanInbox.composedPngName(testKey)
             val file = File(screenshotDir, filename)
-            FileOutputStream(file).use { out ->
-                bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+            // Degenerate-canvas breadcrumb (wave-48 W1): a vertical-mode
+            // layout defect can compose to tens of thousands of px tall
+            // (direction-upright-002: 390×66404 where web lays out 2805)
+            // and such an encode takes SECONDS — the log names the test
+            // and the real dimensions so a slow/failed publish in the
+            // feeder log is attributable to layout, not the encoder. The
+            // bitmap is deliberately NOT clamped or cropped here: the
+            // capture must report the render the runtime actually
+            // produced, or the cross-platform comparison would hide a
+            // real layout defect behind a tidy screenshot.
+            if (bitmap.height > DEGENERATE_CANVAS_PX || bitmap.width > DEGENERATE_CANVAS_PX) {
+                Log.w(TAG, "Degenerate composed canvas for $testKey: " +
+                    "${bitmap.width}x${bitmap.height} — encoding anyway (slow), " +
+                    "suspect a layout defect upstream")
+            }
+            // Atomic publish (wave-48 W1): the feeder polls for THIS
+            // filename's existence and pulls ~150 ms later, so the name
+            // must never exist before the encode is complete — see
+            // AtomicPng for the measured truncation this closed.
+            if (!AtomicPng.writeAtomically(
+                    file,
+                    { out -> bitmap.compress(Bitmap.CompressFormat.PNG, 100, out) },
+                    { msg -> Log.e(TAG, msg) })) {
+                return null
             }
             Log.i(TAG, "Saved composed screenshot: ${file.absolutePath}")
             file
@@ -399,8 +461,15 @@ class ScreenshotManager(private val context: Context) {
             val w = (bitmap.width * 4).coerceAtLeast(1)
             val h = (bitmap.height * 4).coerceAtLeast(1)
             val scaled = Bitmap.createScaledBitmap(bitmap, w, h, true)
-            FileOutputStream(file).use { out ->
-                scaled.compress(Bitmap.CompressFormat.PNG, 100, out)
+            // Atomic publish (wave-48 W1) — same contract as the other two
+            // save paths: the host-side probe pull must never see a
+            // half-encoded 4× buffer, and a failed compress is a null
+            // return, not a truncated file behind a success log.
+            if (!AtomicPng.writeAtomically(
+                    file,
+                    { out -> scaled.compress(Bitmap.CompressFormat.PNG, 100, out) },
+                    { msg -> Log.e(TAG, msg) })) {
+                return null
             }
             Log.i(TAG, "Saved probe screenshot @4×: ${file.absolutePath}")
             file

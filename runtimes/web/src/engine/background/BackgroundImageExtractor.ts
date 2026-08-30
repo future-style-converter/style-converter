@@ -95,10 +95,71 @@ function splitStopsHead(stops: IRStop[]): { head: string[]; rest: IRStop[] } {
   return { head, rest: stops.slice(i) };                               // split into prefix + real stops
 }
 
+// wave-48 lane W5 — author-fidelity re-emission for lab()/lch()/oklab()/
+// oklch() STOPS. The wire's `original` for these spaces is a typed object
+// ({type:'lch', l, c, h, alpha?} — ColorRepresentationSerializer) holding the
+// CANONICAL post-scaling numbers, so the exact authored colour can be handed
+// back to the browser. That matters precisely here: an out-of-srgb-gamut
+// endpoint (`lch(50% 100% 0deg)` = chroma 150) collapses under the rgba()
+// path (srgb is the converter's simple channel clip), and in a polar-space
+// interpolation the browser then ramps between the CLIPPED endpoints instead
+// of gamut-mapping per sample the way it does for the author's own bytes —
+// the exact behaviour the Raw passthrough (1.0000 P on the two hue-lch
+// tests) had and the typed path must not lose. In-gamut originals round-trip
+// srgb↔lch to the same colour, so the two currently-passing typed-stop cells
+// (gradient-powerless-hue-{lch,oklch}, web 0.9995/0.9994) keep their pixels.
+// DELIBERATELY stops-only and lab-family-only: hwb/color() stops keep the
+// rgba path (hwb is always in-gamut; wide-gamut color() re-emission has no
+// corpus cell behind it yet), and non-stop colour consumers are untouched.
+// COUPLING, named (wave-48 S6 must-fix 3): verbatim re-emission is correct
+// ONLY against a converter emitting CANONICAL ok-space L (0..1 — the
+// wave-48 ColorParser %-scaling change; convention pinned in
+// schema/spec/02-values.md §Colors). Reverting either half alone regresses
+// gradient-powerless-hue-oklch: a pre-wave-48 wire carries l=86.64… for
+// oklch(86.64% …), re-emitting that yields oklch(86.64 …) which the
+// browser clamps to WHITE (executed S6 repro on the cell scoring 0.9994 P
+// today). The lightness guard inside typedLabOriginalCss refuses such
+// legacy-scale wires back onto the srgb path.
+const TYPED_LAB_FAMILIES = new Set(['lab', 'lch', 'oklab', 'oklch']);
+
+function typedLabOriginalCss(payload: unknown): string | null {
+  if (!payload || typeof payload !== 'object') return null;
+  const orig = (payload as Record<string, unknown>).original;
+  if (!orig || typeof orig !== 'object') return null;
+  const o = orig as Record<string, unknown>;
+  const t = typeof o.type === 'string' ? o.type : '';
+  if (!TYPED_LAB_FAMILIES.has(t)) return null;
+  // Channel pair per family: lab/oklab carry (l,a,b); lch/oklch carry (l,c,h).
+  const second = t === 'lab' || t === 'oklab' ? o.a : o.c;
+  const third = t === 'lab' || t === 'oklab' ? o.b : o.h;
+  if (typeof o.l !== 'number' || typeof second !== 'number' || typeof third !== 'number') return null;
+  // OK-SPACE LIGHTNESS GUARD (wave-48 S6 must-fix 3, executed repro):
+  // oklab/oklch L is canonically 0..1 (css-color-4 §9.3/§9.4 map 100% → 1;
+  // pinned in schema/spec/02-values.md), but an IR produced BEFORE the
+  // wave-48 ColorParser %-scaling fix carries the legacy 0..100 convention
+  // (oklch(86.64% …) → l=86.64). Re-emitted verbatim that becomes
+  // oklch(86.64 …), which the browser clamps to WHITE — the measured
+  // failure mode: gradient-powerless-hue-oklch (web-ref 0.9994 P today)
+  // would paint a white ramp. Refusing here (return null) falls through to
+  // the clipped-but-sane srgb rgba() path, exactly what such a wire got
+  // before the typed path existed. Threshold 1.5 leaves headroom for a
+  // legitimately super-white canonical L while catching every legacy-scale
+  // value a percentage ≥ 1.5% produces; lab/lch keep their native 0..100 L.
+  if ((t === 'oklab' || t === 'oklch') && o.l > 1.5) return null;
+  // `alpha` key is OMITTED on the wire when 1.0 (serializer contract).
+  const alpha = typeof o.alpha === 'number' ? o.alpha : 1;
+  const tail = alpha !== 1 ? ` / ${alpha}` : '';
+  return `${t}(${o.l} ${second} ${third}${tail})`;                     // css-color-4 space-separated form
+}
+
 // Serialise real color stops: "color", "color N%", or skip unparseable entries.
 function stopsToCss(stops: IRStop[]): string {
   const parts: string[] = [];                                          // CSS fragments
   for (const s of stops) {
+    // Typed lab-family original first (see the fidelity note above)...
+    const typed = typedLabOriginalCss(s.color);
+    if (typed !== null) { parts.push(`${typed}${stopPosCss(s)}`); continue; }
+    // ...then the shared srgb/dynamic path, byte-identical for every other stop.
     const color = extractColor(s.color);                               // parse IR color primitive
     if (color.kind === 'unknown') continue;                            // drop malformed
     const css = colorToCss(color);                                     // rgba(...) or dynamic
@@ -317,8 +378,64 @@ export function layerCss(entry: unknown): string | null {
     case 'repeating-conic-gradient':  return conicGradientCss(obj, true);
     case 'cross-fade':                return crossFadeCss(obj);        // css-images-4 §2.6.2 (A-RC2)
     case 'color':                     return colorLayerCss(obj);       // <color> as image (cross-fade arg)
+    case 'image':                     return imageNotationCss(obj);    // image() notation (css-images-4 §2.1)
     default:                           return null;                    // unknown -> drop
   }
+}
+
+// image() notation — wave-48 lane W5. The wire carries the candidate source
+// list in author order plus the optional fallback colour ({type:'image',
+// srcs:[…], color:{…}?} — ImageNotationParser/BackgroundImageSerializer).
+//
+// Chromium does NOT implement image() (the whole reason WPT css-image-
+// fallbacks-and-annotations 001–005 painted their forbidden red here), so
+// the notation is LOWERED onto plain CSS the capture browser executes:
+// every candidate becomes a url() sub-layer (top-to-bottom in author order —
+// a candidate that fails to load paints nothing and the next one shows,
+// which is §2.1's "first that loads" for the opaque corpus images), and the
+// fallback colour becomes a solid single-colour gradient UNDERNEATH them
+// all, visible exactly when every url above it failed. Stated approximation:
+// a LOADED translucent image would show the colour through, where the spec
+// replaces rather than underlays — no corpus test combines translucent
+// sources with a fallback colour.
+//
+// CROSS-PLATFORM SEAM, stated (wave-48 S6): the NATIVE twins resolve the
+// notation the other way round — fallback-COLOUR-first (Compose
+// color/ColorExtractor.kt `"image"` arm, SwiftUI background/
+// BackgroundImageExtractor.swift `"image"` case), because whether a url
+// will load is unknowable at their extraction time — while web's url stack
+// lets a loadable src win because the browser resolves loading itself. The
+// two answers differ ONLY for image(<loadable-src>, <color>), a
+// combination no corpus test carries; if one ever does, the natives'
+// colour would mis-paint over the loaded source and this seam is where to
+// look first.
+//
+// VERIFIED (w48-w5-verify2 vs wave48-cal, css-images web-ref) — honest
+// net: fallbacks-and-annotations 001–004 flip 0.9999 F → 1.0000 P (the
+// four 1P flips this lowering bought), while fallbacks-005 MOVES 0.9144 →
+// 0.9038, still F — its image(rgba(0,0,255,.5)) layer now paints where the
+// pre-fix runtime dropped it wholesale, and the residual gap is the test's
+// un-bundled support/ asset (manifest tag: requires-bundled-asset), not
+// the lowering itself. Four cells up, one existing F slightly deeper.
+function imageNotationCss(obj: Record<string, unknown>): string | null {
+  const srcs = Array.isArray(obj.srcs) ? obj.srcs : [];
+  // Candidate urls, top-most first (same IRUrl wire shapes as layerCss:
+  // bare string, or {url, data:true} for data URIs); quoted via cssUrl.
+  const parts: string[] = [];
+  for (const s of srcs) {
+    if (typeof s === 'string') parts.push(cssUrl(s));
+    else if (s && typeof s === 'object' && typeof (s as Record<string, unknown>).url === 'string') {
+      parts.push(cssUrl((s as Record<string, unknown>).url as string));
+    } else return null;                                                // malformed wire — drop loudly upstream
+  }
+  // Fallback colour at the BOTTOM of the stack (colorLayerCss reuses the
+  // solid-gradient spelling every engine parses).
+  if (obj.color !== undefined && obj.color !== null) {
+    const c = colorLayerCss({ color: obj.color });
+    if (c === null) return null;                                       // unpaintable colour — whole layer drops
+    parts.push(c);
+  }
+  return parts.length > 0 ? parts.join(', ') : null;                   // src-less colour-less wire is invalid
 }
 
 // A bare <color> used as an image. Valid DIRECTLY only inside

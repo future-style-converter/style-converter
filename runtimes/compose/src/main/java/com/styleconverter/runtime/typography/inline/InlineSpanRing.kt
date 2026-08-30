@@ -82,6 +82,27 @@ object InlineSpanRing {
      *  the fold stays pure). */
     data class Ink(val r: Float, val g: Float, val b: Float, val a: Float)
 
+    /** Wave 48 (lane W4) — a `sup`/`sub` member's UA baseline shift
+     *  (HTML rendering §15.3.4: `sup { vertical-align: super }`,
+     *  `sub { vertical-align: sub }`). Blink resolves the two keywords in
+     *  LayoutBoxModelObject::VerticalPosition as PIXELS off the PARENT's
+     *  computed font-size — super raises by size/3 + 1, sub lowers by
+     *  size/5 + 1 — verified against the frozen subelements-002 ref
+     *  (parent 32px → predicted raise 11.67px, measured ≈12px; the
+     *  member's OWN size would predict 9.9px, clearly off). The parent's
+     *  size is carried here in the same px-or-paragraph-factor encoding
+     *  the font-size fields use, so the seam can resolve it exactly. */
+    data class VerticalShift(
+        /** true = super (raise), false = sub (lower). */
+        val up: Boolean,
+        /** The PARENT box's absolute size in px, when the enclosing
+         *  member declared one — else null. */
+        val parentPx: Float? = null,
+        /** Else the parent's size as a factor of the paragraph's resolved
+         *  size (1.0 for a direct member — its parent IS the paragraph). */
+        val parentEm: Float = 1f,
+    )
+
     /** One member's admitted span attribution. Every field null/false =
      *  [PLAIN]: the member folds exactly like a wave-44 policy-only span
      *  and no span overlay is emitted for it. */
@@ -105,6 +126,10 @@ object InlineSpanRing {
         val underline: Boolean = false,
         /** `text-decoration-line: line-through`. */
         val lineThrough: Boolean = false,
+        /** Wave 48 (lane W4): the `sup`/`sub` UA baseline shift, or null
+         *  for every horizontal member — the pre-wave-48 shapes all carry
+         *  null, so [PLAIN] comparisons are untouched by construction. */
+        val shift: VerticalShift? = null,
     ) {
         /** True when no attribute differs from plain inherited text. */
         val isPlain: Boolean get() = this == PLAIN
@@ -134,9 +159,22 @@ object InlineSpanRing {
         "BorderTopColor", "BorderRightColor", "BorderBottomColor", "BorderLeftColor",
     )
 
-    /** The glyph-member tags this ring styles: the wave-44 no-UA-ink trio
-     *  plus `u`, whose single UA rule (underline) the ring models. */
-    val STYLED_MEMBER_TAGS = setOf("span", "time", "data", "u")
+    /** Wave 48 (lane W4) — the UA-ITALIC family (HTML rendering §15.3.4:
+     *  `cite, dfn, em, i, var { font-style: italic }`). Their one UA rule
+     *  is a slant the span expresses exactly, so the whole family joins
+     *  the ring together — admitting only the corpus-present `i` would be
+     *  a carve-out, and the rule covers all five identically. */
+    private val UA_ITALIC_TAGS = setOf("i", "em", "cite", "var", "dfn")
+
+    /** Wave 48 (lane W4) — the UA-shifted pair (HTML rendering §15.3.4:
+     *  `sub, sup { font-size: smaller }` plus the vertical-align super/sub
+     *  keywords the [VerticalShift] banner derives). */
+    private val UA_SHIFT_TAGS = setOf("sup", "sub")
+
+    /** The glyph-member tags this ring styles: the wave-44 no-UA-ink trio,
+     *  `u` (wave 47 — UA underline), and the wave-48 UA-italic +
+     *  UA-shifted families whose UA rules the ring now models per-range. */
+    val STYLED_MEMBER_TAGS = setOf("span", "time", "data", "u") + UA_ITALIC_TAGS + UA_SHIFT_TAGS
 
     /**
      * Admit one glyph-bearing member's property bag, or refuse with the
@@ -159,9 +197,23 @@ object InlineSpanRing {
         var sizePx: Float? = null
         var sizeEm: Float? = null
         var weight: Int? = null
-        var italic = false
+        // Wave 48 (lane W4): the UA-italic family seeds the slant the
+        // same way `u` seeds its underline (§15.3.4 — see UA_ITALIC_TAGS).
+        var italic = tag in UA_ITALIC_TAGS
         var underline = tag == "u"
         var lineThrough = false
+        // Wave 48 (lane W4): sup/sub seed the UA baseline shift for a
+        // DIRECT member (parent = the paragraph, factor 1) — a nested
+        // member's parent is rewritten by [composeNested].
+        var shift = when (tag) {
+            "sup" -> VerticalShift(up = true)
+            "sub" -> VerticalShift(up = false)
+            else -> null
+        }
+        // Whether the member DECLARED font-size — an author declaration
+        // beats the sup/sub UA `font-size: smaller` seed (cascade origin
+        // order, css-cascade-4 §6.1: author over user agent).
+        var declaredFontSize = false
         // Border longhands seen — reported as ONE stated loss when any
         // side actually paints (style keyword present; §3.2 initial none).
         var borderStyleSeen = false
@@ -176,8 +228,8 @@ object InlineSpanRing {
             }
             // css-fonts-4 §2.4 — absolute px or a paragraph-relative factor.
             "FontSize" -> when (val size = extractFontSize(prop.data)) {
-                is FontSizeValue.Px -> sizePx = size.px
-                is FontSizeValue.Factor -> sizeEm = size.factor
+                is FontSizeValue.Px -> { sizePx = size.px; declaredFontSize = true }
+                is FontSizeValue.Factor -> { sizeEm = size.factor; declaredFontSize = true }
                 null -> return Admission.Refused("member-prop:FontSize-unresolved")
             }
             // css-fonts-4 §2.2 — the wire is pre-normalized 100..900.
@@ -185,11 +237,13 @@ object InlineSpanRing {
                 weight = (prop.data as? JsonObject)?.get("weight")?.jsonPrimitive?.intOrNull
                     ?: return Admission.Refused("member-prop:FontWeight-unresolved")
             }
-            // css-fonts-4 §2.2 font-style — italic/oblique slant, normal
-            // no-op; anything else (oblique with angle object…) refuses.
+            // css-fonts-4 §2.2 font-style — italic/oblique slant; a
+            // declared `normal` RESETS the wave-48 UA-italic seed (author
+            // over user agent, css-cascade-4 §6.1); anything else
+            // (oblique with angle object…) refuses.
             "FontStyle" -> when (extractKeywordish(prop.data)) {
                 "italic", "oblique" -> italic = true
-                "normal" -> {}
+                "normal" -> italic = false
                 else -> return Admission.Refused("member-prop:FontStyle-unresolved")
             }
             // css-text-decor-3 §2.1 — underline/line-through only:
@@ -235,13 +289,108 @@ object InlineSpanRing {
             // the property named, the wave-44 contract.
             else -> return Admission.Refused("member-prop:${prop.type}")
         }
+        // Wave 48 (lane W4): sup/sub's UA `font-size: smaller` (HTML
+        // rendering §15.3.4) — one ×1.2 ladder step down (Blink
+        // FontSizeFunctions::SmallerFontSize), the ring's existing
+        // `smaller` factor — unless the author declared a size (§6.1).
+        if (tag in UA_SHIFT_TAGS && !declaredFontSize) sizeEm = 1f / 1.2f
         // A styleless border never paints (css-backgrounds-3 §3.2) — only
         // report the loss when a style keyword makes the box real.
         val stated = if (borderStyleSeen) listOf("border-box-ink(${losses.joinToString(",")})") else emptyList()
         return Admission.Admitted(
-            Style(ink, sizePx, sizeEm, weight, italic, underline, lineThrough),
+            Style(ink, sizePx, sizeEm, weight, italic, underline, lineThrough, shift),
             stated,
         )
+    }
+
+    /**
+     * Wave 48 (lane W4) — compose a ONE-LEVEL nested member's admitted
+     * style onto its enclosing member's, for the fold's per-piece span
+     * emission (subelements-002's `<i>e = mc<sup>2</sup></i>`): the
+     * nested box inherits the outer's inheritable attributes (css-cascade
+     * -4 §7.3) unless it declares its own, decorations accumulate over
+     * descendants (css-text-decor-3 §2.1 propagation), and a relative
+     * nested size resolves against the OUTER box (css-values-4 §5.1.1 —
+     * its parent is the outer member, not the paragraph). Returns null
+     * for the one shape no flat span can express: BOTH boxes shifted
+     * (vertical-align offsets ADD box-by-box; a compound shift needs the
+     * tree the fold flattened away — zero corpus presence, named wall).
+     */
+    fun composeNested(outer: Style, nested: Style): Style? {
+        // Compound sup/sub-in-sup/sub cannot be expressed flat — refuse.
+        if (outer.shift != null && nested.shift != null) return null
+        // The nested member's own declarations win; else the outer's
+        // inheritable attributes flow through (ink, weight, slant).
+        val sizePx: Float?
+        val sizeEm: Float?
+        when {
+            // Nested absolute size stands on its own.
+            nested.fontSizePx != null -> { sizePx = nested.fontSizePx; sizeEm = null }
+            // Nested factor resolves against the OUTER size: px parent →
+            // absolute; factor/unstyled parent → factors multiply.
+            nested.fontSizeEm != null -> {
+                if (outer.fontSizePx != null) {
+                    sizePx = outer.fontSizePx * nested.fontSizeEm; sizeEm = null
+                } else {
+                    sizePx = null; sizeEm = (outer.fontSizeEm ?: 1f) * nested.fontSizeEm
+                }
+            }
+            // No nested size — the outer's own (possibly relative) size
+            // inherits down unchanged.
+            else -> { sizePx = outer.fontSizePx; sizeEm = outer.fontSizeEm }
+        }
+        // The nested shift's PARENT is the outer member — rewrite the
+        // seed's paragraph-relative parent with the outer's size encoding
+        // (see VerticalShift's banner for the Blink px rule it feeds).
+        val shift = nested.shift?.copy(
+            parentPx = outer.fontSizePx,
+            parentEm = outer.fontSizeEm ?: 1f,
+        ) ?: outer.shift
+        return Style(
+            ink = nested.ink ?: outer.ink,
+            fontSizePx = sizePx,
+            fontSizeEm = sizeEm,
+            fontWeight = nested.fontWeight ?: outer.fontWeight,
+            // OR is the §6.1 approximation: a nested `font-style: normal`
+            // cannot un-slant an italic outer here — no corpus member
+            // declares one, and modeling it needs a tri-state the ring
+            // does not carry (stated, not silent).
+            italic = outer.italic || nested.italic,
+            // §2.1: decorations PROPAGATE — an outer underline paints
+            // over nested descendants, and a nested one adds to it.
+            underline = outer.underline || nested.underline,
+            lineThrough = outer.lineThrough || nested.lineThrough,
+            shift = shift,
+        )
+    }
+
+    /**
+     * Wave 48 (fix lane F5) — resolve a [VerticalShift] to Blink's PIXEL
+     * rule, in ONE place per platform (the Swift twin is
+     * InlineSpanRing.swift `shiftPx`, feeding Text.baselineOffset; this
+     * one feeds InlineSpanContent's BaselineShift conversion). Extracted
+     * because the rule previously lived inline at both seams with ZERO
+     * unit coverage — S5's mutation of `/3+1 → /3` passed all 4644 native
+     * tests; the pins on this helper (InlineSpanRingTest /
+     * InlineSpanRingTests, same rows both sides) close that hole.
+     *
+     * The arithmetic ([VerticalShift]'s banner has the ref verification):
+     *   parent  = parentPx ?? parentEm × paragraph  — the px-or-factor
+     *             encoding [admit] seeds (factor 1 for a direct member)
+     *             and [composeNested] rewrites for nested members;
+     *   super  →  parent/3 + 1   (raise — positive);
+     *   sub    → −(parent/5 + 1) (lower — negative);
+     * per Blink LayoutBoxModelObject::VerticalPosition's resolution of
+     * the `super`/`sub` vertical-align keywords.
+     */
+    fun shiftPx(shift: VerticalShift, paragraphFontSizePx: Float): Float {
+        // The PARENT box's resolved size: absolute when the enclosing
+        // member declared px, else its factor against the paragraph.
+        val parentPx = shift.parentPx ?: (shift.parentEm * paragraphFontSizePx)
+        // Blink's keyword resolution — the direction carries the sign
+        // (positive raises, matching Text.baselineOffset and the positive
+        // BaselineShift multiplier convention on Compose).
+        return if (shift.up) parentPx / 3f + 1f else -(parentPx / 5f + 1f)
     }
 
     /** FontSize wire → absolute px or a paragraph-relative factor. */

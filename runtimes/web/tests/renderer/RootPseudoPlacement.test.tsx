@@ -18,6 +18,7 @@ import { NodeRenderer } from '../../src/renderer/NodeRenderer';
 import {
   containmentBlocksDirectionPropagation,
   rootPseudoPlacementStyle,
+  rootWritingModeSuppression,
 } from '../../src/renderer/RootPseudoPlacement';
 import type { ComposedNode } from '../../src/renderer/Composer';
 import type { IRComponent } from '../../src/core/ir/IRModels';
@@ -119,5 +120,90 @@ describe('NodeRenderer wiring — the pin reaches the span, and loses to authors
   it('an uncontained body-root span is byte-identical to wave 27', () => {
     const uncontained = bodyRoot({ properties: [{ type: 'Direction', data: 'RTL' }] });
     expect(html(uncontained)).not.toMatch(/margin-right/);
+  });
+});
+
+// ── wave-48 lane W5: the BLOCK axis (writing-mode) ─────────────────────────
+//
+// The w-m twins of the dir family declare `writing-mode: vertical-rl` on the
+// body; css-contain-1 §3.1 takes the contained body off the css-writing-
+// modes-4 §3.2 propagation channel exactly as for `direction`, but the pin
+// above is inline-axis-only — in vertical-rl the FIRST BLOCK CHILD stacks
+// from the RIGHT edge (measured on wave48-cal: orange square at
+// [118,16]-[216,115] vs the ref's [16,16]-[115,115], web-ref 0.9101 on all
+// 8 w-m cells while both natives — whose Column/VStack always stack
+// top-to-bottom — score 0.9984+). The suppression overrides the merged
+// body-root element itself back to horizontal-tb.
+//
+// The VERBATIM wave48-cal per-test-ir property list of
+// wpt__css-contain__contain-body-w-m-001__0 (tools/titan/runs/wave48-cal/
+// sections/css-contain/per-test-ir/), trimmed of the four zero margins the
+// rule never reads.
+function wmBodyRoot(overrides: Partial<IRComponent> = {}): IRComponent {
+  return bodyRoot({
+    properties: [
+      { type: 'Width', data: { type: 'length', px: 200 } },
+      { type: 'Height', data: { type: 'length', px: 200 } },
+      { type: 'WritingMode', data: 'VERTICAL_RL' },
+      { type: 'Contain', data: ['LAYOUT'] },
+    ],
+    ...overrides,
+  });
+}
+
+describe('rootWritingModeSuppression — who gets the block-axis override', () => {
+  it('overrides a contained vertical body-root back to horizontal-tb', () => {
+    expect(rootWritingModeSuppression(wmBodyRoot())).toEqual({ writingMode: 'horizontal-tb' });
+  });
+
+  it('covers all four containment kinds of the w-m family (001..004)', () => {
+    // contain-body-w-m-001..004 declare layout/paint/size/style respectively
+    // (VERIFIED against tools/wpt/css/css-contain sources) and share one ref.
+    for (const kind of ['LAYOUT', 'PAINT', 'SIZE', 'STYLE']) {
+      const c = wmBodyRoot({
+        properties: [
+          { type: 'WritingMode', data: 'VERTICAL_RL' },
+          { type: 'Contain', data: [kind] },
+        ],
+      });
+      expect(rootWritingModeSuppression(c)).toEqual({ writingMode: 'horizontal-tb' });
+    }
+  });
+
+  it('leaves an UNCONTAINED vertical body-root alone (propagation is real)', () => {
+    const uncontained = wmBodyRoot({
+      properties: [{ type: 'WritingMode', data: 'VERTICAL_RL' }],
+    });
+    expect(rootWritingModeSuppression(uncontained)).toBeNull();
+  });
+
+  it('leaves a contained HORIZONTAL body-root alone — the dir family DOM must not move', () => {
+    // The 8 contain-{body,html}-dir cells carry Direction but no vertical
+    // WritingMode; their pin is the inline-axis one, nothing more.
+    expect(rootWritingModeSuppression(bodyRoot())).toBeNull();
+  });
+
+  it('leaves every ordinary component alone, containment or not', () => {
+    const ordinary = wmBodyRoot({ meta: { sourceTag: 'div' } });
+    expect(rootWritingModeSuppression(ordinary)).toBeNull();
+  });
+});
+
+describe('NodeRenderer wiring — the override beats the emitted writing-mode', () => {
+  it('emits writing-mode:horizontal-tb on the contained body-root element', () => {
+    const out = html(wmBodyRoot());
+    // The element carries the override, not the wire's vertical-rl.
+    expect(out).toMatch(/writing-mode:horizontal-tb/);
+    expect(out).not.toMatch(/writing-mode:vertical-rl/);
+    // The root-scope span still renders with its author box untouched.
+    expect(out).toContain('data-pseudo="before"');
+    expect(out).toMatch(/background:orange/);
+  });
+
+  it('an uncontained vertical body-root keeps its emitted vertical-rl', () => {
+    const uncontained = wmBodyRoot({
+      properties: [{ type: 'WritingMode', data: 'VERTICAL_RL' }],
+    });
+    expect(html(uncontained)).toMatch(/writing-mode:vertical-rl/);
   });
 });

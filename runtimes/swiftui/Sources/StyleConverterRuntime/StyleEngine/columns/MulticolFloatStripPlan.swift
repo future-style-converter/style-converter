@@ -34,8 +34,9 @@ extension MulticolFloatStrip {
 
     /// Build the strip plan — the Kotlin MulticolFloatStripPlan.plan twin,
     /// same FS rows. Measured heights are the children's IN-FLOW extents
-    /// (on Android the zero-flow plan guarantees that; the future iOS
-    /// integration must feed the same).
+    /// — on both platforms the published zero-flow plan guarantees that
+    /// (Android: MulticolFloatStripMeasure; iOS since wave 48:
+    /// MulticolFloatStripSliceLayout's zero-flow measure).
     static func plan(specs: [MulticolSpannerFlow.ChildSpec],
                      measuredHeightsPx: [Double],
                      columnBlockSize: Double,

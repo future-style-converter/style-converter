@@ -75,7 +75,44 @@ object TransformApplier {
 
         // If we have transform functions, use graphicsLayer for combined transforms
         return if (config.functions.isNotEmpty()) {
-            applyTransformFunctions(modifier, config)
+            // Wave 48 (lane W6) — compose the function list in CSS order.
+            // css-transforms-1 §11: `transform: A B` is the matrix product
+            // A·B, so B maps the point FIRST. The legacy path below
+            // (applyTransformFunctions) accumulates each function KIND into
+            // a separate scalar and feeds graphicsLayer's fixed
+            // translate·rotate·scale order, which discards the list order —
+            // `scale(2) translate(30px)` rendered identically to
+            // `translate(30px) scale(2)` (the ledgered Transform_Combined
+            // iOS-Android divergence; web measures centroid +60 vs
+            // Android's +30 on the TLO probe). stepsFor returns non-null
+            // only for pure-2D multi-member lists it can compose exactly;
+            // everything else (3D, skew, matrix, single-function) keeps its
+            // existing route, so the blast radius is exactly the
+            // order-sensitive 2D lists. iOS's TransformsApplier composes in
+            // declared order since 2026-08-28 — this is the Compose twin.
+            val steps = TransformListComposer.stepsFor(config)
+            if (steps != null) {
+                // The linear part (rotations/scales only) is density-free,
+                // so the graphicsLayer-vs-canvas decision happens here at
+                // construction time, before size/density exist.
+                val fields = TransformListComposer.decomposeRotateScale(
+                    TransformListComposer.linearOf(steps),
+                )
+                if (fields != null) {
+                    // Expressible as rotate·scale — keep the graphicsLayer
+                    // pipeline (same rasterisation path as the legacy route,
+                    // so commuting lists keep their exact pixel texture).
+                    applyOrderedViaGraphicsLayer(modifier, config, steps, fields)
+                } else {
+                    // Shear residue (e.g. scaleX(2) rotate(45deg) = S·R,
+                    // not expressible as R·S) — draw the exact matrix via
+                    // ordered canvas ops, the same mechanism the skew path
+                    // already uses for shear.
+                    applyOrderedViaCanvas(modifier, config, steps)
+                }
+            } else {
+                applyTransformFunctions(modifier, config)
+            }
         } else if (!config.isSimpleTransform || config.hasCustomOrigin) {
             // Use graphicsLayer for complex standalone transforms
             applyWithGraphicsLayer(modifier, config)
@@ -352,6 +389,102 @@ object TransformApplier {
         val scaleY: Float = 1f,
         val skewX: Float = 0f
     )
+
+    /**
+     * Ordered-list route, graphicsLayer flavor (wave 48, lane W6).
+     *
+     * The list composed in CSS order has linear part R(θ)·S(sx,sy) — the
+     * exact shape RenderNode expresses (it builds translate · pivot-rotate ·
+     * pivot-scale; with the pivot parked at (0,0) that is T·R·S). The
+     * transform-origin conjugation (css-transforms-1 §8) and every
+     * translation are folded into the composed matrix's translation
+     * component, so the layer's own pivot must NOT conjugate again —
+     * transformOrigin is pinned to the top-left corner.
+     */
+    private fun applyOrderedViaGraphicsLayer(
+        modifier: Modifier,
+        config: TransformConfig,
+        steps: List<TransformListComposer.Step>,
+        fields: TransformListComposer.LayerFields,
+    ): Modifier {
+        return modifier.graphicsLayer {
+            // Per-axis origin resolution, identical to the legacy paths:
+            // a length origin (originXDp) resolves to absolute px, a
+            // keyword/percentage origin to a fraction of the element's own
+            // size (css-transforms-1 §3.2 — lengths reference the border box).
+            val pivX = config.originXDp?.toPx() ?: (size.width * config.originX)
+            val pivY = config.originYDp?.toPx() ?: (size.height * config.originY)
+            // Full ordered product in px (density and own-size fractions
+            // resolve here, where GraphicsLayerScope provides both), then
+            // the §8 origin conjugation.
+            val f = TransformListComposer.conjugateByOrigin(
+                TransformListComposer.affineOf(steps, density, size.width, size.height),
+                pivX, pivY,
+            )
+            // Pivot at the top-left corner: rotation/scale then compose
+            // about (0,0) and the conjugation above supplies the rest.
+            transformOrigin = TransformOrigin(0f, 0f)
+            // Translation component of the composed matrix (includes the
+            // origin conjugation and every ordered translate).
+            translationX = f.tx
+            translationY = f.ty
+            // Linear part, decomposed at construction time — exact by the
+            // recomposition check in decomposeRotateScale.
+            rotationZ = fields.rotationDeg
+            scaleX = fields.scaleX
+            scaleY = fields.scaleY
+        }
+    }
+
+    /**
+     * Ordered-list route, canvas flavor (wave 48, lane W6) — for composed
+     * matrices graphicsLayer CANNOT express, i.e. a linear part with shear
+     * residue such as `scaleX(2) rotate(45deg)` (= S·R; its columns are
+     * not orthogonal, so no R·S decomposition exists — the TLO_ScaleXRotate
+     * red case). Canvas ops concatenate exactly like the §11 matrix
+     * product (each op maps the geometry drawn AFTER it, so applying steps
+     * in declared order makes the last-listed function innermost), so
+     * replaying the steps between the origin conjugation reproduces the
+     * CSS matrix with no decomposition at all. Same drawWithContent
+     * mechanism the skew path has always used for shear, so painted
+     * overflow behaves identically.
+     */
+    private fun applyOrderedViaCanvas(
+        modifier: Modifier,
+        config: TransformConfig,
+        steps: List<TransformListComposer.Step>,
+    ): Modifier {
+        return modifier.drawWithContent {
+            // Same per-axis origin resolution as the graphicsLayer flavor.
+            val pivX = config.originXDp?.toPx() ?: (size.width * config.originX)
+            val pivY = config.originYDp?.toPx() ?: (size.height * config.originY)
+            val canvas = drawContext.canvas
+            canvas.save()
+            // css-transforms-1 §8: translate to the origin…
+            canvas.translate(pivX, pivY)
+            // …apply the list in declared order (later ops are inner —
+            // exactly §11's product where the rightmost function maps the
+            // point first)…
+            for (step in steps) {
+                when (step) {
+                    is TransformListComposer.Step.Translate -> canvas.translate(
+                        // dp·density plus own-size percentage (§6: percentages
+                        // resolve against the element's border box).
+                        step.xDp * density + step.xFrac * size.width,
+                        step.yDp * density + step.yFrac * size.height,
+                    )
+                    // Canvas.rotate is clockwise-positive like CSS (y-down).
+                    is TransformListComposer.Step.Rotate -> canvas.rotate(step.deg)
+                    is TransformListComposer.Step.Scale -> canvas.scale(step.sx, step.sy)
+                }
+            }
+            // …and translate back (§8's closing -origin translation).
+            canvas.translate(-pivX, -pivY)
+            // Draw the node's actual content under the accumulated CTM.
+            this@drawWithContent.drawContent()
+            canvas.restore()
+        }
+    }
 
     /**
      * Apply transform functions using graphicsLayer.

@@ -9,6 +9,8 @@ package com.styleconverter.runtime.layout.flexbox
 
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class FlexWrapLinesTest {
@@ -185,5 +187,105 @@ class FlexWrapLinesTest {
                 intArrayOf(40, 40), 50, 0, FlexWrapLines.CrossDistribution.CENTER
             )
         )
+    }
+
+    // --- wave 48 lane W7: column-direction wrap geometry (transposed axis) ---
+    //
+    // The SAME pure helpers serve FlexWrapColumn on the transposed axis;
+    // these pins are the verbatim wave48-cal css-gaps numbers, cross-checked
+    // pixel-by-pixel against the frozen Chromium captures (web column of the
+    // wave48-cal css-gaps section — content box starts at canvas x=18/y=18).
+
+    @Test fun `045 line collection - nine 70px items in a 400px column budget`() {
+        // flex-gap-decorations-045: content height 400, row-gap 0 → five
+        // items per column (5×70 = 350 ≤ 400; a sixth would need 420).
+        val lines = FlexWrapLines.breakLines(IntArray(9) { 70 }, 400, 0)
+        assertEquals(listOf(FlexWrapLines.Line(0, 4), FlexWrapLines.Line(5, 8)), lines)
+    }
+
+    @Test fun `045 line stretch - integer split hands the remainder forward`() {
+        // 045: content width 120, two 50px lines, column-gap 5 → leftover
+        // 120−100−5 = 15 → share 7, remainder 1 → [58, 57]. Chromium lays
+        // out 57.5/57.5 subpixel; the leading-remainder split reproduces
+        // its RASTER exactly: line 2 starts at 58+5 = 63 → canvas x 81,
+        // where the web capture's second-column items sit (blue 81..130).
+        assertArrayEquals(
+            intArrayOf(58, 57),
+            FlexWrapLines.stretchLines(intArrayOf(50, 50), 120, 5)
+        )
+        // Packed offsets after stretch: [0, 63] — the browser's line
+        // origins (and the 5px column-rule band lands at [58, 63] →
+        // canvas x 76..80, exactly the web capture's red rule).
+        assertArrayEquals(
+            intArrayOf(0, 63),
+            FlexWrapLines.lineCrossOffsets(intArrayOf(58, 57), 120, 5, null)
+        )
+    }
+
+    @Test fun `043 zero leftover keeps the packed FlowColumn geometry`() {
+        // flex-gap-decorations-043: content width 100, two 50px columns,
+        // no column-gap → leftover 0, stretch is the identity and the
+        // packed offsets equal FlowColumn's [0, 50] — the routing change
+        // must not move this passing capture by a pixel.
+        val base = intArrayOf(50, 50)
+        assertArrayEquals(base, FlexWrapLines.stretchLines(base, 100, 0))
+        assertArrayEquals(
+            intArrayOf(0, 50),
+            FlexWrapLines.lineCrossOffsets(base, 100, 0, null)
+        )
+        // And the column collection itself: 9×70 in 400 → [0..4][5..8].
+        assertEquals(
+            listOf(FlexWrapLines.Line(0, 4), FlexWrapLines.Line(5, 8)),
+            FlexWrapLines.breakLines(IntArray(9) { 70 }, 400, 0)
+        )
+    }
+
+    @Test fun `015 exact-fit columns stretch to identity`() {
+        // flex-gap-decorations-015 (passing today): 6×50px items, 170px
+        // budget, row-gap 10 → three per column (50+10+50+10+50 = 170);
+        // width 120, column-gap 20 → leftover 120−100−20 = 0 → identity.
+        assertEquals(
+            listOf(FlexWrapLines.Line(0, 2), FlexWrapLines.Line(3, 5)),
+            FlexWrapLines.breakLines(IntArray(6) { 50 }, 170, 10)
+        )
+        assertArrayEquals(
+            intArrayOf(50, 50),
+            FlexWrapLines.stretchLines(intArrayOf(50, 50), 120, 20)
+        )
+    }
+
+    @Test fun `046 row-axis line stretch - the same step 8 on the block axis`() {
+        // flex-gap-decorations-046 (ROW direction): three 50px lines,
+        // content height 180, row-gap 5 → leftover 180−150−10 = 20 →
+        // share 6, remainder 2 → [57, 57, 56]; packed line starts
+        // [0, 62, 124] vs Chromium's subpixel 0/61.67/123.3 (canvas rows
+        // 16/78/139 in the web capture, ±1 raster rounding).
+        assertArrayEquals(
+            intArrayOf(57, 57, 56),
+            FlexWrapLines.stretchLines(intArrayOf(50, 50, 50), 180, 5)
+        )
+        assertArrayEquals(
+            intArrayOf(0, 62, 124),
+            FlexWrapLines.lineCrossOffsets(intArrayOf(57, 57, 56), 180, 5, null)
+        )
+    }
+
+    @Test fun `line-stretch routing gate - stretch keyword with definite cross only`() {
+        // The 045/046 route: plain wrap + stretching align-content +
+        // definite cross.
+        assertTrue(FlexWrapLines.routesForLineStretch(
+            plainWrap = true, alignContentStretches = true, hasDefiniteCross = true))
+        // wrap-reverse stays on the frozen Flow* paths (no reverse
+        // ordering in the wrap layouts — both wave48-cal wrap-reverse
+        // column tests pass there today).
+        assertFalse(FlexWrapLines.routesForLineStretch(
+            plainWrap = false, alignContentStretches = true, hasDefiniteCross = true))
+        // Positioning keywords route via their own crossDistribution arm,
+        // not this gate (css-align-3 §5.3: they leave the leftover free).
+        assertFalse(FlexWrapLines.routesForLineStretch(
+            plainWrap = true, alignContentStretches = false, hasDefiniteCross = true))
+        // A hugging container has no leftover for step 8 to hand out.
+        assertFalse(FlexWrapLines.routesForLineStretch(
+            plainWrap = true, alignContentStretches = true, hasDefiniteCross = false))
     }
 }

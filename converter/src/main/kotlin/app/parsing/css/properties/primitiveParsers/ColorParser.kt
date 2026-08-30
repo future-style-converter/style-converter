@@ -60,8 +60,10 @@ object ColorParser {
     // silently rejected before.
     private val hwbRegex = """^hwb\s*\(\s*($HUE|none)\s+([\d.]+%|none)\s+([\d.]+%|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
-    // Lab: lab(50% 25 -25) or lab(50% 25 -25 / 50%) - supports 'none' keyword
-    private val labRegex = """^lab\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+|none)\s+(-?[\d.]+|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // Lab: lab(50% 25 -25) or lab(50% 25 -25 / 50%) - supports 'none' keyword.
+    // a/b accept a <percentage> too (css-color-4 §9.1: ±100% = ±125) — the
+    // old `-?[\d.]+` group nulled the whole colour for `lab(50% 100% -100%)`.
+    private val labRegex = """^lab\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+%?|none)\s+(-?[\d.]+%?|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
     // LCH: lch(50% 25 180) or lch(50% 25 180deg / 50%) - supports 'none' keyword.
     // The hue is a full <hue> ($HUE, unit INSIDE the group so parseHslHue can
@@ -69,14 +71,24 @@ object ColorParser {
     // form nulled the whole colour for `-90deg`, `200grad`, `1.5rad` and
     // `0.25turn` — the unit sat OUTSIDE the capture, so any unit other than
     // a literal `deg` made the regex fail entirely.
-    private val lchRegex = """^lch\s*\(\s*([\d.]+%?|none)\s+([\d.]+|none)\s+($HUE|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // wave-48 lane W5: chroma accepts a <percentage> (css-color-4 §8.2:
+    // 100% = 150 for lch) and a leading `-` (negative chroma is CLAMPED to 0
+    // at parsed-value time, not invalid). The old `([\d.]+|none)` group
+    // nulled `lch(50% 100% 0deg)` entirely, which routed every gradient in
+    // WPT gradient-{in,de}creasing-hue-lch to the Raw fallback — the web
+    // runtime re-emitted the author bytes (1.0000 P) but both natives
+    // painted nothing (0.7278 F, wave48-cal css-images).
+    private val lchRegex = """^lch\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+%?|none)\s+($HUE|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
-    // OKLab: oklab(0.7 -0.1 0.15) or oklab(70% -0.1 0.15 / 50%) - supports 'none' keyword
-    private val oklabRegex = """^oklab\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+|none)\s+(-?[\d.]+|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // OKLab: oklab(0.7 -0.1 0.15) or oklab(70% -0.1 0.15 / 50%) - supports
+    // 'none'. a/b accept a <percentage> (css-color-4 §9.2: ±100% = ±0.4).
+    private val oklabRegex = """^oklab\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+%?|none)\s+(-?[\d.]+%?|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
     // OKLCH: oklch(0.7 0.15 180) or oklch(70% 0.15 180deg / 50%) - supports
     // 'none'. Hue is a full <hue> for the same reason as lchRegex above.
-    private val oklchRegex = """^oklch\s*\(\s*([\d.]+%?|none)\s+([\d.]+|none)\s+($HUE|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
+    // Chroma: <percentage> (100% = 0.4, css-color-4 §8.2) and negative-clamp,
+    // same wave-48 rationale as lch above.
+    private val oklchRegex = """^oklch\s*\(\s*([\d.]+%?|none)\s+(-?[\d.]+%?|none)\s+($HUE|none)\s*(?:/\s*([\d.]+%?))?\s*\)$""".toRegex(RegexOption.IGNORE_CASE)
 
     // color-mix: color-mix(in srgb, red 50%, blue)
     private val colorMixRegex = """^color-mix\s*\(\s*in\s+(\w+)\s*,\s*(.+)\s*\)$""".toRegex()
@@ -142,8 +154,10 @@ object ColorParser {
             val aStr = match.groupValues[2]
             val bStr = match.groupValues[3]
             val l = parseLabValue(lStr) ?: return null
-            val a = parseLabValue(aStr) ?: return null
-            val b = parseLabValue(bStr) ?: return null
+            // a/b percentages scale ±100% → ±125 (css-color-4 §9.1); bare
+            // numbers pass through (scale only applies to the % arm).
+            val a = parseScaledComponent(aStr, 1.25) ?: return null
+            val b = parseScaledComponent(bStr, 1.25) ?: return null
             val alpha = parseAlpha(match.groupValues.getOrNull(4))
             val repr = IRColor.ColorRepresentation.Lab(l = l, a = a, b = b, alpha = alpha)
             val srgb = ColorConversion.labToSrgb(l, a, b, alpha).clamped()
@@ -156,7 +170,10 @@ object ColorParser {
             val cStr = match.groupValues[2]
             val hStr = match.groupValues[3]
             val l = parseLabValue(lStr) ?: return null
-            val c = parseLabValue(cStr) ?: return null
+            // Chroma % scales 100% → 150 (css-color-4 §8.2) and negatives
+            // clamp to 0 at parsed-value time — the repr stores the CANONICAL
+            // number so web re-emission (`lch(50 150 0)`) is valid CSS.
+            val c = (parseScaledComponent(cStr, 1.5) ?: return null).coerceAtLeast(0.0)
             // Hue is an <angle>: normalise units to degrees like hsl does.
             val h = parseHslHue(hStr)
             val alpha = parseAlpha(match.groupValues.getOrNull(4))
@@ -170,9 +187,15 @@ object ColorParser {
             val lStr = match.groupValues[1]
             val aStr = match.groupValues[2]
             val bStr = match.groupValues[3]
-            val l = parseLabValue(lStr) ?: return null
-            val a = parseLabValue(aStr) ?: return null
-            val b = parseLabValue(bStr) ?: return null
+            // ok-space lightness reference is 0..1 (css-color-4 §9.2:
+            // 100% = 1.0), so the % arm scales by 0.01 — the repr then holds
+            // the CANONICAL number (`oklab(86.64% …)` → l=0.8664) instead of
+            // relying on the conversion-side `>1 → /100` heuristic, which a
+            // typed-original re-emission would otherwise misread as L>1.
+            val l = parseScaledComponent(lStr, 0.01) ?: return null
+            // a/b percentages scale ±100% → ±0.4 (css-color-4 §9.2).
+            val a = parseScaledComponent(aStr, 0.004) ?: return null
+            val b = parseScaledComponent(bStr, 0.004) ?: return null
             val alpha = parseAlpha(match.groupValues.getOrNull(4))
             val repr = IRColor.ColorRepresentation.OKLab(l = l, a = a, b = b, alpha = alpha)
             val srgb = ColorConversion.oklabToSrgb(l, a, b, alpha).clamped()
@@ -184,8 +207,12 @@ object ColorParser {
             val lStr = match.groupValues[1]
             val cStr = match.groupValues[2]
             val hStr = match.groupValues[3]
-            val l = parseLabValue(lStr) ?: return null
-            val c = parseLabValue(cStr) ?: return null
+            // ok-space lightness: 100% = 1.0 — same canonical-number rule
+            // as the oklab branch above (css-color-4 §9.2).
+            val l = parseScaledComponent(lStr, 0.01) ?: return null
+            // Chroma % scales 100% → 0.4 (css-color-4 §8.2), negative-clamped
+            // like the lch branch above.
+            val c = (parseScaledComponent(cStr, 0.004) ?: return null).coerceAtLeast(0.0)
             // Hue is an <angle> — same normalisation as lch above.
             val h = parseHslHue(hStr)
             val alpha = parseAlpha(match.groupValues.getOrNull(4))
@@ -360,12 +387,44 @@ object ColorParser {
     /**
      * Parse lab/lch/oklab/oklch component value.
      * Handles: numeric values, percentages, and 'none' keyword.
+     *
+     * NOTE the % arm returns the bare number (`50%` → 50.0) — correct for
+     * lab/lch LIGHTNESS only, whose reference range is 0..100 so 100% = 100
+     * (css-color-4 §9.1). Every channel whose percentage reference differs
+     * (chroma, a/b, the ok-space lightness) goes through
+     * [parseScaledComponent] instead.
      */
     private fun parseLabValue(value: String): Double? {
         val trimmed = value.trim().lowercase()
         if (trimmed == "none") return 0.0 // 'none' is treated as 0
         return if (trimmed.endsWith("%")) {
             trimmed.dropLast(1).toDoubleOrNull()
+        } else {
+            trimmed.toDoubleOrNull()
+        }
+    }
+
+    /**
+     * Parse a lab/lch/oklab/oklch component whose PERCENTAGE arm has a
+     * non-unit reference value (wave-48 lane W5, css-color-4 §8.2/§9.1/§9.2):
+     *
+     *   channel     | 100% equals | percentScale (per 1%)
+     *   ------------|-------------|----------------------
+     *   lab a/b     | ±125        | 1.25
+     *   lch chroma  | 150         | 1.5
+     *   oklab a/b   | ±0.4        | 0.004
+     *   oklch chroma| 0.4         | 0.004
+     *
+     * A bare <number> passes through unscaled (the scale belongs to the %
+     * arm only), and `none` stays 0 exactly like [parseLabValue] — callers
+     * that need the chroma negative-clamp apply it themselves so the a/b
+     * axes (legitimately negative) share this helper.
+     */
+    private fun parseScaledComponent(value: String, percentScale: Double): Double? {
+        val trimmed = value.trim().lowercase()
+        if (trimmed == "none") return 0.0 // css-color-4 §4.1: missing behaves as 0
+        return if (trimmed.endsWith("%")) {
+            trimmed.dropLast(1).toDoubleOrNull()?.times(percentScale)
         } else {
             trimmed.toDoubleOrNull()
         }

@@ -143,6 +143,47 @@ class ColorConversionTest {
         assertSrgb(ir.srgb, 0.0, 1.0, 0.0)
     }
 
+    // ---- ok-space lightness clamp (wave-48 S2 note) ----
+    //
+    // css-color-4 §9.2: ok-space L is canonically 0..1 (100% = 1.0) and
+    // out-of-range L clamps to that reference range. The old conversion-side
+    // `>1 → /100` percentage heuristic mis-read a canonical L of 1.5 as an
+    // unscaled percentage (→ 0.015, near-black) where Chrome clamps to 1.0.
+
+    @Test
+    fun `oklab lightness above 1 clamps to white not near-black`() {
+        // oklab(1.5 0 0): L clamps to 1.0 → the achromatic OKLab white →
+        // sRGB white (1,1,1). Under the old /100 heuristic this came out
+        // ~(0.015)^3-scale — indistinguishable from black.
+        assertSrgb(ColorConversion.oklabToSrgb(1.5, 0.0, 0.0).clamped(), 1.0, 1.0, 1.0)
+    }
+
+    @Test
+    fun `oklch lightness above 1 clamps to white not near-black`() {
+        // Same clamp through the OKLCH polar wrapper (its own coerceIn —
+        // both ok-space converters carry the §9.2 reference-range clamp).
+        assertSrgb(ColorConversion.oklchToSrgb(1.5, 0.0, 0.0).clamped(), 1.0, 1.0, 1.0)
+    }
+
+    @Test
+    fun `parser resolves oklab 1_5 0 0 to sRGB white end-to-end`() {
+        // End-to-end: the parser emits the canonical L (1.5) and the emitted
+        // `srgb` field must be the CLAMPED white, matching Chrome's pixels.
+        val ir = ColorParser.parse("oklab(1.5 0 0)")
+        assertNotNull(ir); assertNotNull(ir.srgb)
+        assertSrgb(ir.srgb, 1.0, 1.0, 1.0)
+    }
+
+    @Test
+    fun `oklab percentage lightness still scales as before`() {
+        // Guard: the parser's % arm (×0.01) is untouched — oklab(100% 0 0)
+        // is canonical L = 1.0 → white. Pinned so removing the parser-side
+        // scaling cannot hide behind the new conversion-side clamp.
+        val ir = ColorParser.parse("oklab(100% 0 0)")
+        assertNotNull(ir); assertNotNull(ir.srgb)
+        assertSrgb(ir.srgb, 1.0, 1.0, 1.0)
+    }
+
     // ---- Regression guards: previously-supported colors must not change ----
 
     @Test

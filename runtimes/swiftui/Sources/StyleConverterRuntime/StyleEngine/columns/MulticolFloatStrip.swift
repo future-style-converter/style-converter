@@ -21,22 +21,20 @@
 //     (css-break-3 §4): fill keeps the definite H (100 → 100+100+50 aqua
 //     slices), balance reduces to H = ceil(C/N) (255/3 → the refs' 85).
 //
-//  CONSUMPTION STATUS (iOS): CONSUMED since wave 45 (lane X3) — seam 1
-//  is closed. The renderer's multicol branch builds the composition-time
-//  engagement (MulticolFloatStripSeam.engagedStrip), publishes the
-//  §9.5.2 zero-flow plan on the floatClearancePlan environment around
-//  the layout's content, and threads the SAME engagement into
-//  MulticolGreedyLayout as a parameter (a SwiftUI Layout cannot inject
-//  environment into its subviews) — the layout's strip branch then
-//  measures under zero-flow and places every child at its strip column
-//  (MulticolFloatStripSeam.columnSlot). STILL OPEN — seam 2: the
-//  css-break-3 §4 clip+translate slice REPLAY needs the multi-child
-//  clone-row seam documented since wave-42 (MulticolRunFragment.swift's
-//  banner: iOS fragments via renderer-composed multicolFragmentRow), so
-//  float ink taller than one column stays in its anchor column instead
-//  of slicing across — renderer-owned, logged at the layout.
-//  On Android the Kotlin twin is consumed by MulticolFloatStripMeasure;
-//  the FS table stays native-pair-pinned on both platforms.
+//  CONSUMPTION STATUS (iOS): FULLY CONSUMED — seam 1 closed in wave 45
+//  (lane X3), seam 2 in wave 48 (lane W3). The renderer's multicol
+//  branch builds the composition-time engagement
+//  (MulticolFloatStrip.engagedStrip), publishes the §9.5.2 zero-flow
+//  plan on the floatClearancePlan environment around the strip content,
+//  and composes the css-break-3 §4 slice REPLAY through the multi-child
+//  clone-row seam documented since wave-42 (one clone of the whole
+//  strip content per used column, each shown through
+//  MulticolFloatStripSliceLayout — the measure half, the Compose
+//  MulticolFloatStripMeasure mirror), so float ink taller than one
+//  column slices across columns exactly like Compose's drawWithContent
+//  replay. On Android the Kotlin twin is consumed by
+//  MulticolFloatStripMeasure; the FS table stays native-pair-pinned on
+//  both platforms.
 //
 
 // CoreGraphics for the FragmentGeometry shapes; Foundation for ceil().

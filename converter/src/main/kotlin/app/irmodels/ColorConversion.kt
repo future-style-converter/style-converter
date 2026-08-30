@@ -188,14 +188,20 @@ object ColorConversion {
 
     /**
      * Convert OKLab to sRGB.
-     * @param l Lightness (0-1 or 0-100 if percentage)
+     * @param l Lightness (canonical 0-1; css-color-4 §9.2 — 100% = 1.0)
      * @param a Green-red axis (-0.4 to 0.4 typically)
      * @param b Blue-yellow axis (-0.4 to 0.4 typically)
      * @param alpha Alpha (0-1)
      */
     fun oklabToSrgb(l: Double, a: Double, b: Double, alpha: Double = 1.0): SRGB {
-        // Normalize L if it's percentage-like (> 1)
-        val lNorm = if (l > 1) l / 100.0 else l
+        // css-color-4 §9.2: ok-space lightness is CANONICALLY 0..1 (100% =
+        // 1.0; ColorParser scales the % arm by 0.01 before calling here) and
+        // out-of-range L is clamped to that reference range — so
+        // `oklab(1.5 0 0)` computes as white, matching Chrome. The previous
+        // `>1 → /100` percentage heuristic mis-read such canonical L as an
+        // unscaled percentage (1.5 → 0.015, near-black) once the parser
+        // started emitting canonical numbers (wave-48 S2 note).
+        val lNorm = l.coerceIn(0.0, 1.0)
 
         // OKLab to linear sRGB
         val l_ = lNorm + 0.3963377774 * a + 0.2158037573 * b
@@ -224,16 +230,22 @@ object ColorConversion {
 
     /**
      * Convert OKLCH to sRGB via OKLab.
-     * @param l Lightness (0-1 or 0-100 if percentage)
+     * @param l Lightness (canonical 0-1; css-color-4 §9.2 — 100% = 1.0)
      * @param c Chroma (0-0.4 typically)
      * @param h Hue in degrees (0-360)
      * @param alpha Alpha (0-1)
      */
     fun oklchToSrgb(l: Double, c: Double, h: Double, alpha: Double = 1.0): SRGB {
+        // Same css-color-4 §9.2 reference-range clamp as oklabToSrgb (ok-space
+        // L is canonically 0..1): applied here TOO so a direct caller of this
+        // converter gets the clamp even if the oklab delegation below is ever
+        // restructured. coerceIn is idempotent, so double-clamping is safe.
+        val lNorm = l.coerceIn(0.0, 1.0)
+        // Polar → rectangular (css-color-4 §9.3): a = C·cos(H), b = C·sin(H).
         val hRad = h * PI / 180
         val a = c * cos(hRad)
         val b = c * sin(hRad)
-        return oklabToSrgb(l, a, b, alpha)
+        return oklabToSrgb(lNorm, a, b, alpha)
     }
 
     // ========== XYZ helpers ==========

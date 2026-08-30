@@ -50,6 +50,18 @@ serializers in `ValueTypes.kt`):
   with 0–255 ints; hsl → `{h,s,l[,a]}`; modern spaces carry a `type` tag
   (`{"type":"oklch","l":…,"c":…,"h":…}`, `lab`, `hwb`, `color`,
   `color-mix`, `light-dark`, `relative`).
+- **Lab-family channel scales** (pinned wave-48; the percentage-mapping
+  tables of css-color-4 §9.1–§9.4 for `lab()`/`lch()`/`oklab()`/`oklch()`):
+  `lab`/`lch` carry `l` on the spec's **0–100** scale (`lab(50% …)` →
+  `"l": 50.0`), while `oklab`/`oklch` carry `l` on the canonical **0–1**
+  scale (`oklab(86.64% …)` → `"l": 0.8664`). Chroma/axis channels are
+  **absolute** values on the spec's reference ranges — authored `100%`
+  maps to ±125 for `lab` `a`/`b`, 150 for `lch` `c`, ±0.4 for `oklab`
+  `a`/`b`, and 0.4 for `oklch` `c`. Readers that re-emit these originals
+  as CSS text may rely on this scale (the web runtime's typed-stop path
+  does); an ok-space `l` on a 0–100 scale is a pre-wave-48 wire defect,
+  not a valid encoding — readers should treat it as unrepresentable and
+  fall back to `srgb`.
 - Flattening side effect: single-color properties whose Kotlin class also
   has a discriminator (e.g. `CaretColor`) emit
   `{"type": "color", "srgb": …, "original": …}` — readers must not choke

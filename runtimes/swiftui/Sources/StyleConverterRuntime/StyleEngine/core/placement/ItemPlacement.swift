@@ -49,6 +49,12 @@ struct ItemPlacement: Equatable {
         var shrink: CGFloat = 1
         /// `flex-basis: <length>` in px; nil = auto/content → intrinsic.
         var basisPx: CGFloat? = nil
+        /// Wave 48 (lane W7) — `flex-basis: <percentage>` as the raw
+        /// percent (100 = 100%). Resolved against the container's MAIN
+        /// content size by the consuming layout (css-flexbox-1 §7.2.3) —
+        /// the child cannot know its container's axis or size, so the
+        /// claim rides unresolved, exactly like the grid claims do.
+        var basisPercent: CGFloat? = nil
         /// `align-self` override; nil/auto → container align-items.
         var alignSelf: AlignmentKeyword? = nil
     }
@@ -146,6 +152,10 @@ enum ItemPlacementExtractor {
         // Only a definite px basis is a static claim; auto/content fall
         // back to the subview's intrinsic size at measure time.
         if case .px(let px)? = flexAgg.flexBasis { p.flex.basisPx = px }
+        // Wave 48 (lane W7): a percent basis rides unresolved — the
+        // consuming layout resolves it against its own main content size
+        // (css-flexbox-1 §7.2.3), which the child cannot know here.
+        if case .percent(let pct)? = flexAgg.flexBasis { p.flex.basisPercent = pct }
         p.flex.alignSelf = flexAgg.alignSelf
         // Size facts — presence checks identical to the pre-v2 renderer's
         // crossAuto (Width/InlineSize vs Height/BlockSize) and gridPlan's

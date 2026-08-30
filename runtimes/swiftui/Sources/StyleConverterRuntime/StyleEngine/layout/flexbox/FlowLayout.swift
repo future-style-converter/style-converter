@@ -43,32 +43,63 @@
 //  distributed line gaps). Nil keywords take mainOffsets' packed
 //  default, byte-identical to the removed accumulation loops.
 //
+//  WAVE 48 (lane W7) — TWO ADDITIONS:
+//
+//  1. THE COLUMN AXIS (`vertical`). The pre-wave-48 layout laid out ROWS
+//     whatever `flex-direction` said, so `flex-flow: column wrap` — a
+//     wrapped COLUMN flow whose lines stand side by side horizontally —
+//     rendered as stacked rows (WPT css-gaps flex-gap-decorations-043:
+//     Chromium staggers two space-between columns at x 0/50; the iOS
+//     capture stacked full-width rows; -045 likewise, plus its stretched
+//     lines). With `vertical: true` every step below transposes: items
+//     flow top→bottom, §9.3 breaks against the HEIGHT budget, the line
+//     cross axis is INLINE, and lines line up left→right. All arithmetic
+//     stays in the same FlexWrapPlan / CSSFlexMath helpers — only the
+//     coordinate each number lands on changes, so `vertical: false`
+//     (every pre-wave-48 call site) is byte-identical to the old code.
+//
+//  2. STATIC MAIN-SIZE BASIS (`flex-basis` px/percent). The layout used
+//     to size every item purely from measurement, so a percent basis —
+//     serialized as a bare number, see FlexboxExtractor.extractFlexBasis
+//     — was dropped and flex-gap-decorations-025's `flex-basis: 100%`
+//     items collapsed to intrinsic 0 width (blank iOS capture). The item
+//     main size now honors the ItemPlacement basis claim, but ONLY for
+//     inflexible items (`flex-grow: 0`): this layout runs no §9.7
+//     resolution (its named gap since wave 25), so adopting a basis that
+//     grow would rewrite (e.g. `flex: 1 1 0%`, css-values
+//     calc-size-flex-007) would paint geometry no browser shows — those
+//     keep the measured fallback. The adopted basis is clamped to the
+//     line budget, the same shrink approximation Compose's FlexWrapRow
+//     documents as its KNOWN GAP.
+//
 //  STILL TODO here (named, not silently skipped): wrap-reverse
-//  ordering. Column-direction wrap is also unimplemented — this Layout
-//  lays out ROWS whatever `flex-direction` says (the pre-wave-25
-//  behaviour), which is why the build-time plan refuses column
-//  containers instead of injecting a cross size the placement would
-//  contradict (that wall is what keeps flex-gap-decorations-043/045
-//  failing on iOS).
+//  ordering — the renderer keeps `wrap-reverse` containers on the
+//  row-flow behaviour they render with today (vertical is gated to
+//  `flex-wrap: wrap`).
 //
 
 import SwiftUI
 
-/// Wrapping flex container (`flex-wrap: wrap` / `wrap-reverse`).
-/// Rows are laid left→right and broken when the next item would exceed
-/// the proposed width; lines stack top→bottom.
+/// Wrapping flex container (`flex-wrap: wrap`).
+/// Row mode (default): lines are laid left→right and broken when the
+/// next item would exceed the proposed width; lines stack top→bottom.
+/// Column mode (`vertical: true`): items are laid top→bottom and broken
+/// against the proposed height; lines stand side by side left→right.
 @available(iOS 16.0, *)
 struct FlowLayout: Layout {
-    /// Horizontal gap between items on a single line, in points.
+    /// Horizontal gap in points: between items on a line in row mode,
+    /// between LINES in column mode (`column-gap` either way).
     var horizontalSpacing: CGFloat = 0
-    /// Vertical gap between wrapped lines, in points.
+    /// Vertical gap in points: between lines in row mode, between items
+    /// in a column in column mode (`row-gap` either way).
     var verticalSpacing: CGFloat = 0
     /// Container `align-items` (§8.3 cross-axis default). Nil = the CSS
     /// initial `normal`, which behaves as `stretch` in a flex container.
     var alignItems: AlignmentKeyword? = nil
-    /// True when the IR declared an explicit cross (block) size. Only
-    /// then is there leftover cross space for §9.6 to hand to the lines;
-    /// otherwise the container hugs its lines and stretch is a no-op.
+    /// True when the IR declared an explicit CROSS size (block size in
+    /// row mode, inline size in column mode). Only then is there leftover
+    /// cross space for §9.6 to hand to the lines; otherwise the container
+    /// hugs its lines and stretch is a no-op.
     var definiteCross: Bool = false
     /// Container `align-content`. Nil = the CSS initial `normal`, which
     /// behaves as `stretch` for a flex container (css-align-3 §5.3).
@@ -79,31 +110,25 @@ struct FlowLayout: Layout {
     /// `center` / `space-between` moves the lines to coordinates the
     /// browser never produces. The Compose lane's FlexWrapLines gates
     /// its identical step-8 on exactly this predicate
-    /// (`alignContentStretches`); without the gate here the two runtimes
-    /// disagree the moment a fixture declares align-content on a wrap
-    /// container. Corpus-inert today: no WPT or property fixture pairs
-    /// `align-content` with `flex-wrap` (grep AlignContent+FlexWrap → 0).
+    /// (`alignContentStretches`).
     var alignContent: AlignmentKeyword? = nil
 
     /// Container `justify-content` (§8.2) — wave 47 (lane Z7): applied
     /// PER LINE through the same CSSFlexMath.mainOffsets the nowrap path
     /// uses (css-align-3 §8.3: content distribution is a per-line
-    /// operation). Nil = the initial `normal` → packed start, which is
-    /// byte-identical to the pre-wave-47 accumulation loop (measured:
-    /// the wave-46 iOS captures for flex-gap-decorations-040…042 packed
-    /// every line flush-left where the Chromium ref distributes them).
+    /// operation). Nil = the initial `normal` → packed start.
     var justifyContent: AlignmentKeyword? = nil
-    /// True when the IR declared an explicit MAIN (inline) size — wave
-    /// 47: a definite-width container's content box IS that width, so
-    /// `sizeThatFits` must claim the proposal instead of hugging the
-    /// widest line, or the per-line §8.2 distribution above never sees
-    /// the free space (measured via the raster pins: a `width: 170`
-    /// wrap container reported 150 — its widest line — and SwiftUI
-    /// placed the Layout hugged inside the outer frame, so
-    /// `bounds.width` at placement was 150 and space-between had
-    /// nothing to hand out). False = CSS shrink-to-fit hugging, the
-    /// pre-wave-47 report, byte for byte.
+    /// True when the IR declared an explicit MAIN size (inline in row
+    /// mode, block in column mode) — wave 47: a definite-size container's
+    /// content box IS that size, so `sizeThatFits` must claim the
+    /// proposal instead of hugging, or the per-line §8.2 distribution
+    /// never sees the free space (measured via the raster pins: a
+    /// `width: 170` wrap container reported 150 — its widest line — and
+    /// space-between had nothing to hand out).
     var definiteMain: Bool = false
+    /// Wave 48 (lane W7) — column-direction wrap (`flex-flow: column
+    /// wrap`). False is the pre-wave-48 row flow, byte for byte.
+    var vertical: Bool = false
 
     /// css-align-3 §5.3 — does `align-content` distribute leftover cross
     /// space to the LINES (rather than merely position them)? Delegated
@@ -113,12 +138,21 @@ struct FlowLayout: Layout {
         FlexWrapPlan.alignContentStretches(alignContent)
     }
 
+    /// The gap between items along the MAIN axis (`column-gap` for rows,
+    /// `row-gap` for columns — css-align-3 §8.1's axis mapping).
+    private var mainSpacing: CGFloat { vertical ? verticalSpacing : horizontalSpacing }
+    /// The gap between LINES along the cross axis (the other one).
+    private var crossSpacing: CGFloat { vertical ? horizontalSpacing : verticalSpacing }
+
     /// One measured item inside a line.
     private struct Item {
         /// Index into `subviews`.
         var index: Int
-        /// Intrinsic size — the wrap decision and the main-axis size.
-        var size: CGSize
+        /// Main-axis extent: the §9.2.3 basis claim when adopted (wave
+        /// 48), else the measured intrinsic size on the main axis.
+        var main: CGFloat
+        /// Cross-axis extent as measured.
+        var cross: CGFloat
         /// Effective alignment after align-self / align-items resolution.
         var align: AlignmentKeyword
         /// True when §8.4 lets this item take the whole line cross:
@@ -140,8 +174,8 @@ struct FlowLayout: Layout {
     /// extent. Shared by both protocol methods so the wrap decision and
     /// the stretch arithmetic can never drift between them.
     ///
-    /// `maxMain` is the width to wrap against; `availCross` is the
-    /// container's definite cross size, or nil when it hugs.
+    /// `maxMain` is the main-axis budget to wrap against; `availCross`
+    /// is the container's definite cross size, or nil when it hugs.
     private func plan(subviews: Subviews,
                       maxMain: CGFloat,
                       availCross: CGFloat?) -> [Line] {
@@ -158,26 +192,49 @@ struct FlowLayout: Layout {
             let align = CSSFlexMath.resolvedAlign(self: placement?.flex.alignSelf,
                                                   items: alignItems)
             // §8.3: stretch only acts on items with an AUTO cross size.
-            // This layout is row-direction only, so the cross axis is
-            // always the block axis → Height/BlockSize.
-            let crossAuto = placement.map { !$0.explicitHeight } ?? true
-            items.append(Item(index: i, size: size, align: align,
+            // The cross axis is block in row mode (Height/BlockSize),
+            // inline in column mode (Width/InlineSize) — the placement
+            // carries both facts precisely so the container can pick.
+            let crossAuto = placement.map {
+                vertical ? !$0.explicitWidth : !$0.explicitHeight
+            } ?? true
+            // Wave 48 — §9.2.3.A/B used flex basis for INFLEXIBLE items:
+            // a px basis directly, a percent basis against the line
+            // budget when it is definite (css-flexbox-1 §7.2.3; an
+            // infinite budget is indefinite → percentage behaves as
+            // auto/content, i.e. the measured size). grow > 0 keeps the
+            // measured fallback — no §9.7 runs here (header, item 2) —
+            // and the clamp to `maxMain` is the Compose KNOWN-GAP shrink
+            // approximation.
+            let basis: CGFloat? = {
+                guard let flex = placement?.flex, flex.grow == 0 else { return nil }
+                if let px = flex.basisPx { return min(px, maxMain) }
+                if let pct = flex.basisPercent, maxMain.isFinite {
+                    return min(maxMain * pct / 100, maxMain)
+                }
+                return nil
+            }()
+            let measuredMain = vertical ? size.height : size.width
+            items.append(Item(index: i,
+                              main: basis ?? measuredMain,
+                              cross: vertical ? size.width : size.height,
+                              align: align,
                               stretches: align == .stretch && crossAuto))
         }
         // §9.3 line collection — the SHARED rule (FlexWrapPlan), so the
         // renderer's build-time plan breaks at exactly these indices and
         // the injected cross size can never belong to a different line.
-        let ranges = FlexWrapPlan.breakLines(mainSizes: items.map(\.size.width),
+        let ranges = FlexWrapPlan.breakLines(mainSizes: items.map(\.main),
                                              containerMain: maxMain,
-                                             gap: horizontalSpacing)
+                                             gap: mainSpacing)
         var lines: [Line] = ranges.map { r in
             var line = Line()
             line.items = (r.first...r.last).map { items[$0] }
             // Main extent = summed item mains + the inter-item gaps.
-            line.main = line.items.reduce(0) { $0 + $1.size.width }
-                + horizontalSpacing * CGFloat(r.count - 1)
-            // §9.4 step 7 — hypothetical line cross = the tallest item.
-            line.cross = line.items.map(\.size.height).max() ?? 0
+            line.main = line.items.reduce(0) { $0 + $1.main }
+                + mainSpacing * CGFloat(r.count - 1)
+            // §9.4 step 7 — hypothetical line cross = the largest item.
+            line.cross = line.items.map(\.cross).max() ?? 0
             return line
         }
         // §9.6 align-content stretch (the initial `normal`): a definite
@@ -191,40 +248,42 @@ struct FlowLayout: Layout {
                 alignContentStretches: alignContentStretches,
                 hasDefiniteCross: definiteCross,
                 cross: availCross),
-            gap: verticalSpacing)
+            gap: crossSpacing)
         for i in lines.indices { lines[i].cross = stretched[i] }
         return lines
     }
 
-    /// Wrapped size: widest line × summed line crosses plus row gaps.
+    /// Wrapped size: content extents per axis, definite axes claiming
+    /// their proposal (wave 47) — see `definiteMain`/`definiteCross`.
     func sizeThatFits(proposal: ProposedViewSize,
                       subviews: Subviews,
                       cache: inout ()) -> CGSize {
-        // `replacingUnspecifiedDimensions` gives a sane width when the
+        // `replacingUnspecifiedDimensions` gives a sane budget when the
         // proposal is `.unspecified` (SwiftUI's ideal-size probe).
+        let resolved = proposal.replacingUnspecifiedDimensions()
         let lines = plan(subviews: subviews,
-                         maxMain: proposal.replacingUnspecifiedDimensions().width,
-                         availCross: proposal.height)
+                         maxMain: vertical ? resolved.height : resolved.width,
+                         availCross: vertical ? proposal.width : proposal.height)
         // Content (hugged) extents — the CSS shrink-to-fit report.
-        let hugWidth = lines.map(\.main).max() ?? 0
-        let hugHeight = lines.reduce(0) { $0 + $1.cross }
-            + verticalSpacing * CGFloat(max(0, lines.count - 1))
+        let hugMain = lines.map(\.main).max() ?? 0
+        let hugCross = lines.reduce(0) { $0 + $1.cross }
+            + crossSpacing * CGFloat(max(0, lines.count - 1))
         // Wave 47 (lane Z7) — a DEFINITE axis claims the proposal: the
-        // CSS content box of a `width: 170px` (or `height: 150px`) flex
-        // container is that size whatever its lines hug to, and the
-        // §8.2/§9.6 distribution at placement time needs `bounds` to BE
-        // that box (see `definiteMain`). max() keeps overflow honest —
-        // lines wider/taller than the box still spill like CSS
-        // `overflow: visible` (the pre-wave-47 behavior for them).
-        // Under stretch the lines already sum to the definite cross, so
-        // the height claim is the number the old code returned anyway.
-        let width = definiteMain
-            ? max(proposal.width.flatMap { $0.isFinite ? $0 : nil } ?? hugWidth, hugWidth)
-            : hugWidth
-        let height = definiteCross
-            ? max(proposal.height.flatMap { $0.isFinite ? $0 : nil } ?? hugHeight, hugHeight)
-            : hugHeight
-        return CGSize(width: width, height: height)
+        // CSS content box of a definite-size flex container is that size
+        // whatever its lines hug to, and the §8.2/§9.6 distribution at
+        // placement time needs `bounds` to BE that box. max() keeps
+        // overflow honest — lines beyond the box still spill like CSS
+        // `overflow: visible`. Under stretch the lines already sum to
+        // the definite cross, so the cross claim is the hug anyway.
+        let proposedMain = (vertical ? proposal.height : proposal.width)
+            .flatMap { $0.isFinite ? $0 : nil }
+        let proposedCross = (vertical ? proposal.width : proposal.height)
+            .flatMap { $0.isFinite ? $0 : nil }
+        let main = definiteMain ? max(proposedMain ?? hugMain, hugMain) : hugMain
+        let cross = definiteCross ? max(proposedCross ?? hugCross, hugCross) : hugCross
+        // Land each axis extent back on its coordinate.
+        return vertical ? CGSize(width: cross, height: main)
+                        : CGSize(width: main, height: cross)
     }
 
     /// Place every item, stretching the auto-cross ones to their line.
@@ -236,48 +295,47 @@ struct FlowLayout: Layout {
         // authority for both axes (the pre-wave-25 layout already used
         // bounds.width for the wrap decision).
         let lines = plan(subviews: subviews,
-                         maxMain: bounds.width,
-                         availCross: bounds.height)
-        // Wave 47 (lane Z7) — §9.6 align-content POSITIONING keywords.
-        // Line cross positions come from the same distribution math the
-        // main axis uses (css-align-3 defines one <content-distribution>
-        // grammar for both): sizes = the line crosses, available = the
-        // container's definite cross, keyword = align-content. Under the
-        // initial normal/stretch the lines were already stretched to
-        // consume the leftover (plan → FlexWrapPlan.stretchLines), so
-        // free space is zero and these offsets reproduce the pre-wave-47
-        // packed accumulation bit for bit; center/end/space-* now place
-        // the line BLOCK where css-flexbox-1 §9.6 says instead of
-        // packing at cross-start (WPT flex-gap-decorations-047…049: the
-        // Chromium ref's row rules sit centred in the DISTRIBUTED line
-        // gaps). `definiteCross` gates it exactly like stretch: a
-        // hugging container has no leftover to distribute.
-        let lineYs = CSSFlexMath.mainOffsets(
+                         maxMain: vertical ? bounds.height : bounds.width,
+                         availCross: vertical ? bounds.width : bounds.height)
+        // Wave 47 (lane Z7) — §9.6 align-content POSITIONING keywords:
+        // line cross positions from the same distribution math the main
+        // axis uses (css-align-3 defines one <content-distribution>
+        // grammar for both). Under the initial normal/stretch the lines
+        // were already stretched to consume the leftover, so free space
+        // is zero and these offsets reproduce the packed accumulation
+        // bit for bit; center/end/space-* place the line BLOCK where
+        // css-flexbox-1 §9.6 says. `definiteCross` gates it exactly like
+        // stretch: a hugging container has no leftover to distribute.
+        let lineCrossStarts = CSSFlexMath.mainOffsets(
             sizes: lines.map(\.cross),
-            available: definiteCross ? bounds.height : nil,
-            gap: verticalSpacing,
+            available: definiteCross ? (vertical ? bounds.width : bounds.height) : nil,
+            gap: crossSpacing,
             justify: alignContentStretches ? nil : alignContent)
         for (li, line) in lines.enumerated() {
-            let y = bounds.minY + lineYs[li]
+            let lineCross = lineCrossStarts[li]
             // §8.2 justify-content per line: item main positions from
             // the shared nowrap math. Nil justify → packed start →
-            // byte-identical to the old `x += size + gap` walk.
-            let xs = CSSFlexMath.mainOffsets(
-                sizes: line.items.map(\.size.width),
-                available: bounds.width,
-                gap: horizontalSpacing,
+            // byte-identical to the old accumulation walk.
+            let mains = CSSFlexMath.mainOffsets(
+                sizes: line.items.map(\.main),
+                available: vertical ? bounds.height : bounds.width,
+                gap: mainSpacing,
                 justify: justifyContent)
             for (k, item) in line.items.enumerated() {
-                let x = bounds.minX + xs[k]
                 // Stretching items take the line's whole cross extent;
                 // everyone else keeps the size they measured at.
-                let cross = item.stretches ? line.cross : item.size.height
+                let cross = item.stretches ? line.cross : item.cross
                 // §8.3 offset of this item inside the line box.
-                let dy = CSSFlexMath.crossOffset(itemCross: cross,
-                                                 lineCross: line.cross,
-                                                 align: item.align)
+                let dCross = CSSFlexMath.crossOffset(itemCross: cross,
+                                                     lineCross: line.cross,
+                                                     align: item.align)
+                // Transpose the (main, cross) pair back onto (x, y).
+                let x = vertical ? bounds.minX + lineCross + dCross
+                                 : bounds.minX + mains[k]
+                let y = vertical ? bounds.minY + mains[k]
+                                 : bounds.minY + lineCross + dCross
                 subviews[item.index].place(
-                    at: CGPoint(x: x, y: y + dy),
+                    at: CGPoint(x: x, y: y),
                     anchor: .topLeading,
                     // A stretched item is PROPOSED the line cross. That
                     // is enough for an elastic subview (a bare Color) but
@@ -287,11 +345,12 @@ struct FlowLayout: Layout {
                     // build time (flexWrapStretchPlan), so by the time
                     // this proposal is made the child already measures at
                     // the line cross and the two agree. A non-stretched
-                    // item gets exactly the proposal the pre-wave-25
-                    // layout gave it, byte for byte.
-                    proposal: item.stretches
-                        ? ProposedViewSize(width: item.size.width, height: cross)
-                        : ProposedViewSize(item.size))
+                    // item is proposed its own (basis-adopted) extents —
+                    // for a measured item that is exactly the pre-wave-48
+                    // proposal, byte for byte.
+                    proposal: ProposedViewSize(
+                        width: vertical ? cross : item.main,
+                        height: vertical ? item.main : cross))
             }
         }
     }

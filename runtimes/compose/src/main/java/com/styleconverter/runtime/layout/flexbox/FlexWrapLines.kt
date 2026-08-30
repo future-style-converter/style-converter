@@ -120,6 +120,34 @@ object FlexWrapLines {
     enum class CrossDistribution { START, END, CENTER, SPACE_BETWEEN, SPACE_AROUND, SPACE_EVENLY }
 
     /**
+     * Wave 48 (lane W7) — the ROUTING gate for "line geometry needs the
+     * real wrap layout even though no ITEM stretches": css-flexbox-1
+     * §9.4 step 8 grows the LINES whenever `align-content` stretches and
+     * the container's cross size is definite, which moves every later
+     * line's cross position (and the gap-decoration bands between them)
+     * regardless of item alignment. Compose's FlowRow/FlowColumn never
+     * run step 8, so a container matching this predicate must route
+     * through FlexWrapRow/FlexWrapColumn (measured: WPT css-gaps
+     * flex-gap-decorations-045 packed its second column 8px left of
+     * Chromium's, -046 its second and third rows 6.7/13.3px above).
+     *
+     * `plainWrap` keeps `wrap-reverse` on the frozen Flow* paths — the
+     * wrap layouts do not implement reverse line ordering (their named
+     * TODO), and both wave48-cal wrap-reverse column tests pass on the
+     * legacy path today.
+     *
+     * One shared, JVM-pinned predicate so the renderer's row and column
+     * branches can never answer the question differently (each feeds its
+     * own axis: the row branch its definite HEIGHT, the column branch
+     * its definite WIDTH).
+     */
+    fun routesForLineStretch(
+        plainWrap: Boolean,
+        alignContentStretches: Boolean,
+        hasDefiniteCross: Boolean
+    ): Boolean = plainWrap && alignContentStretches && hasDefiniteCross
+
+    /**
      * §9.6 — each line's cross-axis START offset, in px.
      *
      * @param lineCross per-line cross sizes (post-stretch, though under a

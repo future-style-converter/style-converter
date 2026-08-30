@@ -165,6 +165,18 @@ enum GridAutoFlowKeyword: Equatable {
 enum FlexBasisValue: Equatable {
     /// Absolute pixel length (post CSS → px normalisation).
     case px(CGFloat)
+    /// Wave 48 (lane W7) — `flex-basis: <percentage>` of the container's
+    /// MAIN content size (css-flexbox-1 §7.2.3; css-sizing-3 §5.1 for the
+    /// resolution base). The converter serializes IRPercentage as a BARE
+    /// JSON number (FlexBasisSerializer → IRPercentage.serializer()), so
+    /// `flex-basis: 100%` arrives as `"FlexBasis": 100` — the web engine
+    /// reads the same wire shape as a percentage (layoutLength's
+    /// "bare number → percentage" rule). Value is the raw percent
+    /// (100 = 100%), NOT a fraction. Before this case existed the shape
+    /// was silently dropped and WPT flex-gap-decorations-025's
+    /// `flex-basis: 100%` items collapsed to intrinsic 0 width on iOS
+    /// (blank capture at wave48-cal).
+    case percent(CGFloat)
     /// `auto` — main-size from width/height or content.
     case auto
     /// `content` — main-size strictly from content, ignore width/height.

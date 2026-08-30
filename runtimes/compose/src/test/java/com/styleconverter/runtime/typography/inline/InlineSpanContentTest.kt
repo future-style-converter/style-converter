@@ -107,4 +107,77 @@ class InlineSpanContentTest {
         )!!
         assertTrue(out.spanStyles.isEmpty())
     }
+
+    // ── wave 48 (fix lane F5): the sup/sub BaselineShift round trip ──────
+    // S5 must-fix 4: the seam converts the pinned shiftPx (InlineSpanRing
+    // .shiftPx — Blink's parent/3+1 / −(parent/5+1)) into a Compose
+    // BaselineShift MULTIPLIER via multiplier = shiftPx / (ASCENT_EM ×
+    // spanPx), because BaselineShiftSpan applies ascent × multiplier and
+    // the registered Inter's ascent is ASCENT_EM × spanPx
+    // (HalfLeadingBaseline's pinned 1984/2048). These pins run the REAL
+    // overlay and assert the round trip multiplier × ASCENT_EM × spanPx
+    // == shiftPx, so a drift in EITHER the rule or the conversion fails.
+
+    /** The overlay's emitted BaselineShift multiplier for one styled span
+     *  over "e = mc2." (subelements-002's shape), or null when none. */
+    private fun overlayShiftMultiplier(style: InlineSpanRing.Style, paragraphPx: Float): Float? {
+        val out = InlineSpanContent.overlay(
+            base = AnnotatedString("e = mc2."),
+            original = "e = mc2.",
+            spans = listOf(InlineRunFold.Span(0, 6, 7, style)),
+            paragraphFontSizePx = paragraphPx,
+        )!!
+        // Exactly the shifted span's multiplier (null = no shift emitted).
+        return out.spanStyles.firstOrNull { it.item.baselineShift != null }
+            ?.item?.baselineShift?.multiplier
+    }
+
+    @Test
+    fun `spanStyle - the sup multiplier round-trips to the pinned shiftPx at every probe size`() {
+        // A direct UA sup: span size = paragraph/1.2 (the UA smaller
+        // seed), shift parent = the paragraph (factor 1).
+        val sup = (InlineSpanRing.admit("sup", emptyList(), emptyList())
+            as InlineSpanRing.Admission.Admitted).style
+        for (paragraphPx in listOf(16f, 32f, 48f, 96f)) {
+            val m = overlayShiftMultiplier(sup, paragraphPx)!!
+            // The px the span ACTUALLY realizes: ascent × multiplier.
+            val realized = m * com.styleconverter.runtime.typography.HalfLeadingBaseline.ASCENT_EM *
+                (paragraphPx / 1.2f)
+            // Must equal the one pinned rule — parent/3 + 1, positive.
+            assertEquals(InlineSpanRing.shiftPx(sup.shift!!, paragraphPx), realized, 1e-3f)
+            assertTrue("super must RAISE (positive multiplier)", m > 0f)
+        }
+    }
+
+    @Test
+    fun `spanStyle - the sub multiplier round-trips negative and a shift-less span emits none`() {
+        // The sub rows: realized px must equal −(parent/5 + 1).
+        val sub = (InlineSpanRing.admit("sub", emptyList(), emptyList())
+            as InlineSpanRing.Admission.Admitted).style
+        for (paragraphPx in listOf(16f, 32f, 96f)) {
+            val m = overlayShiftMultiplier(sub, paragraphPx)!!
+            val realized = m * com.styleconverter.runtime.typography.HalfLeadingBaseline.ASCENT_EM *
+                (paragraphPx / 1.2f)
+            assertEquals(InlineSpanRing.shiftPx(sub.shift!!, paragraphPx), realized, 1e-3f)
+            assertTrue("sub must LOWER (negative multiplier)", m < 0f)
+        }
+        // Byte-identity guard: a shift-less span carries NO baselineShift
+        // (pre-wave-48 SpanStyles stay byte-identical by construction).
+        assertNull(overlayShiftMultiplier(InlineSpanRing.Style(italic = true), 32f))
+    }
+
+    @Test
+    fun `spanStyle - a nested sup under a 30px outer rebases the shift on the OUTER size`() {
+        // subelements-002's `<i>e = mc<sup>2</sup></i>` with a 30px i:
+        // composed size is absolute 30/1.2 = 25px, shift parent 30px →
+        // realized px must be 30/3+1 = 11 (the paragraph's 16 irrelevant).
+        val outer = (InlineSpanRing.admit("i", emptyList(), emptyList())
+            as InlineSpanRing.Admission.Admitted).style.copy(fontSizePx = 30f)
+        val nested = (InlineSpanRing.admit("sup", emptyList(), emptyList())
+            as InlineSpanRing.Admission.Admitted).style
+        val composed = InlineSpanRing.composeNested(outer, nested)!!
+        val m = overlayShiftMultiplier(composed, 16f)!!
+        val realized = m * com.styleconverter.runtime.typography.HalfLeadingBaseline.ASCENT_EM * 25f
+        assertEquals(11.0f, realized, 1e-3f)
+    }
 }

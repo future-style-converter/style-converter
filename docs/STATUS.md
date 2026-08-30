@@ -1811,7 +1811,7 @@ refutes a finding.
 |---|---|
 | ~~Compose perspective conversion wrong~~ **FIXED** — the real defect was not the cameraDistance scale but `depthScaleFactor` computing `1 + z/P`, the first-order Taylor expansion of `1/(1 − z/P)`. See "perspective + translateZ was wrong on both natives" above. | `runtimes/compose/…/transforms/` |
 | ~~iOS composes transforms in reverse order~~ **FIXED** — see "transform order" below. | `runtimes/swiftui/…/transforms/` |
-| **NEW (not from the sweep): Compose does not compose the transform list at all.** It accumulates each kind into a separate scalar (`translateX +=`, `rotation +=`, `scaleX *=`) and hands them to `graphicsLayer`, which applies a fixed scale→rotate→translate order — so `scale(2) translate(30px)` renders identically to `translate(30px) scale(2)`. Measured: web (156,96) vs Android (126,96). Ledgered as `Transform_Combined` iOS-Android with the fix route (compose to a matrix in CSS order, reuse the existing `decomposeMatrix2D`) | `runtimes/compose/…/transforms/` |
+| ~~Compose does not compose the transform list at all~~ **FIXED (wave 48)** — it accumulated each kind into a separate scalar and handed them to `graphicsLayer`'s fixed scale→rotate→translate order, so `scale(2) translate(30px)` rendered identically to `translate(30px) scale(2)`. Wave 48 built `TransformListComposer` (ordered css-transforms-1 §11 product, origin conjugation, exact-or-refuse R·S decomposition; shear residue rides ordered canvas ops) and deleted both `Transform_Combined` ledger lines under the exit-5 contract. The recorded `decomposeMatrix2D` route was NOT taken — that helper mishandles reflections (pinned); skew-bearing lists still accumulate (deferred). | `runtimes/compose/…/transforms/TransformListComposer.kt` |
 | iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely | `runtimes/swiftui/…/effects/blend/` |
 | ~~`border` shorthand drops colour functions / loses `<line-width>` forms~~ **BOTH FIXED** — and the fix uncovered a third defect: a duplicated implementation meant fixing the shared function reached only 1 of the 5 shorthands. See "the border shorthand had two implementations" below. | converter shorthand expander |
 
@@ -1925,6 +1925,9 @@ The fix resolved **three** ledgered divergences (`Transform_Combined`
 iOS-web, `Edge_MultiTransform` iOS-web and iOS-Android) and created one
 (`Transform_Combined` iOS-Android, now that iOS is right and Android is
 not). Two baselines moved, both iOS multi-function transforms.
+*(Update, wave 48: the created line — and its Android-web sibling — were
+deleted again when Compose gained its own ordered composition;
+see `TransformListComposer.kt` and the wave-48 entry above.)*
 
 ## The border shorthand had two implementations (2026-08-28)
 
@@ -2002,15 +2005,53 @@ Residual risk, carried forward honestly: pixelmatch's AA detector can
 also suppress a genuine 1px hairline shift. SSIM remains the backstop
 for that class — it is SSIM's largest unique-catch category.
 
+## Wave 48 (2026-08-30) — first lane wave on the new instrument
+
+Opened with the mandated calibration gate (`corpus-v6-13-cal`: zero lane
+changes on the merged overhaul tree — web/iOS exactly flat, Android −3
+near-threshold cells, all three adjudicated pure instrument effects; the
+one real shift, clip-path-blending-offset, traced to PR #126's correct
+saveLayer-bounds fix un-hiding a pre-existing ancestor-clip gap, now a
+wave-49 obligation). Then eight builder lanes, six skeptics (three
+resumed on opus after a session limit), five fix lanes, and a clean
+device gate. **Net vs v6.13-cal: web 1187→1201 (+14, 87.1%), iOS
+1038→1066 (+28, 78.0%), Android 1026→1045 (+19, 76.5%) — 61 cells
+gained, zero lost** (`corpus-v6-14.json` carries the full story).
+Headlines: the iOS multicol float slice-replay closed seam 2 (all 8
+CSS2 cells 0.92→0.99); the Rule-43 blanket exclusion narrowed to a
+measured 13-key refusal list (+15 scored cells per native, surfacing a
+real Android blank-paint bug on counter-cjk-decimal); the web tail
+finally moved after six flat waves (contain-body writing-mode
+suppression ×8, lch/oklch percentage parsing, image() notation,
+contain-intrinsic bridge); both wave-47 vertical wedges cleared
+(background-image-006 now PASSES on all three — the crash was a
+gradient §3.4.3 all-outside `!!`; direction-upright-002 captures
+honestly at ~0.58 via explicit MeasurePolicies + atomic PNG
+publication); Compose transforms compose in CSS order
+(TransformListComposer — corpus blast radius provably zero, both
+Transform_Combined ledger lines deleted under the exit-5 contract, the
+one predicted baseline refreshed, TLO fixture device-verified 18/18);
+css-gaps column-wrap landed on both natives. Prediction misses stated
+plainly: subelements-002 improved 0.10 without flipping and
+inset-005/006 dipped ~0.01 — the underline-inset wall dominates the
+UA-styled inline ring's correct-but-insufficient fold. The skeptic
+phase caught a DegenerateCalcRewriter url()-payload corruption before
+it shipped (scoped + byte-verbatim pins), pinned the ok-space lightness
+wire convention (`schema/spec/02-values.md`), and forced twin parity on
+Swift gradient monotonicity and image() precedence. Harness lesson: the
+327-net once passed with its whole Android column silently skipped
+(post-watchdog reprovision left two emulators; adb ambiguity + an app
+crash) — re-run full; a column-presence check is queued.
+
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 393 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1308 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2769 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1821 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1845 |
+| converter (Kotlin) | `./gradlew :converter:test` | 419 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1326 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2821 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1849 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1848 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap

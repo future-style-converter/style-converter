@@ -563,4 +563,74 @@ class GradientStopResolverTest {
                 GradientColorMath.fromSrgb(GradientColorMath.Triple3(1.0, 0.0, 0.0), space), space))
         }
     }
+
+    // ── Wave 48 (lane W1): every stop past one end of the line ──────────
+    //
+    // The VERBATIM css-break/background-image-006 payload:
+    // `linear-gradient(green 80px, red 140px)` — wire stops
+    // {green, positionLength 80px} and {red, positionLength 140px} — on a
+    // clone fragment whose gradient line is SHORTER than 80px (the ref is
+    // a green square precisely because the 80px stop sits past every
+    // fragment's padding box). clipToUnit used to answer emptyList() for
+    // that shape, shaderStops returned null, and ColorApplier's
+    // contract-`!!` NPE'd on every draw frame — the whole capture
+    // composition died and the cell shipped unmeasured (feeder TIMEOUT,
+    // reproduced + stack-confirmed on a private API-36.1 emulator).
+
+    /** The corpus green/red, exactly as the converter emits them. */
+    private val corpusGreen = Color(0f, 0.5019607843137255f, 0f)
+    private val corpusRed = Color(1f, 0f, 0f)
+
+    @Test
+    fun `all stops beyond the line end paint the first colour uniformly`() {
+        // Gradient line 45px (a measured failing fragment size): 80/45 and
+        // 140/45 both land past 1.0 — §3.4.3 says everything before the
+        // first stop takes the first stop's colour, so the whole [0,1]
+        // range is corpus-green.
+        val stops = listOf(
+            stop(0f, 0.5019607843137255f, 0f, px = 80f),
+            stop(1f, 0f, 0f, px = 140f))
+        val result = GradientStopResolver.shaderStops(
+            stops, lengthPx = 45f, repeating = false, interp = legacy)
+        // The crash shape: this used to be null with non-empty stops in.
+        assertTrue("shaderStops must not be null for non-empty stops", result != null)
+        val (colors, locs) = result!!
+        // Uniform fill = the §3.4.4 two-identical-stops idiom.
+        assertEquals(listOf(corpusGreen, corpusGreen), colors)
+        assertEquals(listOf(0f, 1f), locs)
+    }
+
+    @Test
+    fun `all stops before the line start paint the last colour uniformly`() {
+        // The mirrored case (negative px stops): [0,1] lies entirely
+        // after the last stop, which owns the padding colour per §3.4.3.
+        val stops = listOf(
+            stop(0f, 0.5019607843137255f, 0f, px = -140f),
+            stop(1f, 0f, 0f, px = -80f))
+        val result = GradientStopResolver.shaderStops(
+            stops, lengthPx = 45f, repeating = false, interp = legacy)
+        assertTrue(result != null)
+        val (colors, locs) = result!!
+        assertEquals(listOf(corpusRed, corpusRed), colors)
+        assertEquals(listOf(0f, 1f), locs)
+    }
+
+    @Test
+    fun `a stop exactly at the line end keeps the in-range path`() {
+        // The reference-intended geometry: an 80px padding box puts the
+        // green stop AT 1.0 (in range) — the fix must not disturb it.
+        // Expected: green kept at 1.0, the red beyond clipped to the
+        // boundary sample, and a green pad inserted at 0.
+        val stops = listOf(
+            stop(0f, 0.5019607843137255f, 0f, px = 80f),
+            stop(1f, 0f, 0f, px = 140f))
+        val (colors, locs) = GradientStopResolver.shaderStops(
+            stops, lengthPx = 80f, repeating = false, interp = legacy)!!
+        // First entry is the §3.4.3 pad: the first stop's colour at 0.
+        assertEquals(corpusGreen, colors.first())
+        assertEquals(0f, locs.first(), 0f)
+        // Green still sits at its declared 1.0.
+        assertTrue(locs.contains(1f))
+        assertEquals(corpusGreen, colors[locs.indexOfFirst { it == 1f }])
+    }
 }

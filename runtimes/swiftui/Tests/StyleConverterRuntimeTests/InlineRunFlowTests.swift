@@ -235,14 +235,31 @@ final class InlineRunFlowTests: XCTestCase {
     }
 
     func testUAStyledTagWithGlyphsStillRefuses() {
-        // The EMPTY ring's wider tags admit only GLYPHLESS members: an
-        // `<em>` WITH text would fold without its UA italic (a producer
-        // gap the fold must not bake in) — tag-gated out, as before.
-        let em = member("a", tag: "em", text: "emphasised")
+        // Wave 48 (lane W4) models the UA italic family and sup/sub, but
+        // `strong`'s UA `font-weight: bolder` (HTML rendering §15.3.4) is
+        // RELATIVE to the inherited weight — machinery the ring does not
+        // carry (zero corpus presence) — so a glyph-bearing strong still
+        // refuses rather than fold without its bolding.
+        let strong = member("a", tag: "strong", text: "important")
         XCTAssertNil(InlineRunFlow.fold(
             runs: [IRRun(text: "x "), IRRun(child: "a")],
-            children: [em], totalChildCount: 1, containerProperties: [],
+            children: [strong], totalChildCount: 1, containerProperties: [],
             containerLang: nil))
+    }
+
+    func testItalicFamilyMemberFoldsWithTheUASlant() {
+        // Wave 48 (lane W4): an `<em>` WITH glyphs folds, its UA italic
+        // riding as a span (HTML rendering §15.3.4 — the exact rule the
+        // wave-45 refusal above used to protect; the ring now models it).
+        let em = member("a", tag: "em", text: "emphasised")
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "a")],
+            children: [em], totalChildCount: 1, containerProperties: [],
+            containerLang: nil)
+        XCTAssertEqual(folded?.text, "x emphasised")
+        XCTAssertEqual(folded?.spans.count, 1)
+        XCTAssertEqual(folded?.spans.first?.style.italic, true)
+        XCTAssertNil(folded?.spans.first?.style.shift)
     }
 
     func testStrutBearingEmptyMemberRefuses() {
@@ -692,16 +709,74 @@ final class InlineRunFlowTests: XCTestCase {
         XCTAssertEqual(folded?.text, "x y")
     }
 
-    func testNestedNonBrMemberAndUnclaimedNestedChildRefuse() {
-        // Only {text, <br>} subtrees flatten — a nested glyph member is
-        // still the wall wave 44 named…
-        let inner = member("inner", text: "deep")
+    func testEmptyRunsListOnBrAndNestedMembersIsNotStructure() {
+        // Fix lane F5 (S5 twin hygiene): the BR and depth-2 structure
+        // guards read `runs?.isEmpty != false` — an empty-but-present []
+        // is NO structure, exactly the Kotlin twin's `isNullOrEmpty`
+        // (the pre-fix `== nil` refused these three shapes where the
+        // Compose fold admitted them). Zero corpus components carry [];
+        // these pins keep the twins from re-diverging.
+        // 1) A TOP-LEVEL BR member with runs:[] still folds to '\n'
+        //    (classify's BR arm), alongside the glyph member that arms
+        //    the break ring.
+        let br = member("b0", tag: "br", text: nil, runs: [])
+        let span = member("s", text: "c")
+        let topLevel = InlineRunFlow.fold(
+            runs: [IRRun(text: "a "), IRRun(child: "b0"),
+                   IRRun(text: " b "), IRRun(child: "s")],
+            children: [br, span], totalChildCount: 2, containerProperties: [],
+            containerLang: nil)
+        XCTAssertEqual(topLevel?.text, "a\nb c")
+        // 2) A NESTED BR kid with runs:[] rides the flatten's BR branch.
+        let innerBr = member("s0", tag: "br", text: nil, runs: [])
+        let host = member("s", text: "y z",
+                          runs: [IRRun(text: "y"), IRRun(child: "s0"), IRRun(text: "z")],
+                          children: [innerBr])
+        let nestedBr = InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [host], totalChildCount: 1, containerProperties: [],
+            containerLang: nil)
+        XCTAssertEqual(nestedBr?.text, "x y\nz")
+        // 3) A NESTED GLYPH kid with runs:[] passes the depth-2 wall
+        //    (it has no structure) and folds its own text.
+        let innerSup = member("inner", tag: "sup", text: "2", runs: [])
+        let outer = member("s", tag: "i", text: "e = mc2",
+                           runs: [IRRun(text: "e = mc"), IRRun(child: "inner")],
+                           children: [innerSup])
+        let nestedGlyph = InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [outer], totalChildCount: 1, containerProperties: [],
+            containerLang: nil)
+        XCTAssertEqual(nestedGlyph?.text, "x e = mc2")
+        // The composed sup piece still carries its shift — [] changed
+        // structure classification only, never the admitted attribution.
+        XCTAssertEqual(nestedGlyph?.spans.last?.style.shift?.up, true)
+    }
+
+    func testNestedForeignTagDepthTwoAndUnclaimedNestedChildRefuse() {
+        // Wave 48 admits one-level nested GLYPH members through the span
+        // ring — a nested tag OUTSIDE the ring (`rt`, ruby semantics no
+        // span expresses) keeps the wall…
+        let innerRt = member("inner", tag: "rt", text: "deep")
         let nested = member("s", text: "y deep",
                             runs: [IRRun(text: "y "), IRRun(child: "inner")],
-                            children: [inner])
+                            children: [innerRt])
         XCTAssertNil(InlineRunFlow.fold(
             runs: [IRRun(text: "x "), IRRun(child: "s")],
             children: [nested], totalChildCount: 1, containerProperties: [],
+            containerLang: nil))
+        // …a nested member with its OWN structure is the depth-2 wall
+        // (decorating-box-001-class trees keep their frozen path)…
+        let leaf = member("leaf", tag: "sup", text: "w")
+        let innerDeep = member("inner", text: "z w",
+                               runs: [IRRun(text: "z "), IRRun(child: "leaf")],
+                               children: [leaf])
+        let deep = member("s", text: "y z w",
+                          runs: [IRRun(text: "y "), IRRun(child: "inner")],
+                          children: [innerDeep])
+        XCTAssertNil(InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [deep], totalChildCount: 1, containerProperties: [],
             containerLang: nil))
         // …and an unclaimed nested child would silently vanish (the
         // outer fold consumes the whole member) — refused.
@@ -713,5 +788,103 @@ final class InlineRunFlowTests: XCTestCase {
             runs: [IRRun(text: "x "), IRRun(child: "s")],
             children: [unclaimed], totalChildCount: 1, containerProperties: [],
             containerLang: nil))
+    }
+
+    func testPlainNestedSpanFoldsFlat() {
+        // Wave 48 (lane W4): the shape wave 47 pinned as the nested wall
+        // now folds — a plain nested span carries no attribution, so the
+        // paragraph is uniform and span-less.
+        let inner = member("inner", text: "deep")
+        let nested = member("s", text: "y deep",
+                            runs: [IRRun(text: "y "), IRRun(child: "inner")],
+                            children: [inner])
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "x "), IRRun(child: "s")],
+            children: [nested], totalChildCount: 1, containerProperties: [],
+            containerLang: nil)
+        XCTAssertEqual(folded?.text, "x y deep")
+        XCTAssertEqual(folded?.spans.isEmpty, true)
+    }
+
+    // MARK: - Wave 48 (lane W4) — the UA-styled + nested-glyph rings
+
+    func testSubelements002FirstHostFoldsItalicAndSupPieces() {
+        // wpt__css-text-decor__text-decoration-subelements-002, first
+        // `div.test` host (wave48-cal android-ref 0.7649 / ios-ref
+        // 0.7272 — ten stacked blocks where Chromium flows two lines):
+        // runs [text "Einstein said that ", <i>, text "."], the i's own
+        // runs [text "e = mc", <sup>2</sup>] — VERBATIM shapes from
+        // tools/titan/runs/wave48-cal/sections/css-text-decor/per-test-ir.
+        let sup = member("text-decoration-subelements-002__1__0__0__0__0",
+                         tag: "sup", text: "2")
+        let i = member("text-decoration-subelements-002__1__0__0__0",
+                       tag: "i", text: "e = mc",
+                       runs: [IRRun(text: "e = mc"),
+                              IRRun(child: "text-decoration-subelements-002__1__0__0__0__0")],
+                       children: [sup])
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "Einstein said that "),
+                   IRRun(child: "text-decoration-subelements-002__1__0__0__0"),
+                   IRRun(text: ".")],
+            children: [i], totalChildCount: 1,
+            // The host's own wire: underline + abspos + nowrap — all
+            // HOST-level (the paragraph pipeline owns them, no gate).
+            containerProperties: [
+                IRProperty(type: "TextDecorationLine", data: .array([.string("UNDERLINE")])),
+                IRProperty(type: "Position", data: .string("ABSOLUTE")),
+                IRProperty(type: "WhiteSpace", data: .string("NOWRAP")),
+            ],
+            containerLang: nil)
+        // ONE flowing line, the ref's exact paint order.
+        XCTAssertEqual(folded?.text, "Einstein said that e = mc2.")
+        // Two pieces: the i's own glyphs (UA italic) and the nested sup
+        // (italic inherited + UA smaller + the super shift).
+        XCTAssertEqual(folded?.spans.count, 2)
+        guard let spans = folded?.spans, spans.count == 2 else { return }
+        XCTAssertEqual(spans[0].start, 19)
+        XCTAssertEqual(spans[0].end, 25)
+        XCTAssertTrue(spans[0].style.italic)
+        XCTAssertNil(spans[0].style.shift)
+        XCTAssertEqual(spans[1].start, 25)
+        XCTAssertEqual(spans[1].end, 26)
+        XCTAssertTrue(spans[1].style.italic)
+        XCTAssertEqual(spans[1].style.fontSizeEm.map { Double($0) } ?? 0, 1.0 / 1.2, accuracy: 1e-6)
+        XCTAssertEqual(spans[1].style.shift,
+                       InlineSpanRing.VerticalShift(up: true, parentPx: nil, parentEm: 1))
+    }
+
+    func testInset005UHostFoldsDirectSupAndSubShifts() {
+        // wpt__css-text-decor__text-decoration-inset-005's `<u>` runs
+        // host (wave48-cal android-ref 0.913 / ios-ref 0.915 — five
+        // stacked blocks): runs [text "ultra-", <sup>quick</sup>,
+        // text " b", <sub>row</sub>, text "n"], the u's own
+        // TextDecorationColor being a HOST property here (ungated).
+        let sup = member("text-decoration-inset-005__1__0__0__0",
+                         tag: "sup", text: "quick")
+        let sub = member("text-decoration-inset-005__1__0__0__1",
+                         tag: "sub", text: "row")
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "ultra-"),
+                   IRRun(child: "text-decoration-inset-005__1__0__0__0"),
+                   IRRun(text: " b"),
+                   IRRun(child: "text-decoration-inset-005__1__0__0__1"),
+                   IRRun(text: "n")],
+            children: [sup, sub], totalChildCount: 2,
+            containerProperties: [
+                IRProperty(type: "TextDecorationColor",
+                           data: .object(["srgb": .object(["r": .int(0), "g": .int(0), "b": .int(0)]),
+                                          "original": .string("black")])),
+            ],
+            containerLang: nil)
+        XCTAssertEqual(folded?.text, "ultra-quick brown")
+        XCTAssertEqual(folded?.spans.count, 2)
+        guard let spans = folded?.spans, spans.count == 2 else { return }
+        // "quick" raised, "row" lowered — both one UA `smaller` step.
+        XCTAssertEqual(spans[0].style.shift,
+                       InlineSpanRing.VerticalShift(up: true, parentPx: nil, parentEm: 1))
+        XCTAssertEqual(spans[1].style.shift,
+                       InlineSpanRing.VerticalShift(up: false, parentPx: nil, parentEm: 1))
+        XCTAssertEqual(spans[0].style.fontSizeEm.map { Double($0) } ?? 0, 1.0 / 1.2, accuracy: 1e-6)
+        XCTAssertFalse(spans[0].style.italic)
     }
 }

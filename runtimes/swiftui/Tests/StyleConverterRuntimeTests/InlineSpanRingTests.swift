@@ -179,6 +179,143 @@ final class InlineSpanRingTests: XCTestCase {
         XCTAssertEqual(refusal(ws), "member-prop:WhiteSpace")
     }
 
+    // MARK: - Wave 48 (lane W4): the UA-styled tag rings
+
+    func testSupAndSubSeedSmallerAndTheirVerticalShifts() {
+        // HTML rendering §15.3.4: `sub, sup { font-size: smaller }` plus
+        // the super/sub vertical-align keywords (VerticalShift's banner
+        // derives Blink's px rule; parent = the paragraph for a direct
+        // member, factor 1).
+        guard let (sup, _) = admitted(InlineSpanRing.admit(tag: "sup", properties: [],
+                                                           hostProperties: [])) else { return }
+        XCTAssertEqual(Double(sup.fontSizeEm ?? 0), 1.0 / 1.2, accuracy: 1e-6)
+        XCTAssertEqual(sup.shift, InlineSpanRing.VerticalShift(up: true, parentPx: nil, parentEm: 1))
+        XCTAssertFalse(sup.isPlain)
+        guard let (sub, _) = admitted(InlineSpanRing.admit(tag: "sub", properties: [],
+                                                           hostProperties: [])) else { return }
+        XCTAssertEqual(sub.shift, InlineSpanRing.VerticalShift(up: false, parentPx: nil, parentEm: 1))
+    }
+
+    func testDeclaredFontSizeBeatsTheSupSmallerSeed() {
+        // css-cascade-4 §6.1 origin order: the author's 24px wins over
+        // the UA `smaller`; the shift itself still rides.
+        guard let (sized, _) = admitted(InlineSpanRing.admit(
+            tag: "sup",
+            properties: [IRProperty(type: "FontSize",
+                                    data: .object(["px": .int(24)]))],
+            hostProperties: [])) else { return }
+        XCTAssertEqual(sized.fontSizePx, 24)
+        XCTAssertNil(sized.fontSizeEm)
+        XCTAssertEqual(sized.shift?.up, true)
+    }
+
+    func testItalicFamilySeedsTheUASlantAndDeclaredNormalResetsIt() {
+        // §15.3.4: `cite, dfn, em, i, var { font-style: italic }`.
+        for tag in ["i", "em", "cite", "var", "dfn"] {
+            guard let (ua, _) = admitted(InlineSpanRing.admit(tag: tag, properties: [],
+                                                              hostProperties: [])) else { return }
+            XCTAssertTrue(ua.italic, "\(tag) must seed italic")
+        }
+        // An author `font-style: normal` beats the UA rule (§6.1) — the
+        // member then folds as PLAIN text, exactly like a bare span.
+        guard let (reset, _) = admitted(InlineSpanRing.admit(
+            tag: "i",
+            properties: [IRProperty(type: "FontStyle", data: .string("normal"))],
+            hostProperties: [])) else { return }
+        XCTAssertTrue(reset.isPlain)
+    }
+
+    func testComposeNestedInheritsSlantAndRebasesTheShiftParent() {
+        guard let (outer, _) = admitted(InlineSpanRing.admit(tag: "i", properties: [],
+                                                             hostProperties: [])),
+              let (nested, _) = admitted(InlineSpanRing.admit(tag: "sup", properties: [],
+                                                              hostProperties: [])) else { return }
+        // Size-less outer: the sup keeps paragraph-relative smaller and
+        // its shift parent stays the paragraph (factor 1).
+        let composed = InlineSpanRing.composeNested(outer: outer, nested: nested)
+        XCTAssertEqual(composed?.italic, true)
+        XCTAssertEqual(Double(composed?.fontSizeEm ?? 0), 1.0 / 1.2, accuracy: 1e-6)
+        XCTAssertEqual(composed?.shift, InlineSpanRing.VerticalShift(up: true, parentPx: nil, parentEm: 1))
+        // A 1.5em outer: factors multiply (css-values-4 §5.1.1 — the
+        // sup's parent is the i) and the shift parent rebases to 1.5.
+        var bigOuter = outer
+        bigOuter.fontSizeEm = 1.5
+        let rebased = InlineSpanRing.composeNested(outer: bigOuter, nested: nested)
+        XCTAssertEqual(Double(rebased?.fontSizeEm ?? 0), 1.5 / 1.2, accuracy: 1e-5)
+        XCTAssertEqual(rebased?.shift, InlineSpanRing.VerticalShift(up: true, parentPx: nil, parentEm: 1.5))
+        // A px outer: the nested factor resolves absolute.
+        var pxOuter = outer
+        pxOuter.fontSizePx = 30
+        let absolute = InlineSpanRing.composeNested(outer: pxOuter, nested: nested)
+        XCTAssertEqual(Double(absolute?.fontSizePx ?? 0), 25, accuracy: 1e-4)
+        XCTAssertEqual(absolute?.shift, InlineSpanRing.VerticalShift(up: true, parentPx: 30, parentEm: 1))
+    }
+
+    func testComposeNestedPropagatesDecorationsAndRefusesCompoundShift() {
+        // css-text-decor-3 §2.1: an outer underline paints over the
+        // nested descendant — the composed piece keeps it.
+        guard let (outerU, _) = admitted(InlineSpanRing.admit(tag: "u", properties: [],
+                                                              hostProperties: [])),
+              let (nestedSup, _) = admitted(InlineSpanRing.admit(tag: "sup", properties: [],
+                                                                 hostProperties: [])),
+              let (outerSub, _) = admitted(InlineSpanRing.admit(tag: "sub", properties: [],
+                                                                hostProperties: [])) else { return }
+        XCTAssertEqual(InlineSpanRing.composeNested(outer: outerU, nested: nestedSup)?.underline, true)
+        // sup-in-sub (offsets ADD box-by-box) has no flat expression —
+        // the named wall answers nil and the fold bails.
+        XCTAssertNil(InlineSpanRing.composeNested(outer: outerSub, nested: nestedSup))
+    }
+
+    // MARK: - Wave 48 (fix lane F5): the sup/sub PIXEL rule, pinned
+
+    // S5 must-fix 4: the parent/3+1 / −(parent/5+1) resolution had ZERO
+    // coverage (mutating /3+1 → /3 passed all 4644 native tests). These
+    // rows pin InlineSpanRing.shiftPx — the ONE iOS resolution site,
+    // feeding PlaceholderLabel's Text.baselineOffset directly — and the
+    // SAME rows are pinned on the Compose twin (InlineSpanRingTest), so
+    // the two seams cannot drift apart silently again.
+
+    func testShiftPxSuperRowsPinBlinkParentOverThreePlusOne() {
+        // Direct sup members (parent = the paragraph, factor 1) — the
+        // S5 probe's exact paragraph sizes and expected px
+        // (16/3+1, 32/3+1, 48/3+1, 96/3+1).
+        guard let (sup, _) = admitted(InlineSpanRing.admit(tag: "sup", properties: [],
+                                                           hostProperties: [])),
+              let shift = sup.shift else { return XCTFail("sup must carry a shift") }
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 16), 6.3333, accuracy: 1e-3)
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 32), 11.6667, accuracy: 1e-3)
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 48), 17.0, accuracy: 1e-3)
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 96), 33.0, accuracy: 1e-3)
+    }
+
+    func testShiftPxSubRowsPinMinusParentOverFivePlusOne() {
+        // Direct sub members — lowering is NEGATIVE points
+        // (−(16/5+1), −(32/5+1), −(96/5+1)).
+        guard let (sub, _) = admitted(InlineSpanRing.admit(tag: "sub", properties: [],
+                                                           hostProperties: [])),
+              let shift = sub.shift else { return XCTFail("sub must carry a shift") }
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 16), -4.2, accuracy: 1e-3)
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 32), -7.4, accuracy: 1e-3)
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 96), -20.2, accuracy: 1e-3)
+    }
+
+    func testShiftPxNestedSupUnderThirtyPxOuterResolvesOffTheOuterSize() {
+        // composeNested rewrites the shift parent to the outer's px
+        // encoding (subelements-002's `<i>…<sup>…` shape with a sized
+        // outer): parent 30 → 30/3+1 = 11, regardless of the paragraph.
+        guard let (outer, _) = admitted(InlineSpanRing.admit(tag: "i", properties: [],
+                                                             hostProperties: [])),
+              let (nested, _) = admitted(InlineSpanRing.admit(tag: "sup", properties: [],
+                                                              hostProperties: [])) else { return }
+        var pxOuter = outer
+        pxOuter.fontSizePx = 30
+        guard let shift = InlineSpanRing.composeNested(outer: pxOuter, nested: nested)?.shift
+        else { return XCTFail("composed sup must carry a shift") }
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 16), 11.0, accuracy: 1e-3)
+        // The paragraph size is irrelevant once the parent is absolute.
+        XCTAssertEqual(InlineSpanRing.shiftPx(shift, paragraphFontSizePx: 96), 11.0, accuracy: 1e-3)
+    }
+
     // MARK: - Alignment
 
     func testAlignmentIdentityWhenNoSurgeryRan() {

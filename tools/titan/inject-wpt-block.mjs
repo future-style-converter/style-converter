@@ -1097,7 +1097,28 @@ export { REF_UNACHIEVABLE_TAGS };
  *  covering the css-counter-styles-3 §6 scripts in ALL FOUR pipelines (ref
  *  @font-face payload, web harness /fonts, Compose res/font, iOS registered
  *  faces) and bump CANVAS_REV so every Latin-only-stack ref retires. The four
- *  surfaces then share a face again and this tag is DELETED, not weakened. */
+ *  surfaces then share a face again and this tag is DELETED, not weakened.
+ *
+ *  wave-48 W2 — THE MATCH SET IS NOW PER-TEST, not per-tag (the queue-#2
+ *  unexclusion re-measure). Everything the blanket exclusion waited for is
+ *  in: the wave-47 ListMarkerRow baseline-claim split, the default-ON mono
+ *  pin, the wave-45 Noto verdict. All 28 tagged cells in the current corpus
+ *  sample (25 css-counter-styles + 3 css-lists — no other section feeds a
+ *  tagged test, verified over every wave48-cal manifest) were re-fed on both
+ *  natives with the current tree (run wave48-w2: private port-5694 emulator
+ *  + the seed sim; EVERY cell reproduced its wave48-cal score to 4 decimals,
+ *  so the instrument is deterministic) and re-scored IGNORING the tag.
+ *  15 of 28 no longer measure a font boundary — 13 clear raw SSIM 0.95 on
+ *  BOTH natives; counter-style-at-rule/name-case-sensitivity ssim-clears on
+ *  both (0.9535/0.9542) and fails only the coverage-ratio veto exactly as
+ *  web itself does (0.9593 F — the missing ink is marker CONTENT, a shared
+ *  upstream gap, not a fallback face); cjk-decimal/counter-cjk-decimal
+ *  passes iOS at 0.9934 while Android paints a BLANK canvas from the same
+ *  IR iOS paints fully (zero ink is a runtime content drop, not typography —
+ *  fallback-face divergence re-shapes ink, it never deletes it). Those 15
+ *  are UNEXCLUDED: the gate now consults NATIVE_FONT_PARITY_REFUSED_TESTS
+ *  below and fires only where the font bound is still the binding
+ *  constraint. */
 const NATIVE_FONT_PARITY_TAGS = new Set([
   'requires-non-latin-font-parity', // Rule 43 — §6 non-Latin counter styles (wave-30)
 ]);
@@ -1118,6 +1139,78 @@ export const NATIVE_FONT_PARITY_PLATFORMS = Object.freeze(['ios-ref', 'android-r
  *  the diff. `true` would make a per-platform font boundary indistinguishable
  *  from a whole-test delivery gap in the manifest. */
 export const NATIVE_FONT_PARITY_STAMP = 'native-font-parity';
+
+/** wave-48 W2 — the PER-TEST refusal list that replaces the blanket match.
+ *
+ *  The TAG machinery is untouched (wpt-not-applicable.mjs Rule 43 still
+ *  stamps `requires-non-latin-font-parity` on every §6 non-Latin user); what
+ *  shrank is the gate's MATCH SET: applyNativeFontParityGate fires only for
+ *  tests named here — the cells the wave-48 re-measure (run wave48-w2, both
+ *  natives re-fed on the current tree; every score reproduced its
+ *  wave48-cal twin to 4 decimals) showed still bounded under the 0.95 gate
+ *  by the font boundary this family names.
+ *
+ *  DECISION RULE (stated in advance, applied per test): unexclude only where
+ *  BOTH natives clear raw SSIM 0.95, or where one does and the other's
+ *  residual is a named NON-font mechanism; retain otherwise. A tagged test
+ *  NOT listed is scored normally — the wave-30 fix-T4 stance ("over-fire
+ *  costs a measurement we can never get back; decline on unknown") applied
+ *  at test granularity. Consequence accepted deliberately: a future corpus
+ *  expansion (BACKLOG queue #10) admits new tagged tests SCORED, and their
+ *  first honest number decides whether they earn a line here — never the
+ *  tag alone.
+ *
+ *  Keys are manifest-relative test paths (INDEX-FREE, the ledger
+ *  discipline). Every retained line carries its measured wave48-w2
+ *  ios/android raw SSIM — the evidence the retention rests on. */
+export const NATIVE_FONT_PARITY_REFUSED_TESTS = Object.freeze(new Set([
+  // ios 0.9688 (clears) / android 0.8230 — Arabic-Indic digit face/advance
+  // residue accumulating over 25 rows on the emulator's Noto face. The iOS
+  // PASS stays excluded with it: the cut is per-TEST, and a pass decided by
+  // fallback-glyph count is the same measurement as its failing sibling.
+  'css/css-counter-styles/arabic-indic/css3-counter-styles-102.html',
+  // ios 0.8513 / android 0.8507 — the wave-31(c) mechanism: one wrap-point
+  // advance-width divergence shifts every row below it by a full advance.
+  'css/css-counter-styles/armenian/css3-counter-styles-007.html',
+  // ios 0.9420 / android 0.9423 — web FAILS the same test at 0.9435: the
+  // §7.1.4 armenian-10000 fallback row renders on one line where Chromium
+  // wraps it to two. The native residual matches web's within 0.002, i.e.
+  // it is no longer font-bound; retained ONLY because neither native clears
+  // 0.95 (the rule's conservative side). Re-label candidate — see the
+  // wave-48 W2 lane report.
+  'css/css-counter-styles/armenian/css3-counter-styles-008.html',
+  // ios 0.8907 / android 0.8517 — Bengali digit residue, the wave-30
+  // glyph-count monotone ("10+" member).
+  'css/css-counter-styles/bengali/css3-counter-styles-117.html',
+  // ios 0.8758 (+ colour-mass veto) / android 0.7456 — Khmer numeral
+  // residue, worst Android cell of the simple-numeric family.
+  'css/css-counter-styles/cambodian/css3-counter-styles-159.html',
+  // ios 0.9653 (clears) / android 0.9039 — the PNGs show the same correct
+  // two CJK columns with visibly different stroke forms: emulator Noto CJK
+  // vs the macOS system face. Font-bound, so clause B declines.
+  'css/css-counter-styles/cjk-decimal/css3-counter-styles-001.html',
+  // ios 0.7098 / android 0.6715 — cjk-decimal "10+" member, both bounded.
+  'css/css-counter-styles/cjk-decimal/css3-counter-styles-004.html',
+  // ios 0.8613 / android 0.8583 — §6.3 complex CJK, both bounded.
+  'css/css-counter-styles/cjk-earthly-branch/css3-counter-styles-201.html',
+  // ios 0.6762 / android 0.6573 — §6.3 complex CJK, both bounded.
+  'css/css-counter-styles/cjk-earthly-branch/css3-counter-styles-202.html',
+  // ios 0.8831 / android 0.8805 — §6.3 complex CJK, both bounded.
+  'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
+  // ios 0.6787 / android 0.6592 — §6.3 complex CJK, both bounded.
+  'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
+  // ios 0.8883 / android 0.8901 — web FAILS at 0.8867 with the same visible
+  // defect (every item's text painted twice + the korean/RTL marker rows
+  // missing): a shared upstream marker/extraction gap, not typography.
+  // Retained only because neither native clears 0.95. Re-label candidate.
+  'css/css-counter-styles/counter-suffix.html',
+  // ios 0.7532 / android 0.7531 — BOTH natives lay the georgian counter
+  // string ONE GLYPH PER LINE (a zero-width wrap defect, plainly non-font;
+  // web fails separately at 0.7779). Neither clears 0.95 so the rule
+  // retains it — but this is a real native layout bug lead, not a font
+  // boundary. Re-label candidate.
+  'css/css-lists/counter-004.html',
+]));
 
 /** wave-36 M6 — THE REFUSED FAMILY. Tags that were formally proposed for an
  *  exclusion family, MEASURED against the corpus, and REJECTED. This constant
@@ -1266,11 +1359,23 @@ export const REFUSED_EXCLUSION_TAGS = Object.freeze([
  *         'ios-ref' / 'android-ref'); mutated in place. Absent platforms
  *         (null — no captures this run) and error-shaped diffs are skipped:
  *         neither carries scoring fields to neutralise.
+ *  @param {string|undefined} testRel  manifest-relative test path (e.g.
+ *         'css/css-counter-styles/armenian/css3-counter-styles-007.html').
+ *         wave-48 W2: the gate fires only when this names a member of
+ *         NATIVE_FONT_PARITY_REFUSED_TESTS — a caller that cannot say WHICH
+ *         test never fires it (decline on unknown: an over-fire costs a
+ *         measurement we can never get back).
  *  @returns {string[]} the platform keys actually stamped, in
  *         NATIVE_FONT_PARITY_PLATFORMS order (empty ⇒ the gate did not fire,
  *         or fired with no native captures present) */
-export function applyNativeFontParityGate(naTags, diffsByPlatform) {
-  const fires = Array.isArray(naTags) && naTags.some((t) => NATIVE_FONT_PARITY_TAGS.has(t));
+export function applyNativeFontParityGate(naTags, diffsByPlatform, testRel) {
+  // The tag arms the gate; wave-48 W2 made it fire per-TEST, not per-tag.
+  const tagged = Array.isArray(naTags) && naTags.some((t) => NATIVE_FONT_PARITY_TAGS.has(t));
+  // Only tests the wave-48 re-measure showed still font-bounded are
+  // neutralised; every other tagged test (including any future corpus
+  // admission) is scored normally and its honest number triaged then.
+  const fires = tagged && typeof testRel === 'string'
+    && NATIVE_FONT_PARITY_REFUSED_TESTS.has(testRel);
   if (!fires) return [];
   const stamped = [];
   for (const key of NATIVE_FONT_PARITY_PLATFORMS) {
@@ -1771,7 +1876,7 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     // — web-ref is still scored, so the label still means something.
     const fontParityExcluded = isNa ? [] : applyNativeFontParityGate(naTags, {
       'web-ref': webRefDiff, 'ios-ref': iosRefDiff, 'android-ref': androidRefDiff,
-    });
+    }, testRel);  // wave-48 W2: the gate is per-test — see the refusal list.
 
     results[testRel] = {
       // wave-8: the one boolean scoring paths filter on. false ⇔ the test

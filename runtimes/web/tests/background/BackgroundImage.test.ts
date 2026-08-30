@@ -370,4 +370,133 @@ describe('BackgroundImage', () => {
         'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 0, 255, 1))');
     }
   });
+
+  // ---- wave-48 W5: typed lab-family stop originals re-emit verbatim ----
+
+  it('re-emits an lch stop from its typed original, not the clipped rgba', () => {
+    // VERBATIM wave48-cal wire shape for a WPT gradient-decreasing-hue-lch
+    // stop after the chroma-% parser fix: chroma 150 is far outside srgb, so
+    // the srgb triple is a simple clip; the browser must get the author's
+    // own colour so its per-sample gamut mapping matches the reference.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 }, interp: 'in lch decreasing hue',
+        stops: [
+          { color: { srgb: { r: 1, g: 0, b: 0.4 }, original: { type: 'lch', l: 50, c: 150, h: 0 } }, position: null },
+          { color: { srgb: { r: 0.9, g: 0.2, b: 0 }, original: { type: 'lch', l: 50, c: 150, h: 80 } }, position: null },
+        ],
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(90deg in lch decreasing hue, lch(50 150 0), lch(50 150 80))');
+  });
+
+  it('carries the typed original alpha through (powerless-hue wire shape)', () => {
+    // VERBATIM wave48-cal per-test-ir stop of gradient-powerless-hue-oklch
+    // (post-fix canonical L: 86.64…% → 0.8664…). alpha rides after a slash.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 }, interp: 'in oklch',
+        stops: [
+          { color: { srgb: { r: 1, g: 0, b: 0 }, original: 'red' }, position: null },
+          { color: { srgb: { r: 0, g: 1, b: 0, a: 0 }, original: { type: 'oklch', l: 0.8664396175234369, c: 0.295, h: 142.4953450414439, alpha: 0 } }, position: null },
+        ],
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(90deg in oklch, rgba(255, 0, 0, 1), oklch(0.8664396175234369 0.295 142.4953450414439 / 0))');
+  });
+
+  it('guards a legacy 0..100 ok-space lightness back onto the srgb path', () => {
+    // VERBATIM wave48-cal per-test-ir stop of gradient-powerless-hue-oklch
+    // as emitted BEFORE the wave-48 ColorParser %-scaling fix: `l` carries
+    // 86.64… (the legacy 0..100 convention for oklch(86.64% …)). Re-emitted
+    // verbatim this would become oklch(86.64… …), which the browser clamps
+    // to WHITE (S6 must-fix 3, executed repro on a cell scoring 0.9994 P) —
+    // so the OK-SPACE LIGHTNESS GUARD must refuse the typed path and fall
+    // through to the srgb rgba() serialisation instead.
+    const legacy = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 }, interp: 'in oklch',
+        stops: [
+          { color: { srgb: { r: 1, g: 0, b: 0 }, original: 'red' }, position: null },
+          { color: { srgb: { r: 0, g: 1, b: 0, a: 0 }, original: { type: 'oklch', l: 86.64396175234369, c: 0.295, h: 142.4953450414439, alpha: 0 } }, position: null },
+        ],
+      }]),
+    ]);
+    expect(applyBackgroundImage(legacy).backgroundImage).toBe(
+      'linear-gradient(90deg in oklch, rgba(255, 0, 0, 1), rgba(0, 255, 0, 0))');
+    // The canonical 0..1 twin of the SAME stop (the post-fix wire) must
+    // keep the typed path — the author fidelity the guard must not cost.
+    // (The alpha-carry pin above asserts this shape independently; paired
+    // here so guard and fidelity are proven against each other.)
+    const canonical = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 }, interp: 'in oklch',
+        stops: [
+          { color: { srgb: { r: 1, g: 0, b: 0 }, original: 'red' }, position: null },
+          { color: { srgb: { r: 0, g: 1, b: 0, a: 0 }, original: { type: 'oklch', l: 0.8664396175234369, c: 0.295, h: 142.4953450414439, alpha: 0 } }, position: null },
+        ],
+      }]),
+    ]);
+    expect(applyBackgroundImage(canonical).backgroundImage).toBe(
+      'linear-gradient(90deg in oklch, rgba(255, 0, 0, 1), oklch(0.8664396175234369 0.295 142.4953450414439 / 0))');
+  });
+
+  it('string originals and plain srgb stops keep the rgba path byte-identically', () => {
+    // The guard: hwb/color()/named stops are NOT typed-re-emitted (see the
+    // TYPED_LAB_FAMILIES note) — nothing outside the lab family moves.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'linear-gradient', angle: { deg: 90 },
+        stops: [
+          { color: { srgb: { r: 1, g: 0, b: 0 }, original: 'red' }, position: null },
+          { color: { srgb: { r: 0, g: 1, b: 0 }, original: { type: 'hwb', h: 120, w: 0, b: 0 } }, position: null },
+        ],
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(90deg, rgba(255, 0, 0, 1), rgba(0, 255, 0, 1))');
+  });
+
+  // ---- wave-48 W5: image() notation lowering -------------------------
+
+  it('lowers image(src, fallback) to a url layer over a solid-colour underlay', () => {
+    // Wire of WPT css-image-fallbacks-and-annotations 001 (`background:
+    // image("green.png", green)`): the url 404s in the capture browser and
+    // the solid green beneath it shows — §2.1's fallback outcome.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'image', srcs: ['green.png'],
+        color: { srgb: { r: 0, g: 0.5019607843137255, b: 0 }, original: 'green' },
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'url("green.png"), linear-gradient(rgba(0, 128, 0, 1), rgba(0, 128, 0, 1))');
+  });
+
+  it('stacks legacy multi-src candidates in author try-order', () => {
+    // Wire of 003/004: first candidate missing on disk → paints nothing →
+    // the next one shows through (first-that-loads for opaque images).
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [{
+        type: 'image', srcs: ['1x1-green.svg', 'support/1x1-green.png', 'support/1x1-green.gif'],
+      }]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'url("1x1-green.svg"), url("support/1x1-green.png"), url("support/1x1-green.gif")');
+  });
+
+  it('renders a src-less image(color) as the solid-colour image', () => {
+    // Wire of 005 layer 1 — image(rgba(0,0,255,0.5)) composited over the
+    // second (url) layer by the browser.
+    const cfg = extractBackgroundImage([
+      p('BackgroundImage', [
+        { type: 'image', srcs: [], color: { srgb: { r: 0, g: 0, b: 1, a: 0.5 }, original: { r: 0, g: 0, b: 255, a: 0.5 } } },
+        'support/1x1-green.png',
+      ]),
+    ]);
+    expect(applyBackgroundImage(cfg).backgroundImage).toBe(
+      'linear-gradient(rgba(0, 0, 255, 0.5), rgba(0, 0, 255, 0.5)), url("support/1x1-green.png")');
+  });
 });

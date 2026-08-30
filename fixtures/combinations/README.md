@@ -104,16 +104,19 @@ by them.
 
 | fixture · component | platform | why (open backlog entry) |
 |---|---|---|
-| `transform-list-order.json` · `TLO_ScaleXRotate` | Android | Compose does not compose the transform list: it accumulates scalars and graphicsLayer applies a fixed T·R·S order, so `scaleX(2) rotate(45deg)` renders as its reverse — box [85,85] instead of [113,57]. (`TLO_RotateScaleX` passes degenerately for the same reason.) |
+| ~~`transform-list-order.json` · `TLO_ScaleXRotate`~~ | ~~Android~~ | FIXED (wave 48): Compose now composes the list in CSS order (`TransformListComposer`); the `scaleX(2) rotate(45deg)` shear residue draws via ordered canvas ops. The Android waiver was deleted in the same change (exit-5 contract); the row stays for history. |
 | `opacity-blend.json` · `OB_Multiply_Op50`, `OB_Screen_Op50` | iOS | mix-blend-mode is applied INSIDE the opacity compositing group, so declaring opacity neutralises the blend — predicted renders (179,204,128) / (77,77,102), the blend-normal values, matching `OB_Normal_Op50_Control` for the multiply pair. |
 | `radius-overflow-transform.json` · `ROT_SelfRotate_ClippedChild` | iOS | the overflow clip is applied OUTSIDE the transform, clipping by the un-transformed axis-aligned frame — box [80,60] instead of [99,99]. The two translated-child rows exercise the parent-clips-child path and MAY also be red on iOS; unverified, so listed as possible, not predicted. |
 
-Also wrong today but INVISIBLE to v1 `_expect` (honesty note, not a
-pass): Android renders every order-swapped translate pair in
+Historical honesty note (fixed in wave 48, kept for the record):
+Android used to render every order-swapped translate pair in
 `transform-list-order.json` at the wrong POSITION with the correct
 bbox size — e.g. `scale(2) translate(30px,0)` centroid at +30 instead
-of +60 (STATUS "Transform order", measured web 156 vs Android 126).
-Only the v2 `bbox` field can catch those.
+of +60 (STATUS "Transform order", measured web 156 vs Android 126) —
+invisibly to v1 `_expect`, which has no position field. The wave-48
+CSS-order composition moves those centroids to the spec answers
+(TransformListComposerTest pins +60/+42.43 on the verbatim IR); a
+future v2 `bbox` field would make regressions visible to the oracle.
 
 `blend-isolation.json` is a probe, not a prediction: `isolation`
 support on the natives' canonical trees is unverified (the legacy
