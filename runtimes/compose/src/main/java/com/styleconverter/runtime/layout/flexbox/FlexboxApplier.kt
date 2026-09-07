@@ -155,7 +155,7 @@ object FlexboxApplier {
 
     /**
      * Compose the main-axis arrangement for a Row from justify-content AND
-     * gap. css-align-3 §8.3: `gap` is spacing BETWEEN adjacent items and it
+     * gap. css-align-3 §8: `gap` is spacing BETWEEN adjacent items and it
      * COMBINES with content distribution — the distributed spacing wins
      * whenever it exceeds the gap. The old renderer let a non-zero gap
      * unconditionally replace the arrangement, so `justify-content:

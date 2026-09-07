@@ -12,15 +12,6 @@
 // Foundation only — no SwiftUI needed at extraction time.
 import Foundation
 
-// Sibling list of property-type names this extractor owns. The registry
-// consults this (via PropertyRegistry.migrated) to route each IR entry.
-enum ColorProperty {
-    // CSS `background-color` → paints the component box.
-    // CSS `color` → the text foreground + the `currentColor` resolution
-    // target for other colour-valued properties.
-    static let names: [String] = ["BackgroundColor", "Color"]
-}
-
 // Single-pass extractor. Iterates the property list once and populates a
 // ColorConfig. Returns nil when neither property was present, mirroring
 // GapExtractor's contract so the applier can skip cleanly.

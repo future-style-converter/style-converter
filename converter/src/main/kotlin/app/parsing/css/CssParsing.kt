@@ -11,6 +11,7 @@ import kotlinx.serialization.json.booleanOrNull
 import kotlinx.serialization.json.doubleOrNull
 import kotlinx.serialization.json.intOrNull
 import app.parsing.css.properties.PropertiesParser
+import app.parsing.css.properties.WritingContext
 import app.parsing.css.selectors.parseSelectors
 import app.parsing.css.mediaQueries.parseMedia
 
@@ -367,10 +368,20 @@ fun cssParsing(doc: JsonObject): IRDocument {
     // Counter for generating unique component IDs
     var componentCounter = 0
 
-    // Recursive function to convert CssComponent to IRComponent
-    fun convertToIR(name: String, component: CssComponent): IRComponent {
+    // Recursive function to convert CssComponent to IRComponent.
+    // `parentContext` is the ancestor chain's computed writing-mode/direction
+    // (css-writing-modes-4 §3.2 / §2.1 — both inherited), so a child with no
+    // own declaration resolves logical aliases under its ancestor's mode.
+    fun convertToIR(name: String, component: CssComponent, parentContext: WritingContext): IRComponent {
         componentCounter++
         val id = "${name.lowercase().replace(" ", "-")}-${componentCounter.toString().padStart(3, '0')}"
+
+        // The component's OWN computed writing context: css-logical-1 §4 pairs
+        // each flow-relative longhand with its physical twin "using the
+        // element's own computed writing mode", and that mode is the own
+        // declaration when present, the parent's otherwise. Same instance as
+        // the parent's when this component declares neither property.
+        val writingContext = WritingContext.derive(parentContext, component.properties?.mapValues { (_, v) -> v.value })
 
         // Parse properties directly to specific property classes. This is
         // the BASE-declaration bucket — the per-component cascade winners —
@@ -383,8 +394,12 @@ fun cssParsing(doc: JsonObject): IRDocument {
         // a UA-styled tag (<select>, <h1>, <th>, …) removing the declaration
         // hands the slot to the UA rule on web instead of to inheritance,
         // so InheritedDefaultResolution exempts those components (guard 4).
+        // `writingContext` rides along for the same base-bucket-only reason:
+        // logical/physical alias pairs collapse by cascade order here, where
+        // the pair is one declaration block (css-logical-1 §4) — see
+        // LogicalAliasResolution; selector/media buckets keep both.
         val properties = component.properties
-            ?.let { PropertiesParser.parse(it, resolveInheritedDefaults = true, sourceTag = component.tag) }
+            ?.let { PropertiesParser.parse(it, resolveInheritedDefaults = true, sourceTag = component.tag, writingContext = writingContext) }
             ?: mutableListOf()
 
         // Extract custom-property declarations (--name: value) from the SAME
@@ -410,7 +425,7 @@ fun cssParsing(doc: JsonObject): IRDocument {
         // child's map key becomes its `name`, so the original ID survives
         // verbatim in the output.
         val children = component.children?.map { (childName, childComponent) ->
-            convertToIR(childName, childComponent)
+            convertToIR(childName, childComponent, writingContext) // children inherit this component's writing context
         }
 
         return IRComponent(
@@ -473,7 +488,10 @@ fun cssParsing(doc: JsonObject): IRDocument {
     }
 
     val irComponents = components.components.map { (name, component) ->
-        convertToIR(name, component)
+        // Top-level components hang off the document root, whose writing
+        // context is the initial horizontal-tb / ltr (css-writing-modes-4
+        // §3.2 / §2.1 initial values — the harness never restyles <html>).
+        convertToIR(name, component, WritingContext.ROOT)
     }
     // Document-level keyframes (wave 8): typed + offset-sorted at this
     // boundary so every downstream consumer (wire codec, runtimes) sees

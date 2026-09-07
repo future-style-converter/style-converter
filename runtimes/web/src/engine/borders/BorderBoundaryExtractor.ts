@@ -1,7 +1,7 @@
 // BorderBoundaryExtractor.ts — folds `BorderBoundary` IR properties into a config.
 // IR shape flavors (parser enum BorderBoundaryValue):
 //   "NONE" / "PARENT" / "DISPLAY"                UPPERCASE bare strings
-// No fixture yet in examples/properties/borders/ — added defensively to keep
+// No fixture yet in fixtures/properties/borders/ — added defensively to keep
 // triplet coverage at 1:1 with irmodels/properties/borders/.
 
 import { extractKeyword } from '../core/types/KeywordValue';                // normaliser

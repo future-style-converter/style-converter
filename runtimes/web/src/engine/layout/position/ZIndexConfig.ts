@@ -4,4 +4,3 @@
 export interface ZIndexConfig { value?: number | 'auto'; }
 
 export const Z_INDEX_PROPERTY_TYPE = 'ZIndex' as const;
-export type ZIndexPropertyType = typeof Z_INDEX_PROPERTY_TYPE;

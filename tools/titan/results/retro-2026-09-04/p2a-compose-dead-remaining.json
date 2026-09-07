@@ -1,0 +1,1509 @@
+{
+ "artifact": "p2a-compose-dead-remaining",
+ "producedBy": "retrospective sweep P2a (findings A6#7 / A6#6 / A6#8 / A6#11 / A6#15), 2026-09-05",
+ "method": "identifier-frequency scan over runtimes/compose/src + apps/android-harness/app/src, comment-stripped; a declaration is listed when its name occurs exactly once in that corpus (its own declaration line) \u2014 i.e. no call site anywhere, tests included. Re-derive with the scanner recipe in the lane report before acting.",
+ "scope": "declarations NESTED inside otherwise-live files. P2a deleted every WHOLE dead file and every dead TOP-LEVEL declaration; these are the leftovers, each needing a surgical in-file excision.",
+ "counts": {
+  "declarations": 187,
+  "estimatedBodyLines": 1319
+ },
+ "caveat": "a nested member of a LIVE object is still unreachable when its own name has no call site (a qualified call must spell the member), but check for reflection/serialization by name before deleting a @Serializable field.",
+ "declarations": [
+  {
+   "name": "markHandled",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/PropertyTracker.kt",
+   "line": 57,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "getReport",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/PropertyTracker.kt",
+   "line": 106,
+   "bodyLines": 21,
+   "private": false
+  },
+  {
+   "name": "isHandled",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/PropertyTracker.kt",
+   "line": 158,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "getOccurrences",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/PropertyTracker.kt",
+   "line": 169,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "toSummary",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/PropertyTracker.kt",
+   "line": 234,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "applyLayoutOnly",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt",
+   "line": 958,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "applyVisualsOnly",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt",
+   "line": 976,
+   "bodyLines": 25,
+   "private": false
+  },
+  {
+   "name": "isPropertySupported",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/StyleApplier.kt",
+   "line": 1075,
+   "bodyLines": 10,
+   "private": false
+  },
+  {
+   "name": "hasInfiniteAnimation",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/animations/AnimationConfig.kt",
+   "line": 85,
+   "bodyLines": 2,
+   "private": false
+  },
+  {
+   "name": "Properties",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/animations/AnimationConfig.kt",
+   "line": 223,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isAnimationProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/animations/AnimationExtractor.kt",
+   "line": 467,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "applyBackgroundWithClip",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/BackgroundBoxApplier.kt",
+   "line": 177,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "calculateOriginOffset",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/BackgroundBoxApplier.kt",
+   "line": 237,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "calculateOriginSize",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/BackgroundBoxApplier.kt",
+   "line": 267,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "TextClipNotes",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/BackgroundBoxApplier.kt",
+   "line": 347,
+   "bodyLines": 18,
+   "private": false
+  },
+  {
+   "name": "isBackgroundBoxProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/BackgroundBoxExtractor.kt",
+   "line": 78,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "createStripesPattern",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RepeatingGradientHelper.kt",
+   "line": 291,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "createCheckerboardApproximation",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RepeatingGradientHelper.kt",
+   "line": 321,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "loadImageFromUrl",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/borders/image/BorderImageApplier.kt",
+   "line": 615,
+   "bodyLines": 4,
+   "private": true
+  },
+  {
+   "name": "loadImageFromUrlDirect",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/borders/image/BorderImageApplier.kt",
+   "line": 623,
+   "bodyLines": 13,
+   "private": true
+  },
+  {
+   "name": "applyBorderImage",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/borders/image/BorderImageApplier.kt",
+   "line": 1183,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isBorderImageProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/borders/image/BorderImageExtractor.kt",
+   "line": 328,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isAccentProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/color/AccentExtractor.kt",
+   "line": 49,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "resolveAll",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/color/BackgroundColorInheritance.kt",
+   "line": 63,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "applyBackgroundColor",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/color/ColorApplier.kt",
+   "line": 263,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "extractBackgroundSize",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/color/ColorExtractor.kt",
+   "line": 856,
+   "bodyLines": 10,
+   "private": true
+  },
+  {
+   "name": "SimpleColumnGrid",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/columns/MultiColumnApplier.kt",
+   "line": 1093,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "MasonryLayout",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/columns/MultiColumnApplier.kt",
+   "line": 1135,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "columnRule",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/columns/MultiColumnApplier.kt",
+   "line": 1161,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "ColumnDivider",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/columns/MultiColumnApplier.kt",
+   "line": 1195,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "calculateAdaptiveColumnCount",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/columns/MultiColumnApplier.kt",
+   "line": 1237,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isMultiColumnProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/columns/MultiColumnExtractor.kt",
+   "line": 141,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "promotedProperties",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/columns/MulticolDescendantSpanner.kt",
+   "line": 205,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "NamedContainer",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 168,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "SizeContainer",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 190,
+   "bodyLines": 10,
+   "private": false
+  },
+  {
+   "name": "InlineSizeContainer",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 208,
+   "bodyLines": 10,
+   "private": false
+  },
+  {
+   "name": "containerDimensions",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 227,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "namedContainerDimensions",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 237,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "widthBetween",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 299,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "Responsive",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 333,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "CompactOrExpanded",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryApplier.kt",
+   "line": 357,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isContainerQueryProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/container/ContainerQueryExtractor.kt",
+   "line": 72,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "PseudoElementImageWithSizing",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/content/ContentApplier.kt",
+   "line": 423,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "fromData",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/content/ContentApplier.kt",
+   "line": 768,
+   "bodyLines": 2,
+   "private": false
+  },
+  {
+   "name": "isContentProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/content/ContentExtractor.kt",
+   "line": 233,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "evaluateDp",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/expressions/CalcExpressionEvaluator.kt",
+   "line": 87,
+   "bodyLines": 22,
+   "private": false
+  },
+  {
+   "name": "evaluateWithPercentage",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/expressions/CalcExpressionEvaluator.kt",
+   "line": 502,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "initialize",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/images/ImageCache.kt",
+   "line": 113,
+   "bodyLines": 21,
+   "private": false
+  },
+  {
+   "name": "loadImageDirect",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/images/ImageCache.kt",
+   "line": 180,
+   "bodyLines": 17,
+   "private": false
+  },
+  {
+   "name": "getCachedGradient",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/images/ImageCache.kt",
+   "line": 229,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "clearAll",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/images/ImageCache.kt",
+   "line": 237,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "clearMemory",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/images/ImageCache.kt",
+   "line": 246,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "getStats",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/images/ImageCache.kt",
+   "line": 254,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "getCoilLoader",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/images/ImageCache.kt",
+   "line": 323,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "extractLengthOrPercentage",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/types/ValueExtractors.kt",
+   "line": 99,
+   "bodyLines": 45,
+   "private": false
+  },
+  {
+   "name": "extractMillis",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/types/ValueExtractors.kt",
+   "line": 389,
+   "bodyLines": 11,
+   "private": false
+  },
+  {
+   "name": "extractPercentage",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/types/ValueExtractors.kt",
+   "line": 405,
+   "bodyLines": 12,
+   "private": false
+  },
+  {
+   "name": "containsVar",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/CssVariableConfig.kt",
+   "line": 93,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "resolveToColor",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/CssVariableResolver.kt",
+   "line": 158,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "resolveToTextUnit",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/CssVariableResolver.kt",
+   "line": 168,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "resolveToFloat",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/CssVariableResolver.kt",
+   "line": 178,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "resolveToString",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/CssVariableResolver.kt",
+   "line": 188,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "applyWithCornerRadius",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/effects/EffectsFacade.kt",
+   "line": 235,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "applyMultipleShadows",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/effects/shadow/MultipleShadowApplier.kt",
+   "line": 260,
+   "bodyLines": 37,
+   "private": false
+  },
+  {
+   "name": "NeumorphicBox",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/effects/shadow/MultipleShadowApplier.kt",
+   "line": 315,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "NeumorphicBoxPressed",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/effects/shadow/MultipleShadowApplier.kt",
+   "line": 354,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "getContentScale",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/images/ObjectFitApplier.kt",
+   "line": 67,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "getAlignment",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/images/ObjectFitApplier.kt",
+   "line": 74,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "fromPercent",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/images/ObjectFitApplier.kt",
+   "line": 346,
+   "bodyLines": 11,
+   "private": false
+  },
+  {
+   "name": "isObjectFitProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/images/ObjectFitExtractor.kt",
+   "line": 133,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "shouldDisablePointerEvents",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/InteractionApplier.kt",
+   "line": 103,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "getAlpha",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/InteractionApplier.kt",
+   "line": 113,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "shouldTakeUpSpace",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/InteractionApplier.kt",
+   "line": 127,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "getTouchActionInfo",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/InteractionApplier.kt",
+   "line": 140,
+   "bodyLines": 34,
+   "private": false
+  },
+  {
+   "name": "extractTouchActionConfig",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/InteractionExtractor.kt",
+   "line": 153,
+   "bodyLines": 26,
+   "private": false
+  },
+  {
+   "name": "Id",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/SpatialNavigationConfig.kt",
+   "line": 10,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isSpatialNavigationProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/SpatialNavigationExtractor.kt",
+   "line": 68,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "radioButtonColors",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 144,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "switchColors",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 156,
+   "bodyLines": 9,
+   "private": false
+  },
+  {
+   "name": "sliderColors",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 170,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "outlinedTextFieldColors",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 223,
+   "bodyLines": 10,
+   "private": false
+  },
+  {
+   "name": "textSelectionColors",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 238,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "shouldSizeToContent",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 318,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "completeCheckboxStyling",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 336,
+   "bodyLines": 6,
+   "private": false
+  },
+  {
+   "name": "completeTextFieldStyling",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingApplier.kt",
+   "line": 354,
+   "bodyLines": 11,
+   "private": false
+  },
+  {
+   "name": "getAccentColorOrDefault",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingConfig.kt",
+   "line": 64,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "getCaretColorOrDefault",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingConfig.kt",
+   "line": 69,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isFormStylingProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/interactions/forms/FormStylingExtractor.kt",
+   "line": 141,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isFloatProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/FloatExtractor.kt",
+   "line": 63,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "applyPositionOnly",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/LayoutFacade.kt",
+   "line": 214,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "applySizingAndSpacing",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/LayoutFacade.kt",
+   "line": 226,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "applyOffsetPath",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/advanced/OffsetPathApplier.kt",
+   "line": 53,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "rememberOffsetPathState",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/advanced/OffsetPathApplier.kt",
+   "line": 211,
+   "bodyLines": 33,
+   "private": false
+  },
+  {
+   "name": "animateAlongPath",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/advanced/OffsetPathApplier.kt",
+   "line": 253,
+   "bodyLines": 26,
+   "private": false
+  },
+  {
+   "name": "isOffsetPathProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/advanced/OffsetPathExtractor.kt",
+   "line": 261,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "getPlacement",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridConfig.kt",
+   "line": 65,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "hasArea",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridConfig.kt",
+   "line": 68,
+   "bodyLines": 38,
+   "private": false
+  },
+  {
+   "name": "AutoFill",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridConfig.kt",
+   "line": 214,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "AutoFit",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridConfig.kt",
+   "line": 215,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "LineNumber",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridConfig.kt",
+   "line": 223,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "LineName",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridConfig.kt",
+   "line": 224,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "Placement",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridConfig.kt",
+   "line": 233,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "extractGridItemConfig",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridExtractor.kt",
+   "line": 55,
+   "bodyLines": 26,
+   "private": false
+  },
+  {
+   "name": "getAutoColumnSize",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridRenderer.kt",
+   "line": 1655,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "getAutoRowSize",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridRenderer.kt",
+   "line": 1664,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "applyZIndexOnly",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionApplier.kt",
+   "line": 252,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "needsAbsoluteContainer",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionApplier.kt",
+   "line": 271,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "needsStickyWrapper",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/PositionApplier.kt",
+   "line": 294,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "buildMarkedText",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListStyleApplier.kt",
+   "line": 55,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "AutoAdd",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/math/MathTypographyConfig.kt",
+   "line": 26,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isMathTypographyProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/math/MathTypographyExtractor.kt",
+   "line": 63,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isIsolationProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/performance/IsolationExtractor.kt",
+   "line": 47,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isPerformanceProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/performance/PerformanceExtractor.kt",
+   "line": 262,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isPrintProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/print/PrintExtractor.kt",
+   "line": 93,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isRegionFlowProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/regions/RegionFlowExtractor.kt",
+   "line": 64,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isRenderingProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/rendering/RenderingExtractor.kt",
+   "line": 92,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isZoomProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/rendering/ZoomExtractor.kt",
+   "line": 109,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "applyScrolling",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/OverflowApplier.kt",
+   "line": 75,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "requiresScrollableContainer",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/OverflowApplier.kt",
+   "line": 87,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "getScrollDirection",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/OverflowApplier.kt",
+   "line": 94,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "getScrollAnimationSpec",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ScrollApplier.kt",
+   "line": 132,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "getSnapPositionOffset",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ScrollApplier.kt",
+   "line": 211,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "getDefaultFlingBehavior",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ScrollApplier.kt",
+   "line": 252,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "getScrollHelperConfig",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ScrollApplier.kt",
+   "line": 296,
+   "bodyLines": 12,
+   "private": false
+  },
+  {
+   "name": "isScrollProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ScrollExtractor.kt",
+   "line": 320,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "Names",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ScrollTimelineConfig.kt",
+   "line": 39,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isScrollTimelineProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ScrollTimelineExtractor.kt",
+   "line": 214,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "isViewTimelineProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/scrolling/ViewTimelineExtractor.kt",
+   "line": 382,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isShapeProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/shapes/ShapeExtractor.kt",
+   "line": 169,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "applyWidthOnly",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt",
+   "line": 496,
+   "bodyLines": 33,
+   "private": false
+  },
+  {
+   "name": "applyHeightOnly",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt",
+   "line": 531,
+   "bodyLines": 26,
+   "private": false
+  },
+  {
+   "name": "isMarginTrimProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/MarginTrimExtractor.kt",
+   "line": 36,
+   "bodyLines": 26,
+   "private": false
+  },
+  {
+   "name": "isSpeechProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/speech/SpeechExtractor.kt",
+   "line": 126,
+   "bodyLines": 6,
+   "private": false
+  },
+  {
+   "name": "getEffectiveFillColor",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 94,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "getEffectiveStrokeColor",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 100,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "getEffectiveStopColor",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 106,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "getDashPattern",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 109,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "toComposeStrokeCap",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 119,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "toComposeStrokeJoin",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 126,
+   "bodyLines": 6,
+   "private": false
+  },
+  {
+   "name": "toComposePathFillType",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 134,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "arrows",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgConfig.kt",
+   "line": 259,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isSvgProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/svg/SvgExtractor.kt",
+   "line": 355,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "ScrollableTable",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "line": 331,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "TableHeaderCell",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "line": 523,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "FixedWidthTable",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "line": 548,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "FixedWidthRow",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "line": 584,
+   "bodyLines": 26,
+   "private": false
+  },
+  {
+   "name": "FixedWidthCell",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "line": 620,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "firstRowBorder",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "line": 670,
+   "bodyLines": 20,
+   "private": false
+  },
+  {
+   "name": "firstCellBorder",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "line": 694,
+   "bodyLines": 13,
+   "private": false
+  },
+  {
+   "name": "isTableProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableExtractor.kt",
+   "line": 119,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isTransform3DProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/transforms/Transform3DExtractor.kt",
+   "line": 143,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "applyTranslate",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/transforms/TransformApplier.kt",
+   "line": 880,
+   "bodyLines": 9,
+   "private": false
+  },
+  {
+   "name": "applySkew",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/transforms/TransformApplier.kt",
+   "line": 974,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "buildFontVariationSettings",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/FontVariantApplier.kt",
+   "line": 137,
+   "bodyLines": 10,
+   "private": false
+  },
+  {
+   "name": "requiresFontFeatures",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/FontVariantApplier.kt",
+   "line": 154,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "applySmallCapsFallback",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/FontVariantApplier.kt",
+   "line": 174,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "getSmallCapsScaleFactor",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/FontVariantApplier.kt",
+   "line": 185,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "shouldRenderAsSmallCap",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/FontVariantApplier.kt",
+   "line": 194,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "ClampedText",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/LineClampApplier.kt",
+   "line": 136,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "HeightConstrainedText",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/LineClampApplier.kt",
+   "line": 166,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "extractTextParameters",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/LineClampApplier.kt",
+   "line": 207,
+   "bodyLines": 11,
+   "private": false
+  },
+  {
+   "name": "wouldTruncate",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/LineClampApplier.kt",
+   "line": 237,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isTextFormattingProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextFormattingExtractor.kt",
+   "line": 142,
+   "bodyLines": 6,
+   "private": false
+  },
+  {
+   "name": "extractComposeLineBreak",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextStyleApplier.kt",
+   "line": 1766,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "extractOverflowWrapWithLegacy",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextStyleApplier.kt",
+   "line": 1777,
+   "bodyLines": 25,
+   "private": false
+  },
+  {
+   "name": "extractTextJustificationConfig",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextStyleApplier.kt",
+   "line": 1978,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "applyTextPreprocessing",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextWrapApplier.kt",
+   "line": 318,
+   "bodyLines": 14,
+   "private": false
+  },
+  {
+   "name": "buildWrapParameters",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextWrapApplier.kt",
+   "line": 431,
+   "bodyLines": 8,
+   "private": false
+  },
+  {
+   "name": "Presets",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextWrapApplier.kt",
+   "line": 443,
+   "bodyLines": 24,
+   "private": false
+  },
+  {
+   "name": "buildTextStyle",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyApplier.kt",
+   "line": 49,
+   "bodyLines": 86,
+   "private": false
+  },
+  {
+   "name": "shouldPreserveWhitespace",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyApplier.kt",
+   "line": 205,
+   "bodyLines": 11,
+   "private": false
+  },
+  {
+   "name": "getLayoutDirection",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyApplier.kt",
+   "line": 265,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "processTextContent",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyApplier.kt",
+   "line": 281,
+   "bodyLines": 15,
+   "private": false
+  },
+  {
+   "name": "hasWordSpacing",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyApplier.kt",
+   "line": 387,
+   "bodyLines": 4,
+   "private": false
+  },
+  {
+   "name": "Digits",
+   "kind": "type",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/advanced/BaselineConfig.kt",
+   "line": 86,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "isBaselineProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/advanced/BaselineExtractor.kt",
+   "line": 161,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isRubyProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/ruby/RubyExtractor.kt",
+   "line": 107,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "isTextProperty",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/text/TextExtractor.kt",
+   "line": 185,
+   "bodyLines": 3,
+   "private": false
+  },
+  {
+   "name": "applyVerticalTextModifier",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/text/WritingModeApplier.kt",
+   "line": 67,
+   "bodyLines": 5,
+   "private": false
+  },
+  {
+   "name": "VerticalTextWrapper",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/text/WritingModeApplier.kt",
+   "line": 80,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "getCharacterRotation",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/text/WritingModeApplier.kt",
+   "line": 138,
+   "bodyLines": 9,
+   "private": false
+  },
+  {
+   "name": "toComposeShadow",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/workarounds/TextShadowApplier.kt",
+   "line": 107,
+   "bodyLines": 7,
+   "private": false
+  },
+  {
+   "name": "NeonText",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/workarounds/TextShadowApplier.kt",
+   "line": 208,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "EmbossedText",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/workarounds/TextShadowApplier.kt",
+   "line": 247,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "LongShadowText",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/workarounds/TextShadowApplier.kt",
+   "line": 300,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "OutlinedText",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/workarounds/TextShadowApplier.kt",
+   "line": 343,
+   "bodyLines": 1,
+   "private": false
+  },
+  {
+   "name": "glow",
+   "kind": "fun",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/workarounds/TextShadowApplier.kt",
+   "line": 396,
+   "bodyLines": 1,
+   "private": false
+  }
+ ]
+}

@@ -190,7 +190,7 @@ export const PREDEFINED = Object.fromEntries([
   }]),
 ]);
 
-/** css-counter-styles-3 §6.1 — the ordinal-INDEPENDENT bullet styles plus
+/** css-counter-styles-3 §6.3 — the ordinal-INDEPENDENT bullet styles plus
  *  `none`. Recognised so the bake can tell "out of scope by design" apart
  *  from "unknown keyword", and report each honestly. */
 export const BULLET_STYLES = new Set([

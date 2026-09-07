@@ -1,5 +1,5 @@
 // Tests for the AspectRatio extractor — every IR shape observed after running
-// the Kotlin converter against examples/properties/sizing/aspect-ratio.json.
+// the Kotlin converter against fixtures/properties/sizing/aspect-ratio.json.
 import { describe, it, expect } from 'vitest';
 import { extractAspectRatio } from '../../src/engine/sizing/AspectRatioValue';
 

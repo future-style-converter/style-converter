@@ -1,4 +1,4 @@
-// Wave 35 lane B3 — css-multicol-1 §6.2 DESCENDANT spanner promotion.
+// Wave 35 lane B3 — css-multicol-1 §6.1 DESCENDANT spanner promotion.
 //
 // §6.2 makes `column-span: all` apply to any in-flow DESCENDANT of the
 // multicol container, not just a direct child: the spanner is pulled out of
@@ -54,7 +54,7 @@ object MulticolDescendantSpanner {
     /**
      * Declarations that make an ancestor an INDEPENDENT fragmentation /
      * containing-block root, disqualifying a `column-span: all` descendant
-     * below it (css-multicol-1 §6.2: the spanner's nearest multicol ancestor
+     * below it (css-multicol-1 §6.1: the spanner's nearest multicol ancestor
      * must be THIS container). This is the exact axis the WPT pair
      * ancestor-toggle-spanner-001 / -002 toggles: -001 REMOVES the ancestor's
      * transform (spanner valid → full-width green square), -002 ADDS one
@@ -129,7 +129,7 @@ object MulticolDescendantSpanner {
         ) return false
         // Exactly ONE in-flow child, and it must be the spanner. A wrapper
         // holding a spanner PLUS other column content would need real
-        // fragmentation around the spanner (css-multicol-1 §6.3), which this
+        // fragmentation around the spanner (css-multicol-1 §6.1), which this
         // rewrite does not model — such wrappers keep the frozen render.
         val inFlow = (child.children ?: emptyList()).filter { inFlowChild(it) }
         return inFlow.size == 1 && spanKeyword(inFlow[0]) == "ALL"

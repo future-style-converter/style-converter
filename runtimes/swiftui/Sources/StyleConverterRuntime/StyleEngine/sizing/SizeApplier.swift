@@ -261,7 +261,7 @@ enum SizeApplierMath {
         // axis has no exact width but does have min/max bounds (the new
         // CSS-cap case). Pure exact-width axes don't need fixedSize.
         // Wave 5: `width: min-content` is NOT the ideal size — it's the
-        // narrowest wrap (css-sizing-3 §4). `.fixedSize` reports the
+        // narrowest wrap (css-sizing-3 §5.1). `.fixedSize` reports the
         // single-line MAX-content width for text, so min-content boxes
         // rendered one wide line while web wrapped at every word
         // (PW_Sizing_Spacing_02). MinContentWidthLayout below proposes

@@ -1,6 +1,6 @@
 // WritingModeExtractor.ts — folds `WritingMode` IR properties into a WritingModeConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { WritingModeConfig, WRITING_MODE_PROPERTY_TYPE, WritingModePropertyType } from './WritingModeConfig';
 import { kwLower } from './_shared';

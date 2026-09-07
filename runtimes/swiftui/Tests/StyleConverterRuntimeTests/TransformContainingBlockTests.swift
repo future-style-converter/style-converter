@@ -1,7 +1,7 @@
 //
 //  TransformContainingBlockTests.swift
 //  Wave 35 (lane B1) — XCTest pins for the transform containing-block rule
-//  table (css-transforms-1 §3 / css-transforms-2 §6), for the FixedHoist
+//  table (css-transforms-1 §3 / css-transforms-2 §8), for the FixedHoist
 //  strip it vetoes, and for the singular-transform paint rule.
 //
 //  THE CROSS-NATIVE PIN. `shapeMatrix` below is the SAME matrix, in the
@@ -54,12 +54,12 @@ final class TransformContainingBlockTests: XCTestCase {
             ("transform: none",
              #"[{"type":"Transform","data":{"type":"functions","list":[]}}]"#,
              false),
-            // ── individual transform properties (css-transforms-2 §4) ────
+            // ── individual transform properties (css-transforms-2 §5) ────
             ("rotate: 45deg", #"[{"type":"Rotate","data":{"type":"angle","deg":45}}]"#, true),
             ("rotate: none", #"[{"type":"Rotate","data":{"type":"none"}}]"#, false),
             ("scale: none", #"[{"type":"Scale","data":{"type":"none"}}]"#, false),
             ("translate: none", #"[{"type":"Translate","data":{"type":"none"}}]"#, false),
-            // ── perspective (css-transforms-2 §6, probe D) ───────────────
+            // ── perspective (css-transforms-2 §8, probe D) ───────────────
             ("perspective: 500px",
              #"[{"type":"Perspective","data":{"type":"length","px":500}}]"#, true),
             ("perspective: none",
@@ -119,7 +119,7 @@ final class TransformContainingBlockTests: XCTestCase {
         // The control that proves the FLAG, not the tree shape, is the
         // cause: the identical tree minus the transform hoists again (pin
         // S3 — a fixed box under a merely `position: relative` ancestor
-        // still anchors at the viewport, css-position-3 §3.2).
+        // still anchors at the viewport, css-position-3 §2.1).
         let cb = try component(#"""
         {"id":"cb","name":"cb","properties":[{"type":"Position","data":"RELATIVE"}],
          "children":[{"id":"parent","name":"parent","properties":[],

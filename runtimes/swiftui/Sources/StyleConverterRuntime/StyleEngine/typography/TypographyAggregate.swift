@@ -171,7 +171,7 @@ struct TypographyAggregate: Equatable {
     /// preserved text is future work).
     var preservesSpaces: Bool = false
     /// Wave 37 (lane W7) — the resolved `hyphens` keyword (css-text-3
-    /// §6.1), lower-cased: "none" | "manual" | "auto", nil when the
+    /// §5.3), lower-cased: "none" | "manual" | "auto", nil when the
     /// element declared none (the initial value `manual` applies).
     /// Two consumers, both in PlaceholderLabel and both via
     /// SoftHyphenPolicy:

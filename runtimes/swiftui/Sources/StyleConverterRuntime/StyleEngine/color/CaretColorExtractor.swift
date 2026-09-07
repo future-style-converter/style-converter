@@ -10,10 +10,6 @@
 
 import Foundation
 
-enum CaretColorProperty {
-    static let names: [String] = ["CaretColor"]
-}
-
 enum CaretColorExtractor {
 
     // Single-pass extractor. Returns nil when no CaretColor entry exists.

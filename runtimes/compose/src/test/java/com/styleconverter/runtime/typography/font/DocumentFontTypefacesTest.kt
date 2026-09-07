@@ -19,7 +19,7 @@ import java.io.File
  * contract [DocumentFontTypefaces] adds to the wave-35 registry: which FACE
  * of a registered family the `ch` basis measures, how the handle expires
  * with the document, and that the JVM (no android.graphics) degrades to the
- * css-values-4 §6.1.3 spec fallback rather than crashing or lying.
+ * css-values-4 §6.1.1 spec fallback rather than crashing or lying.
  *
  * Like [DocumentFontRegistryTest] these are JVM pins of the CONTRACT — the
  * device gate (the wave-47 mono-pin A/B on css-text) measures whether the
@@ -82,7 +82,7 @@ class DocumentFontTypefacesTest {
 
     @Test
     fun `the Regular face is the measuring face whatever the wire order`() {
-        // Bold is declared FIRST (the pilot's real order); §6.1.3 measures a
+        // Bold is declared FIRST (the pilot's real order); §6.1.1 measures a
         // plain run's '0', so the 400 face must win the pick.
         DocumentFontRegistry.register(pinFaces(), pinTree("DejaVuSansMono-Bold.ttf", "DejaVuSansMono.ttf"))
         val family = DocumentFontRegistry.resolve("monospace")
@@ -167,7 +167,7 @@ class DocumentFontTypefacesTest {
     fun `on the JVM a registered family still answers the spec fallback`() {
         // No android.graphics on the JVM: the loader answers null, the
         // DEFAULT-typeface Paint construction throws, and measure() must
-        // answer null — the css-values-4 §6.1.3 "assume 0.5em" route — never
+        // answer null — the css-values-4 §6.1.1 "assume 0.5em" route — never
         // zero and never a crash.
         DocumentFontRegistry.register(pinFaces(), pinTree("DejaVuSansMono-Bold.ttf", "DejaVuSansMono.ttf"))
         assertNull(ChUnitMetrics.measure(DocumentFontRegistry.resolve("monospace"), 32f))

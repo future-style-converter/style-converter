@@ -1,5 +1,12 @@
 package app.parsing.css.properties.shorthands
 
+// A6#14 — clone consolidation: this expander used to carry private
+//   `splitPreservingFunctions` (1 copy), byte-identical to TokenizationUtils.tokenizeByWhitespace
+//   — its 1 call site now calls the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
+
 /**
  * Expands the `background-position` shorthand property.
  *
@@ -24,7 +31,7 @@ object BackgroundPositionExpander : ShorthandExpander {
             trimmed
         }
 
-        val parts = splitPreservingFunctions(firstPosition)
+        val parts = TokenizationUtils.tokenizeByWhitespace(firstPosition)
 
         return when (parts.size) {
             1 -> {
@@ -61,28 +68,6 @@ object BackgroundPositionExpander : ShorthandExpander {
             }
             else -> emptyMap()
         }
-    }
-
-    private fun splitPreservingFunctions(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var current = StringBuilder()
-        var parenDepth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> { parenDepth++; current.append(char) }
-                char == ')' -> { parenDepth--; current.append(char) }
-                char.isWhitespace() && parenDepth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) result.add(current.toString())
-        return result
     }
 
     private fun splitByComma(value: String): List<String> {

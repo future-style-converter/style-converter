@@ -1,6 +1,6 @@
 // RubyPositionExtractor.ts — folds `RubyPosition` IR properties into a RubyPositionConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { RubyPositionConfig, RUBY_POSITION_PROPERTY_TYPE, RubyPositionPropertyType } from './RubyPositionConfig';
 import { kwLower } from './_shared';

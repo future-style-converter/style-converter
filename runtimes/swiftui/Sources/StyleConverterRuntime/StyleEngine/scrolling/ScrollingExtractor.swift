@@ -16,9 +16,11 @@ import Foundation
 /// `src/main/kotlin/app/parsing/css/properties/longhands/scrolling/` and
 /// the IR-model stems under `app/irmodels/properties/scrolling/`.
 enum ScrollingProperty {
-    /// Explicit, diff-auditable list — matches the README-phase10
-    /// scrolling fixture's 60-component coverage minus the 3 scroll-
+    /// Explicit, diff-auditable list — matches the 60-component coverage of
+    /// `fixtures/properties/scrolling/longtail.json` minus the 3 scroll-
     /// timeline longhands (already owned by `ScrollTimelineProperty`).
+    /// (Retro P2e repointed this: the `README-phase10` index it named was
+    /// deleted by the 2026-07-08 restructure, commit 02e4c457.)
     static let names: [String] = [
         // scroll-behavior (interactions/ parser folder, scrolling category).
         "ScrollBehavior",
@@ -66,8 +68,10 @@ enum ScrollingExtractor {
             // (scroll-behavior, snap-align, overscroll-behavior, etc.).
             // For structured values (ScrollbarColor two-token pair,
             // ScrollMargin lengths) we fall back to a debug dump so the
-            // audit map still records that the property was seen. The
-            // applier never reads these strings today — see ScrollingApplier.
+            // audit map still records that the property was seen. NOTHING
+            // reads these strings today: retro P2b (A6#10) deleted the
+            // identity `ScrollingApplier` they were kept for — the family's
+            // iOS analogues are listed in ScrollingConfig's header.
             if let kw = ValueExtractors.extractKeyword(p.data) {
                 cfg.rawByType[p.type] = kw
             } else {

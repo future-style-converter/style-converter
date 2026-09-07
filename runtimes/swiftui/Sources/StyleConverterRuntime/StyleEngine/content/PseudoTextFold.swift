@@ -72,7 +72,7 @@ enum PseudoTextFold {
             return component
         }
         // The em/% base for the pseudo's own `font-size`: css-values-4
-        // §5.1.1 resolves it against the INHERITED size, and the pseudo's
+        // §6.1.1 resolves it against the INHERITED size, and the pseudo's
         // parent IS the originating element — so the host's own declared
         // size (last FontSize wins, the extractors' cascade) or the 16px
         // document default when the host declares none (the only base the

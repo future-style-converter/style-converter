@@ -1499,7 +1499,7 @@ private fun ComposedCaptureCanvas(
                 // hypothetical position and nothing double-renders.
                 // Wave 22 (B-RC2): the classifier now also resolves `em`
                 // against the root's OWN declared FontSize (css-values-4
-                // §5.1.1 — the base rides the same property list), because
+                // §6.1.1 — the base rides the same property list), because
                 // dotted-001's three `margin: .5em; font-size: 92px` divs
                 // bailed on the relative flavor and painted 46+46 = 92px of
                 // inter-div space where the ref collapses to ONE 46px gap.
@@ -1521,7 +1521,7 @@ private fun ComposedCaptureCanvas(
                     StaticEmMargin.verticalEdges(root.properties)
                 // wave-46 lane Y8: the root's UA default resolves its em
                 // against the root's OWN computed font-size (css-values-4
-                // §5.1.1) — null for every root without a font signal, so
+                // §6.1.1) — null for every root without a font signal, so
                 // only a font-sized `<p>`/`<ul>`/… root moves (measured:
                 // inherit-computed-001's `font-size: larger` p, 16 → 19px).
                 // The tag rides in as well: it gates the monospace

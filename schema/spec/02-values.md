@@ -154,7 +154,7 @@ Substitution happens in the **runtimes**, never in the converter. For a
    follows in 03-children.md) and use the first definition found.
    Roots (no `slot`) end the walk.
 3. **Fallback:** otherwise, if the reference carries a fallback
-   (css-variables-1 §2.3 — fallbacks may nest arbitrarily), resolve the
+   (css-variables-1 §3 — fallbacks may nest arbitrarily), resolve the
    fallback by the same rules.
 4. **Guaranteed-invalid:** otherwise the reference is
    *invalid at computed-value time* (css-variables-1 §3): the declaration

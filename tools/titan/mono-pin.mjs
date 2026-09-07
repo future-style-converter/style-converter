@@ -131,7 +131,7 @@ export const MONO_PIN_FAMILY = 'monospace';
 /** The generic spellings that take the pin — exactly the two
  *  MonospaceUAFontSize arms the 13px quirk on, so "pinned face" and "fixed
  *  default size" always travel together. `ui-monospace` is a separate
- *  css-fonts-4 §12.2 keyword that Chromium ALSO maps to the fixed font. */
+ *  css-fonts-4 §2.1.5 keyword that Chromium ALSO maps to the fixed font. */
 export const MONO_PIN_GENERICS = Object.freeze(['monospace', 'ui-monospace']);
 
 /** Corner of each native's fonts sandbox the faces are pushed into. Leading

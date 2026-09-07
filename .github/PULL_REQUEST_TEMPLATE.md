@@ -1,4 +1,5 @@
-<!-- PRs target `dev` (integration branch). `main` is releases only.
+<!-- PRs target `dev` — the only live branch. `main` is frozen at d61601f4
+     (dev→main promotion was declined by the owner; see docs/BACKLOG.md).
      Vocabulary (reader / writer / runtime / harness / fixture / golden /
      baseline) is pinned in docs/NAMING.md — use it in the title too.
      In particular: say "runtime", not "engine". -->

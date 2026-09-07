@@ -28,7 +28,7 @@
 //  Wave-46 rework (lane Y2, css-images natives — 14 iOS cells failed
 //  where web passed, every one a stop/colour-math defect):
 //    4. STOP FIXUP + <length> STOPS — the converter now carries px stop
-//       positions (`positionLength`, wave 40), and css-images-4 §3.4.3
+//       positions (`positionLength`, wave 40), and css-images-3 §3.4.3 / css-images-4 §3.5.3
 //       fixup (clamp-forward, even spread between positioned
 //       neighbours) replaces the old "nil = i/(n−1)" spread. The
 //       gradient-line length is known only at render time, so
@@ -97,7 +97,7 @@ enum GradientApplier {
     }
 
     // ── Stop resolution ────────────────────────────────────────────────
-    // RGBAStop / resolveStops / srgbSubdivided / toGradient / resolvedRamp
+    // RGBAStop / srgbSubdivided / toGradient / resolvedRamp
     // / lineLengthPx live in GradientApplier+Stops.swift (wave-46 file
     // split — the §3.4.3 pipeline outgrew this file's 200-line target).
 

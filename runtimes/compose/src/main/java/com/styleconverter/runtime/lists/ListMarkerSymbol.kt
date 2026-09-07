@@ -61,7 +61,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 object ListMarkerSymbol {
 
     /**
-     * The three UA symbol markers css-counter-styles-3 §6.1 defines and
+     * The three UA symbol markers css-counter-styles-3 §6.3 defines and
      * a browser PAINTS rather than sets in a font.
      */
     enum class Shape {
@@ -186,7 +186,7 @@ object ListMarkerSymbol {
             // NO drawContent() — the glyph is deliberately not painted.
             val top = topPx(size.height, fontSizePx)
             when (shape) {
-                // css-counter-styles-3 §6.1 `disc`: a filled circle
+                // css-counter-styles-3 §6.3 `disc`: a filled circle
                 // inscribed in the side×side box.
                 Shape.FILLED_CIRCLE -> drawCircle(
                     color = color,

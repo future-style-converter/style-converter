@@ -253,7 +253,7 @@ final class MulticolFloatStripSeamTests: XCTestCase {
     // MARK: - FS-Z7: the typed `column-fill` fold (ColumnsExtractor)
 
     /// FS-Z7 — the fill-mode wire: only the AUTO keyword flips fillAuto
-    /// (css-multicol-1 §7.2); balance / absent keep the initial-balance
+    /// (css-multicol-1 §7.1); balance / absent keep the initial-balance
     /// false, and a duplicated declaration folds last-write-wins
     /// (css-cascade-5 §6.4.4 — the same idiom as continueDiscard).
     func testFSZ7ColumnFillExtraction() {

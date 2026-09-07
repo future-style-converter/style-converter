@@ -32,14 +32,13 @@ import kotlinx.serialization.json.jsonPrimitive
  * ```
  *
  * ## Compose Integration
- * ```kotlin
- * val viewConfig = ViewTimelineExtractor.extractViewTimelineConfig(properties)
- * val viewState = ViewTimelineApplier.rememberViewTimeline(
- *     viewportHeight = LocalConfiguration.current.screenHeightDp.dp,
- *     insetTop = viewConfig.insetTop ?: 0.dp,
- *     insetBottom = viewConfig.insetBottom ?: 0.dp
- * )
- * ```
+ * NONE — this extractor has no consumer. (Retro sweep P2a: the snippet that
+ * stood here called `ViewTimelineApplier.rememberViewTimeline`, a scaffold
+ * that was never referenced by anything and is now deleted. The extractor
+ * itself is kept because the view-timeline registration tests read its
+ * output, but nothing renders from it: `animation-timeline: view()` needs
+ * `onGloballyPositioned` + viewport-intersection math feeding the keyframe
+ * driver's clock — TODO 3 in AnimationsRegistration.)
  */
 object ViewTimelineExtractor {
 

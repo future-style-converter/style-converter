@@ -63,10 +63,20 @@ class ItemPlacementExtractorTest {
         ))
         assertEquals(3, bare.grid.rowStart)
         // span / named lines serialize without `number` → auto (honest fallback).
+        // The LIVE span wire is `{"type":"span","count":N}` — probe
+        // `:converter:run` 2026-09-05: `grid-column-start: span 2` →
+        // `{"type":"span","count":2}` (css-grid-2 §8.3 <integer> && span);
+        // the numeric claim stays auto because no line NUMBER was given.
         val span = ItemPlacementExtractor.extract(listOf(
-            prop("GridColumnStart", """{"type":"span","span":2}""")
+            prop("GridColumnStart", """{"type":"span","count":2}""")
         ))
         assertNull(span.grid.colStart)
+        // TOLERANCE, not a live wire (retro R10, A8#5): the `span` key
+        // spelling below was never emitted by the converter — the reader
+        // must still not mistake it for a line number.
+        assertNull(ItemPlacementExtractor.extract(listOf(
+            prop("GridColumnStart", """{"type":"span","span":2}""")
+        )).grid.colStart)
     }
 
     @Test
@@ -106,11 +116,55 @@ class ItemPlacementExtractorTest {
         assertEquals(2f, p.flex.grow)
         assertEquals(0f, p.flex.shrink)
         assertEquals(40.0, p.flex.basisPx!!, 0.0)
-        // Percentage basis carries no px → null (line not statically resolvable).
+        // A px basis is never ALSO a percent claim (the two wire shapes are
+        // exclusive — FlexBasisSerializer emits one per declaration).
+        assertNull(p.flex.basisPercent)
+        // An object-shaped percent (NOT a shape the converter emits) carries
+        // no px → null, and is not the bare-number percent wire either.
         val pct = ItemPlacementExtractor.extract(listOf(
             prop("FlexBasis", """{"value":{"percent":50.0}}""")
         ))
         assertNull(pct.flex.basisPx)
+        assertNull(pct.flex.basisPercent)
+    }
+
+    // ── Retro R2 (A7#0): the bare-number PERCENT wire ─────────────────────
+
+    @Test
+    fun `bare-number FlexBasis is a percent claim - verbatim corpus payloads`() {
+        // wave49-final css-gaps flex-gap-decorations-025 child: `"FlexBasis": 100`
+        // (flex-basis: 100% through IRPercentage's bare-number serializer).
+        val p100 = ItemPlacementExtractor.extract(listOf(
+            prop("BackgroundColor", """{"srgb":{"r":0,"g":0.5019607843137255,"b":0.5019607843137255},"original":"teal"}"""),
+            prop("Height", """{"type":"length","px":50}"""),
+            prop("FlexBasis", "100")
+        ))
+        assertEquals(100.0, p100.flex.basisPercent!!, 0.0)
+        // The percent is NOT a px claim — the line resolves it against its
+        // own inner main size (css-flexbox-1 §7.2.3), never the extractor.
+        assertNull(p100.flex.basisPx)
+        // css-flexbox flexbox-abspos-child-002 __2__0: `"FlexBasis": 80`;
+        // css-backgrounds background-clip-content-box-002: `50`. A double
+        // primitive decodes identically to an int one.
+        assertEquals(80.0, ItemPlacementExtractor.flexBasisPercent(listOf(prop("FlexBasis", "80")))!!, 0.0)
+        assertEquals(50.0, ItemPlacementExtractor.flexBasisPercent(listOf(prop("FlexBasis", "50.0")))!!, 0.0)
+        // css-values calc-size-flex-007: `flex-basis: 0%` → `0` — a zero
+        // percent is a REAL zero basis (flex: 1 0 0%), not "absent".
+        assertEquals(0.0, ItemPlacementExtractor.flexBasisPercent(listOf(prop("FlexBasis", "0")))!!, 0.0)
+    }
+
+    @Test
+    fun `keyword and px FlexBasis shapes are not percent claims`() {
+        // flexbox-abspos-child-002 __3__0: `"FlexBasis": "content"` — a
+        // STRING primitive must not be coerced into a number.
+        assertNull(ItemPlacementExtractor.flexBasisPercent(listOf(prop("FlexBasis", "\"content\""))))
+        assertNull(ItemPlacementExtractor.flexBasisPercent(listOf(prop("FlexBasis", "\"auto\""))))
+        // The px object shape belongs to flexBasisPx only.
+        assertNull(ItemPlacementExtractor.flexBasisPercent(listOf(
+            prop("FlexBasis", """{"value":{"px":2},"normalizedPixels":2}"""))))
+        // No FlexBasis at all → CSS initial `auto` → no percent claim.
+        assertNull(ItemPlacementExtractor.flexBasisPercent(emptyList()))
+        assertNull(ItemPlacementExtractor.extract(emptyList()).flex.basisPercent)
     }
 
     @Test

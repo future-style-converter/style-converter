@@ -44,23 +44,26 @@ Three coverage numbers, all true — and they mean different things:
 | claim | number | source of truth |
 |---|---|---|
 | Registration coverage — a triplet exists + claims the IR type (a string-presence facade; does **not** imply native rendering) | **558 / 558 per platform** (Android 558 / 558 · iOS 558 / 558 · Web 558 / 558) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
-| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 19 / 558 · iOS 74 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 15 / 558 · iOS 70 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
 | Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91/550 (~17%)** | [docs/STATUS.md](docs/STATUS.md) |
 
 `registered` is only a string-presence facade — the triplet exists and
 claims the type, but that alone does not render the property natively. The
 `real` floor counts a dedicated `<Name>Applier.<ext>` file per property; it
 under-counts grouped appliers (one file — e.g. Compose `LayoutApplier.kt`,
-iOS `FlexboxApplier.swift`, web `ScrollMarginApplier.ts` — renders many
+iOS `FlexboxApplier.swift`, web `PaddingApplier.ts` — renders many
 properties but its basename matches at most one IR name, so the raw
-dedicated-applier file counts Android 60 · iOS 119 · Web 530 sit above the
+dedicated-applier file counts Android 45 · iOS 94 · Web 520 sit above the
 per-property floor).
 
 Of the unverified remainder: 419 are blocked on platform capability gaps
 or missing harness tiers (animations, interactions, print, …), 37 are
 exhausted (no meaningful visual test exists), and 3 have known real
-divergences. [docs/STATUS.md](docs/STATUS.md) carries the full breakdown
-and how the tracker got honest.
+divergences. That 91 / 419 / 37 / 3 split is the **round-40 record** —
+the per-property tracker that produced it was retired at round 40 and the
+counts have not been re-derived since, so read it as a dated
+classification, not a live gauge. [docs/STATUS.md](docs/STATUS.md)
+carries the full breakdown and how the tracker got honest.
 
 **Roadmap:** code *writers* that emit static Jetpack Compose / SwiftUI
 source from the IR. An earlier generator scaffold was removed; the
@@ -147,10 +150,17 @@ tools/
 ├── titan/               # WPT-corpus test harness
 └── wpt/                 # WPT corpus mirror (gitignored; tools/titan/fetch-wpt.sh)
 
-fixtures/                # test fixtures: properties/<category>/ + components/ + probes
+fixtures/                # test fixtures — properties/<category>/, components/,
+                         #   combinations/ (interaction-class, `_expect` spec
+                         #   oracles), fidelity/ (generated suites),
+                         #   _metric_probes/, visual-test.json,
+                         #   visual-test-controls.json, composition-test.json,
+                         #   wpt/ (gitignored)
 schema/                  # the IR wire-format contract (JSON Schema + spec + golden fixtures)
-docs/NAMING.md           # vocabulary glossary (reader/writer/runtime/harness/…)
+docs/BACKLOG.md          # the live queue — single source of truth for wave work
 docs/STATUS.md           # one-page honest status (coverage numbers + tier record)
+docs/NAMING.md           # vocabulary glossary (reader/writer/runtime/harness/…)
+docs/DYNAMIC_CAPTURE.md  # forceState / captureWidth capture contract
 test-all.sh              # convert → render on 3 platforms → compare
 ```
 
@@ -197,11 +207,14 @@ the point.
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 463 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1340 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2974 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1941 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1877 |
+| converter (Kotlin) | `./gradlew :converter:test` | 514 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3143 |
+| android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1979 |
+| web-harness (vitest) | `npm -w apps/web-harness run test` | 276 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1979 |
+| ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 23 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 CI (`.github/workflows/ci.yml`) runs the converter, web-runtime,

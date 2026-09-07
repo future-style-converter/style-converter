@@ -5,14 +5,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpOffset      // retro R1: the abspos pivot shift rides in as a DpOffset (PositionApplier.resolvedOffset)
 import androidx.compose.ui.unit.dp
 import kotlin.math.abs
 import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.math.tan
 
 /**
@@ -45,7 +44,13 @@ import kotlin.math.tan
  *
  * ## Limitations
  * - 3D transforms (rotateX/Y, translateZ) have limited Compose support
- * - Perspective uses cameraDistance approximation
+ * - A `perspective()` FUNCTION meeting a 3D rotation takes the exact 4x4
+ *   canvas route (TransformMatrixPathApplier); graphicsLayer's cameraDistance
+ *   is only ever set on the depth-without-rotation shape, where its uniform
+ *   scale is the exact P/(P − z).
+ * - The own `perspective` PROPERTY is the CHILDREN's (css-transforms-2 §8;
+ *   §4.1.1 second way) and — since retro F3 — is applied by NO route here;
+ *   the children channel is unimplemented (OrthographicFlatten names it).
  */
 object TransformApplier {
 
@@ -57,26 +62,48 @@ object TransformApplier {
      *
      * @param modifier The base modifier to extend
      * @param config The transform configuration to apply
+     * @param pivotShift retro R1 (A11#0): the position offset the layout step
+     *   applies INSIDE this node (PositionApplier.resolvedOffset — the value
+     *   form of the `absoluteOffset` StyleApplier chains at step 4, inner of
+     *   this step-2 node). Every route below conjugates its pivot by it, so a
+     *   positioned element rotates/scales about ITS OWN centre instead of its
+     *   local centre expressed in the parent frame (TransformPivot has the
+     *   measurements). Zero — the default, and every unpositioned element —
+     *   leaves every route byte-identical to wave 49.
      * @return Modified Modifier with transforms applied
      */
-    fun applyTransforms(modifier: Modifier, config: TransformConfig): Modifier {
+    fun applyTransforms(modifier: Modifier, config: TransformConfig, pivotShift: DpOffset = DpOffset.Zero): Modifier {
         if (!config.hasTransform) return modifier
+
+        // retro R1 (A11#6 / A10#1 / A11#11): the exact 4x4 canvas route claims
+        // the shapes every scalar route below approximates — a perspective in
+        // effect with a 3D rotation, matrix3d, a diagonal rotate3d axis, an X
+        // rotation meeting a Y rotation, skew or scaleZ under a 3D rotation.
+        // TransformMatrixComposer.takesMatrixPath is the single gate (and its
+        // class doc the routing contract); everything it refuses keeps its
+        // wave-48/49 route so the corpus baselines stay byte-stable.
+        if (TransformMatrixComposer.takesMatrixPath(config)) {
+            return TransformMatrixPathApplier.apply(modifier, config, pivotShift)
+        }
 
         // Check if we have skew transforms - these need special handling
         if (config.hasSkew) {
-            return applyTransformsWithSkew(modifier, config)
+            return applyTransformsWithSkew(modifier, config, pivotShift)
         }
 
-        // Check if we have matrix transforms - these need decomposition
+        // Check if we have matrix transforms - these need decomposition.
+        // (Matrix3d never reaches here any more — takesMatrixPath claims it;
+        // kept in the predicate so a future gate change cannot silently send
+        // a 4x4 literal through the 2D decomposition that used to drop it.)
         val hasMatrix = config.functions.any { it is TransformFunction.Matrix || it is TransformFunction.Matrix3d }
         if (hasMatrix) {
-            return applyTransformsWithMatrix(modifier, config)
+            return applyTransformsWithMatrix(modifier, config, pivotShift)
         }
 
         // If we have transform functions, use graphicsLayer for combined transforms
         return if (config.functions.isNotEmpty()) {
             // Wave 48 (lane W6) — compose the function list in CSS order.
-            // css-transforms-1 §11: `transform: A B` is the matrix product
+            // css-transforms-1 §8: `transform: A B` is the matrix product
             // A·B, so B maps the point FIRST. The legacy path below
             // (applyTransformFunctions) accumulates each function KIND into
             // a separate scalar and feeds graphicsLayer's fixed
@@ -102,34 +129,57 @@ object TransformApplier {
                     // Expressible as rotate·scale — keep the graphicsLayer
                     // pipeline (same rasterisation path as the legacy route,
                     // so commuting lists keep their exact pixel texture).
-                    applyOrderedViaGraphicsLayer(modifier, config, steps, fields)
+                    applyOrderedViaGraphicsLayer(modifier, config, steps, fields, pivotShift)
                 } else {
                     // Shear residue (e.g. scaleX(2) rotate(45deg) = S·R,
                     // not expressible as R·S) — draw the exact matrix via
                     // ordered canvas ops, the same mechanism the skew path
                     // already uses for shear.
-                    applyOrderedViaCanvas(modifier, config, steps)
+                    applyOrderedViaCanvas(modifier, config, steps, pivotShift)
                 }
             } else {
-                applyTransformFunctions(modifier, config)
+                applyTransformFunctions(modifier, config, pivotShift)
             }
-        } else if (!config.isSimpleTransform || config.hasCustomOrigin) {
+        } else if (!config.isSimpleTransform || config.hasCustomOrigin ||
+            // retro R1 (A11#0): Modifier.rotate/scale pivot at the node's own
+            // centre and cannot be told about the abspos shift, so a
+            // positioned element whose longhands rotate or scale must take
+            // the graphicsLayer route, where the pivot is conjugated. A
+            // translate-only longhand is pivot-independent and keeps
+            // Modifier.offset (the standalone 005_box in the finding was
+            // scaleX(2) at left 60: x 100–180 drawn, 40–119 correct).
+            (pivotShift != DpOffset.Zero && (config.rotate != null || config.hasScale))
+        ) {
             // Use graphicsLayer for complex standalone transforms
-            applyWithGraphicsLayer(modifier, config)
+            applyWithGraphicsLayer(modifier, config, pivotShift)
         } else {
             // Use simple modifiers for basic transforms
             applySimpleTransforms(modifier, config)
         }
     }
 
-    /** Default perspective distance for Z-axis calculations when none specified */
-    private const val DEFAULT_PERSPECTIVE = 1000f
+    // retro R1 (A11#6): the 1000px DEFAULT_PERSPECTIVE that every route fell
+    // back to is GONE. css-transforms-2 §4.1: with no perspective matrix in
+    // the accumulation the z row and column are dropped, so translateZ is
+    // invisible — a default camera had no basis in the spec and drew
+    // pairs-04 `translate: 10px 20px 30px` + `perspective: none` at 184x93
+    // for the correct 180x92. TransformMatrixComposer.depthScale returns 1
+    // whenever no perspective is in effect.
 
     /**
      * Apply transforms that include skew using Canvas transformations.
      * This provides true skew support that graphicsLayer cannot offer.
+     *
+     * retro R1: [pivotShift] conjugates the pivot (A11#0); the depth scale
+     * comes from the shared P/(P − z) owner (A10#1 — this route carried the
+     * Taylor form `1 + z/P` in its no-`perspective()` branch and the INVERTED
+     * `P/(P + z)` in its `perspective()` branch, so `perspective(500px)
+     * translateZ(250px) skewX(20deg)` drew 1.5x / 0.667x for the correct 2.0x).
+     * A skew meeting a 3D rotation or matrix3d never arrives here any more
+     * (takesMatrixPath's `skew3D`), so the cos·scaleZ blocks below are
+     * unreachable-by-construction and left as they were.
      */
-    private fun applyTransformsWithSkew(modifier: Modifier, config: TransformConfig): Modifier {
+    private fun applyTransformsWithSkew(modifier: Modifier, config: TransformConfig, pivotShift: DpOffset): Modifier {
         // Collect all transform values
         var translateX = 0f
         var translateY = 0f
@@ -188,6 +238,11 @@ object TransformApplier {
                     skewX += decomposed.skewX
                 }
                 is TransformFunction.Matrix3d -> { /* Complex - skip for now */ }
+                // retro R1: a diagonal-axis rotate3d is claimed by the 4x4 route
+                // before this function is reached (takesMatrixPath). If a gate
+                // change ever lets one through, say so rather than drop it —
+                // the scalar accumulator has no exact representation for it.
+                is TransformFunction.Rotate3d -> com.styleconverter.runtime.PropertyTracker.markUnhandled("Transform")
                 is TransformFunction.None -> {
                     translateX = 0f
                     translateY = 0f
@@ -218,7 +273,14 @@ object TransformApplier {
         }
         config.skewX?.let { skewX += it }
         config.skewY?.let { skewY += it }
-        config.perspective?.let { cameraDistance = it.value }
+        // retro F3: the own `perspective` PROPERTY is NOT read on this route
+        // (or any other). It is css-transforms-2 §4.1.1's second way — the
+        // CHILDREN's perspective (§8) — while only a perspective() FUNCTION
+        // in this element's own list (§12.2, the branch above) puts a camera
+        // in front of ITS content. The wave-1 code overrode the function's
+        // distance with the property unconditionally; R1 narrowed that to a
+        // depth-bearing-list fold (`ownPerspectiveFolds`); both are gone —
+        // TransformMatrixComposer's class doc has the measured reason.
 
         // Convert skew degrees to radians for tan()
         val skewXRad = Math.toRadians(skewX.toDouble()).toFloat()
@@ -238,28 +300,26 @@ object TransformApplier {
             // `transform-origin: 30px 25%` anchored at the box CENTER
             // (0.5 default) instead of x=30px — PW_Color_Transforms_01 sat
             // at A-w 0.771 with iOS agreeing on the same wrong pivot.
-            // Per-axis fallback matches css-transforms-1 §3 (each axis
+            // Per-axis fallback matches css-transforms-1 §4 (each axis
             // resolves independently: px x-axis + % y-axis is legal).
-            val pivotX = config.originXDp?.toPx() ?: (size.width * originX)
-            val pivotY = config.originYDp?.toPx() ?: (size.height * originY)
+            // retro R1 (A11#0): conjugated by the abspos shift — TransformPivot.
+            val pivotX = TransformPivot.axisPx(config.originXDp?.value, density, originX, size.width, pivotShift.x.toPx())
+            val pivotY = TransformPivot.axisPx(config.originYDp?.value, density, originY, size.height, pivotShift.y.toPx())
 
             // Convert Dp values to pixels
             val txPx = translateX * density
             val tyPx = translateY * density
             val tzPx = translateZ * density
 
-            // Calculate perspective distance (use default if not specified)
-            val perspectivePx = if (cameraDistance > 0) cameraDistance * density else DEFAULT_PERSPECTIVE * density
+            // Perspective in effect, device px — 0 when none (retro R1: no
+            // 1000px default; §4.1 drops the z column without a perspective).
+            val perspectivePx = if (cameraDistance > 0) cameraDistance * density else 0f
 
-            // Calculate depth-based scale factor from translateZ
-            // CSS formula: scale = 1 + (translateZ / perspective)
-            // Positive translateZ = element comes toward viewer = appears larger
-            // Negative translateZ = element goes away = appears smaller
-            val depthScale = if (perspectivePx > 0 && tzPx != 0f) {
-                (1f + tzPx / perspectivePx).coerceIn(0.1f, 10f)
-            } else {
-                1f
-            }
+            // retro R1 (A10#1): the ONE depth-scale owner — css-transforms-2
+            // §16's perspective matrix gives w = 1 − z/P, i.e. a uniform
+            // P/(P − z) (2.0 at z = P/2), replacing the Taylor `1 + z/P`
+            // (1.5) and the inverted `P/(P + z)` (0.667) this route carried.
+            val depthScale = TransformMatrixComposer.depthScale(perspectivePx, tzPx)
 
             drawContext.canvas.let { canvas ->
                 canvas.save()
@@ -267,17 +327,9 @@ object TransformApplier {
                 // Move to transform origin
                 canvas.translate(pivotX, pivotY)
 
-                // Apply perspective effect
-                // Note: True perspective would require a perspective projection matrix,
-                // but we approximate using scale based on distance from camera
-                if (cameraDistance > 0) {
-                    // Apply perspective-based scale reduction for distant objects
-                    // This simulates objects getting smaller as they move away
-                    val perspectiveScale = perspectivePx / (perspectivePx + tzPx)
-                    canvas.scale(perspectiveScale.coerceIn(0.1f, 10f), perspectiveScale.coerceIn(0.1f, 10f))
-                } else if (tzPx != 0f) {
-                    // No explicit perspective, but we have translateZ
-                    // Apply basic depth scaling
+                // Depth response of a flat element under the perspective in
+                // effect — identity (skipped) when there is none.
+                if (depthScale != 1f) {
                     canvas.scale(depthScale, depthScale)
                 }
 
@@ -326,10 +378,11 @@ object TransformApplier {
     /**
      * Apply transforms that include matrix functions.
      */
-    private fun applyTransformsWithMatrix(modifier: Modifier, config: TransformConfig): Modifier {
+    private fun applyTransformsWithMatrix(modifier: Modifier, config: TransformConfig, pivotShift: DpOffset): Modifier {
         // For matrix transforms, we decompose and apply as regular transforms
         // This uses the skew path since decomposed matrices often include skew
-        return applyTransformsWithSkew(modifier, config)
+        // (retro R1: the pivot shift rides through unchanged — A11#0).
+        return applyTransformsWithSkew(modifier, config, pivotShift)
     }
 
     /**
@@ -396,7 +449,7 @@ object TransformApplier {
      * The list composed in CSS order has linear part R(θ)·S(sx,sy) — the
      * exact shape RenderNode expresses (it builds translate · pivot-rotate ·
      * pivot-scale; with the pivot parked at (0,0) that is T·R·S). The
-     * transform-origin conjugation (css-transforms-1 §2) and every
+     * transform-origin conjugation (css-transforms-1 §4) and every
      * translation are folded into the composed matrix's translation
      * component, so the layer's own pivot must NOT conjugate again —
      * transformOrigin is pinned to the top-left corner.
@@ -406,17 +459,19 @@ object TransformApplier {
         config: TransformConfig,
         steps: List<TransformListComposer.Step>,
         fields: TransformListComposer.LayerFields,
+        pivotShift: DpOffset,
     ): Modifier {
         return modifier.graphicsLayer {
             // Per-axis origin resolution, identical to the legacy paths:
             // a length origin (originXDp) resolves to absolute px, a
             // keyword/percentage origin to a fraction of the element's own
-            // size (css-transforms-1 §3.2 — lengths reference the border box).
-            val pivX = config.originXDp?.toPx() ?: (size.width * config.originX)
-            val pivY = config.originYDp?.toPx() ?: (size.height * config.originY)
+            // size (css-transforms-1 §4 — lengths reference the border box).
+            // retro R1 (A11#0): conjugated by the abspos shift (TransformPivot).
+            val pivX = TransformPivot.axisPx(config.originXDp?.value, density, config.originX, size.width, pivotShift.x.toPx())
+            val pivY = TransformPivot.axisPx(config.originYDp?.value, density, config.originY, size.height, pivotShift.y.toPx())
             // Full ordered product in px (density and own-size fractions
             // resolve here, where GraphicsLayerScope provides both), then
-            // the css-transforms-1 §2 origin conjugation.
+            // the css-transforms-1 §4 origin conjugation.
             val f = TransformListComposer.conjugateByOrigin(
                 TransformListComposer.affineOf(steps, density, size.width, size.height),
                 pivX, pivY,
@@ -453,14 +508,16 @@ object TransformApplier {
         modifier: Modifier,
         config: TransformConfig,
         steps: List<TransformListComposer.Step>,
+        pivotShift: DpOffset,
     ): Modifier {
         return modifier.drawWithContent {
-            // Same per-axis origin resolution as the graphicsLayer flavor.
-            val pivX = config.originXDp?.toPx() ?: (size.width * config.originX)
-            val pivY = config.originYDp?.toPx() ?: (size.height * config.originY)
+            // Same per-axis origin resolution as the graphicsLayer flavor,
+            // abspos shift included (retro R1, A11#0 — TransformPivot).
+            val pivX = TransformPivot.axisPx(config.originXDp?.value, density, config.originX, size.width, pivotShift.x.toPx())
+            val pivY = TransformPivot.axisPx(config.originYDp?.value, density, config.originY, size.height, pivotShift.y.toPx())
             val canvas = drawContext.canvas
             canvas.save()
-            // css-transforms-1 §2: translate to the origin…
+            // css-transforms-1 §4: translate to the origin…
             canvas.translate(pivX, pivY)
             // …apply the list in declared order (later ops are inner —
             // exactly css-transforms-1 §8's product where the rightmost function maps the
@@ -478,7 +535,7 @@ object TransformApplier {
                     is TransformListComposer.Step.Scale -> canvas.scale(step.sx, step.sy)
                 }
             }
-            // …and translate back (css-transforms-1 §2's closing -origin translation).
+            // …and translate back (css-transforms-1 §4's closing -origin translation).
             canvas.translate(-pivX, -pivY)
             // Draw the node's actual content under the accumulated CTM.
             this@drawWithContent.drawContent()
@@ -487,61 +544,31 @@ object TransformApplier {
     }
 
     /**
-     * Logs the one lossy shape of the orthographic flattening.
-     *
-     * css-transforms-2 §4.1's flattening distributes over a product for every pairing EXCEPT
-     * "an X rotation and a Y rotation in the same accumulation", which also
-     * produces a sin(α)·sin(β) shear that graphicsLayer's scale fields
-     * cannot carry. Rather than swallow it, mark `Transform` unhandled so
-     * PropertyTracker's report names the element. The wave-48 corpus census
-     * (all 30 sections' per-test-ir) found NO two-axis carrier — every 3D
-     * rotation there is single-axis rotateX / rotateY / rotate3d — so this
-     * is a guard against future input, not a live loss.
-     */
-    private fun reportDroppedShear(config: TransformConfig) {
-        // Presence checks only: a perspective or a z-translation routes to
-        // the projective path, where no flattening happens at all.
-        val hasPerspective = config.perspective != null ||
-            config.functions.any { it is TransformFunction.Perspective }
-        val hasTranslateZ = config.translateZ != null ||
-            config.functions.any { it is TransformFunction.TranslateZ }
-        if (hasPerspective || hasTranslateZ) return
-        // Sum each axis exactly the way the layer block does, so the
-        // predicate here and the flattening there cannot disagree.
-        var rotX = config.rotateX ?: 0f
-        var rotY = config.rotateY ?: 0f
-        for (fn in config.functions) {
-            if (fn is TransformFunction.RotateX) rotX += fn.degrees
-            if (fn is TransformFunction.RotateY) rotY += fn.degrees
-        }
-        if (OrthographicFlatten.shearResidual(rotX, rotY) != 0f) {
-            // Same channel every other partial-support site uses; the type
-            // string matches the IR property name so the report lines up.
-            com.styleconverter.runtime.PropertyTracker.markUnhandled("Transform")
-        }
-    }
-
-    /**
      * Apply transform functions using graphicsLayer.
      *
      * This method processes all transform functions from the CSS transform property
      * and combines them into a single graphicsLayer call.
+     *
+     * retro R1: the wave-49 `reportDroppedShear` guard is gone — an X
+     * rotation meeting a Y rotation is now DRAWN exactly by the 4x4 canvas
+     * route (TransformMatrixComposer.takesMatrixPath's `twoAxis`), so there
+     * is no dropped shear left to report. What reaches this route is either
+     * planar or single-axis orthographic, or a translateZ/scaleZ depth under
+     * a perspective with no rotation (graphicsLayer's uniform depth scale is
+     * the exact P/(P − z) there).
      */
-    private fun applyTransformFunctions(modifier: Modifier, config: TransformConfig): Modifier {
-        // NO SILENT FALLTHROUGH: the orthographic flattening below is exact
-        // for a single 3D axis and drops a sin·sin shear when an X rotation
-        // meets a Y rotation (OrthographicFlatten.shearResidual). Report it
-        // once, at modifier-construction time — the angles are density- and
-        // size-independent, so this needs none of the layer scope.
-        reportDroppedShear(config)
+    private fun applyTransformFunctions(modifier: Modifier, config: TransformConfig, pivotShift: DpOffset): Modifier {
         return modifier.graphicsLayer {
             // Set transform origin. Dp overrides resolve against `size`
             // here because CSS lengths on transform-origin reference the
-            // element's own dimensions (Transforms 1 §3.2). See parallel
-            // comment in applyWithGraphicsLayer above.
-            val ox = config.originXDp?.let { dp -> (dp.toPx() / size.width.coerceAtLeast(1f)) } ?: config.originX
-            val oy = config.originYDp?.let { dp -> (dp.toPx() / size.height.coerceAtLeast(1f)) } ?: config.originY
-            transformOrigin = TransformOrigin(ox, oy)
+            // element's own dimensions (css-transforms-1 §4). retro R1
+            // (A11#0): the pivot is conjugated by the abspos shift first
+            // (TransformPivot), then expressed as the fraction of the node's
+            // own size graphicsLayer wants — a fraction outside 0..1 is legal
+            // (RenderNode's pivot is a plain px pair, fraction × size).
+            val pivX = TransformPivot.axisPx(config.originXDp?.value, density, config.originX, size.width, pivotShift.x.toPx())
+            val pivY = TransformPivot.axisPx(config.originYDp?.value, density, config.originY, size.height, pivotShift.y.toPx())
+            transformOrigin = TransformOrigin(pivX / size.width.coerceAtLeast(1f), pivY / size.height.coerceAtLeast(1f))
 
             // Accumulated values (transforms are cumulative in CSS)
             var totalTranslationX = 0f
@@ -643,99 +670,47 @@ object TransformApplier {
             config.scaleY?.let { totalScaleY *= it }
             config.scaleZ?.let { totalScaleZ *= it }
 
-            // Standalone `perspective:` PROPERTY (css-transforms-2 §3).
-            //
-            // The perspective() FUNCTION is folded in by the loop above, but
-            // the property was not — and this branch is the one taken
-            // whenever `config.functions` is non-empty. So a component with
-            // both `perspective: 500px` and `transform: rotateY(30deg)`
-            // rendered with no foreshortening at all. That pairing is the
-            // ONLY way the property is useful, since on its own it
-            // establishes a perspective for children this element does not
-            // have. The other branch, applyWithGraphicsLayer, did read
-            // config.perspective — it just never runs when a transform list
-            // is present.
-            //
-            // Measured, case vs its no-perspective control:
-            //   iOS 2209 px · web 2097 px · Android 0 px
-            // while `transform: rotateY(30deg)` itself was applied on all
-            // three (Android 2709 px), so the rotation worked and only the
-            // projection was missing.
-            //
-            // A perspective() function wins if both are present: it is part
-            // of `transform`, so it composes with the other functions in
-            // declared order, while the property applies to the element as a
-            // whole.
-            if (perspectiveDistance <= 0f) {
-                config.perspective?.let { perspectiveDistance = it.toPx() }
-            }
+            // Standalone `perspective:` PROPERTY (css-transforms-2 §8) —
+            // deliberately NOT folded into `perspectiveDistance`. It is
+            // §4.1.1's second way, the perspective the element's CHILDREN
+            // are projected through, and this element's own list acquires a
+            // perspective row only through a perspective() FUNCTION (§4.1.1
+            // first way; the loop above). The wave-1 code folded the
+            // property unconditionally; retro R1 narrowed the fold to
+            // depth-bearing lists (`ownPerspectiveFolds`), copying the web
+            // `_dispatch.ts` prefix hack and the iOS `pendingPerspective`
+            // seed; retro F3 removed it on measured evidence — the frozen
+            // ref of css-transforms/backface-visibility-hidden-001
+            // (`perspective: 1000px; transform: rotateY(45deg)`) is
+            // orthographic, 100 rows in every column, and the fold keystoned
+            // it (TransformMatrixComposer's class doc). So the property
+            // carriers stay on this route's orthographic branch, exactly the
+            // committed wave-49 Android render.
 
-            // Calculate camera distance from perspective
-            // Compose's cameraDistance is in dp relative to screen density
-            val effectivePerspective = if (perspectiveDistance > 0) {
-                perspectiveDistance / density
-            } else if (totalTranslationZ != 0f || totalScaleZ != 1f) {
-                // Use default perspective if Z transforms are present
-                DEFAULT_PERSPECTIVE / density
-            } else {
-                // Dead branch since wave 49: a 3D ROTATION with no
-                // perspective now takes the orthographic route below and
-                // never reaches cameraDistance at all. Kept only so the
-                // `val` is total. It used to read `8f * density`, i.e.
-                // Compose's DefaultCameraDistance scaled by density and
-                // then scaled by density AGAIN inside the layer — a camera
-                // ~8·density² px from the box (~72 px on a 3x device),
-                // which keystoned every rotateX/rotateY render. Measured
-                // wave-48 Android vs the frozen ref on
-                // css-transforms/css-transform-3d-rotateY-positive:
-                // 139x149 trapezoid where the ref (and iOS) paint an exact
-                // 120x120 square.
-                DEFAULT_PERSPECTIVE / density
-            }
-
-            // Depth-based scale from translateZ under a perspective.
-            //
-            // css-transforms-2 §3: perspective is a PROJECTIVE divide, not a
-            // linear one. A point at depth z under perspective P is scaled by
-            //
-            //     P / (P - z)        equivalently  1 / (1 - z/P)
-            //
-            // This was `1 + z/P` — the first-order Taylor expansion of that.
-            // The two agree only for small z/P and diverge fast. MEASURED on
-            // a 60x20 box under perspective(500px), against web (which is
-            // exact on every row):
-            //
-            //     translateZ    correct   was      now
-            //       100px        1.250    1.20     1.25
-            //       166px        1.497    1.33     1.50
-            //       250px        2.000    1.50     2.00
-            //      -500px        0.500    0.10     0.50
-            //
-            // The -500 row is the clearest tell: `1 + z/P` evaluates to
-            // exactly 0 there and was rescued only by the 0.1 clamp below,
-            // so an element pushed one perspective-length away rendered at
-            // a tenth of its size instead of half.
-            val depthScaleFactor = if (totalTranslationZ != 0f) {
-                val p = if (perspectiveDistance > 0) perspectiveDistance else DEFAULT_PERSPECTIVE
-                val denom = p - totalTranslationZ
-                // z >= P puts the element AT or BEHIND the camera. CSS stops
-                // painting it; there is no finite scale, so cap rather than
-                // divide by zero or flip sign. The clamp below is the cap.
-                val factor = if (denom > 0f) p / denom else Float.MAX_VALUE
-                factor.coerceIn(0.1f, 10f)
-            } else {
-                1f
-            }
+            // Depth-based scale from translateZ under a perspective —
+            // css-transforms-2 §16's perspective matrix: a point at depth z
+            // under P is scaled by P/(P − z), and with NO perspective in
+            // effect §4.1 drops the z column, so translateZ is invisible.
+            // retro R1 (A11#6 / A10#1): the shared owner replaces both the
+            // in-place `p − z` arithmetic and the 1000px default it fell
+            // back to (that default drew Transform_TranslateZ / Translate3d /
+            // pairs-04 040 at a depth scale CSS never applies: 184x93 for a
+            // 180x92 box). The −500px row of the wave-1 measurement table
+            // (0.500 correct) still holds — see depthScale's doc.
+            val depthScaleFactor = TransformMatrixComposer.depthScale(perspectiveDistance, totalTranslationZ)
 
             // ORTHOGRAPHIC FLATTENING (wave 49) — css-transforms-2 §4.1.
             // With no perspective matrix in the accumulation the 4x4 is
             // flattened by dropping the z row/column, so rotateY(θ) is
             // EXACTLY scaleX(cos θ) and rotateX(θ) is scaleY(cos θ). See
-            // OrthographicFlatten for the derivation, the two guards, and
-            // the measured Android-vs-ref evidence. Non-null here means
-            // "take the camera out of the picture"; null keeps the
-            // projective path below untouched for perspective/translateZ.
-            val flat = if (OrthographicFlatten.appliesTo(perspectiveDistance, totalTranslationZ)) {
+            // OrthographicFlatten for the derivation and the measured
+            // Android-vs-ref evidence. retro R1: the guard is the perspective
+            // alone (a translateZ no longer keeps a camera alive), and a
+            // perspective WITH a 3D rotation never reaches this route
+            // (takesMatrixPath's `projective` claims it), so `flat == null`
+            // here means "depth under a perspective, no rotation" — the one
+            // shape graphicsLayer's uniform scale renders exactly.
+            val flat = if (OrthographicFlatten.appliesTo(perspectiveDistance)) {
                 OrthographicFlatten.of(totalRotationX, totalRotationY)
             } else {
                 null
@@ -751,15 +726,14 @@ object TransformApplier {
             rotationX = if (flat != null) 0f else totalRotationX
             rotationY = if (flat != null) 0f else totalRotationY
 
-            // Apply camera distance for perspective effect. Skipped on the
-            // orthographic route: graphicsLayer has no "no camera" setting,
-            // so the ONLY way to get the spec's parallel projection is to
-            // leave rotationX/rotationY at zero and never touch this field.
-            if (flat == null &&
-                (perspectiveDistance > 0 || totalTranslationZ != 0f ||
-                    totalRotationX != 0f || totalRotationY != 0f)
-            ) {
-                cameraDistance = effectivePerspective
+            // Camera distance, projective route only: graphicsLayer has no
+            // "no camera" setting, so on the orthographic route the field is
+            // never touched. Compose's cameraDistance is in dp (it multiplies
+            // by density inside the layer), hence the divide. With no 3D
+            // rotation reaching here the camera has no visible effect; it is
+            // set for parity with the wave-49 render of the depth carriers.
+            if (flat == null) {
+                cameraDistance = perspectiveDistance / density
             }
 
             // Apply 2D scale with depth adjustment
@@ -841,16 +815,18 @@ object TransformApplier {
      * - 3D transforms
      * - Combined transforms with specific ordering
      */
-    private fun applyWithGraphicsLayer(modifier: Modifier, config: TransformConfig): Modifier {
+    private fun applyWithGraphicsLayer(modifier: Modifier, config: TransformConfig, pivotShift: DpOffset): Modifier {
         return modifier.graphicsLayer {
             // Set transform origin. CSS lengths on transform-origin are
-            // resolved against the element's own size; we have `size` in
-            // scope here so a Dp override (config.originXDp/originYDp)
-            // becomes an exact 0..1 fraction. Falls back to the fractional
-            // origin when no Dp override was extracted.
-            val ox = config.originXDp?.let { dp -> (dp.toPx() / size.width.coerceAtLeast(1f)) } ?: config.originX
-            val oy = config.originYDp?.let { dp -> (dp.toPx() / size.height.coerceAtLeast(1f)) } ?: config.originY
-            transformOrigin = TransformOrigin(ox, oy)
+            // resolved against the element's own size (css-transforms-1 §4);
+            // `size` is in scope here so a Dp override becomes a fraction.
+            // retro R1 (A11#0): conjugated by the abspos shift first
+            // (TransformPivot) — this is the route the finding's standalone
+            // 005_box (`scaleX(2)` at left 60) took, drawing x 100–180 for
+            // the correct 40–119.
+            val pivX = TransformPivot.axisPx(config.originXDp?.value, density, config.originX, size.width, pivotShift.x.toPx())
+            val pivY = TransformPivot.axisPx(config.originYDp?.value, density, config.originY, size.height, pivotShift.y.toPx())
+            transformOrigin = TransformOrigin(pivX / size.width.coerceAtLeast(1f), pivY / size.height.coerceAtLeast(1f))
 
             // Apply translations. CSS percentage translates resolve against
             // the element's own size — `size` is available inside the
@@ -862,86 +838,40 @@ object TransformApplier {
             translationY = (config.translateY?.toPx() ?: 0f) +
                     (config.translateYFraction?.let { size.height * it } ?: 0f)
 
-            // Calculate perspective
-            val perspectivePx = config.perspective?.toPx() ?: DEFAULT_PERSPECTIVE
-
-            // Calculate depth scale from translateZ
-            val translateZPx = config.translateZ?.toPx() ?: 0f
-
-            // ORTHOGRAPHIC FLATTENING (wave 49) — same css-transforms-2 §4.1 rule as
-            // applyTransformFunctions, applied on the standalone-property
-            // route so that `rotate: 0 1 0 44deg` and
-            // `transform: rotateY(44deg)` render the SAME matrix. They did
-            // not before: this route fell back to a 1000px camera while the
-            // function route used an 8·density² px one.
-            // The iOS twin is the measured control for this exact carrier —
+            // retro R1 (A11#6) / F3: this is the LONGHAND-ONLY route, and NO
+            // perspective can ever be in effect here — a perspective()
+            // FUNCTION lives only in the `transform` list, and the own
+            // `perspective` PROPERTY is the CHILDREN's (css-transforms-2 §8;
+            // F3 removed the fold from every route, so the "never reaches
+            // the longhands" half of R1's convention is now simply the spec
+            // — web/iOS agree on this half: _dispatch.ts prefixes only the
+            // `transform` string; TransformsApplier.swift "NO perspective for
+            // the longhand `rotate`"). So css-transforms-2 §4.1 flattens orthographically, a
+            // `translate: … <z>` longhand is invisible (the 1000px default
+            // that scaled it is gone — pairs-04 040 drew 184x93 for 180x92),
+            // and scaleZ contributes nothing (scaling z then dropping the z
+            // column is the identity on a flat box). The camera is never set.
+            // The iOS twin is the measured control for the rotation half —
             // `css-transforms/animation/rotate-animation-with-will-change-
             // transform-001` (`rotate: 0 1 0 44deg`, transform-origin
             // 100px 0) renders 72x26 px of ink on iOS, pixel-identical to
-            // the frozen ref, and iOS's Rotate3DEffect projects it
-            // orthographically (perspectivePx nil). cos(44°)·100 = 71.9.
-            val flat = if (OrthographicFlatten.appliesTo(
-                    config.perspective?.toPx() ?: 0f,
-                    translateZPx,
-                )
-            ) {
-                OrthographicFlatten.of(config.rotateX ?: 0f, config.rotateY ?: 0f)
-            } else {
-                null
-            }
+            // the frozen ref; cos(44°)·100 = 71.9. A diagonal-axis `rotate:`
+            // longhand never arrives here (takesMatrixPath claims rotate3d).
+            val flat = OrthographicFlatten.of(config.rotateX ?: 0f, config.rotateY ?: 0f)
 
-            // Apply rotations. Z stays a real rotation on both routes (it
-            // commutes through the flattening); X/Y become cos scales when
-            // the projection is orthographic.
+            // Z stays a real rotation (it commutes through the flattening);
+            // X/Y are the cos scales below, never graphicsLayer rotations.
             config.rotate?.let { rotationZ = it }
-            if (flat == null) {
-                config.rotateX?.let { rotationX = it }
-                config.rotateY?.let { rotationY = it }
-            }
-            val depthScale = if (translateZPx != 0f) {
-                (1f + translateZPx / perspectivePx).coerceIn(0.1f, 10f)
-            } else {
-                1f
-            }
 
-            // Apply scales with depth adjustment
+            // css-transforms-2 §5: `scale` is uniform OR per-axis.
             val uniformScale = config.scale ?: 1f
             val baseScaleX = config.scaleX ?: uniformScale
             val baseScaleY = config.scaleY ?: uniformScale
-            val scaleZValue = config.scaleZ ?: 1f
 
-            // When rotateY is set, scaleZ affects X dimension
-            scaleX = if (flat != null) {
-                // Orthographic: one cos, and scaleZ contributes nothing
-                // (scaling z then dropping the z column is the identity on
-                // a flat box) — see OrthographicFlatten.
-                baseScaleX * depthScale * flat.scaleX
-            } else if (config.rotateY != null && scaleZValue != 1f) {
-                val rotRad = Math.toRadians((config.rotateY).toDouble())
-                baseScaleX * depthScale * abs(cos(rotRad).toFloat() * scaleZValue).coerceAtLeast(0.01f)
-            } else {
-                baseScaleX * depthScale
-            }
-
-            // When rotateX is set, scaleZ affects Y dimension
-            scaleY = if (flat != null) {
-                baseScaleY * depthScale * flat.scaleY
-            } else if (config.rotateX != null && scaleZValue != 1f) {
-                val rotRad = Math.toRadians((config.rotateX).toDouble())
-                baseScaleY * depthScale * abs(cos(rotRad).toFloat() * scaleZValue).coerceAtLeast(0.01f)
-            } else {
-                baseScaleY * depthScale
-            }
-
-            // Apply perspective (using cameraDistance). Never on the
-            // orthographic route: leaving rotationX/rotationY at zero is
-            // the only way graphicsLayer draws a parallel projection.
-            if (flat == null &&
-                (config.perspective != null || config.translateZ != null ||
-                    config.rotateX != null || config.rotateY != null)
-            ) {
-                cameraDistance = perspectivePx / density
-            }
+            // Orthographic: one cos per axis — rotateY foreshortens X,
+            // rotateX foreshortens Y (OrthographicFlatten).
+            scaleX = baseScaleX * flat.scaleX
+            scaleY = baseScaleY * flat.scaleY
         }
     }
 
@@ -1072,188 +1002,13 @@ object TransformApplier {
         }
     }
 
-    /**
-     * Apply translateZ transform with depth simulation.
-     *
-     * CSS translateZ moves elements along the Z-axis. In 2D rendering,
-     * we simulate this by scaling: elements closer to the viewer appear
-     * larger, elements farther away appear smaller.
-     *
-     * @param modifier The base modifier
-     * @param translateZ Z-axis translation
-     * @param perspective Perspective distance (default 1000dp)
-     * @return Modified Modifier with depth simulation
-     */
-    fun applyTranslateZ(
-        modifier: Modifier,
-        translateZ: Dp,
-        perspective: Dp = DEFAULT_PERSPECTIVE.dp
-    ): Modifier {
-        val zValue = translateZ.value
-        if (zValue == 0f) return modifier
-
-        return modifier.graphicsLayer {
-            val perspectivePx = perspective.toPx()
-            val zPx = translateZ.toPx()
-
-            // Calculate scale factor based on depth
-            // Positive Z = toward viewer = larger
-            // Negative Z = away from viewer = smaller
-            val depthScale = (1f + zPx / perspectivePx).coerceIn(0.1f, 10f)
-
-            scaleX = depthScale
-            scaleY = depthScale
-
-            // Also adjust camera distance for proper 3D effect
-            cameraDistance = perspectivePx / density
-        }
-    }
-
-    /**
-     * Apply scaleZ transform with 3D rotation simulation.
-     *
-     * CSS scaleZ affects how elements stretch along the Z-axis during
-     * 3D rotations. In 2D, we simulate by adjusting the apparent scale
-     * based on rotation angles.
-     *
-     * @param modifier The base modifier
-     * @param scaleZ Z-axis scale factor
-     * @param rotationX Current X rotation (affects Y dimension)
-     * @param rotationY Current Y rotation (affects X dimension)
-     * @return Modified Modifier with scaleZ simulation
-     */
-    fun applyScaleZ(
-        modifier: Modifier,
-        scaleZ: Float,
-        rotationX: Float = 0f,
-        rotationY: Float = 0f
-    ): Modifier {
-        if (scaleZ == 1f && rotationX == 0f && rotationY == 0f) return modifier
-
-        return modifier.graphicsLayer {
-            this.rotationX = rotationX
-            this.rotationY = rotationY
-
-            // scaleZ affects the apparent scale during rotation
-            // When rotated around Y, it affects X scale
-            if (rotationY != 0f) {
-                val rotRad = Math.toRadians(rotationY.toDouble())
-                val cosRot = cos(rotRad).toFloat()
-                scaleX = abs(cosRot * scaleZ).coerceAtLeast(0.01f)
-            }
-
-            // When rotated around X, it affects Y scale
-            if (rotationX != 0f) {
-                val rotRad = Math.toRadians(rotationX.toDouble())
-                val cosRot = cos(rotRad).toFloat()
-                scaleY = abs(cosRot * scaleZ).coerceAtLeast(0.01f)
-            }
-        }
-    }
-
-    /**
-     * Apply full 3D transform with translateZ and scaleZ.
-     *
-     * Combines all 3D transform effects into a single graphicsLayer call.
-     *
-     * @param modifier The base modifier
-     * @param translateZ Z-axis translation
-     * @param scaleZ Z-axis scale
-     * @param rotationX X-axis rotation in degrees
-     * @param rotationY Y-axis rotation in degrees
-     * @param rotationZ Z-axis rotation in degrees
-     * @param perspective Perspective distance
-     * @return Modified Modifier with full 3D simulation
-     */
-    fun apply3DTransform(
-        modifier: Modifier,
-        translateZ: Dp = 0.dp,
-        scaleZ: Float = 1f,
-        rotationX: Float = 0f,
-        rotationY: Float = 0f,
-        rotationZ: Float = 0f,
-        perspective: Dp = DEFAULT_PERSPECTIVE.dp
-    ): Modifier {
-        return modifier.graphicsLayer {
-            val perspectivePx = perspective.toPx()
-            val zPx = translateZ.toPx()
-
-            // Camera distance for perspective effect
-            cameraDistance = perspectivePx / density
-
-            // Apply rotations
-            this.rotationX = rotationX
-            this.rotationY = rotationY
-            this.rotationZ = rotationZ
-
-            // Calculate depth-based scale from translateZ
-            val depthScale = if (zPx != 0f) {
-                (1f + zPx / perspectivePx).coerceIn(0.1f, 10f)
-            } else {
-                1f
-            }
-
-            // Apply scale with scaleZ adjustments for 3D rotation
-            scaleX = if (rotationY != 0f && scaleZ != 1f) {
-                val rotRad = Math.toRadians(rotationY.toDouble())
-                depthScale * abs(cos(rotRad).toFloat() * scaleZ).coerceAtLeast(0.01f)
-            } else {
-                depthScale
-            }
-
-            scaleY = if (rotationX != 0f && scaleZ != 1f) {
-                val rotRad = Math.toRadians(rotationX.toDouble())
-                depthScale * abs(cos(rotRad).toFloat() * scaleZ).coerceAtLeast(0.01f)
-            } else {
-                depthScale
-            }
-        }
-    }
-
-    /**
-     * Documentation about 3D transform simulation in Compose.
-     */
-    object Notes {
-        const val TRANSLATE_Z = """
-            CSS translateZ moves elements along the Z-axis (toward/away from viewer).
-
-            In true 3D, this affects rendering order and perspective distortion.
-            In Compose's 2D rendering, we simulate by:
-
-            1. Scale adjustment: translateZ > 0 makes elements larger (closer)
-                                 translateZ < 0 makes elements smaller (farther)
-            2. Formula: scale = 1 + (translateZ / perspective)
-            3. Clamped to 0.1-10x to prevent extreme distortion
-
-            Combined with perspective, this gives a reasonable 3D approximation.
-        """
-
-        const val SCALE_Z = """
-            CSS scaleZ scales elements along the Z-axis.
-
-            By itself, scaleZ has no visible effect in 2D.
-            However, combined with 3D rotation (rotateX/rotateY), it affects
-            how "thick" an element appears during rotation.
-
-            Implementation:
-            - During rotateY, scaleZ modifies the X dimension
-            - During rotateX, scaleZ modifies the Y dimension
-            - Effect: cos(rotation) * scaleZ determines visible dimension
-
-            This is an approximation - true 3D would require WebGL/OpenGL.
-        """
-
-        const val PERSPECTIVE = """
-            CSS perspective defines the distance between viewer and z=0 plane.
-
-            - Larger perspective = less distortion (flatter appearance)
-            - Smaller perspective = more distortion (dramatic 3D effect)
-
-            Compose uses cameraDistance (in dp) for similar effect.
-            Rough conversion: cameraDistance ≈ perspective(px) / 8
-
-            We use DEFAULT_PERSPECTIVE (1000dp) when translateZ/scaleZ is used
-            but no explicit perspective is set.
-        """
-    }
+    // retro R1 (A10#1): the public helpers applyTranslateZ / applyScaleZ /
+    // apply3DTransform and the `Notes` object used to live here. All four
+    // carried the first-order Taylor depth scale `1 + z/P` (Notes even
+    // documented it as "the CSS formula") and the abs(cos)·scaleZ guess, had
+    // no caller anywhere in the runtime, the harness or the tests, and were
+    // the last copies of the expansion STATUS.md said was replaced. Deleted
+    // rather than fixed: the single depth-scale owner is
+    // TransformMatrixComposer.depthScale and the exact 3D route is
+    // TransformMatrixPathApplier.
 }

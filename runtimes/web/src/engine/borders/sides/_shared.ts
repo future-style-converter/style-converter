@@ -16,7 +16,7 @@ import { extractKeyword } from '../../core/types/KeywordValue';            // st
 
 // -- Width ------------------------------------------------------------------
 // The CSS parser already resolves `thin|medium|thick` to px (IR carries
-// {px:1, original:'thin'} — see examples/properties/borders/border-widths.json
+// {px:1, original:'thin'} — see fixtures/properties/borders/border-widths.json
 // after ./gradlew run). Negative or unknown inputs fall back to `0` so the
 // applier never emits a value CSS would reject.  Mirrors the flavors in
 // src/main/kotlin/app/parsing/css/properties/longhands/borders/sides/BorderTopWidthPropertyParser.kt.

@@ -7,4 +7,3 @@
 //   {type:'none'}                       -> 'none'
 //   {type:'shape', shape:'circle(…)'}   -> the declaration text verbatim
 export interface ShapeInsideConfig { value?: string }
-export const SHAPEINSIDE_PROPERTY_TYPE = 'ShapeInside' as const;

@@ -75,7 +75,7 @@ class MulticolRunFragmentGateTest {
 
     @Test
     fun `an inherited vertical writing mode reaches the same flag`() {
-        // css-writing-modes-4 §3.1: writing-mode inherits, and the wave-12
+        // css-writing-modes-4 §3.2: writing-mode inherits, and the wave-12
         // channel carries it — a multicol child declaring only column
         // properties under a vertical parent must ALSO bail the run pass.
         val parentChannel = listOf(prop("WritingMode", "\"VERTICAL_RL\""))
@@ -171,7 +171,7 @@ class MulticolRunFragmentGateTest {
     // ── 4. Wave-43 lane V6: the N == 1 `continue: discard` caveat ─────────
     //
     // The N == 1 gate exists to keep "content painted below" from becoming
-    // "content discarded" — but css-overflow-4 §3 `continue: discard` is
+    // "content discarded" — but css-overflow-4 §5.3 `continue: discard` is
     // exactly the declaration that makes the drop CORRECT. For a definite-
     // height fill:auto multi-child container with `column-count: 1` and
     // `continue: discard`, the bail therefore keeps the WRONG render (the

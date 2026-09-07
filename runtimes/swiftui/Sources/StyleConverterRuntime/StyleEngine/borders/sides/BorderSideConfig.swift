@@ -38,12 +38,25 @@ struct BorderSideConfig: Equatable {
     // `BorderStyleValue` enum for the exhaustive list.
     var style: BorderStyleValue? = nil
 
-    // True when the side is paintable: positive width, non-`none`
-    // non-`hidden` style, and a resolvable (or defaultable) colour.
-    // Matches Android's `hasBorder` derived property.
+    // True when the side is paintable: a DECLARED visible style AND a
+    // positive used width. Matches Android's `hasBorder` derived property
+    // (BorderSideConfig.kt: `style != null && style != NONE && style !=
+    // HIDDEN`), and every band consumer (bandInsets, backgroundClipInsets,
+    // ContainingBlockBasis, MarginCollapse) gates on it — so "no border"
+    // means no paint AND no inset, consistently.
     var hasBorder: Bool {
-        // `none` + `hidden` paint nothing per CSS 2.1 §8.5.3.
-        if let s = style, s == .none || s == .hidden { return false }
+        // CSS 2.1 §8.5.3 / css-backgrounds-3 §3.2: the initial value of
+        // `border-style` is `none`, and `none`/`hidden` make the used
+        // border-width ZERO ("Color and width are ignored"). An ABSENT
+        // style therefore IS `none`: a width-only longhand
+        // (`border-block-start-width: 6px` with no style) paints nothing
+        // and insets nothing, exactly like the web reference. The old
+        // `if let s = style, s == .none || s == .hidden` gate let a nil
+        // style through, and BorderSideApplier's `style ?? .solid` then
+        // painted width-only sides as a solid currentColor band on iOS
+        // alone (retro A11#5: pairs-02 PW_Borders_Color_01 iOS
+        // (238,238,238) top/right bands vs web/Android fill (167,139,250)).
+        guard let s = style, s != .none, s != .hidden else { return false }
         // Effective width: explicit wins; absent width with a visible
         // declared style falls back to the CSS initial `medium` (3px —
         // CSS Backgrounds 3 §3.3). Web paints `border-*-style: dotted`

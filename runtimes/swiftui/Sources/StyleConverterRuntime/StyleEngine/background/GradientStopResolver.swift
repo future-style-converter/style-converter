@@ -3,7 +3,7 @@
 //  StyleEngine/background — wave 46, lane Y2 (css-images natives).
 //
 //  The PURE stop pipeline every gradient flavour shares:
-//    1. css-images-4 §3.4.3 colour-stop FIXUP — declared percents win,
+//    1. css-images-3 §3.4.3 / css-images-4 §3.5.3 colour-stop FIXUP — declared percents win,
 //       <length> stops resolve against the gradient-line length, a stop
 //       behind its predecessor is clamped forward, and nil runs spread
 //       evenly between their positioned neighbours. Before this lane
@@ -11,7 +11,7 @@
 //       stops, so `yellow, blue 70%, green 0` painted green→blue
 //       (WPT gradient-move-stops, iOS 0.81) and `white, black, white
 //       30px` had no period at all (gradient-border-box, 0.645).
-//    2. REPEATING expansion (css-images-4 §3.4.4 / images-3 §3.3.3):
+//    2. REPEATING expansion (css-images-4 §3.4 / images-3 §3.3):
 //       the stop span tiles the line in both directions. SwiftUI's
 //       gradient types have no repeat option, so the copies are
 //       materialised as explicit stops.
@@ -95,7 +95,7 @@ enum GradientStopResolver {
 
     /// Tile the stop span across [0, 1]. A span that cannot be tiled —
     /// zero-length, or finer than `maxCopies` allows — renders as the
-    /// spec's "solid average colour" (css-images-3 §3.3.3).
+    /// spec's "solid average colour" (css-images-3 §3.3).
     static func expandRepeating(_ stops: [Stop]) -> [Stop] {
         guard let first = stops.first, let last = stops.last, stops.count >= 2 else { return stops }
         let period = last.loc - first.loc
@@ -118,7 +118,7 @@ enum GradientStopResolver {
             // the whole line instead, with a breadcrumb so the
             // degradation is never silent.
             PropertyTracker.logOnce(key: "gradient-repeating-period-too-fine",
-                message: "repeating gradient period needs \(kMax - kMin + 1) copies (cap \(maxCopies)) — painting the css-images-3 §3.3.3 average colour instead of a partial lattice")
+                message: "repeating gradient period needs \(kMax - kMin + 1) copies (cap \(maxCopies)) — painting the css-images-3 §3.3 average colour instead of a partial lattice")
             return solidAverage(stops)
         }
         var out: [Stop] = []
@@ -146,7 +146,7 @@ enum GradientStopResolver {
         return out
     }
 
-    /// css-images-3 §3.3.3's degenerate rendering: "the average color of
+    /// css-images-3 §3.3's degenerate rendering: "the average color of
     /// all the color stops", painted flat across the whole line. The
     /// unweighted stop mean is the spec's own wording (not the
     /// length-weighted integral of the ramp), and both boundary stops

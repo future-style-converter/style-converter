@@ -7,9 +7,17 @@
 //  its columns (css-break-3 §4) and, when it does, the full geometry
 //  plan the renderer's clip+translate pass draws. The plan is built
 //  from pure inputs (ColumnsConfig + statically-resolved container
-//  geometry + the child's property list) so ColumnsFragmentPlanTests
-//  pins every gate without a render surface; the SwiftUI half
+//  geometry + the child's property list) so the gates are pinned without
+//  a render surface; the SwiftUI half
 //  (ComponentRenderer.multicolFragmentRow) only consumes the result.
+//  The pins are FragmentGeometryTests (the gate battery + the shared
+//  S1–S5 table Android mirrors), MulticolClonePlanTests and
+//  MulticolCloneGeometryTests (the css-break-3 §5.4 clone branch),
+//  MulticolSpannerFlowTests, VerticalFragmentGeometryTests
+//  (`verticalFragmentPlan`) and Wave12BoxSizingBasisTests — all six call
+//  `ColumnsApplier.fragmentPlan` directly. Retro P2e (finding A4#8)
+//  replaced the name "ColumnsFragmentPlanTests" here: no such class has
+//  ever existed, so the claimed pin could not be checked without a grep.
 //
 
 // CoreGraphics for CGFloat geometry; Foundation for the tracker.
@@ -34,7 +42,7 @@ enum ColumnsApplier {
         let columnBlockSizePx: CGFloat
         /// G — the used column-gap in px (the HStack spacing).
         let gapPx: CGFloat
-        /// Wave-46 lane Y3 — css-break-3 §5.2 `box-decoration-break:
+        /// Wave-46 lane Y3 — css-break-3 §5.4 `box-decoration-break:
         /// clone`: the DECLARED block-size the child copy rendered in
         /// each fragment carries, index-aligned with `fragments`. Nil
         /// (the default, every slice plan) = the child renders unchanged
@@ -102,7 +110,7 @@ enum ColumnsApplier {
     ///   - childIsLeaf: wave-46 lane Y3 — true iff the child has NO content
     ///     of its own (no IR children, no text, no generated content — the
     ///     MulticolSpannerFlow `monolithicContent` predicate). Only such a
-    ///     child may take the css-break-3 §5.2 CLONE branch (its fragments
+    ///     child may take the css-break-3 §5.4 CLONE branch (its fragments
     ///     are nothing but decoration, so re-rendering it at each
     ///     fragment's size IS the clone); the default false keeps every
     ///     legacy caller on slice, and a content-bearing clone child logs.
@@ -126,7 +134,7 @@ enum ColumnsApplier {
         // column-width) establishes columns to fragment into.
         guard columns?.isMulticolContainer == true else { return nil }
         // Wave-21: a column-span:all child never fragments — it SPANS the
-        // columns instead of flowing into them (css-multicol-1 §6.2); its
+        // columns instead of flowing into them (css-multicol-1 §6.1); its
         // sequencing is the spanner-flow plan's job, not this pass'.
         // (Not a fallthrough: identity is the correct render for it.)
         if childProperties.contains(where: {
@@ -206,7 +214,7 @@ enum ColumnsApplier {
             // grows to fit instead of fragmenting (frozen behaviour).
             return nil
         }
-        // ── Wave-46 lane Y3: the CLONE branch (css-break-3 §5.2) ────────
+        // ── Wave-46 lane Y3: the CLONE branch (css-break-3 §5.4) ────────
         // A sole leaf child declaring `box-decoration-break: clone` gets
         // the K-table plan (MulticolClonePlan): per-fragment child copies
         // re-declared at each fragment's size, no block translate. Every

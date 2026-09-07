@@ -1,5 +1,5 @@
 // BoxDecorationBreakExtractor.ts — folds `BoxDecorationBreak` IR properties into a config.
-// IR shape flavors (from examples/properties/borders/box-decoration-break.json):
+// IR shape flavors (from fixtures/properties/borders/box-decoration-break.json):
 //   "SLICE" / "CLONE"                UPPERCASE bare strings from the parser
 // The parser enum lives at BoxDecorationBreakValue in the IR module.
 

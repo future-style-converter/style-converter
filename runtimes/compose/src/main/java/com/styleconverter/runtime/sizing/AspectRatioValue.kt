@@ -5,7 +5,7 @@ package com.styleconverter.runtime.sizing
 // (not an IRLength) so it gets its own extractor rather than reusing the
 // LengthValue pipeline.
 //
-// Reference fixtures (examples/properties/sizing/aspect-ratio.json):
+// Reference fixtures (fixtures/properties/sizing/aspect-ratio.json):
 //   {"ratio":{"w":16.0,"h":9.0},"normalizedRatio":1.777…}  — two-number form
 //   {"ratio":{"value":1.5},"normalizedRatio":1.5}          — single-number form
 //   "auto"                                                  — bare string

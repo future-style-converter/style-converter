@@ -94,7 +94,7 @@ struct MaskApplier: ViewModifier {
             // Mirrors GradientApplier.radial (the background path) so
             // mask and background radials render identically: CSS
             // defaults are ending shape ELLIPSE sized farthest-corner
-            // (css-images-3 §3.5). The old branch hardcoded endRadius
+            // (css-images-3 §3.2). The old branch hardcoded endRadius
             // 200 — on a 160×80 fixture the fade barely started before
             // the edges; on large boxes it died long before the corner.
             GeometryReader { geo in
@@ -114,7 +114,7 @@ struct MaskApplier: ViewModifier {
                     // render circular at the √2-scaled larger axis then
                     // stretch to the box aspect — RadialGradient is
                     // circular-only, exactly like the background ellipse
-                    // branch. The √2 comes from css-images-3 §3.5
+                    // branch. The √2 comes from css-images-3 §3.2
                     // farthest-CORNER sizing (radii √2·w/2 × √2·h/2 for
                     // a centred gradient — see
                     // GradientApplier.ellipseEndRadius); the old

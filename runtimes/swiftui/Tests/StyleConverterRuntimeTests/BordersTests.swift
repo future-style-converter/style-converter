@@ -511,4 +511,108 @@ final class BordersTests: XCTestCase {
         }
         return f
     }
+
+    // Retro R6 (audit A7#2) — Blink's light-edge gate for the 3D border
+    // styles, pinned with the SAME table the Compose twin pins
+    // (BorderShadeBlinkGateTest), so the natives cannot drift again:
+    // box_border_painter.cc CalculateBorderStyleColor lightens via
+    // Color::Light() iff color_utils::GetContrastRatio(color, color.Dark())
+    // < kMinimumBorderEdgeContrastRatio (1.75f), after an early-out for
+    // red ≥ 150/255 or green ≥ 92/255; Dark() is 8-bit-quantised by
+    // TRUNCATION first. The v = 0.33 grey is the divergence witness: the old
+    // Compose gate lifted it (→ 0.66), the old iOS gate never lifted a 0.1 or
+    // 0.2 grey; Blink lifts 0.1/0.2 (contrast 1.20/1.66) and keeps 0.33
+    // (2.78). Proven able to fail: restoring the black-only rule in shade()
+    // fails the 0.1 / 0.2 rows; dropping the early-out changes nothing in
+    // this table (it is a shortcut of the gate) — the boundary is pinned by
+    // the 0.33 row instead.
+    func testLightBandLiftsBlinkGate() {
+        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
+        func rgb(_ c: Color) -> (CGFloat, CGFloat, CGFloat) {
+            XCTAssertTrue(UIColor(c).getRed(&r, green: &g, blue: &b, alpha: &a))
+            return (r, g, b)
+        }
+        func grey(_ v: CGFloat) -> Color { Color(red: v, green: v, blue: v, opacity: 1) }
+        // ── the shared table: greys v = 0, 0.1, 0.2, 0.33, 0.463, 0.937 ──
+        // v = 0: contrast 1.00 → lifts to kLightenedBlack; dark band black.
+        XCTAssertTrue(BlinkBorderShade.lightBandLifts(r: 0, g: 0, b: 0))
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0), light: true)).0 * 255, 84, accuracy: 0.5)
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0), light: false)).0, 0, accuracy: 0.001)
+        // v = 0.1: contrast(0.1 grey, black) = 1.20 < 1.75 → Light():
+        // min(1, 0.43)/0.1 = 4.3 → 0.43.
+        XCTAssertTrue(BlinkBorderShade.lightBandLifts(r: 0.1, g: 0.1, b: 0.1))
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.1), light: true)).0, 0.43, accuracy: 0.004)
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.1), light: false)).0, 0, accuracy: 0.001)
+        // v = 0.2: contrast 1.66 < 1.75 → 0.53.
+        XCTAssertTrue(BlinkBorderShade.lightBandLifts(r: 0.2, g: 0.2, b: 0.2))
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.2), light: true)).0, 0.53, accuracy: 0.004)
+        // v = 0.33: dark band is black yet contrast 2.78 ≥ 1.75 → NOT lifted
+        // (the divergence witness).
+        XCTAssertFalse(BlinkBorderShade.lightBandLifts(r: 0.33, g: 0.33, b: 0.33))
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.33), light: true)).0, 0.33, accuracy: 0.004)
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.33), light: false)).0, 0, accuracy: 0.001)
+        // v = 0.463 (revert-layer-015's rgb(118,118,118)): contrast 3.51 →
+        // no lift; dark = 0.463 − 0.33 = 0.133.
+        XCTAssertFalse(BlinkBorderShade.lightBandLifts(r: 0.463, g: 0.463, b: 0.463))
+        XCTAssertEqual(BorderSideApplier.shade(grey(0.463), light: true), grey(0.463))
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.463), light: false)).0, 0.133, accuracy: 0.004)
+        // v = 0.937 (the fieldset groove #efefef carrier): contrast 2.42 →
+        // no lift; dark 0.607.
+        XCTAssertFalse(BlinkBorderShade.lightBandLifts(r: 0.937, g: 0.937, b: 0.937))
+        XCTAssertEqual(BorderSideApplier.shade(grey(0.937), light: true), grey(0.937))
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.937), light: false)).0, 0.607, accuracy: 0.004)
+        // ── coloured rows ──
+        // Dark blue (0.1, 0.1, 0.5): dark = ×0.34 → (0.034, 0.034, 0.17),
+        // contrast 1.38 < 1.75 → Light(): min(1, 0.83)/0.5 = 1.66 →
+        // (0.166, 0.166, 0.83). The old iOS gate returned the base here.
+        XCTAssertTrue(BlinkBorderShade.lightBandLifts(r: 0.1, g: 0.1, b: 0.5))
+        let blue = rgb(BorderSideApplier.shade(Color(red: 0.1, green: 0.1, blue: 0.5, opacity: 1), light: true))
+        XCTAssertEqual(blue.0, 0.166, accuracy: 0.004)
+        XCTAssertEqual(blue.1, 0.166, accuracy: 0.004)
+        XCTAssertEqual(blue.2, 0.83, accuracy: 0.004)
+        // currentColor green (0, 0.502, 0): early-out (green ≥ 92/255), and
+        // the contrast (3.01) agrees; crimson rgb(220,20,60): early-out
+        // (red ≥ 150/255), contrast 1.98; the wave-3 palette base
+        // (239,100,50): early-out, contrast 2.07.
+        XCTAssertFalse(BlinkBorderShade.lightBandLifts(r: 0, g: 0.5019608, b: 0))
+        XCTAssertFalse(BlinkBorderShade.lightBandLifts(r: 220.0 / 255.0, g: 20.0 / 255.0, b: 60.0 / 255.0))
+        XCTAssertFalse(BlinkBorderShade.lightBandLifts(r: 239.0 / 255.0, g: 100.0 / 255.0, b: 50.0 / 255.0))
+        // ── the 8-bit-input flip row (retro round-2 F2 / F1, skeptic S3 defect 2) ──
+        // v = 0.2137 grey — the ONE grey window where the raw and the packed
+        // verdicts differ: on the raw floats the gate says NO (Dark() is black,
+        // contrast (L(0.2137) + 0.05) / 0.05 = 1.7507 ≥ 1.75) but Compose
+        // packs the channel to 54/255 = 0.2118 at construction, where the
+        // contrast is 1.7378 < 1.75 → LIFT. Before the contract iOS returned
+        // the base (0.2137) and Compose 0.5418 — 84/255 apart. Both natives
+        // now take the PACKED verdict: light band = 54/255 + 0.33 = 0.54176
+        // (Compose stores 138/255 = 0.5412, within the 0.5-LSB tolerance).
+        // The Kotlin twin pins the identical row (BorderShadeBlinkGateTest,
+        // round-2 F1) so the two tables cannot drift apart.
+        let rawL = BlinkBorderShade.relativeLuminance(0.2137, 0.2137, 0.2137)
+        XCTAssertGreaterThanOrEqual(BlinkBorderShade.contrastRatio(rawL, 0), 1.75, "raw floats: the gate would NOT lift")
+        let packedL = BlinkBorderShade.relativeLuminance(54.0 / 255.0, 54.0 / 255.0, 54.0 / 255.0)
+        XCTAssertLessThan(BlinkBorderShade.contrastRatio(packedL, 0), 1.75, "packed 54/255: the gate lifts")
+        // pack8 is Compose's round-half-up store: 0.2137 · 255 = 54.49 → 54.
+        XCTAssertEqual(BlinkBorderShade.pack8(0.2137), 54.0 / 255.0, accuracy: 1e-12)
+        XCTAssertTrue(BlinkBorderShade.lightBandLifts(r: 0.2137, g: 0.2137, b: 0.2137), "the gate takes the packed verdict")
+        // Tolerance 0.001 (¼ LSB) on purpose: it separates the packed Light()
+        // input (54/255 + 0.33 = 0.54176) from a raw-input lift (0.2137 + 0.33
+        // = 0.5437), so the pack in `shade` is pinned, not only the gate's.
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.2137), light: true)).0, 54.0 / 255.0 + 0.33, accuracy: 0.001)
+        XCTAssertEqual(rgb(BorderSideApplier.shade(grey(0.2137), light: false)).0, 0, accuracy: 0.001)
+        // ── the ported Chromium primitives ──
+        // QuantizeTo8Bit truncates: 0.5 × nextafterf(256, 0) = 127.99999 →
+        // 127 (rounding would give 128); 1.0 → 255; 0 → 0.
+        XCTAssertEqual(BlinkBorderShade.quantizeTo8Bit(0.5), 127.0 / 255.0, accuracy: 1e-9)
+        XCTAssertEqual(BlinkBorderShade.quantizeTo8Bit(1.0), 1.0, accuracy: 1e-9)
+        XCTAssertEqual(BlinkBorderShade.quantizeTo8Bit(0.0), 0.0)
+        // WCAG endpoints: white 1, black 0, contrast 21; symmetric; the
+        // 0.04045 knee (Chromium's, not WCAG 2.0's 0.03928).
+        XCTAssertEqual(BlinkBorderShade.relativeLuminance(1, 1, 1), 1.0, accuracy: 1e-6)
+        XCTAssertEqual(BlinkBorderShade.relativeLuminance(0, 0, 0), 0.0)
+        XCTAssertEqual(BlinkBorderShade.contrastRatio(1, 0), 21.0, accuracy: 1e-6)
+        XCTAssertEqual(BlinkBorderShade.contrastRatio(0.2, 0.05), BlinkBorderShade.contrastRatio(0.05, 0.2))
+        XCTAssertEqual(BlinkBorderShade.relativeLuminance(0.04, 0.04, 0.04), 0.04 / 12.92, accuracy: 1e-9)
+        XCTAssertEqual(BlinkBorderShade.relativeLuminance(0.05, 0.05, 0.05), pow((0.05 + 0.055) / 1.055, 2.4), accuracy: 1e-9)
+    }
 }

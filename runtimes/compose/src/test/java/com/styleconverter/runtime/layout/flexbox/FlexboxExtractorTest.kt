@@ -2,7 +2,7 @@ package com.styleconverter.runtime.layout.flexbox
 
 // Phase 7b flexbox extractor tests — each IR fixture shape is copy-pasted
 // from the actual IR emitted by the CSS parser for
-// examples/properties/layout/flex-*.json, so parser drift breaks these tests
+// fixtures/properties/layout/flex-*.json, so parser drift breaks these tests
 // before it reaches the Android runtime.
 
 import com.styleconverter.runtime.layout.AlignmentKeyword
@@ -206,8 +206,13 @@ class FlexboxExtractorTest {
         val cfg = FlexboxExtractor.extract(listOf(
             pair("FlexBasis", """{"type":"length","px":100.0}""")
         ))
-        // Step 1 LayoutConfig only exposes Default — any present value maps.
+        // Presence-only slot by design (retro R2, A7#0): LayoutConfig's
+        // flexBasis has no reader; the live decode lives in
+        // ItemPlacementExtractor (see ItemPlacementExtractorTest).
         assertEquals(FlexBasisValue.Default, cfg.flexBasis)
+        // The bare-number PERCENT wire is "present" too — same marker.
+        assertEquals(FlexBasisValue.Default,
+            FlexboxExtractor.extract(listOf(pair("FlexBasis", "80"))).flexBasis)
     }
 
     // --- BoxOrient (legacy fallback) ---------------------------------------

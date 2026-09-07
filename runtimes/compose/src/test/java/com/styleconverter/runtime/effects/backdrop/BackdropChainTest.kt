@@ -74,7 +74,7 @@ class BackdropChainTest {
         assertNull(BackdropChain.of(listOf(FilterFunction.None)))
     }
 
-    // ── invert maths (filter-effects-1 §8.6) ──────────────────────────────
+    // ── invert maths (filter-effects-1 §6.1) ──────────────────────────────
 
     @Test
     fun `invert one flips every channel`() {

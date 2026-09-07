@@ -30,7 +30,7 @@ object FlexWrapLines {
      *        container does (nothing can overflow, so nothing wraps).
      * @param gap main-axis gap (`column-gap` for a row container) — it
      *        counts against the budget exactly like item size does
-     *        (css-align-3 §8.1: gaps participate in line breaking).
+     *        (css-align-3 §8: gaps participate in line breaking).
      * @return lines in document order; never empty unless [mainSizes] is.
      *
      * §9.3 requires at least ONE item per line even when that item alone
@@ -68,7 +68,7 @@ object FlexWrapLines {
      * Step 8 grows the lines only when BOTH hold: the container's cross
      * size is definite ([hasFixedCross] — Compose's fixed block band), and
      * `align-content` is `normal`/`stretch` ([alignContentStretches]).
-     * css-align-3 §5.3: every other keyword leaves the leftover as free
+     * css-align-3 §5.1: every other keyword leaves the leftover as free
      * space and merely POSITIONS the line block.
      *
      * @return the definite cross size to distribute into, or null for the
@@ -112,7 +112,7 @@ object FlexWrapLines {
 
     /**
      * Wave 47 (lane Z7) — the §9.6 POSITIONING keywords stretchLines'
-     * gate deliberately excludes: css-align-3 §5.3 says every keyword
+     * gate deliberately excludes: css-align-3 §5.1 says every keyword
      * except `normal`/`stretch` leaves the leftover cross space FREE and
      * places the line block inside it. The twin of the iOS runtime's
      * CSSFlexMath.mainOffsets cross-axis call (FlowLayout.placeSubviews).
@@ -156,7 +156,7 @@ object FlexWrapLines {
      *        or null when the container hugs (packed offsets — the
      *        pre-wave-47 accumulation, bit for bit).
      * @param gap `row-gap` between lines — always preserved; the
-     *        distributed extra ADDS to it (css-align-3 §8.3).
+     *        distributed extra ADDS to it (css-align-3 §8).
      * @param distribution the keyword, or null for packed (normal/
      *        stretch — their leftover is zero after stretchLines anyway).
      *

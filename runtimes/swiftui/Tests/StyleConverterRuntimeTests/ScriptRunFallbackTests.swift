@@ -26,7 +26,7 @@ final class ScriptRunFallbackTests: XCTestCase {
     // MARK: - The script table
 
     func testFiveTargetScriptsRecognisedByBlockRanges() {
-        // css-counter-styles-3 §6.2 `arabic-indic` digits U+0660–U+0669.
+        // css-counter-styles-3 §6.1 `arabic-indic` digits U+0660–U+0669.
         XCTAssertEqual(S.script(of: 0x0660), .arabic)
         XCTAssertEqual(S.script(of: 0x0669), .arabic)
         // §6.2 `persian` — extended Arabic-Indic, same block.

@@ -1,5 +1,5 @@
 // BoxShadowExtractor.ts — folds `BoxShadow` IR properties into a BoxShadowConfig.
-// IR shape flavors (from examples/properties/borders/box-shadow.json after conversion):
+// IR shape flavors (from fixtures/properties/borders/box-shadow.json after conversion):
 //   []                                  the `none` keyword (parser emits empty array)
 //   [ {x, y, c}, ... ]                  one or more layers (offsets + color)
 //   [ {x, y, blur, c} ]                 with blur

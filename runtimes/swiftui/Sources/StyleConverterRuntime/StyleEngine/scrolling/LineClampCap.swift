@@ -85,7 +85,7 @@ enum LineClampCap {
     /// or nil when the marker is suppressed — SwiftUI cannot truncate
     /// without painting "…", so the marker-less clamp is enforced by the
     /// cap/clip route alone (the leaf must lay out ALL its lines for the
-    /// first N to keep their natural geometry, css-overflow-4 §4.3). Pure,
+    /// first N to keep their natural geometry, css-overflow-4 §5.3.2). Pure,
     /// so the seam is a one-call fold on TextConfig.lineClampLimit.
     static func leafLineLimit(_ limit: Int?, properties: [IRProperty]) -> Int? {
         markerSuppressed(properties) ? nil : limit

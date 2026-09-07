@@ -39,7 +39,7 @@ object WidthPropertyParser : PropertyParser {
             lower.startsWith("anchor-size(") && lower.endsWith(")") -> {
                 parseAnchorSize(trimmed)
             }
-            // css-values-5 §10.1 calc-size() (wave 42 lane W3). Must sit
+            // css-values-5 §11 calc-size() (wave 42 lane W3). Must sit
             // BEFORE the isExpression branch so it is typed rather than
             // preserved as an opaque Expression string. A parse-time-
             // evaluable call (pure-length basis / size-free expr) collapses

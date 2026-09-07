@@ -2,7 +2,7 @@
 //  MulticolClonePlan.swift
 //  StyleEngine/columns — wave-46 lane Y3.
 //
-//  The css-break-3 §5.2 `box-decoration-break: clone` branch of
+//  The css-break-3 §5.4 `box-decoration-break: clone` branch of
 //  ColumnsApplier.fragmentPlan, split out (the MulticolFloatStripPlan
 //  precedent) so ColumnsApplier.swift keeps its size. Builds the
 //  FragmentPlan whose fragments come from the clone K-table

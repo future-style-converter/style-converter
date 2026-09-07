@@ -351,7 +351,7 @@ struct ComposedCaptureCanvas: View {
         flowRoots.map { root in
             // wave-46 lane H1 (Y8's iOS twin): the root's UA default
             // resolves its em against the root's OWN computed font-size
-            // (css-values-4 §5.1.1) — nil for every root without a font
+            // (css-values-4 §6.1.1) — nil for every root without a font
             // signal, so only a font-sized `<p>`/`<ul>`/… root moves
             // (measured: inherit-computed-001's `font-size: larger` p,
             // 16 → 19px; iOS 0.8863 → 0.9767 on a 3px translate). A

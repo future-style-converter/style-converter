@@ -48,13 +48,13 @@ import SwiftUI
 /// full CSS palette (what the parser recognises), this is the palette the
 /// pass-B image pipeline can run (what the platform can execute).
 enum BackdropOp: Equatable {
-    /// `invert(<amount>)` — per-channel, filter-effects-1 §8.6. Amount is
+    /// `invert(<amount>)` — per-channel, filter-effects-1 §6.1. Amount is
     /// NORMALISED to 0…1 here (the wire carries CSS's 0…100 percentage),
     /// because the byte math in BackdropImageOps is defined on 0…1 and the
     /// Compose twin normalises at the same boundary.
     case invert(amount: Double)
     /// `blur(<length>)` — a Gaussian blur whose STANDARD DEVIATION is the
-    /// declared length (filter-effects-1 §8.2 defers to SVG's
+    /// declared length (filter-effects-1 §6.1 defers to SVG's
     /// feGaussianBlur/stdDeviation). Carried in POINTS; the pixel radius is
     /// derived at draw time from the plate scale, so a 2× plate blurs by
     /// twice as many pixels for the same CSS length.
@@ -112,7 +112,7 @@ struct BackdropPlan: Equatable {
                 // CSS `invert(<number|percentage>)`: the parser normalises
                 // both flavors to a 0…100 scale (FilterExtractor's `numv`),
                 // so /100 lands on the spec's 0…1 amount. Clamped because
-                // filter-effects-1 §8.6 defines the function only on
+                // filter-effects-1 §6.1 defines the function only on
                 // [0,1] — a malformed 300% must not push channels out of
                 // range in the byte math.
                 let amount = min(1.0, max(0.0, Double(pct) / 100.0))

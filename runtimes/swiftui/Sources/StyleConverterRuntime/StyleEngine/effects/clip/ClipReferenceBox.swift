@@ -2,7 +2,7 @@
 //  ClipReferenceBox.swift
 //  StyleEngine/effects/clip — wave 46 (lane Y4).
 //
-//  css-masking-1 §7.1 REFERENCE BOX resolution for `clip-path` on iOS.
+//  css-masking-1 §5.1 REFERENCE BOX resolution for `clip-path` on iOS.
 //  Every `<basic-shape>` (and the bare `<geometry-box>` form) resolves
 //  against a box chosen by the `<geometry-box>` keyword: margin-box /
 //  border-box (the default) / padding-box / content-box. The rect a
@@ -33,7 +33,7 @@ enum ClipReferenceBox {
 
     /// The reference box `box` of an element whose border box is `rect`.
     /// Padding / content boxes inset by the used border widths and the
-    /// paddings (css-backgrounds-3 §5.1 inner radii = outer − width); the
+    /// paddings (css-backgrounds-3 §4.1 inner radii = outer − width); the
     /// margin box outsets by the DECLARED margins with the css-shapes-1
     /// §4 corner rule. With `.none` metrics every box equals `rect` and
     /// carries square corners — byte-identical to the pre-wave-46 shapes.
@@ -97,7 +97,7 @@ enum ClipReferenceBox {
     }
 
     /// Border-box corner curves, order TL / TR / BR / BL: percent axes
-    /// resolve against the border box (css-backgrounds-3 §5.1 via
+    /// resolve against the border box (css-backgrounds-3 §4.1 via
     /// BorderRadiusCorner.resolved), then the §5.1 overlap rule scales ALL
     /// radii by the smallest `side / (sum of adjacent radii)` ratio below 1.
     private static func borderRadii(_ cfg: BorderRadiusConfig, in rect: CGRect) -> [BorderRadiusCorner] {

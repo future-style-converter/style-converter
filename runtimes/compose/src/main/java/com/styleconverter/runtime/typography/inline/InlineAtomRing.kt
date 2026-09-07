@@ -73,7 +73,7 @@ object InlineAtomRing {
     }
 
     /** One side's computed border. [widthPx] is the USED width: forced to
-     *  0 when the style is none/hidden (css-backgrounds-3 §3.1 — the
+     *  0 when the style is none/hidden (css-backgrounds-3 §3.3 — the
      *  computed border-width of a styleless side is zero), so
      *  `widthPx > 0` alone answers "does this side paint". */
     data class Side(val widthPx: Float, val style: String, val paint: Paint) {
@@ -92,7 +92,7 @@ object InlineAtomRing {
     data class Band(val xPx: Float, val yPx: Float, val widthPx: Float, val heightPx: Float, val paint: Paint)
 
     // The width keywords' px values live in ValueExtractors.extractBorderWidth;
-    // `medium` (the css-backgrounds-3 §3.1 initial, what Chromium uses when a
+    // `medium` (the css-backgrounds-3 §3.3 initial, what Chromium uses when a
     // styled side declares no width) is 3px there and 3px here — one number.
     private const val MEDIUM_BORDER_PX = 3f
 
@@ -142,7 +142,7 @@ object InlineAtomRing {
     private fun sideOf(props: List<IRProperty>, side: String, colorData: JsonElement?, ownColor: JsonElement?): Side {
         // Style: absent computes to the `none` initial → the side is off.
         val style = ValueExtractors.extractKeyword(prop(props, "Border${side}Style"))?.uppercase() ?: "NONE"
-        // A styleless/hidden side has USED width 0 (css-backgrounds-3 §3.1).
+        // A styleless/hidden side has USED width 0 (css-backgrounds-3 §3.3).
         val widthPx = if (style in NO_PAINT_STYLES) 0f
         // Declared width in px (the wire pre-resolves lengths); a styled
         // side with no declared width takes the `medium` initial (3px).

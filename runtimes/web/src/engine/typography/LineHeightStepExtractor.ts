@@ -1,6 +1,6 @@
 // LineHeightStepExtractor.ts — folds `LineHeightStep` IR properties into a LineHeightStepConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { LineHeightStepConfig, LINE_HEIGHT_STEP_PROPERTY_TYPE, LineHeightStepPropertyType } from './LineHeightStepConfig';
 import { lengthCss } from './_shared';

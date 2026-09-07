@@ -1,5 +1,12 @@
 package app.parsing.css.properties.shorthands
 
+// A6#14 — clone consolidation: this expander used to carry private
+//   `tokenize` (4 identical copies), byte-identical to TokenizationUtils.tokenizeBySpace
+//   — its 4 call sites now call the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
+
 /**
  * Expands `border-block-start` shorthand into border-block-start-* longhands.
  */
@@ -21,7 +28,7 @@ object BorderBlockStartExpander : ShorthandExpander {
     }
 
     private fun parseBorderShorthand(value: String, prefix: String): Map<String, String> {
-        val tokens = tokenize(value)
+        val tokens = TokenizationUtils.tokenizeBySpace(value)
         var width: String? = null
         var style: String? = null
         var color: String? = null
@@ -47,26 +54,6 @@ object BorderBlockStartExpander : ShorthandExpander {
                value.matches(Regex("-?[\\d.]+[a-z]*"))
     }
 
-    private fun tokenize(value: String): List<String> {
-        val tokens = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-        for (char in value) {
-            when {
-                char == '(' -> { depth++; current.append(char) }
-                char == ')' -> { depth--; current.append(char) }
-                char == ' ' && depth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        tokens.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) tokens.add(current.toString())
-        return tokens
-    }
 }
 
 /**
@@ -86,7 +73,7 @@ object BorderBlockEndExpander : ShorthandExpander {
             )
         }
 
-        val tokens = tokenize(trimmed)
+        val tokens = TokenizationUtils.tokenizeBySpace(trimmed)
         var width: String? = null
         var style: String? = null
         var color: String? = null
@@ -112,26 +99,6 @@ object BorderBlockEndExpander : ShorthandExpander {
                value.matches(Regex("-?[\\d.]+[a-z]*"))
     }
 
-    private fun tokenize(value: String): List<String> {
-        val tokens = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-        for (char in value) {
-            when {
-                char == '(' -> { depth++; current.append(char) }
-                char == ')' -> { depth--; current.append(char) }
-                char == ' ' && depth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        tokens.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) tokens.add(current.toString())
-        return tokens
-    }
 }
 
 /**
@@ -151,7 +118,7 @@ object BorderInlineStartExpander : ShorthandExpander {
             )
         }
 
-        val tokens = tokenize(trimmed)
+        val tokens = TokenizationUtils.tokenizeBySpace(trimmed)
         var width: String? = null
         var style: String? = null
         var color: String? = null
@@ -177,26 +144,6 @@ object BorderInlineStartExpander : ShorthandExpander {
                value.matches(Regex("-?[\\d.]+[a-z]*"))
     }
 
-    private fun tokenize(value: String): List<String> {
-        val tokens = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-        for (char in value) {
-            when {
-                char == '(' -> { depth++; current.append(char) }
-                char == ')' -> { depth--; current.append(char) }
-                char == ' ' && depth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        tokens.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) tokens.add(current.toString())
-        return tokens
-    }
 }
 
 /**
@@ -216,7 +163,7 @@ object BorderInlineEndExpander : ShorthandExpander {
             )
         }
 
-        val tokens = tokenize(trimmed)
+        val tokens = TokenizationUtils.tokenizeBySpace(trimmed)
         var width: String? = null
         var style: String? = null
         var color: String? = null
@@ -242,24 +189,4 @@ object BorderInlineEndExpander : ShorthandExpander {
                value.matches(Regex("-?[\\d.]+[a-z]*"))
     }
 
-    private fun tokenize(value: String): List<String> {
-        val tokens = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-        for (char in value) {
-            when {
-                char == '(' -> { depth++; current.append(char) }
-                char == ')' -> { depth--; current.append(char) }
-                char == ' ' && depth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        tokens.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) tokens.add(current.toString())
-        return tokens
-    }
 }

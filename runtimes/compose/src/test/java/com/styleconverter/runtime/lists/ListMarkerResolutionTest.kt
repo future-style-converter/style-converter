@@ -60,7 +60,7 @@ class ListMarkerResolutionTest {
 
     @Test
     fun withoutAnOwnDeclarationTheUaDefaultStands() {
-        // HTML §15.3.9 UA sheet: ul ⇒ disc, ol ⇒ decimal.
+        // HTML §15.3.7 UA sheet: ul ⇒ disc, ol ⇒ decimal.
         assertEquals("•", marker("ul", ulInside, emptyList()))
         assertEquals("1.", marker("ol", emptyList(), emptyList()))
         assertEquals("3.", marker("ol", emptyList(), emptyList(), index = 2))
@@ -167,7 +167,7 @@ class ListMarkerResolutionTest {
      *
      * Wave 30 (lane 3, fix B5) added a SECOND UA declaration to the same
      * rule — `ul, menu, dir, ol { padding-inline-start: 40px }` (HTML
-     * §15.3.9) — so every container path now also carries a `PaddingLeft`
+     * §15.3.7) — so every container path now also carries a `PaddingLeft`
      * entry. The wave-25 cases below are about the TYPE cascade and are
      * kept focused on it by dropping that entry here; the padding has its
      * own pins under "Wave 30".
@@ -180,7 +180,7 @@ class ListMarkerResolutionTest {
     fun anAncestorTypeLosesToTheContainersUaRule() {
         // The inversion: `<div style="list-style-type:square"><ul><li>`.
         // The ul declares nothing, so the UA rule `ul { list-style-type:
-        // disc }` (HTML §15.3.9) wins the cascade on the ul ELEMENT and
+        // disc }` (HTML §15.3.7) wins the cascade on the ul ELEMENT and
         // inheritance is never consulted (css-cascade-4 §4.3) — Chromium
         // paints a disc, not a square.
         val ancestor = listOf(prop("ListStyleType", "\"square\""))
@@ -249,7 +249,7 @@ class ListMarkerResolutionTest {
 
     @Test
     fun aListContainerWithNoAuthorPaddingTakesTheUa40px() {
-        // HTML §15.3.9 `ul, menu, dir, ol { padding-inline-start: 40px }`.
+        // HTML §15.3.7 `ul, menu, dir, ol { padding-inline-start: 40px }`.
         // The live shape: change-list-style-type-001's ten `<ul>`s declare
         // ListStylePosition and nothing else, and both natives laid their
         // items out 40px left of web (ink columns 17 vs 56) because nothing
@@ -291,7 +291,7 @@ class ListMarkerResolutionTest {
     @Test
     fun anRtlContainerTakesTheUaPaddingOnTheRight() {
         // css-logical-1 §2.1: the inline-START side of a `direction: rtl`
-        // box is the RIGHT one, so HTML §15.3.9's `padding-inline-start:
+        // box is the RIGHT one, so HTML §15.3.7's `padding-inline-start:
         // 40px` must land there. The first cut of B5 injected the physical
         // `PaddingLeft` unconditionally — 40px on the wrong edge AND 40px
         // missing on the right, an 80px relative error on every rtl list.
@@ -382,7 +382,7 @@ class ListMarkerResolutionTest {
 
     @Test
     fun theShorthandExpandsAllThreeComponents() {
-        // css-lists-3 §3.5, any component order.
+        // css-lists-3 §3.6, any component order.
         val full = shorthand("square inside url(bullet.png)")
         assertEquals(ListStyleType.SQUARE, full.listStyleType)
         assertEquals(ListStylePosition.INSIDE, full.listStylePosition)

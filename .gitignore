@@ -97,3 +97,11 @@ apps/web-harness/public/ir-components.json
 # in a commit; wave-48 S1 caught the root copy landing in `git add -A`)
 apps/android-harness/local.properties
 /local.properties
+
+# Kotlin 2.x compiler-daemon session/error directory — one `.kotlin/` grows at
+# the root of EVERY Gradle build that compiles Kotlin (the root converter build
+# and apps/android-harness both). Machine-local and regenerated on each compile;
+# its errors/*.log files are how retro S1 saw the concurrent-daemon "Daemon
+# compilation failed" events the single-writer rule exists for. Directory
+# pattern with no leading slash so both roots are covered (retro S1 #4).
+.kotlin/

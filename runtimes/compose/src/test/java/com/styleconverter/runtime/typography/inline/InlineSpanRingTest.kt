@@ -52,7 +52,7 @@ class InlineSpanRingTest {
         val px = admit("span", prop("FontSize", """{"px":24,"original":{"type":"length","px":24}}"""))
             as InlineSpanRing.Admission.Admitted
         assertEquals(24f, px.style.fontSizePx!!, 1e-6f)
-        // css-fonts-4 §2.4 percentage — a parent-relative factor.
+        // css-fonts-4 §2.5 percentage — a parent-relative factor.
         val pct = admit("span", prop("FontSize", """{"original":{"type":"percentage","value":120}}"""))
             as InlineSpanRing.Admission.Admitted
         assertEquals(1.2f, pct.style.fontSizeEm!!, 1e-6f)
@@ -194,7 +194,7 @@ class InlineSpanRingTest {
         assertTrue(composed.italic)
         assertEquals(1f / 1.2f, composed.fontSizeEm!!, 1e-6f)
         assertEquals(InlineSpanRing.VerticalShift(up = true, parentPx = null, parentEm = 1f), composed.shift)
-        // A 1.5em outer: factors multiply (css-values-4 §5.1.1 — the
+        // A 1.5em outer: factors multiply (css-values-4 §6.1.1 — the
         // sup's parent is the i) and the shift parent rebases to 1.5.
         val bigOuter = outer.copy(fontSizeEm = 1.5f)
         val rebased = InlineSpanRing.composeNested(bigOuter, nested)!!

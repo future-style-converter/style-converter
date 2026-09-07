@@ -27,7 +27,7 @@ import com.styleconverter.runtime.typography.InterFontFamily
  * glyph run because a 14sp box and a 25px box have different ascents.
  *
  * ## The rule
- * css-lists-3 §3.2: the marker box "inherits from the originating
+ * css-lists-3 §3.1.1: the marker box "inherits from the originating
  * element" — it is not an independently-styled box, so the list item's
  * resolved font IS the marker's font.
  *
@@ -94,9 +94,9 @@ object ListMarkerTextStyle {
             // Unspecified size is not "the item's size": Compose's `Text`
             // resolves it to the Material default (~14sp), so one CSS
             // font-size produced a 14sp marker beside 16sp item text on
-            // every marker row of such a document. css-lists-3 §3.2 makes
+            // every marker row of such a document. css-lists-3 §3.5 makes
             // the marker inherit from its originating element, whose
-            // default IS 16 (css-fonts-4 §2.6 `medium`, the corpus-pinned
+            // default IS 16 (css-fonts-4 §2.5.1 `medium`, the corpus-pinned
             // browser default). MEASURED on wave40-final
             // css-counter-styles/cssom__cssom-negative-setter android:
             // marker cap-height 10px vs web's 12px vs the ref's glyph rows
@@ -156,7 +156,7 @@ object ListMarkerTextStyle {
             fontStyle = inherited.fontStyle,
             // The marker's line box must match the item's, or a
             // baseline-aligned row would still stack the two boxes at
-            // different heights (css-lists-3 §3.2 again — same line).
+            // different heights (css-lists-3 §3.5 again — same line).
             lineHeight = inherited.lineHeight,
             // Inherited: yes (css-text-3 §8.2), and it changes the
             // marker's advance width, so it belongs to the glyph run.

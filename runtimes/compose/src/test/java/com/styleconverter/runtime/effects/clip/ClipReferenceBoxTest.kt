@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.effects.clip
 
-// Wave 46 (lane Y4) — JVM pins for css-masking-1 §7.1 reference-box
+// Wave 46 (lane Y4) — JVM pins for css-masking-1 §5.1 reference-box
 // resolution on Android (ClipReferenceBox + the extractor's geometry-box
 // forms). Every expected number is taken from a wave45-final css-masking
 // WPT test whose PNG showed the defect:
@@ -87,7 +87,7 @@ class ClipReferenceBoxTest {
         fun box(kw: String) = ClipPathExtractor.extractClipPathConfig(
             listOf("ClipPath" to parse("""{"geometry-box":"$kw"}"""))
         ).geometryBox
-        // css-masking-1 §7.1: fill-box → content-box; stroke/view → border.
+        // css-masking-1 §5.1: fill-box → content-box; stroke/view → border.
         assertEquals(ClipGeometryBox.CONTENT_BOX, box("fill-box"))
         assertEquals(ClipGeometryBox.BORDER_BOX, box("stroke-box"))
         assertEquals(ClipGeometryBox.BORDER_BOX, box("view-box"))
@@ -143,7 +143,7 @@ class ClipReferenceBoxTest {
         // 1d: border-radius 10, margin 50 → 10 + 50·(1 + (0.2 − 1)³) = 34.4.
         assertEquals(34.4f, ClipReferenceBox.marginOutsetRadius(10f, 50f), 0.01f)
         // 1c: border-radius 50 on a 50px box is overlap-scaled to 25
-        // (css-backgrounds-3 §5.1), then ratio 25/25 = 1 → 25 + 25 = 50: the
+        // (css-backgrounds-3 §4.1), then ratio 25/25 = 1 → 25 + 25 = 50: the
         // 100px margin box becomes a full circle.
         assertEquals(50f, ClipReferenceBox.marginOutsetRadius(25f, 25f), 0.001f)
         // Negative margin: plain r + m, floored at 0.

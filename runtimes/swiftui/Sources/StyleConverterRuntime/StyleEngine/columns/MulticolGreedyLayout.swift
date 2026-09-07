@@ -38,7 +38,7 @@ struct MulticolGreedyLayout: Layout {
     /// The USED column-gap in px — resolved by the caller through the
     /// same lane as the wave-9 fill basis (ComponentRenderer's
     /// multicolUsedGapPx: declared gap via GapApplier, else `normal` =
-    /// 1em per css-align-3 §8.3), so slots and fill agree by construction.
+    /// 1em per css-align-3 §8), so slots and fill agree by construction.
     let gapPx: CGFloat
     /// Wave-21 lane MULTICOL: per-subview spanner-flow roles from
     /// MulticolSpannerFlow.rolesFor, in the exact order
@@ -48,7 +48,7 @@ struct MulticolGreedyLayout: Layout {
     /// byte-identical; a roles list containing a spanner engages the
     /// css-multicol-1 §6 spanner-flow plan instead.
     var roles: [MulticolSpannerFlow.Role]? = nil
-    /// Wave-43 lane V6 — css-overflow-4 §3 `continue: discard`, threaded
+    /// Wave-43 lane V6 — css-overflow-4 §5.3 `continue: discard`, threaded
     /// from ColumnsConfig.continueDiscard through the renderer seam. Only
     /// the roles-gated spanner-flow branch consumes it (the plan marks
     /// content from the first §8.2 overflow column on as discarded); the
@@ -141,7 +141,7 @@ struct MulticolGreedyLayout: Layout {
             }
             // The shared SP-table plan (pinned identically on Android).
             // Wave-43 lane V6: `continue: discard` rides into the plan —
-            // css-overflow-4 §3 drops content from the first overflow
+            // css-overflow-4 §5.3 drops content from the first overflow
             // column on (discard-multicol-003's 4th chunk AND the spanner
             // after it), exactly as Compose already threads it
             // (MultiColumnApplier → MulticolSpannerFlow.plan).
@@ -232,7 +232,7 @@ struct MulticolGreedyLayout: Layout {
             // One slot per subview, index-aligned by construction.
             for (index, sub) in subviews.enumerated() {
                 let slot = sp.slots[index]
-                // Wave-42: css-overflow-4 §3 DISCARDED slots render nothing
+                // Wave-42: css-overflow-4 §5.3 DISCARDED slots render nothing
                 // — but a SwiftUI Layout must place every subview (an
                 // unplaced subview gets a DEFAULT placement, which would
                 // paint it mid-container), so park them far offscreen.

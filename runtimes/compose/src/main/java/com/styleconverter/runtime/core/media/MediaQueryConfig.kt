@@ -194,21 +194,3 @@ data class ScreenInfo(
         val DEFAULT = ScreenInfo(360.dp, 640.dp)
     }
 }
-
-/**
- * Common breakpoint presets matching CSS frameworks.
- */
-object Breakpoints {
-    /** Extra small devices (phones, <576px) */
-    val XS = 0.dp
-    /** Small devices (landscape phones, ≥576px) */
-    val SM = 576.dp
-    /** Medium devices (tablets, ≥768px) */
-    val MD = 768.dp
-    /** Large devices (desktops, ≥992px) */
-    val LG = 992.dp
-    /** Extra large devices (large desktops, ≥1200px) */
-    val XL = 1200.dp
-    /** Extra extra large devices (≥1400px) */
-    val XXL = 1400.dp
-}

@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.Constraints
  *    ([MulticolSpannerFlow.ChildSpec.forcedBreakContent] — the child's own
  *    `break-before`, or either break side on a descendant);
  *  - no child subtree declares a float — the natives still stack floats
- *    in flow (the float lane owns css-break-3 §5 / CSS 2.1 §9.5.2), and
+ *    in flow (the float lane owns CSS 2.1 §9.5.2 clearance), and
  *    slicing that stack would clone a wrong layout into every column
  *    (the floats-clear-multicol family stays on the legacy greedy path
  *    until the float lane lands real out-of-flow geometry);

@@ -247,7 +247,7 @@ export function buildStyles(properties: IRProperty[]): CSSStyles {
  * emit them onto the element's `style` attribute, so definitions placed on
  * the element participate in normal CSS inheritance: descendants (the
  * slot-composed DOM) resolve `var(--name)` against them natively, and a
- * child redefinition shadows the parent exactly per css-variables-1 §2.3.
+ * child redefinition shadows the parent exactly per css-variables-1 §3.
  * Names and values are forwarded VERBATIM — names are case-sensitive and
  * values are untyped token streams (the empty string is legal).
  */

@@ -24,7 +24,7 @@ import kotlin.math.roundToInt
  * result: css-color/composited-filters-under-opacity ios-ref 0.9816 PASS).
  *
  * ## The spec
- * css-color-4 §2.2: opacity < 1 makes the element "a group" — the element
+ * css-color-4 §3.3: opacity < 1 makes the element "a group" — the element
  * and its descendants are composited together at full opacity, then the
  * flattened group composites ONCE with the specified alpha (which is why
  * two 50%-opacity siblings under one opacity parent overlap UNIFORMLY).
@@ -63,7 +63,7 @@ import kotlin.math.roundToInt
  * null bounds ⇒ the layer covers the clip), so nothing the subtree paints
  * inside the visible canvas is ever cropped — and ancestor overflow clips
  * (already applied to the canvas) keep cropping exactly as CSS's overflow
- * path demands. A Skia layer composited at α IS the css-color-4 §2.2
+ * path demands. A Skia layer composited at α IS the css-color-4 §3.3
  * transparency group: descendants flatten at full opacity inside it, the
  * group composites once — uniform overlap, no crop.
  */
@@ -75,7 +75,7 @@ object OpacityApplier {
      * @param modifier Base modifier (the group wraps everything chained
      *   AFTER it plus the children — callers install it OUTERMOST of the
      *   paint they want attenuated, see ColorApplier.applyColors step 1).
-     * @param alpha CSS opacity value; clamped to 0..1 per css-color-4 §2.2
+     * @param alpha CSS opacity value; clamped to 0..1 per css-color-4 §3.3
      *   ("values outside the range are clipped to this range").
      *   DUAL DOMAIN since wave-44 U4: the SAME coerceIn serves css-color-4
      *   §2.2 `opacity` AND Filter Effects 1 §10.2 `filter: opacity()` (§10.2:
@@ -84,7 +84,7 @@ object OpacityApplier {
      * @return The modifier unchanged for opacity ≥ 1, else with the group.
      */
     fun applyOpacity(modifier: Modifier, alpha: Float): Modifier {
-        // css-color-4 §2.2 computed-value clamp: out-of-range values clip
+        // css-color-4 §3.3 computed-value clamp: out-of-range values clip
         // to [0,1] (so 1.5 renders like 1, -0.5 renders like 0).
         val groupAlpha = alpha.coerceIn(0f, 1f)
         // opacity: 1 draws normally — no group, no layer. Parity with the

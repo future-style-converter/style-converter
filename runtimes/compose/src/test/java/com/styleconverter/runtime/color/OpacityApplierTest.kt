@@ -6,7 +6,7 @@ package com.styleconverter.runtime.color
 // via Modifier.alpha, which IS graphicsLayer(alpha, clip = TRUE)
 // (ui-android 1.11.4 AlphaKt bytecode: default-mask 520187 leaves alpha +
 // clip the only explicit params, clip pushed iconst_1). CSS opacity forms
-// a transparency group but NEVER clips (css-color-4 §2.2). Measured: WPT
+// a transparency group but NEVER clips (css-color-4 §3.3). Measured: WPT
 // css-color/composited-filters-under-opacity android-ref 0.9401 — the
 // `left: 50px` child cropped at the opacity parent's right edge (x=116).
 //
@@ -76,7 +76,7 @@ class OpacityApplierTest {
 
     @Test
     fun `opacity above 1 clamps to 1 and stays the identity`() {
-        // css-color-4 §2.2: out-of-range values clip to [0,1] — 1.5 renders
+        // css-color-4 §3.3: out-of-range values clip to [0,1] — 1.5 renders
         // like 1, which renders normally (no group).
         assertEquals(emptyList<String>(), elementNames(OpacityApplier.applyOpacity(Modifier, 1.5f)))
     }
@@ -160,7 +160,7 @@ class OpacityApplierTest {
         assertTrue("group must be OUTER of the bg fill: $flood", floodGroup < floodBg)
 
         // Branch 2 — the drawBehind inset rect taken when background-clip
-        // shrinks the paint area (css-backgrounds-3 §3.11). It is a
+        // shrinks the paint area (css-backgrounds-3 §2.7). It is a
         // SEPARATE `result = …` assignment in applyColors, so it can drift
         // out of order independently of branch 1; pinned alongside it.
         val inset = elementNames(
@@ -183,7 +183,7 @@ class OpacityApplierTest {
 
     @Test
     fun `stacked opacity stays per-application - two independent groups`() {
-        // NESTING pin. css-color-4 §2.2 makes opacity a PER-ELEMENT group:
+        // NESTING pin. css-color-4 §3.3 makes opacity a PER-ELEMENT group:
         // an `opacity: 0.5` child inside an `opacity: 0.5` parent shows
         // through at 0.25 because the inner group flattens first and the
         // outer one composites the result again. Two applications must

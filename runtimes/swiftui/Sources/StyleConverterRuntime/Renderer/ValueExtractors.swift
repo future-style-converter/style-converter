@@ -8,18 +8,20 @@
 //  Mirrors the Android `ValueExtractors.kt` object. IR format recap:
 //    IRLength  : { "px": 16.0 }                           (or { "keyword": "auto" })
 //    IRColor   : { "srgb": { "r": 0.2, "g": 0.6, "b": 0.9, "a": 1.0 }, ... }
-//    IRAngle   : { "degrees": 45.0 }
 //    Keyword   : "flex"   OR   { "keyword": "flex" }   OR   { "type": "flex" }
+//
+//  Retro P2b (A6#10) removed four zero-reference members: the
+//  `LengthOrPercentage` enum with `extractLengthOrPercentage`, plus
+//  `extractFloat` and `extractDegrees`. All three were pre-StyleEngine
+//  twins of the typed value readers every extractor uses today —
+//  StyleEngine/core/types/{LengthValue,NumberValue,AngleValue}.swift —
+//  which is why nothing had called them since Phase 2. Percentages and
+//  angles therefore have no reader in this file at all; reach for the
+//  core/types ones.
 //
 
 import CoreGraphics
 import SwiftUI
-
-enum LengthOrPercentage {
-    case length(CGFloat)
-    case percentage(CGFloat)   // 0.0 – 1.0
-    case auto
-}
 
 enum ValueExtractors {
 
@@ -39,33 +41,6 @@ enum ValueExtractors {
         }
     }
 
-    /// Full length resolution including percentage and `auto`.
-    static func extractLengthOrPercentage(_ value: IRValue?) -> LengthOrPercentage? {
-        guard let value = value else { return nil }
-
-        if case .object(let o) = value {
-            if let px = o["px"]?.doubleValue {
-                return .length(CGFloat(px))
-            }
-            if let kw = o["keyword"]?.stringValue, kw.lowercased() == "auto" {
-                return .auto
-            }
-            if let original = o["original"]?.objectValue,
-               let u = original["u"]?.stringValue, u.uppercased() == "PERCENT",
-               let v = original["v"]?.doubleValue {
-                return .percentage(CGFloat(v / 100.0))
-            }
-            if let pct = (o["percentage"]?.doubleValue ?? o["pct"]?.doubleValue) {
-                return .percentage(CGFloat(pct / 100.0))
-            }
-        }
-
-        if case .double(let d) = value { return .length(CGFloat(d)) }
-        if case .int(let i) = value { return .length(CGFloat(i)) }
-        if case .string(let s) = value, s.lowercased() == "auto" { return .auto }
-        return nil
-    }
-
     // MARK: - Color
 
     /// Extracts a SwiftUI Color from an IRColor (normalized to sRGB).
@@ -83,20 +58,6 @@ enum ValueExtractors {
     }
 
     // MARK: - Scalars
-
-    static func extractFloat(_ value: IRValue?) -> CGFloat? {
-        guard let value = value else { return nil }
-        switch value {
-        case .double(let d): return CGFloat(d)
-        case .int(let i):    return CGFloat(i)
-        case .object(let o):
-            if let d = (o["alpha"] ?? o["value"] ?? o["numeric"])?.doubleValue {
-                return CGFloat(d)
-            }
-            return nil
-        default: return nil
-        }
-    }
 
     static func extractInt(_ value: IRValue?) -> Int? {
         guard let value = value else { return nil }
@@ -126,17 +87,5 @@ enum ValueExtractors {
     /// Normalizes keywords for switch statements: uppercased with "-" → "_".
     static func normalize(_ keyword: String?) -> String {
         (keyword ?? "").uppercased().replacingOccurrences(of: "-", with: "_")
-    }
-
-    // MARK: - Angle
-
-    static func extractDegrees(_ value: IRValue?) -> CGFloat? {
-        guard let value = value else { return nil }
-        if case .object(let o) = value, let deg = o["degrees"]?.doubleValue {
-            return CGFloat(deg)
-        }
-        if case .double(let d) = value { return CGFloat(d) }
-        if case .int(let i) = value { return CGFloat(i) }
-        return nil
     }
 }

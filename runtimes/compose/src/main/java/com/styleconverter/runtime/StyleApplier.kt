@@ -325,7 +325,7 @@ object StyleApplier {
         // Apply in correct order. Wave-43 lane V3: the WPT flag and the
         // declared-`normal` discriminator ride into the spacing context so
         // the `lh` unit resolves against the element's USED line-height
-        // (css-values-4 §6.2.1) instead of a hardcoded 1.2em — the keyword
+        // (css-values-4 §6.1.1) instead of a hardcoded 1.2em — the keyword
         // test is the shared LineHeightNormal predicate over the SAME
         // cascade order (last declaration wins) the typography extractor
         // folded, so the gate and the extracted number can never disagree.
@@ -361,7 +361,12 @@ object StyleApplier {
             // RC-B1: the borders lane also reads the WPT flag — its
             // currentColor bottom-out is mode-split (WPT black / dark #eee).
             borders = BordersFacade.extractConfig(properties, wptCaptureMode),
-            effects = EffectsFacade.extractConfig(properties),
+            // retro R6 (A7#1): the effects lane reads the WPT flag too — its
+            // drop-shadow / box-shadow `currentcolor` bottom-out is the SAME
+            // mode-split ink as the borders lane's (EffectsCurrentColorInk:
+            // WPT black / dark-stage #eee), so the three currentcolor
+            // consumers on one element can never disagree.
+            effects = EffectsFacade.extractConfig(properties, wptCaptureMode),
             transforms = TransformExtractor.extractTransformConfig(properties),
             typography = TypographyExtractor.extractTypographyConfig(properties),
             overflow = OverflowExtractor.extractOverflowConfig(properties),
@@ -480,14 +485,32 @@ object StyleApplier {
         // 1. Interactions (visibility/alpha) — outermost: hides entire element
         result = InteractionApplier.applyInteraction(result, config.interactions)
 
-        // 1.5 Backface culling. CSS Transforms 2 §10: when
-        // `backface-visibility: hidden` is set and the cumulative 3D
-        // rotation flips the element away from the viewer, hide it.
-        // We approximate by setting alpha=0 when rotateY OR rotateX
-        // lands in (90°, 270°) modulo 360 — i.e. the element's normal
-        // points away. The check has to be cross-applier (rotation lives
-        // in TransformConfig, the visibility flag in InteractionConfig)
-        // so we resolve it here rather than inside either applier.
+        // 1.5 Backface culling. css-transforms-2 §10 (`backface-visibility`):
+        //     when the flag is `hidden` and the element's transformed plane
+        //     faces away from the viewer, hide it. The check has to be
+        //     cross-applier (rotation lives in TransformConfig, the visibility
+        //     flag in InteractionConfig) so it is resolved here.
+        //
+        //     retro R1 — DELIBERATELY still the element-local DEGREE rule, and
+        //     the reason is measured. §10 evaluates the ACCUMULATED matrix of
+        //     the element's 3D rendering context (§4.1.2), i.e. the ancestors'
+        //     transforms under `transform-style: preserve-3d` — which a
+        //     Modifier cannot see (the same renderer-seam limit
+        //     OrthographicFlatten names for an inherited `perspective`). A
+        //     matrix-aware rule reading the sign of this element's OWN §6
+        //     matrix m22 was tried and REJECTED on the corpus:
+        //     css-transforms/backface-visibility-hidden-animated-001 (and
+        //     -002) put `matrix3d(−1,0,0,0, 0,1,0,0, 0,0,−1,0, 0,0,0,1)` —
+        //     rotateY(180deg) — on BOTH `#flip` (preserve-3d) and its
+        //     `#back` child, so the accumulated matrix is the IDENTITY and
+        //     Chromium PAINTS the light-blue box (frozen ref: 19360 px of
+        //     (173,216,230); Android today 39360). Culling on the child's own
+        //     m22 = −1 would have drawn ZERO — a regression on two cells that
+        //     pass at 0.9647. The degree rule leaves them painted and still
+        //     culls every single-axis carrier the corpus has
+        //     (backface-visibility-hidden-001's `rotateY(180deg)` red child,
+        //     composited-under-rotateY-180deg-perspective's red block), where
+        //     cos θ < 0 ⇔ θ ∈ (90°, 270°) mod 360 is exact.
         if (config.interactions.backfaceVisibility ==
                 com.styleconverter.runtime.interactions.BackfaceVisibilityMode.HIDDEN) {
             val ry = (config.transforms.rotateY ?: 0f) +
@@ -516,8 +539,21 @@ object StyleApplier {
             if (flipped) result = result.alpha(0f)
         }
 
-        // 2. Transforms — rotate/scale/skew the entire element including bg
-        result = TransformApplier.applyTransforms(result, config.transforms)
+        // 2. Transforms — rotate/scale/skew the entire element including bg.
+        //    retro R1 (A11#0): this node is OUTER of step 4's absoluteOffset,
+        //    so its pivot must be conjugated by the SAME resolved offset the
+        //    effects consumers below already read (PositionApplier.
+        //    resolvedOffset — the value form of the step-4 modifier, so the
+        //    two cannot disagree). Without it a positioned child pivoted
+        //    about its local centre expressed in the PARENT frame — the
+        //    nested-transforms control rotated about (20,20) for a centre
+        //    at (80,40); css-transform-3d-rotateY-positive sat 10px left of
+        //    the frozen ref. Zero for every unpositioned element.
+        result = TransformApplier.applyTransforms(
+            result, config.transforms,
+            pivotShift = com.styleconverter.runtime.layout.position.PositionApplier
+                .resolvedOffset(config.layout.position),
+        )
 
         // 2.2 CSS Motion Path (css-motion-1). Only the static ray() case is
         //     wired: it behaves like a whole-element transform (translate
@@ -551,7 +587,10 @@ object StyleApplier {
         // The effects step is chained OUTSIDE the margin step below, and
         // MarginApplier emits positive margins as `Modifier.absolutePadding`,
         // so the backdrop draw node's box is the MARGIN box — while
-        // filter-effects-2 §2 samples and clips the BORDER box. Read from
+        // filter-effects-2 §2 samples and clips the BORDER box (and, since
+        // retro round-2 F1, the box-shadow nodes' box too — while
+        // css-backgrounds-3 §6.1.1 knocks the shadow out of the BORDER box).
+        // Read from
         // MarginApplier.resolvedInsets, i.e. literally the numbers step 4 is
         // about to add, with the SAME collapse override. NOTE (wave-45 X4):
         // applyMargin now receives the facade-threaded SpacingContext while
@@ -561,10 +600,20 @@ object StyleApplier {
         result = EffectsFacade.apply(
             result, config.effects, config.borders.radius,
             elementAlpha = config.colors.opacity ?: 1f,
-            // Gated on the property actually being declared: the resolve is
+            // Gated on a consumer actually being declared: the resolve is
             // cheap but not free, and every element in the corpus would pay
-            // it for a value only the backdrop path can consume.
-            marginInsets = if (config.effects.filters.hasBackdropFilters)
+            // it for a value only two lanes can consume. TWO consumers now:
+            // the backdrop path, and (retro round-2 F1, skeptic S3 must-fix)
+            // the box-shadow painters — their css-backgrounds-3 §6.1.1
+            // knockout and perimeter read the draw node's `size`, i.e. this
+            // same MARGIN box (CSS2 §8.1), so a margined element knocked out
+            // its whole margin box and cast its ring one margin band too far
+            // out (fixtures/properties/effects/box-shadow-opacity-knockout.json
+            // BSK_Op55_RingDominant: a 98×98 ring instead of its 50×50; the
+            // wave49-final fractional-box-with-shadow-new/-old cells likewise).
+            // Pinned by StyleApplierShadowMarginThreadingTest.
+            marginInsets = if (config.effects.filters.hasBackdropFilters ||
+                config.effects.shadows.hasShadow)
                 com.styleconverter.runtime.spacing.MarginApplier.resolvedInsets(
                     config = config.layout.margin,
                     collapsed = collapsedMargin,
@@ -605,7 +654,7 @@ object StyleApplier {
             else androidx.compose.ui.unit.DpOffset.Zero,
             // wave-46 (lane Y4, skeptic S2) — the SAME §8.3.1 collapse
             // override step 4 below hands MarginApplier, threaded on to the
-            // clip-path lane so its css-masking-1 §7.1 reference box
+            // clip-path lane so its css-masking-1 §5.1 reference box
             // subtracts the bands that were actually applied. It cannot read
             // the CompositionLocal itself: this step's modifiers materialise
             // inside the provider that resets LocalCollapsedMargin to null
@@ -728,7 +777,7 @@ object StyleApplier {
      * ch, so the gate keeps applyConfig allocation-free on the hot path.
      *
      * Wave-43 lane V3 — the context now also carries the `lh` unit's
-     * line-height source (css-values-4 §6.2.1: lh = the element's USED
+     * line-height source (css-values-4 §6.1.1: lh = the element's USED
      * line-height, not a 1.2 constant): LhUnitLineHeight's three-state
      * pick over the extracted line-height, the declared-`normal`
      * discriminator and the WPT flag. Both new parameters default to the
@@ -740,7 +789,7 @@ object StyleApplier {
         wptCaptureMode: Boolean = false,
         lineHeightDeclaredNormal: Boolean = false,
     ): com.styleconverter.runtime.spacing.SpacingContext {
-        // Element font size in px (css-values-4 §5.1.1 resolved value). A
+        // Element font size in px (css-values-4 §6.1.1 resolved value). A
         // non-sp TextUnit (em, unspecified) can't be converted statically —
         // keep the 16px default rather than guessing.
         val fontSizePx = config.typography.fontSize

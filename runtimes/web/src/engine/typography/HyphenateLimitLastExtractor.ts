@@ -1,6 +1,6 @@
 // HyphenateLimitLastExtractor.ts — folds `HyphenateLimitLast` IR properties into a HyphenateLimitLastConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { HyphenateLimitLastConfig, HYPHENATE_LIMIT_LAST_PROPERTY_TYPE, HyphenateLimitLastPropertyType } from './HyphenateLimitLastConfig';
 import { kwLower } from './_shared';

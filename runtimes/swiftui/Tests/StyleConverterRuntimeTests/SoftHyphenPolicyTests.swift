@@ -3,8 +3,8 @@
 //  Wave 37, lane W7 — the PURE half of rules A and B.
 //
 //  Byte-parallel twin of the Compose lane's SoftHyphenPolicyTest: the
-//  same cases against the same rules (css-text-3 §6.1 soft-hyphen
-//  suppression under `hyphens: none`; css-text-3 §5.2 / CSS 2.1 §9.5
+//  same cases against the same rules (css-text-3 §5.3 soft-hyphen
+//  suppression under `hyphens: none`; css-text-3 §5.5 / CSS 2.1 §9.5
 //  unbreakable-word overflow), so a divergence between the two runtimes
 //  surfaces here instead of in a device screenshot.
 //
@@ -22,7 +22,7 @@ final class SoftHyphenPolicyTests: XCTestCase {
     // `Deoxy&shy;ribo&shy;nucleic acid`, the extended form of "DNA".
     private let shyWord = "Deoxy\u{00AD}ribo\u{00AD}nucleic acid"
 
-    // MARK: - §6.1 keyword gate
+    // MARK: - §5.3 keyword gate
 
     /// Only `none` suppresses. `manual` is the INITIAL value and must
     /// honour explicit opportunities, `auto` adds dictionary ones on top
@@ -61,7 +61,7 @@ final class SoftHyphenPolicyTests: XCTestCase {
         XCTAssertFalse(SoftHyphenPolicy.wantsDictionaryHyphenation(nil))
     }
 
-    // MARK: - §6.1 string rewrite
+    // MARK: - §5.3 string rewrite
 
     /// Under `none` the conditional characters go, and NOTHING else does:
     /// the visible glyph sequence is byte-identical to the ref's
@@ -72,7 +72,7 @@ final class SoftHyphenPolicyTests: XCTestCase {
     }
 
     /// Under `manual` the string is untouched — the platform's own
-    /// U+00AD handling IS the correct §6.1 behaviour there.
+    /// U+00AD handling IS the correct §5.3 behaviour there.
     func testManualAndAutoLeaveTheStringIntact() {
         XCTAssertEqual(SoftHyphenPolicy.displayString(shyWord, mode: "manual"), shyWord)
         XCTAssertEqual(SoftHyphenPolicy.displayString(shyWord, mode: "auto"), shyWord)
@@ -88,7 +88,7 @@ final class SoftHyphenPolicyTests: XCTestCase {
     }
 
     /// U+200B ZERO WIDTH SPACE is a plain break opportunity, not a
-    /// hyphenation one: `hyphens` does not govern it (css-text-3 §6.1
+    /// hyphenation one: `hyphens` does not govern it (css-text-3 §5.3
     /// speaks only of hyphenation opportunities), so `none` must leave
     /// it in place.
     func testZeroWidthSpaceSurvivesNone() {

@@ -92,7 +92,7 @@ data class PositionConfig(
      * Wave 22 (B-RC3) — does the INLINE axis anchor from the END (right)
      * edge of the containing block?
      *
-     * css-position-3 §3.5.3: with `left: auto` and `right` non-auto, the
+     * css-position-3 §4.3: with `left: auto` and `right` non-auto, the
      * used inline position is measured from the containing block's RIGHT
      * edge — `right: 0` on a 100px box inside a 390px containing block
      * paints at x = 290, NOT at x = 0. When BOTH sides are declared the box
@@ -113,7 +113,7 @@ data class PositionConfig(
      *
      * ONLY out-of-flow boxes ([isAbsolutelyPositioned]) anchor this way.
      * For `position: relative` an inset is NOT an anchor at all — it is a
-     * displacement from the box's STATIC position (css-position-3 §3.4:
+     * displacement from the box's STATIC position (css-position-3 §3.3:
      * `bottom: 160px` moves the box UP 160px and reserves its original
      * flow space), which [offsetY]'s `-bottom` already renders correctly
      * from the start anchor. Without this gate the predicate answers true
@@ -125,13 +125,13 @@ data class PositionConfig(
      * byte-neutral for every current caller and purely a guard for the
      * nested-containing-block lane that is expected to consume it next.
      * `sticky` is excluded for the same reason — its insets are scroll
-     * thresholds, not containing-block anchors (css-position-3 §3.6).
+     * thresholds, not containing-block anchors (css-position-3 §3.4).
      */
     val anchorsFromEndX: Boolean
         get() = isAbsolutelyPositioned && resolvedStart == null && resolvedEnd != null
 
     /**
-     * Block-axis twin of [anchorsFromEndX] (css-position-3 §3.5.3 applied
+     * Block-axis twin of [anchorsFromEndX] (css-position-3 §4.3 applied
      * to the block axis): `top: auto` + a declared `bottom` anchors the box
      * at the containing block's BOTTOM edge — `bottom: 0` on a 100px box in
      * a 600px containing block paints at y = 500. A declared `top` wins
@@ -236,7 +236,7 @@ enum class PositionType {
 
     /**
      * Removed from flow, positioned relative to the viewport — the capture
-     * canvas (css-position-3 §3.2). Wave 17: hoisted to the canvas-root
+     * canvas (css-position-3 §2.1). Wave 17: hoisted to the canvas-root
      * overlay by [CanvasRootHoist]; NOT a Popup (a separate window never
      * composites into the capture bitmap).
      */

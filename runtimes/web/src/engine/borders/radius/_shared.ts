@@ -25,7 +25,7 @@ export type BorderRadiusValue =
 
 // Parse one IR payload into a BorderRadiusValue, or undefined if unrecognised.
 // The elliptical pair only appears when the CSS was per-corner `40px 20px`
-// (see examples/properties/borders/border-radius-physical.json Radius_Elliptical_*).
+// (see fixtures/properties/borders/border-radius-physical.json Radius_Elliptical_*).
 export function extractBorderCornerRadius(data: unknown): BorderRadiusValue | undefined {
   // Pair shape — presence of `horizontal` + `vertical` is the discriminator.
   if (data && typeof data === 'object') {                                 // guard: only objects can be pairs

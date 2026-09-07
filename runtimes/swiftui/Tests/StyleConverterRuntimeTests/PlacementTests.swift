@@ -124,6 +124,11 @@ final class PlacementTests: XCTestCase {
     func testExtractorGridAndFlexClaims() throws {
         // Combined ITEM declarations — both blocks populate; each
         // container kind will consume only its own (design §2.2).
+        // TOLERANCE shapes for JustifySelf / FlexGrow / ZIndex (retro R10,
+        // A8#5): the bare `"END"` string, the lone `normalizedValue` and the
+        // `original`-less ZIndex are NOT what the converter emits — the live
+        // spellings are pinned in testExtractorReadsTheLiveConverterShapes
+        // below. Kept here because the extractor must keep reading them.
         let p = ItemPlacementExtractor.extract(from: try props("""
         [ {"type":"GridColumnStart","data":{"type":"number","number":2}},
           {"type":"GridColumnEnd","data":{"type":"number","number":4}},
@@ -147,6 +152,44 @@ final class PlacementTests: XCTestCase {
         XCTAssertEqual(p.flex.basisPx, 80)
         XCTAssertEqual(p.flex.alignSelf, .center)
         // Paint block.
+        XCTAssertEqual(p.paint.zIndex, 5)
+    }
+
+    // MARK: - the LIVE converter shapes for the same claims (retro R10, A8#5)
+
+    /// The payloads in `testExtractorGridAndFlexClaims` above are TOLERANCE
+    /// shapes for three of the properties — measured against a probe
+    /// `:converter:run` (2026-09-05) and against the 1436-document
+    /// wave49-final catalogue, the converter emits:
+    ///
+    ///   * `justify-self: end` → `{"type":"end"}`, an OBJECT (never the bare
+    ///     `"END"` string — `align-self` IS a bare string, which is what
+    ///     makes the pair easy to conflate);
+    ///   * `flex-grow: 2` → `{"value":{"type":"…FlexGrowValue.Number",
+    ///     "value":2.0},"normalizedValue":2.0}` — `normalizedValue` is the
+    ///     key the extractor reads, but it never arrives alone;
+    ///   * `z-index: 5` → `{"value":5,"original":{"type":"integer",
+    ///     "value":5}}`.
+    ///
+    /// Hand-copied literals cannot notice a converter shape change, so this
+    /// test feeds the live spellings through the SAME extractor and pins the
+    /// identical claims. If a wire change ever breaks one, it fails HERE
+    /// while the tolerance test above keeps passing — which is exactly the
+    /// separation finding A8#5 asked for.
+    func testExtractorReadsTheLiveConverterShapes() throws {
+        let p = ItemPlacementExtractor.extract(from: try props("""
+        [ {"type":"GridColumnStart","data":{"type":"number","number":2}},
+          {"type":"GridRowStart","data":{"type":"span","count":2}},
+          {"type":"AlignSelf","data":"CENTER"},
+          {"type":"JustifySelf","data":{"type":"end"}},
+          {"type":"FlexGrow","data":{"value":{"type":"app.irmodels.properties.layout.flexbox.FlexGrowProperty.FlexGrowValue.Number","value":2.0},"normalizedValue":2.0}},
+          {"type":"ZIndex","data":{"value":5,"original":{"type":"integer","value":5}}} ]
+        """))
+        XCTAssertEqual(p.grid.request.colStart, 2)
+        XCTAssertEqual(p.grid.request.rowSpan, 2)
+        XCTAssertEqual(p.grid.alignSelf, .center)
+        XCTAssertEqual(p.grid.justifySelf, .end, "the live justify-self object must resolve like the string")
+        XCTAssertEqual(p.flex.grow, 2)
         XCTAssertEqual(p.paint.zIndex, 5)
     }
 }

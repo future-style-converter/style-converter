@@ -65,17 +65,4 @@ object ExpressionDetector {
      * Alias for [startsWithExpression] for semantic clarity.
      */
     fun isExpression(value: String): Boolean = startsWithExpression(value)
-
-    /**
-     * Extract the function name if value starts with an expression.
-     *
-     * @param value The CSS value to check
-     * @return The function name (e.g., "calc", "var") or null if not an expression
-     */
-    fun getExpressionType(value: String): String? {
-        val lower = value.lowercase().trim()
-        return EXPRESSION_FUNCTIONS
-            .find { lower.startsWith(it) }
-            ?.dropLast(1) // Remove the "("
-    }
 }

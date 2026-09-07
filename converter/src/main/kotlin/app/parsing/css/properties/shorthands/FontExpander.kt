@@ -19,15 +19,55 @@ object FontExpander : ShorthandExpander {
         val lower = trimmed.lowercase()
 
         if (lower in globalKeywords) {
-            return mapOf(
-                "font-style" to trimmed,
-                "font-variant" to trimmed,
-                "font-weight" to trimmed,
-                "font-stretch" to trimmed,
-                "font-size" to trimmed,
-                "line-height" to trimmed,
-                "font-family" to trimmed
-            )
+            // css-cascade-4 §3 ("Shorthand Properties"): "If a shorthand is
+            // specified as one of the CSS-wide keywords, it sets all of its
+            // sub-properties to that keyword, including any that are
+            // reset-only sub-properties." The keyword is forwarded VERBATIM
+            // (as authored — the longhand parsers own case-folding) to every
+            // sub-property this expander models, in the css-fonts-4 §2.7
+            // grammar order.
+            //
+            // `font-variant` is NOT a longhand: it is itself a shorthand
+            // (css-fonts-4 §6.11) whose seven sub-properties are the real
+            // sub-properties of `font`. Forwarding the keyword under the
+            // shorthand NAME (the pre-retrospective behaviour) put an
+            // unmapped Generic{propertyName:"font-variant"} on the wire —
+            // no longhand parser is registered for a shorthand name — which
+            // finding A8#0 measured on `font: inherit`. Delegating to
+            // FontVariantExpander's CSS-wide branch keeps every key leaving
+            // this expander a longhand, exactly as the non-keyword path
+            // below emits `font-variant-caps`, never `font-variant`.
+            //
+            // Tracked consequence, not a silent one: none of the seven
+            // font-variant longhand parsers has a CSS-wide arm today, so
+            // `font: inherit` puts seven `_unmapped: true` Generics on the
+            // wire where it used to put one — every key now NAMEABLE by a
+            // future longhand parser, and every one visible to PropertyTracker
+            // instead of unreachable behind a shorthand name. (Zero corpus
+            // carriers: no fixture under fixtures/ declares `font` or
+            // `font-variant` with a CSS-wide keyword — retro R9 grep.)
+            //
+            // Known, deliberate gap: §2.7 also makes `font` RESET the
+            // sub-properties with no slot in its grammar
+            // (font-feature-settings, font-kerning, font-language-override,
+            // font-optical-sizing, font-size-adjust, font-variation-settings
+            // — and, on the non-keyword path below, the six font-variant
+            // longhands other than -caps). This expander never writes those:
+            // `font: 12px Arial` leaves them alone. The CSS-wide path here
+            // does reach all seven font-variant longhands, because it
+            // delegates to the §6.11 shorthand. Closing the reset gap is a
+            // separate change; PropertiesParser's "Expanded 'font: …' → …"
+            // log line lists exactly which longhands were written, so the
+            // omission is visible in every convert log.
+            val out = LinkedHashMap<String, String>()
+            out["font-style"] = trimmed
+            out.putAll(FontVariantExpander.expand(trimmed)) // the seven §6.11 sub-properties
+            out["font-weight"] = trimmed
+            out["font-stretch"] = trimmed
+            out["font-size"] = trimmed
+            out["line-height"] = trimmed
+            out["font-family"] = trimmed
+            return out
         }
 
         // System fonts - pass through as raw
@@ -61,8 +101,17 @@ object FontExpander : ShorthandExpander {
                     result["font-style"] = token
                     i++
                 }
-                tokenLower in variantKeywords && !result.containsKey("font-variant") && tokenLower != "normal" -> {
-                    result["font-variant"] = token
+                tokenLower in variantKeywords && !result.containsKey("font-variant-caps") && tokenLower != "normal" -> {
+                    // css-fonts-4 §2.7: the shorthand's variant slot is
+                    // `<font-variant-css2> = normal | small-caps` and the
+                    // longhand it sets explicitly is `font-variant-caps`
+                    // (§2.7 "Set Explicitly" list) — `font-variant` itself is
+                    // a shorthand (§6.11) and has no longhand parser, so
+                    // writing it here leaked `Generic{propertyName:
+                    // "font-variant", rawValue:"small-caps"}` onto the wire
+                    // (wave49-final css-cascade/all-prop-001, `font: bold
+                    // italic small-caps 20px monospace`).
+                    result["font-variant-caps"] = token
                     i++
                 }
                 tokenLower in weightKeywords && !result.containsKey("font-weight") -> {

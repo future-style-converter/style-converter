@@ -1,6 +1,6 @@
 // TextAlignExtractor.ts — folds `TextAlign` IR properties into a TextAlignConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextAlignConfig, TEXT_ALIGN_PROPERTY_TYPE, TextAlignPropertyType } from './TextAlignConfig';
 import { kwLower } from './_shared';

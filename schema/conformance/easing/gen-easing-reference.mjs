@@ -99,7 +99,7 @@ function cubicBezier(x, x1, y1, x2, y2) {
 
 // ── steps() ─────────────────────────────────────────────────────────────────
 //
-// css-easing-1 §3.2, transcribed literally. The `before flag` step is omitted
+// css-easing-1 §2.3.1, transcribed literally. The `before flag` step is omitted
 // because it only applies when an animation is running in reverse at exactly
 // a step boundary; none of the three runtimes model it, and the harness never
 // samples in that state.
@@ -182,7 +182,7 @@ function linearEasing(x, stops) {
 
 // ── Cases ───────────────────────────────────────────────────────────────────
 //
-// Keyword→bezier mappings are css-easing-1 §3.1 and must match the converter's
+// Keyword→bezier mappings are css-easing-1 §2.2 and must match the converter's
 // AnimationTimingFunctionProperty companion constants exactly.
 
 const KEYWORD_BEZIERS = {
@@ -224,7 +224,7 @@ for (const [keyword, cb] of Object.entries(KEYWORD_BEZIERS)) {
     id: `keyword-${keyword}`,
     kind: 'cubic-bezier',
     css: keyword,
-    note: `CSS keyword "${keyword}" normalises to cubic-bezier(${cb.join(', ')}) — css-easing-1 §3.1.`,
+    note: `CSS keyword "${keyword}" normalises to cubic-bezier(${cb.join(', ')}) — css-easing-1 §2.2.`,
     cubicBezier: { x1: cb[0], y1: cb[1], x2: cb[2], y2: cb[3] },
     samples: CURVE_SAMPLES.map((t) => ({ t, expected: cubicBezier(t, ...cb) })),
   });
@@ -246,7 +246,7 @@ for (const [id, cb, note] of [
 }
 
 // steps(): every position × a spread of counts. jump-none is skipped at n=1
-// because css-easing-1 §3.2 makes steps(1, jump-none) invalid — jumps would
+// because css-easing-1 §2.3 makes steps(1, jump-none) invalid — jumps would
 // be 0 and the output undefined. Testing it would pin a divergence that the
 // spec does not adjudicate.
 for (const position of ['jump-start', 'jump-end', 'jump-none', 'jump-both', 'start', 'end']) {
@@ -267,11 +267,11 @@ for (const position of ['jump-start', 'jump-end', 'jump-none', 'jump-both', 'sta
   }
 }
 
-// step-start / step-end keywords — css-easing-1 §3.1 aliases.
+// step-start / step-end keywords — css-easing-1 §2.3 aliases.
 for (const [keyword, count, position] of [['step-start', 1, 'start'], ['step-end', 1, 'end']]) {
   cases.push({
     id: `keyword-${keyword}`, kind: 'steps', css: keyword,
-    note: `CSS keyword "${keyword}" is steps(${count}, ${position}) — css-easing-1 §3.1.`,
+    note: `CSS keyword "${keyword}" is steps(${count}, ${position}) — css-easing-1 §2.3.`,
     steps: { count, position },
     samples: stepSamples(count).map((t) => ({ t, expected: steps(t, count, position) })),
   });

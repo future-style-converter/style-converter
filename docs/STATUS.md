@@ -15,8 +15,13 @@ the full history lives in git history.
   Config/Extractor/Applier triplet at the same canonical path on all three.
 - **Visual harness** — `./test-all.sh` renders any fixture on all three
   platforms and compares captures with SSIM;
-  `BASELINE=1` gates against the 363 committed baseline PNGs in
-  `tools/visual/baseline/`.
+  `BASELINE=1` gates against the committed baseline PNGs in
+  `tools/visual/baseline/` — **390** (130 components × 3 platforms).
+  History behind that number: this line read 363 until the retro; PR #126
+  added 63 control-fixture baselines (426), and the retro deleted the 36
+  orphaned `AR_*` captures (12 per platform) whose fixture no longer
+  exists. Derive it, don't trust it:
+  `git ls-files tools/visual/baseline | grep -c '\.png$'`.
 - **Wire contract** — the converter emits IR v2 by default (the flat-list
   slot/placement wire); the JSON is machine-checked against
   `schema/ir-v2.schema.json` (`schema/ir-v1.schema.json` is the deprecated
@@ -30,7 +35,7 @@ the full history lives in git history.
 | claim | number | source of truth |
 |---|---|---|
 | Registration coverage — triplet exists + claims the IR type (a string-presence facade; not native rendering) | **558 / 558 per platform** (Android 558 / 558 · iOS 558 / 558 · Web 558 / 558) | `node tools/visual/coverage-audit.mjs` (`registered:`) → `tools/visual/COVERAGE.md` |
-| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 19 / 558 · iOS 74 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
+| Real-applier floor — a dedicated `<Name>Applier` file exists (under-counts grouped appliers) | **Android 15 / 558 · iOS 70 / 558 · Web 516 / 558** | `coverage-audit.mjs` (`real:` line) |
 | Verified rendering coverage — SSIM ≥ 0.95, every variant, every platform pair | **91 / 550 (~17%)** | converged audit campaign, round 40 (below) |
 
 "Registered" is only a string-presence facade — a triplet exists and
@@ -38,9 +43,9 @@ claims the IR type; it does NOT mean a dedicated applier renders the
 property natively. The stricter real-applier floor counts a dedicated
 `<Name>Applier.<ext>` file per property; it under-counts grouped appliers
 (one file — e.g. Compose `LayoutApplier.kt`, iOS `FlexboxApplier.swift`,
-web `ScrollMarginApplier.ts` — renders many properties but its basename
+web `PaddingApplier.ts` — renders many properties but its basename
 matches at most one IR name, so the raw dedicated-applier file counts
-Android 60 · iOS 119 · Web 530 sit above the per-property floor). Some
+Android 45 · iOS 94 · Web 520 sit above the per-property floor). Some
 registered appliers are intentional no-op + TODO where no mobile analogue
 exists (speech/, regions/, print/, …).
 
@@ -66,9 +71,18 @@ matching empty boxes) to a substantively honest classification:
   aural rendering, paged media, cursor/input state, etc. Each row
   carried a root-cause note.
 - **Exhausted (37)** — no meaningful visual test exists.
-- **Failing (3)** — known real cross-platform divergences (e.g. Android
-  `Modifier.scale()` clips to parent bounds at scale ≥ 1.5 where
-  iOS/web extend beyond).
+- **Failing (3)** — known real cross-platform divergences. (The example
+  this bullet used to give — Android `Modifier.scale()` clipping to parent
+  bounds at scale ≥ 1.5 — was refuted by fresh device pixels in wave 6,
+  see below; a divergence that IS still open is Android clipping a
+  transformed child's paint to its layout slot, ledgered in
+  `fixtures/combinations/nested-transforms.json` and tracked as
+  BACKLOG queue #6(b).)
+
+The 91 / 419 / 37 / 3 split is the **round-40 record**: the per-property
+tracker that produced it was retired at round 40 and the counts have not
+been re-derived since, so read them as a dated classification, not a
+live gauge (retro finding A2#14).
 
 The campaign also produced 31 gold-standard fixture rewrites and 4 real
 renderer fixes (iOS mask-image:none short-circuit, Android
@@ -87,13 +101,13 @@ result here as the historical record.
 | 2 | Category-pair combos (33×33) | partial — 526/561 cells passed, but ~99 used no-op defaults (shallow); needs combo-fixture redesign |
 | 3 | Realistic components | partial — 8/15 passing; 6 share an Android flex+text+border-radius root cause, 1 iOS font-metrics |
 | 4 | Keyframe snapshots (t=0/50/100%) | partial — 14/15 passing; scale keyframe blocked on the Android clip-to-parent gap |
-| 5 | Interaction states (:hover/:focus/:active) | web slice done — 90/90 captures via `tools/visual/interaction-states.mjs`; captures browser-default state changes only (IR has no pseudo-class support yet); iOS/Android harnesses were stubs |
+| 5 | Interaction states (:hover/:focus/:active) | web slice done — 90/90 captures via `tools/visual/interaction-states.mjs`; captures browser-default state changes only (at round 40 the IR had no pseudo-class support); iOS/Android harnesses were stubs — **round-40 record, since superseded**: the v2 wire carries `selectors` buckets (`schema/spec/06-dynamic-styling.md`) and all three harnesses implement `forceState` (`docs/DYNAMIC_CAPTURE.md` §1) |
 | 6 | Layout under constraint changes | complete (5/5) |
 | 7 | Parser fuzz (malformed CSS never panics) | complete (15/15) |
 | 8 | SSIM history tracking | retired — history tool pruned; BASELINE=1 regression gating supersedes it |
 | 9 | Real-page conversion | retired — best result: twitter 73%, tailwind 41% (0 deep failures, mean SSIM 0.952); adapter + scraped CSS dumps pruned |
 | 10 | Performance benchmarks | retired — web capture batching fix landed (test-all.sh keeps it); bench driver pruned |
-| 11 | Accessibility (WCAG 2.1 AA) | web color-contrast slice done — 15/15 fixtures scored via `tools/visual/a11y-audit.mjs`, 2 real AA contrast failures found; 7 other criteria blocked on missing IR semantics (no IRRole/IRAriaLabel/IRAlt) |
+| 11 | Accessibility (WCAG 2.1 AA) | web color-contrast slice done — 15/15 fixtures scored via `tools/visual/a11y-audit.mjs`, 2 real AA contrast failures found; 7 other criteria blocked on missing IR semantics (at round 40: no IRRole/IRAriaLabel/IRAlt) — **round-40 record, partly superseded**: `meta.role` exists since wave 7 (only `body-root` is emitted) and the wave-20 `meta.attrs` allowlist carries `alt`; aria-label is still absent |
 | 12 | OS-version snapshot matrix | retired — last result: 109/109 fixtures byte-identical across iOS 26.0 ↔ 26.2; driver pruned |
 
 Still-live harnesses: `tools/visual/smoke.sh` (unit tests + Tier 5 +
@@ -462,7 +476,10 @@ dirs + WPT corpus are gitignored):
   list. Two new sections at first capture: filter-effects
   (backdrop-filter — natives 1/11, the named native feature gap) and
   css-values (the attr() family, the queued bake). 20 sections, 233
-  scored; zero pass-regressions; 327-net clean. Corpus totals: **web
+  scored; 327-net clean. The wave claimed zero pass-regressions, but the
+  snapshot's own section counts show css-gaps iOS 6/12 → 4/12 (−2 vs
+  v4.12) — at least two established cells lost; the run dir is gone, so
+  they cannot be named (retro finding A1#1). Corpus totals: **web
   207/233, iOS 192/233, Android 188/233**.
   Wave 25 (`tools/titan/results/corpus-v5-0.json`) is the **image-pad
   boundary** — the most consequential instrument correction since the
@@ -494,7 +511,12 @@ dirs + WPT corpus are gitignored):
   validates the model (basic 0.966, box-shadow 0.978, opacity twins
   0.999 — 3/11 → 5/11); web's inter-inline-block whitespace fix took
   clip-rect-2 to exactly 1.000; Android's backplate paints but carries
-  an accuracy gap (0.881 vs iOS 0.966) — the named follow-up. And the
+  an accuracy gap (0.881 vs iOS 0.966) — the named follow-up — and one
+  per-section −1 this paragraph omitted until the retro: filter-effects
+  Android 3→2/11 (the `_note` declares it as the backdrop trade, "Android
+  3/11 to 2/11"; S6's per-section scan of v5-0 → v5-1 re-derived it on
+  2026-09-05; the wave-26 run dir is gone, so the lost cell cannot be
+  named). And the
   headline: after a full worktree recycle, ref-cache rebuild, and
   emulator-pool swap, **18 of 20 sections byte-matched the v5.0
   snapshot** — the instrument's determinism is now measured, not
@@ -519,7 +541,7 @@ dirs + WPT corpus are gitignored):
   contain-dir known-divergent passes on the natives (**css-contain
   7→11/12 on both** — the body-root `::before` box now places per
   inline-start semantics under rtl), fixed the inside-marker model
-  (css-lists-3 §3.2: the marker is the item's first inline box, not a
+  (css-lists-3 §3.5: the marker is the item's first inline box, not a
   displacing sibling — plus Compose's alignByBaseline extent bug),
   landed Compose nested end-inset anchoring (two skeptic-caught
   regressions fixed pre-gate), and merged the spun-off shadow-offset
@@ -610,7 +632,9 @@ dirs + WPT corpus are gitignored):
   machinery (Compose's is API 29 vs minSdk 24); Rule 43 stays intact
   with the real closing move specified in its banner. filter-effects
   web 5→6/11. 27 sections; zero regressions; 327-net clean. Totals:
-  **web 269/317, iOS 238/289, Android 229/289**.
+  **web 269/302, iOS 238/289, Android 229/289** (the web denominator
+  read 317 here from wave 39 to the retro — a backfill typo; the snapshot
+  and the wave-31 commit both say 302).
   Wave 32 (`tools/titan/results/corpus-v5-7.json`) landed the **v3
   `meta.runs` wire** — the inline anonymous-run box deferred since
   wave 21. An ordered `[{text}|{child}]` list rides the same meta hop
@@ -635,8 +659,8 @@ dirs + WPT corpus are gitignored):
   item, not an engine defect. Post-load gained wedged-Chromium
   recovery. Operational contract: pre-`_runs` harness builds hard-fail
   the new meta key, so gates force fresh installs. 27 sections; zero
-  regressions; 327-net clean. Totals: **web 269/317, iOS 239/289,
-  Android 234/289**.
+  regressions; 327-net clean. Totals: **web 269/302, iOS 239/289,
+  Android 234/289** (web denominator corrected 317 → 302, see wave 31).
   Wave 33 (`tools/titan/results/corpus-v5-8.json`): **css-tables
   perfect on web (11/11) and Android (11/11), iOS 10/11**. The
   extractor's wrapper-nesting fix — an unclosed tag whose depth
@@ -661,8 +685,8 @@ dirs + WPT corpus are gitignored):
   inline formatting context. One harness item queued from that
   diagnosis: composed-canvas document ROOTS stack in the harness's own
   Column. 27 sections; zero regressions; 327-net clean. Totals:
-  **web 270/317, iOS 241/289, Android 236/289**. Eight web-perfect
-  sections.
+  **web 270/302, iOS 241/289, Android 236/289** (web denominator
+  corrected 317 → 302, see wave 31). Eight web-perfect sections.
   Wave 34 (`tools/titan/results/corpus-v5-9.json`) was the maximum
   wave — nine builder lanes. **css-tables is perfect on all three
   platforms** (the iOS separated-borders track model with the §17.6.1
@@ -750,9 +774,13 @@ dirs + WPT corpus are gitignored):
   (cancelling-error scoring lies repaired). The monospace-quirk
   glyph-advance fix lifted css-overflow natives +6/+9. Grid-lanes
   (384 cells) is confirmed masonry — a feature brief, not a bug
-  hunt. Depth-48 gate: zero regressions, net clean. Totals:
-  **web 1079/1333 (81.0%), iOS 880/1305 (67.4%), Android 835/1301
-  (64.2%)**. css-grid web perfect 48/48 at depth.
+  hunt. Depth-48 gate: net clean; the wave claimed zero regressions, but
+  the snapshot's section counts record two web losses — css-tables 42→41
+  (the deliberate repair above) and css-text-decor 43→42, never
+  declared — plus css-writing-modes Android measured 48→47 with one
+  capture missing and no stated reason (retro findings A1#1, A1#7).
+  Totals: **web 1079/1333 (81.0%), iOS 880/1305 (67.4%), Android
+  835/1301 (64.2%)**. css-grid web perfect 48/48 at depth.
   Wave 37 (`tools/titan/results/corpus-v6-2.json`) answered the
   map's biggest question: **the 384-cell grid-lanes pool is the
   browser's ceiling, not ours** — Chromium-151 itself does not
@@ -775,9 +803,13 @@ dirs + WPT corpus are gitignored):
   taxonomy, which had the direction backwards. Known artifacts:
   webmap-v1 is a stale-refs baseline for css-shapes (45/102 ref inks
   changed under htmlpins); the 22-cell image-set residue is a corpus
-  sparse-checkout gap, not code. Depth-48 gate: zero regressions,
-  net clean. Totals: **web 1120/1333 (84.0%), iOS 890/1305 (68.2%),
-  Android 847/1302 (65.1%)**.
+  sparse-checkout gap, not code. Depth-48 gate: net clean; the wave
+  claimed zero regressions, but css-overflow iOS went 32→31 (−1,
+  undeclared; the run dir is gone so the cell cannot be named), and the
+  wave-36 missing css-writing-modes Android capture came back
+  unremarked (measured 47→48) (retro findings A1#1, A1#7). Totals:
+  **web 1120/1333 (84.0%), iOS 890/1305 (68.2%), Android 847/1302
+  (65.1%)**.
   Wave 38 (`tools/titan/results/corpus-v6-3.json`) was the native
   wave — eight lanes on the web-native gap, and the corpus grew to
   **30 sections**: css-view-transitions joined via the **sixth bake**
@@ -830,7 +862,11 @@ dirs + WPT corpus are gitignored):
   hypothesis refuted by measurement), css-values web 37→42, the
   direction body-root minting, and honest-flat VT mining (four real
   defects fixed; three vacuous passes traded for three earned ones).
-  Depth-48 gate: zero regressions, net clean. Totals: **web
+  Depth-48 gate: net clean; the wave claimed zero regressions, but the
+  snapshot's section counts record css-values iOS 31→30 (−1,
+  undeclared) and css-view-transitions −1 on all three (23→22, 21→20,
+  21→20) — the three deleted visible-drift crops ARE depth-48 gate
+  losses, deliberate but losses (retro finding A1#1). Totals: **web
   1151/1379 (83.5%), iOS 939/1351 (69.5%), Android 931/1347
   (69.1%)**.
   Wave 40 (`tools/titan/results/corpus-v6-5.json`) was the ICB wave.
@@ -840,7 +876,8 @@ dirs + WPT corpus are gitignored):
   against a shifted origin; one line — `display: flow-root` on the
   composed ICB — makes it a formatting-context root exactly like the
   WPT harness viewport. css-transforms web 33→47 (+14), filter-effects
-  31→40 (+9), zero regressions corpus-wide, pinned by a dedicated
+  31→40 (+9), one declared −1 corpus-wide (css-sizing Android
+  abspos-016, below) and no other section moved, pinned by a dedicated
   harness test. Also landed: the will-change list-wire rewrite (every
   `will-change` had been silently dropped), `transform: inherit`,
   gradient angle strictness (css-images +3 web, +1/+1 native),
@@ -863,7 +900,10 @@ dirs + WPT corpus are gitignored):
   waits (loudly, bounded) for the app-created inbox before pushing;
   fonts/images subtrees remain shell-created — a known residual hazard
   on such images. Lesson pinned: verify *capture counts*, never
-  process liveness. Depth-48 gate: zero regressions, net clean.
+  process liveness. Depth-48 gate: one declared −1 (css-sizing Android
+  abspos-016), no other section moved; net clean (the "zero regressions"
+  this paragraph claimed twice until the retro was the A1#1 defect class
+  — S6 re-derived the per-section deltas v6-4 → v6-5 on 2026-09-05).
   Totals: **web 1180/1379 (85.6%), iOS 946/1351 (70.0%), Android
   936/1350 (69.3%)**.
   Wave 41 (`tools/titan/results/corpus-v6-6.json`) was the skeptic
@@ -894,7 +934,7 @@ dirs + WPT corpus are gitignored):
   `--tests` run silently re-runs only the filtered class), and one
   honest −1 shipped knowingly: counter-styles `broken-symbols`
   Android (0.9527→0.9481), named at-risk pre-gate — markers now
-  inherit the document's 16px Inter per css-lists-3 §3.2 instead of
+  inherit the document's 16px Inter per css-lists-3 §3.1.1 instead of
   an off-spec 14sp, and the old pass was metric-lucky. Depth-48 gate:
   all capture columns full, zero watchdogs, 327-net clean. Totals:
   **web 1187/1379 (86.1%), iOS 953/1351 (70.5%), Android 948/1350
@@ -1016,7 +1056,7 @@ dirs + WPT corpus are gitignored):
   Wave 46 (`tools/titan/results/corpus-v6-11.json`) was the
   clean-sweep wave: **zero regressions anywhere**, and every lane's
   projection landed within a cell. The clip-path reference box
-  (css-masking-1 §7.1 geometry-box forms, ignored on both natives —
+  (css-masking-1 §5.1 geometry-box forms, ignored on both natives —
   Android rendered such elements *unclipped*) delivered css-masking
   **+5 / +11** exactly as projected, after a skeptic caught a
   regression-grade defect pre-gate (the clip read its collapsed
@@ -1133,10 +1173,17 @@ capture P3 -> sRGB before scoring moves deltaE95 only 18.697 -> 17.385, while
 Android-vs-web on the same component is 0.373 mean / 0.000 p95. So iOS is the
 lone outlier on the filter maths itself; the P3 tag is a separate, smaller
 defect that happens to share a trigger. Both are real; neither is the other.
-**The filter-arithmetic half remains open** — SwiftUI's `.brightness(_:)` is
-an additive shift where CSS `brightness()` is multiplicative
-(`StyleEngine/effects/filter/FilterApplier.swift` maps `pct` to
-`(pct - 100) / 100`), which is the likely root cause and is still unverified.
+**The filter-arithmetic half was FIXED the same day (2026-08-28)** — the
+root cause was exactly the one suspected: SwiftUI's `.brightness(_:)` is an
+additive shift where CSS `brightness()` is multiplicative
+(filter-effects-1, the `brightness()` filter function — a linear
+multiplier on every channel), and `StyleEngine/effects/filter/FilterApplier.swift` mapped `pct`
+to `(pct - 100) / 100`. It now applies `.colorMultiply(white: pct/100)`
+(`brightnessFactor(_:) = max(0, pct/100)`, pinned by `FilterBrightnessTests`);
+the ΔE section below records the corrected capture matching Android/web and
+the spec to 1 LSB, and the sepia section measured `brightness(1.5)` landing
+exactly on the CSS value on all three platforms. (This paragraph said
+"remains open … still unverified" until the retro — finding A2#13.)
 
 ### The fix
 
@@ -1379,7 +1426,7 @@ apart in meaning. Override with `--delta-e-threshold`.
 ### What it found immediately
 
 **A real iOS bug.** `filter: sepia(80%)` over `#3498db` = (52,152,219):
-the CSS matrix (filter-effects-1 §8.5, interpolated toward identity by
+the CSS matrix (filter-effects-1 §6.1, interpolated toward identity by
 the amount) gives **(153,158,143)**. Android and web both render exactly
 that. iOS renders **(74,110,113)** — same 1954-px box, wrong colour, and
 *cool* where sepia must be warm. `FilterApplier.swift` implements it as
@@ -1580,7 +1627,7 @@ while SSIM 0.957 and Δpx 0.57% both passed, and the divergence classifier
 had already labelled the iOS-web pair `color-drift`. The report knew; the
 gate did not.
 
-`filter: sepia(80%)` over `#3498db` = (52,152,219): filter-effects-1 §8.5
+`filter: sepia(80%)` over `#3498db` = (52,152,219): filter-effects-1 §6.1
 gives **(153,158,143)**, which Android and web both render exactly. iOS
 rendered **(74,110,113)** — RGB distance 97, and *cool* where sepia must
 be warm. The cause was an approximation the file admitted to in its own
@@ -1743,9 +1790,12 @@ but it is not what is holding the gate up.
 
 Captures are 390 wide, so `min(W,H)` is the height, and `ssim.js`
 downsamples only when `f = round(min(W,H)/256) > 1` — i.e. a component
-≥ ~384px tall. Across **all 399 committed baselines exactly three are
-downsampled**: the three platforms of `003_AR_Half` at 390×432. Every
-other capture (visual-test heights are 32–132) is already scored at 1×.
+≥ ~384px tall. Across **all 399 committed baselines at the time
+(2026-08-28) exactly three were downsampled**: the three platforms of
+`003_AR_Half` at 390×432. (Those three no longer exist — the retro
+deleted the orphaned `AR_*` baselines, leaving 390 PNGs, none over
+~384px tall, so nothing in the committed set is downsampled today.)
+Every other capture (visual-test heights are 32–132) is already scored at 1×.
 
 And on that one component it changes nothing measurable: scoring at 1×
 moves iOS-Android from 0.9978 to 0.9969, with **zero verdict flips** on
@@ -1805,39 +1855,47 @@ Each was checked against `docs/`, the source comments and
 refuters were explicitly instructed that a documented deliberate decision
 refutes a finding.
 
+**This section is a dated record, not a queue.** The live queue is
+`docs/BACKLOG.md` (its contract: the single source of truth for wave
+work); rows below that are still open are marked `tracked: BACKLOG #n`
+and the struck-through rows name the fix. The retro (2026-09-04,
+findings A2#10/#12, A10#11, A11#9) struck six rows that had been fixed
+in the tree for days or weeks while this table still presented them as
+open.
+
 ### High
 
 | finding | where |
 |---|---|
 | ~~Compose perspective conversion wrong~~ **FIXED** — the real defect was not the cameraDistance scale but `depthScaleFactor` computing `1 + z/P`, the first-order Taylor expansion of `1/(1 − z/P)`. See "perspective + translateZ was wrong on both natives" above. | `runtimes/compose/…/transforms/` |
 | ~~iOS composes transforms in reverse order~~ **FIXED** — see "transform order" below. | `runtimes/swiftui/…/transforms/` |
-| ~~Compose does not compose the transform list at all~~ **FIXED (wave 48)** — it accumulated each kind into a separate scalar and handed them to `graphicsLayer`'s fixed scale→rotate→translate order, so `scale(2) translate(30px)` rendered identically to `translate(30px) scale(2)`. Wave 48 built `TransformListComposer` (ordered css-transforms-1 §11 product, origin conjugation, exact-or-refuse R·S decomposition; shear residue rides ordered canvas ops) and deleted both `Transform_Combined` ledger lines under the exit-5 contract. The recorded `decomposeMatrix2D` route was NOT taken — that helper mishandles reflections (pinned); skew-bearing lists still accumulate (deferred). | `runtimes/compose/…/transforms/TransformListComposer.kt` |
-| iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely | `runtimes/swiftui/…/effects/blend/` |
+| ~~Compose does not compose the transform list at all~~ **FIXED (wave 48)** — it accumulated each kind into a separate scalar and handed them to `graphicsLayer`'s fixed scale→rotate→translate order, so `scale(2) translate(30px)` rendered identically to `translate(30px) scale(2)`. Wave 48 built `TransformListComposer` (ordered css-transforms-1 §8 product, origin conjugation, exact-or-refuse R·S decomposition; shear residue rides ordered canvas ops) and deleted both `Transform_Combined` ledger lines under the exit-5 contract. The recorded `decomposeMatrix2D` route was NOT taken — that helper mishandles reflections (pinned); skew-bearing lists still accumulate (deferred). | `runtimes/compose/…/transforms/TransformListComposer.kt` |
+| ~~iOS applies `mix-blend-mode` **inside** the opacity compositing group, so declaring `opacity` neutralises the blend entirely~~ **FIXED (#126, 45164b0d)** — `Renderer/StyleBuilder.swift` now orders `.engineIsolation → .engineOpacity → .engineBlendMode` with blend OUTERMOST (compositing-1 §5.1: the group's opacity mixes the blended result), measured on multiply over #3498db at opacity 0.5. `fixtures/combinations/opacity-blend.json` passes on all three (iOS fills (179,184,0) / (117,92,163), the spec values; gate 18/0/0, oracle 15 checks / 0 violations). | `runtimes/swiftui/…/Renderer/StyleBuilder.swift` |
 | ~~`border` shorthand drops colour functions / loses `<line-width>` forms~~ **BOTH FIXED** — and the fix uncovered a third defect: a duplicated implementation meant fixing the shared function reached only 1 of the 5 shorthands. See "the border shorthand had two implementations" below. | converter shorthand expander |
 
 ### Medium
 
 | finding | where |
 |---|---|
-| **NEW (spec-oracle first contact, 2026-08-29): Android clips a transformed child's paint vertically.** The no-parent-transform control (child `rotate(45deg)` alone in a 160×80 parent) measures 55×47 against the 57×57 diamond; nested rows lose 10–30px of height while iOS and web measure the full extent. Clip follows the child's layout slot. Waived-with-reason in `fixtures/combinations/nested-transforms.json` so the fix turns the waivers stale. | `runtimes/compose/…` child transform path |
+| ~~**NEW (spec-oracle first contact, 2026-08-29): Android clips a transformed child's paint vertically.**~~ **WRONG MECHANISM — it was never a clip.** The measurements stand (the no-parent-transform control measures 55×47 against the 57×57 diamond; nested rows lose 10–30px), but the cause is pivot, not clipping: `StyleApplier.applyConfig` chained the transform OUTER to the abspos offset, so the pivot was the child's local centre expressed in the PARENT frame. Fixed in the retro (`TransformPivot` conjugates the pivot by `PositionApplier.resolvedOffset`); the `nested-transforms.json` waivers are the red test the gate deletes. **tracked: BACKLOG queue #6(b)** | `runtimes/compose/…` child transform path |
 | ~~iOS drops translateZ~~ **FIXED** in the same pass — iOS applied no depth response at all under a perspective; see the section above. | `runtimes/swiftui/…/transforms/` |
 | ~~iOS drops negative box-shadow spread~~ **FIXED 2026-08-28** — the spread-path guard was `> 0`; `.inset(by:)` contracts for both signs. iOS now matches web exactly on a 4-case probe (bottom shadow rows 93/101/109/90). | `runtimes/swiftui/…/effects/shadow/` |
-| **NEW: Android over-blurs box-shadow by ~2.4×** — reach 123/131/131/120 rows vs web's 93/101/109/90 on the same probe, clipping at the canvas edge. `MultipleShadowApplier.kt` passes raw CSS blur into `BlurMaskFilter` with no radius→σ conversion (its sibling `ShadowApplier.kt` documents the right one), but the magnitude exceeds that error alone — needs real diagnosis, not a guessed constant. (This row was clobbered by a concurrent doc write on 2026-08-28 and restored from the commit message of `07f75ec9`.) | `runtimes/compose/…/effects/shadow/` |
-| In the skew path the perspective scale is inverted — `d/(d + tz)` instead of `d/(d − tz)` — so `translateZ` toward the viewer *shrinks* the element | `runtimes/compose/…/transforms/` |
-| iOS applies the overflow clip **outside** the transform, so a rotated or skewed element is clipped by its un-transformed axis-aligned frame | `runtimes/swiftui/…/` |
-| `hwb()` / `lch()` / `oklch()` hue still uses a `[\d.]+(?:deg)?` pattern, so angle units, negative hues, `none` and uppercase make the whole declaration fail | converter primitive parsers |
-| `flex: <number>` does not reset `flex-basis` to 0%, and `flex: .5` is misrouted onto `flex-basis` and then dropped | converter shorthand expander |
+| **NEW: Android over-blurs box-shadow by ~2.4×** (**tracked: BACKLOG queue #6(c)**) — reach 123/131/131/120 rows vs web's 93/101/109/90 on the same probe, clipping at the canvas edge. `MultipleShadowApplier.kt` passes raw CSS blur into `BlurMaskFilter` with no radius→σ conversion (its sibling `ShadowApplier.kt` documents the right one), but the magnitude exceeds that error alone — needs real diagnosis, not a guessed constant. (This row was clobbered by a concurrent doc write on 2026-08-28 and restored from the commit message of `07f75ec9`.) | `runtimes/compose/…/effects/shadow/` |
+| ~~In the skew path the perspective scale is inverted — `d/(d + tz)` instead of `d/(d − tz)` — so `translateZ` toward the viewer *shrinks* the element~~ **FIXED in the retro** — every legacy Compose route now reads `TransformMatrixComposer.depthScale` = P/(P − z) (css-transforms-2 §16's perspective matrix: w = 1 − z/P — the same section `TransformMatrixComposer.depthScale` cites). **tracked: BACKLOG queue #0(h)** | `runtimes/compose/…/transforms/` |
+| iOS applies the overflow clip **outside** the transform, so a rotated or skewed element is clipped by its un-transformed axis-aligned frame — confirmed structurally: `StyleBuilder.swift` `.engineTransforms` is wrapped by `.engineVisibility`, the overflow-clip carrier. **tracked: BACKLOG queue #6(d)** | `runtimes/swiftui/…/` |
+| ~~`hwb()` / `lch()` / `oklch()` hue still uses a `[\d.]+(?:deg)?` pattern, so angle units, negative hues, `none` and uppercase make the whole declaration fail~~ **FIXED (#47, bbef3b9d)** — `ColorParser.kt` defines one `HUE` group (`[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?(?:deg\|grad\|rad\|turn)?`, `\|none`) shared by hsl/hwb/lch/oklch; its comment records the old pattern as the bug. | converter primitive parsers |
+| ~~`flex: <number>` does not reset `flex-basis` to 0%, and `flex: .5` is misrouted onto `flex-basis` and then dropped~~ **FIXED (#126, 45164b0d)** — `FlexExpander.kt` emits `flex: <number>` ≡ `<number> 1 0%` (css-flexbox-1 §7.1.1) and its `NUMBER` pattern accepts `.5`. | converter shorthand expander |
 | ~~`computeEdgeSsim` is dead~~ **FIXED 2026-08-29** — replaced the sharp Sobel (whose `scale` defaulted to the zero kernel-sum: divide-by-zero, all-zero buffer, eternal 1.0) with a pure-JS both-axis Sobel; sharp's documented `scale`/`offset` semantics turned out not to be implemented by libvips at all (measured: scale 8 + offset 128 returned all-255). Acceptance matrix now discriminates: edge-vs-flat 0.82, 1px-shift 0.84, 8px-shift 0.68, identity exactly 1.0, both axes. 0.5 ms per 390×132 image. | `tools/visual/compare-screenshots-metrics.mjs` |
-| `SkepticFontShorthandLh`'s `font: inherit` case asserts only `not.toBe('normal')` — a total drop satisfies it, and a total drop is what the engine does | web runtime tests |
+| ~~`SkepticFontShorthandLh`'s `font: inherit` case asserts only `not.toBe('normal')` — a total drop satisfies it, and a total drop is what the engine does~~ **FIXED in the retro** — the test now pins the ABSENCE the live wire produces (`'lineHeight' in buildStyles([])` is `false`: a CSS-wide keyword is runtime-dependent, so the converter emits no LineHeight). **tracked: BACKLOG queue #9(c)** | web runtime tests |
 
 ### Low
 
 | finding | where |
 |---|---|
-| `visibility: collapse` removes layout space on non-table elements; CSS 2.2 §11.2 requires it to behave exactly like `hidden` there | `runtimes/swiftui/…/` |
-| `visibility: hidden` is implemented as `opacity(0)` on both natives, so a descendant's `visibility: visible` cannot re-show itself | both native runtimes |
-| The HTML report headline counts rows with no cross-platform pair as "identical", so a one-platform run reads N/N identical | `tools/visual/compare-screenshots-html.mjs` |
-| The `protocolTimeout` regression-prevention check is satisfied by a code *comment*, so deleting the fix it guards leaves it green | `tools/visual/` |
+| `visibility: collapse` removes layout space on non-table elements; CSS 2.2 §11.2 requires it to behave exactly like `hidden` there. **tracked: BACKLOG queue #9(a)** | `runtimes/swiftui/…/` |
+| `visibility: hidden` is implemented as `opacity(0)` on both natives, so a descendant's `visibility: visible` cannot re-show itself. **tracked: BACKLOG queue #9(a)** | both native runtimes |
+| ~~The HTML report headline counts rows with no cross-platform pair as "identical", so a one-platform run reads N/N identical~~ **FIXED (#126, 45164b0d)** — `compare-screenshots-html.mjs` puts rows with nothing to compare in their own headline bucket (the vacuously-true `.every()` over an empty array is documented in-file as the bug). | `tools/visual/compare-screenshots-html.mjs` |
+| ~~The `protocolTimeout` regression-prevention check is satisfied by a code *comment*, so deleting the fix it guards leaves it green~~ **FIXED (#126, 45164b0d)** — `doc-staleness-check.sh` delegates to `tools/visual/check-protocol-timeout.mjs`, which parses the `puppeteer.launch` call rather than grepping for the word (mutation-verified). | `tools/visual/check-protocol-timeout.mjs` |
 
 ### One meta-finding worth keeping
 
@@ -1893,7 +1951,7 @@ platform rendering no depth at all went unnoticed.
 
 ## Transform order (2026-08-28)
 
-css-transforms-1 §11: `transform: A B` is the matrix product A·B, so **B
+css-transforms-1 §8: `transform: A B` is the matrix product A·B, so **B
 maps the point first**. SwiftUI composes the other way — in
 `v.modA().modB()`, modB wraps modA, so modA reaches the content first and
 the result is B·A·p. Emitting the CSS list front-to-back therefore
@@ -2024,8 +2082,14 @@ real Android blank-paint bug on counter-cjk-decimal); the web tail
 finally moved after six flat waves (contain-body writing-mode
 suppression ×8, lch/oklch percentage parsing, image() notation,
 contain-intrinsic bridge); both wave-47 vertical wedges cleared
-(background-image-006 now PASSES on all three — the crash was a
-gradient §3.4.3 all-outside `!!`; direction-upright-002 captures
+(background-image-006 now scores PASS on all three — the crash was a
+gradient §3.4.3 (css-images-4 §3.5.3) all-outside `!!` — but only the web render is a real
+pass: both native captures still paint the WPT red FAIL square (Android
+~2/3 of the 100px square red, 3.03% red pixels; iOS a red right column
+plus a red stripe below, 2.36%; ref 0.0%) at SSIM 0.9966 / 0.9712, so
+the two native cells are red-square degenerate passes in the wave-49
+census class, not conformance wins — they belong to the red-square fix
+queue, BACKLOG queue #1(a) (retro finding A1#0); direction-upright-002 captures
 honestly at ~0.58 via explicit MeasurePolicies + atomic PNG
 publication); Compose transforms compose in CSS order
 (TransformListComposer — corpus blast radius provably zero, both
@@ -2088,16 +2152,150 @@ closed: the wave-48 column-presence gap is now checked in two places
 exercised for real when the first wave-49 attempt lost its Android
 column to host-disk exhaustion and was caught after ONE section.
 
+**Retrospective (2026-09-04 → 2026-09-05) — the audit of waves 1–49.**
+Twelve audit lanes (A1–A12) executed their evidence over every wave,
+snapshot and doc: 195 findings — 28 must-fix, 114 should-fix, 53 notes —
+then 13 fix lanes (R1–R13) and five sweeps (P2a–P2e), an integrator, six
+executed-repro skeptics on the integrated tree (S1–S6: 49 defects, 3
+must-fix) and a second fix round. **No gate snapshot ships with the retro**: the device gate did not
+complete on this host in 17 attempts (2026-09-05 → 09-07) — one cause,
+memory starvation (15 GB used, ≤230 MB free, 5–6 GB compressed, load
+13–25 with browsers open) — surfacing as adb-server wedges, a false
+`adb install` success, feeder timeouts, a 20-minute vite dependency
+re-optimisation and a 50-minute watchdog overrun; the one section that
+completed at host load 9 was clean (48/48/48). Current stays
+corpus-v6.15; wave 50 opens with the full gate on a quiet host and scores
+it first as the retro's measurement (corpus-v6.16). `docs/BACKLOG.md`
+obligation #1 carries the gate-watch record of what is EXPECTED to move:
+exit 5 on the 12 pre-marked ledger lines, exit 1 on five iOS radius
+baselines whose label now spills like web, Android dark-stage movers from
+the effects lane. Nine harness defects found by the attempts are fixed in
+the same PR (BACKLOG → "Gate on a quiet host").
+What shipped, by lane: **R1** Compose transforms — the abspos pivot is
+conjugated by the position offset (`TransformPivot`; the "clip" of
+nested-transforms was never a clip), one depth-scale owner P/(P−z) replaces
+the Taylor `1 + z/P`, the 1000px default perspective is gone
+(css-transforms-2 §4.1), an exact 4×4 canvas route draws an element's own
+`perspective()`/matrix3d/rotate3d lists (`TransformMatrixPathApplier`),
+individual transforms compose in §6 order, two-keyword `transform-origin`
+resolves per axis, `perspective: 0` is the 1px clamp. **R2** Compose
+flex/sizing — percent `flex-basis` on the bare-number wire, `align-self:
+stretch` for width-less column-flex children in every capture mode, one
+layout-time percent-then-clamp step with min winning, the `BorderBoxFloor`
+twin (css-ui-3 §3.1). **R3** Compose typography — `font-size-adjust`
+ported (css-fonts-4 §2.6; the registry had claimed it as "parse-only" over a
+silent drop), the line-clamp `ellipsis` marker read by one shared
+`LineClampWire`, percentage `font-size` resolved before it becomes the em
+basis. **R4** iOS — `BorderRadiusApplier` no longer clips in-flow
+descendants unconditionally (self-paint vs legacy clip by
+`clipsDescendants`, css-backgrounds-3 §4.3 / css-overflow-3 §3.1),
+width-only borders paint no band, `drop-shadow()` without a colour takes
+`currentColor` at alpha 1 (filter-effects-1 §6.1). **R5** iOS —
+`animation-name: none` keeps its timing slot, `clip-path: none` constructs
+`ClipShape.none`, the font-family-only fallback size is CSS `medium` 16px,
+two-keyword `transform-origin`, groove/ridge/inset/outset outlines get the
+two-tone bevel (`OutlineShadedRing`), the radial gradient shape key is
+read. **R6** Compose effects — `filter: blur()` keeps ink that overflows the
+node (`BlurLayerNode`), the outset box-shadow paints under the border box
+and inside the element's opacity group (`OutsetShadowPainter`,
+css-backgrounds-3 §6.1.1 / css-color-4 §3.3), shadow ink defaults to
+`currentColor`, single-keyword `border-image-repeat` and `overscroll-behavior`
+wires mirror, `background-clip: text` suppresses the solid fill, one Blink
+`Color::Dark()` palette for borders and outlines (`BlinkBorderShade`, with
+the iOS twin landed by seam patch — a render change on iOS for dark 3D
+borders). **R8a/R8b** harness — `test-all.sh` exit 7 and
+`compare-screenshots.mjs` partial/absent-column failure, `section-runner.sh`
+`NATIVE_SHORT` + `TITAN_REQUIRE_ALL_COLUMNS` with per-test column parity,
+the disk preflight and <8G watchdog as code, feeders that refuse to run
+without `--wpt-dir`, truncated captures deleted rather than compared,
+simulator-pool reuse, bounded adb calls, `validateLedger`, `--gate-set`
+over `tools/visual/gate-fixtures.txt`, seize-only motion fixtures, the
+committed `red-square-census.mjs`, the TITAN README as a runbook. **R9**
+converter — logical/physical alias pairs collapse by cascade order
+(css-logical-1 §4), `--from compose|swiftui` is a usage error instead of a
+silent success, `font: inherit` expands to real longhands, the dead
+`KeywordParser` is gone. **R10** — 13 tests that could not fail now assert
+values on byte-verbatim vendored per-test IR
+(`tools/titan/fixtures/per-test-ir/wave49-final/`), the claimed-but-absent
+`ComposedRootInlineFlowTests` written, 10 never-emitted-shape pins relabelled
+as tolerances beside a live-shape case. **R11/R12/R13** — documentation
+truth (below), the BACKLOG/skill rewrite (R12: BACKLOG 355 → 873 lines at its hand-over, ~1,200 after round 2; SKILL 188 → 278, 288 after round 2),
+and the ledger rewritten end to end: 14 "corner AA" reasons were really an
+iOS CLIP asymmetry, every owner is a mechanism handle, every `observed`
+block a 2026-09-04 re-measurement, 36 orphan `AR_*` baseline PNGs removed
+(390 remain), three non-font defects taken off the Rule-43 refusal list
+(13 → 10), eight exclusion-rule descriptions rewritten as tier statements.
+Honesty corrections, all measured: wave 48's headline "background-image-006
+PASSES on all three" is a red-square degenerate pass on both natives (Android
+3.03% / iOS 2.36% red where the ref has 0%); four waves (24, 36, 37, 39)
+claimed "zero regressions" over per-section drops their own snapshots show,
+and round 2 found two more (wave 40's paragraph claimed it twice beside its
+own declared −1; wave 26 had an undeclared −1) — the rule now is the
+per-cell diff of two run dirs, never totals; the wave-49 red-square census
+(179/89) did not reproduce and the committed predicate says 179/87; the
+web denominator 317 for waves 31–33 was 302; "+17" was +12; "363
+baselines" is 390 with the arithmetic shown; 886 citation-only line
+changes across 359 files renumbered the tree's spec citations onto one
+scheme (the drafts.csswg.org ED) in P2d, after the audit found ~60 wrong
+section numbers and the sweep found the rest — S6's tree-wide re-validation leaves 27 residual (spec,§)
+combinations and seven new ones from the comment sweep for round 2; the
+tech-stack table was years stale; six STATUS "Open backlog" rows were fixed
+but presented as open (struck through above); 87 `Status: Empty` README
+stubs sat in folders holding 10–154 implementation files (deleted); the
+real-applier floor moved 20/74/516 → **15/70/516** and dedicated applier
+files 60/119/530 → **45/94/520** because facades that rendered nothing were
+deleted, not because coverage was lost. Two instrument holes closed for
+good: **column presence** (the 327-net once passed with its whole Android
+column silently skipped; a missing or short platform column is now exit 7
+in `test-all.sh`, a regression per skipped baseline in
+`compare-screenshots.mjs`, `NATIVE_SHORT` in the section runner and a
+per-test parity check in `assertPlatformColumns` — proven by mutation in
+`test-all-guards.test.mjs` / `column-presence-e2e.test.mjs`) and **the
+oracle before the gate** (the `_expect` spec oracle and its waivers were
+unreachable behind the cross-platform gate's early exit and lived in
+fixtures no gate ran; both blocks now report first and one enforcement
+block fires the exits in documented order, and `--gate-set` runs every
+fixture in `gate-fixtures.txt` so a waiver CAN go stale). Dead code: 215
+tracked deletions in the retro tree — 92 source/test files (Compose 32,
+SwiftUI 27, web 30, converter 3: zero-reference applier facades, the
+unwired `CollapsedBorderConflict` on both natives, web's 10 phantom
+registry names with their 30 unreachable triplet files, the converter's
+reader stubs and `KeywordParser`), 87 README stubs and 36 orphan PNGs —
+plus, inside live files, 31 Swift declarations and a 65-line
+`containerDecision`, 333 dead web type exports and a 249 → 107-line
+`core/` module, 19 converter declarations and ~40 byte-identical tokenizer
+clones folded into `TokenizationUtils` behind a clone guard, and two Compose
+test classes (20 tests) that pinned deleted code; the measured tail — 187
+nested zero-reference Compose declarations (~1,319 lines) — is committed
+at `tools/titan/results/retro-2026-09-04/p2a-compose-dead-remaining.json`.
+Standing rules added to BACKLOG: an evidence pointer is a tracked path, a
+gate cell or a snapshot field, never a session scratchpad, and every lane
+artifact a later wave acts on is committed under
+`tools/titan/results/<wave>-<lane>/`; "zero lost" is a per-cell diff;
+every "PASSES on all three" gets a PNG check; the fixture net runs at every
+gate; the snapshot's `artifact`/`reproduce` equal the gate run-id;
+calibration runs carry a capture-hash check; suite sweeps are single-writer
+and include the harness suites; `node_modules` is never committed; and,
+from round 2, every "landed"/"not landed" sentence and every `path:LINE`
+pointer in BACKLOG is re-checked against the FINAL tree at ship time (six
+stale facts and 12 drifted pointers survived lane-time verification).
+Suites on the integrated tree, single writer: converter 511 · web 1337 ·
+compose 3121 · android-harness 116 · swiftui 1978 · web-harness 276 ·
+tooling 1964, all 0 failures; `doc-staleness-check.sh` exit 0.
+
 
 ## Test suites
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 463 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1340 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2974 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1941 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1877 |
+| converter (Kotlin) | `./gradlew :converter:test` | 514 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3143 |
+| android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1979 |
+| web-harness (vitest) | `npm -w apps/web-harness run test` | 276 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1979 |
+| ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 23 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 ## Roadmap
@@ -2123,8 +2321,10 @@ controls). It scores two measured populations with the *shipping* metric
 code — same `padToCanvas`, same `computeLabDeltaE` stride, same pixelmatch
 options — plus one new variant:
 
-- **HEALTHY** — all 399 formable pairs of the committed baselines
-  (133 components × 3 pairs), minus the 24 pairs the expectation ledger
+- **HEALTHY** — all 399 formable pairs of the committed baselines at
+  the time (2026-08-29: 133 components × 3 pairs; the committed set is
+  130 components today — +63 control baselines from PR #126, −36
+  orphaned `AR_*` deleted in the retro), minus the 24 pairs the expectation ledger
   excuses (4 of the 28 ledger entries reference composition-test captures
   that have no committed baselines). 375 pairs, all passing today.
 - **BUGGY** — the calibration set: this session's real bugs *at the moment
@@ -2226,7 +2426,10 @@ reason, not a wider gate.
    on the committed bytes. **No candidate threshold set fails it**, which
    also means the gate should currently report those two ledger entries
    as STALE on a `filter-sepia-amounts.json` run (exit 5) — worth a
-   device-run check; if confirmed, the honest fix is content-cropped
+   device-run check (retro 2026-09-05: adjudicated without waiting for a
+   device — R13's re-measure put the pair inside every threshold, so both
+   lines were DELETED under the exit-5 contract, ledger 29 → 27; BACKLOG
+   obligations #1/#7); if confirmed, the honest fix is content-cropped
    metrics (crop to the union bounding box of non-ground pixels before
    scoring), which would raise every metric's sensitivity ~3–5× and is
    the natural follow-up to this study.

@@ -1,6 +1,6 @@
 package app.parsing.css.properties.primitiveParsers
 
-// CalcSizeParser — css-values-5 §10.1 `calc-size(<calc-size-basis>, <calc-sum>)`.
+// CalcSizeParser — css-values-5 §11 `calc-size(<calc-size-basis>, <calc-sum>)`.
 //
 // Wave 42 (lane W3). Before this parser existed every `calc-size()` sizing
 // declaration fell through the sizing longhand parsers to LengthParser (which

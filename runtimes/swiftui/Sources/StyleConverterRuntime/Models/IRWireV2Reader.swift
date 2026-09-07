@@ -115,11 +115,14 @@ enum IRWireV2Reader {
         // Optional document-level @font-face list (spec 01 §5). Strict shape
         // mirrors schema $defs/fontFace: a non-empty array of objects
         // carrying only the four known descriptors, `family` and `src`
-        // REQUIRED and non-empty. Strict even though the SwiftUI renderer
-        // does not yet register faces (no CTFontManagerRegisterFontsForURL
-        // hop exists) — an envelope structure this reader claims to speak
-        // must be well-formed or fail loudly, or a writer bug would hide
-        // until the wave that finally wires registration.
+        // REQUIRED and non-empty. Strict so a malformed envelope fails
+        // loudly HERE rather than as a silently-unregistered face inside
+        // DocumentFontRegistry (wave 35), which is what consumes this list:
+        // it hands each face's `src` to CTFontManagerRegisterFontsForURL
+        // and keys the result by family. Retro P2b (A4#2): the rationale
+        // used to say the renderer "does not yet register faces (no
+        // CTFontManagerRegisterFontsForURL hop exists)" — that hop landed
+        // fourteen waves before this comment was last read.
         var fontFaces: [IRFontFace]? = nil
         if c.contains(IRAnyKey("fontFaces")) {
             var arr = try c.nestedUnkeyedContainer(forKey: IRAnyKey("fontFaces"))

@@ -7,7 +7,7 @@ package com.styleconverter.runtime.images
  *
  * ## Why this exists
  *
- * `image("a.svg", "b.png", "c.gif")` is not "paint a.svg". §2.1 says the UA
+ * `image("a.svg", "b.png", "c.gif")` is not "paint a.svg". §2.5 says the UA
  * tries each `<image-src>` IN AUTHOR ORDER and paints THE FIRST ONE THAT CAN BE
  * DISPLAYED; only when every candidate fails does the optional `<color>` paint.
  * Until this file existed both natives read `srcs[0]` and threw candidates
@@ -21,7 +21,7 @@ package com.styleconverter.runtime.images
  *
  * ## Why it is a separate, platform-free file
  *
- * The walk is the ONE piece of §2.1 both natives must agree on exactly, and it
+ * The walk is the ONE piece of §2.5 both natives must agree on exactly, and it
  * has nothing to do with Compose: it is a fold over strings with a caller-
  * supplied decode probe. Keeping it pure means (a) the plain-JVM unit suite can
  * pin it with a fake decoder — `android.graphics` is a throwing stub off-device
@@ -35,7 +35,7 @@ package com.styleconverter.runtime.images
  * it is present "because loadability is unknowable at extraction time". That
  * was true *of the extractor*. It is not true of the PAINT path, which is the
  * only place that can actually attempt a decode — so the decision moves here,
- * one layer down, and the §2.1 ordering it implements is the same ordering web
+ * one layer down, and the §2.5 ordering it implements is the same ordering web
  * gets for free from the browser's own loader (the web runtime lowers `image()`
  * into a url stack — runtimes/web/src/engine/background/BackgroundImageExtractor
  * .ts `imageNotationCss`). For every corpus value that carries a colour the two
@@ -74,7 +74,7 @@ object ImageCandidateChain {
      * guess: on Compose that is `SyncImageDecode.decodeDataUri` (which caches,
      * so probing a candidate and then painting it costs one decode), on iOS
      * `BackgroundURLImageResolver.image(for:)` (which caches positively AND
-     * negatively). Passing the genuine decoder is what makes this §2.1's
+     * negatively). Passing the genuine decoder is what makes this §2.5's
      * "can be displayed" rather than a heuristic fitted to one corpus.
      *
      * A blank/whitespace-only candidate is skipped without being counted as a
@@ -91,13 +91,13 @@ object ImageCandidateChain {
             // Empty wire slot — not an author candidate; see the doc note.
             if (src.isEmpty()) continue
             val decoded = decode(src)
-            // §2.1 "the first one that can be displayed": stop at the winner,
+            // §2.5 "the first one that can be displayed": stop at the winner,
             // never keep walking (a later candidate must not override it).
             if (decoded != null) return Outcome(src, decoded, declined.toList())
             declined.add(src)
         }
         // Every candidate refused. The caller now paints the optional
-        // `<color>` fallback, or nothing at all — both are §2.1 outcomes and
+        // `<color>` fallback, or nothing at all — both are §2.5 outcomes and
         // both are the caller's decision, not this fold's.
         return Outcome(null, null, declined.toList())
     }

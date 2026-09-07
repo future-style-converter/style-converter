@@ -10,10 +10,6 @@
 
 import Foundation
 
-enum AccentColorProperty {
-    static let names: [String] = ["AccentColor"]
-}
-
 enum AccentColorExtractor {
 
     // Returns nil when no AccentColor property was present so the applier

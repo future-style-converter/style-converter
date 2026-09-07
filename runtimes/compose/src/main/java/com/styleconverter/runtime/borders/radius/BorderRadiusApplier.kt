@@ -122,7 +122,7 @@ object BorderRadiusApplier {
      *    step 2, INSIDE the alpha layer. Self-paint moves the fill into
      *    THIS applier, chained OUTER of ColorApplier — under opacity < 1
      *    the rounded fill would escape the alpha layer and paint at full
-     *    strength (css-color-4 §17.1 groups the element's whole paint).
+     *    strength (css-color-4 §3.3 groups the element's whole paint).
      *    Kept legacy: the child cut is the smaller committed error there.
      */
     fun selfPaintsWithoutClip(
@@ -148,13 +148,18 @@ object BorderRadiusApplier {
 
     /**
      * The uniform-solid predicate, shared with the truth table above: all
-     * four sides identical AND the style is SOLID (absent style defaults
-     * to solid here exactly like BorderSideApplier's fast path does, so
-     * the two appliers agree about which borders are "uniform solid").
+     * four sides identical AND the DECLARED style is SOLID. `hasBorder`
+     * already requires a declared visible style (BorderSideConfig.kt —
+     * CSS 2.1 §8.5.3: an absent style is `none`, used width 0), so the
+     * comparison is against the keyword itself; BorderSideApplier's fast
+     * path and paintSide gate the same way. (retro R4 / A11#5: the old
+     * note "absent style defaults to solid … like BorderSideApplier's fast
+     * path" described a default neither draw path takes — the elvis was
+     * dead code that misled the iOS twin into painting width-only borders
+     * as solid bands.)
      */
     internal fun isUniformSolid(sides: AllBordersConfig): Boolean =
-        sides.isUniform && sides.top.hasBorder &&
-            (sides.top.style ?: LineStyle.SOLID) == LineStyle.SOLID
+        sides.isUniform && sides.top.hasBorder && sides.top.style == LineStyle.SOLID
 
     /**
      * Self-paint mode: round the element's OWN paint, clip nothing.

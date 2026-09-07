@@ -7,10 +7,6 @@
 
 import Foundation
 
-enum BackgroundClipProperty {
-    static let names: [String] = ["BackgroundClip"]
-}
-
 enum BackgroundClipExtractor {
 
     // Single-pass; last-wins. Returns nil when no property was present

@@ -7,8 +7,8 @@ package com.styleconverter.runtime.spacing
 // CSS2/cascade/inherit-computed-001 is a single composed ROOT `<p>` that
 // declares `font-size: larger` (wire: {"original":{"type":"relative",
 // "keyword":"larger"}}, no px). The Chromium UA sheet gives a `<p>`
-// `margin-block: 1em` (HTML §15.3.8 "Flow content"), and css-values-4
-// §5.1.1 resolves that em against the element's OWN computed font-size —
+// `margin-block: 1em` (HTML §15.3.3 "Flow content"), and css-values-4
+// §6.1.1 resolves that em against the element's OWN computed font-size —
 // `larger` of the inherited 16px = 19.2px — so the browser-ref's border
 // box starts at y = 16 (image pad) + 19.2 = 35.2 → row 35. Both natives
 // started it at row 32: 16 + 16, the table's fixed "16px at a 16px root"
@@ -25,7 +25,7 @@ package com.styleconverter.runtime.spacing
 //     2.33em ladder for the other headings; Chromium html.css).
 //  2. [ownFontSizePxFromPairs] — the element's own computed font-size in px
 //     from its property list, against a caller-supplied inherited base
-//     (css-values-4 §5.1.1 em rule for font-size itself + CSS 2.1 §15.7 for
+//     (css-values-4 §6.1.1 em rule for font-size itself + CSS 2.1 §15.7 for
 //     the relative keywords). It returns NULL when the element carries NO
 //     own font signal (no FontSize, no monospace-quirk family — and, for an
 //     em-sized UA heading, not even that: see [uaFontSizeIsKeywordSized]),
@@ -144,7 +144,7 @@ object UaBlockMarginFontBasis {
         (sourceTag ?: "").lowercase() !in EM_SIZED_UA_FONT_TAGS
 
     /**
-     * The absolute-size keyword ladder (css-fonts-4 §2.4 table, Chromium's
+     * The absolute-size keyword ladder (css-fonts-4 §2.5.1 table, Chromium's
      * 16px-medium row) — the same px TextStyleApplier paints the keyword
      * at, pinned against it by the F-pins.
      */
@@ -183,10 +183,10 @@ object UaBlockMarginFontBasis {
      *  B5 relative keyword (`{"type":"relative","keyword":"larger"|"smaller"}`)
      *     → [inheritedPx] × / ÷ [RELATIVE_SIZE_STEP] (CSS 2.1 §15.7).
      *  B6 nested length (`{"type":"length","original":{v,u}}`): EM → v ×
-     *     inherited (css-values-4 §5.1.1: em on font-size itself resolves
+     *     inherited (css-values-4 §6.1.1: em on font-size itself resolves
      *     against the INHERITED size), REM → v × the 16px root.
      *  B7 percentage (`{"type":"percentage","value":N}`) → N% × inherited
-     *     (css-fonts-4 §2.4: same base as em).
+     *     (css-fonts-4 §2.5: same base as em).
      *  B8 anything else (var()/calc()/vw/ex/ch/malformed) → null (the
      *     documented honest fallback: the caller keeps the table).
      *

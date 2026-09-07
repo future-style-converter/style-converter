@@ -153,7 +153,7 @@ class ListMarkerRowTest {
 
     @Test
     fun `inside plus no in-flow text is the overlay placement`() {
-        // css-lists-3 §3.2 — an `inside` marker is the item's FIRST INLINE
+        // css-lists-3 §3.5 — an `inside` marker is the item's FIRST INLINE
         // BOX, so it lives inside the principal box and cannot move it.
         assertTrue(
             ListMarkerRow.rendersInsideOverlay(

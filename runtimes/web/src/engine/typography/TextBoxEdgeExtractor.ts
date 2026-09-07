@@ -1,6 +1,6 @@
 // TextBoxEdgeExtractor.ts — folds `TextBoxEdge` IR properties into a TextBoxEdgeConfig.
 // Family: text-box-edge.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextBoxEdgeConfig, TEXT_BOX_EDGE_PROPERTY_TYPE, TextBoxEdgePropertyType } from './TextBoxEdgeConfig';
 import { kwLower } from './_shared';

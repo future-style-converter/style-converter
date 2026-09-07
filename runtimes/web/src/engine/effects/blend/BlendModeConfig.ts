@@ -11,6 +11,3 @@ export interface BlendModeConfig {
 // IR property types handled by this module.
 export const MIX_BLEND_MODE_PROPERTY = 'MixBlendMode' as const;
 export const BACKGROUND_BLEND_MODE_PROPERTY = 'BackgroundBlendMode' as const;
-export type BlendModePropertyType =
-  | typeof MIX_BLEND_MODE_PROPERTY
-  | typeof BACKGROUND_BLEND_MODE_PROPERTY;

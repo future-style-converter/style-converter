@@ -1,7 +1,7 @@
 # Typography fixtures (Phase 6)
 
 CSS fixtures exercising every value variant accepted by the typography
-parsers in `src/main/kotlin/app/parsing/css/properties/longhands/typography/`.
+parsers in `converter/src/main/kotlin/app/parsing/css/properties/longhands/typography/`.
 
 Each fixture is one sub-topic. Run via:
 
@@ -12,9 +12,11 @@ Each fixture is one sub-topic. Run via:
 ## Coverage map
 
 One fixture per property (or one per tightly-related cluster). All properties
-present under `src/main/kotlin/app/irmodels/properties/typography/` with a
-registered parser are covered. All components convert cleanly (`0 generic`)
-except for the known text-shadow color-first gap noted below.
+present under `converter/src/main/kotlin/app/irmodels/properties/typography/` with a
+registered parser are covered. All components converted cleanly (`0 generic`)
+at authoring except for the known text-shadow color-first gap noted below; the
+claim has not been re-run since. Fixture count:
+`ls fixtures/properties/typography/*.json | wc -l`.
 
 | Fixture | Properties |
 |---|---|
@@ -143,7 +145,7 @@ Every file above produces:
 
 ### Properties not covered (intentionally skipped)
 
-No property under `src/main/kotlin/app/irmodels/properties/typography/` has
+No property under `converter/src/main/kotlin/app/irmodels/properties/typography/` has
 been skipped — every registered parser has a fixture. Two items worth
 naming explicitly:
 

@@ -1,4 +1,9 @@
-// _dispatch.ts — Phase-10 speech long-tail dispatch (30 properties).
+// _dispatch.ts — Phase-10 speech long-tail dispatch (27 properties).
+// speak-header / speak-numeral / speak-punctuation are CSS 2 aural/table
+// properties that were DROPPED from css-speech-1 and are modelled by no
+// IR class in converter/.../irmodels/properties/speech/, so their type
+// strings can never appear on the wire; their triplets were unreachable
+// and are deleted (A6#9).
 import type { CSSProperties } from 'react';
 import { extractVolume } from './VolumeExtractor';
 import { applyVolume } from './VolumeApplier';
@@ -6,12 +11,6 @@ import { extractSpeak } from './SpeakExtractor';
 import { applySpeak } from './SpeakApplier';
 import { extractSpeakAs } from './SpeakAsExtractor';
 import { applySpeakAs } from './SpeakAsApplier';
-import { extractSpeakHeader } from './SpeakHeaderExtractor';
-import { applySpeakHeader } from './SpeakHeaderApplier';
-import { extractSpeakNumeral } from './SpeakNumeralExtractor';
-import { applySpeakNumeral } from './SpeakNumeralApplier';
-import { extractSpeakPunctuation } from './SpeakPunctuationExtractor';
-import { applySpeakPunctuation } from './SpeakPunctuationApplier';
 import { extractPause } from './PauseExtractor';
 import { applyPause } from './PauseApplier';
 import { extractPauseBefore } from './PauseBeforeExtractor';
@@ -66,9 +65,6 @@ export function applySpeechPhase10(properties: IRPropertyLike[]): CSSProperties 
   Object.assign(out, applyVolume(extractVolume(properties)));
   Object.assign(out, applySpeak(extractSpeak(properties)));
   Object.assign(out, applySpeakAs(extractSpeakAs(properties)));
-  Object.assign(out, applySpeakHeader(extractSpeakHeader(properties)));
-  Object.assign(out, applySpeakNumeral(extractSpeakNumeral(properties)));
-  Object.assign(out, applySpeakPunctuation(extractSpeakPunctuation(properties)));
   Object.assign(out, applyPause(extractPause(properties)));
   Object.assign(out, applyPauseBefore(extractPauseBefore(properties)));
   Object.assign(out, applyPauseAfter(extractPauseAfter(properties)));

@@ -1,6 +1,6 @@
 // FontVariantLigaturesExtractor.ts — folds `FontVariantLigatures` IR properties into a FontVariantLigaturesConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariantLigaturesConfig, FONT_VARIANT_LIGATURES_PROPERTY_TYPE, FontVariantLigaturesPropertyType } from './FontVariantLigaturesConfig';
 import { kwList } from './_shared';

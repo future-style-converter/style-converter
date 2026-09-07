@@ -1,6 +1,6 @@
 // TextTransformExtractor.ts — folds `TextTransform` IR properties into a TextTransformConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextTransformConfig, TEXT_TRANSFORM_PROPERTY_TYPE, TextTransformPropertyType } from './TextTransformConfig';
 import { kwLower } from './_shared';

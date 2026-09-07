@@ -10,9 +10,9 @@
 //  MulticolGreedyLayout called plan() with the flag defaulted false. The
 //  measured consequence (wave42-final css-overflow, ios-ref):
 //  discard-multicol-003 at SSIM 0.8244 — the 4th `break-after: column`
-//  chunk lands in a css-multicol-1 §8.2 overflow column right of the box
+//  chunk lands in a css-multicol-1 §8.1 overflow column right of the box
 //  and "Spanner 1" paints on a second row instead of being discarded
-//  (css-overflow-4 §3: content from the first overflow column on drops,
+//  (css-overflow-4 §5.3: content from the first overflow column on drops,
 //  spanners included). These tests pin the three hops of the new thread:
 //  IR → ColumnsConfig.continueDiscard → MulticolGreedyLayout.discardOverflow
 //  → MulticolSpannerFlow.plan(discardOverflow:).
@@ -38,7 +38,7 @@ final class MulticolDiscardThreadingTests: XCTestCase {
         let cfg = try XCTUnwrap(ColumnsExtractor.extract(from: discardMulticolProps()))
         // The typed §3.1 count still extracts alongside the new flag.
         XCTAssertEqual(cfg.count, 3)
-        // css-overflow-4 §3: DISCARD is the one keyword that engages.
+        // css-overflow-4 §5.3: DISCARD is the one keyword that engages.
         XCTAssertTrue(cfg.continueDiscard)
     }
 
@@ -106,7 +106,7 @@ final class MulticolDiscardThreadingTests: XCTestCase {
     /// shared plan with the test's real role sequence — 4 one-line
     /// `break-after: column` chunks + a trailing `column-span: all` under
     /// N = 3. Chunks 0–2 keep their columns; chunk 3 opens the §8.2
-    /// overflow column, so css-overflow-4 §3 discards it AND the spanner
+    /// overflow column, so css-overflow-4 §5.3 discards it AND the spanner
     /// after it, and the container is exactly one 19px line tall (the
     /// BRK1 pin row, now driven by the extractor instead of a literal).
     func testExtractedFlagDrivesTheLivePlanShape() throws {

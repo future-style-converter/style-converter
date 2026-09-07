@@ -9,7 +9,7 @@
 //  pin table lives in MulticolSpannerFlowTests.swift and the Android
 //  MulticolSpannerFlowTest.kt with the SAME rows.
 //
-//  The model (css-multicol-1 §6.2–§6.3, §7.1): a `column-span: all` child
+//  The model (css-multicol-1 §6.1, §7.1): a `column-span: all` child
 //  interrupts the multicol flow; content BEFORE it is distributed into
 //  columns that are BALANCED regardless of `column-fill` (§6.3), the
 //  spanner spans the full content box, and the flow RESUMES in a fresh
@@ -87,7 +87,7 @@ enum MulticolSpannerFlow {
         /// True iff the child's SUBTREE declares `float: left/right`
         /// anywhere (wave-42 lane W4). The multi-child run fragmenter must
         /// bail on such children: the natives still lay floats out as
-        /// stacked in-flow boxes (the float lane owns css-break-3 §5 float
+        /// stacked in-flow boxes (the float lane owns css-break-3 §2.1 parallel-flow float
         /// fragmentation + CSS 2.1 §9.5.2 clearance), so slicing that
         /// stack across columns would replicate a wrong layout per column.
         var floatedContent: Bool = false
@@ -134,12 +134,12 @@ enum MulticolSpannerFlow {
         let role: Role
         /// 0-based used-column index (0 for spanners by convention). May
         /// EXCEED N-1 for a forced-break chunk that ran out of columns —
-        /// a css-multicol-1 §8.2 OVERFLOW column, painted past the
+        /// a css-multicol-1 §8.1 OVERFLOW column, painted past the
         /// container's inline end exactly where i·(W+G) lands it.
         let columnIndex: Int
         /// Block offset from the container's content-box top, in px.
         let yPx: Double
-        /// True when css-overflow-4 §3 `continue: discard` dropped this
+        /// True when css-overflow-4 §5.3 `continue: discard` dropped this
         /// child (content from the first overflow column on, and everything
         /// after it in flow order). Placement loops must skip — or park
         /// offscreen (SwiftUI Layout places every subview) — such slots.
@@ -406,7 +406,7 @@ enum MulticolSpannerFlow {
     ///    only break opportunities), and chunks past column N-1 land in
     ///    §8.2 OVERFLOW columns (columnIndex ≥ N);
     ///  - `discardOverflow` = the container declared `continue: discard`
-    ///    (css-overflow-4 §3): content from the FIRST overflow column on —
+    ///    (css-overflow-4 §5.3): content from the FIRST overflow column on —
     ///    everything after it in flow order, spanners included — is marked
     ///    `Slot.discarded` and contributes no container block-size. The
     ///    default false keeps every pre-wave-42 caller (and the SP pin
@@ -422,7 +422,7 @@ enum MulticolSpannerFlow {
         // Sole-flow bookkeeping for the replay fragmentainer.
         let soleFlow = children.filter { $0.role.isFlow }.count == 1
         var soleFlowH: Double? = nil
-        // css-overflow-4 §3 latch: once discard triggers, EVERYTHING after
+        // css-overflow-4 §5.3 latch: once discard triggers, EVERYTHING after
         // is dropped — the flag never resets within one container.
         var discarding = false
         var i = 0
@@ -460,7 +460,7 @@ enum MulticolSpannerFlow {
                 var h = 0.0
                 for k in i..<j {
                     let ck = children[k]
-                    // css-overflow-4 §3: the first overflow column starts
+                    // css-overflow-4 §5.3: the first overflow column starts
                     // the discard — from here on everything drops.
                     if discardOverflow && col >= n { discarding = true }
                     if discarding {

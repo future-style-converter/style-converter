@@ -47,7 +47,7 @@ object ValueExtractors {
                         // deliberately NOT resolved here — their bases are
                         // owned by callers with real context (FontSize's
                         // extractor resolves em against the threaded
-                        // INHERITED size per css-values-4 §5.1.1, and the
+                        // INHERITED size per css-values-4 §6.1.1, and the
                         // renderer's DynamicValueResolver pre-flattens
                         // em/rem against the LIVE font size). Resolving them
                         // here at a hardcoded 16 would silently mask those

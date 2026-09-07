@@ -1,6 +1,6 @@
 // TextShadowExtractor.ts — folds `TextShadow` IR properties into a TextShadowConfig.
 // Family: text-shadow.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextShadowConfig, TEXT_SHADOW_PROPERTY_TYPE, TextShadowPropertyType } from './TextShadowConfig';
 import { extractLength, toCssLength } from '../core/types/LengthValue';

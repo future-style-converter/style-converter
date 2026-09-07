@@ -1,0 +1,33 @@
+missing per-column cells (test has some diff but not this column): { web: 0, ios: 0, android: 0 } allThreeMissing: 0 refUnavailable: 0 errorCells: 0
+CAUSAL FAMILIES: { 'extraction-wall': 52, 'ref-unachievable': 4 }
+extraction-wall excluded tests whose raw metrics pass on ALL THREE with no veto: 13
+   css/css-anchor-position/anchor-center-visibility-change.html requires-anchor-positioning-runtime+requires-script-mutation postLoad= false struct= false 0.9843/0.9835/0.9835
+   css/css-anchor-position/anchor-scope-scroll.html requires-anchor-positioning-runtime+requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 0.9623/0.9623/0.9623
+   css/css-backgrounds/background-attachment-local/attachment-local-positioning-2.html requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 0.9576/0.9566/0.9573
+   css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 0.9934/0.99/0.954
+   css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 0.9901/0.9908/0.9589
+   css/css-backgrounds/background-attachment-local/attachment-local-positioning-5.html requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 0.982/0.9781/0.9782
+   css/css-backgrounds/background-attachment-local/attachment-scroll-positioning-1.html requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 0.9902/0.9903/0.9906
+   css/css-masking/clip-path/clip-path-on-fixed-position-scroll.html requires-script-driven-scroll postLoad= false struct= false 0.9886/0.9888/0.989
+   css/css-position/overlay/overlay-button-appearance.html requires-script-mutation postLoad= false struct= false 0.989/0.9803/0.9803
+   css/css-position/overlay/overlay-transition-backdrop-entry.html requires-script-mutation postLoad= false struct= false 1/1/1
+   css/css-position/position-fixed-scroll-nested-fixed.html requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 1/1/1
+   css/css-view-transitions/dialog-in-top-layer-during-transition-old.html requires-script-mutation postLoad= false struct= false 0.9647/0.9647/0.9647
+   css/filter-effects/backdrop-filter-edge-behavior.html requires-script-driven-scroll+requires-script-mutation postLoad= false struct= false 0.9534/0.9516/0.9506
+CSS-ANCHOR-POSITION excluded detail ( 16 ):
+   anchor-center-overflow-001.html | requires-anchor-positioning-runtime,requires-containing-block-layout,requires-float-layout,requires-orthogonal-flow | postLoad= false | lossy= [] | web=0.6037 ios=0.6135V android=0.609V | "no-per-test-ir"
+   anchor-center-overflow-002.html | requires-anchor-positioning-runtime,requires-containing-block-layout,requires-float-layout,requires-orthogonal-flow | postLoad= false | lossy= [] | web=0.6676 ios=0.6753 android=0.659V | "no-per-test-ir"
+   anchor-center-overflow-003.html | requires-anchor-positioning-runtime,requires-containing-block-layout,requires-float-layout,requires-orthogonal-flow | postLoad= false | lossy= ["percentage"] | web=0.7384V ios=0.655V android=0.6719V | "no-per-test-ir"
+   anchor-center-overflow-004.html | requires-anchor-positioning-runtime,requires-containing-block-layout,requires-float-layout,requires-orthogonal-flow | postLoad= false | lossy= [] | web=0.5364V ios=0.5745V android=0.5674V | "no-per-test-ir"
+   anchor-center-overflow-005.html | requires-anchor-positioning-runtime,requires-inline-FC | postLoad= false | lossy= [] | web=0.8422 ios=0.7876 android=0.7872 | "no-per-test-ir"
+   anchor-center-safe-rtl.html | requires-anchor-positioning-runtime,requires-containing-block-layout | postLoad= false | lossy= ["body-inherited-baked","baked-bidi-visual-order"] | web=0.9032 ios=0.8851 android=0.8842 | "no-per-test-ir"
+   anchor-center-scroll-001.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= [] | web=0.9297 ios=0.9384 android=0.9295 | "no-per-test-ir"
+   anchor-center-scroll-002.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= ["inline-run-merged","percentage"] | web=0.999V ios=0.9974V android=0.9966V | "no-per-test-ir"
+   anchor-center-scroll-003.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= ["inline-run-merged","percentage"] | web=0.9379V ios=0.9251 android=0.9244 | "no-per-test-ir"
+   anchor-center-visibility-change.html | requires-anchor-positioning-runtime,requires-script-mutation | postLoad= false | lossy= [] | web=0.9843 ios=0.9835 android=0.9835 | "no-per-test-ir"
+   anchor-scope-scroll.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation,requires-viewport-canvas | postLoad= false | lossy= [] | web=0.9623 ios=0.9623 android=0.9623 | "no-per-test-ir"
+   anchor-scroll-chained-001.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= [] | web=0.9375V ios=0.9375V android=0.9375V | "no-per-test-ir"
+   anchor-scroll-chained-002.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= [] | web=0.9242V ios=0.909 android=0.909 | "no-per-test-ir"
+   anchor-scroll-chained-003.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= [] | web=0.9125V ios=0.9184V android=0.9184V | "no-per-test-ir"
+   anchor-scroll-chained-004.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= [] | web=0.923 ios=0.9165 android=0.9165 | "no-per-test-ir"
+   anchor-scroll-chained-fallback.html | requires-anchor-positioning-runtime,requires-script-driven-scroll,requires-script-mutation | postLoad= false | lossy= [] | web=0.8765V ios=0.8765V android=0.885V | "no-per-test-ir"

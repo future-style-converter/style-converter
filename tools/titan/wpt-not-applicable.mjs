@@ -233,8 +233,12 @@ const RX = {
     // Rule 6 — requires-table-layout:
     //   Native `<table>`/`<thead>`/`<tbody>`/`<tr>`/`<td>`/`<th>` elements
     //   OR `display: table`/`table-row`/`table-cell`/`table-caption`/etc.
-    //   The IR has no table-layout fixup pass (anonymous-table generation,
-    //   row/column algorithms, border-collapse).
+    //   RE-TIERED 2026-09-04 (retro A9#8): the IR had no table-layout fixup
+    //   pass when swarm-001 wrote this; the runtimes have one now
+    //   (runtimes/*/table/ on all three — the box tree landed wave 32 on
+    //   compose and wave 34 on swiftui, with separated/collapsed track
+    //   sizing). 182 of 255 tagged cells PASS at wave 49, so the tag marks a
+    //   TIER (residual CSS 2.1 §17 fixup), not an absence.
     //   Source: investigations/swarm-001/css-backgrounds__background-color-animation-with-table1.json
     //           investigations/swarm-001/css-tables__anonymous-table-ws-001.json
     tableTag:           /<(?:table|thead|tbody|tfoot|tr|td|th|caption|colgroup|col)\b/i,
@@ -288,8 +292,13 @@ const RX = {
     //   `position: fixed` / `position: absolute` with bottom/right offsets
     //   that need to be resolved against an ancestor's USED height — which
     //   only works when the IR carries the parent tree AND the engine
-    //   computes used heights bottom-up. The current flat IR makes this
-    //   impossible.
+    //   computes used heights bottom-up.
+    //   RE-TIERED 2026-09-04 (retro A9#8): "the current flat IR makes this
+    //   impossible" is no longer true — IR v2's slot/placement channel
+    //   carries the parent relation (schema/spec/03-children.md) and the
+    //   natives resolve the block (ContainingBlock{,Basis}.swift,
+    //   TransformContainingBlock.{kt,swift}). 289 of 345 tagged cells PASS
+    //   at wave 49: a tier, not a wall.
     //   Heuristic: same rule as the source HTML containing `position:
     //   fixed|absolute` AND a `bottom:` or `right:` declaration. We deliberately
     //   require BOTH signals (not just position:absolute alone) to avoid
@@ -300,9 +309,16 @@ const RX = {
 
     // Rule 11 — requires-orthogonal-flow:
     //   `writing-mode: vertical-*` or `writing-mode: sideways-*` combined
-    //   with descendants that have a different flow direction. The IR
-    //   doesn't carry the parent tree needed to resolve "nearest ancestor
-    //   scroller" max-height per CSS-Writing-Modes-3 §7.3.
+    //   with descendants that have a different flow direction. The residual
+    //   class is the "nearest ancestor scroller" max-height resolution of
+    //   css-writing-modes-4 §7.3 (Orthogonal Flows).
+    //   RE-TIERED 2026-09-04 (retro A9#8): the flat-IR premise this banner
+    //   used to give ("the IR doesn't carry the parent tree needed") expired
+    //   with IR v2's slot/placement channel; all three carry a WritingMode
+    //   triplet and both natives run VerticalBlockFlowLayout.{kt,swift}
+    //   (wave 47, #123). 221 of 315 tagged cells PASS at wave 49 (70% — the
+    //   weakest of the eight re-tiered tags, so this one still has the most
+    //   work behind it).
     //   Heuristic: writing-mode keyword in source — we accept any vertical-*
     //   /sideways-* OR an explicit `text-orientation` setting.
     //   Source: investigations/swarm-001/css-writing-modes__available-size-001.json
@@ -435,10 +451,15 @@ const RX = {
 
     // Rule 21 — requires-fragmentation:
     //   Multi-column / page-break / region-fragment properties that need a
-    //   real fragmentation engine. CLAUDE.md marks multicol as
-    //   "config extraction only" on all three platforms (Compose has no
-    //   Modifier.column*, SwiftUI has no multicol, the web SDUI renders
-    //   each component in its own card outside any multicol container).
+    //   real fragmentation engine.
+    //   RE-TIERED 2026-09-04 (retro A9#8): swarm-002 wrote this when CLAUDE.md
+    //   marked multicol "config extraction only". A real column pass exists
+    //   now — runtimes/*/columns/ is 28 compose / 27 swiftui / 46 web source
+    //   files, and the FRAGMENTATION half is campaign work: MulticolFloatStrip*
+    //   (wave 44, #119), MulticolClone*/FragmentGeometry (wave 46, #122),
+    //   MulticolDescendantSpanner beside them. 341 of 429 tagged cells PASS at
+    //   wave 49. The residual class is css-break-3 §3 break controls, not the
+    //   engine's absence.
     //   Heuristic fires when ANY of:
     //     - `column-fill|column-count|column-width|columns:` in the source
     //     - `break-(before|after|inside): <non-auto>`
@@ -453,12 +474,20 @@ const RX = {
 
     // Rule 22 — requires-containment:
     //   `contain:` with any non-`none` value (layout, paint, style, size,
-    //   inline-size, strict, content, or any combination). Only the web
-    //   has a Contain triplet (runtimes/web/src/engine/performance/
-    //   Contain*); Android + iOS have none. Even on web, `contain` only
-    //   has meaning when the component contains its own children in the
-    //   rendered surface — and the per-component card host doesn't yet
-    //   compose children that way.
+    //   inline-size, strict, content, or any combination). Web has the
+    //   dedicated Contain triplet (runtimes/web/src/engine/performance/
+    //   Contain*); the natives REGISTER the property and deliberately no-op
+    //   it (PerformanceRegistration.kt: "contain / content-visibility:
+    //   Compose auto-composes … No-op"; the PerformanceApplier containment
+    //   branch is legacy and the renderer never chains it, as its own comment
+    //   says). css-contain-2 §2 defines the property.
+    //   RE-TIERED 2026-09-04 (retro A9#8): unlike the other seven re-tiered
+    //   tags this one's ABSENCE claim still holds on the natives — what was
+    //   wrong is the implied consequence. MEASURED: 164 of 204 tagged cells
+    //   PASS at wave 49 (80%), because the rule fires on ANY `contain:`
+    //   declaration and containment rarely changes what a single per-card
+    //   component paints. So the tag marks a TIER of the TEST SET, not a
+    //   wall: do not read it as "these cells are lost".
     //   Source: investigations/swarm-002/css-contain__contain-body-overflow-001.json
     containNonNone:     /\bcontain\s*:\s*(?!none\b)(?:layout|paint|style|size|inline-size|strict|content|\s)+(?:[;{}]|$)/i,
 
@@ -500,10 +529,15 @@ const RX = {
     // Rule 25 — requires-gap-decorations:
     //   CSS Gap Decorations Level 1 — `column-rule-*` (or upcoming
     //   row-rule-* / gap-rule shorthand) on `display: flex | grid |
-    //   inline-flex | inline-grid` containers. None of the three SDUI
-    //   style engines implement the flex/grid integration of column-rule
-    //   painting; Chromium itself only paints these on multicol without
-    //   the GapDecorations blink feature flag.
+    //   inline-flex | inline-grid` containers. Chromium itself only paints
+    //   these on multicol without the GapDecorations blink feature flag.
+    //   RE-TIERED 2026-09-04 (retro A9#8): "None of the three SDUI style
+    //   engines implement the flex/grid integration" was refuted by the
+    //   wave-24/25 gap lanes (compose GapDecorationPainter.kt landed in #89,
+    //   swiftui GapDecorationsPainter.swift in #90) — the painters now sit in
+    //   compose/swiftui columns/ beside web's ColumnRule*/RowRule* triplets
+    //   in engine/columns/. 126 of 138 tagged cells PASS at wave 49 (91%, the
+    //   strongest of the eight re-tiered tags).
     //   Heuristic: source contains `display: flex | grid` AND
     //   `column-rule-` (style/width/color) on the same rule or sibling
     //   rules. Conservatively fire if BOTH signals are present anywhere
@@ -599,13 +633,16 @@ const RX = {
     siblingBlockTagOpen:    /<(?:div|p)\b/gi,
 
     // Rule 31 — requires-float-layout:
-    //   Any non-trivial `float: left|right|inline-start|inline-end`. The float
-    //   property is not implemented on any of the three runtime renderers;
-    //   CLAUDE.md's "Not Applicable to Mobile" section enumerates the absence
-    //   of float-style flow layout. Compose, SwiftUI, and the web renderer's
-    //   per-component card surface all lay out children with no concept of
-    //   CSS float positioning. Note `float: none` is the default and shouldn't
-    //   trigger — we explicitly exclude `none`.
+    //   Any non-trivial `float: left|right|inline-start|inline-end` (CSS 2.1
+    //   §9.5). Note `float: none` is the default and shouldn't trigger — we
+    //   explicitly exclude `none`.
+    //   RE-TIERED 2026-09-04 (retro A9#8): swarm-003 wrote "not implemented on
+    //   any of the three runtime renderers" in wave ~10; wave 19 (#83) landed
+    //   FloatRowLayout.kt / FloatRowPacking.swift on both natives beside web's
+    //   pre-existing engine/layout/Float* triplet, and waves 44/46 added the
+    //   multicol float strip (MulticolFloatStrip*). 9 compose / 8 swiftui / 4
+    //   web source files today, and 239 of 282 tagged cells PASS at wave 49.
+    //   The residual class is the clear/<br> wall (BACKLOG #3).
     //   Source: investigations/swarm-003/CSS2__float-nowrap-5.json
     floatNonTrivial:    /\bfloat\s*:\s*(?:left|right|inline-start|inline-end)\b/i,
 
@@ -1678,11 +1715,11 @@ export function declaresGridLanesLayout(html) {
 
 // ── wave-37 lane W7: the HYPHENATION-DICTIONARY boundary (Rule 45) ──────────
 //
-// A NATIVE-ONLY, INFORMATIONAL tag. It names the one half of css-text-3 §6.1
+// A NATIVE-ONLY, INFORMATIONAL tag. It names the one half of css-text-3 §5.3
 // that neither native runtime can reach, and it is deliberately narrow: only
 // `hyphens: auto` ON LANGUAGE-TAGGED CONTENT.
 //
-// WHY THE LANGUAGE TAG IS THE WHOLE RULE. §6.1 defines `auto` as breaking
+// WHY THE LANGUAGE TAG IS THE WHOLE RULE. §5.3 defines `auto` as breaking
 // "at appropriate hyphenation points … as determined by … a hyphenation
 // resource appropriate to the LANGUAGE of the text", and WPT asserts the
 // contrapositive directly: css-text/hyphens-auto-001's own title is "no
@@ -1759,7 +1796,7 @@ export function needsHyphenationDictionary(html) {
     // WPT idiom is `<body lang="en">` or a per-div `lang`), or a `:lang()`
     // selector, which is how the i18n subdirectory tags its cases. Requiring
     // a letter after the `=` rejects `lang=""` (explicitly UNKNOWN language,
-    // which per §6.1 must NOT hyphenate — same reading as no tag at all).
+    // which per §5.3 must NOT hyphenate — same reading as no tag at all).
     return /\b(?:xml:)?lang\s*=\s*["']?[a-zA-Z]/.test(s)
         || /:lang\(/i.test(s);
 }
@@ -1774,6 +1811,32 @@ export function needsHyphenationDictionary(html) {
 //   description     — one-line reason for git blame
 //   swarm001Source  — the swarm-001 investigation file(s) that surfaced it
 //   test(html, ctx) — boolean predicate; ctx = { refHtml, testRel, refPath }
+//
+// DESCRIPTIONS ARE TIER STATEMENTS, NOT CAPABILITY OBITUARIES (retro A9#8,
+// 2026-09-04). `description` is copied VERBATIM onto every tagged row
+// (bucket-wpt.mjs → notApplicable → the manifests' notApplicableTags), so a
+// dashboard reader takes it as the current state of the runtimes. Eight of
+// these were written in swarm-001/002/003 (waves ~8-12) as absences — "not
+// implemented on any platform", "None of the three SDUI style engines
+// implement…", "fragmentation engine not implemented" — and waves 19-47 then
+// SHIPPED seven of those capabilities (float wave 19, gap decorations 24/25,
+// tables 32/34, multicol fragmentation 44/46, vertical block flow 47) without
+// anyone rewriting the sentence; the eighth, requires-containment, is still a
+// deliberate native no-op and its rewrite says so. Same
+// shape as the Rule-43 premise that expired unnoticed: harmless to the
+// numbers (verified: none of the eight is in ANY exclusion family in
+// inject-wpt-block.mjs — SCORE_EXCLUDED_TAGS / EXTRACTION_WALL_TAGS /
+// FONT_FACE_WALL_TAGS / REF_UNACHIEVABLE_TAGS / NATIVE_FONT_PARITY_TAGS —
+// so every tagged cell stays scoreEligible and IS counted; the wave-49
+// per-tag scored counts below are the proof), but a future wave proposing an
+// exclusion family from a stale sentence would be arguing from a false
+// premise. So: when a tag names a capability that now EXISTS, the
+// description states the TIER — the implementing files and the measured
+// pass rate of its tagged cells at the last full corpus run — and the tag
+// keeps naming the residual class, not a void. Re-measure with the census
+// idiom (scored = typeof ssim === 'number' && !scoreExcluded; pass =
+// wptPass === true) over tools/titan/runs/<run>/sections/*/manifest.json
+// when you change one.
 // ---------------------------------------------------------------------------
 
 export const RULES = [
@@ -1941,7 +2004,19 @@ export const RULES = [
     },
     {
         tag: 'requires-table-layout',
-        description: '<table>/<tr>/<td>/... or display:table* — table-fixup + row/column layout',
+        // TIER, not absence (retro A9#8): table layout ships on all three —
+        // runtimes/{compose,swiftui,web}/…/table/ (6 · 4 · 16 source files at
+        // the 2026-09-05 retro census: TableBoxTree from wave 32 (#103) on
+        // compose and wave 34 (#105) on swiftui, TableSeparatedTracks on both
+        // natives, web's TableLayout{Config,Extractor,Applier}).
+        // CollapsedBorderConflict, which the first draft of this comment
+        // listed as shipped, was DELETED on both natives at the retro's
+        // P2a/P2b dead-code sweep — it had no production caller (retro S4#4;
+        // docs/BACKLOG.md "Mechanisms with no production caller"). The file
+        // census is descriptive only: the tag's test() and its exclusion
+        // semantics do not read it. What the tag still names is the residual
+        // CSS 2.1 §17 fixup class, not a void.
+        description: '<table>/<tr>/<td>/... or display:table* — table-fixup + row/column layout (CSS 2.1 §17). TIER, not absence: implemented on all three (runtimes/*/table/, 6 compose · 4 swiftui · 16 web files); 182/255 tagged cells PASS at wave 49 (71%)',
         swarm001Source: [
             'css-backgrounds__background-color-animation-with-table1.json',
             'css-tables__anonymous-table-ws-001.json',
@@ -1974,7 +2049,15 @@ export const RULES = [
     },
     {
         tag: 'requires-containing-block-layout',
-        description: 'position:fixed/absolute with bottom/right offsets — needs ancestor used-height resolution',
+        // TIER, not absence (retro A9#8): the ancestor resolution the banner
+        // at RX.posFixedAbsolute called impossible under the flat IR is
+        // implemented — swiftui Renderer/ContainingBlock.swift +
+        // ContainingBlockBasis.swift, layout/position/TransformContainingBlock
+        // .{kt,swift}, compose columns/MulticolSpannerContainingBlock.kt —
+        // because IR v2's slot/placement channel carries the parent relation
+        // (schema/spec/03-children.md); ContainingBlock.swift dates to the
+        // fidelity-wave-3 tree work (#28). CSS 2.1 §10.1 defines the block.
+        description: 'position:fixed/absolute with bottom/right offsets — ancestor used-height resolution (CSS 2.1 §10.1). TIER, not absence: resolved on the natives (ContainingBlock{,Basis}.swift, TransformContainingBlock.{kt,swift}); 289/345 tagged cells PASS at wave 49 (84%)',
         swarm001Source: [
             'css-position__absolute-pos-box-inside-fixed-pos-box-with-changing-height.json',
         ],
@@ -1982,7 +2065,14 @@ export const RULES = [
     },
     {
         tag: 'requires-orthogonal-flow',
-        description: 'writing-mode: vertical-* / sideways-* — orthogonal-flow layout pass needed',
+        // TIER, not absence (retro A9#8): all three carry a WritingMode
+        // triplet (compose typography/text/, swiftui typography/writing/, web
+        // engine/typography/) and both natives run a vertical block-flow pass
+        // (VerticalBlockFlowLayout.{kt,swift}, wave 47). css-writing-modes-4 §7.3
+        // (Orthogonal Flows) is the residual class this tag still names — and
+        // at 70% it is the WEAKEST of the eight re-tiered tags, i.e. the one
+        // with the most renderer work left behind it.
+        description: 'writing-mode: vertical-* / sideways-* — orthogonal-flow layout (css-writing-modes-4 §7.3). TIER, not absence: WritingMode triplet on all three + VerticalBlockFlowLayout.{kt,swift}; 221/315 tagged cells PASS at wave 49 (70%, the weakest of the re-tiered eight)',
         swarm001Source: [
             'css-writing-modes__available-size-001.json',
         ],
@@ -2104,7 +2194,13 @@ export const RULES = [
     },
     {
         tag: 'requires-fragmentation',
-        description: 'Multi-column / page-break / region-fragment — fragmentation engine not implemented',
+        // TIER, not absence (retro A9#8): "fragmentation engine not
+        // implemented" was true when swarm-002 wrote it and false since the
+        // wave-44/46 multicol lanes — runtimes/*/columns/ holds 28 compose /
+        // 27 swiftui / 46 web source files (MultiColumn{Config,Extractor,
+        // Applier}, MulticolClone*, MulticolFloatStrip*, FragmentGeometry).
+        // The residual is the css-break-3 §3 break-controls class.
+        description: 'Multi-column / page-break / region-fragment (css-break-3 §3). TIER, not absence: column fragmentation ships (runtimes/*/columns/, 28 compose · 27 swiftui · 46 web files; the clone/strip geometry landed waves 44-46); 341/429 tagged cells PASS at wave 49 (79%)',
         swarm001Source: [],
         swarm002Source: [
             'css-break__block-max-height-004.json',
@@ -2114,7 +2210,14 @@ export const RULES = [
     },
     {
         tag: 'requires-containment',
-        description: 'contain: <non-none> — CSS Containment, no Android/iOS applier and per-card host has no children to contain',
+        // TIER, not absence (retro A9#8) — and the ONLY one of the eight
+        // whose absence half survives verification: the natives register
+        // Contain and deliberately NO-OP it (PerformanceRegistration.kt),
+        // while web has the real Contain* triplet. What the old text implied
+        // and the measurement refutes is that the tagged cells are therefore
+        // lost: 80% of them pass, because the rule fires on any `contain:`
+        // declaration and containment seldom alters a single card's paint.
+        description: 'contain: <non-none> — CSS Containment (css-contain-2 §2). Web has the Contain* triplet; the natives register the property and deliberately no-op it (PerformanceRegistration.kt). TIER of the TEST SET, not a wall: 164/204 tagged cells PASS at wave 49 (80%) — the rule fires on any contain: declaration and containment seldom changes what a single card paints',
         swarm001Source: [],
         swarm002Source: [
             'css-contain__contain-body-overflow-001.json',
@@ -2152,7 +2255,13 @@ export const RULES = [
     },
     {
         tag: 'requires-gap-decorations',
-        description: 'column-rule-* / row-rule-* on display:flex|grid — CSS Gap Decorations L1',
+        // TIER, not absence (retro A9#8): the RX banner's "None of the three
+        // SDUI style engines implement the flex/grid integration" was refuted
+        // by the wave-24/25 gap lanes — GapDecoration* painters in
+        // compose/swiftui columns/, web's ColumnRule*/RowRule* triplets in
+        // engine/columns/. At 91% this is the STRONGEST of the eight
+        // re-tiered tags: it now labels a family we largely render.
+        description: 'column-rule-* / row-rule-* on display:flex|grid — CSS Gap Decorations L1. TIER, not absence: painted on all three since waves 24-25 (GapDecoration* in compose/swiftui columns/, ColumnRule*/RowRule* in web engine/columns/); 126/138 tagged cells PASS at wave 49 (91%, the strongest of the re-tiered eight)',
         swarm001Source: [],
         swarm002Source: [
             'css-gaps__flex-gap-decorations-007.json',
@@ -2179,7 +2288,13 @@ export const RULES = [
     },
     {
         tag: 'requires-multicol-fragmentation',
-        description: 'css-multicol/* test exercising column-* layout — needs multicol fragmentation engine',
+        // TIER, not absence (retro A9#8): the multicol column-box geometry
+        // this tag says is "needed" is implemented (MultiColumnDistribution,
+        // MulticolCloneGeometry + FragmentGeometry from wave 46 (#122),
+        // MulticolDescendantSpanner, in runtimes/*/columns/) — css-multicol-1
+        // §3's column model. The tag keeps its dashboard job: splitting the
+        // multicol family out of the broader Rule-21 fragmentation bucket.
+        description: 'css-multicol/* test exercising column-* layout (css-multicol-1 §3). TIER, not absence: column-box geometry ships (MultiColumn*/Multicol* in runtimes/*/columns/); 110/126 tagged cells PASS at wave 49 (87%)',
         swarm001Source: [],
         swarm002Source: [
             'css-multicol__multicol-clip-scrolled-content-001.json',
@@ -2233,7 +2348,13 @@ export const RULES = [
     },
     {
         tag: 'requires-float-layout',
-        description: 'float: left|right|inline-start|inline-end — float layout not implemented on any platform',
+        // TIER, not absence (retro A9#8): the natives grew float layout in
+        // wave 19 (#83: FloatRowLayout.kt / FloatRowPacking.swift) next to
+        // web's engine/layout/Float* triplet, plus columns/MulticolFloatStrip*
+        // in waves 44/46 — 9 compose · 8 swiftui · 4 web source files. CSS 2.1
+        // §9.5 is the model; the residual class the tag still names is the
+        // clear/<br> wall (BACKLOG #3).
+        description: 'float: left|right|inline-start|inline-end (CSS 2.1 §9.5). TIER, not absence: implemented on all three since wave 19 (layout/Float*; multicol strips in waves 44/46); 239/282 tagged cells PASS at wave 49 (85%); residual = the clear/<br> wall',
         swarm001Source: [],
         swarm002Source: [],
         swarm003Source: [
@@ -2366,15 +2487,53 @@ export const RULES = [
         // they name 404s. The wave-21 gate run surfaced
         // css/css-images/cross-fade-cross-origin-orientation.sub.html
         // reaching extraction with a fixture emitted — the tag makes the
-        // server dependency explicit so the dashboard's denominator can
-        // never quietly include a test our file://-based pipeline cannot
-        // run faithfully. Deliberately filename-only (unambiguous, spec'd
+        // server dependency explicit on the dashboard.
+        //
+        // WHAT IT DOES NOT DO (corrected 2026-09-04, retro A12#7): this
+        // banner used to claim "the dashboard's denominator can never
+        // quietly include a test our file://-based pipeline cannot run
+        // faithfully". It cannot deliver that: `requires-wpt-server` is in
+        // NO exclusion family in inject-wpt-block.mjs (not
+        // SCORE_EXCLUDED_TAGS / EXTRACTION_WALL_TAGS / FONT_FACE_WALL_TAGS /
+        // REF_UNACHIEVABLE_TAGS / NATIVE_FONT_PARITY_TAGS), so a tagged test
+        // stays scoreEligible and IS in the denominator. The tag is
+        // INFORMATIONAL — it labels the row, it does not gate it.
+        // MEASURED (wave49-final, the single tagged member of the depth-48
+        // sample): css/css-images/cross-fade-cross-origin-orientation.sub
+        // scores web 0.9717 / iOS 0.9698 / Android 0.9477, three permanent
+        // FAILs. It is unpassable AS SCORED, not merely hard: the test's
+        // only image is `url("http://{{host}}:{{ports[http][1]}}/…/exif-
+        // orientation-6-ru.jpg")` while its ref loads the SAME file
+        // same-origin, so under file:// the ref paints the photo and the
+        // test paints an empty 50×100 box for every renderer, ours or
+        // Chromium's. Same class as css-values fallbacks-005 (BACKLOG 5d,
+        // "UNPASSABLE AS SCORED").
+        // THE EXCLUSION DECISION IS DELIBERATELY NOT TAKEN HERE. Precision
+        // is not the blocker — over the pinned mirror every `*.sub.html`
+        // REFTEST is genuinely server-bound: 38 of 38 (36 place a
+        // substitution token inside a src/href/data/url() resource URL;
+        // css-masking/mask-image-cors-001 builds its origins from
+        // {{domains}} in script and css-view-transitions/root-element-
+        // transition-iframe-cross-origin pulls a cross-origin frame through
+        // /common/get-host-info.sub.js — both equally undeliverable). What
+        // is missing is the OTHER half of every exclusion family's contract:
+        // a delivery record that can re-admit the test the day the pipeline
+        // does serve it. requires-bundled-asset re-admits on the extractor's
+        // lossyReasons; here lossyReasons records only 'percentage' for this
+        // test — the inliner never even noticed the absolute http:// URL, so
+        // there is nothing to corroborate the textual tag with and nothing
+        // to retire it by. Adding the tag to SCORE_EXCLUDED_TAGS would drop
+        // 3 failing cells from a 4111-cell denominator (81.34% → 81.40%) on
+        // a filename alone. Route: fix the inliner to stamp an
+        // undeliverable-absolute-URL reason, then decide this tag and
+        // fallbacks-005 together in one exclusion lane.
+        // Deliberately filename-only (unambiguous, spec'd
         // by the WPT file-name-flags contract); token-in-body detection
         // stays Rule 38's job, so the two rules overlap on typical
         // `.sub.html` files — a benign double tag, like the existing
         // cross-origin + sub-template overlap.
         tag: 'requires-wpt-server',
-        description: '.sub.html filename — needs the wptserve server (substitution + multi-origin serving); file:// rendering is unfaithful',
+        description: '.sub.html filename — needs the wptserve server (substitution + multi-origin serving); file:// rendering is unfaithful. INFORMATIONAL: in no exclusion family, so tagged tests stay in the scored denominator (retro A12#7)',
         swarm001Source: [],
         swarm002Source: [],
         swarm003Source: [
@@ -2477,7 +2636,7 @@ export const RULES = [
         // platform keeps scoring. The wiring recipe for a future wave that
         // wants to spend it is in the banner.
         tag: 'requires-hyphenation-dictionary',
-        description: 'Declares `hyphens: auto` on language-tagged content (lang= / xml:lang= / :lang()). css-text-3 §6.1 makes the break points a LANGUAGE-dependent dictionary lookup; the IR wire carries no language channel, so neither native can select a dictionary (and iOS additionally has no ImageRenderer-safe TextKit hyphenation seam) — `auto` degrades to `manual` there. Measured on the wave-36 depth-48 gate: web 5/9, iOS 0/9, Android 1/9 across the language-tagged css-text/hyphens cells. NATIVE-ONLY and INFORMATIONAL: in no exclusion family, never changes scoreEligible. Untagged `auto` is deliberately NOT matched — it must render like `manual` (WPT hyphens-auto-001), and it does.',
+        description: 'Declares `hyphens: auto` on language-tagged content (lang= / xml:lang= / :lang()). css-text-3 §5.3 makes the break points a LANGUAGE-dependent dictionary lookup; the IR wire carries no language channel, so neither native can select a dictionary (and iOS additionally has no ImageRenderer-safe TextKit hyphenation seam) — `auto` degrades to `manual` there. Measured on the wave-36 depth-48 gate: web 5/9, iOS 0/9, Android 1/9 across the language-tagged css-text/hyphens cells. NATIVE-ONLY and INFORMATIONAL: in no exclusion family, never changes scoreEligible. Untagged `auto` is deliberately NOT matched — it must render like `manual` (WPT hyphens-auto-001), and it does.',
         swarm001Source: [],
         swarm002Source: [],
         swarm003Source: [
@@ -2508,10 +2667,17 @@ if (RULES.length !== EXPECTED_RULE_COUNT) {
 // ---------------------------------------------------------------------------
 
 /**
- * Classify a single test against all 44 rules (17 from swarm-001 + 12 from
- * swarm-002 + 11 from swarm-003 + 1 from wave-21: requires-wpt-server + 1
- * from wave-29: browser-ref-divergent + 1 from wave-30:
- * requires-non-latin-font-parity + 1 from wave-37: requires-grid-lanes).
+ * Classify a single test against all 45 rules (17 swarm-001 + 12 swarm-002 +
+ * 11 swarm-003 + Rule 41 requires-wpt-server (wave-21) + Rule 42
+ * browser-ref-divergent (wave-29) + Rule 43 requires-non-latin-font-parity
+ * (wave-30) + Rule 44 requires-grid-lanes (wave-37) + Rule 45
+ * requires-hyphenation-dictionary (wave-37)).
+ *
+ * The count is NOT prose: EXPECTED_RULE_COUNT above is 45 and the module
+ * throws on load if RULES.length disagrees, so this sentence is the one
+ * place the number could drift — and it had, since wave-37 (retro A5#1: the
+ * docstring still said 44 and omitted Rule 45 while the guard counted 45).
+ * Keep the two in lock-step when a rule lands.
  *
  * @param {object} args
  * @param {string} args.html       — raw test HTML source

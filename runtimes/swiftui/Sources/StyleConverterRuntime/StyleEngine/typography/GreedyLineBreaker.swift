@@ -59,10 +59,10 @@ enum GreedyLineBreaker {
     /// captures show the undercount this repairs (hyphens-manual-011:
     /// 3 rendered lines centered in a 2-line frame, 0.8832).
     /// - Parameters:
-    ///   - hyphenate: wave 40 (lane T2) — the css-text-3 §6.1 `auto`
+    ///   - hyphenate: wave 40 (lane T2) — the css-text-3 §5.3 `auto`
     ///     dictionary, as "every offset inside this word where a hyphen
     ///     may be inserted" (AutoHyphenation.breakOffsets). nil for every
-    ///     run that is not `hyphens: auto` with a language tag. §6.1's
+    ///     run that is not `hyphens: auto` with a language tag. §5.3's
     ///     priority rule is applied HERE: a word whose characters
     ///     explicitly suggest break points (a soft hyphen or a literal
     ///     hyphen) never consults the dictionary — the WPT
@@ -175,7 +175,7 @@ enum GreedyLineBreaker {
     /// the shared greedy split walk.
     ///
     /// Explicit marks (soft hyphens recorded by `analyze`, literal
-    /// hyphens) suppress the dictionary for THIS word: css-text-3 §6.1
+    /// hyphens) suppress the dictionary for THIS word: css-text-3 §5.3
     /// gives characters inside the word priority over the hyphenation
     /// resource. Only a mark-free word under `hyphens: auto` consults
     /// `hyphenate`, whose offsets become paint-a-hyphen points exactly as
@@ -214,7 +214,7 @@ enum GreedyLineBreaker {
     ///
     /// `lines(text:maxWidth:measure:)` guarantees a fit for every line
     /// EXCEPT one holding a single word wider than `maxWidth`, which CSS
-    /// 2.1 §9.5 / css-text-3 §5.2 require to overflow the line box rather
+    /// 2.1 §9.5 / css-text-3 §5.5 require to overflow the line box rather
     /// than break (the emergency break is reserved for `overflow-wrap:
     /// break-word|anywhere` / `word-break: break-all`). TextKit does not
     /// know that, so the caller must take the run out of the
@@ -242,7 +242,7 @@ enum GreedyLineBreaker {
     /// Wave 40 (lane T2) — `dictionaryHyphenation` VETOES the claim per
     /// line. The `hasSoftWrapOpportunity` predicate answers "does UAX #14
     /// give this line a break?", which is the complete answer only while
-    /// the hyphenator is off; under `hyphens: auto` §6.1 adds the
+    /// the hyphenator is off; under `hyphens: auto` §5.3 adds the
     /// dictionary's points, and `lines(…)` has ALREADY spent them (the
     /// hyphenated head carries a real hyphen character, so a line that
     /// still overflows here genuinely had nowhere to go). Lines with no

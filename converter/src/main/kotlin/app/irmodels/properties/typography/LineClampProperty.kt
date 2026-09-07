@@ -43,10 +43,23 @@ data class LineClampProperty(
          * explicit `ellipsis` keyword — the marker longhand's INITIAL value
          * (WPT line-clamp-valid.html pins `line-clamp: 8 ellipsis` ≡ `8`), so
          * every pre-wave-42 emission stays BYTE-IDENTICAL: the converter's
-         * Json leaves `encodeDefaults` off and omits the field, and both
-         * native decoders read only `{type,count}` from this object (Compose
-         * LineClampCap.linesCount / TextStyleApplier.extractLineClampValue,
-         * Swift LineClampExtractor) — the field is strictly additive.
+         * Json leaves `encodeDefaults` off and omits the field — it is
+         * strictly additive (absent for `4` and `4 ellipsis`).
+         *
+         * Readers (retrospective R3, finding A5#4 — this note used to claim
+         * both natives read only `{type,count}`, stale since wave 46):
+         *  - Swift `LineClampExtractor` folds it into
+         *    `LineClampConfig.markerSuppressed` (wave 46) and
+         *    `LineClampCap.leafLineLimit` routes a marker-less clamp through
+         *    the height cap because `.lineLimit` always paints "…".
+         *  - Web `LineClampExtractor.suppressesMarker` (wave 42) reads it to
+         *    keep the `-webkit-box` trio off for marker-less clamps.
+         *  - Compose reads it through `typography/LineClampWire` (R3) for
+         *    `TextStyleApplier.extractLineClampMarkerSuppressed`,
+         *    `TypographyExtractor` (config.lineClampMarkerSuppressed) and
+         *    `scrolling/LineClampCap.markerSuppressed`; the count readers
+         *    (`LineClampCap.linesCount`, `extractLineClampValue`,
+         *    `extractLineClamp`) still read only `{type,count}`.
          */
         @Serializable
         @SerialName("lines")
@@ -80,7 +93,7 @@ data class LineClampProperty(
     sealed interface BlockEllipsis {
         /**
          * `no-ellipsis` — clamp, but never render a marker; content must NOT
-         * be displaced to make room for one (css-overflow-4 §block-ellipsis;
+         * be displaced to make room for one (css-overflow-4 §4.2;
          * WPT block-ellipsis-023's assert is exactly this).
          */
         @Serializable

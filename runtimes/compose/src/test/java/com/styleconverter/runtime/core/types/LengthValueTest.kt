@@ -2,6 +2,13 @@ package com.styleconverter.runtime.core.types
 
 // Unit tests for extractLength — at least one per documented IR shape quirk.
 // Each shape snippet is copy-pasted from examples/primitives/*.json output.
+//
+// Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+// path above is GONE — renamed to `fixtures/primitives/` by restructure
+// 02e4c457, then deleted by the 2026-07-08 hard prune 1e0234f6 (#8), with
+// nothing to replace it. The shapes enumerated here (and the pins over
+// them) are now the only record of that wire contract: read the names as
+// history, not as a path to open.
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
@@ -157,7 +164,7 @@ class LengthValueTest {
     // ------------- Phase 2 spacing IR shapes -------------
 
     @Test fun `bare numeric primitive treated as PERCENT for padding and margin`() {
-        // examples/properties/spacing/padding-units.json → Padding_Percent_10
+        // fixtures/properties/spacing/padding-units.json → Padding_Percent_10
         // emits `data: 10.0` directly as a JSON number. Padding/margin
         // shorthand expansion drops the {type: percentage, value: N} wrapper
         // and keeps only the bare number, so the extractor must recognise it.
@@ -186,7 +193,7 @@ class LengthValueTest {
     // ------------- Phase 3 sizing IR shapes -------------
 
     @Test fun `type-none on max-width yields LengthValue None`() {
-        // examples/properties/sizing/width-constraints.json → MaxWidth_None
+        // fixtures/properties/sizing/width-constraints.json → MaxWidth_None
         // emits `data: {"type":"none"}`. Must not collapse to Unknown so the
         // Applier can tell "explicit none" apart from "not specified".
         val v = extractLength(parse("""{"type":"none"}"""))
@@ -214,7 +221,7 @@ class LengthValueTest {
     }
 
     @Test fun `logical sizing px shape parses as Exact`() {
-        // examples/properties/sizing/logical-sizing.json → BlockSize_100px
+        // fixtures/properties/sizing/logical-sizing.json → BlockSize_100px
         // uses the raw SizeValue shape {"px":100.0}. Phase 2 already handles
         // this — assert it keeps working for logical sizing too.
         val v = extractLength(parse("""{"px":100.0}"""))

@@ -76,15 +76,19 @@ class HueUnitTest {
     @Test
     fun `the old failure mode is really gone`() {
         // Each of these previously made the ENTIRE declaration parse to
-        // null — not a wrong hue, no colour at all.
-        for (v in listOf(
-            "hwb(200grad 20% 10%)",
-            "hwb(-45deg 0% 0%)",
-            "lch(50% 40 1.2rad)",
-            "oklch(0.7 0.15 200grad)",
-        )) {
-            assertNotNull(ColorParser.parse(v), "still null: $v")
-        }
+        // null — not a wrong hue, no colour at all. Retro R10 (A8#1): a
+        // not-null check alone cannot tell "parsed" from "parsed to the
+        // WRONG hue" — the audit's mutation M7 (grad read as degrees) passed
+        // it while the sibling unit tests failed — so each input is compared
+        // against its plain-degrees spelling. css-color-4 §4.1 <hue>:
+        // 200grad = 180deg, 1.2rad = 68.7549354deg (1.2 × 180/π); -45deg
+        // wraps to 315deg (hue is taken mod 360), and the rad identity is
+        // irrational so it carries the same 1e-4 tolerance as the hwb rad
+        // case above.
+        assertSameColor("hwb(200grad 20% 10%)", "hwb(180 20% 10%)")
+        assertSameColor("hwb(-45deg 0% 0%)", "hwb(315 0% 0%)")
+        assertSameColor("lch(50% 40 1.2rad)", "lch(50% 40 68.7549354)", 1e-4)
+        assertSameColor("oklch(0.7 0.15 200grad)", "oklch(0.7 0.15 180)")
     }
 
     @Test

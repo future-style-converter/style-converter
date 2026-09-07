@@ -1,6 +1,6 @@
 // BaselineSourceExtractor.ts — folds `BaselineSource` IR properties into a BaselineSourceConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { BaselineSourceConfig, BASELINE_SOURCE_PROPERTY_TYPE, BaselineSourcePropertyType } from './BaselineSourceConfig';
 import { kwLower } from './_shared';

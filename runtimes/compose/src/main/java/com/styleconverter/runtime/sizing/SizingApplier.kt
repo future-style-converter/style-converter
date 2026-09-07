@@ -53,7 +53,7 @@ object SizingApplier {
      * keyword lane fell back, per the no-silent-fallthrough rule.
      */
     private fun intrinsicRefusal(declaration: String) =
-        "css-sizing-3 §4 `$declaration` skipped — this box's subtree has " +
+        "css-sizing-3 §5.1 `$declaration` skipped — this box's subtree has " +
             "no intrinsic channel; the box keeps the measure its incoming " +
             "constraints give it (auto-like, mis-sized at worst, alive)."
 
@@ -95,6 +95,16 @@ object SizingApplier {
         // the normal width/height emission is suppressed for that axis.
         val minWCalcOwnsAxis = config.minWidthCalc != null && rawW is LengthValue.Exact
         val minHCalcOwnsAxis = config.minHeightCalc != null && rawH is LengthValue.Exact
+        // Retro R2 (A11#10) — a PERCENT size with a min/max on the same axis
+        // owns that axis through ONE layout-time clamp (PercentSizeClamp):
+        // `fillMaxWidth(f)` OUTER + `widthIn(min)` INNER can never honour
+        // the min (the fill hands the child a tight band), and the reverse
+        // order resolves the fraction against the clamped max. CSS 2.1
+        // §10.4/§10.7: used = clamp(percent-resolved, min, max), min wins.
+        // Null for every non-percent axis and for a percent WITHOUT min/max
+        // — those keep their byte-identical chains below.
+        val pctW = SizingClamps.percentClampSpec(rawW, minWv, maxWv, ctx)
+        val pctH = SizingClamps.percentClampSpec(rawH, minHv, maxHv, ctx)
         // Physical width wins over logical inlineSize (CSS spec).
         // Lane BX — `box-sizing: content-box` (css-sizing-3 §3): the
         // declared width/height size the CONTENT box, but this chain's
@@ -107,7 +117,11 @@ object SizingApplier {
         // inflateForContentBox is identity unless boxSizing is an
         // EXPLICIT CONTENT_BOX (null = unset keeps border-box), so the
         // whole existing corpus keeps byte-identical modifier chains.
-        if (!minWCalcOwnsAxis) r = applyWidth(r, inflateForContentBox(
+        // Retro R2 (A11#10): the percent+min/max lane replaces the fill on
+        // its axis (pairs-01 PW_Background_Sizing_04: 50% + min 300 →
+        // 300, was 179); otherwise the pre-existing emission runs unchanged.
+        if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)
+        else if (!minWCalcOwnsAxis) r = applyWidth(r, inflateForContentBox(
             clampLength(rawW, minWv, maxWv, ctx),
             // RC-B6b: the WPT flag rides the config into the width branch
             // so ch/em widths can take the overflow-aware exact path.
@@ -115,7 +129,8 @@ object SizingApplier {
             // inflation so a content-box Relative resolves against the
             // exact font/line-height basis the apply branch would use.
             config.boxSizing, config.contentBoxInflateX, ctx), ctx, config.wptCaptureMode)
-        if (!minHCalcOwnsAxis) r = applyHeight(r, inflateForContentBox(
+        if (pctH != null) r = r.percentHeightClamped(pctH.fraction, pctH.minDp, pctH.maxDp)
+        else if (!minHCalcOwnsAxis) r = applyHeight(r, inflateForContentBox(
             clampLength(rawH, minHv, maxHv, ctx),
             // Wave 44 (lane U6): ctx threaded — see the width twin above.
             config.boxSizing, config.contentBoxInflateY, ctx), ctx)
@@ -127,9 +142,10 @@ object SizingApplier {
         config.heightCalc?.let { r = r.calcSizePreferred(rowAxis = false, spec = it) }
         // Min/max constraints — kept for the case where no explicit
         // width/height was set (then clamp short-circuits to null and
-        // widthIn/heightIn carry the intent).
-        r = applyWidthIn(r, minWv, maxWv, ctx)
-        r = applyHeightIn(r, minHv, maxHv, ctx)
+        // widthIn/heightIn carry the intent). Retro R2: an axis the percent
+        // clamp owns already applied its min/max inside the one layout step.
+        if (pctW == null) r = applyWidthIn(r, minWv, maxWv, ctx)
+        if (pctH == null) r = applyHeightIn(r, minHv, maxHv, ctx)
         // calc-size MIN (floor) lane — css-flexbox-1 §4.5 / css-sizing-3
         // §5.2. The specified px rides in when the axis had a definite
         // size (the suppressed emission above); a Relative/intrinsic
@@ -150,7 +166,7 @@ object SizingApplier {
         // aspect-ratio. ratio=0.0 with isAuto means auto-only — skip modifier
         // and let Compose auto-size.
         //
-        // css-sizing-4 §5.1: a preferred aspect ratio only takes effect when
+        // css-sizing-4 §4.1: a preferred aspect ratio only takes effect when
         // AT LEAST ONE of the two sizes is auto — with both width and height
         // explicitly set, the ratio is ignored entirely. Compose's
         // aspectRatio modifier doesn't know that rule and re-measured the
@@ -370,7 +386,7 @@ object SizingApplier {
         // incoming measure instead of throwing away the whole capture.
         is LengthValue.Intrinsic -> when (v.kind) {
             // width: min-content → the box takes its MIN intrinsic width
-            // (css-sizing-3 §4: the narrowest width that avoids overflow —
+            // (css-sizing-3 §5.1: the narrowest width that avoids overflow —
             // for text, the widest unbreakable run). The pre-wave
             // wrapContentWidth() let content pick its PREFERRED width, so
             // `width: min-content` rendered max-content-wide — web showed a
@@ -380,7 +396,7 @@ object SizingApplier {
                 m.widthAtMinIntrinsic(TAG, intrinsicRefusal("width: min-content"))
             }
             // width: max-content → MAX intrinsic width (no-wrap preferred
-            // size, css-sizing-3 §4).
+            // size, css-sizing-3 §5.1).
             LengthValue.IntrinsicKind.MAX_CONTENT -> with(IntrinsicChannel) {
                 m.widthAtMaxIntrinsic(TAG, intrinsicRefusal("width: max-content"))
             }
@@ -422,7 +438,7 @@ object SizingApplier {
         // same refusal contract, height twins.
         is LengthValue.Intrinsic -> when (v.kind) {
             // height: min-content → MIN intrinsic content height under the
-            // incoming width (css-sizing-3 §4).
+            // incoming width (css-sizing-3 §5.1).
             LengthValue.IntrinsicKind.MIN_CONTENT -> with(IntrinsicChannel) {
                 m.heightAtMinIntrinsic(TAG, intrinsicRefusal("height: min-content"))
             }
@@ -450,25 +466,26 @@ object SizingApplier {
      *  does not yet — deferred with the repro until a fixture exercises it,
      *  documented here so the fallthrough is not silent. */
     private fun applyWidthIn(m: Modifier, min: LengthValue?, max: LengthValue?, ctx: SpacingContext): Modifier {
-        val mn = toDpOrNull(min, ctx)
-        val mx = toDpOrNull(max, ctx)
-        if (mn == null && mx == null) return m
-        return m.widthIn(min = mn ?: 0.dp, max = mx ?: Dp.Infinity)
+        // Retro R2 (A11#10): min-wins band (CSS 2.1 §10.4) — identical to the
+        // former `min ?: 0.dp, max ?: Infinity` whenever min ≤ max.
+        val (lo, hi) = SizingClamps.minMaxBand(toDpOrNull(min, ctx), toDpOrNull(max, ctx)) ?: return m
+        return m.widthIn(min = lo, max = hi)
     }
 
     /** Min/max height constraint. */
     private fun applyHeightIn(m: Modifier, min: LengthValue?, max: LengthValue?, ctx: SpacingContext): Modifier {
-        val mn = toDpOrNull(min, ctx)
-        val mx = toDpOrNull(max, ctx)
-        if (mn == null && mx == null) return m
-        return m.heightIn(min = mn ?: 0.dp, max = mx ?: Dp.Infinity)
+        // Retro R2 (A11#10): min-wins band (CSS 2.1 §10.7), height twin.
+        val (lo, hi) = SizingClamps.minMaxBand(toDpOrNull(min, ctx), toDpOrNull(max, ctx)) ?: return m
+        return m.heightIn(min = lo, max = hi)
     }
 
     /**
      * Reduce a min/max value to Dp. None/Auto/Unknown → null (no constraint).
      * Percentage/Relative → resolved via SpacingResolve using a default ctx.
+     * Internal (retro R2) so SizingClamps.percentClampSpec reduces min/max
+     * through the SAME function the widthIn/heightIn lane uses.
      */
-    private fun toDpOrNull(v: LengthValue?, ctx: SpacingContext): Dp? = when (v) {
+    internal fun toDpOrNull(v: LengthValue?, ctx: SpacingContext): Dp? = when (v) {
         null, LengthValue.Unknown, LengthValue.Auto, LengthValue.None -> null
         is LengthValue.Exact -> v.px.toFloat().dp
         is LengthValue.Relative, is LengthValue.Calc -> resolveToDp(v, ctx)
@@ -485,19 +502,23 @@ object SizingApplier {
         // and the calc modifiers chain in their canonical positions.
         val rawW = config.width ?: config.inlineSize
         val minOwns = config.minWidthCalc != null && rawW is LengthValue.Exact
+        // Retro R2 (A11#10): same percent+min/max lane as applySizing.
+        val minW = config.minWidth ?: config.minInlineSize
+        val maxW = config.maxWidth ?: config.maxInlineSize
+        val pctW = SizingClamps.percentClampSpec(rawW, minW, maxW, ctx)
         // Lane BX — flex items honour content-box the same way the main
         // lane does (identity unless the item explicitly declared it).
         // RC-B6b: the WPT relative-overflow routing also rides the config
         // here so a flex item's ch/em width resolves identically.
-        if (!minOwns) r = applyWidth(r, inflateForContentBox(
+        if (pctW != null) r = r.percentWidthClamped(pctW.fraction, pctW.minDp, pctW.maxDp)
+        else if (!minOwns) r = applyWidth(r, inflateForContentBox(
             rawW,
             // Wave 44 (lane U6): the flex-item lane threads its own local
             // ctx (default context — same one its apply branch resolves
             // with) so a content-box Relative width inflates identically.
             config.boxSizing, config.contentBoxInflateX, ctx), ctx, config.wptCaptureMode)
         config.widthCalc?.let { r = r.calcSizePreferred(rowAxis = true, spec = it) }
-        r = applyWidthIn(r, config.minWidth ?: config.minInlineSize,
-            config.maxWidth ?: config.maxInlineSize, ctx)
+        if (pctW == null) r = applyWidthIn(r, minW, maxW, ctx)
         config.minWidthCalc?.let {
             r = r.calcSizeMin(rowAxis = true, spec = it,
                 specifiedPx = (rawW as? LengthValue.Exact)?.px?.let { px ->
@@ -513,15 +534,19 @@ object SizingApplier {
         // Wave 42 (lane W3): the height twin of applyWidthOnly's calc lanes.
         val rawH = config.height ?: config.blockSize
         val minOwns = config.minHeightCalc != null && rawH is LengthValue.Exact
+        // Retro R2 (A11#10): height twin of applyWidthOnly's percent lane.
+        val minH = config.minHeight ?: config.minBlockSize
+        val maxH = config.maxHeight ?: config.maxBlockSize
+        val pctH = SizingClamps.percentClampSpec(rawH, minH, maxH, ctx)
         // Lane BX — same explicit-content-box inflation as applyWidthOnly.
-        if (!minOwns) r = applyHeight(r, inflateForContentBox(
+        if (pctH != null) r = r.percentHeightClamped(pctH.fraction, pctH.minDp, pctH.maxDp)
+        else if (!minOwns) r = applyHeight(r, inflateForContentBox(
             rawH,
             // Wave 44 (lane U6): ctx threaded — the height twin of
             // applyWidthOnly's inflation call above.
             config.boxSizing, config.contentBoxInflateY, ctx), ctx)
         config.heightCalc?.let { r = r.calcSizePreferred(rowAxis = false, spec = it) }
-        r = applyHeightIn(r, config.minHeight ?: config.minBlockSize,
-            config.maxHeight ?: config.maxBlockSize, ctx)
+        if (pctH == null) r = applyHeightIn(r, minH, maxH, ctx)
         config.minHeightCalc?.let {
             r = r.calcSizeMin(rowAxis = false, spec = it,
                 specifiedPx = (rawH as? LengthValue.Exact)?.px?.let { px ->

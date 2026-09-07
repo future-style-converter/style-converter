@@ -2,7 +2,7 @@
 //  MulticolCloneGeometry.swift
 //  StyleEngine/columns — wave-46 lane Y3.
 //
-//  Pure fragment geometry for css-break-3 §5.2 `box-decoration-break:
+//  Pure fragment geometry for css-break-3 §5.4 `box-decoration-break:
 //  clone` inside a multicol fragmentainer — the CLONE twin of
 //  FragmentGeometry's slice S-table, and the iOS TWIN of the Android
 //  runtime's MulticolCloneGeometry.kt. The shared K-table (full-fragment
@@ -38,7 +38,7 @@ import Foundation
 enum MulticolCloneGeometry {
 
     /// The child's own block-axis decoration bands in px — what every
-    /// clone fragment wraps its content slice with (css-break-3 §5.2).
+    /// clone fragment wraps its content slice with (css-break-3 §5.4).
     struct Bands: Equatable {
         /// border-top + padding-top (block-start band under horizontal-tb).
         let blockStartPx: Double

@@ -28,10 +28,6 @@
 
 import Foundation
 
-enum BackgroundImageProperty {
-    static let names: [String] = ["BackgroundImage"]
-}
-
 enum BackgroundImageExtractor {
 
     /// Font metrics for lh/em center resolution — byte-parallel with the
@@ -133,7 +129,30 @@ enum BackgroundImageExtractor {
         case "linear-gradient":
             return .linear(angleDeg: angle, stops: parsed.stops)
         case "radial-gradient":
-            return .radial(shape: parsed.shapeKeyword, stops: parsed.stops, cx: cx, cy: cy)
+            // retro R5 (audit A11#13): the ending shape is a FIRST-CLASS
+            // key on the wire — BackgroundImageProperty.kt serialises
+            // `RadialGradient.shape` as `"shape": "circle" | "ellipse"`
+            // (css-images-3 §3.2.1 <rg-ending-shape>) — and only the
+            // pre-Phase-12 malformed "shape-as-stop" wire needs the
+            // parseStops recovery. Reading the recovery ALONE dropped every
+            // modern `circle`, so `radial-gradient(circle, red, blue)`
+            // painted the ELLIPSE default: on pairs-01
+            // 011_PW_Background_Effects_04 (100px tile on a 200×80 box) the
+            // ramp measured the ellipse's √2·100/2 = 70.7px horizontal
+            // radius where web/Android paint the circle's √(100²+80²)/2 =
+            // 64.0px farthest-corner radius. The web twin reads `obj.shape`
+            // the same way (BackgroundImageExtractor.ts radialGradientCss).
+            let shape = o["shape"]?.stringValue?.lowercased() ?? parsed.shapeKeyword
+            // `size` (§3.2.1 <rg-size>: closest-side … farthest-corner) is
+            // still unread on this platform — both painters assume the
+            // farthest-corner default — so any other keyword leaves a
+            // breadcrumb rather than a silent default.
+            if let sz = o["size"]?.stringValue?.lowercased(), sz != "farthest-corner" {
+                PropertyTracker.logOnce(
+                    key: "radial-gradient-size:\(sz)",
+                    message: "radial-gradient size keyword '\(sz)' is not implemented on iOS — painting the farthest-corner default")
+            }
+            return .radial(shape: shape, stops: parsed.stops, cx: cx, cy: cy)
         case "conic-gradient":
             return .conic(fromDeg: angle, stops: parsed.stops, cx: cx, cy: cy)
         case "repeating-linear-gradient":

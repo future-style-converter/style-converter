@@ -1427,7 +1427,9 @@ test('wave29 S-RC3: a plain capability tag still scores (denominator intact)', (
 // wave-48 W2: the gate became PER-TEST. The tag still arms it, but it fires
 // only for members of NATIVE_FONT_PARITY_REFUSED_TESTS — the 13 cells the
 // wave48-w2 re-measure (both natives re-fed on the current tree; every score
-// reproduced wave48-cal to 4 decimals) showed still font-bounded. The pins
+// reproduced wave48-cal to 4 decimals) showed still font-bounded; retro R13
+// (A12#5, 2026-09-04) then re-labelled three of them as non-font defects on
+// PNG evidence, so 10 remain and the three join the negative list. The pins
 // below therefore split into three families of their own: the refusal list's
 // exact membership (a silent widening re-hides honest measurements, a silent
 // shrink floods the corpus with font noise), the fire path for a LISTED
@@ -1453,10 +1455,13 @@ test('wave48 W2: the refusal list is exactly pinned — no silent widening or sh
   // The full membership, sorted, straight from the wave48-w2 measurement
   // table (each retained line's scores are commented in the module). Any
   // membership change MUST re-run the measurement and update this pin.
+  // 10 members since retro R13 (A12#5): the wave48-w2 table minus the three
+  // re-labelled below. Every retained line is still face-bound on its PNGs
+  // (cjk-decimal-001 and arabic-indic-102 spot-checked at the retrospective:
+  // same glyph rows, different stroke forms).
   assert.deepEqual([...NATIVE_FONT_PARITY_REFUSED_TESTS].sort(), [
     'css/css-counter-styles/arabic-indic/css3-counter-styles-102.html',
     'css/css-counter-styles/armenian/css3-counter-styles-007.html',
-    'css/css-counter-styles/armenian/css3-counter-styles-008.html',
     'css/css-counter-styles/bengali/css3-counter-styles-117.html',
     'css/css-counter-styles/cambodian/css3-counter-styles-159.html',
     'css/css-counter-styles/cjk-decimal/css3-counter-styles-001.html',
@@ -1465,13 +1470,17 @@ test('wave48 W2: the refusal list is exactly pinned — no silent widening or sh
     'css/css-counter-styles/cjk-earthly-branch/css3-counter-styles-202.html',
     'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
     'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
-    'css/css-counter-styles/counter-suffix.html',
-    'css/css-lists/counter-004.html',
   ]);
-  // The 15 unexcluded tests must NEVER quietly re-enter: each was measured
+  // The 18 unexcluded tests must NEVER quietly re-enter: 15 were measured
   // clear of the font boundary at wave48-w2 (13 with both natives ≥0.95;
   // name-case-sensitivity failing only the shared coverage veto web fails
-  // too; counter-cjk-decimal an Android blank-paint bug, not a face).
+  // too; counter-cjk-decimal an Android blank-paint bug, not a face), and 3
+  // were re-labelled at the retrospective (R13, A12#5) because their PNGs
+  // show a NON-font defect: armenian-008 (fallback-row line breaking),
+  // counter-suffix (doubled text + missing Korean/RTL markers on all three —
+  // shared extraction gap), counter-004 (Georgian string laid one glyph per
+  // line on both natives — zero-width wrap). Re-adding needs a new measurement
+  // AND a face-bound residual.
   for (const t of [
     'css/css-counter-styles/arabic-indic/css3-counter-styles-101.html',
     'css/css-counter-styles/arabic-indic/css3-counter-styles-103.html',
@@ -1488,9 +1497,13 @@ test('wave48 W2: the refusal list is exactly pinned — no silent widening or sh
     'css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html',
     'css/css-lists/content-property/marker-text-matches-armenian.html',
     'css/css-lists/content-property/marker-text-matches-georgian.html',
+    // retro R13 (A12#5) re-labels — non-font defects, scored honestly:
+    'css/css-counter-styles/armenian/css3-counter-styles-008.html',
+    'css/css-counter-styles/counter-suffix.html',
+    'css/css-lists/counter-004.html',
   ]) {
     assert.equal(NATIVE_FONT_PARITY_REFUSED_TESTS.has(t), false,
-      `${t} was unexcluded at wave48-w2 — re-adding it needs a new measurement`);
+      `${t} was unexcluded (wave48-w2 or retro R13) — re-adding it needs a new measurement`);
   }
 });
 
@@ -1869,7 +1882,7 @@ test('wave37 W5: the at-HEAD verification runs lost no cells and only strengthen
 
 import {
   NOVEL_INK_VETO_ENABLED, novelInkVetoActive,
-  assertPlatformColumns, PLATFORM_COLUMN_KEYS,
+  assertPlatformColumns, PLATFORM_COLUMN_KEYS, NATIVE_PARITY_KEYS,
 } from './inject-wpt-block.mjs';
 
 test('novel-ink veto is OFF unless TITAN_NOVEL_INK_VETO=1', () => {
@@ -1959,6 +1972,71 @@ test('assertPlatformColumns: excluded and error cells do not prop a column up', 
   assert.deepEqual(assertPlatformColumns({}, {}).missing, []);
 });
 
+// ── retro R13 (A9#1 tail): PER-TEST native-column parity ────────────────────
+//
+// The whole-column check above is blind to a PARTIAL column: a feeder that
+// timed out on N tests leaves n > 0 for the column while those N cells are
+// simply absent — neither pass nor fail, a quietly shrunk denominator. These
+// pins hold the per-test check: anchored on a scored web-ref, honouring
+// SKIP_* declarations and the native-font-parity stamp, treating an
+// error-shaped diff as missing, and fatal under the same opt-in switch.
+
+test('assertPlatformColumns: a PARTIAL native column is named per test, while the column itself reads present', () => {
+  const scored = (ssim) => ({ ssim });
+  const results = {
+    t1: { browserRef: { diffs: { 'web-ref': scored(0.99), 'ios-ref': scored(0.98), 'android-ref': scored(0.97) } } },
+    t2: { browserRef: { diffs: { 'web-ref': scored(0.97), 'ios-ref': scored(0.96) } } },              // android absent
+    t3: { browserRef: { diffs: { 'web-ref': scored(0.96), 'ios-ref': { error: 'diff failed' }, 'android-ref': scored(0.95) } } }, // ios error-shaped
+  };
+  const r = assertPlatformColumns(results, {});
+  // The whole-column check is satisfied — every column has n > 0 …
+  assert.deepEqual(r.counts, { 'web-ref': 3, 'ios-ref': 2, 'android-ref': 2 });
+  assert.deepEqual(r.missing, []);
+  // … which is exactly why the per-test check must exist: two cells are gone.
+  assert.deepEqual(r.missingCells, { 'ios-ref': ['t3'], 'android-ref': ['t2'] });
+  // The keys are always both present so callers never null-check.
+  assert.deepEqual(Object.keys(assertPlatformColumns({}, {}).missingCells).sort(), ['android-ref', 'ios-ref']);
+  assert.deepEqual([...NATIVE_PARITY_KEYS], ['ios-ref', 'android-ref']);
+});
+
+test('assertPlatformColumns: per-test parity honours SKIP_* declarations and the font-parity stamp, and only anchors on a SCORED web-ref', () => {
+  const scored = (ssim) => ({ ssim });
+  const results = {
+    // web excluded (whole-test NA gate) → never enters the check even with no natives.
+    na: { browserRef: { diffs: { 'web-ref': { ssim: 0.9, scoreExcluded: true } } } },
+    // no web-ref at all (extraction miss) → never enters.
+    ex: { browserRef: { diffs: { 'ios-ref': scored(0.9) } } },
+    // font-parity stamped natives are PRESENT, just not scored → not missing.
+    fp: { nativeFontParityExcluded: ['ios-ref', 'android-ref'],
+          browserRef: { diffs: { 'web-ref': scored(0.98), 'ios-ref': { ssim: 0.8, scoreExcluded: 'native-font-parity', wptPass: null }, 'android-ref': { ssim: 0.8, scoreExcluded: 'native-font-parity', wptPass: null } } } },
+    // a stamp on ONE native does not excuse the OTHER being absent.
+    half: { nativeFontParityExcluded: ['ios-ref'],
+            browserRef: { diffs: { 'web-ref': scored(0.98), 'ios-ref': { ssim: 0.8, scoreExcluded: 'native-font-parity', wptPass: null } } } },
+    // plain partial.
+    p: { browserRef: { diffs: { 'web-ref': scored(0.98) } } },
+  };
+  assert.deepEqual(assertPlatformColumns(results, {}).missingCells, { 'ios-ref': ['p'], 'android-ref': ['half', 'p'] });
+  // Declaring a platform skipped silences THAT platform's per-test misses only.
+  assert.deepEqual(assertPlatformColumns(results, { SKIP_ANDROID: '1' }).missingCells, { 'ios-ref': ['p'], 'android-ref': [] });
+  assert.deepEqual(assertPlatformColumns(results, { SKIP_IOS: '1', SKIP_ANDROID: '1' }).missingCells, { 'ios-ref': [], 'android-ref': [] });
+  // Sanity: a complete honest run reports nothing.
+  const full = { t: { browserRef: { diffs: { 'web-ref': scored(0.99), 'ios-ref': scored(0.99), 'android-ref': scored(0.99) } } } };
+  assert.deepEqual(assertPlatformColumns(full, {}).missingCells, { 'ios-ref': [], 'android-ref': [] });
+});
+
+test('partial-column presence: emitted always, fatal only on opt-in, same exit code as the whole-column failure', async () => {
+  // Pinned against the module source because the branch lives inside main()'s
+  // tail (same reason as the whole-column pin above). section-runner.sh maps
+  // inject's exit 3 to NATIVE_SHORT, so the partial case MUST reuse it — a
+  // new code would sail past the runner as "some other failure".
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  const tail = src.slice(src.indexOf('const columns = assertPlatformColumns(results);'));
+  assert.match(tail, /PARTIAL native column\(s\)/, 'the per-test signal must be emitted');
+  const partialBlock = tail.slice(tail.indexOf('columns.missingCells'));
+  assert.match(partialBlock, /TITAN_REQUIRE_ALL_COLUMNS === '1'/, 'the partial branch must read the same opt-in switch');
+  assert.match(partialBlock, /if \(fatal\) process\.exitCode = 3;/, 'the partial branch must reuse exit 3');
+});
+
 test('diffComposedVsRef stamps novelInk + novelInkFailed on every diff', async () => {
   // The block must ride along for triage even while the veto is dark, so a
   // manifest row can be queried for the wrong-answer signal without re-running
@@ -2022,4 +2100,34 @@ test('EXECUTED REPRO: the wave-48 hole, and that the switch closes it', async ()
   // Flipping the switch is what closes it: same inputs, opposite verdict.
   assert.equal(computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
     diff.colorFailed, diff.coverageRatioFailed, true), false);
+});
+
+// ── retro R8b (A9#7): the two pipelines' pixelmatch settings, pinned ────────
+//
+// inject-wpt-block.mjs (diffWebVsRef) DELIBERATELY runs pixelmatch at the
+// pre-flip `threshold: 0.25, includeAA: true`; tools/visual/compare-screenshots
+// .mjs (diffPair) runs the 2026-08-29 derived `threshold: 0.02, includeAA:
+// false`. A comment in inject claimed parity for months after they diverged.
+// TITAN's setting feeds only the triage `divergence` labels (a historical
+// series across every corpus-v* snapshot) — never `wptPass` — so it must not
+// be flipped mid-series without a stated decision rule and a re-labelled
+// baseline. This pin turns the NEXT silent divergence (either side moving)
+// into a failing test rather than a stale comment. Source-text pins, because
+// neither diff function is exported and both read their options inline.
+test('pixelmatch options: inject stays pre-flip (0.25/includeAA true); compare-screenshots stays post-flip (0.02/includeAA false)', async () => {
+  const inject = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  const compare = await fs.readFile(new URL('../visual/compare-screenshots.mjs', import.meta.url), 'utf8');
+  // Exactly ONE pixelmatch call per file, so the option object below is THE one.
+  const injCalls = inject.match(/pixelmatch\(A\.data, B\.data, diff\.data, W, H, \{[^}]*\}\)/gs) ?? [];
+  assert.equal(injCalls.length, 1, 'inject must have exactly one pixelmatch call (diffWebVsRef)');
+  assert.match(injCalls[0], /\{\s*threshold: 0\.25,\s*includeAA: true,\s*\}/,
+    'inject is DELIBERATELY pre-flip: threshold 0.25, includeAA true (labels are a historical series)');
+  const cmpCalls = compare.match(/pixelmatch\(a\.data, b\.data, diff\.data, W, H, \{[^}]*\}\)/gs) ?? [];
+  assert.equal(cmpCalls.length, 1, 'compare-screenshots must have exactly one pixelmatch call (diffPair)');
+  assert.match(cmpCalls[0], /threshold: 0\.02,\s*includeAA: false,/,
+    'compare-screenshots is post-flip: threshold 0.02, includeAA false (2026-08-29 derivation)');
+  // And inject's own comment must tell the truth about the difference.
+  const banner = inject.slice(inject.indexOf('async function diffWebVsRef'), inject.indexOf('const mismatched = pixelmatch(A.data'));
+  assert.match(banner, /PRE-FLIP settings/, 'the diffWebVsRef comment must name the pre-flip choice');
+  assert.doesNotMatch(banner, /same threshold as compare-screenshots/, 'the false parity claim must stay gone');
 });

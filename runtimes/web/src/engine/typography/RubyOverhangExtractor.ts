@@ -1,6 +1,6 @@
 // RubyOverhangExtractor.ts — folds `RubyOverhang` IR properties into a RubyOverhangConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { RubyOverhangConfig, RUBY_OVERHANG_PROPERTY_TYPE, RubyOverhangPropertyType } from './RubyOverhangConfig';
 import { kwLower } from './_shared';

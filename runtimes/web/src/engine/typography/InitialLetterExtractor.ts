@@ -1,6 +1,6 @@
 // InitialLetterExtractor.ts — folds `InitialLetter` IR properties into a InitialLetterConfig.
 // Family: initial-letter.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { InitialLetterConfig, INITIAL_LETTER_PROPERTY_TYPE, InitialLetterPropertyType } from './InitialLetterConfig';
 import { kwLower } from './_shared';

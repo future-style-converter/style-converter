@@ -1,0 +1,60 @@
+{
+  "_comment": "filter: blur() on a parent whose absolutely-positioned child OVERFLOWS the parent's box — the retro-R6 pin for audit finding A12#2 (Android dropped every descendant pixel outside the element's layout bounds under blur: Modifier.blur's RenderNode is sized to the node bounds and HWUI renders a RenderEffect node into a buffer of exactly that size, so the committed Filter_Blur baseline shows 'FIL' where iOS/web show the whole blurred label). filter-effects-1: blur() is a Gaussian over the element's rendering — descendants included — and filter functions have no border-box clip, so the overflowing child must survive blurred. GEOMETRY: parent 50x50 #3498db (2500 px) at position:relative; child absolute left 30px top 5px, 90x40 #e74c3c (3600 px) — the child overlaps the parent's right 20px and overflows 70px past it. The child's red dominates the fill mode in every render (3600 vs <=1700 visible blue). ARITHMETIC — FBO_Control_NoBlur: exact red core = the whole child, box [90,40]. FBO_Blur3_ChildOverflow: blur(3px) means sigma = 3px (filter-effects-1 blur(): the length is the standard deviation); a blurred step edge reaches within 2/255 of its interior value once 205*(1-Phi(d/sigma)) < 2, i.e. d > 2.34*sigma = 7.0px, so the exact-red core is the child inset 7px per side = [90-14, 40-14] = [76,26] (boxTolerance 4 absorbs the +-1px the erf tail and platform blur quantisation move the 2/255 contour by). FAILURE MODES, each unmistakable: a blur that crops descendants to the parent's 50px box leaves 20px of child, whose right edge is a hard layer edge with Decal transparency beyond it, so the core is ~[20-14, 26] = [6,26] — 70px short; a runtime that drops the blur altogether measures the sharp child [90,40] — 14px over. No predicted red: the fix lands on Compose in the same retro; iOS (SwiftUI .blur is unclipped) and web already pass this shape (the Filter_Blur label survives on both).",
+  "components": {
+    "FBO_Control_NoBlur": {
+      "properties": {
+        "width": "50px",
+        "height": "50px",
+        "background-color": "#3498db",
+        "position": "relative"
+      },
+      "children": {
+        "overflow": {
+          "properties": {
+            "position": "absolute",
+            "left": "30px",
+            "top": "5px",
+            "width": "90px",
+            "height": "40px",
+            "background-color": "#e74c3c"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [231, 76, 60],
+        "fillTolerance": 2,
+        "box": [90, 40],
+        "boxTolerance": 1,
+        "note": "no filter: the overflowing child paints sharp and whole — the geometry control for the blurred case"
+      }
+    },
+    "FBO_Blur3_ChildOverflow": {
+      "properties": {
+        "width": "50px",
+        "height": "50px",
+        "background-color": "#3498db",
+        "position": "relative",
+        "filter": "blur(3px)"
+      },
+      "children": {
+        "overflow": {
+          "properties": {
+            "position": "absolute",
+            "left": "30px",
+            "top": "5px",
+            "width": "90px",
+            "height": "40px",
+            "background-color": "#e74c3c"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [231, 76, 60],
+        "fillTolerance": 2,
+        "box": [76, 26],
+        "boxTolerance": 4,
+        "note": "sigma 3px: exact-red core = child inset 2.34*sigma = 7px per side -> [76,26]; a node-bounds crop reads ~[6,26], no blur reads [90,40]"
+      }
+    }
+  }
+}

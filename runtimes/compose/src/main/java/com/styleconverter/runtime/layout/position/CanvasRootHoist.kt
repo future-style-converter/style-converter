@@ -99,7 +99,7 @@ object CanvasRootHoist {
      * because the two claim DIFFERENT descendant classes: a positioned
      * ancestor is the containing block for ABSOLUTE descendants only
      * (css-position-3 §3.1), while a transformed one also claims FIXED
-     * descendants (css-transforms-1 §3 / css-transforms-2 §6). Folding them
+     * descendants (css-transforms-1 §3 / css-transforms-2 §8). Folding them
      * into one flag would have let a `position: relative` ancestor swallow a
      * fixed descendant, breaking pin S3 (a fixed child of an in-flow
      * relative parent paints at the canvas corner).
@@ -177,7 +177,7 @@ object CanvasRootHoist {
         positionTypeOf(properties) != PositionType.STATIC
 
     /**
-     * Wave 35 (lane B1) — css-transforms-1 §3 / css-transforms-2 §6: a box
+     * Wave 35 (lane B1) — css-transforms-1 §3 / css-transforms-2 §8: a box
      * with a used transform is the containing block for its positioned
      * descendants of BOTH classes. Delegates the whole clause table to
      * [TransformContainingBlock] (the twin of the Swift
@@ -254,7 +254,7 @@ object CanvasRootHoist {
      * bucket that flips `position` at runtime is out of the emulation's
      * scope, same conservatism as the §8.3.1 collapse plan's B6):
      *  - FIXED always hoists — its containing block is the viewport
-     *    regardless of positioned ancestors (css-position-3 §3.2; pin S3:
+     *    regardless of positioned ancestors (css-position-3 §2.1; pin S3:
      *    a fixed child of an in-flow relative parent paints at canvas
      *    (left, top), NOT parent + offset);
      *  - ABSOLUTE hoists only when NO positioned ancestor exists — then its
@@ -298,8 +298,9 @@ object CanvasRootHoist {
         hasClippingAncestor: Boolean = false,
     ): Boolean = if (hasClippingAncestor) false else when (positionTypeOf(properties)) {
         // Viewport-anchored (F1) UNLESS a transformed ancestor has taken over
-        // the containing block — css-transforms-2 §6 is the one rule that
-        // pulls a fixed box back out of the viewport. Chromium-measured
+        // the containing block — css-transforms-1 §3 (transform) plus
+        // css-transforms-2 §7 (preserve-3d) / §8 (perspective) are the
+        // rules that pull a fixed box back out of the viewport. Chromium-measured
         // (probes C/D/E in _diag35/laneB1/probe-chromium.mjs: fixed under
         // transform, under perspective and under preserve-3d all anchor at
         // the styled ancestor, never at the viewport). A no-inset fixed box
@@ -859,7 +860,7 @@ object CanvasRootHoist {
      * Wave 22 (B-RC3): a hoisted box whose only inset on an axis is
      * `right`/`bottom` anchors at the CANVAS's end edge instead, because
      * for these boxes the canvas IS the containing block (fixed → the
-     * viewport, css-position-3 §3.2; ICB-anchored absolute → the initial
+     * viewport, css-position-3 §2.1; ICB-anchored absolute → the initial
      * containing block, §3.1 — both are the 390×600 capture canvas the
      * browser-ref is captured at). Without the canvas extents (a caller
      * that does not pass them) the start anchor is kept — A4's documented
@@ -930,7 +931,7 @@ object CanvasRootHoist {
         roots: List<IRComponent>,
         // Wave 22 (B-RC3) — the capture canvas's extents, i.e. the
         // containing block every hoisted box anchors in (fixed → viewport,
-        // css-position-3 §3.2; ICB-anchored absolute → the initial
+        // css-position-3 §2.1; ICB-anchored absolute → the initial
         // containing block, §3.1 — both are the canvas). Needed ONLY to
         // resolve `right`/`bottom`-only insets from the END edge; nulls
         // keep the wave-17/18 start anchor for every box (A4). Defaulted so

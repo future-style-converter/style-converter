@@ -1,6 +1,6 @@
 // OrphansExtractor.ts — folds `Orphans` IR properties into a OrphansConfig.
 // Family: number.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { OrphansConfig, ORPHANS_PROPERTY_TYPE, OrphansPropertyType } from './OrphansConfig';
 import { numberOf } from './_shared';

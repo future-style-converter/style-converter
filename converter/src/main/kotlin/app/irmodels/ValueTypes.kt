@@ -119,13 +119,6 @@ data class IRLength(
             // All relative/contextual units - can't normalize
             else -> fromRelative(value, unit)
         }
-
-        /** Check if a unit is absolute (can be normalized to pixels) */
-        fun isAbsoluteUnit(unit: LengthUnit): Boolean = unit in setOf(
-            LengthUnit.PX, LengthUnit.PT, LengthUnit.CM, LengthUnit.MM,
-            LengthUnit.IN, LengthUnit.PC, LengthUnit.Q,
-            LengthUnit.DP, LengthUnit.SP  // Android units, treat as absolute
-        )
     }
 
     enum class LengthUnit {
@@ -282,9 +275,6 @@ data class SRGB(
         b.coerceIn(0.0, 1.0),
         a.coerceIn(0.0, 1.0)
     )
-
-    /** Check if color is within sRGB gamut */
-    fun isInGamut() = r in 0.0..1.0 && g in 0.0..1.0 && b in 0.0..1.0
 }
 
 /**

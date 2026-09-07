@@ -2,7 +2,7 @@
 //  MulticolCloneGeometryTests.swift
 //  StyleConverterRuntimeTests
 //
-//  Wave 46 (lane Y3) — css-break-3 §5.2 `box-decoration-break: clone`
+//  Wave 46 (lane Y3) — css-break-3 §5.4 `box-decoration-break: clone`
 //  inside a multicol fragmentainer. Three layers of proof:
 //    1. MulticolCloneGeometry pinned against the SHARED K-table — rows
 //       K1/K2/K3/K7 (full fragments) are byte-identical with the Android

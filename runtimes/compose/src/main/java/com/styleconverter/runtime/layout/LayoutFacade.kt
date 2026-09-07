@@ -175,7 +175,7 @@ object LayoutFacade {
         // wave-45 lane X4 (one-line seam): margins get the SAME resolution
         // context as sizing — an em margin preserved by MarginExtractor must
         // multiply against the element's own computed font-size (css-values-4
-        // §5.1.1, incl. the monospace-13 quirk the ctx already carries), not
+        // §6.1.1, incl. the monospace-13 quirk the ctx already carries), not
         // the 16px default the old three-arg call fell back to.
         result = SpacingApplier.applyMargin(result, config.margin, collapsedMargin, spacingCtx)
 
@@ -267,18 +267,26 @@ object LayoutFacade {
     // `extractConfig` / `applyToModifier` above — those remain untouched so
     // ComponentRenderer's existing code path works byte-identically.
     //
-    // Later Phase 7 steps will migrate callers from the legacy pair to the
-    // style-engine triplet, then (step 6) delete the legacy pair. Until then
-    // both exist side by side.
+    // The migration that would move callers off the legacy pair and (step 6)
+    // delete it never happened, and both pairs are LIVE today — retro P2e
+    // (finding A6#15) replaced the "later Phase 7 steps will …" future tense
+    // with that fact. StyleApplier still calls the legacy
+    // `extractConfig`/`applyToModifier` for the modifier chain, while
+    // ComponentRenderer calls the style-engine `extractLayoutConfig` +
+    // `containerDecision` for the CONTAINER choice. The split is by
+    // responsibility, not by migration stage, and nothing is scheduled to
+    // collapse it.
     //
     // The method names deliberately don't collide with the legacy ones:
     //   extractConfig       -> legacy LayoutFacade.LayoutConfig
     //   extractLayoutConfig -> new style-engine LayoutConfig (top-level in package)
 
     /**
-     * Phase 7 entrypoint — extract the style-engine [LayoutConfig] scaffold.
+     * Phase 7 entrypoint — extract the style-engine [LayoutConfig].
      *
-     * Step 1: returns [LayoutConfig.Empty] (all nulls). See
+     * Returns the flexbox / grid / position fields resolved and the
+     * advanced + root slots null; it has not returned [LayoutConfig.Empty]
+     * since step 2 (retro P2e, finding A6#15). See
      * [LayoutExtractor.extractLayoutConfig] for the contract.
      */
     fun extractLayoutConfig(
@@ -302,8 +310,13 @@ object LayoutFacade {
 
     /**
      * Phase 7 entrypoint — child-level Modifier contribution (zIndex,
-     * alignSelf, order, relative inset). Step 1 returns identity Modifier so
-     * the legacy StyleApplier chain is unaffected.
+     * alignSelf, order, relative inset). Retro P2e (finding A6#15, phrase
+     * sweep) replaced "Step 1 returns identity Modifier so the legacy
+     * StyleApplier chain is unaffected": [LayoutApplier.childModifier] has
+     * returned PositionLayoutApplier's real z-index + offset chain since
+     * step 4, and the reason the legacy chain is unaffected is simpler —
+     * this method has NO caller in `runtimes/compose/src/main`. It is kept
+     * as the seam a step-6 reconciliation would use; that step never came.
      */
     fun childModifier(
         config: com.styleconverter.runtime.layout.LayoutConfig?

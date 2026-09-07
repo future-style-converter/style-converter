@@ -1,6 +1,6 @@
 package app.parsing.css.properties.longhands.background
 
-// wave-48 lane W5 — image() notation (css-images-4 §2.1 + the legacy
+// wave-48 lane W5 — image() notation (css-images-4 §2.5 + the legacy
 // css-images-3 multi-src grammar). Every payload below is the VERBATIM
 // declaration of one WPT css-image-fallbacks-and-annotations test; before
 // this parser existed all five fell to Raw and every platform painted the

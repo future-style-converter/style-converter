@@ -3,7 +3,7 @@
 CSS fixtures exercising every value variant accepted by the animation,
 transition, view-timeline, view-transition, timeline-scope, and
 scroll-timeline longhand parsers under
-`src/main/kotlin/app/parsing/css/properties/longhands/animations/` and
+`converter/src/main/kotlin/app/parsing/css/properties/longhands/animations/` and
 `.../longhands/scrolling/Scroll{Timeline,TimelineName,TimelineAxis}PropertyParser.kt`.
 
 Run each via:
@@ -12,7 +12,10 @@ Run each via:
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/properties/animations/<file>.json -o /tmp/p9"
 ```
 
-All 10 fixtures convert with `(0 generic)` on every component.
+Fixture count: `ls fixtures/properties/animations/*.json | wc -l` (10 at
+authoring, Phase 9). Every fixture converted with `(0 generic)` on every
+component when the phase shipped; that claim has not been re-run since, so
+re-derive it from the command above rather than trusting this line.
 
 ## Coverage map
 

@@ -11,8 +11,14 @@ import kotlinx.serialization.json.JsonElement
  *      legacy [com.styleconverter.runtime.StyleApplier] dispatch switch
  *      defers to the style-engine path instead of double-applying.
  *   2. Expose a single [extractLayoutConfig] entrypoint that returns a fully
- *      resolved [LayoutConfig]. In step 1 every field resolves to null — the
- *      real extraction logic arrives in Phase 7 steps 2–5.
+ *      resolved [LayoutConfig]. Retro P2e (finding A6#15, phrase sweep): this
+ *      said "in step 1 every field resolves to null — the real extraction
+ *      logic arrives in Phase 7 steps 2-5", which the file itself outgrew.
+ *      Steps 2-4 shipped: the entrypoint folds FlexboxExtractor,
+ *      GridLayoutExtractor and PositionLayoutExtractor. Still null-only are
+ *      the layout/advanced fields and the four layout ROOT properties
+ *      (Clear / Float / Overlay / ReadingFlow) — registered above, but with
+ *      no sub-extractor to populate them here.
  *
  * Precedent: [com.styleconverter.runtime.typography.TypographyExtractor] —
  * same init-block registration + single `extract*Config` entrypoint shape.
@@ -107,13 +113,16 @@ object LayoutExtractor {
     /**
      * Extract a fully-resolved [LayoutConfig] from the IR property stream.
      *
-     * Step 1 stub: returns [LayoutConfig.Empty] unconditionally. Subsequent
-     * Phase 7 steps replace the stub with real per-property extraction. The
-     * method signature is locked in now so the facade and ComponentRenderer
-     * hook don't churn between steps.
+     * NOT a stub any more (retro P2e, finding A6#15: this said "Step 1 stub:
+     * returns [LayoutConfig.Empty] unconditionally", contradicted by the very
+     * next line of its own body). It folds three sub-extractors — flexbox,
+     * grid, position — into one aggregate, each contributing only its own
+     * fields. The signature was locked early so the facade and the
+     * ComponentRenderer hook would not churn as steps landed, and it did not.
      *
      * @param properties (propertyType, data) pairs from IRComponent.properties.
-     * @return LayoutConfig with all fields null in step 1.
+     * @return LayoutConfig with the flexbox / grid / position fields resolved
+     *   and the advanced + root slots still null.
      */
     fun extractLayoutConfig(properties: List<Pair<String, JsonElement?>>): LayoutConfig {
         // Phase 7b step 2: delegate to the flexbox sub-extractor. The flexbox

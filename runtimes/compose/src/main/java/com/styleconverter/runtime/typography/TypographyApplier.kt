@@ -231,6 +231,12 @@ object TypographyApplier {
      * @return true if ellipsis should be used for overflow
      */
     fun hasEllipsis(config: TypographyConfig): Boolean {
+        // Retrospective R3 (A5#4): a clamp whose marker the author forbade
+        // (css-overflow-4 §4.2 `no-ellipsis` / "") implies NO "…" — and an
+        // explicit `text-overflow: ellipsis` cannot bring one back on a
+        // block-clamped run (inline-axis property, css-overflow-3 §6.1); see
+        // LineClampApplier.getTextOverflow for the same rule on the knob.
+        if (config.lineClamp != null && config.lineClamp > 0 && config.lineClampMarkerSuppressed) return false
         return config.textOverflow == androidx.compose.ui.text.style.TextOverflow.Ellipsis ||
                 (config.lineClamp != null && config.lineClamp > 0)
     }

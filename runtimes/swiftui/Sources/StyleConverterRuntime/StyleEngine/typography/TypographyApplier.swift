@@ -19,6 +19,33 @@ import UIKit
 struct TypographyApplier: ViewModifier {
     let aggregate: TypographyAggregate?
 
+    /// The size FontMod / LineSpacingMod compute with when no `font-size`
+    /// reached a FontFamily-only aggregate (retro R5, audit A7#5). CSS
+    /// `font-size`'s initial value is `medium` (css-fonts-4 §2.5), which
+    /// the UA stylesheet resolves to 16px (Blink's kDefaultFontSize) — the
+    /// same 16 every other site in both runtimes bottoms out at
+    /// (ComponentRenderer's `fontSize ?? 16`, UAElementFontRule,
+    /// TypographyExtractor; Compose's DynamicValueResolver
+    /// .DEFAULT_FONT_SIZE_PX). The old fallback here was UIKit's 17pt body
+    /// size, which nothing else in either runtime uses. Liveness, honestly:
+    /// on the renderer's text path ComponentRenderer puts `.font(labelFont)`
+    /// (its own `fontSize ?? 16`) directly on the Text, and SwiftUI's
+    /// nearest-modifier rule makes that win over this container-level
+    /// font — so this fallback is the live size only where no nearer
+    /// `.font` is set (environment-inheriting children, LineSpacingMod's
+    /// subtraction). The fix makes the two fallbacks agree; it is not
+    /// expected to move a corpus pixel (30 FontFamily-only carriers, 25 of
+    /// them already sized by MonospaceUAFontSize).
+    static let fallbackFontSizePx: CGFloat = 16
+
+    /// The size FontMod / LineSpacingMod build on: the extracted
+    /// `fontSizePx`, else the shared CSS-medium fallback above. Internal so
+    /// TypographyFontSizeFallbackTests can pin a FontFamily-only corpus
+    /// aggregate to the same 16 the Compose twin renders.
+    static func resolvedFontSizePx(_ agg: TypographyAggregate) -> CGFloat {
+        agg.fontSizePx ?? fallbackFontSizePx
+    }
+
     func body(content: Content) -> some View {
         // Fast path: if no typography extractor touched the aggregate,
         // pass the content through untouched so we don't force
@@ -67,10 +94,23 @@ struct TypographyApplier: ViewModifier {
             // level shadow now applies inside PlaceholderLabel via the
             // TextConfig.shadows bridge.
             .modifier(LayoutDirectionMod(direction: agg.layoutDirection))
-        // Note: no WritingModeMod. A `.rotationEffect(.degrees(90))`
-        // approximation was tried in Phase 12 and regressed typography SSIM
-        // (see WritingModeApplier.swift header). Vertical writing stays a
-        // deferred no-op until a Core-Text-based implementation lands.
+        // Note: no WritingModeMod HERE. Vertical writing is not handled in
+        // the box-modifier chain at all: the UPRIGHT case (writing-mode:
+        // vertical-rl/lr with text-orientation mixed|upright — the
+        // `writing-mode` + `text-orientation` pair of css-writing-modes-4)
+        // flows through Renderer/VerticalTextFlowLayout.swift —
+        // ComponentRenderer gates on `VerticalUprightGate.stack` and lays
+        // the run out with `VerticalUprightTextFlow` (wave 36; wave 47's Z2
+        // added the vertical multicol twin). What remains unimplemented is
+        // the ROTATED sideways glyph run; WritingModeApplier.swift's header
+        // records why the Phase-12 `.rotationEffect(.degrees(90))`
+        // approximation was rejected (it rotates glyphs but turns the
+        // reported box tall→wide, so the container diverges from the web
+        // reference MORE than identity does). Retro P2b (A4#4): this note
+        // used to call vertical writing "a deferred no-op", which stopped
+        // being true at wave 36 — wave49-final css-writing-modes/
+        // available-size-011 renders upright on iOS at 0.9427 (sub-
+        // threshold, not absent).
     }
 }
 
@@ -125,8 +165,10 @@ private struct FontMod: ViewModifier {
             .first
             ?? agg.fontFamilyPrimary
         if let name = resolvedName {
-            // Use `.custom(_:size:)` when we have an explicit face.
-            font = .custom(name, size: agg.fontSizePx ?? 17)
+            // Use `.custom(_:size:)` when we have an explicit face. The size
+            // is the extracted one or the CSS `medium` 16px fallback — see
+            // TypographyApplier.fallbackFontSizePx (retro R5, A7#5: was 17).
+            font = .custom(name, size: TypographyApplier.resolvedFontSizePx(agg))
         } else if let size = agg.fontSizePx {
             // System font at the explicit pt size.
             font = .system(size: size, design: design(for: agg))
@@ -183,9 +225,12 @@ private struct LineSpacingMod: ViewModifier {
     func body(content: Content) -> some View {
         // Convert CSS line-height (total line-box height) to SwiftUI's
         // `.lineSpacing` (extra space *between* lines). Subtract the
-        // font size when we know it; default to 17 otherwise.
+        // font size when we know it; else the CSS `medium` 16px the
+        // rest of the runtime assumes (TypographyApplier.fallbackFontSizePx,
+        // retro R5 A7#5 — the old 17 made the subtraction disagree with
+        // FontMod's own fallback and with every other 16-based site).
         guard let lineBox = agg.lineHeightPx else { return AnyView(content) }
-        let base = agg.fontSizePx ?? 17
+        let base = TypographyApplier.resolvedFontSizePx(agg)
         let extra = max(0, lineBox - base)
         return AnyView(content.lineSpacing(extra))
     }

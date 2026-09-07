@@ -91,13 +91,16 @@ object InheritedDefaultResolution {
         // css-text-4 §3: white-space + tab-size inherit; direction is
         // css-writing-modes-4 §2.1 ("Inherited: yes").
         "white-space", "tab-size", "direction",
-        // css-writing-modes-4 §3.1: writing-mode inherits.
+        // css-writing-modes-4 §3.2: writing-mode inherits ("Inherited: yes").
+        // (§3.2 is the level-4 numbering of "Block Flow Direction: the
+        // writing-mode property"; §3.1 is the level-3 number and was the
+        // stale citation here — retro R9 verified the level-4 ToC.)
         "writing-mode",
-        // css-color-4 §7: color inherits (the currentColor chain root).
+        // css-color-4 §3.2: color inherits (the currentColor chain root).
         "color",
         // CSS 2.1 §11.2: visibility inherits.
         "visibility",
-        // css-ui-4 §8.1: cursor inherits.
+        // css-ui-4 §5.1.1: cursor inherits.
         "cursor",
         // css-lists-3 §4: the list-style longhands inherit.
         "list-style-type", "list-style-position", "list-style-image",
@@ -148,7 +151,7 @@ object InheritedDefaultResolution {
         // HTML §15.3.2: `b`/`strong` carry a UA `font-weight: bold`, so a
         // dropped `font-weight: inherit` re-bolds the run on web.
         "b", "strong",
-        // HTML §15.3.9 table defaults: `th` carries UA `font-weight: bold`
+        // HTML §15.3.8 table defaults: `th` carries UA `font-weight: bold`
         // and `text-align: center` — both in INHERITED_BY_DEFAULT, and both
         // measured live in the corpus (fixtures/wpt/css-tables/th-text-align
         // declares `text-align: inherit` on a `<th>`).
@@ -172,7 +175,8 @@ object InheritedDefaultResolution {
      * `inherit` — the cascaded winner says "take the parent's computed
      * value" on a property whose defaulting already does exactly that.
      * The keyword match is trimmed + case-insensitive because CSS-wide
-     * keywords are ASCII case-insensitive (css-values-4 §2.1). Name/value
+     * keywords are ASCII case-insensitive (css-values-4 §4.1 "Pre-defined
+     * Keywords"; the CSS-wide keywords themselves are §4.1.1). Name/value
      * only: the UA-tag exemption is a COMPONENT-level fact, applied once in
      * `resolve` rather than re-tested per declaration.
      */

@@ -1,6 +1,6 @@
 // FontWeightExtractor.ts — folds `FontWeight` IR properties into a FontWeightConfig.
 // Family: font-weight.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontWeightConfig, FONT_WEIGHT_PROPERTY_TYPE, FontWeightPropertyType } from './FontWeightConfig';
 import { kwLower } from './_shared';

@@ -44,7 +44,7 @@ data class BorderImageConfig(
     /**
      * The element's COMPUTED border widths (css-backgrounds-3 §4.3: 0 when
      * the side's border-style is none/absent). These are the resolution
-     * basis for border-image-width per §6.3:
+     * basis for border-image-width per §5.3:
      *   - `<number>` is a MULTIPLE of the computed border-width, and the
      *     initial value of border-image-width is the number 1 — so an
      *     element with no real border (computed width 0) paints NO border
@@ -64,7 +64,7 @@ data class BorderImageConfig(
      * the component's full modifier chain, and LayoutFacade's padding
      * modifier (PaddingApplier.apply) shrinks the DrawScope box exactly
      * like StyleApplier.borderContentInset does — so reconstructing the
-     * border box (css-backgrounds-3 §6: the border image area IS the
+     * border box (css-backgrounds-3 §5: the border image area IS the
      * border box + outset) means expanding by padding AND border, else a
      * padded component paints its 9-slice frame floating INSIDE the
      * content area (repro: padding 20px + border 4px on a 200px box —

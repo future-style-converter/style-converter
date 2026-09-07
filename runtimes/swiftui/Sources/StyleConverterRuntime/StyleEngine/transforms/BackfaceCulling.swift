@@ -15,7 +15,7 @@
 //
 //  Mechanism: an ambient CATransform3D environment channel (the
 //  wptCaptureMode / styleViewport pattern). An element that ESTABLISHES
-//  or EXTENDS a 3D rendering context (css-transforms-2 §4: a `perspective`
+//  or EXTENDS a 3D rendering context (css-transforms-2 §4.1: a `perspective`
 //  value other than none establishes one; `transform-style: preserve-3d`
 //  extends the parent's) publishes `inherited · own-rotation` to its
 //  children; a TOUCHED flat element resets the channel to identity
@@ -111,7 +111,7 @@ enum BackfaceCulling {
     }
 
     /// True when the element ESTABLISHES or EXTENDS a 3D rendering context
-    /// for its children (css-transforms-2 §4): a used `perspective` other
+    /// for its children (css-transforms-2 §4.1): a used `perspective` other
     /// than none establishes one; `preserve-3d` extends the parent's. Such
     /// elements publish the accumulated matrix; touched FLAT elements
     /// reset it (their subtree flattens into their plane).

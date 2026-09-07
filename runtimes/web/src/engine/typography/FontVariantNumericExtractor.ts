@@ -1,6 +1,6 @@
 // FontVariantNumericExtractor.ts — folds `FontVariantNumeric` IR properties into a FontVariantNumericConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariantNumericConfig, FONT_VARIANT_NUMERIC_PROPERTY_TYPE, FontVariantNumericPropertyType } from './FontVariantNumericConfig';
 import { kwList } from './_shared';

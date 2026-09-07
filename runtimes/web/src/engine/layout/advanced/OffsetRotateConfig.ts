@@ -5,4 +5,3 @@
 // CSS grammar: `<angle> | auto [<angle>]? | reverse [<angle>]?`.
 export interface OffsetRotateConfig { value?: string; }
 export const OFFSET_ROTATE_PROPERTY_TYPE = 'OffsetRotate' as const;
-export type OffsetRotatePropertyType = typeof OFFSET_ROTATE_PROPERTY_TYPE;

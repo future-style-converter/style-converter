@@ -1,6 +1,6 @@
 // TextDecorationColorExtractor.ts — folds `TextDecorationColor` IR properties into a TextDecorationColorConfig.
 // Family: color.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextDecorationColorConfig, TEXT_DECORATION_COLOR_PROPERTY_TYPE, TextDecorationColorPropertyType } from './TextDecorationColorConfig';
 import { colorCss } from './_shared';

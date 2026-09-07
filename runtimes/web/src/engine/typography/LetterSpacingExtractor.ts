@@ -1,6 +1,6 @@
 // LetterSpacingExtractor.ts — folds `LetterSpacing` IR properties into a LetterSpacingConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { LetterSpacingConfig, LETTER_SPACING_PROPERTY_TYPE, LetterSpacingPropertyType } from './LetterSpacingConfig';
 import { lengthCss } from './_shared';

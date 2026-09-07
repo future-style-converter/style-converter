@@ -54,7 +54,7 @@ object OutlineExtractor {
         // paint path passes the live flag via BordersFacade.
         wptCaptureMode: Boolean = false,
     ): OutlineConfig {
-        // css-ui-4 §4.3: the INITIAL outline-color is `currentColor` — the
+        // css-ui-4 §3.4: the INITIAL outline-color is `currentColor` — the
         // element's used `color`. The old Color.Black default painted a
         // solid-black ring on every fixture that omitted outline-color,
         // while the web reference (whose harness body sets `color: #eee`)
@@ -93,7 +93,7 @@ object OutlineExtractor {
      * Supports both pixel values and keywords (thin, medium, thick — the
      * typed {"type":"keyword","value":"THICK"} envelope included, which
      * `outline-width: thick` emits; see ValueExtractors.extractBorderWidth).
-     * Unparseable data falls back to `medium` (3px), the css-ui-4 §4.2
+     * Unparseable data falls back to `medium` (3px), the css-ui-4 §3.2
      * initial value — never 0, which would silently kill the whole outline.
      */
     private fun extractWidth(json: JsonElement?): Dp {

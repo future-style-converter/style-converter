@@ -8,7 +8,7 @@ package com.styleconverter.runtime.layout.position
 // Constraints(); iOS mirrors it), under which an empty inset-stretched
 // div collapsed to 0×0 — css-sizing abspos-003/004's green square was
 // entirely absent. After the stretch, a declared aspect-ratio resolves
-// with the INLINE axis owning the ratio (css-sizing-4 §5 interaction
+// with the INLINE axis owning the ratio (css-sizing-4 §4.2 interaction
 // with §3.5: the ref renders abspos-003's all-0-inset 1:1 box as
 // 100×100 — inline stretch 100, block DERIVED from the ratio — never
 // 100×500 from the block stretch).
@@ -46,14 +46,14 @@ object AbsposInsetStretch {
 
     /**
      * The pin table (mirrored on iOS byte-for-byte):
-     *  - S1 (stretch, css-position-3 §3.5.3): an axis is stretchable iff
+     *  - S1 (stretch, css-position-3 §4.1 Automatic Sizes): an axis is stretchable iff
      *    it has NO author size, BOTH opposing insets are known px, and
      *    the containing-block axis is known → candidate =
      *    max(0, cb − start − end). Percent/auto/unknown insets and
      *    unknown cb axes conservatively disable the stretch (nothing
      *    honest to resolve against).
      *  - S2 (no ratio): each stretchable axis is injected as-is.
-     *  - S3 (ratio present, css-sizing-4 §5): the inline (width) axis
+     *  - S3 (ratio present, css-sizing-4 §4.2): the inline (width) axis
      *    wins — if width is determined (explicit px or stretch) and
      *    height is NOT explicit, height := width / ratio (this is what
      *    overrides abspos-003's 500px block stretch to 100). Otherwise,
@@ -105,7 +105,7 @@ object AbsposInsetStretch {
     ): Resolved {
         // S1 — per-axis stretch candidates. coerceAtLeast(0): a box whose
         // insets exceed the containing block clamps to zero, never
-        // negative (css-position-3 §3.5.3's over-constrained floor).
+        // negative (css-position-3 §3.5.2's over-constrained floor).
         // S5 folds in as a per-axis ceiling: for a table the candidate may
         // never exceed the containing block's own extent (css-tables-3).
         fun clampToCb(candidate: Double, cb: Double) =

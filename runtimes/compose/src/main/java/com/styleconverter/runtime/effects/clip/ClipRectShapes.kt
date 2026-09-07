@@ -16,12 +16,12 @@ import kotlin.math.min
  * `<geometry-box>` rounded rect, `xywh()`, `inset()`, legacy `clip:
  * rect()`, `polygon()` and `path()` — split out of [ClipPathApplier]
  * (wave 46, lane Y4) to keep each file under the house size target.
- * All of them resolve against the css-masking-1 §7.1 reference box
+ * All of them resolve against the css-masking-1 §5.1 reference box
  * through [ClipPathApplier.ClipRefBox.frame] at draw time.
  */
 internal object ClipRectShapes {
     /**
-     * css-masking-1 §7.1 bare `<geometry-box>`: the clip region is the
+     * css-masking-1 §5.1 bare `<geometry-box>`: the clip region is the
      * reference box itself WITH its corner curves (border-box follows
      * border-radius; padding/content boxes the §5.1 inner radii; the
      * margin box the css-shapes-1 §4 outset rule — all resolved by

@@ -77,9 +77,18 @@ final class InlineBlockAtomTests: XCTestCase {
 
     func testB3RelativeAndStickyStayInFlowAndRemainAtoms() throws {
         for p in ["RELATIVE", "STICKY", "STATIC"] {
-            XCTAssertNotNil(InlineBlockAtom.spec(
-                properties: try box("INLINE_BLOCK", 100, 100, extra: kw("Position", p)),
+            // Retro R10 (A8#1): "remain atoms" means the SAME 100×100 atom the
+            // position-less box yields. CSS 2.1 §9.4.3 (relative positioning)
+            // shifts a box AFTER normal-flow layout without changing its size;
+            // `sticky` is relative positioning plus a scroll-driven offset
+            // (css-position-3) and `static` is plain normal flow. A not-nil
+            // check alone let a doubled width (audit mutation M10) pass here
+            // while 17 siblings failed; the Kotlin twin pins the same values.
+            let spec = try XCTUnwrap(InlineBlockAtom.spec(
+                properties: box("INLINE_BLOCK", 100, 100, extra: kw("Position", p)),
                 hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false), p)
+            XCTAssertEqual(spec.fixedWpx, 100, p)
+            XCTAssertEqual(spec.fixedHpx, 100, p)
         }
     }
 
@@ -106,11 +115,17 @@ final class InlineBlockAtomTests: XCTestCase {
     func testB5ExplicitZeroBandsAreFineTheExtractedCorpusShape() throws {
         // backdrop-filter-clip-rect-2's boxes carry an explicit `padding: 0`
         // from the UA reset the extractor bakes in.
-        XCTAssertNotNil(InlineBlockAtom.spec(
-            properties: try props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
-                                  len("Height", 100), len("PaddingTop", 0),
-                                  len("PaddingLeft", 0), len("MarginTop", 0)),
+        // Retro R10 (A8#1): a zero band ADDS zero — under the `box-sizing:
+        // content-box` default (the rule InlineBlockAtom.swift's H2 header
+        // cites) the outer box is 100 + 0 by 100 + 0, so the atom must be
+        // exactly the declared 100×100, not merely non-nil.
+        let spec = try XCTUnwrap(InlineBlockAtom.spec(
+            properties: props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
+                              len("Height", 100), len("PaddingTop", 0),
+                              len("PaddingLeft", 0), len("MarginTop", 0)),
             hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
+        XCTAssertEqual(spec.fixedWpx, 100)
+        XCTAssertEqual(spec.fixedHpx, 100)
     }
 
     func testB5Wave33AllZeroBandSitesAreByteIdenticalUnderH2() throws {
@@ -150,11 +165,18 @@ final class InlineBlockAtomTests: XCTestCase {
     func testH2BorderBoxToleratesABandShapeThisRuleCannotRead() throws {
         // Under border-box the outer box is the declared px WHATEVER the
         // band is, so a % padding does not need to be resolvable.
-        XCTAssertNotNil(InlineBlockAtom.spec(
-            properties: try props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
-                                  len("Height", 100), kw("BoxSizing", "BORDER_BOX"),
-                                  #"{"type":"PaddingLeft","data":{"type":"percentage","value":25}}"#),
+        // Retro R10 (A8#1): "tolerates" means the unreadable band changes
+        // NOTHING — `box-sizing: border-box` (same rule, cited in
+        // InlineBlockAtom.swift's H2 header) puts every band INSIDE the
+        // declared 100×100, so that is the outer box whatever the padding
+        // resolves to. Pin the value, not just the admission.
+        let spec = try XCTUnwrap(InlineBlockAtom.spec(
+            properties: props(kw("Display", "INLINE_BLOCK"), len("Width", 100),
+                              len("Height", 100), kw("BoxSizing", "BORDER_BOX"),
+                              #"{"type":"PaddingLeft","data":{"type":"percentage","value":25}}"#),
             hasOwnText: false, hasOwnRuns: false, containerDeclaresLineHeight: false))
+        XCTAssertEqual(spec.fixedWpx, 100)
+        XCTAssertEqual(spec.fixedHpx, 100)
     }
 
     func testH2ContentBoxAddsThePaddingAndBorderBands() throws {

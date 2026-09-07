@@ -1,6 +1,6 @@
 // FontNamedInstanceExtractor.ts — folds `FontNamedInstance` IR properties into a FontNamedInstanceConfig.
 // Family: font-named-instance.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontNamedInstanceConfig, FONT_NAMED_INSTANCE_PROPERTY_TYPE, FontNamedInstancePropertyType } from './FontNamedInstanceConfig';
 import { kwLower } from './_shared';

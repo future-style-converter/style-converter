@@ -4,7 +4,7 @@
 //
 //  Folds the 11 flexbox-family longhands (plus BoxOrient, skipped below)
 //  into the shared LayoutAggregate. The aggregate is consumed once by
-//  LayoutApplier / ComponentRenderer to pick the SwiftUI container kind
+//  ComponentRenderer to pick the SwiftUI container kind
 //  (HStack / VStack / ZStack / FlowLayout) and the per-child modifier
 //  chain — see LayoutAggregate.swift for the rationale on why these are
 //  fused rather than one-modifier-per-property.

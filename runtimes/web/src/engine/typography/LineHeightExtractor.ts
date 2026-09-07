@@ -1,6 +1,6 @@
 // LineHeightExtractor.ts — folds `LineHeight` IR properties into a LineHeightConfig.
 // Family: line-height.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { LineHeightConfig, LINE_HEIGHT_PROPERTY_TYPE, LineHeightPropertyType } from './LineHeightConfig';
 import { kwLower, lengthCss } from './_shared';

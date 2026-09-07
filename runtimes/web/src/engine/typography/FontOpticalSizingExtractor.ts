@@ -1,6 +1,6 @@
 // FontOpticalSizingExtractor.ts — folds `FontOpticalSizing` IR properties into a FontOpticalSizingConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontOpticalSizingConfig, FONT_OPTICAL_SIZING_PROPERTY_TYPE, FontOpticalSizingPropertyType } from './FontOpticalSizingConfig';
 import { kwLower } from './_shared';

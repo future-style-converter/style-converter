@@ -97,7 +97,7 @@ class EasingReferenceTest {
 
     @Test
     fun `keyword control points match the CSS spec constants`() {
-        // css-easing-1 §3.1. If the runtime's companion constants drift from
+        // css-easing-1 §2.2. If the runtime's companion constants drift from
         // the spec, every curve built from a keyword is quietly wrong — and
         // no pixel comparison would attribute it to the keyword mapping.
         val expected = mapOf(

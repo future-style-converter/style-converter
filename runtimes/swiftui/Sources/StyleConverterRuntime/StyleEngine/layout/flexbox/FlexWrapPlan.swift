@@ -56,7 +56,7 @@ enum FlexWrapPlan {
     ///     wraps and every item lands on one line.
     ///   - gap: main-axis gap (`column-gap` for a row container) — it
     ///     counts against the budget exactly like item size does
-    ///     (css-align-3 §8.1: gaps participate in line breaking).
+    ///     (css-align-3 §8: gaps participate in line breaking).
     /// - Returns: lines in document order; empty only for no items.
     ///
     /// §9.3 requires at least ONE item per line even when that item alone
@@ -89,7 +89,7 @@ enum FlexWrapPlan {
         return lines
     }
 
-    /// css-align-3 §5.3 — does `align-content` DISTRIBUTE the leftover
+    /// css-align-3 §5.1 — does `align-content` DISTRIBUTE the leftover
     /// cross space to the lines, or merely POSITION the line block?
     ///
     /// Only `normal` / `stretch` (and the `auto` spelling the extractor

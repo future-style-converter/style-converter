@@ -16,7 +16,7 @@ import kotlin.math.min
  * The radial `<basic-shape>` factories — `circle()` and `ellipse()` —
  * split out of [ClipPathApplier] (wave 46, lane Y4) to keep each file
  * under the house size target. Every coordinate below is REFERENCE-BOX
- * space (css-masking-1 §7.1): centres offset from the box's top-left,
+ * space (css-masking-1 §5.1): centres offset from the box's top-left,
  * radius keywords / percents against its extents, the box itself
  * resolved at draw time through [ClipPathApplier.ClipRefBox.frame].
  */

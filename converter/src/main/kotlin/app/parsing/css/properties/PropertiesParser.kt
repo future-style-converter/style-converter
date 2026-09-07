@@ -13,6 +13,7 @@ import app.parsing.css.properties.primitiveParsers.AttrNotationResolver
  * 1. Validate properties (filter invalid CSS property names)
  * 1.5 Resolve decidable attr() notations; drop declarations proven invalid
  * 2. Expand shorthands to longhands (padding: 10px → padding-top/right/bottom/left)
+ * 2.25 Collapse logical/physical alias pairs by cascade order (base bucket only, css-logical-1 §4)
  * 3. Parse each longhand into specific IRProperty (background-color → BackgroundColorProperty)
  * 4. Fallback to GenericProperty for properties without specific parsers
  *
@@ -39,7 +40,7 @@ object PropertiesParser {
      * - Converts camelCase to kebab-case: "backgroundColor" → "background-color"
      * - Lowercases all: "DISPLAY" → "display", "DiSpLaY" → "display"
      */
-    private fun normalizePropertyName(name: String): String {
+    internal fun normalizePropertyName(name: String): String {
         // If already contains hyphens, just lowercase
         if (name.contains("-")) {
             return name.lowercase()
@@ -83,12 +84,23 @@ object PropertiesParser {
      *   the vacated slot is filled by the UA rule instead of by inheritance
      *   (css-cascade-4 §7.3 defaulting applies only when NO origin declared
      *   a winner). Bucket call sites leave it null; they don't drop anyway.
+     * @param writingContext The component's own computed writing mode +
+     *   direction (WritingContext.derive over the parent chain), or null to
+     *   skip logical/physical alias collapsing. Non-null ONLY at the
+     *   base-declaration call site: css-logical-1 §4 pairs a flow-relative
+     *   longhand with its physical twin "using the element's own computed
+     *   writing mode" and cascades the pair "together as one", so the later
+     *   declaration wins — see LogicalAliasResolution. Selector/media
+     *   buckets and keyframe stops pass null: a bucket's `margin-left` versus
+     *   the base's `margin-inline-start` is a cross-bucket cascade this parser
+     *   never sees, so it must not pretend to resolve half of it.
      * @return Mutable list of IRProperty instances (specific types from irmodels/)
      */
     fun parse(
         properties: Map<String, CssPropertyValue>,
         resolveInheritedDefaults: Boolean = false,
-        sourceTag: String? = null
+        sourceTag: String? = null,
+        writingContext: WritingContext? = null
     ): MutableList<IRProperty> {
         val result = mutableListOf<IRProperty>()
 
@@ -166,6 +178,16 @@ object PropertiesParser {
 
         // Step 2: Expand shorthands to longhands
         val expandedProperties = mutableMapOf<String, String>()
+        // Cascade order per resulting longhand: the index of the SOURCE
+        // declaration that last wrote it (every longhand a shorthand expands
+        // to shares the shorthand's index). css-logical-1 §4 needs this to
+        // pick the later of a logical/physical pair. Tracked beside the map,
+        // NOT by moving keys: LinkedHashMap keeps a re-put key at its first
+        // position, and that position fixes the emitted IR property order —
+        // re-inserting would churn every fixture whose later shorthand
+        // re-sets an earlier longhand.
+        val declarationIndex = HashMap<String, Int>()
+        var declarationOrdinal = 0
 
         for ((name, cssValue) in substitutedProperties) {
             val value = cssValue.value
@@ -175,12 +197,37 @@ object PropertiesParser {
                 // Expand shorthand into multiple longhands
                 val expanded = ShorthandRegistry.expand(name, value)
                 expandedProperties.putAll(expanded)
+                for (longhand in expanded.keys) declarationIndex[longhand] = declarationOrdinal
 
                 println("[CSS Parser] Expanded '$name: $value' → ${expanded.keys.joinToString(", ")}")
             } else {
                 // Keep longhand as-is
                 expandedProperties[name] = value
+                declarationIndex[name] = declarationOrdinal
             }
+            declarationOrdinal++
+        }
+
+        // Step 2.25 (base declarations only): collapse logical/physical alias
+        // pairs by cascade order. css-logical-1 §4: paired longhands "share a
+        // computed value … derived from the specified value of the property
+        // declared with higher priority in the CSS cascade" — inside one
+        // declaration block, the later one. Emitting both let each runtime
+        // pick its own winner (retrospective A11#4). Identity when the caller
+        // passes no context or the component declares no pair — the same map
+        // instance flows on, so untouched fixtures stay byte-identical.
+        val aliasResult = if (writingContext != null) {
+            LogicalAliasResolution.collapse(expandedProperties, declarationIndex, writingContext)
+        } else {
+            LogicalAliasResolution.Result(expandedProperties, emptyList(), emptyList())
+        }
+        val aliasResolvedProperties = aliasResult.properties
+        // Both outcomes stay visible in the convert log — a drop AND an abstention.
+        for (d in aliasResult.dropped) {
+            println("[CSS Parser] Collapsed logical/physical alias pair under $writingContext: dropped '${d.loser}: ${d.loserValue}' — '${d.winner}: ${d.winnerValue}' is declared later and the pair shares one computed value (css-logical-1 §4)")
+        }
+        for (k in aliasResult.kept) {
+            println("[CSS Parser] Kept both '${k.logical}' and '${k.physical}': ${k.reason}")
         }
 
         // Step 2.5 (base declarations only): resolve redundant `inherit`.
@@ -191,18 +238,18 @@ object PropertiesParser {
         // vacated slot on web), and for every map with no redundant entry —
         // see InheritedDefaultResolution for the full spec argument.
         val resolvedProperties =
-            if (resolveInheritedDefaults) InheritedDefaultResolution.resolve(expandedProperties, sourceTag)
-            else expandedProperties
+            if (resolveInheritedDefaults) InheritedDefaultResolution.resolve(aliasResolvedProperties, sourceTag)
+            else aliasResolvedProperties
         // Keep the drop visible in the convert log — never a silent eat.
-        if (resolvedProperties.size != expandedProperties.size) {
-            val dropped = expandedProperties.keys - resolvedProperties.keys
+        if (resolvedProperties.size != aliasResolvedProperties.size) {
+            val dropped = aliasResolvedProperties.keys - resolvedProperties.keys
             println("[CSS Parser] Resolved redundant 'inherit' on inherited-by-default propert${if (dropped.size == 1) "y" else "ies"} (drop == natural inheritance): ${dropped.joinToString(", ")}")
         }
         // …and keep the SKIP equally visible: a UA-styled tag that carried
         // candidate `inherit` declarations kept them on purpose, so the log
         // records the exemption instead of leaving a silent non-event.
         if (resolveInheritedDefaults && InheritedDefaultResolution.isUaStyledTag(sourceTag)) {
-            val kept = expandedProperties.filter { (n, v) -> InheritedDefaultResolution.isRedundantInherit(n, v) }.keys
+            val kept = aliasResolvedProperties.filter { (n, v) -> InheritedDefaultResolution.isRedundantInherit(n, v) }.keys
             if (kept.isNotEmpty()) {
                 println("[CSS Parser] Kept 'inherit' on <$sourceTag> (UA-styled tag: the UA sheet declares these, so absence ≠ inheritance): ${kept.joinToString(", ")}")
             }

@@ -1,6 +1,6 @@
 // FontSynthesisPositionExtractor.ts — folds `FontSynthesisPosition` IR properties into a FontSynthesisPositionConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontSynthesisPositionConfig, FONT_SYNTHESIS_POSITION_PROPERTY_TYPE, FontSynthesisPositionPropertyType } from './FontSynthesisPositionConfig';
 import { kwLower } from './_shared';

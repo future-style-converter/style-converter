@@ -84,7 +84,7 @@ internal object VerticalMulticolMeasure {
         if (childSpecs.size != 1 || measurables.size != 1) return null
         val spec = childSpecs[0]
         // Out-of-flow / spanning sole children are not column content
-        // (css-position-3 §2.1, css-multicol-1 §6.2) — decline, keep the
+        // (css-position-3 §2.1, css-multicol-1 §6.1) — decline, keep the
         // frozen behaviour for their owning models.
         if (!with(MulticolSpannerFlow) { spec.role.isFlow }) return null
         // Post-load-extracted wires bake the browser's used physical layout

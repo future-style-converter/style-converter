@@ -11,8 +11,11 @@
 // SwiftUI for UnitPoint used in origin parsing.
 import SwiftUI
 
-// Property-type registry — used by PropertyRegistry.migrated and
-// TransformsSelfTest so every owned name lives in exactly one place.
+// Property-type registry — used by PropertyRegistry.migrated and by
+// TransformsTests (which asserts every name here is in `migrated`), so
+// every owned name lives in exactly one place. Retro P2e corrected the
+// name: the launch-time `TransformsSelfTest` became that XCTest class when
+// the engine moved into the SwiftPM package.
 enum TransformsProperty {
     static let set: Set<String> = [
         "Transform", "Rotate", "Scale", "Translate",
@@ -52,7 +55,7 @@ enum TransformsExtractor {
 
     // Parses `{ "type": "functions", "list": [...] }` into TransformFn entries.
     // Each entry carries `"fn"` + axis-specific keys documented in
-    // `examples/properties/transforms/transform-functions.json`.
+    // `fixtures/properties/transforms/transform-functions.json`.
     private static func applyTransform(_ data: IRValue, into agg: inout TransformsAggregate) {
         // Variant 1: `"none"` → empty list, no-op (but still "touched" so
         // the applier knows the property was present). The IR carries
@@ -322,18 +325,17 @@ enum TransformsExtractor {
 
     // IR carries x / y (and optional z) sub-blobs. Each axis is either
     // { "type": "keyword", "value": "TOP|LEFT|..." }, { "type": "percentage", ... },
-    // or { "type": "length", "px": N }.
+    // or { "type": "length", "px": N }. The `x` / `y` keys are the
+    // converter's FIRST and SECOND slots, not resolved axes: the parser
+    // stores `top right` as x:TOP, y:RIGHT (TransformOriginPropertyParser.kt).
     private static func applyOrigin(_ data: IRValue, into agg: inout TransformsAggregate) {
         guard case .object(let o) = data else { return }
-        var origin = TransformOriginValue()
-        // Defaults: CSS initial is 50% 50%, matched by UnitPoint.center.
-        var fx: CGFloat = 0.5, fy: CGFloat = 0.5
-        var xPx: CGFloat? = nil, yPx: CGFloat? = nil
-        if let xBlob = o["x"] { parseOriginAxis(xBlob, isY: false, frac: &fx, px: &xPx) }
-        if let yBlob = o["y"] { parseOriginAxis(yBlob, isY: true,  frac: &fy, px: &yPx) }
-        origin.unit = UnitPoint(x: fx, y: fy)
-        origin.xPx = xPx
-        origin.yPx = yPx
+        // retro R5 (audit A11#14): resolve the slots through the
+        // css-transforms-1 §5 `&&` rule — a vertical keyword in the first
+        // slot / horizontal in the second names ITS axis, not the slot's.
+        // The old per-slot read sent `top right` to the bottom-left corner
+        // (see TransformOriginResolver for the measured bboxes).
+        var origin = TransformOriginResolver.resolve(first: o["x"], second: o["y"])
         if let zBlob = o["z"], let z = extractLengthPx(zBlob) {
             origin.zPx = CGFloat(z)
         }

@@ -132,6 +132,91 @@ export function pairRegressed(pair, { ssimThreshold, pixelThreshold, deltaEThres
 }
 
 /**
+ * Owner strings that carry no information. The ledger contract (header above
+ * + the `note` field in cross-platform-expectations.json) says every line
+ * names WHO owns the divergence; the retrospective (A9#5 / A12#8) found the
+ * literal placeholder "unassigned" on 29/29 lines and nothing rejecting it,
+ * so the field had been decorative since the wave-1 seed. Lower-cased match.
+ */
+const PLACEHOLDER_OWNERS = new Set(['unassigned', 'tbd', 'todo', 'none', 'n/a', 'nobody', '?']);
+
+/**
+ * 1-based line number of each ledger entry in the raw file text, so a schema
+ * error can name the line (an index into a 400-line JSON array is useless to
+ * the person who has to fix it). Every entry carries exactly one
+ * `"component":` key at its own level (`observed` holds metrics, never a
+ * component), so the n-th occurrence marks the n-th entry. Returns null when
+ * the occurrence count disagrees with the entry count — a guess would point
+ * at the wrong line, which is worse than no line.
+ */
+export function ledgerEntryLines(raw, entryCount) {
+  const lines = [];
+  const re = /"component"\s*:/g;                       // one per entry, by construction
+  let m;
+  while ((m = re.exec(raw)) !== null) {
+    lines.push(raw.slice(0, m.index).split('\n').length); // newlines before the key + 1
+  }
+  return lines.length === entryCount ? lines : null;
+}
+
+/**
+ * Schema-validate a parsed ledger. Returns an array of problems, each
+ * `{ index, line, message }` (line is null when it cannot be located); an
+ * empty array means the ledger honours its own contract.
+ *
+ * Checked per entry: `component` (non-empty), `pair` (one of PAIR_KEYS),
+ * `reason` (non-empty), `owner` (non-empty and NOT a placeholder), `expires`
+ * (present, ISO-parseable, and not before the date the divergence was
+ * observed). The observation date is `observedAt` / `observed.at` when an
+ * entry carries one; otherwise the ledger-level `seededFrom.run` is the floor
+ * — the current schema records metrics under `observed` but no per-entry
+ * date, so an expiry that predates the seed run is the only "dead on
+ * arrival" case the data can expose. Kept separate from
+ * evaluateCrossPlatformGate on purpose: a malformed line is a setup error
+ * (exit 2 in the comparator), never a verdict about the runtimes.
+ *
+ * @param {object} ledger   parsed cross-platform-expectations.json
+ * @param {string|null} raw the file text, for line numbers (optional)
+ */
+export function validateLedger(ledger, raw = null) {
+  const problems = [];
+  const entries = ledger?.expectations;
+  if (!Array.isArray(entries)) {
+    return [{ index: -1, line: 1, message: '`expectations` must be an array' }];
+  }
+  const lines = raw ? ledgerEntryLines(raw, entries.length) : null;
+  const seedFloor = Date.parse(ledger?.seededFrom?.run ?? '');   // NaN when absent
+  entries.forEach((e, i) => {
+    const at = (message) => problems.push({ index: i, line: lines?.[i] ?? null, message });
+    if (!e || typeof e !== 'object' || Array.isArray(e)) { at('entry must be an object'); return; }
+    if (typeof e.component !== 'string' || e.component.trim() === '') at('`component` must be a non-empty string');
+    if (!PAIR_KEYS.includes(e.pair)) at(`\`pair\` must be one of ${PAIR_KEYS.join(' | ')}, got ${JSON.stringify(e.pair)}`);
+    if (typeof e.reason !== 'string' || e.reason.trim() === '') at('`reason` must be a non-empty string');
+    const owner = typeof e.owner === 'string' ? e.owner.trim() : '';
+    if (owner === '') at('`owner` must be a non-empty string (a lane or a person)');
+    else if (PLACEHOLDER_OWNERS.has(owner.toLowerCase())) {
+      at(`\`owner\` is the placeholder ${JSON.stringify(e.owner)} — name a lane or a person`);
+    }
+    if (typeof e.expires !== 'string') {
+      at('`expires` is required (ISO date): an excuse without a re-review date is never re-reviewed');
+    } else {
+      const t = Date.parse(e.expires);
+      if (!Number.isFinite(t)) at(`\`expires\` is not a parseable date: ${JSON.stringify(e.expires)}`);
+      else {
+        // Per-entry observation date wins when present; the seed run otherwise.
+        const observedAt = Date.parse(e.observedAt ?? e.observed?.at ?? '');
+        const floor = Number.isFinite(observedAt) ? observedAt : seedFloor;
+        const floorLabel = Number.isFinite(observedAt) ? 'its observation date' : 'the ledger seed run (seededFrom.run)';
+        if (Number.isFinite(floor) && t < floor) {
+          at(`\`expires\` ${e.expires} precedes ${floorLabel} — the line was dead on arrival`);
+        }
+      }
+    }
+  });
+  return problems;
+}
+
+/**
  * Index a ledger into a Map keyed `${component}\u0000${pair}` for O(1) lookup.
  * Entries carrying a `fixture` apply only to that input label; entries
  * without one apply to any fixture (used for cross-suite divergences).

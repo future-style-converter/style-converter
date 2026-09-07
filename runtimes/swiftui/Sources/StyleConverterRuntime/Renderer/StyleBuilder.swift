@@ -187,14 +187,6 @@ struct EffectConfig {
     var opacity: CGFloat?   = nil
     var rotation: CGFloat?  = nil  // degrees
     var scale: CGFloat?     = nil
-    // Phase 5: BoxShadow moved to StyleEngine/effects/shadow. The legacy
-    // fields below are intentionally kept as `nil` defaults so the
-    // EffectsModifier's ShadowMod short-circuits — the paint now runs
-    // through BoxShadowApplier.
-    var shadowColor: Color? = nil
-    var shadowRadius: CGFloat? = nil
-    var shadowX: CGFloat    = 0
-    var shadowY: CGFloat    = 0
     var zIndex: Double?     = nil
 }
 
@@ -361,7 +353,7 @@ enum StyleBuilder {
         // measured value rides SpacingContext so padding/margin/gap AND
         // the sizing lane (SizeApplierResolve funnels through
         // SpacingResolver) all share one basis; nil keeps the resolver on
-        // the css-values-4 §6.1.3 0.5em fallback.
+        // the css-values-4 §6.1.1 0.5em fallback.
         if ChUnitMetrics.usesCh([
             s.size.width, s.size.height,
             s.size.minWidth, s.size.maxWidth, s.size.minHeight, s.size.maxHeight,
@@ -422,8 +414,9 @@ enum StyleBuilder {
         // rendering-hint bag: the factor lives under `value` in a tagged
         // object, which the generic keyword fold flattens to the string
         // "number" — see ZoomExtractor.swift's header. "Zoom" stays owned
-        // by RenderingProperty in the registry; RenderingApplier is
-        // identity, so only this config reaches a modifier.
+        // by RenderingProperty in the registry, but the rendering family
+        // reaches no modifier at all (retro P2b deleted its identity
+        // applier), so this config is the only `zoom` paint path.
         s.zoom = ZoomExtractor.extract(from: properties)
         // CSS 2.1 §11.1.2 — the legacy `clip` property "applies to:
         // absolutely positioned elements" ONLY. On a static/relative
@@ -609,11 +602,19 @@ enum StyleBuilder {
 
             // ── Layout / display ── migrated to StyleEngine/layout
             // (Phase 7 step 2). Display, FlexDirection, FlexWrap,
-            // JustifyContent, AlignItems now flow through LayoutExtractor
-            // → LayoutAggregate → FlexboxApplier.containerDecision(...),
-            // consumed by ComponentRenderer at container-construction time.
-            // All five names plus the rest of the flex family are in
-            // PropertyRegistry.migrated so they never hit this switch.
+            // JustifyContent, AlignItems flow through LayoutExtractor into a
+            // LayoutAggregate, which ComponentRenderer reads DIRECTLY at
+            // container-construction time (its `gridKind` / flex-wrap
+            // branches) — SwiftUI's stack initialisers take alignment and
+            // spacing as construction arguments, so the container choice can
+            // never be a modifier and never reaches this switch. Retro P2e
+            // (finding A6#15) corrected the middle of that sentence: it
+            // routed the aggregate through `FlexboxApplier.containerDecision
+            // (...)`, a scaffold whose only callers were tests and which
+            // retro P2b deleted (see FlexboxApplier.swift's header for the
+            // inverted `switch aggregate.display` that made it dead as well
+            // as unused). All five names plus the rest of the flex family are
+            // in PropertyRegistry.migrated so they never hit this switch.
             // Gap / RowGap / ColumnGap migrated — see GapExtractor.
 
             // ── Effects ─────────────────────────────────────────────────
@@ -642,7 +643,7 @@ enum StyleBuilder {
             }
         }
 
-        // Wave 40 (lane T7) — the css-ui-3 §5 border-box FLOOR, applied LAST
+        // Wave 40 (lane T7) — the css-ui-3 §3.1 border-box FLOOR, applied LAST
         // because it needs the finished sizing, padding and border configs at
         // once: a `box-sizing: border-box` box whose declared size is smaller
         // than its own padding + border bands has a zero content box, not a
@@ -763,7 +764,13 @@ enum StyleBuilder {
     ///   • border-box (default) → zero (paint under the border too)
     ///   • padding-box          → inset by each side's border width
     ///   • content-box          → inset by border width + padding
-    /// Pure so BackgroundClipTests can pin the arithmetic; padding
+    /// Pure so the arithmetic is pinned without a render surface —
+    /// FidelityWave1Tests.testBackgroundClipInsets (border 4 + padding 12
+    /// → content-box 16 on every edge, padding-box 4, border-box 0), with
+    /// BoxSizingTests mirroring the `hasBorder` gate. Retro P2e (finding
+    /// A4#8) replaced the name "BackgroundClipTests" here: no such class
+    /// exists, so the claimed pin could not be checked without a grep.
+    /// padding
     /// resolves through the same SpacingResolver lane the padding
     /// applier uses (percent sides fall back to the viewport basis —
     /// the same approximation PaddingApplier's fast path makes).
@@ -939,7 +946,7 @@ enum StyleBuilder {
     }
 
     // ── Wave-18 cleanup (clip-003): outline-vs-own-clip ordering ──────────
-    // css-overflow-3 §3 clips the element's CONTENT; the css-ui-4 §4 outline
+    // css-overflow-3 §3 clips the element's CONTENT; the css-ui-4 §3 outline
     // is post-layout ink around the border box, which the element's OWN
     // overflow clip must NOT swallow ("outlines … do not clip" — only
     // ANCESTOR scroll/clip containers may cut it off; that ancestor
@@ -1108,7 +1115,7 @@ extension View {
             // image before every engineBackground* call therefore makes
             // it the TOPMOST background layer: above the whole background
             // chain, beneath the element's own text — the CSS order
-            // (css-backgrounds-3 §6 draws the image "in place of the
+            // (css-backgrounds-3 §5 draws the image "in place of the
             // border"; CSS2 Appendix E paints borders after backgrounds,
             // before content). The old `.overlay` attachment down in
             // Phase 5 painted ABOVE content, so a slice-`fill` center
@@ -1198,7 +1205,29 @@ extension View {
             // there) → radius clip → sides stroke → outline (outside
             // box) → shadow (stacked outside). BoxShadow comes last so
             // `.shadow(...)` stacks on the fully-painted element.
-            .engineBorderRadius(style.borderRadius)
+            // retro R4 (A12#0 / A11#7) — border-radius clip policy.
+            // css-backgrounds-3 §4.3 curves the element's OWN background
+            // and border; descendants are clipped at the curve only when
+            // `overflow` is not visible. The shape-aware fill/stroke
+            // appliers (ColorApplier above, BorderSideApplier below) already
+            // round the element's paint, so the applier drops its
+            // `.clipShape` unless (a) this element clips its own overflow
+            // (the same §3.1-coerced decision engineVisibility takes),
+            // (b) rectangular background-image layers paint and would lose
+            // their corners (the Compose twin's documented residual), or
+            // (c) the border takes the straight-edge Canvas path. Ten iOS
+            // ledger pairs on visual-test rounded boxes were this clip
+            // cutting the label, not "corner AA".
+            .engineBorderRadius(style.borderRadius,
+                                clipsDescendants: BorderRadiusApplier.clipsDescendants(
+                                    radius: style.borderRadius,
+                                    sides: style.borderSides,
+                                    overflowClips: StyleBuilder.ownOverflowClips(style.visibility),
+                                    // Exactly when engineBackgroundImage above paints a
+                                    // rectangular layer (clip:text routes the gradient
+                                    // through the label instead, see that call).
+                                    hasBackgroundLayers: style.backgroundClip?.mode != .text
+                                        && style.backgroundImage?.hasAny == true))
             // currentColor (CSS Backgrounds 3 §3.2): a border side with a
             // style but no colour inherits the element's own `color` —
             // threaded here so dotted/solid colourless sides stop
@@ -1212,7 +1241,7 @@ extension View {
             // then HOISTED past that clip in applyGroupEffects, because
             // SwiftUI's later-wraps-earlier chain would otherwise let
             // engineVisibility's clip swallow the ring web/ref paint
-            // (css-ui-4 §4: the element's own clip must not cut its
+            // (css-ui-4 §3: the element's own clip must not cut its
             // outline). Un-clipped elements keep this slot byte-for-byte.
             .engineOutline(StyleBuilder.inChainOutline(style),
                            radius: style.borderRadius,
@@ -1228,7 +1257,7 @@ extension View {
     /// the halves, so everything below also applies to positioned
     /// descendants — matching CSS, where a parent's opacity/filter/
     /// transform composite the WHOLE subtree (they create stacking and
-    /// containing contexts: css-color-4 §2.1, filter-effects-1 §5,
+    /// containing contexts: css-color-4 §3.3, filter-effects-1 §5,
     /// css-transforms-1 §3) and margin moves the box children ride in.
     @ViewBuilder
     func applyGroupEffects(_ style: ComponentStyle) -> some View {
@@ -1240,7 +1269,7 @@ extension View {
             //      THEIR blend modes stop at this element (isolation:
             //      isolate; the default auto emits nothing).
             //   2. `.engineOpacity` carries its OWN compositing group for
-            //      alpha < 1 (css-color-4 §2.1: the subtree is composited
+            //      alpha < 1 (css-color-4 §3.3: the subtree is composited
             //      as a group, then faded).
             //   3. `.engineBlendMode` is OUTERMOST: compositing-1 §5.1
             //      blends the element's finished GROUP into the parent's
@@ -1287,8 +1316,15 @@ extension View {
             // element's own background is (filter-effects-2 §2). It is inert
             // for the foreground filter chain and for every element that
             // declares no backdrop-filter.
+            // retro R4 (A7#1) — drop-shadow()'s omitted colour is the
+            // element's `color` (filter-effects-1 §6.1: "the missing used
+            // color is taken from the color property"): thread the resolved
+            // text colour exactly like the border-side / outline currentColor
+            // above (the inherited channel has already merged the ancestor
+            // `Color` into `style.text.color`).
             .engineFilter(style.filter, radius: style.borderRadius,
-                          elementOpacity: style.opacity?.alpha ?? 1)
+                          elementOpacity: style.opacity?.alpha ?? 1,
+                          currentColor: style.text.color)
             .engineClipPath(style.clipPath)
             .engineTransforms(style.transforms)
             // Fidelity wave 2 — CSS Motion Path (motion-1 §4). Composes

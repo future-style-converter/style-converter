@@ -5,7 +5,7 @@
 //  Wave-6 pins (issues #32 + #39):
 //    • VariableStore — scope-chain merge with nearest-wins shadowing,
 //      case-sensitive names, verbatim (empty-legal) values.
-//    • VarSubstitutor — css-variables-1 §2.3: chain lookup, fallback,
+//    • VarSubstitutor — css-variables-1 §3: chain lookup, fallback,
 //      NESTED fallback, guaranteed-invalid ⇒ nil, cycle safety.
 //    • CalcEvaluator — css-values-3 §8: px arithmetic, nesting, mixed
 //      units (%, em, rem, vw), × / ÷ typing rules, honest nil.

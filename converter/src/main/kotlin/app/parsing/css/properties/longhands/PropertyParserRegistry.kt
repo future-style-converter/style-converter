@@ -879,18 +879,6 @@ object PropertyParserRegistry {
     }
 
     /**
-     * Check if a parser exists for this property.
-     */
-    fun hasParser(propertyName: String): Boolean {
-        return propertyName in parsers
-    }
-
-    /**
-     * Get the number of parsers registered.
-     */
-    fun parserCount(): Int = parsers.size
-
-    /**
      * All property names with a registered parser.
      *
      * Exposed so ValidatorRegistryParityTest can assert every registered

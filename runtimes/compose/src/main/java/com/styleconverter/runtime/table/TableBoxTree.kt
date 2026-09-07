@@ -124,8 +124,12 @@ object TableBoxTree {
      * UA sheet, so that display never reaches the wire and `meta.sourceTag`
      * is its only sighting — the same channel
      * [TableSeparatedTracks.usedSpacing] already reads for the UA
-     * `border-spacing`, and the same channel
-     * [CollapsedBorderConflict.originOf] reads for §17.6.2.1's rule 4.
+     * `border-spacing`. (Retro sweep P2a, A6#11: this sentence used to
+     * name a second reader, `CollapsedBorderConflict.originOf`, the CSS 2.1
+     * §17.6.2.1 conflict-resolution decision table. That module never had a
+     * production caller on either native and was deleted with its 14 JVM
+     * tests; the collapsed-border gap is a table-LAYOUT gap, not a
+     * conflict-ranking one — see the deletion note in the retro report.)
      *
      * MEASURED (frozen wave37-final, `tools/titan/runs/wave37-final/sections
      * /css-tables`): 122 of the section's table-internal boxes carry a table

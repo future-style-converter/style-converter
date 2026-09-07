@@ -34,7 +34,7 @@ import androidx.compose.ui.zIndex
  *    owning the positioned-ancestor case (pin S4).
  *
  * 2. **Fixed positioning** (wave 17): CSS `position: fixed` anchors at the
- *    VIEWPORT (css-position-3 §3.2) — our capture canvas. [CanvasRootHoist]
+ *    VIEWPORT (css-position-3 §2.1) — our capture canvas. [CanvasRootHoist]
  *    hoists the box out of its parent's flow entirely and renders it from a
  *    zero-size overlay anchor at the UNPADDED canvas origin; the FIXED branch
  *    below then applies the (left, top) inset as an absoluteOffset from that
@@ -113,7 +113,7 @@ object PositionApplier {
 
             PositionType.FIXED -> {
                 // Fixed (wave 17): the containing block is the VIEWPORT —
-                // our capture canvas (css-position-3 §3.2). The offset below
+                // our capture canvas (css-position-3 §2.1). The offset below
                 // is the (left, top) INSET from wherever this node is
                 // anchored: under CanvasRootHoist.Host (the composed WPT
                 // canvas) the node renders from a zero-size overlay anchor
@@ -201,7 +201,7 @@ object PositionApplier {
         // Wave 22 (B-RC3): these offsets are SIGNED insets from whichever
         // anchor the box's declared sides select — positive from the start
         // (left/top) anchor, NEGATIVE from the end (right/bottom) anchor
-        // (css-position-3 §3.5.3). Choosing the anchor is deliberately NOT
+        // (css-position-3 §4.3). Choosing the anchor is deliberately NOT
         // this modifier's job: it has no containing-block extent and no
         // measured box size. The mounting slot owns it — CanvasRootHoist's
         // overlay anchors an end-only-inset box flush with the canvas edge

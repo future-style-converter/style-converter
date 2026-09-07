@@ -6,4 +6,3 @@
 // Native CSS property — no widening.
 export interface OffsetPathConfig { value?: string; }
 export const OFFSET_PATH_PROPERTY_TYPE = 'OffsetPath' as const;
-export type OffsetPathPropertyType = typeof OFFSET_PATH_PROPERTY_TYPE;

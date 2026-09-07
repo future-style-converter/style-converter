@@ -9,4 +9,3 @@ export interface OverlayConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const OVERLAY_PROPERTY_TYPE = 'Overlay' as const;
-export type OverlayPropertyType = typeof OVERLAY_PROPERTY_TYPE;

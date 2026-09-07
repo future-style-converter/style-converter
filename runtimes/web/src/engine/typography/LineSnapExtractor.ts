@@ -1,6 +1,6 @@
 // LineSnapExtractor.ts — folds `LineSnap` IR properties into a LineSnapConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { LineSnapConfig, LINE_SNAP_PROPERTY_TYPE, LineSnapPropertyType } from './LineSnapConfig';
 import { kwLower } from './_shared';

@@ -59,12 +59,19 @@ class DependsOnBackdropTest {
     }
 
     @Test
-    fun `accepts the uppercase enum shape and the value wrapper`() {
-        // The Kotlin enum serializer uppercases; the spec-grade parser
-        // lowercases; some longhands wrap in {value}. A predicate that
-        // handled only one shape would fire on some platforms and not
-        // others — exactly the misalignment this rule must avoid.
+    fun `accepts the uppercase enum shape (LIVE) and the value wrapper (tolerated)`() {
+        // The uppercase BARE STRING is the live wire: probe `:converter:run`
+        // 2026-09-05, `mix-blend-mode: multiply` → `"MULTIPLY"`, and the
+        // 1436-document wave49-final catalogue carries MixBlendMode only as
+        // a bare string. The spec-grade parser lowercases, so both cases
+        // must read — a predicate handling one only would fire on some
+        // platforms and not others, exactly the misalignment this rule
+        // must avoid.
         assertTrue(dependsOnBackdrop(comp(prop("MixBlendMode", "\"MULTIPLY\""))))
+        // TOLERANCE, not a live wire (retro R10, A8#5): no property has ever
+        // arrived as `{"value":…}` for MixBlendMode. Kept because the shared
+        // keyword reader accepts the wrapper for other longhands and the
+        // predicate must not regress if one ever routes through it.
         assertTrue(dependsOnBackdrop(comp(prop("MixBlendMode", """{"value":"SCREEN"}"""))))
     }
 

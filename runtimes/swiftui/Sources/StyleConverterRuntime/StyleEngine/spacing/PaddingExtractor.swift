@@ -12,19 +12,6 @@
 // Foundation for Array enumeration only.
 import Foundation
 
-// Property-type strings we own. Consumed by PropertyRegistry so the
-// renderer knows to skip these in the legacy StyleBuilder switch.
-enum PaddingProperty {
-    // Keep the list in one place so the registry and the extractor never
-    // drift. Physical + logical longhands — no shorthand; shorthand is
-    // pre-expanded to four longhands by the Kotlin converter.
-    static let names: [String] = [
-        "PaddingTop", "PaddingRight", "PaddingBottom", "PaddingLeft",
-        "PaddingBlockStart", "PaddingBlockEnd",
-        "PaddingInlineStart", "PaddingInlineEnd",
-    ]
-}
-
 // Single-pass extractor. Returns `nil` when no padding property was
 // present — the applier treats that as a no-op. Always safe to call.
 enum PaddingExtractor {

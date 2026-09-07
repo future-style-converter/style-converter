@@ -29,7 +29,7 @@ object HeightPropertyParser : PropertyParser {
             lower.startsWith("anchor-size(") && lower.endsWith(")") -> {
                 parseAnchorSize(trimmed)
             }
-            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — see the
+            // css-values-5 §11 calc-size() (wave 42 lane W3) — see the
             // decision record on WidthPropertyParser's identical branch.
             // Typed BEFORE isExpression so the affine `size` family reaches
             // the runtimes as a resolvable value; unreducible calls return

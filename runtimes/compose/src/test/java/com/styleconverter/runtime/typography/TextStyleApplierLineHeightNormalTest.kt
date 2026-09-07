@@ -64,7 +64,26 @@ class TextStyleApplierLineHeightNormalTest {
     }
 
     @Test
-    fun `declared absolute length still wins verbatim`() {
+    fun `declared absolute length still wins verbatim - the LIVE nested-length wire`() {
+        // Retro R10 (A8#5): this is the shape the converter actually emits for
+        // `line-height: 40px` — `{"original":{"type":"length","px":40.0}}`
+        // (probe `:converter:run` 2026-09-04; the wave49-final corpus carries
+        // LineHeight only as this nested length, as `{multiplier, original}`,
+        // or as the `original:"normal"` reset). 40px must reach the TextStyle
+        // as 40sp regardless of the 92px font (css-inline-3 §4.2: a <length>
+        // line-height is used as-is).
+        val style = TextStyleApplier.extractTextStyle(
+            listOf(fontSize92, prop("LineHeight", """{"original":{"type":"length","px":40.0}}"""))
+        )
+        assertEquals(40f, style.lineHeight.value, 0.001f)
+    }
+
+    @Test
+    fun `legacy flat pixels shape is still tolerated (never emitted by the converter)`() {
+        // TOLERANCE test, not a live-wire pin: `{"pixels":40.0}` is a
+        // pre-v2 shape the converter has not emitted in any wave-49 document
+        // (retro A8 wire catalogue, 1436 docs). It stays readable so an old
+        // committed IR still renders, but nothing upstream produces it.
         val style = TextStyleApplier.extractTextStyle(
             listOf(fontSize92, prop("LineHeight", """{"pixels":40.0}"""))
         )

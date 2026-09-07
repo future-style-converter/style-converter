@@ -7,7 +7,12 @@
 //  MulticolFloatStrip.kt / MulticolFloatStripPlan.kt, keeping both under
 //  the repo's file-size rule. Same FS pin rows, same banner: see
 //  MulticolFloatStrip.swift for the model + the iOS CONSUMPTION STATUS
-//  (pure module + pins only until the two renderer seams land).
+//  (FULLY CONSUMED on iOS since wave 48 — seam 1 closed in wave 45 (X3),
+//  seam 2 in wave 48 (W3); ComponentRenderer calls
+//  `MulticolFloatStrip.engagedStrip` and composes the css-break-3 §4 slice
+//  replay through `MulticolFloatStripSliceLayout`). Retro P2b (A4#3): this
+//  parenthetical still said "pure module + pins only until the two
+//  renderer seams land" — both seams had landed.
 //
 
 // CoreGraphics for the FragmentGeometry shapes; Foundation for ceil().

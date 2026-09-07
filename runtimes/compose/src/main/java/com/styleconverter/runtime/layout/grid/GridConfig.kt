@@ -226,14 +226,6 @@ sealed interface GridLinePlacement {
 }
 
 /**
- * Grid template track with optional repeat.
- */
-data class GridTemplateTrack(
-    val repeatCount: GridRepeatCount?,
-    val sizes: List<GridTrackSize>
-)
-
-/**
  * Grid area result from parsing grid-area.
  */
 sealed interface GridAreaResult {

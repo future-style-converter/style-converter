@@ -241,7 +241,7 @@ enum AbsposCbUsedHeight {
 
     /// H1 — `position` values that make this box the containing block of
     /// an absolutely positioned descendant (CSS 2.2 §10.1 item 4;
-    /// `sticky` is css-position-3 §6.3's addition to the same list).
+    /// `sticky` is css-position-3 §2's addition to the same list).
     private static func establishesAbsposCb(_ properties: [IRProperty]) -> Bool {
         guard let kw = lastKeyword(properties, "Position") else { return false }
         return kw == "RELATIVE" || kw == "ABSOLUTE" || kw == "FIXED" || kw == "STICKY"

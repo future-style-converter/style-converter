@@ -6,7 +6,10 @@
 # Built round 55. Previously each tier needed manual invocation:
 #   - Tier 5  interaction-state harness  (tools/visual/interaction-states.mjs)
 #   - Tier 11 a11y color-contrast audit  (tools/visual/a11y-audit.mjs)
-#   - visual-test 327-component baseline (BASELINE=1 ./test-all.sh fixtures/visual-test.json)
+#   - visual-test 109-component (327 platform-pair) baseline
+#     (BASELINE=1 ./test-all.sh fixtures/visual-test.json) — 109 components
+#     × 3 platforms = 327 captures/pairs; "327-component" was a wording error
+#     (retrospective A2#17)
 #
 # Each catches a different class of regression that the others can't:
 #   - Tier 5 fails on FixtureCanvas / Phase 5a route breakage
@@ -143,9 +146,11 @@ run_tier11() {
     fi
 }
 
-# ── visual-test BASELINE=1 (327 platform-comparisons) ────────────────────────
+# ── visual-test BASELINE=1 (109 components → 327 platform-comparisons) ───────
 run_baseline() {
-    echo -e "\n${B}━━━ visual-test BASELINE=1 (327 captures, ~3-5 min) ━━━${N}"
+    # 109 components × 3 platforms = 327 captures, each compared to its own
+    # committed baseline (the count the summary line below reports).
+    echo -e "\n${B}━━━ visual-test BASELINE=1 (109 components / 327 captures, ~3-5 min) ━━━${N}"
     # BASELINE=1 fails the test-all script with non-zero exit on any
     # regression. We capture stdout for the summary line; stderr passes
     # through so the user sees per-fixture progress.

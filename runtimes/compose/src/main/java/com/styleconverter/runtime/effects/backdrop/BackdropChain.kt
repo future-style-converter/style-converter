@@ -19,13 +19,13 @@ import kotlin.math.sqrt
  */
 sealed interface BackdropOp {
     /**
-     * `invert(<amount>)` — filter-effects-1 §8.6. Per-channel, in sRGB:
+     * `invert(<amount>)` — filter-effects-1 §6.1. Per-channel, in sRGB:
      * `c' = amount + c·(1 − 2·amount)` (see [BackdropChain.invertChannel]).
      */
     data class Invert(val amount: Float) : BackdropOp
 
     /**
-     * `blur(<length>)` — filter-effects-1 §8.2. The length IS the Gaussian
+     * `blur(<length>)` — filter-effects-1 §6.1. The length IS the Gaussian
      * standard deviation (unlike `drop-shadow`'s blur radius, which is 2σ —
      * that conversion lives in FilterApplier.dropShadowMaskRadius).
      */
@@ -83,7 +83,7 @@ data class BackdropChain(val ops: List<BackdropOp>) {
                     // Wave 26 contract unification — IDENTITY ops are SKIPPED
                     // (not admitted as no-op work), matching the iOS twin's
                     // BackdropPlan.plan: invert(0) and blur(<=0) are exact
-                    // identities (filter-effects-1 §8.6/§8.2), so dropping
+                    // identities (filter-effects-1 §6.1), so dropping
                     // them is lossless; a chain of ONLY identities then
                     // plans empty and the applier takes the identity branch
                     // on BOTH natives (no pass-A suppression — visually
@@ -107,7 +107,7 @@ data class BackdropChain(val ops: List<BackdropOp>) {
         }
 
         /**
-         * filter-effects-1 §8.6 invert, per sRGB channel, in 0..1:
+         * filter-effects-1 §6.1 invert, per sRGB channel, in 0..1:
          * `c' = amount·(1 − c) + (1 − amount)·c = amount + c·(1 − 2·amount)`.
          *
          * Same curve the element-filter path already ships as a ColorMatrix

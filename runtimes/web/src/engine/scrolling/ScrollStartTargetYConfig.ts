@@ -3,4 +3,3 @@
 // coverage-only registry claim with no applier — now a real triplet
 // mirroring ScrollStartTarget.
 export interface ScrollStartTargetYConfig { value?: string }
-export const SCROLLSTARTTARGETY_PROPERTY_TYPE = 'ScrollStartTargetY' as const;

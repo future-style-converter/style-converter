@@ -11,7 +11,7 @@ package com.styleconverter.runtime.borders
 //     into BorderImageConfig by the extractor mirroring PaddingApplier's
 //     resolution. Repro: padding 20px + border 4px on a 200px box → the
 //     dest must span the full 200px (24px expansion per side + outset).
-//  2. NO CONTENT INSET for border-image-width (css-backgrounds-3 §6:
+//  2. NO CONTENT INSET for border-image-width (css-backgrounds-3 §5:
 //     border-image properties do not affect layout — content is inset by
 //     border-width ONLY; Chromium keeps a 10px inset for border 10px +
 //     border-image-width 15px). extraContentInset was deleted — its old

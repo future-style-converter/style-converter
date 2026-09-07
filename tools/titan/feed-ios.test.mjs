@@ -14,10 +14,16 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { PNG } from 'pngjs';
 import {
   safeName, deviceSafeName, pad3, parseArgs, pickBootedUdid,
   parentCreatesContext, composeComponents, flattenComponents, expectedCaptures,
   composedTestKey, composedPngName,
+  // retro R8b (A9#4): the real pull path (plain paths, no device needed).
+  pullVerified,
 } from './feed-ios.mjs';
 
 test('safeName mirrors the compare-pipeline sanitiser (safe() in inject-wpt-block)', () => {
@@ -300,4 +306,58 @@ test('flattenComponents suppresses backdrop-dependent children like the device',
   // c (normal blend) and d (plain) still capture — and the POSITIONS of the
   // survivors are contiguous, which is the half the phantom bug broke.
   assert.deepEqual(names, ['p', 'c', 'd']);
+});
+
+// ── retro R8b (A9#4): a copy that fails to parse twice must be ABSENT ───────
+//
+// pullVerified retried the truncation/parse flake once but, on the second
+// failure, left the unparseable copy under the compare-glob name in --out.
+// Downstream inject-wpt-block's loadPng threw → an `{error}` diff that
+// silently left the scored denominator and a compare-screenshots "decode
+// error" row. Deleting it makes the cell MISSING, which section-runner.sh's
+// capture-count parity check turns into a loud exit 1.
+
+test('pullVerified DELETES a copy that fails to parse on both attempts (MISSING cell, never corrupt)', async () => {
+  const dir = await fs.mkdtemp(join(tmpdir(), 'r8b-ios-pull-'));
+  // PNG signature + a partial IHDR: the truncated-write shape.
+  const truncated = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]);
+  const src = join(dir, 'device-000.png');
+  const dest = join(dir, 'out-000.png');
+  await fs.writeFile(src, truncated);
+  assert.equal(await pullVerified(src, dest), false);
+  assert.equal(existsSync(dest), false, 'the unparseable copy must be gone after the final failure');
+  // Control: a valid device PNG is copied and kept.
+  const goodSrc = join(dir, 'device-001.png');
+  const goodDest = join(dir, 'out-001.png');
+  await fs.writeFile(goodSrc, PNG.sync.write(new PNG({ width: 2, height: 2 })));
+  assert.equal(await pullVerified(goodSrc, goodDest), true);
+  assert.equal(existsSync(goodDest), true);
+  // Control 2: a source that does not exist (copyFile throws) leaves nothing.
+  const ghostDest = join(dir, 'out-002.png');
+  assert.equal(await pullVerified(join(dir, 'never-written.png'), ghostDest), false);
+  assert.equal(existsSync(ghostDest), false);
+  await fs.rm(dir, { recursive: true, force: true });
+});
+
+// ── retro R8b (A9#3): the --wpt-dir preflight, iOS half ─────────────────────
+
+test('feed-ios runs the preflight BEFORE the pre-raster and simctl, exits 2, and names the real decline cause', async () => {
+  const src = await fs.readFile(new URL('./feed-ios.mjs', import.meta.url), 'utf8');
+  const pre = src.indexOf('assetHopPreflight(await Promise.all(fixtures.map(readDocOrNull)), args.wptDir)');
+  const raster = src.indexOf('await prerasterizeFixtures(fixtures');
+  const simctl = src.indexOf("run('xcrun', ['simctl', 'list', 'devices', '--json'])");
+  assert.ok(pre > 0, 'preflight call missing');
+  assert.ok(pre < raster, 'preflight must precede the pre-raster pass (silently no-ops without a root)');
+  assert.ok(pre < simctl, 'preflight must precede the first simctl call');
+  assert.match(src, /if \(preflight\.fatal\) \{ console\.error\(`\[feed-ios\] \$\{preflight\.message\}`\); process\.exit\(2\); \}/,
+    'a fatal preflight must exit 2 (the usage code), never continue');
+  // Per-src declines branch on the ABSENT root before the resolver runs —
+  // the old log said "unresolvable/not a font" for a root nobody gave.
+  const loop = src.slice(src.indexOf('for (const src of documentFontSrcs(doc))'), src.indexOf('const tmp = join(inboxDir'));
+  const fontBranch = loop.indexOf('if (!args.wptDir)');
+  assert.ok(fontBranch > 0 && fontBranch < loop.indexOf('resolveFontFile('), 'font loop must branch on !wptDir BEFORE resolveFontFile');
+  const imgLoop = loop.slice(loop.indexOf('for (const src of documentReplacedSrcs(doc))'));
+  const imgBranch = imgLoop.indexOf('if (!args.wptDir)');
+  assert.ok(imgBranch > 0 && imgBranch < imgLoop.indexOf('resolveReplacedImageFile('), 'image loop must branch on !wptDir BEFORE resolveReplacedImageFile');
+  assert.equal((loop.match(/NO_WPT_DIR_DECLINE/g) ?? []).length, 2, 'both loops must log the shared no-root decline text');
 });

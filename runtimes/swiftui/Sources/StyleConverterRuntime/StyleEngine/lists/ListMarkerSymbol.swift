@@ -56,7 +56,7 @@ import SwiftUI
 
 enum ListMarkerSymbol {
 
-    /// The three UA symbol markers css-counter-styles-3 §6.1 defines and a
+    /// The three UA symbol markers css-counter-styles-3 §6.3 defines and a
     /// browser PAINTS rather than sets in a font.
     enum Shape: Equatable {
         /// `disc` — filled circle.
@@ -171,7 +171,7 @@ struct ListMarkerSymbolPaint: ViewModifier {
                 .overlay(alignment: .leading) { symbol(shape) }
         } else if markerFontPt > 0 {
             // TEXT branch, wave 41 (lane T4) — the marker's typography.
-            // css-lists-3 §3.2: the ::marker box inherits from its
+            // css-lists-3 §3.1.1: the ::marker box inherits from its
             // originating element, and the item's own text bottoms out at
             // the bundled Inter at 16pt (ComponentRenderer's `font` var:
             // `.custom("Inter", size: textConfig.fontSize ?? 16)`) — the

@@ -118,7 +118,7 @@ fun rootPseudoSpec(bucket: JsonObject?, role: String): RootPseudoSpec? {
 
 /**
  * `<length>` in absolute px, or null (with a log) for every other unit.
- * A bare `0` is legal CSS (css-values-4 §5.2) and resolves to zero.
+ * A bare `0` is legal CSS (css-values-4 §6) and resolves to zero.
  */
 private fun cssPxOrWarn(value: String, prop: String, role: String): Float? {
     val t = value.trim().lowercase()
@@ -159,7 +159,7 @@ internal fun contentLiteral(value: String, role: String): String {
  * wave-28 lane PG — does this body-root's containment take the body OFF
  * the writing-mode/direction propagation path?
  *
- * css-writing-modes-4 §3.2 propagates the BODY's `direction` to the
+ * css-writing-modes-4 §8.1 propagates the BODY's `direction` to the
  * viewport (the ONLY channel by which a body declaration can reach a box
  * generated on the root), and css-contain-1 §3.1 removes a contained body
  * from that channel. So on a contained body-root the generated box keeps

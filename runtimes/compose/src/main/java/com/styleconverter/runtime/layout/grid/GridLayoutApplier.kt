@@ -8,9 +8,21 @@ package com.styleconverter.runtime.layout.grid
 //
 // This is intentionally lightweight — the existing [GridRenderer] already
 // knows how to render from the legacy GridConfig + GridItemConfig shapes.
-// The applier here produces a [GridCellsPlan] summary that a future
-// ComponentRenderer rewrite (step 6) can consume without re-parsing. The
-// legacy render path stays authoritative until that step.
+//
+// Retro P2e (finding A6#15, phrase sweep) split what used to be one stale
+// sentence ("produces a [GridCellsPlan] summary that a future
+// ComponentRenderer rewrite (step 6) can consume without re-parsing; the
+// legacy render path stays authoritative until that step") into the two
+// halves that aged differently:
+//   - [isGridContainer] IS live and authoritative: LayoutFacade
+//     .containerDecision routes through it, and ComponentRenderer picks the
+//     grid container on the result (ComponentRenderer.kt:1268, 2463-2469).
+//   - [cellsPlan]/[GridCellsPlan] is NOT consumed by anything in
+//     `runtimes/compose/src/main` — its only callers are
+//     GridLayoutExtractorTest's four pins. The step-6 ComponentRenderer
+//     rewrite that was to consume it never happened and is not scheduled,
+//     so the legacy GridRenderer path stays authoritative for track and
+//     placement geometry, permanently rather than "until that step".
 
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.ui.unit.Dp

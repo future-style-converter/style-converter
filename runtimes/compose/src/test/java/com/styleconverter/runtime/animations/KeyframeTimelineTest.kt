@@ -65,7 +65,7 @@ class KeyframeTimelineTest {
     @Test
     fun `negative delay advances the start point`() {
         val spec = linear1s().copy(delayMs = -250.0)
-        // css-animations-1 §5.4: at t=0 the animation is already 0.25 in.
+        // css-animations-1 §4.7: at t=0 the animation is already 0.25 in.
         assertEquals(0.25, KeyframeTimeline.directedProgressAt(0.0, spec)!!, EPS)
     }
 

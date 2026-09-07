@@ -16,4 +16,3 @@ export interface TransformConfig {
 
 // IR property type string — single source of truth for extractor + registry.
 export const TRANSFORM_PROPERTY_TYPE = 'Transform' as const;
-export type TransformPropertyType = typeof TRANSFORM_PROPERTY_TYPE;

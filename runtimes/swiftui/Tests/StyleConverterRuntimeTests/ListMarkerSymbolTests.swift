@@ -107,12 +107,12 @@ final class ListMarkerSymbolTests: XCTestCase {
     // MARK: - wave 41 (lane T4): the TEXT branch's typography
 
     func testTheTextBranchCarriesTheResolvedMarkerFontSize() {
-        // css-lists-3 §3.2 — the ::marker inherits from its originating
+        // css-lists-3 §3.1.1 — the ::marker inherits from its originating
         // element, whose iOS text bottom-out is `.custom("Inter",
         // size: fontSize ?? 16)`. Before wave 41 the marker `Text` carried
         // NO font and ASCII markers resolved SwiftUI's environment body
         // default (SF at 17pt) — a face and size with no CSS basis, where
-        // css-lists-3 §3.2 inherits the originating element's computed
+        // css-lists-3 §3.1.1 inherits the originating element's computed
         // font (the document default, 16px Inter). Digit metrics cannot
         // distinguish SF@17 from Inter@16 at capture resolution, so the
         // pin rests on the inheritance rule, not a measured face delta.

@@ -176,7 +176,7 @@ export function bodyRootHasContainment(bodyRoot: IRComponent): boolean {
 }
 
 /**
- * The five `writing-mode` keywords css-writing-modes-4 §3.1 defines. Anything
+ * The five `writing-mode` keywords css-writing-modes-4 §3.2 defines. Anything
  * outside this set is not a writing mode and never reaches the canvas — the
  * resolver below refuses unknown strings rather than writing an arbitrary IR
  * value into a live style object (no-silent-fallthrough).

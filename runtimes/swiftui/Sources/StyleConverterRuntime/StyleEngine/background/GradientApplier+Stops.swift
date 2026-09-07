@@ -5,7 +5,10 @@
 //  §3.4.3 pipeline (GradientStopResolver + GradientRamp) joined the
 //  wave-5 sRGB subdivision. Same type, same internal API — XCTest and
 //  the mask/tile painters keep calling `GradientApplier.toGradient`,
-//  `srgbSubdivided`, `resolveStops` and `RGBAStop` unchanged.
+//  `srgbSubdivided` and `RGBAStop` unchanged. Retro P2b (A6#10) deleted
+//  the `resolveStops` wrapper: every caller now goes straight to
+//  `GradientStopResolver.fixup` (css-images-3 §3.4.3 / css-images-4 §3.5.3), which is what the
+//  one-line wrapper forwarded to.
 //
 
 import SwiftUI
@@ -19,19 +22,6 @@ extension GradientApplier {
     struct RGBAStop: Equatable {
         var r: Double, g: Double, b: Double, a: Double
         var loc: Double
-    }
-
-    /// Resolve declared stops to concrete sRGB + location pairs via the
-    /// css-images-4 §3.4.3 fixup (wave 46). For an all-nil stop list the
-    /// result is exactly the Phase-4 even spread i/(n−1); declared
-    /// percents still win; a stop behind its predecessor now clamps
-    /// forward instead of being handed to SwiftUI out of order.
-    /// `lengthPx` resolves <length> stops; nil (conic, or callers with no
-    /// geometry) leaves them unpositioned with a breadcrumb. Dynamic /
-    /// unknown colours resolve to transparent (same visual as before).
-    static func resolveStops(_ stops: [BackgroundImageStop],
-                             lengthPx: Double? = nil) -> [RGBAStop] {
-        GradientStopResolver.fixup(stops, lengthPx: lengthPx)
     }
 
     /// Subdivide each adjacent stop pair with sRGB-lerped micro-stops so
@@ -81,7 +71,7 @@ extension GradientApplier {
     /// segments) so every pre-wave capture is byte-identical — measured,
     /// not asserted: skeptic S4 (wave 46) re-rendered the 103 committed
     /// dark-stage fixtures through this path and got 103/103 identical.
-    /// Authored `interp` clauses take GradientRamp's css-color-4 §12 path.
+    /// Authored `interp` clauses take GradientRamp's css-color-4 §13 path.
     /// Internal so XCTest pins the composition without a View.
     static func resolvedRamp(_ stops: [BackgroundImageStop],
                              lengthPx: Double?, repeating: Bool) -> [RGBAStop] {

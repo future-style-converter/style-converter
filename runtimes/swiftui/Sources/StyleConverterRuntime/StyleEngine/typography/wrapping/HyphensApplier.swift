@@ -4,7 +4,7 @@
 //
 //  Phase 6 shipped this as a documented identity: "SwiftUI Text has no
 //  hyphenation toggle". That is still true of the two halves of
-//  css-text-3 §6.1 that need a LAYOUT seam —
+//  css-text-3 §5.3 that need a LAYOUT seam —
 //
 //    • `auto` — dictionary hyphenation. TextKit can do it
 //      (NSParagraphStyle.hyphenationFactor / usesDefaultHyphenation), but

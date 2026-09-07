@@ -99,7 +99,7 @@ class DegenerateCalcRewriterTest {
 
     @Test
     fun `image() quoted-string payload containing a degenerate calc survives byte-verbatim`() {
-        // VERBATIM S6 probe2 Q03: image() notation (css-images-4 §2.1) with a
+        // VERBATIM S6 probe2 Q03: image() notation (css-images-4 §2.5) with a
         // <string> src whose bytes spell calc(1px / 0). Previously the srcs
         // came out corrupted ("33554400px.png"); now the surviving calc(
         // routes the whole value to Raw with pure author bytes.

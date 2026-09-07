@@ -1,6 +1,6 @@
 // WhiteSpaceCollapseExtractor.ts — folds `WhiteSpaceCollapse` IR properties into a WhiteSpaceCollapseConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { WhiteSpaceCollapseConfig, WHITE_SPACE_COLLAPSE_PROPERTY_TYPE, WhiteSpaceCollapsePropertyType } from './WhiteSpaceCollapseConfig';
 import { kwLower } from './_shared';

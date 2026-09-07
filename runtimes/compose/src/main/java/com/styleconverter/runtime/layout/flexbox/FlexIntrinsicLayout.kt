@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.layout.flexbox
 
-// css-flexbox-1 §9.2.3.E — the wave-9 INTRINSIC-measure pass (#40).
+// css-flexbox-1 §9.2 step 3.E — the wave-9 INTRINSIC-measure pass (#40).
 //
 // The static resolver (FlexSizeResolver) can only run ahead of composition
 // when every item's flex base is a definite px value. The most common real
@@ -84,7 +84,7 @@ fun FlexIntrinsicRow(
             maxContentOf = { i ->
                 IntrinsicChannel.probe(
                     logTag = "FlexIntrinsicLayout",
-                    refusalContext = "css-flexbox-1 §9.2.3.E content-sized flex " +
+                    refusalContext = "css-flexbox-1 §9.2 step 3.E content-sized flex " +
                         "base skipped — this flex item's subtree has no intrinsic " +
                         "channel; the base falls to 0 and §9.7 grow distributes " +
                         "the line's free space proportionally (the legacy weight " +
@@ -170,7 +170,7 @@ fun FlexIntrinsicColumn(
             maxContentOf = { i ->
                 IntrinsicChannel.probe(
                     logTag = "FlexIntrinsicLayout",
-                    refusalContext = "css-flexbox-1 §9.2.3.E content-sized flex " +
+                    refusalContext = "css-flexbox-1 §9.2 step 3.E content-sized flex " +
                         "base (block axis) skipped — this flex item's subtree has " +
                         "no intrinsic channel; the base falls to 0 and §9.7 grow " +
                         "distributes the column's free space proportionally (the " +

@@ -72,8 +72,11 @@ import com.styleconverter.runtime.typography.FontVariantApplier
 import com.styleconverter.runtime.typography.FontVariantCaps
 import com.styleconverter.runtime.typography.TextEmphasisPosition
 import com.styleconverter.runtime.typography.TextEmphasisStyle
-import com.styleconverter.runtime.animations.AnimationExtractor
-import com.styleconverter.runtime.animations.animatedModifier
+// (Retro sweep P2a, A6#6) `AnimationExtractor` and `animatedModifier` are
+// no longer imported here: the legacy modifier-space animation branch is
+// gone (see the A6#6 block by `val modifier = sizedModifier`), and the
+// renderer now touches animations only through KeyframeAnimationDriver,
+// which is referenced fully-qualified at its overlay call site.
 import com.styleconverter.runtime.container.ContainerQueryApplier
 import com.styleconverter.runtime.container.ContainerQueryExtractor
 import com.styleconverter.runtime.columns.MultiColumnApplier
@@ -172,7 +175,7 @@ object ComponentRenderer {
         "LetterSpacing", "LineHeight", "WordSpacing",
         "TextAlign", "TextTransform", "TextIndent",
         "WhiteSpace", "TabSize", "Direction",
-        // css-writing-modes-4 §3.1: writing-mode INHERITS ("Inherited: yes").
+        // css-writing-modes-4 §3.2: writing-mode INHERITS ("Inherited: yes").
         // Wave 12 honesty fix: without it the wave-10 multicol
         // vertical-writing bail could NEVER fire — the css-break
         // background-image-001/002 fixtures declare `writing-mode:
@@ -185,13 +188,13 @@ object ComponentRenderer {
         // and gives descendant placeholder glyphs the inherited vertical
         // flow exactly like the browser's cascade.
         "WritingMode",
-        // css-color-4 §7: `color` inherits; the currentColor chain hangs
+        // css-color-4 §3.2: `color` inherits; the currentColor chain hangs
         // off the inherited value (placeholder gate documented above).
         "Color",
         // CSS 2.1 §11.2: visibility inherits (a hidden parent hides
         // children unless a child redeclares `visible`).
         "Visibility",
-        // css-ui-4 §8.1: cursor inherits. No visual analogue in a static
+        // css-ui-4 §5.1.1: cursor inherits. No visual analogue in a static
         // native capture (no-op applier) but carried so the wire value
         // survives the cascade honestly.
         "Cursor",
@@ -481,7 +484,7 @@ object ComponentRenderer {
         // RenderListItemMarker, which wraps each item in a marker Row and
         // has nowhere to hand a collapsed block margin. Wave 24 (lane LF)
         // widened marker synthesis from {ol,ul} to the full UA list-container
-        // set {ol,ul,menu,dir} (HTML §15.3.9), so this gate MUST read the
+        // set {ol,ul,menu,dir} (HTML §15.3.7), so this gate MUST read the
         // same predicate or a <menu> would build a plan whose per-child
         // margins the marker branch silently drops. Routing both through
         // uaMarkerDefault makes the two sets un-driftable.
@@ -779,7 +782,7 @@ object ComponentRenderer {
 
     /**
      * Bottom-out for an own `color: currentColor` declaration
-     * (css-color-4 §7.2: currentColor on `color` itself == inherit).
+     * (css-color-4 §6.4: currentColor on `color` itself == inherit).
      * With an ancestor Color on the inheritance channel the inherited
      * value wins; with NO ancestor Color the browser's inherit chain ends
      * at the harness body's `color: #eee` — so the honest fallback is
@@ -874,7 +877,7 @@ object ComponentRenderer {
         val hoistHasPositionedAncestor = com.styleconverter.runtime.layout.position.CanvasRootHoist
             .LocalHasPositionedAncestor.current
         // Wave 35 (lane B1) — the SECOND ancestry channel (css-transforms-1
-        // §3 / css-transforms-2 §6): an ancestor with a used transform is
+        // §3 / css-transforms-2 §8): an ancestor with a used transform is
         // the containing block for fixed AND absolute descendants, so it
         // vetoes the hoist for both. Read next to the positioned flag so the
         // interception below sees one consistent ancestry frame.
@@ -1078,7 +1081,7 @@ object ComponentRenderer {
         // HERE, the last point that still holds the element's OWN list and
         // the inherited channel separately. On a list container with no own
         // declaration, `ul { list-style-type: disc }` / `ol { … decimal }`
-        // (HTML §15.3.9) is a declaration ON the element, so it beats any
+        // (HTML §15.3.7) is a declaration ON the element, so it beats any
         // ancestor value — css-cascade-4 §4.3 consults inheritance only
         // when the cascade produced nothing. Identity (same list instance)
         // for every non-container and every own-declaring container, so no
@@ -1190,10 +1193,11 @@ object ComponentRenderer {
         // (fraction) — is a DOCUMENTED no-op (fraction × ∞ is undefined,
         // Compose skips the constraint): percentage-of-parent sizing is
         // structurally dead for abspos children unless resolved to px
-        // BEFORE the modifier chain is built. css-position-3 §5.1 resolves
-        // an abspos percentage against the CONTAINING BLOCK, which is what
-        // the LocalContainingBlock channel (read above) carries — so
-        // rewrite percent Width/Height wires to exact px here and keep the
+        // BEFORE the modifier chain is built. css-values-4 §5.5 (percentages)
+        // + css-position-3 §2.1 resolve an abspos percentage against the
+        // CONTAINING BLOCK — which is what the LocalContainingBlock
+        // channel (read above) carries — so rewrite percent Width/Height
+        // wires to exact px here and keep the
         // unbounded measure for the px-specified overflow it was built for.
         // Identity (same list instance) for in-flow components and for
         // percent-free lists — the frozen-baseline byte-stability rule.
@@ -1253,14 +1257,19 @@ object ComponentRenderer {
         // Extract property pairs for extractors
         val propertyPairs = effectiveProperties.map { it.type to it.data }
 
-        // Phase 7 step 1: style-engine layout hook (no-op short-circuit).
-        // extractLayoutConfig() returns LayoutConfig.Empty in step 1, and
-        // containerDecision() returns ContainerDecision.default which the
-        // renderer treats as "defer to legacy path." Populated in later steps.
+        // Style-engine layout hook — LIVE, not the no-op short-circuit this
+        // comment described (retro P2e, finding A6#15: it read "extractLayoutConfig()
+        // returns LayoutConfig.Empty in step 1 … populated in later steps",
+        // and the later steps landed). extractLayoutConfig folds the flexbox,
+        // grid and position sub-extractors; containerDecision turns that into
+        // a Flex / Grid / None kind, which this renderer reads below
+        // (`engineDecision.kind`) to choose its container primitive.
         val layoutConfig = com.styleconverter.runtime.layout.LayoutFacade.extractLayoutConfig(propertyPairs)
         val engineDecision = com.styleconverter.runtime.layout.LayoutFacade.containerDecision(layoutConfig)
-        // Step 1: engineDecision is always .default; legacy path still runs unchanged.
-        // Follow-up steps (flexbox/grid/position) will populate this.
+        // ContainerDecision.default still means "defer to the legacy container
+        // logic below" — but it is now the FALL-THROUGH, reached only when the
+        // component is neither a flex nor a grid container (LayoutApplier's
+        // advanced/root branches are the part still unowned).
 
         // Extract data outside composable scope with error handling.
         // The previous catch silently swallowed exceptions and returned a
@@ -1292,24 +1301,21 @@ object ComponentRenderer {
             Modifier
         }
 
-        // Extract animation config and apply animated modifier
-        val animationConfig = try {
-            AnimationExtractor.extractAnimationConfig(propertyPairs)
-        } catch (e: Exception) {
-            null
-        }
-
-        val transitionConfig = try {
-            AnimationExtractor.extractTransitionConfig(propertyPairs)
-        } catch (e: Exception) {
-            null
-        }
+        // (Retro sweep P2a, finding A6#6) The two AnimationExtractor calls
+        // that used to stand here fed ONLY the legacy `animatedModifier`
+        // wrapper deleted below; nothing else in this function read them,
+        // and the extractor is side-effect-free (no PropertyTracker
+        // breadcrumb), so removing the computation changes no output and no
+        // report. Animation EXECUTION is KeyframeAnimationDriver.animate,
+        // which does its own extraction from the same property list
+        // (KeyframeAnimationDriver.kt — spec 07 §3 timing model); transition
+        // execution is TransitionDriver, likewise self-extracting.
 
         // Apply default min dimensions matching web's ComponentRenderer defaults:
         // web: minWidth = styles.width || styles.minWidth || '50px'
         // web: minHeight = styles.height || styles.minHeight || '30px'
         // Wave-47 lane Z2 — the component's USED writing mode, read off the
-        // merged pairs (WritingMode inherits, css-writing-modes-4 §3.1, and
+        // merged pairs (WritingMode inherits, css-writing-modes-4 §3.2, and
         // rides the inherited-property channel). Under a VERTICAL mode the
         // logical size longhands change PHYSICAL axis (css-logical-1 §4.1):
         // InlineSize declares the HEIGHT and BlockSize the WIDTH — exactly
@@ -1493,25 +1499,39 @@ object ComponentRenderer {
             StyleApplier.borderContentInset(effectiveProperties)
         )
 
-        // Apply the LEGACY animated modifier only when the wave-8 driver
-        // did NOT own the animation: (a) none of the names resolve against
-        // the document's wire keyframes (the driver already overlaid those
-        // values into effectiveProperties above — wrapping again would
-        // double-apply), and (b) no CAPTURE_ANIMATION_TIME is forced (a
-        // seized run must never leave a live legacy clock smearing the
-        // frame — spec 07 §5 "every animation, paused").
-        val docKeyframes = com.styleconverter.runtime.animations.KeyframeAnimationDriver
-            .LocalDocumentKeyframes.current
-        val forcedAnimationTime = com.styleconverter.runtime.animations.KeyframeAnimationDriver
-            .LocalForcedAnimationTime.current
-        val modifier = if (animationConfig?.hasAnimations == true &&
-            forcedAnimationTime == null &&
-            animationConfig.names.none { docKeyframes.containsKey(it) || docKeyframes.containsKey(it.lowercase()) }
-        ) {
-            animatedModifier(sizedModifier, animationConfig, transitionConfig ?: com.styleconverter.runtime.animations.TransitionConfig())
-        } else {
-            sizedModifier
-        }
+        // (Retro sweep P2a, finding A6#6) The LEGACY modifier-space
+        // animation branch that stood here is gone, and with it
+        // AnimatedModifier/KeyframeAnimationApplier/KeyframeRegistry.
+        //
+        // What it did: when a component's animation-name resolved against
+        // NO document @keyframes, it looked the name up in a hard-coded
+        // DEMO registry (fadeIn, pulse, spin, bounce, shake, zoomIn, …
+        // KeyframeRegistry.registerBuiltIns) and, on a hit, wrapped the
+        // component in an infinite Compose transition. That is not CSS:
+        // schema/spec/07-animations.md §1.3 makes a dangling
+        // `animation-name` a DEFINED NO-OP — "the component renders in its
+        // base styles, nothing animates" — which is what iOS and web
+        // already do (and what CSS does). The registry could
+        // only ever fire on a name collision with a demo — a guaranteed
+        // cross-platform divergence, never a correctness win.
+        //
+        // Behaviour delta: NONE for any real document. The branch's own
+        // guard required every name to be dangling, and for a dangling name
+        // that is not one of the 19 demos `animatedModifier` returned its
+        // input unchanged. Corpus-simulated over the frozen wave49-final
+        // per-test IR: 10 animation carriers, names `transparent-anim`,
+        // `bgcolor`, `override`, `anim`, `bad`,
+        // `-ua-view-transition-fade-out` — zero demo collisions, so every
+        // corpus cell already took the identity leg.
+        //
+        // EXECUTION of real @keyframes is unaffected: KeyframeAnimationDriver
+        // (spec 07 §2–§5) overlays interpolated values as ordinary typed
+        // IRProperties BEFORE StyleApplier runs, several hundred lines
+        // above, so animated frames ride the same extractor/applier chain
+        // as static styles — including the CAPTURE_ANIMATION_TIME seize
+        // (spec 07 §5) whose "no live clock" invariant the deleted branch's
+        // second guard existed to protect.
+        val modifier = sizedModifier
 
         val displayConfig = try {
             extractDisplayConfig(effectiveProperties)
@@ -1581,7 +1601,7 @@ object ComponentRenderer {
         // the exact split the browser implements.
         val colorIsInheritedOnly = inheritedProperties.any { it.type == "Color" } &&
             schemeResolvedProperties.none { it.type == "Color" }
-        // css-color-4 §7.2: `color: currentColor` on the COLOR property
+        // css-color-4 §6.4: `color: currentColor` on the COLOR property
         // itself is treated as `color: inherit` — it resolves to the
         // INHERITED color, never circularly to the element's own value.
         // The wire ships it srgb-less ({"original":"currentColor"}), so
@@ -1770,7 +1790,7 @@ object ComponentRenderer {
         val inheritableForChildren = effectiveProperties.filter {
             it.type in INHERITED_PROPERTY_TYPES
         }.map { p ->
-            // css-color-4 §7.2: the COMPUTED value of `color: currentColor`
+            // css-color-4 §6.4: the COMPUTED value of `color: currentColor`
             // is the inherited color — children must inherit the resolved
             // ancestor color, not the unresolvable keyword (an unresolved
             // currentColor entry would null out every descendant's color
@@ -1859,7 +1879,7 @@ object ComponentRenderer {
                 properties = component.properties,
             )
         // Wave-35 (lane B1) — the TRANSFORM half of the same channel
-        // (css-transforms-1 §3 / css-transforms-2 §6). Kept separate from the
+        // (css-transforms-1 §3 / css-transforms-2 §8). Kept separate from the
         // positioned flag because the two claim different descendant classes:
         // only a transformed ancestor pulls a FIXED box out of the viewport.
         // Same OR-accumulating rule and the same raw-declaration basis, so it
@@ -1942,7 +1962,7 @@ object ComponentRenderer {
             }
         }
 
-        // css-align-3 §6.2: `justify-self` on a BLOCK-LEVEL box aligns the
+        // css-align-3 §6.1: `justify-self` on a BLOCK-LEVEL box aligns the
         // box itself within its containing block's inline axis. Web renders
         // Layout_C12_JustifySelf (justify-self: center, width 200) centered
         // in the 358px canvas content box (x=95 on the capture) while
@@ -1952,7 +1972,7 @@ object ComponentRenderer {
         // grid cells implement it as cell contentAlignment.
         val blockJustifySelf = extractJustifySelf(effectiveProperties)
         // Resolve the block-level inline-axis alignment from either channel:
-        //   - justify-self center/end (css-align-3 §6.2, wave-2 fix), or
+        //   - justify-self center/end (css-align-3 §6.1, wave-2 fix), or
         //   - auto horizontal margins (CSS 2.1 §10.3.3: definite-width block
         //     box + `margin-left/right: auto` centers in its containing
         //     block; left-only auto pushes the box right). Web centers
@@ -2136,7 +2156,7 @@ object ComponentRenderer {
                     // layout doesn't emit, so every other wrapping row
                     // keeps the frozen FlowRow path.
                     // Wave 47 (lane Z7) — §9.6 POSITIONING keywords
-                    // (css-align-3 §5.3): a non-stretch align-content
+                    // (css-align-3 §5.1): a non-stretch align-content
                     // places the line BLOCK in the free cross space,
                     // which FlowRow cannot express any more than it can
                     // express line stretch. Such a container routes
@@ -2440,7 +2460,12 @@ object ComponentRenderer {
                 }
             }
             DisplayType.GRID -> {
-                // Grid handled separately by GridApplier
+                // Grid is rendered by GridRenderer, not by the modifier
+                // chain. (Retro sweep P2a: this line used to credit
+                // `GridApplier`, a 580-line demo object — LazyGridContainer /
+                // SimpleGrid / GridItem — that nothing ever called; it is
+                // deleted. GridRenderer + GridLayoutApplier are the real
+                // css-grid-1 path.)
                 GridRenderer.RenderGrid(
                     component = component,
                     modifier = modifier,
@@ -3161,7 +3186,7 @@ object ComponentRenderer {
 
             // Bug 2 / wave-24 lane LF (B-RC3 parts 1+2): the marker family
             // is no longer derived from the parent's source tag ALONE. The
-            // tag only supplies the UA default (HTML §15.3.9); the item's
+            // tag only supplies the UA default (HTML §15.3.7); the item's
             // own `list-style-*` declarations — which is where the live
             // wire actually puts them (css-lists change-list-style-type-001
             // carries ListStyleType square/none/upper-roman/decimal on each
@@ -3757,7 +3782,8 @@ object ComponentRenderer {
      * is only the paint.
      *
      * ## Why a LEADING LINE BOX and not a row
-     * css-lists-3 §3.2 makes an `inside` marker the item's FIRST INLINE
+     * css-lists-3 §3.1 generates the ::marker as the item's first child and
+     * §3.5 (`list-style-position: inside`) makes it the FIRST INLINE
      * BOX. The item's own in-flow content on all three runtimes is
      * BLOCK-level ([PlaceholderContent] for text, a Column of children
      * otherwise), so the marker can never share a line with it and owns a
@@ -3832,7 +3858,7 @@ object ComponentRenderer {
                 text = com.styleconverter.runtime.typography.font
                     .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
                 style = markerStyle,
-                // Shrink-to-fit ::marker box (css-lists-3 §3.2) — the same
+                // Shrink-to-fit ::marker box (css-lists-3 §3.5) — the same
                 // fix B2 puts on the two row call sites.
                 softWrap = false,
                 modifier = com.styleconverter.runtime.lists.ListMarkerSymbol.paint(
@@ -3866,7 +3892,7 @@ object ComponentRenderer {
      * Wave 28 (lane MC): `list-style-position` now CHANGES the placement
      * instead of only being resolved and carried. An `inside` marker on an
      * item with no in-flow text is painted INSIDE the item's box, through
-     * a zero-size overlay that cannot move or resize it — css-lists-3 §3.2
+     * a zero-size overlay that cannot move or resize it — css-lists-3 §3.5
      * makes it the item's first inline box. Everything else keeps the Row.
      *
      * STILL DEFERRED — the rest of B-RC3 part 3. `outside` is still
@@ -3892,7 +3918,7 @@ object ComponentRenderer {
         // Wave 27 (lane NMARK, B-RC8) — the CONTAINER's inheritance-merged
         // text style, resolved by the caller at the same place it resolves
         // `textColor` so the two can never come from different property
-        // lists. css-lists-3 §3.2: the marker inherits from its originating
+        // lists. css-lists-3 §3.1.1: the marker inherits from its originating
         // element, so this is the marker's font. Narrowed to the
         // character-level fields by ListMarkerTextStyle.forItem below.
         inheritedTextStyle: TextStyle
@@ -3987,7 +4013,7 @@ object ComponentRenderer {
         // the Row keeps aligning marker and item on the UNMOVED layout
         // baseline while only the item's INK descends. Left alone, the marker
         // would therefore sit 1px above its own item — a divergence this
-        // renderer does not have today, and one css-lists-3 §3.2 forbids
+        // renderer does not have today, and one css-lists-3 §3.5 forbids
         // outright (the marker IS the item's first inline box; they share one
         // line, one baseline). So the marker takes the identical correction,
         // computed from ITS resolved box and ITS measured layout — the same
@@ -4045,7 +4071,7 @@ object ComponentRenderer {
         if (ListMarkerRow.rendersInsideOverlay(
                 listConfig?.listStylePosition, exposesBaseline)) {
             // Wave 28 (lane MC), defect 1 — `list-style-position: inside`
-            // on an item with no in-flow content. css-lists-3 §3.2 makes
+            // on an item with no in-flow content. css-lists-3 §3.5 makes
             // the marker the item's FIRST INLINE BOX: it lives INSIDE the
             // principal box, so it must not move that box. The Row below
             // did move it, and the live counter-styles items anchor an
@@ -4100,7 +4126,7 @@ object ComponentRenderer {
                     text = com.styleconverter.runtime.typography.font
                         .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
                     style = markerStyle,
-                    // Wave 30 (lane 3, fix B2) — css-lists-3 §3.2 makes the
+                    // Wave 30 (lane 3, fix B2) — css-lists-3 §3.5 makes the
                     // ::marker box shrink-to-fit inline-level content, sized
                     // by its glyphs and never by the space its item leaves
                     // over. `softWrap = false` is the closest Compose gets:
@@ -4221,7 +4247,7 @@ object ComponentRenderer {
                     .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
                 style = markerStyle,
                 // Wave 30 (lane 3, fix B2) — the one-line ::marker run
-                // (css-lists-3 §3.2 wants the box shrink-to-fit). THIS is
+                // (css-lists-3 §3.5 wants the box shrink-to-fit). THIS is
                 // the call site where it bites: the marker is a Row sibling
                 // measured against whatever inline space the item's declared
                 // width leaves, and the same over-constraint that made
@@ -4313,7 +4339,7 @@ object ComponentRenderer {
      *
      * Wave 28 (lane NE): the mount is chosen per child. A box whose only
      * inset on an axis is `right`/`bottom` anchors from the containing
-     * block's END edge (css-position-3 §3.5.3) — the wave-22 rule table the
+     * block's END edge (css-position-3 §4.3) — the wave-22 rule table the
      * canvas-hoist slot already applies to ROOT-level boxes, which this
      * NESTED slot never had: every child was placed at the slot origin, so
      * the child's own `−right`/`−bottom` offset (PositionConfig.offsetX/Y)
@@ -4622,7 +4648,7 @@ object ComponentRenderer {
      * wave-8 unbounded measure sets to Infinity; Compose documents the
      * fill modifiers as no-ops there, so a `position:absolute; width:50%`
      * child would collapse to content size (no ink) on the next device
-     * run. css-position-3 §5.1: abspos percentages resolve against the
+     * run. css-values-4 §5.5: abspos percentages resolve against the
      * containing block — [cb] carries the nearest ancestor's CONTENT box
      * (the padding-box the spec names minus nothing further; content box
      * is the channel's existing, documented approximation — same base the
@@ -4911,10 +4937,8 @@ object ComponentRenderer {
             // `align-self: auto` items (align-items initial `normal` behaves
             // as stretch). Container-level inputs read ONCE: what auto
             // resolves to, and whether a definite cross size gives fillMax*
-            // a real line-growth target (§9.4 step 8). Composed-WPT-gated
-            // inside FlexCrossStretch — see that file's banner for why the
-            // dark-stage corpus keeps the frozen no-stretch measure.
-            val composedWptStretch = LocalWptComposedMode.current
+            // a real line-growth target (§9.4 step 8). Retro R2 (A11#12):
+            // capture-mode independent — see FlexCrossStretch's banner.
             val containerItemsStretch = com.styleconverter.runtime.layout.flexbox
                 .FlexCrossStretch.containerAlignItemsStretches(component.properties)
             // Row cross axis = vertical → the container's HEIGHT is the gate.
@@ -4967,7 +4991,7 @@ object ComponentRenderer {
             sortedChildren.forEachIndexed { index, child ->
                 // v2 placement contract: one union read per arriving child;
                 // this flex container consumes ONLY the flex block + the
-                // shared alignment claim (css-align-3 §6.4) — grid claims
+                // shared alignment claim (css-align-3 §6.2 align-self) — grid claims
                 // on the same child are inert here, like `grid-area` on a
                 // flex child in a browser (design §2.2 resolution rule).
                 val childPlacement = com.styleconverter.runtime.core.placement
@@ -4992,12 +5016,12 @@ object ComponentRenderer {
                 // explicit-`align-self: stretch` arm (byte-identical to the
                 // old inline predicate in every mode) PLUS the composed-WPT
                 // `align-self: auto` → `align-items: normal/stretch` arm
-                // (css-align-3 §6.4) that repaints calc-size-flex-001..003 /
-                // 009's zero-ink items — lives in FlexCrossStretch (JVM-
-                // pinned). Cross axis here is HEIGHT (row container).
+                // (css-align-3 §6.2 align-self / §7.2 align-items) that
+                // repaints calc-size-flex-001..003 / 009's zero-ink items
+                // — lives in FlexCrossStretch (JVM-pinned). Cross axis
+                // here is HEIGHT (row container).
                 val stretches = com.styleconverter.runtime.layout.flexbox.FlexCrossStretch
                     .effectiveStretch(
-                        composedWpt = composedWptStretch,
                         alignSelf = alignSelf,
                         rowAxis = true,
                         containerItemsStretch = containerItemsStretch,
@@ -5244,11 +5268,8 @@ object ComponentRenderer {
             // cross-stretch inputs. The column cross axis is HORIZONTAL, so
             // the definite-cross gate reads the container's WIDTH. This arm
             // repaints calc-size-flex-004..006's items (0-wide × 100-tall
-            // green under the frozen loop). Composed-WPT-gated inside
-            // FlexCrossStretch — the dark-stage FC_AlignSelf fit-content
-            // calibration (stretch ⇒ Alignment.Start, no fill) stands
-            // everywhere else.
-            val composedWptStretch = LocalWptComposedMode.current
+            // green under the frozen loop). Retro R2 (A11#12): capture-mode
+            // independent — see FlexCrossStretch's banner.
             val containerItemsStretch = com.styleconverter.runtime.layout.flexbox
                 .FlexCrossStretch.containerAlignItemsStretches(component.properties)
             // Column cross axis = horizontal → the container's WIDTH gates.
@@ -5311,7 +5332,6 @@ object ComponentRenderer {
                 // explicit-stretch fill inside it.
                 val stretches = com.styleconverter.runtime.layout.flexbox.FlexCrossStretch
                     .effectiveStretch(
-                        composedWpt = composedWptStretch,
                         alignSelf = alignSelf,
                         rowAxis = false,
                         containerItemsStretch = containerItemsStretch,
@@ -5419,7 +5439,7 @@ object ComponentRenderer {
                     AlignSelf.STRETCH -> if (stretches) childModifier.fillMaxWidth()
                         else childModifier.align(Alignment.Start)
                     // Wave 47 (lane Z3): the `auto` → `align-items:
-                    // normal/stretch` resolution (css-align-3 §6.4), composed
+                    // normal/stretch` resolution (css-align-3 §6.2 / §7.2), composed
                     // arm only — repaints calc-size-flex-004..006's 0-wide
                     // items. BASELINE also lands here; never a stretch.
                     else -> if (stretches) childModifier.fillMaxWidth() else childModifier
@@ -5547,7 +5567,7 @@ object ComponentRenderer {
      * floor (50px inline / 30px block) — that floor is what web's flex
      * algorithm clamps against (FR_GrowBasis `a`: basis 40 → rendered 50).
      * The maximum is the declared max-size property (max-width/max-height,
-     * css-flexbox-1 §9.7.4.d max violations), +∞ when absent.
+     * css-flexbox-1 §9.7 step 4.d max violations), +∞ when absent.
      */
     internal fun flexLineSpec(
         component: IRComponent,
@@ -5556,8 +5576,18 @@ object ComponentRenderer {
     ): FlexLineSpec? {
         // Only engage when some child actually declares a flex property —
         // otherwise this is a plain Row/Column and legacy behaviour stands.
+        // Retro R2 (A7#0, css-flexbox-1 §4.1): an absolutely-positioned
+        // child of a flex container "does not participate in flex layout"
+        // — its flex-basis/grow/shrink are inert, so it must not be the
+        // reason a line engages either. Before this gate the 12 single-
+        // abspos-child containers of css-flexbox/flexbox-abspos-child-002
+        // engaged on the abspos child's own FlexBasis, and the ones whose
+        // basis was not px-shaped fell into the intrinsic pass, which
+        // measured the abspos child as an in-flow 50px-floor item (the
+        // 50px-wide teal bars in the wave49-final Android capture).
         val anyFlex = sortedChildren.any { c ->
-            c.properties.any { it.type == "FlexBasis" || it.type == "FlexGrow" || it.type == "FlexShrink" }
+            !isOutOfFlowChild(c.properties) &&
+                c.properties.any { it.type == "FlexBasis" || it.type == "FlexGrow" || it.type == "FlexShrink" }
         }
         if (!anyFlex) return null
 
@@ -5593,16 +5623,57 @@ object ComponentRenderer {
             // clamp (an item never grows past its max-width/max-height).
             val maxSize = if (rowAxis) pxOf(cp, "MaxWidth", "MaxInlineSize")
                 else pxOf(cp, "MaxHeight", "MaxBlockSize")
+            // Retro R2 (A7#0, css-flexbox-1 §4.1): an out-of-flow child is
+            // not a flex item — it takes NO main-axis space from the line
+            // (its size comes from its own static-position measure in the
+            // loops below, which already skip the resolved pin for it). The
+            // item list must stay 1:1 with sortedChildren (the loops index
+            // resolvedSizes by position and the intrinsic Layout maps
+            // measurables by position), so the child keeps a slot: an
+            // inflexible zero-base, zero-band item that resolves to 0 and
+            // perturbs neither §9.7 pass. Known residual, documented not
+            // silent: the intrinsic pass (FlexIntrinsicRow/Column) has never
+            // routed out-of-flow children through absposStaticMeasure, so a
+            // MIXED line (content-sized in-flow items + an abspos sibling)
+            // measures that sibling at 0 there — zero wave49-final cells
+            // carry that shape. Executed scan of all 1435 per-test IR docs:
+            // 172 flex containers hold an abspos child; 6 are mixed lines,
+            // none with a content-sized in-flow flex item (the one with an
+            // in-flow flex item, calc-size-flex-007 __1, is wrap-reverse
+            // and never reaches this nowrap spec); the 12 whose abspos
+            // child itself carries flex props are all single-child
+            // (flexbox-abspos-child-002) and now take the `anyFlex ==
+            // false` legacy path above.
+            if (isOutOfFlowChild(cp)) {
+                return@map com.styleconverter.runtime.layout.flexbox.FlexSizeResolver.Item(
+                    basisPx = 0.0, grow = 0.0, shrink = 0.0, minPx = 0.0, maxPx = 0.0
+                )
+            }
             // v2 placement contract: the child's flex claims come from
             // the single ITEM union (grow 0 / shrink 1 / basis auto are
             // the CSS-initial defaults the union carries for absent
             // fields — design §2.2 resolution rule).
             val flexClaims = com.styleconverter.runtime.core.placement
                 .ItemPlacementExtractor.extract(cp).flex
+            // Retro R2 (A7#0, css-flexbox-1 §7.2.3): a PERCENT flex-basis
+            // resolves against the flex container's inner main size — the
+            // definite `contentMain` this spec already demanded above. The
+            // `min(…, contentMain)` clamp is the iOS twin's rule verbatim
+            // (ComponentRenderer.swift:2601 nowrap, :2733 wrap plan, and
+            // FlowLayout.swift:213),
+            // kept so the three runtimes agree on the wire; a >100% basis
+            // with flex-shrink:0 is where that clamp and the browser would
+            // differ — zero wave49-final carriers (values 0/50/80/100).
+            // Before this arm the bare-number wire resolved to NO basis, the
+            // line was declared content-sized, and the item measured at the
+            // 50px placeholder floor instead of its percentage.
+            val basisFromPercent = flexClaims.basisPercent?.let { pct ->
+                minOf(contentMain * pct / 100.0, contentMain)
+            }
             com.styleconverter.runtime.layout.flexbox.FlexSizeResolver.Item(
-                // Used flex basis: flex-basis, else the main-size property,
-                // else content (null → filled by the intrinsic pass).
-                basisPx = flexClaims.basisPx ?: mainSize,
+                // Used flex basis: flex-basis (px, else percent), else the
+                // main-size property, else content (null → intrinsic pass).
+                basisPx = flexClaims.basisPx ?: basisFromPercent ?: mainSize,
                 grow = flexClaims.grow.toDouble(),
                 shrink = flexClaims.shrink.toDouble(),
                 // Web wrapper: minWidth = width || min-width || 50px (30px
@@ -6027,7 +6098,7 @@ object ComponentRenderer {
         val tabConfig = TextStyleApplier.extractTabSize(properties)
         displayText = TextStyleApplier.applyTabSize(displayText, tabConfig)
 
-        // Wave 37 (lane W7, rule A) — `hyphens: none` (css-text-3 §6.1):
+        // Wave 37 (lane W7, rule A) — `hyphens: none` (css-text-3 §5.3):
         // U+00AD SOFT HYPHEN must not be a break opportunity. The twin of
         // the iOS PlaceholderLabel strip, and DELIBERATELY KEPT even though
         // it is measured-INERT on Compose today. The measurement, so the
@@ -6057,7 +6128,7 @@ object ComponentRenderer {
         //
         // The keyword is read from THIS component's own list first and the
         // INHERITED channel second: `hyphens` is an inherited property
-        // (css-text-3 §6.1; it is in this renderer's `inheritableTypes`
+        // (css-text-3 §5.3; it is in this renderer's `inheritableTypes`
         // table), and the run that paints the glyphs is not always the box
         // that declared it.
         val hyphensMode = TextStyleApplier.extractHyphens(
@@ -6067,14 +6138,14 @@ object ComponentRenderer {
         displayText = com.styleconverter.runtime.typography.wrapping.SoftHyphenPolicy
             .displayString(displayText, hyphensMode)
         // ── Wave 40 (lane T2) — THE DICTIONARY HALF, switched on ────────
-        // §6.1's `auto` is "manual's opportunities PLUS the ones a
+        // §5.3's `auto` is "manual's opportunities PLUS the ones a
         // hyphenation resource appropriate to the LANGUAGE of the text
         // determines". Minikin ships those resources
         // (/system/usr/hyphen-data/hyph-<tag>.hyb, API 23+) and Compose can
         // ask for them — the missing input until wave 37 was the language,
         // and `meta.lang` (LocalContentLanguage) now carries it. So the
         // wall the block below used to declare is only a wall for UNTAGGED
-        // content, which is exactly where §6.1 wants no hyphenation
+        // content, which is exactly where §5.3 wants no hyphenation
         // anyway (WPT css-text/hyphens-auto-001).
         //
         // The keyword is read from THIS component's own list first and the
@@ -6221,7 +6292,7 @@ object ComponentRenderer {
         // predicate above answers "does UAX #14 give this run a break
         // opportunity?", and its space/punctuation/ideograph approximation
         // is the complete answer only while the hyphenator is off. Under
-        // `hyphens: auto` + a language tag, §6.1 adds the dictionary's
+        // `hyphens: auto` + a language tag, §5.3 adds the dictionary's
         // opportunities: `highway` becomes `high-way` and the run is no
         // longer unbreakable, so suppressing softWrap here would paint it
         // on one line and silently undo the switch (measured shape:
@@ -6238,7 +6309,7 @@ object ComponentRenderer {
         // parents always publish resolved px, see DynamicValueResolver.
         // fontSizePxOf) is threaded as the base for the relative
         // font-size values (em / % / smaller / larger, css-values-4
-        // §5.1.1 + CSS 2.1 §15.7 resolve against the INHERITED size),
+        // §6.1.1 + CSS 2.1 §15.7 resolve against the INHERITED size),
         // matching iOS's inherited-size resolution. Null (no styled
         // ancestor) falls back to the extractor's 16sp browser default —
         // identical outcomes on the committed fixtures, which never style
@@ -6528,7 +6599,7 @@ object ComponentRenderer {
         val smallCaps = fontVariantConfig?.caps == FontVariantCaps.SMALL_CAPS ||
             fontVariantConfig?.caps == FontVariantCaps.ALL_SMALL_CAPS
 
-        // css-text-3 §5.1 word-spacing — real implementation. Compose's
+        // css-text-3 §7.1 word-spacing — real implementation. Compose's
         // TextStyle has no word-spacing, and the old letter-spacing
         // fallback inserted the gap between EVERY glyph pair (12px between
         // single digits pushed '0123 4567' half off its box). Instead, a
@@ -7590,6 +7661,20 @@ object ComponentRenderer {
         // answers byte-identically.
         unclippedLineWidths: Boolean = false
     ): TextOverflow {
+        // Retrospective R3 (A5#4) — css-overflow-4 §4.2 `block-ellipsis:
+        // no-ellipsis` / the empty string riding on `line-clamp` (the wire's
+        // `ellipsis` component; TextStyleApplier.extractLineClampMarkerSuppressed,
+        // the twin of Swift's LineClampCap.markerSuppressed and web's
+        // suppressesMarker). Compose Text has ONE overflow knob and Ellipsis on
+        // a clamped run paints the "…" the author forbade, so a marker-less
+        // clamp must Clip — even over an explicit `text-overflow: ellipsis`,
+        // which governs INLINE-axis overflow (css-overflow-3 §6.1) and has no
+        // marker to paint on a wrapped, block-clamped run. `pre`/`nowrap` runs
+        // keep their Visible below (no marker there either, and Ellipsis would
+        // trip the finalMaxLines landmine documented at the call site).
+        if (effectiveMaxLines != Int.MAX_VALUE && !unclippedLineWidths &&
+            TextStyleApplier.extractLineClampMarkerSuppressed(properties)
+        ) return TextOverflow.Clip
         // An explicit `text-overflow` is an author decision and always wins,
         // in either direction.
         if (properties.any { it.type == "TextOverflow" }) return declared
@@ -7912,7 +7997,7 @@ object ComponentRenderer {
  * Placeholder break-word shim (wave 5). The web harness's placeholder
  * <span> declares `word-break: break-word`, which makes the span's
  * MIN-CONTENT contribution a single grapheme instead of the widest word
- * (css-text-3 §5.2: break-word allows breaks anywhere for intrinsic-size
+ * (css-text-3 §5.4: break-word allows breaks anywhere for intrinsic-size
  * purposes' worst case). Compose Text reports its longest word as the min
  * intrinsic, so `width: min-content` boxes measured word-wide on Android
  * while the web reference collapsed to a one-character column

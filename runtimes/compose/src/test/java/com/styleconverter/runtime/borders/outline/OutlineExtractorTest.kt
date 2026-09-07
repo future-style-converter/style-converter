@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.borders.outline
 
 // Wave-5 pinning — outline-color's INITIAL value is `currentColor`
-// (css-ui-4 §4.3), NOT black. The web reference harness sets
+// (css-ui-4 §3.4), NOT black. The web reference harness sets
 // `body { color: #eee }` (apps/web-harness/index.html), so a fixture that
 // declares only `outline-style: groove` paints light-gray 3D bands on web;
 // Android's old Color.Black default painted a solid black frame on every

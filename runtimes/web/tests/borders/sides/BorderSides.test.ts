@@ -1,5 +1,5 @@
 // BorderSides — coverage for the 24 per-side Border*Width/Style/Color triplets.
-// Fixtures sourced from examples/properties/borders/border-{widths,styles,colors}.json
+// Fixtures sourced from fixtures/properties/borders/border-{widths,styles,colors}.json
 // after ./gradlew run conversion; we assert the emitted CSS declaration matches
 // what the browser would accept natively.
 import { describe, it, expect } from 'vitest';

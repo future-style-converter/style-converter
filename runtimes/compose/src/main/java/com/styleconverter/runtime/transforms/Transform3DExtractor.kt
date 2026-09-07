@@ -88,7 +88,7 @@ object Transform3DExtractor {
         return px to py
     }
 
-    /** Which axis a <position> keyword is pinned to (css-values-4 §2.4). */
+    /** Which axis a <position> keyword is pinned to (css-values-4 §8.3). */
     private enum class Axis { HORIZONTAL, VERTICAL, EITHER }
 
     /**

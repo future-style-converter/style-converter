@@ -1,0 +1,152 @@
+{
+  "_comment": "Transform PIVOT of a POSITIONED child (retro R1, finding A11#0). css-transforms-1 §4 (the transform-origin property) + §2 (the transform rendering model): transform-origin (default 50% 50%) is the centre of the element's OWN border box, so a child at left:60px/top:20px, 40x40, must rotate/scale about (80,40) in the parent frame. The measured Compose defect: StyleApplier chains the transform layer OUTER to the abspos offset, so the pivot was the child's local centre expressed in the PARENT frame — (20,20), missing (left,top). The v1 oracle measures only the bbox SIZE of fill-coloured pixels, and a single rigid transform's bbox is pivot-invariant, so every pinned row pairs the transformed `mover` with an UNTRANSFORMED `anchor` twin at the same (60,20) in the same fill: the union bbox then depends on WHERE the mover landed. ARITHMETIC (fill #e74c3c=(231,76,60); rotated bbox of w x h is (w|cos|+h|sin|) x (w|sin|+h|cos|)) — TAP_Control_Coincident: anchor + untransformed mover coincide -> [40,40]; proves the twins overlay exactly so the other rows measure the transform alone. TAP_Rotate45_Anchored: correct pivot (80,40) -> the 56.57 diamond is centred on the anchor (its tips at ±28.28 contain the anchor's ±20 extent) -> union [57,57]; the wave-49 pivot (20,20) sends the mover centre to (80-20,40-20) rotated 45deg cw = (28.28,56.57) + (20,20) = (48.3,76.6) -> mover spans x 20..76.6 / y 48.3..104.9, union with the anchor (60..100 x 20..60) = x 20..100 -> [80, 85] (the capture canvas cuts y at 96 -> [80,76]); delta >= 23px on x either way. TAP_ScaleX2_Anchored: correct pivot x=80 -> mover spans x 40..120 (centred on the anchor) -> union [80,40]; wave-49 pivot x=20 -> x' = 20 + 2(x-20): 60..100 -> 100..180 -> union x 60..180 = [120,40]; delta 40px. TAP_RotateY60_Anchored: rotateY(60deg) with no perspective is orthographic scaleX(cos 60 = 0.5) (css-transforms-2 §4.1) about x=80 -> mover x 70..90 inside the anchor -> union [40,40]; wave-49 pivot x=20 -> x' = 20 + 0.5(x-20): 60..100 -> 40..60 -> union x 40..100 = [60,40]; this is the same left*(1-cos) mechanism that put WPT css-transform-3d-rotateY-positive (left 20, 240 wide) 10px left of the frozen ref on Android. MEASURED MECHANISM (A11#0 audit, nested-transforms control): Android bbox (36,65)-(91,111) canvas px vs iOS/web (69,29)-(122,82) — the pivot prediction, not a clip. Parents carry NO background; the twins share one fill so `fill` is unambiguous. Layout 160x80 keeps every correct render inside the box (the rotate row's diamond reaches y 11.7..68.3) and every wrong render well outside the tolerance. No waivers: iOS and web already pivot correctly (measured), Android is fixed by TransformPivot.kt in the same change — all three must be green.",
+  "components": {
+    "TAP_Control_Coincident": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "position": "relative"
+      },
+      "children": {
+        "anchor": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c"
+          }
+        },
+        "mover": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [231, 76, 60],
+        "fillTolerance": 2,
+        "box": [40, 40],
+        "boxTolerance": 1,
+        "note": "control: the untransformed twins coincide exactly, so the pinned rows below measure the transform's pivot alone"
+      }
+    },
+    "TAP_Rotate45_Anchored": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "position": "relative"
+      },
+      "children": {
+        "anchor": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c"
+          }
+        },
+        "mover": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "transform": "rotate(45deg)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [231, 76, 60],
+        "fillTolerance": 2,
+        "box": [57, 57],
+        "boxTolerance": 6,
+        "note": "css-transforms-1 §4: pivot = own centre (80,40) -> 40*sqrt(2)=56.57 diamond centred on the anchor -> [57,57]; the parent-frame pivot (20,20) lands the mover centre at (48.3,76.6) -> union [80,>=76]. boxTolerance 6 absorbs the antialiased diamond tips (web itself under-reads a 45deg diamond by up to ~5px) while a 23px delta stays unmistakable."
+      }
+    },
+    "TAP_ScaleX2_Anchored": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "position": "relative"
+      },
+      "children": {
+        "anchor": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c"
+          }
+        },
+        "mover": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "transform": "scaleX(2)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [231, 76, 60],
+        "fillTolerance": 2,
+        "box": [80, 40],
+        "boxTolerance": 2,
+        "note": "pivot x = 60 + 20 = 80 -> mover x 40..120 centred on the anchor -> [80,40]; the parent-frame pivot x=20 gives x' = 20 + 2(x-20) = 100..180 -> union [120,40] (the standalone 005_box miss in the audit: x 100-179 drawn, 40-119 correct)"
+      }
+    },
+    "TAP_RotateY60_Anchored": {
+      "properties": {
+        "width": "160px",
+        "height": "80px",
+        "position": "relative"
+      },
+      "children": {
+        "anchor": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c"
+          }
+        },
+        "mover": {
+          "properties": {
+            "position": "absolute",
+            "left": "60px",
+            "top": "20px",
+            "width": "40px",
+            "height": "40px",
+            "background-color": "#e74c3c",
+            "transform": "rotateY(60deg)"
+          }
+        }
+      },
+      "_expect": {
+        "fill": [231, 76, 60],
+        "fillTolerance": 2,
+        "box": [40, 40],
+        "boxTolerance": 2,
+        "note": "css-transforms-2 §4.1 (no perspective): rotateY(60deg) = scaleX(0.5) about x=80 -> mover x 70..90 hides inside the anchor -> [40,40]; the parent-frame pivot x=20 gives 40..60 -> union [60,40] — the left*(1-cos) shift that moved WPT css-transform-3d-rotateY-positive 10px on Android"
+      }
+    }
+  }
+}

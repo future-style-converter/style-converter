@@ -35,7 +35,7 @@ class SoftHyphenPolicyTest {
     // The literal the css-text/hyphens family is authored with.
     private val shyWord = "Deoxy\u00ADribo\u00ADnucleic acid"
 
-    // ── §6.1 keyword gate ────────────────────────────────────────────
+    // ── §5.3 keyword gate ────────────────────────────────────────────
 
     /** Only `none` suppresses: `manual` is the INITIAL value and must
      *  honour explicit opportunities, `auto` adds dictionary ones on top
@@ -79,7 +79,7 @@ class SoftHyphenPolicyTest {
         assertFalse(SoftHyphenPolicy.wantsDictionaryHyphenation(null))
     }
 
-    // ── §6.1 string rewrite ──────────────────────────────────────────
+    // ── §5.3 string rewrite ──────────────────────────────────────────
 
     /** Under `none` the conditional characters go, and NOTHING else does:
      *  the visible glyph sequence is byte-identical to the Chromium ref's
@@ -91,7 +91,7 @@ class SoftHyphenPolicyTest {
     }
 
     /** Under `manual`/`auto` the string is untouched — the platform's own
-     *  U+00AD handling IS the correct §6.1 behaviour there. */
+     *  U+00AD handling IS the correct §5.3 behaviour there. */
     @Test
     fun manualAndAutoLeaveTheStringIntact() {
         assertSame(shyWord, SoftHyphenPolicy.displayString(shyWord, "manual"))
@@ -109,7 +109,7 @@ class SoftHyphenPolicyTest {
     }
 
     /** U+200B ZERO WIDTH SPACE is a plain break opportunity, not a
-     *  hyphenation one: `hyphens` does not govern it (css-text-3 §6.1
+     *  hyphenation one: `hyphens` does not govern it (css-text-3 §5.3
      *  speaks only of hyphenation opportunities), so `none` must leave it
      *  in place. */
     @Test

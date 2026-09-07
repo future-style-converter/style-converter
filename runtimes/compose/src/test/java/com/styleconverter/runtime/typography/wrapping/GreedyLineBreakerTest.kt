@@ -166,7 +166,7 @@ class GreedyLineBreakerTest {
 
     /** The soft-hyphen half of the wave-41 fold: hyphens-manual-013's
      *  `Deoxy&shy;ribonucleic acid` at 10ch. The shy is a conditional
-     *  hyphenation point (css-text-3 §6.1): taking it paints U+2010 and
+     *  hyphenation point (css-text-3 §5.3): taking it paints U+2010 and
      *  the mark itself never reaches the output; the unbreakable tail
      *  `ribonucleic` overflows (CSS 2.1 §9.5) and DOES claim rule B —
      *  which is exactly what lets PreBreakPipeline fire and render the

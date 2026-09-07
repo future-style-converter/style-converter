@@ -1,4 +1,4 @@
-// The Compose half of css-break-3 §5.2 `box-decoration-break: clone` for a
+// The Compose half of css-break-3 §5.4 `box-decoration-break: clone` for a
 // multicol container's SOLE over-tall child (wave-46 lane Y3): the
 // measure-pass integration MultiColumnDistributionLayout delegates to right
 // before its slice branch. Split out of MultiColumnApplier.kt (the
@@ -24,7 +24,7 @@ import androidx.compose.ui.unit.Constraints
  * [MulticolCloneGeometry] fragments for the caller's drawWithContent
  * clip+translate replay.
  *
- * THE MEASURING TRICK (why one measure suffices): css-break-3 §5.2 wants
+ * THE MEASURING TRICK (why one measure suffices): css-break-3 §5.4 wants
  * every fragment "independently wrapped" with its border, padding and
  * background, radius applied per fragment, a no-repeat image painted once
  * per fragment. A child with no content of its own (the repo's
@@ -88,11 +88,11 @@ internal object MulticolCloneMeasure {
         logFallback: (String) -> Unit
     ): MeasureResult? {
         // No spec → no IR child view (dark stage by construction), and a
-        // slice child (the css-break-3 §5.2 default) is the S-table's —
+        // slice child (the css-break-3 §5.4 default) is the S-table's —
         // neither is a fallthrough, no log.
         if (spec == null || !spec.cloneDeclared) return null
         // Out-of-flow / spanning sole children are not column content to
-        // clone (css-position-3 §2.1, css-multicol-1 §6.2) — their owning
+        // clone (css-position-3 §2.1, css-multicol-1 §6.1) — their owning
         // models already decided; the slice branch's existing behaviour
         // for them stays untouched.
         if (!with(MulticolSpannerFlow) { spec.role.isFlow }) return null

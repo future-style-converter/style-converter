@@ -2,7 +2,7 @@
 //  ListStyleShorthand.swift
 //  StyleEngine/lists — wave 25 (lane LF follow-up).
 //
-//  The `list-style` SHORTHAND, css-lists-3 §3.5:
+//  The `list-style` SHORTHAND, css-lists-3 §3.6:
 //  `<'list-style-position'> || <'list-style-image'> || <'list-style-type'>`.
 //  TWIN of Compose lists/ListStyleShorthand.kt — same grammar, same
 //  invalid-declaration rule, same global-keyword handling.
@@ -51,7 +51,7 @@ enum ListStyleShorthand {
         var image: String?
     }
 
-    /// css-lists-3 §3.2 — the two `list-style-position` keywords.
+    /// css-lists-3 §3.5 — the two `list-style-position` keywords.
     private static let positionKeywords: Set<String> = ["inside", "outside"]
 
     /// Expand a `list-style` shorthand value.
@@ -121,7 +121,7 @@ enum ListStyleShorthand {
             }
         }
 
-        // css-lists-3 §3.5: a single `none` sets BOTH list-style-type and
+        // css-lists-3 §3.6: a single `none` sets BOTH list-style-type and
         // list-style-image to none; two `none`s set one each. Fill the
         // still-empty slots in that order. (Image's initial value IS none,
         // so filling it changes nothing observable — the step exists to

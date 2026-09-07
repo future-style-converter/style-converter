@@ -60,7 +60,7 @@ import com.styleconverter.runtime.layout.IntrinsicChannel
  * @param containerCross the container's align-items as a Compose
  *        HORIZONTAL alignment — the fallback for DEFAULT placements
  *        (the cross axis of a column container is inline).
- * @param alignContentStretches §9.4 step 8 gate — css-align-3 §5.3:
+ * @param alignContentStretches §9.4 step 8 gate — css-align-3 §5.1:
  *        only `align-content: normal | stretch` grows the lines; every
  *        other keyword leaves the leftover free (same gate, same
  *        rationale as the row twin's parameter).
@@ -110,7 +110,7 @@ fun FlexWrapColumn(
         val mainSizes = IntArray(n) {
             IntrinsicChannel.probe(
                 logTag = "FlexWrapColumn",
-                refusalContext = "css-flexbox-1 §9.2.3.E hypothetical main size " +
+                refusalContext = "css-flexbox-1 §9.2 step 3.E hypothetical main size " +
                     "skipped — this wrapping column-flex item's subtree has no " +
                     "intrinsic channel; the item takes the full column budget as " +
                     "its measure ceiling and §9.3 wraps it onto a line of its own."

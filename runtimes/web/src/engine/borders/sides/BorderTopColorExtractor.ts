@@ -1,5 +1,5 @@
 // BorderTopColorExtractor.ts — folds `BorderTopColor` IR properties into a config.
-// IR shape flavors (from examples/properties/borders/border-colors.json):
+// IR shape flavors (from fixtures/properties/borders/border-colors.json):
 //   {srgb:{r,g,b[,a]}, original:"#ff3366"|"crimson"|...}  static sRGB
 //   {original:"currentColor"}                             dynamic: currentColor
 //   {original:{type:'color-mix'|'light-dark'|'relative'|'var', ...}} dynamic forms

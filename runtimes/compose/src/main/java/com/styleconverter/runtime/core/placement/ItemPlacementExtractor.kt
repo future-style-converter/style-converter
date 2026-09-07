@@ -50,7 +50,9 @@ object ItemPlacementExtractor {
         flex = FlexClaims(
             grow = flexGrow(properties),
             shrink = flexShrink(properties),
-            basisPx = flexBasisPx(properties)
+            basisPx = flexBasisPx(properties),
+            // Retro R2 (A7#0): the percent wire flavor, previously dropped.
+            basisPercent = flexBasisPercent(properties)
         ),
         alignSelf = alignSelf(properties),
         justifySelf = justifySelf(properties),
@@ -59,7 +61,7 @@ object ItemPlacementExtractor {
     )
 
     /**
-     * align-self keyword → renderer enum. css-align-3 §6.4 value space;
+     * align-self keyword → renderer enum. css-align-3 §6.2 value space;
      * `anchor-center` folds to CENTER unconditionally (CSS Anchor
      * Positioning §6: no default anchor in scope in this runtime) —
      * the mapping the wave-4 ledger pinned into the LIVE path.
@@ -83,7 +85,7 @@ object ItemPlacementExtractor {
     }
 
     /**
-     * justify-self keyword → renderer enum (css-align-3 §6.2 value space,
+     * justify-self keyword → renderer enum (css-align-3 §6.1 value space,
      * incl. the physical left/right keywords and self-start/self-end).
      */
     fun justifySelf(properties: List<IRProperty>): ComponentRenderer.JustifySelf {
@@ -144,15 +146,45 @@ object ItemPlacementExtractor {
 
     /**
      * flex-basis in px, or null when auto / percentage / content — the
-     * IR shape is `{"value":{"px":N},"normalizedPixels":N}`; percentage
-     * and keyword bases carry no px and stay unresolved (the §9.7 static
-     * resolver then declares the line unresolvable).
+     * IR shape is `{"value":{"px":N},"normalizedPixels":N}`; keyword
+     * bases carry no px and stay unresolved (the §9.7 static resolver
+     * then declares the line content-sized). A PERCENT basis is NOT a px
+     * claim either — it rides through [flexBasisPercent] instead.
      */
     fun flexBasisPx(properties: List<IRProperty>): Double? {
         val data = properties.firstOrNull { it.type == "FlexBasis" }?.data ?: return null
         val obj = data as? JsonObject ?: return null
         obj["normalizedPixels"]?.jsonPrimitive?.doubleOrNull?.let { return it }
         return (obj["value"] as? JsonObject)?.get("px")?.jsonPrimitive?.doubleOrNull
+    }
+
+    /**
+     * Retro R2 (A7#0) — flex-basis as a raw PERCENT, or null.
+     *
+     * Wire shape: the converter's FlexBasisSerializer writes
+     * `FlexBasis.PercentageValue` through IRPercentage's serializer, which
+     * emits the bare percent as a JSON NUMBER (`flex-basis: 100%` →
+     * `"FlexBasis": 100` — verbatim in wave49-final css-gaps
+     * flex-gap-decorations-025 / css-flexbox flexbox-abspos-child-002 /
+     * css-backgrounds background-clip-content-box-002 per-test IR). Both
+     * sibling runtimes already read that shape as a percentage — web's
+     * layoutLength "bare number → percentage" rule and iOS
+     * FlexboxExtractor.swift's `.double/.int → .percent` arm (wave 48,
+     * lane W7) — so this is the third and last reader to agree on the wire.
+     *
+     * Only a NUMERIC primitive qualifies: the keyword flavors (`"auto"`,
+     * `"content"`, …) are string primitives and stay null here, and the
+     * object shapes belong to [flexBasisPx]. The resolution against the
+     * container's inner main size (css-flexbox-1 §7.2.3) happens in the
+     * consuming line spec, never here.
+     */
+    fun flexBasisPercent(properties: List<IRProperty>): Double? {
+        val data = properties.firstOrNull { it.type == "FlexBasis" }?.data ?: return null
+        // A string primitive ("auto"/"content") has no doubleOrNull; a
+        // JsonObject is the px shape — both fall to null by design.
+        val prim = data as? JsonPrimitive ?: return null
+        if (prim.isString) return null
+        return prim.doubleOrNull
     }
 
     /**

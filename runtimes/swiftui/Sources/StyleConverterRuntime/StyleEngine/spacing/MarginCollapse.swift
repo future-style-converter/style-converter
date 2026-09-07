@@ -245,10 +245,10 @@ enum MarginCollapse {
         if let ox = style.visibility?.overflowX, ox != .visible { return false }
         if let oy = style.visibility?.overflowY, oy != .visible { return false }
         // G4 — out-of-flow parents establish their own context — no
-        // collapse through (css-position-3 §3.4).
+        // collapse through (css-position-3 §2: absolute/fixed are out of flow).
         if let pos = style.layout7?.position, pos == .absolute || pos == .fixed { return false }
         // G5 — bottom edge only: a definite height (or min-height, or an
-        // aspect-ratio that derives one — css-sizing-4 §5) separates the
+        // aspect-ratio that derives one — css-sizing-4 §4.2) separates the
         // last child's bottom margin from the parent's bottom edge
         // (§8.3.1 requires computed `height: auto` + zero min-height).
         // SizeConfig resolves BlockSize→height and MinBlockSize→minHeight

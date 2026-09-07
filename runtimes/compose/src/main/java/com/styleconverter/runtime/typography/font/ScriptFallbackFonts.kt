@@ -64,7 +64,7 @@ import com.styleconverter.runtime.typography.font.ScriptRunSegmenter.TextScript
  * weights per script would have quadrupled the payload for coverage nothing
  * exercises. A bold non-Latin run therefore takes Compose's synthetic
  * emboldening — the same synthesis Chromium applies when a fallback family
- * has no bold member (css-fonts-4 §6, font-synthesis-weight), so it is the
+ * has no bold member (css-fonts-4 §2.8.1, font-synthesis-weight), so it is the
  * matching behaviour rather than a silent gap. Stated, not hidden.
  *
  * ## Scope gate
@@ -121,7 +121,7 @@ object ScriptFallbackFonts {
     const val SUBSTITUTION_ENABLED: Boolean = true
 
     /** Noto Sans Arabic Regular — Arabic-Indic + Extended-Arabic-Indic
-     *  digits (css-counter-styles-3 §6.2 `arabic-indic` / `persian`) and the
+     *  digits (css-counter-styles-3 §6.1 `arabic-indic` / `persian`) and the
      *  Arabic prose of the css-text bidi documents. */
     val ArabicFontFamily: FontFamily = FontFamily(
         Font(R.font.noto_sans_arabic_regular, FontWeight.Normal, FontStyle.Normal)

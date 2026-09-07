@@ -15,7 +15,10 @@ package com.styleconverter.runtime.speech
 // family lands here as registration-only — future work may extend
 // SpeechExtractor if a voice-rendering pipeline is ever added.
 //
-// Parser-gap notes (see README-phase10.md):
+// Parser-gap notes. `examples/properties/README-phase10.md`, cited here
+// until retro P2e, was deleted by the 2026-07-08 restructure (commit
+// 02e4c457) with no replacement; the surviving variant matrix is
+// `fixtures/properties/speech/longtail.json` (45 components):
 //   * Volume / VoiceVolume share a VolumeValue sum type (keyword /
 //     percentage / number / raw / global).
 //   * SpeakAs accepts any whitespace-separated tokens unchecked.

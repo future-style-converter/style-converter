@@ -34,8 +34,8 @@
 //
 //  ## The placement this gate selects
 //  The marker of a `display: list-item` box is that box's FIRST INLINE BOX
-//  (css-lists-3 §3.2). Its in-flow content on all three runtimes is
-//  BLOCK-level — web renders `_text` through its own placeholder node and
+//  (css-lists-3 §3.1 first child + §3.5 inside). Its in-flow content on
+//  all three runtimes is BLOCK-level — web renders `_text` through its own placeholder node and
 //  the natives through `PlaceholderLabel` / `PlaceholderContent` — so the
 //  marker can never share a line with it and owns a LEADING line box. That
 //  is what web renders above (`1.` on one line, `text` on the next) and
@@ -76,7 +76,7 @@ enum ListItemMarkerGate {
     /// The base is `ListMarkerConfig`'s own default — `disc` / `outside`,
     /// the INITIAL values of `list-style-type` and `-position` (css-lists-3
     /// §3.1). That is the right base here precisely because there is no
-    /// container: HTML §15.3.9's `ul { list-style-type: disc }` /
+    /// container: HTML §15.3.7's `ul { list-style-type: disc }` /
     /// `ol { … decimal }` are declarations on the CONTAINER element, and a
     /// `display: list-item` `<div>` matches neither.
     ///
@@ -123,7 +123,7 @@ enum ListItemMarkerGate {
     ///   which crosses a `ComponentHost` boundary; no document in the
     ///   corpus has the shape (every baked marker in it sits on a tagged
     ///   `<li>`, which this gate already excludes).
-    /// - `position == .inside` only. css-lists-3 §3.2 puts an `outside`
+    /// - `position == .inside` only. css-lists-3 §3.5 puts an `outside`
     ///   marker in the item's MARGIN area, left of the border box — a
     ///   LEADING LINE BOX is the `inside` geometry and would instead push
     ///   the item's whole content down by a line the browser does not

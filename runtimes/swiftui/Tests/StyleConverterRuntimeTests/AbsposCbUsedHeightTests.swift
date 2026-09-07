@@ -1,7 +1,7 @@
 //
 //  AbsposCbUsedHeightTests.swift
 //  Wave 33 (lane C) — pins for the abspos CB-HEIGHT channel
-//  (CSS 2.2 §10.6.3 read through css-position-3 §3.1 / §10.6.4).
+//  (CSS 2.2 §10.6.3 and §10.6.4, read through css-position-3 §3.1).
 //
 //  The rule is pure decisions + arithmetic with an identical signature on
 //  Compose (AbsposCbUsedHeightTest.kt pins the same table entry-for-entry

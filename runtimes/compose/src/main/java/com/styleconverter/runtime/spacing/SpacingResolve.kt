@@ -49,7 +49,7 @@ data class SpacingContext(
     val parentWidthPx: Float? = null,
     // Wave-18 lane 2 (pin P1) — the measured advance width of the glyph '0'
     // at the element's resolved font family + size, in px. This is the CSS
-    // `ch` unit basis (css-values-4 §6.1.3). Null = metrics unavailable at
+    // `ch` unit basis (css-values-4 §6.1.1). Null = metrics unavailable at
     // this call site → resolution falls back to 0.5em, the fallback the
     // same spec section mandates ("assumed to be 0.5em wide"). Populated by
     // StyleApplier via ChUnitMetrics when a value in the config uses ch.
@@ -64,7 +64,7 @@ data class SpacingContext(
     // Padding/MarginApplier and by SizingExtractor's content-box inflation.
     val percentIndefiniteAsZero: Boolean = false,
     // Wave-43 lane V3 — the element's USED line-height in px, the `lh` unit
-    // basis (css-values-4 §6.2.1: lh is "equal to the computed value of the
+    // basis (css-values-4 §6.1.1: lh is "equal to the computed value of the
     // line-height property of the element on which it is used"). Populated
     // by StyleApplier.buildSpacingContext through LhUnitLineHeight's
     // three-state pick (declared value wins; WPT capture takes the
@@ -158,17 +158,17 @@ private fun resolveRelative(r: LengthValue.Relative, ctx: SpacingContext): Float
         LengthUnit.EM -> v * ctx.fontSizePx
         LengthUnit.REM -> v * ctx.rootFontSizePx
         // Pin P1 — `ch`: the advance width of '0' in the element's font
-        // (css-values-4 §6.1.3). Measured metrics when the plumbing
+        // (css-values-4 §6.1.1). Measured metrics when the plumbing
         // provided them (ChUnitMetrics via StyleApplier), else the spec's
         // own 0.5em fallback. This branch previously fell into the
         // else→0 arm, collapsing `width: 63.1ch` boxes to nothing
         // (css-overflow block-ellipsis-001 rendered a blank canvas).
         LengthUnit.CH -> v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx)
-        // Pin P2 — `ex`: x-height. §6.1.3 mandates a 0.5em assumption
+        // Pin P2 — `ex`: x-height. §6.1.1 mandates a 0.5em assumption
         // when the metric can't be determined; we don't measure x-height
         // yet, so the spec constant is the honest resolution.
         LengthUnit.EX -> v * 0.5f * ctx.fontSizePx
-        // Pin P3 — `ic`: CJK water ideograph advance; §6.1.3 fallback 1em.
+        // Pin P3 — `ic`: CJK water ideograph advance; §6.1.1 fallback 1em.
         LengthUnit.IC -> v * ctx.fontSizePx
         // Pin P4 — `cap`: cap-height. The spec fallback is the font's
         // ascent, which needs metrics we don't thread here; 1em is the
@@ -179,7 +179,7 @@ private fun resolveRelative(r: LengthValue.Relative, ctx: SpacingContext): Float
             v * ctx.fontSizePx
         }
         // Pin P5 (amended wave 43, lane V3) — `lh`: the element's USED
-        // line-height per css-values-4 §6.2.1. The threaded
+        // line-height per css-values-4 §6.1.1. The threaded
         // [SpacingContext.lineHeightPx] wins when the builder resolved one
         // (declared line-height verbatim, or the WPT-capture calibrated
         // grid — see LhUnitLineHeight); a null channel keeps the

@@ -4,4 +4,3 @@
 // row | column | row dense | column dense.
 export interface GridAutoFlowConfig { value?: string; }
 export const GRID_AUTO_FLOW_PROPERTY_TYPE = 'GridAutoFlow' as const;
-export type GridAutoFlowPropertyType = typeof GRID_AUTO_FLOW_PROPERTY_TYPE;

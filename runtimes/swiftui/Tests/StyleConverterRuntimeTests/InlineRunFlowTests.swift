@@ -53,7 +53,7 @@ final class InlineRunFlowTests: XCTestCase {
         // "means Deoxyribonucleic acid" with Hyphens MANUAL + lang en.
         // The container declares no Hyphens — the member's MANUAL is
         // ADOPTED (X1), which is behavior-neutral downstream: `manual` is
-        // the css-text-3 §6.1 initial the label already assumes.
+        // the css-text-3 §5.3 initial the label already assumes.
         let span = member("hyphens__hyphens-manual-inline-010__1__0",
                           text: "means Deoxyribonucleic acid",
                           props: [IRProperty(type: "Hyphens", data: .string("MANUAL"))],
@@ -76,7 +76,7 @@ final class InlineRunFlowTests: XCTestCase {
         // …-011: the span text carries TWO U+00AD soft hyphens
         // ("Deoxy\u{AD}ribo\u{AD}nucleic"). The fold must hand them
         // through VERBATIM — SoftHyphenPolicy + WordBreakOpportunities own
-        // them inside PlaceholderLabel (css-text-3 §6.1 `manual`), and a
+        // them inside PlaceholderLabel (css-text-3 §5.3 `manual`), and a
         // fold that stripped them would erase the test's whole subject.
         let span = member("hyphens__hyphens-manual-inline-011__0__0",
                           text: "means Deoxy\u{AD}ribo\u{AD}nucleic acid",
@@ -275,7 +275,7 @@ final class InlineRunFlowTests: XCTestCase {
             containerLang: nil))
     }
 
-    // MARK: - Hyphens adoption rules (X1, css-text-3 §6.1)
+    // MARK: - Hyphens adoption rules (X1, css-text-3 §5.3)
 
     func testMemberContradictingHostDeclarationRefuses() {
         // The host DECLARED `none` (deletes soft hyphens downstream); a
@@ -613,7 +613,7 @@ final class InlineRunFlowTests: XCTestCase {
             containerProperties: [IRProperty(type: "Color", data: srgb(0, 0.5, 0.5))],
             containerLang: nil)
         // Four forced-break lines, every collapsible space around a break
-        // fallen (css-text-3 §4.1.4) — the exact lines Chromium paints.
+        // fallen (css-text-3 §4.1.2) — the exact lines Chromium paints.
         XCTAssertEqual(folded?.text, "Line 1\nLine 2\nLine 3\nLine 4")
         // ONE styled member covering its flattened {text, <br>} subtree.
         XCTAssertEqual(folded?.spans.count, 1)
@@ -669,7 +669,7 @@ final class InlineRunFlowTests: XCTestCase {
 
     func testBreakSpacesFallOnBothSides() {
         // "a " loses its line-end space, " b " its line-start one
-        // (css-text-3 §4.1.4); the glyph member arms the break ring.
+        // (css-text-3 §4.1.2); the glyph member arms the break ring.
         let br = member("b0", tag: "br", text: nil)
         let span = member("s", text: "c")
         let folded = InlineRunFlow.fold(

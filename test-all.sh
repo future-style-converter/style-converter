@@ -22,9 +22,51 @@
 #
 # Usage:
 #     ./test-all.sh [input.json]         # default: fixtures/visual-test.json
+#     ./test-all.sh --gate-set           # one child run per line of
+#                                        #   tools/visual/gate-fixtures.txt (the
+#                                        #   BASELINE run set); this env is
+#                                        #   inherited by every child, the first
+#                                        #   non-zero child exit is re-raised.
+#                                        #   GATE_FIXTURES=<file> repoints the list.
+#
+# Fixture headers honoured (top-level keys the converter ignores):
+#     "_capture": {"seizeOnly": true}    a motion fixture whose LIVE-clock capture
+#                                        is meaningless (each platform lands on a
+#                                        different animation phase → exit 4 that
+#                                        says nothing about the runtimes). A bare
+#                                        run is refused (exit 2) with a pointer to
+#                                        tools/visual/animation-sweep.sh; a run
+#                                        that sets CAPTURE_ANIMATION_TIME passes.
+#
+# Exit codes:
+#     0    every non-skipped platform captured its full column, comparator passed
+#     1    a stage failed (convert / xcodebuild / hung adb / stale-wipe post-
+#          condition), or the comparator found a baseline regression
+#     2    refused input (probe fixture; seize-only fixture without
+#          CAPTURE_ANIMATION_TIME; >1 adb device and no ANDROID_SERIAL), lock
+#          contention, or a comparator IO / ledger-schema / missing-column error
+#     3-6  comparator verdicts: non-sRGB capture / unexpected cross-platform
+#          divergence / stale ledger line or waiver / spec-oracle violation
+#     7    COLUMN PRESENCE (retrospective A9#0, BACKLOG #5's 327-net half): a
+#          platform whose SKIP_*=1 was NOT set captured fewer PNGs than the
+#          IR's expected count. A missing or short column is a capture
+#          FAILURE, not a result — before this the summary printed
+#          "– Android: skipped" for a crashed app and the run exited 0.
 #
 # Environment overrides:
-#     SKIP_IOS=1 SKIP_ANDROID=1 SKIP_WEB=1    skip a platform
+#     SKIP_IOS=1 SKIP_ANDROID=1 SKIP_WEB=1    skip a platform — the ONLY way a
+#                                                platform may be absent from the
+#                                                run without exit 7 (auto-skips for
+#                                                a missing toolchain are not exempt)
+#     ANDROID_SERIAL=emulator-5554             pin adb to one device; with >1 device
+#                                                attached and this unset the run
+#                                                ABORTS (exit 2) instead of letting
+#                                                every adb call fail "more than one
+#                                                device" into an empty column
+#     ADB_TIMEOUT=60                           watchdog bound (s) on every adb call;
+#     ADB_PULL_TIMEOUT=120+N                     `pull` gets its own, scaled by the
+#                                                component count. A hung adb is
+#                                                killed and the run fails (exit 1)
 #     NO_CROSS_PLATFORM_GATE=1                 don't gate the 3-way pairs (for
 #                                                control fixtures, whose pairs
 #                                                are intentionally divergent)
@@ -61,6 +103,85 @@ set -euo pipefail
 if [[ "$(uname)" == "Darwin" ]] && command -v caffeinate >/dev/null 2>&1 && [[ -z "${_TESTALL_CAFFEINATED:-}" ]]; then
     export _TESTALL_CAFFEINATED=1
     exec caffeinate -dimsu "$0" "$@"
+fi
+
+# ── --gate-set driver (retrospective A12#3) ──────────────────────────────────
+# `./test-all.sh --gate-set` runs one CHILD test-all per fixture listed in
+# tools/visual/gate-fixtures.txt, each inheriting this process's environment
+# (BASELINE=1, SKIP_*, CAPTURE_*, …). Why a list rather than one fixture: the
+# exit-5 stale check (a ledger line or an `_expect.waive` whose pair now
+# PASSES must be deleted) can only fire on a fixture the gate actually RUNS,
+# and the documented gate ran fixtures/visual-test.json alone — so 6 of 29
+# ledger lines and every waiver lived in fixtures nothing exercised and
+# could never go stale or be validated (the Sepia staleness sat 5 days).
+# Placed BEFORE the single-run lock: each child takes and releases the lock
+# itself; the driver only sequences, tallies, and re-raises the first
+# non-zero exit. bash 3.2 safe (no arrays needed beyond the env override).
+_gate_set_fixtures() {   # $1 = list file → one fixture path per line; `#` lines and blanks dropped
+    local _fx _rest
+    # `read` splits on IFS, so a trailing "# comment" after the path lands in
+    # _rest and is discarded; surrounding whitespace is stripped by `read`.
+    while read -r _fx _rest || [[ -n "$_fx" ]]; do
+        [[ -z "$_fx" || "$_fx" == \#* ]] && continue
+        echo "$_fx"
+    done < "$1"
+}
+# 0 when at least one committed PNG under $2 names a component of fixture $1
+# (baseline files are `{platform}__{NNN}_{Name}.png`; Name may be a nested
+# child, so the fixture's component tree is walked recursively).
+_gate_fixture_has_baselines() {   # $1 = fixture path, $2 = baseline dir
+    node -e '
+      const fs = require("fs");
+      const doc = JSON.parse(fs.readFileSync(process.argv[1], "utf8"));
+      const names = new Set();
+      const walk = (c) => { for (const [k, v] of Object.entries(c ?? {})) { names.add(k); if (v && v.children) walk(v.children); } };
+      walk(doc.components);
+      const hit = fs.existsSync(process.argv[2]) && fs.readdirSync(process.argv[2]).some((f) => {
+        const m = f.match(/^(?:iOS|Android|web)__\d+_(.+)\.png$/); return m && names.has(m[1]);
+      });
+      process.exit(hit ? 0 : 1);
+    ' "$1" "$2" 2>/dev/null
+}
+if [[ "${1:-}" == "--gate-set" ]]; then
+    _gs_root="$(cd "$(dirname "$0")" && pwd)"
+    # Children are re-invoked by ABSOLUTE path: `$0` can be a bare relative
+    # name (`bash test-all.sh --gate-set`) that an exec would look up on
+    # $PATH and miss.
+    _gs_self="$_gs_root/$(basename "$0")"
+    _gs_list="${GATE_FIXTURES:-$_gs_root/tools/visual/gate-fixtures.txt}"
+    if [[ ! -f "$_gs_list" ]]; then
+        echo "[test-all] --gate-set: fixture list not found: $_gs_list" >&2
+        exit 2
+    fi
+    _gs_rc=0; _gs_n=0; _gs_summary=""
+    for _fx in $(_gate_set_fixtures "$_gs_list"); do
+        _gs_n=$(( _gs_n + 1 ))
+        _gs_tag=""; _gs_baseline="${BASELINE:-0}"
+        # BASELINE=1 on a fixture with NO committed baseline would exit 2 ("0
+        # comparisons ran") on every unseeded fixture and make the whole set
+        # useless until devices seed them. Downgrade THAT child to gate-only
+        # (cross-platform gate + spec oracle still apply) — loudly, and
+        # tagged in the summary so the downgrade cannot pass for a result.
+        if [[ "$_gs_baseline" == "1" ]] && ! _gate_fixture_has_baselines "$_gs_root/$_fx" "$_gs_root/tools/visual/baseline"; then
+            echo "[test-all] --gate-set: $_fx has NO committed baseline under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: UPDATE_BASELINE=1 ./test-all.sh $_fx" >&2
+            _gs_baseline=0; _gs_tag="   (gate-only: no committed baseline)"
+        fi
+        echo; echo "━━━ gate set [$_gs_n]: $_fx ━━━"
+        _gs_child_rc=0
+        BASELINE="$_gs_baseline" "$_gs_self" "$_fx" || _gs_child_rc=$?
+        _gs_summary="$_gs_summary
+  exit $_gs_child_rc  $_fx$_gs_tag"
+        # First non-zero exit wins — the earliest failure is the one the
+        # operator should read first; later children still run so one broken
+        # fixture does not hide the verdict on the rest.
+        [[ "$_gs_child_rc" -ne 0 && "$_gs_rc" -eq 0 ]] && _gs_rc=$_gs_child_rc
+    done
+    if [[ "$_gs_n" -eq 0 ]]; then
+        echo "[test-all] --gate-set: $_gs_list lists no fixtures — a gate set that runs nothing must not pass" >&2
+        exit 2
+    fi
+    echo; echo "━━━ gate set summary — $_gs_n fixture(s), first non-zero exit re-raised ━━━$_gs_summary"
+    exit "$_gs_rc"
 fi
 
 # ── Single-run lock ──────────────────────────────────────────────────────────
@@ -139,6 +260,9 @@ _testall_on_exit() {
     if [[ "$LOCK_ACQUIRED" == "1" ]]; then
         rm -rf "$LOCK" 2>/dev/null
     fi
+    # The bounded-adb hang marker (defined in the Android section; empty
+    # when we exit before reaching it).
+    [[ -n "${ADB_HANG_FLAG:-}" ]] && rm -f "$ADB_HANG_FLAG" 2>/dev/null
 }
 # Installed even when TESTALL_SKIP_LOCK=1: parent-held-lock runs still need
 # the emulator teardown on exit (previously they got NO trap at all, so a
@@ -251,6 +375,31 @@ CAPTURED_WEB=""
 if [[ "$INPUT_JSON" == *"_metric_probes/"* ]]; then
   echo "[test-all] $INPUT_JSON is a probe fixture (B8/B9/B10); use tools/visual/probe-text-metrics.sh instead." >&2
   exit 2
+fi
+
+# ── Seize-only fixture guard (retrospective A11#16) ──────────────────────────
+# A fixture may declare `"_capture": {"seizeOnly": true}` at its TOP level —
+# the converter ignores unknown top-level keys (Main.kt parses with
+# ignoreUnknownKeys and reads only root["components"]/keyframes/fontFaces), so
+# the header never reaches the IR or the devices. Such a fixture is
+# meaningless under a live clock: measured on fixtures/fidelity/motion/
+# keyframes-basic.json, a bare run put each platform at a different animation
+# phase and reported 22/24 pairs as unexpected divergence (SSIM 0.79–0.93) —
+# an exit 4 that says nothing about the runtimes. The seized recipe
+# (CAPTURE_ANIMATION_TIME + SIMCTL_CHILD_CAPTURE_ANIMATION_TIME, DYNAMIC_
+# CAPTURE.md §4) is what tools/visual/animation-sweep.sh drives, so a bare run
+# is refused with that pointer; a seized run passes straight through.
+_fixture_is_seize_only() {   # $1 = fixture path → 0 iff the header asks for a seized clock
+    [[ -f "$1" ]] || return 1                                   # missing input is Step 1's error to report
+    node -e '
+      const d = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+      process.exit(d && d._capture && d._capture.seizeOnly === true ? 0 : 1);
+    ' "$1" 2>/dev/null
+}
+if [[ -z "${CAPTURE_ANIMATION_TIME:-}" ]] && _fixture_is_seize_only "$PROJECT_ROOT/$INPUT_JSON"; then
+    err "$INPUT_JSON declares _capture.seizeOnly — a live-clock capture puts every platform at a different animation phase, so its cross-platform pairs are noise, not a verdict."
+    err "run it seized: tools/visual/animation-sweep.sh $INPUT_JSON   (single time point: export CAPTURE_ANIMATION_TIME=<s> SIMCTL_CHILD_CAPTURE_ANIMATION_TIME=<s>)"
+    exit 2
 fi
 
 # ── Step 1: Convert CSS → IR ─────────────────────────────────────────────────
@@ -595,6 +744,76 @@ for c in \
     [[ -n "$c" && -x "$c" ]] && { EMULATOR_BIN="$c"; break; }
 done
 
+# ── Bounded adb (retrospective A11#17) + single-device pin (A9#0) ───────────
+# EVERY adb call below goes through the `adb` function: a watchdog kills a
+# hung client after ADB_TIMEOUT seconds (ADB_PULL_TIMEOUT for `pull`, scaled
+# by the fixture) and the run fails LOUDLY instead of sitting there. Measured
+# without it: after ~85 consecutive runs a read-only emulator's adb shell
+# wedged and `adb shell ls` hung for 898 s until the operator killed the run
+# (exit 143, Android/web never ran). Pattern copied from
+# tools/titan/provision-devices.sh `_bounded`.
+# The optional `-s $ADB_SERIAL` pin (resolved in the Android step once a sole
+# device is known, or taken from ANDROID_SERIAL) is what stops "more than one
+# device/emulator" from failing every call into a silently empty column: with
+# the old bare calls every `2>/dev/null || true` guard swallowed that error
+# into COUNT=0 and the summary printed "– Android: skipped" for a broken run.
+ADB_TIMEOUT="${ADB_TIMEOUT:-60}"
+ADB_PULL_TIMEOUT="${ADB_PULL_TIMEOUT:-$(( 120 + COMPONENT_COUNT ))}"
+ADB_SERIAL="${ANDROID_SERIAL:-}"
+# The watchdog path runs inside `$(…)` subshells, which cannot set a variable
+# in this shell, so "an adb call hung" is recorded as a file that the caller
+# checks with _adb_abort_if_hung after every swallowed-error call site.
+ADB_HANG_FLAG="/tmp/style-converter-testall-adbhang.$$"
+rm -f "$ADB_HANG_FLAG"
+_adb_bounded() {   # $1 = seconds, rest = command → run under a SIGKILL watchdog; returns 124 when killed
+    local secs="$1"; shift
+    "$@" & local pid=$!
+    # The watchdog is a subshell that sleeps, then SIGKILLs the client. Both
+    # its streams go to /dev/null: it has nothing to say, and a `$(…)` caller
+    # (the poll loop) must never find a sleeper holding its pipe open. It
+    # traps TERM so that cancelling it (below, once the client has finished)
+    # also reaps its own `sleep`: a bare `kill $wd` on the subshell leaves the
+    # sleeper running to its full ${secs} as an orphan — and the poll loop
+    # makes one adb call per second for minutes, so provision-devices.sh's
+    # plain pattern would pile up ~60 stray `sleep 60` processes at a time.
+    # `$!` rather than a variable: the fork sets it atomically, so the trap
+    # names the sleeper even when TERM lands before any assignment could run
+    # (before the fork it still holds the client's pid — already reaped, so
+    # the kill is a harmless ESRCH). The `wait` in the trap reaps the killed
+    # sleeper quietly — bash otherwise prints "Terminated: 15" for a
+    # signal-killed background job. bash semantics: a trapped signal makes
+    # `wait` return at once, then the trap runs.
+    ( trap 'kill "${!:-}" 2>/dev/null; wait "${!:-}" 2>/dev/null; exit 0' TERM; sleep "$secs" & wait "$!"; kill -KILL "$pid" 2>/dev/null ) >/dev/null 2>&1 & local wd=$!
+    local rc=0; wait "$pid" 2>/dev/null || rc=$?
+    kill -TERM "$wd" 2>/dev/null; wait "$wd" 2>/dev/null || true
+    if [[ "$rc" -eq 137 ]]; then   # 128+SIGKILL — nothing but the watchdog KILLs the client here
+        err "adb hung for >${secs}s and was killed: $*"
+        err "the device's adb is wedged — reboot/reprovision the emulator (BACKLOG operational recipes) before re-running"
+        touch "$ADB_HANG_FLAG" 2>/dev/null || true
+        return 124
+    fi
+    return "$rc"
+}
+adb() {   # $@ = adb arguments. Never call "$ADB" directly below — this is the bound + pin.
+    local secs="$ADB_TIMEOUT"
+    [[ "${1:-}" == "pull" ]] && secs="$ADB_PULL_TIMEOUT"      # pulls scale with the fixture
+    # "$ADB" (the resolved binary), NEVER the bare word `adb`: _adb_bounded
+    # re-invokes its command by name, and a bare `adb` resolves to THIS
+    # function again (bash looks functions up before $PATH) — unbounded
+    # recursion where a bounded call was promised.
+    _adb_bounded "$secs" "$ADB" ${ADB_SERIAL:+-s "$ADB_SERIAL"} "$@"
+}
+_adb_abort_if_hung() {   # after any adb use whose non-zero exit is otherwise swallowed (`|| true`, `$(…)`)
+    if [[ -e "$ADB_HANG_FLAG" ]]; then
+        rm -f "$ADB_HANG_FLAG"
+        # Self-contained on purpose: most call sites run adb under
+        # `2>/dev/null`, which also silences the watchdog's own two lines, so
+        # this may be the only message the operator sees.
+        err "Android stage aborted: an adb call hung for >${ADB_TIMEOUT}s (pull: >${ADB_PULL_TIMEOUT}s) and was killed by the watchdog. This is not a result — the Android column is unusable; reboot/reprovision the emulator (BACKLOG operational recipes) and re-run."
+        exit 1
+    fi
+}
+
 # Track whether THIS script booted the emulator. If we did, we tear it down
 # at the end (unless EMULATOR_KEEP=1). If the user already had one running
 # we leave it strictly alone — they may be using it for unrelated work.
@@ -610,7 +829,7 @@ maybe_start_headless_emulator() {
     # line per device; we count those that ended in the literal "device"
     # status (ignoring "offline" / "unauthorized").
     local dev_count
-    dev_count=$("$ADB" devices | grep -c "device$" || true)
+    dev_count=$(adb devices | grep -c "device$" || true)
     if [[ "$dev_count" -gt 0 ]]; then
         log "android: using already-connected device (count=$dev_count)"
         return 0
@@ -667,7 +886,7 @@ maybe_start_headless_emulator() {
     # `adb wait-for-device` has no built-in timeout, so wrap it.
     local i
     for i in $(seq 1 90); do
-        if "$ADB" devices | grep -q "device$"; then
+        if adb devices | grep -q "device$"; then
             break
         fi
         # If the emulator process died (bad AVD, missing system image, etc.)
@@ -681,7 +900,7 @@ maybe_start_headless_emulator() {
         fi
         sleep 1
     done
-    if ! "$ADB" devices | grep -q "device$"; then
+    if ! adb devices | grep -q "device$"; then
         err "android: emulator never attached within 90s — giving up"
         return 1
     fi
@@ -690,7 +909,7 @@ maybe_start_headless_emulator() {
     for i in $(seq 1 90); do
         # `getprop` returns "1\r\n" on Android — strip CR before comparing.
         local booted
-        booted=$("$ADB" shell getprop sys.boot_completed 2>/dev/null | tr -d '[:space:]')
+        booted=$(adb shell getprop sys.boot_completed 2>/dev/null | tr -d '[:space:]')
         if [[ "$booted" == "1" ]]; then
             log "android: boot_completed in ${i}s"
             return 0
@@ -715,7 +934,7 @@ _teardown_headless_emulator() {
     # `adb emu kill` is the clean shutdown (sends a stop command to the
     # qemu console). Falls back to SIGTERM on the PID for the rare case
     # where adb has already detached.
-    "$ADB" emu kill 2>/dev/null || true
+    adb emu kill 2>/dev/null || true
     if [[ -n "$EMULATOR_PID" ]]; then
         kill -TERM "$EMULATOR_PID" 2>/dev/null || true
         wait "$EMULATOR_PID" 2>/dev/null || true
@@ -731,15 +950,30 @@ elif [[ -z "$ADB" ]]; then
 elif ! maybe_start_headless_emulator; then
     : # warning already printed by the helper; fall through past the else
 else
-    DEV_COUNT=$("$ADB" devices | grep -c "device$" || true)
+    DEV_COUNT=$(adb devices | grep -c "device$" || true)
+    _adb_abort_if_hung
     if [[ "$DEV_COUNT" -eq 0 ]]; then
         warn "no Android device/emulator connected → skipping Android"
+    elif [[ -z "$ADB_SERIAL" && "$DEV_COUNT" -gt 1 ]]; then
+        # Ambiguity is FATAL, not a skip (retrospective A9#0). With >1 device
+        # and no serial, adb answers "more than one device/emulator" to every
+        # shell/pull call; the old bare calls swallowed that into COUNT=0 and
+        # the summary read "– Android: skipped" for what was a broken capture
+        # (corpus-v6-14 _note: "the 327-net first ran Android-less").
+        err "$DEV_COUNT Android devices attached and ANDROID_SERIAL is unset — refusing to guess:"
+        adb devices | grep "device$" | sed 's/^/    /' >&2 || true
+        err "export ANDROID_SERIAL=<serial> (or stop the extra emulator) and re-run"
+        exit 2
     else
+        # Pin every remaining call to the sole device so a device attaching
+        # mid-run (another session's emulator) cannot turn our calls ambiguous.
+        [[ -z "$ADB_SERIAL" ]] && ADB_SERIAL=$(adb devices | awk '$2 == "device" { print $1; exit }')
+        log "android: adb pinned to ${ADB_SERIAL:-<none>}"
         step "Android capture"
 
         # Match the shared 390×844 canvas at 1px = 1dp.
-        "$ADB" shell wm size 390x844 >/dev/null
-        "$ADB" shell wm density 160 >/dev/null
+        adb shell wm size 390x844 >/dev/null
+        adb shell wm density 160 >/dev/null
         log "emulator: 390×844 @ 160dpi"
 
         # Pick Java 21 for Gradle.
@@ -759,19 +993,20 @@ else
             JAVA_HOME="${JAVA_HOME:-}" ./gradlew installDebug --quiet
         )
 
-        "$ADB" shell am force-stop "$ANDROID_PACKAGE" 2>/dev/null || true
+        adb shell am force-stop "$ANDROID_PACKAGE" 2>/dev/null || true
         # Wipe device-side captures from any previous run BEFORE launching.
         # The app is supposed to clear on startup, but if it crashes before
         # clearing — or if a previous run had a larger fixture — we'd see
         # stale PNGs and the poll loop below (count >= COMPONENT_COUNT)
         # would exit instantly without waiting for THIS run's captures.
         SCREENSHOT_DIR_DEVICE="/sdcard/Android/data/$ANDROID_PACKAGE/files/test_screenshots"
-        "$ADB" shell rm -rf "$SCREENSHOT_DIR_DEVICE" 2>/dev/null || true
+        adb shell rm -rf "$SCREENSHOT_DIR_DEVICE" 2>/dev/null || true
         # POST-CONDITION on the wipe: if the rm silently failed (adb hiccup,
         # permission wobble), the poll below would count the PREVIOUS run's
         # PNGs, finish instantly, and pull stale captures as this run's —
         # the documented instant-exit flake. An unverified rm is not a wipe.
-        LEFTOVER=$("$ADB" shell ls "$SCREENSHOT_DIR_DEVICE" 2>/dev/null | grep -c png || true)
+        LEFTOVER=$(adb shell ls "$SCREENSHOT_DIR_DEVICE" 2>/dev/null | grep -c png || true)
+        _adb_abort_if_hung   # a hung `ls` is the 898-s wedge, not a clean wipe
         LEFTOVER=$((10#${LEFTOVER:-0}))
         if [[ "$LEFTOVER" -ne 0 ]]; then
             err "Android device screenshot dir still holds $LEFTOVER PNG(s) after the wipe — refusing to run against stale captures"
@@ -795,12 +1030,12 @@ else
         # Clear logcat so the post-capture hook verification below greps
         # THIS run's config marker, not a stale one.
         if [[ ${#AM_EXTRAS[@]} -gt 0 ]]; then
-            "$ADB" logcat -c 2>/dev/null || true
+            adb logcat -c 2>/dev/null || true
         fi
         # ${arr[@]+…} guard: macOS bash 3.2 treats expanding an EMPTY
         # array as an unbound variable under `set -u` — the guard expands
         # to nothing when no hook env was set (the historical launch line).
-        "$ADB" shell am start -n "$ANDROID_PACKAGE/$ANDROID_ACTIVITY" ${AM_EXTRAS[@]+"${AM_EXTRAS[@]}"} >/dev/null
+        adb shell am start -n "$ANDROID_PACKAGE/$ANDROID_ACTIVITY" ${AM_EXTRAS[@]+"${AM_EXTRAS[@]}"} >/dev/null
 
         # Poll sdcard until all captures land, OR until the count has been
         # stuck for 20 s (→ the app likely crashed mid-capture). The plain
@@ -826,7 +1061,8 @@ else
             # ls of a missing/empty directory exits non-zero under pipefail.
             # Strip ALL whitespace (incl newlines) — `wc -l || echo 0` can
             # produce a multi-line "0\n0" that breaks arithmetic.
-            COUNT=$("$ADB" shell ls "$SCREENSHOT_DIR_DEVICE" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+            COUNT=$(adb shell ls "$SCREENSHOT_DIR_DEVICE" 2>/dev/null | wc -l | tr -d '[:space:]' || echo 0)
+            _adb_abort_if_hung   # a killed `ls` would read as COUNT=0 and look like a stall, not a wedge
             # Force base-10 to avoid bash treating leading-zero strings ("00",
             # "08") as octal — caused NORESULT for InitialLetter/RubyPosition/
             # MaxLines in noop_fix batch (auditor round 14 finding).
@@ -861,7 +1097,8 @@ else
 
         rm -rf "$ANDROID_DIR/screenshots"
         mkdir -p "$ANDROID_DIR/screenshots"
-        "$ADB" pull "$SCREENSHOT_DIR_DEVICE" "$ANDROID_DIR/screenshots/tmp" >/dev/null 2>&1 || true
+        adb pull "$SCREENSHOT_DIR_DEVICE" "$ANDROID_DIR/screenshots/tmp" >/dev/null 2>&1 || true
+        _adb_abort_if_hung   # a killed pull leaves a PARTIAL column — exit 7 would catch it later, but say why now
         if [[ -d "$ANDROID_DIR/screenshots/tmp" ]]; then
             mv "$ANDROID_DIR/screenshots/tmp"/*.png "$ANDROID_DIR/screenshots/" 2>/dev/null || true
             rmdir "$ANDROID_DIR/screenshots/tmp" 2>/dev/null || true
@@ -876,21 +1113,21 @@ else
         # capture (the web pipeline hard-fails the same way via the
         # data-animation-time marker in capture-screenshots.mjs).
         if [[ -n "${CAPTURE_ANIMATION_TIME:-}" ]]; then
-            if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "animationTime=${CAPTURE_ANIMATION_TIME}"; then
+            if ! adb logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "animationTime=${CAPTURE_ANIMATION_TIME}"; then
                 err "CAPTURE_ANIMATION_TIME=${CAPTURE_ANIMATION_TIME} was set but the Android harness never logged that config — the capture silently ran live"
                 exit 1
             fi
             log "verified: Android capture ran with animationTime=${CAPTURE_ANIMATION_TIME}"
         fi
         if [[ -n "${CAPTURE_WIDTH:-}" ]]; then
-            if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "captureWidth=${CAPTURE_WIDTH}"; then
+            if ! adb logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "captureWidth=${CAPTURE_WIDTH}"; then
                 err "CAPTURE_WIDTH=${CAPTURE_WIDTH} was set but the Android harness never logged that width — the capture silently ran at the default 390"
                 exit 1
             fi
             log "verified: Android capture ran with captureWidth=${CAPTURE_WIDTH}"
         fi
         if [[ -n "${CAPTURE_FORCE_STATE:-}" ]]; then
-            if ! "$ADB" logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "forceState=${CAPTURE_FORCE_STATE}"; then
+            if ! adb logcat -d 2>/dev/null | grep "Capture run config:" | grep -q "forceState=${CAPTURE_FORCE_STATE}"; then
                 err "CAPTURE_FORCE_STATE=${CAPTURE_FORCE_STATE} was set but the Android harness never logged that config — the capture silently ran base-state"
                 exit 1
             fi
@@ -1002,7 +1239,52 @@ COMPARE_ARGS=()
 if [[ "${NO_CROSS_PLATFORM_GATE:-0}" == "1" ]]; then
     COMPARE_ARGS+=(--no-cross-platform-gate)
 fi
+# ── Column presence (retrospective A9#0 — BACKLOG #5's 327-net half) ─────────
+# Every platform whose SKIP_*=1 knob was NOT set must have captured exactly
+# the IR's expected count (expected-captures.mjs mirrors the devices' flatten
+# rules, so the three columns and the count agree on a healthy run: in the
+# committed per-run record tools/titan/results/retro-2026-09-04/fidelity-per-
+# fixture.csv every completed row — 85 of 86, exit 0 or 4 — has cap_ios ==
+# cap_android == cap_web == expected; the one exception is the timeout-killed
+# translate.json row (exit 143: iOS 3, Android 0, web 0), exactly the class
+# exit 7 is for). Anything less is a capture FAILURE (app crash, adb
+# ambiguity, missing simulator, poll exhaustion), not a result: before this,
+# CAPTURED_<P>=0/"" printed "– Android: skipped" — byte-identical to a
+# deliberate SKIP_ANDROID=1 — and the comparator scored the remaining columns
+# to a green exit 0 (executed: iOS+web only → "✓ no regressions vs baseline
+# (284 platform-comparisons ran)"; Android 10/142 → the same verdict). Exit 7
+# so a caller can tell "a column is missing" from every other failure class.
+# Auto-skips (no xcodebuild / no adb / no simulator / no AVD) are NOT exempt:
+# an environment that cannot capture a platform must say so with SKIP_<P>=1,
+# exactly as .github/workflows/visual.yml already does per job.
+_assert_platform_columns() {   # reads COMPONENT_COUNT, CAPTURED_*, SKIP_* → 0 when whole, 7 on any missing/short column
+    local _pi _p _rest _skip _n _fail=0
+    for _pi in "iOS:${SKIP_IOS:-0}:${CAPTURED_IOS:-0}" "Android:${SKIP_ANDROID:-0}:${CAPTURED_ANDROID:-0}" "web:${SKIP_WEB:-0}:${CAPTURED_WEB:-0}"; do
+        _p="${_pi%%:*}"; _rest="${_pi#*:}"; _skip="${_rest%%:*}"; _n="${_rest#*:}"
+        [[ "$_skip" == "1" ]] && continue                      # a deliberate skip is a result
+        _n=$(( 10#${_n:-0} ))                                  # "" → 0; base-10 guards leading zeros
+        if [[ "$_n" -ne "$COMPONENT_COUNT" ]]; then
+            err "$_p: captured $_n of $COMPONENT_COUNT components and SKIP_$(echo "$_p" | tr '[:lower:]' '[:upper:]') was not set — a missing/short column is a capture FAILURE, not a result"
+            _fail=1
+        fi
+    done
+    [[ "$_fail" == "1" ]] && return 7
+    return 0
+}
+# Defined here — above the comparator — so an UPDATE_BASELINE run can be
+# refused BEFORE anything is written; asserted again in the summary below.
+
 if [[ "${UPDATE_BASELINE:-0}" == "1" ]]; then
+    # Never refresh committed baselines from a run with a hole in it. The sync
+    # is an upsert (compare-screenshots.mjs syncBaseline never deletes), so a
+    # short column would leave the missed components' OLD PNGs beside this
+    # run's new ones — a baseline set no single run ever produced, and the
+    # next BASELINE=1 run would grade against it. Same exit 7 as the summary
+    # assertion, raised before the comparator can touch tools/visual/baseline.
+    if ! _assert_platform_columns; then
+        err "UPDATE_BASELINE=1 refused: a platform column is MISSING or SHORT (see above) — baselines are refreshed only from a whole run (exit 7)"
+        exit 7
+    fi
     COMPARE_ARGS+=(--update-baseline)
 elif [[ "${BASELINE:-0}" == "1" ]]; then
     COMPARE_ARGS+=(--baseline)
@@ -1093,15 +1375,24 @@ if [[ -n "$_counts" ]]; then
     fi
 fi
 
-for platform_info in "iOS:$CAPTURED_IOS" "Android:$CAPTURED_ANDROID" "web:$CAPTURED_WEB"; do
-    p="${platform_info%%:*}"
-    n="${platform_info##*:}"
-    if [[ -n "$n" && "$n" -gt 0 ]]; then
+
+for platform_info in "iOS:${SKIP_IOS:-0}:$CAPTURED_IOS" "Android:${SKIP_ANDROID:-0}:$CAPTURED_ANDROID" "web:${SKIP_WEB:-0}:$CAPTURED_WEB"; do
+    p="${platform_info%%:*}"; rest="${platform_info#*:}"
+    skipped="${rest%%:*}"; n="${rest#*:}"
+    if [[ -n "$n" && "$n" -gt 0 && "$n" -eq "$COMPONENT_COUNT" ]]; then
         echo -e "  ${G}✓${N} $p: $n screenshot(s)"
+    elif [[ -n "$n" && "$n" -gt 0 ]]; then
+        echo -e "  ${R}✗${N} $p: $n of $COMPONENT_COUNT screenshot(s) — SHORT column (capture truncated)"
+    elif [[ "$skipped" == "1" ]]; then
+        echo -e "  ${Y}–${N} $p: skipped (SKIP_$(echo "$p" | tr '[:lower:]' '[:upper:]')=1)"
     else
-        echo -e "  ${Y}–${N} $p: skipped"
+        # The line that used to read "skipped" for a crashed app / missing
+        # toolchain — indistinguishable from a deliberate skip.
+        echo -e "  ${R}✗${N} $p: MISSING (capture failed — not skipped)"
     fi
 done
+COLUMNS_EXIT=0
+_assert_platform_columns || COLUMNS_EXIT=$?
 
 echo
 echo -e "  ${G}total elapsed: ${SCRIPT_TOTAL}s${N}"
@@ -1124,22 +1415,38 @@ fi
 
 # Re-raise the comparator's verdict, now that the summary and the report
 # path have been printed. Naming the code matters: a bare "exit 4" sends
-# people digging through the comparator source.
+# people digging through the comparator source. Exit 7 is NOT in this list
+# because the comparator never returns it — it is THIS script's own column-
+# presence verdict, raised in the block that follows.
 if [[ "$COMPARE_EXIT" -ne 0 ]]; then
     echo
     case "$COMPARE_EXIT" in
-        1) echo -e "  ${Y}✗ comparison failed: a platform regressed against its committed baseline${N}" ;;
-        2) echo -e "  ${Y}✗ comparison failed: script/IO error, or baseline mode ran zero comparisons${N}" ;;
+        1) echo -e "  ${Y}✗ comparison failed: a platform regressed against its committed baseline${N}"
+           echo -e "     (or a baseline exists for a component its PARTIAL column did not capture — see the ✗ rows above)" ;;
+        2) echo -e "  ${Y}✗ comparison failed: script/IO error, ledger-schema violation, baseline mode ran zero${N}"
+           echo -e "  ${Y}  comparisons, or a platform with committed baselines captured NOTHING without SKIP_<P>=1${N}" ;;
         3) echo -e "  ${Y}✗ comparison failed: a capture is not untagged-sRGB — see tools/visual/png-color-space.mjs${N}" ;;
         4) echo -e "  ${Y}✗ comparison failed: unexpected cross-platform divergence${N}"
-           echo -e "     Fix it, or record it in ${B}tools/visual/cross-platform-expectations.json${N} with a reason and an owner." ;;
-        5) echo -e "  ${Y}✗ comparison failed: stale cross-platform expectation(s)${N}"
-           echo -e "     A ledger entry now passes, or names a component that no longer exists."
-           echo -e "     Delete the listed lines from ${B}tools/visual/cross-platform-expectations.json${N}." ;;
+           echo -e "     Fix it, or record it in ${B}tools/visual/cross-platform-expectations.json${N} with a reason, an owner and an expiry." ;;
+        5) echo -e "  ${Y}✗ comparison failed: stale cross-platform expectation(s) or stale oracle waiver(s)${N}"
+           echo -e "     A ledger entry / _expect.waive now passes, or names a component that no longer exists."
+           echo -e "     Delete the listed lines (ledger: ${B}tools/visual/cross-platform-expectations.json${N}; waiver: the fixture)." ;;
         6) echo -e "  ${Y}✗ comparison failed: spec-oracle violation — a render disagrees with the CSS spec${N}"
            echo -e "     The fixture's ${B}_expect${N} block carries the spec-derived value; the violation lines above"
            echo -e "     print expected vs measured vs Δ. Platforms agreeing with each other does not excuse this." ;;
         *) echo -e "  ${Y}✗ comparison failed with exit $COMPARE_EXIT${N}" ;;
     esac
+fi
+# Column presence outranks the comparator's verdict: whatever the comparator
+# concluded, it concluded over a run with a hole in it, and the message above
+# stays on screen so both are read. Exit 7 is documented in the header.
+if [[ "$COLUMNS_EXIT" -ne 0 ]]; then
+    echo
+    echo -e "  ${R}✗ column presence: a platform column is MISSING or SHORT (exit 7)${N}"
+    echo -e "     The comparator's verdict covered only the columns that exist. Fix the capture (crash /"
+    echo -e "     adb / simulator / poll exhaustion) — or set SKIP_<PLATFORM>=1 if the omission is deliberate."
+    exit "$COLUMNS_EXIT"
+fi
+if [[ "$COMPARE_EXIT" -ne 0 ]]; then
     exit "$COMPARE_EXIT"
 fi

@@ -1,6 +1,6 @@
 // FontSmoothExtractor.ts — folds `FontSmooth` IR properties into a FontSmoothConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontSmoothConfig, FONT_SMOOTH_PROPERTY_TYPE, FontSmoothPropertyType } from './FontSmoothConfig';
 import { kwLower } from './_shared';

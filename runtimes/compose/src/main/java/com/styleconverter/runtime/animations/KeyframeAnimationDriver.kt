@@ -11,7 +11,9 @@ package com.styleconverter.runtime.animations
 //     overlay that feeds animated values back into the ONE style pipeline.
 //
 // Design: instead of bolting animated modifiers on top of the static chain
-// (the legacy KeyframeAnimationApplier approach), the driver OVERLAYS the
+// (the pre-wave-8 approach — a KeyframeAnimationApplier wrapping the whole
+// component in a Compose transition, deleted with the rest of the legacy
+// path by the retro P2a sweep, A6#6), the driver OVERLAYS the
 // interpolated typed properties onto the component's resolved property
 // list BEFORE StyleApplier runs. An animated Width/BackgroundColor/
 // Transform frame therefore renders through exactly the extractor/applier

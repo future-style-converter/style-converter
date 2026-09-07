@@ -1,0 +1,32 @@
+# tools/visual/gate-fixtures.txt — the fixture set the 327-net gate ITERATES.
+#
+# Why this file exists (retrospective finding A12#3): the gate script and CI
+# ran exactly one fixture, fixtures/visual-test.json. The exit-5 stale check
+# (cross-platform-gate.mjs: a ledger line or an `_expect.waive` whose pair /
+# platform now PASSES must be deleted) can only fire on a fixture the gate
+# actually runs — so 6 of the 29 ledger lines (composition-test.json ×4,
+# filter-sepia-amounts.json ×2) and all 5 `_expect.waive` blocks lived in
+# fixtures nothing ran, and could never go stale or be validated. The Sepia
+# staleness sat unreported for 5 days for exactly this reason.
+#
+# Consumed by `./test-all.sh --gate-set` (one child run per line, the
+# caller's env — BASELINE=1 etc. — inherited by every child; see the
+# `--gate-set` block near the top of test-all.sh). One fixture path per line,
+# relative to the repo root; `#` starts a comment; blank lines are ignored.
+# A fixture with NO committed baselines under tools/visual/baseline/ is run
+# WITHOUT --baseline (cross-platform gate + spec oracle still apply) and the
+# driver says so loudly — seed it with `UPDATE_BASELINE=1 ./test-all.sh <f>`.
+#
+# Ordering: the committed-baseline net first, then the ledger-scoped
+# fixtures, then the combination fixtures (the waiver-carrying ones, plus
+# the waiver-free transform-abspos-pivot pin — retro F3, skeptic S2 must-fix:
+# a pin fixture that is NOT on this list has no executable check at all; the
+# JVM suite stayed green with the A11#0 pivot wiring severed).
+fixtures/visual-test.json
+fixtures/composition-test.json
+fixtures/properties/effects/filter-sepia-amounts.json
+fixtures/combinations/nested-transforms.json
+fixtures/combinations/radius-overflow-transform.json
+fixtures/combinations/transform-abspos-pivot.json   # retro F3: the A11#0 abspos-pivot pin (4 TAP_* rows, no waivers; no committed baseline yet -> gate-only + oracle until seeded)
+fixtures/combinations/blend-isolation.json
+fixtures/combinations/opacity-blend.json

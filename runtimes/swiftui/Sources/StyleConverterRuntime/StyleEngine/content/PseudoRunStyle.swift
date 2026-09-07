@@ -57,14 +57,14 @@ enum PseudoRunStyle {
     ///     (css-syntax-3 §5: names are ASCII-case-insensitive).
     ///   - raw: the author string, verbatim from the wire.
     ///   - emBasePx: the resolution base for em/% font-size — the
-    ///     ORIGINATING element's own font-size (css-values-4 §5.1.1: em on
+    ///     ORIGINATING element's own font-size (css-values-4 §6.1.1: em on
     ///     font-size resolves against the inherited size, and the pseudo's
     ///     parent IS its originating element), threaded by the fold.
     static func convert(prop: String, raw: String, emBasePx: Double) -> Conversion? {
         switch prop {
-        // css-color-4 §3.1: `color` sets the text ink of the run.
+        // css-color-4 §3.2: `color` sets the text ink of the run.
         case "color": return colorConversion(raw)
-        // css-fonts-4 §2.4: `font-size` sets the run's own glyph size.
+        // css-fonts-4 §2.5: `font-size` sets the run's own glyph size.
         case "font-size": return fontSizeConversion(raw, emBasePx: emBasePx)
         // css-fonts-4 §2.1: `font-family` sets the run's face list.
         case "font-family": return fontFamilyConversion(raw)
@@ -114,7 +114,7 @@ enum PseudoRunStyle {
         // A non-numeric prefix (keyword sizes, calc(), var()) is beyond
         // this conversion — the bridge refuses and names it, never guesses.
         guard let v = Double(digits) else { return .unsupported }
-        // Negative font sizes are invalid per css-fonts-4 §2.4 — refuse.
+        // Negative font sizes are invalid per css-fonts-4 §2.5 — refuse.
         guard v >= 0 else { return .unsupported }
         // Every supported unit resolves to canonical 96dpi px (spec 02).
         let px: Double
@@ -127,7 +127,7 @@ enum PseudoRunStyle {
         case "mm": px = v * 96.0 / 25.4
         case "q":  px = v * 96.0 / 25.4 / 4.0   // 1Q = 1/4 mm.
         // em/% resolve against the threaded inherited base (css-values-4
-        // §5.1.1 / css-fonts-4 §2.4 — both use the inherited size).
+        // css-values-4 §6.1.1 / css-fonts-4 §2.5 — both use the inherited size).
         case "em": px = v * emBasePx
         case "%":  px = v / 100.0 * emBasePx
         // rem resolves against the ROOT size — the 16px browser default

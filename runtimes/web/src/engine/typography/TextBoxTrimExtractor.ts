@@ -1,6 +1,6 @@
 // TextBoxTrimExtractor.ts — folds `TextBoxTrim` IR properties into a TextBoxTrimConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextBoxTrimConfig, TEXT_BOX_TRIM_PROPERTY_TYPE, TextBoxTrimPropertyType } from './TextBoxTrimConfig';
 import { kwLower } from './_shared';

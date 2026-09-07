@@ -3,4 +3,3 @@
 // IR: bare string (empty means 'none', otherwise URL reference).
 export interface MaskBorderSourceConfig { value?: string; }
 export const MASK_BORDER_SOURCE_PROPERTY_TYPE = 'MaskBorderSource' as const;
-export type MaskBorderSourcePropertyType = typeof MASK_BORDER_SOURCE_PROPERTY_TYPE;

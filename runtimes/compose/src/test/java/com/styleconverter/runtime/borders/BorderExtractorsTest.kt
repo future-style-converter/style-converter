@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.borders
 
 // Unit tests for the Phase 5 border category extractors. Fixtures are
-// pulled straight from examples/properties/borders/*.json so the IR shapes
+// pulled straight from fixtures/properties/borders/*.json so the IR shapes
 // we test are the same ones the Android runtime renderer will see in
 // production.
 

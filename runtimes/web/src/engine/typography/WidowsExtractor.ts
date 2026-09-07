@@ -1,6 +1,6 @@
 // WidowsExtractor.ts — folds `Widows` IR properties into a WidowsConfig.
 // Family: number.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { WidowsConfig, WIDOWS_PROPERTY_TYPE, WidowsPropertyType } from './WidowsConfig';
 import { numberOf } from './_shared';

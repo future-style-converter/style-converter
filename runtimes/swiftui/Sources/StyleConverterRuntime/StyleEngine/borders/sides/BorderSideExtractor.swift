@@ -21,8 +21,12 @@ enum BorderSideExtractor {
     // consults this list (via `PropertyRegistry.migrated`) so the legacy
     // StyleBuilder switch skips them.
     static let propertyNames: [String] = [
-        // Shorthand longhands — CSS 2.1 §8.5 per-family fallthroughs.
-        "BorderWidth", "BorderColor", "BorderStyle",
+        // Shorthand longhands. A6#9: `BorderColor` removed — it has no IR
+        // class (the `border-color` shorthand is expanded by the converter),
+        // so the `case BorderColor` arm below is unreachable; it is left in
+        // place only because deleting it would strand `sharedColor` as a
+        // never-mutated var. Removing both is a follow-up.
+        "BorderWidth", "BorderStyle",
         // Physical sides.
         "BorderTopWidth", "BorderTopColor", "BorderTopStyle",
         "BorderRightWidth", "BorderRightColor", "BorderRightStyle",

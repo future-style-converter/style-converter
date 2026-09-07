@@ -4,6 +4,13 @@
 //   Many enum-valued properties serialise as either a bare string or { keyword:'flex-start' }.
 // Our job: collapse these into a single normalised lowercase+hyphenated form so callers
 // can compare against static literals without per-property casing logic.
+//
+// Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+// path above is GONE — renamed to `fixtures/primitives/` by restructure
+// 02e4c457, then deleted by the 2026-07-08 hard prune 1e0234f6 (#8), with
+// nothing to replace it. The shapes enumerated here (and the pins over
+// them) are now the only record of that wire contract: read the names as
+// history, not as a path to open.
 
 // Wrapped result so callers see a consistent { normalized } shape.
 export interface KeywordValue { normalized: string }

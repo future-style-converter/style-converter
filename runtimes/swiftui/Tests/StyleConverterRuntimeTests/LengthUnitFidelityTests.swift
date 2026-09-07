@@ -89,7 +89,7 @@ final class LengthUnitFidelityTests: XCTestCase {
     // ── P1: ch — measured advance, spec 0.5em fallback ──────────────────────
 
     func testChFallsBackToHalfAnEm() {
-        // css-values-4 §6.1.3: '0' is "assumed to be 0.5em wide" → 63.1×8.
+        // css-values-4 §6.1.1: '0' is "assumed to be 0.5em wide" → 63.1×8.
         // The OLD resolver treated ch as 1em → 63.1×16 ≈ 1010px (wrong box
         // width AND wrong wrap points on block-ellipsis-001).
         let v = LengthValue.relative(value: 63.1, unit: .ch, pxFallback: nil)
@@ -128,13 +128,13 @@ final class LengthUnitFidelityTests: XCTestCase {
     // ── P2–P6: the font-relative fallback constants ─────────────────────────
 
     func testExResolvesToHalfAnEm() {
-        // §6.1.3 x-height fallback: 0.5em (was 1em on iOS).
+        // §6.1.1 x-height fallback: 0.5em (was 1em on iOS).
         let v = LengthValue.relative(value: 4, unit: .ex, pxFallback: nil)
         XCTAssertEqual(px(v, ctx)!, 32, accuracy: 1e-6)
     }
 
     func testIcAndCapResolveToOneEm() {
-        // ic: §6.1.3 mandates 1em; cap: documented 1em approximation.
+        // ic: §6.1.1 mandates 1em; cap: documented 1em approximation.
         XCTAssertEqual(px(.relative(value: 2, unit: .ic, pxFallback: nil), ctx)!, 32, accuracy: 1e-6)
         XCTAssertEqual(px(.relative(value: 2, unit: .cap, pxFallback: nil), ctx)!, 32, accuracy: 1e-6)
     }

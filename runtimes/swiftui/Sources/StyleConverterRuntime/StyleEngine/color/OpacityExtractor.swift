@@ -11,11 +11,6 @@
 // Foundation — no SwiftUI at extract time.
 import Foundation
 
-// Registered types this extractor owns.
-enum OpacityProperty {
-    static let names: [String] = ["Opacity"]
-}
-
 enum OpacityExtractor {
 
     // Single-pass extractor. Returns nil when no `Opacity` property exists

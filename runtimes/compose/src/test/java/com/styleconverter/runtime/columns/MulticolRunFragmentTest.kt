@@ -14,7 +14,7 @@ import org.junit.Test
  *
  * The run model: a definite-height `column-fill: auto` multicol container's
  * plain flow children stack as ONE continuous strip (CSS 2.1 §9.4.1) and
- * the strip fills columns sequentially to H (css-multicol-1 §7.2) — the
+ * the strip fills columns sequentially to H (css-multicol-1 §7.1) — the
  * same clip+translate replay as the wave-10 sole-child slice, with C = T.
  * The ENGAGEMENT gates (fill:auto only, no floats/statics/spanners/forced
  * breaks, capture only) live in MulticolRunFragmentMeasure and keep every
@@ -117,7 +117,7 @@ class MulticolRunFragmentTest {
         assertEquals(275, breakable.totalBlockSizePx)
         // borders-001: the 120px box is pushed to 100, then spans 100..220
         // — it starts flush now, so the boundary at 200 legitimately
-        // splits it (a box taller than H fits nowhere, css-break-3 §5.2).
+        // splits it (a box taller than H fits nowhere, css-break-3 §4.4).
         val overTall = MulticolRunFragment.runPlan(
             listOf(95, 120), 100, 100, 10, 4, monolithic = listOf(true, true)
         )

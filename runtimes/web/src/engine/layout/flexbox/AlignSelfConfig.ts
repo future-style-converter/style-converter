@@ -9,4 +9,3 @@ export interface AlignSelfConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const ALIGNSELF_PROPERTY_TYPE = 'AlignSelf' as const;
-export type AlignSelfPropertyType = typeof ALIGNSELF_PROPERTY_TYPE;

@@ -1,5 +1,5 @@
 // BorderTopRightRadiusExtractor.ts — folds `BorderTopRightRadius` IR properties into a config.
-// IR shape flavors (from examples/properties/borders/border-radius-*):
+// IR shape flavors (from fixtures/properties/borders/border-radius-*):
 //   {px:N}                                        simple px radius
 //   {original:{v,u:'EM'|'REM'|...}}                 font-relative / percent
 //   {type:'percentage', value:N}                  parser may emit this

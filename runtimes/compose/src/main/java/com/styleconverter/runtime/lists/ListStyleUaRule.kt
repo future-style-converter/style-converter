@@ -24,7 +24,7 @@ import kotlinx.serialization.json.put
  * parent". An inherited value therefore LOSES to any declaration on the
  * element itself, whatever its origin — and the UA stylesheet's
  * `ul, menu, dir { list-style-type: disc }` / `ol { list-style-type:
- * decimal }` (HTML §15.3.9, verbatim in Chromium's html.css) IS such a
+ * decimal }` (HTML §15.3.7, verbatim in Chromium's html.css) IS such a
  * declaration, matching the container ELEMENT. So for a `<ul>` with no
  * author `list-style-type`, the cascade yields `disc` and inheritance is
  * never consulted; the `<li>` — for which the UA sheet declares no
@@ -127,7 +127,7 @@ object ListStyleUaRule {
             ?: false
 
     /**
-     * The UA stylesheet's list indentation, in CSS pixels. HTML §15.3.9
+     * The UA stylesheet's list indentation, in CSS pixels. HTML §15.3.7
      * (verbatim in Chromium's html.css):
      * `ul, menu, dir, ol { padding-inline-start: 40px }`.
      */
@@ -170,7 +170,7 @@ object ListStyleUaRule {
         // Wave 30 (lane 3, fix B5) — the SECOND UA declaration on the same
         // four elements, applied at the same cascade step and for the same
         // reason: `ul, menu, dir, ol { padding-inline-start: 40px }`
-        // (HTML §15.3.9). Nothing in the runtime supplied it, so every list
+        // (HTML §15.3.7). Nothing in the runtime supplied it, so every list
         // container laid its items out at the canvas origin while the
         // browser indents them 40px. MEASURED on the live wave29-final
         // css-lists section — ink columns of

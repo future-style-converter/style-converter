@@ -52,7 +52,7 @@ enum BackdropBlur {
     /// CIGaussianBlur's `inputRadius` per unit of CSS standard deviation.
     ///
     /// CSS `blur(Npx)` means a Gaussian with stdDeviation = N
-    /// (filter-effects-1 §8.2 → SVG feGaussianBlur). CIGaussianBlur's
+    /// (filter-effects-1 §6.1 → SVG feGaussianBlur). CIGaussianBlur's
     /// parameter is named "radius", and this constant is the MEASURED
     /// conversion between the two: BackdropMathTests
     /// (testBlurRecoversDeclaredSigmaFromAStepEdge) recovers the effective σ

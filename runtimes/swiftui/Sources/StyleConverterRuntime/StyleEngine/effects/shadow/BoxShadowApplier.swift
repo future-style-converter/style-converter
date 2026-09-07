@@ -39,7 +39,7 @@ struct BoxShadowApplier: ViewModifier {
         // correctly. SwiftUI applies `.shadow` to the most recent view.
         var v: AnyView = AnyView(content)
         if !outset.isEmpty {
-            // css-backgrounds-3 §7.1: an outer box-shadow is cast by the
+            // css-backgrounds-3 §6.1: an outer box-shadow is cast by the
             // element's BORDER BOX as one silhouette. SwiftUI's `.shadow`
             // instead shadows every opaque pixel of the modified view
             // INDIVIDUALLY — so the label Text inside a box cast its own
@@ -57,7 +57,7 @@ struct BoxShadowApplier: ViewModifier {
             let radius = layer.blur / 2
             if layer.spread != 0 {
                 // NEGATIVE spread contracts the silhouette
-                // (css-backgrounds-3 §7.1: "Negative values cause the
+                // (css-backgrounds-3 §6.1: "Negative values cause the
                 // shadow to shrink") — Tailwind's entire default scale
                 // uses it (`0 4px 6px -1px`, `0 2px 4px -2px`, …). The
                 // old guard was `spread > 0`, so negative spreads fell
@@ -147,7 +147,7 @@ struct BoxShadowApplier: ViewModifier {
 // approximation stroked a CENTERED ring at the element edge and offset
 // the whole blurred ring — which left an opaque colour band on all four
 // edges regardless of the layer's (x, y), instead of the spec picture
-// (css-backgrounds-3 §7.1: the inner shadow darkens the side the offset
+// (css-backgrounds-3 §6.1: the inner shadow darkens the side the offset
 // moves AWAY from and vanishes on the opposite side). Punched-hole fix:
 //   1. fill a rect inflated by blur+spread with the shadow colour,
 //   2. subtract the border-box shape offset by (x, y) and inset by
@@ -229,7 +229,7 @@ struct InsetShadowGeometry: Equatable {
         let pad = layer.blur + max(layer.spread, 0) + 50
         return InsetShadowGeometry(
             outerRect: bounds.insetBy(dx: -pad, dy: -pad),
-            // css-backgrounds-3 §7.1: inset offsets move the SHADOW-FREE
+            // css-backgrounds-3 §6.1: inset offsets move the SHADOW-FREE
             // hole in the offset direction, so the shadow band appears on
             // the top/left for a positive (x, y) — offsetting the hole
             // rect by (x, y) reproduces exactly that.

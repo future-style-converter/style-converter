@@ -3,7 +3,7 @@ package com.styleconverter.runtime.borders
 // Applier campaign, lane BI-ANDROID — pinning tests for the border-image
 // outset direction fix:
 //
-//  css-backgrounds-3 §6.4: border-image-outset EXTENDS the border image
+//  css-backgrounds-3 §5.4: border-image-outset EXTENDS the border image
 //  area OUTSIDE the border box with NO layout effect. The pre-fix
 //  BorderImageBox applied outset as an inward .padding(...) — the exact
 //  inverse: it shrank the border box and pulled the image in. The fix
@@ -94,7 +94,7 @@ class BorderImageOutsetTest {
 
     // ── 3. Content inset: NONE (spec reversal of the wave-3 rule) ────────
     //
-    // css-backgrounds-3 §6: border-image properties do not affect layout —
+    // css-backgrounds-3 §5: border-image properties do not affect layout —
     // content is inset by the computed border-width ONLY, which
     // ComponentRenderer already applies via StyleApplier.borderContentInset
     // before wrapping in BorderImageBox. The extraContentInset padding

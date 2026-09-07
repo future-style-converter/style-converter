@@ -2,7 +2,7 @@
 //  VarSubstitutor.swift
 //  StyleEngine/core/variables — wave 6 (dynamic values, issue #32).
 //
-//  Textual var() substitution per css-variables-1 §2.3 ("substitute a
+//  Textual var() substitution per css-variables-1 §3 ("substitute a
 //  var()"): every `var(--name)` / `var(--name, <fallback>)` occurrence
 //  in a preserved declaration string is replaced by
 //    1. the value of `--name` in the element's scope chain, else

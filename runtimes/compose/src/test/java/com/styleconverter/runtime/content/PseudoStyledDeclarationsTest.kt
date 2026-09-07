@@ -73,7 +73,7 @@ class PseudoStyledDeclarationsTest {
     @Test
     fun `font-size 3em stays symbolic for the inherited base`() {
         // contain-content-011 ::after `font-size: 3em` — em on font-size
-        // resolves against the INHERITED size (css-values-4 §5.1.1), a
+        // resolves against the INHERITED size (css-values-4 §6.1.1), a
         // base only the render site knows, so the shape stays symbolic:
         // the live {"original":{"type":"length","original":{v,u}}} wire.
         val p = typed(PseudoStyledDeclarations.convert("font-size", "3em"))
@@ -97,7 +97,7 @@ class PseudoStyledDeclarationsTest {
 
     @Test
     fun `percentage font-size stays symbolic like em`() {
-        // css-fonts-4 §2.4: % resolves against the inherited size too.
+        // css-fonts-4 §2.5: % resolves against the inherited size too.
         val p = typed(PseudoStyledDeclarations.convert("font-size", "120%"))
         val original = (p.data as JsonObject)["original"]!!.jsonObject
         assertEquals("percentage", original["type"]!!.jsonPrimitive.contentOrNull)
@@ -106,7 +106,7 @@ class PseudoStyledDeclarationsTest {
 
     @Test
     fun `negative and keyword font-sizes are Unsupported`() {
-        // css-fonts-4 §2.4 forbids negatives; keyword sizes are unwired
+        // css-fonts-4 §2.5 forbids negatives; keyword sizes are unwired
         // (census: zero) — named, never guessed.
         assertEquals(Conversion.Unsupported,
             PseudoStyledDeclarations.convert("font-size", "-4px"))

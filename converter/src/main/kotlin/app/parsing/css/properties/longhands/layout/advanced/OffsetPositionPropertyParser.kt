@@ -1,15 +1,18 @@
 package app.parsing.css.properties.longhands.layout.advanced
 
-import app.irmodels.IRPercentage
 import app.irmodels.IRProperty
 import app.irmodels.properties.layout.advanced.AnchorValue
 import app.irmodels.properties.layout.advanced.OffsetPositionProperty
 import app.irmodels.properties.layout.advanced.OffsetPositionValue
 import app.parsing.css.properties.longhands.PropertyParser
-import app.parsing.css.properties.primitiveParsers.LengthParser
+// (IRPercentage + LengthParser are no longer imported here: their only uses
+//  were inside the parseAnchorValue body moved to AnchorValueParsing.)
 import app.parsing.css.properties.primitiveParsers.ExpressionDetector
 import app.parsing.css.properties.primitiveParsers.GlobalKeywords
 
+// A6#14: the private `parseAnchorValue` this file used to carry was
+// byte-identical to the other offset parser's; both now call the shared
+// AnchorValueParsing (same package, no import).
 object OffsetPositionPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim()
@@ -34,10 +37,10 @@ object OffsetPositionPropertyParser : PropertyParser {
         }
 
         val parts = lowered.split(Regex("\\s+"))
-        val x = parseAnchorValue(parts.getOrNull(0) ?: return OffsetPositionProperty(OffsetPositionValue.Raw(trimmed)))
+        val x = AnchorValueParsing.parseAnchorValue(parts.getOrNull(0) ?: return OffsetPositionProperty(OffsetPositionValue.Raw(trimmed)))
             ?: return OffsetPositionProperty(OffsetPositionValue.Raw(trimmed))
         val y = if (parts.size > 1) {
-            parseAnchorValue(parts[1]) ?: return OffsetPositionProperty(OffsetPositionValue.Raw(trimmed))
+            AnchorValueParsing.parseAnchorValue(parts[1]) ?: return OffsetPositionProperty(OffsetPositionValue.Raw(trimmed))
         } else {
             // Default Y based on X value
             when (x) {
@@ -50,23 +53,4 @@ object OffsetPositionPropertyParser : PropertyParser {
         return OffsetPositionProperty(x, y)
     }
 
-    private fun parseAnchorValue(s: String): AnchorValue? {
-        return when (s) {
-            "auto" -> AnchorValue.Auto
-            "center" -> AnchorValue.Center
-            "left" -> AnchorValue.Left
-            "right" -> AnchorValue.Right
-            "top" -> AnchorValue.Top
-            "bottom" -> AnchorValue.Bottom
-            else -> {
-                if (s.endsWith("%")) {
-                    val percent = s.removeSuffix("%").toDoubleOrNull() ?: return null
-                    AnchorValue.Percentage(IRPercentage(percent))
-                } else {
-                    val length = LengthParser.parse(s) ?: return null
-                    AnchorValue.Length(length)
-                }
-            }
-        }
-    }
 }

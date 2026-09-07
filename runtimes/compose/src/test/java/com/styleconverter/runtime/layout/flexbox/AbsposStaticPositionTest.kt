@@ -220,7 +220,7 @@ class AbsposStaticPositionTest {
 
     @Test
     fun `justify-content sole-item folds`() {
-        // Declared center claims the main axis (css-position-3 §3.1.4.1).
+        // Declared center claims the main axis (css-position-3 §3.5.3).
         val pos = AbsposStaticPosition.resolveStatic(
             container(fd = "ROW", justify = "CENTER"), child("safe end"))
         assertEquals(

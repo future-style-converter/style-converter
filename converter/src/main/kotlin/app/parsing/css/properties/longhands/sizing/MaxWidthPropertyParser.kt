@@ -10,7 +10,7 @@ object MaxWidthPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
         val maxValue = when {
-            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — see the
+            // css-values-5 §11 calc-size() (wave 42 lane W3) — see the
             // decision record on WidthPropertyParser's identical branch.
             // Typed mainly so the WEB runtime can replay the declaration
             // verbatim (calc-size-grid-repeat's `max-width: calc-size(

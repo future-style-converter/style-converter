@@ -26,6 +26,8 @@ import {
   PAIR_KEYS,
   EXIT_UNEXPECTED_DIVERGENCE,
   DEFAULT_DELTA_E_THRESHOLD,
+  validateLedger,
+  ledgerEntryLines,
 } from './cross-platform-gate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -236,15 +238,26 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // Hardcoded deliberately: the count is the thing that must not drift
   // unnoticed. Changing it should require editing this line, which is a
   // review prompt.
-  // 23 visual-test + 4 composition-test + 2 filter-sepia-amounts. The count
-  // is asserted so a silent add or drop shows up as a test change, not as a
-  // quiet loosening of the gate. Last moved when the wave-48 Compose
-  // transform-order fix (TransformListComposer — the function list now
-  // composes in css-transforms-1 §11 order) DELETED both Transform_Combined
-  // lines (iOS-Android and Android-web) per the exit-5 contract: the
-  // recorded cause, per-kind scalar accumulation, is gone.
-  assert.equal(led.expectations.length, 29,
-    '23 visual-test + 4 composition-test + 2 filter-sepia-amounts — wave 48 deleted Transform_Combined x2 (Compose order fix)');
+  // 23 visual-test + 4 composition-test. The count is asserted so a silent
+  // add or drop shows up as a test change, not as a quiet loosening of the
+  // gate. Moved at the wave-48 Compose transform-order fix
+  // (TransformListComposer — the function list now composes in
+  // css-transforms-1 §8 order), which DELETED both Transform_Combined
+  // lines per the exit-5 contract (the recorded cause, per-kind scalar
+  // accumulation, was gone), and again in the 2026-09-04 retrospective,
+  // which DELETED both Sepia_Translucent lines (iOS-web, iOS-Android).
+  // Those two are the exit-5 contract applied to the ledger's own numbers:
+  // lane R13 re-measured every line against the committed baselines under
+  // the shipping metric stack and Sepia came back ssim 0.9979 / 0.9986,
+  // dpx 0.858%, ΔE95 0.574 — inside every threshold, i.e. NOT a divergence.
+  // The seed's block (0.95 / 0.0 / 20.0) was round numbers, not a
+  // measurement (finding A12#1). A ledger line that excuses a passing pair
+  // is exactly what the 'every seeded entry actually breaches' test below
+  // exists to forbid, so the line goes rather than the threshold. If the
+  // live gate ever does diverge here it surfaces as a fresh exit 4 with
+  // real numbers, which is strictly better than a pre-excused pair.
+  assert.equal(led.expectations.length, 27,
+    '23 visual-test + 4 composition-test — retro deleted Sepia_Translucent x2 (re-measure: no divergence)');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);
@@ -339,4 +352,71 @@ test('a skipped platform does not orphan its expectations', () => {
   // The genuinely orphaned iOS-web entry IS reported; the two Android ones are not.
   const orphans = r.stale.filter((s) => s.orphaned).map((s) => `${s.component} ${s.pair}`);
   assert.deepEqual(orphans, ['GONE.png iOS-web']);
+});
+
+// ── validateLedger / ledgerEntryLines (retrospective A9#5 / A12#8) ──────────
+//
+// The ledger contract says every line names a reason, an OWNER and an EXPIRY.
+// For 49 waves nothing checked it: 29/29 lines carried owner "unassigned".
+// These pin the schema gate that now runs before any pair is judged.
+
+const GOOD = {
+  component: 'Case.png', pair: 'iOS-Android', reason: 'corner AA', owner: 'lane-R13', expires: '2026-11-30',
+};
+const LEDGER = (entries, extra = {}) => ({ seededFrom: { run: '2026-08-26T14:52:07.252Z' }, expectations: entries, ...extra });
+
+test('validateLedger: a complete entry has no problems', () => {
+  assert.deepEqual(validateLedger(LEDGER([GOOD])), []);
+});
+
+test('validateLedger: the placeholder owner "unassigned" (any case) and an empty/missing owner are rejected', () => {
+  for (const owner of ['unassigned', 'UNASSIGNED', 'tbd', '', '   ', undefined]) {
+    const problems = validateLedger(LEDGER([{ ...GOOD, owner }]));
+    assert.equal(problems.length, 1, `owner=${JSON.stringify(owner)} should yield exactly one problem`);
+    assert.match(problems[0].message, /`owner`/);
+  }
+  assert.match(validateLedger(LEDGER([{ ...GOOD, owner: 'unassigned' }]))[0].message, /placeholder "unassigned"/);
+});
+
+test('validateLedger: expires must be present, parseable, and not before the observation floor', () => {
+  const { expires, ...noExpiry } = GOOD;
+  assert.match(validateLedger(LEDGER([noExpiry]))[0].message, /`expires` is required/);
+  assert.match(validateLedger(LEDGER([{ ...GOOD, expires: 'someday' }]))[0].message, /not a parseable date: "someday"/);
+  // Before the ledger seed run → dead on arrival.
+  assert.match(validateLedger(LEDGER([{ ...GOOD, expires: '2026-08-01' }]))[0].message, /precedes the ledger seed run/);
+  // A per-entry observation date is the floor when present, and wins over the seed.
+  assert.match(
+    validateLedger(LEDGER([{ ...GOOD, observedAt: '2026-09-01', expires: '2026-08-30' }]))[0].message,
+    /precedes its observation date/,
+  );
+  assert.deepEqual(validateLedger(LEDGER([{ ...GOOD, observed: { at: '2026-08-20', ssim: 0.9 }, expires: '2026-08-25' }])), []);
+  // No seed and no per-entry date → nothing to compare against; parseable is enough.
+  assert.deepEqual(validateLedger({ expectations: [{ ...GOOD, expires: '2000-01-01' }] }), []);
+});
+
+test('validateLedger: component, pair and reason are validated too; a non-array ledger is one problem', () => {
+  assert.match(validateLedger(LEDGER([{ ...GOOD, component: '' }]))[0].message, /`component`/);
+  assert.match(validateLedger(LEDGER([{ ...GOOD, pair: 'ios-android' }]))[0].message, /`pair` must be one of iOS-Android \| iOS-web \| Android-web/);
+  assert.match(validateLedger(LEDGER([{ ...GOOD, reason: ' ' }]))[0].message, /`reason`/);
+  assert.match(validateLedger(LEDGER(['not an object']))[0].message, /entry must be an object/);
+  assert.deepEqual(validateLedger({ expectations: 'nope' }), [{ index: -1, line: 1, message: '`expectations` must be an array' }]);
+  assert.equal(validateLedger({}).length, 1);
+});
+
+test('validateLedger: problems carry the entry index and, given the raw text, the 1-based line', () => {
+  const raw = JSON.stringify(LEDGER([GOOD, { ...GOOD, owner: 'unassigned' }, GOOD]), null, 2);
+  const problems = validateLedger(JSON.parse(raw), raw);
+  assert.equal(problems.length, 1);
+  assert.equal(problems[0].index, 1);
+  // The reported line is the second entry's `"component":` line in the text.
+  const lines = raw.split('\n');
+  assert.match(lines[problems[0].line - 1], /"component": "Case\.png"/);
+  const componentLines = lines.map((l, i) => (/"component":/.test(l) ? i + 1 : 0)).filter(Boolean);
+  assert.equal(problems[0].line, componentLines[1]);
+});
+
+test('ledgerEntryLines: one line per entry in order; null when the occurrence count disagrees', () => {
+  const raw = '{\n  "expectations": [\n    { "component": "A" },\n    {\n      "component": "B" }\n  ]\n}';
+  assert.deepEqual(ledgerEntryLines(raw, 2), [3, 5]);
+  assert.equal(ledgerEntryLines(raw, 3), null, 'a guess would point at the wrong line');
 });

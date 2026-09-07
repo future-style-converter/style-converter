@@ -5,7 +5,7 @@ package com.styleconverter.runtime.color
 // StyleEngine/background/GradientInterpolation.swift).
 //
 // The authored <color-interpolation-method> of one gradient
-// (css-images-4 §3.1 `||` clause, css-color-4 §12.4 grammar):
+// (css-images-4 §3.1 `||` clause, css-color-4 §13.2 grammar):
 //   <color-interpolation-method> = in [ <rectangular-color-space>
 //                                     | <polar-color-space> <hue-interpolation-method>? ]
 // The converter carries it verbatim on the layer as the optional
@@ -32,13 +32,13 @@ package com.styleconverter.runtime.color
  */
 data class GradientInterpolation(val space: Space, val hue: HueMethod) {
 
-    /** The interpolation colour space (css-color-4 §12.4). */
+    /** The interpolation colour space (css-color-4 §13.2). */
     enum class Space {
         /** No clause authored → the historical Skia sRGB shader lerp. */
         LEGACY,
         // Rectangular spaces (no hue component).
         SRGB, SRGB_LINEAR, LAB, OKLAB, XYZ_D65, XYZ_D50,
-        // Polar spaces (hue arc applies, css-color-4 §12.5).
+        // Polar spaces (hue arc applies, css-color-4 §13.5).
         HSL, HWB, LCH, OKLCH;
 
         /** True for the polar spaces — the only ones a hue method binds to. */
@@ -47,7 +47,7 @@ data class GradientInterpolation(val space: Space, val hue: HueMethod) {
     }
 
     /**
-     * <hue-interpolation-method> (css-color-4 §12.5). SHORTER is the
+     * <hue-interpolation-method> (css-color-4 §13.5). SHORTER is the
      * grammar default when a polar space carries no explicit method.
      */
     enum class HueMethod { SHORTER, LONGER, INCREASING, DECREASING }
@@ -80,7 +80,7 @@ data class GradientInterpolation(val space: Space, val hue: HueMethod) {
                 return LEGACY
             }
             if (t.size != 4) return GradientInterpolation(space, HueMethod.SHORTER)
-            // A hue tail is only grammatical on a polar space (§12.4).
+            // A hue tail is only grammatical on a polar space (§13.2).
             if (!space.isPolar || t[3] != "hue") return LEGACY
             val m = hueFor(t[2]) ?: return LEGACY
             return GradientInterpolation(space, m)
@@ -95,7 +95,7 @@ data class GradientInterpolation(val space: Space, val hue: HueMethod) {
             "srgb-linear" -> Space.SRGB_LINEAR
             "lab" -> Space.LAB
             "oklab" -> Space.OKLAB
-            // css-color-4 §10.7: bare `xyz` is an alias of `xyz-d65`.
+            // css-color-4 §10.9: bare `xyz` is an alias of `xyz-d65`.
             "xyz", "xyz-d65" -> Space.XYZ_D65
             "xyz-d50" -> Space.XYZ_D50
             "hsl" -> Space.HSL

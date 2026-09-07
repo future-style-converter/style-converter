@@ -89,7 +89,7 @@ class ListItemMarkerGateTest {
     @Test
     fun `a self-marking item with no type declaration takes the initial disc`() {
         // css-lists-3 §3.1: `list-style-type`'s INITIAL value is `disc`.
-        // HTML §15.3.9's ul/ol rules are declarations on a CONTAINER
+        // HTML §15.3.7's ul/ol rules are declarations on a CONTAINER
         // element and match no `display:list-item` div, so the initial
         // value is what stands — and web paints exactly that (a 5×5 bullet
         // at the outer item's content origin, ink rows 30–34).
@@ -127,7 +127,7 @@ class ListItemMarkerGateTest {
 
     @Test
     fun `an outside marker keeps the current no-marker behaviour`() {
-        // MEASURED gate, not an oversight: css-lists-3 §3.2 hangs an
+        // MEASURED gate, not an oversight: css-lists-3 §3.5 hangs an
         // `outside` marker in the item's MARGIN area, and a leading line
         // box would instead push the item's content down a line the
         // browser does not have. change-list-style-position-002 — three

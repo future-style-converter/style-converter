@@ -277,7 +277,7 @@ describe('BackgroundImage', () => {
   });
 
   // ---- wave-40 T6: the <length> arm of a stop position ---------------
-  // css-images-4 §3.4.3 types a stop position as a <length-percentage>. The
+  // css-images-4 §3.5.3 types a stop position as a <length-percentage>. The
   // percentage arm has always been the raw-number `position` key; the length
   // arm arrives as the additive `positionLength` key (an IRLength object).
 

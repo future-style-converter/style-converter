@@ -393,7 +393,7 @@ object DecorationOps {
     fun hasSoftWrapOpportunity(text: String): Boolean = text.any { ch ->
         // Whitespace of any flavor (space, tab, newline) EXCEPT NBSP —
         // Kotlin's isWhitespace includes the SPACE_SEPARATOR category,
-        // but NBSP FORBIDS breaks (css-text-3 §5.2 / UAX #14 class GL).
+        // but NBSP FORBIDS breaks (css-text-3 §5.5 / UAX #14 class GL).
         // The Swift twin carves out the same scalar.
         (ch.isWhitespace() && ch != '\u00A0') ||
             // NEL U+0085 (UAX #14 class BK, a MANDATORY break): Java's

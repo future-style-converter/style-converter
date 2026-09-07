@@ -21,7 +21,7 @@ sealed interface ObjectViewBoxValue {
 
     /**
      * `rect(<top> <right> <bottom> <left>)` — css-shapes-1 §3.2's
-     * <basic-shape-rect>, which css-images-4 §5.3 admits for object-view-box
+     * <basic-shape-rect>, which css-images-5 §3.1 admits for object-view-box
      * alongside `inset()` and `xywh()`.
      *
      * wave-37 lane W2: the parser recognised ONLY `inset()`, so

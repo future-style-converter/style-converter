@@ -1,6 +1,6 @@
 // TextUnderlineOffsetExtractor.ts — folds `TextUnderlineOffset` IR properties into a TextUnderlineOffsetConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextUnderlineOffsetConfig, TEXT_UNDERLINE_OFFSET_PROPERTY_TYPE, TextUnderlineOffsetPropertyType } from './TextUnderlineOffsetConfig';
 import { lengthCss } from './_shared';

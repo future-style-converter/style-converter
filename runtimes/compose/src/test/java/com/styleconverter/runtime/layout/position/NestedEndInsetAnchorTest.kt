@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.position
 
 // Wave 28 (lane NE) — JVM pins for END-EDGE anchoring inside a POSITIONED
-// ANCESTOR (css-position-3 §3.5.3), the nested twin of the wave-22 canvas
+// ANCESTOR (css-position-3 §4.3), the nested twin of the wave-22 canvas
 // slot EndInsetAnchorTest pins. Pure decisions + arithmetic, so the whole
 // N1–N9 table runs without Robolectric — this suite's standing constraint.
 //

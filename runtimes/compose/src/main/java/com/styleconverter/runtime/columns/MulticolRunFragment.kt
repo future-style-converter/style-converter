@@ -10,7 +10,7 @@ package com.styleconverter.runtime.columns
  * stacked at the cumulative height of its predecessors, CSS 2.1 §9.4.1
  * block flow), and under `column-fill: auto` with a definite block-size H
  * that run fills column boxes SEQUENTIALLY to H before advancing
- * (css-multicol-1 §7.2) — i.e. the whole run fragments exactly like the
+ * (css-multicol-1 §7.1) — i.e. the whole run fragments exactly like the
  * sole-child case, so the SAME clip+translate replay draws it: fragment i
  * clips column i and shifts the continuous run paint by (+x_i, −i·H).
  *
@@ -89,7 +89,7 @@ object MulticolRunFragment {
             // and the whole box starts the next column. Skipped when it
             // already starts flush at a boundary (nothing to push it past
             // — a box taller than H then legitimately breaks, which is the
-            // "does not fit anywhere" case css-break-3 §5.2 allows).
+            // "does not fit anywhere" case css-break-3 §4.4 allows).
             //
             // Measured evidence (WPT css-break, all `column-fill: auto`):
             //  · borders-000 — `[95px spacer][100px bordered box]`, H=100:

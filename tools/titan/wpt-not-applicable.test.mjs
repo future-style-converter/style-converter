@@ -2131,7 +2131,7 @@ test('Rule 44: the refusal denominators are re-derivable from the committed map'
 // ── Rule 45 (wave-37 lane W7) — requires-hyphenation-dictionary ─────────────
 //
 // The rule is a CONJUNCTION and both halves earn their keep, so they are
-// pinned independently: `hyphens: auto` alone must NOT fire (css-text-3 §6.1
+// pinned independently: `hyphens: auto` alone must NOT fire (css-text-3 §5.3
 // makes the dictionary language-dependent, and WPT hyphens-auto-001 asserts
 // that untagged `auto` must not hyphenate — which is exactly what the natives
 // already do, and what they now SCORE: 0.7451 → 0.9950 on the private-sim
@@ -2202,4 +2202,120 @@ test('Rule 45 is INFORMATIONAL — in none of the five exclusion families', () =
     }
     // …and the score gate agrees: a test carrying ONLY this tag stays eligible.
     assert.equal(applyNaScoreGate([tag], [], [], false, false, false), false);
+});
+
+// ── retro R13: the catalogue's own prose is data, and it had drifted ────────
+//
+// Three retrospective findings, three pins. All of them hold TEXT the module
+// publishes about itself: `description` is copied verbatim onto every tagged
+// row (bucket-wpt.mjs → notApplicable → the manifests), and the docstring is
+// what a reader trusts about coverage. Prose that outlives its premise is the
+// Rule-43 failure mode (premise expired, text unchanged) and costs nothing
+// until a wave argues a new exclusion family from it.
+
+test('retro A5#1: the tagsForTest docstring rule count tracks RULES.length', async () => {
+    // The bug: wave-37 added Rule 45, bumped EXPECTED_RULE_COUNT to 45 (with a
+    // throwing guard) and left the public docstring saying "all 44 rules" —
+    // the one statement about coverage a caller reads. The guard cannot see
+    // prose, so pin the prose against the array it describes.
+    const { promises: fsp } = await import('node:fs');
+    const src = await fsp.readFile(new URL('./wpt-not-applicable.mjs', import.meta.url), 'utf8');
+    const m = /Classify a single test against all (\d+) rules/.exec(src);
+    assert.ok(m, 'the tagsForTest docstring must state the rule count');
+    assert.equal(Number(m[1]), RULES.length,
+        'docstring rule count must equal RULES.length (retro A5#1: it said 44 for 45 rules)');
+    // Every rule named in the enumeration must exist, so a renumbering cannot
+    // leave the sentence arithmetically right and factually wrong.
+    for (const tag of ['requires-wpt-server', 'browser-ref-divergent',
+                       'requires-non-latin-font-parity', 'requires-grid-lanes',
+                       'requires-hyphenation-dictionary']) {
+        assert.ok(RULES.some((r) => r.tag === tag), `${tag} is enumerated in the docstring`);
+        // Escape regex metacharacters properly (the previous `.replace(/-/g, '-')` was a
+        // no-op CodeQL flagged); tags are [a-z-]+ so this is belt-and-braces.
+        assert.match(src, new RegExp(tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
+            `${tag} must appear in the docstring enumeration`);
+    }
+});
+
+test('retro A12#7: a description claiming "in no exclusion family" must be telling the truth', () => {
+    // Rule 41's banner used to promise a denominator guarantee it never
+    // delivered (requires-wpt-server is in no family, so the tagged test is
+    // scored — three permanent fails at wave 49). The corrected description
+    // says INFORMATIONAL out loud; this pin makes that sentence ENFORCED
+    // rather than decorative, and fires the moment someone wires such a tag
+    // into a family without rewriting the text (or vice versa).
+    const families = [SCORE_EXCLUDED_TAGS, EXTRACTION_WALL_TAGS, FONT_FACE_WALL_TAGS,
+                      REF_UNACHIEVABLE_TAGS, NATIVE_FONT_PARITY_TAGS];
+    const claiming = RULES.filter((r) => /in no exclusion family/i.test(r.description));
+    assert.ok(claiming.some((r) => r.tag === 'requires-wpt-server'),
+        'Rule 41 must carry the INFORMATIONAL note (retro A12#7)');
+    for (const rule of claiming) {
+        for (const fam of families) {
+            assert.equal(fam.has(rule.tag), false,
+                `${rule.tag}'s description says it is in no exclusion family, but it is`);
+        }
+        assert.equal(applyNaScoreGate([rule.tag], [], [], false, false, false), false,
+            `${rule.tag} must stay scoreEligible for its description to be true`);
+    }
+});
+
+// The eight tags whose swarm-002/003 descriptions asserted a capability
+// ABSENCE that waves 44-48 then shipped (retro A9#8), each with the wave-49
+// measurement that replaced the claim: [tag, passing, scored] over
+// tools/titan/runs/wave49-final/sections/*/manifest.json, census idiom
+// scored = typeof ssim === 'number' && !scoreExcluded, pass = wptPass === true.
+const RETIERED_TAGS = [
+    ['requires-table-layout',            182, 255],
+    ['requires-containing-block-layout', 289, 345],
+    ['requires-orthogonal-flow',         221, 315],
+    ['requires-fragmentation',           341, 429],
+    ['requires-containment',             164, 204],
+    ['requires-gap-decorations',         126, 138],
+    ['requires-multicol-fragmentation',  110, 126],
+    ['requires-float-layout',            239, 282],
+];
+
+test('retro A9#8: the eight re-tiered descriptions state a TIER with its measurement, not a refuted absence', () => {
+    // These descriptions travel verbatim onto dashboard rows. Each said the
+    // capability did not exist ("not implemented on any platform", "None of
+    // the three SDUI style engines implement…", "fragmentation engine not
+    // implemented") while the runtimes had shipped it; the replacement must
+    // carry the pass rate that refutes the old claim, so the sentence expires
+    // loudly (a wrong number) instead of quietly (a stale premise).
+    for (const [tag, pass, scored] of RETIERED_TAGS) {
+        const rule = RULES.find((r) => r.tag === tag);
+        assert.ok(rule, `${tag} must still exist`);
+        // Two accepted markers, because verification split the eight in two.
+        // Seven read "TIER, not absence": the capability shipped and the old
+        // sentence was simply false. requires-containment reads "TIER of the
+        // TEST SET": there the absence half SURVIVED checking — the natives
+        // register Contain and deliberately no-op it (PerformanceRegistration
+        // .kt), and the file-name evidence for a native applier turned out to
+        // be a legacy function the renderer never chains — so only the
+        // implied consequence ("therefore these cells are lost") is refuted,
+        // by 164/204 of them passing. Saying "not absence" there would have
+        // replaced one wrong sentence with another.
+        assert.match(rule.description, /TIER(?:, not absence| of the TEST SET)/,
+            `${tag}: the description must say what kind of tier it names`);
+        assert.match(rule.description, new RegExp(`${pass}/${scored} tagged cells PASS at wave 49`),
+            `${tag}: the description must carry its measured wave-49 rate`);
+        // The refuted phrasings, kept as an explicit blacklist so a revert is
+        // a test failure and not a silent regression to the 2026-08 text.
+        assert.doesNotMatch(rule.description, /not implemented|None of the three|no Android\/iOS applier/i,
+            `${tag}: the absence claim was measured false — do not restore it`);
+    }
+});
+
+test('retro A9#8: the re-tiered eight are informational — no family, so the rewrite moved no score', () => {
+    // The finding's own caveat ("informational tags, scores unaffected") is
+    // only checkable, not assumable: if any of the eight were in a family the
+    // wave-49 pass rates quoted in their descriptions could not exist (an
+    // excluded cell is neither pass nor fail). This is the pin that keeps the
+    // quoted denominators meaningful.
+    const families = [SCORE_EXCLUDED_TAGS, EXTRACTION_WALL_TAGS, FONT_FACE_WALL_TAGS,
+                      REF_UNACHIEVABLE_TAGS, NATIVE_FONT_PARITY_TAGS];
+    for (const [tag] of RETIERED_TAGS) {
+        for (const fam of families) assert.equal(fam.has(tag), false, `${tag} must stay scored`);
+        assert.equal(applyNaScoreGate([tag], [], [], false, false, false), false);
+    }
 });

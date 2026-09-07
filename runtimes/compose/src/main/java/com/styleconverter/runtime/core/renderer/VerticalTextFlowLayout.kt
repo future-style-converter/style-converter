@@ -147,7 +147,7 @@ internal fun VerticalUprightTextFlow(
     // the same LargeDimension (32767) fakes as the rotated run's (this
     // flow's slot 0 IS a rotated run, and each glyph fake answered 32767
     // on its unbounded axis). See VerticalRunIntrinsics for the measured
-    // chain and the css-sizing-3 §4 min/max-content model the overrides
+    // chain and the css-sizing-3 §5.1 min/max-content model the overrides
     // implement. The decline breadcrumb stays here (the composable owns
     // the log channel; the policy stays log-free and JVM-testable).
     Layout(

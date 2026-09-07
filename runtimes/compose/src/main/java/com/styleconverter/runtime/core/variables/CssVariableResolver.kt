@@ -503,13 +503,6 @@ object CssVariableResolver {
 }
 
 /**
- * Extension function to check if a string contains unresolved var() expressions.
- */
-fun String.hasUnresolvedVariables(): Boolean {
-    return contains("var(")
-}
-
-/**
  * Extension function to resolve a string using the current variable scope.
  */
 @Composable

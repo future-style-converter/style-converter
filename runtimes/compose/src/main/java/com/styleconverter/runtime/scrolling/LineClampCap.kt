@@ -28,6 +28,7 @@ import com.styleconverter.runtime.core.renderer.composedDefaultLineHeightPx
 import com.styleconverter.runtime.spacing.SpacingContext
 import com.styleconverter.runtime.spacing.SpacingExtractor
 import com.styleconverter.runtime.spacing.resolveToDp
+import com.styleconverter.runtime.typography.LineClampWire
 import com.styleconverter.runtime.typography.TypographyExtractor
 import kotlin.math.ceil
 import kotlinx.serialization.json.JsonElement
@@ -80,6 +81,19 @@ object LineClampCap {
     }
 
     /**
+     * Retrospective R3 (A5#4) — true when the declaration forbids a marker
+     * (`line-clamp: 4 no-ellipsis` / `4 ""`, css-overflow-4 §4.2). Twin of
+     * Swift's LineClampCap.markerSuppressed, delegated to the ONE Compose
+     * wire reader ([LineClampWire]) so the cap, the leaf Text and the
+     * typography config can never disagree about the marker. Unlike Swift,
+     * the Compose cap needs no re-route on it: Text(maxLines, Clip) already
+     * discards without a glyph, so this is exposed for the renderer's
+     * overflow DECISION (Clip, never Ellipsis) and for the JVM pins.
+     */
+    fun markerSuppressed(properties: List<Pair<String, JsonElement?>>): Boolean =
+        LineClampWire.markerSuppressedInPairs(properties)
+
+    /**
      * The full cap height in px for this component, or null when no cap
      * applies. The cap is what the STEP-7 overflow node may measure:
      *
@@ -89,8 +103,12 @@ object LineClampCap {
      * ComponentRenderer's inner chain) nests the css padding (step 8),
      * the placeholder floor and the border-band content inset all INSIDE
      * the step-7 overflow position — the wave-40 leaf calibration pins
-     * it: block-ellipsis-013's PASSING Android box is 34px = 2 lines ×
-     * 16.25 (monospace 13px × the 1.25 ref pin) + 2 × 1px border band.
+     * it: block-ellipsis-013's PASSING Android box measures 35px against a
+     * 34.5px cap (2 lines × 16.25 — monospace 13px × the 1.25 ref pin — +
+     * 2 × 1px border band = 34.5, ceil → 35; the wave49-final capture and
+     * the frozen ref both ink rows 16..50, and LineClampCapTest's
+     * "measurement within slack" pin carries the same 35-vs-34.5 numbers;
+     * retro A3#13 corrected the "34px" arithmetic that stood here).
      */
     fun capPx(properties: List<Pair<String, JsonElement?>>): Float? {
         // Fixed-count clamp on the wire, else nothing to do (fast bail —
@@ -163,7 +181,7 @@ object LineClampCap {
  * Cap this node's LAYOUT height at [capPx] (the N-line-box budget), while
  * measuring content on an UNBOUNDED block axis so text keeps its natural
  * line layout — the visible prefix must be the same first N lines the
- * unclamped layout produces (css-overflow-4 §4.3: discarding content must
+ * unclamped layout produces (css-overflow-4 §5.3.2: discarding content must
  * not re-flow what precedes it). Chain an [axisSelectiveClip] Y-clip
  * OUTSIDE this node (OverflowApplier does) so the discarded lines' ink is
  * actually unpaintable, and never clip X: a clamp does not create an
@@ -186,6 +204,6 @@ fun Modifier.lineClampHeightCap(capPx: Float): Modifier =
         val h = capped.coerceIn(constraints.minHeight, constraints.maxHeight)
         // Report the capped box; place content at the origin so its first
         // N lines fill it and the discarded tail hangs below (the outer
-        // Y-clip erases that ink, css-overflow-4 §4.3).
+        // Y-clip erases that ink, css-overflow-4 §5.3.2).
         layout(placeable.width, h) { placeable.place(0, 0) }
     }

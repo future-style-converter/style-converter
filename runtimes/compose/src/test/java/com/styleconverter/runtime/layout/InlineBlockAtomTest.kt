@@ -94,10 +94,18 @@ class InlineBlockAtomTest {
 
     @Test fun `B3 - relative and sticky stay in flow and remain atoms`() {
         for (kw in listOf("RELATIVE", "STICKY", "STATIC")) {
-            assertNotNull(
-                kw,
-                InlineBlockAtom.spec(box("INLINE_BLOCK", 100.0, 100.0) + prop("Position", "\"$kw\""), false, false, false)
-            )
+            val spec = InlineBlockAtom.spec(box("INLINE_BLOCK", 100.0, 100.0) + prop("Position", "\"$kw\""), false, false, false)
+            // Retro R10 (A8#1): "remain atoms" means the SAME 100×100 atom the
+            // position-less box yields. CSS 2.1 §9.4.3 (relative positioning)
+            // shifts a box AFTER it is laid out in the normal flow, without
+            // changing its size; `sticky` is defined as relative positioning
+            // with a scroll-driven offset (css-position-3), and `static` is
+            // plain normal flow — so all three must carry the declared px
+            // unchanged. A not-null check alone let a doubled width (audit
+            // mutation M5) pass here while nine siblings failed.
+            assertNotNull(kw, spec)
+            assertEquals(kw, 100.0, spec!!.fixedWpx!!, 0.0)
+            assertEquals(kw, 100.0, spec.fixedHpx!!, 0.0)
         }
     }
 
@@ -127,7 +135,14 @@ class InlineBlockAtomTest {
         // 0` from the UA reset the extractor bakes in.
         val props = box("INLINE_BLOCK", 100.0, 100.0) +
             len("PaddingTop", 0.0) + len("PaddingLeft", 0.0) + len("MarginTop", 0.0)
-        assertNotNull(InlineBlockAtom.spec(props, false, false, false))
+        val spec = InlineBlockAtom.spec(props, false, false, false)
+        // Retro R10 (A8#1): a zero band ADDS zero — under the `box-sizing:
+        // content-box` default (the rule InlineBlockAtom.kt's own H2 header
+        // cites) the outer box is 100 + 0 wide and 100 + 0 tall, so the atom
+        // must be exactly the declared 100×100, not merely non-null.
+        assertNotNull(spec)
+        assertEquals(100.0, spec!!.fixedWpx!!, 0.0)
+        assertEquals(100.0, spec.fixedHpx!!, 0.0)
     }
 
     @Test fun `B5 - wave33's all-zero-band sites are byte-identical under H2`() {
@@ -169,7 +184,15 @@ class InlineBlockAtomTest {
         val props = box("INLINE_BLOCK", 100.0, 100.0) +
             prop("BoxSizing", "\"BORDER_BOX\"") +
             prop("PaddingLeft", """{"type":"percentage","value":25}""")
-        assertNotNull(InlineBlockAtom.spec(props, false, false, false))
+        val spec = InlineBlockAtom.spec(props, false, false, false)
+        // Retro R10 (A8#1): "tolerates" means the unreadable band changes
+        // NOTHING — `box-sizing: border-box` (same rule, cited in
+        // InlineBlockAtom.kt's H2 header) puts every band INSIDE the declared
+        // 100×100, so that is the outer box whatever the padding resolves to.
+        // Pin the value, not just the admission.
+        assertNotNull(spec)
+        assertEquals(100.0, spec!!.fixedWpx!!, 0.0)
+        assertEquals(100.0, spec.fixedHpx!!, 0.0)
     }
 
     @Test fun `H2 - content-box ADDS the padding and border bands`() {

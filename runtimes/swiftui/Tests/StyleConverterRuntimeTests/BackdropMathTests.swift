@@ -120,7 +120,7 @@ final class BackdropMathTests: XCTestCase {
                        [.invert(amount: 1.0)], "out-of-range amount clamps to 1")
     }
 
-    // MARK: - 2. invert (filter-effects-1 §8.6)
+    // MARK: - 2. invert (filter-effects-1 §6.1)
 
     /// The byte formula, spelled out at the three amounts that matter.
     /// This is the arithmetic the Compose twin must reproduce channel for

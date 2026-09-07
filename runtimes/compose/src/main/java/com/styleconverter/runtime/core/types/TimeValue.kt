@@ -4,6 +4,13 @@ package com.styleconverter.runtime.core.types
 // Several properties (TransitionDuration, AnimationDelay, …) wrap times in
 // an array — callers can iterate and call extractTime on each element.
 // See examples/primitives/times.json.
+//
+// Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+// path above is GONE — renamed to `fixtures/primitives/` by restructure
+// 02e4c457, then deleted by the 2026-07-08 hard prune 1e0234f6 (#8), with
+// nothing to replace it. The shapes enumerated here (and the pins over
+// them) are now the only record of that wire contract: read the names as
+// history, not as a path to open.
 
 import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement

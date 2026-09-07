@@ -1,7 +1,7 @@
 //
 //  GridContentDistributionTests.swift
 //  Wave 19 (lane GRID-DISTRIBUTION) — XCTest pins for
-//  GridContentDistribution.trackOrigins: css-align-3 §5.3 content
+//  GridContentDistribution.trackOrigins: css-align-3 §5.1 content
 //  distribution of the grid TRACK GROUP + direction:rtl column mirroring.
 //
 //  Shared-semantics contract: rows P1-P12 are lifted from the LIVE wave18
@@ -154,7 +154,7 @@ final class GridContentDistributionTests: XCTestCase {
     // MARK: - adapter (aggregate keyword → twin domain)
 
     /// The AlignmentKeyword fold: distribution-less keywords behave as
-    /// start (css-align-3 §5.3 normal→stretch→start for non-auto tracks).
+    /// start (css-align-3 §5.1 normal→stretch→start for non-auto tracks).
     func testJustifyAdapterFolds() {
         XCTAssertEqual(GridContentDistribution.justify(of: .end), .end)
         XCTAssertEqual(GridContentDistribution.justify(of: .selfEnd), .end)

@@ -283,7 +283,7 @@ final class DecorationOpsTests: XCTestCase {
         XCTAssertFalse(DecorationOps.hasSoftWrapOpportunity("foobarbaz"))
         // Empty string: nothing to wrap.
         XCTAssertFalse(DecorationOps.hasSoftWrapOpportunity(""))
-        // NBSP FORBIDS breaks (css-text-3 §5.2 / UAX #14 GL).
+        // NBSP FORBIDS breaks (css-text-3 §5.5 / UAX #14 GL).
         XCTAssertFalse(DecorationOps.hasSoftWrapOpportunity("foo\u{00A0}bar"))
     }
 

@@ -1,4 +1,4 @@
-// The IR-side half of css-break-3 §5.2 `box-decoration-break: clone` for
+// The IR-side half of css-break-3 §5.4 `box-decoration-break: clone` for
 // multicol fragmentation (wave-46 lane Y3): reads a multicol child's
 // declared decoration bands off its IR property list — CONSUMING the
 // borders / radius / padding trees' extractors read-only, never
@@ -23,7 +23,7 @@ import kotlin.math.roundToInt
 /**
  * Resolves the clone-fragment bands of ONE multicol child from its IR.
  *
- * `box-decoration-break` (css-break-3 §5.2) is carried on the wire as the
+ * `box-decoration-break` (css-break-3 §5.4) is carried on the wire as the
  * IR `BoxDecorationBreak` keyword (`SLICE` | `CLONE`, see the converter's
  * BoxDecorationBreakPropertyParser). Only `CLONE` produces facts; the
  * default `slice` is the existing S-table path and returns null here so
@@ -46,7 +46,7 @@ import kotlin.math.roundToInt
  */
 object MulticolCloneDecoration {
 
-    /** The IR keyword that selects the clone model (css-break-3 §5.2). */
+    /** The IR keyword that selects the clone model (css-break-3 §5.4). */
     private const val CLONE_KEYWORD = "CLONE"
 
     /**

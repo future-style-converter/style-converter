@@ -669,7 +669,7 @@ const TAG_ALLOWLIST = new Set([
   // asymmetric block padding (0.35em top / 0.625em bottom), 0.75em inline
   // padding, `min-inline-size: min-content` and a 2px inline margin, and it
   // NOTCHES that border around the rendered <legend>, which is laid out
-  // inside the border-box instead of the content flow (HTML §15.3.9 "the
+  // inside the border-box instead of the content flow (HTML §15.3.12 "the
   // fieldset and legend elements"). Demoting both to <div> erased all of it.
   //
   // MEASURED on the frozen wave34-depth css-display slice (all three are
@@ -686,9 +686,28 @@ const TAG_ALLOWLIST = new Set([
   // and let the same UA stylesheet that drew the ref draw ours.
   //
   // Blast radius, MEASURED over the corpus: 53 of the 10681 bucket-A tests
-  // contain `<fieldset` and 31 contain `<legend` (0.5%), and NONE of them
-  // appear in any of the 29 frozen wave34-final gate slices — so this
-  // mapping cannot move a single gate number by construction.
+  // contain `<fieldset` and 31 contain `<legend` (0.5%). At wave 35 NONE of
+  // them appeared in the 29 frozen wave34-final gate slices, so the mapping
+  // could not move a gate number. That is no longer true: css-display,
+  // css-contain, css-anchor-position and css-position joined the depth-48
+  // gate, and 9 fieldset/legend tests ARE gate cells today (re-measured on
+  // tools/titan/runs/wave49-final; scorer idiom: skip unless
+  // typeof ssim === 'number' && !scoreExcluded, pass = wptPass === true):
+  //   css-display/display-contents-fieldset            web .9716P ios .9680P android .9693P
+  //   css-display/display-contents-fieldset-002        web .9733P ios .6092F android .4567F
+  //   css-display/display-contents-fieldset-nested-legend
+  //                                                    web .9997P ios .9451F android .9453F
+  //   css-display/display-contents-dynamic-fieldset-legend-001
+  //                                                    web 1.000P ios .7224F android .5239F
+  //   css-display/display-contents-dynamic-generated-content-fieldset-001
+  //                                                    web 1.000P ios .9991P android .9981P
+  //   css-contain/contain-inline-size-fieldset         web .9609P ios .8686F android .8267F
+  //   css-contain/contain-inline-size-legend           web 1.000P ios .8562F android .8479F
+  //   css-anchor-position/anchor-fieldset-001          web .9966P ios .9628P android .9629P
+  //   css-position/position-absolute-fieldset          web .9990P ios .9974P android .9967P
+  // Web passes all 9 (this mapping is why); both natives fail 5 of the 9 —
+  // they still lack the fieldset chrome (border notch + legend inset), which
+  // is the open native-side residual, not a reason to unmap the tag on web.
   'fieldset', 'legend',
   'blockquote', 'q',
   'dl', 'dt', 'dd',
@@ -807,7 +826,7 @@ const HARNESS_OPTIONS: RendererOptions = {
   // that can act on it directly, through two mechanisms nothing else in
   // this pipeline can imitate:
   //
-  //   1. `quotes: auto` (css-content-3 §2.2.1). The harness already maps
+  //   1. `quotes: auto` (css-content-3 §2.4.1). The harness already maps
   //      `q` to a REAL <q> (TAG_ALLOWLIST), so Chromium's own UA rule
   //      `q::before { content: open-quote }` fires — and picks its CLDR
   //      pair from the element's language. With no lang attribute every

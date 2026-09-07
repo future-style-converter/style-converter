@@ -63,7 +63,15 @@ data class ColorConfig(
      * this flag to skip the regular `Modifier.background(brush)` paint
      * so we don't end up with both a clipped-text fill AND a rectangular
      * gradient behind it. ColorExtractor sets this from the
-     * BackgroundClip property at extract time.
+     * BackgroundClip property at extract time — and, since retro R6
+     * (A11#10), ALSO nulls [backgroundColor] in the same case: the `text`
+     * value is css-backgrounds-4 §2.8 (background-clip; Level 3 §2.7 has
+     * no `text`) — the background is painted within the intersection of
+     * the border box and the element's text geometry, and that applies to
+     * EVERY background layer, the solid colour included, so no rectangular
+     * fill of any kind may reach the box (web/iOS paint nothing there;
+     * Android used to flood the box). The glyph-masked solid fill itself
+     * is a logged renderer gap (see ColorExtractor's post-loop block).
      */
     val suppressBackgroundImage: Boolean = false,
     /**
@@ -107,7 +115,7 @@ data class ColorConfig(
 
 /**
  * One gradient-center axis (`at <position>`, css-images-3 §3.2 /
- * css-images-4 §3.4.4). CSS allows a full <length-percentage> per axis;
+ * css-images-4 §3.2). CSS allows a full <length-percentage> per axis;
  * the IR wire carries percents as raw numbers and lengths as objects
  * (IRLengthPercentageSerializer). The extractor resolves runtime-dependent
  * units (lh/em/rem) to PX at extract time — font metrics live in the
@@ -338,7 +346,7 @@ sealed interface BackgroundImageConfig {
  * CSS: `red 25%` or `red 30px` or bare `red` (unpositioned).
  *
  * Wave 47 (lane Z1, the Android half of the wave-46 Y2 gradient
- * pipeline): the css-images-4 §3.4.3 fixup needs to know which stops the
+ * pipeline): the css-images-4 §3.5.3 fixup needs to know which stops the
  * author actually positioned — an unpositioned stop spreads between its
  * POSITIONED neighbours, not over the whole count — and the wave-40
  * `positionLength` px arm (the repeat period of `…, white 30px`) must

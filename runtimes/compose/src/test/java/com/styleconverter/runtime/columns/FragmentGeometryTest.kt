@@ -18,7 +18,7 @@ import org.junit.Test
  * Table inputs (all px): child block-size C, column block-size H, column
  * width W, gap G, used column count N. Expected fragments are
  * {columnIndex, clipRect(l,t,w,h), translate(x,y)} with x_i = i*(W+G) and
- * translate = (+x_i, −i*H) per box-decoration-break: slice (css-break-3 §6).
+ * translate = (+x_i, −i*H) per box-decoration-break: slice (css-break-3 §5.4).
  */
 class FragmentGeometryTest {
 

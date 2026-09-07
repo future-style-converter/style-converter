@@ -229,7 +229,7 @@ final class ReplacedBoxSizingConstraintTests: XCTestCase {
         XCTAssertEqual(used.heightPx, 100, accuracy: 1e-3)
     }
 
-    /// css-ui-3 §5 (the BorderBoxFloor rule): max-height 20 inside a 30px
+    /// css-ui-3 §3.1 (the BorderBoxFloor rule): max-height 20 inside a 30px
     /// padding band leaves a 0 content bound — the content vanishes, the
     /// padding does not. Width follows through the ratio to 0 as well.
     func testBoundSmallerThanItsBandFloorsAtZero() {

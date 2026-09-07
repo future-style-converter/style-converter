@@ -25,7 +25,7 @@ final class MulticolSpannerFlowTests: XCTestCase {
 
     /// SP1 — always-balancing-before-column-span: 200px child balances into 2×100 before the 0-height spanner.
     func testSP1BalanceBeforeSpanner() {
-        // css-multicol §6.3: pre-spanner content balances (H = ceil(200/2)).
+        // css-multicol-1 §6.1: pre-spanner content balances (H = ceil(200/2)).
         let plan = MulticolSpannerFlow.plan(children: [flow(200), spanner(0)], columnCount: 2)
         // Flow child starts at column 0 / y 0; spanner sits below the
         // balanced 100px row; container auto height = 100.
@@ -248,7 +248,7 @@ final class MulticolSpannerFlowTests: XCTestCase {
     func testBRK1DiscardDropsOverflowChunkAndTail() {
         // Wire order: 4 one-line (19px) <p break-after:column> then the
         // flattened "Spanner 1". Chunks p1|p2|p3 own columns 0..2; p4 needs
-        // the §8.2 overflow column → css-overflow-4 §3 discards it AND the
+        // the §8.2 overflow column → css-overflow-4 §5.3 discards it AND the
         // spanner after it; the container is one 19px line tall (the ref).
         let plan = MulticolSpannerFlow.plan(
             children: [breaker(19), breaker(19), breaker(19), breaker(19), spanner(19)],

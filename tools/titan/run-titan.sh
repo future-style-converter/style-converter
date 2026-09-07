@@ -318,14 +318,21 @@ case "$PLATFORM_SCOPE" in
       # (one <safe(testKey)>.png per test) instead of per-component — the
       # honest per-page comparison, matching the web WPT_COMPOSED path.
       # inject's diffComposedVsRef prefers that PNG (stitch is the fallback).
+      # retro R8b (A9#3): `--wpt-dir` is the NATIVE half of the @font-face /
+      # replaced-image asset hop (section-runner.sh Step 5b threads the same
+      # flag). This path omitted it, so every fontFaces/replaced src was
+      # declined and the captures scored ARTIFACTS; the feeders now REFUSE
+      # such a run (exit 2) before touching a device.
       log "feeding Android inbox (feed-android.mjs, composed)…"
       node "$TITAN_DIR/feed-android.mjs" --fixtures "$PERTEST_DIR" --composed \
+        --wpt-dir "$WPT_DIR" \
         --out "$PROJECT_ROOT/apps/android-harness/screenshots" --timeout-per-fixture 180 \
         >>"$CAPTURE_LOG" 2>&1 || warn "feed-android exited non-zero — Android column may be partial"
       # iOS: --timeout-per-fixture is SECONDS, same unit as feed-android above
       # (both feeders were unified on seconds; 180 = 180s).
       log "feeding iOS inbox (feed-ios.mjs, composed)…"
       node "$TITAN_DIR/feed-ios.mjs" --fixtures "$PERTEST_DIR" --composed \
+        --wpt-dir "$WPT_DIR" \
         --out "$PROJECT_ROOT/apps/ios-harness/screenshots" --timeout-per-fixture 180 \
         >>"$CAPTURE_LOG" 2>&1 || warn "feed-ios exited non-zero — iOS column may be partial"
     fi

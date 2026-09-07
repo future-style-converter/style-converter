@@ -17,7 +17,7 @@ package com.styleconverter.runtime.layout.flexbox
 // are NOT resolvable statically — resolve() returns null. The renderer then
 // runs the wave-9 INTRINSIC pass instead (FlexIntrinsicLayout.kt): it
 // measures each content-sized item's max-content main size at layout time
-// (css-flexbox-1 §9.2.3.E) and re-enters this same loop with the bases
+// (css-flexbox-1 §9.2 step 3.E) and re-enters this same loop with the bases
 // filled in. The legacy Modifier.weight fallback survives ONLY for lines
 // whose container main size is genuinely unknowable ahead of composition
 // (percentage / unresolvable-relative container sizes).
@@ -40,7 +40,7 @@ object FlexSizeResolver {
      *                 FR_ShrinkBasis `c` to 50px — pixel-verified against
      *                 the wave-2 web captures.
      * @param maxPx    the item's main-axis maximum (max-width / max-height,
-     *                 css-flexbox-1 §9.7.4.d "max violation"). Defaults to
+     *                 css-flexbox-1 §9.7 step 4.d "max violation"). Defaults to
      *                 +∞ = no declared maximum, which keeps every pre-wave-9
      *                 caller and test byte-identical.
      */

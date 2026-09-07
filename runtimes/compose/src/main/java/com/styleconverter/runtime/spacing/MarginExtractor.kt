@@ -5,7 +5,7 @@ package com.styleconverter.runtime.spacing
 // string "auto", NOT wrapped in a length shape. We detect that before
 // deferring to extractLength().
 //
-// Fixture coverage: examples/properties/spacing/margin-basic.json and
+// Fixture coverage: fixtures/properties/spacing/margin-basic.json and
 // margin-units.json. margin-basic.json's `Margin_Auto_Left_Right` component
 // exercises the mixed case (two sides "auto", two sides {px:0}).
 
@@ -86,7 +86,7 @@ object MarginExtractor {
         // em against ITS OWN font-size oracle, which does NOT model the CSS
         // Fonts 4 §3.5 fixed-default (`monospace` ⇒ 13px) quirk the
         // typography extractor folds into SpacingContext.fontSizePx (wave
-        // 36, MonospaceUAFontSize). css-values-4 §5.1.1 makes the element's
+        // 36, MonospaceUAFontSize). css-values-4 §6.1.1 makes the element's
         // OWN computed font-size the em base for a margin, so the applier's
         // context is the truthful basis. Measured defect (wave-44
         // css-overflow discard-multicol-001): `margin: 1em` on a
@@ -116,7 +116,7 @@ object MarginExtractor {
      * raw relative units, calc, keywords, and malformed data).
      *
      * Strictly narrower than extractLength's px-canonical rule on purpose:
-     * ONLY the EM unit re-resolves at apply time (css-values-4 §5.1.1 own-
+     * ONLY the EM unit re-resolves at apply time (css-values-4 §6.1.1 own-
      * font-size basis, where the applier context is better informed than
      * the pre-pass — see toMarginValue). Other prebaked units (%/vw/rem…)
      * resolve against bases the pre-pass owns exclusively (containing

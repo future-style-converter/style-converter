@@ -5,4 +5,3 @@
 // WHY widen: CSS Grid L3 draft — https://drafts.csswg.org/css-grid-3/#masonry-layout.
 export interface JustifyTracksConfig { value?: string; }
 export const JUSTIFY_TRACKS_PROPERTY_TYPE = 'JustifyTracks' as const;
-export type JustifyTracksPropertyType = typeof JUSTIFY_TRACKS_PROPERTY_TYPE;

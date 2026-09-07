@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.color
 
-// css-backgrounds-3 §3.7 background-repeat tile placement — PURE math,
+// css-backgrounds-3 §2.4 background-repeat tile placement — PURE math,
 // no Compose types, so the space/round rules are pinned by plain JVM tests
 // (BackgroundTileMathTest). ColorApplier feeds one axisPlan per axis and
 // draws the cartesian product of the two per-axis [start, end) segment
@@ -18,7 +18,7 @@ object BackgroundTileMath {
      * tile/area).
      *
      * [tileSize] is the SHADER pitch (fractional for `round`, e.g. 200/7):
-     * gradient geometry must resolve against it (css-images-4 §3.4.1 sizes
+     * gradient geometry must resolve against it (css-images-4 §3.1 sizes
      * the gradient box, not the rasterized rect). [ends] is the DRAW edge:
      * for the abutting modes (REPEAT/ROUND) the edges are pixel-snapped so
      * adjacent rects share INTEGER boundaries — two independently
@@ -52,7 +52,7 @@ object BackgroundTileMath {
      * @param anchor the background-position-resolved offset of the FIRST
      *        tile (free-space × fraction + any px offset). Only NO_REPEAT
      *        honours it exactly; REPEAT phase-shifts the grid through it
-     *        (css-backgrounds-3 §3.6: position anchors the tiling pattern),
+     *        (css-backgrounds-3 §2.6: position anchors the tiling pattern),
      *        SPACE/ROUND pin the pattern to the area edges per §3.7.
      */
     fun axisPlan(area: Float, tile: Float, anchor: Float, mode: AxisRepeat): AxisPlan {

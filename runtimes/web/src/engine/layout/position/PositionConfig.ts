@@ -9,4 +9,3 @@ export interface PositionConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const POSITION_PROPERTY_TYPE = 'Position' as const;
-export type PositionPropertyType = typeof POSITION_PROPERTY_TYPE;

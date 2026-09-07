@@ -21,7 +21,7 @@ final class FlexWrapPlanTests: XCTestCase {
     // MARK: - §9.3 line collection
 
     /// A gap counts against the line budget exactly like item size does
-    /// (css-align-3 §8.1) — ref-002's four 50px items in a 110px box.
+    /// (css-align-3 §8) — ref-002's four 50px items in a 110px box.
     func testGapCountsAgainstTheLineBudget() {
         let lines = FlexWrapPlan.breakLines(mainSizes: [50, 50, 50, 50],
                                             containerMain: 110, gap: 10)
@@ -136,7 +136,7 @@ final class FlexWrapPlanTests: XCTestCase {
 
     // MARK: - The two preconditions
 
-    /// css-align-3 §5.3 — only `normal`/`stretch` (and the `auto`
+    /// css-align-3 §5.1 — only `normal`/`stretch` (and the `auto`
     /// spelling) distribute; every other keyword positions instead.
     func testOnlyNormalAndStretchDistribute() {
         XCTAssertTrue(FlexWrapPlan.alignContentStretches(nil))

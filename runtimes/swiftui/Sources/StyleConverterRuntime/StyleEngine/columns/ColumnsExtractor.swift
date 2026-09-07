@@ -6,7 +6,7 @@
 import Foundation
 
 enum ColumnsProperty {
-    /// 6 entries — ColumnGap deliberately omitted (owned by GapProperty).
+    /// 6 entries — ColumnGap deliberately omitted (owned by GapExtractor).
     static let names: [String] = [
         "ColumnCount", "ColumnWidth", "ColumnFill", "ColumnSpan",
         "ColumnRuleStyle", "ColumnRuleWidth", "ColumnRuleColor",
@@ -33,7 +33,7 @@ enum ColumnsExtractor {
             if p.type == "ColumnCount", let n = p.data.doubleValue, n >= 1 {
                 cfg.count = Int(n)
             }
-            // Wave-45 lane X3 — typed `column-fill` (css-multicol-1 §7.2:
+            // Wave-45 lane X3 — typed `column-fill` (css-multicol-1 §7.1:
             // `auto | balance | balance-all`). Wire shape (converter
             // ColumnFillSerializer): the SHOUTY keyword string ("AUTO" /
             // "BALANCE" / "BALANCE_ALL"). Assignment-per-declaration folds
@@ -71,7 +71,7 @@ enum ColumnsExtractor {
                 }
             }
         }
-        // Wave-43 lane V6 — css-overflow-4 §3 `continue: discard`. The
+        // Wave-43 lane V6 — css-overflow-4 §5.3 `continue: discard`. The
         // "Continue" IR property is REGISTERED by the regions no-op tree
         // (css-regions also defines `continue`), so it is deliberately NOT
         // in ColumnsProperty.names — this extractor only READS it, exactly

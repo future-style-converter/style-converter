@@ -69,7 +69,7 @@ class VarCalcPreservationTest {
 
     @Test
     fun `nested var fallback chains survive verbatim`() {
-        // css-variables-1 §2.3: fallbacks may nest arbitrarily — the whole
+        // css-variables-1 §3: fallbacks may nest arbitrarily — the whole
         // unresolved chain is one raw token stream to the converter.
         assertPreserved("color", "var(--missing, var(--fallback, #00ff00))")
         assertPreserved("padding-top", "var(--a, var(--b, var(--c, 4px)))")

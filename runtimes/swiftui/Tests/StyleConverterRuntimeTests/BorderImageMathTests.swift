@@ -2,7 +2,7 @@
 //  BorderImageMathTests.swift
 //  StyleConverterRuntimeTests
 //
-//  Pins the css-backgrounds-3 §6 border-image geometry (BorderImageMath)
+//  Pins the css-backgrounds-3 §5 border-image geometry (BorderImageMath)
 //  behind the BI-IOS 9-slice painter: width resolution (§6.3), outset
 //  resolution (§6.4), slice-line px conversion + the nine-region grid
 //  (§6.1/§6.2), and the per-edge tile plans (§6.2 repeat keywords).

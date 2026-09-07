@@ -3,8 +3,11 @@ package com.styleconverter.runtime.core.media
 // MediaBucketEvaluator — the dynamic-styling runtime v1 evaluation of the IR
 // envelope's `media` buckets (schema/spec/06-dynamic-styling.md §4).
 //
-// This is deliberately STRICTER than the legacy MediaQueryApplier grammar in
-// this package: spec 06 pins runtime v1 to exactly two features —
+// This is deliberately STRICTER than the pre-campaign `MediaQueryApplier`
+// grammar that used to live in this package (deleted by the retro sweep
+// P2a, A6#7: it had no caller left once its only advertised consumer,
+// `ResponsiveUtils`, turned out to be unreferenced too): spec 06 pins
+// runtime v1 to exactly two features —
 // min-width / max-width in px (compared against the RENDER-SURFACE width,
 // never the device screen) and prefers-color-scheme (mapped to the platform
 // dark-mode signal, isSystemInDarkTheme() on Android) — joined only by `and`.
@@ -13,10 +16,10 @@ package com.styleconverter.runtime.core.media
 // query the runtime cannot evaluate never applies (no apply-by-guess),
 // logged once per query via PropertyTracker (the no-silent-fallthrough rule).
 //
-// The legacy MediaQueryApplier (orientation / aspect-ratio / breakpoints…)
-// stays for the ResponsiveUtils convenience surface; the ENVELOPE bucket
-// path in ComponentRenderer now routes exclusively through this evaluator so
-// all three platforms agree on which buckets are contract-active.
+// The ENVELOPE bucket path in ComponentRenderer routes exclusively through
+// this evaluator, so all three platforms agree on which buckets are
+// contract-active. It is now the package's ONLY media-query evaluator: the
+// old orientation / aspect-ratio / breakpoint surface is gone.
 
 import android.util.Log
 import androidx.compose.runtime.compositionLocalOf

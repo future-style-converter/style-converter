@@ -211,7 +211,7 @@ final class AbsposStaticPositionTests: XCTestCase {
     // MARK: - 4. justify-content as the sole-item main claim
 
     func testJustifyContentSoleItemFolds() {
-        // Declared center claims the main axis (css-position-3 §3.1.4.1)
+        // Declared center claims the main axis (css-position-3 §3.5.3)
         // and marks the TYPED-declared flag (Compose arrangement gate).
         let pos = AbsposStaticPosition.resolveStatic(
             containerProperties: container(fd: "ROW", justify: "CENTER"),

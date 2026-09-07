@@ -85,9 +85,8 @@ export function angleCss(data: unknown): string | undefined {
   return `${a.degrees}deg`;                                        // CSS always accepts deg
 }
 
-// Predicate for the registry/renderer gate: typography properties are enumerated
-// in PropertyRegistry.ts; this helper is unused at runtime but kept for parity
-// with the spacing/borders _shared modules.
-export function isOneOf(type: string, set: ReadonlySet<string>): boolean {
-  return set.has(type);
-}
+// (A6#13) `isOneOf` used to live here as a registry/renderer gate predicate
+// that its own comment admitted was "unused at runtime but kept for parity"
+// with the spacing/borders _shared modules — zero importers repo-wide. The
+// real gate is PropertyRegistry.ts's `migratedProperties` set, so the
+// parity copy is deleted rather than kept as a second, untested surface.

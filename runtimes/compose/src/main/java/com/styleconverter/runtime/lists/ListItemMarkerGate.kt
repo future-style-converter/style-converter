@@ -38,8 +38,8 @@ import kotlinx.serialization.json.JsonElement
  *
  * ## The placement this gate selects
  * The marker of a `display: list-item` box is that box's FIRST INLINE BOX
- * (css-lists-3 §3.2). Its in-flow content on all three runtimes is
- * BLOCK-level — the web runtime renders `_text` through its own
+ * (css-lists-3 §3.1 first child + §3.5 inside). Its in-flow content on
+ * all three runtimes is BLOCK-level — the web runtime renders `_text` through its own
  * placeholder node and the natives through `PlaceholderContent` /
  * `PlaceholderLabel` — so the marker can never share a line with it and
  * ends up owning a LEADING line box of its own. That is what web renders
@@ -81,7 +81,7 @@ object ListItemMarkerGate {
      * The base is [ListStyleConfig]'s own default — `disc` / `outside`,
      * which are the INITIAL values of `list-style-type` and
      * `-position` (css-lists-3 §3.1). That is the right base here
-     * precisely because there is no container: HTML §15.3.9's
+     * precisely because there is no container: HTML §15.3.7's
      * `ul { list-style-type: disc }` / `ol { … decimal }` are declarations
      * on the CONTAINER element, and a `display: list-item` `<div>` matches
      * neither.
@@ -112,7 +112,7 @@ object ListItemMarkerGate {
      *   KNOWN GAP, unchanged by this lane: an `<li>` whose parent is NOT a
      *   list container still gets no marker on either path — no document
      *   in the corpus has that shape.
-     * - `position == INSIDE` only. css-lists-3 §3.2 puts an `outside`
+     * - `position == INSIDE` only. css-lists-3 §3.5 puts an `outside`
      *   marker in the item's MARGIN area, left of the border box — a
      *   LEADING LINE BOX is the `inside` geometry and would instead push
      *   the item's whole content down by a line the browser does not have.

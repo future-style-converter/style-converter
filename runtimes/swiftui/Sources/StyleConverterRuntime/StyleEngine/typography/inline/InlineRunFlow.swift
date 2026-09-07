@@ -58,7 +58,7 @@
 //      (inherit-computed-001's `<em>` carries `border: inherit` COLORS
 //      whose style never reached the wire, a converter gap, so nothing
 //      paints on any path today; the ref's ▮ bar is the named residual).
-//    • HYPHENS ADOPTION (css-text-3 §6.1): a member's `hyphens` governs
+//    • HYPHENS ADOPTION (css-text-3 §5.3): a member's `hyphens` governs
 //      break opportunities inside the member's text, but the pre-break
 //      takes ONE mode per paragraph — so when the container declares none
 //      the first member declaration is ADOPTED for the whole paragraph
@@ -67,7 +67,7 @@
 //      declaration, or two members disagreeing, bail: no single mode is
 //      faithful. `auto` adoption additionally requires the member's
 //      language to equal the paragraph's — the dictionary is selected per
-//      language (§6.1 "appropriate to the language of the text").
+//      language (§5.3 "appropriate to the language of the text").
 //    • HOST gates inherited from the twin: `text-transform` (a length-
 //      changing string rewrite whose member boundaries this fold does not
 //      model) and a tab in the merged text (tab-size expansion downstream
@@ -84,7 +84,7 @@
 //  TextDecorationLine underline+line-through) now FOLD, each recorded as
 //  a `Span` range over the merged text that PlaceholderLabel renders as
 //  a per-segment Text concatenation (admission + walls: InlineSpanRing's
-//  banner). `<br>` members fold to '\n' with css-text-3 §4.1.4 space
+//  banner). `<br>` members fold to '\n' with css-text-3 §4.1.2 space
 //  removal — but ONLY alongside a glyph member: a {text, <br>}*-only
 //  host's stacked fallback already renders the forced-break line
 //  structure, so engaging there would move calibrated passing pixels for
@@ -233,7 +233,7 @@ enum InlineRunFlow {
     /// whitespace to single spaces inside each text node. Twin:
     /// InlineRunFold.appendCollapsed.
     /// Wave 47 (lane Z6): a trailing '\n' (a folded `<br>`) collapses the
-    /// next segment's leading spaces too — css-text-3 §4.1.4(3) removes
+    /// next segment's leading spaces too — css-text-3 §4.1.2(3) removes
     /// collapsible spaces at the START of a line, and everything after a
     /// forced break starts one. '\n' never occurs in a pre-wave-47 merge,
     /// so the old decisions are untouched by construction.
@@ -248,7 +248,7 @@ enum InlineRunFlow {
     }
 
     /// Wave 47 (lane Z6) — append one forced line break (a folded `<br>`
-    /// member, HTML §4.5.27). css-text-3 §4.1.4(1): collapsible spaces at
+    /// member, HTML §4.5.27). css-text-3 §4.1.2(1): collapsible spaces at
     /// the END of a line are removed — everything before a forced break
     /// ends one, so the trailing space run falls before the '\n' lands
     /// (block-ellipsis-004's `Line 2<br>` / ` Line 3` merges to
@@ -277,10 +277,10 @@ enum InlineRunFlow {
     ///     out-of-flow sibling refuses the whole fold.
     ///   - containerProperties: the container's MERGED, inheritance-
     ///     resolved list — `writing-mode` and `hyphens` are Inherited: yes
-    ///     (css-writing-modes-4 §3.1, css-text-3 §6.1) so both usually sit
+    ///     (css-writing-modes-4 §3.2, css-text-3 §5.3) so both usually sit
     ///     on an ancestor and the component's own list would answer wrong.
     ///   - containerLang: the container's COMPUTED content language
-    ///     (`meta.lang`, producer-resolved) — the §6.1 gate on `auto`
+    ///     (`meta.lang`, producer-resolved) — the §5.3 gate on `auto`
     ///     adoption, whose dictionary is language-selected. Compared
     ///     verbatim, exactly like the Compose twin's hostEffectiveLang.
     static func fold(runs: [IRRun]?,
@@ -416,7 +416,7 @@ enum InlineRunFlow {
                 claimed += 1
             case .forcedBreak:
                 // Wave 47 (lane Z6): '\n', spaces falling on both sides
-                // (css-text-3 §4.1.4 — appendBreak's banner).
+                // (css-text-3 §4.1.2 — appendBreak's banner).
                 appendBreak(&out)
                 breakMembers += 1
                 claimed += 1
@@ -770,7 +770,7 @@ enum InlineRunFlow {
         return .droppedEmpty
     }
 
-    /// The css-text-3 §6.1 hyphens ADOPTION walk, shared by the EMPTY and
+    /// The css-text-3 §5.3 hyphens ADOPTION walk, shared by the EMPTY and
     /// glyph member arms (hoisted verbatim from the wave-45 classify).
     /// Returns false after logging when no single paragraph mode is
     /// faithful; `adopted` carries the winner across members.
@@ -798,7 +798,7 @@ enum InlineRunFlow {
             // `auto` is dictionary-driven per language — adopt only
             // when the member's language IS the paragraph's (a nil
             // member lang inherits the host's, trivially equal;
-            // §6.1 "appropriate to the language of the text").
+            // §5.3 "appropriate to the language of the text").
             if mode == "auto", let memberLang = member.meta?.lang,
                memberLang != containerLang {
                 _ = bail("hyphens-lang-divergence",

@@ -58,8 +58,10 @@ final class TableUaDisplayTests: XCTestCase {
 
     func testTagMatchingIsCaseInsensitiveAndNonTableTagsStayNone() {
         // The wire lowercases `sourceTag`, but an uppercase tag must not
-        // silently fall out of the table — the same tolerance
-        // CollapsedBorderConflict.originOf applies to the same channel.
+        // silently fall out of the table. (Retro sweep P2b, A6#11: the
+        // second reader this comment used to cite for the same tolerance,
+        // CollapsedBorderConflict.originOf, is deleted — it had no
+        // production caller on either native.)
         XCTAssertEqual(TableBoxTree.uaRoleOf("TABLE"), .table)
         XCTAssertEqual(TableBoxTree.uaRoleOf("Td"), .cell)
         // Everything else is not a table-internal box, including the two

@@ -37,7 +37,7 @@ data class ClipPathProperty(
         @Serializable data class Ellipse(val radiusX: ShapeRadius?, val radiusY: ShapeRadius?, val position: Position?) : Shape
         @Serializable data class Polygon(val points: List<Point>) : Shape
         /**
-         * css-shapes-2 §3.2 `path()` = `path( <fill-rule>? , <string> )`.
+         * css-shapes-1 §3.1 `path()` = `path( <fill-rule>? , <string> )`.
          *
          * `fillRule` is the optional leading `nonzero` / `evenodd` token.
          * It defaults to null (= `nonzero`, the CSS initial) and is omitted

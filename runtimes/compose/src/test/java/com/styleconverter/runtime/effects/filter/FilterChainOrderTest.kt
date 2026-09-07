@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.effects.filter
 
-// Pins the filter-chain COMPOSITION DIRECTION (filter-effects-1 §2: in
+// Pins the filter-chain COMPOSITION DIRECTION (filter-effects-1 §5: in
 // `filter: F1 F2`, F2 acts on F1's output, so the combined matrix is M2·M1).
 //
 // The old fold did `acc.timesAssign(step)` — acc × step = M1·M2 — running

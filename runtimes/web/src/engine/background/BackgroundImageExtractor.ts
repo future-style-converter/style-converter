@@ -47,7 +47,7 @@ interface IRStop { color?: unknown; position?: unknown; positionLength?: unknown
 // A stop's explicit position → the CSS text that follows the colour, or ''
 // when the stop has none (CSS then auto-spaces it).
 //
-// css-images-4 §3.4.3 types a stop position as a <length-percentage>, and the
+// css-images-4 §3.5.3 types a stop position as a <length-percentage>, and the
 // IR carries the two arms in two keys because only the percentage arm has a
 // frozen wire shape (a raw number):
 //   position: 42          → '42%'
@@ -323,7 +323,7 @@ const PASSTHROUGH_IMAGE_FNS = [
   'image-set(', '-webkit-image-set(',                                  // css-images-4 §2.4
   'linear-gradient(', 'repeating-linear-gradient(',                    // css-images-3 §3.1
   'radial-gradient(', 'repeating-radial-gradient(',                    // css-images-3 §3.2
-  'conic-gradient(', 'repeating-conic-gradient(',                      // css-images-4 §3.4.4
+  'conic-gradient(', 'repeating-conic-gradient(',                      // css-images-4 §3.3
 ];
 
 function rawImageFunctionCss(raw: string): string | null {

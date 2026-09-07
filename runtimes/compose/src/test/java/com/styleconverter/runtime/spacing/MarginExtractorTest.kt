@@ -91,7 +91,7 @@ class MarginExtractorTest {
     // original (shape `{"px":N,"original":{"v":V,"u":"EM"}}`); the
     // extractor must keep the em identity (with the prebake as fallback)
     // so the applier can re-resolve against the element's OWN computed
-    // font-size (css-values-4 §5.1.1 — the CSS Fonts 4 §3.5 monospace-13
+    // font-size (css-values-4 §6.1.1 — the CSS Fonts 4 §3.5 monospace-13
     // quirk case measured on wave-44 discard-multicol-001).
 
     @Test fun `prebaked em keeps Relative with the prebake as pxFallback`() {

@@ -1,5 +1,9 @@
 package app.parsing.css.properties.longhands.animations
 
+// A6#14: this parser's private `splitByComma` was byte-identical to
+// ColorParser's; both now call TokenizationUtils.splitByCommaRaw, the
+// untrimmed comma policy (distinct from splitByComma/splitByTopLevelComma).
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
 import app.irmodels.IRProperty
 import app.irmodels.properties.animations.AnimationTimelineProperty
 import app.irmodels.properties.animations.AnimationTimelineValue
@@ -44,7 +48,7 @@ object AnimationTimelinePropertyParser : PropertyParser {
 
         // Check for comma-separated with functions (need parenthesis-aware split)
         if (trimmed.contains(",")) {
-            val parts = splitByComma(trimmed)
+            val parts = TokenizationUtils.splitByCommaRaw(trimmed)
             if (parts.size > 1) {
                 val timelines = parts.mapNotNull { parseSingleTimeline(it.trim()) }
                 if (timelines.size > 1) {
@@ -139,27 +143,4 @@ object AnimationTimelinePropertyParser : PropertyParser {
         return AnimationTimelineValue.View(axis, insetStart, insetEnd)
     }
 
-    private fun splitByComma(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var depth = 0
-        var current = StringBuilder()
-
-        for (char in value) {
-            when (char) {
-                '(' -> { depth++; current.append(char) }
-                ')' -> { depth--; current.append(char) }
-                ',' -> {
-                    if (depth == 0) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    } else {
-                        current.append(char)
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) result.add(current.toString())
-        return result
-    }
 }

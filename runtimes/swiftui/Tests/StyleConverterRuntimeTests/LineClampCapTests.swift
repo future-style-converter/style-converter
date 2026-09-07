@@ -200,7 +200,7 @@ final class LineClampCapTests: XCTestCase {
     }
 
     func testExactLineCountFollowsTheWhiteSpaceKeyword() {
-        // `pre`: segments are lines, spaces never wrap (css-text-3 §5.1).
+        // `pre`: segments are lines, spaces never wrap (css-text-3 §3).
         XCTAssertEqual(LineClampCensus.exactLineCount("Line 1\nLine 2", whiteSpace: "pre"), 2)
         // `nowrap`: one line, whatever the text.
         XCTAssertEqual(LineClampCensus.exactLineCount("a b\nc", whiteSpace: "nowrap"), 1)
@@ -449,7 +449,7 @@ final class LineClampCapTests: XCTestCase {
         // No cap: all three bars paint (60 rows).
         XCTAssertEqual(try bandHeight(cap: nil), 60)
         // A 2-bar cap: the third bar's ink is clipped (40 rows) —
-        // css-overflow-4 §4.3, the discarded content is not rendered.
+        // css-overflow-4 §5.3.2, the discarded content is not rendered.
         XCTAssertEqual(try bandHeight(cap: 40), 40)
         // Within slack: 60 vs cap 58.5 + 2 → kept byte-identically.
         XCTAssertEqual(try bandHeight(cap: 58.5), 60)

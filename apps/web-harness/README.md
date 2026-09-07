@@ -18,7 +18,7 @@ Run it standalone:
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/visual-test.json -o out"
 npm -w apps/web-harness run copy-ir     # out/tmpOutput.json → public/ir-components.json
 npm -w apps/web-harness run dev         # browse the rendered components
-npm -w apps/web-harness run test        # vitest suite (capture pipeline + UI)
+npm -w apps/web-harness run test        # vitest suite (276 tests: capture pipeline + UI)
 ```
 
 Web-only smoke of the whole capture pipeline:

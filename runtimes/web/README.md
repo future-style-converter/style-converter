@@ -68,7 +68,7 @@ the pre-refactor harness DOM is pinned by that app's
 
 ```bash
 # from the repo root (install once with `npm ci`)
-npm -w runtimes/web run test        # vitest suite (1340 tests, tests/<category>/ + tests/renderer/)
+npm -w runtimes/web run test        # vitest suite (1337 tests, tests/<category>/ + tests/renderer/)
 npm -w runtimes/web run typecheck   # tsc --noEmit
 node runtimes/web/examples/ssr-smoke.mjs   # standalone SSR smoke
 ```

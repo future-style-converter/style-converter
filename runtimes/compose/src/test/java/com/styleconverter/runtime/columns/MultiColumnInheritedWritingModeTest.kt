@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.columns
 
 // Wave 12 — the multicol vertical-writing bail must fire for an INHERITED
-// writing mode (honesty fix). css-writing-modes-4 §3.1: writing-mode
+// writing mode (honesty fix). css-writing-modes-4 §3.2: writing-mode
 // inherits — and the css-break background-image-001/002 fixtures declare
 // `writing-mode: vertical-rl` on the PARENT .container while the multicol
 // children carry only column properties. MultiColumnExtractor reads
@@ -56,7 +56,7 @@ class MultiColumnInheritedWritingModeTest {
 
     @Test
     fun `writing-mode is on the inheritance whitelist`() {
-        // css-writing-modes-4 §3.1 "Inherited: yes" — the wave-12 fix.
+        // css-writing-modes-4 §3.2 "Inherited: yes" — the wave-12 fix.
         assertTrue("WritingMode" in ComponentRenderer.INHERITED_PROPERTY_TYPES)
     }
 

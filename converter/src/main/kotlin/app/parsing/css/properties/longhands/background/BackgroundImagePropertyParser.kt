@@ -270,7 +270,7 @@ object BackgroundImagePropertyParser : PropertyParser {
         if (colorStopStart == 0 && !GradientPrefixGuard.isColorStopSegment(firstPart)) return null
 
         // Parse color stops — flatMap because a double-position stop
-        // (`red 25% 50%`, css-images-4 §3.4.3) expands into TWO entries.
+        // (`red 25% 50%`, css-images-3 §3.4.3 / css-images-4 §3.5.3) expands into TWO entries.
         val colorStops = parts.drop(colorStopStart).flatMap { GradientValueParsers.parseColorStops(it.trim()) }
         if (colorStops.isEmpty()) return null
 

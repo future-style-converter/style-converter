@@ -120,51 +120,8 @@ export function useHotReload(
   };
 }
 
-/**
- * Hot reload status indicator component.
- */
-interface HotReloadStatusProps {
-  isWatching: boolean;
-  reloadCount: number;
-  lastError?: string | null;
-}
-
-export function HotReloadStatus({ isWatching, reloadCount, lastError }: HotReloadStatusProps) {
-  const statusColor = lastError
-    ? 'rgba(239, 68, 68, 0.2)'
-    : isWatching
-    ? 'rgba(34, 197, 94, 0.2)'
-    : 'rgba(156, 163, 175, 0.2)';
-
-  const dotColor = lastError ? '#ef4444' : isWatching ? '#22c55e' : '#9ca3af';
-
-  return (
-    <div
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '8px',
-        padding: '6px 12px',
-        background: statusColor,
-        borderRadius: '6px',
-        fontSize: '12px',
-        color: '#aaa',
-      }}
-    >
-      <span
-        style={{
-          width: '8px',
-          height: '8px',
-          borderRadius: '50%',
-          background: dotColor,
-        }}
-      />
-      <span>{isWatching ? 'Watching' : 'Stopped'}</span>
-      {reloadCount > 0 && (
-        <span style={{ color: '#666' }}>| {reloadCount} reloads</span>
-      )}
-    </div>
-  );
-}
+// (A6#13) the `HotReloadStatus` indicator component that stood here was never
+// mounted by anything — the harness renders its own status chrome — so the
+// hook below is the whole live surface of this module.
 
 export default useHotReload;

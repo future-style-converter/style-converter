@@ -143,7 +143,7 @@ class FilterGroupApplierTest {
     fun `the combined matrix survives the split unchanged`() {
         // generateColorMatrix feeds off the same buildCombinedColorMatrix the
         // group node uses; pin invert(1)'s row form (scale 1−2a = −1, bias
-        // a·255 = 255 — filter-effects-1 §8.6) so a refactor of the split
+        // a·255 = 255 — filter-effects-1 §6.1) so a refactor of the split
         // cannot silently alter the matrix the layer composites with.
         val matrix = FilterApplier.generateColorMatrix(
             FilterConfig(filters = listOf(FilterFunction.Invert(1f))),

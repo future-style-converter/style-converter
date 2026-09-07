@@ -1,5 +1,5 @@
 // BorderRightWidthExtractor.ts — folds `BorderRightWidth` IR properties into a config.
-// IR shape flavors (from examples/properties/borders/border-widths.json after
+// IR shape flavors (from fixtures/properties/borders/border-widths.json after
 // ./gradlew run conversion):
 //   {px:1, original:"thin"}               keyword pre-resolved by parser
 //   {px:6.0}                              plain numeric px

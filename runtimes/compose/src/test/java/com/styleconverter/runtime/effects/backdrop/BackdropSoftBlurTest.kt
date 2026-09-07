@@ -144,7 +144,7 @@ class BackdropSoftBlurTest {
         }
     }
 
-    /** SB7 — invert matches the shared filter-effects-1 §8.6 curve. */
+    /** SB7 — invert matches the shared filter-effects-1 §6.1 curve. */
     @Test
     fun `SB7 invert matches the shared invertChannel curve`() {
         // Full inversion: alpha kept (§8.6 is colour-only), each channel 255−c.

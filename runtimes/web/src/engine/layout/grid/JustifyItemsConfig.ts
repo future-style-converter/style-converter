@@ -9,4 +9,3 @@ export interface JustifyItemsConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const JUSTIFYITEMS_PROPERTY_TYPE = 'JustifyItems' as const;
-export type JustifyItemsPropertyType = typeof JUSTIFYITEMS_PROPERTY_TYPE;

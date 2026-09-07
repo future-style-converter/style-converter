@@ -98,7 +98,7 @@ class FlexSizeResolverTest {
         assertSizes(listOf(100.0, 105.0), sizes)
     }
 
-    // ---- wave 9: max clamps (§9.7.4.d max violations) ----------------------
+    // ---- wave 9: max clamps (§9.7 step 4.d max violations) ----------------------
 
     @Test
     fun `max violation freezes at max and redistributes to siblings`() {
@@ -140,7 +140,7 @@ class FlexSizeResolverTest {
         assertSizes(listOf(70.0), sizes)
     }
 
-    // ---- wave 9: intrinsic pass (resolveWithIntrinsics, §9.2.3.E) ----------
+    // ---- wave 9: intrinsic pass (resolveWithIntrinsics, §9.2 step 3.E) ----------
 
     @Test
     fun `auto bases fill from measured max-content then grow from them`() {
@@ -213,7 +213,7 @@ class FlexSizeResolverTest {
 
     @Test
     fun `measured base above declared max clamps to max`() {
-        // §9.2.3.E + §9.7.4.d: a 180px max-content base under max-width 120
+        // §9.2 step 3.E + §9.7 step 4.d: a 180px max-content base under max-width 120
         // freezes at 120; the sibling absorbs the freed space.
         val sizes = resolveWithIntrinsics(
             contentMainRealPx = 300.0, gapRealPx = 0.0,

@@ -1,6 +1,6 @@
 // TextSpaceCollapseExtractor.ts — folds `TextSpaceCollapse` IR properties into a TextSpaceCollapseConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextSpaceCollapseConfig, TEXT_SPACE_COLLAPSE_PROPERTY_TYPE, TextSpaceCollapsePropertyType } from './TextSpaceCollapseConfig';
 import { kwLower } from './_shared';

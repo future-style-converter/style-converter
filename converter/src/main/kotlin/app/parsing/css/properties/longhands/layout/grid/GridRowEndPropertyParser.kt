@@ -7,30 +7,13 @@ import app.irmodels.properties.layout.grid.*
 /**
  * Parser for `grid-row-end` property.
  */
+// A6#14: the private `parseGridLine` this file used to carry was one of five
+// copies; it now calls the shared GridLineParsing (same package). caseFold =
+// true preserves this longhand's historical lowercase step exactly — see the
+// case-sensitivity note in GridLineParsing.kt.
 object GridRowEndPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
-        val gridLine = parseGridLine(value) ?: return null
+        val gridLine = GridLineParsing.parse(value, caseFold = true) ?: return null
         return GridRowEndProperty(gridLine)
-    }
-
-    private fun parseGridLine(value: String): GridLine? {
-        val trimmed = value.trim().lowercase()
-        if (trimmed == "auto") {
-            return GridLine.Auto()
-        }
-        if (trimmed.startsWith("span ")) {
-            val spanValue = trimmed.substring(5).trim()
-            val spanCount = spanValue.toIntOrNull()
-            return if (spanCount != null) {
-                GridLine.Span(spanCount)
-            } else {
-                GridLine.SpanName(spanValue)
-            }
-        }
-        val lineNumber = trimmed.toIntOrNull()
-        if (lineNumber != null) {
-            return GridLine.LineNumber(lineNumber)
-        }
-        return GridLine.LineName(trimmed)
     }
 }

@@ -5,4 +5,3 @@
 // in migratedProperties made the legacy path SKIP it — nothing was emitted.
 export interface BoxOrientConfig { value?: string }
 export const BOX_ORIENT_PROPERTY_TYPE = 'BoxOrient' as const;
-export type BoxOrientPropertyType = typeof BOX_ORIENT_PROPERTY_TYPE;

@@ -30,7 +30,7 @@ enum CSSFlexMath {
 
     /// One item's resolved inputs for the main-axis pass.
     struct ItemInput: Equatable {
-        /// Flex base size (css-flexbox-1 §9.2.3) — basisPx or intrinsic.
+        /// Flex base size (css-flexbox-1 §9.2 step 3) — basisPx or intrinsic.
         var basis: CGFloat
         /// Automatic minimum main size (§4.5) — from the subview's own
         /// min-size response (the 50×30 harness floor rides in here).

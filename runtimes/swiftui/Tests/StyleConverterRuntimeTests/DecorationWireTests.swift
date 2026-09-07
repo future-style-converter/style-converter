@@ -130,7 +130,7 @@ final class DecorationWireTests: XCTestCase {
     }
 
     func testKeywordCaseIsNormalizedOnBothChannels() {
-        // CSS keywords are ASCII case-insensitive (css-values-4 §3.2), and
+        // CSS keywords are ASCII case-insensitive (css-values-4 §4.1), and
         // the IR's screaming line spelling must keep working too.
         XCTAssertEqual(
             DecorationWire.decorationLines(from: [IRDecoration(line: "LINE_THROUGH", color: "BLUE")]),

@@ -29,7 +29,14 @@ data class FlexContainerConfig(
 data class FlexItemConfig(
     val flexGrow: Float = 0f,
     val flexShrink: Float = 1f,
-    val flexBasis: FlexBasis = FlexBasis.Auto,
+    // Retro R2 (A7#0): the `flexBasis` slot was removed together with the
+    // `FlexBasis` sealed interface below it. It had no reader anywhere in
+    // the runtime (the only reader named here, FlexLayoutHelper, read just
+    // alignSelf and was itself unreferenced — retro sweep P2a deleted it;
+    // LayoutFacade only stores the config) and its extractor misread the
+    // percent wire as px.
+    // The live flex-basis carrier is core/placement/FlexClaims
+    // (basisPx / basisPercent).
     val alignSelf: AlignSelf = AlignSelf.AUTO,
     val order: Int = 0
 )
@@ -114,19 +121,8 @@ enum class AlignSelf {
     STRETCH
 }
 
-/**
- * CSS flex-basis property values.
- */
-sealed interface FlexBasis {
-    /** flex-basis: auto - use the item's intrinsic size */
-    data object Auto : FlexBasis
-
-    /** flex-basis: <length> - absolute size in dp */
-    data class Length(val dp: Float) : FlexBasis
-
-    /** flex-basis: <percentage> - fraction of container (0.0-1.0) */
-    data class Percentage(val fraction: Float) : FlexBasis
-
-    /** flex-basis: content - use the item's content size */
-    data object Content : FlexBasis
-}
+// Retro R2 (A7#0): the legacy `FlexBasis` sealed interface (Auto / Length /
+// Percentage / Content) that used to live here was deleted with its only
+// producer (FlexExtractor.parseFlexBasis) and its only slot
+// (FlexItemConfig.flexBasis) — none of the three had a reader. The single
+// flex-basis representation is FlexClaims in core/placement/ItemPlacement.kt.

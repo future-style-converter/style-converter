@@ -1,10 +1,8 @@
 package com.styleconverter.runtime.effects.filter
 
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.draw.BlurredEdgeTreatment
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
+// `filter: blur()` records the subtree into a clip-sized GraphicsLayer (retro
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.ColorMatrix
@@ -26,7 +24,9 @@ import kotlin.math.sin
  * ## Implementation Notes
  *
  * ### Direct Modifier Support
- * - `blur()` - Uses Modifier.blur() directly
+ * - `blur()` - An UNBOUNDED GraphicsLayer sized to the canvas' current clip
+ *   (retro R6, A12#2 — Modifier.blur's node-bounds RenderNode cropped every
+ *   descendant painting outside the element; see BlurLayerNode)
  * - `opacity()` - Reuses color/OpacityApplier's unbounded saveLayerAlpha
  *   group (wave 44: `Modifier.alpha` IS graphicsLayer(alpha, clip = TRUE) —
  *   the identical record-time crop wave 43 evicted from the CSS `opacity`
@@ -104,27 +104,22 @@ object FilterApplier {
         val opacityFilters = config.filters.filterIsInstance<FilterFunction.Opacity>()
         val dropShadowFilters = config.filters.filterIsInstance<FilterFunction.DropShadow>()
 
-        // Apply blur first.
+        // Apply blur first — one unbounded layer per blur() function (a
+        // second blur() blurs the first's output, so they nest; see
+        // BlurLayerNode for the layer physics).
         //
-        // Unbounded edge treatment: CSS `filter: blur()` (Filter Effects 1
-        // §10.1) does NOT clip the result to the element's border box — the
-        // Gaussian halo bleeds past the bounds, which is exactly what
-        // Chrome renders. Compose's Modifier.blur defaults to
-        // BlurredEdgeTreatment.Rectangle, which clamps + clips at the
-        // bounds and produced hard-edged blurs on Android
-        // (filter-functions 002_Filter_BlurLarge: web soft halo vs Android
-        // sharp rect, Android-web SSIM 0.85).
+        // The Gaussian halo must bleed past the element's bounds: CSS
+        // `filter: blur()` does NOT clip the result to the border box
+        // (filter-effects-1 §6.1 defines blur() over the element's whole
+        // rendering; §8's filter region extends past the bounds), which is
+        // exactly what Chrome renders. The pre-wave Modifier.blur default
+        // (BlurredEdgeTreatment.Rectangle) clamped + clipped at the bounds
+        // and produced hard-edged blurs on Android (filter-functions
+        // 002_Filter_BlurLarge: web soft halo vs Android sharp rect,
+        // Android-web SSIM 0.85); Unbounded fixed the HALO but still cropped
+        // DESCENDANT ink at the node bounds — the retro-R6 fix (BlurLayerNode).
         blurFilters.forEach { blur ->
-            // filter-effects-1 §8.2: blur()'s parameter IS the Gaussian
-            // STANDARD DEVIATION, not a radius — so it cannot be handed
-            // straight to Modifier.blur, whose parameter Skia converts with
-            // σ = radius·0.57735 + 0.5 (the same legacy formula this file
-            // already inverts for drop-shadow, see dropShadowMaskRadius).
-            // Passing the CSS length through unconverted under-blurred
-            // everything, and by a VARYING factor because the relation is
-            // affine rather than a scale.
-            result = result.blur(Dp(blurSigmaToSkiaRadius(blur.radius.value)),
-                                 BlurredEdgeTreatment.Unbounded)
+            result = BlurLayerNode.apply(result, blur)
         }
 
         // Apply drop shadows
@@ -397,8 +392,9 @@ object FilterApplier {
     /**
      * Convert a CSS `blur(<length>)` σ into the radius Skia needs.
      *
-     * filter-effects-1 §8.2: the parameter of blur() IS the standard
-     * deviation. Skia (via RenderEffect.createBlurEffect, which backs
+     * filter-effects-1 §6.1 (Supported Filter Functions, blur()): "The
+     * passed parameter defines the value of the standard deviation to the
+     * Gaussian function" — the parameter IS σ, not a radius. Skia (via RenderEffect.createBlurEffect, which backs
      * Modifier.blur) maps its radius input to σ ≈ radius·0.57735 + 0.5 —
      * the same relation [dropShadowMaskRadius] inverts — so we invert it
      * here too. The only difference between the two helpers is the σ the
@@ -491,7 +487,7 @@ object FilterApplier {
             } ?: return@forEach
 
             // COMPOSITION DIRECTION — this is the whole bug. The ColorFilter
-            // applies M·c, and filter-effects-1 §2 chains left to right: in
+            // applies M·c, and filter-effects-1 §5 chains left to right: in
             // `filter: F1 F2`, F2 acts on F1's OUTPUT, so the total must be
             // M2·M1. The old fold did `acc.timesAssign(step)` (= acc × step),
             // which builds M1·M2 — the SECOND function reached the pixel

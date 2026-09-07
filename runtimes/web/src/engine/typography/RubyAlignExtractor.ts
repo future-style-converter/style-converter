@@ -1,6 +1,6 @@
 // RubyAlignExtractor.ts — folds `RubyAlign` IR properties into a RubyAlignConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { RubyAlignConfig, RUBY_ALIGN_PROPERTY_TYPE, RubyAlignPropertyType } from './RubyAlignConfig';
 import { kwLower } from './_shared';

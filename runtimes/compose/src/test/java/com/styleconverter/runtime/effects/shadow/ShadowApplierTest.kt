@@ -5,9 +5,9 @@ package com.styleconverter.runtime.effects.shadow
 //     shadow used to route through Modifier.shadow(elevation), Android's
 //     physically-modeled z-shadow with fixed ambient/spot alphas, so
 //     `box-shadow: 0 0 40px red` rendered a faint grey rim instead of the
-//     wide red Gaussian halo css-backgrounds-3 §7.1 specifies. Every
+//     wide red Gaussian halo css-backgrounds-3 §6.1 specifies. Every
 //     shadow must now build the drawBehind + BlurMaskFilter chain.
-//  2. The CSS→Skia blur conversion — css-backgrounds-3 §7.1 says blur
+//  2. The CSS→Skia blur conversion — css-backgrounds-3 §6.1 says blur
 //     radius r ⇒ Gaussian σ = r/2 (Chromium's rule); Skia's BlurMaskFilter
 //     maps radius → σ ≈ 0.57735·radius + 0.5, so the applier must invert:
 //     radiusForSkia = max(0, (r/2 − 0.5)/0.57735). Passing the raw CSS

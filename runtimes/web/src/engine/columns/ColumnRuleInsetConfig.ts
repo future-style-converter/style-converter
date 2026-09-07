@@ -5,4 +5,3 @@
 // Config mirrors the ColumnRule{Color,Style,Width}Config shape exactly: one
 // already-serialised CSS string, `undefined` when the IR carried no value.
 export interface ColumnRuleInsetConfig { value?: string }
-export const COLUMNRULEINSET_PROPERTY_TYPE = 'ColumnRuleInset' as const;

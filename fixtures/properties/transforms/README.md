@@ -1,7 +1,7 @@
 # Transforms fixtures (Phase 8)
 
 CSS fixtures exercising every value variant accepted by the transform parsers
-in `src/main/kotlin/app/parsing/css/properties/longhands/transforms/`.
+in `converter/src/main/kotlin/app/parsing/css/properties/longhands/transforms/`.
 
 Run via:
 
@@ -9,7 +9,10 @@ Run via:
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/properties/transforms/<file>.json -o /tmp/p8"
 ```
 
-All 10 fixtures convert with `(0 generic)` on every component.
+Fixture count: `ls fixtures/properties/transforms/*.json | wc -l` (10 at
+authoring, Phase 8; the directory has grown since — the coverage map below
+covers the original 10). Every fixture converted with `(0 generic)` on every
+component when the phase shipped; that claim has not been re-run since.
 
 ## Coverage map
 

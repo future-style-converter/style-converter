@@ -3,4 +3,3 @@
 // IR: bare 'FLAT' | 'PRESERVE_3D'.
 export interface TransformStyleConfig { value?: string; }
 export const TRANSFORM_STYLE_PROPERTY_TYPE = 'TransformStyle' as const;
-export type TransformStylePropertyType = typeof TRANSFORM_STYLE_PROPERTY_TYPE;

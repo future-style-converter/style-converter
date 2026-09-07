@@ -60,7 +60,7 @@ object MaskImagePropertyParser : PropertyParser {
             MaskImageValue.LinearGradient(image.angle, image.colorStops.map { mapStop(it) }, image.repeating)
         is BackgroundImageProperty.BackgroundImage.RadialGradient ->
             MaskImageValue.RadialGradient(
-                // Enum twins map by name (both mirror css-images-3 §3.5).
+                // Enum twins map by name (both mirror css-images-3 §3.2).
                 image.shape?.let { MaskImageValue.GradientShape.valueOf(it.name) },
                 image.size?.let { MaskImageValue.GradientSize.valueOf(it.name) },
                 image.position?.let { MaskImageValue.Position(it.x, it.y) },

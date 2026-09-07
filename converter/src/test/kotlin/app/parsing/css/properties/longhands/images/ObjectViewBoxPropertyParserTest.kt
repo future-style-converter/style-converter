@@ -1,7 +1,7 @@
 package app.parsing.css.properties.longhands.images
 
 // wave-37 lane W2 — `object-view-box`'s other two <basic-shape-rect>
-// spellings (css-shapes-1 §3.2, admitted by css-images-4 §5.3).
+// spellings (css-shapes-1 §3.2, admitted by css-images-5 §3.1).
 //
 // The parser recognised `none` and `inset()` only, so `rect()` / `xywh()`
 // returned null, the declaration was dropped, and the image rendered

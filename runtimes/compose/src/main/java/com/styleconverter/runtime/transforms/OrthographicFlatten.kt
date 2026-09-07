@@ -102,32 +102,37 @@ object OrthographicFlatten {
     /**
      * Is the orthographic rule the correct one for this accumulation?
      *
-     * Two guards, both about staying inside what is provably exact:
+     * One guard, about staying inside what is provably exact:
+     * `perspectivePx > 0` means a `perspective()` FUNCTION in the element's
+     * own list put a real m34 in the matrix (§4.1.1 first way / §12.2), so
+     * the projection IS projective and the 4x4 canvas route owns it. The
+     * own `perspective` PROPERTY never arrives here: it is §4.1.1's second
+     * way and projects the CHILDREN (§8) — retro F3 removed the R1 fold
+     * (`ownPerspectiveFolds`) that used to route it in; the measured
+     * reason is in TransformMatrixComposer's class doc. NOTE the honest
+     * limit: this only sees the element's OWN list. A perspective
+     * inherited from an ancestor's `perspective` property is not visible to a Modifier
+     * (it would need a CompositionLocal threaded from the renderer —
+     * a seam this folder does not own). Corpus carriers of that shape:
+     * `filter-effects/backdrop-filter-3d-transform-perspective` and
+     * `…-nested-3d-transform-perspective` (parent `perspective: 600px`,
+     * child `rotateY(45deg)`). For those the orthographic answer is
+     * still far closer to the browser than the previous 8·density² px
+     * camera was — the residual is named, not hidden.
      *
-     * - `perspectivePx > 0` means a `perspective()` function or the
-     *   `perspective` property put a real m34 in the matrix (§8/§4.1.1),
-     *   so the projection IS projective and the existing camera path is
-     *   the right owner. NOTE the honest limit: this only sees the
-     *   element's OWN perspective. A perspective inherited from an
-     *   ancestor's `perspective` property is not visible to a Modifier
-     *   (it would need a CompositionLocal threaded from the renderer —
-     *   a seam this lane does not own). Corpus carriers of that shape:
-     *   `filter-effects/backdrop-filter-3d-transform-perspective` and
-     *   `…-nested-3d-transform-perspective` (parent `perspective: 600px`,
-     *   child `rotateY(45deg)`). For those the orthographic answer is
-     *   still far closer to the browser than the previous 8·density² px
-     *   camera was — the residual is named, not hidden.
-     * - `translateZPx != 0` keeps the depth-scale path (which models
-     *   translateZ under [TransformApplier.DEFAULT_PERSPECTIVE]) intact.
-     *   Under a strict reading of §4.1 a translateZ with no perspective is
-     *   invisible too, but its corpus carriers
-     *   (`css-transforms/3d-rendering-context-*`) sit inside preserve-3d
-     *   rendering contexts whose semantics are a separate mechanism; they
-     *   currently score 0.984–0.992 on Android and are deliberately left
-     *   untouched by this change.
+     * The wave-49 `translateZPx != 0` guard is GONE (retro R1, A11#6):
+     * under §4.1 a translateZ with no perspective in effect drops out with
+     * the z column, and the 1000px DEFAULT_PERSPECTIVE that scaled it had
+     * no basis in the spec. Its corpus carriers
+     * (`css-transforms/3d-rendering-context-*`, preserve-3d contexts whose
+     * ANCESTOR holds the perspective) were measured, not assumed: on
+     * 3d-rendering-context-and-abspos the 1.02x/1.01x oversized green boxes
+     * exposed a red/orange edge the frozen ref does not have, so removing
+     * the depth scale moves toward the ref, not away. The inherited
+     * perspective those tests actually want remains the renderer-seam
+     * limit above.
      */
-    fun appliesTo(perspectivePx: Float, translateZPx: Float): Boolean =
-        perspectivePx <= 0f && translateZPx == 0f
+    fun appliesTo(perspectivePx: Float): Boolean = perspectivePx <= 0f
 
     /**
      * Flatten the accumulated X/Y rotations to a scale pair.

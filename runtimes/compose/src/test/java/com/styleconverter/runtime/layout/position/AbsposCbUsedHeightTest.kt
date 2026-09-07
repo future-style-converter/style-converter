@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.position
 
 // Wave 33 (lane C) — JVM pins for the abspos CB-HEIGHT channel
-// (CSS 2.2 §10.6.3 read through css-position-3 §3.1 / §10.6.4).
+// (CSS 2.2 §10.6.3 and §10.6.4, read through css-position-3 §3.1).
 //
 // The rule is pure decisions + arithmetic with an identical signature on
 // iOS (AbsposCbUsedHeightTests.swift pins the same table entry-for-entry

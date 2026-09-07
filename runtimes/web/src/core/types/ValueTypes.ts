@@ -113,64 +113,15 @@ export interface IRPercentage {
   value: number;
 }
 
-// ==================== Shadows ====================
-
-export interface IRShadow {
-  x: IRLength;
-  y: IRLength;
-  blur?: IRLength;
-  spread?: IRLength;
-  c?: IRColor;
-  color?: IRColor;
-  inset?: boolean;
-}
-
-// ==================== Gradients ====================
-
-export interface ColorStop {
-  color: IRColor;
-  position?: number; // Percentage 0-100
-}
-
-export interface LinearGradient {
-  type: 'linear-gradient';
-  angle: IRAngle;
-  stops: ColorStop[];
-  repeating?: boolean;
-}
-
-export interface RadialGradient {
-  type: 'radial-gradient';
-  shape?: 'circle' | 'ellipse';
-  size?: string;
-  position?: { x: IRLength; y: IRLength };
-  stops: ColorStop[];
-  repeating?: boolean;
-}
-
-export interface ConicGradient {
-  type: 'conic-gradient';
-  from?: IRAngle;
-  position?: { x: IRLength; y: IRLength };
-  stops: ColorStop[];
-  repeating?: boolean;
-}
-
-export type Gradient = LinearGradient | RadialGradient | ConicGradient;
-
-// ==================== Timing Functions ====================
-
-export interface CubicBezier {
-  cb: [number, number, number, number];
-  original?: string;
-}
-
-export interface Steps {
-  steps: number;
-  jumpTerm?: 'start' | 'end' | 'none' | 'both';
-}
-
-export type TimingFunction = CubicBezier | Steps | { type: 'linear' };
+// ==================== Shadows / Gradients / Timing functions ====================
+//
+// DELETED (finding A6#13): the `IRShadow` shape, the gradient cluster
+// (`ColorStop`, `Linear`/`Radial`/`ConicGradient`, `Gradient`) and the
+// timing-function cluster (`CubicBezier`, `Steps`, `TimingFunction`) had
+// zero importers anywhere in the repo. The live decoders for those IR
+// payloads are the engine triplets — `engine/effects/shadow/`,
+// `engine/background/BackgroundImage*` and `engine/animations/` — which
+// carry their own typed shapes; these were an unused parallel vocabulary.
 
 // ==================== Border Width ====================
 

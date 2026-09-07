@@ -43,11 +43,19 @@ enum ClipExtractor {
 
     // MARK: - ClipPath
 
-    // IR shapes documented in examples/properties/effects/clip-path-*.
+    // IR shapes documented in fixtures/properties/effects/clip-path-*.
     private static func applyClipPath(_ data: IRValue, into cfg: inout ClipConfig) {
         // Bare string shapes: "none" or "#svgId".
         if let s = data.stringValue {
-            if s == "none" { cfg.shape = .none; cfg.touched = true; return }
+            // Explicit type qualification (retro R5, audit A6#4): `shape`
+            // is `ClipShape?`, so a bare `.none` here was Optional.none —
+            // ClipShape.none was never constructed anywhere and the
+            // ClipConfig contract ("nil ≡ not set; .some(.none) ≡ explicit
+            // `clip-path: none`", css-masking-1 §5.1 initial value) did not
+            // exist at runtime; ClipApplier's `.none` arm and
+            // RootCanvasClip's `.some(.none)` arm were dead. Pinned by
+            // ClipNoneKeywordTests.
+            if s == "none" { cfg.shape = ClipShape.none; cfg.touched = true; return }
             if s.hasPrefix("#") {
                 cfg.shape = .url(id: String(s.dropFirst()))
                 cfg.touched = true
@@ -57,7 +65,7 @@ enum ClipExtractor {
         }
         guard case .object(let o) = data else { return }
 
-        // Geometry-box-only (or box + shape combo). css-masking-1 §7.1:
+        // Geometry-box-only (or box + shape combo). css-masking-1 §5.1:
         // the keyword picks the REFERENCE BOX the shape resolves against
         // — or IS the clip when no shape follows. Wave 46 (lane Y4): the
         // keyword used to be read and dropped here ("documented TODO"),

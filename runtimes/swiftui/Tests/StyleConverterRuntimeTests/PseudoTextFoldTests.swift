@@ -216,7 +216,7 @@ final class PseudoTextFoldTests: XCTestCase {
     }
 
     /// The em base is the HOST's own font-size when declared (css-values-4
-    /// §5.1.1: font-size's em resolves against the INHERITED size, and the
+    /// §6.1.1: font-size's em resolves against the INHERITED size, and the
     /// pseudo's parent is its originating element) — not a hardcoded 16.
     func testStyledFontSizeEmResolvesAgainstHostFontSize() throws {
         let c = try component("""

@@ -13,7 +13,7 @@ import com.styleconverter.runtime.spacing.resolveToDp
 import kotlinx.serialization.json.JsonElement
 
 /**
- * Wave 46 (lane Y4) — the css-masking-1 §7.1 half of clip-path
+ * Wave 46 (lane Y4) — the css-masking-1 §5.1 half of clip-path
  * extraction: the `<geometry-box>` keyword and the element's own box
  * metrics ([ClipBoxGeometry]) the applier turns into a reference box at
  * draw time. Split from [ClipPathExtractor] (the shape-wire reader) to
@@ -22,7 +22,7 @@ import kotlinx.serialization.json.JsonElement
 internal object ClipBoxGeometryExtractor {
 
     /**
-     * css-masking-1 §7.1 keyword → [ClipGeometryBox]. The SVG-only boxes
+     * css-masking-1 §5.1 keyword → [ClipGeometryBox]. The SVG-only boxes
      * take the spec's used value for an element with a CSS layout box
      * (fill-box → content-box, stroke-box / view-box → border-box); an
      * unknown keyword keeps the border-box initial rather than dropping

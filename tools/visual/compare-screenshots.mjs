@@ -28,8 +28,15 @@
 //
 // Exit codes:
 //   0 — success or no baseline
-//   1 — at least one component regressed beyond thresholds
-//   2 — script / IO error (including "baseline mode requested but 0 comparisons ran")
+//   1 — at least one component regressed beyond thresholds — INCLUDING a
+//       component whose baseline exists but which this run's PARTIAL platform
+//       column did not capture (retrospective A9#0: a short column used to be
+//       skipped silently and the remaining rows passed).
+//   2 — script / IO error (including "baseline mode requested but 0 comparisons
+//       ran", a schema-invalid expectation ledger, and — under --baseline — a
+//       platform with committed baselines for this fixture that produced ZERO
+//       captures while SKIP_<PLATFORM>=1 was not set; test-all.sh's own
+//       column-presence assertion is exit 7 on its side)
 //   3 — a capture is not untagged-sRGB. Distinct from 1 because it means the
 //       NUMBERS are untrustworthy, not that the render changed: pngjs
 //       discards colour profiles without applying them, so a tagged capture
@@ -49,42 +56,75 @@
 //
 // MEASURED 2026-08-28, and the scope is much narrower than that reads.
 // Captures are 390 wide, so min(W,H) is the HEIGHT and f > 1 needs a
-// component ≥ ~384px tall. Across all 399 committed baselines exactly
-// THREE are downsampled — the three platforms of one component,
+// component ≥ ~384px tall. Across the then-399 committed baselines exactly
+// THREE were downsampled — the three platforms of one component,
 // `003_AR_Half` at 390×432. Every other capture (heights 32–132 on
-// visual-test) is already scored at 1×.
+// visual-test) is scored at 1×.
 //
-// And on that one component it changes nothing: SSIM moves 0.9978 → 0.9969
+// And on that one component it changed nothing: SSIM moved 0.9978 → 0.9969
 // (iOS-Android) when scored at 1×, with ZERO verdict flips on any of its
-// three pairs. Control: two non-downsampled rows score identically both
+// three pairs. Control: two non-downsampled rows scored identically both
 // ways (0.9406 → 0.9406), confirming the flag does what it claims.
+//
+// RE-CHECKED 2026-09-04 (retrospective A12#4): `003_AR_Half` came from
+// fixtures/perfect/spacing/AspectRatio.json, deleted in the 2026-07-08 hard
+// prune; its 12 AR_* components survived only as 36 orphan PNGs because
+// syncBaseline() upserts and never deletes. The retrospective's R13 lane
+// removed them (`git rm tools/visual/baseline/*__0??_AR_*.png` → 390 PNGs /
+// 130 components remain), so NO committed baseline reaches the ~384px
+// threshold — the caveat has zero carriers and every pair is scored at 1×.
+// doc-staleness-check.sh's orphan check now fails on any baseline PNG whose
+// component no fixture declares, so it cannot recur silently. The caveat
+// goes live again the day a ≥384px-tall fixture lands: re-run the header
+// census then (`round(min(W,H)/256) > 1` over tools/visual/baseline/*.png).
 //
 // Do not "fix" this by flipping `downsample` — it would move a committed
 // figure for no verdict change.
 //
 // The old text ended "the fix is to stop gating on SSIM." That advice is
-// CONTRADICTED by measuring what each metric actually contributes. Over
-// the 327 visual-test pairs, 26 fail at least one threshold, and the
-// UNIQUE catches — failures no other metric sees — are:
+// CONTRADICTED by measuring what each metric actually contributes.
 //
-//     SSIM alone : 14      (border radii, large radii, multi-transform,
-//                           inset round shadow — antialiased CURVE
-//                           divergence, where ΔE95 reads 0.00 and Δpx
-//                           reads under 1.4%)
-//     ΔE alone   :  4      (the iOS sepia bug; Neumorphic shadow)
-//     Δpx alone  :  0
+// HISTORY (2026-08-28, pre-flip pixelmatch 0.25 / AA-off): over the 327
+// visual-test pairs 26 failed at least one threshold; unique catches were
+// SSIM alone 14, ΔE alone 4 (the iOS sepia bug; Neumorphic shadow), Δpx
+// alone 0.
 //
-// SSIM is the LARGEST unique contributor and the only metric that sees
-// antialiased-curve structure. `pixelmatch` is the one contributing no
-// unique signal here — and it is separately blind to any uniform lightness
-// shift below 66/255 under the pre-flip settings — ~6/255 since the
-// 2026-08-29 flip to 0.02 + AA-on (see the threshold note at its call
-// site). Removing
-// SSIM on the strength of a caveat that fires on one component and flips
-// no verdict would blind the gate to its largest catch class.
+// RE-DERIVED 2026-09-04 (retrospective A5#7) on the COMMITTED visual-test
+// baselines: the three platform columns copied into scratch capture dirs
+// and scored with the current settings (0.95 / 2% / ΔE95 5.0; pixelmatch
+// 0.02 + AA-on since 2026-08-29). 23 of 327 pairs fail a threshold — exactly
+// the 23 visual-test lines in cross-platform-expectations.json, none stale.
+// UNIQUE catches — failures no other metric sees:
 //
-// Re-derive with: score both corpora, then per pair compare
-// (ssim < 0.95), (pixelPct > 2), (ΔE95 > 5) and count the singletons.
+//     SSIM alone : 11      (BorderRadius_Uniform/Pill/Mixed ×2 each,
+//                           Edge_VeryLargeRadius ×2, Edge_GradientWithRadius
+//                           ×2, Edge_InsetRoundShadow iOS-web — antialiased
+//                           CURVE divergence: ΔE95 0.00–0.40, Δpx ≤ 1.05%)
+//     Δpx alone  :  3      (Filter_Blur iOS-Android + Android-web — the
+//                           blur class the 2026-08-29 flip was made to
+//                           catch; Edge_InsetRoundShadow Android-web)
+//     ΔE alone   :  0      (the sepia catch retired with the 2026-08-28 fix)
+//     2+ metrics :  9      (Button_Outline, Input_Field, Edge_DeepNesting
+//                           ×2 each on SSIM+Δpx+ΔE; Neumorphic_Light ×2 on
+//                           Δpx+ΔE; Edge_InsetRoundShadow iOS-Android on
+//                           SSIM+Δpx)
+//
+// SSIM is still the LARGEST unique contributor and the only metric that
+// sees antialiased-curve structure. `pixelmatch` now contributes unique
+// signal too (the blur rows) — that is what the flip bought — but it stays
+// blind to any uniform lightness shift below ~6/255 (66/255 before the
+// flip; see the threshold note at its call site). Removing SSIM on the
+// strength of a caveat with zero carriers would blind the gate to its
+// largest catch class.
+//
+// Re-derive with: copy tools/visual/baseline/{iOS,Android,web}__NNN_X.png
+// into three capture dirs as NNN_X.png, run this script over them with
+// --no-cross-platform-gate and MANIFEST_OUT set, then per pair test
+// (ssim < 0.95), (pixelMismatchedPct > 2), (labDeltaE.p95 > 5) and count
+// the singletons. Use THOSE manifest keys: the retrospective's own recount
+// (A5#7) read `pixelPct` / `deltaE95` — names the manifest never carried —
+// so every failing pair looked SSIM-only (18 of 327) and the three Δpx-only
+// blur rows plus the nine multi-metric rows vanished from its tally.
 //
 // Usage:
 //     node compare-screenshots.mjs [options]
@@ -143,6 +183,7 @@ import {
   evaluateCrossPlatformGate,
   pairRegressed,
   formatRecord,
+  validateLedger,
   EXIT_UNEXPECTED_DIVERGENCE,
   EXIT_STALE_EXPECTATION,
   DEFAULT_DELTA_E_THRESHOLD,
@@ -443,11 +484,23 @@ async function main() {
     process.exit(3);
   }
 
-  // ── Cross-platform gate verdict ──────────────────────────────────────────
-  // Evaluated above (before the report was written); reported and enforced
-  // here, BEFORE the baseline gate, so "the three runtimes disagree" is
-  // surfaced on its own terms rather than being masked by, or confused with,
-  // "this platform changed since its last capture".
+  // ── Cross-platform gate verdict — REPORT ─────────────────────────────────
+  // Evaluated above (before the report was written); REPORTED here and
+  // ENFORCED in the block further down, BEFORE the baseline gate, so "the
+  // three runtimes disagree" is surfaced on its own terms rather than being
+  // masked by, or confused with, "this platform changed since its last
+  // capture".
+  //
+  // Report and enforcement are SPLIT on purpose (retrospective A11#3). The
+  // gate used to process.exit(4) inside this block — before the spec oracle
+  // below had printed a single line. On every fixture whose waived pair also
+  // trips the cross-platform gate (nested-transforms: 12 Android pairs;
+  // radius-overflow-transform and blend-isolation: 2 iOS pairs each) the
+  // oracle therefore never ran under ./test-all.sh, and the `_expect.waive`
+  // blocks — "the red test that the fix turns stale" — were unreachable:
+  // oracle-only rescores found all of them still valid, but nothing in the
+  // normal pipeline could ever have said so, or reported one stale. Now both
+  // verdicts print in full, then the exits fire in the decided order.
   if (xGate.skipped) {
     console.log(`· cross-platform gate skipped — ${xGate.reason}`);
   } else {
@@ -467,32 +520,35 @@ async function main() {
     for (const u of xGate.unexercised ?? []) {
       console.warn(`  ⚠ ledger pair not exercised this run (capture missing on one side): ${u.component} · ${u.pair}`);
     }
-
-    // Unexpected divergence is checked FIRST. When both conditions are
-    // present, "the runtimes disagree" is the one worth surfacing — a stale
-    // line is bookkeeping, a new divergence is a product regression.
     if (xGate.unexpected.length > 0) {
       console.error(`✗ ${xGate.unexpected.length} unexpected cross-platform divergence(s):`);
       for (const r of xGate.unexpected) console.error(`  · ${formatRecord(r)}`);
       console.error('  Either fix the divergence, or add it to');
-      console.error('  tools/visual/cross-platform-expectations.json with a reason and an owner.');
-      process.exit(EXIT_UNEXPECTED_DIVERGENCE);
+      console.error('  tools/visual/cross-platform-expectations.json with a reason, an owner and an expiry.');
+    }
+    // Stale entries FAIL (enforced below). This was a warning while the
+    // harness's A/A noise floor was unmeasured — the fear being that a pair
+    // at 0.9499 would flap and the failure would be indistinguishable from a
+    // real fix. tools/visual/noise-floor.sh measured it: captures are
+    // BIT-FOR-BIT identical across independent full runs (423 captures over
+    // two fixtures), so a metric cannot flap run-to-run and the fear does
+    // not apply. See cross-platform-gate.mjs for the full result and scope.
+    if (xGate.stale.length > 0) {
+      const orphans = xGate.stale.filter((r) => r.orphaned);
+      const fixed   = xGate.stale.filter((r) => !r.orphaned);
+      console.error(`✗ ${xGate.stale.length} stale expectation(s) — the ledger no longer matches reality:`);
+      for (const r of fixed) console.error(`  · now passing, delete the line: ${formatRecord(r)}`);
+      for (const r of orphans) console.error(`  · no such component: ${formatRecord(r)}`);
+      console.error('  Delete them from tools/visual/cross-platform-expectations.json.');
+      console.error('  An expectation that outlives the divergence it excused is how the ledger rots.');
     }
   }
 
-  // ── Spec-oracle verdict (Lane A) ─────────────────────────────────────────
-  // ORDERING, decided rather than accidental: exit 4 > exit 6 > exit 5.
-  //   · Unexpected divergence (4) stays first — when the runtimes disagree
-  //     AND one is spec-wrong, the disagreement is the richer signal (it
-  //     names which platform diverged from the others) and the established
-  //     one; the oracle violation will still be there on the next run.
-  //   · The oracle (6) outranks stale expectations (5) — a platform
-  //     rendering the wrong colour is a product defect; a ledger line that
-  //     now passes is bookkeeping. Spec wrongness must not queue behind a
-  //     tidy-up chore, or the tidy-up commit "fixes" the build while the
-  //     render is still wrong.
-  // The oracle runs even when the gate self-skipped (single-platform run):
-  // each platform is judged ALONE, so one platform is exactly enough.
+  // ── Spec-oracle verdict (Lane A) — REPORT ────────────────────────────────
+  // Printed whenever the fixture declares `_expect`, even when the gate above
+  // is about to exit 4, so a violation or a stale waiver is never hidden
+  // behind a divergence. The oracle runs even when the gate self-skipped
+  // (single-platform run): each platform is judged ALONE, so one is enough.
   if (xOracle !== null) {
     if (xOracle.skipped) {
       console.log(`· spec oracle skipped — ${xOracle.reason}`);
@@ -521,7 +577,6 @@ async function main() {
         console.error('  The expected values are spec-derived (_expect in the fixture), so the platforms');
         console.error('  agreeing with EACH OTHER does not excuse this. Fix the platform(s) — or, if the');
         console.error('  derivation itself is wrong, correct the fixture and cite the spec in _expect.note.');
-        process.exit(EXIT_SPEC_ORACLE_VIOLATION);
       }
       // A waiver whose platform now PASSES has outlived the divergence it
       // excused. Same two-sided rule (and same exit code) as the ledger's
@@ -532,7 +587,6 @@ async function main() {
         for (const st of xOracle.stale) {
           console.error(`  · ${st.platform} · ${st.component} — waived as: ${st.reason}`);
         }
-        process.exit(EXIT_STALE_EXPECTATION);
       }
       // An oracle that measured NOTHING must not read as green — the same
       // "check that cannot fail" doctrine behind the zero-comparison guard
@@ -542,30 +596,28 @@ async function main() {
         console.error('✗ spec oracle: the fixture declares _expect but ZERO checks ran —');
         console.error('  no expectation matched any captured component (see the ⚠ lines above).');
         console.error('  A declared oracle that measures nothing must not pass.');
-        process.exit(EXIT_SPEC_ORACLE_VIOLATION);
       }
     }
   }
 
-  if (!xGate.skipped) {
-    // Stale entries now FAIL. This was a warning while the harness's A/A
-    // noise floor was unmeasured — the fear being that a pair at 0.9499
-    // would flap and the failure would be indistinguishable from a real fix.
-    // tools/visual/noise-floor.sh measured it: captures are BIT-FOR-BIT
-    // identical across independent full runs (423 captures over two
-    // fixtures), so a metric cannot flap run-to-run and the fear does not
-    // apply. See cross-platform-gate.mjs for the full result and its scope.
-    if (xGate.stale.length > 0) {
-      const orphans = xGate.stale.filter((r) => r.orphaned);
-      const fixed   = xGate.stale.filter((r) => !r.orphaned);
-      console.error(`✗ ${xGate.stale.length} stale expectation(s) — the ledger no longer matches reality:`);
-      for (const r of fixed) console.error(`  · now passing, delete the line: ${formatRecord(r)}`);
-      for (const r of orphans) console.error(`  · no such component: ${formatRecord(r)}`);
-      console.error('  Delete them from tools/visual/cross-platform-expectations.json.');
-      console.error('  An expectation that outlives the divergence it excused is how the ledger rots.');
-      process.exit(EXIT_STALE_EXPECTATION);
-    }
-  }
+  // ── ENFORCEMENT — ordering decided rather than accidental: 4 > 6 > 5 ────
+  //   · Unexpected divergence (4) first — when the runtimes disagree AND one
+  //     is spec-wrong, the disagreement is the richer signal (it names which
+  //     platform diverged from the others) and the established one; the
+  //     oracle violation is already printed above and will still be there on
+  //     the next run.
+  //   · The oracle (6) outranks stale expectations (5) — a platform rendering
+  //     the wrong colour is a product defect; a ledger line that now passes
+  //     is bookkeeping. Spec wrongness must not queue behind a tidy-up chore,
+  //     or the tidy-up commit "fixes" the build while the render is wrong.
+  //   · Within the oracle the order is violations (6) → stale waivers (5) →
+  //     zero checks (6), unchanged from before the report/enforce split.
+  const oracleLive = xOracle !== null && !xOracle.skipped;
+  if (!xGate.skipped && xGate.unexpected.length > 0) process.exit(EXIT_UNEXPECTED_DIVERGENCE);
+  if (oracleLive && xOracle.violations.length > 0) process.exit(EXIT_SPEC_ORACLE_VIOLATION);
+  if (oracleLive && (xOracle.stale?.length ?? 0) > 0) process.exit(EXIT_STALE_EXPECTATION);
+  if (oracleLive && xOracle.checked === 0) process.exit(EXIT_SPEC_ORACLE_VIOLATION);
+  if (!xGate.skipped && xGate.stale.length > 0) process.exit(EXIT_STALE_EXPECTATION);
 
   if (useBaseline) {
     // Count how many baseline comparisons actually ran. A row only counts
@@ -579,6 +631,30 @@ async function main() {
       for (const info of Object.values(r.baseline.platforms)) {
         if (info && info.ssim !== undefined) checked += 1;
       }
+    }
+
+    // Column-presence check (retrospective A9#0, the comparator half of
+    // BACKLOG #5). A platform that captured NOTHING while committed baselines
+    // exist for this fixture's components is a capture FAILURE unless the
+    // caller said the skip was deliberate via test-all.sh's own SKIP_<P>=1
+    // knob (which reaches this process through the environment). Executed
+    // before this check existed: iOS + web columns present, Android dir
+    // EMPTY → "✓ no regressions vs baseline (284 platform-comparisons ran)",
+    // exit 0 — the two remaining columns green-lit the run. The baseline
+    // names are matched against THIS run's component names so baselines
+    // belonging to other fixtures (per-property suites) cannot demand a
+    // column this fixture never renders.
+    for (const p of PLATFORMS) {
+      if (Object.keys(captures[p]).length > 0) continue;        // column present (partial rows are handled per row)
+      const envName = `SKIP_${p.toUpperCase()}`;                // SKIP_IOS / SKIP_ANDROID / SKIP_WEB — test-all.sh's knobs
+      if (process.env[envName] === '1') continue;               // a deliberate skip is a result
+      const expected = names.filter((n) => existsSync(join(paths.baseline, `${p}__${n}`))).length;
+      if (expected === 0) continue;                             // fixture has no baselines for p → nothing was missed
+      console.error(`✗ ${p}: ${expected} committed baseline(s) match this fixture's components but the run`);
+      console.error(`  produced ZERO ${p} captures and ${envName}=1 was not set. A missing platform column is a`);
+      console.error(`  capture FAILURE (crash, adb ambiguity, missing simulator), not a result — the other columns`);
+      console.error(`  would have passed on their own. Fix the capture, or set ${envName}=1 if the skip is deliberate.`);
+      process.exit(2);
     }
 
     if (checked === 0) {
@@ -732,7 +808,9 @@ async function analyzeComponent(name, captures) {
   // baseline counterpart (same platform, same component name).
   let baseline = null;
   if (useBaseline && existsSync(paths.baseline)) {
-    baseline = await compareBaseline(name, normalized, canvasW, canvasH);
+    // `captures` rides along so compareBaseline can tell a PARTIAL column
+    // (platform captured other components, not this one) from an absent one.
+    baseline = await compareBaseline(name, normalized, canvasW, canvasH, captures);
   }
 
   return { name, canvasW, canvasH, platforms, pairs, baseline };
@@ -771,12 +849,34 @@ function loadCrossPlatformLedger() {
     ? resolve(process.env.CROSS_PLATFORM_EXPECTATIONS)
     : resolve(__dirname, 'cross-platform-expectations.json');
   if (!existsSync(path)) return { expectations: [] };
+  let raw, ledger;
   try {
-    return JSON.parse(readFileSync(path, 'utf8'));
+    raw = readFileSync(path, 'utf8');
+    ledger = JSON.parse(raw);
   } catch (e) {
     console.error(`✗ cross-platform-expectations.json is unreadable: ${e.message}`);
     process.exit(2);
   }
+  // Schema gate (retrospective A9#5 / A12#8). The ledger's own contract says
+  // every line names a reason, an OWNER and an EXPIRY; the wave-1 seed shipped
+  // 29/29 lines with owner "unassigned" and nothing rejected it, so the field
+  // was decorative for 49 waves. A line that violates the contract is a setup
+  // error — exit 2, naming the file:line — never silently excused or ignored,
+  // for the same reason unparseable JSON is fatal above: quietly narrowing or
+  // widening the gate at the moment someone mistyped a line is the worst
+  // possible failure mode for a gate whose job is to not be theatre.
+  const problems = validateLedger(ledger, raw);
+  if (problems.length > 0) {
+    console.error(`✗ ${path} violates the ledger contract (${problems.length} problem(s)):`);
+    for (const p of problems) {
+      const where = p.line !== null ? `${path}:${p.line}` : `entry #${p.index}`;
+      console.error(`  · ${where} — ${p.message}`);
+    }
+    console.error('  Every entry needs: component, pair, reason, owner (a lane or a person, not a');
+    console.error('  placeholder) and expires (ISO date, not before the divergence was observed).');
+    process.exit(2);
+  }
+  return ledger;
 }
 
 /**
@@ -984,13 +1084,42 @@ async function safeSsim(a, b) {
 // they can be unit-tested in isolation. See the imports at the top of this
 // file.)
 
-async function compareBaseline(name, normalized, canvasW, canvasH) {
+async function compareBaseline(name, normalized, canvasW, canvasH, captures = {}) {
   const result = { platforms: {}, regressed: false };
 
   for (const p of PLATFORMS) {
     const baselinePath = join(paths.baseline, `${p}__${name}`);
-    if (!existsSync(baselinePath) || !normalized[p]) {
+    if (!existsSync(baselinePath)) {
+      // No committed baseline for this platform/component — nothing to
+      // compare against (a new component, or a fixture never seeded).
       result.platforms[p] = { present: false };
+      continue;
+    }
+    if (!normalized[p]) {
+      // A baseline EXISTS but this run has nothing to hold against it. The
+      // old code `continue`d here exactly like the no-baseline case, which
+      // is how a PARTIAL column passed the 327-net (retrospective A9#0,
+      // executed: Android 10/142 captured → "✓ no regressions", exit 0).
+      // Two sub-cases, both loud:
+      //   · the platform captured OTHER components this run (or this one
+      //     failed to decode) → this component's capture FAILED. That is a
+      //     regression of the row, not a gap in it — result.regressed=true
+      //     so --baseline exits 1.
+      //   · the platform captured NOTHING → the whole column is absent;
+      //     main()'s column-presence check owns that (exit 2 unless the
+      //     matching SKIP_<P>=1 says the absence was deliberate), so here
+      //     it is recorded but not counted as a row regression, or every
+      //     row would shout the same thing 109 times.
+      const columnCaptured = Object.keys(captures[p] ?? {}).length > 0;
+      const decodeFailed = Boolean(captures[p]?.[name]);      // file was there, loadPng threw
+      if (columnCaptured) {
+        result.platforms[p] = { present: false, missingCapture: true, decodeFailed, regressed: true };
+        result.regressed = true;
+        console.warn(`  ✗ ${p}/${name}: baseline exists but this run has no usable ${p} capture` +
+          (decodeFailed ? ' (decode failed)' : ` — the ${p} column is PARTIAL`));
+      } else {
+        result.platforms[p] = { present: false, missingCapture: true, columnAbsent: true };
+      }
       continue;
     }
 
@@ -1129,7 +1258,7 @@ async function runPhaseBDriftCheck(rows) {
   // leaving it looking healthy — no warning, no output, nothing to notice.
   //
   // That is not hypothetical: the committed baseline-stats.json was a 6-pair
-  // `examples/wpt/css-color/color-003.json` snapshot from 2026-07-08, and
+  // `fixtures/wpt/css-color/color-003.json` snapshot from 2026-07-08, and
   // ZERO of the 327 visual-test pairs matched any of its keys. The drift
   // check had been a complete no-op for every visual-test run since.
   //

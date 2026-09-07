@@ -43,12 +43,20 @@ import com.styleconverter.runtime.core.types.ValueExtractors.LineStyle
  *                            (sunken look); outset is the mirror (raised
  *                            look). This is the canonical CSS 3D shading.
  *
- * The 3D styles use Chromium's two-tone palette (see shade()): the light
- * band is the declared color UNCHANGED (unless the base is near-black —
- * then Blink Color::Light() lifts it so the bands stay distinguishable)
- * and the dark band follows Blink Color::Dark()'s subtractive model —
- * 3D painting is UA-defined, so the web reference engine's measured
- * palette is the cross-platform contract.
+ * The 3D styles use Chromium's two-tone palette (see shade()): the dark
+ * band follows Blink Color::Dark()'s subtractive model, and the light band
+ * is the declared color UNCHANGED unless it would not read against that
+ * dark band — Blink's contrast-ratio gate (lightBandLifts) then lifts it
+ * via Color::Light(). 3D painting is UA-defined, so the web reference
+ * engine's own arithmetic is the cross-platform contract. The Swift twin
+ * is `StyleEngine/borders/sides/BlinkBorderShade.swift` (landed in the
+ * 2026-09 retro by R6's seam patch 03; `BorderSideApplier.swift`
+ * `shade(_:light:)` delegates to it): the same helpers with byte-parallel
+ * bodies, one shared pinned table (BorderShadeBlinkGateTest /
+ * BordersTests.testLightBandLiftsBlinkGate) and the same 8-bit input rule
+ * (BlinkBorderShade.pack8 — its class banner states the contract). Retro
+ * P2e's "no such Swift file / lifts pure black only" wording described the
+ * tree BEFORE that seam applied; round-2 F1 re-trued it (skeptics S3, S6).
  */
 object BorderSideApplier {
 
@@ -62,10 +70,12 @@ object BorderSideApplier {
     fun applyBorders(modifier: Modifier, config: AllBordersConfig): Modifier {
         if (!config.hasBorders) return modifier
 
-        // Fast path: every side identical + SOLID — delegates to Compose's
-        // highly optimized native Modifier.border.
-        val topStyle = config.top.style ?: LineStyle.SOLID
-        if (config.isUniform && config.top.hasBorder && topStyle == LineStyle.SOLID) {
+        // Fast path: every side identical + DECLARED SOLID — delegates to
+        // Compose's highly optimized native Modifier.border. No `?: SOLID`
+        // default: `hasBorder` already requires a declared visible style
+        // (CSS 2.1 §8.5.3 — absent = `none` = used width 0), same gate as
+        // paintSide below (retro R4 / A11#5).
+        if (config.isUniform && config.top.hasBorder && config.top.style == LineStyle.SOLID) {
             val width = config.top.width ?: 1.dp
             val color = config.top.color ?: Color.Black
             return modifier.border(width, color)
@@ -470,57 +480,19 @@ object BorderSideApplier {
 
     /**
      * Chromium's two-tone palette for the 3D border styles
-     * (groove/ridge/inset/outset). 3D shading is UA-defined, so the web
-     * reference engine (Blink color.cc Color::Dark()/Color::Light()) is
-     * the contract:
-     *   - LIGHT band  = the declared color UNCHANGED for normal bases,
-     *     EXCEPT when the base is so dark the dark band collapses to
-     *     black (max channel ≤ 0.33) — then Blink lifts the light band
-     *     via Color::Light() (black → rgb(84,84,84)) so groove/ridge/
-     *     inset/outset never vanish into a flat black border.
-     *   - DARK band   = Blink Color::Dark()'s SUBTRACTIVE model: every
-     *     RGB channel × max(0, (v − 0.33)/v) where v = max(r,g,b). The
-     *     previous single-point ×0.65 was fitted at one measurement
-     *     (declared 239 → 155, i.e. v = 0.937 where Dark() yields
-     *     0.6478 ≈ 0.649 measured) but drifted for mid/dark bases —
-     *     e.g. #808080 darkens ×0.343 in Blink, not ×0.65.
-     * Alpha is untouched throughout (Chromium shades in-gamut without
-     * changing transparency). Internal so JVM tests can pin the palette
-     * (BorderFidelityWave3Test / Wave4Test).
+     * (groove/ridge/inset/outset) — Blink Color::Dark()/Color::Light()
+     * gated by box_border_painter.cc CalculateBorderStyleColor. The
+     * arithmetic lives in [BlinkBorderShade] (retro R6, audit A7#2); its iOS
+     * twin is `StyleEngine/borders/sides/BlinkBorderShade.swift`, which
+     * `BorderSideApplier.swift` `shade(_:light:)` delegates to — byte-parallel
+     * bodies, one shared pinned table, one 8-bit input rule (pack8). Retro
+     * P2e (BACKLOG queue entry (f)) had rewritten this KDoc to "a Swift
+     * `BlinkBorderShade.swift` that has never existed" — correct until R6's
+     * seam patch 03 landed that very file in the integrated tree, stale
+     * after it; round-2 F1 re-trued it (skeptics S3 defect 3, S6 defect 4).
+     * This entry point stays so every caller (the side painters above,
+     * OutlineApplier, the fidelity pins) keeps one name for "the border
+     * palette". Alpha is untouched throughout.
      */
-    internal fun shade(base: Color, lighten: Boolean): Color {
-        // Blink's brightness proxy: the value channel v = max(r,g,b).
-        val v = maxOf(base.red, base.green, base.blue)
-        // Subtractive dark multiplier — 0.33 of full-scale is removed
-        // then renormalized by v; clamps to 0 for v ≤ 0.33 (and guards
-        // the v == 0 division, where Blink also short-circuits to 0).
-        val darkMultiplier = if (v <= 0f) 0f else ((v - 0.33f) / v).coerceAtLeast(0f)
-        if (lighten) {
-            // Normal bases: Chromium paints the light band as-is.
-            if (darkMultiplier > 0f) return base
-            // Dark-base special case — the dark band is pure black here,
-            // so a base≈black light band would be indistinguishable.
-            // Blink Color::Light(): pure black lifts to the fixed
-            // kLightenedBlack rgb(84,84,84)…
-            if (v <= 0f) return Color(84 / 255f, 84 / 255f, 84 / 255f, base.alpha)
-            // …and other dark bases scale ADDITIVELY by min(1, v+0.33)/v
-            // (the min keeps the max channel in gamut; the others are ≤ v
-            // so they stay in gamut too).
-            val lightMultiplier = kotlin.math.min(1f, v + 0.33f) / v
-            return Color(
-                red = base.red * lightMultiplier,
-                green = base.green * lightMultiplier,
-                blue = base.blue * lightMultiplier,
-                alpha = base.alpha
-            )
-        }
-        // Dark band — every channel scaled by the one shared multiplier
-        // (Blink darkens uniformly, preserving hue).
-        return Color(
-            red = base.red * darkMultiplier,
-            green = base.green * darkMultiplier,
-            blue = base.blue * darkMultiplier,
-            alpha = base.alpha
-        )
-    }
+    internal fun shade(base: Color, lighten: Boolean): Color = BlinkBorderShade.shade(base, lighten)
 }

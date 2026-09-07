@@ -9,4 +9,3 @@ export interface FlexWrapConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const FLEXWRAP_PROPERTY_TYPE = 'FlexWrap' as const;
-export type FlexWrapPropertyType = typeof FLEXWRAP_PROPERTY_TYPE;

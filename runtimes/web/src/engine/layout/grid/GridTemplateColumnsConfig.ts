@@ -4,4 +4,3 @@
 // just carries what renderTrackList produced.
 export interface GridTemplateColumnsConfig { value?: string; }
 export const GRID_TEMPLATE_COLUMNS_PROPERTY_TYPE = 'GridTemplateColumns' as const;
-export type GridTemplateColumnsPropertyType = typeof GRID_TEMPLATE_COLUMNS_PROPERTY_TYPE;

@@ -1,6 +1,6 @@
 // TextDecorationLineExtractor.ts — folds `TextDecorationLine` IR properties into a TextDecorationLineConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextDecorationLineConfig, TEXT_DECORATION_LINE_PROPERTY_TYPE, TextDecorationLinePropertyType } from './TextDecorationLineConfig';
 import { kwList } from './_shared';

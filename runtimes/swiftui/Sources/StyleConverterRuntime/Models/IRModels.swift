@@ -53,13 +53,19 @@ public struct IRDocument: Decodable {
     /// (omit-when-empty) and always nil for v1 documents (the v1 wire
     /// structurally cannot carry it — IRDocument.kt marks it @Transient).
     ///
-    /// DECODED BUT NOT YET CONSUMED, and that is the honest state as of wave
-    /// 34: ComponentRenderer resolves text through `.custom("Inter", size:)`
-    /// and the runtime has no `CTFontManagerRegisterFontsForURL` hop, so an
-    /// element referencing a declared family still renders in the bundled
-    /// Inter. The field exists so the wire is not a web-only dialect and so
-    /// that hop, when it lands, reads the file path off the document instead
-    /// of re-deriving it.
+    /// CONSUMED since wave 35 (retro P2e, finding A6#15 — this paragraph read
+    /// "DECODED BUT NOT YET CONSUMED … as of wave 34" for fourteen waves
+    /// after the hop landed). The hop is `DocumentFontRegistry`
+    /// (StyleEngine/typography/font/): the host calls
+    /// `DocumentFontRegistry.shared.register(...)` right after the IRDocument
+    /// decode (ios-harness InboxCaptureView.swift:105) and it hands each
+    /// declared face's file to `CTFontManagerRegisterFontsForURL`, keyed by
+    /// the family name — the URL being exactly this string resolved against
+    /// the host's asset root, which is why the field carries a path and not a
+    /// payload. The per-property read CONSULTS the registry before falling
+    /// back to the bundled Inter; a document-scoped registry (rather than a
+    /// property triplet) is the spec-shaped place for it because css-fonts-4
+    /// §4.1 scopes an `@font-face` rule to the document's font database.
     public let fontFaces: [IRFontFace]?
 
     // public: hand-written Decodable witness on a public type.
@@ -213,18 +219,23 @@ public struct IRAttrs: Equatable {
     /// Wave-36 lane M1: the REPLACED-ELEMENT SOURCE — a third disjoint attr
     /// lane (img/embed/object/video). ONE canonical key whatever the markup
     /// spelled (`src` on img/embed, `data` on object per HTML §4.8.7,
-    /// `poster` on video per §4.8.9), carrying a PRODUCER-RELATIVE PATH or a
+    /// `poster` on video per §4.8.8), carrying a PRODUCER-RELATIVE PATH or a
     /// `data:` URI — never a payload — on the same consumer-resolves
     /// contract as the document-level `fontFaces[].src`
     /// (schema/spec/04-metadata-fields.md).
     ///
-    /// DECODED, NOT YET PAINTED. This runtime has no asset origin for a
-    /// producer-relative corpus path (a device cannot read the host's disk —
-    /// the same asymmetry the @font-face channel documents), so the field
-    /// exists so the strict v2 reader ACCEPTS the key rather than throwing on
-    /// a wire the web consumer needs. Painting it is the named follow-up: a
-    /// bundling hop like the feeders' --wpt-dir copy, then an `Image` in
-    /// ComponentRenderer. Twin of Kotlin IRAttrs.src.
+    /// PAINTED since wave 39 (retro P2e, finding A6#15 — this read "DECODED,
+    /// NOT YET PAINTED" and named the hop as a follow-up long after lane A2
+    /// built it). The asset origin the paragraph said this runtime lacked is
+    /// now supplied by the host exactly as predicted: the feeders'
+    /// `--wpt-dir` copy stages the bytes on-device and
+    /// `DocumentImageRegistry` (StyleEngine/images/) turns THIS
+    /// producer-relative path into a decoded image (it also accepts the
+    /// `data:` URI arm without touching disk). ComponentRenderer paints it —
+    /// `DocumentImageRegistry.shared.resolve(component.meta?.attrs?.src)` —
+    /// and an unresolvable asset falls through to the pre-channel content
+    /// path with a registry-logged breadcrumb, never a silent blank.
+    /// Twin of Kotlin IRAttrs.src.
     public let src: String?
     /// Wave-44 lane U5: `<ol reversed>` — HTML §4.4.5's BOOLEAN attribute
     /// (presence is the whole value), so the producer emits literal `true`

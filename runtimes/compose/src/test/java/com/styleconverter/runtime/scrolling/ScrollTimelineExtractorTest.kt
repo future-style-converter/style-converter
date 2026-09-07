@@ -3,7 +3,7 @@ package com.styleconverter.runtime.scrolling
 // Phase 9 extractor tests for the three scroll-timeline longhands
 // (ScrollTimeline, ScrollTimelineName, ScrollTimelineAxis). IR shapes are
 // taken verbatim from
-// examples/properties/animations/scroll-timeline.json conversions.
+// fixtures/properties/animations/scroll-timeline.json conversions.
 //
 // Parser gap worth calling out in-test: both `scroll-timeline` and
 // `scroll-timeline-name` store the literal string "none" as the name

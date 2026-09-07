@@ -1,6 +1,6 @@
 // FontDisplayExtractor.ts — folds `FontDisplay` IR properties into a FontDisplayConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontDisplayConfig, FONT_DISPLAY_PROPERTY_TYPE, FontDisplayPropertyType } from './FontDisplayConfig';
 import { kwLower } from './_shared';

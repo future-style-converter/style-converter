@@ -36,7 +36,7 @@ data class MinWidthProperty(
         @SerialName("fit-content")
         data class FitContent(val maxSize: IRLength?) : MinMaxValue
 
-        // css-values-5 §10.1 calc-size(<keyword basis>, affine `size` expr)
+        // css-values-5 §11 calc-size(<keyword basis>, affine `size` expr)
         // (wave 42 lane W3). The kotlinx polymorphic encoding writes the
         // @SerialName as the `type` discriminator and the constructor
         // parameter names as payload keys, so the wire shape is

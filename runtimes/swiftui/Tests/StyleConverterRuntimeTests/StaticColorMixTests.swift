@@ -118,7 +118,7 @@ final class StaticColorMixTests: XCTestCase {
     }
 
     func testEndpointOrderIsSymmetric() {
-        // …-01's .t6 swaps the operands; the §12.5 hue arc must be symmetric.
+        // …-01's .t6 swaps the operands; the §13.5 hue arc must be symmetric.
         assertBytes(percentsPurple, StaticColorMix.resolve(
             mix(#"{"type":"color-mix","colorSpace":"lch","color1":"plum","color2":"purple"}"#),
             currentColor: nil))

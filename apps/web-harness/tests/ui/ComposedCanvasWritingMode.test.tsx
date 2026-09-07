@@ -81,7 +81,7 @@ describe('resolveCanvasWritingMode (wave-37 W6)', () => {
   });
 
   it('propagates each of the four vertical keywords', () => {
-    // css-writing-modes-4 §3.1's non-horizontal set. The wm-propagation-body
+    // css-writing-modes-4 §3.2's non-horizontal set. The wm-propagation-body
     // family walks all four: 032 vertical-rl, 033 vertical-lr, 034
     // sideways-rl, 035 sideways-lr, each against the same upper-right ref.
     for (const [ir, css] of [

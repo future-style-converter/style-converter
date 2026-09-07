@@ -88,7 +88,7 @@ object ClipPathShapeSerializer : KSerializer<ClipPathProperty.Shape> {
             is ClipPathProperty.Shape.Path -> buildJsonObject {
                 put("type", "path")
                 put("d", value.d)
-                // Optional `<fill-rule>` (css-shapes-2 §3.2). Omitted when
+                // Optional `<fill-rule>` (css-shapes-1 §3.1). Omitted when
                 // absent so pre-wave-37 `path('M…')` fixtures keep their
                 // exact bytes; present only for the two-argument form.
                 value.fillRule?.let { put("rule", it) }

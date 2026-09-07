@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.core.colors
 
-// LightDarkResolver — resolves `light-dark()` COLOR VALUES (css-color-5 §7.2)
+// LightDarkResolver — resolves `light-dark()` COLOR VALUES (css-color-5 §7)
 // against the platform dark-mode signal, per the spec 06 §4 note: light-dark
 // rides INSIDE property `data` as a dynamic color (`srgb: null`, structured
 // original — schema/spec/02-values.md) and MUST resolve against the SAME
@@ -93,7 +93,7 @@ object LightDarkResolver {
 
     /**
      * Resolve one light-dark envelope to the standard static color shape.
-     * css-color-5 §7.2: `light-dark(<light>, <dark>)` computes to the first
+     * css-color-5 §7: `light-dark(<light>, <dark>)` computes to the first
      * arm under a light used color scheme and the second under dark.
      */
     private fun resolveNode(envelope: JsonObject, original: JsonObject, isDark: Boolean): JsonElement {

@@ -64,9 +64,9 @@ object PseudoStyledDeclarations {
      * @param value the raw author string, verbatim from the wire.
      */
     fun convert(prop: String, value: String): Conversion? = when (prop) {
-        // css-color-4 §3.1: `color` sets the text ink of the run.
+        // css-color-4 §3.2: `color` sets the text ink of the run.
         "color" -> colorConversion(value)
-        // css-fonts-4 §2.4: `font-size` sets the run's own glyph size.
+        // css-fonts-4 §2.5: `font-size` sets the run's own glyph size.
         "font-size" -> fontSizeConversion(value)
         // css-fonts-4 §2.1: `font-family` sets the run's face list.
         "font-family" -> fontFamilyConversion(value)
@@ -111,7 +111,7 @@ object PseudoStyledDeclarations {
      * here (spec 02: absolute lengths normalize to px at 96dpi), while
      * em / rem / % stay SYMBOLIC in the `original` wrapper so the render
      * site resolves them against the threaded INHERITED base
-     * (css-values-4 §5.1.1: font-size's own em resolves against the
+     * (css-values-4 §6.1.1: font-size's own em resolves against the
      * inherited size — a base only the render site knows).
      */
     private fun fontSizeConversion(value: String): Conversion {
@@ -126,7 +126,7 @@ object PseudoStyledDeclarations {
         // A non-numeric prefix (absolute keywords, calc(), var()) is
         // beyond this conversion — named by the caller, never guessed.
         val v = num.toDoubleOrNull() ?: return Conversion.Unsupported
-        // Negative font sizes are invalid per css-fonts-4 §2.4 — refuse.
+        // Negative font sizes are invalid per css-fonts-4 §2.5 — refuse.
         if (v < 0) return Conversion.Unsupported
         // Absolute units → canonical px (spec 02-values.md table).
         val px: Double? = when (unit) {
@@ -162,7 +162,7 @@ object PseudoStyledDeclarations {
                 }
             ))
             // %: the LIVE percentage wire shape — same inherited base as em
-            // (css-fonts-4 §2.4), resolved by the same render-site branch.
+            // (css-fonts-4 §2.5), resolved by the same render-site branch.
             unit == "%" -> Conversion.Typed(IRProperty(
                 type = "FontSize",
                 data = buildJsonObject {

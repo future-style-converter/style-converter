@@ -1,5 +1,12 @@
 package app.parsing.css.properties.shorthands
 
+// A6#14 — clone consolidation: this expander used to carry private
+//   `tokenize` (1 copy), byte-identical to TokenizationUtils.tokenizeBySpace
+//   — its 1 call site now calls the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
+
 /**
  * Expands `offset` shorthand into offset-* longhands.
  * Syntax: [offset-position] [offset-path] [offset-distance] [offset-rotate] / [offset-anchor]
@@ -28,7 +35,7 @@ object OffsetExpander : ShorthandExpander {
         }
 
         val mainPart = slashParts[0].trim()
-        val tokens = tokenize(mainPart)
+        val tokens = TokenizationUtils.tokenizeBySpace(mainPart)
 
         for (token in tokens) {
             val lower = token.lowercase()
@@ -65,25 +72,4 @@ object OffsetExpander : ShorthandExpander {
         return result
     }
 
-    private fun tokenize(value: String): List<String> {
-        val tokens = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> { depth++; current.append(char) }
-                char == ')' -> { depth--; current.append(char) }
-                char == ' ' && depth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        tokens.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) tokens.add(current.toString())
-        return tokens
-    }
 }

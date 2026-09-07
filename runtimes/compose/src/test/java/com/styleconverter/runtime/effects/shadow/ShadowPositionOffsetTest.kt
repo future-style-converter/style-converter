@@ -99,7 +99,7 @@ class ShadowPositionOffsetTest {
     @Test
     fun `position offset and spread compose independently`() {
         // Spread inflates around the TRANSLATED box: negative spread
-        // (perimeter contraction, css-backgrounds-3 §7.1) contracts the
+        // (perimeter contraction, css-backgrounds-3 §6.1) contracts the
         // already-slid rect — the two terms must never interact.
         val rect = ShadowGeometry.outsetShadowRect(
             widthPx = 60f, heightPx = 60f,

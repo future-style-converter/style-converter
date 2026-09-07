@@ -61,7 +61,7 @@ object DocumentFontTypefaces {
      *  reason as [DocumentFontRegistry.fontLoader]: Typeface.createFromFile
      *  is unmocked on the JVM, so with the call inlined no unit test could
      *  pin the memoization or the face pick. runCatching: a broken font
-     *  answers null and ChUnitMetrics falls to the css-values-4 §6.1.3 0.5em
+     *  answers null and ChUnitMetrics falls to the css-values-4 §6.1.1 0.5em
      *  fallback — never a crash over a metric. `internal` + restored by the
      *  test's tearDown, exactly like the registry's own loader seam. */
     internal var typefaceLoader: (File) -> android.graphics.Typeface? = { file ->
@@ -90,7 +90,7 @@ object DocumentFontTypefaces {
         generation += 1
     }
 
-    /** css-values-4 §6.1.3 measures '0' "in the element's font"; for a family
+    /** css-values-4 §6.1.1 measures '0' "in the element's font"; for a family
      *  declared by several faces the plain-text face is the family's
      *  canonical advance source (the face a weightless upright run renders
      *  in): normal style outranks italic (§4.5), then nearest-to-400 weight

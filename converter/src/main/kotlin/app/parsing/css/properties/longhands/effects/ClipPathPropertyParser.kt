@@ -462,7 +462,7 @@ object ClipPathPropertyParser : PropertyParser {
     /**
      * Parse path() function.
      *
-     * css-shapes-2 §3.2: `path( <fill-rule>? , <string> )` — the fill rule
+     * css-shapes-1 §3.1: `path( <fill-rule>? , <string> )` — the fill rule
      * (`nonzero` | `evenodd`) is an OPTIONAL first argument, comma-separated
      * from the SVG path string.
      *

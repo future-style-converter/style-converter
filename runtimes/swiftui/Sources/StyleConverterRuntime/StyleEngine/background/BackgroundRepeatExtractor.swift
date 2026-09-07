@@ -9,10 +9,6 @@
 
 import Foundation
 
-enum BackgroundRepeatProperty {
-    static let names: [String] = ["BackgroundRepeat"]
-}
-
 enum BackgroundRepeatExtractor {
 
     static func extract(from properties: [IRProperty]) -> BackgroundRepeatConfig? {

@@ -7,7 +7,7 @@ package com.styleconverter.runtime.columns
 /**
  * Computes where each fragment of an over-tall multicol child lands, per
  * css-break-3 §4 (fragmentation into column boxes) with the
- * `box-decoration-break: slice` default of css-break-3 §6:
+ * `box-decoration-break: slice` default of css-break-3 §5.4:
  *
  * - the child is laid out ONCE at column width as a single continuous box of
  *   block-size C (backgrounds, tiles, borders painted as if unfragmented);

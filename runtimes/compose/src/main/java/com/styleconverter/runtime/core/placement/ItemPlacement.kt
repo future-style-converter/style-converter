@@ -62,7 +62,18 @@ data class FlexClaims(
     val grow: Float = 0f,
     val shrink: Float = 1f,
     /** Used flex basis in px; null = auto/content (not statically resolvable). */
-    val basisPx: Double? = null
+    val basisPx: Double? = null,
+    /**
+     * Retro R2 (A7#0) — a PERCENT flex basis, carried UNRESOLVED as the raw
+     * percent (`flex-basis: 100%` → 100.0). css-flexbox-1 §7.2.3: a
+     * percentage flex-basis resolves against the flex container's inner
+     * main size, which the CHILD cannot know at extraction time — the
+     * consuming line (ComponentRenderer.flexLineSpec) resolves it. Twin of
+     * ItemPlacement.swift's `basisPercent` (wave 48, lane W7); null = no
+     * percent basis on the wire. Exclusive with [basisPx]: the converter's
+     * FlexBasisSerializer emits ONE shape per declaration.
+     */
+    val basisPercent: Double? = null
 )
 
 /**
@@ -80,9 +91,9 @@ data class FlexClaims(
 data class ItemPlacement(
     val grid: GridClaims = GridClaims(),
     val flex: FlexClaims = FlexClaims(),
-    /** Cross-axis self-alignment (css-align-3 §6.4). AUTO = defer to container. */
+    /** Cross-axis self-alignment (css-align-3 §6.2). AUTO = defer to container. */
     val alignSelf: ComponentRenderer.AlignSelf = ComponentRenderer.AlignSelf.AUTO,
-    /** Inline-axis self-alignment (css-align-3 §6.2) — grid + block-level only; flex items ignore it. */
+    /** Inline-axis self-alignment (css-align-3 §6.1) — grid + block-level only; flex items ignore it. */
     val justifySelf: ComponentRenderer.JustifySelf = ComponentRenderer.JustifySelf.AUTO,
     /** Visual reordering (css-display-3 / css-flexbox-1 §5.4). CSS initial 0. */
     val order: Int = 0,

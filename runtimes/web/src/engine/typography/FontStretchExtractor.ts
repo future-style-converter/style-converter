@@ -1,6 +1,6 @@
 // FontStretchExtractor.ts — folds `FontStretch` IR properties into a FontStretchConfig.
 // Family: font-stretch.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontStretchConfig, FONT_STRETCH_PROPERTY_TYPE, FontStretchPropertyType } from './FontStretchConfig';
 import { kwLower } from './_shared';

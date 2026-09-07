@@ -289,23 +289,4 @@ object PropertyParserFactory {
             return constructor(insetValue)
         }
     }
-
-    // ========== Keyword Parsers ==========
-
-    /**
-     * Create a parser for simple keyword-only properties.
-     *
-     * @param allowedKeywords Set of valid keywords
-     * @param constructor Function that creates the IRProperty from the keyword string
-     */
-    inline fun <reified T : IRProperty> keywordParser(
-        allowedKeywords: Set<String>,
-        crossinline constructor: (String) -> T
-    ): PropertyParser = object : PropertyParser {
-        override fun parse(value: String): IRProperty? {
-            val lower = value.trim().lowercase()
-            if (lower !in allowedKeywords && lower !in globalKeywords) return null
-            return constructor(lower)
-        }
-    }
 }

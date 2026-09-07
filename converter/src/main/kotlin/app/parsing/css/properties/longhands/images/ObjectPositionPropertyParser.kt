@@ -8,7 +8,7 @@ import app.parsing.css.properties.primitiveParsers.GlobalKeywords
 import app.parsing.css.properties.primitiveParsers.ExpressionDetector
 
 /**
- * `object-position` — css-images-3 §5.2, whose value is the css-values-4
+ * `object-position` — css-images-3 §4.6, whose value is the css-values-4
  * `<position>` grammar shared with `background-position` (css-backgrounds-3
  * §3.6), `mask-position`, and every `<basic-shape>` `at` clause.
  *

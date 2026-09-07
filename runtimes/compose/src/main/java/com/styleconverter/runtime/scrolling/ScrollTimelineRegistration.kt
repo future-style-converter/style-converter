@@ -24,17 +24,20 @@ import com.styleconverter.runtime.PropertyRegistry
  * ## Properties
  * - `scroll-timeline` — shorthand (name + optional axis) parsed by
  *   ScrollTimelinePropertyParser. See the parser-gap note in
- *   examples/properties/animations/README.md: the parser stores the literal
+ *   fixtures/properties/animations/README.md: the parser stores the literal
  *   string `"none"` as the name when no token is seen (no sentinel).
  * - `scroll-timeline-name` — `<dashed-ident>` | `none`. Parser also stores
  *   `"none"` as a literal string.
  * - `scroll-timeline-axis` — `block` | `inline` | `x` | `y`.
  *
  * Extraction lives in [ScrollTimelineExtractor] (shared with view-timeline
- * and animation-timeline). Static rendering is a no-op — scroll-linked
- * animation progress plumbing exists in [ScrollTimelineApplier] but is not
- * wired into ComponentRenderer yet (see the Phase 9 TODO list in
- * AnimationsRegistration).
+ * and animation-timeline). Static rendering is a NO-OP, and there is no
+ * plumbing behind it: the scroll-progress scaffold this used to point at
+ * (`ScrollTimelineApplier`) had no caller in 49 waves and the retro P2a
+ * sweep deleted it. Wiring scroll-linked animation means deriving progress
+ * from a real LazyListState/ScrollState and feeding
+ * [com.styleconverter.runtime.animations.KeyframeAnimationDriver]'s clock —
+ * see TODO 2 in AnimationsRegistration.
  */
 object ScrollTimelineRegistration {
 

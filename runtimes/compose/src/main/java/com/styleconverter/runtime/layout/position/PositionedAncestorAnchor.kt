@@ -14,7 +14,7 @@ package com.styleconverter.runtime.layout.position
 // `−right` / `−bottom` (PositionConfig.offsetX/offsetY: a negated inset that
 // is only correct measured FROM the end edge), so a `right:20px;
 // bottom:20px` child of a 300×120 `position:relative` parent painted at
-// (−20,−20) instead of the css-position-3 §3.5.3 used position (220, 60).
+// (−20,−20) instead of the css-position-3 §4.3 used position (220, 60).
 // The live witness is fixtures/properties/layout/position-right-bottom.json
 // (RB_Px / RB_Zero / RB_Negative — every variant whose only insets are
 // right/bottom).
@@ -81,7 +81,7 @@ object PositionedAncestorAnchor {
      * The wire has three shapes for a declared inset: a resolved length
      * (`{"px":20.0}` / `{"original":{"v":1,"u":"EM"}}` — extractDp reads
      * both), the `auto` keyword (the CSS initial value, i.e. NOT declared
-     * for anchoring purposes — css-position-3 §3.5.3 treats it as absent),
+     * for anchoring purposes — css-position-3 §4.3 treats it as absent),
      * and a value that only the LIVE render context can compute:
      * `{"expr":"calc(10px + 5px)"}` / `{"expr":"var(--x)"}` /
      * `{"percentage":25.0}`. The third shape is the hazard this predicate
@@ -121,7 +121,7 @@ object PositionedAncestorAnchor {
      * Withdrawing the anchor degrades that axis to EndInsetAnchor's A4
      * (start anchor, byte-identical to wave 8), which is the honest
      * answer: an over-constrained box resolves in favour of the start
-     * inset in LTR (css-position-3 §3.5.3), and a `%` start inset the
+     * inset in LTR (css-position-3 §4.3), and a `%` start inset the
      * runtime cannot pre-compute is likewise not something this slot may
      * assume away. Not a silent fallthrough — it is the same degradation
      * A4 already names, applied one level earlier.
@@ -183,7 +183,7 @@ object PositionedAncestorAnchor {
      *  - A5 anchored: `fill − ink`, putting the box's end edge flush with the
      *    containing block's end edge; the child's own PositionApplier offset
      *    (`−right` / `−bottom`) then pulls it inward to the used position
-     *    `cb − box − right` (css-position-3 §3.5.3).
+     *    `cb − box − right` (css-position-3 §4.3).
      *  - A6 un-anchored: 0 — the slot origin, byte-identical to the wave-8
      *    absposOverflowMeasure placement.
      * No floor at 0: an out-of-flow box may overflow its containing block

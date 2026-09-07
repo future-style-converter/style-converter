@@ -3,7 +3,7 @@ package app.parsing.css.properties.longhands.background
 // image() notation micro-grammar — wave-48 lane W5, split into its own file
 // per the ≤200-line rule (BackgroundImagePropertyParser only dispatches here).
 //
-// css-images-4 §2.1:  image( <image-tags>? [ <image-src>? , <color>? ]! )
+// css-images-4 §2.5:  image( <image-tags>? [ <image-src>? , <color>? ]! )
 // with <image-src> = <url> | <string>.  WPT css-image-fallbacks-and-
 // annotations003/004 additionally exercise the LEGACY css-images-3 grammar
 // where several <image-src> candidates are listed ("try each in order"), so

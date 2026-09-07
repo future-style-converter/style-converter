@@ -85,7 +85,7 @@ class CanvasRootHoistTest {
     }
 
     // ── S3: fixed child of an in-flow relative parent at (116,16) ──────────
-    // css-position-3 §3.2: fixed ignores positioned ancestors entirely — the
+    // css-position-3 §2.1: fixed ignores positioned ancestors entirely — the
     // child paints at canvas (116,16), NOT parent + offset = (232,32).
 
     @Test fun `S3 fixed hoists even under a positioned ancestor — anchor is inset, not parent+inset`() {
@@ -183,7 +183,7 @@ class CanvasRootHoistTest {
     }
 
     @Test fun `walk recurses INTO hoisted subtrees — fixed inside fixed both anchor at the canvas`() {
-        // css-position-3 §3.2: a fixed box inside a fixed box still anchors
+        // css-position-3 §2.1: a fixed box inside a fixed box still anchors
         // at the viewport; its absolute sibling anchors at the (positioned)
         // fixed parent instead.
         val innerFixed = comp("inner-fixed", positioned("fixed", left = 30.0))
@@ -250,7 +250,7 @@ class CanvasRootHoistTest {
     }
 
     @Test fun `RC1 fixed keeps the wave-17 canvas anchor even with no inset — kept behavior`() {
-        // css-position-3 §3.2: the viewport IS a no-inset fixed box's
+        // css-position-3 §2.1: the viewport IS a no-inset fixed box's
         // containing block; the wave-17 canvas-origin anchor stays (all
         // six wave-17 css-position greens ride it).
         val fixed = comp("rc1-fixed", positioned("fixed"))

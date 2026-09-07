@@ -102,7 +102,8 @@ object ColorExtractor {
                     // directly. CSS treats `text` as the painting clip
                     // for every layer in our simplified single-layer
                     // model; suppress the rectangular bg paint when
-                    // any layer requests it.
+                    // any layer requests it (the solid background-color
+                    // too — see the post-loop block below, retro R6).
                     val keywords = (data as? JsonArray)?.mapNotNull {
                         (it as? JsonPrimitive)?.contentOrNull?.lowercase()
                     } ?: emptyList()
@@ -150,6 +151,33 @@ object ColorExtractor {
                 }
                 "BackgroundAttachment" -> backgroundAttachment = extractBackgroundAttachment(data)
             }
+        }
+
+        // `background-clip: text` — css-backgrounds-4 §2.8 (the `text` value
+        // is Level 4; Level 3 §2.7 defines only the box keywords) — retro R6,
+        // audit finding A11#10: the painting area is the intersection of the
+        // border box with the element's TEXT — the glyph shapes — never the
+        // box itself, and the solid `background-color` is a background layer
+        // like any image layer, so it is confined to the glyph mask too.
+        // Compose has no glyph-masked SOLID fill yet: the placeholder text
+        // path only carries a GRADIENT brush (ComponentRenderer.clipTextBrush
+        // builds `TextStyle.brush` from the first BackgroundImage layer), so
+        // the honest render for a solid colour is to paint NOTHING for the
+        // box — which is what web (glyph-masked, no glyphs in the box) and
+        // iOS (nothing) both show for pairwise pairs-01 008
+        // PW_Background_Effects_01 (`background-clip: text; background-color:
+        // #3498db`, no text), while Android flooded the full 140×96 box.
+        // Logged once so the missing glyph fill is a breadcrumb, not a
+        // silent drop; the renderer half (a SolidColor brush) is the
+        // documented follow-up.
+        if (suppressBackgroundImage && backgroundColor != null) {
+            GradientLog.once(
+                "background-clip-text-solid-color",
+                "background-clip: text with a solid background-color — the box fill is suppressed " +
+                    "(css-backgrounds-4 §2.8 confines it to the glyphs); glyph-masked SOLID fill is not " +
+                    "implemented on Compose (ComponentRenderer.clipTextBrush carries gradients only)",
+            )
+            backgroundColor = null
         }
 
         // Resolve `background-clip: padding-box | content-box` into edge

@@ -1,4 +1,8 @@
 {
+  "_capture": {
+    "seizeOnly": true,
+    "recipe": "tools/visual/animation-sweep.sh (CAPTURE_ANIMATION_TIME + SIMCTL_CHILD_CAPTURE_ANIMATION_TIME, docs/DYNAMIC_CAPTURE.md §4)"
+  },
   "keyframes": {
     "motion-fade": [
       {

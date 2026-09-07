@@ -251,7 +251,7 @@ object ContentApplier {
 
         // Extract text style. The inherited font-size base for relative
         // font-size values (em / % / smaller / larger — css-values-4
-        // §5.1.1: they resolve against the INHERITED size) comes off the
+        // §6.1.1: they resolve against the INHERITED size) comes off the
         // renderer's inheritance channel; read OUTSIDE the try because
         // CompositionLocal.current is a composable read (Compose forbids
         // composable calls inside try blocks). Null when no ancestor
@@ -805,21 +805,5 @@ fun AttributeProviderProvider(
     val provider = remember(attributes) { AttributeProvider.fromMap(attributes) }
     CompositionLocalProvider(LocalAttributeProvider provides provider) {
         content()
-    }
-}
-
-/**
- * Combined provider for both counters and attributes.
- */
-@Composable
-fun ContentContextProvider(
-    counterConfig: CounterConfig = CounterConfig(),
-    attributes: Map<String, String> = emptyMap(),
-    content: @Composable () -> Unit
-) {
-    CounterStateProvider(counterConfig) {
-        AttributeProviderProvider(attributes) {
-            content()
-        }
     }
 }

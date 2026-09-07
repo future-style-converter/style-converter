@@ -132,8 +132,10 @@ package com.styleconverter.runtime.layout
 //        only. Scoped to the new admissions: the frozen wave-34
 //        zero-margin declared-inline-block family keeps its VA-ignorant
 //        admission (css-cascade/scope-pseudo-element's three `vertical-
-//        align: top` roots are admitted TODAY and score Android 0.9742
-//        PASS; evicting them would be an unmeasured regression).
+//        align: top` roots are admitted TODAY and score Android 0.9746
+//        PASS — wave48/49-final android-ref; retro A3#12 corrected the
+//        transposed 0.9742, which is calc-size-grid-repeat's cell —
+//        evicting them would be an unmeasured regression).
 // Blast radius, re-enumerated over all 1435 frozen wave43-final per-test
 // IRs (30 sections under tools/titan/runs/wave43-final/): with the
 // pre-raster OFF — now the TITAN_SVG_PRERASTER=0 ESCAPE HATCH, not the
@@ -511,7 +513,7 @@ object InlineBlockAtom {
      * The intrinsic fields are the raster's pixel dimensions, which ARE
      * the CSS intrinsic size at the capture density (the
      * [DocumentImageRegistry.DecodedImage] contract), and the ratio is
-     * css-images-3 §5.2's width ÷ height (null for a degenerate raster).
+     * css-images-3 §4.1's width ÷ height (null for a degenerate raster).
      */
     data class ReplacedRootFacts(
         val sourceTag: String?,
@@ -675,7 +677,8 @@ object InlineBlockAtom {
         // B8 — scoped to the NEW margin channel: a margin-free inline-block
         // keeps the frozen wave-34 (VA-ignorant) admission, because
         // css-cascade/scope-pseudo-element's `vertical-align: top` run is
-        // admitted today and scores Android 0.9742 PASS.
+        // admitted today and scores Android 0.9746 PASS (wave48/49-final
+        // android-ref; retro A3#12 fixed the transposed 0.9742 here).
         if (carriesMargins && !verticalAlignIsBaseline(properties)) return null
         // B2 — a definite size on BOTH axes, or no atom.
         val w = exactPx(properties, INLINE_SIZE) ?: return null
@@ -793,7 +796,7 @@ object InlineBlockAtom {
             else -> return null
         }
         // Declared px → CONTENT px on each axis (border-box subtracts its
-        // band, floored at 0 per css-ui-3 §5's empty-content floor).
+        // band, floored at 0 per css-ui-3 §3.1's empty-content floor).
         fun contentX(px: Double) = if (borderBox) kotlin.math.max(0.0, px - bandX) else px
         fun contentY(px: Double) = if (borderBox) kotlin.math.max(0.0, px - bandY) else px
         // Axis reads: definite px, auto, or refuse.

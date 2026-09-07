@@ -14,7 +14,7 @@
 //  ── WHY THIS EXISTS ──────────────────────────────────────────────────
 //  v2 IR components carry baked ::before/::after generated content:
 //  `pseudos.before._text` is the extractor's full css-content-3 §2 /
-//  css-lists-3 §5 resolution. Web renders it as an inline <span>
+//  css-lists-3 §4.7 resolution. Web renders it as an inline <span>
 //  (runtimes/web/src/renderer/PseudoNodeRenderer.ts); iOS rendered
 //  NOTHING for every non-body-root component until wave 42 folded the
 //  UNSTYLED population. Wave 43 widens the fold three measured steps:
@@ -84,7 +84,7 @@ enum PseudoTextBridge {
     ///   - role: "before" / "after", for the log lines only.
     ///   - emBasePx: the originating element's font-size in px — the
     ///     em/% base for the pseudo's own `font-size` (css-values-4
-    ///     §5.1.1), threaded by PseudoTextFold from the host's properties.
+    ///     §6.1.1), threaded by PseudoTextFold from the host's properties.
     static func inlineRun(bucket: IRValue?, role: String, emBasePx: Double) -> PseudoInlineRun? {
         // A bucket is an object; anything else is not a pseudo payload.
         guard let b = bucket, b.objectValue != nil else { return nil }

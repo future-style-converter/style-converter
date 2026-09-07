@@ -1,5 +1,5 @@
 // BorderMisc — coverage for BoxDecorationBreak, CornerShape, BorderBoundary.
-// Fixtures: examples/properties/borders/{box-decoration-break,corner-shape}.json.
+// Fixtures: fixtures/properties/borders/{box-decoration-break,corner-shape}.json.
 import { describe, it, expect } from 'vitest';
 import { extractBoxDecorationBreak } from '../../src/engine/borders/BoxDecorationBreakExtractor';
 import { applyBoxDecorationBreak }   from '../../src/engine/borders/BoxDecorationBreakApplier';

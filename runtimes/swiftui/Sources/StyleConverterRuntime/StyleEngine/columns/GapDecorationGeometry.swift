@@ -84,7 +84,7 @@ enum GapIntervals {
     }
 
     /// The `widthPx`-wide rule band CENTRED in its gap (css-gaps-1
-    /// inherits css-multicol-1 §5.2's centred rule). Ref 011 pins it: a
+    /// inherits css-multicol-1 §4's centred rule). Ref 011 pins it: a
     /// 2px rule in the 52–62 band lands at 56–58.
     static func band(gap: GapSpan, widthPx: CGFloat) -> GapSpan {
         // Gap midpoint, then half the rule width on each side.

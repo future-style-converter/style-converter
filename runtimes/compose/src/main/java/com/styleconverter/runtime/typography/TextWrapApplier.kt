@@ -219,7 +219,7 @@ object TextWrapApplier {
      *
      * Returns [Hyphens.None] — Compose's own default, so the emitted
      * TextStyle is unchanged — for every run that does not qualify:
-     * `none`/`manual`, and `auto` with no language tag (§6.1 makes the
+     * `none`/`manual`, and `auto` with no language tag (§5.3 makes the
      * resource language-dependent; WPT css-text/hyphens-auto-001 asserts
      * automatic hyphenation must NOT happen without language tagging).
      *

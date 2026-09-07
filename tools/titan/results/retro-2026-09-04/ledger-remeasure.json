@@ -1,0 +1,763 @@
+[
+ {
+  "entry": "composition-test.json / Backdrop_Blur_OverStripes.png / Android-web",
+  "status": "NO-BASELINE",
+  "expires": "2026-09-30"
+ },
+ {
+  "entry": "composition-test.json / Backdrop_Blur_OverStripes.png / iOS-web",
+  "status": "NO-BASELINE",
+  "expires": "2026-09-30"
+ },
+ {
+  "entry": "visual-test.json / BorderRadius_Uniform.png / iOS-Android",
+  "baselineRow": "019_BorderRadius_Uniform.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9406"
+  ],
+  "measured": {
+   "ssim": 0.9406,
+   "pixelPct": 0.865,
+   "dE95": 0,
+   "edgeSsim": 0.9348,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9406,
+   "pixelPct": 0.873,
+   "labDeltaEP95": 0,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / BorderRadius_Uniform.png / iOS-web",
+  "baselineRow": "019_BorderRadius_Uniform.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9416"
+  ],
+  "measured": {
+   "ssim": 0.9416,
+   "pixelPct": 0.865,
+   "dE95": 0,
+   "edgeSsim": 0.9362,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9416,
+   "pixelPct": 0.873,
+   "labDeltaEP95": 0,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / BorderRadius_Pill.png / iOS-Android",
+  "baselineRow": "020_BorderRadius_Pill.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x62",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9404"
+  ],
+  "measured": {
+   "ssim": 0.9404,
+   "pixelPct": 0.786,
+   "dE95": 0,
+   "edgeSsim": 0.9342,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9404,
+   "pixelPct": 0.802,
+   "labDeltaEP95": 0,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / BorderRadius_Pill.png / iOS-web",
+  "baselineRow": "020_BorderRadius_Pill.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x62",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9411"
+  ],
+  "measured": {
+   "ssim": 0.9411,
+   "pixelPct": 0.79,
+   "dE95": 0,
+   "edgeSsim": 0.9352,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9411,
+   "pixelPct": 0.802,
+   "labDeltaEP95": 0,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / BorderRadius_Mixed.png / iOS-Android",
+  "baselineRow": "022_BorderRadius_Mixed.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9464"
+  ],
+  "measured": {
+   "ssim": 0.9464,
+   "pixelPct": 0.791,
+   "dE95": 0,
+   "edgeSsim": 0.9409,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.9464,
+   "pixelPct": 0.783,
+   "labDeltaEP95": 0,
+   "divergence": "mixed"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / BorderRadius_Mixed.png / iOS-web",
+  "baselineRow": "022_BorderRadius_Mixed.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9465"
+  ],
+  "measured": {
+   "ssim": 0.9465,
+   "pixelPct": 0.791,
+   "dE95": 0,
+   "edgeSsim": 0.9413,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.9465,
+   "pixelPct": 0.783,
+   "labDeltaEP95": 0,
+   "divergence": "mixed"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Button_Outline.png / Android-web",
+  "baselineRow": "091_Button_Outline.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x58",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 7.457",
+   "dE95 49.707",
+   "ssim 0.9138"
+  ],
+  "measured": {
+   "ssim": 0.9138,
+   "pixelPct": 7.457,
+   "dE95": 49.707,
+   "edgeSsim": 0.8982,
+   "divergence": "no-content"
+  },
+  "recorded": {
+   "ssim": 0.9138,
+   "pixelPct": 7.597,
+   "labDeltaEP95": 49.707,
+   "divergence": "no-content",
+   "sizes": {
+    "iOS": "390x62",
+    "Android": "390x58",
+    "web": "390x62"
+   }
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Button_Outline.png / iOS-Android",
+  "baselineRow": "091_Button_Outline.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x58",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 8.052",
+   "dE95 49.707",
+   "ssim 0.8671"
+  ],
+  "measured": {
+   "ssim": 0.8671,
+   "pixelPct": 8.052,
+   "dE95": 49.707,
+   "edgeSsim": 0.8471,
+   "divergence": "no-content"
+  },
+  "recorded": {
+   "ssim": 0.8671,
+   "pixelPct": 8.184,
+   "labDeltaEP95": 49.707,
+   "divergence": "no-content",
+   "sizes": {
+    "iOS": "390x62",
+    "Android": "390x58",
+    "web": "390x62"
+   }
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Input_Field.png / Android-web",
+  "baselineRow": "094_Input_Field.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x60",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 4.036",
+   "dE95 13.955",
+   "ssim 0.899"
+  ],
+  "measured": {
+   "ssim": 0.899,
+   "pixelPct": 4.036,
+   "dE95": 13.955,
+   "edgeSsim": 0.8521,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.899,
+   "pixelPct": 4.888,
+   "labDeltaEP95": 13.955,
+   "divergence": "mixed",
+   "sizes": {
+    "iOS": "390x62",
+    "Android": "390x60",
+    "web": "390x62"
+   }
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Input_Field.png / iOS-Android",
+  "baselineRow": "094_Input_Field.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x60",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 4.045",
+   "dE95 13.955",
+   "ssim 0.8987"
+  ],
+  "measured": {
+   "ssim": 0.8987,
+   "pixelPct": 4.045,
+   "dE95": 13.955,
+   "edgeSsim": 0.8517,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.8987,
+   "pixelPct": 4.888,
+   "labDeltaEP95": 13.955,
+   "divergence": "mixed",
+   "sizes": {
+    "iOS": "390x62",
+    "Android": "390x60",
+    "web": "390x62"
+   }
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_VeryLargeRadius.png / iOS-Android",
+  "baselineRow": "101_Edge_VeryLargeRadius.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x62",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9268"
+  ],
+  "measured": {
+   "ssim": 0.9268,
+   "pixelPct": 1.046,
+   "dE95": 0,
+   "edgeSsim": 0.9191,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9268,
+   "pixelPct": 1.042,
+   "labDeltaEP95": 0,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_VeryLargeRadius.png / iOS-web",
+  "baselineRow": "101_Edge_VeryLargeRadius.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x62",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9275"
+  ],
+  "measured": {
+   "ssim": 0.9275,
+   "pixelPct": 1.034,
+   "dE95": 0,
+   "edgeSsim": 0.9202,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9275,
+   "pixelPct": 1.042,
+   "labDeltaEP95": 0,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_DeepNesting.png / Android-web",
+  "baselineRow": "105_Edge_DeepNesting.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x58",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 8.015",
+   "dE95 49.707",
+   "ssim 0.9137"
+  ],
+  "measured": {
+   "ssim": 0.9137,
+   "pixelPct": 8.015,
+   "dE95": 49.707,
+   "edgeSsim": 0.8947,
+   "divergence": "color-drift"
+  },
+  "recorded": {
+   "ssim": 0.9137,
+   "pixelPct": 7.601,
+   "labDeltaEP95": 49.707,
+   "divergence": "color-drift",
+   "sizes": {
+    "iOS": "390x62",
+    "Android": "390x58",
+    "web": "390x62"
+   }
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_DeepNesting.png / iOS-Android",
+  "baselineRow": "105_Edge_DeepNesting.png",
+  "sizes": {
+   "iOS": "390x62",
+   "Android": "390x58",
+   "web": "390x62"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 8.755",
+   "dE95 49.707",
+   "ssim 0.8644"
+  ],
+  "measured": {
+   "ssim": 0.8644,
+   "pixelPct": 8.755,
+   "dE95": 49.707,
+   "edgeSsim": 0.8415,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.8644,
+   "pixelPct": 8.325,
+   "labDeltaEP95": 49.707,
+   "divergence": "mixed",
+   "sizes": {
+    "iOS": "390x62",
+    "Android": "390x58",
+    "web": "390x62"
+   }
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_InsetRoundShadow.png / iOS-Android",
+  "baselineRow": "107_Edge_InsetRoundShadow.png",
+  "sizes": {
+   "iOS": "390x82",
+   "Android": "390x82",
+   "web": "390x82"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 3.218",
+   "ssim 0.9403"
+  ],
+  "measured": {
+   "ssim": 0.9403,
+   "pixelPct": 3.218,
+   "dE95": 1.133,
+   "edgeSsim": 0.9308,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9403,
+   "pixelPct": 0.866,
+   "labDeltaEP95": 0.853,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_InsetRoundShadow.png / iOS-web",
+  "baselineRow": "107_Edge_InsetRoundShadow.png",
+  "sizes": {
+   "iOS": "390x82",
+   "Android": "390x82",
+   "web": "390x82"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9414"
+  ],
+  "measured": {
+   "ssim": 0.9414,
+   "pixelPct": 1.035,
+   "dE95": 0.401,
+   "edgeSsim": 0.9348,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9414,
+   "pixelPct": 0.872,
+   "labDeltaEP95": 0.389,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_GradientWithRadius.png / Android-web",
+  "baselineRow": "108_Edge_GradientWithRadius.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9313"
+  ],
+  "measured": {
+   "ssim": 0.9313,
+   "pixelPct": 0.997,
+   "dE95": 0,
+   "edgeSsim": 0.9253,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9313,
+   "pixelPct": 1.011,
+   "labDeltaEP95": 0.287,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_GradientWithRadius.png / iOS-web",
+  "baselineRow": "108_Edge_GradientWithRadius.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "ssim 0.9312"
+  ],
+  "measured": {
+   "ssim": 0.9312,
+   "pixelPct": 1.004,
+   "dE95": 0.281,
+   "edgeSsim": 0.925,
+   "divergence": "structural-divergence"
+  },
+  "recorded": {
+   "ssim": 0.9312,
+   "pixelPct": 1.011,
+   "labDeltaEP95": 0.278,
+   "divergence": "structural-divergence"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Neumorphic_Light.png / iOS-Android",
+  "baselineRow": "098_Neumorphic_Light.png",
+  "sizes": {
+   "iOS": "390x82",
+   "Android": "390x82",
+   "web": "390x82"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 10.813",
+   "dE95 5.321"
+  ],
+  "measured": {
+   "ssim": 0.9558,
+   "pixelPct": 10.813,
+   "dE95": 5.321,
+   "edgeSsim": 0.9461,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.9558,
+   "pixelPct": 0.47,
+   "labDeltaEP95": 5.34,
+   "divergence": "glyph-metric-noise"
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Neumorphic_Light.png / iOS-web",
+  "baselineRow": "098_Neumorphic_Light.png",
+  "sizes": {
+   "iOS": "390x82",
+   "Android": "390x82",
+   "web": "390x82"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 11.016",
+   "dE95 5.619"
+  ],
+  "measured": {
+   "ssim": 0.9554,
+   "pixelPct": 11.016,
+   "dE95": 5.619,
+   "edgeSsim": 0.9456,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.9554,
+   "pixelPct": 0.47,
+   "labDeltaEP95": 5.59,
+   "divergence": "glyph-metric-noise"
+  },
+  "expires": "2026-09-30",
+  "expired": false
+ },
+ {
+  "entry": "composition-test.json / Backdrop_Saturate_OverStripes.png / iOS-web",
+  "status": "NO-BASELINE",
+  "expires": "2026-09-30"
+ },
+ {
+  "entry": "composition-test.json / Backdrop_Saturate_OverStripes.png / Android-web",
+  "status": "NO-BASELINE",
+  "expires": "2026-09-30"
+ },
+ {
+  "entry": "filter-sepia-amounts.json / Sepia_Translucent.png / iOS-web",
+  "baselineRow": "006_Sepia_Translucent.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "NOW-PASSING(STALE)",
+  "breach": [],
+  "measured": {
+   "ssim": 0.9979,
+   "pixelPct": 0.858,
+   "dE95": 0.574,
+   "edgeSsim": 0.9962,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.95,
+   "pixelPct": 0,
+   "labDeltaEP95": 20,
+   "divergence": "color-drift"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "filter-sepia-amounts.json / Sepia_Translucent.png / iOS-Android",
+  "baselineRow": "006_Sepia_Translucent.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "NOW-PASSING(STALE)",
+  "breach": [],
+  "measured": {
+   "ssim": 0.9986,
+   "pixelPct": 0.858,
+   "dE95": 0.574,
+   "edgeSsim": 0.9978,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.95,
+   "pixelPct": 0,
+   "labDeltaEP95": 20,
+   "divergence": "color-drift"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Filter_Blur.png / iOS-Android",
+  "baselineRow": "032_Filter_Blur.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 2.34"
+  ],
+  "measured": {
+   "ssim": 0.9844,
+   "pixelPct": 2.34,
+   "dE95": 0.585,
+   "edgeSsim": 0.974,
+   "divergence": "glyph-metric-noise"
+  },
+  "recorded": {
+   "ssim": 0.9844,
+   "pixelPct": 2.34,
+   "labDeltaEP95": 0.58,
+   "divergence": "glyph-metric-noise"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Filter_Blur.png / Android-web",
+  "baselineRow": "032_Filter_Blur.png",
+  "sizes": {
+   "iOS": "390x72",
+   "Android": "390x72",
+   "web": "390x72"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 2.429"
+  ],
+  "measured": {
+   "ssim": 0.9854,
+   "pixelPct": 2.429,
+   "dE95": 0.832,
+   "edgeSsim": 0.9738,
+   "divergence": "glyph-metric-noise"
+  },
+  "recorded": {
+   "ssim": 0.9854,
+   "pixelPct": 2.43,
+   "labDeltaEP95": 0.83,
+   "divergence": "glyph-metric-noise"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ },
+ {
+  "entry": "visual-test.json / Edge_InsetRoundShadow.png / Android-web",
+  "baselineRow": "107_Edge_InsetRoundShadow.png",
+  "sizes": {
+   "iOS": "390x82",
+   "Android": "390x82",
+   "web": "390x82"
+  },
+  "status": "STILL-FAILING",
+  "breach": [
+   "dpx 2.927"
+  ],
+  "measured": {
+   "ssim": 0.9966,
+   "pixelPct": 2.927,
+   "dE95": 1.06,
+   "edgeSsim": 0.9933,
+   "divergence": "mixed"
+  },
+  "recorded": {
+   "ssim": 0.9966,
+   "pixelPct": 2.93,
+   "labDeltaEP95": 1.06,
+   "divergence": "mixed"
+  },
+  "expires": "2026-11-30",
+  "expired": false
+ }
+]

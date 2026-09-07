@@ -15,7 +15,7 @@ import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.types.ValueExtractors
 
 /**
- * The spanner-aware column flow: css-multicol-1 §6.2–§6.3. A
+ * The spanner-aware column flow: css-multicol-1 §6.1. A
  * `column-span: all` element interrupts the multicol flow; the content
  * BEFORE it is distributed into columns that are BALANCED regardless of
  * `column-fill` (§6.3: "the column heights before the spanner are
@@ -96,7 +96,7 @@ object MulticolSpannerFlow {
          * True iff the child's SUBTREE declares `float: left/right`
          * anywhere (wave-42 lane W4). The multi-child run fragmenter must
          * bail on such children: the natives still lay floats out as
-         * stacked in-flow boxes (the float lane owns css-break-3 §5 float
+         * stacked in-flow boxes (the float lane owns css-break-3 §2.1 parallel-flow float
          * fragmentation + CSS 2.1 §9.5.2 clearance), so slicing that stack
          * across columns would faithfully replicate a WRONG layout into
          * every column instead of one.
@@ -141,7 +141,7 @@ object MulticolSpannerFlow {
         val floatStrip: MulticolFloatStrip.ChildFacts? = null,
         /**
          * Wave-46 lane Y3 — true iff the child declares
-         * `box-decoration-break: clone` (css-break-3 §5.2). Separate from
+         * `box-decoration-break: clone` (css-break-3 §5.4). Separate from
          * [cloneBands] so the sole-child fragmenter can LOG (never
          * silently slice) a clone child whose bands did not resolve or
          * whose content it cannot re-flow per fragment.
@@ -180,14 +180,14 @@ object MulticolSpannerFlow {
         /**
          * 0-based used-column index (0 for spanners by convention). May
          * EXCEED N-1 for a forced-break chunk that ran out of columns —
-         * that is a css-multicol-1 §8.2 OVERFLOW column, painted past the
+         * that is a css-multicol-1 §8.1 OVERFLOW column, painted past the
          * container's inline end edge exactly where i·(W+G) lands it.
          */
         val columnIndex: Int,
         /** Block offset from the container's content-box top, in px. */
         val yPx: Int,
         /**
-         * True when css-overflow-4 §3 `continue: discard` dropped this
+         * True when css-overflow-4 §5.3 `continue: discard` dropped this
          * child: content from the first overflow column on — and EVERYTHING
          * after it in flow order, spanners included — is not rendered.
          * Placement loops must skip (or park offscreen) discarded slots.
@@ -310,7 +310,7 @@ object MulticolSpannerFlow {
                 // null bail) — computed only for containers with a float
                 // somewhere (see the `anyFloated` gate above).
                 if (anyFloated) MulticolFloatStrip.factsFor(child) else null,
-                // Wave-46 lane Y3: the css-break-3 §5.2 clone signal + its
+                // Wave-46 lane Y3: the css-break-3 §5.4 clone signal + its
                 // resolved decoration bands (null for slice children, so
                 // every non-clone container's spec is byte-identical).
                 MulticolCloneDecoration.declaresClone(child),
@@ -493,7 +493,7 @@ object MulticolSpannerFlow {
      *    break opportunities). Chunks past column N-1 land in §8.2
      *    OVERFLOW columns (columnIndex ≥ N — painted past the inline end).
      *  - [discardOverflow] = the container declared `continue: discard`
-     *    (css-overflow-4 §3): content from the FIRST overflow column on —
+     *    (css-overflow-4 §5.3): content from the FIRST overflow column on —
      *    and everything after it in flow order, later spanners and
      *    segments included — is marked [Slot.discarded] and contributes no
      *    container block-size. Default false keeps every pre-wave-42
@@ -508,7 +508,7 @@ object MulticolSpannerFlow {
         // Sole-flow bookkeeping for the replay fragmentainer.
         val soleFlow = children.count { it.role.isFlow } == 1
         var soleFlowH: Int? = null
-        // css-overflow-4 §3 latch: once discard triggers, EVERYTHING after
+        // css-overflow-4 §5.3 latch: once discard triggers, EVERYTHING after
         // is dropped — the flag never resets within one container.
         var discarding = false
         var i = 0
@@ -546,7 +546,7 @@ object MulticolSpannerFlow {
                 var h = 0
                 for (k in i until j) {
                     val ck = children[k]
-                    // css-overflow-4 §3: the first overflow column starts
+                    // css-overflow-4 §5.3: the first overflow column starts
                     // the discard — from here on everything drops.
                     if (discardOverflow && col >= n) discarding = true
                     if (discarding) {

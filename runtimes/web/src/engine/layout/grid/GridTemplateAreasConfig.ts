@@ -5,4 +5,3 @@
 // Dots in cells preserve their literal `.` meaning (empty cell).
 export interface GridTemplateAreasConfig { value?: string; }
 export const GRID_TEMPLATE_AREAS_PROPERTY_TYPE = 'GridTemplateAreas' as const;
-export type GridTemplateAreasPropertyType = typeof GRID_TEMPLATE_AREAS_PROPERTY_TYPE;

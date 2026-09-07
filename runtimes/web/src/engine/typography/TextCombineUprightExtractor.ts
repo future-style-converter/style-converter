@@ -1,6 +1,6 @@
 // TextCombineUprightExtractor.ts — folds `TextCombineUpright` IR properties into a TextCombineUprightConfig.
 // Family: text-combine-upright.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextCombineUprightConfig, TEXT_COMBINE_UPRIGHT_PROPERTY_TYPE, TextCombineUprightPropertyType } from './TextCombineUprightConfig';
 import { kwLower } from './_shared';

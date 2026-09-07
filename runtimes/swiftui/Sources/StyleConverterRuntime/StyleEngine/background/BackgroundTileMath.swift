@@ -2,7 +2,7 @@
 //  BackgroundTileMath.swift
 //  StyleEngine/background — gradient-geometry lane (space/round repeat).
 //
-//  css-backgrounds-3 §3.7 background-repeat tile placement — PURE math,
+//  css-backgrounds-3 §2.4 background-repeat tile placement — PURE math,
 //  no SwiftUI types, ported 1:1 from the Compose runtime's
 //  BackgroundTileMath.kt so both native platforms pin the same numbers
 //  (XCTest mirror: BackgroundTileMathTests ↔ BackgroundTileMathTest.kt).
@@ -83,7 +83,7 @@ enum BackgroundTileMath {
     /// `anchor` is the background-position-resolved offset of the FIRST
     /// tile (free-space × fraction + any px offset). Only NO_REPEAT
     /// honours it exactly; REPEAT phase-shifts the grid through it
-    /// (css-backgrounds-3 §3.6), SPACE/ROUND pin the pattern to the
+    /// (css-backgrounds-3 §2.6), SPACE/ROUND pin the pattern to the
     /// area edges per §3.7.
     static func axisPlan(area: CGFloat, tile: CGFloat, anchor: CGFloat,
                          mode: AxisRepeat) -> AxisPlan {

@@ -18,9 +18,10 @@
 //
 //  Registry note: "Zoom" stays inside `RenderingProperty.names` (see
 //  RenderingExtractor.swift) so PropertyRegistry ownership and the
-//  Phase-10 coverage probe are unchanged. RenderingApplier is identity,
-//  so the string RenderingExtractor also records for `Zoom` is inert —
-//  this extractor is the only one whose output reaches a modifier.
+//  Phase-10 coverage probe are unchanged. The string RenderingExtractor
+//  also records for `Zoom` is inert — the rendering family has no applier
+//  at all since retro P2b (A6#10) deleted the identity one, so this
+//  extractor is the only path whose output reaches a modifier.
 //
 
 import Foundation

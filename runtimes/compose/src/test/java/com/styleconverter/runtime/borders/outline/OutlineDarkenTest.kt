@@ -4,8 +4,11 @@ package com.styleconverter.runtime.borders.outline
 // shades, measured from a fresh headless-Chrome probe (outline-probe.png):
 //   `5px ridge crimson` inner band  → rgb(136,12,37)
 //   `3px groove #eee`   outer band  → rgb(154,154,154)
-// The formula is an HSL lightness transform L' = max(0, L·2/3 − 0.02);
-// tolerances allow ±2/255 for Chrome's own rounding.
+// Retro R6 (A7#3): darken() now delegates to BorderSideApplier.shade —
+// Blink's subtractive max-channel model, which reproduces both probe values
+// (136/154) as well as the wave-5 HSL transform did (137/154) — see
+// OutlineShadeDelegationTest for the delegation pins. Tolerances allow
+// ±2/255 for Chrome's own rounding.
 
 import androidx.compose.ui.graphics.Color
 import org.junit.Assert.assertEquals

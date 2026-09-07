@@ -15,7 +15,7 @@
       "id": "keyword-linear",
       "kind": "cubic-bezier",
       "css": "linear",
-      "note": "CSS keyword \"linear\" normalises to cubic-bezier(0, 0, 1, 1) — css-easing-1 §3.1.",
+      "note": "CSS keyword \"linear\" normalises to cubic-bezier(0, 0, 1, 1) — css-easing-1 §2.2.",
       "cubicBezier": {
         "x1": 0,
         "y1": 0,
@@ -113,7 +113,7 @@
       "id": "keyword-ease",
       "kind": "cubic-bezier",
       "css": "ease",
-      "note": "CSS keyword \"ease\" normalises to cubic-bezier(0.25, 0.1, 0.25, 1) — css-easing-1 §3.1.",
+      "note": "CSS keyword \"ease\" normalises to cubic-bezier(0.25, 0.1, 0.25, 1) — css-easing-1 §2.2.",
       "cubicBezier": {
         "x1": 0.25,
         "y1": 0.1,
@@ -211,7 +211,7 @@
       "id": "keyword-ease-in",
       "kind": "cubic-bezier",
       "css": "ease-in",
-      "note": "CSS keyword \"ease-in\" normalises to cubic-bezier(0.42, 0, 1, 1) — css-easing-1 §3.1.",
+      "note": "CSS keyword \"ease-in\" normalises to cubic-bezier(0.42, 0, 1, 1) — css-easing-1 §2.2.",
       "cubicBezier": {
         "x1": 0.42,
         "y1": 0,
@@ -309,7 +309,7 @@
       "id": "keyword-ease-out",
       "kind": "cubic-bezier",
       "css": "ease-out",
-      "note": "CSS keyword \"ease-out\" normalises to cubic-bezier(0, 0, 0.58, 1) — css-easing-1 §3.1.",
+      "note": "CSS keyword \"ease-out\" normalises to cubic-bezier(0, 0, 0.58, 1) — css-easing-1 §2.2.",
       "cubicBezier": {
         "x1": 0,
         "y1": 0,
@@ -407,7 +407,7 @@
       "id": "keyword-ease-in-out",
       "kind": "cubic-bezier",
       "css": "ease-in-out",
-      "note": "CSS keyword \"ease-in-out\" normalises to cubic-bezier(0.42, 0, 0.58, 1) — css-easing-1 §3.1.",
+      "note": "CSS keyword \"ease-in-out\" normalises to cubic-bezier(0.42, 0, 0.58, 1) — css-easing-1 §2.2.",
       "cubicBezier": {
         "x1": 0.42,
         "y1": 0,
@@ -1917,7 +1917,7 @@
       "id": "keyword-step-start",
       "kind": "steps",
       "css": "step-start",
-      "note": "CSS keyword \"step-start\" is steps(1, start) — css-easing-1 §3.1.",
+      "note": "CSS keyword \"step-start\" is steps(1, start) — css-easing-1 §2.3.",
       "steps": {
         "count": 1,
         "position": "start"
@@ -1949,7 +1949,7 @@
       "id": "keyword-step-end",
       "kind": "steps",
       "css": "step-end",
-      "note": "CSS keyword \"step-end\" is steps(1, end) — css-easing-1 §3.1.",
+      "note": "CSS keyword \"step-end\" is steps(1, end) — css-easing-1 §2.3.",
       "steps": {
         "count": 1,
         "position": "end"

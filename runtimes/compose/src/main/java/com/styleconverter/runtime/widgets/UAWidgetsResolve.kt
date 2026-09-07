@@ -124,7 +124,7 @@ object UAWidgetsResolve {
         val fraction: Float? = when (kind) {
             UAWidgetsGeometry.Kind.RANGE -> {
                 val min = (a?.min ?: 0.0); val max = (a?.max ?: 100.0)
-                // HTML §2.3.5.1 valid floating-point numbers exclude
+                // HTML §2.3.4.3 valid floating-point numbers exclude
                 // NaN/Infinity, but BOTH natives' Double parsers accept
                 // those strings — gate on finiteness or the thumb
                 // geometry itself goes NaN (wave-20 skeptic fix; the
@@ -217,7 +217,7 @@ object UAWidgetsResolve {
      * ref-probed table describes (see the axis gate in
      * [com.styleconverter.runtime.layout.UAWidgetBlockLine.leadFor]).
      *
-     * `writing-mode` INHERITS (css-writing-modes-4 §3.1) and is carried in
+     * `writing-mode` INHERITS (css-writing-modes-4 §3.2) and is carried in
      * ComponentRenderer's inherited-property set, so the declaration on an
      * ancestor wrapper — which is where the css-writing-modes `forms`
      * tests put it — reaches this merged list. (Written without a glob:

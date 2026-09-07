@@ -10,6 +10,9 @@ import com.styleconverter.runtime.spacing.SpacingContext
 import com.styleconverter.runtime.spacing.resolveToDp
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
+// The single-keyword `border-image-repeat` wire is a BARE STRING primitive
+// (see extractBorderImageRepeat) — retro R6, A6#0.
+import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.floatOrNull
 import kotlinx.serialization.json.jsonPrimitive
@@ -85,7 +88,7 @@ object BorderImageExtractor {
             }
         }
 
-        // Resolve the element's COMPUTED border widths — the §6.3 basis for
+        // Resolve the element's COMPUTED border widths — the §5.3 basis for
         // `<number>` border-image-width values (and for the initial value 1
         // when no border-image-width is declared). css-backgrounds-3 §4.3:
         // a side whose border-style is none/hidden/absent computes to width
@@ -252,26 +255,70 @@ object BorderImageExtractor {
     }
 
     /**
-     * Extract border-image-repeat values.
+     * Extract border-image-repeat values — (horizontal, vertical).
+     *
+     * TWO wire shapes, both live (retro R6, A6#0 — pinned against
+     * `./gradlew :converter:run … -i fixtures/properties/borders/
+     * border-image-repeat.json`):
+     *   "ROUND"                                       — the single-keyword form
+     *                                                   is a BARE STRING primitive
+     *   {"horizontal": "REPEAT", "vertical": "STRETCH"} — the two-keyword form
+     * The old reader accepted only the object and threw the primitive away
+     * (`if (data !is JsonObject) return stretch/stretch`), so `border-image-
+     * repeat: round | repeat | space` all rendered stretch/stretch on Android
+     * while iOS's BorderImageExtractor.swift handled both shapes. Gate-
+     * invisible (no corpus carrier), fixture-visible (BIR_Round / BIR_Space).
+     *
+     * css-backgrounds-3 §5.5 (border-image-repeat): the first keyword is the
+     * horizontal (top/bottom edge) behaviour, the second the vertical; "If
+     * the second keyword is absent, it is assumed to be the same as the
+     * first." — the elvis below is that rule, live now that
+     * [extractRepeatValue] returns null for a missing/unknown keyword.
      */
     private fun extractBorderImageRepeat(data: JsonElement?): Pair<BorderImageRepeatValue, BorderImageRepeatValue> {
-        if (data == null) return Pair(BorderImageRepeatValue.STRETCH, BorderImageRepeatValue.STRETCH)
-        if (data !is JsonObject) return Pair(BorderImageRepeatValue.STRETCH, BorderImageRepeatValue.STRETCH)
+        // Initial value `stretch` (§5.5) for an absent property.
+        val stretch = Pair(BorderImageRepeatValue.STRETCH, BorderImageRepeatValue.STRETCH)
+        if (data == null) return stretch
+        // Single-keyword form: one keyword sets BOTH axes (§5.5).
+        if (data is JsonPrimitive) {
+            val both = extractRepeatValue(data.contentOrNull) ?: run {
+                // Unknown keyword on the wire — say so, then fall back to the
+                // initial value (no silent fallthrough).
+                com.styleconverter.runtime.core.ir.IRLog.warn(
+                    "BorderImageExtractor",
+                    "BorderImageRepeat keyword not understood: $data — using stretch",
+                )
+                return stretch
+            }
+            return Pair(both, both)
+        }
+        if (data !is JsonObject) return stretch
 
+        // Two-keyword form: horizontal first; a missing horizontal keyword
+        // is the initial `stretch`.
         val horizontal = extractRepeatValue(data["horizontal"]?.jsonPrimitive?.contentOrNull)
+            ?: BorderImageRepeatValue.STRETCH
+        // §5.5 absent-second-keyword rule: vertical mirrors horizontal.
         val vertical = extractRepeatValue(data["vertical"]?.jsonPrimitive?.contentOrNull)
             ?: horizontal
 
         return Pair(horizontal, vertical)
     }
 
-    private fun extractRepeatValue(keyword: String?): BorderImageRepeatValue {
+    /**
+     * One `<repeat-style>` keyword → enum, or NULL for absent/unknown so
+     * callers can apply their own default (the §5.5 mirror rule above needs
+     * to tell "absent" from "stretch" — the old non-null return made the
+     * `?: horizontal` fallback unreachable; kotlinc flagged it: "Elvis
+     * operator (?:) always returns the left operand").
+     */
+    private fun extractRepeatValue(keyword: String?): BorderImageRepeatValue? {
         return when (keyword?.uppercase()) {
             "STRETCH" -> BorderImageRepeatValue.STRETCH
             "REPEAT" -> BorderImageRepeatValue.REPEAT
             "ROUND" -> BorderImageRepeatValue.ROUND
             "SPACE" -> BorderImageRepeatValue.SPACE
-            else -> BorderImageRepeatValue.STRETCH
+            else -> null
         }
     }
 

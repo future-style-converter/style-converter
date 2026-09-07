@@ -151,7 +151,7 @@ object ReplacedImageContent {
      *   * everything else (explicit `border-box`, or unset = the chain's
      *     border-box status quo) — content bound = declared − (padding +
      *     used border) band on that axis, floored at 0 (a bound smaller than
-     *     its own bands leaves a zero content box, css-ui-3 §5's floor).
+     *     its own bands leaves a zero content box, css-ui-3 §3.1's floor).
      * Only [LengthValue.Exact] bounds participate: `none` means unbounded and
      * a %/em bound has no resolvable px here (documented narrowing — the
      * chain still clamps the BOX by it at layout time).

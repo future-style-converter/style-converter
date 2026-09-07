@@ -1,6 +1,6 @@
 // FontSynthesisStyleExtractor.ts — folds `FontSynthesisStyle` IR properties into a FontSynthesisStyleConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontSynthesisStyleConfig, FONT_SYNTHESIS_STYLE_PROPERTY_TYPE, FontSynthesisStylePropertyType } from './FontSynthesisStyleConfig';
 import { kwLower } from './_shared';

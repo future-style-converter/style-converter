@@ -4,7 +4,7 @@ package com.styleconverter.runtime.spacing
 // Config/Extractor/Applier triplet. Each side is stored as a LengthValue? so
 // percent/em/vw/calc variants survive to the Applier.
 //
-// Fixture coverage (examples/properties/spacing/):
+// Fixture coverage (fixtures/properties/spacing/):
 //   padding-absolute.json  — px/pt/cm/mm/in/pc (all absolute → Exact)
 //   padding-units.json     — em/rem/%/vw/vh/calc  (→ Relative or Calc)
 //

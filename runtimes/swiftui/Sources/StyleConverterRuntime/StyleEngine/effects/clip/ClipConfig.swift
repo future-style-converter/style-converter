@@ -57,7 +57,7 @@ enum ClipShape: Equatable {
     // equivalent — we carry the id so the applier can log / skip.
     case url(id: String)
     // `clip-path: border-box` etc. — a geometry-box keyword with no
-    // shape. css-masking-1 §7.1: the clip region IS that reference box,
+    // shape. css-masking-1 §5.1: the clip region IS that reference box,
     // corner curves included (a `border-radius: 50px` border-box clips
     // to the circle; the margin box's corners follow css-shapes-1 §4).
     // Which box is in `ClipConfig.geometryBox`. Wave 46 (lane Y4):
@@ -83,7 +83,7 @@ struct ClipInsetSides: Equatable {
     var leftFraction: CGFloat? = nil
 }
 
-// css-masking-1 §7.1 `<geometry-box>` — the reference box every basic
+// css-masking-1 §5.1 `<geometry-box>` — the reference box every basic
 // shape resolves against (and the clip itself for the bare keyword
 // form). The SVG-only fill-box / stroke-box / view-box keywords map per
 // the spec's used-value rule for an element with a CSS layout box
@@ -168,7 +168,7 @@ struct ClipConfig: Equatable {
     // Primary clip-path value. `nil` ≡ not set; `.some(.none)` ≡
     // explicit `clip-path: none`.
     var shape: ClipShape? = nil
-    // css-masking-1 §7.1 reference box — border-box unless the wire
+    // css-masking-1 §5.1 reference box — border-box unless the wire
     // named another (alone or next to a shape). Wave 46 (lane Y4):
     // before this the keyword was read and dropped ("documented TODO"),
     // so `circle(farthest-side) content-box` clipped to the 180px border

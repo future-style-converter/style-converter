@@ -9,7 +9,7 @@
 //  count re-audited when the self-test became AnimationsTests.)
 //
 //  IR shapes are documented on each `case`. The parser quirks noted in
-//  examples/properties/animations/README.md (identifier lowercasing,
+//  fixtures/properties/animations/README.md (identifier lowercasing,
 //  axis "last wins", ViewTransitionGroup raw catch-all, etc.) are
 //  faithfully preserved here — this extractor does not second-guess
 //  the parser.
@@ -195,7 +195,17 @@ enum AnimationsExtractor {
             guard case .object(let o) = entry,
                   let t = o["type"]?.stringValue else { return nil }
             switch t {
-            case "none": return .none
+            // Explicit type qualification (retro R5, audit A6#1): this
+            // closure returns `AnimationNameEntry?`, so a bare `.none` was
+            // Optional.none and compactMap DROPPED the entry — the
+            // `animation-name: none, foo` hole vanished and `foo` then read
+            // slot 0's duration/delay/fill instead of slot 1's. The hole
+            // must survive: css-animations-1 §4 (a coordinating list property group, css-values-4 Appendix A) matches every other
+            // animation-* list against the animation-name list "from the
+            // first value", holes included. Same trap parseFillMode /
+            // parseTimeline / parseTransitionPropertyList already qualify;
+            // pinned by AnimationsTests.testAnimationNameNoneKeepsItsTimingSlot.
+            case "none": return AnimationNameEntry.none
             case "identifier":
                 return .identifier(o["name"]?.stringValue ?? "")
             default: return nil

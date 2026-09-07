@@ -1,6 +1,6 @@
 // WordBreakExtractor.ts — folds `WordBreak` IR properties into a WordBreakConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { WordBreakConfig, WORD_BREAK_PROPERTY_TYPE, WordBreakPropertyType } from './WordBreakConfig';
 import { kwLower } from './_shared';

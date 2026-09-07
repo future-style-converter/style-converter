@@ -3,4 +3,3 @@
 // IR: 'VISIBLE' | 'HIDDEN' | 'COLLAPSE'.
 export interface VisibilityConfig { value?: string; }
 export const VISIBILITY_PROPERTY_TYPE = 'Visibility' as const;
-export type VisibilityPropertyType = typeof VISIBILITY_PROPERTY_TYPE;

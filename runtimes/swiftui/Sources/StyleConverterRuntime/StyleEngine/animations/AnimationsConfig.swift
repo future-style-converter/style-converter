@@ -4,10 +4,22 @@
 //
 //  Grouped config for the 22 animation + transition + view-timeline +
 //  view-transition + timeline-scope longhands. SwiftUI has no single
-//  animation modifier that takes every CSS knob, so we aggregate here
-//  and let the applier translate into `withAnimation` / `.animation` /
-//  `.transition` calls (or log TODOs for the bits SwiftUI can't model
-//  yet — e.g. scroll-linked timelines pre-iOS 17).
+//  animation modifier that takes every CSS knob.
+//
+//  WHERE EXECUTION LIVES (wave 8, #35 — moved here by retro P2b when the
+//  identity `AnimationsApplier` modifier that carried this note was
+//  deleted as zero-reference, A6#10): keyframe + transition execution is
+//  NOT a view modifier. It runs as a property-space pass ahead of
+//  StyleBuilder — AnimationResolver + KeyframeInterpolator +
+//  TransitionResolver, driven by ComponentRenderer's TimelineView clock
+//  and the pinned CAPTURE_ANIMATION_TIME hook. That altitude was chosen
+//  deliberately: interpolating IR payloads leaves every existing applier
+//  untouched and makes the math XCTest-pinnable, where a SwiftUI-native
+//  `withAnimation` model would leave progress unobservable (spec 07 §5
+//  deterministic-capture contract). `animation-play-state: paused` is
+//  honoured in that same property space (AnimationResolver's clock
+//  freeze). What remains unmodelled is scroll-driven timelines and view
+//  transitions, which map to iOS 17/18 APIs above our iOS 16 target.
 //
 //  Scope: longhands only. `animation` / `transition` / `view-timeline`
 //  / `scroll-timeline` shorthands are expanded by the CSS parser

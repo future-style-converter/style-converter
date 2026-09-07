@@ -20,7 +20,9 @@ package com.styleconverter.runtime.spacing
 // applied margins per child, plus the hoisted (escaped) edge amounts — and
 // hands each child its override through [LocalCollapsedMargin]; the child's
 // MarginApplier substitutes the block-axis sides before building modifiers
-// (the CompositionLocal mechanism MarginTrimApplier's file comment sketched).
+// (the CompositionLocal mechanism sketched by the old MarginTrimApplier
+// file comment — that 27-line no-op scaffold had no caller and was deleted
+// by the retro P2a sweep; this file is the mechanism it described).
 // The hoisted amounts become TRANSPARENT outer padding on the parent wrapper
 // so the parent background does not paint the escaped region — exactly the
 // browser's geometry for collapse-through.
@@ -172,7 +174,7 @@ object BlockMarginCollapse {
             // classifies through that fallback. MarginExtractor now keeps
             // the DynamicValueResolver-prebaked em shape as Relative(EM,
             // pxFallback=prebake) so the APPLIER can re-resolve against the
-            // element's own computed font-size (css-values-4 §5.1.1 / the
+            // element's own computed font-size (css-values-4 §6.1.1 / the
             // CSS Fonts 4 §3.5 monospace-13 quirk); before wave 45 the
             // exact same wire classified here as Exact(prebake), so using
             // the fallback keeps every §8.3.1 plan value byte-identical —
@@ -310,7 +312,7 @@ object BlockMarginCollapse {
         // §8.3.1: the parent/last-child BOTTOM margins are adjoining only
         // when the parent's height is auto ("height is auto and min-height
         // is zero") — any explicit block-size, min-block-size, or
-        // aspect-ratio (which derives a definite height; css-sizing-4 §5)
+        // aspect-ratio (which derives a definite height; css-sizing-4 §4.2)
         // pins the bottom edge away from the child margin. MaxHeight /
         // MaxBlockSize are deliberately NOT in the set (contract G5):
         // max-height leaves the used height auto-derived, so collapse-
@@ -346,7 +348,7 @@ object BlockMarginCollapse {
         data class EdgeBands(val top: Boolean, val bottom: Boolean)
 
         fun edgeBands(pairs: List<Pair<String, JsonElement?>>): EdgeBands {
-            // css-backgrounds-3 §6: border-image paints INSTEAD of the
+            // css-backgrounds-3 §5: border-image paints INSTEAD of the
             // border styles but still occupies the border area (and can
             // even extend it via outset) — any BorderImage* declaration
             // conservatively closes both gates (contract G2: "BorderImage

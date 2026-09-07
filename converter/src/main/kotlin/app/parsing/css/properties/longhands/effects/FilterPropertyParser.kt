@@ -22,6 +22,9 @@ import app.parsing.css.properties.primitiveParsers.GlobalKeywords
  * - drop-shadow(2px 2px 4px rgba(0,0,0,0.5))
  * - none
  */
+// A6#14: the private `parseDropShadow` this file used to carry was
+// byte-identical to the sibling filter parser's; both now call the shared
+// DropShadowParsing (same package, no import).
 object FilterPropertyParser : PropertyParser {
 
     override fun parse(value: String): FilterProperty? {
@@ -149,7 +152,7 @@ object FilterPropertyParser : PropertyParser {
                 val amount = parsePercentageOrNumber(args) ?: return null
                 FilterFunction.Sepia(amount)
             }
-            "drop-shadow" -> parseDropShadow(args)
+            "drop-shadow" -> DropShadowParsing.parseDropShadow(args)
             else -> null // Unknown filter function
         }
     }
@@ -176,32 +179,4 @@ object FilterPropertyParser : PropertyParser {
      * Parse drop-shadow function arguments.
      * Format: <offset-x> <offset-y> [<blur-radius>] [<color>]
      */
-    private fun parseDropShadow(args: String): FilterFunction.DropShadow? {
-        val parts = args.split("""\s+""".toRegex())
-
-        if (parts.size < 2) return null
-
-        val offsetX = LengthParser.parse(parts[0]) ?: return null
-        val offsetY = LengthParser.parse(parts[1]) ?: return null
-
-        var blurRadius: app.irmodels.IRLength? = null
-        var color: app.irmodels.IRColor? = null
-
-        // Parse optional blur and color
-        if (parts.size > 2) {
-            // Try to parse as length (blur radius)
-            LengthParser.parse(parts[2])?.let {
-                blurRadius = it
-                // If there's a 4th part, try to parse as color
-                if (parts.size > 3) {
-                    color = ColorParser.parse(parts.subList(3, parts.size).joinToString(" "))
-                }
-            } ?: run {
-                // Not a length, try to parse as color
-                color = ColorParser.parse(parts.subList(2, parts.size).joinToString(" "))
-            }
-        }
-
-        return FilterFunction.DropShadow(offsetX, offsetY, blurRadius, color)
-    }
 }

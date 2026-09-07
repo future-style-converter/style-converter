@@ -1,6 +1,6 @@
 // TextSpaceTrimExtractor.ts — folds `TextSpaceTrim` IR properties into a TextSpaceTrimConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextSpaceTrimConfig, TEXT_SPACE_TRIM_PROPERTY_TYPE, TextSpaceTrimPropertyType } from './TextSpaceTrimConfig';
 import { kwList } from './_shared';

@@ -1,5 +1,5 @@
 // BorderImage — coverage for the 5 BorderImage* triplets.
-// Fixture: examples/properties/borders/border-image.json.
+// Fixture: fixtures/properties/borders/border-image.json.
 import { describe, it, expect } from 'vitest';
 import { extractBorderImageSource } from '../../../src/engine/borders/image/BorderImageSourceExtractor';
 import { applyBorderImageSource }   from '../../../src/engine/borders/image/BorderImageSourceApplier';
@@ -37,7 +37,10 @@ describe('BorderImageSource', () => {
       + '<rect fill="red" width="10" height="10"/></svg>';
     expect(applyBorderImageSource(extractBorderImageSource([
       p('BorderImageSource', { type: 'url', url: uri }),
-    ]))).toEqual({ borderImageSource: `url("${uri.replace(/"/g, '\\"')}")` });
+    // Backslashes first, then quotes — the same order as the applier's CSS <string>
+    // escaper (css-values-4 §4.3); CodeQL js/incomplete-sanitization flags a quote-only
+    // replace even when, as here, the input carries no backslash.
+    ]))).toEqual({ borderImageSource: `url("${uri.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}")` });
   });
   it('backslashes and newlines are CSS-string escaped', () => {
     // Backslash doubles (it is the escape char); a raw newline is

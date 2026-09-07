@@ -9,4 +9,3 @@ export interface AlignContentConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const ALIGNCONTENT_PROPERTY_TYPE = 'AlignContent' as const;
-export type AlignContentPropertyType = typeof ALIGNCONTENT_PROPERTY_TYPE;

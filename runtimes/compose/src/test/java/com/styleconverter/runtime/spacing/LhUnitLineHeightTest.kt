@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.spacing
 
 // Wave-43 lane V3 — the `lh` unit's line-height source (css-values-4
-// §6.2.1: lh = the element's USED line-height, not a hardcoded 1.2em).
+// §6.1.1: lh = the element's USED line-height, not a hardcoded 1.2em).
 //
 // Wire shapes are copied VERBATIM from the live wave42-final IR
 // (tools/titan/runs/wave42-final/sections/css-overflow/per-test-ir/
@@ -32,7 +32,7 @@ class LhUnitLineHeightTest {
     // ── The pure three-state pick ───────────────────────────────────────────
 
     @Test fun `declared typed line-height wins verbatim in both modes`() {
-        // Author value beats every calibration (css-values-4 §6.2.1 — the
+        // Author value beats every calibration (css-values-4 §6.1.1 — the
         // computed line-height of the element IS the lh basis).
         assertEquals(32f, LhUnitLineHeight.usedLineHeightPx(32f, false, 16f, wptCapture = true)!!, 0f)
         assertEquals(32f, LhUnitLineHeight.usedLineHeightPx(32f, false, 16f, wptCapture = false)!!, 0f)

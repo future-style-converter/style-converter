@@ -1,6 +1,6 @@
 // GlyphOrientationVerticalExtractor.ts — folds `GlyphOrientationVertical` IR properties into a GlyphOrientationVerticalConfig.
 // Family: glyph-orientation.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { GlyphOrientationVerticalConfig, GLYPH_ORIENTATION_VERTICAL_PROPERTY_TYPE, GlyphOrientationVerticalPropertyType } from './GlyphOrientationVerticalConfig';
 import { kwLower, angleCss } from './_shared';

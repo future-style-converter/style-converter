@@ -1,6 +1,6 @@
 // DominantBaselineExtractor.ts — folds `DominantBaseline` IR properties into a DominantBaselineConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { DominantBaselineConfig, DOMINANT_BASELINE_PROPERTY_TYPE, DominantBaselinePropertyType } from './DominantBaselineConfig';
 import { kwLower } from './_shared';

@@ -30,7 +30,7 @@ package com.styleconverter.runtime.lists
 //    the reference column inherits the whole displacement (+~24px above,
 //    and up to +70px on the wide `start:10000` markers of -102/-007/
 //    -117/-159, which are exactly the four rows scoring 0.60–0.70).
-//    css-lists-3 §3.2 is explicit that a `list-style-position: inside`
+//    css-lists-3 §3.5 is explicit that a `list-style-position: inside`
 //    marker is the item's FIRST INLINE BOX — it lives INSIDE the
 //    principal box and cannot move it. See [rendersInsideOverlay].
 //
@@ -185,7 +185,7 @@ object ListMarkerRow {
      *
      * Both gates are load-bearing:
      *
-     * - `position == INSIDE` only. css-lists-3 §3.2 puts an `inside`
+     * - `position == INSIDE` only. css-lists-3 §3.5 puts an `inside`
      *   marker in the item's content, but an `outside` marker in the
      *   item's MARGIN area, to the left of the border box — drawing that
      *   one at the content-box origin would move it right by its own
@@ -228,13 +228,13 @@ object ListMarkerRow {
     /**
      * Measure-and-place modifier for the overlaid marker: measure it
      * UNBOUNDED (shrink-to-fit — the ::marker box is inline-level content
-     * sized by its glyphs, css-lists-3 §3.2; iOS spells the same rule
+     * sized by its glyphs, css-lists-3 §3.5; iOS spells the same rule
      * `.fixedSize()`), then report a ZERO size so the enclosing Box sizes
      * itself from the item alone and the marker can neither widen nor
      * heighten the item's principal box.
      *
      * Placed at (0, 0) = the item's border-box origin. KNOWN
-     * APPROXIMATION: css-lists-3 §3.2 wants the item's CONTENT-box origin,
+     * APPROXIMATION: css-lists-3 §3.5 wants the item's CONTENT-box origin,
      * so an item with its own padding/border would offset the marker by
      * that much. Every `<li>` in the counter-styles corpus declares
      * neither, and closing it needs the item's resolved box metrics at

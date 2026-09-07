@@ -5,4 +5,3 @@
 // Config mirrors the ColumnRule{Color,Style,Width}Config shape exactly: one
 // already-serialised CSS string, `undefined` when the IR carried no value.
 export interface ColumnRuleBreakConfig { value?: string }
-export const COLUMNRULEBREAK_PROPERTY_TYPE = 'ColumnRuleBreak' as const;

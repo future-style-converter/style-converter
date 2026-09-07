@@ -1,6 +1,6 @@
 // TextIndentExtractor.ts — folds `TextIndent` IR properties into a TextIndentConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextIndentConfig, TEXT_INDENT_PROPERTY_TYPE, TextIndentPropertyType } from './TextIndentConfig';
 import { lengthCss } from './_shared';

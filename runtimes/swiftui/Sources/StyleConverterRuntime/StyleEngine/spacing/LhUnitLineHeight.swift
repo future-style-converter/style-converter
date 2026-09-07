@@ -2,7 +2,7 @@
 //  LhUnitLineHeight.swift
 //  StyleEngine/spacing — wave 43, lane V3.
 //
-//  The `lh` unit's LINE-HEIGHT SOURCE. css-values-4 §6.2.1: `lh` is
+//  The `lh` unit's LINE-HEIGHT SOURCE. css-values-4 §6.1.1: `lh` is
 //  "equal to the computed value of the line-height property of the
 //  element on which it is used". Until this wave SpacingResolver (and the
 //  calc evaluator) hardcoded `1.2 × font-size` — the UA default-sheet

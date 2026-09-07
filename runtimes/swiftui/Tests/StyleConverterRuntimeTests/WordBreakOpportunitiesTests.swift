@@ -28,7 +28,7 @@ final class WordBreakOpportunitiesTests: XCTestCase {
         XCTAssertTrue(w.ops.isEmpty)
     }
 
-    /// css-text-3 §6.1: each U+00AD is REMOVED from the display text and
+    /// css-text-3 §5.3: each U+00AD is REMOVED from the display text and
     /// recorded as a hyphenation op at its position in the cleaned word.
     func testSoftHyphensAreStrippedAndRecorded() {
         let w = WordBreakOpportunities.analyze("Deoxy\u{AD}ribo\u{AD}nucleic")
@@ -125,7 +125,7 @@ final class WordBreakOpportunitiesTests: XCTestCase {
             ["xx", "imple-", "menta-", "tion"])
     }
 
-    /// css-text-3 §6.1 PRIORITY: characters inside the word that
+    /// css-text-3 §5.3 PRIORITY: characters inside the word that
     /// explicitly suggest break points take priority over the
     /// hyphenation resource — the hyphens-auto-control ref breaks
     /// `fragilistic&shy;expiali` at the conditional hyphen in ALL THREE

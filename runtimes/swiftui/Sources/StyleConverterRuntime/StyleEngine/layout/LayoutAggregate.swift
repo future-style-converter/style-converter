@@ -249,10 +249,13 @@ struct GridLine: Equatable {
 
 /// Rolled-up layout state produced by the Phase 7 extractors.
 ///
-/// Scaffold only in step 1: every field is nil-default and no extractor
-/// writes to it. The container builder reads `containerDecision()` to
-/// pick a SwiftUI stack/grid; leaf modifiers (offset / zIndex / position)
-/// are applied per-child by `LayoutApplier.apply(...)`.
+/// Every field is nil-default; FlexboxExtractor / GridExtractor /
+/// PositionExtractor write the ones they own. ComponentRenderer is the
+/// consumer: it builds the `ContainerDecision.ContainerKind` for the
+/// SwiftUI stack/grid itself and applies the per-child modifiers.
+/// Retro P2b (A6#3/A6#10): this paragraph used to name
+/// `FlexboxApplier.containerDecision()` and `LayoutApplier.apply(...)`,
+/// neither of which had a production caller; both are deleted.
 struct LayoutAggregate: Equatable {
 
     // MARK: - Flexbox axes
@@ -354,7 +357,8 @@ struct LayoutAggregate: Equatable {
 
     /// True when at least one Phase 7 extractor wrote into the aggregate.
     /// Mirrors the `TypographyAggregate.touched` short-circuit pattern —
-    /// lets `LayoutApplier` return the view untouched on `nil`/unchanged.
+    /// lets `LayoutExtractor.extract` return nil so the renderer skips the
+    /// layout7 branch (retro P2b: LayoutApplier, named here, was dead).
     var touched: Bool = false
 }
 

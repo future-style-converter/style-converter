@@ -7,10 +7,6 @@
 
 import Foundation
 
-enum BackgroundOriginProperty {
-    static let names: [String] = ["BackgroundOrigin"]
-}
-
 enum BackgroundOriginExtractor {
 
     static func extract(from properties: [IRProperty]) -> BackgroundOriginConfig? {

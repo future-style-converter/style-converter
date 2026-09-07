@@ -415,24 +415,4 @@ object CssPropertyValidator {
 
         return false
     }
-
-    /**
-     * Filter a map of properties, removing invalid CSS properties.
-     *
-     * @param properties The map of property names to values
-     * @return A new map containing only valid CSS properties
-     */
-    fun filterValidProperties(properties: Map<String, String>): Map<String, String> {
-        return properties.filterKeys { isValidProperty(it) }
-    }
-
-    /**
-     * Get a list of invalid property names from a map.
-     *
-     * @param properties The map of property names to values
-     * @return A list of property names that are not valid CSS properties
-     */
-    fun getInvalidProperties(properties: Map<String, String>): List<String> {
-        return properties.keys.filter { !isValidProperty(it) }
-    }
 }

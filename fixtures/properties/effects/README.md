@@ -1,7 +1,7 @@
 # Effects fixtures (Phase 8)
 
 CSS fixtures exercising every value variant accepted by the effects-category
-parsers in `src/main/kotlin/app/parsing/css/properties/longhands/effects/`
+parsers in `converter/src/main/kotlin/app/parsing/css/properties/longhands/effects/`
 (and the `FilterProperty` parser, which lives there even though its IR model
 is under `irmodels/properties/color/`).
 
@@ -11,7 +11,10 @@ Run via:
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/properties/effects/<file>.json -o /tmp/p8"
 ```
 
-All 25 fixtures convert with `(0 generic)` on every component.
+Fixture count: `ls fixtures/properties/effects/*.json | wc -l` (25 at
+authoring, Phase 8; the directory has grown since — the coverage map below
+covers the original 25). Every fixture converted with `(0 generic)` on every
+component when the phase shipped; that claim has not been re-run since.
 
 ## Coverage map
 

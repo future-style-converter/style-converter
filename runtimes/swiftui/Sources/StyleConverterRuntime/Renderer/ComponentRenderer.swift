@@ -309,7 +309,7 @@ public struct ComponentRenderer: View {
         // HERE, the last point that still holds the element's OWN list and
         // the inherited channel separately. On a list container with no
         // own declaration, `ul { list-style-type: disc }` / `ol { … decimal }`
-        // (HTML §15.3.9) is a declaration ON the element, so it beats any
+        // (HTML §15.3.7) is a declaration ON the element, so it beats any
         // ancestor value — css-cascade-4 §4.3 consults inheritance only
         // when the cascade produced nothing. Returns its input unchanged
         // for every non-container and every own-declaring container, so no
@@ -906,7 +906,7 @@ public struct ComponentRenderer: View {
             // §10.5); nil keeps the percent-height skip.
             s.spacing.context.containingBlockHeightPx = containingBlockHeight.map(Double.init)
             // Wave 43 (lane V3) — the `lh` unit's line-height source
-            // (css-values-4 §6.2.1: lh = the element's USED line-height).
+            // (css-values-4 §6.1.1: lh = the element's USED line-height).
             // Folded HERE because only the renderer holds the
             // wptCaptureMode environment flag the calibrated rows key on;
             // the pick itself is the pure LhUnitLineHeight three-state
@@ -1795,7 +1795,7 @@ public struct ComponentRenderer: View {
                                 children: FlexboxApplier.sorted(inFlowChildren),
                                 leadingText: component.text?.isEmpty == false)
                             : nil,
-                        // Wave-43 lane V6 — css-overflow-4 §3 `continue:
+                        // Wave-43 lane V6 — css-overflow-4 §5.3 `continue:
                         // discard`, from the typed columns config (the
                         // "Continue" IR property, DISCARD keyword).
                         // Threaded unconditionally because only the
@@ -2232,7 +2232,7 @@ public struct ComponentRenderer: View {
                 // otherwise fit-content hug (web harness parity).
                 definiteWidth: style.size.width != nil,
                 // Wave-19 RC-A2: container justify-content — content
-                // distribution of the track group (css-align-3 §5.3); the
+                // distribution of the track group (css-align-3 §5.1); the
                 // aggregate keyword FlexboxExtractor already parses.
                 // Wave-19 RC-A2: direction:rtl is NOT passed — SwiftUI's
                 // ambient layoutDirection environment (set by
@@ -2466,7 +2466,7 @@ public struct ComponentRenderer: View {
                 if case .px(let p)? = a.flexBasis { return p }
                 return nil
             }()
-            // Explicit main size fallback (css-flexbox-1 §9.2.3.A —
+            // Explicit main size fallback (css-flexbox-1 §9.2 step 3.A —
             // basis auto defers to the main-size property).
             let cs = SizeExtractor.extract(from: child.properties)
             let explicit: CGFloat? = column
@@ -2568,7 +2568,7 @@ public struct ComponentRenderer: View {
         for child in children {
             let cs = SizeExtractor.extract(from: child.properties)
             // Flex factors — `flex-basis: <length>` wins over `width`
-            // on the main axis (css-flexbox-1 §9.2.3.A).
+            // on the main axis (css-flexbox-1 §9.2 step 3.A).
             var agg = LayoutAggregate()
             FlexboxExtractor.extract(from: child.properties, into: &agg)
             // SKEPTIC (wave 25) — the plan's per-child index must address
@@ -2794,7 +2794,7 @@ public struct ComponentRenderer: View {
     /// width and the slot width drift apart). A declared ColumnGap/Gap
     /// resolves through the SAME GapApplier lane the flow container's
     /// spacing uses; an UNDECLARED gap is `normal`, which for multicol
-    /// containers is 1em (css-align-3 §8.3) — the element's resolved
+    /// containers is 1em (css-align-3 §8) — the element's resolved
     /// font-size, NOT the GapConfig zero default (that zero is right for
     /// flex/grid, where `normal` means no gap). Non-multicol callers get
     /// 0 without touching the resolver.
@@ -2813,7 +2813,7 @@ public struct ComponentRenderer: View {
                                       parentWidth: flexContentSize(style: style,
                                                                    vertical: false)).column
         }
-        // `column-gap: normal` = 1em for multicol (css-align-3 §8.3).
+        // `column-gap: normal` = 1em for multicol (css-align-3 §8).
         return CGFloat(style.spacing.context.fontSizePx)
     }
 
@@ -3302,7 +3302,7 @@ public struct ComponentRenderer: View {
                                      // X1: the container's computed content
                                      // language — gates `auto` ADOPTION,
                                      // whose dictionary is language-
-                                     // selected (css-text-3 §6.1).
+                                     // selected (css-text-3 §5.3).
                                      containerLang: component.meta?.lang)
                 : nil
             // ── Wave-32 lane R: the ordered inline content ──────────────
@@ -3358,7 +3358,7 @@ public struct ComponentRenderer: View {
                 // ADOPTED member `hyphens` injected (the fold only adopts
                 // when the host declared none, so this never overrides a
                 // host declaration; behavior-neutral for `manual`, the
-                // css-text-3 §6.1 initial the label already assumes).
+                // css-text-3 §5.3 initial the label already assumes).
                 let foldTextConfig: TextConfig = {
                     var cfg = style.text
                     if let adopted = flow.adoptedHyphensMode {
@@ -3399,7 +3399,7 @@ public struct ComponentRenderer: View {
                     // ADOPTED `auto` is safe with this lang because the
                     // fold's lang-divergence gate only adopts a member
                     // `auto` whose language equals the paragraph's
-                    // (css-text-3 §6.1 language-appropriate resource).
+                    // (css-text-3 §5.3 language-appropriate resource).
                     lang: component.meta?.lang,
                     // The container's own decoration wire propagates over
                     // its whole inline content (css-text-decor-3 §2.1) —
@@ -3699,7 +3699,7 @@ public struct ComponentRenderer: View {
                 //
                 // Wave 24 (lane LF, B-RC3 parts 1+2): the marker is no
                 // longer hard-coded to "1." for <ol> / a bullet for <ul>.
-                // The tag supplies only the UA default (HTML §15.3.9); the
+                // The tag supplies only the UA default (HTML §15.3.7); the
                 // ITEM's own list-style-* declarations — which is where the
                 // live wire puts them (tools/titan/runs/wave23-final/
                 // sections/css-lists/per-test-ir/wpt__css-lists__change-
@@ -3716,7 +3716,7 @@ public struct ComponentRenderer: View {
                 // the placement instead of only being carried. An
                 // `inside` marker on an item with no in-flow text paints
                 // INSIDE the item's box, through an overlay that cannot
-                // move or resize it — css-lists-3 §3.2 makes it the item's
+                // move or resize it — css-lists-3 §3.5 makes it the item's
                 // first inline box. Everything else keeps the HStack.
                 //
                 // STILL DEFERRED — the rest of B-RC3 part 3: `outside` is
@@ -3791,7 +3791,7 @@ public struct ComponentRenderer: View {
                     // Wave 12 — read the writing mode from the MERGED,
                     // inheritance-resolved list, not the typography
                     // aggregate: `writing-mode` is Inherited: yes
-                    // (css-writing-modes-4 §3.1) so it usually sits on
+                    // (css-writing-modes-4 §3.2) so it usually sits on
                     // an ANCESTOR (now flowing in via InheritedText's
                     // "WritingMode" entry), and the aggregate is nil
                     // whenever writing-mode is the only typography
@@ -3818,7 +3818,7 @@ public struct ComponentRenderer: View {
                     // Wave-21: unlocks the §7.1 auto-height balanced
                     // fragmentainer (B-RC5) in capture only.
                     wptCaptureMode: wptCaptureMode,
-                    // Wave-46 lane Y3: the css-break-3 §5.2 clone branch
+                    // Wave-46 lane Y3: the css-break-3 §5.4 clone branch
                     // engages only for a child with no content of its own
                     // (MulticolClonePlan's re-render trick) — the shared
                     // leaf predicate, computed here because the plan sees
@@ -4193,7 +4193,7 @@ public struct ComponentRenderer: View {
     /// F clones of the child's full view, each clipped to its COLUMN
     /// rect and translated so fragment i exposes the child's continuous
     /// paint band [i·H, min((i+1)·H, C)) — box-decoration-break:slice
-    /// (css-break-3 §5.2, the initial value): backgrounds paint as ONE
+    /// (css-break-3 §5.4, the initial value): backgrounds paint as ONE
     /// unfragmented C-tall box, then each column shows a slice of it,
     /// so stripes/gradients continue seamlessly across columns.
     ///
@@ -4239,7 +4239,7 @@ public struct ComponentRenderer: View {
             ForEach(plan.fragments, id: \.columnIndex) { frag in
                 // Wave-46 lane Y3: under `box-decoration-break: clone`
                 // the plan hands each fragment the child RE-DECLARED at
-                // that fragment's block-size (css-break-3 §5.2 — every
+                // that fragment's block-size (css-break-3 §5.4 — every
                 // fragment independently wrapped); under slice this is
                 // the child itself, byte-identical to the wave-10 row.
                 ComponentHost(component: plan.child(child, forFragmentAt: frag.columnIndex))
@@ -4409,7 +4409,7 @@ public struct ComponentRenderer: View {
     ///
     /// The marker `Text` is identical in both: `.fixedSize()` because the
     /// ::marker box is inline-level shrink-to-fit content sized by its
-    /// glyphs (css-lists-3 §3.2, B-RC5) — never by whatever inline space
+    /// glyphs (css-lists-3 §3.5, B-RC5) — never by whatever inline space
     /// the item's declared width leaves over. Wave 30 (lane 3, fix B6)
     /// adds `.listMarkerSymbol` to both: for `disc`/`circle`/`square` it
     /// swaps the glyph's INK for the painted Chromium symbol while keeping
@@ -4498,7 +4498,8 @@ public struct ComponentRenderer: View {
     /// function is only the paint.
     ///
     /// ## Why a LEADING LINE BOX and not an HStack
-    /// css-lists-3 §3.2 makes an `inside` marker the item's FIRST INLINE
+    /// css-lists-3 §3.1 generates the ::marker as the item's first child and
+    /// §3.5 (`list-style-position: inside`) makes it the FIRST INLINE
     /// BOX. The item's own in-flow content on all three runtimes is
     /// BLOCK-level (`PlaceholderLabel` for text, a stack of children
     /// otherwise), so the marker can never share a line with it and owns a
@@ -4534,7 +4535,7 @@ public struct ComponentRenderer: View {
         Text(ScriptFallbackFonts.annotate(markerText,
                                           enabled: wptCaptureMode,
                                           size: fontSizePx))
-            // Shrink-to-fit ::marker box (css-lists-3 §3.2) — the same
+            // Shrink-to-fit ::marker box (css-lists-3 §3.5) — the same
             // rule both row placements above carry.
             .fixedSize(horizontal: true, vertical: true)
             .listMarkerSymbol(
@@ -4689,7 +4690,7 @@ private struct PlaceholderLabel: View {
             visibleText,
             textCase: textConfig.textCase,
             capitalize: textConfig.capitalizeWords)
-        // Wave 37 (lane W7, rule A) — `hyphens: none` (css-text-3 §6.1):
+        // Wave 37 (lane W7, rule A) — `hyphens: none` (css-text-3 §5.3):
         // delete the CONDITIONAL soft hyphens so TextKit cannot break at
         // them. Applied here, in the same "rewrite the string before it
         // is measured" lane as the case fold above, for the same reason:
@@ -4717,7 +4718,7 @@ private struct PlaceholderLabel: View {
         //
         // Wave 37 (lane W7, rule B) — and WHETHER any committed line is
         // WIDER than `avail`. GreedyLineBreaker leaves an overlong word
-        // alone on its line to overflow (CSS 2.1 §9.5 / css-text-3 §5.2:
+        // alone on its line to overflow (CSS 2.1 §9.5 / css-text-3 §5.5:
         // under `overflow-wrap: normal` a word with no break opportunity
         // overflows the line box), but a Text still constrained to the
         // box width hands that line straight back to TextKit, which
@@ -4729,7 +4730,7 @@ private struct PlaceholderLabel: View {
         // feeds the `.fixedSize(horizontal:)` gate below, which is the
         // same vehicle wave 21 built for whole-run unbreakables.
         //
-        // Wave 40 (lane T2) — and it now carries the css-text-3 §6.1 `auto`
+        // Wave 40 (lane T2) — and it now carries the css-text-3 §5.3 `auto`
         // DICTIONARY. On this platform the pre-break IS the line breaker
         // (TextKit only ever sees hard newlines), so hyphenation has to
         // happen here or nowhere; `hyphenator` below is nil for every run
@@ -4790,7 +4791,7 @@ private struct PlaceholderLabel: View {
                 hyphenate: hyphenLocale.map { loc in
                     { word in AutoHyphenation.breakOffsets(in: word, locale: loc) }
                 },
-                // The UA hyphen §6.1 leaves undefined: U+2010, which is what
+                // The UA hyphen §5.3 leaves undefined: U+2010, which is what
                 // Chromium paints and therefore what the frozen refs carry.
                 // css-text-4 §6.3 `hyphenate-character` would override it,
                 // but HyphenateCharacterApplier is still an identity
@@ -4875,7 +4876,7 @@ private struct PlaceholderLabel: View {
         // Wave 40 (lane T2) — `broken.preBroken` VETOES the claim. The
         // predicate answers "does UAX #14 give this run a break?", which
         // is the complete answer only while the hyphenator is off; under
-        // `hyphens: auto` §6.1 adds the dictionary's points and the
+        // `hyphens: auto` §5.3 adds the dictionary's points and the
         // pre-break has ALREADY spent them, so `displayText` carries hard
         // newlines even though it has no space. Leaving the claim standing
         // there would `.fixedSize(horizontal:)` the run back onto one line
@@ -4891,7 +4892,7 @@ private struct PlaceholderLabel: View {
         // wider than the box. wave 21's whole-run test misses it (a
         // single space anywhere in the run answers "breakable"), yet the
         // overlong word is just as unbreakable as a whole run with no
-        // spaces at all: css-text-3 §5.2 lets it overflow, it must not be
+        // spaces at all: css-text-3 §5.5 lets it overflow, it must not be
         // emergency-broken. The greedy pre-break already put it alone on
         // its line; this flag is what stops TextKit re-breaking that line
         // at the proposal edge. Gated on `preBroken` because only then do
@@ -5278,7 +5279,7 @@ private struct PlaceholderLabel: View {
             // finds nothing and silently no-ops: the wave-6 iOS captures
             // rendered plain `italic` fully upright while web and Android
             // both SYNTHESIZED a slant. Mirror their font synthesis
-            // (css-fonts-4 §6, font-synthesis-style) with the same fixed
+            // (css-fonts-4 §2.8.2, font-synthesis-style) with the same fixed
             // matrix shear both use (Skia textSkewX -0.25 ≈ 14deg).
             // Guard: only when the resolved face carries the final weight
             // (weightBaked, or no weight requested) — a UIFont-backed
@@ -5527,7 +5528,7 @@ private struct PlaceholderLabel: View {
             let piece = String(chars[range])
             var t = wordSpacedText(piece)
             if let style {
-                // The member's own ink (css-color-4 §3.1) — inner
+                // The member's own ink (css-color-4 §3.2) — inner
                 // foregroundColor wins over the label's outer one.
                 if let ink = style.ink {
                     t = t.foregroundColor(Color(.sRGB, red: ink.r, green: ink.g,
@@ -5536,7 +5537,7 @@ private struct PlaceholderLabel: View {
                 // A member face override rebuilds through the SAME
                 // ladder the paragraph face used (labelFont) over a
                 // config copy — em resolves against the paragraph size
-                // (css-values-4 §5.1.1: the fold host is the parent).
+                // (css-values-4 §6.1.1: the fold host is the parent).
                 if style.fontSizePx != nil || style.fontSizeEm != nil
                     || style.fontWeight != nil || style.italic {
                     t = t.font(labelFont(for: segmentConfig(for: style)))
@@ -5998,36 +5999,6 @@ private struct GlyphShadows: ViewModifier {
         layers.reduce(AnyView(content)) { acc, l in
             AnyView(acc.shadow(color: l.color ?? .black.opacity(0.5),
                                radius: l.radius / 2, x: l.x, y: l.y))
-        }
-    }
-}
-
-// MARK: - Alignment bridges
-
-private extension LayoutConfig.Align {
-    var verticalAlignment: VerticalAlignment {
-        switch self {
-        case .flexStart: return .top
-        case .flexEnd:   return .bottom
-        case .center:    return .center
-        case .baseline:  return .firstTextBaseline
-        // css-flexbox-1 §8.3: `stretch` only stretches items whose cross
-        // size is `auto`; items with a definite cross size are aligned
-        // as `flex-start`. Our items are intrinsically sized (fit-content
-        // harness parity), so the visible behaviour of the default
-        // `align-items: stretch` is TOP alignment — web/Android agree;
-        // the old `.center` mapping floated shorter items mid-row.
-        case .stretch:   return .top
-        }
-    }
-
-    var horizontalAlignment: HorizontalAlignment {
-        switch self {
-        case .flexStart: return .leading
-        case .flexEnd:   return .trailing
-        case .center:    return .center
-        case .baseline:  return .leading
-        case .stretch:   return .leading
         }
     }
 }

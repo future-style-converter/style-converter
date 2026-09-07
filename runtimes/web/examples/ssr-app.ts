@@ -1,6 +1,9 @@
 /**
  * ssr-app.ts — the "consume from a real app" example (issue #41),
- * executed standalone by examples/ssr-smoke.mjs.
+ * executed standalone by runtimes/web/examples/ssr-smoke.mjs (the sibling
+ * file — retro P2e made the path repo-relative: the bare `examples/`
+ * prefix has read as the repo-root `examples/` tree, deleted by the
+ * 2026-07-08 restructure 02e4c457, ever since that rename).
  *
  * A token-themed IR document — CSS custom properties as design tokens
  * defined on the root component, consumed via var() below it — rendered

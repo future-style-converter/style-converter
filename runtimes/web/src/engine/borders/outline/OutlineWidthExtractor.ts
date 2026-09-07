@@ -1,5 +1,5 @@
 // OutlineWidthExtractor.ts — folds `OutlineWidth` IR properties into a config.
-// IR shape flavors (from examples/properties/borders/outline.json):
+// IR shape flavors (from fixtures/properties/borders/outline.json):
 //   {type:'keyword', value:'THIN'|'MEDIUM'|'THICK'}   keyword form (UA-defined px)
 //   {type:'length', px:N}                             plain px
 //   {type:'length', original:{v,u:'REM'|...}}         font-relative

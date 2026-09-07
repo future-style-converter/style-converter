@@ -132,7 +132,7 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
                         'border-bottom-right-radius', 'border-bottom-left-radius']) {
     assert.equal(WRITE_RULES[corner].deleteWhen, '0px', `${corner} must be delete-not-write at 0px`);
   }
-  // wave-40 T1: `flat` is the css-transforms-2 §4 initial and what Chromium
+  // wave-40 T1: `flat` is the css-transforms-2 §7 initial and what Chromium
   // reports for every element outside a 3D rendering context — writing it
   // would stamp a key onto essentially every post-load component, so only a
   // genuinely 3D-preserving element gains one.

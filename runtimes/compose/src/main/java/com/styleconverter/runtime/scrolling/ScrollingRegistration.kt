@@ -21,9 +21,11 @@ package com.styleconverter.runtime.scrolling
 //   * OverflowClipMargin single-token form is lowercase-only; mixing case
 //     falls through to length parser and returns null.
 //
-// See examples/properties/scrolling/longtail.json (Phase 10 fixture, 60
-// components) and examples/properties/README-phase10.md for the full
-// variant matrix.
+// See fixtures/properties/scrolling/longtail.json (Phase 10 fixture, 60
+// components) for the full variant matrix. Retro P2e corrected both halves
+// of this pointer: the 2026-07-08 restructure (commit 02e4c457) moved
+// `examples/` to `fixtures/` and DELETED `README-phase10.md` outright, so
+// the fixture is now the only surviving index of that matrix.
 
 import com.styleconverter.runtime.PropertyRegistry
 

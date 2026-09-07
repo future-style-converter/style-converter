@@ -278,8 +278,16 @@ final class InlineAtomFlowTests: XCTestCase {
     // ── Wave-20 fix 3 — the fill-width fold guard, pinned on the LIVE
     // appearance-auto-001 wire ──
 
-    /// Repo-root anchored path to the REAL wave20-final per-test IR (the
-    /// ConformanceTests #filePath-hop pattern; skip-guarded below).
+    /// Repo-root anchored path to the VENDORED per-test IR (the
+    /// ConformanceTests #filePath-hop pattern).
+    ///
+    /// Retro R10 (finding A8#3): this pointed at
+    /// `tools/titan/runs/wave20-final/sections/css-ui/per-test-ir/…` behind
+    /// an `XCTSkip` — and that gitignored run directory was pruned waves
+    /// ago, so the pin skipped on every sweep, on every machine,
+    /// permanently rather than hermetically. `tools/titan/fixtures/` (see
+    /// its README) now carries the byte-verbatim document, so the pin runs
+    /// on a hermetic checkout; an absent fixture is a real failure.
     private static var appearanceAuto001IR: URL {
         URL(fileURLWithPath: #filePath)               // …/InlineAtomFlowTests.swift
             .deletingLastPathComponent()              // StyleConverterRuntimeTests/
@@ -287,21 +295,22 @@ final class InlineAtomFlowTests: XCTestCase {
             .deletingLastPathComponent()              // swiftui/
             .deletingLastPathComponent()              // runtimes/
             .deletingLastPathComponent()              // repo root
-            .appendingPathComponent("tools/titan/runs/wave20-final/sections/css-ui/per-test-ir/"
+            .appendingPathComponent("tools/titan/fixtures/per-test-ir/wave49-final/css-ui/"
                 + "wpt__css-ui__appearance-auto-001.json")
     }
 
     func testFix3FillWidthFoldSkipsEveryLiveAtomAndRowPartitionHoldsRef() throws {
-        // Live-wire pin: hermetic checkouts without the run dir skip.
+        // Live-wire pin over the vendored corpus document (no skip guard).
         let url = Self.appearanceAuto001IR
-        guard FileManager.default.fileExists(atPath: url.path) else {
-            throw XCTSkip("wave20-final run directory absent")
-        }
         let doc = try JSONDecoder().decode(IRDocument.self, from: Data(contentsOf: url))
         // The v2 decode slot-COMPOSES the flat wire (doc.components are
         // the composed roots), so the container's sixteen widget children
-        // arrive via container.children, in wire order.
-        let container = try XCTUnwrap(doc.components.first { $0.id.hasSuffix("__0-007") })
+        // arrive via container.children, in wire order. The id suffix is
+        // the vendored document's own (`…__0-005`): TITAN numbers ids per
+        // section run, so the wave-20 spelling `__0-007` no longer names
+        // this container — it names its second CHILD. Matching the frozen
+        // fixture's id keeps the pin exact rather than positional.
+        let container = try XCTUnwrap(doc.components.first { $0.id.hasSuffix("__0-005") })
         let children = container.children ?? []
         XCTAssertEqual(16, children.count)
         // fix 3 — the fold guard: EVERY widget child is an inline atom

@@ -98,7 +98,7 @@ class NestedEndInsetAnchorGateTest {
     /**
      * G3 — `auto` is the INITIAL value, not a declaration: an
      * `left: auto; right: 20px` box still anchors from the end
-     * (css-position-3 §3.5.3). The converter emits the bare string
+     * (css-position-3 §4.3). The converter emits the bare string
      * `"auto"`, which extractDp cannot read either — so without the
      * keyword carve-out the gate would kill the fixture the lane exists
      * for (position-right-bottom's sibling spelling).

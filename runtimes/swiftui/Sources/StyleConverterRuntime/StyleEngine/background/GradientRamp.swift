@@ -2,7 +2,7 @@
 //  GradientRamp.swift
 //  StyleEngine/background — wave 46, lane Y2 (css-images natives).
 //
-//  The per-pair colour math of a gradient ramp: css-color-4 §12
+//  The per-pair colour math of a gradient ramp: css-color-4 §13
 //  interpolation between two resolved stops (premultiplied alpha, hue
 //  arc selection, powerless-hue carry) and the subdivision that bakes
 //  that ramp into micro-stops SwiftUI's gradient types can follow.
@@ -23,18 +23,18 @@ enum GradientRamp {
 
     typealias Stop = GradientApplier.RGBAStop
 
-    // MARK: - Interpolation (css-color-4 §12)
+    // MARK: - Interpolation (css-color-4 §13)
 
     /// Colour at `t` between `a` and `b` in the authored space:
-    /// premultiplied non-hue components (§12.3), hue arc per method
-    /// (§12.5), powerless hue carried from the other stop (§12.2).
+    /// premultiplied non-hue components (§13.4), hue arc per method
+    /// (§13.5), powerless hue carried from the other stop (§13.3).
     static func interpolate(_ a: Stop, _ b: Stop, t: Double, interp: GradientInterpolation) -> Stop {
         let space = interp.space
         var ca = comps(GradientColorMath.fromSrgb((a.r, a.g, a.b), to: space))
         var cb = comps(GradientColorMath.fromSrgb((b.r, b.g, b.b), to: space))
         let alpha = a.a + (b.a - a.a) * t
         let hueIx = GradientColorMath.hueIndex(space)
-        // Missing-component carry for the hue (§12.2 "analogous"): a
+        // Missing-component carry for the hue (§13.3 "analogous"): a
         // powerless hue takes the other stop's hue before the arc is
         // chosen — `red → black in hsl longer hue` therefore sweeps the
         // whole wheel instead of fading straight to black.
@@ -54,7 +54,7 @@ enum GradientRamp {
                 // (byte-stable with the pre-wave srgbSubdivided path).
                 out[i] = va + (vb - va) * t
             } else if alpha > 0 {
-                // Premultiplied (§12.3): each component weighted by its
+                // Premultiplied (§13.4): each component weighted by its
                 // own alpha, un-premultiplied by the interpolated alpha.
                 out[i] = (va * a.a * (1 - t) + vb * b.a * t) / alpha
             } else {
@@ -69,7 +69,7 @@ enum GradientRamp {
     /// Tuple → array so components are index-addressable.
     private static func comps(_ c: GradientColorMath.Triple) -> [Double] { [c.0, c.1, c.2] }
 
-    /// css-color-4 §12.5 arc selection: the (possibly >360 / unordered)
+    /// css-color-4 §13.5 arc selection: the (possibly >360 / unordered)
     /// endpoint pair the lerp runs between. Exposed for the subdivision
     /// density and for XCTest.
     static func hueArc(_ h1: Double, _ h2: Double, method: GradientInterpolation.HueMethod) -> (Double, Double) {

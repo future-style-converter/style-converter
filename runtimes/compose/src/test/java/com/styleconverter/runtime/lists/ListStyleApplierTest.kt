@@ -19,8 +19,9 @@ package com.styleconverter.runtime.lists
 // the visual gate to notice.
 //
 // ## The contract pinned here
-// css-counter-styles-3 §6.2: a predefined style whose symbol run does not
-// cover the value falls back to `decimal`. The guard applies that at BOTH
+// css-counter-styles-3 §2: a predefined style whose symbol run does not
+// cover the value falls back to `decimal` (the counter-representation
+// algorithm exits to the fallback style when the value is out of range). The guard applies that at BOTH
 // ends, exactly like the iOS twin StyleEngine/lists/ListMarkerText.cyclic
 // (`index >= 0 && index < symbols.count ? … : "\(index + 1)"`), which has
 // carried the lower bound since wave 24.

@@ -57,8 +57,13 @@
 #
 # Exit codes:
 #   0 — full success
-#   1 — at least one stage failed (extract/capture/compare)
-#   2 — infra error (missing corpus, missing tools, lock contention)
+#   1 — at least one stage failed (extract/capture/compare), OR — under
+#       --all-platforms — a native column came back SHORT or ABSENT
+#       (NATIVE_SHORT, retro R8b/A9#1: the manifest IS written first, for
+#       diagnosis; the exit code is what the gate driver keys on)
+#   2 — infra error (missing corpus, missing tools, lock contention, disk
+#       preflight below TITAN_MIN_FREE_GB, or the low-disk watchdog — see
+#       $WORK_DIR/DISK_ABORT)
 
 set -euo pipefail
 
@@ -194,6 +199,31 @@ command -v node    >/dev/null || { err "node not found"; exit 2; }
 command -v rsync   >/dev/null || { err "rsync not found"; exit 2; }
 command -v lsof    >/dev/null || warn "lsof not found — skipping port-busy preflight check"
 
+# ── Disk preflight (retro R8b / A10#12 — BACKLOG obligation #6 made code) ────
+#
+# The first wave-49 gate attempt lost its whole Android column when the HOST
+# hit 94% full: the emulator destabilised into an adb "Broken pipe" during
+# :app:installDebug. Until now the "≥10G or abort" preflight and the "<8G"
+# mid-run abort lived only in BACKLOG prose (the gate script was re-derived
+# from the template every wave), so any wave could drop them silently. This
+# is the code. `df -Pk` is POSIX (macOS and Linux agree on it; `df -g` is
+# BSD-only) and column 4 is Available in 1K blocks → integer GiB. Both floors
+# are env-tunable for a small machine, never switch-off-able.
+TITAN_MIN_FREE_GB="${TITAN_MIN_FREE_GB:-10}"    # preflight floor  (BACKLOG: "≥10G or abort")
+TITAN_ABORT_FREE_GB="${TITAN_ABORT_FREE_GB:-8}" # mid-run watchdog (BACKLOG: "<8G is a gate abort")
+_free_gb() { df -Pk "$PROJECT_ROOT" 2>/dev/null | awk 'NR==2 { printf "%d", $4 / 1048576 }'; }
+FREE_GB="$(_free_gb)"
+if [[ -z "$FREE_GB" ]]; then
+  warn "df unreadable for $PROJECT_ROOT — disk preflight skipped"
+elif (( FREE_GB < TITAN_MIN_FREE_GB )); then
+  # Refuse BEFORE creating the run dir: a section that starts on a nearly
+  # full disk ends as the wave-49 incident did. The recipe that freed space
+  # (BACKLOG obligation #6) is named so the operator need not re-derive it.
+  err "disk preflight: ${FREE_GB}G free < ${TITAN_MIN_FREE_GB}G — refusing to start. Prune tools/titan/runs/*, delete Shutdown sims + DerivedData, then 'tmutil thinlocalsnapshots / 21474836480 4' (APFS parks freed space in local snapshots)."
+  exit 2
+fi
+log "disk: ${FREE_GB:-?}G free (floor ${TITAN_MIN_FREE_GB}G; watchdog aborts below ${TITAN_ABORT_FREE_GB}G)"
+
 # ── Deterministic vite port from section name ────────────────────────────────
 #
 # Hash the section name into the 3100..3299 range. Reproducible per-section
@@ -234,6 +264,45 @@ WORK_DIR="$RUN_DIR/sections/$SECTION"
 mkdir -p "$WORK_DIR"
 log "run id: $RUN_ID"
 log "work dir: $WORK_DIR"
+
+# ── Low-disk watchdog (retro R8b / A10#12) ───────────────────────────────────
+#
+# A background poller: every 30s it re-reads free space and, below
+# TITAN_ABORT_FREE_GB, writes $WORK_DIR/DISK_ABORT (the number + UTC time, for
+# the gate driver to read) and signals this shell with USR1. The handler kills
+# the native feeders (they would otherwise keep writing to a full disk while
+# holding their pool slots), then exits 2 — the infra-error code — which fires
+# the EXIT trap (lock, slots, vite). bash defers a trap while a FOREGROUND
+# command runs (gradle, compare, inject), so there the abort lands when that
+# command returns; during the feeders' `wait` it lands immediately (bash
+# `wait` returns on a trapped signal). The poller stops on its own once this
+# shell is gone (`kill -0 $$` fails) and every EXIT trap below also stops it.
+DISK_ABORT_MARKER="$WORK_DIR/DISK_ABORT"
+rm -f "$DISK_ABORT_MARKER"   # a stale marker from a re-used --run-id must not read as this run's abort
+_on_disk_abort() {
+  err "DISK WATCHDOG: $(cat "$DISK_ABORT_MARKER" 2>/dev/null || echo 'free space') is below ${TITAN_ABORT_FREE_GB}G — aborting section (marker: $DISK_ABORT_MARKER)"
+  kill -TERM ${FEED_ANDROID_PID:-} ${FEED_IOS_PID:-} 2>/dev/null || true   # unquoted on purpose: empty pids vanish
+  exit 2
+}
+trap '_on_disk_abort' USR1
+(
+  # Subshell: traps reset to defaults here, so its exit never runs the parent's
+  # EXIT cleanup (the same isolation the backgrounded vite relies on).
+  while kill -0 "$$" 2>/dev/null; do
+    free="$(_free_gb)"
+    if [[ -n "$free" ]] && (( free < TITAN_ABORT_FREE_GB )); then
+      echo "free=${free}G at $(date -u +%Y-%m-%dT%H:%M:%SZ)" > "$DISK_ABORT_MARKER"
+      kill -USR1 "$$" 2>/dev/null
+      exit 0
+    fi
+    sleep 30
+  done
+) &
+DISK_WD_PID=$!
+_stop_disk_watchdog() { kill "${DISK_WD_PID:-}" 2>/dev/null || true; }
+# Re-install the base EXIT trap with the watchdog stop in front (the later
+# trap rewrites below each carry it too).
+trap '_stop_disk_watchdog; rm -rf "$LOCK" 2>/dev/null || true; rm -rf "${VITE_TMPDIR:-/dev/null}" 2>/dev/null || true' EXIT
 
 # ── Resolve test list (bucket-A entries in the section) ─────────────────────
 
@@ -434,7 +503,7 @@ _cleanup_vite() {
 # Chain into the lock-release trap installed at top of script. EXIT-only:
 # the INT/TERM/HUP traps installed up top keep routing signals through
 # `exit`, which fires this handler exactly once.
-trap '_cleanup_vite; rm -rf "$LOCK" 2>/dev/null || true' EXIT
+trap '_stop_disk_watchdog; _cleanup_vite; rm -rf "$LOCK" 2>/dev/null || true' EXIT
 
 log "waiting for vite @ :$PORT…"
 VITE_READY=0
@@ -499,7 +568,7 @@ _cleanup_vite
 unset VITE_PID
 # Restore the base lock-release trap (vite cleanup already ran). EXIT-only —
 # the signal traps from the top of the script stay installed.
-trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT
+trap '_stop_disk_watchdog; rm -rf "$LOCK" 2>/dev/null || true' EXIT
 set -m
 
 # ── Step 5b: native composed capture (--all-platforms, device-pooled) ───────
@@ -521,12 +590,22 @@ IOS_SHOTS_DIR="$WORK_DIR/ios-screenshots"
 ANDROID_SHOTS_DIR="$WORK_DIR/android-screenshots"
 rm -rf "$IOS_SHOTS_DIR" "$ANDROID_SHOTS_DIR"
 mkdir -p "$IOS_SHOTS_DIR" "$ANDROID_SHOTS_DIR"
+# retro R8b (A9#1): NATIVE_SHORT is the section's "a native column is short
+# or absent" flag. Every native delivery failure below sets it — a slot never
+# acquired, a missing per-test dir, a feeder exiting non-zero, a capture
+# count that does not match the per-test count, inject's whole-column-zero
+# exit — and the Summary turns it into exit 1 AFTER the manifest is written.
+# Before this flag each of those paths was a `warn` into a per-section log,
+# the runner exited 0, and the missing cells simply shrank that platform's
+# denominator (a missing capture is neither pass nor fail). --web-only never
+# sets it: the empty native dirs there are declared, not short.
+NATIVE_SHORT=0
 if [[ "$PLATFORM_SCOPE" == "all" ]]; then
   step "Step 5b: native composed capture (device-pooled)"
   PERTEST_DIR="$WORK_DIR/per-test-ir"
   # Split THIS section's combined IR (from Step 4) into per-test docs.
   node "$TITAN_DIR/split-combined-ir.mjs" --in "$GRADLE_OUT_DIR/tmpOutput.json" --out "$PERTEST_DIR" \
-    >>"$CAPTURE_LOG" 2>&1 || warn "split-combined-ir failed — natives will be absent"
+    >>"$CAPTURE_LOG" 2>&1 || { warn "split-combined-ir failed — natives will be absent"; NATIVE_SHORT=1; }
 
   POOL_ROOT="/tmp/titan-device-pool"
   # adb lives outside PATH in most shells; mirror feed-android's resolution.
@@ -542,7 +621,18 @@ if [[ "$PLATFORM_SCOPE" == "all" ]]; then
   # provisioning more devices needs zero config here.
   _android_candidates() {
     local adb; adb=$(_adb_bin) || return 0
-    "$adb" devices 2>/dev/null | awk '$2=="device" && $1 ~ /^emulator-/ {print $1}'
+    # Retro gate 2026-09-06: this `adb devices` was UNBOUNDED and hung for 49 min (twice) when the
+    # adb server wedged mid-gate, stalling Step 5b before either feeder launched — the 50-min
+    # watchdog then killed the whole section. Bound it (perl alarm), and on a timeout restart the
+    # server DETACHED (a server spawned from a pipeline inherits its fds) and retry once.
+    local out=""
+    for _attempt in 1 2; do
+      if out=$(perl -e 'alarm 20; exec @ARGV' "$adb" devices </dev/null 2>/dev/null); then break; fi
+      warn "adb devices timed out (attempt $_attempt) — restarting the adb server and retrying"
+      perl -e 'alarm 10; exec @ARGV' "$adb" kill-server </dev/null >/dev/null 2>&1; pkill -9 -x adb 2>/dev/null; sleep 1
+      nohup "$adb" start-server >/dev/null 2>&1 </dev/null; sleep 2; out=""
+    done
+    printf '%s\n' "$out" | awk '$2=="device" && $1 ~ /^emulator-/ {print $1}'
   }
   _ios_candidates() {
     xcrun simctl list devices booted 2>/dev/null | grep -oE '\([0-9A-F-]{36}\)' | tr -d '()'
@@ -576,11 +666,13 @@ if [[ "$PLATFORM_SCOPE" == "all" ]]; then
     # Acquire one slot per platform (independently — a busy emulator pool must
     # not delay the iOS feed, and vice versa). Empty candidate list or a 2h
     # wait → that platform is skipped with a warning, the other still runs.
+    # retro R8b (A9#1): a slot that was never acquired is a SHORT column, not
+    # a footnote — flag it so the section exits 1 once the manifest is out.
     ANDROID_DEV=$(_pool_acquire android $(_android_candidates)) \
-      || warn "no free Android device (pool empty or 2h wait) — Android column absent for $SECTION"
+      || { warn "no free Android device (pool empty or 2h wait) — Android column absent for $SECTION"; NATIVE_SHORT=1; }
     IOS_DEV=$(_pool_acquire ios $(_ios_candidates)) \
-      || warn "no free iOS simulator (pool empty or 2h wait) — iOS column absent for $SECTION"
-    trap '_cleanup_vite 2>/dev/null; _pool_release android "$ANDROID_DEV"; _pool_release ios "$IOS_DEV"; rm -rf "$LOCK" 2>/dev/null || true' EXIT
+      || { warn "no free iOS simulator (pool empty or 2h wait) — iOS column absent for $SECTION"; NATIVE_SHORT=1; }
+    trap '_stop_disk_watchdog; _cleanup_vite 2>/dev/null; _pool_release android "$ANDROID_DEV"; _pool_release ios "$IOS_DEV"; rm -rf "$LOCK" 2>/dev/null || true' EXIT
 
     # Prebuilt markers (written by provision-devices.sh): the app is already
     # installed on every pool device, so feeders skip their own gradle install /
@@ -621,16 +713,38 @@ if [[ "$PLATFORM_SCOPE" == "all" ]]; then
         --out "$IOS_SHOTS_DIR" --timeout-per-fixture 180 >"$WORK_DIR/feed-ios.log" 2>&1 &
       FEED_IOS_PID=$!
     fi
-    [[ -n "$FEED_ANDROID_PID" ]] && { wait "$FEED_ANDROID_PID" || warn "feed-android exited non-zero — Android column may be partial"; }
-    [[ -n "$FEED_IOS_PID" ]]     && { wait "$FEED_IOS_PID"     || warn "feed-ios exited non-zero — iOS column may be partial"; }
+    # retro R8b (A9#1): a feeder's non-zero exit (its own okCount != total)
+    # is a SHORT column — flagged, not just warned about.
+    [[ -n "$FEED_ANDROID_PID" ]] && { wait "$FEED_ANDROID_PID" || { warn "feed-android exited non-zero — Android column partial"; NATIVE_SHORT=1; }; }
+    [[ -n "$FEED_IOS_PID" ]]     && { wait "$FEED_IOS_PID"     || { warn "feed-ios exited non-zero — iOS column partial"; NATIVE_SHORT=1; }; }
     cat "$WORK_DIR/feed-android.log" "$WORK_DIR/feed-ios.log" >>"$CAPTURE_LOG" 2>/dev/null || true
 
     # Release slots the instant feeding ends so the next section can start
     # (web/compare work below continues without any device held).
     _pool_release android "$ANDROID_DEV" ; _pool_release ios "$IOS_DEV"
     ANDROID_DEV="" ; IOS_DEV=""
-    trap 'rm -rf "$LOCK" 2>/dev/null || true' EXIT   # drop pool slots from the trap
-    log "native composed: iOS $(find "$IOS_SHOTS_DIR" -maxdepth 1 -name '*.png' | wc -l | tr -d ' '), Android $(find "$ANDROID_SHOTS_DIR" -maxdepth 1 -name '*.png' | wc -l | tr -d ' ')"
+    trap '_stop_disk_watchdog; rm -rf "$LOCK" 2>/dev/null || true' EXIT   # drop pool slots from the trap
+    # retro R8b (A9#1): CAPTURE-COUNT PARITY. A missing native capture is
+    # neither pass nor fail — inject silently shrinks that platform's
+    # denominator, and assertPlatformColumns only ever sees a WHOLE column at
+    # zero, never a partial one. So the runner compares each native dir's PNG
+    # count with the number of per-test docs it fed (composed mode: exactly
+    # one PNG per doc, feed-*.mjs composedPngName). Only a feeder that RAN is
+    # held to it — a platform whose slot was never acquired already flagged.
+    N_PERTEST=$(find "$PERTEST_DIR" -maxdepth 1 -name '*.json' -type f | wc -l | tr -d ' ')
+    N_IOS=$(find "$IOS_SHOTS_DIR" -maxdepth 1 -name '*.png' -type f | wc -l | tr -d ' ')
+    N_ANDROID=$(find "$ANDROID_SHOTS_DIR" -maxdepth 1 -name '*.png' -type f | wc -l | tr -d ' ')
+    log "native composed: iOS $N_IOS, Android $N_ANDROID (per-test docs fed: $N_PERTEST)"
+    if [[ -n "$FEED_IOS_PID" && "$N_IOS" != "$N_PERTEST" ]]; then
+      warn "iOS column SHORT: $N_IOS captures for $N_PERTEST per-test docs"; NATIVE_SHORT=1
+    fi
+    if [[ -n "$FEED_ANDROID_PID" && "$N_ANDROID" != "$N_PERTEST" ]]; then
+      warn "Android column SHORT: $N_ANDROID captures for $N_PERTEST per-test docs"; NATIVE_SHORT=1
+    fi
+  else
+    # retro R8b (A9#1): no per-test dir means the split above wrote nothing —
+    # both native columns will be absent from a run that asked for them.
+    warn "per-test IR dir $PERTEST_DIR missing — natives absent"; NATIVE_SHORT=1
   fi
 fi
 
@@ -751,7 +865,43 @@ step "Step 7: inject wpt: block (manifest v4)"
 # platform honestly; under --web-only the native dirs are empty (Step 5b
 # creates but doesn't feed them) so only web-ref is produced — same result
 # as the old EMPTY_DIR path, without the hardcoded dead-end.
-node "$TITAN_DIR/inject-wpt-block.mjs" \
+#
+# retro R8b (A9#1): DECLARE the platform scope to inject's column-presence
+# assertion (assertPlatformColumns) instead of letting it warn into a log:
+#   --web-only      → SKIP_IOS=1 SKIP_ANDROID=1 — the empty native dirs are
+#                     intentional, so the assertion stays silent;
+#   --all-platforms → TITAN_REQUIRE_ALL_COLUMNS=1 — a whole column at zero,
+#                     or (retro R13's per-test parity, `missingCells`) a
+#                     PARTIAL column — a native cell absent or error-shaped
+#                     where the web-ref scored — is FATAL in inject (exit 3;
+#                     the manifest is written first), mapped to NATIVE_SHORT
+#                     by _inject_rc_check.
+# Scoped to the inject commands through `env` — compare-screenshots.mjs in
+# Step 6 also reads SKIP_* and must never see them. A plain string, not an
+# array: macOS bash 3.2 + `set -u` reject an empty "${arr[@]}", and every
+# value here is space-free so word-splitting is safe.
+if [[ "$PLATFORM_SCOPE" == "all" ]]; then
+  INJECT_ENV="TITAN_REQUIRE_ALL_COLUMNS=1"
+else
+  INJECT_ENV="SKIP_IOS=1 SKIP_ANDROID=1"
+fi
+_inject_rc_check() {
+  # inject's exit 3 = "a platform column produced ZERO scored diffs while its
+  # siblings did" OR (retro R13, assertPlatformColumns' per-test parity) "a
+  # native column has cells absent/error-shaped where the web-ref scored" —
+  # both reachable only under TITAN_REQUIRE_ALL_COLUMNS=1. The
+  # manifest is written BEFORE inject exits, so the section carries on and
+  # fails LOUDLY at the Summary via NATIVE_SHORT instead of dying under
+  # `set -e` with nothing left to diagnose. Other non-zero codes (1 usage,
+  # 2 IO) are left to Step 7.5's wpt-block check + one recovery re-run.
+  case "$1" in
+    0) ;;
+    3) warn "inject: platform column ABSENT or PARTIAL under --all-platforms — manifest written for diagnosis; section will exit 1"; NATIVE_SHORT=1 ;;
+    *) warn "inject exited $1 — Step 7.5 verifies the wpt block and retries once" ;;
+  esac
+}
+INJECT_RC=0
+env $INJECT_ENV node "$TITAN_DIR/inject-wpt-block.mjs" \
   --manifest "$MANIFEST_OUT" \
   --tests "$TESTS_LIST" \
   --wpt-ref "$WPT_REF" \
@@ -761,7 +911,8 @@ node "$TITAN_DIR/inject-wpt-block.mjs" \
   --combined "$COMBINED_FIXTURE" \
   --web-dir "$WEB_SHOTS_DIR" \
   --ios-dir "$IOS_SHOTS_DIR" \
-  --android-dir "$ANDROID_SHOTS_DIR"
+  --android-dir "$ANDROID_SHOTS_DIR" || INJECT_RC=$?
+_inject_rc_check "$INJECT_RC"
 log "manifest v4 → $MANIFEST_OUT"
 
 # ── Step 7.5: verify wpt block was actually written ─────────────────────────
@@ -780,7 +931,11 @@ process.stdout.write(
 " 2>/dev/null || echo "0")
 if [[ "$WPT_OK" != "1" ]]; then
   warn "manifest missing wpt block after Step 7 — re-running inject (recovery)"
-  node "$TITAN_DIR/inject-wpt-block.mjs" \
+  # retro R8b (A9#1): the recovery run carries the SAME scope declaration
+  # and the same exit-3 → NATIVE_SHORT mapping as Step 7 — a column absent
+  # on the retry is exactly as short as one absent on the first pass.
+  INJECT_RC=0
+  env $INJECT_ENV node "$TITAN_DIR/inject-wpt-block.mjs" \
     --manifest "$MANIFEST_OUT" \
     --tests "$TESTS_LIST" \
     --wpt-ref "$WPT_REF" \
@@ -790,7 +945,8 @@ if [[ "$WPT_OK" != "1" ]]; then
     --combined "$COMBINED_FIXTURE" \
     --web-dir "$WEB_SHOTS_DIR" \
     --ios-dir "$IOS_SHOTS_DIR" \
-    --android-dir "$ANDROID_SHOTS_DIR"
+    --android-dir "$ANDROID_SHOTS_DIR" || INJECT_RC=$?
+  _inject_rc_check "$INJECT_RC"
   WPT_OK=$(node -e "
 const m = require('$MANIFEST_OUT');
 process.stdout.write(
@@ -823,6 +979,18 @@ const seen = Object.keys(labels).filter(k => !order.includes(k));
 const summary = [...order, ...seen].filter(k => labels[k]).map(k => k+': '+labels[k]).join(' · ');
 console.log('classifier      :', summary);
 "
+
+# retro R8b (A9#1): the NATIVE_SHORT gate — AFTER the manifest is written and
+# verified (Step 7.5), so every cell that did land is there to diagnose, and
+# BEFORE the exit code the gate driver keys on. Under --all-platforms a
+# section whose native column is short or absent is a DELIVERY FAILURE, not a
+# result: a missing capture is neither pass nor fail, it silently shrinks that
+# platform's denominator. wave49-final happened to land 0 missing cells; the
+# next run that does not now fails loudly instead of averaging over the hole.
+if [[ "${NATIVE_SHORT:-0}" == 1 ]]; then
+  err "native column short/absent under --all-platforms — manifest written at $MANIFEST_OUT for diagnosis; exit 1. Refeed the missing cells (BACKLOG 'Single-fixture recovery', with --wpt-dir) and re-run inject."
+  exit 1
+fi
 
 log "done."
 exit 0

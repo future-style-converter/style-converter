@@ -57,7 +57,7 @@ data class MultiColumnConfig(
     /**
      * True when the container declares `continue: discard` (css-overflow-4
      * §3, the IR `Continue` keyword — wave-42 lane W4): content that lands
-     * in an OVERFLOW column (css-multicol-1 §8.2), and everything after it
+     * in an OVERFLOW column (css-multicol-1 §8.1), and everything after it
      * in flow order, is discarded instead of painted. Consumed by the
      * spanner-flow plan (MulticolSpannerFlow.plan's discardOverflow);
      * default false keeps every other caller byte-identical.

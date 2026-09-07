@@ -1,6 +1,6 @@
 // FontKerningExtractor.ts — folds `FontKerning` IR properties into a FontKerningConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontKerningConfig, FONT_KERNING_PROPERTY_TYPE, FontKerningPropertyType } from './FontKerningConfig';
 import { kwLower } from './_shared';

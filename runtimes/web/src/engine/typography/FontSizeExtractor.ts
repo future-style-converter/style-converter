@@ -1,6 +1,6 @@
 // FontSizeExtractor.ts — folds `FontSize` IR properties into a FontSizeConfig.
 // Family: font-size.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontSizeConfig, FONT_SIZE_PROPERTY_TYPE, FontSizePropertyType } from './FontSizeConfig';
 import { isWholeVarExpression } from '../core/types/LengthValue';

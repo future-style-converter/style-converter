@@ -7,4 +7,3 @@
 
 export interface RotateConfig { value?: string; }                                 // pre-serialised CSS
 export const ROTATE_PROPERTY_TYPE = 'Rotate' as const;
-export type RotatePropertyType = typeof ROTATE_PROPERTY_TYPE;

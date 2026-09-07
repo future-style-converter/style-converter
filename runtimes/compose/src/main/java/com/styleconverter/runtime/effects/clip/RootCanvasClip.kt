@@ -7,7 +7,7 @@ package com.styleconverter.runtime.effects.clip
 // ── THE DEFECT (measured, wave 49 lane A4) ─────────────────────────────
 // css-masking-1 §5: a non-`none` `clip-path` clips the element AND its
 // descendants. On the DOCUMENT element that covers the whole page, the
-// background css-backgrounds-3 §2.11.2 propagates to the canvas included —
+// background css-backgrounds-3 §2.11.1 propagates to the canvas included —
 // the fxtf compositing §rootgroup / §pagebackdrop chain the WPT test links,
 // whose `meta name=assert` states it outright: "Clip-path on the document
 // element applies to the root background."

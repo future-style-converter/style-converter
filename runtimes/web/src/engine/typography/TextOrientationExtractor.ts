@@ -1,6 +1,6 @@
 // TextOrientationExtractor.ts — folds `TextOrientation` IR properties into a TextOrientationConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextOrientationConfig, TEXT_ORIENTATION_PROPERTY_TYPE, TextOrientationPropertyType } from './TextOrientationConfig';
 import { kwLower } from './_shared';

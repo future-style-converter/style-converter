@@ -45,7 +45,10 @@ import { documentFontSrcs, resolveFontFile,
          // wave-39 lane A2: the replaced-element image hop, likewise shared
          // byte-for-byte with feed-android.mjs.
          documentReplacedSrcs, resolveReplacedImageFile,
-         dependsOnBackdrop } from './feed-lib.mjs';
+         dependsOnBackdrop,
+         // retro R8b (A9#3): the shared --wpt-dir preflight + the honest
+         // decline text for an absent corpus root (see feed-lib's banner).
+         assetHopPreflight, NO_WPT_DIR_DECLINE } from './feed-lib.mjs';
 // wave-40 lane T5: the SVG PRE-RASTER pre-pass. iOS ships no SVG file decoder
 // (asset catalogs only), so the vector is rasterised on the HOST and this
 // document's copy of the wire is re-pointed at the PNG sibling BEFORE the
@@ -366,8 +369,9 @@ async function waitForCaptures(shotsDir, expected, timeoutMs) {
 }
 
 // Copy one device PNG to --out and verify it parses; retry the copy once on a
-// truncation/parse flake before giving up on that component.
-async function pullVerified(srcPath, destPath) {
+// truncation/parse flake before giving up on that component. Exported for
+// feed-ios.test.mjs (A9#4 pin) — it takes plain paths, so no device is needed.
+export async function pullVerified(srcPath, destPath) {
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
       await fs.copyFile(srcPath, destPath);
@@ -376,6 +380,15 @@ async function pullVerified(srcPath, destPath) {
     } catch (err) {
       if (attempt === 1) {
         console.error(`  ! pull failed for ${basename(destPath)}: ${err.message}`);
+        // retro R8b (A9#4): DELETE the copy that failed to parse. Left in
+        // place under the compare-glob name it makes inject-wpt-block's
+        // loadPng throw → an `{error}` diff that silently leaves the scored
+        // denominator (assertPlatformColumns skips error cells) and a
+        // compare-screenshots "decode error" row. Absent, it is a MISSING
+        // cell, which section-runner.sh Step 5b's capture-count parity check
+        // turns into exit 1. `force` swallows ENOENT (copyFile may have
+        // thrown before writing anything).
+        await fs.rm(destPath, { force: true }).catch(() => { /* nothing landed */ });
         return false;
       }
       await sleep(120); // brief backoff, then one retry
@@ -398,13 +411,28 @@ async function main() {
   await fs.mkdir(outDir, { recursive: true });
   console.log(`[feed-ios] ${fixtures.length} fixture(s) → ${outDir}`);
 
+  // retro R8b (A9#3) — the --wpt-dir PREFLIGHT, FIRST of all: before the
+  // pre-raster below (which silently no-ops without a corpus root) and before
+  // `simctl list` (the first device-side call). If any fixture declares a
+  // @font-face or replaced-image src and no root was given, the hop cannot
+  // happen and every capture would score an ARTIFACT (the bundled face, an
+  // empty image box) — so the run refuses here with exit 2 (the usage code
+  // above) instead of writing that into a manifest. An unreadable fixture is
+  // skipped here (null) and reported per-fixture by the loop below.
+  const readDocOrNull = async (fx) => { try { return JSON.parse(await fs.readFile(fx, 'utf8')); } catch { return null; } };
+  const preflight = assetHopPreflight(await Promise.all(fixtures.map(readDocOrNull)), args.wptDir);
+  if (preflight.fatal) { console.error(`[feed-ios] ${preflight.message}`); process.exit(2); }
+
   // wave-40 lane T5 — SVG PRE-RASTER pre-pass. FIRST, ahead of every device
   // call: it is pure HOST work (headless Chromium → PNG siblings in the
   // corpus) with no device dependency at all, so running it here means a sick
   // simulator cannot mask a raster failure, and a raster failure cannot be
   // mistaken for one. ONE browser launch covers the whole batch (the css-ui
   // box-sizing cluster's 19 tests share six support vectors), and a batch with
-  // no vectors — 29 of the depth-48 corpus's 30 sections — launches nothing at
+  // no vectors — 28 of the depth-48 corpus's 30 sections (only css-ui and
+  // css-flexbox carry SVG <img> sources: the box-sizing cluster and
+  // align-items-007's ../support/red-rect.svg; wave49-final feed logs show
+  // PRE-RASTER lines in exactly those two sections) — launches nothing at
   // all. The returned map is vector-src → raster-src for the rasters that
   // actually exist; anything missing from it keeps its `.svg` on the wire so
   // DocumentImageRegistry's format decline still fires and still stamps.
@@ -569,6 +597,10 @@ async function main() {
     // stamps the miss (failing the fixture would hide every other property it
     // measures).
     for (const src of documentFontSrcs(doc)) {
+      // retro R8b (A9#3): an ABSENT corpus root is named as the cause BEFORE
+      // the resolver runs — its null used to read as "unresolvable/not a
+      // font", the wrong diagnosis. Normally unreachable after the preflight.
+      if (!args.wptDir) { console.error(`[feed-ios] ${label}: font ${NO_WPT_DIR_DECLINE}: ${src}`); continue; }
       const abs = resolveFontFile(args.wptDir, src, { resolve, existsSync, statSync });
       if (!abs) { console.error(`[feed-ios] ${label}: font DECLINED (unresolvable/not a font): ${src}`); continue; }
       // The corpus-relative path is preserved verbatim under fontsDir — the
@@ -595,6 +627,8 @@ async function main() {
       console.log(`[feed-ios] ${label}: svg PRE-RASTER stand-in ${src} → ${rasterSrc}`);
     }
     for (const src of documentReplacedSrcs(doc)) {
+      // retro R8b (A9#3): same honest-cause branch as the font loop above.
+      if (!args.wptDir) { console.error(`[feed-ios] ${label}: image ${NO_WPT_DIR_DECLINE}: ${src}`); continue; }
       const abs = resolveReplacedImageFile(args.wptDir, src, { resolve, existsSync, statSync });
       if (!abs) { console.error(`[feed-ios] ${label}: image DECLINED (unresolvable/not an image): ${src}`); continue; }
       // Corpus-relative path preserved verbatim under imagesDir — the runtime's

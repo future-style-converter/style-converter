@@ -1,6 +1,6 @@
 // TextEmphasisPositionExtractor.ts — folds `TextEmphasisPosition` IR properties into a TextEmphasisPositionConfig.
 // Family: text-emphasis-position.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextEmphasisPositionConfig, TEXT_EMPHASIS_POSITION_PROPERTY_TYPE, TextEmphasisPositionPropertyType } from './TextEmphasisPositionConfig';
 import { kwLower } from './_shared';

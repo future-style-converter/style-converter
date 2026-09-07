@@ -44,7 +44,7 @@ class BackgroundImagePropertyParserTest {
 
     @Test
     fun `double-position stop expands into two stops sharing the color`() {
-        // css-images-4 §3.4.3: `red 25% 50%` ≡ `red 25%, red 50%`.
+        // css-images-4 §3.5.3: `red 25% 50%` ≡ `red 25%, red 50%`.
         val g = layer("linear-gradient(red 25% 50%, blue)")
         assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(g)
         assertEquals(3, g.colorStops.size)
@@ -64,7 +64,7 @@ class BackgroundImagePropertyParserTest {
         assertEquals(-90.0, g.angle!!.degrees)
         // 4 double-position segments → 8 stops.
         assertEquals(8, g.colorStops.size)
-        // Bare `0` parses as 0% (css-values-4 §5.1 unitless zero length) —
+        // Bare `0` parses as 0% (css-values-4 §6 unitless zero length) —
         // PercentageParser alone rejects it, which used to null the stop.
         assertEquals(0.0, g.colorStops[0].position!!.value)
         assertEquals(25.0, g.colorStops[1].position!!.value)

@@ -1,6 +1,6 @@
 // DirectionExtractor.ts — folds `Direction` IR properties into a DirectionConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { DirectionConfig, DIRECTION_PROPERTY_TYPE, DirectionPropertyType } from './DirectionConfig';
 import { kwLower } from './_shared';

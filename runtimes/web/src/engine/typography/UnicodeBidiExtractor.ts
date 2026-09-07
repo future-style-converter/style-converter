@@ -1,6 +1,6 @@
 // UnicodeBidiExtractor.ts — folds `UnicodeBidi` IR properties into a UnicodeBidiConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { UnicodeBidiConfig, UNICODE_BIDI_PROPERTY_TYPE, UnicodeBidiPropertyType } from './UnicodeBidiConfig';
 import { kwLower } from './_shared';

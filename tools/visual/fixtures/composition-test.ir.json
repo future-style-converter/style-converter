@@ -1,0 +1,2433 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "blend_multiply_overgradient-001",
+            "name": "Blend_Multiply_OverGradient",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": 0.0
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.10196078431372549,
+                                            "g": 0.10196078431372549,
+                                            "b": 0.1803921568627451
+                                        },
+                                        "original": "#1a1a2e"
+                                    },
+                                    "position": 100.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "layer-002",
+            "name": "layer",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 140.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "MixBlendMode",
+                    "data": "MULTIPLY"
+                }
+            ],
+            "slot": {
+                "parent": "blend_multiply_overgradient-001"
+            }
+        },
+        {
+            "id": "blend_normal_overgradient_control-003",
+            "name": "Blend_Normal_OverGradient_Control",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": 0.0
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.10196078431372549,
+                                            "g": 0.10196078431372549,
+                                            "b": 0.1803921568627451
+                                        },
+                                        "original": "#1a1a2e"
+                                    },
+                                    "position": 100.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "layer-004",
+            "name": "layer",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 140.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "MixBlendMode",
+                    "data": "NORMAL"
+                }
+            ],
+            "slot": {
+                "parent": "blend_normal_overgradient_control-003"
+            }
+        },
+        {
+            "id": "blend_screen_overgradient-005",
+            "name": "Blend_Screen_OverGradient",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": 0.0
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.10196078431372549,
+                                            "g": 0.10196078431372549,
+                                            "b": 0.1803921568627451
+                                        },
+                                        "original": "#1a1a2e"
+                                    },
+                                    "position": 100.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "layer-006",
+            "name": "layer",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 140.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "MixBlendMode",
+                    "data": "SCREEN"
+                }
+            ],
+            "slot": {
+                "parent": "blend_screen_overgradient-005"
+            }
+        },
+        {
+            "id": "blend_difference_overgradient-007",
+            "name": "Blend_Difference_OverGradient",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": 0.0
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.10196078431372549,
+                                            "g": 0.10196078431372549,
+                                            "b": 0.1803921568627451
+                                        },
+                                        "original": "#1a1a2e"
+                                    },
+                                    "position": 100.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "layer-008",
+            "name": "layer",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 140.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "MixBlendMode",
+                    "data": "DIFFERENCE"
+                }
+            ],
+            "slot": {
+                "parent": "blend_difference_overgradient-007"
+            }
+        },
+        {
+            "id": "blend_overlay_overgradient-009",
+            "name": "Blend_Overlay_OverGradient",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": 0.0
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.10196078431372549,
+                                            "g": 0.10196078431372549,
+                                            "b": 0.1803921568627451
+                                        },
+                                        "original": "#1a1a2e"
+                                    },
+                                    "position": 100.0
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "layer-010",
+            "name": "layer",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 140.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9450980392156862,
+                            "g": 0.7686274509803922,
+                            "b": 0.058823529411764705
+                        },
+                        "original": "#f1c40f"
+                    }
+                },
+                {
+                    "type": "MixBlendMode",
+                    "data": "OVERLAY"
+                }
+            ],
+            "slot": {
+                "parent": "blend_overlay_overgradient-009"
+            }
+        },
+        {
+            "id": "backdrop_blur_overstripes-011",
+            "name": "Backdrop_Blur_OverStripes",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "repeating-linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 0.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 10.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.08627450980392157,
+                                            "g": 0.6274509803921569,
+                                            "b": 0.5215686274509804
+                                        },
+                                        "original": "#16a085"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 10.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.08627450980392157,
+                                            "g": 0.6274509803921569,
+                                            "b": 0.5215686274509804
+                                        },
+                                        "original": "#16a085"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 20.0
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "glass-012",
+            "name": "glass",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 30.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 0.2
+                        },
+                        "original": {
+                            "r": 255,
+                            "g": 255,
+                            "b": 255,
+                            "a": 0.2
+                        }
+                    }
+                },
+                {
+                    "type": "BackdropFilter",
+                    "data": [
+                        {
+                            "fn": "blur",
+                            "r": {
+                                "px": 8.0
+                            }
+                        }
+                    ]
+                }
+            ],
+            "slot": {
+                "parent": "backdrop_blur_overstripes-011"
+            }
+        },
+        {
+            "id": "backdrop_none_overstripes_control-013",
+            "name": "Backdrop_None_OverStripes_Control",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "repeating-linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 0.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 10.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.08627450980392157,
+                                            "g": 0.6274509803921569,
+                                            "b": 0.5215686274509804
+                                        },
+                                        "original": "#16a085"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 10.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.08627450980392157,
+                                            "g": 0.6274509803921569,
+                                            "b": 0.5215686274509804
+                                        },
+                                        "original": "#16a085"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 20.0
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "glass-014",
+            "name": "glass",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 30.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 0.2
+                        },
+                        "original": {
+                            "r": 255,
+                            "g": 255,
+                            "b": 255,
+                            "a": 0.2
+                        }
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "backdrop_none_overstripes_control-013"
+            }
+        },
+        {
+            "id": "backdrop_saturate_overstripes-015",
+            "name": "Backdrop_Saturate_OverStripes",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundImage",
+                    "data": [
+                        {
+                            "type": "repeating-linear-gradient",
+                            "angle": {
+                                "deg": 90.0
+                            },
+                            "stops": [
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 0.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 1.0,
+                                            "g": 1.0,
+                                            "b": 1.0
+                                        },
+                                        "original": "#ffffff"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 10.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.08627450980392157,
+                                            "g": 0.6274509803921569,
+                                            "b": 0.5215686274509804
+                                        },
+                                        "original": "#16a085"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 10.0
+                                    }
+                                },
+                                {
+                                    "color": {
+                                        "srgb": {
+                                            "r": 0.08627450980392157,
+                                            "g": 0.6274509803921569,
+                                            "b": 0.5215686274509804
+                                        },
+                                        "original": "#16a085"
+                                    },
+                                    "position": null,
+                                    "positionLength": {
+                                        "px": 20.0
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "glass-016",
+            "name": "glass",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 30.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0,
+                            "a": 0.05
+                        },
+                        "original": {
+                            "r": 255,
+                            "g": 255,
+                            "b": 255,
+                            "a": 0.05
+                        }
+                    }
+                },
+                {
+                    "type": "BackdropFilter",
+                    "data": [
+                        {
+                            "fn": "saturate",
+                            "v": 400.0
+                        }
+                    ]
+                }
+            ],
+            "slot": {
+                "parent": "backdrop_saturate_overstripes-015"
+            }
+        },
+        {
+            "id": "overflow_hidden_clipschild-017",
+            "name": "Overflow_Hidden_ClipsChild",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 70.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.28627450980392155,
+                            "b": 0.3686274509803922
+                        },
+                        "original": "#34495e"
+                    }
+                },
+                {
+                    "type": "OverflowX",
+                    "data": "HIDDEN"
+                },
+                {
+                    "type": "OverflowY",
+                    "data": "HIDDEN"
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "big-018",
+            "name": "big",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 260.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9019607843137255,
+                            "g": 0.49411764705882355,
+                            "b": 0.13333333333333333
+                        },
+                        "original": "#e67e22"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "overflow_hidden_clipschild-017"
+            }
+        },
+        {
+            "id": "overflow_visible_control-019",
+            "name": "Overflow_Visible_Control",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 70.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.28627450980392155,
+                            "b": 0.3686274509803922
+                        },
+                        "original": "#34495e"
+                    }
+                },
+                {
+                    "type": "OverflowX",
+                    "data": "VISIBLE"
+                },
+                {
+                    "type": "OverflowY",
+                    "data": "VISIBLE"
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "big-020",
+            "name": "big",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 260.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9019607843137255,
+                            "g": 0.49411764705882355,
+                            "b": 0.13333333333333333
+                        },
+                        "original": "#e67e22"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "overflow_visible_control-019"
+            }
+        },
+        {
+            "id": "overflow_hidden_withradius-021",
+            "name": "Overflow_Hidden_WithRadius",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 70.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.28627450980392155,
+                            "b": 0.3686274509803922
+                        },
+                        "original": "#34495e"
+                    }
+                },
+                {
+                    "type": "BorderTopLeftRadius",
+                    "data": {
+                        "px": 24.0
+                    }
+                },
+                {
+                    "type": "BorderTopRightRadius",
+                    "data": {
+                        "px": 24.0
+                    }
+                },
+                {
+                    "type": "BorderBottomRightRadius",
+                    "data": {
+                        "px": 24.0
+                    }
+                },
+                {
+                    "type": "BorderBottomLeftRadius",
+                    "data": {
+                        "px": 24.0
+                    }
+                },
+                {
+                    "type": "OverflowX",
+                    "data": "HIDDEN"
+                },
+                {
+                    "type": "OverflowY",
+                    "data": "HIDDEN"
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "big-022",
+            "name": "big",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 0.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 0.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 260.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9019607843137255,
+                            "g": 0.49411764705882355,
+                            "b": 0.13333333333333333
+                        },
+                        "original": "#e67e22"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "overflow_hidden_withradius-021"
+            }
+        },
+        {
+            "id": "zorder_ascending-023",
+            "name": "ZOrder_Ascending",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.10196078431372549,
+                            "g": 0.10196078431372549,
+                            "b": 0.1803921568627451
+                        },
+                        "original": "#1a1a2e"
+                    }
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "a-024",
+            "name": "a",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "ZIndex",
+                    "data": {
+                        "value": 1,
+                        "original": {
+                            "type": "integer",
+                            "value": 1
+                        }
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_ascending-023"
+            }
+        },
+        {
+            "id": "b-025",
+            "name": "b",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "ZIndex",
+                    "data": {
+                        "value": 2,
+                        "original": {
+                            "type": "integer",
+                            "value": 2
+                        }
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_ascending-023"
+            }
+        },
+        {
+            "id": "c-026",
+            "name": "c",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 100.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "ZIndex",
+                    "data": {
+                        "value": 3,
+                        "original": {
+                            "type": "integer",
+                            "value": 3
+                        }
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_ascending-023"
+            }
+        },
+        {
+            "id": "zorder_descending-027",
+            "name": "ZOrder_Descending",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.10196078431372549,
+                            "g": 0.10196078431372549,
+                            "b": 0.1803921568627451
+                        },
+                        "original": "#1a1a2e"
+                    }
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "a-028",
+            "name": "a",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "ZIndex",
+                    "data": {
+                        "value": 3,
+                        "original": {
+                            "type": "integer",
+                            "value": 3
+                        }
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_descending-027"
+            }
+        },
+        {
+            "id": "b-029",
+            "name": "b",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "ZIndex",
+                    "data": {
+                        "value": 2,
+                        "original": {
+                            "type": "integer",
+                            "value": 2
+                        }
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_descending-027"
+            }
+        },
+        {
+            "id": "c-030",
+            "name": "c",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 100.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "ZIndex",
+                    "data": {
+                        "value": 1,
+                        "original": {
+                            "type": "integer",
+                            "value": 1
+                        }
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_descending-027"
+            }
+        },
+        {
+            "id": "zorder_sourceorder_noindex-031",
+            "name": "ZOrder_SourceOrder_NoIndex",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 220.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.10196078431372549,
+                            "g": 0.10196078431372549,
+                            "b": 0.1803921568627451
+                        },
+                        "original": "#1a1a2e"
+                    }
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "a-032",
+            "name": "a",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_sourceorder_noindex-031"
+            }
+        },
+        {
+            "id": "b-033",
+            "name": "b",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_sourceorder_noindex-031"
+            }
+        },
+        {
+            "id": "c-034",
+            "name": "c",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 100.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "zorder_sourceorder_noindex-031"
+            }
+        },
+        {
+            "id": "nested_boxmodel_paddingborder-035",
+            "name": "Nested_BoxModel_PaddingBorder",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 200.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.17254901960784313,
+                            "g": 0.24313725490196078,
+                            "b": 0.3137254901960784
+                        },
+                        "original": "#2c3e50"
+                    }
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "px": 16.0
+                    }
+                },
+                {
+                    "type": "PaddingRight",
+                    "data": {
+                        "px": 16.0
+                    }
+                },
+                {
+                    "type": "PaddingBottom",
+                    "data": {
+                        "px": 16.0
+                    }
+                },
+                {
+                    "type": "PaddingLeft",
+                    "data": {
+                        "px": 16.0
+                    }
+                },
+                {
+                    "type": "BorderTopWidth",
+                    "data": {
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "BorderRightWidth",
+                    "data": {
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "BorderBottomWidth",
+                    "data": {
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "BorderLeftWidth",
+                    "data": {
+                        "px": 8.0
+                    }
+                },
+                {
+                    "type": "BorderTopStyle",
+                    "data": "SOLID"
+                },
+                {
+                    "type": "BorderRightStyle",
+                    "data": "SOLID"
+                },
+                {
+                    "type": "BorderBottomStyle",
+                    "data": "SOLID"
+                },
+                {
+                    "type": "BorderLeftStyle",
+                    "data": "SOLID"
+                },
+                {
+                    "type": "BorderTopColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "BorderRightColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "BorderBottomColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "BorderLeftColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "BoxSizing",
+                    "data": "BORDER_BOX"
+                }
+            ]
+        },
+        {
+            "id": "inner-036",
+            "name": "inner",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "percentage",
+                        "value": 100.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "percentage",
+                        "value": 100.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9450980392156862,
+                            "g": 0.7686274509803922,
+                            "b": 0.058823529411764705
+                        },
+                        "original": "#f1c40f"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "nested_boxmodel_paddingborder-035"
+            }
+        },
+        {
+            "id": "nested_threedeep-037",
+            "name": "Nested_ThreeDeep",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 200.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 90.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.5568627450980392,
+                            "g": 0.26666666666666666,
+                            "b": 0.6784313725490196
+                        },
+                        "original": "#8e44ad"
+                    }
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "PaddingRight",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "PaddingBottom",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "PaddingLeft",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "BoxSizing",
+                    "data": "BORDER_BOX"
+                }
+            ]
+        },
+        {
+            "id": "mid-038",
+            "name": "mid",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "percentage",
+                        "value": 100.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "percentage",
+                        "value": 100.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.08627450980392157,
+                            "g": 0.6274509803921569,
+                            "b": 0.5215686274509804
+                        },
+                        "original": "#16a085"
+                    }
+                },
+                {
+                    "type": "PaddingTop",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "PaddingRight",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "PaddingBottom",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "PaddingLeft",
+                    "data": {
+                        "px": 10.0
+                    }
+                },
+                {
+                    "type": "BoxSizing",
+                    "data": "BORDER_BOX"
+                }
+            ],
+            "slot": {
+                "parent": "nested_threedeep-037"
+            }
+        },
+        {
+            "id": "leaf-039",
+            "name": "leaf",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "percentage",
+                        "value": 100.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "percentage",
+                        "value": 100.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9529411764705882,
+                            "g": 0.611764705882353,
+                            "b": 0.07058823529411765
+                        },
+                        "original": "#f39c12"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "mid-038"
+            }
+        },
+        {
+            "id": "nested_opacitygroup-040",
+            "name": "Nested_OpacityGroup",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 200.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 80.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        },
+                        "original": "#ffffff"
+                    }
+                },
+                {
+                    "type": "Opacity",
+                    "data": {
+                        "alpha": 0.5,
+                        "original": {
+                            "type": "number",
+                            "value": 0.5
+                        }
+                    }
+                },
+                {
+                    "type": "Position",
+                    "data": "RELATIVE"
+                }
+            ]
+        },
+        {
+            "id": "a-041",
+            "name": "a",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 20.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 100.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "nested_opacitygroup-040"
+            }
+        },
+        {
+            "id": "b-042",
+            "name": "b",
+            "properties": [
+                {
+                    "type": "Position",
+                    "data": "ABSOLUTE"
+                },
+                {
+                    "type": "Left",
+                    "data": {
+                        "px": 70.0
+                    }
+                },
+                {
+                    "type": "Top",
+                    "data": {
+                        "px": 15.0
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 100.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1607843137254902,
+                            "g": 0.5019607843137255,
+                            "b": 0.7254901960784313
+                        },
+                        "original": "#2980b9"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "nested_opacitygroup-040"
+            }
+        }
+    ]
+}

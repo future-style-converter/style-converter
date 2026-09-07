@@ -9,4 +9,3 @@ export interface ClearConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const CLEAR_PROPERTY_TYPE = 'Clear' as const;
-export type ClearPropertyType = typeof CLEAR_PROPERTY_TYPE;

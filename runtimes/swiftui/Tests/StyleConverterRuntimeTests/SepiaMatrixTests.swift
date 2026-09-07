@@ -14,7 +14,7 @@ import SwiftUI
 
 final class SepiaMatrixTests: XCTestCase {
 
-    /// The spec matrix, verbatim from filter-effects-1 §8.5. If someone
+    /// The spec matrix, verbatim from filter-effects-1 §6.1. If someone
     /// "tidies" a coefficient this fails before any pixel moves.
     func testFullMatrixMatchesTheSpec() {
         XCTAssertEqual(SepiaMatrix.full[0], [0.393, 0.769, 0.189])

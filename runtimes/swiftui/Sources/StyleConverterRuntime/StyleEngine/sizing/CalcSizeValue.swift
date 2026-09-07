@@ -2,7 +2,7 @@
 //  CalcSizeValue.swift
 //  StyleEngine/sizing — wave 42 (lane W3).
 //
-//  css-values-5 §10.1 `calc-size()` typed wire decode + pure arithmetic.
+//  css-values-5 §11 `calc-size()` typed wire decode + pure arithmetic.
 //  Wire shape (converter CalcSizeParser.kt, identical across the Width /
 //  MinMax / Max value families):
 //    {"type":"calc-size","basis":"auto","factor":1,"offsetPx":20,
@@ -33,8 +33,8 @@ import Foundation
 // bases never reach the runtime (the converter evaluates them at parse time).
 enum CalcSizeBasis: String, Equatable {
     case auto = "auto"                    // the property's normal auto size
-    case minContent = "min-content"       // css-sizing-3 §4
-    case maxContent = "max-content"       // css-sizing-3 §4
+    case minContent = "min-content"       // css-sizing-3 §5.1
+    case maxContent = "max-content"       // css-sizing-3 §5.1
     case fitContent = "fit-content"       // css-sizing-3 §5.1 clamp
     case stretch = "stretch"              // css-sizing-4 — treated like auto
     case content = "content"              // css-values-5 — treated like auto

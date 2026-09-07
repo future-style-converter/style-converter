@@ -2,11 +2,11 @@
 //  SoftHyphenPolicy.swift
 //  StyleEngine/typography/wrapping — wave 37 (lane W7, rule A).
 //
-//  css-text-3 §6.1 `hyphens`, the SOFT HYPHEN half.
+//  css-text-3 §5.3 `hyphens`, the SOFT HYPHEN half.
 //
 //  U+00AD SOFT HYPHEN is a *conditional* character: it is invisible
 //  unless the line actually breaks at it, in which case the UA paints
-//  the hyphenate-character there. §6.1 defines the three keywords over
+//  the hyphenate-character there. §5.3 defines the three keywords over
 //  exactly that conditionality:
 //
 //    manual (initial) — "words are only broken at line breaks where
@@ -51,7 +51,7 @@ import Foundation
 
 enum SoftHyphenPolicy {
 
-    /// U+00AD SOFT HYPHEN — the one conditional character §6.1 governs.
+    /// U+00AD SOFT HYPHEN — the one conditional character §5.3 governs.
     /// (U+200B ZERO WIDTH SPACE is a plain break opportunity, NOT a
     /// hyphenation one: `hyphens` does not suppress it, so it is not in
     /// this policy's scope.)
@@ -67,7 +67,7 @@ enum SoftHyphenPolicy {
         return m == "none"
     }
 
-    /// Does this run ask for DICTIONARY hyphenation (§6.1 `auto`:
+    /// Does this run ask for DICTIONARY hyphenation (§5.3 `auto`:
     /// "words may be broken at appropriate hyphenation points … as
     /// determined by … a hyphenation resource appropriate to the
     /// language of the text")?

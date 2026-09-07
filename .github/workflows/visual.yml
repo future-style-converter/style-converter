@@ -35,7 +35,7 @@ on:
   workflow_dispatch:
     inputs:
       fixture:
-        description: Fixture JSON to run through the pipeline
+        description: Fixture JSON to run through the pipeline, or `--gate-set` to iterate tools/visual/gate-fixtures.txt
         required: false
         default: fixtures/visual-test.json
   schedule:
@@ -54,8 +54,15 @@ concurrency:
 
 env:
   # workflow_dispatch supplies inputs.fixture; on schedule/push the inputs
-  # context is empty, so the || falls back to the default fixture.
-  FIXTURE: ${{ inputs.fixture || 'fixtures/visual-test.json' }}
+  # context is empty, so the || falls back to a default. The NIGHTLY default
+  # is `--gate-set` (retrospective A12#3): test-all.sh then runs one child per
+  # line of tools/visual/gate-fixtures.txt, so the fixture-scoped ledger
+  # lines (composition-test, filter-sepia-amounts) and every `_expect.waive`
+  # (nested-transforms, radius-overflow-transform, blend-isolation) are
+  # exercised and CAN go stale (exit 5) — a single-fixture gate could never
+  # reach them. A fixture with no committed baselines runs gate-only (the
+  # driver says so). On push the single 327-net fixture keeps the job short.
+  FIXTURE: ${{ inputs.fixture || (github.event_name == 'schedule' && '--gate-set' || 'fixtures/visual-test.json') }}
 
 jobs:
   android-visual:

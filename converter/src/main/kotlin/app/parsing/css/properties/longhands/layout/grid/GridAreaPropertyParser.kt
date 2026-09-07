@@ -5,6 +5,10 @@ import app.irmodels.properties.layout.grid.GridAreaProperty
 import app.irmodels.properties.layout.grid.GridLine
 import app.parsing.css.properties.longhands.PropertyParser
 
+// A6#14: the private `parseGridLine` this file used to carry was the fifth copy
+// of that reader; it now calls the shared GridLineParsing (same package).
+// caseFold = false preserves `grid-area`'s case-preserving behaviour, which is
+// the css-values-4-correct one for <custom-ident> line names.
 object GridAreaPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
@@ -17,7 +21,7 @@ object GridAreaPropertyParser : PropertyParser {
             if (trimmed.toIntOrNull() == null && !trimmed.startsWith("span")) {
                 return GridAreaProperty(GridAreaProperty.GridAreaValue.AreaName(trimmed))
             }
-            val line = parseGridLine(trimmed) ?: return null
+            val line = GridLineParsing.parse(trimmed, caseFold = false) ?: return null
             return GridAreaProperty(
                 GridAreaProperty.GridAreaValue.Lines(
                     rowStart = line,
@@ -31,8 +35,8 @@ object GridAreaPropertyParser : PropertyParser {
         val parts = trimmed.split('/').map { it.trim() }
         return when (parts.size) {
             2 -> {
-                val rowStart = parseGridLine(parts[0]) ?: return null
-                val columnStart = parseGridLine(parts[1]) ?: return null
+                val rowStart = GridLineParsing.parse(parts[0], caseFold = false) ?: return null
+                val columnStart = GridLineParsing.parse(parts[1], caseFold = false) ?: return null
                 GridAreaProperty(
                     GridAreaProperty.GridAreaValue.Lines(
                         rowStart = rowStart,
@@ -43,9 +47,9 @@ object GridAreaPropertyParser : PropertyParser {
                 )
             }
             3 -> {
-                val rowStart = parseGridLine(parts[0]) ?: return null
-                val columnStart = parseGridLine(parts[1]) ?: return null
-                val rowEnd = parseGridLine(parts[2]) ?: return null
+                val rowStart = GridLineParsing.parse(parts[0], caseFold = false) ?: return null
+                val columnStart = GridLineParsing.parse(parts[1], caseFold = false) ?: return null
+                val rowEnd = GridLineParsing.parse(parts[2], caseFold = false) ?: return null
                 GridAreaProperty(
                     GridAreaProperty.GridAreaValue.Lines(
                         rowStart = rowStart,
@@ -56,10 +60,10 @@ object GridAreaPropertyParser : PropertyParser {
                 )
             }
             4 -> {
-                val rowStart = parseGridLine(parts[0]) ?: return null
-                val columnStart = parseGridLine(parts[1]) ?: return null
-                val rowEnd = parseGridLine(parts[2]) ?: return null
-                val columnEnd = parseGridLine(parts[3]) ?: return null
+                val rowStart = GridLineParsing.parse(parts[0], caseFold = false) ?: return null
+                val columnStart = GridLineParsing.parse(parts[1], caseFold = false) ?: return null
+                val rowEnd = GridLineParsing.parse(parts[2], caseFold = false) ?: return null
+                val columnEnd = GridLineParsing.parse(parts[3], caseFold = false) ?: return null
                 GridAreaProperty(
                     GridAreaProperty.GridAreaValue.Lines(
                         rowStart = rowStart,
@@ -71,26 +75,5 @@ object GridAreaPropertyParser : PropertyParser {
             }
             else -> null
         }
-    }
-
-    private fun parseGridLine(value: String): GridLine? {
-        val trimmed = value.trim()
-        if (trimmed == "auto") {
-            return GridLine.Auto()
-        }
-        if (trimmed.startsWith("span ")) {
-            val spanValue = trimmed.substring(5).trim()
-            val spanCount = spanValue.toIntOrNull()
-            return if (spanCount != null) {
-                GridLine.Span(spanCount)
-            } else {
-                GridLine.SpanName(spanValue)
-            }
-        }
-        val lineNumber = trimmed.toIntOrNull()
-        if (lineNumber != null) {
-            return GridLine.LineNumber(lineNumber)
-        }
-        return GridLine.LineName(trimmed)
     }
 }

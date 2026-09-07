@@ -2,10 +2,21 @@ package com.styleconverter.runtime.layout
 
 // Phase 7 layout style-engine aggregate config.
 //
-// This is the SCAFFOLD introduced in step 1 of the Phase 7 rollout. Every field
-// is nullable and defaults to null. Later phase steps populate the individual
+// Introduced as the step-1 SCAFFOLD of the Phase 7 rollout. Every field is
+// nullable and defaults to null. Retro P2e (finding A6#15, phrase sweep)
+// replaced the future tense "later phase steps populate the individual
 // categories (flexbox -> step 2, grid -> step 3, position -> step 4,
-// advanced/root -> step 5, legacy reconciliation -> step 6).
+// advanced/root -> step 5, legacy reconciliation -> step 6)" with where the
+// rollout actually stopped: steps 2-4 shipped and LayoutExtractor
+// .extractLayoutConfig folds FlexboxExtractor + GridLayoutExtractor +
+// PositionLayoutExtractor into this aggregate; the advanced fields and the
+// four layout ROOT properties (Clear / Float / Overlay / ReadingFlow) are
+// still null-only (registered, no sub-extractor); and step 6 — the "legacy
+// reconciliation" that would delete LayoutFacade's legacy extractConfig /
+// applyToModifier pair — never happened. Both pairs are live 40-odd waves
+// later, split by responsibility (StyleApplier drives the modifier chain off
+// the legacy config, ComponentRenderer drives the CONTAINER choice off this
+// one), and nothing is scheduled to collapse them.
 //
 // The shape mirrors the IR property tree under
 //   src/main/kotlin/app/irmodels/properties/layout/
@@ -30,7 +41,11 @@ package com.styleconverter.runtime.layout
  *   - flexbox/  -> display + flex* + align/justify*
  *   - grid/     -> gridTemplate* + gridAuto* + grid placements + justify/align Items/Self
  *   - position/ -> position + inset + zIndex
- *   - advanced/ -> (not yet modelled in this scaffold; future step)
+ *   - advanced/ -> still unmodelled: the advanced longhands are registered
+ *     by LayoutExtractor's init block (so StyleApplier defers) but no
+ *     sub-extractor writes a field here, and none is scheduled (retro P2e,
+ *     finding A6#15 — this read "future step", which named a step that never
+ *     came)
  *   - root      -> clear + float
  */
 data class LayoutConfig(

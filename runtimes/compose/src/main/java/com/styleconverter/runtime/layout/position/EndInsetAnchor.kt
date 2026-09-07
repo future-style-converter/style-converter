@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.position
 
 // Wave 22 (B-RC3) — END-EDGE anchoring for out-of-flow boxes whose only
-// declared inset on an axis is `right` / `bottom` (css-position-3 §3.5.3).
+// declared inset on an axis is `right` / `bottom` (css-position-3 §4.3).
 //
 // ## The measured defect
 // PositionConfig.offsetX/offsetY treat `right`/`bottom` as NEGATED offsets
@@ -49,7 +49,7 @@ object EndInsetAnchor {
      *  - A1 end-only inset + known containing-block extent → that extent
      *    (the box's end edge is then placed flush with it).
      *  - A2 BOTH insets declared → null: over-constrained, and in an LTR
-     *    containing block `left`/`top` wins (css-position-3 §3.5.3), which
+     *    containing block `left`/`top` wins (css-position-3 §4.3), which
      *    the existing start anchor + positive offset already render.
      *  - A3 start-only or no inset → null: the start anchor is correct
      *    (an all-auto-inset box is at its static position — §3.1).
@@ -71,7 +71,7 @@ object EndInsetAnchor {
      * A5: with an end edge, the box's own end edge sits flush with it —
      * `endEdgePx − boxPx`. The caller's PositionApplier offset (`−right`)
      * then pulls the box inward by the declared inset, producing the CSS
-     * used position `cb − box − right` (css-position-3 §3.5.3).
+     * used position `cb − box − right` (css-position-3 §4.3).
      *
      * A6: with no end edge (null) the slot origin is the anchor — 0 — which
      * is the byte-identical pre-wave-22 behavior for every start-anchored,

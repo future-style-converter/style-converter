@@ -1,6 +1,6 @@
 // FontLanguageOverrideExtractor.ts — folds `FontLanguageOverride` IR properties into a FontLanguageOverrideConfig.
 // Family: font-language-override.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontLanguageOverrideConfig, FONT_LANGUAGE_OVERRIDE_PROPERTY_TYPE, FontLanguageOverridePropertyType } from './FontLanguageOverrideConfig';
 import { kwLower } from './_shared';

@@ -8,4 +8,3 @@
 
 export interface ScaleConfig { value?: string; }
 export const SCALE_PROPERTY_TYPE = 'Scale' as const;
-export type ScalePropertyType = typeof SCALE_PROPERTY_TYPE;

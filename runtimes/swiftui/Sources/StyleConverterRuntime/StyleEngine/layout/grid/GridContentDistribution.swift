@@ -3,7 +3,7 @@
 //  StyleEngine/layout/grid — wave 19 (lane GRID-DISTRIBUTION).
 //
 //  Content-distribution of the grid TRACK GROUP inside the grid container's
-//  content box (css-align-3 §5.3 justify-content on grid tracks) +
+//  content box (css-align-3 §5.1 justify-content on grid tracks) +
 //  direction:rtl column mirroring (css-grid-1 §7.1 / css-writing-modes: in
 //  RTL the inline START edge is the RIGHT content edge, so column 1 sits
 //  rightmost and the whole group packs toward the right). Before this wave
@@ -39,7 +39,7 @@ enum GridContentDistribution {
     ///
     ///  - `trackWidths`  resolved track widths in logical order (the output
     ///    of GridTrackMath.columnWidths — sizing runs FIRST, distribution
-    ///    only moves the already-sized group, css-align-3 §5.3).
+    ///    only moves the already-sized group, css-align-3 §5.1).
     ///  - `gap`          the used column-gap between adjacent tracks.
     ///  - `contentExtent` the grid content-box inline size the group aligns
     ///    within. For an indefinite (fit-content) grid the caller passes the
@@ -51,7 +51,7 @@ enum GridContentDistribution {
     ///    order (logical positions are computed start-relative, then
     ///    mirrored).
     ///
-    /// Overflow (leftover < 0) follows css-align-3 §5.3 default (unsafe)
+    /// Overflow (leftover < 0) follows css-align-3 §5.1 default (unsafe)
     /// semantics: end/center simply overflow the start/both side(s), and the
     /// <content-distribution> fallbacks apply — space-between falls back to
     /// start, space-around/space-evenly fall back to center.
@@ -124,7 +124,7 @@ enum GridContentDistribution {
     /// (ValueExtractors fold, mirroring extractDisplayConfig on Compose);
     /// everything without a distribution meaning for a fixed track group —
     /// nil / normal / stretch / auto / baseline / self-* — behaves as start
-    /// per css-align-3 §5.3 (`normal` → `stretch`, which distributes nothing
+    /// per css-align-3 §5.1 (`normal` → `stretch`, which distributes nothing
     /// over non-auto tracks).
     static func justify(of keyword: AlignmentKeyword?) -> Justify {
         switch keyword {

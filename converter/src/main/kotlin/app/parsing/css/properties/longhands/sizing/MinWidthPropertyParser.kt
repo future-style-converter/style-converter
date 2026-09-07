@@ -10,7 +10,7 @@ object MinWidthPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
         val minValue = when {
-            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — see the
+            // css-values-5 §11 calc-size() (wave 42 lane W3) — see the
             // decision record on WidthPropertyParser's identical branch. On
             // min-width the runtimes resolve the `auto` basis as the
             // automatic minimum size (css-flexbox-1 §4.5 for flex items —

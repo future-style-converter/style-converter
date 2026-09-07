@@ -7,16 +7,20 @@
 //  previous one — so we reduce in declared order. Equivalent SwiftUI
 //  APIs:
 //
-//    blur(sigma)        → .blur(radius: sigma)   §8.2: the CSS
-//                         parameter IS σ, and SwiftUI's radius ≈ σ
+//    blur(sigma)        → .blur(radius: sigma)   filter-effects-1 §6.1
+//                         blur(): the CSS parameter IS σ, and SwiftUI's
+//                         radius ≈ σ (section numbers below follow the
+//                         current ED, drafts.csswg.org/filter-effects-1,
+//                         where every shorthand function lives in §6.1
+//                         Supported Filter Functions — retro R4 recite)
 //    brightness(pct)    → .colorMultiply(white: pct/100)   MULTIPLIER, not additive
 //    contrast(pct)      → .contrast(pct/100)
 //    grayscale(pct)     → .grayscale(pct/100)
 //    saturate(pct)      → .saturation(pct/100)
 //    hue-rotate(deg)    → .hueRotation(.degrees(deg))
-//    invert(a)          → lerp to .colorInvert() at opacity a   §8.6
+//    invert(a)          → lerp to .colorInvert() at opacity a   §6.1 invert()
 //    opacity(pct)       → .opacity(pct/100)
-//    sepia(pct)         → §8.5 matrix to within a quantisation step, via
+//    sepia(pct)         → §6.1 sepia() matrix to within a quantisation step, via
 //                         SepiaMatrix's rank-1 factorisation (reweight →
 //                         .grayscale → tint, additively blended)
 //    drop-shadow        → .shadow(color:, radius:, x:, y:)
@@ -47,6 +51,20 @@ struct FilterApplier: ViewModifier {
     /// Compose twin threads `elementAlpha` for the same reason; the backplate
     /// must fade with the element it belongs to.
     var elementOpacity: Double = 1
+    /// The element's resolved `color` — own declaration or the inherited
+    /// one (ComponentRenderer merges the ancestor chain into the property
+    /// list before extraction; InheritedText.inheritedTypes carries
+    /// "Color"), threaded by StyleBuilder exactly like
+    /// BorderSideApplier.currentColor. filter-effects-1 §6.1 drop-shadow():
+    /// "the missing used color is taken from the color property" — this is
+    /// that colour. Nil when nothing up the chain declared `color`
+    /// (retro A7#1 seam; default nil keeps `engineFilter(_:)` compiling).
+    var currentColor: Color? = nil
+    /// Capture-mode ink split for the currentColor bottom-out — the SAME
+    /// chain BorderSideApplier/OutlineApplier bottom out on (WPT canvas →
+    /// spec black; dark stage → #eee), so a colourless drop-shadow can
+    /// never disagree with a colourless border on the same element.
+    @Environment(\.wptCaptureMode) private var wptCaptureMode: Bool
 
     func body(content: Content) -> some View {
         // Short-circuit — nil / untouched means identity.
@@ -113,18 +131,44 @@ struct FilterApplier: ViewModifier {
     /// invalid CSS and clamp to 0 (black) rather than inverting the image.
     static func brightnessFactor(_ pct: Double) -> Double { max(0, pct / 100) }
 
+    /// The used colour of one `drop-shadow()`, filter-effects-1 §6.1
+    /// (Supported Filter Functions): the declared `<color>` when present,
+    /// otherwise "the missing used color is taken from the color property"
+    /// — the element's resolved `color`, at FULL alpha. Pure static so
+    /// XCTest pins it on the verbatim corpus wire (`c: {"original":
+    /// "currentColor"}` with no srgb block, which the extractor maps to
+    /// `declared == nil`).
+    ///
+    /// The bottom-out when no `color` resolved anywhere up the chain is
+    /// BorderSideApplier.fallbackInk — the shared currentColor chain (WPT
+    /// capture → spec black per the UA `color: CanvasText`; dark stage →
+    /// #eee, the web harness body colour) — so border, outline and shadow
+    /// ink agree byte-for-byte. Compose lane R6 pins the same rule
+    /// (resolved text colour, alpha 1).
+    ///
+    /// The old code substituted `.black.opacity(0.3)`: neither the spec
+    /// colour nor either twin's — css-color/currentcolor-003 painted GREY
+    /// shadow copies at +333px where the browser ref paints the element's
+    /// red (retro A7#1), and Compose painted opaque black.
+    static func dropShadowColor(declared: Color?,
+                                currentColor: Color?,
+                                wptCaptureMode: Bool) -> Color {
+        declared ?? BorderSideApplier.fallbackInk(currentColor: currentColor,
+                                                  wptCaptureMode: wptCaptureMode)
+    }
+
     // One filter function → one SwiftUI modifier.
     @ViewBuilder
     private func applyOne(_ fn: FilterFn, to v: AnyView) -> some View {
         switch fn {
         case .blur(let r):
-            // filter-effects-1 §8.2: the parameter of blur() IS the Gaussian
+            // filter-effects-1 §6.1 blur(): the parameter IS the Gaussian
             // STANDARD DEVIATION — "the parameter defines the value of the
             // standard deviation to the Gaussian function". It is NOT a
-            // radius, and it is NOT the box-shadow/drop-shadow convention
-            // (css-backgrounds-3, filter-effects-1 §10.1) where a blur
-            // radius r means σ = r/2. Conflating the two is the bug this
-            // line had: it halved σ on every blur.
+            // radius, and it is NOT the box-shadow convention
+            // (css-backgrounds-3 §6.1 box-shadow) where a blur radius r
+            // means σ = r/2. Conflating the two is the bug this line had:
+            // it halved σ on every blur.
             //
             // MEASURED with the same step-edge estimator BackdropBlur pins
             // `ciRadiusPerSigma` with (the derivative of a blurred step edge
@@ -141,7 +185,7 @@ struct FilterApplier: ViewModifier {
             // correct call passes R unchanged.
             v.blur(radius: r, opaque: false)
         case .brightness(let pct):
-            // filter-effects-1 §2.2: brightness() is a linear MULTIPLIER on
+            // filter-effects-1 §6.1 brightness(): a linear MULTIPLIER on
             // the colour channels — 100 is identity, 150 scales each channel
             // by 1.5, 0 is black. SwiftUI's `.brightness(_:)` is an ADDITIVE
             // shift in [-1, 1]: a different operation that only coincides
@@ -175,7 +219,7 @@ struct FilterApplier: ViewModifier {
             // CSS grayscale amount in 0–100; SwiftUI expects 0–1.
             v.grayscale(pct / 100)
         case .sepia(let pct):
-            // filter-effects-1 §8.5's colour matrix, via the least-squares
+            // filter-effects-1 §6.1 sepia()'s colour matrix, via the least-squares
             // rank-1 factorisation in SepiaMatrix (see that file for the
             // derivation, the platform facts it rests on, and why a real
             // colour matrix was declined):
@@ -233,7 +277,7 @@ struct FilterApplier: ViewModifier {
                 }
             }
         case .invert(let pct):
-            // filter-effects-1 §8.6: invert(a) is a per-channel LINEAR
+            // filter-effects-1 §6.1 invert(): a per-channel LINEAR
             // transfer — feFuncR type="table" tableValues="a 1-a" — i.e.
             //
             //     out = (1-a)·c + a·(1-c)
@@ -256,7 +300,7 @@ struct FilterApplier: ViewModifier {
             //
             // This runtime already had the correct formula: BackdropImageOps
             // .invertByte computes `c + (255 - 2c)·amount` with this same
-            // §8.6 citation, for the BACKDROP path. Only the foreground
+            // §6.1 invert() rule, for the BACKDROP path. Only the foreground
             // filter lane was missing it.
             //
             // Composited src-over at .opacity(a), matching the sepia case in
@@ -282,10 +326,32 @@ struct FilterApplier: ViewModifier {
         case .hueRotate(let deg):
             v.hueRotation(.degrees(deg))
         case .dropShadow(let x, let y, let blur, let color):
-            // SwiftUI `.shadow` has the same semantics as CSS drop-shadow:
-            // it respects the alpha channel of the view so transparent
-            // pixels don't cast shadow. Perfect parity.
-            v.shadow(color: color ?? .black.opacity(0.3),
+            // filter-effects-1 §6.1 drop-shadow(): a blurred, offset copy
+            // of the input image's ALPHA, filled with the shadow colour,
+            // composited under the input. SwiftUI `.shadow` is alpha-
+            // aware the same way (transparent pixels cast no shadow).
+            // Colour: the declared <color>, else the element's `color`
+            // at full alpha — see dropShadowColor (retro A7#1; the old
+            // `.black.opacity(0.3)` was neither the spec nor the twins).
+            // Blur: filter-effects-1 §6.1 makes drop-shadow()'s 3rd length
+            // "the standard deviation instead of blur radius" (its note:
+            // "Standard deviation is different to box-shadow's blur
+            // radius"), so the spec σ is `blur` itself. This call passes
+            // `blur / 2` — the css-backgrounds-3 §6.1 box-shadow convention
+            // (blur radius = 2σ) that the Compose twin applies too
+            // (FilterApplier.kt dropShadowMaskRadius, cited from
+            // BackdropChain.kt) — so BOTH natives render drop-shadow() at
+            // half the spec's σ while the browser uses the length verbatim
+            // (Blink hands it to SkImageFilters::DropShadow as sigma).
+            // Pre-existing, twin-mirrored and outside retro R4's brief
+            // (colour only): left untouched and reported for the backlog —
+            // fixing one native alone would break the cross-platform pair
+            // gate on filter-functions.json's Filter_DropShadow_* cells.
+            // SwiftUI's `.shadow(radius:)` parameter is ≈ σ (same estimator
+            // as the blur() note above), so the value passed IS the σ used.
+            v.shadow(color: FilterApplier.dropShadowColor(declared: color,
+                                                          currentColor: currentColor,
+                                                          wptCaptureMode: wptCaptureMode),
                      radius: blur / 2, x: x, y: y)
         case .url(let id):
             // Can't resolve SVG filter refs in SwiftUI — log-and-skip.
@@ -301,10 +367,16 @@ extension View {
     // radius — used ONLY to clip the lane BF-I backdrop backplate to the
     // rounded border box; it does not affect the foreground filter chain,
     // and defaults to nil (square) for callers that have no radius in hand.
+    // `currentColor` is the element's resolved `color` for the
+    // drop-shadow() colour default (filter-effects-1 §6.1) — StyleBuilder
+    // threads `style.text.color` like it does for border sides (retro
+    // A7#1); nil bottoms out on the shared capture-mode ink chain.
     func engineFilter(_ config: FilterConfig?,
                       radius: BorderRadiusConfig? = nil,
-                      elementOpacity: Double = 1) -> some View {
+                      elementOpacity: Double = 1,
+                      currentColor: Color? = nil) -> some View {
         modifier(FilterApplier(config: config, radius: radius,
-                               elementOpacity: elementOpacity))
+                               elementOpacity: elementOpacity,
+                               currentColor: currentColor))
     }
 }

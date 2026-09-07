@@ -4,4 +4,3 @@
 // WHY widen: csstype has no `position-area` — https://drafts.csswg.org/css-anchor-position-1/#position-area.
 export interface PositionAreaConfig { value?: string; }
 export const POSITION_AREA_PROPERTY_TYPE = 'PositionArea' as const;
-export type PositionAreaPropertyType = typeof POSITION_AREA_PROPERTY_TYPE;

@@ -43,28 +43,18 @@ export function applyTransformsPhase8(properties: IRPropertyLike[]): CSSProperti
   Object.assign(out, applyPerspectiveOrigin(extractPerspectiveOrigin(properties)));  // vanishing point
   Object.assign(out, applyBackfaceVisibility(extractBackfaceVisibility(properties)));// card flip
 
-  // CSS spec: `perspective: <length>` on an element only affects the
-  // 3D rendering of its CHILDREN — not the element itself. iOS and
-  // Android, however, interpret a co-located `perspective` + 3D
-  // `transform` (rotateY, rotateX, …) as "apply this perspective to
-  // the rotation" — which matches the visible intent of every
-  // perspective fixture in the suite.  To converge web with
-  // iOS/Android, fold the `perspective` length into the transform
-  // string itself via the `perspective(<length>)` function. This is
-  // the canonical spec-compliant way to apply perspective to the
-  // SAME element's transform.  Keep the standalone `perspective` key
-  // for the (rare) genuine parent-of-children use case — both
-  // declarations are valid simultaneously.
-  const persp = extractPerspective(properties);
-  const xform = extractTransform(properties);
-  if (persp.value !== undefined && xform.value !== undefined &&
-      // Only prepend when the transform string actually contains a
-      // 3D function. Otherwise the perspective() prefix would just
-      // tax the GPU for zero visual difference.
-      /(rotate[XYZ3]|translate[XYZ3]|matrix3d|scale[XYZ3])/i.test(String(xform.value)) &&
-      // Don't double-add when the author already prefixed perspective().
-      !/^\s*perspective\s*\(/.test(String(xform.value))) {
-    out.transform = `perspective(${persp.value}) ${xform.value}`;
-  }
+  // css-transforms-2 §4.1.1 names two ways a perspective reaches an element:
+  // a `perspective()` FUNCTION in its own transform list ("computes into
+  // the element's current transformation matrix", §12.2) and the
+  // `perspective` PROPERTY, which "influence[s] the rendering of its
+  // 3d-transformed children" (§8). The property is therefore NOT folded
+  // into this element's own `transform` string any more (retro F3, skeptic
+  // S2): the previous `perspective(<len>)` prefix hack made
+  // `perspective: 1000px; transform: rotateY(45deg)` keystone the element
+  // itself, which the frozen WPT ref for css-transforms/backface-visibility-
+  // hidden-001 does not do (100 rows in every column — orthographic), and it
+  // is the shape Compose stopped drawing in the same retro. The standalone
+  // `perspective` key applyPerspective emitted above is the spec's actual
+  // channel — the browser projects the CHILDREN through it natively.
   return out;
 }

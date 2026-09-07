@@ -95,7 +95,7 @@ class WptBorderInkTest {
 
     @Test
     fun `outline currentColor bottom-out mirrors the same mode split`() {
-        // css-ui-4 §4.3: outline-color's initial is currentColor — same
+        // css-ui-4 §3.4: outline-color's initial is currentColor — same
         // chain, same split (the OutlineApplier's ring must not stay #eee
         // on the white WPT canvas while the ref draws black).
         val outline = listOf(

@@ -2,14 +2,16 @@
  * Maps IR colors to CSS color strings.
  *
  * Extracts color values from IR format and converts to CSS.
+ *
+ * The `ExtractedColor` shape and the `parseIRColor` reader that used to sit
+ * here had zero importers anywhere in the repo (finding A6#13) — the
+ * migrated triplets read colours through `engine/core/types/ColorValue.ts`
+ * — so they are deleted instead of drifting as a second IR colour decoder.
  */
 
-import type { IRColor, SRGB } from '../types/ValueTypes';
-
-export interface ExtractedColor {
-  color: string;
-  opacity?: number;
-}
+// Only the sRGB tuple is still needed here; `IRColor` was imported solely for
+// the deleted `parseIRColor` return type.
+import type { SRGB } from '../types/ValueTypes';
 
 /**
  * Extract color from IR data format.
@@ -85,36 +87,6 @@ export function extractOpacity(data: unknown): number | null {
     const obj = data as Record<string, unknown>;
     if (typeof obj.alpha === 'number') return obj.alpha;
     if (typeof obj.value === 'number') return obj.value;
-  }
-
-  return null;
-}
-
-/**
- * Parse a color value from IR property data.
- */
-export function parseIRColor(data: unknown): IRColor | null {
-  if (!data || typeof data !== 'object') return null;
-
-  const obj = data as Record<string, unknown>;
-
-  if (obj.srgb) {
-    return {
-      srgb: obj.srgb as SRGB,
-      original: obj.original as string | undefined,
-    };
-  }
-
-  // Direct sRGB properties
-  if (typeof obj.r === 'number') {
-    return {
-      srgb: {
-        r: obj.r as number,
-        g: obj.g as number,
-        b: obj.b as number,
-        a: obj.a as number | undefined,
-      },
-    };
   }
 
   return null;

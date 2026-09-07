@@ -143,7 +143,7 @@ class PositionedParentFlowSlotTest {
         // A `right: 20px; width: 100px` child of a 358px-wide abspos parent:
         // the slot places the box flush with the end edge (358 − 100 = 258)
         // and the child's own PositionApplier offset (−20) then pulls it to
-        // the css-position-3 §3.5.3 used position 238. Same arithmetic the
+        // the css-position-3 §4.3 used position 238. Same arithmetic the
         // canvas overlay pins at CanvasRootHoistTest.
         val endEdge = PositionedParentFlowSlot.slotEndEdgePx(anchorsFromEnd = true, boundedMaxPx = 358)
         assertEquals(258, CanvasRootHoist.anchorPlacePx(originPx = 0, endEdgePx = endEdge, boxPx = 100))

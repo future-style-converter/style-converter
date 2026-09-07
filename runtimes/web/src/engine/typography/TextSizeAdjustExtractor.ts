@@ -1,6 +1,6 @@
 // TextSizeAdjustExtractor.ts — folds `TextSizeAdjust` IR properties into a TextSizeAdjustConfig.
 // Family: text-size-adjust.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextSizeAdjustConfig, TEXT_SIZE_ADJUST_PROPERTY_TYPE, TextSizeAdjustPropertyType } from './TextSizeAdjustConfig';
 import { kwLower } from './_shared';

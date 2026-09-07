@@ -69,12 +69,21 @@ object EffectsFacade {
      *
      * @param properties List of pairs where first is the property type (e.g., "Filter")
      *                   and second is the JSON data for that property.
+     * @param wptCaptureMode the TITAN WPT flag StyleApplier.extractConfig
+     *   already hands the layout and borders lanes — consumed here by the
+     *   filter and shadow extractors' `currentcolor` bottom-out (retro R6,
+     *   A7#1: drop-shadow/box-shadow default colour = the element's `color`,
+     *   mode-split exactly like border-color's — EffectsCurrentColorInk).
+     *   Default false keeps every existing call byte-identical.
      * @return EffectsConfig containing configurations for all effect types.
      */
-    fun extractConfig(properties: List<Pair<String, JsonElement?>>): EffectsConfig {
+    fun extractConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        wptCaptureMode: Boolean = false,
+    ): EffectsConfig {
         return EffectsConfig(
-            filters = FilterExtractor.extractFilterConfig(properties),
-            shadows = ShadowExtractor.extractShadowConfig(properties),
+            filters = FilterExtractor.extractFilterConfig(properties, wptCaptureMode),
+            shadows = ShadowExtractor.extractShadowConfig(properties, wptCaptureMode),
             clipPath = ClipPathExtractor.extractClipPathConfig(properties),
             mask = MaskExtractor.extractMaskConfig(properties),
             blendMode = BlendModeExtractor.extractBlendModeConfig(properties)
@@ -88,7 +97,7 @@ object EffectsFacade {
      * @param config The combined effects configuration.
      * @param radiusConfig The element's border-radius config, threaded to
      *   the shadow painter so the shadow perimeter follows the border-box
-     *   corner shape (css-backgrounds-3 §7.1.1 — `border-radius: 50%` must
+     *   corner shape (css-backgrounds-3 §6.1.1 — `border-radius: 50%` must
      *   cast an elliptical spread ring, not a rectangular one).
      * @return Modified modifier with effects applied.
      */
@@ -97,18 +106,30 @@ object EffectsFacade {
         config: EffectsConfig,
         radiusConfig: com.styleconverter.runtime.borders.radius.BorderRadiusConfig =
             com.styleconverter.runtime.borders.radius.BorderRadiusConfig.NONE,
-        // wave-26 skeptic fix — the element's own `opacity`, consumed ONLY by
-        // the backdrop path (filter-effects-2 §2 composites the filtered
+        // wave-26 skeptic fix — the element's own `opacity`, consumed by the
+        // backdrop path (filter-effects-2 §2 composites the filtered
         // backdrop into the element's group, so the group's opacity
         // attenuates it; ColorApplier's alpha layer sits INSIDE this chain and
-        // cannot reach it). Defaulted, so nothing else in the chain changes.
+        // cannot reach it) and — retro R6, A11#2 — by the box-shadow painter,
+        // which draws at this same step outside that alpha layer and must
+        // attenuate its own paint (css-color-4 §3.3: opacity applies "to the
+        // element as a whole", shadow included). Defaulted, so nothing else
+        // in the chain changes.
         elementAlpha: Float = 1f,
         // wave-26 skeptic fix — the element's resolved margin bands, consumed
-        // ONLY by the backdrop path. The whole effects step is chained OUTSIDE
-        // the margin step (StyleApplier steps 3 then 4, and MarginApplier
-        // emits positive margins as `absolutePadding`), so the backdrop draw
-        // node is sized by the MARGIN box while filter-effects-2 §2 samples
-        // and clips the BORDER box. Defaulted, so nothing else changes.
+        // by the backdrop path and — retro round-2 F1 (skeptic S3 must-fix) —
+        // by the box-shadow painters. The whole effects step is chained
+        // OUTSIDE the margin step (StyleApplier steps 3 then 4, and
+        // MarginApplier emits positive margins as `absolutePadding`), so
+        // EVERY draw node installed here is sized by the MARGIN box (CSS2
+        // §8.1): the backdrop node, while filter-effects-2 §2 samples and
+        // clips the BORDER box; and the shadow nodes, while css-backgrounds-3
+        // §6.1.1 knocks the shadow out of the BORDER box and hangs its
+        // perimeter on it — R6's knockout read the node size and so knocked
+        // out a margined element's whole margin box (its own fixture
+        // BSK_Op55_RingDominant: 98×98 ring instead of 50×50). StyleApplier
+        // resolves the value once (MarginApplier.resolvedInsets) whenever
+        // either consumer is declared. Defaulted, so nothing else changes.
         marginInsets: com.styleconverter.runtime.spacing.MarginInsets =
             com.styleconverter.runtime.spacing.MarginInsets.NONE,
         // wave-27 fix — the element's resolved POSITION offset, consumed by
@@ -127,7 +148,7 @@ object EffectsFacade {
         // wave-46 (lane Y4, skeptic S2) — the CSS2 §8.3.1 collapse override
         // the element's MARGIN step receives, consumed ONLY by the clip-path
         // lane, which needs to know how much of the node is applied margin
-        // band to place the css-masking-1 §7.1 reference box. Threaded as a
+        // band to place the css-masking-1 §5.1 reference box. Threaded as a
         // parameter for the same reason MarginApplier takes one: this step's
         // modifiers materialise INSIDE the provider that re-provides
         // `LocalCollapsedMargin` as null for descendants, so a
@@ -191,9 +212,19 @@ object EffectsFacade {
         // position offset rides along because the shadow draws via
         // `drawBehind` at THIS step — outer of the layout offset — so a
         // positioned element's shadow must slide to the offset slot with
-        // the box that casts it (css-backgrounds-3 §7.1 attaches the shadow
-        // to the box, not to its abandoned layout slot).
-        result = ShadowApplier.applyShadow(result, config.shadows, radiusConfig, positionOffset)
+        // the box that casts it (css-backgrounds-3 §6.1 attaches the shadow
+        // to the box, not to its abandoned layout slot). The element's
+        // opacity rides along too (retro R6, A11#2): this node is OUTER of
+        // ColorApplier's step-6 transparency group, so the shadow's paint
+        // must carry the group alpha itself — see ShadowGeometry.attenuate.
+        // And the margin bands ride along (retro round-2 F1): this node is
+        // OUTER of the step-4 margin padding too, so its size is the margin
+        // box and the §6.1.1 knockout/perimeter must strip the bands off
+        // first — see the marginInsets parameter above and
+        // ShadowGeometry.borderBoxRect.
+        result = ShadowApplier.applyShadow(
+            result, config.shadows, radiusConfig, positionOffset, elementAlpha, marginInsets,
+        )
 
         // The rest of the element's own `filter` chain (blur, drop-shadow,
         // opacity) stays INNER of the shadow step, exactly where it has

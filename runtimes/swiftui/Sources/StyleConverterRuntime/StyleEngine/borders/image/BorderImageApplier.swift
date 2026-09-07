@@ -2,7 +2,7 @@
 //  BorderImageApplier.swift
 //  StyleEngine/borders/image — BI-IOS lane (9-slice painter).
 //
-//  Real CSS border-image (css-backgrounds-3 §6) for `url(...)` sources:
+//  Real CSS border-image (css-backgrounds-3 §5) for `url(...)` sources:
 //  the source decodes through BackgroundURLImageResolver (percent-
 //  encoded data URIs, file/bundle paths; remote = defined no-op), the
 //  image is cut along the §6.1 slice lines into nine regions, and a
@@ -22,7 +22,7 @@
 //
 //  Paint order (IOS-BI lane): the Canvas attaches as a `.background`,
 //  NOT an `.overlay`. CSS paints border-image in place of the border
-//  (css-backgrounds-3 §6), and CSS2 Appendix E paints an element's
+//  (css-backgrounds-3 §5), and CSS2 Appendix E paints an element's
 //  backgrounds-then-borders BEFORE its content — so border-image sits
 //  above the whole background chain yet BENEATH the element's text.
 //  The old `.overlay` inverted that: with slice `fill`, the center

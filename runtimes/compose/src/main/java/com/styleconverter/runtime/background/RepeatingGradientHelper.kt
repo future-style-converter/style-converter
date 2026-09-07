@@ -41,7 +41,7 @@ import kotlin.math.sqrt
  * we manually expand the color stops to cover 360 degrees multiple times.
  *
  * ### One-stop gradients (wave 46, lane Y2)
- * css-images-3 §3.4.4 makes a one-stop gradient a UNIFORM fill of that
+ * css-images-3 §3.4.1 makes a one-stop gradient a UNIFORM fill of that
  * colour — `repeating-linear-gradient(green 50px)` and
  * `repeating-radial-gradient(circle at 0 0, green)` paint solid green.
  * Wave 36 (ColorApplier.paintableStops) widened the one-stop list for the

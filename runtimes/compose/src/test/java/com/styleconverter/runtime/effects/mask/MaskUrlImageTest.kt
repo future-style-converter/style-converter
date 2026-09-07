@@ -21,8 +21,8 @@ package com.styleconverter.runtime.effects.mask
 //  3. routing: a data-URI url mask is NO LONGER the identity modifier —
 //     it builds the same Offscreen + drawWithContent chain as gradient
 //     masks; http and malformed payloads STAY identity (+ one log).
-//  4. mask-repeat → BackgroundTileMath axis modes (css-masking-1 §4.5
-//     defers placement to css-backgrounds-3 §3.7, one shared owner).
+//  4. mask-repeat → BackgroundTileMath axis modes (css-masking-1 §7.3
+//     defers placement to css-backgrounds-3 §2.4, one shared owner).
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ImageBitmap
@@ -194,7 +194,7 @@ class MaskUrlImageTest {
 
     @Test
     fun `mask-repeat maps onto the shared background axis modes`() {
-        // css-masking-1 §4.5 = backgrounds §3.7 semantics: the initial
+        // css-masking-1 §7.3 = css-backgrounds-3 §2.4 semantics: the initial
         // `repeat` tiles BOTH axes (what the default-config fixture needs),
         // and every other keyword maps per-axis onto the SAME AxisRepeat
         // owner the background path draws with.

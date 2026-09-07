@@ -53,7 +53,7 @@ function keywordOf(data) {
 
 /**
  * True when the component declares `column-span: all` — the spanner that
- * interrupts the multicol flow (css-multicol §6) and triggers Chromium's
+ * interrupts the multicol flow (css-multicol-1 §6.1) and triggers Chromium's
  * abspos containing-block promotion path. `column-span: none` is inert
  * (the initial value — no interruption, no promotion), so only ALL fires.
  */

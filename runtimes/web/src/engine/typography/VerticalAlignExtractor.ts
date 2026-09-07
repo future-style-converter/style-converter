@@ -1,6 +1,6 @@
 // VerticalAlignExtractor.ts — folds `VerticalAlign` IR properties into a VerticalAlignConfig.
 // Family: vertical-align.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { VerticalAlignConfig, VERTICAL_ALIGN_PROPERTY_TYPE, VerticalAlignPropertyType } from './VerticalAlignConfig';
 import { kwLower } from './_shared';

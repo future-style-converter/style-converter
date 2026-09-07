@@ -2,7 +2,7 @@
 // (array of strings).  IR emits uppercase SNAKE_CASE (e.g. 'PLUS_LIGHTER'); we
 // lowercase + hyphenate to the CSS token.
 
-import type { BlendModeConfig, BlendModePropertyType } from './BlendModeConfig';
+import type { BlendModeConfig } from './BlendModeConfig';
 import {
   MIX_BLEND_MODE_PROPERTY,
   BACKGROUND_BLEND_MODE_PROPERTY,
@@ -11,10 +11,9 @@ import {
 // Minimal IR property shape.
 interface IRPropertyLike { type: string; data: unknown; }
 
-// Registry predicate.
-export function isBlendModeProperty(type: string): type is BlendModePropertyType {
-  return type === MIX_BLEND_MODE_PROPERTY || type === BACKGROUND_BLEND_MODE_PROPERTY;
-}
+// (A6#13) the `isBlendModeProperty` registry predicate that stood here had
+// zero importers: dispatch goes through PropertyRegistry.ts's name set and
+// the two extract* functions below match the type strings directly.
 
 // Normalise one enum token to the CSS keyword form.
 function toCssKeyword(raw: unknown): string | null {

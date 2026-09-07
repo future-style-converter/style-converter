@@ -77,7 +77,14 @@ enum FilterExtractor {
         case "hue-rotate": return .hueRotate(deg: degv("a"))
         case "drop-shadow":
             // Drop-shadow carries x,y (lengths), optional r (blur) and
-            // optional c (colour). Defaults: blur 0, colour nil (inherit).
+            // optional c (colour). Defaults: blur 0, colour nil. A nil
+            // colour means currentColor — filter-effects-1 §6.1: "the
+            // missing used color is taken from the color property". The
+            // converter emits `c: {"original":"currentColor"}` with NO srgb
+            // block for both an omitted colour and the explicit keyword
+            // (corpus: css-color/currentcolor-003), and extractColor
+            // returns nil for it; FilterApplier.dropShadowColor resolves
+            // that nil against the element's threaded `color` (retro A7#1).
             let colour = extractColor(fields["c"]).toSwiftUIColor()
             return .dropShadow(x: px("x"), y: px("y"),
                                 blur: px("r"), color: colour)

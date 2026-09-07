@@ -1,6 +1,6 @@
 // HyphenateCharacterExtractor.ts — folds `HyphenateCharacter` IR properties into a HyphenateCharacterConfig.
 // Family: hyphenate-character.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { HyphenateCharacterConfig, HYPHENATE_CHARACTER_PROPERTY_TYPE, HyphenateCharacterPropertyType } from './HyphenateCharacterConfig';
 import { kwLower } from './_shared';

@@ -58,7 +58,17 @@ object FlexExtractor {
             config = when (type) {
                 "FlexGrow" -> config.copy(flexGrow = ValueExtractors.extractFloat(data) ?: 0f)
                 "FlexShrink" -> config.copy(flexShrink = ValueExtractors.extractFloat(data) ?: 1f)
-                "FlexBasis" -> config.copy(flexBasis = parseFlexBasis(data))
+                // Retro R2 (A7#0): FlexBasis is deliberately NOT read here any
+                // more. The former `parseFlexBasis` routed the bare-number
+                // percent wire (`flex-basis: 80%` → `80`) through
+                // ValueExtractors.extractLengthOrPercentage's "bare number → px"
+                // rule and produced Length(80dp) — N% misread as N px — into a
+                // FlexItemConfig.flexBasis slot that had ZERO readers (grep
+                // `\.flexBasis\b` over compose/src/main: none). Dead code
+                // carrying a wrong rule is worse than no code: the ONE flex
+                // basis reader is core/placement/ItemPlacementExtractor
+                // (px via flexBasisPx, percent via flexBasisPercent), which
+                // is what ComponentRenderer.flexLineSpec consumes.
                 "AlignSelf" -> config.copy(alignSelf = parseAlignSelf(ValueExtractors.extractKeyword(data)))
                 "Order" -> config.copy(order = ValueExtractors.extractInt(data) ?: 0)
                 else -> config
@@ -132,19 +142,6 @@ object FlexExtractor {
         "anchor-center" -> AlignSelf.CENTER
         else -> AlignSelf.AUTO
     }
-
-    private fun parseFlexBasis(data: JsonElement?): FlexBasis {
-        if (data == null) return FlexBasis.Auto
-
-        val keyword = ValueExtractors.extractKeyword(data)?.lowercase()
-        if (keyword == "auto") return FlexBasis.Auto
-        if (keyword == "content") return FlexBasis.Content
-
-        val lop = ValueExtractors.extractLengthOrPercentage(data)
-        return when (lop) {
-            is ValueExtractors.LengthOrPercentage.Length -> FlexBasis.Length(lop.dp.value)
-            is ValueExtractors.LengthOrPercentage.Percentage -> FlexBasis.Percentage(lop.fraction)
-            else -> FlexBasis.Auto
-        }
-    }
+    // Retro R2 (A7#0): `parseFlexBasis` deleted — see the FlexBasis note in
+    // extractItemConfig for why (dead reader with the N%→N px misread).
 }

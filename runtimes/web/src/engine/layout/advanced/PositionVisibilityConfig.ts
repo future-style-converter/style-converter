@@ -9,4 +9,3 @@ export interface PositionVisibilityConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const POSITIONVISIBILITY_PROPERTY_TYPE = 'PositionVisibility' as const;
-export type PositionVisibilityPropertyType = typeof POSITIONVISIBILITY_PROPERTY_TYPE;

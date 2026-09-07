@@ -1,6 +1,6 @@
 // TextSpacingTrimExtractor.ts — folds `TextSpacingTrim` IR properties into a TextSpacingTrimConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextSpacingTrimConfig, TEXT_SPACING_TRIM_PROPERTY_TYPE, TextSpacingTrimPropertyType } from './TextSpacingTrimConfig';
 import { kwLower } from './_shared';

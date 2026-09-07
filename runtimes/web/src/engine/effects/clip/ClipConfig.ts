@@ -7,4 +7,3 @@
 //   {type:'rect', top, right, bottom, left}             -> 'rect(<T>, <R>, <B>, <L>)'
 export interface ClipConfig { value?: string; }
 export const CLIP_PROPERTY_TYPE = 'Clip' as const;
-export type ClipPropertyType = typeof CLIP_PROPERTY_TYPE;

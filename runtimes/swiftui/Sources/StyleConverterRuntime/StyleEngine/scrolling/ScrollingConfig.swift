@@ -12,10 +12,17 @@
 //  for ~42 IR property type names — see `ScrollingProperty.names` for
 //  the exact list.
 //
-//  The applier best-efforts the small subset SwiftUI can express
-//  (scroll-snap-type / -align via `.scrollTargetBehavior`, overscroll
-//  via `.scrollBounceBehavior`). Everything else is stored for audit
-//  only; see the per-case TODO notes in ScrollingApplier.swift.
+//  NOTHING in this family reaches a modifier today. The two members with
+//  a SwiftUI analogue are scroll-snap-type/-align (`.scrollTargetBehavior
+//  (.viewAligned)`, iOS 17+) and overscroll-behavior
+//  (`.scrollBounceBehavior(.basedOnSize)`, iOS 16.4+); scrollbar-color/
+//  -width are system-rendered with no public API, scroll-margin/-padding
+//  have no ScrollView analogue, and overflow-anchor, overflow-clip-margin,
+//  scroll-start*, scroll-marker-group and scroll-target-group have none at
+//  all. Applying the two expressible ones needs a "this component is the
+//  scroll host" signal the SDUI runtime does not carry, so the payload is
+//  kept for audit only. Retro P2b (A6#10) deleted the identity
+//  `ScrollingApplier` that used to hold these notes — it had no caller.
 //
 
 import Foundation

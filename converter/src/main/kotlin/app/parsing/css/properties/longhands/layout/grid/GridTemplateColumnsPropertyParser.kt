@@ -53,19 +53,10 @@ object GridTemplateColumnsPropertyParser : PropertyParser {
 
     private fun isComplexExpression(value: String): Boolean {
         // Check for nested function calls that our parser can't handle
-        val depth = countMaxParenDepth(value)
+        // A6#14: was a private byte-identical copy shared with the other axis;
+        // one body now lives in GridTrackListParser (same package).
+        val depth = GridTrackListParser.countMaxParenDepth(value)
         return depth > 2 || value.contains("min(") || value.contains("max(") || value.contains("clamp(")
     }
 
-    private fun countMaxParenDepth(value: String): Int {
-        var max = 0
-        var current = 0
-        for (char in value) {
-            when (char) {
-                '(' -> { current++; if (current > max) max = current }
-                ')' -> current--
-            }
-        }
-        return max
-    }
 }

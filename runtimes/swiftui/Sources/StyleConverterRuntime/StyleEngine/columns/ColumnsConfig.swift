@@ -6,8 +6,9 @@
 //  owned-here-see-spacing-GapExtractor, column-rule-*, column-span,
 //  column-fill). SwiftUI has no multi-column layout — nothing maps.
 //
-//  NOTE: ColumnGap lives in the Phase 2 spacing family (GapProperty)
-//  and is intentionally NOT re-claimed here.
+//  NOTE: ColumnGap lives in the Phase 2 spacing family (GapExtractor)
+//  and is intentionally NOT re-claimed here. (Retro P2b: the name used to
+//  be the `GapProperty` enum, deleted as zero-reference — A6#10.)
 //
 
 import Foundation
@@ -32,7 +33,7 @@ struct ColumnsConfig: Equatable {
     // multicol element's children is the column box).
     var widthPx: Double? = nil
 
-    // Wave-43 lane V6 — css-overflow-4 §3 `continue: discard`: content
+    // Wave-43 lane V6 — css-overflow-4 §5.3 `continue: discard`: content
     // laid out past the multicol box's last column (the §8.2 overflow
     // columns) is DISCARDED instead of painted. Only the DISCARD keyword
     // flips this; `auto` (and any future keyword) keeps normal overflow.
@@ -47,7 +48,7 @@ struct ColumnsConfig: Equatable {
     // true here (an any-DISCARD-wins `contains` scan) and false on Compose.
     var continueDiscard: Bool = false
 
-    // Wave-45 lane X3 — typed `column-fill` (css-multicol-1 §7.2): true
+    // Wave-45 lane X3 — typed `column-fill` (css-multicol-1 §7.1): true
     // iff the computed value is `auto` (sequential fill); false is the
     // INITIAL `balance` (§7.1) and every other/absent keyword. The float
     // strip needs the distinction because the two modes produce different

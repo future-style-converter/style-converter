@@ -52,7 +52,7 @@ enum VerticalUprightGate {
     /// - Parameters:
     ///   - properties: the MERGED, inheritance-resolved list — `writing-mode`
     ///     and `text-orientation` are both `Inherited: yes`
-    ///     (css-writing-modes-4 §3.1 / §5.1), so they usually sit on an
+    ///     (css-writing-modes-4 §3.2 / §5.1), so they usually sit on an
     ///     ancestor and the component's own list would answer "horizontal".
     ///   - text: the run as it will be painted (post text-transform).
     static func stack(properties: [IRProperty], text: String?) -> LineStack? {

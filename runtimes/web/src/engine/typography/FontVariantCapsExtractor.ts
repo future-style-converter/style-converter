@@ -1,6 +1,6 @@
 // FontVariantCapsExtractor.ts — folds `FontVariantCaps` IR properties into a FontVariantCapsConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariantCapsConfig, FONT_VARIANT_CAPS_PROPERTY_TYPE, FontVariantCapsPropertyType } from './FontVariantCapsConfig';
 import { kwLower } from './_shared';

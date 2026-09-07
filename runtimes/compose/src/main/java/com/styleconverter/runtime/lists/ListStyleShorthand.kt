@@ -36,7 +36,7 @@ package com.styleconverter.runtime.lists
  */
 object ListStyleShorthand {
 
-    /** css-lists-3 §3.2 — the two `list-style-position` keywords. */
+    /** css-lists-3 §3.5 — the two `list-style-position` keywords. */
     private val POSITION_KEYWORDS = setOf("inside", "outside")
 
     /**
@@ -126,7 +126,7 @@ object ListStyleShorthand {
             }
         }
 
-        // css-lists-3 §3.5: a single `none` sets BOTH list-style-type and
+        // css-lists-3 §3.6: a single `none` sets BOTH list-style-type and
         // list-style-image to none; two `none`s set one each. Fill the
         // still-empty slots in that order. (Image's initial value IS none,
         // so filling it is a no-op on the config — the loop below exists to

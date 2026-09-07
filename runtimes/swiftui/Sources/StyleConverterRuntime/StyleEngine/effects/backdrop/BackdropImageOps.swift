@@ -165,7 +165,7 @@ enum BackdropImageOps {
 
     // MARK: - invert
 
-    /// Per-channel CSS invert on ONE 8-bit channel — filter-effects-1 §8.6:
+    /// Per-channel CSS invert on ONE 8-bit channel — filter-effects-1 §6.1:
     ///
     ///     out = c·(1 − amount) + (255 − c)·amount
     ///         = c + (255 − 2c)·amount            (the form used here)

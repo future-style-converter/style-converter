@@ -165,8 +165,12 @@ class PseudoBucketExtractorTest {
         assertNull(PseudoBucketExtractor.extractBeforeAfterConfig(p, role = null))
         // …and the box path is what took it (the shared claim function), so
         // the bucket is re-homed rather than dropped. PseudoBoxFoldTest pins
-        // the spliced child; ComponentRendererPseudoBoxSeamTest pins that the
-        // renderer's own entry point is what calls the fold.
+        // the spliced child; SeamReachabilityTest's `the four wave 49
+        // composition seams are still spliced into the renderer` pins that
+        // ComponentRenderer's own per-component entry is what calls
+        // `PseudoBoxFold.resolve(` (retro P2e: this named a
+        // `ComponentRendererPseudoBoxSeamTest` that has never existed — a
+        // pin claim no grep could confirm).
         assertNotNull(PseudoGeneratedBox.claim(
             (p["before"] as JsonObject), role = "before", hostRole = null))
     }

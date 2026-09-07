@@ -237,7 +237,7 @@ class BorderFidelityWave2Test {
 
     @Test
     fun `outline-style alone paints the medium 3px initial width`() {
-        // css-ui-4 §4.2: initial outline-width is medium (3px), not 0.
+        // css-ui-4 §3.2: initial outline-width is medium (3px), not 0.
         val cfg = OutlineExtractor.extractOutlineConfig(listOf(
             pair("OutlineStyle", "\"SOLID\"")
         ))

@@ -7,4 +7,3 @@
 // See https://drafts.csswg.org/css-grid-3/#masonry-auto-flow.
 export interface MasonryAutoFlowConfig { value?: string; }
 export const MASONRY_AUTO_FLOW_PROPERTY_TYPE = 'MasonryAutoFlow' as const;
-export type MasonryAutoFlowPropertyType = typeof MASONRY_AUTO_FLOW_PROPERTY_TYPE;

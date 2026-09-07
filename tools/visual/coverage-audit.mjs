@@ -33,7 +33,7 @@
 //
 //      CAVEAT — the REAL floor UNDER-counts on platforms that batch several
 //      properties into one grouped applier (e.g. iOS `FlexboxApplier.swift`,
-//      Compose `LayoutApplier.kt`, web `ScrollMarginApplier.ts`). Those files
+//      Compose `LayoutApplier.kt`, web `PaddingApplier.ts`). Those files
 //      genuinely render multiple properties, but their basename matches at most
 //      one IR name (often none), so the batched properties score REGISTERED-yes
 //      / REAL-no. REAL is therefore a lower bound on real rendering, not an
@@ -177,8 +177,80 @@ function assertFixtureTaxonomy() {
 }
 assertFixtureTaxonomy();
 
+// ── 2d. Registry-declaration guard (finding A6#9) ───────────────────────
+// The REGISTERED scrape above is anchored to the IR dictionary — it only
+// ever ADDS names it recognises — so a platform can declare a property that
+// does not exist and the audit stays silent. That is exactly how ten phantom
+// names survived in the web registry (the `overflow`, `scroll-margin{,-block,
+// -inline}`, `scroll-padding{,-block,-inline}` SHORTHANDS, which
+// ShorthandRegistry.kt expands to longhands before the longhand parser runs,
+// plus the three CSS 2 aural properties speak-header / -numeral /
+// -punctuation, which no IR class models) together with nine unreachable
+// Config/Extractor/Applier triplets behind them.
+//
+// This guard closes the direction `unclaimedAnywhere` never looked at:
+// every name a platform DECLARES must exist in the IR catalogue.
+//
+// SCOPE — it runs over declaration files that are an explicit, complete,
+// static list of claimed IR type names. Today that is the web engine's
+// `migratedProperties` set. Compose is excluded because it has no static
+// list at all (extractors call `PropertyRegistry.migrated(...)` at
+// class-load time), and the SwiftUI registry is excluded because its set is
+// only partially static — several groups are union-ed in from
+// `{Group}Property.names` lists elsewhere. (Its one phantom, `BorderColor`
+// at PropertyRegistry.swift:83 / BorderSideExtractor.swift:25, was dropped
+// by the retro P2c seam patch; the partial-static shape is what still keeps
+// iOS off this list.) Both are tracked as follow-ups.
+// CONTRACT for a listed file: every single-or-double-quoted PascalCase token
+// in it is a claimed IR type name, so claims are never written as anything
+// else (comments here use backticks, not quotes).
+const REGISTRY_DECLARATIONS = [
+  { id: 'web', file: 'runtimes/web/src/engine/PropertyRegistry.ts' },
+];
+
+// Returns { declared: {id: count}, phantoms: [{id, file, name}] }.
+function scanRegistryDeclarations(irNames) {
+  const declared = {};
+  const phantoms = [];
+  for (const reg of REGISTRY_DECLARATIONS) {
+    const src = readFileSync(join(REPO, reg.file), 'utf8');
+    // Same token shape as scrapePlatform, but WITHOUT the dictionary filter —
+    // that filter is precisely what hides a phantom.
+    const names = [
+      ...new Set((src.match(/["'][A-Z][A-Za-z0-9]*["']/g) || []).map((t) => t.slice(1, -1))),
+    ];
+    declared[reg.id] = names.length;
+    for (const n of names) if (!irNames.has(n)) phantoms.push({ id: reg.id, file: reg.file, name: n });
+  }
+  return { declared, phantoms };
+}
+
 // ── 3. Build the matrix ─────────────────────────────────────────────────
 const ir = extractIrProperties();
+const irNames = new Set(ir.map((p) => p.name));
+// Hard gate, in EVERY render mode: a declared name with no
+// `<Name>Property.kt` behind it can never appear on the wire, so the code
+// behind it is unreachable. Fail loudly rather than counting it as coverage.
+const registry = scanRegistryDeclarations(irNames);
+if (registry.phantoms.length > 0) {
+  console.error(
+    `\u2717 registry declares ${registry.phantoms.length} name(s) with no IR property class:`,
+  );
+  for (const p of registry.phantoms) console.error(`  - ${p.file}: '${p.name}'`);
+  console.error(
+    `  An IR type is the converter class name minus "Property" (${irNames.size} exist under`,
+  );
+  console.error(
+    '  converter/src/main/kotlin/app/irmodels/properties/). Shorthands are expanded by',
+  );
+  console.error(
+    '  ShorthandRegistry.kt before the longhand registry runs, so a shorthand name never',
+  );
+  console.error(
+    '  reaches the wire: delete the claim (and any triplet behind it), or add the IR model.',
+  );
+  process.exit(1);
+}
 const byCategory = {};
 for (const p of ir) (byCategory[p.category] ??= []).push(p.name);
 
@@ -266,6 +338,11 @@ if (mode === 'json') {
     totals: { ir: totalIr, ...platformTotals },
     realTotals: { ir: totalIr, ...realTotals },
     applierFiles, // raw dedicated-applier file count (incl. grouped appliers)
+    // §2d registry-declaration guard: how many IR type names each static
+    // registry DECLARES, and (always empty here — a non-empty scan exits 1
+    // above) the declared names with no `<Name>Property.kt` behind them.
+    registryDeclared: registry.declared,
+    registryPhantoms: registry.phantoms.map((p) => `${p.id}:${p.name}`),
     passed,
     unclaimedAnywhere: unclaimedAnywhere.map((p) => `${p.category}/${p.name}`),
     byCategory: rows,
@@ -283,7 +360,7 @@ if (mode === 'md') {
   lines.push('- **reg** (registered): the property\'s PascalCase IR type name appears as a quoted string anywhere under the platform engine root — a claim/registration, which counts facades, grouped `Set`s, comments and TODO strings the same as real renderers.');
   lines.push('- **real**: a dedicated applier file named exactly `<Name>Applier.<ext>` exists — the strict filesystem floor for "a renderer was authored for this property".');
   lines.push('');
-  lines.push('**real is a lower bound.** Grouped appliers (e.g. iOS `FlexboxApplier.swift`, Compose `LayoutApplier.kt`, web `ScrollMarginApplier.ts`) render several properties from one file whose basename matches at most one IR name, so the batched properties score reg-yes / real-no. The raw count of dedicated `*Applier` files (which includes those grouped files) is reported per platform below.');
+  lines.push('**real is a lower bound.** Grouped appliers (e.g. iOS `FlexboxApplier.swift`, Compose `LayoutApplier.kt`, web `PaddingApplier.ts`) render several properties from one file whose basename matches at most one IR name, so the batched properties score reg-yes / real-no. The raw count of dedicated `*Applier` files (which includes those grouped files) is reported per platform below.');
   lines.push('');
   lines.push(`**IR catalogue**: ${totalIr} properties across ${categories.length} categories.`);
   lines.push('');

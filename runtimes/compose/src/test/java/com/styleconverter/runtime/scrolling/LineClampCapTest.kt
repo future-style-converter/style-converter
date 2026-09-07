@@ -15,6 +15,7 @@ package com.styleconverter.runtime.scrolling
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertSame
@@ -233,5 +234,39 @@ class LineClampCapTest {
         val m = androidx.compose.ui.Modifier
         val out = OverflowApplier.applyOverflow(m, OverflowConfig(lineClampCapPx = 40f))
         assertTrue(out !== m)
+    }
+
+    // ==================== markerSuppressed: R3 twin of Swift's ============
+
+    @Test
+    fun `no-ellipsis and the empty string suppress the marker`() {
+        // block-ellipsis-023 / -024, verbatim wave49-final per-test-ir wires
+        // (the two-value grammar, css-overflow-4 §5.1; `no-ellipsis` §4.2).
+        assertTrue(LineClampCap.markerSuppressed(listOf(pair("LineClamp", """{"type":"lines","count":4,"ellipsis":{"type":"no-ellipsis"}}"""))))
+        assertTrue(LineClampCap.markerSuppressed(listOf(pair("LineClamp", """{"type":"lines","count":4,"ellipsis":{"type":"string","value":""}}"""))))
+    }
+
+    @Test
+    fun `drawn markers are not suppressed by the cap`() {
+        // Absent (initial `ellipsis`), `auto`, a non-empty string, `none`.
+        assertFalse(LineClampCap.markerSuppressed(listOf(pair("LineClamp", """{"type":"lines","count":4}"""))))
+        assertFalse(LineClampCap.markerSuppressed(listOf(pair("LineClamp", """{"type":"lines","count":4,"ellipsis":{"type":"auto"}}"""))))
+        assertFalse(LineClampCap.markerSuppressed(listOf(pair("LineClamp", """{"type":"lines","count":4,"ellipsis":{"type":"string","value":"…"}}"""))))
+        assertFalse(LineClampCap.markerSuppressed(listOf(pair("LineClamp", """{"type":"none"}"""))))
+        assertFalse(LineClampCap.markerSuppressed(emptyList()))
+    }
+
+    @Test
+    fun `the marker-less clamp still caps`() {
+        // -023's root: no font-size + first-family monospace → the UA 13px,
+        // × the composed 1.25 line box × 4 lines = 65. The cap is identical
+        // with or without the marker component — Compose needs no re-route
+        // (Text(maxLines, Clip) already discards without a glyph).
+        val props = listOf(
+            pair("LineClamp", """{"type":"lines","count":4,"ellipsis":{"type":"no-ellipsis"}}"""),
+            pair("FontFamily", """["monospace"]""")
+        )
+        assertEquals(4, LineClampCap.linesCount(props))
+        assertEquals(65f, LineClampCap.capPx(props)!!, 0.01f)
     }
 }

@@ -13,10 +13,15 @@ harness-level hooks:
 3. **`CAPTURE_ANIMATION_TIME`** — freeze every animation at an absolute
    time t, paused (keyframe animations + transitions, §4).
 
-All three are *contracts for all three harnesses*; the **web harness is
-the reference implementation** today. Wiring the native harnesses is the
-platform lanes' job (tracked per-lane; the contract below is what they
-implement against).
+All three are *contracts for all three harnesses* and **all three
+harnesses implement them**: web is the reference implementation, iOS
+takes launch arguments / `SIMCTL_CHILD_*` env, and Android takes launch
+**intent extras** on `MainActivity` (`--es forceState`, `--ei
+captureWidth`, `--es animationTime`, wired in wave 7 / `e4d87c2c`; see
+`apps/android-harness/README.md` for the `adb` recipes and the logcat
+markers). Verification markers are part of the contract on every
+platform, and `test-all.sh` hard-fails a hooked Android run whose logcat
+marker is missing.
 
 ## 1. The `forceState` hook
 
@@ -42,7 +47,7 @@ exactly **one forced state per capture run**:
 | platform | transport | status |
 |---|---|---|
 | web | `?forceState=<state>` query param on the capture URL (`?mode=capture&forceState=active`); `CAPTURE_FORCE_STATE=<state>` env on `apps/web-harness/capture-screenshots.mjs` sets it | **reference implementation, wired end-to-end** — the capture screen (`CaptureGallery.tsx`) validates the value and stamps `data-force-state="<state>"` on every capture canvas; the harness renderer adds a `force-<state>` class to every component element, which twins the real pseudo-class on the SAME RuleBuilder rule (`runtimes/web/src/core/renderer/RuleBuilder.ts`) — identical declarations, identical specificity, so forced and real input resolve byte-identically |
-| Android | launch intent extra `forceState=<state>` on the harness activity; the capture screen passes it into the runtime's resolution entry point | platform lane |
+| Android | launch intent extra `--es forceState <state>` on `MainActivity` (`MainActivity.kt` `readForceStateExtra()` validates against the runtime-v1 condition set and passes it into the runtime's resolution entry point) | **wired** — logcat marker `Capture run config: forceState=…` (tag `ScreenshotCapture`) and the canvas test tag `capture-canvas-force-state-<state>`; `test-all.sh` HARD-FAILS a `CAPTURE_FORCE_STATE` run whose marker is missing |
 | iOS | launch argument `-forceState <state>` (or `FORCE_STATE` env — `SIMCTL_CHILD_FORCE_STATE=<state>` on the host shell flows through `xcrun simctl launch`, so `SIMCTL_CHILD_FORCE_STATE=active SKIP_ANDROID=1 SKIP_WEB=1 ./test-all.sh …` is the full recipe); `CaptureOverrides.swift` validates the value and the capture canvas publishes the runtime's `forcedStyleStates` environment, which `StateResolver` layers per spec 06 §3. Marker: the canvas accessibility identifier reads `force-state-<state>` on a forced run (`capture-canvas` otherwise) and the capture screen logs `[Capture] forceState=…` | **wired** |
 
 The DOM/view marker (`data-force-state` on web, an equivalent test tag
@@ -89,7 +94,7 @@ historical capture path — committed baselines were all captured at 390.
 | platform | wiring | status |
 |---|---|---|
 | web | `CAPTURE_WIDTH` env read by `capture-screenshots.mjs` (viewport width + `&width=<px>` on the capture URL; `CaptureGallery.tsx` sizes the canvas from it) | **wired** |
-| Android | harness sets emulator `wm size <px>x844` + `CaptureCanvas` width from the same intent extra | platform lane |
+| Android | launch intent extra `--ei captureWidth <px>` on `MainActivity` (`MainActivity.kt` reads it with a 390 default and rejects non-positive values); the capture canvas sizes from it, so media min-/max-width evaluate against the render surface, not the device screen | **wired** — logcat marker `Capture run config: … captureWidth=…` |
 | iOS | `CaptureCanvas.swift` width from the `-captureWidth <px>` launch argument (or `CAPTURE_WIDTH` env via `SIMCTL_CHILD_CAPTURE_WIDTH`); the canvas publishes the width through `styleViewport`, which IS the surface `MediaQueryEvaluator` compares min-/max-width against | **wired** |
 
 `test-all.sh` needs **no changes**: the env var flows through the shell
@@ -101,20 +106,21 @@ to `capture-screenshots.mjs` automatically.
 # run 1 — default 390 px: the normal 3-platform gate + committed baselines
 ./test-all.sh fixtures/fidelity/dynamic/media-width.json
 
-# run 2 — 250 px: web-only until the native lanes wire CAPTURE_WIDTH
-SKIP_ANDROID=1 SKIP_IOS=1 CAPTURE_WIDTH=250 \
-  ./test-all.sh fixtures/fidelity/dynamic/media-width.json
+# run 2 — 250 px: all three platforms (every harness implements the override)
+CAPTURE_WIDTH=250 ./test-all.sh fixtures/fidelity/dynamic/media-width.json
 ```
+
+(On Android the 250 px run is a manual relaunch against the emulator
+`test-all.sh` leaves running with `EMULATOR_KEEP=1`:
+`adb shell am start -n com.styleconverter.test/.MainActivity --ei captureWidth 250`.)
 
 Gating rules:
 
 - The 390 px run gates cross-platform exactly like any other fixture
   (SSIM ≥ 0.95 on every platform pair; baselines at 390 only —
   `UPDATE_BASELINE=1` must never be combined with `CAPTURE_WIDTH`).
-- The 250 px run becomes a cross-platform gate once ≥2 platforms
-  implement the width override. Until then the 250 px **web** captures
-  are the reference PNGs the platform lanes compare their first native
-  250 px captures against.
+- The 250 px run **is** a cross-platform gate: this doc's own rule was
+  "once ≥2 platforms implement the width override", and all three do.
 - Do not mix widths inside one report: `compare-screenshots.mjs` pairs
   by filename, and a 390-vs-250 pairing is a guaranteed size-mismatch
   row. One width per run, one report per run.

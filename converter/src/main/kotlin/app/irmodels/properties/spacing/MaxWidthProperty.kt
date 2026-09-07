@@ -36,7 +36,7 @@ data class MaxWidthProperty(
         @SerialName("fit-content")
         data class FitContent(val maxSize: IRLength?) : MaxValue
 
-        // css-values-5 §10.1 calc-size (wave 42 lane W3) — same wire shape as
+        // css-values-5 §11 calc-size (wave 42 lane W3) — same wire shape as
         // the MinMaxValue/WidthValue twins (see MinWidthProperty.CalcSize for
         // the polymorphic-encoding note). Typed so max-width/max-height
         // declarations reach the web runtime for verbatim browser replay;
