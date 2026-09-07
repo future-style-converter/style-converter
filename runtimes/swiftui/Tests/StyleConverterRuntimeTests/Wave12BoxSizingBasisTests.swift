@@ -18,7 +18,7 @@
 //         the full 100×100 padding box.
 //
 //  2. INHERITED WRITING-MODE THREADING: `writing-mode` is
-//     Inherited: yes (css-writing-modes-4 §3.1) but was absent from
+//     Inherited: yes (css-writing-modes-4 §3.2) but was absent from
 //     InheritedText.inheritedTypes, AND the fragmentPlan call site read
 //     it through the typography aggregate (nil whenever writing-mode is
 //     the only typography signal — WritingModeApplier never flips
@@ -291,7 +291,7 @@ final class Wave12BoxSizingBasisTests: XCTestCase {
 
     // MARK: - 2. Inherited writing-mode threading
 
-    /// `writing-mode` flows parent → child (css-writing-modes-4 §3.1
+    /// `writing-mode` flows parent → child (css-writing-modes-4 §3.2
     /// Inherited: yes): the InheritedText channel must carry it, and the
     /// merged list must expose it to WritingModeExtractor — the exact
     /// read the fragmentPlan call site now performs.

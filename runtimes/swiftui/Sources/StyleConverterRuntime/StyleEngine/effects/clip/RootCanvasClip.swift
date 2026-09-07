@@ -8,7 +8,7 @@
 //  ── THE DEFECT (measured) ─────────────────────────────────────────────
 //  css-masking-1 §5: a non-`none` `clip-path` clips the element AND its
 //  descendants. On the DOCUMENT element that covers the whole page — the
-//  background css-backgrounds-3 §2.11.2 propagates to the canvas included,
+//  background css-backgrounds-3 §2.11.1 propagates to the canvas included,
 //  which the fxtf compositing §rootgroup / §pagebackdrop chain composites
 //  through the root's own group. The WPT test says it outright in its
 //  `meta name=assert`: "Clip-path on the document element applies to the
@@ -82,8 +82,14 @@ public enum RootCanvasClip {
         // it on the element's own box for absolutely positioned elements, it
         // is not a subtree clip, so it is not the document-element clip this
         // file is about.
+        // Spelled `nil` / `.some(.none)` (retro R5, audit A6#4): on an
+        // Optional<ClipShape> a bare `.none` is Optional.none — the compiler
+        // warned it was "assuming Optional<ClipShape>.none" — and until
+        // ClipExtractor produced a real ClipShape.none the second pattern
+        // was unreachable. Both halves of the contract are now live:
+        // unset (nil) and explicit `clip-path: none` are each no page clip.
         switch cfg.shape {
-        case .none, .some(.none), .some(.url(_)):
+        case nil, .some(.none), .some(.url(_)):
             return nil
         default:
             return cfg

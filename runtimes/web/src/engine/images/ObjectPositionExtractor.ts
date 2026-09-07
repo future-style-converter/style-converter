@@ -1,5 +1,5 @@
 // ObjectPositionExtractor.ts — folds IR `ObjectPosition` into a CSS
-// `<position>` string (css-images-3 §5.2).
+// `<position>` string (css-images-3 §4.3.1).
 //
 // WAVE-36 LANE M1 — WHY THIS IS NO LONGER `keywordOrRaw`. The IR value for
 // object-position is NOT a flat keyword: ObjectPositionProperty.kt emits a

@@ -77,7 +77,7 @@ final class Wave18CleanupParityTests: XCTestCase {
     }
 
     func testCalcChPlusPxUsesTheChPinTable() {
-        // Unmeasured ch → the css-values-4 §6.1.3 0.5em assumption:
+        // Unmeasured ch → the css-values-4 §6.1.1 0.5em assumption:
         // 2×8 + 4 = 20 (the Compose-side full resolution the skeptic saw).
         XCTAssertEqual(px(.calc(expression: "calc(2ch + 4px)"), ctx)!, 20, accuracy: 1e-6)
         // Measured advance wins — 2×10 + 4 = 24, the exact Compose pin

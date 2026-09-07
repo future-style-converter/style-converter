@@ -17,7 +17,7 @@
 //  inter-div space against the ref's 46 (measured Android capture).
 //
 //  ## Why em — and ONLY em — is statically resolvable here
-//  css-values-4 §5.1.1: `em` resolves against the element's OWN computed
+//  css-values-4 §6.1.1: `em` resolves against the element's OWN computed
 //  font-size (except on `font-size` itself, where it is the inherited one).
 //  For a margin the base is therefore the element's own font-size — and
 //  FontSize rides the SAME property list this classifier already reads, so
@@ -68,7 +68,7 @@ enum StaticEmMargin {
     static let uaDefaultPx: CGFloat = 16
 
     /// The component's OWN font-size in px — the em base of css-values-4
-    /// §5.1.1 — or nil when a DECLARED size is not statically resolvable.
+    /// §6.1.1 — or nil when a DECLARED size is not statically resolvable.
     ///
     /// Resolution ladder (wave 45, H0 — the UAElementFontRule.emBasePx
     /// ladder, applied to the composed-root lane):
@@ -127,7 +127,7 @@ enum StaticEmMargin {
         // is deliberately left unresolved.
         guard case .relative(let value, let unit, let pxFallback) = v,
               unit == .em else { return nil }
-        // E2 — a converter-resolved px wins (css-values-4 §5.1.1 already
+        // E2 — a converter-resolved px wins (css-values-4 §6.1.1 already
         // applied upstream); negatives stay out of the §8.3.1 scope.
         if let fb = pxFallback { return fb >= 0 ? CGFloat(fb) : nil }
         // E4 — no own font-size ⇒ nothing honest to multiply against.

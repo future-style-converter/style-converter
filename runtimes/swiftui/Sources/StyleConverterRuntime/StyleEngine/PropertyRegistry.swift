@@ -5,10 +5,12 @@
 // extractor functions once they are migrated out of the monolithic
 // `StyleBuilder.build(from:)` path.
 //
-// In Phase 0 this registry is intentionally empty: every property still flows
-// through the legacy `StyleBuilder`, and `isLegacy(_:)` returns `true` for
-// every input. Future phases will add entries to `migrated` and wire real
-// extractors here, without forking the renderer dispatch.
+// In Phase 0 this registry was intentionally empty: every property flowed
+// through the legacy `StyleBuilder`. Later phases filled `migrated`, which the
+// renderer consults DIRECTLY (`PropertyRegistry.migrated.contains`, see
+// StyleBuilder.swift) — the `isLegacy(_:)` / `migratedCount` wrappers that
+// once stood here had no caller and were deleted (retro P2a / round-2 F2,
+// finding A6#8; the note at the end of this file records why).
 //
 // See `CLAUDE.md` → *Per-property contract* for the migration rules.
 
@@ -31,9 +33,9 @@ enum PropertyRegistry {
     /// and into dedicated `{Property}Extractor.swift` files under
     /// `StyleEngine/{category}/`. Empty in Phase 0; filled by later phases.
     ///
-    /// When a property is added here, the renderer will route its IR through
-    /// the corresponding extractor instead of the legacy `StyleBuilder` path.
-    /// Until then, `isLegacy(_:)` returns `true` for every property type.
+    /// When a property is added here, the renderer routes its IR through
+    /// the corresponding extractor instead of the legacy `StyleBuilder` path
+    /// (StyleBuilder.swift tests membership in this set directly).
     static let migrated: Set<String> = Set<String>([
         // Phase 2 — spacing family. Padding/Margin physical+logical, Gap
         // longhands, MarginTrim. See runtimes/swiftui/.../StyleEngine/spacing/.
@@ -80,7 +82,12 @@ enum PropertyRegistry {
         // only miscellanies (BoxDecorationBreak, CornerShape, BorderBoundary).
         // See runtimes/swiftui/.../StyleEngine/borders/ and effects/shadow/.
         // Sides — shorthand longhands + 4 physical × 3 + 4 logical × 3 = 27.
-        "BorderWidth", "BorderColor", "BorderStyle",
+        // A6#9: `BorderColor` is NOT listed — no `BorderColorProperty.kt`
+        // exists in the IR catalogue (BorderColorExpander expands the
+        // `border-color` shorthand to the four side longhands before the
+        // longhand parser runs), so the name can never reach the wire.
+        // BorderWidth/BorderStyle DO have IR classes and stay.
+        "BorderWidth", "BorderStyle",
         "BorderTopWidth", "BorderTopColor", "BorderTopStyle",
         "BorderRightWidth", "BorderRightColor", "BorderRightStyle",
         "BorderBottomWidth", "BorderBottomColor", "BorderBottomStyle",
@@ -140,11 +147,13 @@ enum PropertyRegistry {
     .union(UnsupportedFontMetaProperty.set)
     .union(UnsupportedSpacingProperty.set)
     // Phase 7 — layout family (flexbox + grid + position + advanced +
-    // root). Scaffold-only in step 1: the 60 names below are registered
-    // so the renderer ledger reflects ownership, but `LayoutExtractor`
-    // currently returns nil and `LayoutApplier` is identity. Real
-    // extractors/appliers land in Phase 7 steps 2-5. See
-    // runtimes/swiftui/.../StyleEngine/layout/LayoutExtractor.swift.
+    // root). The 60 names below are registered so the renderer ledger
+    // reflects ownership; `LayoutExtractor` folds them into one
+    // `LayoutAggregate` that ComponentRenderer consumes directly at
+    // container-construction time. Retro P2b (A6#10/A6#3): the
+    // "LayoutApplier is identity" half of this note named a scaffold enum
+    // with no caller — deleted, so the aggregate's only consumer is now
+    // the renderer. See StyleEngine/layout/LayoutExtractor.swift.
     .union(LayoutProperty.set)
     // Phase 8 — transforms, clip, visibility/overflow, filter, mask.
     // Each enum centralises its owned property-type names so the
@@ -156,8 +165,14 @@ enum PropertyRegistry {
     .union(MaskProperty.set)
     // Phase 9 — animations + transitions + view-timeline + view-transition
     // + timeline-scope (22 owned names) and the 3 scroll-timeline longhands.
-    // Extractors live at StyleEngine/animations/ and StyleEngine/scrolling/;
-    // appliers are identity in this phase (see AnimationsApplier.swift).
+    // Extractors live at StyleEngine/animations/ and StyleEngine/scrolling/.
+    // Execution is NOT a view modifier: keyframes/transitions run as a
+    // property-space pass (AnimationResolver + KeyframeInterpolator +
+    // TransitionResolver) ahead of StyleBuilder — see AnimationsConfig.swift.
+    // Retro P2b (A6#10): the identity `AnimationsApplier` /
+    // `ScrollTimelineApplier` modifiers this note pointed at had no call
+    // site (their `.engineAnimations` / `.engineScrollTimeline` chain
+    // helpers were never attached) and were deleted.
     .union(AnimationsProperty.set)
     .union(ScrollTimelineProperty.set)
     // Phase 10 — long-tail sweep (~22 categories, ~150 property names).
@@ -166,7 +181,10 @@ enum PropertyRegistry {
     // because SwiftUI has no analog; a small SwiftUI-capable subset
     // (scroll-snap, overscroll-behavior, pointer-events:none, user-
     // select:none) is flagged in the per-category applier headers for a
-    // future wiring pass. See examples/properties/README-phase10.md.
+    // future wiring pass. The per-category Phase-10 fixtures are
+    // `fixtures/properties/<category>/longtail.json`; the index this line
+    // used to cite (`examples/properties/README-phase10.md`) was deleted by
+    // the 2026-07-08 restructure, commit 02e4c457 (retro P2e).
     .union(ScrollingProperty.set)
     .union(SvgProperty.set)
     .union(UnsupportedSpeechProperty.set)
@@ -199,24 +217,14 @@ enum PropertyRegistry {
 
     // MARK: - Query helpers
 
-    /// Returns `true` when the given IR property type is still served by
-    /// the legacy `StyleBuilder`. The renderer uses this during transition
-    /// to decide whether to dispatch to `StyleBuilder.build(from:)` or to a
-    /// migrated extractor. In Phase 0 this is always `true`.
-    ///
-    /// - Parameter propertyType: The IR property `type` field (e.g. `"width"`,
-    ///   `"background-color"`). Compared against `migrated` verbatim.
-    /// - Returns: `true` if the property has not been migrated yet.
-    static func isLegacy(_ propertyType: String) -> Bool {
-        // `contains` is O(1) on `Set<String>`; invert because `migrated` is
-        // the positive set.
-        !migrated.contains(propertyType)
-    }
-
-    /// Count of migrated properties — exposed for the coverage report /
-    /// rollout dashboard. Zero in Phase 0.
-    static var migratedCount: Int {
-        // Set.count is O(1).
-        migrated.count
-    }
+    // (Retro sweep P2a, finding A6#8) `isLegacy(_:)` and `migratedCount`
+    // stood here and had ZERO references in Sources/, Tests/ and
+    // apps/ios-harness. Their doc comments described consumers that do not
+    // exist: the renderer decides dispatch with `PropertyRegistry.migrated
+    // .contains(...)` directly (StyleBuilder.swift), there is no "rollout
+    // dashboard", and the coverage report (tools/visual/coverage-audit.mjs)
+    // scrapes FILES, never a runtime count. Both are deleted; the `migrated`
+    // set they wrapped is untouched and still the live dispatch input.
+    // The web twin of `migratedCount` was removed for the same reason
+    // (A6#13, runtimes/web/src/engine/PropertyRegistry.ts).
 }

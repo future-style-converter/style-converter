@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.position
 
 // Wave 22 (B-RC3) — JVM pins for END-EDGE anchoring of out-of-flow boxes
-// (css-position-3 §3.5.3). Pure over the IR + plain arithmetic, so the whole
+// (css-position-3 §4.3). Pure over the IR + plain arithmetic, so the whole
 // A1–A8 table is pinnable without Robolectric (the suite's standing
 // constraint — same style as CanvasRootHoistTest).
 //
@@ -50,7 +50,7 @@ class EndInsetAnchorTest {
 
     @Test
     fun `A2 over-constrained insets keep the START anchor — left-top wins in LTR`() {
-        // css-position-3 §3.5.3: with both sides declared the LTR containing
+        // css-position-3 §4.3: with both sides declared the LTR containing
         // block ignores `right`/`bottom`, which the existing start anchor +
         // positive offset already render.
         val c = config(
@@ -147,7 +147,7 @@ class EndInsetAnchorTest {
     fun `A5 a non-zero end inset composes with the applier's negated offset`() {
         // `right: 20` on a 100px box in a 390px containing block: the anchor
         // gives 290 and PositionApplier adds −20 → 270 = cb − box − right,
-        // the css-position-3 §3.5.3 used position.
+        // the css-position-3 §4.3 used position.
         val anchored = EndInsetAnchor.placePx(390f, boxPx = 100)
         val c = config(listOf(prop("Position", "\"ABSOLUTE\""), inset("Right", 20.0)))
         assertEquals(-20f, c.offsetX.value)
@@ -182,7 +182,7 @@ class EndInsetAnchorTest {
 
     @Test
     fun `A7 a relative box with only bottom is a displacement, never an end anchor`() {
-        // css-position-3 §3.4: on a relatively positioned box an inset
+        // css-position-3 §3.3: on a relatively positioned box an inset
         // displaces the box from its STATIC position and reserves the
         // original flow space — it is not a containing-block anchor. The
         // live corpus witness is css-backgrounds/background-334's root __2

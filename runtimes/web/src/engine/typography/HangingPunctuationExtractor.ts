@@ -1,6 +1,6 @@
 // HangingPunctuationExtractor.ts — folds `HangingPunctuation` IR properties into a HangingPunctuationConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { HangingPunctuationConfig, HANGING_PUNCTUATION_PROPERTY_TYPE, HangingPunctuationPropertyType } from './HangingPunctuationConfig';
 import { kwList } from './_shared';

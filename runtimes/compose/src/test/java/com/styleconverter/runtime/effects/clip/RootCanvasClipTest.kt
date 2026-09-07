@@ -107,6 +107,19 @@ class RootCanvasClipTest {
         // clip-path is the root's own clip over its own subtree, so no
         // containment clause applies to it.
         val contained = rootProps() + prop("Contain", """["LAYOUT"]""")
-        assertNotNull(rootCanvasClipConfig(documentElementRoots(contained)))
+        val config = rootCanvasClipConfig(documentElementRoots(contained))
+        // Retro R10 (A8#1): "does not block" must mean the SAME clip is
+        // resolved — a config with `hasClipPath == false` (the audit's
+        // mutation M6, which returned an empty ClipPathConfig whenever a
+        // Contain leaf was present) is non-null yet paints no clip, so the
+        // old not-null assertion could not see the block it claimed to rule
+        // out. Pin the decision AND the geometry against the uncontained bag.
+        assertNotNull("containment must not suppress the root clip", config)
+        assertTrue(config!!.hasClipPath)
+        // Identical polygon to the uncontained resolve — the six wire vertices
+        // of the document-element "L", untouched by the Contain leaf.
+        val uncontained = rootCanvasClipConfig(documentElementRoots(rootProps()))!!
+        assertEquals(uncontained.shape, config.shape)
+        assertEquals(6, (config.shape as ClipShape.Polygon).points.size)
     }
 }

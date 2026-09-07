@@ -7,4 +7,3 @@
 export interface FlexBasisConfig { value?: string; }
 
 export const FLEX_BASIS_PROPERTY_TYPE = 'FlexBasis' as const;
-export type FlexBasisPropertyType = typeof FLEX_BASIS_PROPERTY_TYPE;

@@ -5,4 +5,3 @@
 // Config mirrors the ColumnRule{Color,Style,Width}Config shape exactly: one
 // already-serialised CSS string, `undefined` when the IR carried no value.
 export interface RowRuleColorConfig { value?: string }
-export const ROWRULECOLOR_PROPERTY_TYPE = 'RowRuleColor' as const;

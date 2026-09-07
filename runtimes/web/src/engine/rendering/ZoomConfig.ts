@@ -20,4 +20,3 @@
 //                    silently rewrite it)
 // `undefined` = no Zoom property in the IR, so nothing is emitted.
 export interface ZoomConfig { value?: string }
-export const ZOOM_PROPERTY_TYPE = 'Zoom' as const;

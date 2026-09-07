@@ -1,6 +1,6 @@
 // BaselineShiftExtractor.ts — folds `BaselineShift` IR properties into a BaselineShiftConfig.
 // Family: baseline-shift.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { BaselineShiftConfig, BASELINE_SHIFT_PROPERTY_TYPE, BaselineShiftPropertyType } from './BaselineShiftConfig';
 import { kwLower, lengthCss, percentCss } from './_shared';

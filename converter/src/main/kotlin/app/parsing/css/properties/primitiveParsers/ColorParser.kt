@@ -439,7 +439,10 @@ object ColorParser {
         val inner = value.trim().removePrefix("color-mix(").removeSuffix(")").trim()
 
         // Split by comma, respecting nested parentheses
-        val parts = splitByComma(inner)
+        // A6#14: was a private `splitByComma` byte-identical to
+        // AnimationTimelinePropertyParser's; both now use the shared untrimmed
+        // comma policy (TokenizationUtils.splitByCommaRaw, same package).
+        val parts = TokenizationUtils.splitByCommaRaw(inner)
         if (parts.size < 2) return IRColor(IRColor.ColorRepresentation.Named(value), null)
 
         // Parse "in <color-space> [<hue-method>]"
@@ -486,7 +489,7 @@ object ColorParser {
      */
     private fun parseLightDark(value: String): IRColor {
         val inner = value.trim().removePrefix("light-dark(").removeSuffix(")").trim()
-        val parts = splitByComma(inner)
+        val parts = TokenizationUtils.splitByCommaRaw(inner)
 
         if (parts.size != 2) return IRColor(IRColor.ColorRepresentation.Named(value), null)
 
@@ -529,30 +532,6 @@ object ColorParser {
     /**
      * Split string by comma, respecting nested parentheses.
      */
-    private fun splitByComma(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var depth = 0
-        var current = StringBuilder()
-
-        for (char in value) {
-            when (char) {
-                '(' -> { depth++; current.append(char) }
-                ')' -> { depth--; current.append(char) }
-                ',' -> {
-                    if (depth == 0) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    } else {
-                        current.append(char)
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) result.add(current.toString())
-        return result
-    }
-
     /**
      * Parse color with optional percentage (e.g., "red 50%", "blue", "#ff0000 25%")
      */

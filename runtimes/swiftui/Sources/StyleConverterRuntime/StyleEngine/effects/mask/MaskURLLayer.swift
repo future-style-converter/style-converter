@@ -55,7 +55,7 @@ enum MaskURLLayer {
             return .transparent
         }
         // mask-mode: for a RASTER source the initial `match-source`
-        // resolves to `alpha` (css-masking-1 §7.4.3) — SwiftUI's
+        // resolves to `alpha` (css-masking-1 §7.2) — SwiftUI's
         // `.mask` reads exactly the view's alpha channel, so drawing
         // the image directly is the correct default with no conversion.
         // TODO(SVG): `match-source` resolves to LUMINANCE for <mask>
@@ -111,7 +111,7 @@ enum MaskURLLayer {
         case .repeatBoth: return BackgroundRepeatLayer(x: "repeat",    y: "repeat")
         case .noRepeat:   return BackgroundRepeatLayer(x: "no-repeat", y: "no-repeat")
         // Single-axis shorthands: `repeat-x` = repeat no-repeat,
-        // `repeat-y` = no-repeat repeat (css-backgrounds-3 §3.7).
+        // `repeat-y` = no-repeat repeat (css-backgrounds-3 §2.4).
         case .repeatX:    return BackgroundRepeatLayer(x: "repeat",    y: "no-repeat")
         case .repeatY:    return BackgroundRepeatLayer(x: "no-repeat", y: "repeat")
         // space/round run the real §3.7 gap/rescale arithmetic in

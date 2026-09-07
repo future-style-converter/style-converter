@@ -4,8 +4,8 @@ package com.styleconverter.runtime.color
 // GradientStopResolverTests.swift, wave 46 lane Y2 — same scenarios, same
 // reference pixels, so the two natives are pinned against each other).
 //
-// Pins the css-images-4 §3.4.3 stop pipeline (GradientStopResolver), the
-// css-color-4 §12 interpolation (GradientRamp + GradientColorMath) and
+// Pins the css-images-3 §3.4.3 / css-images-4 §3.5.3 stop pipeline (GradientStopResolver), the
+// css-color-4 §13 interpolation (GradientRamp + GradientColorMath) and
 // the `positionLength` / `interp` wire reads — the mechanisms behind the
 // wave-46 Android fails gradient-border-box / gradient-content-box
 // (android-ref 0.646: one ramp instead of 30px stripes) and the hsl
@@ -167,7 +167,7 @@ class GradientStopResolverTest {
 
     @Test
     fun `zero-period repeating is the average solid`() {
-        // css-images-3 §3.3.3's stated degenerate rendering.
+        // css-images-3 §3.3's stated degenerate rendering.
         val base = GradientStopResolver.fixup(
             listOf(stop(1f, 0f, 0f, pos = 0.5f), stop(0f, 0f, 1f, pos = 0.5f)),
             lengthPx = null)
@@ -288,7 +288,7 @@ class GradientStopResolverTest {
             GradientInterpolation.parse("in hsl longer hue"))
         assertEquals(interp(GradientInterpolation.Space.LCH, GradientInterpolation.HueMethod.DECREASING),
             GradientInterpolation.parse("in lch decreasing hue"))
-        // Hue method on a rectangular space is ungrammatical (§12.4).
+        // Hue method on a rectangular space is ungrammatical (§13.2).
         assertEquals(legacy, GradientInterpolation.parse("in oklab longer hue"))
         // Unsupported-but-valid space degrades to legacy (with a breadcrumb).
         assertEquals(legacy, GradientInterpolation.parse("in display-p3-linear"))
@@ -339,7 +339,7 @@ class GradientStopResolverTest {
         assertEquals(0.7f, g2.colorStops[0].declaredPosition!!, 1e-6f)
     }
 
-    // ── css-color-4 §12.5 hue arcs ───────────────────────────────────────
+    // ── css-color-4 §13.5 hue arcs ───────────────────────────────────────
 
     @Test
     fun `hue arc selection`() {
@@ -347,7 +347,7 @@ class GradientStopResolverTest {
         val lo = GradientInterpolation.HueMethod.LONGER
         val inc = GradientInterpolation.HueMethod.INCREASING
         val dec = GradientInterpolation.HueMethod.DECREASING
-        // Examples straight from the §12.5 tables (h1 = 0, h2 = 40).
+        // Examples straight from the §13.5 tables (h1 = 0, h2 = 40).
         assertEquals(0.0 to 40.0, GradientRamp.hueArc(0.0, 40.0, sh))
         assertEquals(360.0 to 40.0, GradientRamp.hueArc(0.0, 40.0, lo))
         assertEquals(0.0 to 40.0, GradientRamp.hueArc(0.0, 40.0, inc))

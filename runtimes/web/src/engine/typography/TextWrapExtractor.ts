@@ -1,6 +1,6 @@
 // TextWrapExtractor.ts — folds `TextWrap` IR properties into a TextWrapConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextWrapConfig, TEXT_WRAP_PROPERTY_TYPE, TextWrapPropertyType } from './TextWrapConfig';
 import { kwLower } from './_shared';

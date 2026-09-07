@@ -135,13 +135,13 @@ object CssFontFamilyResolver {
         // walking past it into the platform default.
         if (name == "inter") return InterFontFamily
 
-        // ── css-fonts-4 §12.1 generic families, exact matches.
+        // ── css-fonts-4 §2.1.5 generic families, exact matches.
         when (name) {
             "serif" -> return FontFamily.Serif
             "sans-serif" -> return FontFamily.SansSerif
             "monospace" -> return FontFamily.Monospace
             "cursive" -> return FontFamily.Cursive
-            // §12.2 system-ui / ui-* : the platform's UI faces. Compose
+            // §2.1.5 system-ui / ui-* : the platform's UI faces. Compose
             // exposes only Default (= the system UI font, Roboto on
             // Android) plus the three shaped generics. `ui-sans-serif` maps
             // to SansSerif, NOT Default — that is what the legacy
@@ -153,7 +153,7 @@ object CssFontFamilyResolver {
             "ui-sans-serif" -> return FontFamily.SansSerif
             "ui-serif" -> return FontFamily.Serif
             "ui-monospace" -> return FontFamily.Monospace
-            // §12.1 fantasy / math / emoji / fangsong have no Compose
+            // §2.1.5 fantasy / math / emoji / fangsong have no Compose
             // analogue; Android resolves them to the system default. These
             // are dark-stage-verified variants (FontFamily_Fantasy,
             // _Math, _Emoji, _Fangsong all baseline to the default face),

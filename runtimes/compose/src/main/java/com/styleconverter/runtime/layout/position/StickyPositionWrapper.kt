@@ -195,20 +195,3 @@ private fun calculateStickyOffset(
 
     return 0f
 }
-
-/**
- * Check if a component should use sticky position rendering.
- */
-fun PositionConfig.isSticky(): Boolean = type == PositionType.STICKY
-
-/**
- * Represents the current sticky state for debugging/styling purposes.
- */
-enum class StickyState {
-    /** Element is in normal flow (not yet sticky) */
-    NORMAL,
-    /** Element is currently stuck at its threshold */
-    STUCK,
-    /** Element has scrolled past its container (released from sticky) */
-    RELEASED
-}

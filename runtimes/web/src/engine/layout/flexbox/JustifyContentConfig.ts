@@ -9,4 +9,3 @@ export interface JustifyContentConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const JUSTIFYCONTENT_PROPERTY_TYPE = 'JustifyContent' as const;
-export type JustifyContentPropertyType = typeof JUSTIFYCONTENT_PROPERTY_TYPE;

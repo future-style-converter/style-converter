@@ -703,7 +703,7 @@ function buildTreeInheritanceExtended(rng) {
         ),
       },
     ),
-    // outline-color's initial is currentColor too (css-ui-4 §4.3) — same
+    // outline-color's initial is currentColor too (css-ui-4 §3.4) — same
     // assertion one hop up, on the outline channel.
     IE_CurrentColorOutline: box(
       { width: '280px', padding: '14px', color: '#c0392b', 'background-color': '#fdf2e9' },
@@ -1134,7 +1134,7 @@ function buildTokenFallbacks(rng) {
       saved: { properties: { width: '70px', height: '48px', 'background-color': 'var(--nope, #e67e22)' } },
       reference: { properties: { width: '70px', height: '48px', 'background-color': nextColor() } },
     }),
-    // Nested fallback chains (css-variables-1 §2.3): --mid IS defined, so
+    // Nested fallback chains (css-variables-1 §3): --mid IS defined, so
     // the chain must stop there (NOT fall through to the literal); the
     // sibling's fully-missing chain must reach the deepest literal.
     TK_NestedFallback: box({
@@ -1424,6 +1424,24 @@ function buildMotionKeyframes() {
   // time captures diff against; a reroll would invalidate baselines
   // without changing coverage.
   return {
+    // SEIZE-ONLY capture header (retro A11#16). A live-clock ./test-all.sh
+    // run of this fixture is MEANINGLESS: each platform samples the
+    // animation at a different phase, which measured 22 of 24 pairs
+    // "unexpected" at 0.79-0.93 — a harness artefact scored as a runtime
+    // divergence. test-all.sh reads this block and refuses a bare run with
+    // exit 2 plus the recipe pointer instead of producing that exit 4; a
+    // seized run (CAPTURE_ANIMATION_TIME + SIMCTL_CHILD_CAPTURE_ANIMATION_TIME,
+    // docs/DYNAMIC_CAPTURE.md §4) passes straight through. It is emitted
+    // HERE, not hand-added to the committed JSON, because the byte-identity
+    // pin in gen-fidelity.test.mjs regenerates every fixture and compares:
+    // a header only the committed file carries fails that test (it did).
+    // Shape is fixed at exactly {seizeOnly, recipe} — the envelope assertion
+    // in gen-fidelity.test.mjs rejects any other key, and test-all.sh
+    // honours only the boolean true.
+    _capture: {
+      seizeOnly: true,
+      recipe: 'tools/visual/animation-sweep.sh (CAPTURE_ANIMATION_TIME + SIMCTL_CHILD_CAPTURE_ANIMATION_TIME, docs/DYNAMIC_CAPTURE.md §4)',
+    },
     keyframes: {
       // Opacity fade: 0 → 1 over the run (t=0 invisible, t=mid half,
       // t=end solid — the §5 reference proof rides this set).

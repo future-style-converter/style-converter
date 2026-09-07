@@ -1,5 +1,5 @@
 // Outline — coverage for the 4 Outline* triplets.
-// Fixture: examples/properties/borders/outline.json.
+// Fixture: fixtures/properties/borders/outline.json.
 import { describe, it, expect } from 'vitest';
 import { extractOutlineWidth }  from '../../../src/engine/borders/outline/OutlineWidthExtractor';
 import { applyOutlineWidth }    from '../../../src/engine/borders/outline/OutlineWidthApplier';

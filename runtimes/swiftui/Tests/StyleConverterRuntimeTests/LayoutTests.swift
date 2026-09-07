@@ -299,10 +299,12 @@ final class LayoutTests: XCTestCase {
 
     // MARK: - Flexbox behavioural checks (Phase 7 step 2)
 
-    /// Parse-and-apply sanity checks for the 11 flexbox properties. Each
-    /// check constructs an IR property list, runs it through
-    /// FlexboxExtractor, and asserts the aggregate + derived
-    /// ContainerDecision match the CSS spec mapping.
+    /// Parse sanity checks for the 11 flexbox properties. Each check
+    /// constructs an IR property list, runs it through FlexboxExtractor,
+    /// and asserts the resulting LayoutAggregate matches the CSS spec
+    /// mapping — the aggregate being exactly what ComponentRenderer reads
+    /// to choose the container (retro P2b: the derived ContainerDecision
+    /// this doc named came from a scaffold with no caller, A6#3).
     ///
     /// Kept self-contained so the registry check in `run()` stays the
     /// single source of truth for coverage — `runFlexbox()` only cares
@@ -339,15 +341,26 @@ final class LayoutTests: XCTestCase {
             f.append("Display NONE did not resolve to .none")
         }
 
-        // ── FlexDirection → ContainerDecision axis (4 cases) ────────────
-        let rowAxis = axisFor(direction: kw("ROW"))
-        if rowAxis != .horizontal { f.append("FlexDirection ROW axis != horizontal") }
-        let rrAxis  = axisFor(direction: kw("ROW_REVERSE"))
-        if rrAxis  != .horizontal { f.append("FlexDirection ROW_REVERSE axis != horizontal") }
-        let colAxis = axisFor(direction: kw("COLUMN"))
-        if colAxis != .vertical   { f.append("FlexDirection COLUMN axis != vertical") }
-        let crAxis  = axisFor(direction: kw("COLUMN_REVERSE"))
-        if crAxis  != .vertical   { f.append("FlexDirection COLUMN_REVERSE axis != vertical") }
+        // ── FlexDirection keywords (4 cases) ────────────────────────────
+        // These used to assert through `FlexboxApplier.containerDecision`,
+        // which retro P2b deleted (A6#3: no production caller, and its
+        // `switch aggregate.display` was inverted). ComponentRenderer picks
+        // the stack axis from `aggregate.flexDirection` itself, so the
+        // aggregate field IS the production contract — assert on it. Axis
+        // per css-flexbox-1 §5.1: row/row-reverse are the inline axis
+        // (horizontal in horizontal-tb), column/column-reverse the block one.
+        if agg("FlexDirection", kw("ROW")).flexDirection != .row {
+            f.append("FlexDirection ROW did not resolve to .row")
+        }
+        if agg("FlexDirection", kw("ROW_REVERSE")).flexDirection != .rowReverse {
+            f.append("FlexDirection ROW_REVERSE did not resolve to .rowReverse")
+        }
+        if agg("FlexDirection", kw("COLUMN")).flexDirection != .column {
+            f.append("FlexDirection COLUMN did not resolve to .column")
+        }
+        if agg("FlexDirection", kw("COLUMN_REVERSE")).flexDirection != .columnReverse {
+            f.append("FlexDirection COLUMN_REVERSE did not resolve to .columnReverse")
+        }
 
         // ── FlexWrap → FlowLayout selection ─────────────────────────────
         // When flex-wrap: wrap is set alongside display: flex, the
@@ -435,43 +448,27 @@ final class LayoutTests: XCTestCase {
             f.append("AlignContent SPACE_BETWEEN did not resolve to .spaceBetween")
         }
 
-        // ── ContainerDecision end-to-end — display:flex + direction:row
-        //    + align-items:center should produce .stack(.horizontal) /
-        //    center alignment.
+        // ── Multi-property fold — display:flex + direction:row +
+        //    align-items:center must land in ONE aggregate, which is what
+        //    ComponentRenderer reads to build the container. (Retro P2b:
+        //    this block used to end at `FlexboxApplier.containerDecision`,
+        //    a scaffold with no production caller — A6#3.)
         var containerAgg = LayoutAggregate()
         FlexboxExtractor.extract(from: [
             IRProperty(type: "Display",       data: kw("FLEX")),
             IRProperty(type: "FlexDirection", data: kw("ROW")),
             IRProperty(type: "AlignItems",    data: kw("CENTER")),
         ], into: &containerAgg)
-        let dec = FlexboxApplier.containerDecision(for: containerAgg)
-        if case .stack(let ax) = dec.kind {
-            if ax != .horizontal {
-                f.append("ContainerDecision axis for row flex != horizontal")
-            }
-        } else {
-            f.append("ContainerDecision kind for display:flex was not .stack")
+        if containerAgg.display != .flex {
+            f.append("multi-property fold lost Display FLEX")
         }
-        if dec.alignment != .center {
-            f.append("ContainerDecision alignment for align-items:center != .center")
+        if containerAgg.flexDirection != .row {
+            f.append("multi-property fold lost FlexDirection ROW")
+        }
+        if containerAgg.alignItems != .center {
+            f.append("multi-property fold lost AlignItems CENTER")
         }
 
         return f
-    }
-
-    /// Helper — build a full (display:flex + FlexDirection) aggregate and
-    /// return the axis ContainerDecision picked. Keeps the direction
-    /// checks in `runFlexbox` readable.
-    private static func axisFor(direction: IRValue) -> ContainerAxis {
-        var a = LayoutAggregate()
-        FlexboxExtractor.extract(from: [
-            IRProperty(type: "Display",       data: .string("FLEX")),
-            IRProperty(type: "FlexDirection", data: direction),
-        ], into: &a)
-        let dec = FlexboxApplier.containerDecision(for: a)
-        if case .stack(let ax) = dec.kind { return ax }
-        // Fallback — non-.stack decision means the mapping broke; return
-        // a value that will fail the caller's equality check loudly.
-        return .horizontal
     }
 }

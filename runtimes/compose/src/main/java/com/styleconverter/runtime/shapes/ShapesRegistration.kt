@@ -18,8 +18,11 @@ import com.styleconverter.runtime.PropertyRegistry
 /**
  * Registers the 5 CSS Shapes / Exclusions IR properties under the
  * `shapes` owner. Float-wrap-around does not exist in Compose, so shape-
- * outside is parse-only in practice (ShapeApplier only emits a clip-path
- * approximation when the renderer happens to support it).
+ * outside is PARSE-ONLY: nothing reads the extracted config. (Retro sweep
+ * P2a: the "ShapeApplier only emits a clip-path approximation" caveat named
+ * a 482-line object with no caller, now deleted. `clip-path` itself is
+ * rendered by effects/clip/ClipPathApplier, which is unrelated to this
+ * registration.)
  */
 object ShapesRegistration {
 

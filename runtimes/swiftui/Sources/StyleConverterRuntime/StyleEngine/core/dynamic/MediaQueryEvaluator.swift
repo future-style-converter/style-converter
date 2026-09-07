@@ -12,7 +12,7 @@
 //                            px values only, inclusive boundaries
 //                            (mediaqueries-5 §4.2).
 //    prefers-color-scheme    light | dark, mapped to the platform
-//                            dark-mode signal (mediaqueries-5 §11.5 —
+//                            dark-mode signal (mediaqueries-5 §12.5 —
 //                            SwiftUI's colorScheme environment on iOS).
 //
 //  EVERYTHING else — `not`/`only` prefixes, comma query lists, range

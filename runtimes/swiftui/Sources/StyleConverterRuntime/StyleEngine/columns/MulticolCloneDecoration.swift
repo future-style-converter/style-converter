@@ -2,7 +2,7 @@
 //  MulticolCloneDecoration.swift
 //  StyleEngine/columns — wave-46 lane Y3.
 //
-//  The IR-side half of css-break-3 §5.2 `box-decoration-break: clone`
+//  The IR-side half of css-break-3 §5.4 `box-decoration-break: clone`
 //  for multicol fragmentation: reads a multicol child's declared
 //  decoration bands off its IR property list — CONSUMING the borders /
 //  padding trees' extractors read-only, never re-parsing their wire
@@ -42,7 +42,7 @@ enum MulticolCloneDecoration {
     /// folds the logical longhands onto their physical sides
     /// (css-logical-1 §4.1 — horizontal-tb, the fragmenter's contract).
     static func bands(for properties: [IRProperty]) -> MulticolCloneGeometry.Bands? {
-        // Slice (the css-break-3 §5.2 default) never builds bands — the
+        // Slice (the css-break-3 §5.4 default) never builds bands — the
         // S-table owns it.
         guard declaresClone(properties) else { return nil }
         // USED border widths (nil config = no border declared at all).

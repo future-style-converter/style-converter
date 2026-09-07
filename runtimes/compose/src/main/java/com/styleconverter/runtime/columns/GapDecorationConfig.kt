@@ -20,7 +20,7 @@ import androidx.compose.ui.graphics.Color
 
 /**
  * `<gap-rule-break>` — how a rule reacts to things crossing its gap
- * (css-gap-decorations-1 §5.1).
+ * (css-gap-decorations-1 §3.2).
  *
  * - [NORMAL]        CSS initial value: the rule is continuous along its
  *                   gap. Matches the converter lane's

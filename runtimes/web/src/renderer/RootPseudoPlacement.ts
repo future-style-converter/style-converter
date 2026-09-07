@@ -23,7 +23,7 @@
  * box width, to the right (iOS-web 0.8913 / Android-web 0.8960).
  *
  * ── THE SPEC RULE ──────────────────────────────────────────────────────
- * css-writing-modes-4 §3.2 propagates the BODY's `direction` to the
+ * css-writing-modes-4 §8.1 propagates the BODY's `direction` to the
  * viewport (that is the only channel by which a body declaration can reach
  * a box generated on the root), and css-contain-1 §3.1 removes a contained
  * body from that channel — "if this is the body element, the used values
@@ -165,7 +165,7 @@ export function rootPseudoPlacementStyle(component: IRComponent): CSSProperties 
 }
 
 /**
- * The vertical writing-mode wire values (css-writing-modes-4 §3.1) whose
+ * The vertical writing-mode wire values (css-writing-modes-4 §3.2) whose
  * block axis is HORIZONTAL — the axis the marginRight pin above cannot
  * reach. Uppercase enum spellings are what WritingModeProperty serializes
  * (`"VERTICAL_RL"` — see the corpus IR for contain-body-w-m-001); the
@@ -182,7 +182,7 @@ const VERTICAL_WRITING_MODES = new Set([
  * `null` for every other component (their emitted styles do not move).
  *
  * THE SPEC RULE (wave-48 lane W5, closing the block-axis gap named above):
- * css-writing-modes-4 §3.2 propagates the BODY's used `writing-mode` to
+ * css-writing-modes-4 §8.1 propagates the BODY's used `writing-mode` to
  * the viewport's principal writing mode, and css-contain-1 §3.1 removes a
  * contained body from that channel — same chain, one property over from
  * the `direction` case rootPseudoPlacementStyle handles. The WPT extractor
@@ -224,7 +224,7 @@ export function rootWritingModeSuppression(component: IRComponent): CSSPropertie
   // the viewport's role; every other element's writing-mode is its own.
   if (component.meta?.role !== 'body-root') return null;
   // Same containment gate: an UNCONTAINED body's writing-mode really does
-  // propagate (css-writing-modes-4 §3.2), so today's emission stands.
+  // propagate (css-writing-modes-4 §8.1), so today's emission stands.
   if (!containmentBlocksDirectionPropagation(component.properties)) return null;
   // Only a VERTICAL mode mis-stacks the root flow; horizontal-tb (or no
   // WritingMode leaf at all) needs no override — and returning null keeps

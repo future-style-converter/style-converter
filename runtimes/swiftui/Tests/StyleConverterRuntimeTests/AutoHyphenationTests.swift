@@ -16,7 +16,7 @@ import XCTest
 
 final class AutoHyphenationTests: XCTestCase {
 
-    // MARK: - §6.1: `auto` AND a language, both required
+    // MARK: - §5.3: `auto` AND a language, both required
 
     /// The tagged case: WPT css-text/hyphens-auto-010 (`<body lang="en">`
     /// + `hyphens: auto`), where the Chromium ref breaks `regu-/lation`.

@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.grid
 
 // Wave 19 (lane GRID-DISTRIBUTION): content-distribution of the grid TRACK
-// GROUP inside the grid container's content box (css-align-3 §5.3
+// GROUP inside the grid container's content box (css-align-3 §5.1
 // justify-content on grid tracks) + direction:rtl column mirroring
 // (css-grid-1 §7.1 / css-writing-modes: in RTL the inline START edge is the
 // RIGHT content edge, so column 1 sits rightmost and the whole group packs
@@ -33,7 +33,7 @@ object GridContentDistribution {
      *
      *  - [trackWidths] resolved track widths in logical order (the output of
      *    computeTrackWidths / GridTrackMath.columnWidths — sizing runs FIRST,
-     *    distribution only moves the already-sized group, css-align-3 §5.3).
+     *    distribution only moves the already-sized group, css-align-3 §5.1).
      *  - [gap]           the used column-gap between adjacent tracks.
      *  - [contentExtent] the grid content-box inline size the group aligns
      *    within. For an indefinite (fit-content) grid the caller passes the
@@ -44,7 +44,7 @@ object GridContentDistribution {
      *    physical edge is the inline start AND reverses the physical column
      *    order (logical positions are computed start-relative, then mirrored).
      *
-     * Overflow (leftover < 0) follows css-align-3 §5.3 default (unsafe)
+     * Overflow (leftover < 0) follows css-align-3 §5.1 default (unsafe)
      * semantics: end/center simply overflow the start/both side(s), and the
      * <content-distribution> fallbacks apply — space-between falls back to
      * start, space-around/space-evenly fall back to center.
@@ -117,7 +117,7 @@ object GridContentDistribution {
      * DisplayConfig keyword FlexRow/FlexColumn already consume) → the twin
      * math's [Justify]. FLEX_START also covers the parse-level fold of
      * start/left/normal (extractDisplayConfig's default arm), matching the
-     * css-align-3 §5.3 rule that `normal` behaves as `stretch`, which for a
+     * css-align-3 §5.1 rule that `normal` behaves as `stretch`, which for a
      * template of non-auto tracks distributes nothing = start.
      */
     fun justifyOf(

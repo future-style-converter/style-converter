@@ -42,7 +42,7 @@ enum ListMarkerType: String, Equatable {
     case hiraganaIroha, katakanaIroha
 }
 
-/// css-lists-3 §3.2 — where the marker box sits relative to the item's
+/// css-lists-3 §3.5 — where the marker box sits relative to the item's
 /// principal box. Resolved and carried; the GEOMETRY it should drive is
 /// B-RC3 part 3 and is deliberately deferred (see ComponentRenderer's
 /// marker branch for the exact deferral note).
@@ -60,7 +60,7 @@ struct ListMarkerConfig: Equatable {
 enum ListMarkerResolver {
 
     /// The UA-stylesheet marker family a list container hands its items —
-    /// HTML §15.3.9 (`ol { list-style-type: decimal }`,
+    /// HTML §15.3.7 (`ol { list-style-type: decimal }`,
     /// `ul, menu, dir { list-style-type: disc }`). `nil` for anything that
     /// is not a list container, which is how the renderer decides NOT to
     /// synthesise a marker at all.
@@ -87,7 +87,7 @@ enum ListMarkerResolver {
     /// arrive there and beat the container's UA default. That is
     /// backwards: css-cascade-4 §4.3 consults inheritance only when the
     /// cascade produced NO value for the element, and the UA sheet's
-    /// `ul { list-style-type: disc }` (HTML §15.3.9) IS a declaration on
+    /// `ul { list-style-type: disc }` (HTML §15.3.7) IS a declaration on
     /// the container element. The repair is NOT a fold reorder here — an
     /// author declaration on the container must still beat the UA rule
     /// (the live `marker-text-matches-armenian` `<ol>` declares `armenian`
@@ -146,7 +146,7 @@ enum ListMarkerResolver {
     /// `list-style-type: my-disc` / `my-circle` — cannot be resolved to
     /// its symbols. Keeping the container's UA default (`•` under a
     /// `<ul>`) is what those two @counter-style rules happen to define,
-    /// and is preferred over css-counter-styles-3 §7.1's "treat an
+    /// and is preferred over css-counter-styles-3 §2's "treat an
     /// UNDEFINED name as decimal" (they ARE defined — the wire lost the
     /// rule). Same decision as the Compose twin.
     static func markerType(from data: IRValue?) -> ListMarkerType? {

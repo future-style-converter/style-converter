@@ -2,7 +2,7 @@
 //  ChUnitMetrics.swift
 //  StyleEngine/spacing — wave-18 lane 2 (pin P1): the CSS `ch` unit basis.
 //
-//  css-values-4 §6.1.3 defines 1ch as the advance width of the glyph '0'
+//  css-values-4 §6.1.1 defines 1ch as the advance width of the glyph '0'
 //  in the element's font. The old resolver approximated ch as 1em, so
 //  `width: 63.1ch` at 16px monospace produced a ~1010px box instead of the
 //  ~advance-based ~600px (css-overflow block-ellipsis-001: wrong box width

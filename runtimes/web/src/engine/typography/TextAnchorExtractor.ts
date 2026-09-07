@@ -1,6 +1,6 @@
 // TextAnchorExtractor.ts — folds `TextAnchor` IR properties into a TextAnchorConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextAnchorConfig, TEXT_ANCHOR_PROPERTY_TYPE, TextAnchorPropertyType } from './TextAnchorConfig';
 import { kwLower } from './_shared';

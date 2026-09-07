@@ -20,7 +20,7 @@ package com.styleconverter.test.screenshot
 // a measured 92px of inter-div space against the ref's 46px.
 //
 // ## Why em — and ONLY em — is statically resolvable here
-// css-values-4 §5.1.1: `em` resolves against the element's OWN computed
+// css-values-4 §6.1.1: `em` resolves against the element's OWN computed
 // font-size (except on `font-size` itself, where it is the inherited one).
 // For a margin the base is therefore the element's own font-size — and
 // FontSize rides the SAME property list this classifier already reads, so
@@ -78,7 +78,7 @@ object StaticEmMargin {
 
     /**
      * The component's OWN font-size in px — the em base of css-values-4
-     * §5.1.1 — or null when a DECLARED size is not statically resolvable.
+     * §6.1.1 — or null when a DECLARED size is not statically resolvable.
      *
      * Resolution ladder (wave 45, H0 — mirrors the Swift
      * UAElementFontRule.emBasePx precedent):
@@ -154,7 +154,7 @@ object StaticEmMargin {
                 if (len.unit != LengthUnit.EM) {
                     null
                 } else {
-                    // E2 — a converter-resolved px wins (css-values-4 §5.1.1
+                    // E2 — a converter-resolved px wins (css-values-4 §6.1.1
                     // already applied upstream); else E3's multiplication
                     // against the component's own font size, or E4's bail.
                     val px = len.pxFallback

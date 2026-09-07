@@ -77,7 +77,18 @@ import StyleConverterRuntime
 ///    resolvers cannot disagree about which root represents the document
 ///    body.
 ///
-/// Pure over the decoded IR — unit-pinned in ComposedRootInlineFlowTests.
+/// Pure over the decoded IR — unit-pinned in
+/// apps/ios-harness/StyleConverterTestTests/ComposedRootInlineFlowTests.swift
+/// (retro R10, finding A4#5: that file did not exist when this sentence was
+/// written, and nothing anywhere referenced `composedRootInlineBoxes`; it
+/// now pins the two victim documents' atoms and runs on their verbatim
+/// vendored IR). CAVEAT, stated because the finding was about a false
+/// coverage claim: the `StyleConverterTestTests` bundle is not part of any
+/// documented sweep — it needs a booted simulator and
+/// tools/visual/doc-staleness-check.sh warns about the gap on every run —
+/// so the pin that EXECUTES on every wave is its Kotlin twin,
+/// apps/android-harness .../screenshot/ComposedRootInlineFlowTest.kt, which
+/// reads the same vendored payload.
 func composedRootInlineBoxes(_ roots: [IRComponent]) -> [InlineBlockAtom.RootBox?] {
     // B7's container read: does the document's body declare its own
     // line-height? Computed once — it is a property of the DOCUMENT, not of

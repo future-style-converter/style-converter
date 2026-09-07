@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 data class ClipPathConfig(
     val shape: ClipShape? = null,
     /**
-     * css-masking-1 §7.1 `<geometry-box>` — the REFERENCE BOX every
+     * css-masking-1 §5.1 `<geometry-box>` — the REFERENCE BOX every
      * `<basic-shape>` percentage / keyword / coordinate resolves against
      * (and, with no shape, the clip region itself). Defaults to
      * border-box, the spec's initial for an HTML element. Wave 46 (lane
@@ -54,7 +54,7 @@ data class ClipPathConfig(
 }
 
 /**
- * css-masking-1 §7.1 `<geometry-box>` keywords, reduced to the four that
+ * css-masking-1 §5.1 `<geometry-box>` keywords, reduced to the four that
  * exist for an element with a CSS layout box. The SVG-only `fill-box`,
  * `stroke-box` and `view-box` keywords map per the spec's used-value rule
  * ("for elements with an associated CSS layout box, fill-box → content-box,
@@ -237,7 +237,7 @@ sealed interface ClipShape {
     }
 
     /**
-     * css-masking-1 §7.1 `clip-path: <geometry-box>` with NO basic shape:
+     * css-masking-1 §5.1 `clip-path: <geometry-box>` with NO basic shape:
      * the clip region IS the reference box, including its corner curves
      * (a `border-radius: 50px` border-box clips to the circle; the
      * margin-box corners follow css-shapes-1 §4's outset formula — see

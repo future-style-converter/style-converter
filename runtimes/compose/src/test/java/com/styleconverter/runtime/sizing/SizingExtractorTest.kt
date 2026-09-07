@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.sizing
 
 // Unit tests for Phase 3 SizingExtractor. Each fixture shape was copy-pasted
-// out of examples/properties/sizing/*.json so parser drift would fail these
+// out of fixtures/properties/sizing/*.json so parser drift would fail these
 // tests before it reached the Applier.
 
 import com.styleconverter.runtime.core.types.LengthUnit

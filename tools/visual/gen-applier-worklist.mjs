@@ -231,7 +231,9 @@ const out = {
     // Which buckets have a runnable per-property fixture TODAY. Load-bearing
     // for wave planning: a verified/failing property with fixture:none cannot
     // be re-verified without re-authoring its fixture first (the campaign-era
-    // fixtures under examples/properties/perfect/ were pruned — even Scale,
+    // fixtures under examples/properties/perfect/ were pruned by the
+    // 2026-07-08 hard prune 1e0234f6 (#8) and nothing under fixtures/
+    // replaced them — even Scale,
     // one of the 3 real divergences, has no current fixture).
     fixtureByBucket: Object.fromEntries(
       Object.keys(byBucket).sort().map((b) => [b, {

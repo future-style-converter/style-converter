@@ -184,7 +184,7 @@ enum SpacingCalcEvaluator {
             // the percentBasePx tri-state in every context.
             case "%":   return v / 100.0
                              * (ctx.calcPercentBasisPx ?? Double(ctx.containingBlockWidth))
-            // Pin P1 — ch: measured '0' advance (css-values-4 §6.1.3), or
+            // Pin P1 — ch: measured '0' advance (css-values-4 §6.1.1), or
             // the same section's 0.5em assumption when unmeasured.
             case "ch":  return v * (ctx.chAdvancePx ?? 0.5 * ctx.fontSizePx)
             // Pins P2–P6 — spec/UA fallback constants (see resolver docs).

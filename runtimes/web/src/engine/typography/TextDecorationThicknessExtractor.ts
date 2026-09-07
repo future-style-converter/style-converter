@@ -1,6 +1,6 @@
 // TextDecorationThicknessExtractor.ts — folds `TextDecorationThickness` IR properties into a TextDecorationThicknessConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextDecorationThicknessConfig, TEXT_DECORATION_THICKNESS_PROPERTY_TYPE, TextDecorationThicknessPropertyType } from './TextDecorationThicknessConfig';
 import { lengthCss } from './_shared';

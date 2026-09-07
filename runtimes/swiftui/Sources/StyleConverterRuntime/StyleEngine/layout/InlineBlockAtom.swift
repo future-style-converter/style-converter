@@ -478,7 +478,7 @@ public enum InlineBlockAtom {
     /// The intrinsic fields are the raster's pixel dimensions, which ARE
     /// the CSS intrinsic size at the capture scale (the
     /// `DocumentImageRegistry.DecodedImage` contract), and the ratio is
-    /// css-images-3 §5.2's width ÷ height (nil for a degenerate raster).
+    /// css-images-3 §4.1's width ÷ height (nil for a degenerate raster).
     public struct ReplacedRootFacts: Equatable {
         public let sourceTag: String?
         public let intrinsicWidthPx: Double
@@ -800,7 +800,7 @@ public enum InlineBlockAtom {
         default: return nil
         }
         // Declared px → CONTENT px on each axis (border-box subtracts its
-        // band, floored at 0 per css-ui-3 §5's empty-content floor).
+        // band, floored at 0 per css-ui-3 §3.1's empty-content floor).
         func contentX(_ px: Double) -> Double { borderBox ? max(0, px - bands.x) : px }
         func contentY(_ px: Double) -> Double { borderBox ? max(0, px - bands.y) : px }
         // Axis reads: definite px, auto, or refuse.

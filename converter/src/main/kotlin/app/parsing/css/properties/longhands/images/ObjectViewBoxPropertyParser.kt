@@ -9,7 +9,7 @@ import app.parsing.css.properties.primitiveParsers.LengthParser
 import app.parsing.css.properties.primitiveParsers.PercentageParser
 
 /**
- * `object-view-box: none | <basic-shape-rect>` (css-images-4 §5.3).
+ * `object-view-box: none | <basic-shape-rect>` (css-images-5 §3.1).
  *
  * `<basic-shape-rect>` (css-shapes-1 §3.2) has THREE spellings —
  * `inset()`, `rect()` and `xywh()`. Only `inset()` was implemented, so the
@@ -71,7 +71,7 @@ object ObjectViewBoxPropertyParser : PropertyParser {
     /**
      * One `<length-percentage>` argument. Percentages keep the legacy raw-number
      * wire form (IRLengthPercentage.Percentage); `0` is a valid unitless
-     * <length> per css-values-4 §5.1 and LengthParser handles it.
+     * <length> per css-values-4 §6 and LengthParser handles it.
      */
     private fun lengthPercentage(token: String): IRLengthPercentage? {
         PercentageParser.parse(token)?.let { return IRLengthPercentage.Percentage(it) }

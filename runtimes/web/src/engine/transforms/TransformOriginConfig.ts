@@ -7,4 +7,3 @@
 
 export interface TransformOriginConfig { value?: string; }
 export const TRANSFORM_ORIGIN_PROPERTY_TYPE = 'TransformOrigin' as const;
-export type TransformOriginPropertyType = typeof TRANSFORM_ORIGIN_PROPERTY_TYPE;

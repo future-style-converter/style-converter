@@ -9,4 +9,3 @@ export interface FlexDirectionConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const FLEXDIRECTION_PROPERTY_TYPE = 'FlexDirection' as const;
-export type FlexDirectionPropertyType = typeof FLEXDIRECTION_PROPERTY_TYPE;

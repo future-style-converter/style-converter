@@ -9,4 +9,3 @@ export interface PositionAnchorConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const POSITIONANCHOR_PROPERTY_TYPE = 'PositionAnchor' as const;
-export type PositionAnchorPropertyType = typeof POSITIONANCHOR_PROPERTY_TYPE;

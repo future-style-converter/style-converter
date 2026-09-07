@@ -2,7 +2,7 @@ package com.styleconverter.runtime.spacing
 
 // ChUnitMetrics — wave-18 lane 2 (pin P1): the CSS `ch` unit basis.
 //
-// css-values-4 §6.1.3 defines 1ch as the advance width of the glyph '0' in
+// css-values-4 §6.1.1 defines 1ch as the advance width of the glyph '0' in
 // the element's font. This helper measures that advance with the SAME
 // platform text engine Compose ultimately shells out to (android.graphics
 // Paint/Typeface), so a `width: 63.1ch` box fits exactly 63 characters of
@@ -12,7 +12,7 @@ package com.styleconverter.runtime.spacing
 // JVM unit tests have no Android graphics runtime: android.graphics.Paint
 // is an unmocked stub that throws on construction. measure() catches every
 // throwable and returns null, which the resolver maps to the spec's own
-// 0.5em fallback (§6.1.3: "assumed to be 0.5em wide") — so the pure test
+// 0.5em fallback (§6.1.1: "assumed to be 0.5em wide") — so the pure test
 // suite exercises the fallback lane deterministically.
 
 import androidx.compose.ui.text.font.FontFamily

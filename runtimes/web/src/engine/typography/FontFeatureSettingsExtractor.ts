@@ -1,6 +1,6 @@
 // FontFeatureSettingsExtractor.ts — folds `FontFeatureSettings` IR properties into a FontFeatureSettingsConfig.
 // Family: font-feature-settings.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontFeatureSettingsConfig, FONT_FEATURE_SETTINGS_PROPERTY_TYPE, FontFeatureSettingsPropertyType } from './FontFeatureSettingsConfig';
 import { kwLower } from './_shared';

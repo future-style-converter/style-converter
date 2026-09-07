@@ -1,4 +1,4 @@
-// Pure fragment geometry for css-break-3 §5.2 `box-decoration-break: clone`
+// Pure fragment geometry for css-break-3 §5.4 `box-decoration-break: clone`
 // inside a multicol fragmentainer — the CLONE twin of FragmentGeometry's
 // slice S-table. No Compose imports on purpose: the JUnit suite pins this
 // math on the plain JVM, and the identical K-table is pinned on the iOS
@@ -8,7 +8,7 @@ package com.styleconverter.runtime.columns
 
 /**
  * Where each fragment of an over-tall `box-decoration-break: clone` child
- * lands, per css-break-3 §5.2: "each box fragment is independently wrapped
+ * lands, per css-break-3 §5.4: "each box fragment is independently wrapped
  * with the border, padding, and margin … the border-radius … applied to
  * each fragment independently. The background is drawn independently in
  * each fragment."
@@ -43,7 +43,7 @@ object MulticolCloneGeometry {
 
     /**
      * The child's own block-axis decoration bands, in px — what a clone
-     * fragment wraps its content slice with (css-break-3 §5.2).
+     * fragment wraps its content slice with (css-break-3 §5.4).
      */
     data class Bands(
         /** border-top + padding-top (block-start band under horizontal-tb). */

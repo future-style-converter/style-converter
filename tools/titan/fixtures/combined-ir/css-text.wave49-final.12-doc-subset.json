@@ -1,0 +1,1557 @@
+{
+  "irVersion": 2,
+  "minReaderVersion": 2,
+  "components": [
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-001__0-084",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-001__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-001__1-085",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-001__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-001__2-086",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-001__2",
+      "properties": [
+        {
+          "type": "Generic",
+          "data": {
+            "propertyName": "vertical-align",
+            "rawValue": "initial",
+            "_unmapped": true
+          }
+        },
+        {
+          "type": "PaddingTop",
+          "data": "initial"
+        },
+        {
+          "type": "PaddingRight",
+          "data": "initial"
+        },
+        {
+          "type": "PaddingBottom",
+          "data": "initial"
+        },
+        {
+          "type": "PaddingLeft",
+          "data": "initial"
+        },
+        {
+          "type": "MarginTop",
+          "data": {
+            "expr": "initial"
+          }
+        },
+        {
+          "type": "MarginRight",
+          "data": {
+            "expr": "initial"
+          }
+        },
+        {
+          "type": "MarginBottom",
+          "data": {
+            "expr": "initial"
+          }
+        },
+        {
+          "type": "MarginLeft",
+          "data": {
+            "expr": "initial"
+          }
+        },
+        {
+          "type": "BorderTopColor",
+          "data": {
+            "original": "initial"
+          }
+        },
+        {
+          "type": "BorderRightColor",
+          "data": {
+            "original": "initial"
+          }
+        },
+        {
+          "type": "BorderBottomColor",
+          "data": {
+            "original": "initial"
+          }
+        },
+        {
+          "type": "BorderLeftColor",
+          "data": {
+            "original": "initial"
+          }
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-001__3-087",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-001__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-002__0-088",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-002__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-002__1-089",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-002__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-002__2-090",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-002__2",
+      "properties": [
+        {
+          "type": "VerticalAlign",
+          "data": {
+            "type": "length",
+            "original": {
+              "v": 1,
+              "u": "EM"
+            }
+          }
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-002__3-091",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-002__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-003__0-092",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-003__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-003__1-093",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-003__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-003__2-094",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-003__2",
+      "properties": [
+        {
+          "type": "PaddingLeft",
+          "data": {
+            "px": 10
+          }
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-003__3-095",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-003__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-004__0-096",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-004__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-004__1-097",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-004__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-004__2-098",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-004__2",
+      "properties": [
+        {
+          "type": "MarginRight",
+          "data": {
+            "px": 10
+          }
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-004__3-099",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-004__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-005__0-100",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-005__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-005__1-101",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-005__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-005__2-102",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-005__2",
+      "properties": [
+        {
+          "type": "BorderRightWidth",
+          "data": {
+            "px": 10
+          }
+        },
+        {
+          "type": "BorderRightStyle",
+          "data": "SOLID"
+        },
+        {
+          "type": "BorderRightColor",
+          "data": {
+            "srgb": {
+              "r": 0,
+              "g": 0,
+              "b": 0,
+              "a": 0
+            },
+            "original": "transparent"
+          }
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-005__3-103",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-005__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-006__0-104",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-006__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-006__1-105",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-006__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-006__2-106",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-006__2",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "boundary-shaping__boundary-shaping-006__0__0-107",
+      "name": "boundary-shaping__boundary-shaping-006__0__0",
+      "properties": [],
+      "slot": {
+        "parent": "wpt__css-text__boundary-shaping__boundary-shaping-006__2-106"
+      },
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "boundary-shaping__boundary-shaping-006__0__0__0-108",
+      "name": "boundary-shaping__boundary-shaping-006__0__0__0",
+      "properties": [
+        {
+          "type": "VerticalAlign",
+          "data": {
+            "type": "keyword",
+            "value": "SUPER"
+          }
+        }
+      ],
+      "slot": {
+        "parent": "boundary-shaping__boundary-shaping-006__0__0-107"
+      },
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "boundary-shaping__boundary-shaping-006__0__0__0__0-109",
+      "name": "boundary-shaping__boundary-shaping-006__0__0__0__0",
+      "properties": [],
+      "slot": {
+        "parent": "boundary-shaping__boundary-shaping-006__0__0__0-108"
+      },
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-006__3-110",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-006__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-007__0-111",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-007__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-007__1-112",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-007__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-007__2-113",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-007__2",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "boundary-shaping__boundary-shaping-007__0__0-114",
+      "name": "boundary-shaping__boundary-shaping-007__0__0",
+      "properties": [
+        {
+          "type": "PaddingLeft",
+          "data": {
+            "px": 10
+          }
+        }
+      ],
+      "slot": {
+        "parent": "wpt__css-text__boundary-shaping__boundary-shaping-007__2-113"
+      },
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "boundary-shaping__boundary-shaping-007__0__0__0-115",
+      "name": "boundary-shaping__boundary-shaping-007__0__0__0",
+      "properties": [],
+      "slot": {
+        "parent": "boundary-shaping__boundary-shaping-007__0__0-114"
+      },
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "boundary-shaping__boundary-shaping-007__0__0__0__0-116",
+      "name": "boundary-shaping__boundary-shaping-007__0__0__0__0",
+      "properties": [
+        {
+          "type": "MarginRight",
+          "data": {
+            "px": 10
+          }
+        }
+      ],
+      "slot": {
+        "parent": "boundary-shaping__boundary-shaping-007__0__0__0-115"
+      },
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-007__3-117",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-007__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-008__0-118",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-008__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-008__1-119",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-008__1",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "of"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-008__2-120",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-008__2",
+      "properties": [
+        {
+          "type": "UnicodeBidi",
+          "data": "ISOLATE"
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "f",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-008__3-121",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-008__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "test"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ice"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-010__0-155",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-010__0",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "sans-serif"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "body-root"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-010__1-156",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-010__1",
+      "properties": [
+        {
+          "type": "TextAlign",
+          "data": "CENTER"
+        },
+        {
+          "type": "Direction",
+          "data": "RTL"
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "sans-serif"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "meta": {
+        "role": "ws-after"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-010__2-157",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-010__2",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "sans-serif"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ال"
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-010__3-158",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-010__3",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "sans-serif"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "سل",
+      "meta": {
+        "sourceTag": "span"
+      }
+    },
+    {
+      "id": "wpt__css-text__boundary-shaping__boundary-shaping-010__4-159",
+      "name": "wpt__css-text__boundary-shaping__boundary-shaping-010__4",
+      "properties": [
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 36,
+            "original": {
+              "type": "length",
+              "px": 36
+            }
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "sans-serif"
+          ]
+        },
+        {
+          "type": "LineHeight",
+          "data": {
+            "multiplier": 1.2,
+            "original": "normal"
+          }
+        }
+      ],
+      "text": "ام"
+    },
+    {
+      "id": "wpt__css-text__hyphens__hyphens-auto-001__0-232",
+      "name": "wpt__css-text__hyphens__hyphens-auto-001__0",
+      "properties": [],
+      "text": "Test passes if none of the words below are hyphenated.",
+      "meta": {
+        "sourceTag": "p"
+      }
+    },
+    {
+      "id": "wpt__css-text__hyphens__hyphens-auto-001__1-233",
+      "name": "wpt__css-text__hyphens__hyphens-auto-001__1",
+      "properties": [
+        {
+          "type": "Width",
+          "data": {
+            "type": "length",
+            "original": {
+              "v": 4,
+              "u": "CH"
+            }
+          }
+        },
+        {
+          "type": "Hyphens",
+          "data": "AUTO"
+        }
+      ],
+      "text": "implementation initialization realization hyphenation anticonstitutionnellement intergouvernementalisation dichlorodiphényltrichloroéthane honorificabilitudinitatibus Wiedervereinigung Rechtsschutzversicherungsgesellschaften"
+    },
+    {
+      "id": "wpt__css-text__hyphens__hyphens-manual-013__0-254",
+      "name": "wpt__css-text__hyphens__hyphens-manual-013__0",
+      "properties": [
+        {
+          "type": "BorderTopWidth",
+          "data": {
+            "px": 2
+          }
+        },
+        {
+          "type": "BorderRightWidth",
+          "data": {
+            "px": 2
+          }
+        },
+        {
+          "type": "BorderBottomWidth",
+          "data": {
+            "px": 2
+          }
+        },
+        {
+          "type": "BorderLeftWidth",
+          "data": {
+            "px": 2
+          }
+        },
+        {
+          "type": "BorderTopStyle",
+          "data": "SOLID"
+        },
+        {
+          "type": "BorderRightStyle",
+          "data": "SOLID"
+        },
+        {
+          "type": "BorderBottomStyle",
+          "data": "SOLID"
+        },
+        {
+          "type": "BorderLeftStyle",
+          "data": "SOLID"
+        },
+        {
+          "type": "BorderTopColor",
+          "data": {
+            "srgb": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "original": "black"
+          }
+        },
+        {
+          "type": "BorderRightColor",
+          "data": {
+            "srgb": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "original": "black"
+          }
+        },
+        {
+          "type": "BorderBottomColor",
+          "data": {
+            "srgb": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "original": "black"
+          }
+        },
+        {
+          "type": "BorderLeftColor",
+          "data": {
+            "srgb": {
+              "r": 0,
+              "g": 0,
+              "b": 0
+            },
+            "original": "black"
+          }
+        },
+        {
+          "type": "FontFamily",
+          "data": [
+            "monospace"
+          ]
+        },
+        {
+          "type": "FontSize",
+          "data": {
+            "px": 32,
+            "original": {
+              "type": "length",
+              "px": 32
+            }
+          }
+        },
+        {
+          "type": "Hyphens",
+          "data": "MANUAL"
+        },
+        {
+          "type": "Width",
+          "data": {
+            "type": "length",
+            "original": {
+              "v": 10,
+              "u": "CH"
+            }
+          }
+        }
+      ],
+      "text": "Deoxy­ribonucleic acid"
+    },
+    {
+      "id": "wpt__css-text__hyphens__hyphens-none-shy-on-2nd-line-001__0-268",
+      "name": "wpt__css-text__hyphens__hyphens-none-shy-on-2nd-line-001__0",
+      "properties": [
+        {
+          "type": "Hyphens",
+          "data": "NONE"
+        },
+        {
+          "type": "Width",
+          "data": {
+            "type": "length",
+            "original": {
+              "v": 10,
+              "u": "CH"
+            }
+          }
+        }
+      ],
+      "text": "12345678 Deoxy­ribo­nucleic Deoxy­ribo­nucleic 12345678"
+    }
+  ],
+  "fontFaces": [
+    {
+      "family": "test",
+      "src": "css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff"
+    }
+  ]
+}

@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.color
 
-// Pins css-backgrounds-3 §3.7 tile placement (BackgroundTileMath) — the
+// Pins css-backgrounds-3 §2.4 tile placement (BackgroundTileMath) — the
 // wave-9 space/round implementation behind ColorApplier's per-layer draw.
 
 import org.junit.Assert.assertEquals

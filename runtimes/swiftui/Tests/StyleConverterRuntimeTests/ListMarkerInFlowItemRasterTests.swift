@@ -194,7 +194,7 @@ final class ListMarkerInFlowItemRasterTests: XCTestCase {
         guard first.groups.count >= 2 else {
             return XCTFail(
                 "the first row rendered as ONE ink group \(first.groups) — the "
-                + "marker is overlapping the item's own text. css-lists-3 §3.2 "
+                + "marker is overlapping the item's own text. css-lists-3 §3.5 "
                 + "makes an `inside` marker the item's FIRST INLINE BOX: it "
                 + "precedes the text on the line, it does not paint over it. "
                 + "(This is exactly what dropping rendersInsideOverlay's "

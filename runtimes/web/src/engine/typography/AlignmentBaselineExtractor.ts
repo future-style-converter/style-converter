@@ -1,6 +1,6 @@
 // AlignmentBaselineExtractor.ts — folds `AlignmentBaseline` IR properties into a AlignmentBaselineConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { AlignmentBaselineConfig, ALIGNMENT_BASELINE_PROPERTY_TYPE, AlignmentBaselinePropertyType } from './AlignmentBaselineConfig';
 import { kwLower } from './_shared';

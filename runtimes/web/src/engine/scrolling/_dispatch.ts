@@ -1,5 +1,14 @@
-// _dispatch.ts — Phase-9 + Phase-10 scrolling dispatch (47 properties:
-// 3 scroll-timeline from Phase 9 + 44 long-tail from Phase 10).
+// _dispatch.ts — Phase-9 + Phase-10 scrolling dispatch (45 dispatched
+// properties: 3 scroll-timeline from Phase 9 + 42 long-tail from Phase 10).
+// The six scroll-margin / scroll-padding SHORTHANDS (scroll-margin,
+// -block, -inline and the scroll-padding trio) are expanded to their
+// physical/logical longhands by ScrollMargin*/ScrollPadding*Expander
+// (ShorthandRegistry.kt:91-96) before the longhand parser registry runs,
+// exactly as css-scroll-snap-1 defines them (scroll-margin/scroll-padding
+// and their logical block/inline forms are shorthands for the four side
+// longhands), so their IR type names can never appear on the wire. Their
+// triplets were unreachable and are deleted (A6#9); only the longhands
+// below are dispatched.
 import type { CSSProperties } from 'react';
 // Phase-9 scroll-timeline (kept for back-compat with StyleBuilder.ts imports).
 import { extractScrollTimeline } from './ScrollTimelineExtractor';
@@ -16,8 +25,6 @@ import { extractScrollSnapAlign } from './ScrollSnapAlignExtractor';
 import { applyScrollSnapAlign } from './ScrollSnapAlignApplier';
 import { extractScrollSnapStop } from './ScrollSnapStopExtractor';
 import { applyScrollSnapStop } from './ScrollSnapStopApplier';
-import { extractScrollPadding } from './ScrollPaddingExtractor';
-import { applyScrollPadding } from './ScrollPaddingApplier';
 import { extractScrollPaddingTop } from './ScrollPaddingTopExtractor';
 import { applyScrollPaddingTop } from './ScrollPaddingTopApplier';
 import { extractScrollPaddingRight } from './ScrollPaddingRightExtractor';
@@ -26,20 +33,14 @@ import { extractScrollPaddingBottom } from './ScrollPaddingBottomExtractor';
 import { applyScrollPaddingBottom } from './ScrollPaddingBottomApplier';
 import { extractScrollPaddingLeft } from './ScrollPaddingLeftExtractor';
 import { applyScrollPaddingLeft } from './ScrollPaddingLeftApplier';
-import { extractScrollPaddingBlock } from './ScrollPaddingBlockExtractor';
-import { applyScrollPaddingBlock } from './ScrollPaddingBlockApplier';
 import { extractScrollPaddingBlockStart } from './ScrollPaddingBlockStartExtractor';
 import { applyScrollPaddingBlockStart } from './ScrollPaddingBlockStartApplier';
 import { extractScrollPaddingBlockEnd } from './ScrollPaddingBlockEndExtractor';
 import { applyScrollPaddingBlockEnd } from './ScrollPaddingBlockEndApplier';
-import { extractScrollPaddingInline } from './ScrollPaddingInlineExtractor';
-import { applyScrollPaddingInline } from './ScrollPaddingInlineApplier';
 import { extractScrollPaddingInlineStart } from './ScrollPaddingInlineStartExtractor';
 import { applyScrollPaddingInlineStart } from './ScrollPaddingInlineStartApplier';
 import { extractScrollPaddingInlineEnd } from './ScrollPaddingInlineEndExtractor';
 import { applyScrollPaddingInlineEnd } from './ScrollPaddingInlineEndApplier';
-import { extractScrollMargin } from './ScrollMarginExtractor';
-import { applyScrollMargin } from './ScrollMarginApplier';
 import { extractScrollMarginTop } from './ScrollMarginTopExtractor';
 import { applyScrollMarginTop } from './ScrollMarginTopApplier';
 import { extractScrollMarginRight } from './ScrollMarginRightExtractor';
@@ -48,14 +49,10 @@ import { extractScrollMarginBottom } from './ScrollMarginBottomExtractor';
 import { applyScrollMarginBottom } from './ScrollMarginBottomApplier';
 import { extractScrollMarginLeft } from './ScrollMarginLeftExtractor';
 import { applyScrollMarginLeft } from './ScrollMarginLeftApplier';
-import { extractScrollMarginBlock } from './ScrollMarginBlockExtractor';
-import { applyScrollMarginBlock } from './ScrollMarginBlockApplier';
 import { extractScrollMarginBlockStart } from './ScrollMarginBlockStartExtractor';
 import { applyScrollMarginBlockStart } from './ScrollMarginBlockStartApplier';
 import { extractScrollMarginBlockEnd } from './ScrollMarginBlockEndExtractor';
 import { applyScrollMarginBlockEnd } from './ScrollMarginBlockEndApplier';
-import { extractScrollMarginInline } from './ScrollMarginInlineExtractor';
-import { applyScrollMarginInline } from './ScrollMarginInlineApplier';
 import { extractScrollMarginInlineStart } from './ScrollMarginInlineStartExtractor';
 import { applyScrollMarginInlineStart } from './ScrollMarginInlineStartApplier';
 import { extractScrollMarginInlineEnd } from './ScrollMarginInlineEndExtractor';
@@ -122,26 +119,20 @@ export function applyScrollingPhase10(properties: IRPropertyLike[]): CSSProperti
   Object.assign(out, applyScrollSnapType(extractScrollSnapType(properties)));
   Object.assign(out, applyScrollSnapAlign(extractScrollSnapAlign(properties)));
   Object.assign(out, applyScrollSnapStop(extractScrollSnapStop(properties)));
-  Object.assign(out, applyScrollPadding(extractScrollPadding(properties)));
   Object.assign(out, applyScrollPaddingTop(extractScrollPaddingTop(properties)));
   Object.assign(out, applyScrollPaddingRight(extractScrollPaddingRight(properties)));
   Object.assign(out, applyScrollPaddingBottom(extractScrollPaddingBottom(properties)));
   Object.assign(out, applyScrollPaddingLeft(extractScrollPaddingLeft(properties)));
-  Object.assign(out, applyScrollPaddingBlock(extractScrollPaddingBlock(properties)));
   Object.assign(out, applyScrollPaddingBlockStart(extractScrollPaddingBlockStart(properties)));
   Object.assign(out, applyScrollPaddingBlockEnd(extractScrollPaddingBlockEnd(properties)));
-  Object.assign(out, applyScrollPaddingInline(extractScrollPaddingInline(properties)));
   Object.assign(out, applyScrollPaddingInlineStart(extractScrollPaddingInlineStart(properties)));
   Object.assign(out, applyScrollPaddingInlineEnd(extractScrollPaddingInlineEnd(properties)));
-  Object.assign(out, applyScrollMargin(extractScrollMargin(properties)));
   Object.assign(out, applyScrollMarginTop(extractScrollMarginTop(properties)));
   Object.assign(out, applyScrollMarginRight(extractScrollMarginRight(properties)));
   Object.assign(out, applyScrollMarginBottom(extractScrollMarginBottom(properties)));
   Object.assign(out, applyScrollMarginLeft(extractScrollMarginLeft(properties)));
-  Object.assign(out, applyScrollMarginBlock(extractScrollMarginBlock(properties)));
   Object.assign(out, applyScrollMarginBlockStart(extractScrollMarginBlockStart(properties)));
   Object.assign(out, applyScrollMarginBlockEnd(extractScrollMarginBlockEnd(properties)));
-  Object.assign(out, applyScrollMarginInline(extractScrollMarginInline(properties)));
   Object.assign(out, applyScrollMarginInlineStart(extractScrollMarginInlineStart(properties)));
   Object.assign(out, applyScrollMarginInlineEnd(extractScrollMarginInlineEnd(properties)));
   Object.assign(out, applyOverscrollBehavior(extractOverscrollBehavior(properties)));

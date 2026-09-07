@@ -75,8 +75,10 @@ class TableUaDisplayTest {
     @Test
     fun `tag matching is case-insensitive and non-table tags stay NONE`() {
         // The wire lowercases `sourceTag`, but an uppercase tag must not
-        // silently fall out of the table — the same tolerance
-        // CollapsedBorderConflict.originOf applies to the same channel.
+        // silently fall out of the table. (Retro sweep P2a, A6#11: the
+        // second reader this comment used to cite for the same tolerance,
+        // CollapsedBorderConflict.originOf, is deleted — it had no
+        // production caller on either native.)
         assertEquals(TableBoxTree.Role.TABLE, TableBoxTree.uaRoleOf("TABLE"))
         assertEquals(TableBoxTree.Role.CELL, TableBoxTree.uaRoleOf("Td"))
         // Everything else is not a table-internal box, including the two

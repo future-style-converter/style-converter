@@ -20,7 +20,7 @@ import org.junit.Test
  * gate is pinned against the shapes that actually reach the device, not
  * against invented ones. DS1/DS2 are the two halves of the WPT toggle pair
  * ancestor-toggle-spanner-001 / -002 — the same DOM with and without a
- * transform on the wrapper — which is exactly the css-multicol-1 §6.2
+ * transform on the wrapper — which is exactly the css-multicol-1 §6.1
  * discriminator this gate implements.
  *
  * This file has NO iOS twin on purpose: the rewrite compensates for

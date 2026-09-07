@@ -24,8 +24,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 // Tile placement math is shared with the background path so mask-repeat
-// and background-repeat can never diverge (css-masking-1 §4.5 defines
-// mask-repeat with css-backgrounds-3 §3.7 semantics).
+// and background-repeat can never diverge (css-masking-1 §7.3 defines
+// mask-repeat with css-backgrounds-3 §2.4 semantics).
 import com.styleconverter.runtime.color.AxisRepeat
 import com.styleconverter.runtime.color.BackgroundTileMath
 // Gradient geometry is shared with the background path (ColorApplier) so
@@ -216,7 +216,7 @@ object MaskApplier {
      * Geometry: mask-size (§4.8 — default `auto` = intrinsic px),
      * mask-position (§4.6 — default 0% 0% = top-left), mask-repeat
      * (§4.5 — default `repeat`, tiling BOTH axes; css-masking-1 defers
-     * the placement rules to css-backgrounds-3 §3.7, so the lattice comes
+     * the placement rules to css-backgrounds-3 §2.4, so the lattice comes
      * from BackgroundTileMath.axisPlan, the same pinned owner the
      * background path draws with, including space/round and the snapped
      * abutting edges that close antialiasing seams).
@@ -237,16 +237,16 @@ object MaskApplier {
         val imageW = mask.width.toFloat()
         val imageH = mask.height.toFloat()
         // mask-size: default Auto keeps the intrinsic dimensions
-        // (css-masking-1 §4.8 / backgrounds §3.9 `auto`).
+        // (css-masking-1 §7.7 / css-backgrounds-3 §2.9 `auto`).
         val (tileW, tileH) = calculateMaskSize(config.size, size, imageW, imageH)
         // mask-position: the anchor of the first tile (free-space ×
-        // fraction — §4.6 positive-percentage semantics).
+        // fraction — §7.4 positive-percentage semantics).
         val (anchorX, anchorY) = calculateMaskPosition(config.position, size, tileW, tileH)
         // mask-repeat → per-axis placement modes, then one axis plan each.
         val (modeX, modeY) = maskRepeatAxes(config.repeat)
         val planX = BackgroundTileMath.axisPlan(size.width, tileW, anchorX, modeX)
         val planY = BackgroundTileMath.axisPlan(size.height, tileH, anchorY, modeY)
-        // mask-mode (css-masking-1 §7.4.3): `match-source` resolves to
+        // mask-mode (css-masking-1 §7.2): `match-source` resolves to
         // ALPHA for raster <image> sources — luminance is only the
         // match-source default for SVG <mask> element references.
         // TODO(svg-masks): when SVG mask sources land on this wire,
@@ -290,8 +290,8 @@ object MaskApplier {
     }
 
     /**
-     * mask-repeat → per-axis [AxisRepeat] modes. css-masking-1 §4.5
-     * defines mask-repeat with css-backgrounds-3 §3.7 semantics, so the
+     * mask-repeat → per-axis [AxisRepeat] modes. css-masking-1 §7.3
+     * defines mask-repeat with css-backgrounds-3 §2.4 semantics, so the
      * mapping targets the background path's enum directly. Internal:
      * pinned by the plain-JVM suite (MaskUrlImageTest).
      */
@@ -400,7 +400,7 @@ object MaskApplier {
                 }
             }
             is MaskGradientConfig.Radial -> {
-                // css-images-3 §3.5 defaults: ending shape ELLIPSE, size
+                // css-images-3 §3.2 defaults: ending shape ELLIPSE, size
                 // farthest-corner. The old branch hardcoded a CIRCLE of
                 // radius min(w,h)/2 — on the 160×80 mask fixtures that
                 // faded to transparent at x=±40 while web's ellipse

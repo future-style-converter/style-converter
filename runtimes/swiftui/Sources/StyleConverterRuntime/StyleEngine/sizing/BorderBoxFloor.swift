@@ -2,7 +2,7 @@
 //  BorderBoxFloor.swift
 //  StyleEngine/sizing — wave-40 lane T7 (iOS depth tails).
 //
-//  css-ui-3 §5 `box-sizing: border-box`, the clause every implementation has
+//  css-ui-3 §3.1 `box-sizing: border-box`, the clause every implementation has
 //  to spell out separately: the declared size sets the BORDER box, the content
 //  box is what is left after the padding + border bands, and "the content
 //  width/height cannot be negative — it is floored at zero". A declared size
@@ -45,9 +45,14 @@
 //  `contentBoxInflation`'s own band helpers instead of growing a second,
 //  drift-prone copy of "what counts as a border".
 //
-//  TWIN STATUS: iOS-only in wave 40. Android shows the same red square in the
-//  same capture; the Compose twin (`sizing/BorderBoxFloor.kt`) is DEFERRED
-//  because this lane owns no Android device.
+//  TWIN STATUS: ported. The Compose twin `runtimes/compose/.../sizing/
+//  BorderBoxFloor.kt` landed in the wave-49 retrospective (lane R2, finding
+//  A4#7) — same explicit-BORDER_BOX-only predicate, same `floored` arithmetic,
+//  wired in SizingExtractor after the box-sizing tri-state resolves, pinned
+//  test-for-test by BorderBoxFloorTest.kt on the verbatim box-sizing-026 IR.
+//  (The section cited above is css-ui-3 §3.1 "Changing the Box Model: the
+//  box-sizing property"; the Kotlin twin's header carries the corrected
+//  citation.)
 //
 
 import CoreGraphics

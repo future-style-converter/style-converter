@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.sizing
 
-// CalcSizeLayout — the Modifier halves of css-values-5 §10.1 calc-size().
+// CalcSizeLayout — the Modifier halves of css-values-5 §11 calc-size().
 //
 // Wave 42 (lane W3). Two lanes, both driven by CalcSizeMath's JVM-pinned
 // arithmetic (CalcSizeValue.kt) and both following the house overflow

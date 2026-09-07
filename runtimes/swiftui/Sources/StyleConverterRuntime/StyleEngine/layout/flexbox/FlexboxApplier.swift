@@ -3,17 +3,26 @@
 //  StyleEngine/layout/flexbox — Phase 7 step 2 (flexbox).
 //
 //  Reads flex fields out of a populated LayoutAggregate and produces:
-//    • A ContainerDecision that ComponentRenderer uses to select
-//      HStack / VStack / ZStack / FlowLayout for this component.
 //    • Per-child modifiers (align-self override, flex-basis sizing,
 //      flex-grow priority).
 //    • A child-sorter that re-orders a [IRComponent] array by `order`
 //      BEFORE rendering — SwiftUI has no equivalent of CSS `order`.
 //
 //  SwiftUI's stack initialisers consume alignment+spacing at construction
-//  time, which is why this lives outside the per-modifier chain: a late
-//  `.modifier(...)` cannot reshape the container after the fact. Callers
-//  therefore read `containerDecision(for:)` up-front.
+//  time, which is why the CONTAINER choice is not a modifier at all:
+//  ComponentRenderer builds the `ContainerDecision.ContainerKind` itself,
+//  at container-construction time (`gridKind` / the flex-wrap branch), from
+//  the same LayoutAggregate this file reads.
+//
+//  Retro P2b (finding A6#3): the `containerDecision(for:)` scaffold that
+//  used to live here was deleted. It had no production caller — the two
+//  call sites were both in LayoutTests — and its `switch aggregate.display`
+//  was inverted: `display` is `DisplayKeyword?`, so `case .none` matched
+//  NIL (an omitted display returned kind `.none` = "no container") while
+//  `display: none` fell through to the flex default, and `case .flex, nil`
+//  was unreachable (the Swift 5.9 compiler said so: "case is already
+//  handled by previous patterns"). Nothing rendered from it, so nothing
+//  moved when it went.
 //
 //  The wrap container itself (`FlowLayout`) moved to FlowLayout.swift at
 //  wave 25 — its §8.4/§9.6 cross-axis pass took this file past the
@@ -23,71 +32,6 @@
 import SwiftUI
 
 enum FlexboxApplier {
-
-    // MARK: - Container decision
-
-    /// Derives the SwiftUI container kind + alignment for `aggregate`.
-    /// Only the flexbox subset is populated here (display != grid/none).
-    /// The grid and position decisions are produced by sibling appliers
-    /// in Phase 7 steps 3+4; this function returns a sensible flex default
-    /// when the aggregate's `display` is unset or non-flex so the renderer
-    /// can still route through LayoutApplier without a second branch.
-    static func containerDecision(for aggregate: LayoutAggregate) -> ContainerDecision {
-        // Grid / none / contents are out of this applier's scope — let
-        // the sibling appliers own them. We return a safe vertical-stack
-        // default so the renderer's call site never has to nil-check.
-        switch aggregate.display {
-        case .none:
-            // `display: none` shortcuts to "no container"; the renderer
-            // also checks this directly and emits EmptyView.
-            return ContainerDecision(kind: .none, alignment: .start, spacing: nil)
-        case .grid, .inline, .block, .contents, .none?:
-            // Not our job — fall through to the default below so the
-            // sibling grid/position/block appliers can take over.
-            break
-        case .flex, nil:
-            // Flex container (or flex-only sibling properties set on a
-            // container whose display was omitted — common in IR emitted
-            // from Tailwind-style CSS that relies on default display:flex
-            // being inferred from flex-direction being present).
-            break
-        }
-
-        // Axis defaults to horizontal for flex (CSS initial value is row);
-        // VStack → block display falls through to the default below.
-        let axis: ContainerAxis = {
-            switch aggregate.flexDirection {
-            case .column, .columnReverse: return .vertical
-            case .row, .rowReverse, nil:  return .horizontal
-            }
-        }()
-
-        // Cross-axis alignment comes from align-items. Initial value per
-        // the CSS spec is `stretch`, which we map to `.center` in SwiftUI
-        // since SwiftUI has no stretch alignment for stacks — stretch is
-        // enforced by .frame(maxWidth/maxHeight:.infinity) on children
-        // instead.
-        let cross = aggregate.alignItems ?? .stretch
-
-        // FlexWrap → FlowLayout for wrap, plain stack otherwise. iOS 16+
-        // always (project deployment target), so the @available branch is
-        // safe to use unconditionally.
-        if aggregate.display == .flex, aggregate.flexWrap == .wrap || aggregate.flexWrap == .wrapReverse {
-            // FlowLayout is a custom Layout — see below. Cast as `.wrap`
-            // via the ContainerDecision's `lazyHGrid` slot is wrong, so
-            // we introduce a marker by shoving the axis back into `kind`
-            // as a stack, then ComponentRenderer branches on
-            // `aggregate.flexWrap` itself to pick FlowLayout. This keeps
-            // the decision struct lean without a new enum case.
-            return ContainerDecision(kind: .stack(axis), alignment: cross, spacing: nil)
-        }
-
-        // Fallback: a plain stack of the chosen axis. Spacing is NOT
-        // populated here — GapApplier already resolved row/column gap
-        // and the renderer passes that directly into the HStack/VStack
-        // constructor. Leaving spacing nil prevents double-application.
-        return ContainerDecision(kind: .stack(axis), alignment: cross, spacing: nil)
-    }
 
     // MARK: - Child ordering (CSS `order`)
 

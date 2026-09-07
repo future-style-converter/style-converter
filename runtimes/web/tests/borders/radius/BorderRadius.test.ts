@@ -1,5 +1,5 @@
 // BorderRadius — coverage for the 4 physical + 4 logical corner triplets.
-// Fixtures: examples/properties/borders/border-radius-physical.json and
+// Fixtures: fixtures/properties/borders/border-radius-physical.json and
 // border-radius-logical.json.
 import { describe, it, expect } from 'vitest';
 import { extractBorderTopLeftRadius }     from '../../../src/engine/borders/radius/BorderTopLeftRadiusExtractor';

@@ -4,7 +4,7 @@ package com.styleconverter.runtime.typography.wrapping
  * AutoHyphenation.kt
  * typography/wrapping — wave 40 (lane T2).
  *
- * css-text-3 §6.1 `hyphens: auto`, the DICTIONARY half — the switch that
+ * css-text-3 §5.3 `hyphens: auto`, the DICTIONARY half — the switch that
  * wave 37 named and wave 39's A3 finding measured as still off.
  *
  * ── WHAT WAS MISSING ────────────────────────────────────────────────
@@ -20,7 +20,7 @@ package com.styleconverter.runtime.typography.wrapping
  * "high-/way", "exam-/ple") and Android renders the whole word.
  *
  * ── WHY IT COULD NOT BE SWITCHED ON BEFORE, AND CAN NOW ─────────────
- * §6.1 makes the hyphenation resource LANGUAGE-dependent, and WPT
+ * §5.3 makes the hyphenation resource LANGUAGE-dependent, and WPT
  * `css-text/hyphens/hyphens-auto-001` asserts the contrapositive in so
  * many words: "automatic hyphenation must not work without language
  * tagging" (its own `<div>` carries `hyphens: auto` and NO `lang`, and
@@ -46,7 +46,7 @@ package com.styleconverter.runtime.typography.wrapping
  * `lang` is null there and this file cannot change a pixel of the 363
  * committed `tools/visual/baseline/` captures. That is a stronger,
  * spec-derived gate than a WPT-mode flag would be: it is the same
- * condition §6.1 itself imposes.
+ * condition §5.3 itself imposes.
  *
  * Pure Kotlin (no Compose, no Android) so the JVM suite pins the
  * decision without a device. The Compose-typed half — `Hyphens.Auto` +
@@ -67,7 +67,7 @@ object AutoHyphenation {
      *   spelling the two extractors produce (the wire authors upper-case
      *   `"AUTO"`, iOS's extractor lowercases) — compared case-insensitively.
      * @param lang the run's COMPUTED content language (`meta.lang`).
-     *   Null/blank means the document declares none, which §6.1 leaves
+     *   Null/blank means the document declares none, which §5.3 leaves
      *   with no resource to select: `auto` then degrades to `manual`'s
      *   explicit opportunities, exactly as before this file existed.
      */
@@ -92,7 +92,7 @@ object AutoHyphenation {
         if (engaged(hyphensMode, lang)) lang!!.trim() else null
 
     /**
-     * css-text-4 §6.2 `hyphenate-limit-chars: auto` — the MINIMUM word
+     * css-text-4 §6.3.4 `hyphenate-limit-chars: auto` — the MINIMUM word
      * length a UA will hyphenate at all. Chromium (`kMinimumPrefixLength`
      * 2 + `kMinimumSuffixLength` 2) and Minikin (`Hyphenator` MIN_PREFIX 2
      * / MIN_SUFFIX 3) both refuse anything shorter, so five is the floor

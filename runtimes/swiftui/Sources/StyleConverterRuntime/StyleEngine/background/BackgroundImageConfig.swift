@@ -13,7 +13,7 @@ import Foundation
 import SwiftUI
 
 // One gradient-center axis (`at <position>`, css-images-3 §3.2 /
-// css-images-4 §3.4.4). CSS allows a full <length-percentage> per axis;
+// css-images-4 §3.2). CSS allows a full <length-percentage> per axis;
 // the IR wire carries percents as raw numbers and lengths as objects
 // (IRLengthPercentageSerializer). The extractor resolves runtime-dependent
 // units (lh/em/rem) to PX at extract time — font metrics live in the
@@ -146,7 +146,7 @@ enum BackgroundImageLayer: Equatable {
 
 // Single gradient stop. `position` is 0..1 (normalised from 0..100
 // percentage in the IR) or nil when CSS didn't specify one — the
-// resolver (GradientStopResolver, css-images-4 §3.4.3) spaces nil
+// resolver (GradientStopResolver, css-images-4 §3.5.3) spaces nil
 // stops between their positioned neighbours.
 struct BackgroundImageStop: Equatable {
     // Parsed colour. May be `.dynamic(...)` or `.unknown` — applier
@@ -155,7 +155,7 @@ struct BackgroundImageStop: Equatable {
     // Normalised position 0..1, or nil for "auto".
     var position: Double?
     // Wave 46 (lane Y2): the <length> arm of the stop position
-    // (wire `positionLength: {px: N}`, css-images-4 §3.4.2
+    // (wire `positionLength: {px: N}`, css-images-4 §3.5.1
     // <length-percentage>). Absolute CSS px along the gradient line;
     // resolved against the line length at render time (the box is only
     // known inside the GeometryReader / Canvas). Dropped on the floor

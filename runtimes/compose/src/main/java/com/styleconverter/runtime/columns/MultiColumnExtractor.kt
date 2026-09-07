@@ -34,7 +34,7 @@ object MultiColumnExtractor {
                 "ColumnRuleColor" -> ruleColor = ValueExtractors.extractColor(data)
                 "ColumnSpan" -> span = extractColumnSpan(data)
                 "ColumnFill" -> fill = extractColumnFill(data)
-                // css-overflow-4 §3 `continue: discard` (wave-42 lane W4) —
+                // css-overflow-4 §5.3 `continue: discard` (wave-42 lane W4) —
                 // only the DISCARD keyword flips the flag; `auto` (and any
                 // future keyword) keeps the normal overflow rendering.
                 "Continue" -> continueDiscard =

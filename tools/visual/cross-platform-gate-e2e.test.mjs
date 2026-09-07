@@ -17,12 +17,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, readdirSync } from 'node:fs';
+import { mkdtempSync, mkdirSync, copyFileSync, writeFileSync, readdirSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve, dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { EXIT_UNEXPECTED_DIVERGENCE, EXIT_STALE_EXPECTATION } from './cross-platform-gate.mjs';
+import { EXIT_UNEXPECTED_DIVERGENCE, EXIT_STALE_EXPECTATION, validateLedger } from './cross-platform-gate.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const BASELINE = resolve(__dirname, 'baseline');
@@ -60,7 +60,14 @@ function scaffold(mode, expectations) {
   copyFileSync(join(BASELINE, mode === 'diverge' ? other : same), join(dirs.iOS, NAME));
 
   const ledger = join(dir, 'ledger.json');
-  writeFileSync(ledger, JSON.stringify({ expectations }, null, 2));
+  // The ledger SCHEMA (validateLedger, retrospective A9#5/A12#8) now demands
+  // an owner and an expiry on every line — a schema-invalid ledger is exit 2
+  // before any pair is judged. These tests are about the GATE's semantics,
+  // so the scaffold fills in the contract fields an entry omits; the schema
+  // has its own tests (unit in cross-platform-gate.test.mjs, exit-2 e2e
+  // below). Fields an entry states explicitly win.
+  const complete = expectations.map((e) => ({ owner: 'test', expires: '2099-01-01', ...e }));
+  writeFileSync(ledger, JSON.stringify({ expectations: complete }, null, 2));
   return { dir, dirs, ledger, NAME };
 }
 
@@ -145,6 +152,49 @@ test('the two failure codes are distinct', () => {
   // "a runtime regressed" to every caller that branches on $?.
   assert.notEqual(EXIT_STALE_EXPECTATION, EXIT_UNEXPECTED_DIVERGENCE);
   assert.equal(EXIT_STALE_EXPECTATION, 5);
+});
+
+// ── The ledger schema (retrospective A9#5 / A12#8) ───────────────────────────
+
+test('a schema-invalid ledger exits 2 and names the offending file:line', () => {
+  // The wave-1 seed carried owner "unassigned" on 29/29 lines for 49 waves
+  // and nothing rejected it. Now the loader refuses to judge a single pair
+  // against a ledger that violates its own contract — and points at the line.
+  const s = scaffold('diverge', [
+    { component: '000_Case.png', pair: 'iOS-Android', reason: 'known', owner: 'unassigned' },
+    { component: '000_Case.png', pair: 'iOS-web', reason: 'known' },   // owner + expires filled by the scaffold → valid
+  ]);
+  const { status, out } = runGate(s);
+  assert.equal(status, 2, out);
+  assert.match(out, /violates the ledger contract \(1 problem\(s\)\)/);
+  assert.match(out, /ledger\.json:\d+ — `owner` is the placeholder "unassigned"/);
+  // It must fail as a SETUP error, never as a verdict: no exit 4/5 text.
+  assert.doesNotMatch(out, /unexpected cross-platform divergence/);
+});
+
+test('a ledger line whose expiry is unparseable or absent exits 2', () => {
+  const s = scaffold('diverge', [
+    { component: '000_Case.png', pair: 'iOS-Android', reason: 'known', owner: 'lane-x', expires: 'someday' },
+  ]);
+  const { status, out } = runGate(s);
+  assert.equal(status, 2, out);
+  assert.match(out, /`expires` is not a parseable date: "someday"/);
+});
+
+test('the COMMITTED ledger honours its own contract', () => {
+  // The pin the retrospective asked for: every line of
+  // tools/visual/cross-platform-expectations.json carries a real owner and a
+  // parseable, non-dead expiry. Red exactly while any line still says
+  // "unassigned" — which is the point: the gate itself exits 2 on that
+  // ledger, so this test failing first is the cheaper place to learn it.
+  const path = resolve(__dirname, 'cross-platform-expectations.json');
+  const raw = readFileSync(path, 'utf8');
+  const problems = validateLedger(JSON.parse(raw), raw);
+  assert.deepEqual(
+    problems.map((p) => `${path}:${p.line} — ${p.message}`),
+    [],
+    'the committed ledger has schema problems (assign owners / fix expiries):',
+  );
 });
 
 test('--no-cross-platform-gate suppresses the stale failure', () => {

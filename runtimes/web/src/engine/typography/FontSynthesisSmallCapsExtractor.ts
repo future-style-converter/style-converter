@@ -1,6 +1,6 @@
 // FontSynthesisSmallCapsExtractor.ts — folds `FontSynthesisSmallCaps` IR properties into a FontSynthesisSmallCapsConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontSynthesisSmallCapsConfig, FONT_SYNTHESIS_SMALL_CAPS_PROPERTY_TYPE, FontSynthesisSmallCapsPropertyType } from './FontSynthesisSmallCapsConfig';
 import { kwLower } from './_shared';

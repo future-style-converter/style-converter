@@ -63,7 +63,7 @@ final class RootPseudoSpecTests: XCTestCase {
         """)
         let spec = try XCTUnwrap(RootPseudo.spec(bucket: b, role: "before"))
         XCTAssertNil(spec.widthPx)
-        // A bare `0` IS a valid length (css-values-4 §5.2).
+        // A bare `0` IS a valid length (css-values-4 §6).
         XCTAssertEqual(spec.heightPx, 0)
     }
 

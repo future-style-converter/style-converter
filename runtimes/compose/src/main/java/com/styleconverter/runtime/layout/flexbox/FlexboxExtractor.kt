@@ -116,12 +116,20 @@ object FlexboxExtractor {
                     ?.let { cfg.copy(order = it) } ?: cfg
 
                 // --- flex-basis ---------------------------------------------
-                // FlexBasis has a compound grammar: keyword (auto/content) or
-                // <length-percentage>. Step 1 LayoutConfig only exposes a
-                // `Default` placeholder, so we map any non-null input to it;
-                // the richer variants arrive when FlexBasisValue is expanded
-                // in a later step. TODO(phase7): wire length/percentage cases
-                // once FlexBasisValue has Length / Percentage / Auto variants.
+                // PRESENCE-ONLY slot, and that is final — not a placeholder.
+                // Retro R2 (A7#0) retired the phase-7 TODO that promised
+                // Length / Percentage / Auto variants here: LayoutConfig's
+                // `flexBasis` has NO reader anywhere in the runtime (the
+                // renderer never consumed it), while the LIVE flex-basis
+                // decode — px via `flexBasisPx`, the bare-number percent wire
+                // via `flexBasisPercent` — is core/placement/
+                // ItemPlacementExtractor, consumed by ComponentRenderer.
+                // flexLineSpec. Growing a second decoder for a dead slot would
+                // recreate the exact twin-drift the audit found (the legacy
+                // FlexExtractor.parseFlexBasis misread N% as N px for months
+                // with nobody noticing, because nothing read it). The slot
+                // stays `Default` = "a flex-basis was declared" so
+                // LayoutConfig's field shape is unchanged for its pins.
                 "FlexBasis" -> cfg.copy(flexBasis = FlexBasisValue.Default)
 
                 // Anything else: pass through unchanged — the other

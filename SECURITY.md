@@ -3,16 +3,18 @@
 ## Supported versions
 
 There are no tagged releases yet. Until there are, security fixes land on
-the two live branches:
+`dev`, the only live branch:
 
 | version | supported |
 |---|---|
-| `dev` (integration branch — all PRs target it) | yes |
-| `main` (latest promoted release state) | yes |
+| `dev` (integration branch — all PRs target it; the only live branch) | yes |
+| `main` (frozen at `d61601f4`, 99 commits behind `dev`) | no — stale, do not deploy from it |
 | anything older | no — please update |
 
-Once releases exist, this table will name the latest release explicitly;
-only the latest release and `dev` will receive fixes.
+`dev` is where every fix lands. There is no dev→main promotion pipeline:
+`docs/BACKLOG.md` records the promotion as explicitly declined by the
+owner, so `main` will stay frozen until that decision changes. Once
+releases exist, this table will name the latest release explicitly.
 
 ## Reporting a vulnerability
 

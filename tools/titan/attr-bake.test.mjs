@@ -455,7 +455,7 @@ for (const [name, prop, decl, attrs, expected] of PROVING_SET) {
   });
 }
 
-test('PROVING SET: the six declarations are still exactly what WPT ships', () => {
+test('PROVING SET: the six declarations are still exactly what WPT ships', (t) => {
   // Guards against the bake being pinned to a stale reading of the corpus:
   // if WPT rewrites one of these tests, this fails LOUDLY instead of the
   // proving set quietly proving the wrong thing. Skipped when the WPT
@@ -465,7 +465,14 @@ test('PROVING SET: the six declarations are still exactly what WPT ships', () =>
   try {
     html = readFileSync(join(wptDir, 'css', 'css-values', 'attr-color-valid.html'), 'utf8');
   } catch {
-    return; // no corpus on this machine — the unit pins above still hold
+    // retro R8b (A8#2): SKIP visibly — never a bare `return`. The return made
+    // this test report PASS with ZERO assertions executed on every CI run
+    // (ci.yml's test-tooling job has no tools/wpt mirror), so the proving set
+    // looked green while proving nothing there. `t.skip` is the idiom the
+    // other corpus-gated pins already use (capture-divergence.test.mjs:150,
+    // extract-fixture.test.mjs:5321): the runner reports `# skipped 1`.
+    t.skip('WPT mirror absent (run tools/titan/fetch-wpt.sh) — proving set not exercised');
+    return; // the unit pins above still hold; this one is honestly unrun
   }
   assert.ok(html.includes('background: attr(data-test type(<color>))'));
   assert.ok(html.includes('data-test="green"'));

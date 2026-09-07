@@ -127,4 +127,26 @@ object GridTrackListParser {
         }
         return null
     }
+
+    /**
+     * Maximum parenthesis nesting depth in a track-list value.
+     *
+     * A6#14: GridTemplateColumns/RowsPropertyParser each carried a
+     * byte-identical private copy, both feeding the same
+     * `isComplexExpression` bail-out (depth > 2 ⇒ hand the value to the
+     * runtime unparsed). One body here keeps the two axes' bail-out
+     * thresholds from drifting apart — the axes are symmetric in
+     * css-grid-2's <track-list> grammar, so they must agree.
+     */
+    fun countMaxParenDepth(value: String): Int {
+        var max = 0
+        var current = 0
+        for (char in value) {
+            when (char) {
+                '(' -> { current++; if (current > max) max = current }
+                ')' -> current--
+            }
+        }
+        return max
+    }
 }

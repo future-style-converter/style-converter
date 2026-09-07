@@ -71,7 +71,7 @@ public extension UABlockMargin {
     /// behavior via rootStackMargin's R4/R5 branch).
     ///
     /// Wave 22 (B-RC2): `em` is now RESOLVED rather than bailed, against the
-    /// component's OWN declared FontSize (css-values-4 §5.1.1 — the base
+    /// component's OWN declared FontSize (css-values-4 §6.1.1 — the base
     /// rides the same property list). dotted-001's `margin: .5em` over
     /// `font-size: 92px` is 46px per edge, which the fold then collapses to
     /// ONE 46px inter-root gap instead of the two stacked 46s the natives

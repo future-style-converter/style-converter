@@ -56,7 +56,7 @@ class TransformListComposerTest {
     fun `Transform_Combined translate is scaled then rotated - the ledgered fix`() {
         val cfg = config("Transform" to transformCombined)
         val steps = TransformListComposer.stepsFor(cfg)!!
-        // css-transforms-1 §11: the translateX(10px) is mapped by scale(1.1)
+        // css-transforms-1 §8: the translateX(10px) is mapped by scale(1.1)
         // then rotate(5deg): 10·1.1 = 11; (11·cos5°, 11·sin5°) =
         // (10.9581, 0.9587). The legacy accumulation rendered (10, 0) —
         // predicting a (0.96, 0.96)px NW displacement; the measurement

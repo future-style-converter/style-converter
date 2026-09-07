@@ -267,6 +267,53 @@ export function resolveReplacedImageFile(wptDir, src, { resolve, existsSync, sta
   return abs;
 }
 
+// ── retro R8b (A9#3): the --wpt-dir PREFLIGHT shared by both feeders ────────
+//
+// Both resolvers above return null for a MISSING corpus root, and that null is
+// the same value as a genuinely unresolvable path. So a feeder invoked without
+// `--wpt-dir` (run-titan.sh's --all-platforms path did exactly this) logged
+// "DECLINED (unresolvable/not a font)" for every face, the pre-raster and WOFF
+// pre-passes silently no-op'd (both `return` on `!wptDir`), the capture went
+// ahead, and ARTIFACT scores — bundled-face text, empty image boxes — entered
+// the manifest as if they measured the renderers. BACKLOG kept "refeeds must
+// carry --wpt-dir" as an operator recipe; this helper is the guard that
+// replaces the recipe: scan every fixture's asset srcs BEFORE any device is
+// touched and refuse the whole run when the hop cannot happen.
+
+/** Pure. Given the decoded IR docs of a batch (null entries tolerated — an
+ *  unreadable fixture is reported per-fixture later) and the parsed `--wpt-dir`
+ *  value, return the distinct font / image srcs the hops WOULD carry and
+ *  whether the run must refuse: `fatal` is true iff at least one src exists and
+ *  wptDir is null. The message is pre-rendered so both feeders log one text. */
+export function assetHopPreflight(docs, wptDir) {
+  const fontSrcs = new Set();   // distinct `fontFaces[].src` across the batch
+  const imageSrcs = new Set();  // distinct replaced-element `meta.attrs.src`
+  for (const doc of docs ?? []) {
+    for (const s of documentFontSrcs(doc)) fontSrcs.add(s);      // the SAME walker pushFontFaces uses
+    for (const s of documentReplacedSrcs(doc)) imageSrcs.add(s); // the SAME walker pushReplacedImages uses
+  }
+  // Srcs declared but nowhere to resolve them: the hop would skip silently.
+  const fatal = fontSrcs.size + imageSrcs.size > 0 && !wptDir;
+  return {
+    fontSrcs: [...fontSrcs], imageSrcs: [...imageSrcs], fatal,
+    // One sentence naming the count, the cause and the fix — the line an
+    // operator sees at the top of the feed log instead of N cryptic declines.
+    message: fatal
+      ? `FATAL: fixtures declare ${fontSrcs.size} @font-face src(s) + ${imageSrcs.size} replaced-image src(s) ` +
+        'but --wpt-dir was not given — the asset hop would silently skip and every capture would score ' +
+        'ARTIFACTS (bundled-face text / empty image boxes). Pass --wpt-dir <corpus root> (tools/wpt).'
+      : null,
+  };
+}
+
+/** The decline text for one src when the corpus root is ABSENT. Kept apart
+ *  from the resolvers' null so a per-fixture log names the real cause; the
+ *  feeders branch on `!wptDir` BEFORE calling resolveFontFile /
+ *  resolveReplacedImageFile (normally unreachable after the preflight above —
+ *  it exists so a future caller that skips the preflight still cannot log
+ *  "unresolvable" for a root that was simply never given). */
+export const NO_WPT_DIR_DECLINE = 'DECLINED (no --wpt-dir: corpus root absent, nothing to resolve against)';
+
 // ── Filename derivation (mirror of the Android capture path) ─────────────────
 
 /** Sanitise a component name for the ON-DEVICE per-component filename —

@@ -2,7 +2,7 @@ package com.styleconverter.runtime.layout.grid
 
 // Wave 19 (lane GRID-DISTRIBUTION) pins.
 //
-// Half 1 — GridContentDistribution.trackOrigins: css-align-3 §5.3 content
+// Half 1 — GridContentDistribution.trackOrigins: css-align-3 §5.1 content
 // distribution of the track group + direction:rtl column mirroring. The
 // numeric rows P1-P12 are lifted from the LIVE wave18 IR of the failing WPT
 // family (css-grid descendant-static-position-002/003/004: 40/43/44px and

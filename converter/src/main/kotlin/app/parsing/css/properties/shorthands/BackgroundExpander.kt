@@ -4,6 +4,12 @@ package app.parsing.css.properties.shorthands
 // every CSS Color 4-5 function), backed by ColorConversion's complete named
 // table. It replaces the private 26-name list that used to misclassify
 // `background: skyblue` as an image.
+// A6#14 — clone consolidation: this expander used to carry private
+//   `splitByTopLevelComma` (1 copy), byte-identical to TokenizationUtils.splitByTopLevelComma
+//   — its 1 call site now calls the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
 import app.parsing.css.properties.primitiveParsers.ColorSyntaxClassifier
 
 /**
@@ -98,7 +104,7 @@ object BackgroundExpander : ShorthandExpander {
     private fun isGradientOrImage(value: String): Boolean {
         val lower = value.lowercase()
         return lower.startsWith("url(") ||
-               // image() notation (wave-48 lane W5, css-images-4 §2.1) —
+               // image() notation (wave-48 lane W5, css-images-4 §2.5) —
                // WPT css-image-fallbacks-and-annotations declares it through
                // the `background:` shorthand; without this membership the
                // whole declaration fell into the complex-background token
@@ -158,7 +164,7 @@ object BackgroundExpander : ShorthandExpander {
         }
 
         // Split by top-level commas for multiple backgrounds
-        val layers = splitByTopLevelComma(value)
+        val layers = TokenizationUtils.splitByTopLevelComma(value)
 
         if (layers.size > 1) {
             // Multiple backgrounds - extract just the images from each layer
@@ -328,33 +334,4 @@ object BackgroundExpander : ShorthandExpander {
         return tokens
     }
 
-    private fun splitByTopLevelComma(value: String): List<String> {
-        val parts = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> {
-                    depth++
-                    current.append(char)
-                }
-                char == ')' -> {
-                    depth--
-                    current.append(char)
-                }
-                char == ',' && depth == 0 -> {
-                    parts.add(current.toString().trim())
-                    current = StringBuilder()
-                }
-                else -> current.append(char)
-            }
-        }
-
-        if (current.isNotEmpty()) {
-            parts.add(current.toString().trim())
-        }
-
-        return parts
-    }
 }

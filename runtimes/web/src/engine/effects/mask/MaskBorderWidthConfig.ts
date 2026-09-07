@@ -6,4 +6,3 @@
 //   {type:'multi', top,right,bottom,left}     -> 'T R B L' (each already a CSS string)
 export interface MaskBorderWidthConfig { value?: string; }
 export const MASK_BORDER_WIDTH_PROPERTY_TYPE = 'MaskBorderWidth' as const;
-export type MaskBorderWidthPropertyType = typeof MASK_BORDER_WIDTH_PROPERTY_TYPE;

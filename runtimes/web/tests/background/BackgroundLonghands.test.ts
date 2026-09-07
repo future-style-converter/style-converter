@@ -125,7 +125,7 @@ describe('BackgroundPosition', () => {
 
   it('shorthand wire: one-value keyword folds the missing axis to center', () => {
     // Model variant PositionValue.Keyword ({"type":"keyword","keyword":"top"});
-    // css-backgrounds-3 §3.6: single `top` ≡ `center top`.
+    // css-backgrounds-3 §2.6: single `top` ≡ `center top`.
     const cfg = extractBackgroundPosition([
       p('BackgroundPosition', [{ type: 'keyword', keyword: 'top' }]),
     ]);

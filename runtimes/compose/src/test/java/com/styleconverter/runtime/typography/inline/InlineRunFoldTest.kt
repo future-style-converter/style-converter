@@ -455,7 +455,7 @@ class InlineRunFoldTest {
         val outcome = foldOf(root(BLOCK_ELLIPSIS_004, 0))
         val folded = outcome as InlineRunFold.Outcome.Folded
         // Four forced-break lines; every collapsible space around a break
-        // falls (css-text-3 §4.1.4) — the exact lines Chromium paints.
+        // falls (css-text-3 §4.1.2) — the exact lines Chromium paints.
         assertEquals("Line 1\nLine 2\nLine 3\nLine 4", folded.text)
         // ONE styled member: the span, covering its flattened subtree.
         assertEquals(1, folded.spans.size)
@@ -481,8 +481,10 @@ class InlineRunFoldTest {
     fun `block-ellipsis-002 - a text-and-br-only host stays stacked (br-stacked-equivalent)`() {
         // The stacked fallback already renders one block per anonymous
         // run — exactly the forced-break line structure — and this test
-        // PASSES on both natives today (wave46-final android-ref 0.9884 /
-        // ios-ref 0.9813): the ring must not move its calibrated pixels.
+        // PASSES on both natives (android-ref 0.9884 / ios-ref 0.9813 —
+        // first measured at wave46-final, re-measured byte-identical at
+        // wave49-final by retro P2e, so the label is the run the numbers
+        // still hold at): the ring must not move its calibrated pixels.
         val outcome = foldOf(root(BLOCK_ELLIPSIS_002, 0))
         assertEquals("br-stacked-equivalent", (outcome as InlineRunFold.Outcome.Bailed).reason)
     }
@@ -501,7 +503,7 @@ class InlineRunFoldTest {
             hostEffectiveLang = null,
         )
         // "a " loses its line-end space, " b " loses its line-start one
-        // (css-text-3 §4.1.4); the member boundary collapse is unchanged.
+        // (css-text-3 §4.1.2); the member boundary collapse is unchanged.
         assertEquals("a\nb c", (outcome as InlineRunFold.Outcome.Folded).text)
     }
 

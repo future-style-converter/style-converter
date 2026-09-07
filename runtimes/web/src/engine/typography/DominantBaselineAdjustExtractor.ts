@@ -1,6 +1,6 @@
 // DominantBaselineAdjustExtractor.ts — folds `DominantBaselineAdjust` IR properties into a DominantBaselineAdjustConfig.
 // Family: dominant-baseline-adjust.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { DominantBaselineAdjustConfig, DOMINANT_BASELINE_ADJUST_PROPERTY_TYPE, DominantBaselineAdjustPropertyType } from './DominantBaselineAdjustConfig';
 import { kwLower, lengthCss } from './_shared';

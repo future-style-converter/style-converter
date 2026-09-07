@@ -1,6 +1,6 @@
 // TextUnderlinePositionExtractor.ts — folds `TextUnderlinePosition` IR properties into a TextUnderlinePositionConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextUnderlinePositionConfig, TEXT_UNDERLINE_POSITION_PROPERTY_TYPE, TextUnderlinePositionPropertyType } from './TextUnderlinePositionConfig';
 import { kwList } from './_shared';

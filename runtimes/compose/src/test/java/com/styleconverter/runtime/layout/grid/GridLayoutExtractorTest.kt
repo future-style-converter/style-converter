@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.grid
 
 // Phase 7b grid extractor unit tests. Each fixture shape is taken verbatim
-// from examples/properties/layout/grid-*.json so the extractor stays in sync
+// from fixtures/properties/layout/grid-*.json so the extractor stays in sync
 // with the CSS parser's output format.
 
 import com.styleconverter.runtime.layout.GridLine

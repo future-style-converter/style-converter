@@ -1,4 +1,4 @@
-// CalcSizeValue.ts — css-values-5 §10.1 `calc-size()` typed wire decode.
+// CalcSizeValue.ts — css-values-5 §11 `calc-size()` typed wire decode.
 //
 // Wave 42 (lane W3). The converter now types the affine calc-size() family
 // (CalcSizeParser.kt) instead of letting it ride the Generic envelope:

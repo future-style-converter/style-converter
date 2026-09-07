@@ -15,7 +15,7 @@
 //
 //  CSS 2.1 gives `width: auto` / `height: auto` on a replaced element a cascade
 //  of rules; with an intrinsic width, height AND ratio all available (which is
-//  the case once the raster is decoded — css-images-3 §5.2 derives the ratio
+//  the case once the raster is decoded — css-images-3 §4.1 derives the ratio
 //  from the raster's own dimensions) they collapse to four:
 //
 //  | declared width | declared height | used content box                      |

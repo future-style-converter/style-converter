@@ -1,6 +1,6 @@
 // WordSpacingExtractor.ts — folds `WordSpacing` IR properties into a WordSpacingConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { WordSpacingConfig, WORD_SPACING_PROPERTY_TYPE, WordSpacingPropertyType } from './WordSpacingConfig';
 import { lengthCss } from './_shared';

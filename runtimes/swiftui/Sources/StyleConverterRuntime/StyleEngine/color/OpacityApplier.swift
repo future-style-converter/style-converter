@@ -24,7 +24,7 @@ struct OpacityApplier: ViewModifier {
         // alpha == 1 is the identity: no group, no fade, no layer cost.
         guard alpha < 1 else { return AnyView(content.opacity(alpha)) }
 
-        // css-color-4 §2.1: an opacity below 1 makes the element a
+        // css-color-4 §3.3: an opacity below 1 makes the element a
         // stacking context, and "the element (including its descendants)
         // is composited as a GROUP, then blended into the backdrop at
         // that opacity". SwiftUI's `.opacity(_:)` alone does NOT do that

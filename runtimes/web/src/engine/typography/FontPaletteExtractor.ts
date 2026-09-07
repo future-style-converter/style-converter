@@ -1,6 +1,6 @@
 // FontPaletteExtractor.ts — folds `FontPalette` IR properties into a FontPaletteConfig.
 // Family: font-palette.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontPaletteConfig, FONT_PALETTE_PROPERTY_TYPE, FontPalettePropertyType } from './FontPaletteConfig';
 import { kwLower } from './_shared';

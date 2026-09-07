@@ -1,6 +1,6 @@
 // WordSpaceTransformExtractor.ts — folds `WordSpaceTransform` IR properties into a WordSpaceTransformConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { WordSpaceTransformConfig, WORD_SPACE_TRANSFORM_PROPERTY_TYPE, WordSpaceTransformPropertyType } from './WordSpaceTransformConfig';
 import { kwLower } from './_shared';

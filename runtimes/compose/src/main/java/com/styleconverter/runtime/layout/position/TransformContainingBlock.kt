@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.layout.position
 
-// Wave 35 (lane B1) — css-transforms-1 §3 / css-transforms-2 §6: a box with
+// Wave 35 (lane B1) — css-transforms-1 §3 / css-transforms-2 §8: a box with
 // a USED transform (or perspective, or a preserved 3D rendering context)
 // establishes the containing block for ALL of its positioned descendants —
 // absolutely positioned AND fixed positioned alike. Until this file existed
@@ -22,7 +22,7 @@ package com.styleconverter.runtime.layout.position
 // Blink implements (`ComputedStyle::HasTransformRelatedProperty()` =
 // transform | individual transform properties | perspective | preserves3D |
 // will-change transform hint). The prose in css-transforms-1 §3 only names
-// `transform`; css-transforms-2 §6 adds `perspective`. `transform-style:
+// `transform`; css-transforms-2 §8 adds `perspective`. `transform-style:
 // preserve-3d` is NOT named by either, yet Chromium makes it a containing
 // block — measured directly, not assumed:
 //
@@ -91,10 +91,10 @@ object TransformContainingBlock {
     internal val CANDIDATE_TYPES = setOf(
         // css-transforms-1 §3 — the named clause.
         "Transform",
-        // css-transforms-2 §4 — the individual transform properties compose
+        // css-transforms-2 §5 — the individual transform properties compose
         // into the same used transform, so any non-none value counts.
         "Translate", "Rotate", "Scale",
-        // css-transforms-2 §6 — perspective, explicitly named for FIXED.
+        // css-transforms-2 §8 — perspective, explicitly named for FIXED.
         "Perspective",
         // Blink's `preserves3D()` half of HasTransformRelatedProperty —
         // probe E above; the spec prose does not state it.
@@ -146,7 +146,7 @@ object TransformContainingBlock {
     }
 
     /**
-     * `translate` / `rotate` / `scale` — the css-transforms-2 §4 individual
+     * `translate` / `rotate` / `scale` — the css-transforms-2 §5 individual
      * transform properties. Each serializes its `none` as the discriminator
      * `{"type":"none"}` (same live-conversion evidence), so the clause is a
      * single discriminator comparison and every other shape establishes.
@@ -157,7 +157,7 @@ object TransformContainingBlock {
     }
 
     /**
-     * `perspective` — css-transforms-2 §6 names this clause for FIXED
+     * `perspective` — css-transforms-2 §8 names this clause for FIXED
      * descendants explicitly. `perspective: none` serializes as
      * `{"type":"none"}`; a length as `{"type":"length","px":…}`.
      */

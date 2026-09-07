@@ -8,7 +8,7 @@ package com.styleconverter.runtime.typography.wrapping
  * The IN-WORD break opportunities [GreedyLineBreaker]'s space-split fold
  * was blind to, per css-text-3:
  *
- *  * U+00AD SOFT HYPHEN (§6.1) — a CONDITIONAL hyphenation opportunity:
+ *  * U+00AD SOFT HYPHEN (§5.3) — a CONDITIONAL hyphenation opportunity:
  *    invisible unless the line breaks there, in which case the UA paints
  *    the hyphenate-character. `hyphens: none` never lets one reach this
  *    code ([SoftHyphenPolicy] deletes them at the call site), so any shy
@@ -46,7 +46,7 @@ package com.styleconverter.runtime.typography.wrapping
  */
 object WordBreakOpportunities {
 
-    /** The css-text-3 §6.1 UA hyphenate-character: U+2010 HYPHEN is what
+    /** The css-text-3 §5.3 UA hyphenate-character: U+2010 HYPHEN is what
      *  Chromium paints at a taken soft hyphen, so it is what the frozen
      *  refs carry (byte-parallel with the Swift twin's
      *  `AutoHyphenation.defaultHyphenCharacter`). */
@@ -61,7 +61,7 @@ object WordBreakOpportunities {
      *   (a break needs ink on both sides).
      * @property paintsHyphen true — a HYPHENATION point (a removed soft
      *   hyphen): taking it paints the hyphenate-character at the end of
-     *   the head (§6.1). false — a literal-hyphen break-after point: the
+     *   the head (§5.3). false — a literal-hyphen break-after point: the
      *   glyph is already there.
      */
     data class Op(val offset: Int, val paintsHyphen: Boolean)
@@ -169,7 +169,7 @@ object WordBreakOpportunities {
         if (op.offset <= 0 || op.offset >= t.length) return null
         // Never split between a high and low surrogate.
         if (t[op.offset - 1].isHighSurrogate() && t[op.offset].isLowSurrogate()) return null
-        // §6.1: a taken hyphenation point paints the hyphenate-character;
+        // §5.3: a taken hyphenation point paints the hyphenate-character;
         // a literal-hyphen break-after point already ends in its glyph.
         val head = t.substring(0, op.offset) + if (op.paintsHyphen) hyphenChar else ""
         val tail = Word(

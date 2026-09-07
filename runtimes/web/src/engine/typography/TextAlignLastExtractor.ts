@@ -1,6 +1,6 @@
 // TextAlignLastExtractor.ts — folds `TextAlignLast` IR properties into a TextAlignLastConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextAlignLastConfig, TEXT_ALIGN_LAST_PROPERTY_TYPE, TextAlignLastPropertyType } from './TextAlignLastConfig';
 import { kwLower } from './_shared';

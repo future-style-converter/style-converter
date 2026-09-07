@@ -1,7 +1,7 @@
 # Layout fixtures (Phase 7)
 
 CSS fixtures exercising every value variant accepted by the layout parsers in
-`src/main/kotlin/app/parsing/css/properties/longhands/layout/`.
+`converter/src/main/kotlin/app/parsing/css/properties/longhands/layout/`.
 
 This phase's theme is **child-in-parent divergences** — every fixture styles
 both the parent (flex/grid/positioned container) and at least one, usually
@@ -14,7 +14,10 @@ Run via:
 ./gradlew :converter:run --args="convert --from css --to ir -i fixtures/properties/layout/<file>.json -o /tmp/p7"
 ```
 
-All 48 fixtures convert with `(0 generic)` on every component.
+Fixture count: `ls fixtures/properties/layout/*.json | wc -l` (48 at
+authoring, Phase 7; the directory has grown since — the coverage map below
+covers the original 48). Every fixture converted with `(0 generic)` on every
+component when the phase shipped; that claim has not been re-run since.
 
 ## Coverage map
 

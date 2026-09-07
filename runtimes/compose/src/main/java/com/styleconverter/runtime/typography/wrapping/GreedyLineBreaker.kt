@@ -64,12 +64,12 @@ object GreedyLineBreaker {
      * Byte-parallel with the Swift twin's fold — same "first word always
      * opens the line" rule, same candidate-measured-as-one-string rule
      * (so the separator's own advance and any kerning across it are
-     * included exactly as rendered), same §6.1 handling — minus the
+     * included exactly as rendered), same §5.3 handling — minus the
      * dictionary seam, which on this platform belongs to Minikin
      * ([AutoHyphenation]'s banner owns that story).
      *
      * @param hyphenChar the glyph painted at a taken hyphenation point
-     *   (css-text-3 §6.1 UA-defined; css-text-4 `hyphenate-character`
+     *   (css-text-3 §5.3 UA-defined; css-text-4 `hyphenate-character`
      *   would override). A REAL character in the returned string, so it
      *   is measured and rendered like any other glyph — a line that ends
      *   in a hyphen must fit WITH the hyphen.
@@ -200,7 +200,7 @@ object GreedyLineBreaker {
      */
     /**
      * @param dictionaryHyphenation wave 40 (lane T2) — `hyphens: auto`
-     *   with a language tag is live for this run, so §6.1 ADDS the
+     *   with a language tag is live for this run, so §5.3 ADDS the
      *   dictionary's opportunities to the UAX #14 set the veto below
      *   approximates. A line holding a hyphenatable word is therefore no
      *   longer unbreakable and must not trigger rule B — pre-breaking it

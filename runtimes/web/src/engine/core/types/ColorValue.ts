@@ -5,6 +5,13 @@
 //   examples/primitives/colors-named.json   (named colors + 'transparent' + 'currentColor')
 // Quirk #5: Dynamic colors (color-mix, light-dark, relative, currentColor) have NO srgb key.
 // Quirk #6: Alpha key is 'a' in legacy shapes, 'alpha' in modern shapes.
+//
+// Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+// path in this header is GONE — the directory was renamed to
+// `fixtures/primitives/` by restructure 02e4c457, then deleted by the
+// 2026-07-08 hard prune 1e0234f6 (#8), with nothing to replace it. The
+// shapes enumerated above (and the pins over them) are now the only record
+// of that wire contract: read the names as history, not as a path to open.
 
 // Classification of dynamic (non-pre-resolved) color values.
 export type DynamicKind =

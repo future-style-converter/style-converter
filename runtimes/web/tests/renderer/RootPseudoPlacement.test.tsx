@@ -4,7 +4,7 @@
 // the synthetic body-root holds a box the CSS generated on the DOCUMENT
 // ROOT (`html::before`), so a CONTAINED body's `direction: rtl` must not
 // decide where it sits (css-contain-1 §3.1 takes the contained body off
-// the css-writing-modes-4 §3.2 propagation channel).
+// the css-writing-modes-4 §8.1 propagation channel).
 //
 // MEASURED shape under test — css-contain/contain-body-dir-001..004 in
 // tools/titan/runs/wave27-final/sections/css-contain: the Chromium ref

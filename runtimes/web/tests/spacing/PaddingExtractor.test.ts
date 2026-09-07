@@ -1,5 +1,5 @@
 // Tests for PaddingExtractor — covers every IR shape seen in the
-// padding-* fixtures under examples/properties/spacing/.
+// padding-* fixtures under fixtures/properties/spacing/.
 import { describe, it, expect } from 'vitest';
 import { extractPadding } from '../../src/engine/spacing/PaddingExtractor';
 import { applyPadding } from '../../src/engine/spacing/PaddingApplier';

@@ -5,8 +5,14 @@
 //  The two layout constants ComponentRenderer's marker branch builds its
 //  HStack from, with the measurement and the spec citation that fix each.
 //  They live here rather than inline in the 3970-line renderer so the
-//  argument is readable and the values are unit-pinnable
-//  (ListMarkerRowTests) without rasterizing.
+//  argument is readable and the values are unit-pinnable without
+//  rasterizing. The pins live in ListMarkerAbsposItemRasterTests
+//  (`testMarkerRowAlignmentIsChosenPerItem` asserts rowAlignment's two
+//  arms and `gapPt == 4`, plus rendersInsideOverlay's four arms) and
+//  ListMarkerInFlowItemRasterTests (itemExposesTextBaseline +
+//  rendersInsideOverlay's negative half). Retro P2e (finding A4#8)
+//  replaced the name "ListMarkerRowTests" here: no such class exists, so
+//  the claimed pin could not be checked without a grep.
 //
 //  ## The defect these constants repair
 //  On the wave27-gate arabic-indic capture
@@ -34,7 +40,7 @@
 //     (the marker `Text`) to ~zero width. It painted nothing, and its
 //     glyphs wrapped onto extra lines, stretching the row. Repaired at
 //     the call site with `.fixedSize()`: the ::marker box is
-//     inline-level shrink-to-fit content (css-lists-3 §3.2), sized by
+//     inline-level shrink-to-fit content (css-lists-3 §3.5), sized by
 //     its glyphs — never by the leftover space in its item.
 //
 //  2. `.firstTextBaseline` alignment applied UNCONDITIONALLY. This
@@ -45,7 +51,7 @@
 //     marker's descent to every row even in the cases where the marker
 //     did fit (measured: 37px pitch for a 31.25px item). The repair is
 //     NOT "always top": for an item that DOES have text, sharing a
-//     baseline with the marker is exactly right (css-lists-3 §3.2 — the
+//     baseline with the marker is exactly right (css-lists-3 §3.5 — the
 //     marker is the item's first inline box, and inline boxes align on
 //     the line's baseline). So the alignment is now CHOSEN per item, by
 //     whether the item exposes a first text baseline at all.
@@ -88,7 +94,7 @@ enum ListMarkerRow {
     ///
     /// - `.firstTextBaseline` when the item CAN expose one: the marker is
     ///   the item's first inline box and shares the line's baseline
-    ///   (css-lists-3 §3.2). This is the pre-wave-27 behaviour, kept
+    ///   (css-lists-3 §3.5). This is the pre-wave-27 behaviour, kept
     ///   verbatim for every item it was ever correct for.
     /// - `.top` otherwise: with no baseline to share, SwiftUI would fall
     ///   back to the item's BOTTOM edge and hang the marker's ascent
@@ -162,7 +168,7 @@ enum ListMarkerRow {
     /// -102/-007/-117/-159, the four rows scoring 0.60–0.86).
     ///
     /// ## Both gates are load-bearing
-    /// - `.inside` only. css-lists-3 §3.2 puts an `inside` marker in the
+    /// - `.inside` only. css-lists-3 §3.5 puts an `inside` marker in the
     ///   item's content but an `outside` marker in the item's MARGIN area,
     ///   left of the border box — drawing that one at the content-box
     ///   origin would move it right by its own width. `outside` keeps the

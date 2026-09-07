@@ -8,10 +8,6 @@
 
 import Foundation
 
-enum BackgroundSizeProperty {
-    static let names: [String] = ["BackgroundSize"]
-}
-
 enum BackgroundSizeExtractor {
 
     // Single-pass; last-wins. Returns nil when no BackgroundSize property.

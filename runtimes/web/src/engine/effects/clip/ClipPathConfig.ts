@@ -14,4 +14,3 @@
 //                                                                  (box keyword alone if no shape)
 export interface ClipPathConfig { value?: string; }                                // pre-serialised
 export const CLIP_PATH_PROPERTY_TYPE = 'ClipPath' as const;
-export type ClipPathPropertyType = typeof CLIP_PATH_PROPERTY_TYPE;

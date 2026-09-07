@@ -3,6 +3,7 @@ package com.styleconverter.runtime.layout.flexbox
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.renderer.ComponentRenderer.AlignSelf
 import kotlinx.serialization.json.JsonPrimitive
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -20,7 +21,9 @@ class FlexCrossStretchTest {
 
     // Convenience: the all-gates-open composed call, overridable per test.
     private fun decide(
-        composedWpt: Boolean = true,
+        // Retro R2 seam patch: the capture mode is no longer an input; the
+        // parameter is kept on this helper so the existing pins read as-is.
+        @Suppress("UNUSED_PARAMETER") composedWpt: Boolean = true,
         alignSelf: AlignSelf = AlignSelf.AUTO,
         rowAxis: Boolean = true,
         containerItemsStretch: Boolean = true,
@@ -29,7 +32,7 @@ class FlexCrossStretchTest {
         childIsOutOfFlow: Boolean = false,
         childGeneratesBox: Boolean = true,
     ) = FlexCrossStretch.effectiveStretch(
-        composedWpt, alignSelf, rowAxis, containerItemsStretch,
+        alignSelf, rowAxis, containerItemsStretch,
         containerCrossDefinite, childCrossDefinite, childIsOutOfFlow,
         childGeneratesBox,
     )
@@ -62,18 +65,57 @@ class FlexCrossStretchTest {
             rowAxis = true, containerCrossDefinite = false, containerItemsStretch = false))
     }
 
+    // ── Retro R2 (A11#12): the capture mode no longer gates the spec arms ─
+
     @Test
-    fun `dark stage - auto never stretches (the frozen no-op)`() {
-        // Outside composed capture the fit-content calibration stands: an
-        // `auto` item keeps the legacy hug regardless of the other gates.
-        assertFalse(decide(composedWpt = false, alignSelf = AlignSelf.AUTO))
+    fun `dark stage - auto stretches exactly like composed capture`() {
+        // css-flexbox-1 §8.3 does not know what a capture mode is. Wave 47's
+        // composed-only gate made Android render FC_AlignSelf / N3 /
+        // AI_Stretch items content-sized on the dark stage (A11#12); both
+        // modes now return the same decision for the same inputs.
+        assertTrue(decide(composedWpt = false, alignSelf = AlignSelf.AUTO))
+        assertEquals(decide(composedWpt = true), decide(composedWpt = false))
     }
 
     @Test
-    fun `dark stage - explicit column stretch keeps Alignment-Start, no fill`() {
-        // The column loop NEVER filled before wave 47 (FC_AlignSelf pixel
-        // calibration) — composed=false must keep that exactly.
-        assertFalse(decide(composedWpt = false, alignSelf = AlignSelf.STRETCH, rowAxis = false))
+    fun `dark stage - explicit column stretch fills the line cross size`() {
+        // §9.4 step 11: the audit's FC_AlignSelf `d` row — `align-self:
+        // stretch`, no width, in a 200px-wide column container — must fill
+        // (iOS 188 wide, CSS-correct) instead of hugging (Android/web 48).
+        assertTrue(decide(composedWpt = false, alignSelf = AlignSelf.STRETCH, rowAxis = false))
+    }
+
+    @Test
+    fun `FC_AlignSelf verbatim IR - only d stretches, a b c are positional`() {
+        // fixtures/fidelity/trees/flex-column.json → converter IR (retro R2
+        // scratch run): container `AlignItems: "CENTER"` → auto items do NOT
+        // stretch; `d` carries `AlignSelf: "STRETCH"` and no Width.
+        val container = listOf(IRProperty("AlignItems", JsonPrimitive("CENTER")),
+            IRProperty("FlexDirection", JsonPrimitive("COLUMN")))
+        val itemsStretch = FlexCrossStretch.containerAlignItemsStretches(container)
+        assertFalse(itemsStretch)
+        // a/b/c: explicit positional align-self + a definite 80px width.
+        for (a in listOf(AlignSelf.FLEX_START, AlignSelf.CENTER, AlignSelf.FLEX_END)) {
+            assertFalse(decide(composedWpt = false, alignSelf = a, rowAxis = false,
+                containerItemsStretch = itemsStretch, childCrossDefinite = true))
+        }
+        // d: stretch, width auto → fills the 200px (minus padding) line.
+        assertTrue(decide(composedWpt = false, alignSelf = AlignSelf.STRETCH, rowAxis = false,
+            containerItemsStretch = itemsStretch, childCrossDefinite = false))
+    }
+
+    @Test
+    fun `N3_ColumnOfRows and AI_Stretch verbatim IR - auto items stretch on both axes`() {
+        // nested-3level N3_ColumnOfRows: Width 280, FlexDirection COLUMN, no
+        // AlignItems → initial `normal` = stretch; row1/row2 have no Width.
+        assertTrue(FlexCrossStretch.containerAlignItemsStretches(
+            listOf(IRProperty("FlexDirection", JsonPrimitive("COLUMN")))))
+        assertTrue(decide(composedWpt = false, alignSelf = AlignSelf.AUTO, rowAxis = false))
+        // flex-align-items AI_Stretch: Width 300, Height 100, `AlignItems:
+        // "STRETCH"`, children width 50 and NO height → fill the row height.
+        assertTrue(FlexCrossStretch.containerAlignItemsStretches(
+            listOf(IRProperty("AlignItems", JsonPrimitive("STRETCH")))))
+        assertTrue(decide(composedWpt = false, alignSelf = AlignSelf.AUTO, rowAxis = true))
     }
 
     // ── Spec gates on the new arms ─────────────────────────────────────
@@ -115,14 +157,14 @@ class FlexCrossStretchTest {
     @Test
     fun `non-stretch align-items keeps auto items positional`() {
         // `align-self: auto` resolves to the container's align-items
-        // (css-align-3 §6.4) — center/start/end are positional, no fill.
+        // (css-align-3 §6.2) — center/start/end are positional, no fill.
         assertFalse(decide(containerItemsStretch = false))
     }
 
     @Test
     fun `explicit column stretch fills in composed capture`() {
-        // The composed WPT page has no fit-content wrapper, so an explicit
-        // `align-self: stretch` column item genuinely fills its width.
+        // An explicit `align-self: stretch` column item fills its width
+        // (§9.4 step 11) — composed capture was the first mode to get it.
         assertTrue(decide(alignSelf = AlignSelf.STRETCH, rowAxis = false))
     }
 

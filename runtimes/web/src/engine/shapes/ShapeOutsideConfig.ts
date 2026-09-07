@@ -11,4 +11,3 @@
 //   {type:'keyword', keyword:'inherit'}       -> the CSS-wide keyword
 //   {type:'raw', value:'linear-gradient(…)'}  -> the value verbatim
 export interface ShapeOutsideConfig { value?: string }
-export const SHAPEOUTSIDE_PROPERTY_TYPE = 'ShapeOutside' as const;

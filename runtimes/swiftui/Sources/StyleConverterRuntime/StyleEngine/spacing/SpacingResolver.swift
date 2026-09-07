@@ -4,7 +4,11 @@
 //
 //  Shared LengthValue → CGFloat resolver for padding / margin / gap. Kept
 //  separate from the appliers so the applier files stay under 200 lines
-//  and so the resolver can be unit-tested independently (SpacingSelfTest).
+//  and so the resolver can be unit-tested independently — the pins are
+//  SpacingTests (`SpacingResolver.resolve` px / negative-padding-clamp /
+//  negative-margin cases). Retro P2e corrected the name: the launch-time
+//  `SpacingSelfTest` became that XCTest class when the engine moved into
+//  the SwiftPM package.
 //  All functions are pure; unresolved values degrade to 0 with a logged
 //  reason rather than raising.
 //
@@ -142,21 +146,21 @@ enum SpacingResolver {
         // ~advance-based width) into the per-unit rules of the pin table,
         // mirrored line-for-line by the Compose resolveRelative():
         // Pin P1 — `ch` = advance width of '0' in the element's font
-        // (css-values-4 §6.1.3), measured via ChUnitMetrics/CoreText when
+        // (css-values-4 §6.1.1), measured via ChUnitMetrics/CoreText when
         // the plumbing provided it; else the spec's own 0.5em assumption.
         case .ch:
             return toPx(value * (ctx.chAdvancePx ?? 0.5 * ctx.fontSizePx))
-        // Pin P2 — `ex` = x-height; §6.1.3 mandates 0.5em when the metric
+        // Pin P2 — `ex` = x-height; §6.1.1 mandates 0.5em when the metric
         // is impractical to determine (we don't measure x-height yet).
         case .ex:
             return toPx(value * 0.5 * ctx.fontSizePx)
-        // Pin P3 — `ic` fallback is 1em per §6.1.3. Pin P4 — `cap`'s spec
+        // Pin P3 — `ic` fallback is 1em per §6.1.1. Pin P4 — `cap`'s spec
         // fallback is the ascent; 1em is the documented approximation kept
         // identical to the previous behaviour (and to Compose).
         case .em, .cap, .ic:
             return toPx(value * ctx.fontSizePx)
         // Pin P5 (amended wave 43, lane V3) — `lh` = the element's USED
-        // line-height (css-values-4 §6.2.1). The threaded
+        // line-height (css-values-4 §6.1.1). The threaded
         // SpacingContext.lineHeightPx wins when the renderer resolved one
         // (declared line-height verbatim, or the WPT-capture calibrated
         // grid — see LhUnitLineHeight); a nil channel keeps the historical

@@ -1,6 +1,6 @@
 // FontMinSizeExtractor.ts — folds `FontMinSize` IR properties into a FontMinSizeConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontMinSizeConfig, FONT_MIN_SIZE_PROPERTY_TYPE, FontMinSizePropertyType } from './FontMinSizeConfig';
 import { lengthCss } from './_shared';

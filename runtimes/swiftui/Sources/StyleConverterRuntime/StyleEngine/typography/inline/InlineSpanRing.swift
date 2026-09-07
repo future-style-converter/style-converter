@@ -91,7 +91,7 @@ enum InlineSpanRing {
         var fontSizePx: CGFloat? = nil
         /// Relative font-size FACTOR (em / % / smaller / larger wires) —
         /// multiplied against the paragraph's resolved size in the label
-        /// (the fold host is the CSS parent, css-values-4 §5.1.1).
+        /// (the fold host is the CSS parent, css-values-4 §6.1.1).
         var fontSizeEm: CGFloat? = nil
         /// Numeric weight 100..900 (the wire is pre-normalized).
         var fontWeight: Int? = nil
@@ -153,7 +153,7 @@ enum InlineSpanRing {
 
     /// Admit one glyph-bearing member's property bag, or refuse with the
     /// first offending property named. `Hyphens` is skipped — the fold's
-    /// adoption walk owns it (css-text-3 §6.1). Byte-parallel with
+    /// adoption walk owns it (css-text-3 §5.3). Byte-parallel with
     /// InlineSpanRing.kt's admit.
     static func admit(tag: String,
                       properties: [IRProperty],
@@ -181,13 +181,13 @@ enum InlineSpanRing {
             // Paragraph policy — the fold's adoption walk owns it.
             case "Hyphens":
                 continue
-            // The member's own text ink (css-color-4 §3.1).
+            // The member's own text ink (css-color-4 §3.2).
             case "Color":
                 guard let ink = extractInk(prop.data) else {
                     return .refused("member-prop:Color-unresolved")
                 }
                 style.ink = ink
-            // css-fonts-4 §2.4 — absolute px or a parent-relative factor.
+            // css-fonts-4 §2.5 — absolute px or a parent-relative factor.
             case "FontSize":
                 switch extractFontSize(prop.data) {
                 case .px(let px): style.fontSizePx = px; declaredFontSize = true
@@ -275,7 +275,7 @@ enum InlineSpanRing {
     /// (css-cascade-4 §7.3) unless it declares its own, decorations
     /// accumulate over descendants (css-text-decor-3 §2.1 propagation),
     /// and a relative nested size resolves against the OUTER box
-    /// (css-values-4 §5.1.1 — its parent is the outer member, not the
+    /// (css-values-4 §6.1.1 — its parent is the outer member, not the
     /// paragraph). Returns nil for the one shape no flat span can
     /// express: BOTH boxes shifted (vertical-align offsets ADD box-by-
     /// box; a compound shift needs the tree the fold flattened away —
@@ -370,7 +370,7 @@ enum InlineSpanRing {
         if let px = o["pixels"]?.doubleValue { return .px(CGFloat(px)) }
         guard case .object(let original)? = o["original"] else { return nil }
         switch original["type"]?.stringValue {
-        // css-fonts-4 §2.4 absolute-size ladder (the shared px table).
+        // css-fonts-4 §2.5.1 absolute-size ladder (the shared px table).
         case "absolute", "absoluteKeyword":
             switch original["keyword"]?.stringValue?.lowercased() {
             case "xx-small": return .px(9)
@@ -390,7 +390,7 @@ enum InlineSpanRing {
             case "smaller": return .factor(1.0 / 1.2)
             default: return nil
             }
-        // css-values-4 §5.1.1 — em against the parent (= the fold host),
+        // css-values-4 §6.1.1 — em against the parent (= the fold host),
         // rem against the 16px pinned root.
         case "length":
             guard case .object(let inner)? = original["original"],
@@ -400,7 +400,7 @@ enum InlineSpanRing {
             case "REM": return .px(CGFloat(v) * 16)
             default: return nil
             }
-        // css-fonts-4 §2.4 <percentage> — against the parent size.
+        // css-fonts-4 §2.5 <percentage> — against the parent size.
         case "percentage":
             guard let pct = original["value"]?.doubleValue else { return nil }
             return .factor(CGFloat(pct) / 100)

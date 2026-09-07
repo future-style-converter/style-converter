@@ -6,7 +6,7 @@ package com.styleconverter.runtime.core.variables
 //
 //   1. var() chains through 2 slot levels — CssVariableScope.merge order
 //      (element shadows slot-parent, spec 02 resolution step 1-2).
-//   2. Fallbacks, nested per css-variables-1 §2.3 (variables-basic golden).
+//   2. Fallbacks, nested per css-variables-1 §3 (variables-basic golden).
 //   3. Guaranteed-invalid ⇒ UNSET — the declaration is DROPPED so the
 //      renderer paints the absent-property default (token-fallbacks
 //      "missing" tile: transparent, exactly what web paints).
@@ -91,7 +91,7 @@ class DynamicValueResolverTest {
         assertEquals(1.0, srgbOf(r.properties, "Color")!!["r"]!!.jsonPrimitive.doubleOrNull!!, 1e-6)
     }
 
-    // ── 2. fallbacks (css-variables-1 §2.3) ───────────────────────────
+    // ── 2. fallbacks (css-variables-1 §3) ───────────────────────────
 
     @Test
     fun `missing variable uses fallback, nested fallback recurses`() {
@@ -247,7 +247,7 @@ class DynamicValueResolverTest {
 
     @Test
     fun `font-size em resolves against the PARENT size, then feeds siblings`() {
-        // css-values-4 §5.1.1: em on font-size is relative to the INHERITED
+        // css-values-4 §6.1.1: em on font-size is relative to the INHERITED
         // size (parent channel = 20) → own 30; em on OTHER properties then
         // uses the element's own 30.
         val props = listOf(
@@ -297,7 +297,7 @@ class DynamicValueResolverTest {
 
     @Test
     fun `rem width resolves against the root font size, ignoring the element font size`() {
-        // css-values-4 §5.1.1: rem is ALWAYS relative to the ROOT font size,
+        // css-values-4 §6.1.1: rem is ALWAYS relative to the ROOT font size,
         // never the element's own. Even with a local `font-size: 32px`, a
         // `width: 12rem` must resolve to 12 × 16 (root) = 192, NOT 12 × 32.
         // ctx().rootFontSizePx is fixed at 16 (the harness never styles the

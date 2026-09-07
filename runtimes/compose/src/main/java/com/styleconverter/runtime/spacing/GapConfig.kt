@@ -3,7 +3,7 @@ package com.styleconverter.runtime.spacing
 // GapConfig — container-level row-gap and column-gap. CSS shorthand `gap: N`
 // expands to `row-gap: N; column-gap: N` (no standalone Gap property reaches
 // us — the converter always emits both longhands). See
-// examples/properties/spacing/gap.json for fixture coverage.
+// fixtures/properties/spacing/gap.json for fixture coverage.
 //
 // IR shapes (DIFFERENT from padding/margin — all tagged):
 //   {"type": "length", "px": 10}                 → Exact 10px

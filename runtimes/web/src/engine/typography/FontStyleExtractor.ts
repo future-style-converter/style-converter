@@ -1,6 +1,6 @@
 // FontStyleExtractor.ts — folds `FontStyle` IR properties into a FontStyleConfig.
 // Family: font-style.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontStyleConfig, FONT_STYLE_PROPERTY_TYPE, FontStylePropertyType } from './FontStyleConfig';
 import { kwLower, angleCss } from './_shared';

@@ -43,7 +43,7 @@ behavior, caveats included.
 declarations paint. Two mechanisms read it, and a wire without it runs
 both on the consumer's default locale:
 
-- **`quotes: auto`** (css-content-3 §2.2.1). The UA's
+- **`quotes: auto`** (css-content-3 §2.4.1). The UA's
   `q::before { content: open-quote }` picks a CLDR quote pair keyed by
   the content language: French `«…»`, Japanese `「…」`, German `„…“`.
   With no language on the wire every `<q>` paints the root pair.
@@ -164,7 +164,7 @@ describes a scaling of nothing. `src` closes that.
 
 - **One canonical key, whatever the markup spelled.** `src` on
   `img`/`embed`, `data` on `object` (HTML §4.8.7), `poster` on `video`
-  (§4.8.9 — the poster frame is what a still capture paints, and it is
+  (§4.8.8 — the poster frame is what a still capture paints, and it is
   object-fit-scaled like any other replaced content). Normalizing is in
   keeping with the lane's siblings, which already retype rather than
   mirror (`checked` → literal `true`, `min`/`max` → Number).

@@ -56,7 +56,7 @@ struct InsetShape: Shape {
         // then constrains them against the inset rect) — WPT
         // clip-path-inset-round-percent: `inset(80% 0 0 round 8%)` on a
         // 100px box is an 8px radius on the 100×20 strip, not 8×1.6. The
-        // css-backgrounds-3 §5.1 overlap rule then scales BOTH axes by
+        // css-backgrounds-3 §4.5 overlap rule then scales BOTH axes by
         // one factor so the corners stay similar ellipses.
         if let frac = cornerRadiusFraction {
             let rx0 = cornerRadius + box.width * frac

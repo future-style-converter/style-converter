@@ -5,7 +5,7 @@ package com.styleconverter.runtime.spacing
 // primitive; the Applier is a documented no-op for Phase 2. We still model
 // the config so PropertyTracker sees the property as "implemented stub".
 //
-// Fixture: examples/properties/spacing/margin-trim.json (7 components).
+// Fixture: fixtures/properties/spacing/margin-trim.json (7 components).
 // Note (fixture spec): the combined form "block inline" is NOT parsed by the
 // upstream CSS parser today. We therefore only model the seven keyword
 // variants the parser actually emits.

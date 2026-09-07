@@ -1,6 +1,6 @@
 // BlockEllipsisExtractor.ts — folds `BlockEllipsis` IR properties into a BlockEllipsisConfig.
 // Family: block-ellipsis.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { BlockEllipsisConfig, BLOCK_ELLIPSIS_PROPERTY_TYPE, BlockEllipsisPropertyType } from './BlockEllipsisConfig';
 import { kwLower } from './_shared';

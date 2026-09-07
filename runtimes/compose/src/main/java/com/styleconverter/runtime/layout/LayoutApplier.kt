@@ -12,10 +12,15 @@ import androidx.compose.ui.Modifier
 //       the correct Compose container primitive (Row / Column / Box /
 //       LazyVerticalGrid / custom position-layer).
 //
-// Step 1 leaves both hooks as identity: Modifier is returned unchanged, and
-// ContainerDecision.default signals "let the legacy renderer decide." This
-// keeps the Phase 7 rollout zero-behavioral-change until step 2 starts
-// populating FlexContainer decisions.
+// Retro P2e (finding A6#15, phrase sweep): this paragraph said "Step 1 leaves
+// both hooks as identity: Modifier is returned unchanged, and
+// ContainerDecision.default signals 'let the legacy renderer decide'". Neither
+// half survives — `containerDecision` classifies Flex (via FlexboxApplier),
+// None (display:none) and Grid (GridLayoutApplier.isGridContainer) and only
+// then falls through to ContainerDecision.default, and ComponentRenderer reads
+// the result (`engineDecision.kind`) to pick its container. What IS still a
+// stub is the `TODO(phase7/step4+)` at the end of that function: the advanced
+// / root branches (anchor positioning, motion path) still return .default.
 
 /**
  * High-level classification of the Compose container primitive the renderer
@@ -89,9 +94,16 @@ object LayoutApplier {
      * properties (zIndex, alignSelf, order, position inset when
      * position=relative/sticky, etc.).
      *
-     * Step 1: identity. The legacy [com.styleconverter.runtime.StyleApplier]
-     * still produces the real modifier chain because every layout property
-     * stays on its legacy path until step 6 reconciliation.
+     * NOT identity, and NOT reached in production — retro P2e (finding
+     * A6#15, phrase sweep) replaced "Step 1: identity … until step 6
+     * reconciliation" with both halves of the truth. It delegates to
+     * [com.styleconverter.runtime.layout.position.PositionLayoutApplier
+     * .childModifier], which chains z-index + relative/sticky offsets; but
+     * its only caller is [LayoutFacade.childModifier], which nothing in
+     * `runtimes/compose/src/main` calls, so the real per-child chain is
+     * still the legacy [com.styleconverter.runtime.StyleApplier] one and
+     * step-6 reconciliation never happened. The delegate itself IS pinned
+     * (PositionRtlPhysicalOffsetTest calls PositionLayoutApplier directly).
      */
     fun childModifier(config: LayoutConfig): Modifier {
         // Phase 7b: wire z-index + position offsets via the position sub-applier.
@@ -107,8 +119,15 @@ object LayoutApplier {
     /**
      * Decide which Compose container to render children with.
      *
-     * Step 1: always returns [ContainerDecision.default] so the
-     * ComponentRenderer falls through to its existing dispatch.
+     * Retro P2e (finding A6#15, phrase sweep): this said "Step 1: always
+     * returns [ContainerDecision.default] so the ComponentRenderer falls
+     * through to its existing dispatch". It has not since step 2 — the body
+     * classifies Flex (FlexboxApplier.decide), None (display:none) and Grid
+     * (GridLayoutApplier.isGridContainer) and only THEN falls through to
+     * [ContainerDecision.default], and ComponentRenderer reads the result
+     * (`engineDecision.kind`, ComponentRenderer.kt:1268) to pick its
+     * container primitive. Default is still the answer for the advanced /
+     * root branches — see the `TODO(phase7/step4+)` at the end of the body.
      */
     fun containerDecision(config: LayoutConfig): ContainerDecision {
         // Phase 7b step 2: consult the flexbox sub-applier first. It returns

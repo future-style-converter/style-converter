@@ -3,7 +3,7 @@
 //  IOS-BI lane — paint-order pin for the border-image nine-slice.
 //
 //  CSS paints border-image above the background chain but BENEATH the
-//  element's content (css-backgrounds-3 §6 draws it "in place of the
+//  element's content (css-backgrounds-3 §5 draws it "in place of the
 //  border"; CSS2 Appendix E paints borders after backgrounds, before
 //  content). The applier used to attach its Canvas as an `.overlay`,
 //  which inverted that: with slice `fill`, the center rectangle painted

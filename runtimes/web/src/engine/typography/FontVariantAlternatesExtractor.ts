@@ -1,6 +1,6 @@
 // FontVariantAlternatesExtractor.ts — folds `FontVariantAlternates` IR properties into a FontVariantAlternatesConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariantAlternatesConfig, FONT_VARIANT_ALTERNATES_PROPERTY_TYPE, FontVariantAlternatesPropertyType } from './FontVariantAlternatesConfig';
 import { kwList } from './_shared';

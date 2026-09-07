@@ -78,7 +78,7 @@ final class ListMarkerAbsposItemRasterTests: XCTestCase {
     /// One `<li>`: RELATIVE, 158×31.25 border-box, holding a single
     /// absolutely-positioned 13.14×30 text run. `arabic-indic` is a counter
     /// style NEITHER native models, so the UA `ol { list-style-type:
-    /// decimal }` (HTML §15.3.9) stands and the marker reads "1." / "2.".
+    /// decimal }` (HTML §15.3.7) stands and the marker reads "1." / "2.".
     private static func item(id: String, glyph: String, type: String,
                              markerText: String?) -> String {
         // `meta.markerText` is the wave-27 lane-CBAKE baked marker — the
@@ -205,7 +205,7 @@ final class ListMarkerAbsposItemRasterTests: XCTestCase {
             XCTAssertLessThan(band.left, 240,
                 "leftmost ink at x=\(band.left) — B-RC5: the marker box was "
                 + "compressed out of existence by the item's declared width "
-                + "(css-lists-3 §3.2 makes it shrink-to-fit, not flexible)")
+                + "(css-lists-3 §3.5 makes it shrink-to-fit, not flexible)")
         }
     }
 
@@ -274,7 +274,7 @@ final class ListMarkerAbsposItemRasterTests: XCTestCase {
                 "item \(i): the abspos reference glyph's right edge moved from "
                 + "\(pair.1.right) (no marker) to \(pair.0.right) (marker) — the "
                 + "`inside` marker is displacing the item's principal box, but "
-                + "css-lists-3 §3.2 makes it the item's FIRST INLINE BOX, inside "
+                + "css-lists-3 §3.5 makes it the item's FIRST INLINE BOX, inside "
                 + "that box and unable to move it")
         }
     }

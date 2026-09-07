@@ -1,5 +1,5 @@
 // Fonts.test.ts — Phase-6 coverage for font-* property triplets.
-// Fixtures mined from examples/properties/typography/font-*.json after
+// Fixtures mined from fixtures/properties/typography/font-*.json after
 // ./gradlew run conversion.  Each block asserts the emitted CSS matches
 // what the browser would accept natively.
 import { describe, it, expect } from 'vitest';

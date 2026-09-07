@@ -77,9 +77,14 @@ class ComposedRootInlineFlowTest {
         // The packer's 16/4 strut pins are solved for the ref's INJECTED
         // body line box; an author override invalidates them, exactly like
         // absolute-tables-013's `line-height: 0` <td> in the nested lane.
+        // The LIVE converter wire for `line-height: 0` is the NESTED length
+        // — `{"original":{"type":"length","px":0.0}}` — which is the only
+        // length spelling the wave49-final corpus carries for LineHeight
+        // (retro R10, A8#5: the flat `{"type":"length","px":0}` literal that
+        // stood here is a shape the converter has never emitted).
         val body = IRComponent(
             id = "body", name = "body",
-            properties = listOf(prop("LineHeight", """{"type":"length","px":0}""")),
+            properties = listOf(prop("LineHeight", """{"original":{"type":"length","px":0.0}}""")),
             role = "body-root",
         )
         val boxes = composedRootInlineBoxes(
@@ -208,29 +213,34 @@ class ComposedRootInlineFlowTest {
 
     // ── wave 44 (skeptic S2): the B8 pass-preservation proof ────────────
 
-    @Test fun `B8 - scope-pseudo-element's verbatim wave43 IR keeps its passing root run`() {
+    @Test fun `B8 - scope-pseudo-element's verbatim corpus IR keeps its passing root run`() {
         // ADVERSARIAL pin (wave-44 skeptic S2): css-cascade/scope-pseudo-
         // element is the ONE currently-PASSING composed document (Android
-        // 0.9742, wave43-final frozen) whose three roots declare BOTH
-        // `display: inline-block` AND `vertical-align: top`. An UNSCOPED
-        // B8 gate would evict all three from the root run and revert the
-        // canvas to the block stack — an unmeasured regression of a pass.
-        // This test feeds the committed wave43-final per-test IR VERBATIM
-        // (decoder → SlotComposer → the harness facade — the exact path
-        // ComposedCaptureCanvas runs) and pins the run's survival.
-        val rel = "tools/titan/runs/wave43-final/sections/css-cascade/" +
-            "per-test-ir/wpt__css-cascade__scope-pseudo-element.json"
+        // 0.9746 android-ref, wave48-final and wave49-final — retro A3#12
+        // corrected the 0.9742 transposed here from calc-size-grid-repeat)
+        // whose three roots declare BOTH `display: inline-block` AND
+        // `vertical-align: top`. An UNSCOPED B8 gate would evict all three
+        // from the root run and revert the canvas to the block stack — an
+        // unmeasured regression of a pass. This test feeds the committed
+        // per-test IR VERBATIM (decoder → SlotComposer → the harness facade
+        // — the exact path ComposedCaptureCanvas runs) and pins the run's
+        // survival.
+        //
+        // Retro R10 (finding A8#3): the payload used to be read from
+        // `tools/titan/runs/wave43-final/…` behind an `Assume.assumeTrue`,
+        // and that gitignored run directory was pruned waves ago — so this
+        // pin SKIPPED on every sweep, on every machine, permanently. The
+        // byte-verbatim document now lives in `tools/titan/fixtures/` (see
+        // that dir's README for the provenance rules); the wave49-final copy
+        // is byte-identical to wave47/48-final. No skip guard: a missing
+        // fixture is a real failure.
+        val rel = "tools/titan/fixtures/per-test-ir/wave49-final/css-cascade/" +
+            "wpt__css-cascade__scope-pseudo-element.json"
         // Repo-root walk-up — the ComposedFullHeightCaptureTest convention,
-        // robust to Gradle running tests from module subdirs. The frozen
-        // runs/ evidence is gitignored (materialised in campaign worktrees,
-        // absent on CI), so absence SKIPS rather than fails: the gate table
-        // itself stays pinned by the synthetic B8 test above either way.
+        // robust to Gradle running tests from module subdirs.
         var dir: java.io.File? = java.io.File(System.getProperty("user.dir") ?: ".").absoluteFile
         while (dir != null && !java.io.File(dir, rel).exists()) dir = dir.parentFile
-        org.junit.Assume.assumeTrue(
-            "wave43-final evidence not materialised (gitignored runs/) — skipping the verbatim-IR pin",
-            dir != null,
-        )
+        assertNotNull("vendored corpus IR not found by walking up from ${System.getProperty("user.dir")}", dir)
         val json = java.io.File(dir!!, rel).readText()
         val roots = com.styleconverter.runtime.core.renderer.SlotComposer.compose(
             com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(json),

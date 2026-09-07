@@ -48,7 +48,7 @@ class ListMarkerTextStyleTest {
 
     @Test
     fun `marker inherits the item's font quartet`() {
-        // css-lists-3 §3.2 — the marker box inherits from its originating
+        // css-lists-3 §3.1.1 — the marker box inherits from its originating
         // element; css-fonts-4 §1.1 makes all four "Inherited: yes". This
         // is the whole of B-RC8: before the fix these were all unset and
         // the marker fell back to Material's ~14sp default.
@@ -119,7 +119,7 @@ class ListMarkerTextStyleTest {
         // "the item's font" — it is Compose's SYSTEM face, so the same CSS
         // `font-family` produced two different primary faces for marker and
         // item, and hence two different natural line boxes on the row.
-        // css-lists-3 §3.2 makes the marker inherit from its originating
+        // css-lists-3 §3.1.1 makes the marker inherit from its originating
         // element, so it must land on the item's face, not the platform's.
         //
         // WAVE 41 (lane T4) — the font SIZE bottoms out at 16sp, the same
@@ -165,7 +165,7 @@ class ListMarkerTextStyleTest {
         // SKEPTIC REGRESSION PIN (wave 27). The marker's style is resolved
         // by ComponentRenderer through TextStyleApplier.extractTextStyle,
         // whose `inheritedFontSizeSp` parameter is what every RELATIVE
-        // font-size resolves against (css-values-4 §5.1.1 — `em` is a
+        // font-size resolves against (css-values-4 §6.1.1 — `em` is a
         // multiple of the INHERITED size; the wire leaves it unresolved on
         // purpose, CLAUDE.md's "null means runtime-dependent").
         //

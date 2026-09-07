@@ -9,4 +9,3 @@ export interface ReadingFlowConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const READINGFLOW_PROPERTY_TYPE = 'ReadingFlow' as const;
-export type ReadingFlowPropertyType = typeof READINGFLOW_PROPERTY_TYPE;

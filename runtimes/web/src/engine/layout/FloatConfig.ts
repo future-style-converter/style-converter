@@ -9,4 +9,3 @@ export interface FloatConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const FLOAT_PROPERTY_TYPE = 'Float' as const;
-export type FloatPropertyType = typeof FLOAT_PROPERTY_TYPE;

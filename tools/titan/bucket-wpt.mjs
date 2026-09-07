@@ -461,12 +461,18 @@ async function resolveWptRef() {
 // of the CharacterData write patterns. `.textContent =` is deliberately NOT
 // repeated here — Rule 4 already covers it.
 //
-// TODO(wave-30, lane ownership): this belongs in wpt-not-applicable.mjs's
-// Rule 4 regex next to the other mutation patterns; it lives here only
-// because the wave-30 lane split made that file another lane's. Folding it
-// in is a pure move — this function's regex is the exact alternation to add,
-// and this block should be DELETED at the same time so the catalogue stays
-// the single source of truth for what a tag means.
+// STILL OPEN, and the reason it was opened is long gone: this belongs in
+// wpt-not-applicable.mjs's Rule 4 regex (:161) next to the other mutation
+// patterns, and it lives here only because the wave-30 LANE SPLIT made that
+// file another lane's for the length of one wave. Retro P2e (finding A6#15)
+// dropped the "TODO(wave-30, lane ownership)" tag: 19 waves later the
+// ownership excuse cannot apply to anyone, so the tag read as a scheduled
+// commitment when it is an unscheduled one. The move itself is unchanged and
+// still pure — this function's regex is the exact alternation to add to Rule
+// 4, and this block should be DELETED in the same edit so the catalogue stays
+// the single source of truth for what a tag means. Doing it is a behaviour
+// change (the tag would then be emitted by the catalogue, and its unit pins
+// move with it), which is why a comment sweep leaves it standing.
 const CHARACTER_DATA_MUTATION_RX =
     /<script\b(?![^>]*\bsrc=)[^>]*>[\s\S]*?(?:\.data\s*=|\.nodeValue\s*=|\.(?:replaceData|appendData|insertData|deleteData)\s*\()/i;
 
@@ -529,7 +535,9 @@ async function main() {
             }
         }
 
-        // Architectural-exclusion gate (swarm-001 17 rules). Runs on EVERY
+        // Architectural-exclusion gate (wpt-not-applicable.mjs — ALL of its
+        // EXPECTED_RULE_COUNT rules run here, 17 seeded by swarm-001 and 45
+        // today; retro A5#1 corrected the "17 rules" this read). Runs on EVERY
         // test regardless of bucket, but the practical effect is to flag
         // bucket-A and bucket-B tests that should be excluded from SSIM
         // gating because they exercise web-platform features the IR
@@ -567,7 +575,8 @@ async function main() {
     const buckets = { A: [], B: [], C: [] };
     const reasons = {};
     // notApplicable: { test-rel-path: [tag, tag, ...] } — set by the
-    // architectural-exclusion pass (swarm-001's 17 rules). Tests with
+    // architectural-exclusion pass (wpt-not-applicable.mjs, all 45 rules —
+    // 17 seeded by swarm-001; retro A5#1). Tests with
     // a non-empty tag list should be excluded from SSIM gating EVEN IF
     // they're bucket-A; the test exercises a web-platform feature the IR
     // doesn't model. Backward-compat: this is an additive top-level

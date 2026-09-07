@@ -1,6 +1,6 @@
 // OverflowWrapExtractor.ts — folds `OverflowWrap` IR properties into a OverflowWrapConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { OverflowWrapConfig, OVERFLOW_WRAP_PROPERTY_TYPE, OverflowWrapPropertyType } from './OverflowWrapConfig';
 import { kwLower } from './_shared';

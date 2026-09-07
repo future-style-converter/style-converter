@@ -10,16 +10,16 @@ describe('applySpeechPhase10', () => {
     expect(applySpeechPhase10([{ type: 'Speak', data: 'NEVER' }]))
       .toEqual({ speak: 'never' });
   });
-  it('SpeakHeader → once', () => {
-    expect(applySpeechPhase10([{ type: 'SpeakHeader', data: 'ONCE' }]))
-      .toEqual({ speakHeader: 'once' });
-  });
-  it('SpeakNumeral → digits', () => {
-    expect(applySpeechPhase10([{ type: 'SpeakNumeral', data: 'DIGITS' }]))
-      .toEqual({ speakNumeral: 'digits' });
-  });
-  it('SpeakPunctuation → code', () => {
-    expect(applySpeechPhase10([{ type: 'SpeakPunctuation', data: 'CODE' }]))
-      .toEqual({ speakPunctuation: 'code' });
+  // speak-header / speak-numeral / speak-punctuation are CSS 2 aural/table
+  // properties dropped from css-speech-1 with no IR class under
+  // irmodels/properties/speech/, so those type strings can never reach this
+  // dispatch; the three cases that synthesised them tested unreachable
+  // triplets, now deleted (A6#9). Pin the ignore behaviour instead.
+  it('IR types the converter cannot emit (speak-header/-numeral/-punctuation) are ignored', () => {
+    expect(applySpeechPhase10([
+      { type: 'SpeakHeader', data: 'ONCE' },
+      { type: 'SpeakNumeral', data: 'DIGITS' },
+      { type: 'SpeakPunctuation', data: 'CODE' },
+    ])).toEqual({});
   });
 });

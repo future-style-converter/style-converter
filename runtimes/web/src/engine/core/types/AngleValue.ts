@@ -4,6 +4,13 @@
 // 'original' is omitted when the source unit was already 'deg'.
 // Quirk #7: Some properties (transitions, filter drop-shadow) can carry lists of angles,
 // but per-element extraction is still the single-object form below.
+//
+// Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+// path in this header is GONE — the directory was renamed to
+// `fixtures/primitives/` by restructure 02e4c457, then deleted by the
+// 2026-07-08 hard prune 1e0234f6 (#8), with nothing to replace it. The
+// shapes enumerated above (and the pins over them) are now the only record
+// of that wire contract: read the names as history, not as a path to open.
 
 // Normalised angle value — always in degrees so downstream code can rotate() directly.
 export interface AngleValue { degrees: number }

@@ -2,7 +2,7 @@
 //  FilterBrightnessTests.swift
 //  Regression pins for the CSS brightness() operator.
 //
-//  filter-effects-1 §2.2 defines brightness() as a linear MULTIPLIER on the
+//  filter-effects-1 §6.1 defines brightness() as a linear MULTIPLIER on the
 //  colour channels. SwiftUI's `.brightness(_:)` is an ADDITIVE shift in
 //  [-1, 1]. The two coincide only at the identity point, and FilterApplier
 //  used the additive one — mapping `pct` to `(pct - 100) / 100`.

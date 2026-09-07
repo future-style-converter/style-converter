@@ -55,14 +55,14 @@ struct SpacingContext: Equatable {
 
     // Wave-18 lane 2 (pin P1) — the measured advance width of the glyph
     // '0' at the element's resolved font family + size, in px: the CSS
-    // `ch` unit basis (css-values-4 §6.1.3). Populated by StyleBuilder
+    // `ch` unit basis (css-values-4 §6.1.1). Populated by StyleBuilder
     // via ChUnitMetrics only when some length in the style actually uses
     // ch (zero cost otherwise). Nil = metrics unavailable → the resolver
     // falls back to the same section's mandated 0.5em assumption.
     var chAdvancePx: Double? = nil
 
     // Wave-43 lane V3 — the element's USED line-height in px: the CSS `lh`
-    // unit basis (css-values-4 §6.2.1: lh equals the computed line-height
+    // unit basis (css-values-4 §6.1.1: lh equals the computed line-height
     // of the element it is used on). Populated by ComponentRenderer's
     // styledContent context fold through LhUnitLineHeight's three-state
     // pick (declared line-height wins; declared-`normal`/absent under WPT

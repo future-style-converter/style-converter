@@ -62,7 +62,7 @@ enum BorderImageExtractor {
         // No border-image key seen → nil so the applier short-circuits
         // without resolving borders it will never use.
         guard touched else { return nil }
-        // Resolve the element's COMPUTED border widths — the §6.3 basis
+        // Resolve the element's COMPUTED border widths — the §5.3 basis
         // for `<number>` border-image-width values (and the initial `1`).
         // css-backgrounds-3 §4.3: a side whose border-style is
         // none/hidden/absent computes to width 0, which

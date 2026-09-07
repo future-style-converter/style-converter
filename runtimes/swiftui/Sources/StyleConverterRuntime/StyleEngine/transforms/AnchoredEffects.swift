@@ -5,7 +5,7 @@
 //  `transform-origin` expressed as a LENGTH, for the scale and 2D-rotate
 //  functions.
 //
-//  THE DEFECT. css-transforms-1 §2 renders every transform function as
+//  THE DEFECT. css-transforms-1 §4 renders every transform function as
 //  T(origin) · F · T(−origin), and §4 lets each axis of `transform-origin`
 //  be a keyword, a percentage, OR a length. The extractor already models
 //  that split faithfully — `TransformsExtractor.parseOriginAxis` writes a
@@ -44,7 +44,7 @@ import SwiftUI
 /// Conjugation of a linear 2x2 about the transform-origin, in the closed
 /// form the sibling `TransformsMath.anchoredSkew` uses.
 ///
-/// For any linear map L and anchor c, css-transforms-1 §2's
+/// For any linear map L and anchor c, css-transforms-1 §4's
 /// T(c) · L · T(−c) sends p to L·(p − c) + c, i.e. it keeps L's 2x2 block
 /// and adds the constant translation c − L·c. Writing that out avoids
 /// three matrix concatenations and, more importantly, avoids depending on

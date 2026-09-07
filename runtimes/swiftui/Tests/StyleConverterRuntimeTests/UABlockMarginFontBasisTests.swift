@@ -115,7 +115,7 @@ final class UABlockMarginFontBasisTests: XCTestCase {
         XCTAssertNil(UABlockMarginFontBasis.ownFontSizePx([prop("FontSize", #"{"px":0}"#)]))
     }
 
-    /// B4 — absolute keywords resolve through the css-fonts-4 §2.4 ladder.
+    /// B4 — absolute keywords resolve through the css-fonts-4 §2.5.1 ladder.
     func testB4_absoluteKeywordLadder() {
         func kw(_ k: String) -> [IRProperty] {
             [prop("FontSize", #"{"original":{"type":"absolute","keyword":"\#(k)"}}"#)]
@@ -138,7 +138,7 @@ final class UABlockMarginFontBasisTests: XCTestCase {
     }
 
     /// B6/B7 — em and % on font-size resolve against the INHERITED size
-    /// (css-values-4 §5.1.1 / css-fonts-4 §2.4); rem against the 16px root.
+    /// (css-values-4 §6.1.1 / css-fonts-4 §2.5); rem against the 16px root.
     func testB6B7_emRemAndPercentage() {
         XCTAssertEqual(UABlockMarginFontBasis.ownFontSizePx([
             prop("FontSize", #"{"original":{"type":"length","original":{"v":2,"u":"EM"}}}"#)])!,

@@ -9,4 +9,3 @@
 
 export interface TranslateConfig { value?: string; }
 export const TRANSLATE_PROPERTY_TYPE = 'Translate' as const;
-export type TranslatePropertyType = typeof TRANSLATE_PROPERTY_TYPE;

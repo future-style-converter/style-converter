@@ -92,7 +92,7 @@ fun uaVerticalBlockMargins(sourceTag: String?): Pair<Float, Float> =
 
 /**
  * wave-46 lane Y8 — the same UA margins resolved against the element's
- * OWN computed font-size, the em base css-values-4 §5.1.1 prescribes
+ * OWN computed font-size, the em base css-values-4 §6.1.1 prescribes
  * (HTML §15.3 declares every UA block margin in em; inherit-computed-001's
  * `<p>` with `font-size: larger` gets 1em × 19.2 = 19.2px in the browser
  * -ref, where the fixed table above gave 16 and painted the box 3px high).

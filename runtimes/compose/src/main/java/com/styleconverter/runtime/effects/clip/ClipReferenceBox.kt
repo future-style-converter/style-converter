@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.effects.clip
 
-// Wave 46 (lane Y4) — css-masking-1 §7.1 REFERENCE BOX resolution for
+// Wave 46 (lane Y4) — css-masking-1 §5.1 REFERENCE BOX resolution for
 // `clip-path` on Android.
 //
 // The spec resolves every `<basic-shape>` (and the bare `<geometry-box>`
@@ -139,7 +139,7 @@ object ClipReferenceBox {
     /**
      * The reference box [box] of an element whose clip node measures [size].
      * Border box = node minus the applied bands, shifted; the other three
-     * derive from it per css-masking-1 §7.1 / css-shapes-1 §4 (margin box
+     * derive from it per css-masking-1 §5.1 / css-shapes-1 §4 (margin box
      * outset by the DECLARED margins — collapsing moves the node, not the
      * element's own margin box; padding/content boxes inset by the used
      * border widths and paddings).
@@ -154,7 +154,7 @@ object ClipReferenceBox {
             right = size.width - insets.bands.right.toPx() + sx,
             bottom = size.height - insets.bands.bottom.toPx() + sy,
         )
-        // Corner curves of the border box: css-backgrounds-3 §5.1 percent
+        // Corner curves of the border box: css-backgrounds-3 §4.1 percent
         // axes against the border box, then the §5.1 overlap scaling.
         val radii = borderRadii(geometry.radius, border, density)
         val bw = geometry.borderWidths; val pd = geometry.paddings
@@ -198,7 +198,7 @@ object ClipReferenceBox {
         return max(0f, r + m * (1f + d * d * d))
     }
 
-    /** Inner-box curves: css-backgrounds-3 §5.1 "inner radius = outer − width", floored at 0. */
+    /** Inner-box curves: css-backgrounds-3 §4.1 "inner radius = outer − width", floored at 0. */
     private fun insetFrame(outer: Rect, radii: Array<CornerRadius>, t: Float, r: Float, b: Float, l: Float) =
         ClipReferenceFrame(
             Rect(outer.left + l, outer.top + t, max(outer.left + l, outer.right - r), max(outer.top + t, outer.bottom - b)),
@@ -215,7 +215,7 @@ object ClipReferenceBox {
      * Border-box corner curves in px, order TL / TR / BR / BL. A percent
      * axis (fraction wins over the Dp placeholder, as BorderRadiusConfig
      * documents) resolves against the border box's width (x) / height (y);
-     * then css-backgrounds-3 §5.1's overlap rule scales ALL radii by the
+     * then css-backgrounds-3 §4.5's overlap rule scales ALL radii by the
      * smallest `side / (sum of the two adjacent radii)` ratio below 1.
      */
     private fun borderRadii(cfg: BorderRadiusConfig, box: Rect, density: Density): Array<CornerRadius> {

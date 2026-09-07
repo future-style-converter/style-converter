@@ -4,7 +4,15 @@ package com.styleconverter.runtime.core.types
 // shape produced by the Style-Converter IR. Extractors never throw and never
 // return null — they always return a LengthValue (Unknown on parse failure).
 //
-// Reference fixtures (under examples/primitives/):
+// Reference fixtures (once under examples/primitives/):
+//
+// Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+// path listed below is GONE — the directory was renamed to
+// `fixtures/primitives/` by restructure 02e4c457, then deleted by the
+// 2026-07-08 hard prune 1e0234f6 (#8), with nothing to replace it. The
+// shapes enumerated here (and the pins over them in LengthValueTest) are
+// now the only record of that wire contract: read the names as history,
+// not as a path to open.
 //   lengths-absolute.json       — px/pt/cm/mm/in/pc/Q
 //   lengths-font-relative.json  — em/rem/ex/ch/cap/ic/lh/rlh
 //   lengths-viewport.json       — vw/vh/vmin/vmax/vi/vb + svw..dvmax
@@ -120,7 +128,7 @@ fun extractLength(json: JsonElement?): LengthValue {
     if (json is JsonPrimitive) {
         // Bare numeric primitives show up on padding/margin longhands as the
         // percentage shape (spec: "padding: 10%" → data: 10.0). See
-        // examples/properties/spacing/padding-units.json → Padding_Percent_10.
+        // fixtures/properties/spacing/padding-units.json → Padding_Percent_10.
         // We treat bare numbers as PERCENT so shorthand-expanded % survives
         // the IR round-trip. Other wrapper shapes handle non-% percentages.
         if (!json.isString) {
@@ -135,7 +143,7 @@ fun extractLength(json: JsonElement?): LengthValue {
     json["fr"]?.jsonPrimitive?.doubleOrNull?.let { return LengthValue.Fraction(it) }
 
     // Min/Max sizing explicit `none`: {"type":"none"}. Seen in
-    // examples/properties/sizing/width-constraints.json → MaxWidth_None.
+    // fixtures/properties/sizing/width-constraints.json → MaxWidth_None.
     if ((json["type"] as? JsonPrimitive)?.content == "none") return LengthValue.None
 
     // Bounded fit-content: {"fit-content": <inner-length>}. The inner element

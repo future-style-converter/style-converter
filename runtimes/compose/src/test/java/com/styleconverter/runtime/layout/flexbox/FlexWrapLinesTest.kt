@@ -281,7 +281,7 @@ class FlexWrapLinesTest {
         assertFalse(FlexWrapLines.routesForLineStretch(
             plainWrap = false, alignContentStretches = true, hasDefiniteCross = true))
         // Positioning keywords route via their own crossDistribution arm,
-        // not this gate (css-align-3 §5.3: they leave the leftover free).
+        // not this gate (css-align-3 §5.1: they leave the leftover free).
         assertFalse(FlexWrapLines.routesForLineStretch(
             plainWrap = true, alignContentStretches = false, hasDefiniteCross = true))
         // A hugging container has no leftover for step 8 to hand out.

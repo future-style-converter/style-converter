@@ -5,4 +5,3 @@
 //   |  {x:{type:'length', px}, y:...}
 export interface PerspectiveOriginConfig { value?: string; }
 export const PERSPECTIVE_ORIGIN_PROPERTY_TYPE = 'PerspectiveOrigin' as const;
-export type PerspectiveOriginPropertyType = typeof PERSPECTIVE_ORIGIN_PROPERTY_TYPE;

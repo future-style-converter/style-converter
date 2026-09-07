@@ -203,32 +203,71 @@ test('splitCombinedIr keeps every face for every doc when a group is unscannable
   assert.deepEqual(docs[0].doc.fontFaces, faces);
 });
 
-// ── The wave42-final proving set (skip-guarded: runs/ is a gitignored run
-// artifact, so CI and fresh checkouts skip; any machine with the wave-42
-// css-text run proves the measured claim verbatim). The smell this lane
-// fixes: the combined css-text document registers ONE LinLibertine face and
-// the wave-35 carry put it on all 48 per-test docs, though only the 8
-// boundary-shaping tests (001..008) reference family "test".
-const RUNS_COMBINED = join(
+// ── The live-wire proving set (VENDORED css-text combined IR) ─────────────
+//
+// The smell this lane fixes: the combined css-text document registers ONE
+// LinLibertine face and the wave-35 carry put it on EVERY per-test doc,
+// though only the boundary-shaping tests (001..008) reference family
+// "test". Retro R10 (finding A8#3): this pin used to read
+// `runs/wave42-final/.../out/tmpOutput.json` and skip when absent — and
+// that run directory was pruned waves ago, so it skipped on every sweep,
+// on every machine, permanently. It now reads the vendored 12-document
+// subset of the wave49-final css-text combined convert
+// (tools/titan/fixtures/README.md carries the provenance and the filter
+// recipe: the 8 carriers plus 4 undeclared controls, envelope untouched),
+// so the measurement executes on a hermetic checkout and on CI.
+const VENDORED_COMBINED = join(
   dirname(fileURLToPath(import.meta.url)),
-  'runs', 'wave42-final', 'sections', 'css-text', 'out', 'tmpOutput.json',
+  'fixtures', 'combined-ir', 'css-text.wave49-final.12-doc-subset.json',
 );
 
-test('wave42-final css-text: 40 undeclared carriers drop to the true 8-doc set',
-  { skip: !existsSync(RUNS_COMBINED) }, () => {
-    const combinedIr = JSON.parse(readFileSync(RUNS_COMBINED, 'utf8'));
-    // Precondition of the measurement: one document-level LinLibertine face.
-    assert.equal(combinedIr.fontFaces.length, 1);
-    assert.match(combinedIr.fontFaces[0].src, /LinLibertine/);
-    const docs = splitCombinedIr(combinedIr);
-    assert.equal(docs.length, 48, 'the wave-42 css-text section is 48 tests');
-    const carriers = docs.filter(({ doc }) => doc.fontFaces?.length).map(({ key }) => key);
-    // Exactly the 8 tests whose WPT sources declare AND use family "test".
-    assert.deepEqual(carriers.sort(), [1, 2, 3, 4, 5, 6, 7, 8].map(
-      (n) => `wpt__css-text__boundary-shaping__boundary-shaping-00${n}`,
-    ));
-    // And each carrier keeps the face VERBATIM (same object shape, §4.1 order).
-    for (const { doc } of docs) {
-      if (doc.fontFaces) assert.deepEqual(doc.fontFaces, combinedIr.fontFaces);
-    }
-  });
+test('live css-text combined IR: the 4 undeclared docs drop the face, the 8 carriers keep it', () => {
+  const combinedIr = JSON.parse(readFileSync(VENDORED_COMBINED, 'utf8'));
+  // Precondition of the measurement: one document-level LinLibertine face.
+  assert.equal(combinedIr.fontFaces.length, 1);
+  assert.match(combinedIr.fontFaces[0].src, /LinLibertine/);
+  const docs = splitCombinedIr(combinedIr);
+  assert.equal(docs.length, 12, 'the vendored subset is 12 of the section\'s 48 tests');
+  const carriers = docs.filter(({ doc }) => doc.fontFaces?.length).map(({ key }) => key);
+  // Exactly the 8 tests whose WPT sources declare AND use family "test" —
+  // the 4 controls (boundary-shaping-010 with a generic sans-serif, and the
+  // three hyphens tests) must come back face-free.
+  assert.deepEqual(carriers.sort(), [1, 2, 3, 4, 5, 6, 7, 8].map(
+    (n) => `wpt__css-text__boundary-shaping__boundary-shaping-00${n}`,
+  ));
+  assert.deepEqual(
+    docs.filter(({ doc }) => !doc.fontFaces?.length).map(({ key }) => key).sort(),
+    [
+      'wpt__css-text__boundary-shaping__boundary-shaping-010',
+      'wpt__css-text__hyphens__hyphens-auto-001',
+      'wpt__css-text__hyphens__hyphens-manual-013',
+      'wpt__css-text__hyphens__hyphens-none-shy-on-2nd-line-001',
+    ],
+  );
+  // And each carrier keeps the face VERBATIM (same object shape, css-fonts-4
+  // §4.1 `@font-face` descriptor order preserved by the splitter's copy).
+  for (const { doc } of docs) {
+    if (doc.fontFaces) assert.deepEqual(doc.fontFaces, combinedIr.fontFaces);
+  }
+});
+
+test('live css-text combined IR: a run directory, when present, still splits 48 ways', (t) => {
+  // Drift guard on the vendoring: on a campaign worktree carrying the
+  // wave49-final run, the FULL section must still split into 48 documents
+  // whose carrier set is the same 8. Skip-guarded — but nothing depends on
+  // it: the vendored pin above executes everywhere.
+  const runCombined = join(
+    dirname(fileURLToPath(import.meta.url)),
+    'runs', 'wave49-final', 'sections', 'css-text', 'out', 'tmpOutput.json',
+  );
+  if (!existsSync(runCombined)) {
+    t.skip('wave49-final css-text run artifact not present (vendored pin above still ran)');
+    return;
+  }
+  const docs = splitCombinedIr(JSON.parse(readFileSync(runCombined, 'utf8')));
+  assert.equal(docs.length, 48, 'the css-text section is 48 tests');
+  assert.deepEqual(
+    docs.filter(({ doc }) => doc.fontFaces?.length).map(({ key }) => key).sort(),
+    [1, 2, 3, 4, 5, 6, 7, 8].map((n) => `wpt__css-text__boundary-shaping__boundary-shaping-00${n}`),
+  );
+});

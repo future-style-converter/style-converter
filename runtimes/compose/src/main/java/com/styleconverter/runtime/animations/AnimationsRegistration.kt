@@ -47,21 +47,32 @@ import com.styleconverter.runtime.PropertyRegistry
  * - **view-transition-\*** (3): name, class, group.
  * - **timeline-scope** (1).
  *
- * Totals 26 IR property types. See `examples/properties/animations/README.md`
+ * Totals 26 IR property types. See `fixtures/properties/animations/README.md`
  * for the fixture coverage map of every value variant.
  *
  * ## TODOs not covered by Phase 9
- * 1. **Runtime animation execution.** Compose's `Animatable` /
- *    `rememberInfiniteTransition` / `animate*AsState` APIs are not wired
- *    into ComponentRenderer yet — config is extracted but CSS @keyframes
- *    are not interpreted into state-driven Compose animations.
- * 2. **Scroll-linked timelines.** `animation-timeline: scroll(...)` requires
- *    a LazyListState / ScrollState progress derivation pipeline. The
- *    plumbing exists in [com.styleconverter.runtime.scrolling.ScrollTimelineApplier]
- *    but it is not connected to the animation driver from #1.
- * 3. **View timelines.** `animation-timeline: view(...)` needs Compose
- *    `onGloballyPositioned` + viewport intersection math to derive
- *    visibility progress. Scaffolded in ViewTimelineApplier, not wired.
+ * 1. ~~Runtime animation execution.~~ **CLOSED** (retro P2e, finding A6#15
+ *    — this item read "not wired into ComponentRenderer yet" long after the
+ *    driver landed). [KeyframeAnimationDriver] executes the document-level
+ *    wire keyframes (schema/spec/07-animations.md): ComponentRenderer reads
+ *    `LocalDocumentKeyframes` and OVERLAYS the interpolated typed
+ *    properties onto the component's property list before StyleApplier
+ *    runs, so an animated frame renders through the same extractor/applier
+ *    path the static corpus is SSIM-verified on. The clock is either a live
+ *    `withFrameNanos` loop or the forced `CAPTURE_ANIMATION_TIME` seek the
+ *    harness uses (spec 07 §5) — a deterministic capture, which is what the
+ *    visual gate needs.
+ * 2. **Scroll-linked timelines.** STILL OPEN, and with NOTHING behind it.
+ *    `animation-timeline: scroll(...)` requires a LazyListState /
+ *    ScrollState progress-derivation pipeline feeding
+ *    [KeyframeAnimationDriver]'s clock. This item used to say "the plumbing
+ *    exists in ScrollTimelineApplier"; the retro P2a sweep established that
+ *    object had no caller anywhere in 49 waves and deleted it, so the work
+ *    starts from the extractor's output.
+ * 3. **View timelines.** STILL OPEN, likewise unscaffolded.
+ *    `animation-timeline: view(...)` needs Compose `onGloballyPositioned` +
+ *    viewport-intersection math to derive visibility progress; the
+ *    "scaffolded in ViewTimelineApplier" this cited was deleted with it.
  *
  * Touching [AnimationsRegistration] from any test primes this init block via
  * Kotlin's lazy `object` initialization rules; see the `@Before` hook in
@@ -102,7 +113,7 @@ object AnimationsRegistration {
             // Source: src/main/kotlin/app/irmodels/properties/animations/Transition*Property.kt
             // TransitionTimingFunction re-uses the AnimationTimingFunction
             // parser family except for `linear(stops)` (see parser-gaps note
-            // in examples/properties/animations/README.md). TransitionBehavior
+            // in fixtures/properties/animations/README.md). TransitionBehavior
             // is a two-value enum (normal | allow-discrete) parsed by
             // TransitionBehaviorPropertyParser.kt.
             "TransitionProperty",

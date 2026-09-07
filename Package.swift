@@ -32,58 +32,18 @@ let package = Package(
         .target(
             name: "StyleConverterRuntime",
             path: "runtimes/swiftui/Sources/StyleConverterRuntime",
-            // The canonical category tree keeps a README.md stub in every
-            // not-yet-populated folder (CLAUDE.md: "coverage auditable by
-            // ls"). SwiftPM treats unknown files as unhandled — exclude
-            // them explicitly so the build stays warning-free.
-            exclude: [
-                "StyleEngine/animations/README.md",
-                "StyleEngine/appearance/README.md",
-                "StyleEngine/background/README.md",
-                "StyleEngine/borders/README.md",
-                "StyleEngine/borders/image/README.md",
-                "StyleEngine/borders/outline/README.md",
-                "StyleEngine/borders/radius/README.md",
-                "StyleEngine/borders/sides/README.md",
-                "StyleEngine/color/README.md",
-                "StyleEngine/columns/README.md",
-                "StyleEngine/container/README.md",
-                "StyleEngine/content/README.md",
-                "StyleEngine/counters/README.md",
-                "StyleEngine/effects/README.md",
-                "StyleEngine/effects/blend/README.md",
-                "StyleEngine/effects/clip/README.md",
-                "StyleEngine/effects/filter/README.md",
-                "StyleEngine/effects/mask/README.md",
-                "StyleEngine/effects/shadow/README.md",
-                "StyleEngine/experimental/README.md",
-                "StyleEngine/global/README.md",
-                "StyleEngine/images/README.md",
-                "StyleEngine/interactions/README.md",
-                "StyleEngine/layout/README.md",
-                "StyleEngine/layout/advanced/README.md",
-                "StyleEngine/layout/flexbox/README.md",
-                "StyleEngine/layout/grid/README.md",
-                "StyleEngine/layout/position/README.md",
-                "StyleEngine/lists/README.md",
-                "StyleEngine/math/README.md",
-                "StyleEngine/navigation/README.md",
-                "StyleEngine/paging/README.md",
-                "StyleEngine/performance/README.md",
-                "StyleEngine/print/README.md",
-                "StyleEngine/regions/README.md",
-                "StyleEngine/rendering/README.md",
-                "StyleEngine/rhythm/README.md",
-                "StyleEngine/scrolling/README.md",
-                "StyleEngine/shapes/README.md",
-                "StyleEngine/sizing/README.md",
-                "StyleEngine/spacing/README.md",
-                "StyleEngine/speech/README.md",
-                "StyleEngine/svg/README.md",
-                "StyleEngine/table/README.md",
-                "StyleEngine/transforms/README.md",
-                "StyleEngine/typography/README.md",
-            ],
+            // Retro (finding A2#8): the 43 per-category README.md stubs this
+            // block used to exclude are DELETED. They claimed every folder was
+            // "Empty — properties migrate in one-at-a-time … per the
+            // testing/ROLLOUT.md phase plan" while holding 10–34 implementation
+            // files each, and cited a path (testing/ROLLOUT.md) that does not
+            // exist. Per-category coverage is auditable from
+            // `node tools/visual/coverage-audit.mjs` (generated:
+            // tools/visual/COVERAGE.md), which reports the registered facade
+            // signal AND the stricter real dedicated-applier floor — strictly
+            // more than an `ls` of stub files could. With the files gone the
+            // exclude list is not just dead but harmful: SwiftPM emits an
+            // "Invalid Exclude … File not found" warning per stale entry.
             // Wave 34 (lane F1) — the five bundled per-script fallback faces
             // (Noto Sans Arabic / Armenian / Bengali / Hebrew / Khmer
             // Regular, ~537 KB, OFL 1.1). They ship INSIDE the runtime, not

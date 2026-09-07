@@ -12,8 +12,10 @@ import Foundation
 /// Registry ownership. Names mirror the files under
 /// `app/irmodels/properties/speech/` with the `Property` suffix stripped.
 enum UnsupportedSpeechProperty {
-    /// Explicit, diff-auditable list. See the README-phase10 speech
-    /// fixture for variant coverage.
+    /// Explicit, diff-auditable list. Variant coverage lives in
+    /// `fixtures/properties/speech/longtail.json` (45 components) — retro
+    /// P2e repointed this from the `README-phase10` index, which the
+    /// 2026-07-08 restructure (commit 02e4c457) deleted.
     static let names: [String] = [
         // Volume + speak.
         "Volume", "Speak", "SpeakAs",

@@ -13,8 +13,6 @@
  * +-- PropertyTracker.kt    # Debug/coverage tracking
  * +-- core/                 # Shared utilities
  * |   +-- ValueExtractors.kt
- * |   +-- Types.kt
- * |   +-- ModifierExtensions.kt
  * +-- layout/               # Layout properties
  * |   +-- LayoutFacade.kt
  * |   +-- sizing/

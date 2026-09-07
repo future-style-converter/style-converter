@@ -8,10 +8,6 @@
 
 import Foundation
 
-enum IsolationProperty {
-    static let names: [String] = ["Isolation"]
-}
-
 enum IsolationExtractor {
 
     // Nil when no Isolation property in IR.

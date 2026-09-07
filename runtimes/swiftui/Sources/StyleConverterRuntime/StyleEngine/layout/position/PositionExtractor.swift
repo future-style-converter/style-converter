@@ -147,13 +147,22 @@ enum PositionExtractor {
     /// Extract a CGFloat from the many shapes Top/Right/Bottom/Left use:
     ///   • { "px": N }
     ///   • { "keyword": "auto" } → nil (CSS auto leaves the edge free)
-    ///   • { "original": { "u": "PERCENT", "v": N } } → stored as-is in
-    ///     px for now; true % resolution needs the applier's GeometryReader.
-    ///     (TODO: percent support — requires parent-size resolution.)
+    ///   • { "original": { "u": …, "v": N } } with no `px` sibling → nil.
+    ///     This is the runtime-dependent-unit arm (EM/CH/VW…), NOT the
+    ///     percentage one: the converter's InsetValueSerializer writes a
+    ///     percentage inset as a BARE NUMBER, so percentages never reach
+    ///     this branch (MEASURED over all 1435 wave49-final per-test IR
+    ///     documents: 10 bare-number insets, 2932 `{px}`, and ZERO
+    ///     `{original:{u:"PERCENT"}}` — the object arm carries only EM/CH
+    ///     there). Percentages are handled before this function is ever
+    ///     called, by PercentInsetResolve.percentOf in `contribute` above
+    ///     (wave 49, lane A7), which is why the three "TODO: percent
+    ///     support" notes this docstring and the body used to carry are
+    ///     gone — retro P2e, finding A6#15.
     ///   • raw Double/Int for post-normalisation examples (inset-logical.json
     ///     uses bare Double for some sides).
     private static func extractPx(_ value: IRValue) -> CGFloat? {
-        // Bare numerics — examples/properties/layout/inset-logical.json
+        // Bare numerics — fixtures/properties/layout/inset-logical.json
         // has "inset-block-start": 10.0 in some variants.
         if case .double(let d) = value { return CGFloat(d) }
         if case .int(let i) = value    { return CGFloat(i) }
@@ -165,13 +174,23 @@ enum PositionExtractor {
             if let px = o["px"]?.doubleValue {
                 return CGFloat(px)
             }
-            // Percent — no parent size here. Encode as nil + TODO; the
-            // applier may later pick this up via LengthOrPercentage.
+            // Defensive arm for a percentage that arrived in the OBJECT
+            // shape. The converter does not emit one (see the docstring's
+            // measured census), so this is unreachable on today's wire; it
+            // stays because reading a percentage magnitude as points is the
+            // exact defect PercentInsetResolve was written for
+            // (position-relative-006's `top:-10000%` translating 10 000 pt),
+            // and nil — "leave this edge unconstrained" to every downstream
+            // reader — is the safe answer if a future wire revision ever
+            // takes this branch. The LIVE percentage path is
+            // PercentInsetResolve.percentOf in `contribute`, which collects
+            // the magnitude alongside the point slot and lets PositionApplier
+            // resolve it against the containing block (CSS 2.1 §9.4.3 /
+            // css-position-3 relpos-insets). Retro P2e (A6#15) deleted the
+            // two "TODO: carry percentages through" notes that stood here
+            // after wave 49 closed them.
             if let original = o["original"]?.objectValue,
                let u = original["u"]?.stringValue, u.uppercased() == "PERCENT" {
-                // Stash percent into nil for now — downstream readers treat
-                // nil as "leave this edge unconstrained". TODO: carry
-                // percentages through for GeometryReader resolution.
                 return nil
             }
         }

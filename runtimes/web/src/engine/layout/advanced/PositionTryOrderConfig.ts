@@ -9,4 +9,3 @@ export interface PositionTryOrderConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const POSITIONTRYORDER_PROPERTY_TYPE = 'PositionTryOrder' as const;
-export type PositionTryOrderPropertyType = typeof POSITIONTRYORDER_PROPERTY_TYPE;

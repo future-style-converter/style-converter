@@ -5,4 +5,3 @@
 // silent drop. Now a real (csstype-widened) one-key pass-through.
 export interface DynamicRangeLimitConfig { value?: string }
 export const DYNAMIC_RANGE_LIMIT_PROPERTY_TYPE = 'DynamicRangeLimit' as const;
-export type DynamicRangeLimitPropertyType = typeof DYNAMIC_RANGE_LIMIT_PROPERTY_TYPE;

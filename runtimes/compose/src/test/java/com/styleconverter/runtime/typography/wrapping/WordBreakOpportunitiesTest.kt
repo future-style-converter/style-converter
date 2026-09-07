@@ -29,7 +29,7 @@ class WordBreakOpportunitiesTest {
         assertTrue(w.ops.isEmpty())
     }
 
-    /** css-text-3 §6.1: each U+00AD is REMOVED from the display text and
+    /** css-text-3 §5.3: each U+00AD is REMOVED from the display text and
      *  recorded as a hyphenation op (paintsHyphen) at its position in the
      *  cleaned word. */
     @Test

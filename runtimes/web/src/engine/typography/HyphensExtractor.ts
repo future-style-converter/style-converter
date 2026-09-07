@@ -1,6 +1,6 @@
 // HyphensExtractor.ts — folds `Hyphens` IR properties into a HyphensConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { HyphensConfig, HYPHENS_PROPERTY_TYPE, HyphensPropertyType } from './HyphensConfig';
 import { kwLower } from './_shared';

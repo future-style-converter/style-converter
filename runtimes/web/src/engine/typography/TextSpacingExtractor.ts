@@ -1,6 +1,6 @@
 // TextSpacingExtractor.ts — folds `TextSpacing` IR properties into a TextSpacingConfig.
 // Family: text-spacing.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextSpacingConfig, TEXT_SPACING_PROPERTY_TYPE, TextSpacingPropertyType } from './TextSpacingConfig';
 import { kwLower } from './_shared';

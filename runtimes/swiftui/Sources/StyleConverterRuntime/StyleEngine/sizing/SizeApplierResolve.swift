@@ -4,8 +4,11 @@
 //
 //  LengthValue → CGFloat resolver for sizing axes. Separated from the
 //  SwiftUI modifier code so both (a) `SizeApplier.swift` stays under
-//  200 lines and (b) this logic is testable via SizingSelfTest with no
-//  SwiftUI dependency.
+//  200 lines and (b) this logic is testable with no SwiftUI dependency —
+//  the pins are SizingTests (`SizeApplierResolve.exact` px / auto /
+//  percentage cases). Retro P2e corrected the name: the launch-time
+//  `SizingSelfTest` became that XCTest class when the engine moved into
+//  the SwiftPM package.
 //
 //  Three entry points:
 //    * `exact(_:)`       — for Width/Height. Returns nil when the

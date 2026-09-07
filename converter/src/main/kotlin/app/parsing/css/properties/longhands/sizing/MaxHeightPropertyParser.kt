@@ -11,7 +11,7 @@ object MaxHeightPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
         val maxValue = when {
-            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — the
+            // css-values-5 §11 calc-size() (wave 42 lane W3) — the
             // block-axis twin of MaxWidthPropertyParser's branch; see the
             // decision record on WidthPropertyParser's.
             trimmed.startsWith("calc-size(") -> when (val r = CalcSizeParser.parse(trimmed)) {

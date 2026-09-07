@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.spacing
 
 // Unit tests for PaddingExtractor. Each test mirrors an actual IR shape we
-// saw in examples/properties/spacing/padding-*.json (fixtures verified via
+// saw in fixtures/properties/spacing/padding-*.json (fixtures verified via
 // `./gradlew run` on main and piped through python).
 
 import com.styleconverter.runtime.core.types.LengthUnit

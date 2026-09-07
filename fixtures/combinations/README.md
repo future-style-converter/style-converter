@@ -79,15 +79,16 @@ rgb(26,26,46) and is NEVER used as a component colour.
 
 | file | interaction class |
 |---|---|
-| `transform-list-order.json` | multi-function transform list composition order (css-transforms-1 §11) |
+| `transform-list-order.json` | multi-function transform list composition order (css-transforms-1 §8) |
 | `nested-transforms.json` | parent transform × child transform (child moves in the PARENT's frame) |
 | `perspective-translatez.json` | perspective() × translateZ() — regression pin for the 2026-08-28 both-natives fix |
 | `opacity-blend.json` | mix-blend-mode × opacity on the same element (compositing-1 §5.1) |
 | `blend-isolation.json` | mix-blend-mode × isolation on an intermediate wrapper (compositing-1 §3) |
-| `filter-chain-order.json` | filter function chain order (filter-effects-1 §2: left-to-right) |
+| `filter-chain-order.json` | filter function chain order (filter-effects-1 §5: left-to-right) |
 | `opacity-filter-stacking.json` | filter × opacity ordering (filter first, THEN group opacity) |
 | `radius-overflow-transform.json` | overflow clip × border-radius × transformed content (clip applies POST-transform, in the clipper's space) |
 | `gradient-stops-interp.json` | hard gradient stops at non-midpoint positions (css-images-3 §3.4.1) |
+| `transform-abspos-pivot.json` | transform pivot × absolute positioning (css-transforms-1 §4: transform-origin is the element's OWN border-box centre, (left, top) included; Compose's transform node is OUTER of the abspos offset — finding A11#0). Anchor/mover twin rows so the v1 bbox oracle sees WHERE the mover landed. Listed in `tools/visual/gate-fixtures.txt` (retro F3): a pin fixture off that list is never executed. |
 
 Deliberately absent: a blur-combination fixture. Gaussian tails cannot
 be hand-computed to a byte, so a blur `_expect` would either restate a
@@ -105,7 +106,7 @@ by them.
 | fixture · component | platform | why (open backlog entry) |
 |---|---|---|
 | ~~`transform-list-order.json` · `TLO_ScaleXRotate`~~ | ~~Android~~ | FIXED (wave 48): Compose now composes the list in CSS order (`TransformListComposer`); the `scaleX(2) rotate(45deg)` shear residue draws via ordered canvas ops. The Android waiver was deleted in the same change (exit-5 contract); the row stays for history. |
-| `opacity-blend.json` · `OB_Multiply_Op50`, `OB_Screen_Op50` | iOS | mix-blend-mode is applied INSIDE the opacity compositing group, so declaring opacity neutralises the blend — predicted renders (179,204,128) / (77,77,102), the blend-normal values, matching `OB_Normal_Op50_Control` for the multiply pair. |
+| ~~`opacity-blend.json` · `OB_Multiply_Op50`, `OB_Screen_Op50`~~ | ~~iOS~~ | FIXED (#126): `Renderer/StyleBuilder.swift` now orders `.engineIsolation → .engineOpacity → .engineBlendMode`, blend OUTERMOST, so the group's opacity mixes the *blended* result (compositing-1 §5.1). The prediction — blend-normal (179,204,128) / (77,77,102) — was never device-verified and is refuted: the fixture passes on all three (exit 0, gate 18/0/0, oracle 15 checks / 0 violations; iOS measures (179,184,0) and (117,92,163), the spec values). The row stays for history. |
 | `radius-overflow-transform.json` · `ROT_SelfRotate_ClippedChild` | iOS | the overflow clip is applied OUTSIDE the transform, clipping by the un-transformed axis-aligned frame — box [80,60] instead of [99,99]. The two translated-child rows exercise the parent-clips-child path and MAY also be red on iOS; unverified, so listed as possible, not predicted. |
 
 Historical honesty note (fixed in wave 48, kept for the record):

@@ -74,7 +74,7 @@ const PAINTABLE_LINES: ReadonlySet<string> = new Set([
  */
 export function normalizeLine(token: string | null | undefined): string | null {
   if (typeof token !== 'string') return null;
-  // CSS keywords are ASCII case-insensitive (css-values-4 §3.2); `_` → `-`
+  // CSS keywords are ASCII case-insensitive (css-values-4 §4.1); `_` → `-`
   // absorbs the IR enum spelling.
   const css = token.toLowerCase().replace(/_/g, '-');
   return PAINTABLE_LINES.has(css) ? css : null;

@@ -1,6 +1,6 @@
 // FontVariantEmojiExtractor.ts — folds `FontVariantEmoji` IR properties into a FontVariantEmojiConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariantEmojiConfig, FONT_VARIANT_EMOJI_PROPERTY_TYPE, FontVariantEmojiPropertyType } from './FontVariantEmojiConfig';
 import { kwLower } from './_shared';

@@ -79,7 +79,7 @@ object TextStyleApplier {
      *   to read it from (ComponentRenderer / ContentApplier thread
      *   `DynamicValueResolver.fontSizePxOf(LocalInheritedProperties)`).
      *   It is the resolution base for the relative font-size values —
-     *   em / % (css-values-4 §5.1.1: font-size's own em resolves against
+     *   em / % (css-values-4 §6.1.1: font-size's own em resolves against
      *   the INHERITED size) and smaller / larger (CSS 2.1 §15.7: one
      *   ladder step from the INHERITED size). Null (unit tests, callers
      *   without a cascade) falls back to [RELATIVE_SIZE_BASE_SP] — the
@@ -139,7 +139,7 @@ object TextStyleApplier {
                     "LineHeight" -> lineHeight = extractLineHeight(property.data, preResolvedFontSp)
                     "LetterSpacing" -> letterSpacing = extractLetterSpacing(property.data)
                     "WordSpacing" -> {
-                        // css-text-3 §5.1: word-spacing adds advance at WORD
+                        // css-text-3 §7.1: word-spacing adds advance at WORD
                         // SEPARATORS only. The old fallback mapped it onto
                         // TextStyle.letterSpacing, which inserts the gap
                         // between EVERY glyph pair — `word-spacing: 12px` on
@@ -187,6 +187,32 @@ object TextStyleApplier {
             }
         }
 
+        // Retrospective R3 (A7#4) — `font-size-adjust` (css-fonts-4 §2.6):
+        // used = computed × number / metricRatio(reference face). Port of
+        // the iOS twin's fontSizeAdjustFactor (TypographyExtractor.swift,
+        // fidelity wave 2) — the registry had claimed the property as
+        // "parse-only" while silently ignoring it. Applied HERE, to the glyph
+        // size only, AFTER the fold: line-height's unitless multiplier above
+        // already used the COMPUTED size (css-inline-3: <number> × computed
+        // font-size), and the sizing em basis lives in TypographyExtractor,
+        // untouched — em tracks the computed size (css-values-4 §6.1.1), the
+        // same order Swift keeps. Absent / `none` / `from-font` → factor null
+        // → `fontSize` passes through byte-identically. With no declared
+        // size the 16px default (or the monospace UA 13px) is what scales —
+        // Swift: `(agg.fontSizePx ?? 16) * factor`.
+        val adjustFactor = FontSizeAdjust.factor(properties)
+        val usedFontSize: TextUnit? = if (adjustFactor == null) fontSize else {
+            // The metric table is the bundled Inter's (FontSizeAdjust.kt
+            // header); a run that resolved to ANOTHER face still scales (twin
+            // parity) but says so — its own cap/x-height ratio is unknown.
+            if (fontFamily != null && fontFamily !== InterFontFamily) {
+                PropertyTracker.markUnhandled("FontSizeAdjust[metric-table:Inter,face:other]")
+            }
+            // Computed size in the runtime's px==sp space, then the scale.
+            val computedPx = fontSize?.value ?: monospaceUaSp ?: RELATIVE_SIZE_BASE_SP
+            FontSizeAdjust.usedSizePx(computedPx, adjustFactor).sp
+        }
+
         // Build TextStyle using copy to apply properties.
         // PlatformTextStyle(includeFontPadding = false) + LineHeightStyle
         // (alignment Center, trim None) is the canonical Compose recipe
@@ -212,8 +238,9 @@ object TextStyleApplier {
             // absent `font-size` ONLY on a first-family-monospace element —
             // everywhere else `monospaceUaSp` is null and the field stays
             // Unspecified, so the renderer's own 16.sp bottom-out is
-            // byte-identical to before.
-            fontSize = fontSize ?: monospaceUaSp?.sp ?: TextUnit.Unspecified,
+            // byte-identical to before. `usedFontSize` == `fontSize` unless a
+            // numeric `font-size-adjust` is on the wire (R3 block above).
+            fontSize = usedFontSize ?: monospaceUaSp?.sp ?: TextUnit.Unspecified,
             fontWeight = fontWeight,
             fontStyle = fontStyle,
             fontFamily = fontFamily,
@@ -367,7 +394,7 @@ object TextStyleApplier {
                 // Relative lengths (LIVE wire, verified against the running
                 // converter: `font-size: 1.5em` deep-flattens to
                 // {"original":{"type":"length","original":{"v":1.5,"u":"EM"}}}
-                // — NO resolved px, NO "value" key). css-values-4 §5.1.1:
+                // — NO resolved px, NO "value" key). css-values-4 §6.1.1:
                 // em on font-size itself resolves against the INHERITED
                 // size (the threaded base); rem against the ROOT size,
                 // which the harness pins at the 16px browser default
@@ -396,7 +423,7 @@ object TextStyleApplier {
                 }
                 // Percentages (LIVE wire: `font-size: 120%` emits
                 // {"original":{"type":"percentage","value":120}}, no px).
-                // css-fonts-4 §2.4: a <percentage> font-size resolves
+                // css-fonts-4 §2.5: a <percentage> font-size resolves
                 // against the inherited font-size — the same base as em,
                 // so 120% of the 16px default = 19.2px. Previously fell
                 // through to null → the 16sp default.
@@ -478,7 +505,7 @@ object TextStyleApplier {
         return null
     }
 
-    // css-fonts-4 §2.5: bare `oblique` means `oblique 14deg`, and 14deg is
+    // css-fonts-4 §2.4: bare `oblique` means `oblique 14deg`, and 14deg is
     // also the slant at which Blink's font-matching starts treating an
     // oblique request as italic-shaped. Pinned empirically against the
     // wave-6 web captures (Inter ships roman-only in every harness, so
@@ -512,7 +539,7 @@ object TextStyleApplier {
         }
         val keyword = ValueExtractors.extractKeyword(data)
         return when (keyword?.lowercase()) {
-            // Bare `oblique` = `oblique 14deg` (css-fonts-4 §2.5 default),
+            // Bare `oblique` = `oblique 14deg` (css-fonts-4 §2.4 default),
             // exactly at the threshold → slants like italic on all three
             // platforms (verified: web capture 039 == 038 pixel-identical).
             "italic", "oblique" -> FontStyle.Italic
@@ -653,7 +680,7 @@ object TextStyleApplier {
                 if (vu != null) {
                     val (v, u) = vu
                     when (u) {
-                        // css-values-4 §5.1.1: em resolves against the
+                        // css-values-4 §6.1.1: em resolves against the
                         // ELEMENT's own font-size. Compose has a native em
                         // TextUnit for exactly this (a letterSpacing given
                         // in .em resolves against the style's fontSize at
@@ -737,10 +764,10 @@ object TextStyleApplier {
      * `normal` ships as original:"normal" and relative units (em/rem) ship
      * the same bogus px:0.0 the letter-spacing wire does — so the px==0
      * case gets the identical {v,u} escape hatch: em × the ELEMENT
-     * font-size (css-values-4 §5.1.1 — word-spacing has no per-glyph em
+     * font-size (css-values-4 §6.1.1 — word-spacing has no per-glyph em
      * TextUnit path because the value is applied via 1-char spans, so it
      * is resolved eagerly here), rem × the 16px harness root. Negative
-     * values pass through untouched (css-text-3 §5.1 allows them; the
+     * values pass through untouched (css-text-3 §7.1 allows them; the
      * span mechanism contracts advance the same way it expands it).
      */
     fun extractWordSpacingSp(properties: List<IRProperty>, fontSizeSp: Float): Float? {
@@ -779,12 +806,12 @@ object TextStyleApplier {
 
     /**
      * The letter-spacing a word-separator SPAN must carry so that both
-     * trackings apply. css-text-3 §5.1: letter-spacing applies between
+     * trackings apply. css-text-3 §7.2: letter-spacing applies between
      * ALL typographic units and word-spacing applies ADDITIONALLY at word
      * separators — but a SpanStyle letterSpacing REPLACES (not adds to)
      * the paragraph's base letter-spacing on the spanned characters, so
      * the span value has to be the SUM of both. The em base resolves
-     * against the element font-size (css-values-4 §5.1.1); Unspecified
+     * against the element font-size (css-values-4 §6.1.1); Unspecified
      * base contributes nothing.
      */
     fun resolveWordSpacingSpanSp(
@@ -807,7 +834,7 @@ object TextStyleApplier {
      * advance after a space == exactly the CSS word-spacing model —
      * including negatives, which contract the gap symmetrically to the
      * browser. Separators: SPACE and NO-BREAK SPACE, the word-separator
-     * characters (css-text-3 §5.1) the Latin fixture corpus produces
+     * characters (css-text-3 §7.2) the Latin fixture corpus produces
      * (ideographic/ogham separators are out of scope for this corpus).
      * Builder-copies the input so existing spans (synthesized small-caps
      * runs) survive untouched.
@@ -1128,7 +1155,7 @@ object TextStyleApplier {
         // toInt() truncates toward zero == floor for the positive advance.
         val truncatedEvenAdvance = widestAdvance.toInt() and 1.inv()
         val drawX = ((layoutWidthPx.toInt() - truncatedEvenAdvance) shr 1).toFloat()
-        // True fractional CSS centering position (css-text-3 §7.1 center
+        // True fractional CSS centering position (css-text-3 §6.1 center
         // alignment is exact — browsers place the run at the half-remainder
         // with subpixel precision, verified on the TextAlign_Center capture).
         val idealX = (layoutWidthPx - widestAdvance) / 2f
@@ -1431,6 +1458,21 @@ object TextStyleApplier {
 
         return null
     }
+
+    /**
+     * Retrospective R3 (A5#4) — the `<'block-ellipsis'>` component riding on
+     * `line-clamp` (css-overflow-4 §5.1 / §4.2): true when the author forbade
+     * a marker (`no-ellipsis` / the empty string). This is the leaf-path
+     * companion of [extractMaxLines]: the renderer feeds the count to
+     * Text(maxLines) and this flag to its overflow DECISION, so a clamped run
+     * with a suppressed marker uses TextOverflow.Clip (Compose discards
+     * without a glyph natively) and never the "…" Ellipsis paints — twin of
+     * Swift's LineClampCap.markerSuppressed. Read through the ONE Compose
+     * wire reader, [LineClampWire], shared with TypographyExtractor's config
+     * fold and scrolling/LineClampCap, so no two readers can disagree.
+     */
+    fun extractLineClampMarkerSuppressed(properties: List<IRProperty>): Boolean =
+        LineClampWire.markerSuppressed(properties)
 
     /**
      * Extract line-clamp value from IR data.

@@ -83,7 +83,7 @@ object DocumentImageRegistry {
 
     /**
      * One decoded replaced-element image: the raster plus the INTRINSIC size
-     * CSS 2.1 §10.3.2 / css-images-3 §5.2 size the box from.
+     * CSS 2.1 §10.3.2 / css-images-3 §4.3.1 size the box from.
      *
      * The intrinsic size is in raw image pixels, which equals CSS px at the
      * 160 dpi capture density (1 px == 1 dp) — the same identity every other
@@ -96,7 +96,7 @@ object DocumentImageRegistry {
         val intrinsicWidthPx: Int,
         val intrinsicHeightPx: Int,
     ) {
-        /** The css-images-3 §5.2 intrinsic ASPECT RATIO (width ÷ height), or
+        /** The css-images-3 §4.1 intrinsic ASPECT RATIO (width ÷ height), or
          *  null when either axis is degenerate — the caller then falls back to
          *  the intrinsic size rather than dividing by zero. */
         val aspectRatio: Float?
@@ -323,7 +323,7 @@ object DocumentImageRegistry {
      *  `inScaled = false` is load-bearing. BitmapFactory otherwise rescales by
      *  the ratio of the file's nominal density to the device's, so a 200×100
      *  PNG comes back 400×200 on an xhdpi device and every intrinsic-size rule
-     *  in css-images-3 §5.2 would be computed from a number the CSS box model
+     *  in css-images-3 §4.3.1 would be computed from a number the CSS box model
      *  never heard of. The capture runs at 160 dpi where the scale factor is 1,
      *  so this pins a behaviour rather than changing today's numbers — but it
      *  pins the one that is CORRECT off the capture density too. */

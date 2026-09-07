@@ -9,4 +9,3 @@ export interface FlexGrowConfig {
 }
 
 export const FLEX_GROW_PROPERTY_TYPE = 'FlexGrow' as const;
-export type FlexGrowPropertyType = typeof FLEX_GROW_PROPERTY_TYPE;

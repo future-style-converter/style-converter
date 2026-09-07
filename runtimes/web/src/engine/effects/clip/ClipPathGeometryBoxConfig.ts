@@ -6,4 +6,3 @@
 // IR: bare SHOUTY_SNAKE keyword (e.g. 'BORDER_BOX').
 export interface ClipPathGeometryBoxConfig { value?: string; }
 export const CLIP_PATH_GEOMETRY_BOX_PROPERTY_TYPE = 'ClipPathGeometryBox' as const;
-export type ClipPathGeometryBoxPropertyType = typeof CLIP_PATH_GEOMETRY_BOX_PROPERTY_TYPE;

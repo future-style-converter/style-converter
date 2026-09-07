@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.columns
 
-// WAVE-46 LANE Y3 — css-break-3 §5.2 `box-decoration-break: clone`: the
+// WAVE-46 LANE Y3 — css-break-3 §5.4 `box-decoration-break: clone`: the
 // IR → bands reader the sole-child clone fragmenter consumes, pinned
 // against the LIVE wave45-final IR shapes of the corpus' clone family
 // (tools/titan/runs/wave45-final/sections/css-break/per-test-ir/):
@@ -55,7 +55,7 @@ class MulticolCloneDecorationTest {
 
     @Test
     fun `D3 - slice (declared or default) never builds bands`() {
-        // The css-break-3 §5.2 default — no property at all…
+        // The css-break-3 §5.4 default — no property at all…
         val silent = leaf(prop("BorderTopWidth", """{"px":10}"""))
         assertFalse(MulticolCloneDecoration.declaresClone(silent))
         assertNull(MulticolCloneDecoration.bandsFor(silent))

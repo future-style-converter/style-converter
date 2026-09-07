@@ -83,6 +83,15 @@ object LineClampApplier {
         val explicitEllipsis = config.textOverflow == TextOverflow.Ellipsis
 
         return when {
+            // Retrospective R3 (A5#4) — css-overflow-4 §4.2 `block-ellipsis:
+            // no-ellipsis` (or the empty string) on the clamp: NO marker may
+            // be drawn. Compose's single overflow knob would paint "…" under
+            // Ellipsis, so a marker-less clamp Clips — even over an explicit
+            // `text-overflow: ellipsis`, which governs INLINE-axis overflow
+            // (css-overflow-3 §6.1) and has nothing to paint on a wrapped,
+            // block-clamped run. Twin: Swift routes the same case away from
+            // its "…"-only `.lineLimit` (LineClampCap.leafLineLimit → nil).
+            hasClamp && config.lineClampMarkerSuppressed -> TextOverflow.Clip
             hasClamp || explicitEllipsis -> TextOverflow.Ellipsis
             config.textOverflow != null -> config.textOverflow
             else -> TextOverflow.Clip

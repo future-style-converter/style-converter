@@ -15,7 +15,8 @@ package com.styleconverter.runtime.typography.font
 //
 // The `ScriptFallbackFonts` half (which family, and the WPT gate) needs the
 // Android resource system for `R.font.*`, so its JVM-safe halves are pinned
-// in ScriptFallbackFontsGateTest.
+// in ScriptFallbackFontsTest (retro P2e corrected the name: the class is
+// `ScriptFallbackFontsTest`, and no `…GateTest` has ever existed).
 
 import com.styleconverter.runtime.typography.font.ScriptRunSegmenter.TextScript
 import org.junit.Assert.assertEquals
@@ -29,7 +30,7 @@ class ScriptRunSegmenterTest {
 
     @Test
     fun `the five target scripts are recognised by their block ranges`() {
-        // css-counter-styles-3 §6.2 `arabic-indic` digits U+0660–U+0669.
+        // css-counter-styles-3 §6.1 `arabic-indic` digits U+0660–U+0669.
         assertEquals(TextScript.ARABIC, ScriptRunSegmenter.scriptOf(0x0660))
         assertEquals(TextScript.ARABIC, ScriptRunSegmenter.scriptOf(0x0669))
         // §6.2 `persian` — extended Arabic-Indic, same block.

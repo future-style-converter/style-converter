@@ -16,7 +16,7 @@
 //    Generic border-*-radius rawValue var(…)     → typed radius { "px": N }
 //
 //  Declarations whose reference is guaranteed-invalid (undefined name,
-//  no fallback — css-variables-1 §3.1) are DROPPED, which is exactly
+//  no fallback — css-variables-1 §3) are DROPPED, which is exactly
 //  `unset`: background-color falls to transparent, width to auto. The
 //  token fixtures are designed so that degrade path is visible.
 //

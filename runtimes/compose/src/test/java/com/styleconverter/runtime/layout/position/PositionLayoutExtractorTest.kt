@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.position
 
 // Phase 7b position extractor unit tests. Fixture shapes mirror
-// examples/properties/layout/position-*.json + inset-logical.json +
+// fixtures/properties/layout/position-*.json + inset-logical.json +
 // z-index.json. Covers the logical→physical reconciliation and zIndex
 // auto/integer/negative parsing.
 

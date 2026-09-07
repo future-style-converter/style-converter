@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.position
 
 // Wave 35 (lane B1) — JVM pins for the transform containing-block rule
-// table (css-transforms-1 §3 / css-transforms-2 §6) and for the hoist
+// table (css-transforms-1 §3 / css-transforms-2 §8) and for the hoist
 // decisions that consume it.
 //
 // THE CROSS-NATIVE PIN. `shapeMatrix` below is the SAME matrix, in the SAME
@@ -61,12 +61,12 @@ class TransformContainingBlockTest {
             listOf(prop("Transform", """{"type":"functions","list":[]}""")),
             false,
         ),
-        // ── individual transform properties (css-transforms-2 §4) ────────
+        // ── individual transform properties (css-transforms-2 §5) ────────
         Triple("rotate: 45deg", listOf(prop("Rotate", """{"type":"angle","deg":45}""")), true),
         Triple("rotate: none", listOf(prop("Rotate", """{"type":"none"}""")), false),
         Triple("scale: none", listOf(prop("Scale", """{"type":"none"}""")), false),
         Triple("translate: none", listOf(prop("Translate", """{"type":"none"}""")), false),
-        // ── perspective (css-transforms-2 §6, probe D) ───────────────────
+        // ── perspective (css-transforms-2 §8, probe D) ───────────────────
         Triple(
             "perspective: 500px",
             listOf(prop("Perspective", """{"type":"length","px":500}""")),
@@ -109,7 +109,7 @@ class TransformContainingBlockTest {
     // ── The hoist truth table the rule table feeds ────────────────────────
 
     @Test fun `a fixed box under a transformed ancestor does NOT hoist`() {
-        // css-transforms-2 §6 / probe C: the transformed ancestor is the
+        // css-transforms-2 §8 / probe C: the transformed ancestor is the
         // containing block, so the box stays where it is instead of
         // anchoring at the viewport. This is the 3d-rendering-context-and-
         // fixpos cell on BOTH natives.
@@ -127,7 +127,7 @@ class TransformContainingBlockTest {
 
     @Test fun `a fixed box under a merely POSITIONED ancestor still hoists`() {
         // Pin S3, unchanged by wave 35: `position: relative` is NOT a
-        // containing block for fixed descendants (css-position-3 §3.2), so
+        // containing block for fixed descendants (css-position-3 §2.1), so
         // only the transform flag may veto the hoist.
         val fixed = listOf(
             prop("Position", "\"FIXED\""),

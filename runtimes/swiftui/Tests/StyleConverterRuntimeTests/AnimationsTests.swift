@@ -408,4 +408,65 @@ final class AnimationsTests: XCTestCase {
         // One XCTFail per collected failure name (was: print PASS/FAIL).
         for failure in f { XCTFail(failure) }
     }
+
+    // retro R5 (audit A6#1) — `animation-name: none` is a HOLE that still
+    // occupies its slot in css-animations-1 §4's coordinated list matching (css-values-4 Appendix A: "the
+    // length of the animation-name list determines the number of items in
+    // each list"; lists are matched up from the first value). parseNameList's
+    // compactMap closure returns `AnimationNameEntry?`, so the bare `.none`
+    // it used to return was Optional.none and the entry was DROPPED —
+    // `none, bgcolor` collapsed to `[bgcolor]` and bgcolor read slot 0's
+    // 100s duration instead of its own slot-1 500ms.
+    //
+    // Payload: the VERBATIM wave49-final carrier
+    // css-backgrounds/per-test-ir/wpt__css-backgrounds__animations__
+    // background-color-animation-with-table2.json (component
+    // animations__background-color-animation-with-table2__0__0__0 — the
+    // eight animation-* envelopes byte for byte) with a leading `none`
+    // entry and a second duration slot added. The corpus has no `none`
+    // carrier (10 AnimationName carriers, none with a hole), so the hole
+    // itself is synthetic and says so here.
+    func testAnimationNameNoneKeepsItsTimingSlot() throws {
+        let doc = try JSONDecoder().decode(IRDocument.self, from: Data("""
+        {"irVersion": 2, "minReaderVersion": 2, "components": [{
+          "id": "animations__background-color-animation-with-table2__0__0__0-001",
+          "name": "animations__background-color-animation-with-table2__0__0__0",
+          "properties": [
+            {"type": "AnimationName", "data": [{"type": "none"}, {"type": "identifier", "name": "bgcolor"}]},
+            {"type": "AnimationDuration", "data": {"type": "app.irmodels.properties.animations.AnimationDurationProperty.AnimationDurationValue.Durations", "durations": [{"ms": 100000, "original": {"v": 100, "u": "S"}}, {"ms": 500, "original": {"v": 0.5, "u": "S"}}]}},
+            {"type": "AnimationTimingFunction", "data": [{"cb": [0.25, 0.1, 0.25, 1], "original": "ease"}]},
+            {"type": "AnimationDelay", "data": [{"ms": 0, "original": {"v": 0, "u": "S"}}]},
+            {"type": "AnimationIterationCount", "data": [1]},
+            {"type": "AnimationDirection", "data": ["NORMAL"]},
+            {"type": "AnimationFillMode", "data": ["NONE"]},
+            {"type": "AnimationPlayState", "data": ["RUNNING"]},
+            {"type": "BackgroundColor", "data": {"srgb": {"r": 0, "g": 0.5019607843137255, "b": 0}, "original": "green"}}
+          ]}]}
+        """.utf8))
+        let props = doc.components[0].properties
+        let cfg = try XCTUnwrap(AnimationsExtractor.extract(from: props))
+        // The hole survives extraction: two entries, `none` first.
+        XCTAssertEqual(cfg.name, [AnimationNameEntry.none, .identifier("bgcolor")],
+                       "animation-name: none must stay in the list (§3.2 slot)")
+        // §3.2 list matching: bgcolor is slot 1 → the 500ms duration.
+        XCTAssertEqual(AnimationResolver.timingSlice(cfg, index: 1).durationMs, 500)
+        // End to end through the resolver: at t = 1s the 500ms slot-1
+        // animation (fill none) is OVER, so the green base shows. Under the
+        // dropped-hole pairing bgcolor sat in slot 0 (100s) and was still
+        // mid-flight at 1% — the red→blue overlay replaced the base.
+        let red = IRProperty(type: "BackgroundColor",
+                             data: .object(["srgb": .object(["r": .double(1), "g": .double(0), "b": .double(0)])]))
+        let blue = IRProperty(type: "BackgroundColor",
+                              data: .object(["srgb": .object(["r": .double(0), "g": .double(0), "b": .double(1)])]))
+        let keyframes: [String: [IRKeyframeStop]] = ["bgcolor": [
+            IRKeyframeStop(offset: 0, properties: [red]),
+            IRKeyframeStop(offset: 1, properties: [blue]),
+        ]]
+        let out = AnimationResolver.resolve(properties: props, keyframes: keyframes,
+                                            atSeconds: 1.0, pinnedClock: true)
+        let bg = out.first { $0.type == "BackgroundColor" }?.data.objectValue?["srgb"]?.objectValue
+        XCTAssertEqual(bg?["g"]?.doubleValue ?? -1, 0.5019607843137255, accuracy: 1e-9,
+                       "the base green must survive — slot 1's 500ms animation has ended")
+        XCTAssertEqual(bg?["r"]?.doubleValue ?? -1, 0, accuracy: 1e-9)
+    }
 }

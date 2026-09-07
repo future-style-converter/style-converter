@@ -43,7 +43,18 @@ final class IOSTextLaneTests: XCTestCase {
         let cfg = TextDecorationLineExtractor.extract(from: props(
             #"[{"type":"TextDecorationLine","data":["LINE_THROUGH"]}]"#))
         XCTAssertEqual(cfg?.lineThrough, true, "LINE_THROUGH must map to line-through")
-        // Mixed string form with an underscore token.
+        // The LIVE two-token form is an ARRAY of enum names — probe
+        // `:converter:run` 2026-09-05: `text-decoration-line: underline
+        // line-through` → `["UNDERLINE","LINE_THROUGH"]` (css-text-decor-3
+        // §2.1 accepts the tokens in any order, so both flags must set).
+        let live2 = TextDecorationLineExtractor.extract(from: props(
+            #"[{"type":"TextDecorationLine","data":["UNDERLINE","LINE_THROUGH"]}]"#))
+        XCTAssertEqual(live2?.underline, true)
+        XCTAssertEqual(live2?.lineThrough, true)
+        // TOLERANCE, not a live wire (retro R10, A8#5): the space-separated
+        // STRING form is not emitted by the converter for any of the 1436
+        // wave49-final documents — TextDecorationLine is always an array. It
+        // stays readable so a hand-written or legacy IR still renders.
         let cfg2 = TextDecorationLineExtractor.extract(from: props(
             #"[{"type":"TextDecorationLine","data":"underline LINE_THROUGH"}]"#))
         XCTAssertEqual(cfg2?.underline, true)
@@ -236,7 +247,16 @@ final class IOSTextLaneTests: XCTestCase {
             #"[{"type":"FontWeight","data":800}]"#))
         XCTAssertEqual(cfg?.numeric, 800)
         XCTAssertEqual(cfg?.weight, .heavy)
-        // Keyword forms map to their §2.2 numeric equivalents.
+        // The LIVE keyword wire is the {weight, original} pair — probe
+        // `:converter:run` 2026-09-05: `font-weight: bold` →
+        // `{"weight":700,"original":"bold"}` (css-fonts-4 §2.2 maps `bold`
+        // to 700; the bare `800` above IS live for the numeric form).
+        let live = FontWeightExtractor.extract(from: props(
+            #"[{"type":"FontWeight","data":{"weight":700,"original":"bold"}}]"#))
+        XCTAssertEqual(live?.numeric, 700)
+        // TOLERANCE, not a live wire (retro R10, A8#5): the bare keyword
+        // STRING is not emitted by the converter (it always carries the
+        // resolved weight beside the original), but stays readable.
         let cfg2 = FontWeightExtractor.extract(from: props(
             #"[{"type":"FontWeight","data":"bold"}]"#))
         XCTAssertEqual(cfg2?.numeric, 700)

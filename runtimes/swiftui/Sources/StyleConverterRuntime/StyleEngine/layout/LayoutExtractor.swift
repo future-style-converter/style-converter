@@ -12,8 +12,9 @@
 //  names with `PropertyRegistry.migrated` so the renderer knows those
 //  properties are owned by the layout engine (even if the engine currently
 //  no-ops them — the legacy StyleBuilder still handles them in practice
-//  because `LayoutApplier.apply(...)` is identity and callers read the
-//  migration ledger via `union`-ing the set below).
+//  because callers read the migration ledger via `union`-ing the set
+//  below). Retro P2b (A6#10): the `LayoutApplier` identity enum this
+//  paragraph named was deleted — nothing ever called it.
 //
 //  Important: the 60 PascalCase type names below mirror the IR type
 //  strings produced by `src/main/kotlin/app/parsing/css/properties/
@@ -126,11 +127,17 @@ enum LayoutRootProperty {
     ]
 }
 
-/// Union of all five layout groups — 60 property type names total.
+/// Union of all five layout groups — 61 property type names total
+/// (12 flexbox + 18 grid + 10 position + 17 advanced + 4 root; retro P2e
+/// re-counted: this said 60, one short of what the sets actually hold and
+/// of what the pin asserts).
 /// `PropertyRegistry.migrated` picks this up via `.union(...)`.
 enum LayoutProperty {
     /// All layout-family property type names. The count is asserted by
-    /// `LayoutSelfTest.run()` to catch accidental drift.
+    /// `LayoutTests.testRegistryDrift` (retro P2e corrected the
+    /// name: the launch-time `LayoutSelfTest.run()` became that XCTest case
+    /// when the engine moved into the SwiftPM package, and no `LayoutSelfTest`
+    /// symbol remains) to catch accidental drift.
     static let set: Set<String> =
         LayoutFlexboxProperty.set
             .union(LayoutGridProperty.set)
@@ -143,9 +150,10 @@ enum LayoutProperty {
 
 enum LayoutExtractor {
 
-    /// Runs every (future) layout extractor and folds them into one
-    /// aggregate. Returns nil when no layout property was seen — this
-    /// lets `LayoutApplier` short-circuit.
+    /// Runs every layout extractor and folds them into one aggregate.
+    /// Returns nil when no layout property was seen — this lets the
+    /// renderer skip the layout7 branch entirely (retro P2b: the
+    /// `LayoutApplier` short-circuit this line named was dead code).
     ///
     /// STEP 1 IMPLEMENTATION: no extractors exist yet, so this always
     /// returns nil. Steps 2-5 will replace this with the typography-style
@@ -193,8 +201,9 @@ enum LayoutExtractor {
             }
         }
 
-        // Return nil when nothing wrote — lets LayoutApplier short-
-        // circuit and leaves the renderer's legacy fallback untouched.
+        // Return nil when nothing wrote — leaves the renderer's legacy
+        // StyleBuilder fallback untouched (retro P2b: the consumer is
+        // ComponentRenderer's `style.layout7` read, not a LayoutApplier).
         return agg.touched ? agg : nil
     }
 }

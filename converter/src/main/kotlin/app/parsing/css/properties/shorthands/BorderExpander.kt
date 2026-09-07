@@ -1,5 +1,12 @@
 package app.parsing.css.properties.shorthands
 
+// A6#14 — clone consolidation: this expander used to carry private
+//   `tokenizeBorderValue` (1 copy), byte-identical to TokenizationUtils.tokenizeByWhitespace
+//   — its 1 call site now calls the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
+
 /**
  * Expands the `border` shorthand property into width, style, and color for all sides.
  *
@@ -63,7 +70,7 @@ object BorderExpander : ShorthandExpander {
      */
     internal fun parseBorderValue(value: String): Map<String, String> {
         // Use smart tokenizer that respects parentheses in color functions
-        val tokens = tokenizeBorderValue(value.trim())
+        val tokens = TokenizationUtils.tokenizeByWhitespace(value.trim())
         val result = mutableMapOf<String, String>()
 
         for (token in tokens) {
@@ -157,41 +164,6 @@ object BorderExpander : ShorthandExpander {
     /** A bare identifier: named colours, `currentcolor`, `transparent`. */
     private val BARE_IDENT = """^[a-zA-Z][a-zA-Z-]*$""".toRegex()
 
-    /**
-     * Tokenize border value, respecting parentheses in color functions.
-     * Example: "1px solid rgba(255, 255, 255, 0.2)" → ["1px", "solid", "rgba(255, 255, 255, 0.2)"]
-     */
-    internal fun tokenizeBorderValue(value: String): List<String> {
-        val tokens = mutableListOf<String>()
-        var current = StringBuilder()
-        var parenDepth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> {
-                    parenDepth++
-                    current.append(char)
-                }
-                char == ')' -> {
-                    parenDepth--
-                    current.append(char)
-                }
-                char.isWhitespace() && parenDepth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        tokens.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-
-        if (current.isNotEmpty()) {
-            tokens.add(current.toString())
-        }
-
-        return tokens
-    }
 }
 
 /**

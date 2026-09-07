@@ -48,20 +48,22 @@ object TransformOriginPropertyParser : PropertyParser {
         val parts = lowerValue.split(Regex("\\s+"))
         if (parts.isEmpty()) return TransformOriginProperty.Raw(trimmed)
 
-        // Parse x value
-        val x = parseOriginValue(parts[0]) ?: return TransformOriginProperty.Raw(trimmed)
+        // Parse the first value
+        val first = parseOriginValue(parts[0]) ?: return TransformOriginProperty.Raw(trimmed)
 
-        // Parse y value (default to center if not provided)
-        val y = when {
-            parts.size < 2 -> {
-                // If only one value provided, determine default for y
-                when {
-                    isHorizontalKeyword(parts[0]) -> parseOriginValue("center")!!
-                    isVerticalKeyword(parts[0]) -> x
-                    else -> parseOriginValue("center")!!
-                }
-            }
-            else -> parseOriginValue(parts[1]) ?: return TransformOriginProperty.Raw(trimmed)
+        // css-transforms-1 §5: "If only one value is specified, the second value
+        // is assumed to be center." A lone VERTICAL keyword names the y offset,
+        // so the implied `center` fills the x slot — `top` is `center top`.
+        // (retro R5, A11#14: this used to duplicate the keyword into BOTH slots,
+        // x:TOP y:TOP — the web runtime replayed that as the invalid `top top`,
+        // which Chromium drops to 50% 50%, and the positional natives read the
+        // top-LEFT corner.) Two values stay positional — the wire is frozen; the
+        // §5 keyword-axis binding is the runtimes' job.
+        val (x, y) = when {
+            parts.size >= 2 -> first to (parseOriginValue(parts[1]) ?: return TransformOriginProperty.Raw(trimmed))
+            isHorizontalKeyword(parts[0]) -> first to parseOriginValue("center")!!
+            isVerticalKeyword(parts[0]) -> parseOriginValue("center")!! to first
+            else -> first to parseOriginValue("center")!!
         }
 
         // Parse z value (optional, for 3D transforms)

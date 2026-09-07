@@ -11,12 +11,6 @@
 // Foundation only.
 import Foundation
 
-enum GapProperty {
-    // The renderer treats `Gap` itself as migrated because the shorthand
-    // path occasionally keeps the original name in hand-authored IR.
-    static let names: [String] = ["Gap", "RowGap", "ColumnGap"]
-}
-
 enum GapExtractor {
 
     // Single-pass extractor. Gap uses the standard `extractLength` (not

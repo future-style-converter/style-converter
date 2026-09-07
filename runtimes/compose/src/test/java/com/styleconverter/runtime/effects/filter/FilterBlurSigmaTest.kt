@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.effects.filter
 
 // Pins the `filter: blur()` sigma conversion. Context: Modifier.blur was
-// handed the CSS length UNCONVERTED, but filter-effects-1 §8.2 says that
+// handed the CSS length UNCONVERTED, but filter-effects-1 §6.1 says that
 // length IS the Gaussian standard deviation while Skia's radius maps to
 // σ ≈ radius·0.57735 + 0.5. Android therefore under-blurred by a factor
 // that DRIFTED with radius (the relation is affine, not a scale).

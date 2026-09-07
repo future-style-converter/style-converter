@@ -9,4 +9,3 @@ export interface AnchorScopeConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const ANCHORSCOPE_PROPERTY_TYPE = 'AnchorScope' as const;
-export type AnchorScopePropertyType = typeof ANCHORSCOPE_PROPERTY_TYPE;

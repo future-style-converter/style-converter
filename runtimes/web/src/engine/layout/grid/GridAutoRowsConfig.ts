@@ -4,4 +4,3 @@
 // serialised CSS string or undefined.
 export interface GridAutoRowsConfig { value?: string; }
 export const GRID_AUTO_ROWS_PROPERTY_TYPE = 'GridAutoRows' as const;
-export type GridAutoRowsPropertyType = typeof GRID_AUTO_ROWS_PROPERTY_TYPE;

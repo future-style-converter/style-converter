@@ -1,6 +1,6 @@
 // VerticalAlignLastExtractor.ts — folds `VerticalAlignLast` IR properties into a VerticalAlignLastConfig.
 // Family: vertical-align.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { VerticalAlignLastConfig, VERTICAL_ALIGN_LAST_PROPERTY_TYPE, VerticalAlignLastPropertyType } from './VerticalAlignLastConfig';
 import { kwLower } from './_shared';

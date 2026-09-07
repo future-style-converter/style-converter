@@ -93,7 +93,11 @@ class FontExpanderTest {
     fun `reset survives the full leading longhand form`() {
         val out = FontExpander.expand("italic small-caps bold condensed 12pt \"Times New Roman\"")
         assertEquals("italic", out["font-style"])
-        assertEquals("small-caps", out["font-variant"])
+        // css-fonts-4 §2.7: the shorthand's `<font-variant-css2>` slot sets the
+        // LONGHAND font-variant-caps; `font-variant` is itself a shorthand and
+        // must never leave the expander (retrospective A8#0 leak).
+        assertEquals("small-caps", out["font-variant-caps"])
+        assertNull(out["font-variant"], "shorthand name must not leak as a longhand")
         assertEquals("bold", out["font-weight"])
         assertEquals("condensed", out["font-stretch"])
         assertEquals("12pt", out["font-size"])

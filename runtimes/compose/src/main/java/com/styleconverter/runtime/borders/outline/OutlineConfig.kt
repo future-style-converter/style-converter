@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
  * ```
  */
 data class OutlineConfig(
-    // css-ui-4 §4.2: the initial value of outline-width is `medium` = 3px,
+    // css-ui-4 §3.2: the initial value of outline-width is `medium` = 3px,
     // NOT 0 — `outline-style: solid` alone must paint a 3px ring like the
     // browser does. An explicit `outline-width: 0` still extracts to 0.dp
     // and disables the ring via [hasOutline].

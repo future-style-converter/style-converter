@@ -76,7 +76,7 @@ class RootPseudoSpecTest {
             })
         }, "before")
         assertNull(spec!!.widthPx)
-        // A bare `0` IS a valid length (css-values-4 §5.2).
+        // A bare `0` IS a valid length (css-values-4 §6).
         assertEquals(0f, spec.heightPx)
     }
 

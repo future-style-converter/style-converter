@@ -1,6 +1,6 @@
 // FontVariantPositionExtractor.ts — folds `FontVariantPosition` IR properties into a FontVariantPositionConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariantPositionConfig, FONT_VARIANT_POSITION_PROPERTY_TYPE, FontVariantPositionPropertyType } from './FontVariantPositionConfig';
 import { kwLower } from './_shared';

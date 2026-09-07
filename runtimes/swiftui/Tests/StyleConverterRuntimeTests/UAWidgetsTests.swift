@@ -248,7 +248,7 @@ final class UAWidgetsTests: XCTestCase {
     func testFractionEdgeCasesStayFiniteAndTwinAligned() throws {
         // Wave-20 skeptic pins (Kotlin twin: fractionEdgeCases_...).
         // "NaN" parses via Double.init but is NOT a valid HTML float
-        // (§2.3.5.1) — must fall back to the midpoint, never NaN.
+        // (§2.3.4.3) — must fall back to the midpoint, never NaN.
         let nan = try comp(#"{"id":"r","name":"r","meta":{"sourceTag":"input","attrs":{"type":"range","value":"NaN"}}}"#)
         XCTAssertEqual(UAWidgetsResolve.resolve(component: nan, properties: [])?.fraction, 0.5)
         // Degenerate travel (min == max) → midpoint, not 0/0 NaN.

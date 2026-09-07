@@ -62,16 +62,21 @@ struct TransformsApplier: ViewModifier {
         // to the next 3D rotate, which renders the true keystone via
         // Rotate3DEffect instead of the old flat scale approximation.
         var v: AnyView = AnyView(content)
-        // Seed from the `perspective` PROPERTY: the web reference
-        // (engine/transforms/_dispatch.ts) deliberately folds a
-        // co-located perspective length into the element's OWN
-        // transform — `perspective: 500px` + `transform: rotateY(30deg)`
-        // renders the keystone on the element itself across all three
-        // runtimes (convergence decision; strict spec would only
-        // project the children). A perspective() FUNCTION in the list
-        // overrides the seed below.
+        // NO seed from the `perspective` PROPERTY (retro F3, skeptic S2):
+        // css-transforms-2 §4.1.1 names two ways a perspective reaches an
+        // element — a perspective() FUNCTION in its own list ("computes
+        // into the element's current transformation matrix", §12.2) and
+        // the `perspective` PROPERTY, which "influence[s] the rendering of
+        // its 3d-transformed children" (§8). The wave-5 seed folded the
+        // property into the element's OWN rotation (the web `_dispatch.ts`
+        // prefix hack's twin); the frozen WPT ref of css-transforms/
+        // backface-visibility-hidden-001 (`perspective: 1000px; transform:
+        // rotateY(45deg)`) is orthographic — 100 rows in every column —
+        // so that keystone was a shared divergence, not convergence.
+        // Compose stopped folding in the same retro. Only a perspective()
+        // FUNCTION in the list primes the rotation that follows it.
         //
-        // ORDER. css-transforms-1 §11: `transform: A B` is the matrix
+        // ORDER. css-transforms-1 §8: `transform: A B` is the matrix
         // product A·B, so B maps the point FIRST and A last. SwiftUI
         // composes the other way round — in `v.modA().modB()`, modB wraps
         // modA, so modA reaches the content first and the result is B·A·p.
@@ -93,7 +98,7 @@ struct TransformsApplier: ViewModifier {
         // `perspective()` function primes the rotation that FOLLOWS it in
         // CSS order. So pair each function with its governing distance in
         // list order first, then emit the pairs in reverse.
-        var pendingPerspective: CGFloat? = (c.perspective?.distancePx).map { CGFloat($0) }
+        var pendingPerspective: CGFloat? = nil                 // §8: the property is the children's, never this list's seed
         var ordered: [(fn: TransformFn, perspectivePx: CGFloat?)] = []
         for fn in c.functions {
             if case .perspective(let d) = fn {
@@ -117,7 +122,7 @@ struct TransformsApplier: ViewModifier {
         // it) — the browser renders `rotate: 1 1 0 45deg` next to a
         // `perspective:` declaration orthographically.
         // Emitted in REVERSE spec order for the same reason as the
-        // function list above: css-transforms-2 §3 composes the individual
+        // function list above: css-transforms-2 §6 composes the individual
         // properties as translate · rotate · scale, so `scale` maps the
         // point first and must be the INNERMOST SwiftUI modifier.
         if let s = c.scale     { v = AnyView(applyFunction(s, to: v, anchor: anchor)) }
@@ -125,8 +130,9 @@ struct TransformsApplier: ViewModifier {
         if let t = c.translate { v = AnyView(applyFunction(t, to: v, anchor: anchor)) }
 
         // Step 2b — NON-INVERTIBLE used transform (wave 35, lane B1).
-        // css-transforms-1 §3: "If the transform is not invertible, the
-        // element and its content are not rendered." A rotateX/rotateY of
+        // css-transforms-1 §8: "If a transform function causes the current
+        // transformation matrix of an object to be non-invertible, the object
+        // and its content do not get displayed." A rotateX/rotateY of
         // exactly ±90° collapses the box edge-on, and SwiftUI does NOT
         // collapse with it: `ProjectionTransform` with a zero-determinant
         // slice falls back to IDENTITY, so Rotate3DEffect drew the box
@@ -143,7 +149,7 @@ struct TransformsApplier: ViewModifier {
         // Step 3 — `transform-style: preserve-3d` emits NO modifier here
         // (wave 20, B-RC4). The old `.drawingGroup()` wrap was backwards
         // twice over: (a) drawingGroup FLATTENS the subtree into one
-        // offscreen raster — the exact flattening css-transforms-2 §4
+        // offscreen raster — the exact flattening css-transforms-2 §7
         // says preserve-3d must prevent — and (b) it CLIPS that raster
         // to the view's bounds, while CSS never clips at a preserve-3d
         // boundary (overflow is a separate, default-visible property).
@@ -173,7 +179,7 @@ struct TransformsApplier: ViewModifier {
 
         // Step 4b — context propagation for DESCENDANTS: an element that
         // establishes/extends a 3D rendering context (perspective ≠ none,
-        // or preserve-3d — css-transforms-2 §4) publishes the accumulated
+        // or preserve-3d — css-transforms-2 §4.1) publishes the accumulated
         // matrix so nested faces cull against the full ancestor chain
         // (backface-visibility-hidden-001: container rotateY(45°) reaches
         // the grandchild faces through this channel). A touched FLAT
@@ -197,12 +203,12 @@ struct TransformsApplier: ViewModifier {
         v = AnyView(v.environment(\.cssInheritedTransform,
                                   TransformInheritance.published(c)))
 
-        // Step 5 — the `perspective` PROPERTY (css-transforms-2 §6).
-        // Wave 5: consumed as the pendingPerspective SEED in Step 1
-        // (web-reference convergence: the co-located length projects
-        // the element's own 3D rotation). Beyond that seed the
-        // longhand draws nothing here — applied to flat content the
-        // §13.1 matrix is identity, and the wave-3 "depth-feel" scale
+        // Step 5 — the `perspective` PROPERTY (css-transforms-2 §8).
+        // Retro F3: no longer consumed as a Step-1 seed (see there) —
+        // the property projects the element's CHILDREN, a channel this
+        // applier does not implement yet (named, not hidden). It draws
+        // nothing here — applied to flat content the §4.1.1 perspective
+        // matrix is identity, and the wave-3 "depth-feel" scale
         // approximation (max(0.9, d/1000) when 3D-rotated) fabricated
         // a distortion neither web nor Android paints.
         // TransformsMath.perspectiveScale stays XCTest-pinned for the
@@ -226,7 +232,7 @@ struct TransformsApplier: ViewModifier {
             // that "SwiftUI has no Z-translate on a non-3D view". That is
             // true of a GENERAL 3D translate and beside the point for the
             // case that actually occurs: under a perspective, translateZ
-            // is not a translation at all — css-transforms-2 §3 makes it a
+            // is not a translation at all — css-transforms-2 §4.1.1 makes it a
             // UNIFORM SCALE of P/(P − z), which `.scaleEffect` expresses
             // exactly.
             //
@@ -338,7 +344,7 @@ struct TransformsApplier: ViewModifier {
             // SwiftUI has no first-class skew, and a bare
             // `.projectionEffect` applies its matrix about the view's
             // TOP-LEADING corner. CSS composes every transform function
-            // about `transform-origin` (css-transforms-1 §2: translate
+            // about `transform-origin` (css-transforms-1 §4: translate
             // by origin · function · translate by −origin), default
             // 50% 50%. Shearing about the top edge instead of the
             // vertical centre displaced skewX(θ) content by a constant

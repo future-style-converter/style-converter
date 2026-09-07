@@ -230,7 +230,7 @@ export interface IRMeta {
    * Absent = "unknown", i.e. the consumer's default locale — the state
    * every document was in before this key existed. The web capture
    * harness puts it back on the DOM as a real `lang` attribute so the
-   * browser's own CLDR `quotes: auto` table (css-content-3 §2.2.1) and
+   * browser's own CLDR `quotes: auto` table (css-content-3 §2.4.1) and
    * its generic-family font fallback engage; readers with no UA quote
    * engine get literal marks baked upstream instead
    * (schema/spec/04-metadata-fields.md).

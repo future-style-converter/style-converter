@@ -44,7 +44,7 @@ export function trackSize(data: unknown): string | undefined {
 //   [track, track, …]                    → 'track track …'
 //   { expr: '<raw CSS>' }                → verbatim — used by the parser's
 //                                          isComplexExpression fallback (see
-//                                          examples/properties/layout/README.md)
+//                                          fixtures/properties/layout/README.md)
 //   anything else                        → undefined (drop)
 export function renderTrackList(data: unknown): string | undefined {
   if (data && typeof data === 'object') {

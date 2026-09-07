@@ -5,4 +5,3 @@
 // See https://developer.chrome.com/blog/anchor-positioning-api#inset-area.
 export interface InsetAreaConfig { value?: string; }
 export const INSET_AREA_PROPERTY_TYPE = 'InsetArea' as const;
-export type InsetAreaPropertyType = typeof INSET_AREA_PROPERTY_TYPE;

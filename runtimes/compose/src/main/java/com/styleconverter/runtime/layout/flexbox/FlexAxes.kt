@@ -9,7 +9,7 @@ package com.styleconverter.runtime.layout.flexbox
 // `flexDecision.horizontalArrangement` / `.verticalArrangement` — the
 // justify-content-ONLY mapping built by FlexboxApplier.decide, which knows
 // nothing about gap — so `column-gap` was dropped in EVERY wrapping flex
-// row and `row-gap` in every wrapping flex column (css-align-3 §8.1: the
+// row and `row-gap` in every wrapping flex column (css-align-3 §8: the
 // gap applies to flex containers regardless of flex-wrap). The cross-axis
 // half was already spaced, which is exactly why the bug survived: a
 // wrapping row still showed its row-gap, so the missing column-gap read as

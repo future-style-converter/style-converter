@@ -171,6 +171,34 @@ check_suite_count "web"       "$WEB_TESTS"       README.md CLAUDE.md docs/STATUS
 check_suite_count "compose"   "$COMPOSE_TESTS"   README.md CLAUDE.md docs/STATUS.md runtimes/compose/README.md apps/android-harness/README.md
 check_suite_count "swiftui"   "$SWIFTUI_TESTS"   README.md CLAUDE.md docs/STATUS.md runtimes/swiftui/README.md
 
+# ── Harness suites (retrospective A8#4) ─────────────────────────────────────
+#
+# The sweep tables enumerated the four runtime suites + tooling and nothing
+# else — yet the Android half of the wave-45 em-margin four-rung ladder is
+# pinned ONLY by apps/android-harness's :app JUnit tree (StaticEmMarginsTest
+# 18 + UaBlockMarginsTest 37), and the wave-40 flow-root and wave-49 root-clip
+# web pins live in apps/web-harness/tests (CI runs it via `npm -ws run test`;
+# no local table listed it). A suite outside every documented row is a suite
+# nobody runs. Derive both exactly like the runtime suites above and hold the
+# same three docs to a row whose FIRST cell names the harness.
+APP_ANNOTATED=$(grep -rE "@Test" apps/android-harness/app/src/test --include="*.kt" | wc -l | tr -d ' ')
+APP_XML=$(xml_test_total apps/android-harness/app/build/test-results/testDebugUnitTest apps/android-harness/app/src/test "$APP_ANNOTATED" || true)
+APP_TESTS=${APP_XML:-$APP_ANNOTATED}
+[[ -n "$APP_XML" && "$APP_XML" != "$APP_ANNOTATED" ]] && \
+    warn "android-harness :app executed=$APP_XML != annotated=$APP_ANNOTATED — annotation-invisible tests; docs held to the executed total"
+# vitest run (~3s) — same reporter parse as the runtimes/web row above.
+WEB_HARNESS_TESTS=$(npm -w apps/web-harness run test 2>&1 | grep -E "Tests +[0-9]+ passed" | grep -oE "[0-9]+" | head -1)
+log "live: android-harness(:app)=$APP_TESTS web-harness=$WEB_HARNESS_TESTS"
+check_suite_count "android-harness" "$APP_TESTS"         README.md CLAUDE.md docs/STATUS.md
+check_suite_count "web-harness"     "$WEB_HARNESS_TESTS" README.md CLAUDE.md docs/STATUS.md
+# The ios-harness XCTest bundle (project.yml target StyleConverterTestTests)
+# is defined but no documented command runs it and it needs a booted
+# simulator, so it cannot be derived here — counted and surfaced as a
+# WARNING so the gap stays visible until it is either wired into a row or
+# deleted (A8#4's prescription offers both).
+IOS_HARNESS_DECLS=$(grep -rE "func test" apps/ios-harness/StyleConverterTestTests --include="*.swift" 2>/dev/null | wc -l | tr -d ' ')
+warn "ios-harness XCTest bundle declares $IOS_HARNESS_DECLS tests but no documented sweep row runs it (needs a simulator) — wire it into the tables or delete the target"
+
 # ── Fixture category count vs root README/CLAUDE (R7 addition) ──────────────
 #
 # The "33 categories" claim (the canonical irmodels/fixtures taxonomy)
@@ -256,15 +284,147 @@ PASS=$(grep -m1 -i "verified rendering coverage" docs/STATUS.md | grep -oE "[0-9
 if [[ -z "$PASS" ]]; then
     err "docs/STATUS.md: could not extract the verified-coverage \"N/$CATALOG\" headline"
 else
-    log "docs/STATUS.md quotes verified coverage $PASS/$CATALOG"
+    # Print the denominator the grep below actually pins (550, the round-40
+    # historical record) — it used to print the live $CATALOG (558) while the
+    # assertion checked 550, so message and check disagreed (retro A9#9 (d)).
+    log "docs/STATUS.md quotes verified coverage $PASS/550 (historical denominator; live catalogue is $CATALOG)"
     for doc in README.md CLAUDE.md; do
         if grep -qE "$PASS ?/ ?550" "$doc"; then
-            log "✓ $doc mentions verified coverage $PASS/$CATALOG"
+            log "✓ $doc mentions verified coverage $PASS/550" # 550 = the denominator the grep above pins; it printed the live $CATALOG (558) while checking 550 (retro S1 #3 / A9#9 (d))
         else
             err "$doc does NOT mention verified coverage $PASS/550 (the STATUS.md headline)"
         fi
     done
 fi
+
+# ── Newest corpus snapshot vs BACKLOG "Current:" + STATUS wave paragraph ────
+#
+# Retrospective A9#9 (a): BACKLOG.md's "Current: corpus-v6.15 (web 1205/1379
+# …)" line and STATUS.md's latest wave paragraph were checked by hand only.
+# Derive the newest tools/titan/results/corpus-v<M>-<n>.json by version
+# (dotted in the docs, hyphenated on disk; `-cal` calibration snapshots are
+# not gate snapshots and are excluded) and require both docs to name it and
+# to quote its three passing/measured fractions. Parameterised so the
+# checker can be pointed at scratch copies (doc-staleness-checks.test.mjs).
+echo -e "\n${B}━━━ newest corpus snapshot vs docs/BACKLOG.md + docs/STATUS.md ━━━${N}"
+newest_corpus_snapshot() { # $1=results dir → path of the highest-versioned corpus-v<M>[-<n>].json
+    node -p '
+      const fs = require("fs"), d = process.argv[1];
+      const v = (f) => { const m = f.match(/^corpus-v(\d+)(?:-(\d+))?\.json$/); return m && [+m[1], +(m[2] ?? 0)]; };
+      fs.readdirSync(d).filter(v).sort((a, b) => { const A = v(a), B = v(b); return A[0] - B[0] || A[1] - B[1]; }).map((f) => d + "/" + f).pop() ?? ""
+    ' "$1"
+}
+check_corpus_current() { # $1=snapshot json $2=BACKLOG.md path (its "Current:" line must name it) $3=STATUS.md path
+    local snap="$1" backlog="$2" status="$3" id fr f
+    id=$(basename "$snap" .json | sed 's/^corpus-v//; s/-/./')        # corpus-v6-15.json → 6.15
+    fr=$(node -p '
+      const t = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8")).totals;
+      ["web", "ios", "android"].map((k) => t[k].passing + "/" + t[k].measured).join(" ")
+    ' "$snap" 2>/dev/null) || { err "$snap: no totals.{web,ios,android}.{passing,measured} block"; return; }
+    log "live: corpus-v$id → web/iOS/Android = $fr"
+    # BACKLOG: the "Current:" line itself must name the newest snapshot.
+    if grep -qE "Current:.*corpus-v${id//./\\.}" "$backlog"; then
+        log "✓ $backlog Current: names corpus-v$id"
+    else
+        err "$backlog: the 'Current:' line does not name the newest snapshot corpus-v$id"
+    fi
+    # STATUS: the wave paragraph names the snapshot somewhere.
+    if grep -qE "corpus-v${id//./\\.}" "$status"; then
+        log "✓ $status names corpus-v$id"
+    else
+        err "$status: does not name the newest snapshot corpus-v$id"
+    fi
+    # Both docs quote all three fractions (fixed strings — a fraction is
+    # specific enough that context matching adds nothing).
+    for f in $fr; do
+        grep -qF "$f" "$backlog" || err "$backlog does not quote $f from corpus-v$id"
+        grep -qF "$f" "$status"  || err "$status does not quote $f from corpus-v$id"
+    done
+}
+NEWEST_CORPUS=$(newest_corpus_snapshot tools/titan/results)
+if [[ -z "$NEWEST_CORPUS" ]]; then
+    err "no corpus-v<M>-<n>.json snapshot found under tools/titan/results"
+else
+    check_corpus_current "$NEWEST_CORPUS" docs/BACKLOG.md docs/STATUS.md
+fi
+
+# ── coverage-audit real / applier-file counts vs README + COVERAGE.md ───────
+#
+# Retrospective A6#16: the coverage check above pins only the `registered:`
+# totals, so README's real-applier row (19 vs live 20) and COVERAGE.md's whole
+# body (last regenerated pre-campaign: 550/550, real 18/73/508, files
+# 59/115/522) drifted unguarded. Pin the `real:` totals and the dedicated
+# `*Applier` file counts from `coverage-audit.mjs --json` against README's row
+# and COVERAGE.md's total row + "Dedicated" line. Fix: edit README's row and
+# `node tools/visual/coverage-audit.mjs --md` for COVERAGE.md.
+echo -e "\n${B}━━━ coverage-audit real/applier-file counts vs README.md + COVERAGE.md ━━━${N}"
+check_real_floor() { # $1=coverage-audit --json output file $2=README.md $3=COVERAGE.md (uses $CATALOG)
+    local j="$1" readme="$2" cov="$3" ra ri rw fa fi fw
+    read -r ra ri rw fa fi fw < <(node -p '
+      const j = JSON.parse(require("fs").readFileSync(process.argv[1], "utf8"));
+      [j.realTotals.android, j.realTotals.ios, j.realTotals.web, j.applierFiles.android, j.applierFiles.ios, j.applierFiles.web].join(" ")
+    ' "$j")
+    log "live: real android=$ra ios=$ri web=$rw · applier files android=$fa ios=$fi web=$fw"
+    # README's row: "**Android 20 / 558 · iOS 74 / 558 · Web 516 / 558**".
+    if grep -qE "Android *$ra */ *$CATALOG *· *iOS *$ri */ *$CATALOG *· *Web *$rw */ *$CATALOG" "$readme"; then
+        log "✓ $readme real-applier row matches"
+    else
+        err "$readme: real-applier floor row is not 'Android $ra / $CATALOG · iOS $ri / $CATALOG · Web $rw / $CATALOG' (live coverage-audit real: line)"
+    fi
+    # COVERAGE.md total row: | **total** | **reg/N** | **real/N** | … three times.
+    if grep -qE "^\| \*\*total\*\* \| \*\*[0-9]+/$CATALOG\*\* \| \*\*$ra/$CATALOG\*\* \| \*\*[0-9]+/$CATALOG\*\* \| \*\*$ri/$CATALOG\*\* \| \*\*[0-9]+/$CATALOG\*\* \| \*\*$rw/$CATALOG\*\* \|" "$cov"; then
+        log "✓ $cov total row matches"
+    else
+        err "$cov: total row does not carry real $ra/$ri/$rw of $CATALOG — regenerate: node tools/visual/coverage-audit.mjs --md"
+    fi
+    if grep -qF "Android $fa · iOS $fi · Web $fw" "$cov"; then
+        log "✓ $cov dedicated-applier-file counts match"
+    else
+        err "$cov: dedicated *Applier file counts are not 'Android $fa · iOS $fi · Web $fw' — regenerate: node tools/visual/coverage-audit.mjs --md"
+    fi
+}
+COVERAGE_JSON=$(mktemp -t doc-staleness-coverage)
+if node tools/visual/coverage-audit.mjs --json > "$COVERAGE_JSON" 2>/dev/null; then
+    check_real_floor "$COVERAGE_JSON" README.md tools/visual/COVERAGE.md
+else
+    err "coverage-audit.mjs --json failed — cannot pin the real/applier-file counts"
+fi
+rm -f "$COVERAGE_JSON"
+
+# ── Committed baselines vs fixture components (orphan PNGs) ─────────────────
+#
+# Retrospective A12#4: syncBaseline() upserts and never deletes, so the 12
+# AR_* components of a fixture pruned on 2026-07-08 survived as 36 orphan
+# PNGs through 49 waves (and were the only carriers of the SSIM downsample
+# caveat). Every `{platform}__{NNN}_{Name}.png` under the baseline dir must
+# name a component (top-level or nested child) declared by SOME fixture under
+# fixtures/. Fix: `git rm tools/visual/baseline/*__NNN_<Name>.png`.
+echo -e "\n${B}━━━ committed baselines vs fixture components (orphan PNGs) ━━━${N}"
+check_baseline_orphans() { # $1=baseline dir $2=fixtures root → err naming every component no fixture declares
+    local out total list
+    out=$(node -e '
+      const fs = require("fs"), path = require("path");
+      const [dir, root] = process.argv.slice(1);
+      const names = new Set();
+      const rec = (c) => { for (const [k, v] of Object.entries(c ?? {})) { names.add(k); if (v && v.children) rec(v.children); } };
+      const walk = (d) => { for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+        const p = path.join(d, e.name);
+        if (e.isDirectory()) walk(p);
+        else if (e.name.endsWith(".json")) { let doc; try { doc = JSON.parse(fs.readFileSync(p, "utf8")); } catch { continue; } if (doc && doc.components) rec(doc.components); }
+      } };
+      walk(root);
+      const orphans = new Set(); let total = 0;
+      for (const f of fs.readdirSync(dir)) { const m = f.match(/^(?:iOS|Android|web)__\d+_(.+)\.png$/); if (!m) continue; total++; if (!names.has(m[1])) orphans.add(m[1]); }
+      console.log(total + " " + [...orphans].sort().join(","));
+    ' "$1" "$2") || { err "orphan scan failed for $1 vs $2"; return; }
+    total="${out%% *}"; list="${out#* }"
+    if [[ -z "$list" || "$list" == "$total" ]]; then
+        log "✓ all $total committed baseline PNGs name a component declared by a fixture under $2"
+    else
+        err "orphan baselines under $1 — components declared by NO fixture under $2: ${list//,/ }  (git rm the *__NNN_<Name>.png files; syncBaseline upserts and never deletes)"
+    fi
+}
+check_baseline_orphans tools/visual/baseline fixtures
 
 echo
 if [[ "$FAILED" -eq 0 ]]; then

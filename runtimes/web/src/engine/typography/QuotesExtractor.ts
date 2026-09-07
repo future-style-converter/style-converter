@@ -1,6 +1,6 @@
 // QuotesExtractor.ts — folds `Quotes` IR properties into a QuotesConfig.
 // Family: quotes.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { QuotesConfig, QUOTES_PROPERTY_TYPE, QuotesPropertyType } from './QuotesConfig';
 import { kwLower } from './_shared';

@@ -62,7 +62,7 @@ object KeyframeTimeline {
      * DIRECTED iteration progress at absolute time [tMs] (0..1, after the
      * §5.6 direction mapping but BEFORE any easing), or null when the base
      * styles apply unchanged (before/after phase without the matching
-     * fill — css-animations-1 §5.7 fill semantics).
+     * fill — css-animations-1 §4.8 fill semantics).
      *
      * Easing is deliberately NOT applied here: per [css-animations-1]
      * §4.4 the timing function applies BETWEEN KEYFRAMES (each segment
@@ -103,7 +103,7 @@ object KeyframeTimeline {
                 spec.fillMode == AnimationFillMode.BOTH
             if (!fills) return null
             // Overall progress at the end boundary equals the iteration
-            // count itself (web-animations-1 §4.8.3 end-of-animation rule):
+            // count itself (web-animations-1 §4.7.3 end-of-animation rule):
             // integer counts end a whole iteration (progress 1 in the LAST
             // iteration), fractional counts end mid-iteration.
             val overall = spec.iterations
@@ -152,7 +152,7 @@ object KeyframeTimeline {
      */
     internal fun ease(timing: TimingFunctionConfig, p: Double): Double {
         val clamped = p.coerceIn(0.0, 1.0)
-        // steps(n, position) — css-easing-1 §3.2 step positions. Implemented
+        // steps(n, position) — css-easing-1 §2.3 step positions. Implemented
         // here (not via Compose Easing) because Compose has no step easing.
         val n = timing.stepsCount
         if (n != null && n > 0) {

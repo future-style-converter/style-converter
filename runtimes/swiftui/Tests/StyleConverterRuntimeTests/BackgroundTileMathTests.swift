@@ -2,7 +2,7 @@
 //  BackgroundTileMathTests.swift
 //  StyleConverterRuntimeTests
 //
-//  Pins css-backgrounds-3 §3.7 tile placement (BackgroundTileMath) — the
+//  Pins css-backgrounds-3 §2.4 tile placement (BackgroundTileMath) — the
 //  iOS port of the Compose runtime's BackgroundTileMath.kt, mirrored
 //  test-for-test against BackgroundTileMathTest.kt so both native
 //  platforms are provably running the same space/round arithmetic.

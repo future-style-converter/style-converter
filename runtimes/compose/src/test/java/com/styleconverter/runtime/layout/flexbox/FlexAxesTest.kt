@@ -118,7 +118,7 @@ class FlexAxesTest {
 
     @Test fun `space-between keeps distributing with a gap declared`() {
         val axes = FlexAxes.of(wrappingRow(AlignmentKeyword.SpaceBetween), 4.dp, 10.dp)
-        // css-align-3 §8.3: distributed spacing (50px here) exceeds the
+        // css-align-3 §8: distributed spacing (50px here) exceeds the
         // 10px gap, so the Space* arrangement stands — the wave-2
         // FC_SpaceBetween regression must not come back through this fold.
         assertArrayEquals(

@@ -47,7 +47,7 @@ class SpacingResolveLengthUnitsTest {
     // ── P1: ch — measured advance, spec 0.5em fallback ──────────────────────
 
     @Test fun `ch falls back to half an em when metrics are unavailable`() {
-        // css-values-4 §6.1.3: '0' is "assumed to be 0.5em wide" → 63.1 × 8.
+        // css-values-4 §6.1.1: '0' is "assumed to be 0.5em wide" → 63.1 × 8.
         // Previously this collapsed to 0 (the silent else-arm), rendering
         // the whole block-ellipsis-001 component blank.
         val v = LengthValue.Relative(63.1, LengthUnit.CH, null)
@@ -72,13 +72,13 @@ class SpacingResolveLengthUnitsTest {
     // ── P2–P6: the font-relative fallback constants ─────────────────────────
 
     @Test fun `ex resolves to half an em per the spec fallback`() {
-        // §6.1.3: x-height "assumed to be 0.5em" when indeterminable.
+        // §6.1.1: x-height "assumed to be 0.5em" when indeterminable.
         val v = LengthValue.Relative(4.0, LengthUnit.EX, null)
         assertEquals(4f * 8f, resolveToDp(v, ctx).value, 1e-4f)
     }
 
     @Test fun `ic and cap resolve to one em`() {
-        // §6.1.3 mandates 1em for ic; cap uses the documented 1em
+        // §6.1.1 mandates 1em for ic; cap uses the documented 1em
         // approximation (spec fallback is the ascent — see resolver docs).
         assertEquals(32f, resolveToDp(LengthValue.Relative(2.0, LengthUnit.IC, null), ctx).value, 1e-4f)
         assertEquals(32f, resolveToDp(LengthValue.Relative(2.0, LengthUnit.CAP, null), ctx).value, 1e-4f)

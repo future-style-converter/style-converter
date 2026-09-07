@@ -132,25 +132,29 @@ final class FixedHoistTests: XCTestCase {
     ///
     /// Shape: a nested inset-anchored ABSOLUTE box with NO positioned and NO
     /// transformed ancestor anywhere above it.
-    ///   • Chromium (probe A, _diag35/laneB1/probe-chromium.mjs): the
-    ///     INITIAL CONTAINING BLOCK is the containing block — the box lands
-    ///     at (20,10) in viewport space, not at its parent.
+    ///   • Chromium (CSS 2.1 §10.1 rule 4 — no absolute/relative/fixed
+    ///     ancestor means the INITIAL containing block is the containing
+    ///     block; confirmed by the wave-35 probe): the box lands at
+    ///     (20,10) in viewport space, not at its parent.
     ///   • Compose `CanvasRootHoist.shouldHoistToCanvasRoot`: hoists it,
     ///     i.e. implements the browser rule.
     ///   • This file: keeps it, i.e. anchors it at the parent's padding box.
     ///
-    /// The conservative clause is kept ON PURPOSE and the reason is measured:
-    /// the IR's positioned-ancestor chain is LOSSY. Of the six frozen tests
-    /// carrying this shape (_diag35/laneB1/scan-oof2.mjs), four are
-    /// css-writing-modes available-size-00x, whose `body > div { position:
-    /// relative }` never reaches the wire — the extractor drops that
-    /// descendant-combinator rule, so the IR claims "no positioned ancestor"
-    /// for a box that demonstrably has one. iOS passes all four by keeping
-    /// them in place; Compose hoists them to the canvas corner and FAILS
-    /// available-size-001/012 at 0.8998. Adopting the browser-correct clause
-    /// here would trade four green cells for none. The defect to fix is the
-    /// extractor, not this table — named as a follow-up, not silently lived
-    /// with.
+    /// STATUS: A/B PENDING, not "measured and rejected" (retro P2b, findings
+    /// A4#0 / A10#4 — this doc comment asserted the opposite for fourteen
+    /// waves). The reason it gave — that the IR's positioned-ancestor chain
+    /// is lossy for css-writing-modes available-size-00x, and that Compose's
+    /// spec-correct clause therefore FAILS 001/012 at 0.8998 — is false on
+    /// the frozen wave49-final gate: that run's per-test IR for
+    /// available-size-001/-012 carries the wrapper's Position RELATIVE with
+    /// the abspos child slotted under it, and both cells score web P 0.9881
+    /// · iOS P 0.9771 · android P 0.9791 (flat since wave47-final) — Compose
+    /// PASSES. The clause below is therefore kept only until the device A/B
+    /// in docs/BACKLOG.md queue 6(e) runs over the six frozen carriers of
+    /// this shape; that A/B, not this pin, decides whether iOS adopts the
+    /// ICB clause and this row flips to parity. Retro P2b changed the
+    /// reasoning on the record, NOT the behaviour: the assertions below
+    /// still describe what `split` does today.
     func testEXPECTED_DIVERGENCE_nestedInsetAbsoluteWithNoContainingBlockAncestor() throws {
         // A plain STATIC wrapper — no position, no transform — holding an
         // inset-anchored absolute child two levels down.
@@ -161,7 +165,7 @@ final class FixedHoistTests: XCTestCase {
         let split = FixedHoist.split(roots: [wrapper])
         // iOS side of the divergence: the box stays in the tree.
         XCTAssertEqual(split.flow[0].children?.map(\.id), ["nested"],
-                       "EXPECTED DIVERGENCE: iOS keeps a nested absolute where Compose hoists it to the ICB — see this test's doc comment for the measured reason")
+                       "EXPECTED DIVERGENCE (A/B pending, BACKLOG 6(e)): iOS keeps a nested absolute where Compose hoists it to the ICB — see this test's doc comment; the wave-35 justification for keeping it is false on the wave49-final wire")
         XCTAssertTrue(split.hoisted.isEmpty)
         // …and it is NOT the transform clause doing it: no ancestor in this
         // tree establishes a transform containing block, so the wave-35 veto
@@ -494,7 +498,7 @@ final class FixedHoistTests: XCTestCase {
         XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(leftOnly))
         let noInsetFixed = try box(id: "f", position: "FIXED", w: 50, h: 50, rgb: (1, 0, 0))
         // Fixed keeps the always-hoist rule even with no inset — its
-        // containing block IS the viewport (css-position-3 §3.2).
+        // containing block IS the viewport (css-position-3 §2.1).
         XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(noInsetFixed))
         let split = FixedHoist.split(roots: [leftOnly, noInsetFixed])
         XCTAssertTrue(split.flow.isEmpty)

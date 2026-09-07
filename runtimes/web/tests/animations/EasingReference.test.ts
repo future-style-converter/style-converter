@@ -87,7 +87,7 @@ describe('easing reference table', () => {
   });
 
   it('keyword control points match the CSS spec constants', () => {
-    // css-easing-1 §3.1. Web never evaluates these, but the converter's
+    // css-easing-1 §2.2. Web never evaluates these, but the converter's
     // normalisation feeds all three runtimes — a drift here is wrong
     // everywhere at once, which is precisely the correlated failure that
     // three-way agreement cannot detect.

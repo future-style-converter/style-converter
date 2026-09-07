@@ -94,9 +94,16 @@ import kotlin.math.sin
  * ```
  *
  * ## Limitations
- * - Gradient sources require separate implementation
  * - Network images loaded asynchronously
  * - Performance: Custom drawing for each frame
+ * (Retro P2e, finding A6#15: "Gradient sources require separate
+ * implementation" used to head this list and has been false for a long
+ * time — `BorderImageSourceValue.Gradient` is rasterised by
+ * [rememberCachedGradient] + `renderGradientToBitmap` a few lines into
+ * [BorderImageBox], covering linear / radial / conic and their repeating
+ * forms. What IS still true is narrower and lives at the parser:
+ * `parseGradient` returns null for a syntax it cannot read, and a null
+ * bitmap paints no border image at all.)
  */
 object BorderImageApplier {
 
@@ -124,7 +131,7 @@ object BorderImageApplier {
         val density = LocalDensity.current
 
         // Resolve the four border-image-width values against the element's
-        // COMPUTED border widths (css-backgrounds-3 §6.3). When every side
+        // COMPUTED border widths (css-backgrounds-3 §5.3). When every side
         // resolves to 0 — the spec outcome for the initial `1` (or any
         // `<number>`) multiplier on a border-less element — the border
         // image paints NOTHING and must not inset the content either.
@@ -168,7 +175,7 @@ object BorderImageApplier {
         val borderBottom = resolvedBottom
         val borderLeft = resolvedLeft
 
-        // Calculate outsets. css-backgrounds-3 §6.4: <length> is literal,
+        // Calculate outsets. css-backgrounds-3 §5.4: <length> is literal,
         // <number> is a multiple of the computed border-width, initial 0.
         val outsetTop = config.outsetTop.resolveOutset(config.computedBorderTop)
         val outsetRight = config.outsetRight.resolveOutset(config.computedBorderRight)
@@ -178,7 +185,7 @@ object BorderImageApplier {
         Box(
             modifier = modifier
                 // Outset is deliberately NOT a layout modifier: css-backgrounds-3
-                // §6.4 — "the border image area ... can extend outside the border
+                // §5.4 — "the border image area ... can extend outside the border
                 // box" and the outset region "does not trigger scrolling" nor
                 // "affect layout". Painting outward is safe here because
                 // Modifier.drawBehind draws with an UNCLIPPED DrawScope — Compose
@@ -199,7 +206,7 @@ object BorderImageApplier {
                             borderBottom = borderBottom.toPx(),
                             borderLeft = borderLeft.toPx(),
                             // Expand the destination geometry outward: outset
-                            // (§6.4) PLUS the computed border band PLUS the
+                            // (§5.4) PLUS the computed border band PLUS the
                             // resolved CSS padding. The compensation exists
                             // because this drawBehind sits AFTER the
                             // component's own modifier chain, which already
@@ -212,7 +219,7 @@ object BorderImageApplier {
                             // showed the amber frame floating ~20px inside the
                             // perimeter; the skeptic repro showed padding 20px
                             // + border 4px pulling it a further 20px in).
-                            // §6: the border-image area IS the border box (+
+                            // §5.3/§5.4: the border image area IS the border box (+
                             // outset) — reconstruct it by expanding each side
                             // by exactly what the chain inset (destExpansion).
                             outsetTop = destExpansion(outsetTop.toPx(), config.computedBorderTop.toPx(), config.resolvedPaddingTop.toPx()),
@@ -222,7 +229,7 @@ object BorderImageApplier {
                         )
                     }
                 },
-            // NO content padding here — deliberately. css-backgrounds-3 §6:
+            // NO content padding here — deliberately. css-backgrounds-3 §5:
             // the border-image properties "do not affect layout"; content is
             // inset by border-width ONLY, and ComponentRenderer already
             // chains StyleApplier.borderContentInset (the computed border
@@ -238,7 +245,7 @@ object BorderImageApplier {
     }
 
     /**
-     * Per-side outward expansion of the drawBehind destination: the §6.4
+     * Per-side outward expansion of the drawBehind destination: the §5.4
      * outset (the only spec'd growth beyond the border box) plus the two
      * insets the component's modifier chain already applied BEFORE this
      * drawBehind — the computed border band (StyleApplier
@@ -256,9 +263,12 @@ object BorderImageApplier {
     ): Float = outsetPx + computedBorderPx + resolvedPaddingPx
 
     /**
-     * The four slice offsets in image pixels AFTER the css-backgrounds-3
-     * §6.1 overlap fix ("if the sum ... is larger than the [image extent],
-     * ... proportionally reduced"). Plain holder so the reduction stays a
+     * The four slice offsets in image pixels AFTER the overlap fix. css-backgrounds-3
+     * §5.2 empties the edges of overlapping slices ("if the sum of the right and
+     * left widths is equal to or greater than the width of the image"); both
+     * natives instead apply §5.3's rule for overlapping WIDTHS ("proportionally
+     * reduced until they no longer overlap") to the slices, so the degenerate
+     * case still paints (reduceSlices). Plain holder so the reduction stays a
      * pure, JVM-testable function.
      */
     internal data class ReducedSlices(
@@ -269,7 +279,8 @@ object BorderImageApplier {
     )
 
     /**
-     * Apply css-backgrounds-3 §6.1's proportional slice reduction: when
+     * Apply the proportional slice reduction (css-backgrounds-3 §5.3's
+     * width-overlap rule, used here on §5.2 slices — see ReducedSlices): when
      * left+right exceeds the image width (or top+bottom its height) BOTH
      * sides scale by extent/sum, so opposing slice lines never cross.
      * Without this, any slice ≥ 50% (e.g. `border-image-slice: 60%` on a
@@ -278,7 +289,7 @@ object BorderImageApplier {
      * BorderImageMath.nineGrid overlap branch exactly (same clamp, same
      * factor) so both natives paint the identical degenerate geometry.
      * Negative inputs are clamped to 0 first — negative slices are
-     * invalid per the §6.1 grammar, matching iOS slicePx's clamp.
+     * invalid per the §5.2 grammar, matching iOS slicePx's clamp.
      * Pure arithmetic, internal for JVM tests.
      */
     internal fun reduceSlices(
@@ -289,7 +300,7 @@ object BorderImageApplier {
         imageWidth: Float,
         imageHeight: Float
     ): ReducedSlices {
-        // Clamp invalid negative inputs before the overlap check (§6.1
+        // Clamp invalid negative inputs before the overlap check (§5.2
         // grammar: slice values are non-negative).
         var t = kotlin.math.max(top, 0f)
         var r = kotlin.math.max(right, 0f)
@@ -298,7 +309,7 @@ object BorderImageApplier {
         // Horizontal overlap: left+right may not exceed the image width.
         // The sum > 0 guard avoids 0/0 on a degenerate zero-width image.
         if (l + r > imageWidth && l + r > 0f) {
-            // §6.1 factor — both sides shrink by the SAME ratio.
+            // §5.3-style factor — both sides shrink by the SAME ratio.
             val f = imageWidth / (l + r)
             l *= f
             r *= f
@@ -318,7 +329,7 @@ object BorderImageApplier {
      * Border-image destination rectangle in the draw scope's local
      * coordinates: the element's border box ([width] × [height] at origin
      * 0,0) EXPANDED outward by the four resolved outsets — css-backgrounds-3
-     * §6.4: "The border-image-outset properties specify the amount by which
+     * §5.4: "The border-image-outset properties specify the amount by which
      * the border image area extends beyond the border box." Origin moves to
      * (−outsetLeft, −outsetTop); size grows by the per-axis outset sums.
      * Pure Compose-geometry math (no DrawScope), internal for JVM tests.
@@ -345,7 +356,7 @@ object BorderImageApplier {
 
     /**
      * Draw the 9-slice border image into the outset-expanded destination
-     * rect (border box grown per css-backgrounds-3 §6.4 — outsets default
+     * rect (border box grown per css-backgrounds-3 §5.4 — outsets default
      * to 0, keeping the destination exactly the border box).
      */
     private fun DrawScope.drawBorderImage(
@@ -363,8 +374,8 @@ object BorderImageApplier {
         val imageWidth = bitmap.width.toFloat()
         val imageHeight = bitmap.height.toFloat()
 
-        // Calculate slice sizes in image pixels, then apply the §6.1
-        // proportional reduction: opposing slices whose sum exceeds the
+        // Calculate slice sizes in image pixels, then apply the §5.3-style
+        // proportional reduction (ReducedSlices): opposing slices whose sum exceeds the
         // image extent scale down by extent/sum — without it, slice ≥ 50%
         // makes (imageWidth − sliceRight) < sliceLeft and the center/edge
         // source rects below get NEGATIVE widths (drawImage crash / garbage
@@ -385,7 +396,7 @@ object BorderImageApplier {
         val sliceLeft = slices.left
 
         // Destination area: the border box (`size`) expanded by the outsets
-        // (§6.4). drawBehind's DrawScope is unclipped, so the negative /
+        // (§5.4). drawBehind's DrawScope is unclipped, so the negative /
         // past-size coordinates below paint outside the layout bounds as the
         // spec requires (see the BorderImageBox comment for the clip audit).
         val dest = outsetDestRect(
@@ -417,7 +428,7 @@ object BorderImageApplier {
         val srcBottomRight = IntRect((imageWidth - sliceRight).toInt(), (imageHeight - sliceBottom).toInt(), imageWidth.toInt(), imageHeight.toInt())
 
         // Destination rectangles — the 9-slice grid of the OUTSET-EXPANDED
-        // dest rect (§6.4: "the [border-image] widths ... are measured from
+        // dest rect (§5.4: "the [border-image] widths ... are measured from
         // the border image area's boundary", i.e. the border bands hug the
         // expanded rect's edges, not the border box's).
         val dstTopLeft = IntRect(destLeft, destTop, destLeft + borderLeft.toInt(), destTop + borderTop.toInt())
@@ -1115,12 +1126,12 @@ object BorderImageApplier {
     }
 
     /**
-     * Resolve one border-image-width value per css-backgrounds-3 §6.3.
+     * Resolve one border-image-width value per css-backgrounds-3 §5.3.
      *
      * @param computedBorder the side's COMPUTED border-width (0 when the
      *        side has no border-style) — the basis for `<number>` values
      *        and for the initial value `1`.
-     * @param slice the side's border-image-slice, used for `auto` (§6.3:
+     * @param slice the side's border-image-slice, used for `auto` (§5.3:
      *        auto = the intrinsic size of the corresponding slice; for our
      *        gradient/bitmap sources the slice's px value is that size).
      */
@@ -1137,7 +1148,7 @@ object BorderImageApplier {
             BorderImageDimension.Auto ->
                 if (slice != null && !slice.isPercentage) slice.value.dp else computedBorder
             is BorderImageDimension.Length -> value
-            // TODO(spec §6.3): percentages refer to the border image AREA
+            // TODO(spec §5.3): percentages refer to the border image AREA
             // dimension (border box width/height), which is only known at
             // draw time. Approximated against the computed border width —
             // logged as an honest gap rather than silently wrong: the old
@@ -1149,7 +1160,7 @@ object BorderImageApplier {
     }
 
     /**
-     * Resolve one border-image-outset value per css-backgrounds-3 §6.4:
+     * Resolve one border-image-outset value per css-backgrounds-3 §5.4:
      * lengths are literal, numbers multiply the computed border-width,
      * initial value 0.
      */
@@ -1183,7 +1194,7 @@ object BorderImageApplier {
             return modifier
         }
 
-        // Same §6.3 resolution as BorderImageBox — number/initial values
+        // Same §5.3 resolution as BorderImageBox — number/initial values
         // multiply the computed border-width, so a border-less element
         // draws nothing here either.
         val borderTop = config.widthTop.resolve(config.computedBorderTop, config.sliceTop)
@@ -1204,7 +1215,7 @@ object BorderImageApplier {
                 borderRight = borderRight.toPx(),
                 borderBottom = borderBottom.toPx(),
                 borderLeft = borderLeft.toPx(),
-                // §6.4 outward expansion by the outset ONLY — unlike
+                // §5.4 outward expansion by the outset ONLY — unlike
                 // BorderImageBox this variant attaches to an arbitrary
                 // caller-supplied modifier position, so it cannot assume a
                 // border/padding inset sits before it in the chain and adds
@@ -1222,10 +1233,22 @@ object BorderImageApplier {
      * CSS border-image property notes.
      */
     object Notes {
+        // Retro P2e (finding A6#15): this constant said "Gradient border
+        // images are not yet implemented. They would require parsing the
+        // gradient string and creating a shader-based image." Both halves
+        // are now history — that is exactly what `parseGradient` +
+        // `renderGradientToBitmap` do (android.graphics Linear/Radial/Sweep
+        // shaders drawn into a 256x256 bitmap, memoised by
+        // rememberCachedGradient). The note is kept as a POINTER rather than
+        // deleted because nothing reads these constants programmatically and
+        // a reader arriving here should land on the implementation.
         const val GRADIENT_SUPPORT = """
-            Gradient border images are not yet implemented.
-            They would require parsing the gradient string and
-            creating a shader-based image.
+            Gradient border images ARE implemented: parseGradient parses the
+            CSS gradient string (linear / radial / conic, incl. repeating)
+            and renderGradientToBitmap rasterises it through an
+            android.graphics shader; rememberCachedGradient memoises the
+            256x256 result. Unparseable syntax yields a null bitmap and the
+            border image is not painted.
         """
 
         const val PERFORMANCE = """

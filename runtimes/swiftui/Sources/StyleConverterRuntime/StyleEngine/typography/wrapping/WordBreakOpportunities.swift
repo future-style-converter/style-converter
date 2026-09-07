@@ -20,7 +20,7 @@
 //
 //  This file models exactly those two opportunity classes, per css-text-3:
 //
-//   * U+00AD SOFT HYPHEN (§6.1) — a CONDITIONAL hyphenation opportunity:
+//   * U+00AD SOFT HYPHEN (§5.3) — a CONDITIONAL hyphenation opportunity:
 //     invisible unless the line breaks there, in which case the UA paints
 //     the hyphenate-character. `hyphens: none` never lets one reach this
 //     code (SoftHyphenPolicy deletes them at the call site), so any shy
@@ -52,7 +52,7 @@ enum WordBreakOpportunities {
         let offset: Int
         /// true — a HYPHENATION point (a removed soft hyphen, or a
         /// dictionary point the caller merged in): taking it paints the
-        /// hyphenate-character at the end of the head (§6.1). false — a
+        /// hyphenate-character at the end of the head (§5.3). false — a
         /// literal-hyphen break-after point: the glyph is already there.
         let paintsHyphen: Bool
     }
@@ -169,7 +169,7 @@ enum WordBreakOpportunities {
               let idx = String.Index(u16, within: word.text) else { return nil }
         let suffix = String(word.text[idx...])
         guard !suffix.isEmpty, idx > word.text.startIndex else { return nil }
-        // §6.1: a taken hyphenation point paints the hyphenate-character;
+        // §5.3: a taken hyphenation point paints the hyphenate-character;
         // a literal-hyphen break-after point already ends in its glyph.
         let head = String(word.text[..<idx]) + (op.paintsHyphen ? hyphenChar : "")
         return (head, tail(word, splitAt: op.offset, suffix: suffix))

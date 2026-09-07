@@ -69,7 +69,7 @@ struct ClipApplier: ViewModifier {
                                                      rxKind: rxK, ryKind: ryK,
                                                      cx: cx, cy: cy, ref: ref)))
             case .polygon(let pts):
-                // css-masking-1 §7.1: `clip-rule` selects the polygon's
+                // css-masking-1 §6.2: `clip-rule` selects the polygon's
                 // fill rule — threaded through `.clipShape`'s FillStyle
                 // (the Path itself has no winding flag).
                 v = AnyView(v.clipShape(PolygonClip(points: pts, ref: ref),

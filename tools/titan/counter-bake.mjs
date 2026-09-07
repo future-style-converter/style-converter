@@ -437,7 +437,7 @@ function resolveBag(bag, set, queue) {
   let cursor = 0;
   for (const call of calls) {
     const stack = set[call.name] ?? [];
-    // css-lists-3 §5.1: an undefined counter behaves as if instantiated on
+    // css-lists-3 §4.7: an undefined counter behaves as if instantiated on
     // the root with value 0.
     const values = stack.length ? stack.map((c) => c.value) : [0];
     // `counters()` walks the whole nesting chain outermost-first; `counter()`

@@ -31,8 +31,9 @@
 // Deriving them mechanically makes that class of error impossible.
 //
 // It also means the source fixture is never edited: fixtures/visual-test.json
-// keeps its 109 components, its 363 committed baselines and its ledger
-// entries untouched, and this emits a SIBLING document.
+// keeps its 109 components, its 327 committed baselines (109 × 3 platforms —
+// the earlier "363" matched no count at any commit; retrospective A5#5) and
+// its ledger entries untouched, and this emits a SIBLING document.
 //
 // Usage:
 //     node tools/visual/gen-control-fixture.mjs fixtures/visual-test.json \

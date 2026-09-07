@@ -122,7 +122,7 @@ internal fun rotatedRunMeasurePolicy(rotationDegrees: Float): MeasurePolicy =
  * VERTICAL, lines stack across the width):
  *  - min WIDTH  = the widest single glyph — the narrowest the flow can
  *    be is one column, and a column is as wide as its widest glyph
- *    (css-sizing-3 §4 min-content: the largest unbreakable unit).
+ *    (css-sizing-3 §5.1 min-content: the largest unbreakable unit).
  *  - max WIDTH(heightBudget) = the planned column count × widest glyph:
  *    the SAME wrap plan [VerticalTextFlow.uprightColumnIndices] the
  *    measure runs, fed the SAME first-glyph advance rule (rationale on
@@ -296,7 +296,7 @@ internal fun uprightFlowMeasurePolicy(
         // cannot tell the difference.
         val advance = advances.first().toDouble()
         // Unbounded hint = max-content: no wrapping, one unwrapped
-        // column, the widest glyph (css-sizing-3 §4). The planner is
+        // column, the widest glyph (css-sizing-3 §5.1). The planner is
         // deliberately NOT consulted here — it declines unbounded
         // budgets, which for the MEASURE means the fallback path, but a
         // max-content QUERY wants the flow's own unwrapped extent (the

@@ -74,7 +74,5 @@ sealed interface TransformFunction {
 
         // Identity transforms
         fun identity() = scale(1.0)
-        fun noTranslate() = translate(0.0, 0.0)
-        fun noRotate() = rotate(0.0)
     }
 }

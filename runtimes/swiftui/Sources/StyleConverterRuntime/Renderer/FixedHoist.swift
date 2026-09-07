@@ -30,7 +30,7 @@
 //    • position:fixed DESCENDANTS at ANY depth are stripped from their
 //      parent's children and hoisted (F1 — viewport containing block),
 //      UNLESS an ancestor with a used transform has taken that containing
-//      block over (wave 35, lane B1 — css-transforms-2 §6; the rule table
+//      block over (wave 35, lane B1 — css-transforms-2 §8; the rule table
 //      is StyleEngine/layout/position/TransformContainingBlock.swift);
 //    • out-of-flow ROOTS (absolute + fixed) are hoisted whole (F2 — the
 //      initial containing block IS the canvas for a root-level box);
@@ -129,35 +129,50 @@ public enum FixedHoist {
     ///   • every `position: fixed` DESCENDANT of any root, at any depth,
     ///     EXCEPT one whose containing block a transformed ancestor has
     ///     taken over (wave 35, lane B1 — css-transforms-1 §3 /
-    ///     css-transforms-2 §6; see `strippingFixedDescendants`).
+    ///     css-transforms-2 §8; see `strippingFixedDescendants`).
     /// Nested ABSOLUTE descendants are never touched — they keep the
     /// wave-8/9 positioned-ancestor padding-box containing block.
     ///
-    /// ── PARITY NOTE, measured (wave 35, lane B1) ────────────────────────
+    /// ── PARITY NOTE — A/B PENDING (rewritten by retro P2b, A4#0/A10#4) ──
     /// That last clause is where this rule table still DIVERGES from its
     /// Compose twin: `CanvasRootHoist.shouldHoistToCanvasRoot` hoists a
     /// nested inset-anchored ABSOLUTE box to the initial containing block
     /// when no positioned (and now no transformed) ancestor exists, while
     /// `split` leaves every nested absolute where it is.
     ///
-    /// Chromium says COMPOSE is right in the abstract — probe A in
-    /// _diag35/laneB1/probe-chromium.mjs nests an inset absolute two levels
-    /// under un-positioned wrappers and Chromium anchors it at the ICB
-    /// (20,10), not at the parent. The clause is nevertheless NOT adopted
-    /// here, and the reason is measured rather than aesthetic: the IR's
-    /// positioned-ancestor chain is LOSSY. In the six frozen tests that
-    /// carry this shape (scan-oof2.mjs), four are css-writing-modes
-    /// available-size-00x, whose `body > div { position: relative }` never
-    /// reaches the wire at all — the extractor drops the descendant-combinator
-    /// rule, so the IR claims "no positioned ancestor" for a box that has
-    /// one. iOS's conservative clause renders them correctly by accident and
-    /// PASSES all four; Compose's spec-correct clause hoists them to the
-    /// canvas corner and FAILS available-size-001/012 at 0.8998. Adopting
-    /// the ICB clause here would trade four green cells for zero.
-    /// The defect to fix is therefore the extractor's lost `position:
-    /// relative`, not this table; until it is fixed the divergence is
-    /// deliberate, pinned in FixedHoistTests (the parity matrix marks this
-    /// one row EXPECTED-DIVERGENT) and named as a follow-up.
+    /// Chromium says COMPOSE is right — CSS 2.1 §10.1 rule 4 makes the
+    /// INITIAL containing block the containing block of an absolutely
+    /// positioned box with no absolute/relative/fixed ancestor (css-
+    /// position-3 keeps that rule), and the wave-35 probe measured it: an
+    /// inset absolute two levels under un-positioned wrappers anchors at
+    /// (20,10), not at the parent.
+    ///
+    /// THE BLOCKER THIS NOTE USED TO CITE IS FALSE ON THE CURRENT WIRE.
+    /// From wave 35 to wave 49 the paragraph here said the IR's
+    /// positioned-ancestor chain is lossy — that css-writing-modes
+    /// available-size-00x's `body > div { position: relative }` "never
+    /// reaches the wire", so the ICB clause would hoist a box that really
+    /// does have a positioned ancestor, and that Compose therefore "FAILS
+    /// available-size-001/012 at 0.8998". Both halves are contradicted by
+    /// the frozen gate:
+    ///   • `tools/titan/runs/wave49-final/sections/css-writing-modes/
+    ///     per-test-ir/wpt__css-writing-modes__available-size-001.json`
+    ///     carries the wrapper `…available-size-001__1-344` with
+    ///     {"type":"Position","data":"RELATIVE"} and the abspos `aside`
+    ///     (`available-size-001__1__0-345`, Left 0 / Top 1ch) slotted under
+    ///     it — the positioned ancestor IS on the wire (same for -012).
+    ///   • wave49-final available-size-001 and -012 both score
+    ///     web P 0.9881 · iOS P 0.9771 · android P 0.9791, flat since
+    ///     wave47-final. Compose PASSES with the ICB clause; nothing fails
+    ///     at 0.8998.
+    /// So the conservative clause is no longer justified by evidence — it
+    /// is simply not measured yet. It stays ONLY pending the A/B named in
+    /// docs/BACKLOG.md queue 6(e): adopt the §10.1-rule-4 ICB clause here
+    /// behind a device A/B over the six frozen carriers of this shape,
+    /// then flip the FixedHoistTests row from EXPECTED-DIVERGENT to parity.
+    /// Both cells pass today on all three platforms, so this is a
+    /// correctness/parity item, not a cell-flip hunt. Behaviour is
+    /// UNCHANGED by the retro: this is a comment correction.
     public static func split(roots: [IRComponent])
         -> (flow: [IRComponent], hoisted: [IRComponent]) {
         // Accumulators preserve document order across both halves.
@@ -250,7 +265,7 @@ public enum FixedHoist {
     /// here — root-level classification is `split`'s job.
     ///
     /// Wave 35 (lane B1) — `hasTransformedAncestor` is the css-transforms-1
-    /// §3 / css-transforms-2 §6 veto: an ancestor with a USED transform
+    /// §3 / css-transforms-2 §8 veto: an ancestor with a USED transform
     /// (`TransformContainingBlock`, the byte-parallel twin of Compose's rule
     /// table) is the containing block for FIXED descendants too, so such a
     /// box must NOT be stripped to the viewport overlay. Left in place it

@@ -30,7 +30,9 @@ import com.styleconverter.runtime.PropertyRegistry
  *
  * Touching [VisibilityRegistration] from any test primes this init block via
  * Kotlin's lazy object initialization rules; the `@Before` hook in
- * Phase8RegistryTest does exactly that.
+ * VisibilityRegistryTest (runtimes/compose/src/test/…/visibility/) does
+ * exactly that. (Retro R10, A3#14: the class was previously named
+ * "Phase8RegistryTest" here — a test that has never existed in the tree.)
  */
 object VisibilityRegistration {
 

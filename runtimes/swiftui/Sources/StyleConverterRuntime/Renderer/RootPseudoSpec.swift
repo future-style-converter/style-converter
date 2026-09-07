@@ -105,7 +105,7 @@ enum RootPseudo {
     }
 
     /// `<length>` in absolute px, or nil (with a log) for every other unit.
-    /// A bare `0` is legal CSS (css-values-4 §5.2) and resolves to zero.
+    /// A bare `0` is legal CSS (css-values-4 §6) and resolves to zero.
     static func px(_ value: String, prop: String, role: String) -> Double? {
         let t = value.trimmingCharacters(in: .whitespaces).lowercased()
         if t == "0" { return 0 }
@@ -143,7 +143,7 @@ enum RootPseudo {
     /// wave-28 lane PG — does this body-root's containment take the body
     /// OFF the writing-mode/direction propagation path?
     ///
-    /// css-writing-modes-4 §3.2 propagates the BODY's `direction` to the
+    /// css-writing-modes-4 §8.1 propagates the BODY's `direction` to the
     /// viewport (the ONLY channel by which a body declaration can reach a
     /// box generated on the root), and css-contain-1 §3.1 removes a
     /// contained body from that channel. So on a contained body-root the

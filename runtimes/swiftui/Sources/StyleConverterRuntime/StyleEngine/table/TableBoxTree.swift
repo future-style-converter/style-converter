@@ -110,8 +110,13 @@ enum TableBoxTree {
     /// the UA sheet, so that display never reaches the wire and
     /// `meta.sourceTag` is its only sighting — the same channel
     /// `TableSeparatedTracks.usedSpacing` already reads for the UA
-    /// `border-spacing` and `CollapsedBorderConflict.originOf` reads for
-    /// §17.6.2.1's rule 4.
+    /// `border-spacing`. (Retro sweep P2b, A6#11: this sentence used to
+    /// name a second reader, `CollapsedBorderConflict.originOf`, the CSS
+    /// 2.1 §17.6.2.1 conflict-resolution decision table. That module never
+    /// had a production caller on EITHER native and was deleted with its
+    /// tests on both — 14 JVM tests on Compose (sweep P2a), 14 XCTest
+    /// methods here; the collapsed-border gap is a table-LAYOUT gap, not a
+    /// conflict-ranking one.)
     ///
     /// MEASURED (frozen wave37-final,
     /// `tools/titan/runs/wave37-final/sections/css-tables`): 122 of the
@@ -213,18 +218,4 @@ enum TableBoxTree {
     /// A ROW is deliberately NOT shrink-to-fit: §17.5.2 sizes rows to the
     /// table's used width.
     static func shrinkToFitBox(_ role: Role) -> Bool { role == .table }
-
-    /// Does a box with this role render its content as an ordinary BLOCK
-    /// CONTAINER rather than re-entering table layout?
-    ///
-    /// css-tables-3 §2.1: a `table-cell` box "establishes a block
-    /// container box for its contents", and a `table-caption` is likewise
-    /// a block container. iOS already reaches this outcome structurally —
-    /// `FlexboxExtractor.mapDisplay` folds every unrecognized keyword
-    /// (including `TABLE_CELL`) to `.block` — so this predicate exists to
-    /// keep the two runtimes' decision tables readable side by side and
-    /// to give the layout gate below one named place to ask.
-    static func rendersAsBlockContainer(_ role: Role) -> Bool {
-        role == .cell || role == .caption
-    }
 }

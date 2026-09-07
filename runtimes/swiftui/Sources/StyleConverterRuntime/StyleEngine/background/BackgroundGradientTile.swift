@@ -63,7 +63,7 @@ struct BackgroundGradientTileView: View {
             // rescale to e.g. 200/7). tileRects returns pixel-SNAPPED
             // rects (±1px per tile, integer shared edges — no AA seam),
             // so gradient geometry must NOT be built from rect.size: it
-            // stays pinned to this fractional pitch (css-images-4 §3.4.1)
+            // stays pinned to this fractional pitch (css-images-4 §3.1)
             // and only the fill region is snapped.
             let shaderSize = BackgroundImageGeometry.shaderTileSize(placement: plan, box: size)
             if BackgroundImageGeometry.tileCount(placement: plan, box: size) > 4096 {
@@ -81,7 +81,7 @@ struct BackgroundGradientTileView: View {
     /// per-flavour and mirrors GradientApplier's full-box view path so
     /// a full-box tile renders the same picture the default path does.
     /// `shaderSize` is the FRACTIONAL tile pitch the gradient geometry
-    /// resolves against (css-images-4 §3.4.1) — `rect` is the snapped
+    /// resolves against (css-images-4 §3.1) — `rect` is the snapped
     /// fill region and may differ from it by up to 1px per axis.
     private func fill(_ rect: CGRect, shaderSize: CGSize, in context: GraphicsContext) {
         switch layer {
@@ -89,7 +89,7 @@ struct BackgroundGradientTileView: View {
             fillLinear(rect, shaderSize: shaderSize, in: context, angleDeg: angle, stops: stops)
         case .radial(let shape, let stops, let cx, let cy):
             // Coords resolve against the FRACTIONAL shader tile — the
-            // gradient box per css-images-4 §3.4.1 (px centers divide by
+            // gradient box per css-images-4 §3.1 (px centers divide by
             // the tile axis; fractions pass through unchanged).
             fillRadial(rect, shaderSize: shaderSize, in: context,
                        shape: shape, stops: stops,
@@ -147,7 +147,7 @@ struct BackgroundGradientTileView: View {
         let (s, e) = GradientApplier.linearEndpoints(angleDeg: angleDeg ?? 180,
                                                      size: shaderSize)
         // <length> stops / the repeat period resolve against THIS tile's
-        // gradient-line length (css-images-4 §3.4.1: the gradient box is
+        // gradient-line length (css-images-4 §3.1: the gradient box is
         // the tile) — same quantity the view path feeds toGradient.
         let gradient = GradientApplier.toGradient(
             stops,
@@ -166,8 +166,18 @@ struct BackgroundGradientTileView: View {
                               y: rect.minY + e.y * shaderSize.height)))
     }
 
-    /// Radial fill. `circle` uses the half-diagonal (≈ the CSS
-    /// `farthest-corner` default, css-images-3 §3.2) exactly like
+    /// css-images-3 §3.2.1 `circle` at the default `farthest-corner` size:
+    /// the end radius is the distance from the (centred) start to the
+    /// tile's farthest corner — half the tile diagonal. Internal + pure so
+    /// RadialGradientShapeKeyTests pins the pairs-01 011 geometry: the
+    /// 100×80 tile gives 64.03 (the web/Android ramp), against the ellipse
+    /// path's 70.71 that the dropped `circle` keyword painted (retro R5).
+    static func circleEndRadius(_ size: CGSize) -> CGFloat {
+        (size.width * size.width + size.height * size.height).squareRoot() / 2
+    }
+
+    /// Radial fill. `circle` uses the half-diagonal (the CSS
+    /// `farthest-corner` default, css-images-3 §3.2.1) exactly like
     /// GradientApplier.radial; the default `ellipse` mirrors that view
     /// path's render-circular-then-squash trick with Canvas transforms.
     private func fillRadial(_ rect: CGRect, shaderSize: CGSize, in context: GraphicsContext,
@@ -176,11 +186,13 @@ struct BackgroundGradientTileView: View {
         // Geometry (centre / radii) resolves against the FRACTIONAL
         // shader tile, not the snapped rect (§3.4.1 — see fillLinear).
         let w = shaderSize.width, h = shaderSize.height
+        // Circle end radius — shared with the test pin (see above).
+        let circleR = Self.circleEndRadius(shaderSize)
         // <length> stops measure along the ray: the circle's end radius,
         // or the ellipse's HORIZONTAL radius √2·w/2 (css-images-3
         // §3.2.3) — mirrors GradientApplier.radial's lengths exactly.
         let rayPx: Double = shape == "circle"
-            ? Double(sqrt(w * w + h * h) / 2)
+            ? Double(circleR)
             : Double(w) / 2 * 2.0.squareRoot()
         let g = GradientApplier.toGradient(stops, lengthPx: rayPx, repeating: repeating)
         if shape == "circle" {
@@ -190,7 +202,7 @@ struct BackgroundGradientTileView: View {
                 g,
                 center: CGPoint(x: rect.minX + cx * w, y: rect.minY + cy * h),
                 startRadius: 0,
-                endRadius: sqrt(w * w + h * h) / 2))
+                endRadius: circleR))
         } else {
             // Ellipse: shade a max(w,h)-square circular gradient, then
             // scale the axes down to the tile aspect — the GraphicsContext

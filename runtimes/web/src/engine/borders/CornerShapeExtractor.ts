@@ -1,5 +1,5 @@
 // CornerShapeExtractor.ts — folds `CornerShape` IR properties into a config.
-// IR shape flavors (from examples/properties/borders/corner-shape.json):
+// IR shape flavors (from fixtures/properties/borders/corner-shape.json):
 //   "ROUND" / "ANGLE" / "NOTCH" / "BEVEL" / "SCOOP" / "SQUIRCLE"
 // The parser emits the CornerShapeValue enum name UPPERCASE; we lowercase + validate.
 

@@ -101,7 +101,7 @@ class UaBlockMarginFontBasisTest {
         assertNull(UaBlockMarginFontBasis.ownFontSizePx(listOf(prop("FontSize", """{"px":0}"""))))
     }
 
-    /** B4 — absolute keywords resolve through the css-fonts-4 §2.4 ladder. */
+    /** B4 — absolute keywords resolve through the css-fonts-4 §2.5.1 ladder. */
     @Test
     fun `B4 - absolute keyword ladder`() {
         fun kw(k: String) = listOf(prop("FontSize", """{"original":{"type":"absolute","keyword":"$k"}}"""))
@@ -123,7 +123,7 @@ class UaBlockMarginFontBasisTest {
     }
 
     /** B6/B7 — em and % on font-size resolve against the INHERITED size
-     *  (css-values-4 §5.1.1 / css-fonts-4 §2.4); rem against the 16px root. */
+     *  (css-values-4 §6.1.1 / css-fonts-4 §2.5); rem against the 16px root. */
     @Test
     fun `B6 B7 - em rem and percentage`() {
         assertEquals(32f, UaBlockMarginFontBasis.ownFontSizePx(listOf(

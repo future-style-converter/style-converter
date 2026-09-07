@@ -1,5 +1,5 @@
 // ObjectViewBoxExtractor.ts — folds IR `ObjectViewBox` into a CSS
-// `<basic-shape-rect>` string (css-images-4 §5.3 object-view-box).
+// `<basic-shape-rect>` string (css-images-5 §3.1 object-view-box).
 //
 // WAVE-36 LANE M1 — same shape bug as its ObjectPosition sibling. The IR
 // value is a structured basic shape, `{type:'inset', top, right, bottom,

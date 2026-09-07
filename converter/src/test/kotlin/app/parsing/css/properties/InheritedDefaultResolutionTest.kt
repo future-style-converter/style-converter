@@ -45,7 +45,7 @@ class InheritedDefaultResolutionTest {
     }
 
     @Test
-    fun `keyword match is trimmed and case-insensitive per css-values-4 §2·1`() {
+    fun `keyword match is trimmed and case-insensitive per css-values-4 §4·1`() {
         // "  INHERIT  " is the same CSS-wide keyword — must drop identically.
         val out = parseBase("color" to "  INHERIT  ")
         assertTrue(out.none { it.propertyName == "color" }, "Color must be dropped, got $out")

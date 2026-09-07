@@ -1,8 +1,14 @@
 package com.styleconverter.runtime.effects.shadow
 
+import androidx.compose.ui.graphics.Color
 import com.styleconverter.runtime.PropertyRegistry
 import com.styleconverter.runtime.core.types.ValueExtractors
+// css-backgrounds-3 §6.1: an absent/`currentColor` shadow colour is the
+// element's `color` — resolved by the shared effects ink helper (retro R6).
+import com.styleconverter.runtime.effects.EffectsCurrentColorInk
+import kotlinx.serialization.json.JsonArray
 import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 
 /**
  * Extracts shadow configuration from IR property JSON data.
@@ -46,12 +52,21 @@ object ShadowExtractor {
      *
      * @param properties List of pairs where first is the property type
      *                   and second is the JSON data for that property.
+     * @param wptCaptureMode the StyleApplier-threaded WPT flag for the
+     *   `currentcolor` bottom-out (EffectsCurrentColorInk); default false
+     *   keeps every dark-stage caller on the historical #eee ink.
      * @return ShadowConfig with extracted shadow values.
      */
-    fun extractShadowConfig(properties: List<Pair<String, JsonElement?>>): ShadowConfig {
+    fun extractShadowConfig(
+        properties: List<Pair<String, JsonElement?>>,
+        wptCaptureMode: Boolean = false,
+    ): ShadowConfig {
         for ((type, data) in properties) {
             if (type == "BoxShadow" && data != null) {
-                return ShadowConfig(shadows = extractShadows(data))
+                // Resolved lazily — only a declared box-shadow pays for it.
+                return ShadowConfig(
+                    shadows = extractShadows(data, EffectsCurrentColorInk.resolve(properties, wptCaptureMode)),
+                )
             }
         }
         return ShadowConfig()
@@ -60,21 +75,37 @@ object ShadowExtractor {
     /**
      * Extract a list of shadow data from JSON.
      *
-     * Uses the existing ValueExtractors.extractShadows method and maps
-     * to the shadow module's ShadowData type.
+     * Uses the existing ValueExtractors.extractShadows method for the
+     * geometry and maps to the shadow module's ShadowData type; the COLOUR
+     * is re-read here because ValueExtractors substitutes opaque black for
+     * an absent or statically-unresolvable `c` (ValueExtractors.kt
+     * extractShadows: `?: Color.Black`), while css-backgrounds-3 §6.1 says
+     * "If the color is absent, the used color is taken from the color
+     * property" — and the wire's `c: {"original": "currentColor"}` (the
+     * css-color/currentcolor-003 carrier) decodes to null for the same
+     * reason. Retro R6, sibling of the drop-shadow default (A7#1).
      *
      * @param json The JSON data (should be a JsonArray of shadow objects)
+     * @param currentColorInk the element's resolved `color` — the §6.1 default
      * @return List of parsed ShadowData values
      */
-    private fun extractShadows(json: JsonElement): List<ShadowData> {
+    private fun extractShadows(json: JsonElement, currentColorInk: Color): List<ShadowData> {
         val shadowList = ValueExtractors.extractShadows(json)
-        return shadowList.map { shadow ->
+        // ValueExtractors walks the array's JsonObjects in order (mapNotNull
+        // over `as? JsonObject`), so filtering the same way here keeps the
+        // two lists index-aligned without duplicating the geometry parse.
+        val objects = (json as? JsonArray)?.filterIsInstance<JsonObject>() ?: emptyList()
+        return shadowList.mapIndexed { index, shadow ->
+            // The colour the author actually declared, or null when absent /
+            // `currentColor` / otherwise runtime-dependent.
+            val declared = objects.getOrNull(index)?.get("c")?.let { ValueExtractors.extractColor(it) }
             ShadowData(
                 offsetX = shadow.offsetX,
                 offsetY = shadow.offsetY,
                 blurRadius = shadow.blurRadius,
                 spreadRadius = shadow.spreadRadius,
-                color = shadow.color,
+                // Declared colour wins; otherwise the element's own `color`.
+                color = declared ?: currentColorInk,
                 inset = shadow.inset
             )
         }

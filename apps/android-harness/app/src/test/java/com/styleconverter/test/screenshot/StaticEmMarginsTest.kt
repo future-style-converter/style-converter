@@ -99,7 +99,7 @@ class StaticEmMarginsTest {
 
     @Test
     fun e3_ownFontSizeIsTheBase_notTheRootDefault() {
-        // css-values-4 §5.1.1: `em` on a margin resolves against the
+        // css-values-4 §6.1.1: `em` on a margin resolves against the
         // element's OWN computed font-size — 92, never the 16px root.
         assertEquals(92f, StaticEmMargin.ownFontSizePx(listOf(fontSize(92.0))))
     }

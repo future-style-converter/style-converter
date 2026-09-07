@@ -97,7 +97,7 @@ object ColorApplier {
      *    clip=TRUE) in bytecode and cropped overflowing children at the
      *    element's bounds (css-color/composited-filters-under-opacity,
      *    android-ref 0.9401) — to OpacityApplier's UNBOUNDED saveLayer
-     *    group; CSS opacity never clips (css-color-4 §2.2).
+     *    group; CSS opacity never clips (css-color-4 §3.3).
      * 2. Background images (gradients) - drawn first (bottom layer)
      * 3. Solid background color - drawn on top of gradients
      *
@@ -120,7 +120,7 @@ object ColorApplier {
         // 1. Opacity FIRST → the transparency group wraps bg + children
         // below it. Delegated to OpacityApplier (the dedicated per-property
         // applier, twin of iOS color/OpacityApplier.swift): an unbounded
-        // saveLayer group per css-color-4 §2.2 — never a clipping
+        // saveLayer group per css-color-4 §3.3 — never a clipping
         // graphicsLayer (see OpacityApplier's header for the bytecode
         // proof that Modifier.alpha ≡ graphicsLayer(alpha, clip=true)).
         config.opacity?.let { alpha ->
@@ -267,7 +267,7 @@ object ColorApplier {
     /**
      * Apply opacity to a Modifier — kept as a public convenience surface;
      * the real semantics (clamp, opacity-1 fast path, the UNBOUNDED
-     * css-color-4 §2.2 transparency group that replaced the clipping
+     * css-color-4 §3.3 transparency group that replaced the clipping
      * `Modifier.alpha`) live in the dedicated [OpacityApplier].
      *
      * @param modifier The base modifier
@@ -602,7 +602,7 @@ object ColorApplier {
                 return@drawBehind
             }
             // Pin the gradient's shader geometry to the TILE, not the box:
-            // css-images-4 §3.4.1 sizes the gradient line against the
+            // css-images-4 §3.1 sizes the gradient line against the
             // "gradient box", which for a background is the background-size
             // tile — NOT the element. Without the pin every tile's
             // createShader received the full DrawScope size, so a 30px tile
@@ -976,7 +976,7 @@ object ColorApplier {
      * [clip] is the painting-area rect the tiles are clipped to
      * (css-backgrounds-3 §2.2 — the border box), [tileSize] the SHADER
      * pitch after any `round` rescale (fractional, e.g. 200/7 — gradient
-     * geometry resolves against it per css-images-4 §3.4.1), [origins] the
+     * geometry resolves against it per css-images-4 §3.1), [origins] the
      * cartesian product of the two per-axis §3.7 plans, and [drawSizes]
      * each tile's DRAWN extent (parallel to [origins]). Drawn extents come
      * from the axis plans' pixel-snapped edges: abutting lattices
@@ -1035,7 +1035,7 @@ object ColorApplier {
     /**
      * Wrap a gradient [brush] so its shader is ALWAYS built against the
      * background-size [tile], no matter what draw size Compose hands to
-     * createShader. css-images-4 §3.4.1: gradient-line length / radial
+     * createShader. css-images-4 §3.1: gradient-line length / radial
      * radii / sweep centres resolve against the gradient box = the TILE
      * when background-size is explicit (matches the web runtime, which
      * rasterizes the gradient into a tile-sized canvas). Non-shader
@@ -1124,7 +1124,7 @@ object ColorApplier {
      * NOTE: background-position is deliberately NOT a parameter. Per
      * css-backgrounds-3 §2.6 position places the background-image TILE
      * inside the box; it never shifts the gradient geometry INSIDE its
-     * own tile (css-images-4 §3.4.1 centres the gradient line on the
+     * own tile (css-images-4 §3.1 centres the gradient line on the
      * gradient box unconditionally). The previous posX·w / posY·h centre
      * shift here double-applied the position — once in the tile translate,
      * once inside the shader — skewing the ramp for any non-0 position.
@@ -1179,7 +1179,7 @@ object ColorApplier {
     }
 
     /**
-     * css-images-4 §3.4.1 gradient-line endpoints for a linear gradient of
+     * css-images-4 §3.1 gradient-line endpoints for a linear gradient of
      * [angleDeg] over a gradient box of [size]: the line passes through the
      * CENTRE of the box at the requested angle and is exactly long enough
      * (|W·sinθ| + |H·cosθ|) that the perpendicular at each end touches the

@@ -127,7 +127,7 @@ enum UAWidgetsResolve {
         case .range:
             // HTML defaults min 0 / max 100 / value midpoint; range value
             // rides the wire as a STRING (contract) → numeric parse here.
-            // HTML §2.3.5.1 valid floating-point numbers exclude NaN and
+            // HTML §2.3.4.3 valid floating-point numbers exclude NaN and
             // Infinity, but Double.init(String) accepts them — gate on
             // finiteness or the thumb geometry itself goes NaN (wave-20
             // skeptic fix; the Kotlin twin carries the identical gate).
@@ -215,7 +215,7 @@ enum UAWidgetsResolve {
     /// ref-probed table describes (see the axis gate in
     /// `UAWidgetBlockLine.leadFor`).
     ///
-    /// `writing-mode` INHERITS (css-writing-modes-4 §3.1) and is carried in
+    /// `writing-mode` INHERITS (css-writing-modes-4 §3.2) and is carried in
     /// the renderer's inherited-property set, so the declaration on an
     /// ancestor wrapper — which is where css-writing-modes' forms/* tests
     /// put it — reaches this merged list. Read as the raw wire keyword

@@ -60,7 +60,7 @@ fun uaBlockMargins(sourceTag: String?, ownFontSizePx: Float? = null): UaMargins 
     // ul/ol/blockquote/pre/figure 16 · everything else 0), so every
     // Round-4 / RC-A4 pin in UaBlockMarginsTest keeps its number.
     // wave-46 lane Y8: [ownFontSizePx] (null = no own font signal → the
-    // table verbatim) is the em basis of css-values-4 §5.1.1 — a root
+    // table verbatim) is the em basis of css-values-4 §6.1.1 — a root
     // `<p>` with `font-size: larger` gets 1em × 19.2 = 19.2 → 19px, the
     // browser-ref's row (inherit-computed-001 sat 3px high at 16). Rounded
     // to whole px: Chromium snaps the box edge, and 19.2 lands on row 35

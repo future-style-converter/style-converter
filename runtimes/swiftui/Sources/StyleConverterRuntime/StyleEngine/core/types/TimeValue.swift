@@ -9,6 +9,13 @@
 //  Quirk #7: transition-duration etc. often wrap this in an array. This
 //  extractor handles a single IRValue — callers iterate lists.
 //
+//  Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+//  path in this header is GONE — the directory was renamed to
+//  `fixtures/primitives/` by restructure 02e4c457, then deleted by the
+//  2026-07-08 hard prune 1e0234f6 (#8), with nothing to replace it. The
+//  shapes enumerated above (and the pins over them) are now the only
+//  record of that wire contract: read the names as history, not as a path
+//  to open.
 
 import Foundation
 

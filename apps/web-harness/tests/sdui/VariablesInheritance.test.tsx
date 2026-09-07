@@ -8,7 +8,7 @@
 // What jsdom gives us (probed against jsdom 29): getComputedStyle DOES
 // implement custom-property INHERITANCE — a `--name` defined on an ancestor
 // element's inline style is visible on every descendant's computed style,
-// and a descendant redefinition shadows it (css-variables-1 §2.3). jsdom
+// and a descendant redefinition shadows it (css-variables-1 §3). jsdom
 // does NOT substitute var() into regular longhands (that's a real-browser
 // behaviour, exercised by the fixtures/fidelity/tokens/ captures), so for
 // the consuming declarations we pin the VERBATIM var() text — exactly what
@@ -96,7 +96,7 @@ describe('variables — a child resolves a parent-defined variable (getComputedS
     expect(cs.getPropertyValue('--Pad')).toBe('10px');               // exact-case lookup hits
     expect(cs.getPropertyValue('--pad')).toBe('');                   // lowercase MISSES — names are case-sensitive
   });
-  it('leaf shadows --accent per css-variables-1 §2.3 element-scope rule', () => {
+  it('leaf shadows --accent per css-variables-1 §3 element-scope rule', () => {
     expect(getComputedStyle(el('leaf-003')).getPropertyValue('--accent')).toBe('#2ecc71');
     // …while the outer scope still sees the root's value.
     expect(getComputedStyle(el('mid-002')).getPropertyValue('--accent')).toBe('#e74c3c');

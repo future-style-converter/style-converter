@@ -305,7 +305,7 @@ final class FragmentGeometryTests: XCTestCase {
         }
     }
 
-    /// The stripe-continuity pin (css-break-3 §5.2 slice): fragment 1's
+    /// The stripe-continuity pin (css-break-3 §5.4 slice): fragment 1's
     /// top is the CONTINUATION of fragment 0's bottom stripe — plus the
     /// gap stays unpainted, the tail past C is clipped, and nothing
     /// paints below the container (the pre-wave-10 overflow is gone).

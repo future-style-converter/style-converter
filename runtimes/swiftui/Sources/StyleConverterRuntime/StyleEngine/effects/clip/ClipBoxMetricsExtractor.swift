@@ -2,7 +2,7 @@
 //  ClipBoxMetricsExtractor.swift
 //  StyleEngine/effects/clip — wave 46 (lane Y4).
 //
-//  The css-masking-1 §7.1 half of clip-path extraction: the
+//  The css-masking-1 §5.1 half of clip-path extraction: the
 //  `<geometry-box>` keyword and the element's own box metrics
 //  (ClipBoxMetrics) the applier turns into a reference box at draw time.
 //  Split from ClipExtractor (the shape-wire reader) to keep both files
@@ -14,7 +14,7 @@ import SwiftUI
 
 enum ClipBoxMetricsExtractor {
 
-    /// css-masking-1 §7.1 keyword → `ClipGeometryBox`. The SVG-only
+    /// css-masking-1 §5.1 keyword → `ClipGeometryBox`. The SVG-only
     /// keywords take the spec's used value for an element with a CSS
     /// layout box (fill-box → content-box, stroke-box / view-box →
     /// border-box); an unknown keyword keeps the border-box initial

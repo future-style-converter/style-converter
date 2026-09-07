@@ -7,10 +7,6 @@
 
 import Foundation
 
-enum BackgroundAttachmentProperty {
-    static let names: [String] = ["BackgroundAttachment"]
-}
-
 enum BackgroundAttachmentExtractor {
 
     static func extract(from properties: [IRProperty]) -> BackgroundAttachmentConfig? {

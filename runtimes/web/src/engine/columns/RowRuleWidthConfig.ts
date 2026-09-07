@@ -5,4 +5,3 @@
 // Config mirrors the ColumnRule{Color,Style,Width}Config shape exactly: one
 // already-serialised CSS string, `undefined` when the IR carried no value.
 export interface RowRuleWidthConfig { value?: string }
-export const ROWRULEWIDTH_PROPERTY_TYPE = 'RowRuleWidth' as const;

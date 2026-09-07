@@ -41,7 +41,7 @@ test('M1: the tag→attribute table is exactly img/embed/object/video', () => {
     ['img', 'src'],
     ['embed', 'src'],
     ['object', 'data'],   // HTML §4.8.7
-    ['video', 'poster'],  // HTML §4.8.9 — the poster frame a still capture paints
+    ['video', 'poster'],  // HTML §4.8.8 — the poster frame a still capture paints
   ]);
 });
 

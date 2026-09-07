@@ -2,8 +2,9 @@
 //  SingularTransform.swift
 //  StyleEngine/transforms — wave 35 (lane B1).
 //
-//  css-transforms-1 §3: "If the transform is not invertible, the element
-//  and its content are not rendered." A rotateX/rotateY of exactly ±90°
+//  css-transforms-1 §8: "If a transform function causes the current
+//  transformation matrix of an object to be non-invertible, the object and
+//  its content do not get displayed." A rotateX/rotateY of exactly ±90°
 //  (or ±270°) turns the box EDGE-ON: its 2D projection collapses to a
 //  line, the matrix is non-invertible, and every browser paints nothing.
 //
@@ -44,7 +45,7 @@
 //
 //  SCOPE, stated rather than silent: only the ROTATE family is tested.
 //  A `scale(0)` and a `matrix()` with zero determinant are equally
-//  non-invertible per §3, but neither appears in the corpus and neither
+//  non-invertible per §8, but neither appears in the corpus and neither
 //  exhibits the SwiftUI fallback (a zero `.scaleEffect` genuinely
 //  collapses), so they are deliberately left out rather than fixed blind.
 //
@@ -54,7 +55,7 @@ import SwiftUI
 // determinant is taken on the matrix that is actually rendered.
 import QuartzCore
 
-/// Is the used transform non-invertible (css-transforms-1 §3)?
+/// Is the used transform non-invertible (css-transforms-1 §8)?
 enum SingularTransform {
 
     /// Determinant magnitude below which the projection counts as

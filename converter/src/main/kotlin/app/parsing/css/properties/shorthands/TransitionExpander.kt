@@ -1,5 +1,14 @@
 package app.parsing.css.properties.shorthands
 
+// A6#14 — clone consolidation: this expander used to carry private
+//   `tokenize` (1 copy), byte-identical to TokenizationUtils.tokenizeBySpace
+//   — its 1 call site now calls the shared utility instead.
+//   `splitByTopLevelComma` (1 copy), byte-identical to TokenizationUtils.splitByTopLevelComma
+//   — its 1 call site now calls the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
+
 /**
  * Expands the `transition` shorthand property into its longhand equivalents.
  *
@@ -31,7 +40,7 @@ object TransitionExpander : ShorthandExpander {
         }
 
         // Split by top-level commas for multiple transitions
-        val transitions = splitByTopLevelComma(trimmed)
+        val transitions = TokenizationUtils.splitByTopLevelComma(trimmed)
 
         val properties = mutableListOf<String>()
         val durations = mutableListOf<String>()
@@ -62,7 +71,7 @@ object TransitionExpander : ShorthandExpander {
     )
 
     private fun parseTransition(value: String): ParsedTransition {
-        val tokens = tokenize(value)
+        val tokens = TokenizationUtils.tokenizeBySpace(value)
         if (tokens.isEmpty()) return ParsedTransition()
 
         var property = "all"
@@ -106,65 +115,4 @@ object TransitionExpander : ShorthandExpander {
         return lower.matches(Regex("-?[\\d.]+m?s"))
     }
 
-    private fun tokenize(value: String): List<String> {
-        val tokens = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> {
-                    depth++
-                    current.append(char)
-                }
-                char == ')' -> {
-                    depth--
-                    current.append(char)
-                }
-                char == ' ' && depth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        tokens.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-
-        if (current.isNotEmpty()) {
-            tokens.add(current.toString())
-        }
-
-        return tokens
-    }
-
-    private fun splitByTopLevelComma(value: String): List<String> {
-        val parts = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> {
-                    depth++
-                    current.append(char)
-                }
-                char == ')' -> {
-                    depth--
-                    current.append(char)
-                }
-                char == ',' && depth == 0 -> {
-                    parts.add(current.toString().trim())
-                    current = StringBuilder()
-                }
-                else -> current.append(char)
-            }
-        }
-
-        if (current.isNotEmpty()) {
-            parts.add(current.toString().trim())
-        }
-
-        return parts
-    }
 }

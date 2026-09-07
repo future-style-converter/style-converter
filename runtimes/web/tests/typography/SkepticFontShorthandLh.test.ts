@@ -10,7 +10,9 @@
 //
 // Every payload below was captured from a real `:converter:run` on a
 // purpose-built `font:` shorthand matrix fixture and on
-// fixtures/wpt/css-text-decor/text-decoration-dotted-001.json.
+// fixtures/wpt/css-text-decor/text-decoration-dotted-001.json — EXCEPT the
+// keyword-object payload in the `font: inherit` case, which is labelled
+// there as a tolerance shape the converter does not emit (retro R10, A8#0).
 
 import { describe, it, expect } from 'vitest';
 
@@ -49,13 +51,26 @@ describe('skeptic — web emission for the `font` shorthand line-height reset', 
     expect(s.lineHeight).toBe(2);
   });
 
-  it('`font: inherit` forwards the global keyword, never the reset', () => {
-    // Live wire: the global path rides original:{type:'keyword'}, an OBJECT,
-    // so it can never be mistaken for the bare-string `normal` discriminator.
+  it('`font: inherit` emits NO LineHeight at all — never the reset', () => {
+    // THE LIVE WIRE (probe `:converter:run` 2026-09-05, this tree): `font:
+    // inherit` expands per css-cascade-4 §3 to `line-height: inherit`, and
+    // the converter emits NOTHING for that declaration — a CSS-wide keyword
+    // is runtime-dependent, so no LineHeight property reaches the renderer
+    // and the inherited `body.wpt-mode { line-height: 1.25 }` keeps
+    // applying. That is the contract the corpus rides, so pin the ABSENCE.
+    expect('lineHeight' in buildStyles([] as any)).toBe(false);
+    // TOLERANCE, not a live wire (retro R10, A8#0): if a keyword-object
+    // LineHeight ever appeared, the extractor matches no branch and drops
+    // the key — the same visible result, never the `normal` reset. The old
+    // assertion here was `not.toBe('normal')`, which `undefined` satisfies:
+    // it could not tell "forwarded", "dropped" or "wrong" apart, and the
+    // comment claiming this shape was the live wire was false in both
+    // directions (the converter emitted no LineHeight, and for `font:
+    // inherit` it emitted only unmapped font-variant Generics).
     const s = buildStyles([
       { type: 'LineHeight', data: { original: { type: 'keyword', keyword: 'inherit' } } },
     ] as any);
-    expect(s.lineHeight).not.toBe('normal');
+    expect('lineHeight' in s).toBe(false);
   });
 
   it('`font: 16px/24px Arial` keeps the nested length wire', () => {

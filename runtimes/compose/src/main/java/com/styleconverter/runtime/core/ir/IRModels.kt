@@ -17,14 +17,21 @@ import kotlinx.serialization.json.JsonObject
  *   v2 minor revision — schema/spec/01-envelope.md §5). null when the wire
  *   omitted the key (omit-when-empty rule) and for every v1 document.
  *
- *   DECODED BUT NOT YET CONSUMED, and that is the honest state as of wave
- *   34: Compose selects one face per weight/style through
- *   `FontFamily(Font(...))` and has no runtime hook to register an arbitrary
- *   file into the resolver, so every component referencing a declared family
- *   still renders in the bundled Inter. The field exists so the wire is not
- *   a web-only dialect and so the future registration hop reads the file
- *   path off the document instead of re-deriving it — `Typeface.Builder`
- *   takes exactly this string joined to the harness's asset root.
+ *   CONSUMED since wave 35 (retro P2e, finding A6#15 — this paragraph read
+ *   "DECODED BUT NOT YET CONSUMED … as of wave 34" for fourteen waves after
+ *   the hop landed). The registration hop is
+ *   [com.styleconverter.runtime.typography.font.DocumentFontRegistry]: the
+ *   host calls `register(document.fontFaces, fontsDir)` right after
+ *   [IRDocumentDecoder.decode] (android-harness
+ *   ScreenshotCaptureScreen.kt:286) and it builds one `FontFamily` per
+ *   declared `family` out of `Font(File(...), weight, style)` — the file
+ *   path being exactly this string joined to the host's asset root, which is
+ *   why the field carries a path and not a payload. The per-property read is
+ *   [com.styleconverter.runtime.typography.CssFontFamilyResolver], which
+ *   CONSULTS the registry before falling back to the bundled Inter
+ *   (css-fonts-4 §4.1 scopes a face to the document's font database, so a
+ *   document-scoped registry is the spec-shaped place for it, not a
+ *   per-property triplet).
  */
 @Serializable
 data class IRDocument(
@@ -127,18 +134,23 @@ data class IRAttrs(
     // wave-36 lane M1: the REPLACED-ELEMENT SOURCE — a third disjoint attr
     // lane (img/embed/object/video). ONE canonical key whatever the markup
     // spelled (`src` on img/embed, `data` on object per HTML §4.8.7,
-    // `poster` on video per §4.8.9), carrying a PRODUCER-RELATIVE PATH or a
+    // `poster` on video per §4.8.8), carrying a PRODUCER-RELATIVE PATH or a
     // `data:` URI — never a payload — on the same consumer-resolves
     // contract as the document-level `fontFaces[].src`
     // (schema/spec/04-metadata-fields.md).
     //
-    // DECODED, NOT YET PAINTED. Compose has no asset origin for a
-    // producer-relative corpus path (a device cannot read the host's disk —
-    // the same asymmetry the @font-face channel documents), so this field
-    // exists so the strict v2 envelope ACCEPTS the key rather than throwing
-    // on a wire the web consumer needs. Painting it is the named follow-up:
-    // a bundling hop like the two feeders' --wpt-dir copy, then an
-    // AsyncImage/Painter in ComponentRenderer. Appended LAST for the same
+    // PAINTED since wave 39 (retro P2e, finding A6#15 — this read "DECODED,
+    // NOT YET PAINTED" and named the hop as a follow-up long after lane A2
+    // built it). The asset origin the paragraph said Compose lacked is now
+    // supplied by the host exactly as predicted: the feeders' `--wpt-dir`
+    // copy stages the bytes on-device and
+    // [com.styleconverter.runtime.images.DocumentImageRegistry] turns THIS
+    // producer-relative path into an ImageBitmap (it also accepts the
+    // `data:` URI arm without touching disk). ComponentRenderer paints it
+    // through ReplacedImageContent.Paint before the text/children path runs
+    // (ComponentRenderer.kt, `if (ReplacedImageContent.isCandidate(...))`),
+    // and a declined asset falls through to the pre-channel behaviour with a
+    // registry-logged breadcrumb — no silent blank. Appended LAST for the same
     // positional-construction reason `start` was. Twin of Swift IRAttrs.src.
     val src: String? = null,
     // wave-44 lane U5: `<ol reversed>` — HTML §4.4.5's BOOLEAN attribute
@@ -218,11 +230,17 @@ data class IRDecoration(
  * @property pseudos v2 generated-content payload (wire rename of the
  *   authoring `_pseudo`): an opaque component-shaped {before?, after?,
  *   marker?} object. Pseudo nodes never flatten (design §4.2) — they have
- *   no independent lifecycle. Decoded and retained so the contract
- *   round-trips; the Compose renderer does not consume it yet (its
- *   ::before/::after support still rides the selectors channel — TODO
- *   route pseudos into ContentApplier when the web/iOS ordering contract
- *   is pinned cross-platform).
+ *   no independent lifecycle. CONSUMED since wave 42 (retro P2e, finding
+ *   A6#15 — this said "the Compose renderer does not consume it yet" and
+ *   carried a TODO to route it into ContentApplier, which lane W1 did):
+ *   [com.styleconverter.runtime.content.PseudoBucketExtractor] converts the
+ *   bucket into the ContentApplier config the renderer's ::before/::after
+ *   wrapper already took, and ComponentRenderer now calls
+ *   `extractBeforeAfterConfig(component.pseudos, component.role)` — the old
+ *   selectors channel no v2 document emits is gone. Root pseudos take the
+ *   [com.styleconverter.runtime.core.renderer.RootPseudoBox] path;
+ *   `pseudos != null` also vetoes the display:contents unboxing and the
+ *   float-clearance fold, which must not lose a generated box.
  * @property role v2 `meta.role` droppable hint (only value emitted today
  *   is "body-root"). v1 wire spelled it `_role` and this model dropped it
  *   (the documented spec-04 caveat); the v2 decoder closes that gap.

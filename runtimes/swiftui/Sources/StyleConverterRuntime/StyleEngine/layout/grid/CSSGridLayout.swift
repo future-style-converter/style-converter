@@ -57,7 +57,7 @@ struct CSSGridLayout: Layout {
     /// unmatched children and duplicated one child per spanned cell.
     var templateAreas: [[String]]? = nil
     /// Wave-19 RC-A2: container `justify-content` — content distribution of
-    /// the whole track group inside the content box (css-align-3 §5.3, a
+    /// the whole track group inside the content box (css-align-3 §5.1, a
     /// distinct axis from the per-item justifyItems default above). nil =
     /// unset → the adapter folds it to start.
     var justifyContent: AlignmentKeyword? = nil
@@ -158,12 +158,12 @@ struct CSSGridLayout: Layout {
         // sizing already trusts) or, for a fit-content grid, the footprint
         // itself (leftover 0 → distribution no-op, rtl a pure order mirror).
         // An INFINITE proposal (unbounded scroller probe) is not a definite
-        // extent (css-align-3 §5.3 needs free space to distribute) — degrade
+        // extent (css-align-3 §5.1 needs free space to distribute) — degrade
         // to the footprint no-op rather than infinite origins.
         let definiteW: CGFloat? = (containerW?.isFinite == true) ? containerW : nil
         let extent = definiteW ?? totalW
         // LOGICAL (inline-start-relative) origin of every column track:
-        // css-align-3 §5.3 justify-content distribution via the pure twin
+        // css-align-3 §5.1 justify-content distribution via the pure twin
         // shared with Compose (GridContentDistribution — identical pins).
         //
         // rtl is deliberately NOT forwarded: SwiftUI's Layout engine

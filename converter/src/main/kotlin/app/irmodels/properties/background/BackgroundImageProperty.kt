@@ -1,6 +1,6 @@
 package app.irmodels.properties.background
 
-// IR model for `background-image` (css-backgrounds-3 §3.1, css-images-3/4).
+// IR model for `background-image` (css-backgrounds-3 §2.3, css-images-3/4).
 // The wire serializer lives in BackgroundImageSerializer.kt (same package) —
 // split out per the ≤200-line file rule when cross-fade() joined the union.
 import app.irmodels.*
@@ -15,7 +15,7 @@ data class BackgroundImageProperty(
 
     @Serializable(with = BackgroundImageSerializer::class)
     sealed interface BackgroundImage {
-        // `none` — a layer that paints nothing (css-backgrounds-3 §3.1).
+        // `none` — a layer that paints nothing (css-backgrounds-3 §3.3).
         @Serializable data class None(val unit: Unit = Unit) : BackgroundImage
         // url() / image() reference — payload bytes preserved case-exactly.
         @Serializable data class Url(val url: IRUrl) : BackgroundImage
@@ -26,9 +26,9 @@ data class BackgroundImageProperty(
         // rather than dropped. Serializes as the OPTIONAL "interp" key, so a
         // gradient written without one is byte-identical to the pre-wave-37 wire.
         @Serializable data class LinearGradient(val angle: IRAngle?, val colorStops: List<ColorStop>, val repeating: Boolean = false, val interp: String? = null) : BackgroundImage
-        // radial-gradient() — shape/size prefix per css-images-3 §3.5.
+        // radial-gradient() — shape/size prefix per css-images-3 §3.2.
         @Serializable data class RadialGradient(val shape: GradientShape?, val size: GradientSize?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false, val interp: String? = null) : BackgroundImage
-        // conic-gradient() — `from <angle> at <position>` per css-images-4 §3.4.4.
+        // conic-gradient() — `from <angle> at <position>` per css-images-4 §3.3.
         @Serializable data class ConicGradient(val angle: IRAngle?, val position: Position?, val colorStops: List<ColorStop>, val repeating: Boolean = false, val interp: String? = null) : BackgroundImage
         // A bare `<color>` used *as an image* — only valid inside
         // cross-fade() per css-images-4 §2.6.2 (`<cf-image> = <percentage>?
@@ -36,7 +36,7 @@ data class BackgroundImageProperty(
         // stay a homogeneous list of BackgroundImage values.
         @Serializable data class ColorLayer(val color: IRColor) : BackgroundImage
         // image() notation with sources and/or a fallback colour
-        // (css-images-4 §2.1 `image( <image-tags>? [<image-src># ]? [, <color>]? )`;
+        // (css-images-4 §2.5 `image( <image-tags>? [<image-src># ]? [, <color>]? )`;
         // the multi-src form is the legacy css-images-3 grammar WPT
         // css-image-fallbacks-and-annotations003/004 still exercise).
         // `srcs` are the candidate sources IN AUTHOR ORDER — the first that
@@ -70,7 +70,7 @@ data class BackgroundImageProperty(
     @Serializable data class CrossFadeArg(val weight: IRPercentage?, val image: BackgroundImage)
 
     // One gradient color stop. Double-position stops
-    // (`<color> <pos1> <pos2>`, css-images-4 §3.4.3) are expanded by the
+    // (`<color> <pos1> <pos2>`, css-images-4 §3.5.3) are expanded by the
     // parser into TWO ColorStop entries sharing the color, so this model
     // stays a single-position pair and every runtime renders the implied
     // hard stop without new wire shapes.
@@ -93,9 +93,14 @@ data class BackgroundImageProperty(
     // NOT additive: the Compose reader decodes it as
     // `obj["position"]?.jsonPrimitive?.floatOrNull`, and `jsonPrimitive`
     // THROWS on a JsonObject, so an object-shaped position would break
-    // Android decoding of every length stop. Both native readers ignore
-    // unknown stop keys, so they keep today's behavior until their own
-    // lane teaches them the length arm.
+    // Android decoding of every length stop. Both native readers ignored
+    // the key when it was introduced (wave 40); Compose
+    // (ColorExtractor.extractColorStops, wave 47) and SwiftUI
+    // (BackgroundImageExtractor, wave 46) now decode `positionLength: {px}`
+    // as the stop's absolute position, and runtime-dependent units
+    // ({original} without px) stay unpositioned with a logged breadcrumb.
+    // (Retrospective A5#3 replaced the stale "both readers still ignore
+    // it" sentence that stood here through two waves of reader changes.)
     @Serializable data class ColorStop(
         val color: IRColor,
         val position: IRPercentage?,
@@ -103,7 +108,7 @@ data class BackgroundImageProperty(
     )
 
     // Gradient center (`at <position>`). Each axis is a
-    // <length-percentage> (css-images-3 §3.5 / css-values-4 §5.4):
+    // <length-percentage> (css-images-3 §3.2 / css-values-4 §5.4):
     // percentages keep their legacy raw-number wire form; lengths ride the
     // IRLengthPercentage object form ({"px":100} absolute, or
     // {"original":{"v":1,"u":"LH"}} for runtime-dependent units the
@@ -119,8 +124,8 @@ data class BackgroundImageProperty(
         }
     }
 
-    // Radial ending shape (css-images-3 §3.5).
+    // Radial ending shape (css-images-3 §3.2).
     enum class GradientShape { CIRCLE, ELLIPSE }
-    // Radial size keyword (css-images-3 §3.5).
+    // Radial size keyword (css-images-3 §3.2).
     enum class GradientSize { CLOSEST_SIDE, CLOSEST_CORNER, FARTHEST_SIDE, FARTHEST_CORNER }
 }

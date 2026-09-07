@@ -91,7 +91,7 @@ private struct PressBridge: ViewModifier {
     }
 }
 
-/// `:focus` — css-selectors-4 §7.3 via @FocusState (the platform focus
+/// `:focus` — css-selectors-4 §9.3 via @FocusState (the platform focus
 /// system, spec 06 §2 — v1 implements `focus` only). On views the
 /// platform cannot focus (plain boxes on touch iOS) the binding simply
 /// never becomes true — captures use the forced-state hook instead.

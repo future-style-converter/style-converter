@@ -3742,7 +3742,7 @@ export function collectDefinedTags(html) {
 
 /**
  * Synthetic document-element ancestor injected at match time (NOT in the
- * public ancestors chain). Selectors-4 §3.4.3 + §6.4.1 carve-out: the
+ * public ancestors chain). Selectors-4 §13.1 + §13.3 carve-out: the
  * document root has `isRoot:true` so child-indexed pseudos all match. We
  * model the root as if it were the sole sibling of itself (sibCount/
  * typeCount = 1) so anyone evaluating `:nth-of-type(1)` on it sees the
@@ -4300,7 +4300,7 @@ export function widgetAttrsFor(tag, attrs) {
 //
 // CANONICAL KEY `src`, whatever the HTML attribute was spelled: <img>/
 // <embed> use `src`, <object> uses `data` (HTML §4.8.7), <video> uses
-// `poster` (§4.8.9 — the poster frame IS what a still capture paints, and
+// `poster` (§4.8.8 — the poster frame IS what a still capture paints, and
 // it is object-fit-scaled like any other replaced content). Normalising is
 // in keeping with the `_attrs` contract, which already retypes rather than
 // mirrors (`checked` → literal `true`, `min`/`max` → Number).
@@ -5148,7 +5148,7 @@ function evalHas(pseudo, pos, tag, attrs, ctx, ancestors) {
 /**
  * swarm-003 Bug 2 (selectors__nth-child-of-pseudo-class): split a
  * `:nth-child(...)` argument into its An+B head and optional Selectors-4
- * `of <selector-list>` suffix. The grammar (Selectors-4 §6.4.2) is
+ * `of <selector-list>` suffix. The grammar (Selectors-4 §13.3.1) is
  * `<An+B-expr> ws+ 'of' ws+ <selector-list>`. We do a tokenised scan
  * rather than a regex split because the An+B head may contain whitespace
  * (`2n + 1`, `- n + 3`) and the selector list may contain commas and
@@ -5209,7 +5209,7 @@ export function splitAnBOfSelector(arg) {
  * drives the Selectors-4 `:nth-child(An+B of S)` filter where we have
  * to renumber among only the siblings matching S.
  *
- * Spec carve-out (Selectors-4 §6.4.1): "an element with no parent" matches
+ * Spec carve-out (Selectors-4 §13.3): "an element with no parent" matches
  * `:first-child`, `:nth-child(n)`, `:last-child`, `:only-child` and all
  * typed equivalents. We surface this via `pos.isRoot === true` — when set,
  * every child-indexed pseudo returns true unconditionally.
@@ -5311,7 +5311,7 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors =
     const defined = ctx.definedTags;
     return !!(defined && defined.has(tag));
   }
-  // Selectors-4 §6.4.1 carve-out for the parentless root:
+  // Selectors-4 §13.3 carve-out for the parentless root:
   //   - :first-child, :last-child, :only-child, :first-of-type,
   //     :last-of-type, :only-of-type ALWAYS match.
   //   - :nth-child(An+B) / :nth-of-type(An+B) and the *-last-* variants
@@ -5354,7 +5354,7 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors =
       // swarm-003 Bug 2: split off any `of <selector-list>` suffix
       // BEFORE running evalAnB on the An+B head. When a selector list
       // is present the index basis changes: we count only siblings that
-      // match the selector list (per Selectors-4 §6.4.2 / §6.4.3).
+      // match the selector list (per Selectors-4 §13.3.1 / §13.3.2).
       const { anb, ofSelectors } = splitAnBOfSelector(pseudo.arg);
       if (ofSelectors && ofSelectors.length > 0) {
         // Need full sibling metadata to renumber. Without `siblings` on
@@ -5416,7 +5416,7 @@ function evalPseudo(pseudo, pos, tag = null, attrs = null, ctx = {}, ancestors =
         switch (pseudo.name) {
           case 'nth-child':        return evalAnB(anb, filteredIndex);
           case 'nth-last-child':   return evalAnB(anb, filteredTotal - filteredIndex + 1);
-          // For `:nth-of-type(of S)` Selectors-4 §6.4.4 keeps the
+          // For `:nth-of-type(of S)` Selectors-4 §13.4.1 keeps the
           // type-filtering on top of the selector-list filter; the
           // intersection is small enough that we model it as
           // `match S AND share host's tag`. Same renumbering shape.
@@ -5530,7 +5530,7 @@ function compoundMatches(compound, tag, attrs, pos = null, ctx = {}, ancestors =
  *     IMMEDIATE parent (last `ancestors` entry); chains (`A > B > C`)
  *     consume ancestors right-to-left. No legacy fallback: without an
  *     ancestor chain a child-combinator rule never matches.
- *   - sibling combinators: `A + B` (next-sibling, Selectors-4 §15.4) and
+ *   - sibling combinators: `A + B` (next-sibling, Selectors-4 §14.3) and
  *     `A ~ B` (subsequent-sibling, §15.5) — wave-30 A2, resolved against
  *     the subject's `pos.siblings` list. Same no-legacy-fallback rule as
  *     `>`: without an ancestor chain the rule never matches.
@@ -5630,7 +5630,7 @@ export function selectorMatchesPseudoElement(
    *     negative when the greedy nearest `.b` candidate has the wrong
    *     parent. Chains in the WPT corpus are ≤3 compounds, so the
    *     backtracking cost is negligible.
-   *   - wave-30 A2: '+' (Selectors-4 §15.4) pins compounds[ci] to the
+   *   - wave-30 A2: '+' (Selectors-4 §14.3) pins compounds[ci] to the
    *     IMMEDIATELY PRECEDING sibling of whatever matched compounds[ci+1];
    *     '~' (§15.5) lets it match ANY preceding sibling, with the same
    *     backtracking. Sibling steps do NOT consume an ancestor — siblings
@@ -5921,7 +5921,7 @@ export function propsForBodyRoot(rules) {
     // Refuse attribute syntax (`[…]`) outright, but for pseudos parse the
     // compound and accept it iff every pseudo is in the supported set AND
     // every pseudo is one of the "always true on root" kinds (root + the
-    // child-indexed family per Selectors-4 §6.4.1 carve-out). This lets
+    // child-indexed family per Selectors-4 §13.3 carve-out). This lets
     // `:root`, `:root:first-child`, `html:nth-of-type(1)` etc. land on the
     // synthetic body component without leaking unsupported syntax.
     if (sel.includes('[')) continue;
@@ -5954,7 +5954,7 @@ export function propsForBodyRoot(rules) {
     for (const ps of parsed.pseudos) {
       if (ps.name === 'root') { hasRootMarker = true; continue; }
       if (ps.name === 'empty') { allOk = false; break; }
-      // Selectors-4 §6.4.1 carve-out evaluation for the root. Mirrors
+      // Selectors-4 §13.3 carve-out evaluation for the root. Mirrors
       // evalPseudo()'s isRoot branch exactly so propsForBodyRoot agrees
       // with selectorMatches on what root-only-and-pseudo combos pass.
       switch (ps.name) {
@@ -6134,7 +6134,7 @@ function lossyReasonsFor(props) {
 // We therefore parse @keyframes blocks, and when a component's animation
 // declaration resolves to a NEGATIVE delay strictly inside the first
 // iteration (0 < progress < 1 — inside the ACTIVE phase, where
-// animation-fill-mode can never matter, css-animations-1 §5.4), we
+// animation-fill-mode can never matter, css-animations-1 §4.8), we
 // interpolate every keyframed property at that progress and BAKE the
 // sampled values into the component's extracted properties. The
 // animation-* declarations themselves are dropped (nothing downstream can
@@ -6222,7 +6222,7 @@ function lossyReasonsFor(props) {
 //     steps() holds one output value for a whole 1/n slice of the duration.
 //     css-color/animation/contrast-color-interpolation.html is the measured
 //     case: `steps(2, start)` over 2000s holds output progress 0.5 for the
-//     first 1000 SECONDS (css-easing-1 §3.9.2 step arithmetic — the
+//     first 1000 SECONDS (css-easing-1 §2.3.1 step arithmetic — the
 //     jump-start rise makes even input progress 0 evaluate to 0.5).
 //   - delay 0 + endpoints closer than one rendering quantum (the images
 //     family above).
@@ -6380,7 +6380,7 @@ export function parseKeyframes(css) {
   //
   // wave-35 B7: the ident grammar now covers the LEADING-HYPHEN forms.
   // css-animations-1 §4 types the keyframes name as <keyframes-name> =
-  // <custom-ident> | <string>, and css-values-4 §3.2 defines <custom-ident>
+  // <custom-ident> | <string>, and css-values-4 §4.2 defines <custom-ident>
   // on the CSS Syntax 3 §4.3.11 identifier production — which admits an
   // optional '-' before the first name-start code point, and the `--`
   // dashed-ident prefix in full. The pre-wave-35 class `[A-Za-z_]` silently
@@ -6541,7 +6541,7 @@ export function parseTimingFunction(raw) {
 
 /** Evaluate a parsed timing function at input progress `p`. Callers only
  *  pass p strictly inside (0,1) (exact-frame hits shortcut before easing),
- *  so the css-easing-1 §3.9.2 before-flag edge cases never arise; the
+ *  so the css-easing-1 §2.3.1 before-flag edge cases never arise; the
  *  steps output is still clamped to [0,1] defensively. Exported for the
  *  pinned-point tests. */
 export function evalTimingFunction(tf, p) {
@@ -6550,7 +6550,7 @@ export function evalTimingFunction(tf, p) {
     if (tf.x1 === tf.y1 && tf.x2 === tf.y2) return p;
     return cubicBezierY(tf.x1, tf.y1, tf.x2, tf.y2, p); // general bezier eval
   }
-  // steps() per css-easing-1 §3.9.2: current step = ⌊p·n⌋ …
+  // steps() per css-easing-1 §2.3.1: current step = ⌊p·n⌋ …
   let step = Math.floor(p * tf.n);
   // … +1 when the position starts with a rise (jump-start / jump-both).
   if (tf.pos === 'jump-start' || tf.pos === 'jump-both') step += 1;
@@ -6562,7 +6562,7 @@ export function evalTimingFunction(tf, p) {
 
 // The CSS2/css-color-4 §6.1 basic named colors (+ orange, the one HTML4
 // addition WPT reftests actually use, + transparent = rgba(0,0,0,0) per
-// css-color-4 §7.4). Deliberately tiny: the sampler only needs the names
+// css-color-4 §6.3). Deliberately tiny: the sampler only needs the names
 // the animation corpus interpolates; unknown names simply refuse to lerp.
 const NAMED_SRGB = {
   transparent: [0, 0, 0, 0],       black: [0, 0, 0, 1],       silver: [192, 192, 192, 1],
@@ -6795,7 +6795,7 @@ export function parseAnimationDecl(props) {
         spec.direction = low; gotDir = true; continue;
       }
       // <single-animation-fill-mode>: irrelevant inside the active phase
-      // (css-animations-1 §5.4), which is the only place the frozen
+      // (css-animations-1 §4.8), which is the only place the frozen
       // negative-delay path samples — but wave-35 B7's stability window can
       // land a window end in the BEFORE or AFTER phase, where fill decides
       // whether an effect value exists at all, so the value is now recorded.
@@ -6975,7 +6975,7 @@ function sampleFramesAt(frames, progress, elementTf) {
     // local 0 → 0) but WRONG for a step function that rises at its start:
     // css-color/animation/contrast-color-interpolation.html samples at
     // progress 0 under `steps(2, start)`, whose output at input 0 is 0.5
-    // (css-easing-1 §3.9.2), so the correct value is the interval MIDPOINT,
+    // (css-easing-1 §2.3.1), so the correct value is the interval MIDPOINT,
     // not the `from` keyframe. The shortcut below keeps the frozen path
     // byte-identical for the bezier case.
     let prev = null, next = null;                  // interval endpoints A and B
@@ -7066,7 +7066,7 @@ export function sampleKeyframesAnimation(props, keyframesMap) {
     const progress = -anim.delayMs / anim.durationMs;
     // Must land strictly INSIDE the active phase's first iteration: at 0/1
     // or beyond, the rendered value depends on fill-mode / iteration
-    // compositing (css-animations-1 §5.4) — out of scope.
+    // compositing (css-animations-1 §4.8 / §4.4) — out of scope.
     if (!(progress > 0 && progress < 1)) return null;
     if (!(progress < anim.iterations)) return null; // count must cover the sample point
     const baked = sampleFramesAt(frames, progress, elementTf);
@@ -7920,7 +7920,7 @@ export async function extractFixture(testRel, opts = {}) {
     // argument — the PARENT language of every top-level component, which in
     // the common unslotted shape are SIBLINGS of the body-root and so have
     // no parent edge the walk could read it from. It is what resolves
-    // `quotes: auto` (css-content-3 §2.2.1) into real CLDR marks.
+    // `quotes: auto` (css-content-3 §2.4.1) into real CLDR marks.
     const gc = generatedContentBake.bakeGeneratedContentText(
       built.components, null, documentLanguage(cleaned),
     );
@@ -8337,7 +8337,7 @@ export function mintDocumentDirection(root, documentDir) {
 // pipeline carried it. Two mechanisms depend on it and both were silently
 // running on the browser's default locale in every capture:
 //
-//   1. `quotes: auto` (css-content-3 §2.2.1) — the UA's `q::before {
+//   1. `quotes: auto` (css-content-3 §2.4.1) — the UA's `q::before {
 //      content: open-quote }` picks a CLDR quote pair keyed by the content
 //      language. With no lang attribute anywhere in the harness DOM every
 //      `<q>` in the corpus painted the ROOT pair (“ ” / ‘ ’), so the whole
@@ -8687,7 +8687,7 @@ export function shouldSlotBodyChildren(props) {
 // `normal`). Keyed by trigger longhand; only the shorthands that actually
 // cover a member of the trigger set appear.
 const INHERITED_COVERING_SHORTHANDS = {
-  // css-fonts-4 §6: the `font` shorthand sets font-style/weight/size/
+  // css-fonts-4 §2.7: the `font` shorthand sets font-style/weight/size/
   // family AND resets line-height — all five are trigger props.
   'font-size': ['font'],
   'font-family': ['font'],
@@ -8749,7 +8749,7 @@ const ALL_SHORTHAND_EXEMPT = new Set(['direction']);
 // and the bake then behaves exactly as it did before this lane — no
 // derivation, no marker, no drift):
 //   * <system-family-name> — `font: menu`, `caption`, `icon`, `message-box`,
-//     `small-caption`, `status-bar`. css-fonts-4 §3.7 resolves these from the
+//     `small-caption`, `status-bar`. css-fonts-4 §2.7 resolves these from the
 //     PLATFORM's font database, so there is no size and no family to derive:
 //     any value we invented would be a guess about the capture host.
 //   * the CSS-wide keywords (`inherit`, `initial`, `unset`, `revert`,
@@ -8757,7 +8757,7 @@ const ALL_SHORTHAND_EXEMPT = new Set(['direction']);
 //     "ask the cascade again", and the fixture wire has no cascade to ask.
 //   * anything carrying `var()` — unresolvable by construction (the same
 //     rule the IR states as "null means runtime-dependent").
-//   * a value that does not parse as the §3.7 size/family form at all: a
+//   * a value that does not parse as the §2.7 size/family form at all: a
 //     missing size, a missing family, an unrecognised token before the size.
 //     CSS 2.2 §4.2 drops an invalid declaration whole; so do we, rather than
 //     bake half of a value we did not understand.
@@ -8768,7 +8768,7 @@ const FONT_SH_SYSTEM_FAMILIES = new Set([
 const FONT_SH_CSS_WIDE = new Set([
   'inherit', 'initial', 'unset', 'revert', 'revert-layer',
 ]);
-// The pre-size modifier keywords, css-fonts-4 §3.7:
+// The pre-size modifier keywords, css-fonts-4 §2.7:
 //   [ <'font-style'> || <font-variant-css2> || <'font-weight'> || <font-width-css3> ]?
 // `normal` is legal in ALL FOUR slots and says nothing about which, so it is
 // consumed generically rather than assigned — exactly what FontExpander.kt
@@ -8780,7 +8780,7 @@ const FONT_SH_STRETCH_KEYWORDS = new Set([
   'ultra-condensed', 'extra-condensed', 'condensed', 'semi-condensed',
   'semi-expanded', 'expanded', 'extra-expanded', 'ultra-expanded',
 ]);
-// <absolute-size> | <relative-size>, css-fonts-4 §3.5. NOTE `small-caps` is a
+// <absolute-size> | <relative-size>, css-fonts-4 §2.5. NOTE `small-caps` is a
 // distinct token from `small`, so the variant keyword can never be mistaken
 // for a size — tokens are compared whole, never by prefix.
 const FONT_SH_SIZE_KEYWORDS = new Set([
@@ -8796,10 +8796,10 @@ const FONT_SH_SIZE_KEYWORDS = new Set([
 // row), which is the same honest non-answer the root itself gets.
 const FONT_SH_LENGTH_RX =
   /^[+-]?(?:\d+\.?\d*|\.\d+)(?:px|pt|pc|in|cm|mm|q|em|rem|ex|ch|cap|ic|lh|rlh|vw|vh|vi|vb|vmin|vmax|svw|svh|lvw|lvh|dvw|dvh|%)$/i;
-// css-values-4 §8.4 <angle>, for the `oblique <angle>` form of font-style.
+// css-values-4 §7.1 <angle>, for the `oblique <angle>` form of font-style.
 const FONT_SH_ANGLE_RX = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:deg|grad|rad|turn)$/i;
 // A bare <number> in the pre-size run is a numeric font-weight (css-fonts-4
-// §3.2 — 1 to 1000). It can never be a font-size: `font-size` has no unitless
+// §2.2 — 1 to 1000). It can never be a font-size: `font-size` has no unitless
 // form, which is exactly what makes this position unambiguous.
 const FONT_SH_NUMBER_RX = /^\d+\.?\d*$/;
 
@@ -8874,7 +8874,7 @@ function isFontShorthandLineHeight(t) {
 
 /**
  * Derive the INHERITED longhands a body-root `font` shorthand declares, per
- * the css-fonts-4 §3.7 grammar
+ * the css-fonts-4 §2.7 grammar
  *
  *   [ [ <'font-style'> || <font-variant-css2> || <'font-weight'> ||
  *       <font-width-css3> ]? <'font-size'> [ / <'line-height'> ]?
@@ -8926,7 +8926,7 @@ export function parseFontShorthand(value) {
     if (isFontShorthandSize(t.split('/')[0])) break;
     if (t === 'oblique' && !seenStyle) {
       seenStyle = true;
-      // `oblique <angle>` (css-fonts-4 §3.4) — the angle is part of the value.
+      // `oblique <angle>` (css-fonts-4 §2.4) — the angle is part of the value.
       if (i + 1 < tokens.length && FONT_SH_ANGLE_RX.test(tokens[i + 1])) {
         out['font-style'] = `${raw} ${tokens[i + 1]}`;
         i += 2;
@@ -10158,7 +10158,7 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
         const peProps = pseudo[peName];
         if (!peProps || Object.keys(peProps).length === 0) continue;
         // wave-21 A-RC6: pseudo bags bake with the HOST's sibling index —
-        // per css-values-5 §5.1 tree-counting resolves against the
+        // per css-values-5 §10 tree-counting resolves against the
         // originating element for pseudo-elements.
         const peSibBaked = node.pos
           ? bakeSiblingIndex(peProps, node.pos.domSibIndex + 1)
@@ -10597,9 +10597,10 @@ async function main() {
   // POST_LOAD_EXTRACT=1 env (the env form is how section-runner.sh opts a
   // whole section run in without a script change). When enabled, tests
   // whose wpt-buckets.json notApplicable tags cross the EXTRACTION WALL
-  // (post-load-extract.mjs's isWallTagged — exactly the tags the score gate
-  // excludes on) get the live-browser computed-state overlay; everything
-  // else keeps the static path byte-identically. The module is imported
+  // (post-load-extract.mjs's shouldPostLoadExtractFor — route 1 is hasWallTag,
+  // exactly the tags the score gate excludes on; route 2 is the wave-30 A3
+  // unsupportedRules count) get the live-browser computed-state overlay;
+  // everything else keeps the static path byte-identically. The module is imported
   // DYNAMICALLY so the default static path never pays the puppeteer/sharp
   // import cost (and so this module stays stdlib-only for its ~24k-file
   // batch runs).

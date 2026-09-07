@@ -52,6 +52,15 @@ data class TransformConfig(
     val rotateX: Float? = null,
     /** Standalone rotation around Y axis (3D) */
     val rotateY: Float? = null,
+    /**
+     * Standalone `rotate: x y z <angle>` (css-transforms-2 §5) with a
+     * DIAGONAL axis — retro R1 (A11#6/#11). Axis-aligned forms keep landing
+     * in rotate/rotateX/rotateY so every legacy route is untouched; only a
+     * genuinely off-axis vector arrives here and is drawn exactly by the
+     * 4x4 canvas route (TransformMatrixPathApplier) instead of the old
+     * largest-axis guess (Rotate3dAxis documents the measured miss).
+     */
+    val rotate3d: TransformFunction.Rotate3d? = null,
     /** Uniform scale factor (CSS scale property) */
     val scale: Float? = null,
     /** Horizontal scale factor */
@@ -80,7 +89,18 @@ data class TransformConfig(
     val skewX: Float? = null,
     /** Skew Y angle in degrees */
     val skewY: Float? = null,
-    /** Perspective distance for 3D transforms */
+    /**
+     * The `perspective` PROPERTY (css-transforms-2 §8) — the distance this
+     * element's CHILDREN are projected through (§4.1.1's second way; `none`
+     * extracts as null). Kept on the config for that still-unimplemented
+     * children channel (OrthographicFlatten names the renderer seam) and,
+     * since retro F3, read by NO own-transform route — a perspective()
+     * FUNCTION in [functions] is the only way this element's own matrix
+     * gets a perspective row (TransformMatrixComposer's class doc). It still
+     * counts toward [hasTransform]/[has3DTransform] below, which is why a
+     * perspective-only element takes the graphicsLayer identity route rather
+     * than no route at all — pre-existing routing, deliberately unchanged.
+     */
     val perspective: Dp? = null
 ) {
     /**
@@ -91,6 +111,7 @@ data class TransformConfig(
                 rotate != null ||
                 rotateX != null ||
                 rotateY != null ||
+                rotate3d != null ||                       // retro R1: diagonal `rotate:` longhand
                 scale != null ||
                 scaleX != null ||
                 scaleY != null ||
@@ -112,12 +133,15 @@ data class TransformConfig(
                 scaleZ != null ||
                 rotateX != null ||
                 rotateY != null ||
+                rotate3d != null ||                       // retro R1: diagonal axis is 3D by definition
                 perspective != null ||
                 functions.any {
                     it is TransformFunction.TranslateZ ||
                     it is TransformFunction.ScaleZ ||
                     it is TransformFunction.RotateX ||
                     it is TransformFunction.RotateY ||
+                    it is TransformFunction.Rotate3d ||   // retro R1: kept whole, never planar
+                    it is TransformFunction.Matrix3d ||   // retro R1: a 4x4 literal is 3D (was routed as 2D matrix)
                     it is TransformFunction.Perspective ||
                     (it is TransformFunction.Translate && it.z.value != 0f) ||
                     (it is TransformFunction.Scale && it.z != 1f)
@@ -246,6 +270,16 @@ sealed interface TransformFunction {
      * Compose: `graphicsLayer { rotationZ = ... }`
      */
     data class RotateZ(val degrees: Float) : TransformFunction
+
+    /**
+     * 3D rotation about an arbitrary NORMALISED axis — css-transforms-2
+     * §12.2 `rotate3d(x, y, z, α)`, kept whole only when the axis is not one
+     * of the three unit axes (Rotate3dAxis.classify routes those to
+     * RotateX/RotateY/RotateZ so the legacy routes stay byte-identical).
+     * Compose: Mat4.rotate3d on the 4x4 canvas route (§16 quaternion-form
+     * matrix); the legacy scalar routes never receive it (retro R1).
+     */
+    data class Rotate3d(val x: Float, val y: Float, val z: Float, val degrees: Float) : TransformFunction
 
     /**
      * 2D/3D scaling.

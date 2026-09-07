@@ -1,6 +1,6 @@
 // FontVariationSettingsExtractor.ts — folds `FontVariationSettings` IR properties into a FontVariationSettingsConfig.
 // Family: font-variation-settings.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariationSettingsConfig, FONT_VARIATION_SETTINGS_PROPERTY_TYPE, FontVariationSettingsPropertyType } from './FontVariationSettingsConfig';
 import { kwLower } from './_shared';

@@ -1,6 +1,6 @@
 // RubyMergeExtractor.ts — folds `RubyMerge` IR properties into a RubyMergeConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { RubyMergeConfig, RUBY_MERGE_PROPERTY_TYPE, RubyMergePropertyType } from './RubyMergeConfig';
 import { kwLower } from './_shared';

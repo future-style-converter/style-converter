@@ -52,7 +52,7 @@ object InlineSpanContent {
      * @param spans the fold's member ranges, wire order.
      * @param paragraphFontSizePx the paragraph's RESOLVED font size — the
      *   base a member's em/% font-size factor multiplies (css-values-4
-     *   §5.1.1: the fold host is the member's CSS parent).
+     *   §6.1.1: the fold host is the member's CSS parent).
      */
     fun overlay(
         base: AnnotatedString,

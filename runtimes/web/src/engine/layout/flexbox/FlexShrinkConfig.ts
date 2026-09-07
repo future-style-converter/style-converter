@@ -5,4 +5,3 @@
 export interface FlexShrinkConfig { value?: number | string; }
 
 export const FLEX_SHRINK_PROPERTY_TYPE = 'FlexShrink' as const;
-export type FlexShrinkPropertyType = typeof FLEX_SHRINK_PROPERTY_TYPE;

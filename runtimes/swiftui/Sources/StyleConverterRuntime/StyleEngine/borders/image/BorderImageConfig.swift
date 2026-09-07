@@ -2,13 +2,19 @@
 //  BorderImageConfig.swift
 //  StyleEngine/borders/image — Phase 5.
 //
-//  CSS `border-image-*` family. Full spec is a 9-slice image applied
-//  around the border box. iOS has no native `border-image` primitive,
-//  so the Applier renders what it can (solid-colour placeholder for
-//  `url(...)` sources, nothing for `none`, best-effort tiling for
-//  stretch/repeat/round/space). Data is still captured faithfully so
-//  a future phase can swap in a real NineSlice drawer without
-//  re-touching the extractor.
+//  CSS `border-image-*` family (css-backgrounds-3 §5). iOS has no native
+//  `border-image` primitive, so the family is drawn by hand — and it IS
+//  drawn: retro P2e replaced the Phase-5 sentence that stood here ("the
+//  Applier renders what it can (solid-colour placeholder for `url(...)`
+//  sources …) … a future phase can swap in a real NineSlice drawer").
+//  That future phase landed: BorderImageApplier decodes a `url()` raster
+//  through BackgroundURLImageResolver and paints all nine regions in a
+//  Canvas (`BorderImageNineSliceView`) — §5.2 slices incl. the `fill`
+//  keyword, §5.3 widths, §5.4 outsets (BorderImageMath) and the §5.5
+//  stretch/repeat/round/space rules. Still identity, each with a
+//  PropertyTracker breadcrumb rather than a silent placeholder: a
+//  GRADIENT source (Compose has it, iOS does not) and a url() that fails
+//  to decode.
 //
 //  Mirrors Android's `image/BorderImageConfig.kt`.
 //
@@ -85,8 +91,8 @@ struct BorderImageConfig: Equatable {
     var repeatVertical: BorderImageRepeat = .stretch
     // The element's COMPUTED border widths (css-backgrounds-3 §4.3: a
     // side whose border-style is none/hidden/absent computes to 0) —
-    // the §6.3 basis for `<number>` border-image-width values and the
-    // initial `1`, and the §6.4 basis for `<number>` outsets. Populated
+    // the §5.3 basis for `<number>` border-image-width values and the
+    // initial `1`, and the §5.4 basis for `<number>` outsets. Populated
     // by the extractor from the same BorderSideExtractor lane the stroke
     // painter reads, mirroring Compose's computedBorder* config fields.
     var computedBorderTop: CGFloat = 0

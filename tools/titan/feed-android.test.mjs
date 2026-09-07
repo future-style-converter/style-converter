@@ -14,9 +14,10 @@ import assert from 'node:assert/strict';
 import { promises as fs } from 'node:fs';
 import { PNG } from 'pngjs';
 
-import { existsSync, statSync } from 'node:fs';
-import { join, resolve } from 'node:path';
+import { existsSync, statSync, mkdtempSync, writeFileSync, readFileSync, rmSync } from 'node:fs';
+import { join, resolve, dirname } from 'node:path';
 import { tmpdir } from 'node:os';
+import { fileURLToPath } from 'node:url';
 
 import {
   parseArgs, safe, deviceSafeName, expectedPngNames, composedPngName,
@@ -25,7 +26,12 @@ import {
   documentFontSrcs, resolveFontFile,
   // wave-39 lane A2 — the replaced-element image hop, its structural twin.
   documentReplacedSrcs, resolveReplacedImageFile,
+  // retro R8b (A9#3) — the --wpt-dir preflight both feeders run first.
+  assetHopPreflight, NO_WPT_DIR_DECLINE,
 } from './feed-lib.mjs';
+// retro R8b (A9#4): the real pull path, importable now that feed-android.mjs
+// carries feed-ios.mjs's CLI guard (main() no longer runs on import).
+import { pullVerified } from './feed-android.mjs';
 
 /** The fs probes resolveFontFile takes by injection (so the pure resolution
  *  rules can be pinned without stubbing the module's imports). */
@@ -608,4 +614,105 @@ test('expectedPngNames suppresses backdrop-dependent children like the devices d
     'the blend child must be suppressed; the plain child keeps the NEXT index');
   assert.equal(names[1].deviceFile.startsWith('001_'), true,
     'positional numbering must match the device (no gap for the suppressed child)');
+});
+
+// ── retro R8b (A9#3): the --wpt-dir preflight ───────────────────────────────
+//
+// Before the guard, a feeder run without --wpt-dir declined every face as
+// "unresolvable/not a font" (the resolver returns the same null for a missing
+// root as for a bad path), the pre-raster and WOFF passes silently no-op'd,
+// and the captures scored ARTIFACTS. run-titan.sh --all-platforms was a
+// committed caller doing exactly that. The preflight refuses such a run
+// before the first device call.
+
+test('assetHopPreflight REFUSES a batch that declares srcs when --wpt-dir is absent', () => {
+  const fontDoc = { fontFaces: [{ family: 'Lib', src: 'css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff' }], components: [] };
+  const imgDoc = { components: [{ meta: { sourceTag: 'img', attrs: { src: 'css/support/red-rect.svg' } }, properties: [] }] };
+  const plain = { components: [{ properties: [] }] };
+  // A null entry stands for an unreadable fixture (reported per-fixture later).
+  const r = assetHopPreflight([fontDoc, imgDoc, plain, null], null);
+  assert.equal(r.fatal, true, 'srcs declared + no corpus root must refuse');
+  assert.deepEqual(r.fontSrcs, ['css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff']);
+  assert.deepEqual(r.imageSrcs, ['css/support/red-rect.svg']);
+  assert.match(r.message,
+    /^FATAL: fixtures declare 1 @font-face src\(s\) \+ 1 replaced-image src\(s\) but --wpt-dir was not given/);
+  // The same batch WITH a root is admitted — resolution is per src, later.
+  assert.equal(assetHopPreflight([fontDoc, imgDoc], '/corpus').fatal, false);
+  assert.equal(assetHopPreflight([fontDoc, imgDoc], '/corpus').message, null);
+  // Nothing to hop → never fatal, flag or no flag (a no-asset section must
+  // keep running exactly as before).
+  assert.equal(assetHopPreflight([plain, null], null).fatal, false);
+  assert.equal(assetHopPreflight([], null).fatal, false);
+});
+
+test('assetHopPreflight on the VERBATIM wave49-final per-test IR (the font + svg carriers)', (t) => {
+  // Two real corpus payloads: boundary-shaping-001 carries the LinLibertine
+  // woff (css-text), align-items-007 carries ../support/red-rect.svg
+  // (css-flexbox) — one test per asset channel. runs/ is local-only, so skip
+  // visibly when the gate artifacts are absent.
+  const runs = resolve(dirname(fileURLToPath(import.meta.url)), 'runs', 'wave49-final', 'sections');
+  const font = join(runs, 'css-text', 'per-test-ir', 'wpt__css-text__boundary-shaping__boundary-shaping-001.json');
+  const img = join(runs, 'css-flexbox', 'per-test-ir', 'wpt__css-flexbox__align-items-007.json');
+  if (!existsSync(font) || !existsSync(img)) { t.skip('wave49-final run artifacts not present on this machine'); return; }
+  const docs = [font, img].map((p) => JSON.parse(readFileSync(p, 'utf8')));
+  const r = assetHopPreflight(docs, null);
+  assert.equal(r.fatal, true, 'both corpus carriers must trip the preflight without a root');
+  assert.deepEqual(r.fontSrcs, ['css/css-text/boundary-shaping/resources/LinLibertine_Re-4.7.5.woff']);
+  assert.deepEqual(r.imageSrcs, ['css/support/red-rect.svg']);
+  assert.equal(assetHopPreflight(docs, 'tools/wpt').fatal, false, 'the gate invocation (--wpt-dir tools/wpt) is admitted');
+});
+
+test('feed-android runs the preflight BEFORE any device call, exits 2, and names the real decline cause', async () => {
+  const src = await fs.readFile(new URL('./feed-android.mjs', import.meta.url), 'utf8');
+  const pre = src.indexOf('assetHopPreflight(fixtures.map(readDocOrNull), opts.wptDir)');
+  const adb = src.indexOf('const adb = findAdb();');
+  const raster = src.indexOf('await prerasterizeFixtures(fixtures');
+  assert.ok(pre > 0, 'preflight call missing');
+  assert.ok(pre < adb, 'preflight must precede findAdb (the first device-side call)');
+  assert.ok(pre < raster, 'preflight must precede the pre-raster pass (which silently no-ops without a root)');
+  assert.match(src, /if \(preflight\.fatal\) \{ log\(preflight\.message\); process\.exit\(2\); \}/,
+    'a fatal preflight must exit 2 (the usage code), never continue');
+  // Per-src declines branch on the ABSENT root before the resolver runs, so
+  // the log can never say "unresolvable/not a font" for a root nobody gave.
+  const fontFn = src.slice(src.indexOf('function pushFontFaces'), src.indexOf('function pushReplacedImages'));
+  assert.ok(fontFn.indexOf('!opts.wptDir') > 0 && fontFn.indexOf('!opts.wptDir') < fontFn.indexOf('resolveFontFile('),
+    'pushFontFaces must branch on !wptDir BEFORE resolveFontFile');
+  assert.match(fontFn, /NO_WPT_DIR_DECLINE/, 'pushFontFaces must log the shared no-root decline text');
+  const imgFn = src.slice(src.indexOf('function pushReplacedImages'), src.indexOf('function pullVerified'));
+  assert.ok(imgFn.indexOf('!opts.wptDir') > 0 && imgFn.indexOf('!opts.wptDir') < imgFn.indexOf('resolveReplacedImageFile('),
+    'pushReplacedImages must branch on !wptDir BEFORE resolveReplacedImageFile');
+  assert.match(imgFn, /NO_WPT_DIR_DECLINE/, 'pushReplacedImages must log the shared no-root decline text');
+  assert.match(NO_WPT_DIR_DECLINE, /no --wpt-dir/, 'the decline text must name the flag');
+});
+
+// ── retro R8b (A9#4): a PNG that fails to parse twice must be ABSENT ────────
+//
+// pullVerified retried the adb-pull truncation flake once but, on the second
+// failure, left the truncated file under the compare-glob name. Downstream
+// inject-wpt-block's loadPng threw → an `{error}` diff that silently left
+// the scored denominator (assertPlatformColumns skips error cells) and a
+// compare-screenshots "decode error" row. Deleting it makes the cell MISSING,
+// which section-runner.sh's capture-count parity check turns into exit 1.
+
+test('pullVerified DELETES a PNG that fails to parse on both attempts (MISSING cell, never corrupt)', () => {
+  const out = mkdtempSync(join(tmpdir(), 'r8b-pull-'));
+  // PNG signature + a partial IHDR: exactly the adb-pull truncation shape.
+  const truncated = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52]);
+  let pulls = 0;
+  // Fake adbx: `pull <remote> <local>` writes the truncated bytes to <local>.
+  const adbxTrunc = (args) => { if (args[0] === 'pull') { pulls++; writeFileSync(args[2], truncated); } return ''; };
+  assert.equal(pullVerified(adbxTrunc, 'wpt__x.png', 'wpt__x.png', out), false);
+  assert.equal(pulls, 2, 'the truncation flake gets exactly one retry');
+  assert.equal(existsSync(join(out, 'wpt__x.png')), false, 'the corrupt file must be gone after the final failure');
+  // Control: a pull that lands a real PNG on the retry keeps it (the flake path).
+  const good = PNG.sync.write(new PNG({ width: 2, height: 2 }));
+  let n = 0;
+  const adbxFlaky = (args) => { if (args[0] === 'pull') writeFileSync(args[2], ++n === 1 ? truncated : good); return ''; };
+  assert.equal(pullVerified(adbxFlaky, 'wpt__y.png', 'wpt__y.png', out), true);
+  assert.equal(existsSync(join(out, 'wpt__y.png')), true, 'a valid retry must be kept');
+  // Control 2: adb throwing twice (device offline) also leaves nothing behind.
+  const adbxThrow = () => { throw new Error('adb: device offline'); };
+  assert.equal(pullVerified(adbxThrow, 'wpt__z.png', 'wpt__z.png', out), false);
+  assert.equal(existsSync(join(out, 'wpt__z.png')), false);
+  rmSync(out, { recursive: true, force: true });
 });

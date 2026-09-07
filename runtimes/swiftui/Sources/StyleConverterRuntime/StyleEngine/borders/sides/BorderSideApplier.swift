@@ -83,11 +83,17 @@ struct BorderSideApplier: ViewModifier {
         // Fast path A — absent or empty.
         guard let cfg = config, cfg.hasAny else { return AnyView(content) }
 
-        // Fast path B — every side identical AND style is solid.
-        // Uses the same shape the background paints with, so the border
-        // visually sits on the perimeter.
-        if cfg.isUniform, let w = cfg.top.width, w > 0,
-           (cfg.top.style ?? .solid) == .solid {
+        // Fast path B — every side identical AND the DECLARED style is
+        // solid. Uses the same shape the background paints with, so the
+        // border visually sits on the perimeter. An absent style is NOT
+        // solid: CSS 2.1 §8.5.3 / css-backgrounds-3 §3.2 make the initial
+        // `none` zero the used width, and `hasAny` above
+        // (BorderSideConfig.hasBorder) already rejects style-less sides —
+        // so the comparison is against the keyword itself, never a
+        // `?? .solid` default (retro A11#5: that default painted width-
+        // only borders as solid bands on iOS while web/Android painted
+        // nothing). Routing is mirrored by paintsAlongRoundedShape below.
+        if cfg.isUniform, let w = cfg.top.width, w > 0, cfg.top.style == .solid {
             let colour = cfg.top.color ?? inheritedColor
             return AnyView(
                 content.overlay(
@@ -106,8 +112,12 @@ struct BorderSideApplier: ViewModifier {
         // drew a SQUARE dashed perimeter over the rounded background
         // (self-inflicted regression). See usesRoundedDashPerimeter for
         // the phase-accrual tradeoff this routing accepts.
+        // The style is bound here (not defaulted): usesRoundedDashPerimeter
+        // only returns true for a DECLARED dashed/dotted keyword, so a nil
+        // style can never reach this path — the old `?? .solid` default was
+        // unreachable and misleading (retro A11#5).
         if Self.usesRoundedDashPerimeter(cfg: cfg, radius: radius),
-           let w = cfg.top.effectiveWidth {
+           let w = cfg.top.effectiveWidth, let s = cfg.top.style {
             let colour = cfg.top.color ?? inheritedColor
             return AnyView(
                 content.overlay(
@@ -115,8 +125,7 @@ struct BorderSideApplier: ViewModifier {
                         // strokeBorder insets by half the width so the
                         // pattern band sits inside the border box, same
                         // as the solid fast path above.
-                        .strokeBorder(colour, style: Self.roundedDashStrokeStyle(
-                            cfg.top.style ?? .solid, width: w))
+                        .strokeBorder(colour, style: Self.roundedDashStrokeStyle(s, width: w))
                 )
             )
         }
@@ -136,6 +145,30 @@ struct BorderSideApplier: ViewModifier {
                 }
             )
         )
+    }
+
+    // TRUE when this applier's OWN stroke already follows the rounded
+    // border box for `cfg` + `radius`, i.e. the border needs NO outer clip
+    // to look rounded. This is exactly body()'s routing: fast path B
+    // (uniform solid with an explicit width → `strokeBorder` on
+    // BorderRadiusShape) or fast path C (uniform dashed/dotted at a
+    // non-zero radius → the rounded strokeBorder perimeter). Everything
+    // else — per-side widths/colours/styles, double/groove/ridge/inset/
+    // outset, and a style-only uniform solid (Canvas path) — paints
+    // STRAIGHT full-length edges that today only look rounded because
+    // BorderRadiusApplier's clip cuts their corners. Consumed by
+    // BorderRadiusApplier.clipsDescendants (retro R4) so the two appliers
+    // can never disagree about which borders are self-rounding — the iOS
+    // twin of Compose's BorderRadiusApplier.isUniformSolid gate. Internal
+    // static so XCTest pins the routing table.
+    static func paintsAlongRoundedShape(cfg: AllBordersConfig?,
+                                        radius: BorderRadiusConfig?) -> Bool {
+        // No paintable border → nothing that could poke past the curve.
+        guard let cfg = cfg, cfg.hasAny else { return true }
+        // Fast path B's exact predicate (explicit width, declared solid).
+        if cfg.isUniform, let w = cfg.top.width, w > 0, cfg.top.style == .solid { return true }
+        // Fast path C's exact predicate (declared dashed/dotted + radius).
+        return usesRoundedDashPerimeter(cfg: cfg, radius: radius)
     }
 
     // Routing predicate for uniform dashed/dotted borders: TRUE routes
@@ -263,46 +296,20 @@ struct BorderSideApplier: ViewModifier {
     }
 
     // Blink's Color::Dark()/Light() two-tone palette for the 3D border
-    // styles (groove/ridge/inset/outset). 3D shading is UA-defined, so
-    // the web reference engine's own arithmetic is the contract
-    // (third_party/blink/renderer/platform/graphics/color.cc):
-    //   - DARK band  — Dark(): v = max(r,g,b); every channel scales by
-    //     the SUBTRACTIVE multiplier max(0, (v − 0.33) / v), i.e. the
-    //     max channel drops by an absolute 0.33 and the others keep
-    //     their ratios; black stays black via the max(0, ·) clamp. The
-    //     previous flat ×0.65 was a one-point measurement of this model
-    //     at v = 239/255 ((0.937−0.33)/0.937 = 0.648) that drifted for
-    //     every other declared colour (mid greys darken twice as hard
-    //     under Blink: 0.5 → 0.17, not 0.325).
-    //   - LIGHT band — the declared colour UNCHANGED, except a BLACK
-    //     base where both bands would collapse to black: Blink's
-    //     Light() hardcodes lightened black rgb(84,84,84)
-    //     (kLightenedBlack; 84/255 ≈ 0.33), keeping the carve visible
-    //     on `groove black`.
-    // Mirrors the Android applier's shade() so the natives cannot drift.
-    // UIColor bridging (available via SwiftUI on iOS/Catalyst — same
-    // approach as MaskApplier) extracts the RGBA components, since
-    // SwiftUI.Color has no direct channel accessors on iOS 16.
+    // styles (groove/ridge/inset/outset) — the arithmetic lives in
+    // BlinkBorderShade (one pure helper per platform, byte-parallel with
+    // Compose's BlinkBorderShade.kt — retro R6, audit A7#2): dark band =
+    // Color::Dark()'s subtractive max-channel model; light band = the
+    // declared colour unless box_border_painter.cc CalculateBorderStyleColor's
+    // contrast gate lifts it via Color::Light(). This entry point stays so
+    // every caller (the per-side Canvas renderer below, grooveRidgeBandColours,
+    // OutlineShadedRing, the XCTest pins) keeps one name for "the border
+    // palette". The pre-retro body lifted pure black only, while the Compose
+    // twin lifted every max-channel ≤ 0.33 base — the two natives DID drift
+    // for 0 < v ≤ 0.33 (the old "cannot drift" claim here was wrong), and
+    // neither matched Blink; both now call the same gate.
     static func shade(_ base: Color, light: Bool) -> Color {
-        var r: CGFloat = 0, g: CGFloat = 0, b: CGFloat = 0, a: CGFloat = 0
-        // Non-RGB-convertible colours (dynamic/catalog) fall back to the
-        // base rather than guessing — no silent wrong-colour band.
-        guard UIColor(base).getRed(&r, green: &g, blue: &b, alpha: &a) else { return base }
-        // Blink's "v": the max channel the absolute 0.33 shift scales by.
-        let v = max(r, max(g, b))
-        if light {
-            // Light band = base, except black → kLightenedBlack (see doc).
-            // Alpha carries over — Blink lightens in-gamut only.
-            if v <= 0 {
-                return Color(red: 84.0 / 255.0, green: 84.0 / 255.0,
-                             blue: 84.0 / 255.0, opacity: a)
-            }
-            return base
-        }
-        // Dark band — subtractive multiplier; alpha untouched (Blink
-        // darkens in-gamut without changing transparency).
-        let m = v > 0 ? max(0, (v - 0.33) / v) : 0
-        return Color(red: r * m, green: g * m, blue: b * m, opacity: a)
+        BlinkBorderShade.shade(base, light: light)
     }
 
     // (outer, inner) band colours for one groove/ridge edge. Blink
@@ -379,11 +386,15 @@ struct BorderSideApplier: ViewModifier {
     private func drawEdge(_ ctx: inout GraphicsContext, size: CGSize,
                           side: Side, c: BorderSideConfig) {
         // effectiveWidth (not raw width) so a style-only side paints at
-        // the CSS `medium` 3px default like web does.
-        guard c.hasBorder, let w = c.effectiveWidth else { return }
+        // the CSS `medium` 3px default like web does. `hasBorder` also
+        // guarantees a DECLARED visible style: a nil style is the CSS
+        // initial `none` (CSS 2.1 §8.5.3 — used width 0, nothing to
+        // paint), so the side returns here and there is no `?? .solid`
+        // default any more (retro A11#5 — pairs-02 PW_Borders_Images_03's
+        // `border-top-width: 8px` painted a white 8px band on iOS only).
+        guard c.hasBorder, let w = c.effectiveWidth, let style = c.style else { return }
         // currentColor fallback — see the `inheritedColor` doc above.
         let colour = c.color ?? inheritedColor
-        let style = c.style ?? .solid
         // Full-width band stroke centred w/2 inside the edge.
         let path = edgeLine(side: side, size: size, inset: w / 2)
 

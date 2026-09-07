@@ -1,7 +1,7 @@
 package app.parsing.css.properties.longhands.images
 
 // Regression suite for the wave-36 lane M1 <position> AXIS fix
-// (css-images-3 §5.2 object-position, whose value is the css-values-4
+// (css-images-3 §4.6 object-position, whose value is the css-values-4
 // `<position>` grammar shared with background-position).
 //
 // ROOT CAUSE PINNED HERE: the old parser read the token stream POSITIONALLY

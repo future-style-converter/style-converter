@@ -30,7 +30,7 @@ class MulticolSpannerFlowTest {
     /** SP1 — always-balancing-before-column-span: 200px child balances into 2×100 before the 0-height spanner. */
     @Test
     fun `SP1 balance before spanner - live IR always-balancing-before-column-span`() {
-        // css-multicol §6.3: pre-spanner content balances (H = ceil(200/2)).
+        // css-multicol-1 §6.1: pre-spanner content balances (H = ceil(200/2)).
         val plan = MulticolSpannerFlow.plan(
             listOf(Child(200, Role.FLOW), Child(0, Role.SPANNER)), 2
         )
@@ -295,7 +295,7 @@ class MulticolSpannerFlowTest {
     fun `BRK1 discard drops the overflow chunk and everything after - live IR discard-multicol-003`() {
         // Wire order: 4 one-line (19px) <p break-after:column> then the
         // flattened "Spanner 1". Chunks p1|p2|p3 own columns 0..2; p4 needs
-        // the §8.2 overflow column → css-overflow-4 §3 discards it AND the
+        // the §8.2 overflow column → css-overflow-4 §5.3 discards it AND the
         // spanner after it; the container is one 19px line tall (the ref).
         val plan = MulticolSpannerFlow.plan(
             listOf(

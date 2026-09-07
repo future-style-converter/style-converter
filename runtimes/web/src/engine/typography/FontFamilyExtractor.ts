@@ -1,6 +1,6 @@
 // FontFamilyExtractor.ts — folds `FontFamily` IR properties into a FontFamilyConfig.
 // Family: font-family.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontFamilyConfig, FONT_FAMILY_PROPERTY_TYPE, FontFamilyPropertyType } from './FontFamilyConfig';
 

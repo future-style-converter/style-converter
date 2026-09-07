@@ -211,7 +211,7 @@ object ListStyleApplier {
         // negative ordinal stringifies with a leading '-', and `'-' - '0'`
         // is -3, so the digit map would be indexed at -3 and throw
         // StringIndexOutOfBoundsException (app death ⇒ harness TIMEOUT).
-        // css-counter-styles-3 §6.2 gives cjk-decimal no `negative`
+        // css-counter-styles-3 §6.1 gives cjk-decimal no `negative`
         // descriptor override, so the default "-" sign prefix applies and
         // the plain decimal string is the honest fallback here — the same
         // decimal fallback `cyclic` uses when it runs off its run.

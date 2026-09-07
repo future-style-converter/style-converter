@@ -74,7 +74,7 @@ enum GapDecorationsExtractor {
             case "RowRuleStyle":    cfg.row.style = extractBorderStyle(p.data)
             // ── widths ─────────────────────────────────────────────────
             // Typed length object → px. Negative widths are meaningless
-            // per css-multicol-1 §5.2 (<length [0,∞]>) so we clamp at 0,
+            // per css-multicol-1 §4.4 (<length [0,∞]>) so we clamp at 0,
             // which `paints` then reads as "no ink".
             case "ColumnRuleWidth": cfg.column.widthPx = nonNegative(p.data)
             case "RowRuleWidth":    cfg.row.widthPx = nonNegative(p.data)

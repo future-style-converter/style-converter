@@ -26,7 +26,7 @@ data class WidthProperty(
             val anchorName: String?, // null for implicit anchor
             val dimension: String    // width, height, block, inline, self-block, self-inline
         ) : WidthValue
-        // css-values-5 §10.1 calc-size(<basis>, <calc-sum>) with a KEYWORD
+        // css-values-5 §11 calc-size(<basis>, <calc-sum>) with a KEYWORD
         // basis and an affine expression over `size` — the runtime-resolvable
         // typed form CalcSizeParser produces (wave 42 lane W3). Pure-length
         // bases and size-free expressions are evaluated at parse time and

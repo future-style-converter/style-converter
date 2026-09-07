@@ -447,7 +447,7 @@ test('W4 bake: `quotes: auto` now paints, keyed by the language on the wire', ()
 });
 
 test('W4 bake: `auto` resolves against the PARENT language, not the element\'s own', () => {
-  // css-content-3 §2.2.1 as amended by csswg-drafts#5478, pinned by
+  // css-content-3 §2.4.1 as amended by csswg-drafts#5478, pinned by
   // quotes-030 ("based on the parent language (not the language of the
   // element itself)"). Its reference renders
   //   One “two <span lang=ja>‘three <span lang=fr>『four』</span>’</span>”

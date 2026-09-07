@@ -12,7 +12,7 @@ import kotlin.math.sin
 /**
  * Composes a CSS transform list into ONE affine matrix in declared order.
  *
- * Why this exists (wave 48, lane W6): css-transforms-1 §11 defines
+ * Why this exists (wave 48, lane W6): css-transforms-1 §8 defines
  * `transform: A B` as the matrix product A·B — B maps the point FIRST.
  * The legacy Compose path (TransformApplier.applyTransformFunctions)
  * instead accumulates each function KIND into a separate scalar
@@ -29,7 +29,7 @@ object TransformListComposer {
 
     /**
      * 2D affine in the CSS matrix(a,b,c,d,tx,ty) convention
-     * (css-transforms-1 §9.1): columns (a,b) and (c,d) are the linear
+     * (css-transforms-1 §7.1): columns (a,b) and (c,d) are the linear
      * part, (tx,ty) the translation. Maps p -> (a·x + c·y + tx,
      * b·x + d·y + ty).
      */
@@ -39,7 +39,7 @@ object TransformListComposer {
         val tx: Float, val ty: Float, // translation   — image of (0,0)
     ) {
         companion object {
-            /** Identity — the empty transform list (css-transforms-1 §11). */
+            /** Identity — the empty transform list (css-transforms-1 §8). */
             val IDENTITY = Affine2D(1f, 0f, 0f, 1f, 0f, 0f)
         }
     }
@@ -60,11 +60,11 @@ object TransformListComposer {
         ty = m.b * n.tx + m.d * n.ty + m.ty,
     )
 
-    /** translate(x, y) — css-transforms-1 §13.1. */
+    /** translate(x, y) — css-transforms-1 §12. */
     fun translation(x: Float, y: Float): Affine2D = Affine2D(1f, 0f, 0f, 1f, x, y)
 
     /**
-     * rotate(deg) — css-transforms-1 §13.1. Positive angles are clockwise
+     * rotate(deg) — css-transforms-1 §12. Positive angles are clockwise
      * in CSS's y-down coordinate system, which is also the convention of
      * Compose's graphicsLayer.rotationZ and Canvas.rotate, so degrees pass
      * through with no sign flip (the legacy path relied on the same
@@ -77,11 +77,11 @@ object TransformListComposer {
         return Affine2D(cs, sn, -sn, cs, 0f, 0f)           // [[c,-s],[s,c]]
     }
 
-    /** scale(sx, sy) — css-transforms-1 §13.1. */
+    /** scale(sx, sy) — css-transforms-1 §12. */
     fun scale(sx: Float, sy: Float): Affine2D = Affine2D(sx, 0f, 0f, sy, 0f, 0f)
 
     /**
-     * Conjugate by transform-origin — css-transforms-1 §2: the full
+     * Conjugate by transform-origin — css-transforms-1 §4: the full
      * transform is translate(origin) · M · translate(-origin). The linear
      * part is untouched; only the translation moves, which is why the
      * graphicsLayer route can decompose the linear part BEFORE the origin
@@ -111,9 +111,12 @@ object TransformListComposer {
      * css-transforms-2 §4.1 flattens EXACTLY to 2D scales.
      *
      * Every clause is a refusal with a reason:
-     * - a `perspective` property or `perspective()` function puts a real
-     *   m34 in the matrix, so the projection is projective, not parallel
-     *   (css-transforms-2 §8) — the legacy camera path owns that;
+     * - a `perspective()` FUNCTION puts a real m34 in the matrix, so the
+     *   projection is projective, not parallel (css-transforms-2 §4.1.1
+     *   first way / §12.2) — the 4x4 canvas route owns that. The
+     *   `perspective` PROPERTY does NOT disqualify: it is §4.1.1's second
+     *   way and projects the CHILDREN (§8), never this element's own list
+     *   (retro F3 removed the R1 fold that vetoed here);
      * - translateZ / scaleZ / a z-bearing translate3d or scale3d carries
      *   depth the 2D composer cannot represent;
      * - the STANDALONE `rotate` longhand's axis-angle X/Y forms
@@ -125,9 +128,24 @@ object TransformListComposer {
      *   steps carries (OrthographicFlatten.shearResidual).
      */
     fun isOrthographicRotationOnly(config: TransformConfig): Boolean {
-        // Perspective in any form → projective, not parallel.
-        if (config.perspective != null) return false
+        // A perspective() FUNCTION → projective, not parallel (css-transforms-2
+        // §4.1.1's first way; the function is §12.2). The own `perspective`
+        // PROPERTY is deliberately NOT consulted: it is §4.1.1's second way
+        // and projects the CHILDREN (§8), never this element's own list —
+        // retro F3 removed the R1 fold (`ownPerspectiveFolds`) that vetoed
+        // here whenever a depth-bearing function was present; the measured
+        // reason (backface-visibility-hidden-001's ref is orthographic) is in
+        // TransformMatrixComposer's class doc. So `perspective: 1000px;
+        // transform: rotateY(45deg)` IS orthographic-eligible, and pairs-01
+        // 038 (`perspective: 500px` + rotateZ(45deg) + `scale: 1.2 0.8`)
+        // takes the ordered route on the strength of its planar list alone,
+        // drawing the spec's S·R instead of the legacy accumulator's R·S
+        // (A11#11) — a decision that no longer depends on any fold rule.
         if (config.functions.any { it is TransformFunction.Perspective }) return false
+        // A diagonal-axis rotation (longhand or function) belongs to the
+        // 4x4 route (takesMatrixPath claims it first); refuse here so a
+        // direct caller never composes it as planar.
+        if (config.rotate3d != null || config.functions.any { it is TransformFunction.Rotate3d }) return false
         // Depth in any form → the depth-scale path owns it.
         if (config.translateZ != null || config.scaleZ != null) return false
         if (config.functions.any {

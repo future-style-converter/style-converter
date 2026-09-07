@@ -40,6 +40,11 @@
 //   0 — wrote v4 manifest
 //   1 — usage / input
 //   2 — IO error
+//   3 — under TITAN_REQUIRE_ALL_COLUMNS=1 only: a platform column is ABSENT
+//       (zero scored diffs while its siblings have some) or PARTIAL (per-test
+//       parity — a native cell absent/error-shaped where the web-ref scored).
+//       The manifest IS written first (assertPlatformColumns, main()).
+//       section-runner.sh maps this code to NATIVE_SHORT (retro R8b/R13).
 
 import { promises as fs } from 'node:fs';
 // basename dropped at the wave-21 collision fix — the one stem-derivation
@@ -230,9 +235,16 @@ async function loadPng(p) {
  *  corpus-v4 white-canvas boundary (capture-browser-ref.mjs CANVAS_BG and
  *  all three platform WPT capture modes paint white now), so a shorter
  *  capture's padding blends into the ref's white tail instead of stamping
- *  a dark block over it. This module serves ONLY WPT browser-ref diffs;
- *  the 327-pair pipeline keeps its own dark padToCanvas in
- *  compare-screenshots.mjs untouched. */
+ *  a foreign block over it. This module serves ONLY WPT browser-ref diffs
+ *  and keeps its own padder for that reason; the 327-pair pipeline pads in
+ *  tools/visual/pad-canvas.mjs, which fills with PAD_SENTINEL MAGENTA
+ *  (0xFF00FF) — not the "dark" fill this sentence used to claim (retro P2e,
+ *  finding A6#15: the dark #1A1A2E fill was replaced precisely because it
+ *  matched the capture background and made an UNDER-SIZED render score a
+ *  perfect 1.0; see pad-canvas.mjs's header). The two fills are opposite by
+ *  design: magenta SHOUTS a size disagreement in a pipeline where both
+ *  images are the harness's own captures, while white here must stay
+ *  invisible against a Chromium ref whose tail is white. */
 async function padToCanvas(img, W, H) {
   if (img.width === W && img.height === H) return img;
   const padded = await sharp(PNG.sync.write(img))
@@ -404,7 +416,22 @@ async function diffWebVsRef(webPath, refPath) {
   const A = await padToCanvas(a, W, H);
   const B = await padToCanvas(b, W, H);
 
-  // Pixelmatch with the same threshold as compare-screenshots.mjs.
+  // Pixelmatch — DELIBERATELY the PRE-FLIP settings (threshold 0.25,
+  // includeAA: true). These are NOT compare-screenshots.mjs's, which has run
+  // `threshold: 0.02, includeAA: false` since the 2026-08-29 threshold flip
+  // (docs/STATUS.md "The threshold flip landed"; tools/visual/
+  // compare-screenshots.mjs diffPair). An earlier version of this comment
+  // claimed the two pipelines shared a threshold; they have differed since
+  // that date (retro finding A9#7). Why TITAN stays pre-flip: the
+  // `pixelMismatchedPct` computed here feeds classifyDivergence, whose labels
+  // form a HISTORICAL series across every corpus-v* snapshot, and flipping
+  // mid-series without a stated decision rule would silently re-label the
+  // past. What that does and does not touch: the `divergence` labels are
+  // TRIAGE-ONLY and carry pixelmatch's pre-flip 66/255 luma blind spot;
+  // `wptPass` never reads them (it is SSIM / <meta fuzzy> / the vetoes), and
+  // the WPT-native fuzzy quantities computed a few lines below are an exact
+  // per-channel pass with no threshold at all, so they are unaffected. A
+  // future flip here needs its own decision rule and a re-labelled baseline.
   // Deliberately still the UNION frame: mismatch COUNTS (which the WPT
   // fuzzy budgets consume) must keep seeing overflow ink pixel-for-pixel,
   // and union counting is already honest for counts (white-vs-white adds
@@ -1192,7 +1219,11 @@ export { REF_UNACHIEVABLE_TAGS };
  *  fallback-face divergence re-shapes ink, it never deletes it). Those 15
  *  are UNEXCLUDED: the gate now consults NATIVE_FONT_PARITY_REFUSED_TESTS
  *  below and fires only where the font bound is still the binding
- *  constraint. */
+ *  constraint. Retro R13 (A12#5, 2026-09-04) then unexcluded THREE of the
+ *  13 retained — armenian 008, counter-suffix, css-lists/counter-004 — on
+ *  PNG evidence: their native residual is a line-breaking / zero-width-wrap
+ *  / doubled-text defect the natives SHARE with web, not a face (details at
+ *  the list below). 10 remain. */
 const NATIVE_FONT_PARITY_TAGS = new Set([
   'requires-non-latin-font-parity', // Rule 43 — §6 non-Latin counter styles (wave-30)
 ]);
@@ -1234,6 +1265,13 @@ export const NATIVE_FONT_PARITY_STAMP = 'native-font-parity';
  *  first honest number decides whether they earn a line here — never the
  *  tag alone.
  *
+ *  REFINED 2026-09-04 (retro R13, A12#5): the conservative arm ("retain
+ *  while neither native clears 0.95") applies only while the residual is
+ *  PLAUSIBLY the face. A residual with a NAMED non-font mechanism — visible
+ *  in the ref | web | iOS | Android PNGs — is scored, not stamped, even when
+ *  neither native clears 0.95: an honest FAIL is a measurement, a
+ *  'native-font-parity' stamp on a layout bug is a mislabel that hides one.
+ *
  *  Keys are manifest-relative test paths (INDEX-FREE, the ledger
  *  discipline). Every retained line carries its measured wave48-w2
  *  ios/android raw SSIM — the evidence the retention rests on. */
@@ -1246,13 +1284,6 @@ export const NATIVE_FONT_PARITY_REFUSED_TESTS = Object.freeze(new Set([
   // ios 0.8513 / android 0.8507 — the wave-31(c) mechanism: one wrap-point
   // advance-width divergence shifts every row below it by a full advance.
   'css/css-counter-styles/armenian/css3-counter-styles-007.html',
-  // ios 0.9420 / android 0.9423 — web FAILS the same test at 0.9435: the
-  // §7.1.4 armenian-10000 fallback row renders on one line where Chromium
-  // wraps it to two. The native residual matches web's within 0.002, i.e.
-  // it is no longer font-bound; retained ONLY because neither native clears
-  // 0.95 (the rule's conservative side). Re-label candidate — see the
-  // wave-48 W2 lane report.
-  'css/css-counter-styles/armenian/css3-counter-styles-008.html',
   // ios 0.8907 / android 0.8517 — Bengali digit residue, the wave-30
   // glyph-count monotone ("10+" member).
   'css/css-counter-styles/bengali/css3-counter-styles-117.html',
@@ -1273,17 +1304,24 @@ export const NATIVE_FONT_PARITY_REFUSED_TESTS = Object.freeze(new Set([
   'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
   // ios 0.6787 / android 0.6592 — §6.3 complex CJK, both bounded.
   'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
-  // ios 0.8883 / android 0.8901 — web FAILS at 0.8867 with the same visible
-  // defect (every item's text painted twice + the korean/RTL marker rows
-  // missing): a shared upstream marker/extraction gap, not typography.
-  // Retained only because neither native clears 0.95. Re-label candidate.
-  'css/css-counter-styles/counter-suffix.html',
-  // ios 0.7532 / android 0.7531 — BOTH natives lay the georgian counter
-  // string ONE GLYPH PER LINE (a zero-width wrap defect, plainly non-font;
-  // web fails separately at 0.7779). Neither clears 0.95 so the rule
-  // retains it — but this is a real native layout bug lead, not a font
-  // boundary. Re-label candidate.
-  'css/css-lists/counter-004.html',
+  // UNEXCLUDED 2026-09-04 (retro R13, A12#5) — three former members whose
+  // side-by-side PNGs (ref | web | iOS | Android) show NON-font defects, so
+  // the 'native-font-parity' stamp mislabelled two native layout bugs and
+  // one shared extraction gap as typography. Their 6 native cells now score
+  // honestly (all FAIL at wave-49 raw SSIM) and are queued as runtime work:
+  //   css-counter-styles/armenian/css3-counter-styles-008 — both natives
+  //     print the §7.1.4 fallback row '10000. 10000' on ONE line where the
+  //     ref wraps it to two (line breaking); web fails the same test at
+  //     0.9435 for its own reason (black tofu boxes). ios 0.9420 / android
+  //     0.9423.
+  //   css-counter-styles/counter-suffix — every item's text painted twice
+  //     ('foo / foo') and the Korean + RTL marker rows missing on web, iOS
+  //     AND Android alike: a shared upstream marker/extraction defect. ios
+  //     0.8883 / android 0.8901 / web 0.8867.
+  //   css-lists/counter-004 — both natives lay the Georgian counter string
+  //     ONE GLYPH PER LINE (zero-width wrap) while web keeps two lines. ios
+  //     0.7532 / android 0.7531 / web 0.7779.
+  // Re-adding any of them needs a new measurement AND a face-bound residual.
 ]));
 
 /** wave-36 M6 — THE REFUSED FAMILY. Tags that were formally proposed for an
@@ -2070,19 +2108,52 @@ import { existsSync as _existsSync } from 'node:fs';
 // per-test column can legitimately be missing (an extraction miss, a
 // not-applicable test), and demanding equal N would fail honest runs. What
 // cannot be legitimate is a whole column at zero while its siblings have data.
+//
+// PER-TEST PARITY (retro R13, A9#1 tail): the whole-column check cannot see a
+// PARTIAL column — a native feeder that timed out on N fixtures, or skipped a
+// test that crashed the harness, leaves a manifest whose column is present
+// (n > 0) while those N cells are simply absent, and an absent cell is neither
+// pass nor fail: it silently shrinks that platform's denominator. So for every
+// result whose web-ref DID score (numeric ssim, not score-excluded — the same
+// idiom), each native browser-ref diff must be present unless (a) the operator
+// declared that platform skipped, or (b) the cell was neutralised by the
+// native-font-parity gate (`nativeFontParityExcluded` names it — a stamped
+// cell is present, just not scored). Whole-test exclusions never enter: their
+// web-ref is score-excluded too. Error-shaped diffs (`{ error }`) count as
+// missing — they carry no evidence either. Measured over the committed runs:
+// wave49-final and wave48-final 0 missing cells; wave48-cal and wave47-final
+// 1 missing (css-break/background-image-006 android) + 1 error
+// (css-writing-modes/direction-upright-002 android), which is exactly the
+// class this check exists to make loud.
 const PLATFORM_COLUMN_KEYS = Object.freeze({
   'web-ref': 'SKIP_WEB', 'ios-ref': 'SKIP_IOS', 'android-ref': 'SKIP_ANDROID',
 });
 
+/** The two NATIVE columns the per-test parity check covers. web-ref is the
+ *  anchor (a test only enters the check when its web-ref scored), never a
+ *  subject — the web column has no feeder to time out. Pinned separately from
+ *  NATIVE_FONT_PARITY_PLATFORMS on purpose: same members today, different
+ *  contracts (that one says which cells the font gate may stamp). */
+const NATIVE_PARITY_KEYS = Object.freeze(['ios-ref', 'android-ref']);
+
 /** Pure + exported for unit pins. `results` is the buildResults map; `env` is
  *  the environment to read the SKIP_* declarations from. Returns
- *  `{ counts, missing }` — `missing` lists the platform keys that produced
- *  ZERO scored diffs while at least one sibling produced some and the operator
- *  did NOT declare them skipped. An empty `missing` means the run is honest. */
+ *  `{ counts, missing, missingCells }`:
+ *   - `missing` lists the platform keys that produced ZERO scored diffs while
+ *     at least one sibling produced some and the operator did NOT declare
+ *     them skipped (the whole-column check);
+ *   - `missingCells` maps each native key to the test keys whose web-ref
+ *     scored but whose native diff is absent or error-shaped, excluding
+ *     SKIP-declared platforms and font-parity-stamped cells (the per-test
+ *     check — see the banner above). Always carries both native keys, each
+ *     possibly an empty array, so callers never null-check.
+ *  Both empty means the run is honest. */
 function assertPlatformColumns(results, env = process.env) {
   const counts = {};
   for (const key of Object.keys(PLATFORM_COLUMN_KEYS)) counts[key] = 0;
-  for (const r of Object.values(results ?? {})) {
+  const missingCells = {};
+  for (const key of NATIVE_PARITY_KEYS) missingCells[key] = [];
+  for (const [testKey, r] of Object.entries(results ?? {})) {
     const diffs = r?.browserRef?.diffs;
     if (!diffs) continue;
     for (const key of Object.keys(PLATFORM_COLUMN_KEYS)) {
@@ -2091,13 +2162,27 @@ function assertPlatformColumns(results, env = process.env) {
       // carries a numeric ssim and was not score-excluded.
       if (d && typeof d.ssim === 'number' && !d.scoreExcluded) counts[key]++;
     }
+    // Per-test parity: anchored on a SCORED web-ref (same idiom), so
+    // whole-test exclusions and extraction misses (no web-ref at all) never
+    // enter — those are not native delivery failures.
+    const web = diffs['web-ref'];
+    if (!(web && typeof web.ssim === 'number' && !web.scoreExcluded)) continue;
+    const stamped = new Set(Array.isArray(r?.nativeFontParityExcluded) ? r.nativeFontParityExcluded : []);
+    for (const key of NATIVE_PARITY_KEYS) {
+      if (env[PLATFORM_COLUMN_KEYS[key]] === '1') continue;   // declared skip: intentional absence
+      if (stamped.has(key)) continue;                          // font-parity stamp: present, not scored
+      const d = diffs[key];
+      // Absent (feeder never captured / diff never ran) or error-shaped (the
+      // diff ran and failed) — either way the cell carries no evidence.
+      if (!d || typeof d !== 'object' || d.error) missingCells[key].push(testKey);
+    }
   }
   const present = Object.values(counts).filter((n) => n > 0).length;
   const missing = present === 0 ? []   // nothing captured at all: a different failure, not this one
     : Object.entries(counts)
       .filter(([key, n]) => n === 0 && env[PLATFORM_COLUMN_KEYS[key]] !== '1')
       .map(([key]) => key);
-  return { counts, missing };
+  return { counts, missing, missingCells };
 }
 
 function await_fs_exists_sync(p) { return _existsSync(p); }
@@ -2256,6 +2341,24 @@ async function main() {
     );
     if (fatal) process.exitCode = 3;   // distinct from the usage (1) / IO (2) codes above
   }
+  // Per-test parity (retro R13, A9#1 tail): a PARTIAL native column — the
+  // whole-column check above is blind to it. Same warn-by-default / fatal-on-
+  // opt-in shape and the SAME exit code, because section-runner.sh already
+  // maps inject's exit 3 to NATIVE_SHORT and a partial column is the same
+  // delivery failure as an absent one, only quieter.
+  const partial = Object.entries(columns.missingCells).filter(([, tests]) => tests.length > 0);
+  if (partial.length > 0) {
+    const fatal = process.env.TITAN_REQUIRE_ALL_COLUMNS === '1';
+    process.stderr.write(
+      `inject-wpt-block: ${fatal ? 'FATAL' : 'WARNING'} — PARTIAL native column(s): ` +
+      partial.map(([key, tests]) =>
+        `${key} has no diff on ${tests.length} test(s) whose web-ref scored ` +
+        `(e.g. ${tests.slice(0, 3).join(', ')})`).join('; ') +
+      '. A missing cell is neither pass nor fail — it silently shrinks that platform\'s ' +
+      'denominator. Declare the matching SKIP_* env var if the platform was intentionally not run.\n'
+    );
+    if (fatal) process.exitCode = 3;   // same code as the whole-column failure (section-runner: NATIVE_SHORT)
+  }
 }
 
 // Only invoke main() when this file is the entry point (node ...mjs ...);
@@ -2289,5 +2392,5 @@ export {
   // and that computeWptPass's sixth argument is a real veto when it is ON.
   NOVEL_INK_VETO_ENABLED, novelInkVetoActive,
   // wave-49 / BACKLOG #5 column-presence assertion (see its banner).
-  assertPlatformColumns, PLATFORM_COLUMN_KEYS,
+  assertPlatformColumns, PLATFORM_COLUMN_KEYS, NATIVE_PARITY_KEYS,
 };

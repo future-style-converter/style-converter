@@ -34,20 +34,6 @@ import Foundation
 // Namespacing enum — all members static + pure (MulticolMath pattern).
 enum MulticolLineSnap {
 
-    /// The inline size the line-box probe measures at (the Compose twin's
-    /// minIntrinsicHeight width): wide enough that fixture-scale text lays
-    /// out as ONE line, so the probed height IS the line-box height L.
-    ///
-    /// Wave-42 skeptic S2: the shared value is 65534, not the 1_000_000
-    /// this twin first carried, because the ANDROID half must build
-    /// `Constraints(maxWidth:)` from it and Compose cannot represent a
-    /// width above 262142 at all (it throws IllegalArgumentException out of
-    /// Constraints packing, killing the capture composition). SwiftUI has no
-    /// such packing limit, but the twins advertise ONE probe width or the
-    /// pair silently probes different geometry — see the Kotlin twin's
-    /// MAX_CONSTRAINT_WIDTH_PX banner for the bytecode evidence.
-    static let lineProbeWidthPx: Double = 65_534
-
     /// The snapped fragment list, or nil when the line-stack heuristic
     /// declines — callers then keep the raw FragmentGeometry slice:
     ///  - no probe answer (L == nil) or degenerate inputs (L ≤ 0, H ≤ 0);

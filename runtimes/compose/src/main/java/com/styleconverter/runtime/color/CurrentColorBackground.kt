@@ -28,6 +28,21 @@ import kotlinx.serialization.json.contentOrNull
  * captures: iOS ssim 0.9988 with `colorFailed` and labDeltaE.mean 11.24,
  * Android ssim 0.8957 / mean 8.48.
  *
+ * wave-49 residual on Compose (retrospective R3, finding A3#0): the colour is
+ * right (`colorFailed` false, labDeltaE.mean 5.85) but the box is 96×96 —
+ * 6em against 16px, the percentage font-size never reaches the em basis —
+ * android-ref 0.8957 on currentcolor-001/002 while iOS paints the ref's
+ * 192×192 and passes (0.9990). Measured on the wave49-final captures: green
+ * n=9216 bbox [16,88]-[111,183] vs the frozen ref's n=36864 bbox
+ * [16,88]-[207,279]. Not this file's mechanism: the outer div's FontSize
+ * arrives as `{"original":{"type":"percentage","value":200}}` and the em
+ * basis for Width/Height `6em` is resolved by
+ * `core/variables/DynamicValueResolver.resolveOriginalObject`, which needs a
+ * `{type:percentage}` branch (css-fonts-4 §2.5: a percentage font-size
+ * resolves against the INHERITED size; css-values-4 §5.5) before the element's
+ * own em resolves — the R3 seam patch, pinned on the verbatim
+ * currentcolor-002 IR (outer/middle/inner all 192px).
+ *
  * ## The resolution target
  *
  * The `Color` entry of the list handed to [resolve] is the element's COMPUTED

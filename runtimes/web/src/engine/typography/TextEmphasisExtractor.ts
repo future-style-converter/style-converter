@@ -1,6 +1,6 @@
 // TextEmphasisExtractor.ts — folds `TextEmphasis` IR properties into a TextEmphasisConfig.
 // Family: text-emphasis.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextEmphasisConfig, TEXT_EMPHASIS_PROPERTY_TYPE, TextEmphasisPropertyType } from './TextEmphasisConfig';
 import { kwLower, colorCss } from './_shared';

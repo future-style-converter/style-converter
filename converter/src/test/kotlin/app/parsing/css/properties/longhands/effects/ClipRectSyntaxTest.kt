@@ -1,7 +1,7 @@
 package app.parsing.css.properties.longhands.effects
 
 // Regression suite for the legacy `clip` property's rect() syntax
-// (CSS 2.1 §11.1.2, restated by css-masking-1 §7).
+// (CSS 2.1 §11.1.2, restated by css-masking-1 Appendix A).
 //
 // Wave-37 lane W3 finding: the parser split the rect() arguments on
 // commas ONLY. CSS 2.1 printed the commas but the shape has always

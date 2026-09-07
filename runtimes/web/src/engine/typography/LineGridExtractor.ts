@@ -1,6 +1,6 @@
 // LineGridExtractor.ts — folds `LineGrid` IR properties into a LineGridConfig.
 // Family: line-grid.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { LineGridConfig, LINE_GRID_PROPERTY_TYPE, LineGridPropertyType } from './LineGridConfig';
 import { kwLower } from './_shared';

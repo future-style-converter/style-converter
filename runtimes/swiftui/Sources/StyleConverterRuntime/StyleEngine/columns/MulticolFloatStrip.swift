@@ -47,7 +47,10 @@ enum MulticolFloatStrip {
     /// One proven leading float: id (zero-flow key) + side + px extent.
     struct FloatFact: Equatable {
         /// The float component's document-unique id — keys the synthetic
-        /// zero-flow plan once the renderer seam lands (seam 1 above).
+        /// §9.5.2 zero-flow plan the renderer publishes on the
+        /// floatClearancePlan environment around the strip content. Retro
+        /// P2e dropped the "once the renderer seam lands" future tense: that
+        /// is seam 1 in the banner above, closed in wave 45 (lane X3).
         let componentId: String
         /// Physical side under the engine's LTR normalization (true=right).
         let rightSide: Bool

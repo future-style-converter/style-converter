@@ -67,7 +67,7 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
   const styles = useMemo(() => buildStyles(component.properties), [component.properties]);
   // Custom-property DEFINITIONS (`variables` map) become `--name` inline
   // keys on THIS element; CSS inheritance then resolves descendants'
-  // var() references natively (css-variables-1 §2.3).
+  // var() references natively (css-variables-1 §3).
   const variableStyles = useMemo(() => buildVariables(component.variables), [component.variables]);
   // Composed-children presence drives the content shape below.
   const hasChildren = node.children.length > 0;

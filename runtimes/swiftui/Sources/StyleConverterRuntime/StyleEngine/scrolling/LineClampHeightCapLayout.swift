@@ -7,7 +7,7 @@
 //  LineClampCap.kt): cap this node's LAYOUT height at the N-line-box
 //  budget while laying the content out on an UNBOUNDED block axis, so the
 //  visible prefix is the same first N lines the unclamped layout produces
-//  (css-overflow-4 §4.3: discarding content must not re-flow what
+//  (css-overflow-4 §5.3.2: discarding content must not re-flow what
 //  precedes it). The discarded tail hangs below the reported box; the
 //  Y-only clip chained outside makes its ink unpaintable (§4.3 "is not
 //  rendered"), and X is NEVER clipped: a clamp creates no inline-axis
@@ -75,7 +75,7 @@ extension View {
     func engineLineClampCap(_ capPx: CGFloat?) -> some View {
         if let cap = capPx {
             LineClampHeightCapLayout(capPx: cap) { self }
-                // css-overflow-4 §4.3 — the discarded lines' ink must not
+                // css-overflow-4 §5.3.2 — the discarded lines' ink must not
                 // paint; the block axis is bound to the capped box, the
                 // inline axis stays open (AxisClipRect, the wave-18 clip
                 // geometry shared with the overflow-x/-y appliers).

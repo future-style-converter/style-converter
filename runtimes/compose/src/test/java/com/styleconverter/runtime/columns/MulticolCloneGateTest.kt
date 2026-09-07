@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.columns
 
-// WAVE-46 LANE Y3 — the css-break-3 §5.2 `box-decoration-break: clone`
+// WAVE-46 LANE Y3 — the css-break-3 §5.4 `box-decoration-break: clone`
 // pass' wiring + gates, pinned the way the suite pins every other measure
 // integration (MulticolRunFragmentGateTest / MultiColumnMeasureDrawBridge-
 // Test precedent — no Robolectric, so the real measure body is scanned):

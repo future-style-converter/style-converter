@@ -79,7 +79,7 @@ final class ContentsUnboxingTests: XCTestCase {
         let resolved = ContentsUnboxing.resolve(grid)
         XCTAssertEqual(resolved.children?.map(\.id), ["square"])
         let item = resolved.children![0]
-        // css-align-3 §6.4: justify-items does not inherit — dropped.
+        // css-align-3 §7.1: justify-items does not inherit — dropped.
         XCTAssertFalse(item.properties.contains { $0.type == "JustifyItems" })
         // The item's own declarations survive verbatim.
         XCTAssertTrue(item.properties.contains { $0.type == "JustifySelf" })

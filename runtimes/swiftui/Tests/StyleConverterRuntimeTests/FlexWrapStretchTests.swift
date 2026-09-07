@@ -170,7 +170,7 @@ final class FlexWrapStretchTests: XCTestCase {
     // MARK: - The guards (what must NOT stretch)
 
     /// No definite container cross size ⇒ no leftover space to divide
-    /// (css-align-3 §5.3), so the lines hug their items and nothing
+    /// (css-align-3 §5.1), so the lines hug their items and nothing
     /// stretches. `fixtures/visual-test.json`'s `Flex_Wrap` is exactly
     /// this shape — it declares a width and no height — so this pin is
     /// what keeps the committed baseline inert.
@@ -252,7 +252,7 @@ final class FlexWrapStretchTests: XCTestCase {
     }
 
     /// §9.6's equal division is gated on `align-content`, not just on a
-    /// definite cross size (css-align-3 §5.3): under `space-between` the
+    /// definite cross size (css-align-3 §5.1): under `space-between` the
     /// leftover stays FREE SPACE — the lines keep their hypothetical
     /// 30pt cross. Wave 47 (lane Z7) implemented the wave-25 TODO this
     /// pin used to freeze: that free space now POSITIONS the line block

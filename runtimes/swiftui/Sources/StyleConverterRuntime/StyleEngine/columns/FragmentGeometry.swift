@@ -8,7 +8,7 @@
 //  column block-size H breaks into F = ceil(C/H) fragments, fragment i
 //  rendered in column i (inline origin x_i = i·(W+G)) showing the
 //  child's content slice [i·H, min((i+1)·H, C)). Backgrounds paint per
-//  box-decoration-break:slice (css-break-3 §5.2, the initial value):
+//  box-decoration-break:slice (css-break-3 §5.4, the initial value):
 //  the child is painted ONCE as an unfragmented C-tall box and each
 //  fragment shows a clipped, translated band of that continuous paint —
 //  which is exactly the {clipRect, translate} pair emitted here. F is
@@ -45,7 +45,7 @@ enum FragmentGeometry {
         /// The continuous-paint translation: (+i·(W+G), −i·H). The
         /// +x moves the paint into column i; the −y slides the child's
         /// band [i·H, (i+1)·H) up to the column's block start so the
-        /// clip exposes exactly that slice (css-break-3 §5.2 slice).
+        /// clip exposes exactly that slice (css-break-3 §5.4 slice).
         let translate: CGSize
     }
 

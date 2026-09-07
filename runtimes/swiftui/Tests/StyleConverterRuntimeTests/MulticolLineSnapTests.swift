@@ -83,7 +83,7 @@ final class MulticolLineSnapTests: XCTestCase {
     func testLS7FragmentCountCapsAtColumnCount() {
         // 10 lines of 10px, H=15 → k=1 → 10 chunks, capped at N=3 (the
         // column-fill:auto overflow clip — for `continue: discard`
-        // containers this cap IS the discard, css-overflow-4 §3).
+        // containers this cap IS the discard, css-overflow-4 §5.3).
         XCTAssertEqual(MulticolLineSnap.snappedFragments(
             childBlockSize: 100, columnBlockSize: 15, lineBox: 10,
             columnWidth: 50, gapPx: 5, columnCount: 3)?.count, 3)

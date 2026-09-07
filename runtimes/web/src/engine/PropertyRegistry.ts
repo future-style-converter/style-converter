@@ -13,6 +13,21 @@
  * Property-type names that have been migrated out of `StyleBuilder.ts`
  * and into dedicated `{Property}Extractor.ts` files under
  * `engine/{category}/`. Empty in Phase 0; filled by later phases.
+ *
+ * THIS SET IS THE SINGLE SOURCE OF TRUTH for the web claim list, and it is
+ * written as string literals on purpose (finding A6#13 asked us to choose):
+ * the alternative — importing the ~558 `<NAME>_PROPERTY_TYPE` constants the
+ * Config files exported — would have meant a 558-line import block in a file
+ * with a 200-line target and would have destroyed the category grouping and
+ * the per-entry "why this is claimed" comments that make the list auditable.
+ * The 312 of those constants (and their `<Name>PropertyType` aliases) that no
+ * Extractor imported were deleted instead; the ones an Extractor DOES import
+ * stay where they are, next to the Config they type.
+ *
+ * INVARIANT, enforced by tools/visual/coverage-audit.mjs §2d: every quoted
+ * PascalCase token in this file is an IR type name that exists in the
+ * catalogue (a `<Name>Property.kt` under converter/.../irmodels/properties/).
+ * Never write any other bare-quoted PascalCase string here.
  */
 export const migratedProperties = new Set<string>([
   // Spacing — Phase 2 migration. See engine/spacing/*.
@@ -27,7 +42,7 @@ export const migratedProperties = new Set<string>([
   'AspectRatio',
   'BlockSize', 'InlineSize',
   'MinBlockSize', 'MaxBlockSize', 'MinInlineSize', 'MaxInlineSize',
-  // css-sizing-3 §4 — real triplet since issue #38 (engine/sizing/BoxSizing*).
+  // css-sizing-3 §3.3 — real triplet since issue #38 (engine/sizing/BoxSizing*).
   'BoxSizing',
   // Colors + background — Phase 4 migration. See engine/color/*, engine/background/*,
   // engine/effects/blend/*, engine/performance/*.
@@ -131,9 +146,13 @@ export const migratedProperties = new Set<string>([
   // Transforms (10)
   'Transform', 'Rotate', 'Scale', 'Translate', 'TransformOrigin', 'TransformBox',
   'TransformStyle', 'Perspective', 'PerspectiveOrigin', 'BackfaceVisibility',
-  // Clip + visibility + overflow (10)
+  // Clip + visibility + overflow (9) — the `overflow` SHORTHAND is NOT
+  // listed: css-overflow-3 defines it as a shorthand for overflow-x/-y, and
+  // ShorthandRegistry.kt:88 hands 'overflow' to OverflowExpander, so no
+  // `OverflowProperty` IR class exists and the type string can never reach
+  // the wire (A6#9). Only the four longhands are claimable.
   'ClipPath', 'ClipPathGeometryBox', 'ClipRule', 'Clip',
-  'Visibility', 'Overflow', 'OverflowX', 'OverflowY', 'OverflowBlock', 'OverflowInline',
+  'Visibility', 'OverflowX', 'OverflowY', 'OverflowBlock', 'OverflowInline',
   // Filter (2)
   'Filter', 'BackdropFilter',
   // Mask (16)
@@ -160,14 +179,19 @@ export const migratedProperties = new Set<string>([
   // platform: nearly all of these pass straight through to native CSS.  A
   // subset are csstype-widened because they're CSS L4 / spec-only / dropped-
   // from-spec; see the individual appliers for MDN links.
-  // ── scrolling (44, non-timeline) ─────────────────────────────────────
+  // ── scrolling (38, non-timeline) ─────────────────────────────────────
+  // The six scroll-padding / scroll-margin SHORTHANDS (bare, -block, -inline)
+  // are NOT listed: ShorthandRegistry.kt:91-96 expands each of them to its
+  // side longhands exactly as css-scroll-snap-1 defines them, so no
+  // `ScrollPaddingProperty` / `ScrollMarginProperty` (or Block/Inline) IR
+  // class exists and those type strings can never reach the wire (A6#9).
   'ScrollBehavior', 'ScrollSnapType', 'ScrollSnapAlign', 'ScrollSnapStop',
-  'ScrollPadding', 'ScrollPaddingTop', 'ScrollPaddingRight', 'ScrollPaddingBottom', 'ScrollPaddingLeft',
-  'ScrollPaddingBlock', 'ScrollPaddingBlockStart', 'ScrollPaddingBlockEnd',
-  'ScrollPaddingInline', 'ScrollPaddingInlineStart', 'ScrollPaddingInlineEnd',
-  'ScrollMargin', 'ScrollMarginTop', 'ScrollMarginRight', 'ScrollMarginBottom', 'ScrollMarginLeft',
-  'ScrollMarginBlock', 'ScrollMarginBlockStart', 'ScrollMarginBlockEnd',
-  'ScrollMarginInline', 'ScrollMarginInlineStart', 'ScrollMarginInlineEnd',
+  'ScrollPaddingTop', 'ScrollPaddingRight', 'ScrollPaddingBottom', 'ScrollPaddingLeft',
+  'ScrollPaddingBlockStart', 'ScrollPaddingBlockEnd',
+  'ScrollPaddingInlineStart', 'ScrollPaddingInlineEnd',
+  'ScrollMarginTop', 'ScrollMarginRight', 'ScrollMarginBottom', 'ScrollMarginLeft',
+  'ScrollMarginBlockStart', 'ScrollMarginBlockEnd',
+  'ScrollMarginInlineStart', 'ScrollMarginInlineEnd',
   'OverscrollBehavior', 'OverscrollBehaviorX', 'OverscrollBehaviorY',
   'OverscrollBehaviorBlock', 'OverscrollBehaviorInline',
   'ScrollbarWidth', 'ScrollbarColor', 'ScrollbarGutter',
@@ -190,8 +214,12 @@ export const migratedProperties = new Set<string>([
   // marker-side (SVG 2 draft) — real triplet since issue #38
   // (engine/svg/MarkerSide*): csstype-widened pass-through.
   'MarkerSide',
-  // ── speech (30) ──────────────────────────────────────────────────────
-  'Volume', 'Speak', 'SpeakAs', 'SpeakHeader', 'SpeakNumeral', 'SpeakPunctuation',
+  // ── speech (27) ──────────────────────────────────────────────────────
+  // speak-header / speak-numeral / speak-punctuation are NOT listed: they are
+  // CSS 2 aural/table properties dropped from css-speech-1 and modelled by no
+  // IR class under irmodels/properties/speech/, so their type strings can
+  // never reach the wire (A6#9).
+  'Volume', 'Speak', 'SpeakAs',
   'Pause', 'PauseBefore', 'PauseAfter', 'Rest', 'RestBefore', 'RestAfter',
   'Cue', 'CueBefore', 'CueAfter',
   'VoiceFamily', 'VoiceRate', 'VoicePitch', 'VoiceRange', 'VoiceStress',
@@ -279,5 +307,7 @@ export function isLegacyProperty(propertyType: string): boolean {
   return !migratedProperties.has(propertyType);
 }
 
-/** Count of migrated properties — exposed for the coverage report. */
-export const migratedCount: number = migratedProperties.size;
+// (A6#13) `migratedCount` was exported here "for the coverage report" and
+// never imported by anything — the coverage report is
+// tools/visual/coverage-audit.mjs, which reads this file as text and never
+// executes it. Deleted rather than left as a second, unread count.

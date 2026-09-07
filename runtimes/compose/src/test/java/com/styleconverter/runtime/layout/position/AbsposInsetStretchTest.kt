@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.layout.position
 
 // Wave 18 (RC2) — JVM pins for abspos inset-stretch sizing
-// (css-position-3 §3.5 + the css-sizing-4 §5 aspect-ratio interaction).
+// (css-position-3 §3.5 + the css-sizing-4 §4.2 aspect-ratio interaction).
 // The resolver is pure math with an identical signature on iOS
 // (AbsposInsetStretchTests.swift pins the same table), and the wire
 // wrapper is pinned against the LIVE wave-18 IR shapes

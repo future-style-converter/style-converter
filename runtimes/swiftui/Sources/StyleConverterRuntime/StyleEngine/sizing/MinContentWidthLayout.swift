@@ -13,7 +13,7 @@ import SwiftUI
 /// Proposes width 0 to its single child and adopts whatever size the
 /// child reports back — SwiftUI text under a zero-width proposal wraps
 /// at every soft-wrap opportunity and measures its longest word, which
-/// IS the CSS min-content inline size (css-sizing-3 §4). `.fixedSize`
+/// IS the CSS min-content inline size (css-sizing-3 §5.1). `.fixedSize`
 /// can't express this (it reports the IDEAL = max-content size), so
 /// `width: min-content` boxes rendered a single wide line on iOS while
 /// web/Android wrapped (PW_Sizing_Spacing_02, i-w 0.703).

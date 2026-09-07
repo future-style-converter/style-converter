@@ -5,4 +5,3 @@
 // https://drafts.csswg.org/css-anchor-position-1/#position-fallback.
 export interface PositionFallbackConfig { value?: string; }
 export const POSITION_FALLBACK_PROPERTY_TYPE = 'PositionFallback' as const;
-export type PositionFallbackPropertyType = typeof POSITION_FALLBACK_PROPERTY_TYPE;

@@ -102,7 +102,7 @@ struct FlowLayout: Layout {
     /// hugs its lines and stretch is a no-op.
     var definiteCross: Bool = false
     /// Container `align-content`. Nil = the CSS initial `normal`, which
-    /// behaves as `stretch` for a flex container (css-align-3 §5.3).
+    /// behaves as `stretch` for a flex container (css-align-3 §5.1).
     ///
     /// SKEPTIC (wave 25) — §9.6's equal division fires ONLY under
     /// normal/stretch. Every other keyword leaves the leftover as free
@@ -115,7 +115,7 @@ struct FlowLayout: Layout {
 
     /// Container `justify-content` (§8.2) — wave 47 (lane Z7): applied
     /// PER LINE through the same CSSFlexMath.mainOffsets the nowrap path
-    /// uses (css-align-3 §8.3: content distribution is a per-line
+    /// uses (css-align-3 §8: content distribution is a per-line
     /// operation). Nil = the initial `normal` → packed start.
     var justifyContent: AlignmentKeyword? = nil
     /// True when the IR declared an explicit MAIN size (inline in row
@@ -130,7 +130,7 @@ struct FlowLayout: Layout {
     /// wrap`). False is the pre-wave-48 row flow, byte for byte.
     var vertical: Bool = false
 
-    /// css-align-3 §5.3 — does `align-content` distribute leftover cross
+    /// css-align-3 §5.1 — does `align-content` distribute leftover cross
     /// space to the LINES (rather than merely position them)? Delegated
     /// to FlexWrapPlan so the Layout and the renderer's build-time plan
     /// can never answer it differently.
@@ -139,7 +139,7 @@ struct FlowLayout: Layout {
     }
 
     /// The gap between items along the MAIN axis (`column-gap` for rows,
-    /// `row-gap` for columns — css-align-3 §8.1's axis mapping).
+    /// `row-gap` for columns — css-align-3 §8's axis mapping).
     private var mainSpacing: CGFloat { vertical ? verticalSpacing : horizontalSpacing }
     /// The gap between LINES along the cross axis (the other one).
     private var crossSpacing: CGFloat { vertical ? horizontalSpacing : verticalSpacing }

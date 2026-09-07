@@ -5,4 +5,3 @@
 // Config mirrors the ColumnRule{Color,Style,Width}Config shape exactly: one
 // already-serialised CSS string, `undefined` when the IR carried no value.
 export interface RowRuleInsetConfig { value?: string }
-export const ROWRULEINSET_PROPERTY_TYPE = 'RowRuleInset' as const;

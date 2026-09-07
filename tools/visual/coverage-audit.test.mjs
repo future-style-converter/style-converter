@@ -115,3 +115,32 @@ test('per-category rows carry both reg and real, and real ⊆ reg', () => {
     }
   }
 });
+
+// ── §2d registry-declaration guard (finding A6#9) ────────────────────────
+// The REGISTERED scrape is dictionary-anchored: it only records names it
+// already recognises, so a registry can declare a type that does not exist
+// and the audit stays green. Ten such phantoms (the `overflow`,
+// `scroll-margin{,-block,-inline}` and `scroll-padding{,-block,-inline}`
+// shorthands, which ShorthandRegistry.kt expands before the longhand parser
+// runs, plus speak-header/-numeral/-punctuation, which no IR class models)
+// sat in the web registry behind ten unreachable triplets. These two tests
+// pin BOTH directions of the web registry's declaration: nothing extra
+// (phantom) and nothing missing.
+test('the web registry declares exactly the IR catalogue — no phantom names', () => {
+  const j = runJson();
+  // Empty by construction: a non-empty scan makes coverage-audit.mjs exit 1,
+  // which turns runJson()'s execFileSync into a throw — so this assertion
+  // fails either way when a phantom is declared.
+  assert.deepEqual(j.registryPhantoms, [], 'no declared name lacks an IR property class');
+});
+
+test('the web registry declares all 558 catalogue names — none dropped', () => {
+  const j = runJson();
+  // Counterpart to the phantom check: the declaration is COMPLETE, so
+  // silently deleting a claim (which would demote a rendered property to the
+  // legacy StyleBuilder path without any coverage number moving) fails here.
+  assert.equal(j.registryDeclared.web, 558, 'web PropertyRegistry.ts declares 558 IR type names');
+  // And the declared count is exactly what the platform scrape reports, i.e.
+  // every declared name is a real, counted registration.
+  assert.equal(j.registryDeclared.web, j.totals.web, 'declared == registered on web');
+});

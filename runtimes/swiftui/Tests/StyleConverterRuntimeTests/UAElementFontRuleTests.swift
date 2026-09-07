@@ -175,7 +175,7 @@ final class UAElementFontRuleTests: XCTestCase {
         XCTAssertEqual(firstFontSizePx(out) ?? 0, 32, accuracy: 1e-9)
     }
 
-    /// An INHERITED font-size is the `em` base (css-values-4 §5.1.1), and it
+    /// An INHERITED font-size is the `em` base (css-values-4 §6.1.1), and it
     /// out-ranks the `medium` default — including the monospace one, which
     /// only stands in when nothing up the chain declared a size at all.
     func testInheritedSizeIsTheEmBase() {

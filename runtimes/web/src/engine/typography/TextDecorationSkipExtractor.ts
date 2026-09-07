@@ -1,6 +1,6 @@
 // TextDecorationSkipExtractor.ts — folds `TextDecorationSkip` IR properties into a TextDecorationSkipConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextDecorationSkipConfig, TEXT_DECORATION_SKIP_PROPERTY_TYPE, TextDecorationSkipPropertyType } from './TextDecorationSkipConfig';
 import { kwList } from './_shared';

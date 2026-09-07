@@ -68,7 +68,11 @@ class UAWidgetsResolveTest {
         }
         // Missing Appearance → the UA sheet's auto (bare accent tests).
         assertEquals(Kind.CHECKBOX, UAWidgetsResolve.resolve(comp("input", cb))?.kind)
-        // `initial` computes to the property's initial value `none`.
+        // `initial` computes to the property's initial value `none`. The
+        // `{"type":"keyword","keyword":"initial"}` shape IS the live converter
+        // wire for `appearance: initial` (probe `:converter:run` 2026-09-04);
+        // it is absent from the wave-49 corpus only because no WPT test
+        // declares it (retro A8#5 catalogue), not because it is legacy.
         assertNull(UAWidgetsResolve.resolve(comp("input", cb,
             listOf(prop("Appearance", """{"type":"keyword","keyword":"initial"}""")))))
     }
@@ -104,7 +108,7 @@ class UAWidgetsResolveTest {
     @Test
     fun fractionEdgeCases_stayFiniteAndTwinAligned() {
         // Wave-20 skeptic pins. "NaN"/"Infinity" parse in both natives'
-        // Double parsers but are NOT valid HTML floats (§2.3.5.1) — they
+        // Double parsers but are NOT valid HTML floats (§2.3.4.3) — they
         // must fall back to the UA midpoint, never propagate NaN into
         // the thumb geometry.
         assertEquals(0.5f, UAWidgetsResolve.resolve(comp("input", IRAttrs(type = "range", value = "NaN")))!!.fraction)
@@ -138,7 +142,17 @@ class UAWidgetsResolveTest {
         val cb = IRAttrs(type = "checkbox", checked = true)
         // No AccentColor → the Chromium default #0075FF.
         assertEquals(0xFF0075FFL, UAWidgetsResolve.resolve(comp("input", cb))!!.accent)
-        // Explicit srgb red → packed red.
+        // Explicit srgb red → packed red. LIVE wire first (retro R10, A8#5):
+        // the converter's AccentColor carries a `"type":"color"` discriminator
+        // beside the srgb/original pair — `accent-color: red` →
+        // `{"type":"color","srgb":{"r":1.0,"g":0.0,"b":0.0},"original":"red"}`
+        // (probe `:converter:run` 2026-09-04; the wave49-final corpus emits
+        // AccentColor only in this `{type,srgb,original}` shape).
+        assertEquals(0xFFFF0000L, UAWidgetsResolve.resolve(comp("input", cb, listOf(
+            prop("AccentColor", """{"type":"color","srgb":{"r":1.0,"g":0.0,"b":0.0},"original":"red"}""")
+        )))!!.accent)
+        // …and the discriminator-less `{srgb, original}` shape (the generic
+        // colour envelope) is TOLERATED — never emitted for AccentColor.
         assertEquals(0xFFFF0000L, UAWidgetsResolve.resolve(comp("input", cb, listOf(
             prop("AccentColor", """{"srgb":{"r":1,"g":0,"b":0},"original":"red"}""")
         )))!!.accent)

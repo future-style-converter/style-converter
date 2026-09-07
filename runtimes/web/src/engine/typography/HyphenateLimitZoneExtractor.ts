@@ -1,6 +1,6 @@
 // HyphenateLimitZoneExtractor.ts — folds `HyphenateLimitZone` IR properties into a HyphenateLimitZoneConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { HyphenateLimitZoneConfig, HYPHENATE_LIMIT_ZONE_PROPERTY_TYPE, HyphenateLimitZonePropertyType } from './HyphenateLimitZoneConfig';
 import { lengthCss } from './_shared';

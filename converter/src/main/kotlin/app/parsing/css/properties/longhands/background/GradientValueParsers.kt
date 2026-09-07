@@ -18,7 +18,7 @@ import app.parsing.css.properties.primitiveParsers.TokenizationUtils
 
 internal object GradientValueParsers {
 
-    // One comma-segment → 0..2 color stops (css-images-4 §3.4.3):
+    // One comma-segment → 0..2 color stops (css-images-3 §3.4.3 / css-images-4 §3.5.3):
     //   <color>                → 1 stop, auto position
     //   <color> <pos>          → 1 stop
     //   <color> <pos1> <pos2>  → TWO stops sharing the color ("double-
@@ -28,7 +28,7 @@ internal object GradientValueParsers {
     // conic-gradient-angle-negative 0.944 failure on all three platforms).
     // Tokenization is paren-aware so colors with spaces inside functions
     // (`color(srgb 1 0 0 / 0.5)`, `rgb(0, 0, 0)`) stay ONE token.
-    // One resolved <color-stop> position. css-images-4 §3.4.3 types it as a
+    // One resolved <color-stop> position. css-images-3 §3.4.3 / css-images-4 §3.5.3 types it as a
     // <length-percentage>, so exactly one of the two arms is ever set:
     //   pct — the historical raw-number `position` wire key (unchanged bytes)
     //   len — the ADDITIVE `positionLength` key (see ColorStop's doc comment)
@@ -40,7 +40,7 @@ internal object GradientValueParsers {
     private fun stopPos(tok: String): StopPos? {
         // <percentage> — the legacy raw-number wire form.
         PercentageParser.parse(tok)?.let { return StopPos(it, null) }
-        // Unitless zero is a valid <length> (css-values-4 §5.1) that
+        // Unitless zero is a valid <length> (css-values-4 §6) that
         // PercentageParser rejects; 0px from the gradient line start ≡ 0%,
         // so it keeps riding the percentage arm (byte-stable).
         if (tok == "0") return StopPos(IRPercentage(0.0), null)
@@ -108,7 +108,7 @@ internal object GradientValueParsers {
         fun lp(tok: String): IRLengthPercentage? {
             // Percentage form keeps the legacy raw-number wire shape.
             PercentageParser.parse(tok)?.let { return IRLengthPercentage.Percentage(it) }
-            // Bare `0` is a valid <length> (css-values-4 §5.1) = 0px = 0%.
+            // Bare `0` is a valid <length> (css-values-4 §6) = 0px = 0%.
             if (tok == "0") return IRLengthPercentage.Percentage(IRPercentage(0.0))
             // <length> — LengthParser normalizes absolute units to px and
             // carries relative units typed with pixels=null.

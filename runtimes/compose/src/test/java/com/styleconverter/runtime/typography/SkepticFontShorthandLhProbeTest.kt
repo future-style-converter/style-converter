@@ -4,7 +4,10 @@ package com.styleconverter.runtime.typography
 // probes against the LIVE converter wire. Every payload below was captured
 // from an actual `:converter:run` on fixtures/wpt/css-text-decor/
 // text-decoration-dotted-001.json and on a purpose-built font-shorthand matrix
-// fixture; nothing here is invented.
+// fixture; nothing here is invented — with ONE exception, labelled at its
+// test: the keyword-object `original` (retro R10, finding A8#5, re-probed
+// 2026-09-05) is a TOLERANCE shape, because `font: inherit` and
+// `line-height: inherit` both emit no LineHeight property at all.
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.renderer.composedDefaultLineHeightPx
 import kotlinx.serialization.json.Json
@@ -38,9 +41,20 @@ class SkepticFontShorthandLhProbeTest {
             json("""{"multiplier":2.0,"original":{"type":"number","value":2.0}}""")))
     }
 
-    /** `font: inherit` — global keyword rides an OBJECT, must not collide. */
+    /**
+     * TOLERANCE shape, NOT a live wire (retro R10, finding A8#5): the name
+     * used to read `liveConverterWire_forFontInherit_isNotNormal`, but a
+     * probe `:converter:run` (2026-09-05) shows `font: inherit` emits NO
+     * LineHeight property at all — the CSS-wide keyword is runtime-dependent
+     * so the converter drops it, exactly like `line-height: inherit` on its
+     * own. The keyword-object payload below has never been on the wire; it
+     * stays as a collision guard (an OBJECT `original` must not read as the
+     * bare-string `normal` discriminator) should any producer ever emit one.
+     * The live `font: inherit` answer is the absent-property case pinned by
+     * [absentLineHeight_isNotDeclaredNormal] below.
+     */
     @Test
-    fun liveConverterWire_forFontInherit_isNotNormal() {
+    fun toleratedKeywordObjectOriginal_isNotNormal() {
         assertFalse(LineHeightNormal.isDeclaredNormal(
             json("""{"original":{"type":"keyword","keyword":"inherit"}}""")))
     }

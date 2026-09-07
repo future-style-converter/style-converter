@@ -2,8 +2,8 @@
 //  GradientStopResolverTests.swift
 //  Wave 46, lane Y2 — css-images natives.
 //
-//  Pins the css-images-4 §3.4.3 stop pipeline (GradientStopResolver),
-//  the css-color-4 §12 interpolation (GradientRamp + GradientColorMath)
+//  Pins the css-images-3 §3.4.3 / css-images-4 §3.5.3 stop pipeline (GradientStopResolver),
+//  the css-color-4 §13 interpolation (GradientRamp + GradientColorMath)
 //  and the `positionLength` / `interp` wire reads — the mechanisms
 //  behind the wave-45 iOS fails gradient-move-stops (0.81),
 //  gradient-border-box / gradient-content-box (0.645), the hsl
@@ -281,7 +281,7 @@ final class GradientStopResolverTests: XCTestCase {
                        GradientInterpolation(space: .hsl, hue: .longer))
         XCTAssertEqual(GradientInterpolation.parse("in lch decreasing hue"),
                        GradientInterpolation(space: .lch, hue: .decreasing))
-        // Hue method on a rectangular space is ungrammatical (§12.4).
+        // Hue method on a rectangular space is ungrammatical (§13.2).
         XCTAssertEqual(GradientInterpolation.parse("in oklab longer hue"), .legacy)
         // Unsupported-but-valid space degrades to legacy (with a breadcrumb).
         XCTAssertEqual(GradientInterpolation.parse("in display-p3-linear"), .legacy)
@@ -308,10 +308,10 @@ final class GradientStopResolverTests: XCTestCase {
         XCTAssertEqual(stops[1].interp, GradientInterpolation(space: .hsl, hue: .increasing))
     }
 
-    // MARK: - css-color-4 §12.5 hue arcs
+    // MARK: - css-color-4 §13.5 hue arcs
 
     func testHueArcSelection() {
-        // Examples straight from the §12.5 tables (h1 = 0, h2 = 40).
+        // Examples straight from the §13.5 tables (h1 = 0, h2 = 40).
         XCTAssertTrue(GradientRamp.hueArc(0, 40, method: .shorter) == (0, 40))
         XCTAssertTrue(GradientRamp.hueArc(0, 40, method: .longer) == (360, 40))
         XCTAssertTrue(GradientRamp.hueArc(0, 40, method: .increasing) == (0, 40))

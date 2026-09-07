@@ -6,4 +6,3 @@
 //   [{type:'linear-gradient', angle, stops}, ...]    -> gradient list
 export interface MaskImageConfig { value?: string; }                                // comma-joined layers
 export const MASK_IMAGE_PROPERTY_TYPE = 'MaskImage' as const;
-export type MaskImagePropertyType = typeof MASK_IMAGE_PROPERTY_TYPE;

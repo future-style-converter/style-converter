@@ -64,9 +64,22 @@ object TransformExtractor {
     init {
         // Phase 8 registration. Claim the 2D transform longhands + origin so the
         // legacy dispatch switch (and any future one) defers to this extractor.
-        // TransformBox is listed here because it's a transform-family keyword
-        // that conceptually belongs with Transform/TransformOrigin, even though
-        // the runtime applier currently no-ops it (see TODO in TransformApplier).
+        // TransformBox is CLAIMED, NOT CONSUMED — say it plainly (retro P2e,
+        // finding A6#15: this line pointed at "the TODO in TransformApplier",
+        // and TransformApplier.kt / TransformConfig.kt contain no TransformBox
+        // handling and no such TODO — a pointer to nothing). Nothing in
+        // runtimes/compose/src/main reads the type: it is registered only so
+        // PropertyRegistry.allRegistered() reports the transform family as
+        // owned, and a `transform-box` declaration therefore always renders as
+        // the property's initial value (css-transforms-1 §6 "Transform
+        // reference box: the transform-box property" — `Initial: view-box`,
+        // which on a non-SVG element is the border box) whatever the author
+        // wrote. The iOS twin DOES decode it
+        // (TransformsExtractor.applyBox → TransformsAggregate.box), so this is
+        // a live Compose-side gap, not a shared no-op. It has no corpus
+        // carrier to expose it: MEASURED zero `TransformBox` properties across
+        // all 1435 wave49-final per-test IR documents — which is why the gap
+        // costs no gate cell today and why closing it needs a fixture first.
         PropertyRegistry.migrated(
             "Transform",
             "TransformOrigin",
@@ -111,14 +124,25 @@ object TransformExtractor {
                     val axisAngle = (data as? JsonObject)
                         ?.takeIf { it["type"]?.jsonPrimitive?.contentOrNull == "axis-angle" }
                     if (axisAngle != null) {
-                        val deg = ValueExtractors.extractDegrees(axisAngle["angle"])
+                        val deg = ValueExtractors.extractDegrees(axisAngle["angle"]) ?: 0f
                         val ax = axisAngle["x"]?.jsonPrimitive?.floatOrNull ?: 0f
                         val ay = axisAngle["y"]?.jsonPrimitive?.floatOrNull ?: 0f
-                        when {
-                            ax != 0f && ay == 0f -> config.copy(rotateX = deg)
-                            ay != 0f && ax == 0f -> config.copy(rotateY = deg)
-                            // z-axis (or unsupported diagonal axis) → planar.
-                            else -> config.copy(rotate = deg)
+                        val az = axisAngle["z"]?.jsonPrimitive?.floatOrNull ?: 0f
+                        // retro R1 (A11#6/#11): classify the axis EXACTLY.
+                        // This branch used to read only x/y — `rotate: 1 1 0
+                        // 45deg` fell to the planar `else` (a Z rotation:
+                        // pairs-06 035/040 at 0.71–0.81) and `rotate: 1 0 1 …`
+                        // to rotateX. Rotate3dAxis keeps unit axes on their
+                        // legacy fields and hands a genuine diagonal to the
+                        // 4x4 route via `rotate3d`.
+                        when (val fn = Rotate3dAxis.classify(ax, ay, az, deg)) {
+                            is TransformFunction.RotateX -> config.copy(rotateX = fn.degrees)
+                            is TransformFunction.RotateY -> config.copy(rotateY = fn.degrees)
+                            is TransformFunction.RotateZ -> config.copy(rotate = fn.degrees)
+                            is TransformFunction.Rotate3d -> config.copy(rotate3d = fn)
+                            // css-transforms-2 §12.2: a zero vector means the
+                            // rotation is not applied — identity, no field set.
+                            else -> config
                         }
                     } else {
                         config.copy(rotate = ValueExtractors.extractDegrees(data))
@@ -216,6 +240,13 @@ object TransformExtractor {
      */
     fun extractTransformOriginDp(data: JsonElement?): Pair<Dp?, Dp?>? {
         if (data !is JsonObject) return null
+        // retro R5 (A11#14 twin agreement): a reordered keyword beside a <length>
+        // (`top 10px`) is outside css-transforms-1 §4's grammar (§5 in the TR
+        // numbering) — Chromium ignores the declaration — so the <length> must
+        // not ride as a dp anchor: TransformOriginKeywords.resolve already returns
+        // the initial 50% 50% for the fractions and a positional dp read here
+        // would still pivot the box at y = 10px. The iOS resolver does the same.
+        if (TransformOriginKeywords.dropsDeclaration(data["x"], data["y"])) return null
         fun axis(d: JsonElement?): Dp? {
             if (d !is JsonObject) return null
             val type = d["type"]?.jsonPrimitive?.contentOrNull?.lowercase()
@@ -236,10 +267,15 @@ object TransformExtractor {
 
         return when (data) {
             is JsonObject -> {
-                // Extract x and y, handling various formats
-                val x = extractOriginComponent(data["x"]) ?: 0.5f
-                val y = extractOriginComponent(data["y"]) ?: 0.5f
-                Pair(x, y)
+                // retro R1 (A11#14): keywords bind to their OWN axis
+                // (css-transforms-1 §4's <position>-style grammar) while the
+                // converter stores the two tokens positionally, so `top
+                // right` used to read x = TOP → 0, y = RIGHT → 1 — the
+                // bottom-LEFT corner (both natives measured at the un-swapped
+                // centroid, Chromium at the swapped one; numbers in
+                // TransformOriginKeywords). Percentages/lengths keep
+                // extractOriginComponent's readings through the callback.
+                TransformOriginKeywords.resolve(data["x"], data["y"], ::extractOriginComponent)
             }
             is JsonPrimitive -> {
                 // Handle keyword values
@@ -468,19 +504,17 @@ object TransformExtractor {
     }
 
     private fun extractRotate3dFunction(obj: JsonObject): TransformFunction? {
-        // rotate3d(x, y, z, angle) - rotation around an arbitrary axis
-        // For simplicity, map to individual axis rotations based on which component is non-zero
+        // rotate3d(x, y, z, angle) — css-transforms-2 §12.2. retro R1
+        // (A11#6): the old "largest component" heuristic drew
+        // rotate3d(1,1,0,45deg) as rotateY(45deg) and rotate3d(0,0,0,θ) as
+        // rotateZ(θ); Rotate3dAxis keeps unit axes exact (sign included),
+        // returns null for the §12.2 zero vector (identity — mapNotNull drops
+        // it), and preserves a diagonal axis for the 4x4 route.
         val angle = (obj["a"] ?: obj["angle"])?.let { ValueExtractors.extractDegrees(it) } ?: return null
         val x = obj["x"]?.jsonPrimitive?.floatOrNull ?: 0f
         val y = obj["y"]?.jsonPrimitive?.floatOrNull ?: 0f
         val z = obj["z"]?.jsonPrimitive?.floatOrNull ?: 0f
-
-        // Simple heuristic: use the axis with the largest component
-        return when {
-            z >= x && z >= y -> TransformFunction.RotateZ(angle)
-            y >= x -> TransformFunction.RotateY(angle)
-            else -> TransformFunction.RotateX(angle)
-        }
+        return Rotate3dAxis.classify(x, y, z, angle)
     }
 
     // ==================== SCALE FUNCTIONS ====================
@@ -659,21 +693,14 @@ object TransformExtractor {
      * Extract translate data from standalone Translate property.
      */
     private fun extractTranslateData(data: JsonElement?): TranslateData {
-        if (data == null) return TranslateData()
-
-        return when (data) {
-            is JsonObject -> {
-                val x = data["x"]?.let { ValueExtractors.extractDp(it) }
-                val y = data["y"]?.let { ValueExtractors.extractDp(it) }
-                val z = data["z"]?.let { ValueExtractors.extractDp(it) }
-                // Percentage shape: { "type": "percentage", "percentage": 50.0 }
-                val xPct = (data["x"] as? JsonObject)?.takeIf { it["type"]?.jsonPrimitive?.contentOrNull == "percentage" }
-                    ?.get("percentage")?.jsonPrimitive?.floatOrNull?.div(100f)
-                val yPct = (data["y"] as? JsonObject)?.takeIf { it["type"]?.jsonPrimitive?.contentOrNull == "percentage" }
-                    ?.get("percentage")?.jsonPrimitive?.floatOrNull?.div(100f)
-                TranslateData(x, y, z, xPct, yPct)
-            }
-            else -> TranslateData()
-        }
+        // retro R1 (A11#1): the longhand is a discriminated union (none / 1d
+        // length / 1d percentage / 2d / 3d — TranslateProperty.kt) and only
+        // the `2d` shape carries the top-level x/y keys this function used
+        // to read, so every one-axis `translate: 20px` decoded as identity
+        // (Translate_OneAxis_Px Android x0 = 16 vs iOS/web 36). The shapes
+        // now live in TranslateLonghandWire with their verbatim wires; this
+        // stays the adapter onto the config's fields.
+        val d = TranslateLonghandWire.decode(data)
+        return TranslateData(d.x, d.y, d.z, d.xFraction, d.yFraction)
     }
 }

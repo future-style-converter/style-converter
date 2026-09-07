@@ -14,7 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 /**
  * Applies CSS outline styling to Compose modifiers.
  *
- * CSS (css-ui-4 §4): the outline is drawn AROUND the outline rect — the
+ * CSS (css-ui-4 §3): the outline is drawn AROUND the outline rect — the
  * border box inflated by `outline-offset` (negative offset pulls the ring
  * inside the box) — and, critically, it is painted ON TOP of the element's
  * own background and border (outline participates above the background in
@@ -28,9 +28,15 @@ import androidx.compose.ui.graphics.toArgb
  * 3D styles (ridge/groove/inset/outset) use two shades of the declared
  * color, split per side exactly as Chromium rasterizes them (verified by
  * pixel-scanning the Borders_C14 web capture):
- *   - light shade = the declared color UNCHANGED,
- *   - dark shade  = declared color × 0.618 per RGB channel (web paints
- *     crimson rgb(220,20,60) → rgb(136,12,37); 136/220 = 0.618).
+ *   - light / dark shade = Blink's border palette — BorderSideApplier.shade
+ *     (Color::Dark()/Light() gated by CalculateBorderStyleColor's contrast
+ *     rule), which Blink's OutlinePainter reuses for non-solid outlines via
+ *     BoxBorderPainter. Retro R6 (audit A7#3): this file used to carry a
+ *     SECOND "Chromium Dark()" model (an HSL L' = L·2/3 − 0.02 transform),
+ *     so the same declared colour got different dark bands as a border and
+ *     as an outline; both now delegate to the one helper (crimson
+ *     rgb(220,20,60) → rgb(136,12,37) under either model — the web capture
+ *     value; #eee → 154 under either).
  *   - ridge: outer half light on top/left, dark on right/bottom; inner
  *     half mirrored. groove is the exact inverse.
  *   - the light half takes ceil(w/2), the dark half floor(w/2) — the web
@@ -139,7 +145,8 @@ object OutlineApplier {
     private fun DrawScope.drawShadedRing(config: OutlineConfig, groove: Boolean) {
         val w = config.width.toPx()
         val off = config.offset.toPx()
-        val light = config.color
+        // Both tones from the shared Blink palette (see darken/lighten).
+        val light = lighten(config.color)
         val dark = darken(config.color)
         // Chrome's split: ceil band + floor band.
         val tCeil = kotlin.math.ceil(w / 2f)
@@ -206,7 +213,8 @@ object OutlineApplier {
     private fun DrawScope.drawFlatShadedRing(config: OutlineConfig, inset: Boolean) {
         val w = config.width.toPx()
         val off = config.offset.toPx()
-        val light = config.color
+        // Both tones from the shared Blink palette (see darken/lighten).
+        val light = lighten(config.color)
         val dark = darken(config.color)
         drawSideBands(
             distOut = off + w, thickness = w,
@@ -257,45 +265,30 @@ object OutlineApplier {
     }
 
     /**
-     * Dark shade for the 3D styles — Chromium's Color::Dark(), i.e. an HSL
-     * transform L' = max(0, L·2/3 − 0.02) with hue/saturation preserved.
-     * Calibrated against the wave-5 headless-Chrome probe:
-     *   crimson rgb(220,20,60)  → rgb(136,12,37)   (this formula: 137,12,37)
-     *   #eee    rgb(238,238,238)→ rgb(154,154,154) (this formula: 154,154,154)
-     * The previous flat per-channel ×0.618 was exact for crimson but 7/255
-     * off for grays — visible on every currentColor(#eee) 3D outline.
+     * Dark shade for the 3D outline styles — Blink Color::Dark() via the ONE
+     * Compose implementation, BorderSideApplier.shade(lighten = false)
+     * (retro R6, audit A7#3). The wave-5 HSL transform this replaced
+     * (L' = max(0, L·2/3 − 0.02)) was calibrated on two probe points and
+     * agreed with the subtractive model there to ≤1/255 —
+     *   crimson rgb(220,20,60)  → probe rgb(136,12,37); HSL 137, shade 136
+     *   #eee    rgb(238,238,238)→ probe rgb(154,154,154); both 154
+     * — but diverged for mid greys (#808080: HSL 0.313, Blink/shade 0.172),
+     * so a border and an outline of the same colour painted two different
+     * dark bands. Blink paints non-solid outlines through the border painter
+     * (OutlinePainter → BoxBorderPainter), so one palette is also the truth.
      */
-    internal fun darken(base: Color): Color {
-        val r = base.red; val g = base.green; val b = base.blue
-        val mx = maxOf(r, g, b); val mn = minOf(r, g, b)
-        val l = (mx + mn) / 2f
-        val c = mx - mn
-        // Hue in [0,6) sextants; saturation per HSL.
-        val h = when {
-            c == 0f -> 0f
-            mx == r -> ((g - b) / c).mod(6f)
-            mx == g -> (b - r) / c + 2f
-            else -> (r - g) / c + 4f
-        }
-        val s = if (c == 0f) 0f else c / (1f - kotlin.math.abs(2f * l - 1f))
-        val l2 = (l * 2f / 3f - 0.02f).coerceAtLeast(0f)
-        // HSL → RGB at the darkened lightness.
-        val c2 = (1f - kotlin.math.abs(2f * l2 - 1f)) * s
-        val x2 = c2 * (1f - kotlin.math.abs(h.mod(2f) - 1f))
-        val m = l2 - c2 / 2f
-        val (r2, g2, b2) = when {
-            h < 1f -> Triple(c2, x2, 0f)
-            h < 2f -> Triple(x2, c2, 0f)
-            h < 3f -> Triple(0f, c2, x2)
-            h < 4f -> Triple(0f, x2, c2)
-            h < 5f -> Triple(x2, 0f, c2)
-            else -> Triple(c2, 0f, x2)
-        }
-        return Color(
-            red = (r2 + m).coerceIn(0f, 1f),
-            green = (g2 + m).coerceIn(0f, 1f),
-            blue = (b2 + m).coerceIn(0f, 1f),
-            alpha = base.alpha
-        )
-    }
+    internal fun darken(base: Color): Color =
+        com.styleconverter.runtime.borders.sides.BorderSideApplier.shade(base, lighten = false)
+
+    /**
+     * Light shade for the 3D outline styles — the declared colour, lifted by
+     * Color::Light() only when Blink's contrast gate says the dark band would
+     * not read against it (BorderSideApplier.shade(lighten = true) /
+     * lightBandLifts). Previously the outline always used the declared
+     * colour, so `outline: 3px groove black` painted two indistinguishable
+     * black bands where the border painter (and Blink) lift one to
+     * rgb(84,84,84).
+     */
+    internal fun lighten(base: Color): Color =
+        com.styleconverter.runtime.borders.sides.BorderSideApplier.shade(base, lighten = true)
 }

@@ -19,7 +19,7 @@ import com.styleconverter.runtime.spacing.CollapsedMargin
  * - Inset: Full support including border-radius
  * - Polygon: Full support for arbitrary polygons
  * - Path: full SVG path data via [SvgPathParser]
- * - Geometry box: the bare `<geometry-box>` keyword (css-masking-1 §7.1)
+ * - Geometry box: the bare `<geometry-box>` keyword (css-masking-1 §5.1)
  *
  * ## Compose Implementation
  * Compose's clip modifier uses [Shape] to define clipping regions.

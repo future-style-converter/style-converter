@@ -35,10 +35,10 @@ import kotlinx.serialization.json.doubleOrNull
  * endpoints, and hands the pair to [GradientRamp.interpolate], which already
  * implements §13.4 premultiplication, §13.5 hue-arc selection and the §13.3
  * powerless-hue carry in every space [GradientColorMath] can convert.
- * (GradientRamp / GradientColorMath / GradientInterpolation still spell those
- * rules §12.x on their own lines; css-color-4 §12 is "Comparing <color>
- * Values" and interpolation is §13 — those files are outside this wave's
- * change set, so they are reported rather than rewritten here.) The two
+ * (GradientRamp / GradientColorMath / GradientInterpolation spell those same
+ * rules; the retrospective citation sweep renumbered their comments to
+ * §13.x — css-color-4 §12 is "Comparing <color> Values", interpolation is
+ * §13, so the two files now agree on the section numbers.) The two
  * value paths can therefore never disagree about what "mix in lch" means, and
  * the iOS twin (`StyleEngine/color/StaticColorMix.swift`) reuses ITS
  * GradientRamp the same way.

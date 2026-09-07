@@ -2,7 +2,7 @@ package com.styleconverter.runtime.spacing
 
 // The `lh` unit's LINE-HEIGHT SOURCE — wave 43, lane V3.
 //
-// css-values-4 §6.2.1: `lh` is "equal to the computed value of the
+// css-values-4 §6.1.1: `lh` is "equal to the computed value of the
 // line-height property of the element on which it is used". Until this
 // wave SpacingResolve hardcoded `1.2 × font-size` — the UA default-sheet
 // approximation of `normal` — for EVERY element, including ones whose

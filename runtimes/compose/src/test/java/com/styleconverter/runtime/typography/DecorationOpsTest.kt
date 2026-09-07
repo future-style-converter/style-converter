@@ -289,7 +289,7 @@ class DecorationOpsTest {
         assertFalse(DecorationOps.hasSoftWrapOpportunity("foobarbaz"))
         // Empty string: nothing to wrap.
         assertFalse(DecorationOps.hasSoftWrapOpportunity(""))
-        // NBSP FORBIDS breaks (css-text-3 §5.2 / UAX #14 GL) — Kotlin's
+        // NBSP FORBIDS breaks (css-text-3 §5.5 / UAX #14 GL) — Kotlin's
         // isWhitespace counts it as SPACE_SEPARATOR, so the predicate
         // carves it out explicitly (the Swift twin does the same).
         assertFalse(DecorationOps.hasSoftWrapOpportunity("foo\u00A0bar"))

@@ -1,5 +1,5 @@
 // BorderInlineStartStyleExtractor.ts — folds `BorderInlineStartStyle` IR properties into a config.
-// IR shape flavors (from examples/properties/borders/border-styles.json):
+// IR shape flavors (from fixtures/properties/borders/border-styles.json):
 //   "SOLID" / "DASHED" / "DOTTED" / "DOUBLE" / "GROOVE" / "RIDGE" / "INSET" / "OUTSET" / "NONE" / "HIDDEN"
 // Parser emits UPPERCASE bare strings; we lowercase + validate against the
 // CSS Backgrounds & Borders §5 keyword set (see _shared.ts).

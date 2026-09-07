@@ -8,7 +8,11 @@ package com.styleconverter.runtime.interactions
 // coverage) so a `ls interactions/` folder audit matches the parser's
 // interactions/ IR folder exactly.
 //
-// Parser-gap notes (see README-phase10.md):
+// Parser-gap notes. The index they used to cite,
+// `examples/properties/README-phase10.md`, was DELETED by the 2026-07-08
+// restructure (commit 02e4c457, `examples/` -> `fixtures/`) and nothing
+// replaced it — retro P2e. The variant matrix that survived is the fixture
+// itself, `fixtures/properties/interactions/longtail.json`:
 //   * Cursor with `url(...)` REQUIRES a fallback keyword after the URL;
 //     parser returns null if no valid keyword fallback is found.
 //   * Caret shorthand parses whichever tokens it can — allows either

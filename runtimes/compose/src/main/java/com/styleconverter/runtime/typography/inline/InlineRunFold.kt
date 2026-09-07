@@ -98,7 +98,7 @@ import com.styleconverter.runtime.typography.text.TextExtractor
  * (the small-caps case rewrite is not always length-preserving, which
  * would break the span alignment), and an empty merge result.
  *
- * ## Hyphens adoption (css-text-3 §6.1)
+ * ## Hyphens adoption (css-text-3 §5.3)
  * `hyphens` is the one policy the victims' spans DO declare. It governs
  * break opportunities inside the span's text, but Compose's line breaker
  * takes ONE mode per paragraph — so the fold adopts the members' mode
@@ -234,7 +234,7 @@ object InlineRunFold {
      * inherit-computed-001's `… size <em></em> and …` as "size ▮and":
      * the space BEFORE the em survives, the one after it collapses.
      * Wave 47 (lane Z6): a trailing '\n' (a folded `<br>`) answers true
-     * too — css-text-3 §4.1.4(3): collapsible spaces at the START of a
+     * too — css-text-3 §4.1.2(3): collapsible spaces at the START of a
      * line are removed, and everything after a forced break starts a
      * line. '\n' never occurs in a pre-wave-47 merge, so the old
      * decisions are untouched by construction.
@@ -248,7 +248,7 @@ object InlineRunFold {
 
     /**
      * Append one forced line break (a folded `<br>` member — HTML
-     * §4.5.27) to [sb]. css-text-3 §4.1.4(1): collapsible spaces at the
+     * §4.5.27) to [sb]. css-text-3 §4.1.2(1): collapsible spaces at the
      * END of a line are removed — everything before a forced break ends a
      * line, so the trailing space run is dropped before the '\n' lands
      * (block-ellipsis-004's `Line 2<br>` / ` Line 3` wire merges to
@@ -330,7 +330,7 @@ object InlineRunFold {
         val spans = mutableListOf<Span>()
         var breakMembers = 0
         var glyphMembers = 0
-        // The css-text-3 §6.1 adoption walk, shared by the EMPTY and the
+        // The css-text-3 §5.3 adoption walk, shared by the EMPTY and the
         // glyph member arms (a lambda so `adopted` threads through both).
         // Returns the bail reason, or null when the member's declaration
         // is compatible — the exact wave-44 rules, hoisted verbatim.
@@ -394,7 +394,7 @@ object InlineRunFold {
                 // ── Wave 47 (lane Z6) — the BR RING ─────────────────────
                 // `<br>` is a FORCED line break (HTML §4.5.27), i.e. '\n'
                 // in the merged paragraph — surrounding collapsible spaces
-                // fall per css-text-3 §4.1.4 (appendBreak's banner). The
+                // fall per css-text-3 §4.1.2 (appendBreak's banner). The
                 // extractor tags it `role: line-break`, read alongside the
                 // tag so the two producers agree.
                 if (tag == "br" || child.role == "line-break") {

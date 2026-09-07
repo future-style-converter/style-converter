@@ -1053,7 +1053,7 @@ test('bug1-fextractor: buildComponents emits _tag for the canonical text-styling
 // swarm-002 / selectors__child-indexed-no-parent: the prior compoundMatches
 // rejected every compound containing `:` or `[`, silently dropping rules
 // like `:root:first-child #a`. We now allow-list structural pseudos and
-// evaluate them against position metadata (with Selectors-4 §6.4.1 carve-
+// evaluate them against position metadata (with Selectors-4 §13.3 carve-
 // out for the parentless root).
 
 test('bug2a: selectorMatches honours :root via synthetic root ancestor', () => {
@@ -1192,7 +1192,7 @@ test('bug2c: propsForBodyRoot accepts bare :root', () => {
 
 test('bug2c: propsForBodyRoot accepts :root with the always-true pseudo carve-out', () => {
   // `:root:first-child` is always-true on the parentless root.
-  // `:root:nth-last-child(2)` should NOT land (Selectors-4 §6.4.1 says
+  // `:root:nth-last-child(2)` should NOT land (Selectors-4 §13.3 says
   // An+B only matches when it yields 1; 2 doesn't).
   const rules = parseCss(
     ':root:first-child { color: green } ' +
@@ -1217,7 +1217,7 @@ test('m7: the injected document chain is <html> then <body>, in document order',
   // Shape pin — the matcher consumes the chain right-to-left, so `body` MUST
   // be last (the immediate parent of every top-level component).
   assert.deepEqual(DOCUMENT_SENTINEL_ANCESTORS.map((a) => a.tag), ['html', 'body']);
-  // The root keeps the Selectors-4 §6.4.1 carve-out metadata.
+  // The root keeps the Selectors-4 §13.3 carve-out metadata.
   assert.equal(DOCUMENT_SENTINEL_ANCESTORS[0].pos.isRoot, true);
   // body is the 2nd of the document element's 2 element children
   // (HTML §13.2.6.4 always synthesises <head> + <body>), and the only body.
@@ -1999,7 +1999,7 @@ test('wave13: parseTimingFunction handles keywords, functions, and rejects junk'
 test('wave13: evalTimingFunction — linear identity and steps positions', () => {
   // linear shortcut is exact (no bisection noise).
   assert.equal(evalTimingFunction(parseTimingFunction('linear'), 0.3), 0.3);
-  // steps(4, end) at 0.3: floor(1.2)/4 = 0.25 (css-easing-1 §3.9.2).
+  // steps(4, end) at 0.3: floor(1.2)/4 = 0.25 (css-easing-1 §2.3.1).
   assert.equal(evalTimingFunction(parseTimingFunction('steps(4)'), 0.3), 0.25);
   // step-start jumps immediately: (floor(0.3)+1)/1 = 1.
   assert.equal(evalTimingFunction(parseTimingFunction('step-start'), 0.3), 1);
@@ -2090,7 +2090,7 @@ test('wave13 PIN: positive-delay and drifting zero-delay controls do NOT sample'
 // extract-fixture.mjs's STABILITY WINDOW banner.
 
 test('wave35 B7: @keyframes names accept the dashed-ident forms', () => {
-  // css-animations-1 §4 types the name as <custom-ident>; css-values-4 §3.2 /
+  // css-animations-1 §4 types the name as <custom-ident>; css-values-4 §4.2 /
   // CSS Syntax 3 §4.3.11 admit a leading '-' and the '--' dashed prefix. The
   // measured case is css-color/animation/contrast-color-interpolation.html.
   assert.deepEqual(Object.keys(parseKeyframes('@keyframes --anim { from { opacity: 0 } }')), ['--anim']);
@@ -2152,7 +2152,7 @@ test('wave35 B7 PIN: css-color/animation/contrast-color-interpolation bakes gree
   // `from { box-shadow: contrast-color(white) 100px 0px }` →
   // `to { box-shadow: lime 100px 0px }`.
   // steps(2, jump-start) outputs 0.5 for the WHOLE first half of the duration
-  // (css-easing-1 §3.9.2), i.e. 1000 SECONDS — three orders of magnitude wider
+  // (css-easing-1 §2.3.1), i.e. 1000 SECONDS — three orders of magnitude wider
   // than the capture window. contrast-color(white) = black, and black → lime
   // at 0.5 is rgb(0, 128, 0), which is exactly the `green` its reference
   // (/css/reference/ref-filled-green-100px-square-only.html) paints.
@@ -4412,7 +4412,7 @@ test('wave30 A1: :dir() inherits through the ancestor chain at match time', () =
   assert.equal(selectorMatches('span:dir(ltr)', 'span', {}, ancestors), false);
 });
 
-// ── A2: sibling combinators (Selectors-4 §15.4 / §15.5) ─────────────────────
+// ── A2: sibling combinators (Selectors-4 §14.3 / §14.4) ─────────────────────
 
 test('wave30 A2: splitSelectorChain tokenises + and ~', () => {
   assert.deepEqual(splitSelectorChain('div + p'),
@@ -4647,7 +4647,7 @@ test('wave30 A4: the child\'s OWN declaration beats the root (cascade §7.3)', (
 });
 
 test('wave30 A4: a shorthand that COVERS the longhand suppresses the bake', () => {
-  // css-fonts-4 §6: `font` sets size/family/weight/style and resets
+  // css-fonts-4 §2.7: `font` sets size/family/weight/style and resets
   // line-height, so none of the five may be baked over it — even though
   // their names never appear in the child's bag.
   assert.equal(
@@ -4725,7 +4725,7 @@ test('wave35 FX: parseFontShorthand derives the §3.7 size/family form', () => {
     'font-style': 'italic', 'font-weight': 'bold', 'font-size': '16px',
     'line-height': '1.2', 'font-family': 'X, serif',
   });
-  // css-fonts-4 §3.4 `oblique <angle>` is ONE font-style value.
+  // css-fonts-4 §2.4 `oblique <angle>` is ONE font-style value.
   assert.deepEqual(parseFontShorthand('oblique 20deg 16px serif'), {
     'font-style': 'oblique 20deg', 'font-size': '16px',
     'line-height': 'normal', 'font-family': 'serif',
@@ -4755,7 +4755,7 @@ test('wave35 FX: the `/` delimiter binds through any whitespace (syntax-3 §5)',
 });
 
 test('wave35 FX: the REFUSALS are honest — no half-derived font', () => {
-  // <system-family-name> (css-fonts-4 §3.7): resolved from the PLATFORM font
+  // <system-family-name> (css-fonts-4 §2.7): resolved from the PLATFORM font
   // database, so there is no size and no family in the document to derive.
   for (const kw of ['caption', 'icon', 'menu', 'message-box', 'small-caption',
     'status-bar', 'MENU']) {

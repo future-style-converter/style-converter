@@ -1,6 +1,6 @@
 // GlyphOrientationHorizontalExtractor.ts — folds `GlyphOrientationHorizontal` IR properties into a GlyphOrientationHorizontalConfig.
 // Family: glyph-orientation.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { GlyphOrientationHorizontalConfig, GLYPH_ORIENTATION_HORIZONTAL_PROPERTY_TYPE, GlyphOrientationHorizontalPropertyType } from './GlyphOrientationHorizontalConfig';
 import { kwLower, angleCss } from './_shared';

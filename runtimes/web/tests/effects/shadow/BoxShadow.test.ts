@@ -1,5 +1,5 @@
 // BoxShadow — coverage for the engine/effects/shadow/BoxShadow triplet.
-// Fixture: examples/properties/borders/box-shadow.json.
+// Fixture: fixtures/properties/borders/box-shadow.json.
 import { describe, it, expect } from 'vitest';
 import { extractBoxShadow } from '../../../src/engine/effects/shadow/BoxShadowExtractor';
 import { applyBoxShadow }   from '../../../src/engine/effects/shadow/BoxShadowApplier';

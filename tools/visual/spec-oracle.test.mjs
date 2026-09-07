@@ -410,10 +410,48 @@ test('e2e ordering: the oracle (6) outranks a stale ledger entry (5)', () => {
   const wrong = [74, 110, 113];
   const s = scaffold({
     ios: wrong, android: wrong, web: wrong, expect: OK_EXPECT,
-    ledger: [{ component: 'Oracle_Case.png', pair: 'iOS-Android', reason: 'stale by construction', owner: 'test' }],
+    // `expires` is part of the ledger contract (validateLedger) — a line
+    // without one is exit 2 before any verdict, which would mask the ordering
+    // this test is about.
+    ledger: [{ component: 'Oracle_Case.png', pair: 'iOS-Android', reason: 'stale by construction', owner: 'test', expires: '2099-01-01' }],
   });
   const { status, out } = run(s);
   assert.equal(status, 6, out);   // LITERAL, not the imported constant — see the contract test
+});
+
+test('e2e (retro A11#3): the oracle is REPORTED even when the gate exits 4 — a waived fixture reaches it', () => {
+  // iOS renders red, Android/web the spec value: the cross-platform gate has
+  // two unexpected pairs (exit 4) AND the fixture waives iOS. Before the
+  // report/enforce split the comparator process.exit(4)'d inside the gate
+  // block, so the oracle never printed and every `_expect.waive` in
+  // nested-transforms / radius-overflow-transform / blend-isolation was
+  // unreachable under ./test-all.sh. The exit code is unchanged (4 still
+  // outranks 6); what changes is that the oracle's verdict is on the record.
+  const s = scaffold({
+    ios: [255, 0, 0], android: SPEC, web: SPEC,
+    expect: { fill: SPEC, note: 'reachability', waive: { iOS: 'known iOS divergence, ledgered' } },
+  });
+  const { status, out, manifest } = run(s);
+  assert.equal(status, 4, out);
+  assert.match(out, /unexpected cross-platform divergence/);           // the gate still reports
+  assert.match(out, /spec oracle: 3 platform-component check\(s\) · 0 violation\(s\) · 1 waived/);
+  assert.match(out, /waived: iOS · Oracle_Case · fill/);
+  assert.match(out, /waiver: known iOS divergence, ledgered/);
+  assert.equal(manifest.specOracle.waived.length, 1, 'the manifest records the waiver');
+});
+
+test('e2e (retro A11#3): a STALE waiver is reported under an exit-4 run instead of being hidden', () => {
+  // The two-sided rule needs the oracle to be reached: web passes but carries
+  // a waiver (stale), while iOS diverges (exit 4). The stale line must print
+  // even though exit 4 wins, or the waiver rots exactly as before.
+  const s = scaffold({
+    ios: [255, 0, 0], android: SPEC, web: SPEC,
+    expect: { fill: SPEC, note: 'stale under 4', waive: { web: 'was broken once' } },
+  });
+  const { status, out } = run(s);
+  assert.equal(status, 4, out);
+  assert.match(out, /stale oracle waiver\(s\) — the platform now passes; delete the waiver/);
+  assert.match(out, /web · Oracle_Case — waived as: was broken once/);
 });
 
 test('e2e: an oracle whose expectations bind to nothing fails instead of passing', () => {

@@ -79,7 +79,7 @@ public final class DocumentImageRegistry {
     public static let shared = DocumentImageRegistry()
 
     /// One decoded replaced-element image: the raster plus the INTRINSIC size
-    /// CSS 2.1 §10.3.2 / css-images-3 §5.2 size the box from.
+    /// CSS 2.1 §10.3.2 / css-images-3 §4.3.1 size the box from.
     public struct DecodedImage {
         #if canImport(UIKit)
         public let image: UIImage
@@ -94,7 +94,7 @@ public final class DocumentImageRegistry {
         public let intrinsicWidthPx: Double
         public let intrinsicHeightPx: Double
 
-        /// The css-images-3 §5.2 intrinsic ASPECT RATIO (width ÷ height), or
+        /// The css-images-3 §4.1 intrinsic ASPECT RATIO (width ÷ height), or
         /// nil when either axis is degenerate — the caller then falls back to
         /// the intrinsic size rather than dividing by zero.
         public var aspectRatio: Double? {

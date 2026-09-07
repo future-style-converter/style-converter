@@ -74,7 +74,7 @@ object BackgroundImageSerializer : KSerializer<BackgroundImageProperty.Backgroun
             put("type", "color")
             put("color", json.encodeToJsonElement(IRColor.serializer(), value.color))
         }
-        // image() notation (wave-48 lane W5, css-images-4 §2.1). ADDITIVE
+        // image() notation (wave-48 lane W5, css-images-4 §2.5). ADDITIVE
         // shape: a brand-new discriminator, so no existing wire bytes move;
         // readers that predate it fall into their unknown-type branch and
         // paint nothing — exactly what they painted when this was Raw.

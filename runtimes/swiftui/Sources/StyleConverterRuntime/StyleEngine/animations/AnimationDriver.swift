@@ -10,7 +10,7 @@
 //  TimelineView clock or the pinned CAPTURE_ANIMATION_TIME) only decides
 //  WHAT t to ask about, never how t maps to progress.
 //
-//  The phase arithmetic mirrors web-animations-1 §4.8 (before/active/
+//  The phase arithmetic mirrors web-animations-1 §4.6.6 (before/active/
 //  after phases, directed progress, transformed progress) because the
 //  web reference implementation IS the Web Animations API — matching
 //  its math is what keeps t=0 / t=mid captures comparable across
@@ -31,15 +31,15 @@ enum AnimationDriver {
         /// animation-duration in ms (≥ 0; CSS initial 0s).
         var durationMs: Double = 0
         /// animation-delay in ms — negative delays advance the start
-        /// point per css-animations-1 §5.5.
+        /// point per css-animations-1 §4.7.
         var delayMs: Double = 0
         /// animation-iteration-count — nil means `infinite`; fractional
         /// counts end mid-iteration (spec 07 §3). CSS initial 1.
         var iterations: Double? = 1
-        /// animation-direction (css-animations-1 §5.6).
+        /// animation-direction (css-animations-1 §4.5).
         var direction: AnimationDirectionKind = .normal
         /// animation-fill-mode — which stop applies outside the active
-        /// interval (css-animations-1 §5.7).
+        /// interval (css-animations-1 §4.8).
         var fillMode: AnimationFillModeKind = .none
         /// animation-timing-function — nil = the `ease` default, which
         /// the parser normalizes to cubic-bezier(.25,.1,.25,1). NOT
@@ -61,7 +61,7 @@ enum AnimationDriver {
     /// (css-easing-1 §2.3); used when no timing-function is declared.
     static let easeDefault = AnimationTimingFn.cubicBezier(x1: 0.25, y1: 0.1, x2: 0.25, y2: 1.0)
 
-    // MARK: - Phase arithmetic (web-animations-1 §4.8)
+    // MARK: - Phase arithmetic (web-animations-1 §4.6.6)
 
     /// RAW directed progress at absolute timeline second t — or nil when
     /// nothing applies (before phase without backwards fill, after phase
@@ -71,7 +71,7 @@ enum AnimationDriver {
     /// position that selects the segment.
     static func progress(atSeconds t: Double, timing: Timing) -> Double? {
         // Local time: absolute t minus the delay — a NEGATIVE delay
-        // advances the start point (css-animations-1 §5.5).
+        // advances the start point (css-animations-1 §4.7).
         let localMs = t * 1000.0 - timing.delayMs
         // Active duration: duration × iteration count (∞ for infinite).
         let iterations = timing.iterations
@@ -95,7 +95,7 @@ enum AnimationDriver {
             // End-state iteration index + in-iteration progress: whole
             // counts end at progress 1 of iteration (n−1); fractional
             // counts end mid-iteration floor(n) at the fractional part
-            // (css-animations-1 §5.4 fractional counts).
+            // (css-animations-1 §4.4 fractional counts).
             let n = iterations ?? 1 // infinite never reaches the after phase in practice
             let whole = n.rounded(.down)
             let endIteration: Double
@@ -123,7 +123,7 @@ enum AnimationDriver {
                         direction: timing.direction)
     }
 
-    /// Directed progress (web-animations-1 §4.9.1): flip odd/even
+    /// Directed progress (web-animations-1 §4.7.6): flip odd/even
     /// iterations per animation-direction so `alternate` ping-pongs.
     static func directed(iteration: Double, progress: Double,
                          direction: AnimationDirectionKind) -> Double {
@@ -215,7 +215,7 @@ enum AnimationDriver {
 
     /// Step easing: divide the input into `count` intervals and jump per
     /// the position keyword. `jumps` differs per keyword (jump-none has
-    /// count−1 rises, jump-both count+1) — the css-easing-1 §3.9.2 table.
+    /// count−1 rises, jump-both count+1) — the css-easing-1 §2.3.1 table.
     static func step(_ p: Double, count: Int, position: StepsPosition) -> Double {
         // Defensive: a non-positive step count is unrepresentable CSS —
         // treat as a single end-jump so we never divide by zero.

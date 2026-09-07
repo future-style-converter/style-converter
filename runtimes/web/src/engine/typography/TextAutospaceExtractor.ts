@@ -1,6 +1,6 @@
 // TextAutospaceExtractor.ts — folds `TextAutospace` IR properties into a TextAutospaceConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextAutospaceConfig, TEXT_AUTOSPACE_PROPERTY_TYPE, TextAutospacePropertyType } from './TextAutospaceConfig';
 import { kwList } from './_shared';

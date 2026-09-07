@@ -161,7 +161,7 @@ export function unescapeCssString(body) {
 
 // ── THE CLDR QUOTE TABLE (wave-37 lane W4) ─────────────────────────────────
 //
-// `quotes: auto` (css-content-3 §2.2.1) resolves to "typographically
+// `quotes: auto` (css-content-3 §2.4.1) resolves to "typographically
 // appropriate quotes for the content language of the element". Until this
 // wave the wire carried no language at all, so parseQuotesValue REPORTED
 // `auto` and applyQuoteKeyword painted nothing under it — the documented

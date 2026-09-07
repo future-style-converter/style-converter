@@ -71,7 +71,7 @@ final class InlineSpanRingTests: XCTestCase {
             properties: [IRProperty(type: "FontSize", data: .object(["px": .double(24)]))],
             hostProperties: [])
         XCTAssertEqual(admitted(px)?.0.fontSizePx, 24)
-        // css-fonts-4 §2.4 percentage — a parent-relative factor.
+        // css-fonts-4 §2.5 percentage — a parent-relative factor.
         let pct = InlineSpanRing.admit(
             tag: "span",
             properties: [IRProperty(type: "FontSize",
@@ -236,7 +236,7 @@ final class InlineSpanRingTests: XCTestCase {
         XCTAssertEqual(composed?.italic, true)
         XCTAssertEqual(Double(composed?.fontSizeEm ?? 0), 1.0 / 1.2, accuracy: 1e-6)
         XCTAssertEqual(composed?.shift, InlineSpanRing.VerticalShift(up: true, parentPx: nil, parentEm: 1))
-        // A 1.5em outer: factors multiply (css-values-4 §5.1.1 — the
+        // A 1.5em outer: factors multiply (css-values-4 §6.1.1 — the
         // sup's parent is the i) and the shift parent rebases to 1.5.
         var bigOuter = outer
         bigOuter.fontSizeEm = 1.5

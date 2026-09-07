@@ -97,6 +97,16 @@ test('committed fixtures/fidelity/ files are byte-identical to a regeneration', 
   }
 });
 
+test('committed motion/keyframes-basic.json declares the seize-only capture header (retro A11#16)', () => {
+  // Pinned on the COMMITTED file, not the in-process regeneration: the header
+  // is what makes a bare ./test-all.sh on this fixture exit 2 with a pointer
+  // to animation-sweep.sh instead of exit 4 on 22/24 phase-skewed pairs. The
+  // byte-identical test above holds the generator to emit it too.
+  const doc = JSON.parse(readFileSync(join(REPO, 'fixtures/fidelity/motion/keyframes-basic.json'), 'utf8'));
+  assert.equal(doc._capture?.seizeOnly, true, 'keyframes-basic.json must carry _capture.seizeOnly === true');
+  assert.match(doc._capture?.recipe ?? '', /animation-sweep\.sh/);
+});
+
 test('seed is pinned in the manifest', () => {
   assert.equal(manifest.seed, SEED);
   assert.equal(manifest.generator, 'tools/visual/gen-fidelity.mjs');
@@ -225,7 +235,18 @@ test('every generated fixture parses as JSON and matches the CSS envelope shape'
     // keyframes fixture, which adds the document-level keyframes block
     // (spec 07 §1.1 — mirrors CSS @keyframes being document-scoped).
     if ('keyframes' in doc) {
-      assert.deepEqual(Object.keys(doc).sort(), ['components', 'keyframes'], `${relPath}: envelope must be exactly {keyframes, components}`);
+      // The motion fixture may also carry the `_capture` header (retrospective
+      // A11#16): a TOP-LEVEL key the converter ignores (Main.kt parses with
+      // ignoreUnknownKeys and reads only components/keyframes/fontFaces) that
+      // tells test-all.sh a live-clock capture of this file is meaningless.
+      // When present it must be exactly the seize-only form test-all honours.
+      const { _capture, ...envelope } = doc;
+      assert.deepEqual(Object.keys(envelope).sort(), ['components', 'keyframes'], `${relPath}: envelope must be exactly {keyframes, components} (+ optional _capture)`);
+      if (_capture !== undefined) {
+        assert.deepEqual(Object.keys(_capture).sort(), ['recipe', 'seizeOnly'], `${relPath}: _capture must be exactly {seizeOnly, recipe}`);
+        assert.equal(_capture.seizeOnly, true, `${relPath}: _capture.seizeOnly must be the boolean true — test-all.sh honours nothing else`);
+        assert.match(_capture.recipe, /animation-sweep\.sh/, `${relPath}: _capture.recipe must point at the seized-capture recipe`);
+      }
       assertKeyframesBlock(doc.keyframes, relPath);
     } else {
       assert.deepEqual(Object.keys(doc), ['components'], `${relPath}: envelope must be exactly {components}`);

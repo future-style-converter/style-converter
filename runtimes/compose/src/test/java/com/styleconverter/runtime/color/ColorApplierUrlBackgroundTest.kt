@@ -21,7 +21,7 @@ package com.styleconverter.runtime.color
 //  2. decode seam sharing: the mask-facing seam (rasterMaskDecoder) and
 //     the background path read the SAME SyncImageDecode pipeline — one
 //     decode, one cache, by construction.
-//  3. tile geometry: css-backgrounds-3 §3.9 size resolution (auto =
+//  3. tile geometry: css-backgrounds-3 §2.9 size resolution (auto =
 //     natural px, cover/contain scales, one-auto-axis keeps the intrinsic
 //     ratio) and the §3.6 anchor (free-space × fraction + px offset,
 //     unclamped) — the pure halves the drawBehind lambda consumes.

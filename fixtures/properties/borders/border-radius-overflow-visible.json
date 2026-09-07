@@ -1,0 +1,23 @@
+{
+  "_comment": "Retro R4 (A12#0 / A11#7): border-radius must curve the element's OWN background and border only. css-backgrounds-3 §4.3 (Corner Clipping) clips the background to the curve; DESCENDANTS are clipped at the curve only when the element's overflow is not visible (css-overflow-3 §3.1.2, Interaction of border-radius and overflow). The visual-test rounded boxes only ever exposed this through the harness debug label, so every iOS ledger pair read as 'corner AA'; these three components put a REAL in-flow descendant past the curve so the gate measures the runtime, not the label. Child fill #2ecc71 = (46,204,113) is the oracle fill (it outnumbers the purple parent on every platform); `box` is the child's fill bbox — 130 wide when it spills, 100 when the element's own overflow clip cuts it at the padding box.",
+  "components": {
+    "RadiusOverflow_Visible_ChildSpills": {
+      "properties": { "width": "100px", "height": "40px", "border-radius": "12px", "background-color": "#9b59b6", "padding-top": "5px", "overflow": "visible" },
+      "children": {
+        "spill": { "properties": { "width": "130px", "height": "30px", "background-color": "#2ecc71" } }
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [130, 30], "boxTolerance": 2, "note": "overflow: visible (the initial value, spelled out): the 130x30 child is NOT clipped by the 12px corners — css-backgrounds-3 §4.3 curves only the element's own background; a runtime that clips descendants to the rounded shape reads 100 wide here (the old iOS BorderRadiusApplier .clipShape)." }
+    },
+    "RadiusOverflow_Hidden_ChildClipped": {
+      "properties": { "width": "100px", "height": "40px", "border-radius": "12px", "background-color": "#9b59b6", "padding-top": "5px", "overflow": "hidden" },
+      "children": {
+        "spill": { "properties": { "width": "130px", "height": "30px", "background-color": "#2ecc71" } }
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [100, 30], "boxTolerance": 2, "note": "control: overflow: hidden establishes the element's own overflow clip, and css-backgrounds-3 §4.3 / css-overflow-3 §3.1.2 clip that content at the curved padding edge — the child is cut to the 100px box (rows 12-33 of the child sit on the straight edges, so the bbox width is exactly the box width)." }
+    },
+    "RadiusOverflow_Visible_TextSpills": {
+      "properties": { "width": "100px", "height": "40px", "border-radius": "12px", "background-color": "#9b59b6", "color": "#ffffff", "font-size": "16px", "line-height": "40px", "white-space": "nowrap", "overflow": "visible" },
+      "_text": "OVERFLOWING LABEL TEXT"
+    }
+  }
+}

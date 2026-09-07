@@ -2,7 +2,7 @@
 //  ClipReferenceBoxTests.swift
 //  StyleConverterRuntimeTests — wave 46 (lane Y4).
 //
-//  Pins for css-masking-1 §7.1 reference-box resolution, the SVG path()
+//  Pins for css-masking-1 §5.1 reference-box resolution, the SVG path()
 //  parser and the inset percent sides on iOS. Every expected number comes
 //  from a wave45-final css-masking WPT test whose PNG showed the defect:
 //   - contentBox-1a: `circle(farthest-side) content-box` on a 100px box
@@ -67,7 +67,7 @@ final class ClipReferenceBoxTests: XCTestCase {
         }
         XCTAssertEqual(box("margin-box"), .marginBox)
         XCTAssertEqual(box("padding-box"), .paddingBox)
-        // css-masking-1 §7.1 used values for an element with a CSS box.
+        // css-masking-1 §5.1 used values for an element with a CSS box.
         XCTAssertEqual(box("fill-box"), .contentBox)
         XCTAssertEqual(box("stroke-box"), .borderBox)
         XCTAssertEqual(box("view-box"), .borderBox)

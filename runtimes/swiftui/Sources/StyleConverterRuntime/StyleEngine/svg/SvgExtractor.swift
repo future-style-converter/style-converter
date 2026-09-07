@@ -13,9 +13,11 @@ import Foundation
 /// `src/main/kotlin/app/irmodels/properties/svg/` with the `Property`
 /// suffix stripped (the IR serialises the class stem).
 enum SvgProperty {
-    /// Explicit name list — 34 entries, matching the README-phase10
-    /// fixture's 87-component coverage (variants × property = 87,
-    /// properties = 34).
+    /// Explicit name list — 34 entries, matching the 87-component coverage
+    /// of `fixtures/properties/svg/longtail.json` (variants × property =
+    /// 87, properties = 34). (Retro P2e repointed this: the
+    /// `README-phase10` index it named was deleted by the 2026-07-08
+    /// restructure, commit 02e4c457.)
     static let names: [String] = [
         // Paint — fill family.
         "Fill", "FillRule", "FillOpacity",

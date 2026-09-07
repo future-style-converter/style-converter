@@ -80,6 +80,15 @@ data class TypographyConfig(
     val maxLines: Int? = null,
     /** Line clamp (CSS -webkit-line-clamp equivalent) */
     val lineClamp: Int? = null,
+    /**
+     * Retrospective R3 (A5#4) — the `<'block-ellipsis'>` component riding on
+     * `line-clamp` (css-overflow-4 §5.1 / §4.2): true when the author FORBADE
+     * a marker (`no-ellipsis` or the empty string), so a clamped run must
+     * Clip rather than paint Compose's "…" (see [LineClampWire]). False for
+     * an absent component, `auto`, a non-empty string and every clamp-less
+     * declaration — the Swift twin's LineClampConfig.markerSuppressed.
+     */
+    val lineClampMarkerSuppressed: Boolean = false,
     /** Text shadow */
     val textShadow: TextShadowConfig? = null,
     /** Baseline shift (subscript, superscript) */

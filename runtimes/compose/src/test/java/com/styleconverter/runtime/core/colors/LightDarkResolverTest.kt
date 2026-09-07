@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.core.colors
 
-// Wave-7 pinning tests for light-dark() color resolution (css-color-5 §7.2;
+// Wave-7 pinning tests for light-dark() color resolution (css-color-5 §7;
 // spec 06 §4 note): the wire's {original:{type:"light-dark", lightColor,
 // darkColor}} dynamic shape resolves to the scheme-chosen arm as a standard
 // static {srgb, original} node — closing the Android drop path where the

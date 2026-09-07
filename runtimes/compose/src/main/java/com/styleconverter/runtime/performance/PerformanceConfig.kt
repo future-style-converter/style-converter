@@ -187,15 +187,3 @@ data class BoxModelConfig(
     val isBorderBox: Boolean
         get() = boxSizing == BoxSizingValue.BORDER_BOX
 }
-
-/**
- * CSS resize property values.
- */
-enum class ResizeValue {
-    NONE,
-    BOTH,
-    HORIZONTAL,
-    VERTICAL,
-    BLOCK,
-    INLINE
-}

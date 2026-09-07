@@ -6,17 +6,32 @@ package com.styleconverter.runtime.layout.grid
 // [com.styleconverter.runtime.layout.LayoutConfig]. This is a THIN
 // translation layer on top of the legacy [GridExtractor] — we parse the IR
 // once via the legacy extractor (which already handles every fixture flavor
-// in examples/properties/layout/grid-*.json) and then project that result
+// in fixtures/properties/layout/grid-*.json) and then project that result
 // into the style-engine's [GridTrackList] / [GridPlacement] / [GridLinePair]
 // vocabulary.
 //
 // Rationale for two extractors side-by-side:
 //   - The legacy GridExtractor is shared with the existing GridRenderer
-//     rendering path which cannot be retired until ComponentRenderer is
-//     rewritten (Phase 7 step 6). Keeping it untouched means zero visual
-//     regressions during this phase.
-//   - The new GridLayoutExtractor feeds the aggregate LayoutConfig, which is
-//     the surface future phases will switch ComponentRenderer over to.
+//     rendering path. Keeping it untouched meant zero visual regressions
+//     during this phase.
+//   - The new GridLayoutExtractor feeds the aggregate LayoutConfig.
+//
+// Retro P2e (finding A6#15, phrase sweep) replaced the future tense that
+// stood in both bullets ("cannot be retired until ComponentRenderer is
+// rewritten (Phase 7 step 6)" / "the surface future phases will switch
+// ComponentRenderer over to") with where this actually landed, 40-odd waves
+// on. The ComponentRenderer rewrite never happened and no step 6 exists, so
+// the two extractors are a PERMANENT split, by responsibility:
+//   - this one's projection reaches ComponentRenderer through
+//     LayoutExtractor.extractLayoutConfig (LayoutExtractor.kt:142) →
+//     LayoutFacade.containerDecision → GridLayoutApplier.isGridContainer,
+//     which is what decides a component renders as a grid at all
+//     (ComponentRenderer.kt:1268, 2463-2469);
+//   - the TRACK and PLACEMENT geometry inside that grid is still parsed by
+//     the legacy path — GridRenderer.RenderGrid calls its own
+//     extractGridConfig(component.properties) and never reads LayoutConfig.
+// So a grid IR shape must keep parsing correctly in BOTH extractors; a fix
+// applied to one of them alone will not move a render.
 //
 // Every incoming property fixture shape is parsed by GridExtractor already —
 // see extractTrackList / extractTemplateAreas / extractGridLine in that file

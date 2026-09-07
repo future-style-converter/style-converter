@@ -2,7 +2,7 @@
 //  BorderBoxFloorTests.swift
 //  StyleConverterRuntimeTests
 //
-//  Wave 40, lane T7 — pins the css-ui-3 §5 border-box floor
+//  Wave 40, lane T7 — pins the css-ui-3 §3.1 border-box floor
 //  (StyleEngine/sizing/BorderBoxFloor.swift).
 //
 //  ── What is being protected ────────────────────────────────────────────────

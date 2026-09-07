@@ -19,7 +19,7 @@ package com.styleconverter.runtime.layout.flexbox
 //     typed AlignSelf and the Generic safe/unsafe escape hatch, exactly
 //     the wave-18 readers);
 //   • the MAIN axis from the container's justify-content applied to the
-//     sole hypothetical item (css-position-3 §3.1.4.1 / css-flexbox-1
+//     sole hypothetical item (css-position-3 §3.5.3 / css-flexbox-1
 //     §4.1: the abspos child is positioned as if it were the sole flex
 //     item, so justify-content's fallback alignment places it).
 //

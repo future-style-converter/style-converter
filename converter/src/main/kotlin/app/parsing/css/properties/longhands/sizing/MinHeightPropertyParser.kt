@@ -11,7 +11,7 @@ object MinHeightPropertyParser : PropertyParser {
     override fun parse(value: String): IRProperty? {
         val trimmed = value.trim().lowercase()
         val minValue = when {
-            // css-values-5 §10.1 calc-size() (wave 42 lane W3) — see the
+            // css-values-5 §11 calc-size() (wave 42 lane W3) — see the
             // decision record on WidthPropertyParser's identical branch; the
             // column-axis twin of MinWidthPropertyParser's branch
             // (calc-size-flex-004..006 exercise it on min-height).

@@ -25,20 +25,6 @@
 
 import Foundation
 
-enum BackgroundPositionProperty {
-    // BackgroundPosition shorthand is pre-expanded upstream. We consume
-    // the two physical longhands plus the two logical-axis variants
-    // (block / inline) so the registry marks all four as migrated and
-    // they participate in the dispatch loop below.
-    static let names: [String] = [
-        "BackgroundPosition",
-        "BackgroundPositionX",
-        "BackgroundPositionY",
-        "BackgroundPositionBlock",
-        "BackgroundPositionInline",
-    ]
-}
-
 enum BackgroundPositionExtractor {
 
     // Extract both axes in one pass. Nil return when neither is present.
@@ -96,7 +82,7 @@ enum BackgroundPositionExtractor {
         guard case .object(let o) = v else { return nil }
         switch o["type"]?.stringValue?.lowercased() {
         case "center":
-            // Bare `center` → 50% on both axes (css-backgrounds-3 §3.6);
+            // Bare `center` → 50% on both axes (css-backgrounds-3 §2.6);
             // reuse the keyword lane so the applier's UnitPoint math is
             // shared with the longhand path.
             return (.keyword("CENTER"), .keyword("CENTER"))

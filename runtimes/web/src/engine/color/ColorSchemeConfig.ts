@@ -5,4 +5,3 @@
 // fixtures could never flip because the scheme never reached the DOM.
 export interface ColorSchemeConfig { value?: string }
 export const COLOR_SCHEME_PROPERTY_TYPE = 'ColorScheme' as const;
-export type ColorSchemePropertyType = typeof COLOR_SCHEME_PROPERTY_TYPE;

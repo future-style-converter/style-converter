@@ -86,18 +86,28 @@ class OrthographicFlattenTest {
 
     @Test
     fun `a perspective distance disables the orthographic route`() {
-        // §6: a perspective puts a real m34 in the matrix, so the
-        // projection is projective and the camera path stays the owner.
-        assertFalse(OrthographicFlatten.appliesTo(perspectivePx = 500f, translateZPx = 0f))
-        assertTrue(OrthographicFlatten.appliesTo(perspectivePx = 0f, translateZPx = 0f))
+        // css-transforms-2 §4.1.1: a perspective puts a real m34 in the
+        // matrix, so the projection is projective — and (retro R1) the 4x4
+        // canvas route, not a camera, is its owner.
+        assertFalse(OrthographicFlatten.appliesTo(perspectivePx = 500f))
+        assertTrue(OrthographicFlatten.appliesTo(perspectivePx = 0f))
     }
 
     @Test
-    fun `a z translation keeps the depth-scale path`() {
-        // Carriers: css-transforms/3d-rendering-context-* (translateZ 20 /
-        // 75 px inside preserve-3d contexts) — a separate mechanism, left
-        // deliberately untouched by this lane.
-        assertFalse(OrthographicFlatten.appliesTo(perspectivePx = 0f, translateZPx = 20f))
+    fun `a z translation without a perspective is orthographic too`() {
+        // retro R1 (A11#6): the wave-49 `translateZPx != 0` guard kept a
+        // 1000px default camera alive for css-transforms/3d-rendering-
+        // context-* (translateZ 10/20 px, no own perspective). css-transforms-2
+        // §4.1 drops the z column when no perspective is in effect, so the
+        // depth is invisible: appliesTo no longer takes a z argument at all,
+        // and the shared depth-scale owner returns exactly 1 for that shape.
+        // Measured on 3d-rendering-context-and-abspos: the 1.02x/1.01x
+        // oversized green boxes exposed a red/orange edge the frozen ref
+        // does not have — removing the scale moves TOWARD the ref.
+        assertTrue(OrthographicFlatten.appliesTo(perspectivePx = 0f))
+        assertEquals(1f, TransformMatrixComposer.depthScale(perspectivePx = 0f, zPx = 20f), 0f)
+        // …while under a real perspective the same z scales by P/(P − z).
+        assertEquals(500f / 480f, TransformMatrixComposer.depthScale(perspectivePx = 500f, zPx = 20f), 1e-5f)
     }
 
     @Test
@@ -135,14 +145,28 @@ class OrthographicFlattenTest {
     }
 
     @Test
-    fun `a perspective-bearing list is not orthographic-eligible`() {
+    fun `the perspective PROPERTY does not disqualify — only a perspective() FUNCTION does`() {
         // Same list plus the `perspective` PROPERTY — the shape
-        // css-transforms/backface-visibility-hidden-001 carries.
-        val c = config(
+        // css-transforms/backface-visibility-hidden-001 carries. retro F3:
+        // the property is css-transforms-2 §4.1.1's SECOND way, projecting
+        // the CHILDREN (§8), so this element's own list stays orthographic
+        // (its frozen ref measures 100 rows in every column) and IS eligible.
+        // Under R1's fold this pin asserted the opposite; the measurement in
+        // TransformMatrixComposer's class doc is why it flipped.
+        val prop = config(
             "Transform" to """{"type":"functions","list":[{"fn":"rotateY","a":{"deg":45}}]}""",
             "Perspective" to """{"type":"length","px":1000}""",
         )
-        assertFalse(TransformListComposer.isOrthographicRotationOnly(c))
+        assertTrue(TransformListComposer.isOrthographicRotationOnly(prop))
+        // VERBATIM: fidelity/pairwise/pairs-02 → PW_Borders_Transforms_03
+        // (`transform: perspective(500px) rotateY(45deg)`): the FUNCTION is
+        // §4.1.1's FIRST way and puts the m34 row in THIS element's matrix
+        // (§12.2) → refused here; the 4x4 canvas route owns it.
+        val fn = config(
+            "Transform" to """{"type":"functions","list":[{"fn":"perspective","l":{"px":500.0}},{"fn":"rotateY","a":{"deg":45.0}}]}""",
+        )
+        assertFalse(TransformListComposer.isOrthographicRotationOnly(fn))
+        assertTrue(TransformMatrixComposer.takesMatrixPath(fn))
     }
 
     @Test

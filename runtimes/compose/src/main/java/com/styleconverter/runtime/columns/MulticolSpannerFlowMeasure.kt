@@ -26,7 +26,7 @@ import com.styleconverter.runtime.layout.IntrinsicChannel
 
 /**
  * Measures + places a multicol container per [MulticolSpannerFlow.plan]
- * (css-multicol-1 §6.2–§6.3 spanner sequencing, §7.1 auto-height
+ * (css-multicol-1 §6.1 spanner sequencing, §7.1 auto-height
  * balancing, css-position-3 §3.1 abspos static anchors).
  *
  * Returns null whenever the plan does NOT engage — the caller then falls
@@ -71,7 +71,7 @@ internal object MulticolSpannerFlowMeasure {
         // False under vertical writing modes (blocked-platform bail).
         fragmentationAllowed: Boolean,
         // Wave-42 lane W4: the container declared `continue: discard`
-        // (css-overflow-4 §3, threaded from MultiColumnConfig) — overflow-
+        // (css-overflow-4 §5.3, threaded from MultiColumnConfig) — overflow-
         // column content and everything after it is dropped by the plan.
         discardOverflow: Boolean = false,
         // The measure→draw bridge state ([] = plain drawContent). Written
@@ -119,7 +119,7 @@ internal object MulticolSpannerFlowMeasure {
         val probed = measurables.mapIndexed { i, m ->
             IntrinsicChannel.probe(
                 logTag = "MulticolSpannerFlow",
-                refusalContext = "css-multicol §6 spanner-flow natural-height " +
+                refusalContext = "css-multicol-1 §6.1 spanner-flow natural-height " +
                     "probe skipped — a child's subtree has no intrinsic " +
                     "channel; the spanner-flow plan disengages and the frozen " +
                     "legacy paths keep this container's measure."
@@ -212,7 +212,7 @@ internal object MulticolSpannerFlowMeasure {
             fragmentsBridge.value = fragments
             // In-flow content first — spanners at x=0 (full width), flow
             // children at their column's inline origin i·(W+G). Wave-42:
-            // css-overflow-4 §3 DISCARDED slots are simply never placed —
+            // css-overflow-4 §5.3 DISCARDED slots are simply never placed —
             // an unplaced Compose placeable draws nothing, which IS the
             // discard rendering.
             plan.slots.forEachIndexed { index, slot ->

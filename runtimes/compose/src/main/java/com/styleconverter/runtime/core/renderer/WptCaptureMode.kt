@@ -35,8 +35,9 @@ import androidx.compose.ui.graphics.compositeOver
  *   text nodes) must still render — see [shouldSuppressSynthesizedName].
  *
  * Follows the existing CompositionLocal pattern in this runtime
- * (`LocalCssVariables` in core/variables/CssVariableConfig.kt,
- * `LocalAccentColor` in color/AccentApplier.kt).
+ * (`LocalCssVariables` in core/variables/CssVariableConfig.kt; the second
+ * example this cited, `LocalAccentColor` in color/AccentApplier.kt, went
+ * with that file in the retro P2a dead-code sweep).
  */
 val LocalWptCaptureMode = compositionLocalOf { false }
 

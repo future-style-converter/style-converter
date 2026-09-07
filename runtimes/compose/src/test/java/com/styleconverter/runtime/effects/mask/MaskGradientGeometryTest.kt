@@ -5,7 +5,7 @@ package com.styleconverter.runtime.effects.mask
 // Two diagnosed Android mask divergences live here:
 //  - RADIAL: the old branch hardcoded a circle of radius min(w,h)/2,
 //    while CSS defaults to an ELLIPSE sized farthest-corner
-//    (css-images-3 §3.5) — on the 160×80 mask fixtures the fade died at
+//    (css-images-3 §3.2) — on the 160×80 mask fixtures the fade died at
 //    x=±40 where web reached the corners. radialMaskRadii mirrors
 //    ColorApplier's FARTHEST_CORNER geometry.
 //  - CONIC: the old branch used Brush.sweepGradient (0 at 3 o'clock, no

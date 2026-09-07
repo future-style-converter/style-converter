@@ -281,8 +281,19 @@ final class FloatRowPackingTests: XCTestCase {
 
     // ── Wave-20 fix 6 — the RTL double-mirror regression (002 live IR) ──
 
-    /// Repo-root anchored path to the REAL wave20-final per-test IR — the
-    /// same live-wire pattern ConformanceTests uses (#filePath hops).
+    /// Repo-root anchored path to the VENDORED per-test IR — the same
+    /// #filePath-hop pattern ConformanceTests uses.
+    ///
+    /// Retro R10 (finding A8#3): this pointed at
+    /// `tools/titan/runs/wave20-final/sections/css-grid/per-test-ir/…`, a
+    /// gitignored run directory pruned waves ago, behind an `XCTSkip` — so
+    /// the pin skipped on every sweep, on every machine, permanently rather
+    /// than hermetically. `tools/titan/fixtures/` (see its README) now
+    /// carries the byte-verbatim document — the wave49-final copy, which
+    /// `shasum -a 256` shows identical to wave47-final and wave48-final —
+    /// under its current corpus path (the WPT `abspos/` subdirectory is in
+    /// the stem: `wpt__css-grid__abspos__descendant-static-position-002`).
+    /// No skip guard: an absent fixture is now a real failure.
     private static var descendant002IR: URL {
         URL(fileURLWithPath: #filePath)               // …/FloatRowPackingTests.swift
             .deletingLastPathComponent()              // StyleConverterRuntimeTests/
@@ -290,17 +301,14 @@ final class FloatRowPackingTests: XCTestCase {
             .deletingLastPathComponent()              // swiftui/
             .deletingLastPathComponent()              // runtimes/
             .deletingLastPathComponent()              // repo root
-            .appendingPathComponent("tools/titan/runs/wave20-final/sections/css-grid/per-test-ir/"
-                + "wpt__css-grid__descendant-static-position-002.json")
+            .appendingPathComponent("tools/titan/fixtures/per-test-ir/wave49-final/css-grid/"
+                + "wpt__css-grid__abspos__descendant-static-position-002.json")
     }
 
     func testDescendantStaticPosition002RightRunKeepsFirstFloatRightmost() throws {
-        // Live-wire pin (skip-guarded like the web suites: hermetic
-        // checkouts without the run directory stay green).
+        // Live-wire pin over the vendored corpus document (no skip guard —
+        // the file is committed, so a missing or renamed fixture FAILS).
         let url = Self.descendant002IR
-        guard FileManager.default.fileExists(atPath: url.path) else {
-            throw XCTSkip("wave20-final run directory absent")
-        }
         let doc = try JSONDecoder().decode(IRDocument.self, from: Data(contentsOf: url))
         // The v2 decode slot-COMPOSES the flat wire (doc.components are
         // the composed roots), so the float pair lives nested under the
@@ -314,9 +322,13 @@ final class FloatRowPackingTests: XCTestCase {
         }
         walk(doc.components)
         // The abspos red box's two float children (green first, gray
-        // second — source order).
-        let green = try XCTUnwrap(found["descendant-static-position-002__0__0__0__0-031"])
-        let gray = try XCTUnwrap(found["descendant-static-position-002__0__0__0__1-032"])
+        // second — source order). The ids carry the WPT `abspos__`
+        // subdirectory segment, which the wave-20 spelling did not: TITAN
+        // derives component ids from the test path, and this test moved from
+        // css-grid/ to css-grid/abspos/ in the corpus. Matching the vendored
+        // document's own ids keeps the pin exact rather than positional.
+        let green = try XCTUnwrap(found["abspos__descendant-static-position-002__0__0__0__0-031"])
+        let gray = try XCTUnwrap(found["abspos__descendant-static-position-002__0__0__0__1-032"])
         // P10 facts off the REAL wire: both are Float:RIGHT (physical —
         // the grid root's Direction:RTL does not relabel a physical side).
         let facts = [green, gray].map {

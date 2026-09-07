@@ -85,9 +85,13 @@ object TypographyExtractor {
         // surface that this monolithic extractor (plus its TextEmphasis,
         // FontVariant, FontSynthesis companions) already handles, plus the
         // long tail of spec properties we parse but do not yet render on
-        // Compose. Registration here is what stops the legacy PropertyApplier
-        // switch from re-handling these IDs — rendering happens inside
-        // TextStyleApplier / TextFormattingApplier downstream.
+        // Compose. (Retro sweep P2a, A6#8/A6#7: registration "stops the
+        // legacy PropertyApplier switch from re-handling these IDs" was
+        // never true on Compose — nothing consults PropertyRegistry at
+        // render time, and both the `PropertyApplier` interface and
+        // `TextFormattingApplier` were unreferenced and are deleted.
+        // Rendering happens inside TextStyleApplier and, for the
+        // paragraph-level bits, ComponentRenderer's own text path.)
         //
         // Sibling extractors own the five sub-families we delegate to:
         //   typography/advanced → AlignmentBaseline, BaselineShift, …
@@ -103,6 +107,13 @@ object TypographyExtractor {
         PropertyRegistry.migrated(
             // ---- Core font descriptors (rendered via Compose TextStyle) ----
             "FontFamily", "FontSize", "FontWeight", "FontStyle", "FontStretch",
+            // Retrospective R3 (A7#4): `font-size-adjust` IS rendered — the
+            // used glyph size is scaled by the metric ratio (css-fonts-4 §2.6;
+            // FontSizeAdjust.kt, hooked in TextStyleApplier.extractTextStyle).
+            // It sat in the parse-only group below while the iOS twin applied
+            // it since fidelity wave 2, a false "migrated" claim the audit
+            // measured (zero corpus carriers, so no gate cell depended on it).
+            "FontSizeAdjust",
             // ---- Font variant / feature / synthesis ----
             // extractFontVariantConfig() and extractFontSynthesisConfig() below.
             "FontVariantCaps", "FontVariantLigatures", "FontVariantNumeric",
@@ -114,7 +125,7 @@ object TypographyExtractor {
             "FontSynthesisPosition",
             // ---- Font identity / metadata (no Compose analogue — parse-only) ----
             "FontDisplay", "FontLanguageOverride", "FontNamedInstance",
-            "FontPalette", "FontSizeAdjust", "FontSmooth",
+            "FontPalette", "FontSmooth",
             "FontMinSize", "FontMaxSize",
             // ---- Caret (routed to AccentExtractor for actual rendering but
             //      the IR property lives under typography so we claim it
@@ -129,7 +140,9 @@ object TypographyExtractor {
             "TextDecorationThickness", "TextUnderlineOffset", "TextUnderlinePosition",
             // TextDecorationSkip* are parse-only — Compose has no API for them.
             "TextDecorationSkip", "TextDecorationSkipInk",
-            // ---- Text emphasis (rendered via TextEmphasisApplier overlay) ----
+            // ---- Text emphasis (PARSE-ONLY on Compose: the overlay object
+            // this line credited, TextEmphasisApplier, had no caller and was
+            // deleted by the retro P2a sweep) ----
             "TextEmphasis", "TextEmphasisStyle", "TextEmphasisColor", "TextEmphasisPosition",
             // ---- Shadows, vertical-align, line-clamp ----
             "TextShadow", "VerticalAlign", "VerticalAlignLast",
@@ -223,7 +236,14 @@ object TypographyExtractor {
                 "TextIndent" -> config.copy(textIndent = extractTextIndent(data))
                 "WordSpacing" -> config.copy(wordSpacing = extractWordSpacing(data))
                 "WhiteSpace" -> config.copy(whiteSpace = extractWhiteSpace(data))
-                "LineClamp" -> config.copy(lineClamp = extractLineClamp(data))
+                // Retrospective R3 (A5#4): the count read stays as it was; the
+                // marker component (`no-ellipsis` / "") of the same declaration
+                // is folded alongside it through the shared LineClampWire reader
+                // — css-overflow-4 §5.1's two-value grammar, one declaration.
+                "LineClamp" -> config.copy(
+                    lineClamp = extractLineClamp(data),
+                    lineClampMarkerSuppressed = LineClampWire.markerSuppressed(data)
+                )
                 "MaxLines" -> config.copy(maxLines = extractMaxLines(data))
                 "TextShadow" -> config.copy(textShadow = extractTextShadow(data))
                 "VerticalAlign" -> config.copy(baselineShift = extractBaselineShift(data))

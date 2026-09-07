@@ -229,13 +229,18 @@ class IRDocumentDecoderTest {
      * img/embed/object/video, one canonical key whatever the markup spelled)
      * joins the strict attr key set and decodes as a VERBATIM string.
      *
-     * Why the decode is load-bearing here even though Compose does not yet
-     * PAINT the source: this decoder is strict on the attr key set, so a
-     * missing entry would make it THROW on a document the web consumer
-     * needs — the entire css-images object-fit family. Accepting the key is
-     * the wire contract; painting it is the named follow-up (a device cannot
-     * read the host's corpus, the same asymmetry the @font-face channel
-     * documents). TWIN of the iOS `ConformanceTests` replaced-source case.
+     * Why the decode is load-bearing: this decoder is strict on the attr key
+     * set, so a missing entry would make it THROW on a document the web
+     * consumer needs — the entire css-images object-fit family. Accepting
+     * the key is the wire contract, and it is a SEPARATE concern from
+     * painting, which is why this pin stays a pure decode assertion. Retro
+     * P2e (finding A6#15, phrase sweep) dropped the "even though Compose
+     * does not yet PAINT the source … painting it is the named follow-up"
+     * clause: that follow-up landed in wave 39 (lane A2). Compose paints it
+     * through `images/DocumentImageRegistry`, which the harness fills right
+     * after `IRDocumentDecoder.decode` from the files
+     * `tools/titan/feed-android.mjs pushReplacedImages` pushes into the
+     * app sandbox. TWIN of the iOS `ConformanceTests` replaced-source case.
      */
     @Test
     fun `v2 meta attrs src decodes verbatim for every replaced tag`() {

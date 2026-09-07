@@ -5,4 +5,3 @@
 // WHY widen: csstype has no `anchor-name` entry — https://drafts.csswg.org/css-anchor-position-1/#name-defining.
 export interface AnchorNameConfig { value?: string; }
 export const ANCHOR_NAME_PROPERTY_TYPE = 'AnchorName' as const;
-export type AnchorNamePropertyType = typeof ANCHOR_NAME_PROPERTY_TYPE;

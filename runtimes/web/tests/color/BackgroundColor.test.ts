@@ -1,5 +1,8 @@
 // BackgroundColor — extractor + applier coverage against the fixture shapes
-// observed under examples/properties/colors/*.
+// observed under fixtures/properties/color/* (retro P2e: the directory was
+// `examples/properties/colors/` — both halves moved, `examples/` ->
+// `fixtures/` in restructure 02e4c457 and the plural `colors` folded into
+// the canonical singular category `color`).
 import { describe, it, expect } from 'vitest';
 import { extractBackgroundColor } from '../../src/engine/color/BackgroundColorExtractor';
 import { applyBackgroundColor } from '../../src/engine/color/BackgroundColorApplier';

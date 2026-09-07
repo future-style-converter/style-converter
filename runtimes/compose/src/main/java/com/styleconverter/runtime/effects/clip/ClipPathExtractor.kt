@@ -50,11 +50,34 @@ import kotlinx.serialization.json.jsonPrimitive
 object ClipPathExtractor {
 
     init {
-        // Phase 8 registration. Claim ClipPath + the legacy `clip` rect() form +
-        // the two clip-path geometry/fill-rule modifiers. ClipPathGeometryBox
-        // and ClipRule don't yet affect the rendered Shape (TODO in the
-        // applier) but are claimed here so coverage reporting is honest — the
-        // IR is consumed, just not every variant is mapped yet.
+        // Phase 8 registration. Claim ClipPath + the legacy `clip` rect() form
+        // + the two clip-path geometry/fill-rule modifiers. Retro P2e (finding
+        // A6#15) rewrote what follows: it said BOTH modifiers "don't yet
+        // affect the rendered Shape (TODO in the applier)", and
+        // ClipPathApplier.kt has no TODO at all — one of the two claims had
+        // also stopped being true. Where each actually stands:
+        //  • the `<geometry-box>` (css-masking-1 §5.1 "Clipping Shape: the
+        //    clip-path property", which is where the production and the
+        //    border-box default live — NOT the §7.1 this file's neighbouring
+        //    comments cite; §7 is Positioned Masks, retro finding A3#5) IS
+        //    honoured since wave 46 (lane Y4). It is read off the
+        //    `ClipPath` payload's own
+        //    `geometry-box` key in the loop below, into ClipPathConfig
+        //    .geometryBox. The standalone `ClipPathGeometryBox` PROPERTY type
+        //    claimed here is still unread; nothing in the corpus emits one
+        //    (the converter parses `clip-path-geometry-box` as its own
+        //    longhand, and MEASURED zero occurrences across all 1435
+        //    wave49-final per-test IR documents).
+        //  • `ClipRule` (`clip-rule`, the nonzero/evenodd winding rule —
+        //    css-masking-1 §6.2 "Winding Rules: the clip-rule property") is
+        //    CLAIMED, NOT CONSUMED: `grep -rni clipRule runtimes/compose/src/
+        //    main` finds this registration line and nothing else, so an
+        //    `evenodd` polygon self-intersection renders as `nonzero` here.
+        //    Both twins do read it (Swift ClipConfig.rule / ClipExtractor,
+        //    web ClipRuleApplier), so this is a live Compose-side gap — again
+        //    with zero corpus carriers, which is why no gate cell shows it.
+        // The claims stay so PropertyRegistry.allRegistered() keeps reporting
+        // the family as owned; this comment is what keeps that honest.
         PropertyRegistry.migrated(
             "ClipPath",
             "Clip",
@@ -82,7 +105,7 @@ object ClipPathExtractor {
         var clipPathShape: ClipShape? = null
         var legacyRect: ClipShape.LegacyRect? = null
         var positionKeyword: String? = null
-        // css-masking-1 §7.1 `<geometry-box>` — border-box unless the wire
+        // css-masking-1 §5.1 `<geometry-box>` — border-box unless the wire
         // names another (alone, or next to a shape).
         var geometryBox = ClipGeometryBox.BORDER_BOX
         for ((type, data) in properties) {
@@ -122,7 +145,7 @@ object ClipPathExtractor {
                 "Position" -> positionKeyword = ValueExtractors.extractKeyword(data)?.uppercase()
             }
         }
-        // Modern `clip-path` always applies (css-masking-1 §7). The box
+        // Modern `clip-path` always applies (css-masking-1 §5.1). The box
         // metrics are read only once a clip exists — this extractor runs for
         // every component and the margin/border/padding/radius/position
         // reads would otherwise tax the whole corpus for nothing.

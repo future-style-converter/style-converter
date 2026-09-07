@@ -26,11 +26,4 @@ enum AccentColorConfig: Equatable {
     // Concrete colour. Dynamic variants (color-mix, light-dark) are
     // currently unsupported for accent — see the applier comment.
     case color(ColorValue)
-
-    // True when the applier should touch the view hierarchy. Only the
-    // `.color` case changes output; `.auto` defers to the environment.
-    var hasEffect: Bool {
-        if case .color = self { return true }
-        return false
-    }
 }

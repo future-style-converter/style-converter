@@ -302,7 +302,7 @@ object ObjectFitApplier {
                 intrinsicWidth.toFloat() to intrinsicHeight.toFloat()
             } else {
                 // Natural size is larger — or unknowable (either probe
-                // refused): css-images-3 §5.4 scale-down is the smaller of
+                // refused): css-images-3 §4.5 scale-down is the smaller of
                 // none/contain, and with no knowable natural size contain is
                 // the bound that cannot overflow the box.
                 containWidth to containHeight

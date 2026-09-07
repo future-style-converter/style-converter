@@ -8,4 +8,3 @@
 
 export interface FilterConfig { value?: string; }                                  // pre-serialised
 export const FILTER_PROPERTY_TYPE = 'Filter' as const;
-export type FilterPropertyType = typeof FILTER_PROPERTY_TYPE;

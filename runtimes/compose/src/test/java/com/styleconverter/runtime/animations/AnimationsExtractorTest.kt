@@ -3,7 +3,7 @@ package com.styleconverter.runtime.animations
 // Phase 9 extractor tests. Exercises the existing AnimationExtractor and
 // the cross-cutting parts of ScrollTimelineExtractor / ViewTimelineExtractor
 // with IR shapes pulled verbatim from
-// examples/properties/animations/*.json conversions (dump commands in the
+// fixtures/properties/animations/*.json conversions (dump commands in the
 // PR description). Keeping test inputs aligned with real parser output
 // avoids the classic "unit test passes, integration breaks" pitfall when a
 // parser IR shape drifts.

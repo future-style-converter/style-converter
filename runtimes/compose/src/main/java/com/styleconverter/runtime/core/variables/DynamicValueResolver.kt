@@ -8,7 +8,7 @@ package com.styleconverter.runtime.core.variables
 // extraction. The whole style pipeline (StyleApplier → facades → appliers)
 // is pure non-composable code, so routing var()/calc()/em/rem through it
 // per-property would have meant touching every extractor. Rewriting the
-// IRProperty list ONCE — var() substituted per css-variables-1 §2.3,
+// IRProperty list ONCE — var() substituted per css-variables-1 §3,
 // calc()/min()/max()/clamp() evaluated with a real EvalContext, relative
 // units resolved against the live font-size / containing-block channels —
 // lets every downstream applier keep its frozen px-shape contract.
@@ -17,7 +17,7 @@ package com.styleconverter.runtime.core.variables
 // substitution, and dynamic expressions"):
 //   1. element scope → slot-parent chain (CssVariableScope merge, child
 //      shadows parent — provided by the renderer's LocalCssVariables)
-//   2. fallback, nested per css-variables-1 §2.3 (CssVariableResolver)
+//   2. fallback, nested per css-variables-1 §3 (CssVariableResolver)
 //   3. guaranteed-invalid ⇒ UNSET: the declaration is dropped from the
 //      list, which renders as the property's absent/default behaviour
 //      (transparent background, auto size) — the same pixels web paints.
@@ -91,7 +91,7 @@ object DynamicValueResolver {
      *    (the runtime's px==dp space) for vw/vh/vmin/vmax.
      *  - [parentFontSizePx]: the inheritance channel's font-size — the em
      *    base for the element's OWN font-size declaration (css-values-4
-     *    §5.1.1: em on font-size is relative to the INHERITED size).
+     *    §6.1.1: em on font-size is relative to the INHERITED size).
      *  - [rootFontSizePx]: rem base. RESIDUAL CONSTANT — the harness never
      *    styles the root element, so 16px (the browser default the web
      *    reference inherits) is the honest value until a root-font channel
@@ -165,7 +165,7 @@ object DynamicValueResolver {
     ): Resolution {
         val scope = CssVariableScope(variables)
         // Own font-size FIRST: it is the em base for every other property
-        // (css-values-4 §5.1.1), while its own em/% resolve against the
+        // (css-values-4 §6.1.1), while its own em/% resolve against the
         // PARENT size (the inheritance channel).
         val fontSizePx = resolveOwnFontSize(properties, scope, ctx)
         // Fast path — identical list instance out when nothing is dynamic.
@@ -381,7 +381,7 @@ object DynamicValueResolver {
 
     /**
      * The element's own font size in px: the FontSize declaration resolved
-     * against the PARENT base (em/% per css-values-4 §5.1.1), falling back
+     * against the PARENT base (em/% per css-values-4 §6.1.1), falling back
      * to the inherited size itself. Post-merge property lists already
      * contain the parent's RESOLVED px FontSize when the element declared
      * none, so the px branch covers plain inheritance.
@@ -423,6 +423,26 @@ object DynamicValueResolver {
         if (v != null && u != null) {
             val px = convertRelativeToPx(v, u, emBase, percentBase, ctx)
             return if (px != null) Outcome.Px(px) else Outcome.Keep
+        }
+        // Percentage envelope — {"type":"percentage","value":N}. The converter
+        // emits it for a `%` it cannot pre-resolve; on FontSize that is
+        // `font-size: 200%` → {"original":{"type":"percentage","value":200}}
+        // (verbatim: wave49-final css-color/currentcolor-002's outer div).
+        // css-fonts-4 §2.5 / css-values-4 §5.5: a percentage font-size
+        // resolves against the INHERITED size — the [percentBase] the FontSize
+        // callers thread (ctx.parentFontSizePx). Before this branch the shape
+        // fell through to Keep, so resolveOwnFontSize answered the PARENT's
+        // 16px and every em on the element (Width/Height 6em) resolved to 96
+        // instead of 192 — the wave-49 Android residual on currentcolor-001/
+        // -002 (Android-web 0.8957; iOS 0.9990). Retrospective R3 (A3#0).
+        // Callers with no % base threaded (LineHeight's / Opacity's envelopes
+        // — 48 corpus carriers each — pass null) still Keep: nothing guessed.
+        if ((original["type"] as? JsonPrimitive)?.contentOrNull == "percentage") {
+            // The percentage magnitude; a malformed envelope keeps the wire.
+            val pct = (original["value"] as? JsonPrimitive)?.doubleOrNull ?: return Outcome.Keep
+            // No base for this property → untouched, exactly as before.
+            val base = percentBase ?: return Outcome.Keep
+            return Outcome.Px((pct * base / 100.0).toFloat())
         }
         // Nested expression (FontSize: {"original":{"type":"expression","expr":…}}).
         val expr = (original["expr"] as? JsonPrimitive)?.takeIf { it.isString }?.content

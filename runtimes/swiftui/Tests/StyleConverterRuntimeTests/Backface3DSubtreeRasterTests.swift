@@ -158,12 +158,14 @@ final class Backface3DSubtreeRasterTests: XCTestCase {
 
     // MARK: - B-RC4 pin: the full hidden-001 tree paints correctly
 
-    /// Green face perspective-projected, red face culled, on the exact
-    /// live wire. Expected green quad from the CSS §13.1 math (origin at
-    /// the container center (100,100), P(1000)·rotateY(45°)): face X
-    /// spans ±50 about the origin, so the projected horizontal edges are
-    /// x' = ∓35.36/(1 ∓ 0.0354) → raster x ≈ [63, 134], and the keystone
-    /// stretches the near edge to y ≈ [48, 152] (far edge ≈ [52, 148]).
+    /// Green face orthographically flattened, red face culled, on the exact
+    /// live wire. css-transforms-2 §8 / §4.1.1: the container's `perspective`
+    /// PROPERTY is its CHILDREN's perspective, never a factor of its OWN
+    /// rotateY(45°) (retro F3 — the wave-5 seed folded it in and this pin
+    /// asserted the resulting keystone, y ≈ [48, 152]; the frozen WPT ref
+    /// draws exactly 100 rows in every column). §4.1 flatten: face X spans
+    /// ±50 about the origin (100,100) → x' = 100 ∓ 50·cos45 = [64.6, 135.4]
+    /// → raster x ≈ [65, 134]; y is untouched → raster y ≈ [50, 149].
     @MainActor
     func testHidden001GreenFaceProjectedAndRedFaceCulled() throws {
         let img = try renderStage(try hidden001Container())
@@ -176,10 +178,10 @@ final class Backface3DSubtreeRasterTests: XCTestCase {
         XCTAssertEqual(s.red, 0, "red backface leaked through culling")
         // 3. Geometry: the green quad sits at the CSS-projected bbox
         //    (±4px tolerance for the projective edge antialiasing).
-        XCTAssertEqual(box.minX, 63, accuracy: 4, "left edge off projection")
-        XCTAssertEqual(box.maxX, 134, accuracy: 4, "right edge off projection")
-        XCTAssertEqual(box.minY, 48, accuracy: 4, "top edge off projection")
-        XCTAssertEqual(box.maxY, 152, accuracy: 4, "bottom edge off projection")
+        XCTAssertEqual(box.minX, 65, accuracy: 4, "left edge off the orthographic flatten")
+        XCTAssertEqual(box.maxX, 134, accuracy: 4, "right edge off the orthographic flatten")
+        XCTAssertEqual(box.minY, 50, accuracy: 2, "top edge keystoned — the property must not project the element itself")
+        XCTAssertEqual(box.maxY, 149, accuracy: 2, "bottom edge keystoned — the property must not project the element itself")
         // 4. Coverage sanity: the projected quad area is ≈ 71 × 100+ —
         //    demand most of it (no hairline or single-row artifacts).
         XCTAssertGreaterThan(s.green, 5000, "green ink far below projected quad area")
@@ -223,7 +225,7 @@ final class Backface3DSubtreeRasterTests: XCTestCase {
     /// Documents the removal rationale in executable form; if SwiftUI
     /// ever changes drawingGroup's clipping, this pin flags it for
     /// re-evaluation (the removal stays correct either way — CSS never
-    /// flattens or clips at a preserve-3d boundary, css-transforms-2 §4).
+    /// flattens or clips at a preserve-3d boundary, css-transforms-2 §7).
     @MainActor
     func testDrawingGroupClipsZeroHeightOverlaySubtree() throws {
         // The hidden-001 preserve-3d DIV skeleton: 200×0 flow box whose

@@ -1,6 +1,6 @@
 // LineBreakExtractor.ts — folds `LineBreak` IR properties into a LineBreakConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { LineBreakConfig, LINE_BREAK_PROPERTY_TYPE, LineBreakPropertyType } from './LineBreakConfig';
 import { kwLower } from './_shared';

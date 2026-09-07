@@ -26,7 +26,17 @@
 # emulator instance wants ~2-3 GB while simulators are lightweight processes;
 # more Android instances than RAM allows makes the whole pool SLOWER (swap).
 #
-# usage: provision-devices.sh [--android N] [--ios N] [--avd NAME]
+# usage: provision-devices.sh [--android N] [--ios N] [--avd NAME] [--restart-fleet]
+#
+# retro R8b (A9#6) — two idempotence repairs:
+#   * iOS: Shutdown `titan-pool-*` simulators from a previous run are BOOTED
+#     before any new one is created; new ones get a unique `titan-pool-<n>-
+#     <utc>` name. Creating fresh sims on every run (each a fresh CoreSimulator
+#     data dir) is the mechanism behind BACKLOG #6's 81-sim / 38 GB disk
+#     exhaustion that killed the first wave-49 Android column.
+#   * Android: the writable-emulator restart kills only emulators THIS script
+#     launched (pids in $POOL_ROOT/emulator-pids); killing every qemu on the
+#     host — other sessions' emulators included — now needs --restart-fleet.
 #
 set -euo pipefail
 
@@ -38,14 +48,16 @@ IOS_DIR="$REPO_ROOT/apps/ios-harness"
 APK="$REPO_ROOT/apps/android-harness/app/build/outputs/apk/debug/app-debug.apk"
 APP="$IOS_DIR/build/Build/Products/Debug-iphonesimulator/StyleConverterTest.app"
 
-WANT_ANDROID=2
-WANT_IOS=3
+WANT_ANDROID="${WANT_ANDROID:-2}"   # retro 2026-09-06: overridable — on this host the SECOND concurrent -read-only instance of the AVD wedged in 4 of 5 gate attempts (adbd never answered / app vanished); gates run WANT_ANDROID=1
+WANT_IOS="${WANT_IOS:-3}"
 AVD_NAME=""
+RESTART_FLEET=0   # retro R8b (A9#6): opt-in to killing emulators this script did not launch
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --android) WANT_ANDROID="$2"; shift 2 ;;
     --ios)     WANT_IOS="$2"; shift 2 ;;
     --avd)     AVD_NAME="$2"; shift 2 ;;
+    --restart-fleet) RESTART_FLEET=1; shift ;;
     -h|--help) grep '^#' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
     *) echo "unknown arg: $1" >&2; exit 2 ;;
   esac
@@ -105,15 +117,68 @@ xcodebuild \
 # fleet read-only. Consequence of -read-only (temporary disk overlay):
 # installs do NOT persist across emulator restarts — re-run this script
 # after any emulator restart.
-_booted_serials() { "$ADB" devices | awk '$2=="device" && $1 ~ /^emulator-/ {print $1}'; }
+# Retro 2026-09-06: the adb SERVER wedges on this host (an `adb devices` hung 48 min inside this
+# script, 49 min inside section-runner). Every device listing is bounded and, on a timeout,
+# restarts the server DETACHED (a server spawned from a pipeline inherits its fds) and retries once.
+_adb_devices() {
+  local out=""
+  for _a in 1 2; do
+    if out=$(perl -e 'alarm 20; exec @ARGV' "$ADB" devices </dev/null 2>/dev/null); then printf '%s\n' "$out"; return 0; fi
+    perl -e 'alarm 10; exec @ARGV' "$ADB" kill-server </dev/null >/dev/null 2>&1; pkill -9 -x adb 2>/dev/null; sleep 1
+    nohup "$ADB" start-server >/dev/null 2>&1 </dev/null; sleep 2
+  done
+  printf '%s\n' "$out"
+}
+_booted_serials() { _adb_devices | awk '$2=="device" && $1 ~ /^emulator-/ {print $1}'; }
+# retro R8b (A9#6): the emulators THIS script launched, by pid. The old
+# `pkill -f qemu-system` killed EVERY emulator on the host — including
+# instances owned by other sessions (cross-session emulator contention is a
+# recorded project hazard). Launch pids are appended to $EMU_PIDS_FILE at
+# launch time; the restart branch below kills only those unless the operator
+# passed --restart-fleet. The emulator launcher may exec into qemu (same pid)
+# or fork it (child pid), so both the recorded pid and its children count.
+EMU_PIDS_FILE="$POOL_ROOT/emulator-pids"
+_our_live_emulator_pids() {
+  [[ -f "$EMU_PIDS_FILE" ]] || return 0
+  local p
+  while read -r p; do
+    [[ "$p" =~ ^[0-9]+$ ]] || continue            # ignore garbage lines
+    kill -0 "$p" 2>/dev/null && echo "$p"         # still alive → ours
+    pgrep -P "$p" 2>/dev/null || true             # its qemu child, if forked
+  done < "$EMU_PIDS_FILE"
+}
 CUR=$(_booted_serials | wc -l | tr -d ' ')
 if (( CUR < WANT_ANDROID )) && (( CUR > 0 )); then
-  QPID=$(pgrep -f 'qemu-system' | head -1 || true)
-  if [[ -n "$QPID" ]] && ! ps -o command= -p "$QPID" | grep -q -- '-read-only'; then
-    log "running emulator is WRITABLE (blocks extra instances) — restarting Android fleet read-only…"
-    pkill -f 'qemu-system' || true
-    sleep 5
-    CUR=0
+  # Every qemu whose command line lacks -read-only is a WRITABLE instance and
+  # blocks additional -read-only launches of the same AVD.
+  WRITABLE=""
+  for q in $(pgrep -f 'qemu-system' || true); do
+    ps -o command= -p "$q" 2>/dev/null | grep -q -- '-read-only' || WRITABLE="$WRITABLE $q"
+  done
+  if [[ -n "$WRITABLE" ]]; then
+    OURS=" $(_our_live_emulator_pids | tr '\n' ' ')"
+    FOREIGN=""
+    for q in $WRITABLE; do [[ "$OURS" == *" $q "* ]] || FOREIGN="$FOREIGN $q"; done
+    if (( RESTART_FLEET )); then
+      # The operator asked for it explicitly — this is the only path that may
+      # take down emulators this script never started.
+      log "writable emulator(s) [$WRITABLE ] block extra instances — --restart-fleet: restarting the WHOLE Android fleet read-only…"
+      pkill -f 'qemu-system' || true   # --restart-fleet ONLY: kills other sessions' emulators too
+      sleep 5
+      CUR=0
+    elif [[ -z "$FOREIGN" ]]; then
+      # Every writable instance is one we launched: restart just those.
+      log "writable emulator(s) [$WRITABLE ] were launched by this script — restarting them read-only…"
+      kill $WRITABLE 2>/dev/null || true   # unquoted on purpose: a space-separated pid list
+      sleep 5
+      CUR=$(_booted_serials | wc -l | tr -d ' ')
+    else
+      # A foreign writable emulator: never kill it silently. Continue with the
+      # smaller pool (section-runner just gets fewer Android slots) and say
+      # exactly which flag would change that and what it costs.
+      log "WARNING: writable emulator(s) [$FOREIGN ] NOT launched by this script block extra -read-only instances — continuing with the $CUR booted. Pass --restart-fleet to kill them (that also kills other sessions' emulators)."
+      WANT_ANDROID=$CUR
+    fi
   fi
 fi
 if (( CUR < WANT_ANDROID )); then
@@ -129,6 +194,7 @@ if (( CUR < WANT_ANDROID )); then
     log "launching emulator instance $((i+1))/$WANT_ANDROID of AVD '$AVD_NAME' (read-only, headless) → $ELOG"
     nohup "$EMU" -avd "$AVD_NAME" -read-only -no-window -no-audio -no-boot-anim \
       -no-snapshot -gpu swiftshader_indirect >"$ELOG" 2>&1 &
+    echo $! >> "$EMU_PIDS_FILE"   # retro R8b (A9#6): remembered so a later restart kills only OUR instances
     disown || true
   done
   # Bounded wait for the fleet to boot (cold boots under -read-only: ~60-90s
@@ -139,7 +205,9 @@ if (( CUR < WANT_ANDROID )); then
   for (( t=0; t<240; t+=5 )); do
     READY=0
     for s in $(_booted_serials); do
-      [[ "$("$ADB" -s "$s" shell getprop sys.boot_completed 2>/dev/null | tr -d '\r')" == "1" ]] && READY=$((READY+1))
+      # retro 2026-09-06: BOUNDED — an instance whose adbd never answers made this poll hang 30+ min
+      # (attempt 5 of the retro gate); the outer 240s budget only bounds the loop, not one call.
+      [[ "$(_bounded 15 "$ADB" -s "$s" shell getprop sys.boot_completed 2>/dev/null </dev/null | tr -d '\r')" == "1" ]] && READY=$((READY+1))
     done
     (( READY >= WANT_ANDROID )) && break
     sleep 5
@@ -167,7 +235,12 @@ for s in $(_booted_serials); do
   if (( ! PM_OK )); then log "WARNING: $s package service never came up — skipping"; continue; fi
   INSTALLED=0
   for attempt in 1 2 3; do
-    if _bounded 120 "$ADB" -s "$s" install -r "$APK" >/dev/null 2>&1; then INSTALLED=1; break; fi
+    # Retro gate 2026-09-06: `adb install` exits 0 even when it prints `Failure [...]`
+    # (seen on an API-36.1 read-only instance whose external dir was wedged): the
+    # pool was declared ready with NO app on emulator-5554 and every section fed it
+    # to a 0/48 Android column. Success is the package being PRESENT, not adb's rc.
+    if _bounded 120 "$ADB" -s "$s" install -r "$APK" >/dev/null 2>&1 \
+       && [ -n "$(_bounded 30 "$ADB" -s "$s" shell pm path com.styleconverter.test 2>/dev/null </dev/null)" ]; then INSTALLED=1; break; fi
     log "install attempt $attempt on $s failed — retrying in 10s…"
     sleep 10
   done
@@ -192,7 +265,28 @@ mv "$POOL_ROOT/provisioned-android.tmp" "$POOL_ROOT/provisioned-android"
 
 # ── 3. iOS fleet ─────────────────────────────────────────────────────────────
 _booted_udids() { xcrun simctl list devices booted | grep -oE '\([0-9A-F-]{36}\)' | tr -d '()'; }
+# retro R8b (A9#6): REUSE before CREATE. Every run that found fewer than
+# WANT_IOS booted sims used to `simctl create` new devices — each a fresh
+# CoreSimulator data dir — even when Shutdown titan-pool-* sims from the
+# previous run were sitting right there (this host carries titan-pool-1 and
+# titan-pool-2 TWICE each). That is the mechanism behind BACKLOG #6's "81 sims
+# → 5, CoreSimulator 38G → 11G" disk exhaustion. Boot the existing pool sims
+# first — bounded, a wedged sim must not hang the run — then create only the
+# remaining shortfall. `unavailable` sims (runtime gone) are skipped: they
+# cannot boot and `simctl delete unavailable` is the operator's job.
+_shutdown_pool_udids() {
+  xcrun simctl list devices 2>/dev/null | grep -E 'titan-pool-[0-9]+' | grep '(Shutdown)' \
+    | grep -v unavailable | grep -oE '[0-9A-F-]{36}'
+}
 CUR=$(_booted_udids | wc -l | tr -d ' ')
+if (( CUR < WANT_IOS )); then
+  for u in $(_shutdown_pool_udids || true); do
+    (( $(_booted_udids | wc -l | tr -d ' ') >= WANT_IOS )) && break
+    log "reusing Shutdown pool simulator $u (simctl boot)…"
+    _bounded 60 xcrun simctl boot "$u" || log "WARNING: simctl boot of pool sim $u timed out/failed — trying the next"
+  done
+  CUR=$(_booted_udids | wc -l | tr -d ' ')   # re-count: the create loop below fills only what is still missing
+fi
 if (( CUR < WANT_IOS )); then
   # Create new sims of the SAME device type + runtime as the booted iPhone so
   # the whole pool renders identically. simctl clone needs a Shutdown source;
@@ -209,8 +303,12 @@ if (( CUR < WANT_IOS )); then
     process.exit(1);' "$BASE_UDID")
   DEVTYPE="${PAIR%%$'\t'*}" ; RUNTIME="${PAIR##*$'\t'}"
   for (( i=CUR; i<WANT_IOS; i++ )); do
-    log "creating + booting extra simulator $((i+1))/$WANT_IOS (titan-pool-$i, $DEVTYPE)…"
-    U=$(_bounded 60 xcrun simctl create "titan-pool-$i" "$DEVTYPE" "$RUNTIME") || { log "WARNING: simctl create timed out — continuing with fewer sims"; continue; }
+    # retro R8b (A9#6): a UNIQUE name (index + UTC stamp). A re-run must never
+    # mint a second device under an existing pool name — the reuse loop above
+    # finds every past pool sim by the `titan-pool-<n>` prefix regardless.
+    NAME="titan-pool-$i-$(date -u +%Y%m%dT%H%M%SZ)"
+    log "creating + booting extra simulator $((i+1))/$WANT_IOS ($NAME, $DEVTYPE)…"
+    U=$(_bounded 60 xcrun simctl create "$NAME" "$DEVTYPE" "$RUNTIME") || { log "WARNING: simctl create timed out — continuing with fewer sims"; continue; }
     _bounded 60 xcrun simctl boot "$U" || log "WARNING: simctl boot of $U timed out — it may still come up"
   done
   # Bounded boot wait. NEVER use `simctl bootstatus -b` here: on some

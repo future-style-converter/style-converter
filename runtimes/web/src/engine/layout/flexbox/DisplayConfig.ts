@@ -9,4 +9,3 @@ export interface DisplayConfig {
 
 // Name exported for tests + registry assertions (no magic strings).
 export const DISPLAY_PROPERTY_TYPE = 'Display' as const;
-export type DisplayPropertyType = typeof DISPLAY_PROPERTY_TYPE;

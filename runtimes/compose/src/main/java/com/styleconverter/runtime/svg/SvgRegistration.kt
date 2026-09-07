@@ -9,7 +9,11 @@ package com.styleconverter.runtime.svg
 // which only matter inside an actual <svg> subtree which our renderer does
 // not yet support on Android.
 //
-// Parser-gap notes (see examples/properties/README-phase10.md):
+// Parser-gap notes. `examples/properties/README-phase10.md`, cited here
+// until retro P2e, was deleted by the 2026-07-08 restructure (commit
+// 02e4c457, `examples/` -> `fixtures/`) with no replacement; the surviving
+// variant matrix is `fixtures/properties/svg/longtail.json` (87
+// components over these 34 properties):
 //   * Cx/Cy/R/Rx/Ry/X/Y never fail — parser always returns a property
 //     (raw fallback). Appliers must validate the stored value.
 //   * D returns null only for the empty string; anything else is stored as

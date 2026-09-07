@@ -1,5 +1,12 @@
 package app.parsing.css.properties.shorthands
 
+// A6#14 — clone consolidation: this expander used to carry private
+//   `splitPreservingFunctions` (3 identical copies), byte-identical to TokenizationUtils.tokenizeByWhitespace
+//   — its 3 call sites now call the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
+
 /**
  * Expands the `scroll-padding` shorthand property.
  *
@@ -8,7 +15,7 @@ package app.parsing.css.properties.shorthands
  */
 object ScrollPaddingExpander : ShorthandExpander {
     override fun expand(value: String): Map<String, String> {
-        val parts = splitPreservingFunctions(value.trim())
+        val parts = TokenizationUtils.tokenizeByWhitespace(value.trim())
 
         return when (parts.size) {
             1 -> mapOf(
@@ -39,27 +46,6 @@ object ScrollPaddingExpander : ShorthandExpander {
         }
     }
 
-    private fun splitPreservingFunctions(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var current = StringBuilder()
-        var parenDepth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> { parenDepth++; current.append(char) }
-                char == ')' -> { parenDepth--; current.append(char) }
-                char.isWhitespace() && parenDepth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) result.add(current.toString())
-        return result
-    }
 }
 
 /**
@@ -67,7 +53,7 @@ object ScrollPaddingExpander : ShorthandExpander {
  */
 object ScrollPaddingBlockExpander : ShorthandExpander {
     override fun expand(value: String): Map<String, String> {
-        val parts = splitPreservingFunctions(value.trim())
+        val parts = TokenizationUtils.tokenizeByWhitespace(value.trim())
 
         return when (parts.size) {
             1 -> mapOf(
@@ -82,27 +68,6 @@ object ScrollPaddingBlockExpander : ShorthandExpander {
         }
     }
 
-    private fun splitPreservingFunctions(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var current = StringBuilder()
-        var parenDepth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> { parenDepth++; current.append(char) }
-                char == ')' -> { parenDepth--; current.append(char) }
-                char.isWhitespace() && parenDepth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) result.add(current.toString())
-        return result
-    }
 }
 
 /**
@@ -110,7 +75,7 @@ object ScrollPaddingBlockExpander : ShorthandExpander {
  */
 object ScrollPaddingInlineExpander : ShorthandExpander {
     override fun expand(value: String): Map<String, String> {
-        val parts = splitPreservingFunctions(value.trim())
+        val parts = TokenizationUtils.tokenizeByWhitespace(value.trim())
 
         return when (parts.size) {
             1 -> mapOf(
@@ -125,25 +90,4 @@ object ScrollPaddingInlineExpander : ShorthandExpander {
         }
     }
 
-    private fun splitPreservingFunctions(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var current = StringBuilder()
-        var parenDepth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> { parenDepth++; current.append(char) }
-                char == ')' -> { parenDepth--; current.append(char) }
-                char.isWhitespace() && parenDepth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-        if (current.isNotEmpty()) result.add(current.toString())
-        return result
-    }
 }

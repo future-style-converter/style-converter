@@ -1,6 +1,6 @@
 package app.parsing.css.properties.longhands.sizing
 
-// Wave 42 (lane W3) — css-values-5 §10.1 `calc-size()` typed parsing.
+// Wave 42 (lane W3) — css-values-5 §11 `calc-size()` typed parsing.
 //
 // Every rawValue below is VERBATIM from the wave41-final css-values per-test
 // IRs (tools/titan/runs/wave41-final/sections/css-values/per-test-ir), where

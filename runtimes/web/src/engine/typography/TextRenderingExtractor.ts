@@ -1,6 +1,6 @@
 // TextRenderingExtractor.ts — folds `TextRendering` IR properties into a TextRenderingConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextRenderingConfig, TEXT_RENDERING_PROPERTY_TYPE, TextRenderingPropertyType } from './TextRenderingConfig';
 import { kwLower } from './_shared';

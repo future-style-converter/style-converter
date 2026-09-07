@@ -1,6 +1,6 @@
 // TextJustifyExtractor.ts — folds `TextJustify` IR properties into a TextJustifyConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextJustifyConfig, TEXT_JUSTIFY_PROPERTY_TYPE, TextJustifyPropertyType } from './TextJustifyConfig';
 import { kwLower } from './_shared';

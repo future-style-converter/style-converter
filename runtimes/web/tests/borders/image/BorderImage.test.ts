@@ -1,5 +1,5 @@
 // BorderImage — coverage for the 5 BorderImage* triplets.
-// Fixture: examples/properties/borders/border-image.json.
+// Fixture: fixtures/properties/borders/border-image.json.
 import { describe, it, expect } from 'vitest';
 import { extractBorderImageSource } from '../../../src/engine/borders/image/BorderImageSourceExtractor';
 import { applyBorderImageSource }   from '../../../src/engine/borders/image/BorderImageSourceApplier';

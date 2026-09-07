@@ -1,5 +1,5 @@
 // Tests for SizeExtractor — covers every IR shape observed across the six
-// examples/properties/sizing/*.json fixtures after the Kotlin converter.
+// fixtures/properties/sizing/*.json fixtures after the Kotlin converter.
 import { describe, it, expect } from 'vitest';
 import { extractSize } from '../../src/engine/sizing/SizeExtractor';
 

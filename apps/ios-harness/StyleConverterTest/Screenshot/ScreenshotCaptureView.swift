@@ -227,13 +227,11 @@ private func tryStringValue(_ v: IRValue) -> String? {
     return nil
 }
 
-/// Helper: extract a Double from an IRValue that may be a bare `.int`/
-/// `.double` or an `.object` wrapping `{value: <Number>}`.
-private func tryNumericValue(_ v: IRValue) -> Double? {
-    if let d = v.doubleValue { return d }
-    if let inner = v["value"], let d = inner.doubleValue { return d }
-    return nil
-}
+// Retro P2b (A6#10): `tryNumericValue` — a bare/`{value:}` Double reader —
+// was deleted here as zero-reference. `tryStringValue` above and
+// `tryOpacityValue` below are the two carriers this file actually reads;
+// the numeric one had no call site (the runtime's own
+// StyleEngine/core/types/NumberValue.swift owns that job).
 
 /// Helper: extract an opacity scalar from an IRValue. Handles all three
 /// carrier shapes the IR has used historically:

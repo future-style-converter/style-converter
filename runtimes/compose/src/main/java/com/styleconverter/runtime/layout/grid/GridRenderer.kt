@@ -201,7 +201,7 @@ object GridRenderer {
             }
         }
 
-        // Container-level item alignment defaults (css-align-3 §6.2/§6.4):
+        // Container-level item alignment defaults (css-align-3 §7.1/§7.2):
         // justify-self:auto resolves to the container's justify-items;
         // align-self:auto resolves to the container's align-items. These
         // fallbacks are what PL_GridJustifyOverride pinned — `d` (no
@@ -212,7 +212,7 @@ object GridRenderer {
 
         // Wave-19 RC-A2: container-level CONTENT distribution + direction.
         // justify-content moves the whole track group inside the content box
-        // (css-align-3 §5.3 — a distinct axis from the per-item justify-self
+        // (css-align-3 §5.1 — a distinct axis from the per-item justify-self
         // handled above); DisplayConfig already parses the keyword for the
         // flex paths, so grid reuses the same single owner.
         val justifyContent = GridContentDistribution.justifyOf(displayConfig.justifyContent)
@@ -248,7 +248,7 @@ object GridRenderer {
                 // css-align-3 §6); the flex block on the same child is inert.
                 val placement = claims[cell.childIndex]
 
-                // css-align-3 §6.2: justify-self:auto → container
+                // css-align-3 §6.1: justify-self:auto → container
                 // justify-items (default normal → start for our
                 // fit-content items).
                 val effJustify =
@@ -262,7 +262,7 @@ object GridRenderer {
                 val cellHeightDefinite = (cell.row until cell.row + cell.rowSpan)
                     .all { resolvedRowHeights.getOrNull(it) != null }
 
-                // css-align-3 §6.6: `align-self: stretch` (and the
+                // css-align-3 §6.2: `align-self: stretch` (and the
                 // `normal`/auto default) makes an AUTO-height item
                 // fill its row track. Web stretches these (the
                 // harness only suppresses INLINE-axis stretch via
@@ -357,7 +357,7 @@ object GridRenderer {
                 outOfFlowChildren.forEach { child ->
                     // §9.2 static position: sole-item alignment from the
                     // self properties, falling back to the container's
-                    // align-items / justify-items (css-align-3 §6.2/§6.4) —
+                    // align-items / justify-items (css-align-3 §7.2/§7.1) —
                     // pure resolution pinned in GridAbsposPartitionTest.
                     val (inlineSpec, blockSpec) = absposStaticSpecs(
                         childProperties = child.properties,
@@ -684,7 +684,7 @@ object GridRenderer {
 
     /**
      * Container-level justify-items keyword → the JustifySelf domain used
-     * for per-cell alignment (css-align-3 §6.2: justify-self:auto resolves
+     * for per-cell alignment (css-align-3 §6.1: justify-self:auto resolves
      * to the container's justify-items). Null when the container doesn't
      * declare it (callers then keep the child's own AUTO → start default).
      */
@@ -776,7 +776,7 @@ object GridRenderer {
      * [AbsposStaticAlignment.Spec] domain so the block axis can ride into
      * absposOverflowMeasure's safe-aware overflow offset unchanged.
      *
-     * Per-axis resolution order (css-align-3 §6.2/§6.4 + css-position-3 §3.5):
+     * Per-axis resolution order (css-align-3 §6.1/§6.2 + css-position-3 §3.5):
      *   1. an EXPLICIT inset on the axis replaces the static position
      *      entirely — the child's own PositionApplier offsets from the
      *      containing-block corner, so the alignment stands down to START
@@ -834,7 +834,7 @@ object GridRenderer {
 
     /**
      * JustifySelf keyword → static-position Base, or null when the keyword
-     * makes no static-position claim (css-align-3 §6.2: auto defers to the
+     * makes no static-position claim (css-align-3 §6.1: auto defers to the
      * container; normal/stretch behave as start for a non-stretchable
      * abspos box — returning null lets the resolution chain fall through
      * to the container level first). Same keyword grouping as
@@ -938,7 +938,7 @@ object GridRenderer {
         rowHeights: List<Dp?>,
         definiteWidth: Boolean,
         cells: List<PlacedItem>,
-        // Wave-19 RC-A2: container justify-content (css-align-3 §5.3) — the
+        // Wave-19 RC-A2: container justify-content (css-align-3 §5.1) — the
         // whole track group's distribution inside the content box.
         justify: GridContentDistribution.Justify,
         // Wave-19 RC-A2: direction:rtl — inline start becomes the RIGHT edge
@@ -1049,7 +1049,7 @@ object GridRenderer {
                     if (constraints.hasBoundedWidth) constraints.maxWidth else Int.MAX_VALUE
                 )
             // Wave-19 RC-A2: physical LEFT-edge origin of every column track
-            // — css-align-3 §5.3 content distribution (justify-content) plus
+            // — css-align-3 §5.1 content distribution (justify-content) plus
             // the rtl mirror, replacing the old LTR start-packed prefix sums.
             // Indefinite grids pass their own footprint → leftover 0 →
             // distribution no-op, rtl a pure order mirror inside the hug.

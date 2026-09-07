@@ -204,46 +204,16 @@ enum ScreenshotManager {
                                                                   scale: scale))))
     }
 
-    /// Hi-res variant for the B-EXT typography probes
-    /// (docs/reports/COMPARE_METRICS_B8-B10.md Section 1.1). Renders at
-    /// scale=4.0 so a 0.25-pt baseline shift in CSS coords surfaces as
-    /// a 1-px shift in the captured buffer (above AA noise).
-    ///
-    /// The probe pipeline uses this only for components whose ID begins
-    /// with "B8_", "B9_", or "B10_" — the canonical naming convention
-    /// for fixtures/_metric_probes/ fixtures. The 327-pair regression
-    /// baseline is locked at 1× and must never call into here.
-    ///
-    /// TODO[B-EXT round 91+]: requires Xcode/simulator validation pass
-    /// before the iOS branch of probe-text-metrics.sh can call it. The
-    /// web pipeline already produces real probe data via
-    /// capture-screenshots-hires.mjs.
-    @MainActor
-    static func renderHires<V: View>(_ view: V) -> UIImage? {
-        let renderer = ImageRenderer(content: view)
-        // 4.0 — Section 1.1 of the spec. NOT a config value: hardcoded
-        // because the B8/B9/B10 metric helpers expect exactly 4× and the
-        // unit conversion (4× px → 1× px = divide by 4) is baked in there.
-        renderer.scale = 4.0
-        // Same colour-space gate as `render` — see
-        // Renderer/CaptureColorSpace.swift. The probe path is not wired
-        // into the iOS pipeline yet, so this is not fixing an observed
-        // failure; it keeps the two capture entry points from drifting into
-        // different colour policies, which is exactly how the tag reached a
-        // committed run unnoticed.
-        return CaptureColorSpace.capture(renderer, scale: 4.0)
-    }
-
-    /// Returns true when a component ID belongs to the B-EXT typography
-    /// probe set (B8/B9/B10). Used by the capture loop to decide between
-    /// the standard 1× render and the hires 4× render.
-    /// See docs/reports/COMPARE_METRICS_B8-B10.md Section 2 for the naming
-    /// convention.
-    static func isProbeComponent(_ name: String) -> Bool {
-        // Underscore-suffix match keeps "B8_Serif_AVATAR_16" in the set
-        // but excludes a hypothetical "B8X_..." that isn't ours.
-        return name.hasPrefix("B8_") || name.hasPrefix("B9_") || name.hasPrefix("B10_")
-    }
+    // Retro P2b (A6#10): `renderHires` (the 4× B-EXT typography-probe
+    // capture) and `isProbeComponent` (its B8_/B9_/B10_ ID gate) were
+    // deleted here as zero-reference. Their own TODO said the iOS branch
+    // of probe-text-metrics.sh could not call them until a
+    // Xcode/simulator validation pass ran; that pass never ran, and the
+    // capture loop never grew the branch, so the pair sat unreferenced
+    // from Phase 7 to wave 49. The web pipeline still produces the probe
+    // data (tools/visual/capture-screenshots-hires.mjs); rebuilding the
+    // iOS half means an ImageRenderer at scale 4.0 routed through
+    // CaptureColorSpace.capture, exactly like `render` above.
 
     // MARK: - TITAN Phase 1 inbox-polling mode
     //

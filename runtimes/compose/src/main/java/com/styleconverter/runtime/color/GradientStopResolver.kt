@@ -10,7 +10,7 @@ import kotlin.math.max
 // StyleEngine/background/GradientStopResolver.swift).
 //
 // The PURE stop pipeline every gradient flavour shares:
-//   1. css-images-4 §3.4.3 colour-stop FIXUP — declared percents win,
+//   1. css-images-3 §3.4.3 / css-images-4 §3.5.3 colour-stop FIXUP — declared percents win,
 //      <length> stops resolve against the gradient-line length, a stop
 //      behind its predecessor is clamped forward, and unpositioned runs
 //      spread evenly between their positioned neighbours. Before this
@@ -19,7 +19,7 @@ import kotlin.math.max
 //      white 30px` had no period at all (wave-46 gate: gradient-border-
 //      box android-ref 0.646 — one full-box ramp instead of 30px
 //      stripes; the ref PNG shows 13 diagonal stripe periods).
-//   2. REPEATING expansion (css-images-4 §3.4.4 / images-3 §3.3.3):
+//   2. REPEATING expansion (css-images-4 §3.4 / images-3 §3.3):
 //      the stop span tiles the line in both directions, materialised as
 //      explicit stops — replacing RepeatingGradientHelper's
 //      fraction-range × diagonal approximation, which could never carry
@@ -130,7 +130,7 @@ internal object GradientStopResolver {
     /**
      * Tile the stop span across [0, 1]. A span that cannot be tiled —
      * zero-length, or finer than [MAX_COPIES] allows — renders as the
-     * spec's "solid average colour" (css-images-3 §3.3.3).
+     * spec's "solid average colour" (css-images-3 §3.3).
      */
     fun expandRepeating(stops: List<RGBAStop>): List<RGBAStop> {
         // Fewer than two stops: nothing to tile (a single stop is the
@@ -149,7 +149,7 @@ internal object GradientStopResolver {
             // flat across the whole line (the F2 rule — see MAX_COPIES),
             // with a breadcrumb so the degradation is never silent.
             GradientLog.once("gradient-repeating-period-too-fine",
-                "repeating gradient period needs ${kMax - kMin + 1} copies (cap $MAX_COPIES) — painting the css-images-3 §3.3.3 average colour instead of a partial lattice")
+                "repeating gradient period needs ${kMax - kMin + 1} copies (cap $MAX_COPIES) — painting the css-images-3 §3.3 average colour instead of a partial lattice")
             return solidAverage(stops)
         }
         val out = ArrayList<RGBAStop>((kMax - kMin + 1) * stops.size)
@@ -174,7 +174,7 @@ internal object GradientStopResolver {
     }
 
     /**
-     * css-images-3 §3.3.3's degenerate rendering: "the average color of
+     * css-images-3 §3.3's degenerate rendering: "the average color of
      * all the color stops", painted flat across the whole line. The
      * unweighted stop mean is the spec's own wording (not the
      * length-weighted integral of the ramp), and both boundary stops
@@ -262,7 +262,7 @@ internal object GradientStopResolver {
      * pre-wave `stops.map { it.position }` hand-off (measured over the
      * five committed gradient fixtures in GradientStopResolverTest's
      * dark-stage block). Authored `interp` clauses take GradientRamp's
-     * css-color-4 §12 path.
+     * css-color-4 §13 path.
      */
     fun resolvedRamp(
         stops: List<ColorStop>,

@@ -8,7 +8,7 @@ import org.junit.Assert.assertNull
 import org.junit.Test
 
 /**
- * Pins the css-break-3 §5.2 `box-decoration-break: clone` fragment
+ * Pins the css-break-3 §5.4 `box-decoration-break: clone` fragment
  * geometry ([MulticolCloneGeometry.cloneFragments]) against the wave-46
  * SHARED K-table — the SAME rows are pinned on the iOS runtime
  * (MulticolCloneGeometryTests.swift), so any drift here is a cross-

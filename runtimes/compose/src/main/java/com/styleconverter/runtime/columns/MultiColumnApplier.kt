@@ -423,7 +423,7 @@ object MultiColumnApplier {
         // Wave-42: true iff the container declares `column-fill: auto` —
         // the multi-child run pass engages only there (§7.2 sequential fill).
         columnFillAuto: Boolean = false,
-        // Wave-42: `continue: discard` (css-overflow-4 §3) for the plan.
+        // Wave-42: `continue: discard` (css-overflow-4 §5.3) for the plan.
         discardOverflow: Boolean = false,
         // Wave-47 lane Z2: vertical-pass inputs (see MultiColumnLayout).
         verticalMode: Boolean = false,
@@ -524,7 +524,7 @@ object MultiColumnApplier {
                 // Draw rules between the USED columns only — a single-column fallback
                 // (used.count == 1) correctly draws no rules at all.
                 for (i in 1 until used.count) {
-                    // Rule sits centered in the gap after column i (css-multicol §5).
+                    // Rule sits centered in the gap after column i (css-multicol-1 §4.5).
                     val x = columnWidth * i + gapPx * (i - 0.5f)
 
                     val pathEffect = when (ruleStyle) {
@@ -567,7 +567,7 @@ object MultiColumnApplier {
      * per fragment through clip(column i) + translate(+x_i, −i*H). Drawing
      * the SAME laid-out child means its background color and image tiles are
      * painted as one continuous C-tall box and merely sliced — exactly the
-     * box-decoration-break: slice default of css-break-3 §6.
+     * box-decoration-break: slice default of css-break-3 §5.4.
      *
      * drawWithContent was chosen over F subcomposed wrapper boxes because the
      * Layout receives opaque measurables: subcomposition would instantiate
@@ -608,7 +608,7 @@ object MultiColumnApplier {
         // Wave-42: `column-fill: auto` flag — the multi-child run pass
         // engages only there (§7.2; balance keeps the greedy spread).
         columnFillAuto: Boolean = false,
-        // Wave-42: `continue: discard` (css-overflow-4 §3) for the
+        // Wave-42: `continue: discard` (css-overflow-4 §5.3) for the
         // spanner-flow plan's overflow-column truncation.
         discardOverflow: Boolean = false,
         // Wave-47 lane Z2: the vertical writing-mode pass' inputs — the
@@ -746,7 +746,7 @@ object MultiColumnApplier {
             val columnBlockSize = constraints.maxHeight
             val definiteBlockSize =
                 fragmentainerBlockSizePx(containerBlockSizeDefinite, constraints) != null
-            // ---- Wave-21 lane MULTICOL: spanner-flow plan (css-multicol §6) ----
+            // ---- Wave-21 lane MULTICOL: spanner-flow plan (css-multicol-1 §6.1) ----
             // Engages ONLY under composed-WPT capture with aligned roles, for
             // (a) containers with a column-span:all child — content before the
             // spanner balances (§6.3), the spanner spans full width, flow
@@ -766,7 +766,7 @@ object MultiColumnApplier {
                     definiteBlockSize = definiteBlockSize,
                     fragmentationAllowed = fragmentationAllowed,
                     // Wave-42: `continue: discard` truncates the plan's
-                    // overflow columns (css-overflow-4 §3).
+                    // overflow columns (css-overflow-4 §5.3).
                     discardOverflow = discardOverflow,
                     // B-RC6 contract: the helper receives the bridge STATE
                     // and writes it from its PLACEMENT block only (the
@@ -882,7 +882,7 @@ object MultiColumnApplier {
                     logFragmentationFallbackOnce("multi-child container (only single-child fragmentation is implemented)")
                 } else if (overflowing == 1) {
                     // THE fragmentation branch: sole child, C > H, horizontal-tb.
-                    // ── Wave-46 lane Y3: the CLONE pass (css-break-3 §5.2) ──
+                    // ── Wave-46 lane Y3: the CLONE pass (css-break-3 §5.4) ──
                     // A sole `box-decoration-break: clone` child with no
                     // content of its own is measured at H and replayed
                     // untranslated per column — one complete decorated box
@@ -1023,7 +1023,7 @@ object MultiColumnApplier {
             val maxHeight = MultiColumnDistribution.containerBlockSizePx(childHeights, slots)
             // Reported inline size: the full bounded width as before; under an
             // unbounded measure report the widest child instead — layout()
-            // must never report Infinity (css-position-3 §3.6 shrink-to-fit
+            // must never report Infinity (css-position-3 §4.1 automatic sizes
             // is the closest CSS analogue for the abspos multicol that lands
             // here).
             val layoutWidth = if (inlineSizeBounded) constraints.maxWidth

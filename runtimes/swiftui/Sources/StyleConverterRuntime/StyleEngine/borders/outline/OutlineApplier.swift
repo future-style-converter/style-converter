@@ -9,8 +9,10 @@
 //  Android applier's behaviour.
 //
 //  Style keywords: solid / dashed / dotted / double are rendered by a
-//  Canvas stroke. `groove/ridge/inset/outset` degrade to solid (same
-//  compromise as Android).
+//  Shape stroke (OutlineShape). groove / ridge / inset / outset paint the
+//  css-backgrounds-3 §3.2 two-tone bevel through OutlineShadedRingView
+//  (retro R5, audit A7#3 — they used to degrade to a flat solid ring
+//  while Compose had painted the bevel since wave 5).
 //
 
 // SwiftUI for Canvas/Shape overlays.
@@ -37,8 +39,9 @@ struct OutlineApplier: ViewModifier {
         // `outline-offset` gap. Negative offsets pull inward — SwiftUI
         // handles that naturally via `.padding` with negative values.
         let outer = cfg.width / 2 + cfg.offset
-        // Colour: declared outline-color → element `color` (currentColor,
-        // css-ui-4 §4.3 initial) → the SHARED mode-split bottom-out
+        // Colour: declared outline-color → element `color` (currentColor —
+        // css-ui-4 §3.4's initial is `auto`, which Chromium computes to
+        // currentcolor) → the SHARED mode-split bottom-out
         // (BorderSideApplier.fallbackInk, RC-B1): dark stage keeps the
         // harness #eee (the old `.primary` fallback resolved BLACK there
         // while web painted its light currentColor frame — W5_OutlineGroove
@@ -111,6 +114,14 @@ private struct OutlineShape: View {
         // unchanged — its concentric bands rely on inset behaviour.
         let shape = BorderRadiusShape(radius: radius)
         switch style {
+        case .groove, .ridge, .inset, .outset:
+            // retro R5 (A7#3): the 3D bevels — per-side two-tone bands at
+            // the outline offset, not a flat ring. The overlay frame this
+            // view fills IS the ring's outer rectangle (see `.padding`
+            // below), which is the coordinate frame OutlineShadedRing's
+            // band table assumes.
+            OutlineShadedRingView(radius: radius, style: style,
+                                  width: strokeWidth, colour: colour)
         case .dashed:
             shape.strokeBorder(colour, style: StrokeStyle(lineWidth: strokeWidth,
                                                           dash: [strokeWidth * 3,

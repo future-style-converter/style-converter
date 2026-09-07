@@ -94,7 +94,7 @@ final class EasingReferenceTests: XCTestCase {
     }
 
     func testKeywordControlPointsMatchTheSpec() throws {
-        // css-easing-1 §3.1. AnimationDriver documents `ease` as the CSS
+        // css-easing-1 §2.2. AnimationDriver documents `ease` as the CSS
         // initial timing function; if the constant drifts from the spec every
         // keyword-built curve is quietly wrong, and no pixel comparison would
         // attribute the error to the keyword mapping.

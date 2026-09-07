@@ -30,7 +30,7 @@ struct ComponentState: Equatable {
     var hovered = false
     /// `:active` — press gesture in progress (css-selectors-4 §7.2).
     var pressed = false
-    /// `:focus` — component holds input focus (css-selectors-4 §7.3).
+    /// `:focus` — component holds input focus (css-selectors-4 §9.3).
     var focused = false
     /// `:disabled` — host disabled the subtree (css-selectors-4 §12.1.2).
     var disabled = false

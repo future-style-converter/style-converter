@@ -2,10 +2,10 @@
 //  BorderImageMath.swift
 //  StyleEngine/borders/image — BI-IOS lane (9-slice painter).
 //
-//  PURE geometry for CSS border-image (css-backgrounds-3 §6): width
-//  resolution (§6.3), outset resolution (§6.4), the nine-region grid
-//  shared by slice lines (§6.1) and the border image area (§6.2), and
-//  the per-edge tile plan for the repeat keywords (§6.2). No SwiftUI
+//  PURE geometry for CSS border-image (css-backgrounds-3 §5): width
+//  resolution (§5.3), outset resolution (§5.4), the nine-region grid
+//  shared by slice lines (§5.2) and the border image area (§5.3), and
+//  the per-edge tile plan for the repeat keywords (§5.5). No SwiftUI
 //  types, so XCTest (BorderImageMathTests) pins every number without
 //  rendering — mirroring the Compose runtime's geometry in
 //  borders/image/BorderImageApplier.kt so the natives share one set of
@@ -30,7 +30,7 @@ enum BorderImageMath {
 
     // MARK: - §6.3 border-image-width
 
-    /// Resolve ONE border-image-width value per css-backgrounds-3 §6.3.
+    /// Resolve ONE border-image-width value per css-backgrounds-3 §5.3.
     /// `computedBorder` is the side's COMPUTED border-width (0 when the
     /// side has no border-style — §4.3), the basis for `<number>` values
     /// and the initial value `1`. `boxExtent` is the border image area's
@@ -88,7 +88,7 @@ enum BorderImageMath {
 
     // MARK: - §6.4 border-image-outset
 
-    /// Resolve one border-image-outset value per css-backgrounds-3 §6.4:
+    /// Resolve one border-image-outset value per css-backgrounds-3 §5.4:
     /// lengths are literal, numbers multiply the computed border-width,
     /// initial value 0. `auto`/percent are not in the outset grammar —
     /// they resolve to 0 (mirrors Compose's resolveOutset()).

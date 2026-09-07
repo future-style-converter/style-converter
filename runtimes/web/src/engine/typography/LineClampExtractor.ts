@@ -1,6 +1,6 @@
 // LineClampExtractor.ts — folds `LineClamp` IR properties into a LineClampConfig.
 // Family: line-clamp.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { LineClampConfig, LINE_CLAMP_PROPERTY_TYPE, LineClampPropertyType } from './LineClampConfig';
 import { kwLower } from './_shared';

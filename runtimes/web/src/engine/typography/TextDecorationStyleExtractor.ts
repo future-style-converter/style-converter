@@ -1,6 +1,6 @@
 // TextDecorationStyleExtractor.ts — folds `TextDecorationStyle` IR properties into a TextDecorationStyleConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextDecorationStyleConfig, TEXT_DECORATION_STYLE_PROPERTY_TYPE, TextDecorationStylePropertyType } from './TextDecorationStyleConfig';
 import { kwLower } from './_shared';

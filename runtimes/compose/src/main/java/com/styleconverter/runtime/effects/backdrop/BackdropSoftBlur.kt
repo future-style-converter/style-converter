@@ -237,7 +237,7 @@ object BackdropSoftBlur {
     }
 
     /**
-     * `invert(amount)` over an ARGB patch, filter-effects-1 §8.6 — the same
+     * `invert(amount)` over an ARGB patch, filter-effects-1 §6.1 — the same
      * curve [BackdropChain.invertChannel] pins, applied in place on the
      * colour channels only (alpha is untouched by §8.6). Kept here so the
      * software path runs the WHOLE chain in CSS order instead of splitting

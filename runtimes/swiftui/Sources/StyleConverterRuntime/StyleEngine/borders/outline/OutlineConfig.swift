@@ -19,7 +19,7 @@ import SwiftUI
 struct OutlineConfig: Equatable {
     // `outline-width`. Keywords (`thin|medium|thick`) pre-resolve to px
     // in the CSS parser so this always ends up numeric.
-    // Wave 5: the initial value is MEDIUM = 3px (css-ui-4 §4.2), not 0 —
+    // Wave 5: the initial value is MEDIUM = 3px (css-ui-4 §3.2), not 0 —
     // `outline-style: groove` with no declared width must paint a 3px
     // frame exactly like the browser (PW_Borders_Sizing_04: iOS painted
     // NOTHING because width stayed 0 and hasOutline gated the applier).

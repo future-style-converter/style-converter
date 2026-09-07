@@ -93,7 +93,7 @@ class ContentsUnboxingTest {
         assertEquals(1, resolved.children!!.size)
         val item = resolved.children!![0]
         assertEquals("square", item.id)
-        // The wrapper's JustifyItems is NOT inherited (css-align-3 §6.4:
+        // The wrapper's JustifyItems is NOT inherited (css-align-3 §7.1:
         // justify-items does not inherit) and must NOT leak onto the item.
         assertFalse(item.properties.any { it.type == "JustifyItems" })
         // The item's own declarations survive verbatim.

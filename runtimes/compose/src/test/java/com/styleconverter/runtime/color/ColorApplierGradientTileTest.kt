@@ -8,7 +8,7 @@ package com.styleconverter.runtime.color
 //     top slice of a 120px gradient line: every tile rendered solid red
 //     instead of the red→blue ramp. ColorApplier.pinShaderToTile now
 //     forces createShader to resolve against the background-size tile
-//     (css-images-4 §3.4.1: the gradient box IS the tile), matching web.
+//     (css-images-4 §3.1: the gradient box IS the tile), matching web.
 //
 // (2) PAINTING-AREA CLIP — css-backgrounds-3 §2.2 clips background
 //     painting to the border box, but REPEAT plans deliberately overhang
@@ -20,7 +20,7 @@ package com.styleconverter.runtime.color
 //     clipRect(0,0,clip.width,clip.height).
 //
 // (3) NO POSITION SHIFT IN THE SHADER — background-position places the
-//     TILE (css-backgrounds-3 §3.6, applied via the tile translate); it
+//     TILE (css-backgrounds-3 §2.6, applied via the tile translate); it
 //     never shifts the gradient line inside its own tile. The old
 //     createLinearGradientBrush baked posX·w/posY·h into the line CENTRE,
 //     double-applying position. linearGradientPoints is now pure and
@@ -112,7 +112,7 @@ class ColorApplierGradientTileTest {
     @Test
     fun `to-right line spans exactly the box width`() {
         // 90deg = "to right" on 200×100: horizontal line through the
-        // vertical centre, full width (css-images-4 §3.4.1).
+        // vertical centre, full width (css-images-4 §3.1).
         val (from, to) = ColorApplier.linearGradientPoints(90f, Size(200f, 100f))
         assertOffset(Offset(0f, 50f), from)
         assertOffset(Offset(200f, 50f), to)
@@ -235,7 +235,7 @@ class ColorApplierGradientTileTest {
     // BackgroundImageApplier.gradientNeedsGeometry: any non-default
     // position or non-`repeat` axis routes through the tile path with
     // tile = box (auto size for an intrinsic-less gradient = the box,
-    // css-backgrounds-3 §3.9). These tests pin BOTH directions of the
+    // css-backgrounds-3 §2.9). These tests pin BOTH directions of the
     // predicate so the default path can never re-widen (baseline safety)
     // and the knob paths can never re-narrow (the regression itself).
 

@@ -1,6 +1,6 @@
 // FontVariantEastAsianExtractor.ts — folds `FontVariantEastAsian` IR properties into a FontVariantEastAsianConfig.
 // Family: keyword-list.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { FontVariantEastAsianConfig, FONT_VARIANT_EAST_ASIAN_PROPERTY_TYPE, FontVariantEastAsianPropertyType } from './FontVariantEastAsianConfig';
 import { kwList } from './_shared';

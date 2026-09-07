@@ -1,6 +1,6 @@
 // WhiteSpaceExtractor.ts — folds `WhiteSpace` IR properties into a WhiteSpaceConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { WhiteSpaceConfig, WHITE_SPACE_PROPERTY_TYPE, WhiteSpacePropertyType } from './WhiteSpaceConfig';
 import { kwLower } from './_shared';

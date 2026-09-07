@@ -273,9 +273,14 @@ test('computeEdgeSsim: flat vs flat in different colours → exactly 1.0', async
 
 test('computeEdgeSsim on a real baseline pair is finite, in (0,1], and is not plain SSIM', async () => {
   // Real-data control on two committed captures of the same component from
-  // different platforms — iOS vs Android 000_AR_Single1, both 390×232 (equal
+  // different platforms — iOS vs Android 090_Button_Primary (a
+  // fixtures/visual-test.json component, so its baselines are refreshed by
+  // every UPDATE_BASELINE run and cannot be orphaned), both 390×62 (equal
   // dims by construction of this pair, so no padding step can distort the
-  // comparison), 1080 genuinely differing pixels.
+  // comparison), 204 genuinely differing pixels (measured 2026-09-05:
+  // edge 0.9481 vs plain 0.9533). The pair used to be 000_AR_Single1 — an
+  // orphan of a fixture pruned 2026-07-08 whose 36 PNGs the retrospective
+  // removed (A12#4), which is why the pin now rides a LIVE fixture.
   //
   // Three pins: (a) the metric survives real render output (no null); (b) a
   // pair with real pixel differences must NOT read exactly 1 — under the
@@ -283,12 +288,13 @@ test('computeEdgeSsim on a real baseline pair is finite, in (0,1], and is not pl
   // alone would have caught it; (c) the edge score differs from plain SSIM
   // of the same pair, proving B3 measures the gradient structure rather
   // than repackaging the base metric.
-  const a = loadBaseline('iOS__000_AR_Single1.png');
-  const b = loadBaseline('Android__000_AR_Single1.png');
+  const a = loadBaseline('iOS__090_Button_Primary.png');
+  const b = loadBaseline('Android__090_Button_Primary.png');
+  assert.equal(`${a.width}x${a.height}`, `${b.width}x${b.height}`, 'the control pair must share dimensions (no padding step)');
   const e = await computeEdgeSsim(a, b);
   assert.ok(e !== null && Number.isFinite(e), `expected a finite score, got ${e}`);
   assert.ok(e > 0 && e <= 1, `edge SSIM out of (0,1]: ${e}`);
-  assert.ok(e < 1, `a pair with 1080 differing pixels must not score exactly 1, got ${e}`);
+  assert.ok(e < 1, `a pair with 204 differing pixels must not score exactly 1, got ${e}`);
   const plain = +computeSsim(a, b, { ssim: 'fast' }).mssim.toFixed(4);
   assert.notEqual(e, plain, `edge SSIM (${e}) must not equal plain SSIM (${plain}) on a real pair`);
 });

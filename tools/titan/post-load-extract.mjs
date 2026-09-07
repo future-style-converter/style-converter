@@ -249,7 +249,7 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
   // out BLANK (ink 0.00 % against the ref's 8.55 %) and tripped the presence
   // + coverage-ratio vetoes on all three platforms.
   //
-  // `flat` is the css-transforms-2 §4 initial value and is what the pinned
+  // `flat` is the css-transforms-2 §7 initial value and is what the pinned
   // headless Chromium reports for every element that does not opt in, so it
   // is delete-not-write below: only a genuinely 3D-preserving element gains
   // the key, and the overlay stays reviewable.
@@ -341,7 +341,7 @@ export const WRITE_RULES = {
   'border-top-right-radius':    { deleteWhen: '0px' },
   'border-bottom-right-radius': { deleteWhen: '0px' },
   'border-bottom-left-radius':  { deleteWhen: '0px' },
-  // wave-40 lane T1: `flat` is the css-transforms-2 §4 initial value and what
+  // wave-40 lane T1: `flat` is the css-transforms-2 §7 initial value and what
   // the pinned headless Chromium reports for every element that has not opted
   // into a 3D rendering context, so writing it would stamp a key onto
   // essentially every component in every post-load fixture. Delete-not-write
@@ -444,11 +444,11 @@ export function hasWallTag(naTags) {
   return Array.isArray(naTags) && naTags.some((t) => EXTRACTION_WALL_TAGS.has(t));
 }
 
-/** Async convenience: wall-tag check for a repo-relative test path. */
-export async function isWallTagged(testRel) {
-  // Look the test up in the shared notApplicable map (see notApplicableIndex).
-  return hasWallTag((await notApplicableIndex())[testRel]);
-}
+// (A6#13) `isWallTagged` — the wave-16 async convenience wrapper around
+// hasWallTag — stood here with ZERO callers: the CLIs activate through
+// shouldPostLoadExtractFor (below), whose route 1 IS hasWallTag, so the
+// wrapper was a second name for the same rule. Deleted; hasWallTag remains
+// the one exported pure predicate.
 
 // ── Traversal identity: static side ──────────────────────────────────────────
 
@@ -761,11 +761,11 @@ export function shouldPostLoadExtract(naTags, unsupportedRules = 0) {
 }
 
 /** Async convenience for the two CLIs: the wave-30 A3 gate for a
- *  repo-relative test path, looked up in the SAME notApplicable map
- *  isWallTagged reads, so the two activation helpers can never disagree
+ *  repo-relative test path, looked up in the notApplicable map via the same
+ *  hasWallTag predicate, so route 1 and the bucketer can never disagree
  *  about a test's tags. `unsupportedRules` comes from the static pass
  *  (extract-fixture's `result.unsupportedRules`); omitting it degrades this
- *  to exactly isWallTagged. */
+ *  to exactly the wave-16 wall-tag rule. */
 export async function shouldPostLoadExtractFor(testRel, unsupportedRules = 0) {
   return shouldPostLoadExtract((await notApplicableIndex())[testRel], unsupportedRules);
 }

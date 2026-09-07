@@ -39,7 +39,7 @@ object StateHandler {
     enum class SelectorCondition {
         HOVER,          // css-selectors-4 §7.1 — pointer designation
         ACTIVE,         // css-selectors-4 §7.2 — activation in progress
-        FOCUS,          // css-selectors-4 §7.3 — input focus
+        FOCUS,          // css-selectors-4 §9.3 — input focus
         FOCUS_VISIBLE,  // reserved at runtime v1 (inert + logged)
         FOCUS_WITHIN,   // reserved at runtime v1 (inert + logged)
         DISABLED,       // css-selectors-4 §12.1.2 — host-supplied flag

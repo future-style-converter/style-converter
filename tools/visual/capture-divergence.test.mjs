@@ -19,7 +19,9 @@
 //   3. The full-document grouping against the LIVE wire: synthetic
 //      combined docs shaped exactly like build-combined-fixture output
 //      (prefixed roots + raw-named children linked by slot.parent), plus
-//      the real wave21-gate per-test IR artifacts when present on disk.
+//      the real per-test IR vendored in tools/titan/fixtures/ (retro R10,
+//      A8#3: this used to read a pruned wave21-gate run directory and so
+//      skipped forever).
 //
 // Lives in tools/visual/ so CI's `node --test tools/visual/*.test.mjs
 // tools/titan/*.test.mjs` glob picks it up (same placement rationale as
@@ -55,7 +57,7 @@ test('spanner predicate: lower-case "all" fires too (spec-parser shape)', () => 
   assert.equal(componentSpansAllColumns(comp({ properties: [prop('ColumnSpan', 'all')] })), true);
 });
 
-test('spanner predicate: ColumnSpan NONE is inert (initial value, css-multicol §6)', () => {
+test('spanner predicate: ColumnSpan NONE is inert (initial value, css-multicol-1 §6.1)', () => {
   // `none` interrupts nothing — no containing-block promotion, no bug.
   assert.equal(componentSpansAllColumns(comp({ properties: [prop('ColumnSpan', 'NONE')] })), false);
 });
@@ -138,31 +140,37 @@ test('keys: malformed document throws loudly (no silent zero-flag run)', () => {
   assert.throws(() => divergenceProneTestKeys({ nope: true }), /components array/);
 });
 
-// ── Live-artifact pin (wave21-gate css-multicol per-test IR) ───────────────
+// ── Live-artifact pins (VENDORED wave49-final css-multicol per-test IR) ───
 
-test('keys: live wave21-gate css-multicol IR flags exactly the spanner+abspos family', (t) => {
-  // Pin against the REAL wire that motivated B-RC3. runs/ artifacts are
-  // local-only (not shipped to CI), so skip — visibly, never silently —
-  // when the run dir is absent.
-  const here = dirname(fileURLToPath(import.meta.url));
-  const irDir = resolve(here, '../titan/runs/wave21-gate/sections/css-multicol/per-test-ir');
-  if (!existsSync(irDir)) {
-    t.skip('wave21-gate run artifacts not present on this machine');
-    return;
-  }
-  // Build a combined doc from four live per-test docs with known verdicts.
-  const load = (stem) => JSON.parse(readFileSync(resolve(irDir, `${stem}.json`), 'utf8')).components;
+// Retro R10 (finding A8#3): both pins below used to read
+// `tools/titan/runs/wave21-gate/…`, a gitignored run directory that was
+// pruned waves ago — so they skipped on every sweep, on every machine,
+// permanently rather than hermetically. They now read the byte-verbatim
+// per-test IR vendored under tools/titan/fixtures/ (see that dir's README
+// for the provenance rules), so they EXECUTE on a fresh checkout and on CI.
+const MULTICOL_IR = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  '../titan/fixtures/per-test-ir/wave49-final/css-multicol',
+);
+
+// Load one vendored per-test document's components by its file stem.
+const loadMulticol = (stem) =>
+  JSON.parse(readFileSync(resolve(MULTICOL_IR, `${stem}.json`), 'utf8')).components;
+
+test('keys: the live css-multicol wire flags exactly the spanner+abspos family', () => {
+  // Pin against the REAL wire that motivated B-RC3 — four documents with
+  // known verdicts, combined the way build-combined-fixture combines them.
   const combined = {
     irVersion: 2, minReaderVersion: 2,
     components: [
       // PRONE — the B-RC3 poster child (web 0.932, paint ~2312px off).
-      ...load('wpt__css-multicol__abspos-containing-block-outside-spanner'),
+      ...loadMulticol('wpt__css-multicol__abspos-containing-block-outside-spanner'),
       // PRONE — same spanner+abspos family.
-      ...load('wpt__css-multicol__abspos-after-spanner'),
+      ...loadMulticol('wpt__css-multicol__abspos-after-spanner'),
       // NOT prone — spanner, no out-of-flow box.
-      ...load('wpt__css-multicol__always-balancing-before-column-span'),
+      ...loadMulticol('wpt__css-multicol__always-balancing-before-column-span'),
       // NOT prone — abspos, no spanner.
-      ...load('wpt__css-multicol__abspos-autopos-contained-by-viewport-000'),
+      ...loadMulticol('wpt__css-multicol__abspos-autopos-contained-by-viewport-000'),
     ],
   };
   assert.deepEqual([...divergenceProneTestKeys(combined)].sort(), [
@@ -171,32 +179,60 @@ test('keys: live wave21-gate css-multicol IR flags exactly the spanner+abspos fa
   ]);
 });
 
-test('keys: FULL live wave21-gate css-multicol section flags exactly 3 tests', (t) => {
-  // Sweep the ENTIRE 12-test section (not a hand-picked subset): the full
-  // flag set is 3 — the two from the pin above PLUS abspos-after-spanner-
-  // static-pos (spanner+abspos in one fixture). The adversarial wave-21
-  // repro proved static-pos and after-spanner are cost-only over-flags on
-  // this page (their isolated captures came back byte-identical to the
-  // batch/archived PNGs), while containing-block-outside-spanner is the
-  // true positive (batch: 20000 red px / 0 green; isolated: 20000 green px
-  // at the geometry rects / 0 red). Pinning the whole-section set keeps
-  // any future detector tweak honest about its live blast radius.
-  const here = dirname(fileURLToPath(import.meta.url));
-  const irDir = resolve(here, '../titan/runs/wave21-gate/sections/css-multicol/per-test-ir');
-  if (!existsSync(irDir)) {
-    t.skip('wave21-gate run artifacts not present on this machine');
-    return;
-  }
+test('keys: the vendored css-multicol set flags exactly the 7 wave49-final tests', () => {
+  // Sweep the whole vendored set (not a hand-picked pair): 9 documents —
+  // the 7 the detector flags in the live wave49-final css-multicol section
+  // plus the 2 controls above. Measured 2026-09-05 by running this same
+  // `divergenceProneTestKeys` over BOTH the vendored dir and the full
+  // 48-document live section: identical 7-key sets, which is what makes the
+  // subset a faithful stand-in. The wave-21 record for the first three:
+  // static-pos and after-spanner are cost-only over-flags on this page
+  // (their isolated captures came back byte-identical to the batch PNGs),
+  // while containing-block-outside-spanner is the true positive (batch:
+  // 20000 red px / 0 green; isolated: 20000 green px at the geometry rects
+  // / 0 red). Pinning the whole set keeps any future detector tweak honest
+  // about its live blast radius.
   const components = [];
-  for (const f of readdirSync(irDir).filter((f) => f.endsWith('.json')).sort()) {
-    components.push(...JSON.parse(readFileSync(resolve(irDir, f), 'utf8')).components);
+  for (const f of readdirSync(MULTICOL_IR).filter((f) => f.endsWith('.json')).sort()) {
+    components.push(...JSON.parse(readFileSync(resolve(MULTICOL_IR, f), 'utf8')).components);
   }
   const keys = divergenceProneTestKeys({ irVersion: 2, minReaderVersion: 2, components });
   assert.deepEqual([...keys].sort(), [
     'wpt__css-multicol__abspos-after-spanner',
     'wpt__css-multicol__abspos-after-spanner-static-pos',
     'wpt__css-multicol__abspos-containing-block-outside-spanner',
+    'wpt__css-multicol__column-balancing-with-span-and-oof-001',
+    'wpt__css-multicol__column-balancing-with-span-and-oof-002',
+    'wpt__css-multicol__column-height-006',
+    'wpt__css-multicol__column-height-013',
   ]);
+});
+
+test('keys: the vendored subset still matches the LIVE section when a run is on disk', (t) => {
+  // Drift guard for the vendoring itself: when a campaign worktree carries
+  // the wave49-final run, the full 48-document section must flag the SAME
+  // 7 keys the vendored 9-document set does. Skip-guarded — but unlike the
+  // pins above, nothing else depends on it: the pins execute everywhere.
+  const irDir = resolve(
+    dirname(fileURLToPath(import.meta.url)),
+    '../titan/runs/wave49-final/sections/css-multicol/per-test-ir',
+  );
+  if (!existsSync(irDir)) {
+    t.skip('wave49-final run artifacts not present on this machine (vendored pins above still ran)');
+    return;
+  }
+  const live = [];
+  for (const f of readdirSync(irDir).filter((f) => f.endsWith('.json')).sort()) {
+    live.push(...JSON.parse(readFileSync(resolve(irDir, f), 'utf8')).components);
+  }
+  const vendored = [];
+  for (const f of readdirSync(MULTICOL_IR).filter((f) => f.endsWith('.json')).sort()) {
+    vendored.push(...JSON.parse(readFileSync(resolve(MULTICOL_IR, f), 'utf8')).components);
+  }
+  assert.deepEqual(
+    [...divergenceProneTestKeys({ irVersion: 2, minReaderVersion: 2, components: live })].sort(),
+    [...divergenceProneTestKeys({ irVersion: 2, minReaderVersion: 2, components: vendored })].sort(),
+  );
 });
 
 // ── Driver source pin: batch loop must screenshot EVERY canvas ─────────────

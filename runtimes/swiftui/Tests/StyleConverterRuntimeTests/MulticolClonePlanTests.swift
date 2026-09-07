@@ -2,7 +2,7 @@
 //  MulticolClonePlanTests.swift
 //  StyleConverterRuntimeTests
 //
-//  Wave 46 (lane Y3) — ColumnsApplier.fragmentPlan's css-break-3 §5.2
+//  Wave 46 (lane Y3) — ColumnsApplier.fragmentPlan's css-break-3 §5.4
 //  CLONE branch: the pure gate pins (leaf-only, sole-child, px bands,
 //  box-sizing tri-state, the logged bails) and the ImageRenderer raster
 //  pin of WPT css-break borders-008's shape — a 240px-tall, 10px-bordered,

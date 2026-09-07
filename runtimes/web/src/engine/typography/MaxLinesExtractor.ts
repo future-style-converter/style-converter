@@ -1,6 +1,6 @@
 // MaxLinesExtractor.ts — folds `MaxLines` IR properties into a MaxLinesConfig.
 // Family: max-lines.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { MaxLinesConfig, MAX_LINES_PROPERTY_TYPE, MaxLinesPropertyType } from './MaxLinesConfig';
 import { kwLower } from './_shared';

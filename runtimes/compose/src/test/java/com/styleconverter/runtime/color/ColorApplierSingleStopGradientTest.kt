@@ -15,7 +15,7 @@ import org.junit.Test
  * div with a degenerate one-stop gradient (`linear-gradient(green)`,
  * `linear-gradient(to right, green 90%)`, `repeating-linear-gradient(green
  * 50px)`, and the radial/conic equivalents) directly over an abspos RED div.
- * css-images-3 §3.4.4 makes the one-stop ramp a UNIFORM fill of that colour,
+ * css-images-3 §3.4.1 makes the one-stop ramp a UNIFORM fill of that colour,
  * so the correct render is a green square; Chromium, the web runtime and the
  * SwiftUI runtime all produce one.
  *

@@ -17,7 +17,7 @@ import org.junit.Test
 // rests on — is exactly when the switch is allowed to be thrown.
 class AutoHyphenationTest {
 
-    // ── §6.1: `auto` AND a language, both required ───────────────────
+    // ── §5.3: `auto` AND a language, both required ───────────────────
 
     /** The tagged case: WPT css-text/hyphens-auto-010 (`<body lang="en">`
      *  + `hyphens: auto`), where the Chromium ref breaks

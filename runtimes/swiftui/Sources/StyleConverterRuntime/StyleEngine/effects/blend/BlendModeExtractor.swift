@@ -9,10 +9,6 @@
 
 import SwiftUI
 
-enum BlendModeProperty {
-    static let names: [String] = ["MixBlendMode", "BackgroundBlendMode"]
-}
-
 enum BlendModeExtractor {
 
     // Extract both in one pass; nil when neither property was present.

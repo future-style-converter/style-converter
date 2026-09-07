@@ -3,7 +3,7 @@
 //  StyleEngine/background — wave 46, lane Y2 (css-images natives).
 //
 //  PURE colour-space conversions for gradient interpolation
-//  (css-color-4 §12 "Interpolation"). Every stop arrives as resolved
+//  (css-color-4 §13 "Interpolation"). Every stop arrives as resolved
 //  sRGB (the converter normalises all colours to sRGB floats —
 //  schema/spec/02-values.md), so the interpolation space is reached by
 //  converting OUT of sRGB, lerping, and converting BACK. The matrices
@@ -35,7 +35,7 @@ enum GradientColorMath {
     typealias Triple = (Double, Double, Double)
 
     /// Which component index holds the hue for a polar space (nil for
-    /// rectangular spaces) — css-color-4 §12.5 interpolates hue as an
+    /// rectangular spaces) — css-color-4 §13.5 interpolates hue as an
     /// angle, never premultiplied.
     static func hueIndex(_ space: GradientInterpolation.Space) -> Int? {
         switch space {
@@ -253,7 +253,7 @@ enum GradientColorMath {
     /// css-color-4 §4.4 / §7.1 / §8.1 / §9.3 powerless-hue analysis in
     /// the converted colour: hsl with zero saturation, hwb with
     /// w + b ≥ 100, (ok)lch with zero chroma. Powerless components are
-    /// treated as MISSING for interpolation (§12.2) and carried from the
+    /// treated as MISSING for interpolation (§13.3) and carried from the
     /// other stop — that is what makes `red → black in hsl longer hue`
     /// sweep the whole wheel (WPT gradient-longer-hue-hsl-013). The
     /// chroma epsilons absorb float noise from the sRGB round trip

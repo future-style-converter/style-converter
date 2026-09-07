@@ -158,7 +158,7 @@ function shapeToCss(o: Record<string, unknown>): string | undefined {
     }
     case 'path': {
       if (typeof o.d !== 'string') return undefined;
-      // css-shapes-2 §3.2 `path( <fill-rule>? , <string> )`. The rule is a
+      // css-shapes-1 §3.1 `path( <fill-rule>? , <string> )`. The rule is a
       // separate IR field (`rule`) since wave 37 — it used to be swallowed
       // into `d`, which produced an unparseable `path("nonzero, 'M…'")`.
       const rule = typeof o.rule === 'string' && o.rule.length > 0 ? `${o.rule}, ` : '';

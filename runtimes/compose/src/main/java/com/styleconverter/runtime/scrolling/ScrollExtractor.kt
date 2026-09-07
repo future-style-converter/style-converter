@@ -4,6 +4,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.core.types.ValueExtractors
 import kotlinx.serialization.json.JsonElement
+// The converter serialises the single-value `overscroll-behavior` form with an
+// explicit `"y": null` (see extractOverscrollBehavior) — retro R6, A6#5.
+import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
 import kotlinx.serialization.json.jsonObject
@@ -236,16 +239,36 @@ object ScrollExtractor {
         }
     }
 
+    /**
+     * `overscroll-behavior` shorthand → (x, y).
+     *
+     * css-overscroll-1 §4 (Overscroll Behavior Properties — the shorthand;
+     * §4.1 is the physical longhands): "If only one value is specified, the
+     * second value defaults to the same value." The converter serialises that
+     * single-value form as `{"x": "CONTAIN", "y": null}`
+     * (OverscrollBehaviorPropertyParser.kt sets y = null; the nullable field
+     * has no default so it is written as JSON null — pinned against the
+     * scrolling/longtail.json conversion, retro R6 A6#5). The old reader ran
+     * `extractOverscrollBehaviorMode(obj["y"]) ?: x`, but that function is
+     * non-null (JsonNull → keyword null → AUTO), so the elvis was dead code
+     * (kotlinc: "Elvis operator (?:) always returns the left operand") and
+     * `overscroll-behavior: contain` gave y = AUTO on Compose. An ABSENT or
+     * JSON-null `y` now mirrors `x` explicitly.
+     */
     private fun extractOverscrollBehavior(data: JsonElement?): Pair<OverscrollBehaviorMode, OverscrollBehaviorMode> {
         if (data == null) return Pair(OverscrollBehaviorMode.AUTO, OverscrollBehaviorMode.AUTO)
 
         val obj = data as? JsonObject
         if (obj != null) {
             val x = extractOverscrollBehaviorMode(obj["x"])
-            val y = extractOverscrollBehaviorMode(obj["y"]) ?: x
+            // §4 single-value rule: no second value (absent key OR the
+            // converter's explicit null) → same as the first.
+            val yElement = obj["y"]
+            val y = if (yElement == null || yElement is JsonNull) x else extractOverscrollBehaviorMode(yElement)
             return Pair(x, y)
         }
 
+        // Bare keyword (legacy producers): one value for both axes (§4).
         val both = extractOverscrollBehaviorMode(data)
         return Pair(both, both)
     }

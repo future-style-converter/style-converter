@@ -77,10 +77,16 @@
 //     than carrying a "this size came from a keyword" channel the wire does
 //     not have.
 //
-//  TWIN STATUS: iOS-only in wave 40 — the Compose twin
-//  (`typography/UAElementFontRule.kt`) is DEFERRED, because this lane owns no
-//  Android device and an unverifiable Kotlin edit is worse than a stated
-//  asymmetry. Android shows the identical defect in the same captures.
+//  TWIN STATUS: still iOS-only. `typography/UAElementFontRule.kt` does not
+//  exist; Android shows the identical defect in the same captures
+//  (`css-text-decor/text-decoration-color` android 0.6164 F at
+//  wave49-final). The wave-40 reason given here — "this lane owns no Android
+//  device" — was a LANE's constraint, not a standing one, and it stood as
+//  the whole plan for nine waves without ever becoming work (retro finding
+//  A4#7). It is now a QUEUED backlog item: docs/BACKLOG.md ranked-queue
+//  entry (g), which carries the target cell and the iOS gate table's caveat
+//  that only leaf-text hosts improve (iOS 0.674 after the gated heading
+//  face). Point a port at that entry, not at this banner.
 //
 
 import Foundation
@@ -165,7 +171,7 @@ enum UAElementFontRule {
     ///
     /// Two cases, in cascade order:
     ///  1. An INHERITED `font-size` — the parent's computed pixels, which is
-    ///     what `em` means (css-values-4 §5.1.1). Present in `merged` whenever
+    ///     what `em` means (css-values-4 §6.1.1). Present in `merged` whenever
     ///     any ancestor declared a size; read with `first`, the same read
     ///     StyleBuilder performs, so the two never disagree about which entry
     ///     is the element's size.

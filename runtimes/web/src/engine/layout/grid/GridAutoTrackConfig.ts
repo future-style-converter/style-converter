@@ -5,4 +5,3 @@
 // Deliberately standalone: does NOT touch GridExtractor or its repeat() path.
 export interface GridAutoTrackConfig { value?: string }
 export const GRID_AUTO_TRACK_PROPERTY_TYPE = 'GridAutoTrack' as const;
-export type GridAutoTrackPropertyType = typeof GRID_AUTO_TRACK_PROPERTY_TYPE;

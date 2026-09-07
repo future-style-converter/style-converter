@@ -1,6 +1,6 @@
 // TextOverflowExtractor.ts — folds `TextOverflow` IR properties into a TextOverflowConfig.
 // Family: text-overflow.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TextOverflowConfig, TEXT_OVERFLOW_PROPERTY_TYPE, TextOverflowPropertyType } from './TextOverflowConfig';
 import { kwLower } from './_shared';

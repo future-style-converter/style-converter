@@ -1,6 +1,6 @@
 // InitialLetterAlignExtractor.ts — folds `InitialLetterAlign` IR properties into a InitialLetterAlignConfig.
 // Family: keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { InitialLetterAlignConfig, INITIAL_LETTER_ALIGN_PROPERTY_TYPE, InitialLetterAlignPropertyType } from './InitialLetterAlignConfig';
 import { kwLower } from './_shared';

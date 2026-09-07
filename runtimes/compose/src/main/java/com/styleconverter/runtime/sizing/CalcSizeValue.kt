@@ -1,6 +1,6 @@
 package com.styleconverter.runtime.sizing
 
-// CalcSizeValue — css-values-5 §10.1 `calc-size()` typed wire decode + the
+// CalcSizeValue — css-values-5 §11 `calc-size()` typed wire decode + the
 // PURE arithmetic the layout modifiers in CalcSizeLayout.kt consume.
 //
 // Wave 42 (lane W3). Wire shape (converter CalcSizeParser.kt, identical
@@ -31,9 +31,9 @@ import kotlinx.serialization.json.jsonPrimitive
 enum class CalcSizeBasis {
     /** The property's normal `auto` behavior supplies the size. */
     AUTO,
-    /** css-sizing-3 §4 min-content size. */
+    /** css-sizing-3 §5.1 min-content size. */
     MIN_CONTENT,
-    /** css-sizing-3 §4 max-content size. */
+    /** css-sizing-3 §5.1 max-content size. */
     MAX_CONTENT,
     /** css-sizing-3 §5.1 fit-content: clamp(min-content, avail, max-content). */
     FIT_CONTENT,

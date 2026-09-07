@@ -79,7 +79,7 @@ function applyShorthandList(data: unknown, cfg: BackgroundPositionConfig): void 
     case 'keyword': {                                                 // one-value keyword, e.g. `left` / `top`
       const kw = typeof first.keyword === 'string' ? first.keyword.toLowerCase() : null;
       if (kw === null) break;                                         // malformed payload → drop
-      // CSS one-value rule (css-backgrounds-3 §3.6): the missing axis is
+      // CSS one-value rule (css-backgrounds-3 §2.6): the missing axis is
       // `center`; top/bottom name the vertical axis, everything else horizontal.
       if (kw === 'top' || kw === 'bottom') { cfg.x = 'center'; cfg.y = kw; }
       else { cfg.x = kw; cfg.y = 'center'; }

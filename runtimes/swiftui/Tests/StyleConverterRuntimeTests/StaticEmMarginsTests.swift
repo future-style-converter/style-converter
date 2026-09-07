@@ -11,10 +11,21 @@
 //  IDENTICAL to the Kotlin twin's (apps/android-harness
 //  StaticEmMarginsTest.kt) so the two implementations cannot drift.
 //
-//  The wire literals below are copied from the LIVE per-test IR at
+//  The wire literals below were copied from the LIVE per-test IR at
 //  tools/titan/runs/wave21-final/sections/css-text-decor/per-test-ir/
-//  wpt__css-text-decor__text-decoration-dotted-001.json, so a converter
-//  shape change fails here first.
+//  wpt__css-text-decor__text-decoration-dotted-001.json, and re-verified
+//  against a probe `:converter:run` on 2026-09-05: `font-size: 16px` →
+//  `{"px":16.0,"original":{"type":"length","px":16.0}}` and `margin-top:
+//  2em` → `{"original":{"v":2.0,"u":"EM"}}` are both current.
+//
+//  They are FROZEN COPIES, not a live feed (retro R10, finding A8#5): the
+//  header used to claim "so a converter shape change fails here first",
+//  which is false in both directions — a hand-copied literal keeps passing
+//  after the converter changes shape (it only stops matching reality), and
+//  the pins that DO fail first on a shape change are the ones that read
+//  real converter output (the vendored corpus pins under
+//  tools/titan/fixtures/, and the converter's own suite). What this table
+//  pins is the classifier's arithmetic on those byte shapes.
 //
 
 import XCTest
@@ -111,7 +122,7 @@ final class StaticEmMarginsTests: XCTestCase {
     }
 
     func testE3OwnFontSizeIsTheBaseNotTheRootDefault() throws {
-        // css-values-4 §5.1.1: `em` on a margin resolves against the
+        // css-values-4 §6.1.1: `em` on a margin resolves against the
         // element's OWN computed font-size — 92, never the 16px root.
         XCTAssertEqual(StaticEmMargin.ownFontSizePx(try props(fontSize(92))), 92)
     }

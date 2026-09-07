@@ -8,7 +8,7 @@ import kotlin.math.min
 // GradientRamp — wave 47, lane Z1 (byte-parallel twin of iOS
 // StyleEngine/background/GradientRamp.swift).
 //
-// The per-pair colour math of a gradient ramp: css-color-4 §12
+// The per-pair colour math of a gradient ramp: css-color-4 §13
 // interpolation between two resolved stops (premultiplied alpha, hue
 // arc selection, powerless-hue carry) and the subdivision that bakes
 // that ramp into micro-stops the Skia shaders can follow. Only
@@ -24,12 +24,12 @@ import kotlin.math.min
 
 internal object GradientRamp {
 
-    // ── Interpolation (css-color-4 §12) ──────────────────────────────────
+    // ── Interpolation (css-color-4 §13) ──────────────────────────────────
 
     /**
      * Colour at [t] between [a] and [b] in the authored space:
-     * premultiplied non-hue components (§12.3), hue arc per method
-     * (§12.5), powerless hue carried from the other stop (§12.2).
+     * premultiplied non-hue components (§13.4), hue arc per method
+     * (§13.5), powerless hue carried from the other stop (§13.3).
      */
     fun interpolate(
         a: GradientStopResolver.RGBAStop,
@@ -42,7 +42,7 @@ internal object GradientRamp {
         val cb = comps(GradientColorMath.fromSrgb(GradientColorMath.Triple3(b.r, b.g, b.b), space))
         val alpha = a.a + (b.a - a.a) * t
         val hueIx = GradientColorMath.hueIndex(space)
-        // Missing-component carry for the hue (§12.2 "analogous"): a
+        // Missing-component carry for the hue (§13.3 "analogous"): a
         // powerless hue takes the other stop's hue before the arc is
         // chosen — `red → black in hsl longer hue` therefore sweeps the
         // whole wheel instead of fading straight to black.
@@ -63,7 +63,7 @@ internal object GradientRamp {
                     // Android — the shader handles legacy in-range lerps).
                     va + (vb - va) * t
                 alpha > 0 ->
-                    // Premultiplied (§12.3): each component weighted by its
+                    // Premultiplied (§13.4): each component weighted by its
                     // own alpha, un-premultiplied by the interpolated alpha.
                     (va * a.a * (1 - t) + vb * b.a * t) / alpha
                 else ->
@@ -87,7 +87,7 @@ internal object GradientRamp {
     private fun triple(c: DoubleArray) = GradientColorMath.Triple3(c[0], c[1], c[2])
 
     /**
-     * css-color-4 §12.5 arc selection: the (possibly >360 / unordered)
+     * css-color-4 §13.5 arc selection: the (possibly >360 / unordered)
      * endpoint pair the lerp runs between. Exposed for the subdivision
      * density and for JUnit (GradientStopResolverTest.hueArcSelection).
      */

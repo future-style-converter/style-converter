@@ -183,21 +183,3 @@ enum GridApplier {
         return any ? p : nil
     }
 }
-
-// MARK: - Placement PreferenceKey
-
-/// Preference key used to bubble a child's grid-placement up to the
-/// nearest grid container. The container reads `[Placement]` and lays
-/// children into the named / numbered cells.
-///
-/// Only used by the template-areas (iOS 16 Grid) path today; the
-/// LazyVGrid path relies on child order since it has no span support.
-struct GridPlacementKey: PreferenceKey {
-    /// Default is an empty list — children contribute via `reduce`.
-    static var defaultValue: [GridApplier.Placement] = []
-    /// Append child placements in document order.
-    static func reduce(value: inout [GridApplier.Placement],
-                       nextValue: () -> [GridApplier.Placement]) {
-        value.append(contentsOf: nextValue())
-    }
-}

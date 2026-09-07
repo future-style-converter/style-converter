@@ -25,7 +25,7 @@ Use this directory's scripts only when you want iOS in isolation:
 ## Scope
 
 The rendering surface is the `StyleConverterRuntime` package, not this
-app — all 550 IR properties have registered Config/Extractor/Applier
+app — all 558 IR properties have registered Config/Extractor/Applier
 triplets there (verified rendering coverage is far lower; see the repo-root
 `CLAUDE.md` "Honest status"). To add or fix properties, work in
 [`../../runtimes/swiftui/Sources/StyleConverterRuntime/`](../../runtimes/swiftui/Sources/StyleConverterRuntime/)
@@ -34,7 +34,9 @@ triplets there (verified rendering coverage is far lower; see the repo-root
 
 ## Requirements
 
-- macOS with Xcode 15+ (iOS 16+ simulator)
+- macOS with Xcode 26 (Swift 6.3 toolchain) or newer — `Package.swift`
+  declares `// swift-tools-version:6.3`, which no older toolchain can read
+  — and an iOS 16+ simulator
 - [XcodeGen](https://github.com/yonaskolb/XcodeGen) — `test-all.sh` installs
   it via Homebrew automatically if missing.
 - `xcpretty` (optional, prettifies build logs): `gem install xcpretty`

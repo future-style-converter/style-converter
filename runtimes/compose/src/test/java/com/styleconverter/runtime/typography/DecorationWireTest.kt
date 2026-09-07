@@ -149,7 +149,7 @@ class DecorationWireTest {
 
     @Test
     fun `keyword case is normalized on both channels`() {
-        // CSS keywords are ASCII case-insensitive (css-values-4 §3.2), and
+        // CSS keywords are ASCII case-insensitive (css-values-4 §4.1), and
         // the IR's screaming line spelling must keep working too.
         assertEquals(
             listOf(DecorationLine(LineKind.LINE_THROUGH, blue)),

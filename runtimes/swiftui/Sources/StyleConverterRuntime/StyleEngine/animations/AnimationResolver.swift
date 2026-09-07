@@ -76,32 +76,6 @@ enum AnimationResolver {
         return out
     }
 
-    // MARK: - Live-clock gate
-
-    /// Should the renderer drive a live frame clock for this component?
-    /// True only when a MATCHED animation could still change pixels over
-    /// wall time: running play-state and either an unfinished finite
-    /// timeline or an infinite one. The static corpus (no AnimationName)
-    /// and pinned captures never tick.
-    static func wantsLiveClock(properties: [IRProperty],
-                               keyframes: [String: [IRKeyframeStop]],
-                               atSeconds t: Double) -> Bool {
-        guard let cfg = AnimationsExtractor.extract(from: properties),
-              let names = cfg.name else { return false }
-        for (index, entry) in names.enumerated() {
-            guard case .identifier(let name) = entry, keyframes[name] != nil else { continue }
-            let timing = timingSlice(cfg, index: index)
-            // Paused or zero-duration animations are static frames.
-            guard timing.playState == .running, timing.durationMs > 0 else { continue }
-            // Infinite iterations tick forever; finite ones tick until
-            // the active interval ends (fill freezes the last frame).
-            guard let iterations = timing.iterations else { return true }
-            let endSeconds = (timing.delayMs + timing.durationMs * max(0, iterations)) / 1000.0
-            if t < endSeconds { return true }
-        }
-        return false
-    }
-
     // MARK: - Timing list matching (css-animations-1 §5.2)
 
     /// The per-animation timing tuple: index i of every comma list, short

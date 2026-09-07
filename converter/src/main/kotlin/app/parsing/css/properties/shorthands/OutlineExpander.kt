@@ -1,5 +1,14 @@
 package app.parsing.css.properties.shorthands
 
+// A6#14 — clone consolidation: this expander used to carry private
+//   `splitByWhitespace` (1 copy), byte-identical to TokenizationUtils.tokenizeByWhitespace
+//   once local names are normalised — the rename is why the byte-level dup
+//   scan missed it and TokenizationCloneGuardTest caught it.
+//   — its 1 call site now calls the shared utility instead.
+// One tokenizer rule, one body: a per-expander copy is exactly how the
+// wave-47 border-shorthand defect (fix one, miss six) became possible.
+import app.parsing.css.properties.primitiveParsers.TokenizationUtils
+
 /**
  * Expands the `outline` shorthand property.
  *
@@ -38,7 +47,7 @@ object OutlineExpander : ShorthandExpander {
      * Parse outline shorthand value into width, style, and color components.
      */
     private fun parseOutlineValue(value: String): Map<String, String> {
-        val tokens = splitByWhitespace(value.trim())
+        val tokens = TokenizationUtils.tokenizeByWhitespace(value.trim())
         val result = mutableMapOf<String, String>()
 
         val outlineStyles = setOf("none", "hidden", "dotted", "dashed", "solid", "double",
@@ -83,35 +92,4 @@ object OutlineExpander : ShorthandExpander {
      * Split by whitespace while respecting parentheses.
      * This ensures "rgba(0, 0, 0, 0)" stays as one token.
      */
-    private fun splitByWhitespace(value: String): List<String> {
-        val result = mutableListOf<String>()
-        var current = StringBuilder()
-        var depth = 0
-
-        for (char in value) {
-            when {
-                char == '(' -> {
-                    depth++
-                    current.append(char)
-                }
-                char == ')' -> {
-                    depth--
-                    current.append(char)
-                }
-                char.isWhitespace() && depth == 0 -> {
-                    if (current.isNotEmpty()) {
-                        result.add(current.toString())
-                        current = StringBuilder()
-                    }
-                }
-                else -> current.append(char)
-            }
-        }
-
-        if (current.isNotEmpty()) {
-            result.add(current.toString())
-        }
-
-        return result
-    }
 }

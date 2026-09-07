@@ -3,7 +3,7 @@
 //  StyleConverterRuntimeTests
 //
 //  Wave-43 lane V3 — the `lh` unit's line-height source (css-values-4
-//  §6.2.1: lh = the element's USED line-height, not a hardcoded 1.2em).
+//  §6.1.1: lh = the element's USED line-height, not a hardcoded 1.2em).
 //  Compose twin: spacing/LhUnitLineHeightTest.kt. Wire shapes are copied
 //  VERBATIM from the live wave42-final IR (css-overflow/per-test-ir/
 //  wpt__css-overflow__line-clamp__discard__discard-multicol-001.json):
@@ -29,7 +29,7 @@ final class LhUnitLineHeightTests: XCTestCase {
     // ── The pure three-state pick ───────────────────────────────────────────
 
     func testDeclaredTypedLineHeightWinsVerbatimInBothModes() {
-        // Author value beats every calibration (css-values-4 §6.2.1 — the
+        // Author value beats every calibration (css-values-4 §6.1.1 — the
         // computed line-height of the element IS the lh basis).
         XCTAssertEqual(LhUnitLineHeight.usedLineHeightPx(
             declaredPx: 32, declaredNormal: false, fontSizePx: 16, wptCapture: true), 32)

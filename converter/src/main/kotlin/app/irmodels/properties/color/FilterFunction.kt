@@ -35,9 +35,6 @@ sealed interface FilterFunction {
         /** Grayscale filter (percentage, 0 = none, 100 = full) */
         fun grayscale(percent: Double) = Grayscale(IRPercentage(percent))
 
-        /** Hue-rotate filter (degrees) */
-        fun hueRotate(degrees: Double) = HueRotate(IRAngle.fromDegrees(degrees))
-
         /** Invert filter (percentage, 0 = none, 100 = full) */
         fun invert(percent: Double) = Invert(IRPercentage(percent))
 
@@ -49,24 +46,5 @@ sealed interface FilterFunction {
 
         /** Opacity filter (percentage, 100 = full opacity) */
         fun opacity(percent: Double) = Opacity(IRPercentage(percent))
-
-        /** Drop shadow filter */
-        fun dropShadow(
-            offsetXPx: Double,
-            offsetYPx: Double,
-            blurRadiusPx: Double? = null,
-            color: IRColor? = null
-        ) = DropShadow(
-            IRLength.fromPx(offsetXPx),
-            IRLength.fromPx(offsetYPx),
-            blurRadiusPx?.let { IRLength.fromPx(it) },
-            color
-        )
-
-        // Common presets
-        fun fullGrayscale() = grayscale(100.0)
-        fun fullInvert() = invert(100.0)
-        fun fullSepia() = sepia(100.0)
-        fun noFilter() = brightness(100.0)
     }
 }

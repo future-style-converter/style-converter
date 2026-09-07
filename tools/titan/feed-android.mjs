@@ -39,7 +39,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs, expectedPngNames, composedPngName, pngIsValid,
          documentFontSrcs, resolveFontFile,
-         documentReplacedSrcs, resolveReplacedImageFile } from './feed-lib.mjs';
+         documentReplacedSrcs, resolveReplacedImageFile,
+         // retro R8b (A9#3): the shared --wpt-dir preflight + the honest
+         // decline text for an absent corpus root (see feed-lib's banner).
+         assetHopPreflight, NO_WPT_DIR_DECLINE } from './feed-lib.mjs';
 // wave-40 lane T5: the SVG PRE-RASTER pre-pass. Android's BitmapFactory ships
 // no SVG decoder, so the vector is rasterised on the HOST and this document's
 // copy of the wire is re-pointed at the PNG sibling BEFORE the image hop
@@ -122,7 +125,24 @@ function findAdb() {
 
 /** Return connected device serials (lines ending in a TAB + "device"). */
 function listDevices(adb) {
-  const out = execFileSync(adb, ['devices'], { encoding: 'utf8' });
+  // Bounded like every other adb call (retro 2026-09-06): a wedged adb server made this first
+  // call hang before the feeder's first log line, so a whole section's native step went silent.
+  // Retried with a server restart between attempts: right after an `adb kill-server` elsewhere
+  // (a gate's reprovision, another tool) the first client call can sit in SYN_SENT past 20 s
+  // (retro 2026-09-06, attempt 15: the feeder died here at startup and a whole section shipped
+  // Android-less). A restart from THIS process, then a retry, recovers it in ~3 s.
+  let out = '';
+  for (let attempt = 1; ; attempt++) {
+    try {
+      out = execFileSync(adb, ['devices'], { encoding: 'utf8', timeout: 20_000, killSignal: 'SIGKILL', maxBuffer: 8 * 1024 * 1024, stdio: ['ignore', 'pipe', 'ignore'] });
+      break;
+    } catch (e) {
+      if (attempt >= 3 || !(e && e.code === 'ETIMEDOUT')) throw e;
+      log(`adb devices timed out (attempt ${attempt}) — restarting the adb server and retrying`);
+      try { execFileSync(adb, ['kill-server'], { timeout: 10_000, killSignal: 'SIGKILL', stdio: 'ignore' }); } catch { /* best-effort */ }
+      try { execFileSync(adb, ['start-server'], { timeout: 20_000, killSignal: 'SIGKILL', stdio: 'ignore' }); } catch { /* the retry's auto-start covers it */ }
+    }
+  }
   return out.split('\n').slice(1)
     .map((l) => l.trim()).filter(Boolean)
     .filter((l) => /\tdevice$/.test(l))
@@ -131,8 +151,27 @@ function listDevices(adb) {
 
 /** Bind a factory that runs `adb -s <serial> …`, returning stdout as text. */
 function makeAdb(adb, serial) {
-  return (args, opts = {}) =>
-    execFileSync(adb, ['-s', serial, ...args], { encoding: 'utf8', ...opts });
+  return (args, opts = {}) => {
+    // Retro gate 2026-09-06: EVERY adb call is bounded. A single `adb logcat -d` hung for 15 min
+    // (child alive, node waiting on exit) with the marker already in the buffer — an unbounded
+    // execFileSync deadlocks when the child stalls or its output outgrows the default 1 MiB
+    // maxBuffer (an emulator's main log buffer reads 5 MiB after a long boot). A timed-out call
+    // throws, and every caller here already treats a throw as 'retry' or 'declined'.
+    // A host under memory pressure (retro gate 2026-09-06: load 25, swap 14 GB) makes single adb
+    // calls exceed 30 s; ETIMEDOUT is retried with a doubling budget (30 → 60 → 120 s) so a slow
+    // host degrades to a slow feed instead of a FATAL exit mid-section (attempt 8 died at 25/48
+    // on the per-fixture cleanup rm). Non-timeout failures still throw on the first attempt —
+    // callers that treat a throw as 'declined'/'retry' keep their semantics.
+    let budget = 30_000;
+    for (let attempt = 1; ; attempt++) {
+      try {
+        return execFileSync(adb, ['-s', serial, ...args], { encoding: 'utf8', timeout: budget, killSignal: 'SIGKILL', maxBuffer: 64 * 1024 * 1024, ...opts });
+      } catch (e) {
+        if (e && e.code === 'ETIMEDOUT' && attempt < 3) { budget *= 2; continue; }
+        throw e;
+      }
+    }
+  };
 }
 
 // ── Per-fixture steps ─────────────────────────────────────────────────────────
@@ -225,7 +264,9 @@ async function resetAndLaunch(adbx, opts) {
   const markerRe = opts.composed ? /titanInbox=true titanComposed=true/ : /titanInbox=true/;
   let marked = false;
   for (let i = 0; i < 40 && !marked; i++) {
-    try { marked = markerRe.test(adbx(['logcat', '-d'])); } catch { /* retry */ }
+    // `-t 2000`: the marker is a fresh line (logcat was cleared above), so the last 2000 lines
+    // always contain it; dumping the whole buffer is what made this poll hang (retro 2026-09-06).
+    try { marked = markerRe.test(adbx(['logcat', '-d', '-t', '2000'])); } catch { /* retry */ }
     if (!marked) await new Promise((r) => setTimeout(r, 250));
   }
   // The first push must land in APP-created dirs (see the mkdir note above)
@@ -324,7 +365,15 @@ function pushMonoPinFonts(adbx) {
  *  Failing the fixture instead would hide every OTHER property it measures. */
 function pushFontFaces(adbx, doc, opts) {
   const srcs = documentFontSrcs(doc);
-  if (srcs.length === 0 || !opts.wptDir) return { pushed: 0, declined: srcs.length };
+  if (srcs.length === 0) return { pushed: 0, declined: 0 };
+  // retro R8b (A9#3): an ABSENT corpus root is named as the cause, per src,
+  // instead of falling into resolveFontFile's null (which reads as
+  // "unresolvable/not a font" — the wrong diagnosis). Normally unreachable:
+  // main()'s preflight refuses such a run before any device call.
+  if (!opts.wptDir) {
+    for (const src of srcs) log(`  font ${NO_WPT_DIR_DECLINE}: ${src}`);
+    return { pushed: 0, declined: srcs.length };
+  }
   let pushed = 0, declined = 0;
   const madeDirs = new Set();
   for (const src of srcs) {
@@ -359,7 +408,13 @@ function pushFontFaces(adbx, doc, opts) {
  *  every OTHER property the test measures. */
 function pushReplacedImages(adbx, doc, opts) {
   const srcs = documentReplacedSrcs(doc);
-  if (srcs.length === 0 || !opts.wptDir) return { pushed: 0, declined: srcs.length };
+  if (srcs.length === 0) return { pushed: 0, declined: 0 };
+  // retro R8b (A9#3): same honest-cause branch as pushFontFaces — an absent
+  // corpus root must never be logged as "unresolvable/not an image".
+  if (!opts.wptDir) {
+    for (const src of srcs) log(`  image ${NO_WPT_DIR_DECLINE}: ${src}`);
+    return { pushed: 0, declined: srcs.length };
+  }
   let pushed = 0, declined = 0;
   const madeDirs = new Set();
   for (const src of srcs) {
@@ -395,6 +450,15 @@ function pullVerified(adbx, remoteName, localName, outDir) {
       log(`  pull ${remoteName} errored (attempt ${attempt + 1}): ${e.message}`);
     }
   }
+  // retro R8b (A9#4): after the FINAL failed attempt, DELETE whatever landed.
+  // A truncated PNG left under the compare-glob name is worse than no file:
+  // inject-wpt-block's loadPng throws on it → an `{error}`-shaped diff that
+  // silently leaves the scored denominator (assertPlatformColumns skips error
+  // cells) and compare-screenshots renders a "decode error" row. An ABSENT
+  // file is a MISSING cell, which section-runner.sh Step 5b's capture-count
+  // parity check turns into a loud exit 1. `force` swallows ENOENT (the pull
+  // may have written nothing at all).
+  try { rmSync(local, { force: true }); } catch { /* nothing landed to remove */ }
   return false;
 }
 
@@ -422,6 +486,18 @@ async function main() {
   if (fixtures.length === 0) { log(`no fixtures found under ${opts.fixtures}`); process.exit(2); }
   mkdirSync(opts.out, { recursive: true });
 
+  // retro R8b (A9#3) — the --wpt-dir PREFLIGHT, FIRST of all: before findAdb
+  // (the first device-side call) and before the two host pre-passes below,
+  // which both silently no-op without a corpus root. If any fixture declares
+  // a @font-face or replaced-image src and no root was given, the hop cannot
+  // happen and every capture would score an ARTIFACT — so the run refuses
+  // here, loudly, with exit 2 (the usage-error code above), instead of
+  // producing a manifest of bundled-face text. A fixture that fails to parse
+  // is skipped here (null) and reported per-fixture by the loop below.
+  const readDocOrNull = (fx) => { try { return JSON.parse(readFileSync(fx, 'utf8')); } catch { return null; } };
+  const preflight = assetHopPreflight(fixtures.map(readDocOrNull), opts.wptDir);
+  if (preflight.fatal) { log(preflight.message); process.exit(2); }
+
   const adb = findAdb();
   const devices = listDevices(adb);
   if (devices.length === 0) {
@@ -439,7 +515,10 @@ async function main() {
   // emulator cannot mask a raster failure, and a raster failure cannot be
   // mistaken for one. ONE browser launch covers the whole batch (the css-ui
   // box-sizing cluster's 19 tests share six support vectors), and a batch with
-  // no vectors — 29 of the depth-48 corpus's 30 sections — launches nothing at
+  // no vectors — 28 of the depth-48 corpus's 30 sections (only css-ui and
+  // css-flexbox carry SVG <img> sources: the box-sizing cluster and
+  // align-items-007's ../support/red-rect.svg; wave49-final feed logs show
+  // PRE-RASTER lines in exactly those two sections) — launches nothing at
   // all. The returned map is vector-src → raster-src for the rasters that
   // actually exist; anything missing from it keeps its `.svg` on the wire so
   // DocumentImageRegistry's format decline still fires and still stamps.
@@ -649,7 +728,11 @@ async function main() {
       // restart if this was the last fixture — nothing left to protect.
       if (i < fixtures.length - 1) {
         log(`  ${base}: TIMEOUT (${present.size}/${expected.length} PNGs) — restarting app to clear the wedge`);
-        const remarked = await resetAndLaunch(adbx, opts);
+        // Retro 2026-09-06 (attempt 16 died HERE at 18/48): a starved device can make the restart's
+        // adb calls exhaust their retry budget; treat that as 'not re-marked' and let the tail
+        // retry / the column-presence guard report the short column honestly — never FATAL.
+        let remarked = false;
+        try { remarked = await resetAndLaunch(adbx, opts); } catch (e) { log(`  app restart failed (${e && e.code || e}) — fixture stays failed`); }
         if (!remarked) log('  WARNING: marker not seen after restart (continuing)');
         // wave-46 lane Y7: the relaunch wiped FONTS_DIR — re-deliver the pin.
         pushMonoPinFonts(adbx);
@@ -666,7 +749,9 @@ async function main() {
     }
     const elapsedSec = (Date.now() - t0) / 1000;
     // Clear this fixture's on-device PNGs so the next fixture's poll is clean.
-    adbx(['shell', 'rm', '-f', `${SHOT_DIR}/*`]);
+    // Best-effort: a failed cleanup only means the next fixture's poll sees stale PNGs (it
+    // already tolerates that via expected-name matching); it must never abort the feed.
+    try { adbx(['shell', 'rm', '-f', `${SHOT_DIR}/*`]); } catch { log(`  ${base}: on-device cleanup failed (adb) — continuing`); }
     const ok = bad.length === 0;
     results.push({ fixture: base, ok, pulled, ...(bad.length ? { badPngs: bad } : {}), elapsedSec });
     log(`  ${base}: ${ok ? 'OK' : 'PARTIAL'} ${pulled.length}/${expected.length} PNGs in ${elapsedSec.toFixed(2)}s`);
@@ -737,7 +822,10 @@ async function main() {
         }
       } else {
         log(`  ${row.fixture}: RETRY TIMEOUT — genuinely failing, restarting app`);
-        await resetAndLaunch(adbx, opts);
+        // Retro 2026-09-06: a device so starved that `am force-stop` exhausts its 30/60/120 s retry
+        // budget (attempt 16: host at 76 MB free RAM) must cost ONE fixture, not the feed — the
+        // column-presence guard downstream still reports the short column honestly.
+        try { await resetAndLaunch(adbx, opts); } catch (e) { log(`  app restart failed (${e && e.code || e}) — continuing without a relaunch`); }
         // wave-46 lane Y7: the relaunch wiped FONTS_DIR — re-deliver the pin
         // so the NEXT retry row (and the force-stop'd app's final state)
         // never run un-pinned under a pilot-labelled run.
@@ -768,4 +856,16 @@ async function main() {
   process.exit(okCount === fixtures.length ? 0 : 1);
 }
 
-main().catch((e) => { log(`FATAL: ${e.stack || e.message}`); process.exit(1); });
+// retro R8b: CLI guard — the exact shape feed-ios.mjs already uses — so
+// feed-android.test.mjs can import pullVerified for a real-path unit test
+// without main() parsing the test runner's argv and exiting 2. Every caller
+// (section-runner.sh, run-titan.sh, the BACKLOG refeed recipe) invokes this
+// file as `node …/feed-android.mjs`, so argv[1] resolves to this module.
+if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+  main().catch((e) => { log(`FATAL: ${e.stack || e.message}`); process.exit(1); });
+}
+
+// Exported for tools/titan/feed-android.test.mjs (A9#4 pin: a PNG that fails
+// to parse twice must be ABSENT afterwards, never left corrupt under the
+// compare-glob name). Takes an injected `adbx`, so the test needs no device.
+export { pullVerified };

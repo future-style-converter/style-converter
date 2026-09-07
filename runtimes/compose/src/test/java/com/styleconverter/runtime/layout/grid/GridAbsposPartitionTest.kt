@@ -144,7 +144,7 @@ class GridAbsposPartitionTest {
 
     @Test
     fun `auto self falls back to container items values`() {
-        // css-align-3 §6.2/§6.4: *-self:auto resolves to the container's
+        // css-align-3 §6.1/§6.2: *-self:auto resolves to the container's
         // *-items — the sole-item alignment the 4 §9.2 WPT refs exercise.
         val (inline, block) = specs(
             abspos(),

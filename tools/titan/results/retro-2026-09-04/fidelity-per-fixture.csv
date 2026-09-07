@@ -1,0 +1,87 @@
+fixture,exit,elapsed_s,expected,cap_ios,cap_android,cap_web,gate_pairs,gate_known,gate_unexpected,gate_stale,oracle_checked,oracle_violations,oracle_waived,oracle_stale,notes,failing_components(class)
+fixtures/combinations/transform-list-order.json,0,87,6,6,6,6,18,0,0,0,18,0,0,0,,
+fixtures/combinations/blend-isolation.json,4,85,7,7,7,7,21,0,2,0,,,0,0,,003_wrapper=IOS-ODD
+fixtures/combinations/filter-chain-order.json,0,61,4,4,4,4,12,0,0,0,12,0,0,0,,
+fixtures/combinations/gradient-stops-interp.json,0,62,4,4,4,4,12,0,0,0,12,0,0,0,,
+fixtures/combinations/nested-transforms.json,4,66,8,8,8,8,24,0,12,0,,,0,0,,000_NT_Control_ChildRotate=ANDROID-ODD | 001_box=ANDROID-ODD | 002_NT_ParentScaleX_ChildRotate=ANDROID-ODD | 003_box=ANDROID-ODD | 004_NT_ParentRotate_ChildScaleX=ANDROID-ODD | 005_box=ANDROID-ODD
+fixtures/combinations/opacity-blend.json,0,65,6,6,6,6,18,0,0,0,15,0,0,0,,
+fixtures/combinations/opacity-filter-stacking.json,0,65,8,8,8,8,24,0,0,0,12,0,0,0,,
+fixtures/combinations/perspective-translatez.json,0,59,5,5,5,5,15,0,0,0,15,0,0,0,,
+fixtures/combinations/radius-overflow-transform.json,4,56,4,4,4,4,12,0,2,0,,,0,0,,003_ROT_SelfRotate_ClippedChild=IOS-ODD
+fixtures/fidelity/animations.combos.json,4,63,11,11,11,11,33,0,2,0,,,0,0,,010_Animations_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/appearance.combos.json,4,57,4,4,4,4,12,0,4,0,,,0,0,,001_Appearance_BoxModel=WEB-ODD | 003_Appearance_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/background.combos.json,4,61,6,6,6,6,18,0,3,0,,,0,0,,005_Background_Decorated=THREE-WAY-ODD
+fixtures/fidelity/borders.combos.json,4,67,17,17,17,17,51,0,6,0,,,0,0,,013_Borders_C14_CornerShape=THREE-WAY-ODD | 016_Borders_Decorated=THREE-WAY-ODD
+fixtures/fidelity/color.combos.json,4,58,5,5,5,5,15,0,2,0,,,0,0,,004_Color_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/columns.combos.json,4,58,5,5,5,5,15,0,2,0,,,0,0,,004_Columns_Decorated=NATIVES-WIDER
+fixtures/fidelity/container.combos.json,4,59,4,4,4,4,12,0,2,0,,,0,0,,003_Container_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/counters.combos.json,4,58,4,4,4,4,12,0,2,0,,,0,0,,003_Counters_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/dynamic/dark-mode.json,0,57,4,4,4,4,12,0,0,0,,,0,0,,
+fixtures/fidelity/dynamic/media-width.json,0,57,7,7,7,7,21,0,0,0,,,0,0,,
+fixtures/fidelity/dynamic/states.json,0,57,6,6,6,6,18,0,0,0,,,0,0,,
+fixtures/fidelity/effects.combos.json,0,63,11,11,11,11,33,0,0,0,,,0,0,,
+fixtures/fidelity/experimental.combos.json,4,55,4,4,4,4,12,0,2,0,,,0,0,,003_Experimental_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/images.combos.json,4,57,4,4,4,4,12,0,4,0,,,0,0,,001_Images_BoxModel=WEB-ODD | 003_Images_Decorated=ANDROID-ODD
+fixtures/fidelity/interactions.combos.json,4,59,6,6,6,6,18,0,2,0,,,0,0,,005_Interactions_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/layout.combos.json,4,73,22,22,22,22,66,0,11,0,,,0,0,,000_Layout_C01_AlignContent=THREE-WAY-ODD | 010_Layout_C11_InsetInlineStart=WEB-ODD | 013_Layout_C14_OffsetPath=IOS-ODD | 020_Layout_TextBlock=ANDROID-ODD | 021_Layout_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/lists.combos.json,0,58,4,4,4,4,12,0,0,0,,,0,0,,
+fixtures/fidelity/math.combos.json,4,57,4,4,4,4,12,0,2,0,,,0,0,,001_Math_BoxModel=WEB-ODD
+fixtures/fidelity/motion/keyframes-basic.json,4,62,8,8,8,8,24,0,22,0,,,0,0,,000_MK_Fade=THREE-WAY-ODD | 001_MK_Slide=THREE-WAY-ODD | 002_MK_Pulse=THREE-WAY-ODD | 003_MK_ColorShift=THREE-WAY-ODD | 004_MK_Multi=THREE-WAY-ODD | 005_MK_ThreeStop=IOS-ODD | 006_MK_Alternate=THREE-WAY-ODD | 007_MK_FillBoth=ANDROID-ODD
+fixtures/fidelity/motion/transitions.json,0,55,4,4,4,4,12,0,0,0,,,0,0,,
+fixtures/fidelity/navigation.combos.json,4,56,4,4,4,4,12,0,2,0,,,0,0,,003_Navigation_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/paging.combos.json,0,58,5,5,5,5,15,0,0,0,,,0,0,,
+fixtures/fidelity/pairwise/pairs-01.json,4,89,44,44,44,44,132,0,14,0,,,0,0,,002_PW_Background_Borders_03=IOS-ODD | 008_PW_Background_Effects_01=ANDROID-ODD | 011_PW_Background_Effects_04=IOS-ODD | 025_PW_Background_Shapes_02=WEB-ODD | 031_PW_Background_Sizing_04=ANDROID-ODD | 034_PW_Background_Spacing_03=SIZE-MISMATCH | 038_PW_Background_Transforms_03=ANDROID-ODD
+fixtures/fidelity/pairwise/pairs-02.json,4,89,44,44,44,44,132,0,33,0,,,0,0,,000_PW_Borders_Color_01=IOS-ODD | 001_PW_Borders_Color_02=ANDROID-ODD | 003_PW_Borders_Color_04=IOS-ODD | 005_PW_Borders_Effects_02=THREE-WAY-ODD | 006_PW_Borders_Effects_03=PARTIAL:IOS-WEB-ODD | 009_PW_Borders_Images_02=WEB-ODD | 010_PW_Borders_Images_03=IOS-ODD | 012_PW_Borders_Layout_01=WEB-ODD | 020_PW_Borders_Shapes_01=IOS-ODD | 024_PW_Borders_Sizing_01=IOS-ODD | 025_PW_Borders_Sizing_02=IOS-ODD | 026_PW_Borders_Sizing_03=WEB-ODD | 027_PW_Borders_Sizing_04=IOS-ODD | 034_PW_Borders_Transforms_03=THREE-WAY-ODD | 036_PW_Borders_Typography_01=IOS-ODD | 038_PW_Borders_Typography_03=WEB-ODD
+fixtures/fidelity/pairwise/pairs-03.json,4,91,44,44,44,44,132,0,15,0,,,0,0,,005_PW_Color_Layout_02=SIZE-MISMATCH | 006_PW_Color_Layout_03=THREE-WAY-ODD | 007_PW_Color_Layout_04=ANDROID-ODD | 021_PW_Color_Spacing_02=SIZE-MISMATCH | 030_PW_Color_Typography_03=ANDROID-ODD | 031_PW_Color_Typography_04=THREE-WAY-ODD
+fixtures/fidelity/pairwise/pairs-04.json,4,90,44,44,44,44,132,0,9,0,,,0,0,,014_PW_Effects_Transforms_03=THREE-WAY-ODD | 037_PW_Images_Spacing_02=SIZE-MISMATCH | 040_PW_Images_Transforms_01=ANDROID-ODD | 043_PW_Images_Transforms_04=ANDROID-ODD
+fixtures/fidelity/pairwise/pairs-05.json,4,89,44,44,44,44,132,0,6,0,,,0,0,,015_PW_Layout_Sizing_04=NATIVES-WIDER | 018_PW_Layout_Spacing_03=SIZE-MISMATCH | 026_PW_Layout_Typography_03=WEB-ODD
+fixtures/fidelity/pairwise/pairs-06.json,4,90,44,44,44,44,132,0,10,0,,,0,0,,022_PW_Sizing_Spacing_03=SIZE-MISMATCH | 027_PW_Sizing_Transforms_04=SIZE-MISMATCH | 035_PW_Spacing_Transforms_04=ANDROID-ODD | 040_PW_Transforms_Typography_01=ANDROID-ODD | 043_PW_Transforms_Typography_04=ANDROID-ODD
+fixtures/fidelity/performance.combos.json,4,61,5,5,5,5,15,0,2,0,,,0,0,,004_Performance_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/placement/flex-order.json,0,65,15,15,15,15,45,0,0,0,,,0,0,,
+fixtures/fidelity/placement/grid-areas.json,0,63,13,13,13,13,39,0,0,0,,,0,0,,
+fixtures/fidelity/placement/grid-lines.json,0,64,13,13,13,13,39,0,0,0,,,0,0,,
+fixtures/fidelity/placement/mixed-claims.json,0,66,18,18,18,18,54,0,0,0,,,0,0,,
+fixtures/fidelity/placement/self-alignment.json,0,64,15,15,15,15,45,0,0,0,,,0,0,,
+fixtures/fidelity/placement/z-stack.json,0,59,11,11,11,11,33,0,0,0,,,0,0,,
+fixtures/fidelity/print.combos.json,4,60,6,6,6,6,18,0,1,0,,,0,0,,005_Print_Decorated=PARTIAL:ANDROID-WEB-ODD
+fixtures/fidelity/regions.combos.json,4,58,6,6,6,6,18,0,3,0,,,0,0,,005_Regions_Decorated=THREE-WAY-ODD
+fixtures/fidelity/rendering.combos.json,4,58,7,7,7,7,21,0,3,0,,,0,0,,006_Rendering_Decorated=THREE-WAY-ODD
+fixtures/fidelity/rhythm.combos.json,0,55,4,4,4,4,12,0,0,0,,,0,0,,
+fixtures/fidelity/scrolling.combos.json,4,69,15,15,15,15,45,0,2,0,,,0,0,,014_Scrolling_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/shapes.combos.json,4,60,4,4,4,4,12,0,2,0,,,0,0,,003_Shapes_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/sizing.combos.json,4,59,5,5,5,5,15,0,2,0,,,0,0,,002_Sizing_BoxModel=SIZE-MISMATCH
+fixtures/fidelity/spacing.combos.json,4,63,11,11,11,11,33,0,6,0,,,0,0,,002_Spacing_C03_MarginInlineEnd=ANDROID-ODD | 003_Spacing_C04_MarginRight=SIZE-MISMATCH | 008_Spacing_BoxModel=WEB-ODD
+fixtures/fidelity/speech.combos.json,4,65,11,11,11,11,33,0,2,0,,,0,0,,010_Speech_Decorated=ANDROID-ODD
+fixtures/fidelity/svg.combos.json,0,64,13,13,13,13,39,0,0,0,,,0,0,,
+fixtures/fidelity/table.combos.json,0,56,4,4,4,4,12,0,0,0,,,0,0,,
+fixtures/fidelity/tokens/calc-units.json,4,63,10,10,10,10,30,0,2,0,,,0,0,,008_tokenMath=IOS-ODD
+fixtures/fidelity/tokens/token-fallbacks.json,0,61,9,9,9,9,27,0,0,0,,,0,0,,
+fixtures/fidelity/tokens/token-theme.json,4,60,11,11,11,11,33,0,8,0,,,0,0,,001_a=SIZE-MISMATCH | 002_b=SIZE-MISMATCH | 003_c=SIZE-MISMATCH | 009_styled=ANDROID-ODD
+fixtures/fidelity/transforms.combos.json,4,57,6,6,6,6,18,0,2,0,,,0,0,,005_Transforms_Decorated=WEB-LABEL-SPILL
+fixtures/fidelity/trees/block-flow.json,0,61,12,12,12,12,36,0,0,0,,,0,0,,
+fixtures/fidelity/trees/flex-column.json,4,61,17,17,17,17,51,0,2,0,,,0,0,,000_FC_AlignSelf=IOS-ODD
+fixtures/fidelity/trees/flex-row.json,0,60,17,17,17,17,51,0,0,0,,,0,0,,
+fixtures/fidelity/trees/grid-2col.json,0,67,20,20,20,20,60,0,0,0,,,0,0,,
+fixtures/fidelity/trees/inheritance-color.json,4,62,12,12,12,12,36,0,13,0,,,0,0,,003_IH_FontSize=SIZE-MISMATCH | 006_IH_LineHeight=SIZE-MISMATCH | 007_plain=SIZE-MISMATCH | 008_redeclared=SIZE-MISMATCH | 011_deep=ANDROID-ODD
+fixtures/fidelity/trees/inheritance-extended.json,4,63,16,16,16,16,48,0,16,0,,,0,0,,007_IE_LeadingText=SIZE-MISMATCH | 008_mid=SIZE-MISMATCH | 010_IE_TextShadow=THREE-WAY-ODD | 011_plain=ANDROID-ODD | 012_redeclared=ANDROID-ODD | 013_IE_WrapChain=SIZE-MISMATCH | 014_mid=SIZE-MISMATCH
+fixtures/fidelity/trees/inheritance-typography.json,4,60,12,12,12,12,36,0,11,0,,,0,0,,001_plain=ANDROID-ODD | 002_redeclared=THREE-WAY-ODD | 007_plain=ANDROID-ODD | 010_plain=ANDROID-ODD | 011_redeclared=ANDROID-ODD
+fixtures/fidelity/trees/mixed-direction.json,4,59,17,17,17,17,51,0,2,0,,,0,0,,007_MD_ColumnWithRow=IOS-ODD
+fixtures/fidelity/trees/nested-3level.json,4,62,18,18,18,18,54,0,2,0,,,0,0,,000_N3_ColumnOfRows=IOS-ODD
+fixtures/fidelity/typography.combos.json,4,74,25,25,25,25,75,0,5,0,,,0,0,,001_Typography_C02_Direction=THREE-WAY-ODD | 024_Typography_Decorated=WEB-LABEL-SPILL
+fixtures/properties/columns/longtail.json,0,90,22,22,22,22,66,0,0,0,,,0,0,,
+fixtures/properties/columns/nested-multicol.json,4,80,4,4,4,4,12,0,6,0,,,0,0,,000_Multicol_NestedMulticolChild_CaptureAlive=THREE-WAY-ODD | 001_inner=SIZE-MISMATCH
+fixtures/properties/transforms/audit-phase12.json,4,82,18,18,18,18,54,0,13,0,,,0,0,,000_Audit_ChainFive=ANDROID-ODD | 001_Audit_Matrix_SkewTrans=THREE-WAY-ODD | 002_Audit_Matrix3dIdentityT=ANDROID-ODD | 003_Audit_InlinePerspective=ANDROID-ODD | 015_Audit_OrderSensitive=ANDROID-ODD | 016_Audit_Perspective_Zero=WEB-ODD
+fixtures/properties/transforms/backface-visibility.json,0,60,2,2,2,2,6,0,0,0,,,0,0,,
+fixtures/properties/transforms/perspective-origin.json,4,66,6,6,6,6,18,0,12,0,,,0,0,,000_PerspOrigin_Center=ANDROID-ODD | 001_PerspOrigin_CenterCenter=ANDROID-ODD | 002_PerspOrigin_TopLeft=ANDROID-ODD | 003_PerspOrigin_BottomRight=ANDROID-ODD | 004_PerspOrigin_Pcts=ANDROID-ODD | 005_PerspOrigin_Lengths=ANDROID-ODD
+fixtures/properties/transforms/perspective.json,4,60,4,4,4,4,12,0,6,0,,,0,0,,001_Perspective_500px=ANDROID-ODD | 002_Perspective_1000px=ANDROID-ODD | 003_Perspective_Zero=WEB-ODD
+fixtures/properties/transforms/rotate-longhand.json,4,65,10,10,10,10,30,0,2,0,,,0,0,,008_Rotate_XYZ_Angle=ANDROID-ODD
+fixtures/properties/transforms/rotate.json,0,61,2,2,2,2,6,0,0,0,,,0,0,,
+fixtures/properties/transforms/scale-longhand.json,0,65,8,8,8,8,24,0,0,0,,,0,0,,
+fixtures/properties/transforms/scale.json,0,64,4,4,4,4,12,0,0,0,,,0,0,,
+fixtures/properties/transforms/transform-box.json,0,64,5,5,5,5,15,0,0,0,,,0,0,,
+fixtures/properties/transforms/transform-functions.json,4,83,28,28,28,28,84,0,15,0,,,0,0,,003_Transform_TranslateZ=ANDROID-ODD | 006_Transform_Translate3d=ANDROID-ODD | 013_Transform_Rotate3d=ANDROID-ODD | 023_Transform_Matrix=THREE-WAY-ODD | 024_Transform_Matrix3d=ANDROID-ODD | 025_Transform_Perspective=ANDROID-ODD | 027_Transform_ChainLong=ANDROID-ODD
+fixtures/properties/transforms/transform-origin.json,4,67,9,9,9,9,27,0,4,0,,,0,0,,003_Origin_TopRight=WEB-ODD | 004_Origin_BottomCenter=WEB-ODD
+fixtures/properties/transforms/transform-style.json,0,57,2,2,2,2,6,0,0,0,,,0,0,,
+fixtures/properties/transforms/transform.json,0,66,7,7,7,7,21,0,0,0,,,0,0,,
+fixtures/properties/transforms/translate-longhand.json,4,64,8,8,8,8,24,0,6,0,,,0,0,,001_Translate_OneAxis_Px=ANDROID-ODD | 002_Translate_OneAxis_Pct=ANDROID-ODD | 006_Translate_ThreeAxis=ANDROID-ODD
+fixtures/properties/transforms/translate.json,143,898,3,3,0,0,,,,0,,,0,0,,001_Translate_OneAxis_Px=ANDROID-ODD | 002_Translate_OneAxis_Pct=ANDROID-ODD | 006_Translate_ThreeAxis=ANDROID-ODD

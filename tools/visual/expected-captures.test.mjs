@@ -15,22 +15,41 @@ import { expectedCaptureCount, parentCreatesContext, dependsOnBackdrop } from '.
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
-test('composition-test: 42 wire components → 32 captures', (t) => {
+test('composition-test: 42 wire components → 32 captures', () => {
   // The number every device produces (verified on all three platforms),
   // which the old grep-based count read as 42 — sending every run through
-  // the stuck-counter branch. Reads the converter's real output when the
-  // last convert was composition-test; SKIPS (visibly, never passes
-  // vacuously) otherwise — out/ is gitignored scratch, so its content
-  // depends on what ran last.
-  let wire = null;
+  // the stuck-counter branch.
+  //
+  // Retro R10 (finding A8#3): this used to read `out/tmpOutput.json` and
+  // SKIP unless the last convert on this machine happened to be
+  // composition-test — which it never was on any recorded sweep, so the
+  // pin never executed. It now reads the committed convert of
+  // fixtures/composition-test.json vendored beside this test
+  // (tools/visual/fixtures/composition-test.ir.json, 42 components, a
+  // `:converter:run --from css --to ir` of that fixture), so the mirror is
+  // pinned against real converter output on every run, everywhere.
+  const wire = JSON.parse(
+    readFileSync(resolve(__dirname, 'fixtures/composition-test.ir.json'), 'utf8'),
+  );
+  // Guard the premise: a different fixture (or a re-vendor that changed the
+  // wire) must fail loudly here rather than silently re-baselining the 32.
+  assert.equal((wire.components ?? []).length, 42, 'the vendored convert is the 42-component composition-test wire');
+  assert.equal(expectedCaptureCount(wire), 32);
+});
+
+test('composition-test: a fresh convert in out/ must agree with the vendored wire', (t) => {
+  // Drift guard on the vendoring: when the last `test-all.sh` convert WAS
+  // composition-test, out/tmpOutput.json must produce the same count. This
+  // is the only part that may skip — the pin above always runs.
+  let fresh = null;
   try {
-    wire = JSON.parse(readFileSync(resolve(__dirname, '../../out/tmpOutput.json'), 'utf8'));
+    fresh = JSON.parse(readFileSync(resolve(__dirname, '../../out/tmpOutput.json'), 'utf8'));
   } catch { /* absent → skip below */ }
-  if (!wire || (wire.components ?? []).length !== 42) {
-    t.skip('out/tmpOutput.json is not the composition-test convert — run test-all.sh on it first');
+  if (!fresh || (fresh.components ?? []).length !== 42) {
+    t.skip('out/tmpOutput.json is not the composition-test convert (vendored pin above still ran)');
     return;
   }
-  assert.equal(expectedCaptureCount(wire), 32);
+  assert.equal(expectedCaptureCount(fresh), 32);
 });
 
 test('a flat document counts every component', () => {

@@ -8,7 +8,7 @@ import kotlin.system.exitProcess
 
 /*
 Purpose: Kotlin CLI entry for the CSS → IR conversion pipeline.
-Usage: style-converter convert --from css|compose|swiftui --to ir -i <input> -o <outDir>
+Usage: style-converter convert --from css --to ir -i <input> -o <outDir>
 Pipeline: Parse input JSON → normalize to IR → write <outDir>/tmpOutput.json.
 
 The platform code generators (compose/swiftui/css writers) were removed:
@@ -16,6 +16,12 @@ they were dead stubs (SwiftUI/CSS exited 0 without output; Compose emitted
 non-compiling code covering ~20/550 properties). The three runtime renderers
 under runtimes/ consume the IR artifact (tmpOutput.json) directly, so `ir`
 is the only supported target until real writers exist.
+
+The INPUT side had the same hole until the retrospective (finding A6#2):
+`--from compose` / `--from swiftui` routed to placeholder readers that
+printed "not yet implemented" and exited 0 without writing anything — a
+silent success to every calling script. Both stubs are deleted; `css` is
+the only reader, and anything else is a usage error (exit 2) below.
 */
 
 /**
@@ -57,7 +63,7 @@ private fun parseArgs(args: List<String>): Map<String, String> {
 private val prettyJson = Json { prettyPrint = true }
 
 private fun printUsage() {
-    println("Usage: style-converter convert --from css|compose|swiftui --to ir -i <input> -o <outDir> [--emit-ir v1|v2]")
+    println("Usage: style-converter convert --from css --to ir -i <input> -o <outDir> [--emit-ir v1|v2]")
     println("  --emit-ir v2   (default) flat-list IR v2 wire: irVersion/minReaderVersion envelope,")
     println("                 flat components + slot refs, text/pseudos/meta field names")
     println("  --emit-ir v1   DEPRECATED legacy nested-children wire, byte-identical to the pre-v2")
@@ -120,9 +126,13 @@ fun main(rawArgs: Array<String>) {
         }
     }
 
-    // Route to the correct parser based on --from
-    val allowedFrom = setOf("css", "compose", "swiftui")
-    if (fromRaw !in allowedFrom) usageError("unknown --from '$fromRaw'")
+    // Route to the correct parser based on --from. CSS is the ONLY reader:
+    // the `compose`/`swiftui` entries this set used to carry pointed at stub
+    // readers that exited 0 with no artifact (retrospective A6#2 — the
+    // input-side twin of the silent-success generators removed above), so an
+    // unknown source is a usage error that exits 2 BEFORE any file is read.
+    val allowedFrom = setOf("css")
+    if (fromRaw !in allowedFrom) usageError("unknown --from '$fromRaw' — only 'css' has a reader")
 
     // IR wire version selector. v2 (flat list + slot) is the DEFAULT as of
     // the v2 freeze; `--emit-ir v1` keeps the legacy nested wire available

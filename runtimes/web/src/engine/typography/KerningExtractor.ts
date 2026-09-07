@@ -1,6 +1,6 @@
 // KerningExtractor.ts — folds `Kerning` IR properties into a KerningConfig.
 // Family: kerning.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { KerningConfig, KERNING_PROPERTY_TYPE, KerningPropertyType } from './KerningConfig';
 import { kwLower, lengthCss } from './_shared';

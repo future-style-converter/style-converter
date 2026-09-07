@@ -20,7 +20,7 @@ package com.styleconverter.runtime.borders
 //  3. (SUPERSEDED) Border-image extra content inset: the wave-3 fix made
 //     BorderImageBox pad max(0, resolvedWidth − computedBorderWidth). The
 //     skeptic pass then showed even that partial inset violates
-//     css-backgrounds-3 §6 — border-image properties do not affect layout
+//     css-backgrounds-3 §5 — border-image properties do not affect layout
 //     AT ALL; content is inset by border-width only (Chromium: border
 //     10px + border-image-width 15px keeps the content inset at 10px).
 //     extraContentInset was deleted; its former pins here went with it.

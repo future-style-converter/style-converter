@@ -9,7 +9,7 @@ import { extractLength, toCssLength, type LengthValue } from '../../core/types/L
 import { extractKeyword } from '../../core/types/KeywordValue';            // keyword normaliser
 
 // --- border-image-source ---------------------------------------------------
-// IR shapes (from examples/properties/borders/border-image.json):
+// IR shapes (from fixtures/properties/borders/border-image.json):
 //   {type:'none'}                                   the `none` keyword
 //   {type:'url', url:'border.png'}                   url(...) token
 //   {type:'gradient', gradient:'linear-gradient(...)'} raw gradient CSS

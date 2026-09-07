@@ -10,7 +10,7 @@
 //      which is the piece that CAN drift (the two platforms read definiteness
 //      off different representations of the same wire);
 //    * ReplacedImageContent.isCandidate / fit / position — the identity gate
-//      and the two css-images-3 §5.5 readings;
+//      and the two css-images-3 §4.5 readings;
 //    * DocumentImageRegistry's DECLINE behaviour — the half that matters most,
 //      because a silent decline would paint a wrong picture with nothing in
 //      any log.

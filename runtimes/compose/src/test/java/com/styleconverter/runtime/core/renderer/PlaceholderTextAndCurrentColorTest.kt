@@ -13,7 +13,7 @@ package com.styleconverter.runtime.core.renderer
 //      ({"original":"currentColor"}), which extractTextColor nulled out,
 //      dropping the value to the placeholder's bg-contrast pick. The
 //      renderer now resolves it through the wave-9 inheritance channel
-//      (css-color-4 §7.2: currentColor on `color` itself == inherit);
+//      (css-color-4 §6.4: currentColor on `color` itself == inherit);
 //      this suite pins the wire-shape detector that gates that path.
 
 import com.styleconverter.runtime.core.ir.IRProperty
@@ -121,7 +121,7 @@ class PlaceholderTextAndCurrentColorTest {
 
     @Test
     fun `detection is case-insensitive`() {
-        // CSS keywords are ASCII case-insensitive (css-color-4 §7.2's
+        // CSS keywords are ASCII case-insensitive (css-color-4 §6.4's
         // canonical spelling is camelCase but any casing is valid input).
         assertTrue(ComponentRenderer.isCurrentColorValue(j("""{"original":"currentcolor"}""")))
     }
@@ -193,7 +193,7 @@ class PlaceholderTextAndCurrentColorTest {
 
     @Test
     fun `an inherited color always wins over the default`() {
-        // css-color-4 §7.2: currentColor on `color` == inherit — a real
+        // css-color-4 §6.4: currentColor on `color` == inherit — a real
         // ancestor value must pass through untouched, on BOTH sides of the
         // corpus-v4.1 ink split (author color beats any default ink).
         val inherited = androidx.compose.ui.graphics.Color(0.2f, 0.4f, 0.6f, 1f)

@@ -68,7 +68,7 @@ class TypographyTextPipelineFixTest {
 
     @Test
     fun `word-spacing negative px passes through`() {
-        // css-text-3 §5.1 allows negatives; spans contract advance the
+        // css-text-3 §7.2 allows negatives; spans contract advance the
         // same way they expand it.
         val sp = TextStyleApplier.extractWordSpacingSp(
             listOf(prop("WordSpacing", """{"px":-4.0}""")),
@@ -150,7 +150,7 @@ class TypographyTextPipelineFixTest {
 
     @Test
     fun `span spacing sums an sp letter-spacing base`() {
-        // css-text-3 §5.1: BOTH trackings apply at a separator, and a
+        // css-text-3 §7.2: BOTH trackings apply at a separator, and a
         // SpanStyle letterSpacing REPLACES the base on the spanned char —
         // so the span must carry the sum.
         assertEquals(
@@ -222,7 +222,7 @@ class TypographyTextPipelineFixTest {
     fun `letter-spacing em resolves via the native em TextUnit (live direct nesting)`() {
         // 0.1em on a 22px element must yield 2.2px — the old ×16 hardcode
         // produced 1.6px. The em TextUnit defers resolution to the style's
-        // own fontSize, which is exactly the css-values-4 §5.1.1 base.
+        // own fontSize, which is exactly the css-values-4 §6.1.1 base.
         // LIVE wire (verified against the running converter):
         // `letter-spacing: 0.1em` emits {"px":0.0,"original":{"type":
         // "length","original":{"v":0.1,"u":"EM"}}} — {v,u} DIRECTLY under
@@ -298,7 +298,7 @@ class TypographyTextPipelineFixTest {
         // LIVE wire, verified against the running converter:
         // `font-size: 1.5em` deep-flattens to {"original":{"type":
         // "length","original":{"v":1.5,"u":"EM"}}} — NO "value" key, NO
-        // resolved px. css-values-4 §5.1.1: font-size's own em resolves
+        // resolved px. css-values-4 §6.1.1: font-size's own em resolves
         // against the INHERITED size (16px browser default here) → 24.
         // Previously this shape fell through to the 16sp default while
         // iOS/web resolved it.
@@ -333,7 +333,7 @@ class TypographyTextPipelineFixTest {
     @Test
     fun `font-size percentage resolves against the inherited base (live wire)`() {
         // LIVE wire: `font-size: 120%` emits {"original":{"type":
-        // "percentage","value":120.0}} (no px). css-fonts-4 §2.4: % of
+        // "percentage","value":120.0}} (no px). css-fonts-4 §2.5: % of
         // the inherited size — 120% × 16 default = 19.2. Previously fell
         // through to the 16sp default.
         val style = TextStyleApplier.extractTextStyle(

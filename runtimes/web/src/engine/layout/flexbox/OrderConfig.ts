@@ -4,4 +4,3 @@
 export interface OrderConfig { value?: number; }
 
 export const ORDER_PROPERTY_TYPE = 'Order' as const;
-export type OrderPropertyType = typeof ORDER_PROPERTY_TYPE;

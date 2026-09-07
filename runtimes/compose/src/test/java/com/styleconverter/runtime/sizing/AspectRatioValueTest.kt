@@ -1,7 +1,7 @@
 package com.styleconverter.runtime.sizing
 
 // Unit tests for extractAspectRatio. Each test matches an IR shape pulled
-// verbatim from examples/properties/sizing/aspect-ratio.json.
+// verbatim from fixtures/properties/sizing/aspect-ratio.json.
 
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals

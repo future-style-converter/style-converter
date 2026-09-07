@@ -3,7 +3,7 @@
 //  StyleEngine/background — wave 46, lane Y2 (css-images natives).
 //
 //  The authored <color-interpolation-method> of one gradient
-//  (css-images-4 §3.1 `||` clause, css-color-4 §12.4 grammar):
+//  (css-images-4 §3.1 `||` clause, css-color-4 §13.2 grammar):
 //    <color-interpolation-method> = in [ <rectangular-color-space>
 //                                      | <polar-color-space> <hue-interpolation-method>? ]
 //  The converter carries it verbatim on the layer as the optional
@@ -31,13 +31,13 @@ import Foundation
 /// 103/103 identical. The claim is a measurement, not an assumption.
 struct GradientInterpolation: Equatable {
 
-    /// The interpolation colour space (css-color-4 §12.4).
+    /// The interpolation colour space (css-color-4 §13.2).
     enum Space: Equatable {
         /// No clause authored → the historical sRGB component lerp.
         case legacy
         /// Rectangular spaces (no hue component).
         case srgb, srgbLinear, lab, oklab, xyzD65, xyzD50
-        /// Polar spaces (hue arc applies, css-color-4 §12.5).
+        /// Polar spaces (hue arc applies, css-color-4 §13.5).
         case hsl, hwb, lch, oklch
 
         /// True for the polar spaces — the only ones a hue method binds to.
@@ -49,7 +49,7 @@ struct GradientInterpolation: Equatable {
         }
     }
 
-    /// <hue-interpolation-method> (css-color-4 §12.5). `shorter` is the
+    /// <hue-interpolation-method> (css-color-4 §13.5). `shorter` is the
     /// grammar default when a polar space carries no explicit method.
     enum HueMethod: Equatable { case shorter, longer, increasing, decreasing }
 
@@ -79,7 +79,7 @@ struct GradientInterpolation: Equatable {
             return .legacy
         }
         guard t.count == 4 else { return GradientInterpolation(space: space, hue: .shorter) }
-        // A hue tail is only grammatical on a polar space (§12.4).
+        // A hue tail is only grammatical on a polar space (§13.2).
         guard space.isPolar, t[3] == "hue", let m = hueFor(t[2]) else { return .legacy }
         return GradientInterpolation(space: space, hue: m)
     }
@@ -92,7 +92,7 @@ struct GradientInterpolation: Equatable {
         case "srgb-linear":   return .srgbLinear
         case "lab":           return .lab
         case "oklab":         return .oklab
-        // css-color-4 §10.7: bare `xyz` is an alias of `xyz-d65`.
+        // css-color-4 §10.9: bare `xyz` is an alias of `xyz-d65`.
         case "xyz", "xyz-d65": return .xyzD65
         case "xyz-d50":       return .xyzD50
         case "hsl":           return .hsl

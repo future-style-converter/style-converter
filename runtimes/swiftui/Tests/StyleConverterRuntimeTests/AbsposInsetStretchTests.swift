@@ -1,7 +1,7 @@
 //
 //  AbsposInsetStretchTests.swift
 //  Wave 18 (RC2, lane 1) — abspos inset-stretch sizing pins
-//  (css-position-3 §3.5 + the css-sizing-4 §5 aspect-ratio interaction).
+//  (css-position-3 §3.5 + the css-sizing-4 §4.2 aspect-ratio interaction).
 //
 //  The resolver is pure math with an identical signature on Compose
 //  (AbsposInsetStretchTest.kt pins the same table entry-for-entry so
@@ -153,7 +153,7 @@ final class AbsposInsetStretchTests: XCTestCase {
     }
 
     /// Over-constrained insets clamp at zero, never negative
-    /// (css-position-3 §3.5.3's floor).
+    /// (css-position-3 §3.5.2's floor).
     func testOverConstrainedClampsAtZero() {
         let r = resolve(cbW: 100, left: 80, right: 80)
         XCTAssertEqual(r.widthPx, 0)

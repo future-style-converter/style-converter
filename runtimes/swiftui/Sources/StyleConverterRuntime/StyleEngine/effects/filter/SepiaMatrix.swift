@@ -9,7 +9,7 @@
 //
 //  ## The spec
 //
-//  filter-effects-1 §8.5 defines sepia(amount) as a colour matrix
+//  filter-effects-1 §6.1 sepia() defines sepia(amount) as a colour matrix
 //  interpolated toward the identity by the amount:
 //
 //      M(a) = I + a · (S - I)         S = the full-sepia matrix below
@@ -137,7 +137,7 @@ import SwiftUI
 /// testable without rendering.
 enum SepiaMatrix {
 
-    /// The full-sepia matrix from filter-effects-1 §8.5, row-major.
+    /// The full-sepia matrix from filter-effects-1 §6.1 sepia(), row-major.
     /// Verbatim so a reader can diff it against the spec text.
     static let full: [[Double]] = [
         [0.393, 0.769, 0.189],
@@ -165,7 +165,7 @@ enum SepiaMatrix {
     }()
 
     /// CSS amount (a percentage from the parser) → clamped 0…1 factor.
-    /// filter-effects-1 §8.5: amounts over 1 are "interpreted as 1" — unlike
+    /// filter-effects-1 §6.1 sepia(): amounts over 1 are "interpreted as 1" — unlike
     /// brightness, which is deliberately unbounded. Negative is invalid CSS
     /// and collapses to the identity rather than inverting.
     static func amount(_ pct: Double) -> Double { max(0, min(1, pct / 100)) }

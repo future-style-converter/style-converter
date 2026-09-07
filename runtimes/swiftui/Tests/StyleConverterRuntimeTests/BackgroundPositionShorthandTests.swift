@@ -48,7 +48,7 @@ final class BackgroundPositionShorthandTests: XCTestCase {
     }
 
     /// `background: blue url(…) center` — the bare-center PositionValue
-    /// means 50% on both axes (css-backgrounds-3 §3.6).
+    /// means 50% on both axes (css-backgrounds-3 §2.6).
     func testBareCenterFillsBothAxes() throws {
         let cfg = BackgroundPositionExtractor.extract(from: try props("""
         [{"type":"BackgroundPosition","data":[{"type":"center"}]}]

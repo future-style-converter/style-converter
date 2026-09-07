@@ -188,7 +188,7 @@ final class FidelityWave5Tests: XCTestCase {
     }
 
     func testDefaultEllipseEndRadiusIsFarthestCorner() {
-        // css-images-3 §3.5: the default radial ending shape is an
+        // css-images-3 §3.2: the default radial ending shape is an
         // ellipse sized `farthest-corner` — farthest-SIDE aspect
         // (w/2 : h/2 centred) scaled to pass THROUGH the farthest
         // corner, i.e. radii (√2·w/2, √2·h/2). The applier renders a

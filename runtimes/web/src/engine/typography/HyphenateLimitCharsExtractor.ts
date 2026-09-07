@@ -1,6 +1,6 @@
 // HyphenateLimitCharsExtractor.ts — folds `HyphenateLimitChars` IR properties into a HyphenateLimitCharsConfig.
 // Family: hyphenate-limit-chars.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { HyphenateLimitCharsConfig, HYPHENATE_LIMIT_CHARS_PROPERTY_TYPE, HyphenateLimitCharsPropertyType } from './HyphenateLimitCharsConfig';
 import { kwLower } from './_shared';

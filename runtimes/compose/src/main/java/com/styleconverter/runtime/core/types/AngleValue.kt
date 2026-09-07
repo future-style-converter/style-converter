@@ -3,6 +3,13 @@ package com.styleconverter.runtime.core.types
 // Phase 1 primitive: IR angles always expose a normalized `deg` field, with
 // the original unit preserved under `original: { v, u }` only when the source
 // wasn't already degrees. See examples/primitives/angles.json.
+//
+// Retro P2e (dangling-pointer sweep): every `examples/primitives/*.json`
+// path above is GONE — renamed to `fixtures/primitives/` by restructure
+// 02e4c457, then deleted by the 2026-07-08 hard prune 1e0234f6 (#8), with
+// nothing to replace it. The shapes enumerated here (and the pins over
+// them) are now the only record of that wire contract: read the names as
+// history, not as a path to open.
 
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject

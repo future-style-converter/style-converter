@@ -2,7 +2,7 @@ package com.styleconverter.runtime.spacing
 
 // Wave-45 lane X4 — the em-margin BASIS: margins declared in `em` must
 // resolve against the element's OWN computed font-size (css-values-4
-// §5.1.1), including the CSS Fonts 4 §3.5 fixed-default quirk (an element
+// §6.1.1), including the CSS Fonts 4 §3.5 fixed-default quirk (an element
 // with NO font-size declaration whose FIRST declared family is the
 // `monospace` generic computes to 13px, not 16 — MonospaceUAFontSize,
 // wave 36).

@@ -47,7 +47,7 @@ enum ReplacedImageContent {
         return !(src ?? "").isEmpty
     }
 
-    /// css-images-3 §5.5 `object-fit`, resolved from the element's own
+    /// css-images-3 §4.5 `object-fit`, resolved from the element's own
     /// properties. Defaults to `.fill` — the property's initial value — so a
     /// replaced element that declares nothing behaves exactly as CSS says.
     enum Fit: String {
@@ -119,7 +119,7 @@ enum ReplacedImageContent {
     ///   * everything else (explicit `border-box`, or unset = the chain's
     ///     border-box status quo) — content bound = declared − (padding +
     ///     used border) band on that axis via StyleBuilder's ONE band
-    ///     definition (paddingAndBorderBands), floored at 0 (css-ui-3 §5).
+    ///     definition (paddingAndBorderBands), floored at 0 (css-ui-3 §3.1).
     /// Only `.exact` bounds participate: `none` means unbounded and a %/em
     /// bound has no resolvable px here (documented narrowing — the chain
     /// still clamps the BOX by it at layout time). Twin of the Kotlin
@@ -212,7 +212,7 @@ struct ReplacedImageView: View {
         }
     }
 
-    /// The raster with its css-images-3 §5.5 `object-fit` behaviour applied.
+    /// The raster with its css-images-3 §4.5 `object-fit` behaviour applied.
     @ViewBuilder
     private var scaled: some View {
         switch fit {

@@ -16,7 +16,7 @@ import kotlin.math.sin
 // colour seam in the css-images hue-family cells).
 //
 // PURE colour-space conversions for gradient interpolation
-// (css-color-4 §12 "Interpolation"). Every stop arrives as resolved
+// (css-color-4 §13 "Interpolation"). Every stop arrives as resolved
 // sRGB (the converter normalises all colours to sRGB floats —
 // schema/spec/02-values.md), so the interpolation space is reached by
 // converting OUT of sRGB, lerping, and converting BACK. The matrices
@@ -48,7 +48,7 @@ internal object GradientColorMath {
     data class Triple3(val c0: Double, val c1: Double, val c2: Double)
 
     /** Which component index holds the hue for a polar space (null for
-     *  rectangular spaces) — css-color-4 §12.5 interpolates hue as an
+     *  rectangular spaces) — css-color-4 §13.5 interpolates hue as an
      *  angle, never premultiplied. */
     fun hueIndex(space: GradientInterpolation.Space): Int? = when (space) {
         GradientInterpolation.Space.HSL, GradientInterpolation.Space.HWB -> 0
@@ -278,7 +278,7 @@ internal object GradientColorMath {
      * css-color-4 §4.4 / §7.1 / §8.1 / §9.3 powerless-hue analysis in
      * the converted colour: hsl with zero saturation, hwb with
      * w + b ≥ 100, (ok)lch with zero chroma. Powerless components are
-     * treated as MISSING for interpolation (§12.2) and carried from the
+     * treated as MISSING for interpolation (§13.3) and carried from the
      * other stop — that is what makes `red → black in hsl longer hue`
      * sweep the whole wheel (WPT gradient-longer-hue-hsl-013). The
      * chroma epsilons absorb float noise from the sRGB round trip

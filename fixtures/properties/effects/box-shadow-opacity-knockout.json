@@ -1,0 +1,53 @@
+{
+  "_comment": "box-shadow x opacity on one element — two css-backgrounds-3 §6.1 / css-color-4 §3.3 rules the Android painter broke (retro R6, audit A11#2 + A10#5, measured on images.combos 003_Images_Decorated). (1) KNOCKOUT: §6.1 'The shadow is drawn outside the border edge only: it is clipped inside the border-box of the element' — no shadow ink may sit UNDER the box. (2) GROUP ALPHA: §3.3 'The opacity property applies the specified opacity to the element as a whole, including its contents' — the shadow composites at the element's opacity too. Canvas ground is the harness page bg rgb(26,26,46); the two colours are #e74c3c = (231,76,60) fill and #3498db = (52,152,219) ring. ARITHMETIC — BSK_Op55_SpreadRing (120x60 fill, 3px spread ring, opacity .55): fill@0.55 over ground = (26+0.55*205, 26+0.55*50, 46+0.55*14) = (138.75, 53.5, 53.7) -> (139,54,54); a runtime that paints the shadow UNDER the box instead reads fill@0.55 over the OPAQUE ring = (0.55*231+0.45*52, 0.55*76+0.45*152, 0.55*60+0.45*219) = (150.45,110.2,131.55) -> (150,110,132), the exact value Android measured — 11/56/78 per channel from spec, unmissable at tolerance 2. BSK_Op55_RingDominant (10x10 fill, 20px spread ring): the ring is 50x50-10x10 = 2400 px vs 100 px of fill, so the fill-mode IS the ring: ring@0.55 over ground = (26+0.55*26, 26+0.55*126, 46+0.55*173) = (40.3, 95.3, 141.15) -> (40,95,141), box = the ring's outer extent 10+2*20 = 50 square; a shadow that escapes the opacity group reads the declared (52,152,219) at full alpha — 12/57/78 off. BSK_Op100_Control: no opacity — fill (231,76,60), box 120x60 exactly as declared, so a knockout that eats INTO the box (wrong side of the Difference clip) would shrink the box and fail here. Margin 24px on the ring-dominant component keeps the 20px ring inside the capture canvas — and makes it the MARGIN-BOX pin (retro round-2 F1, skeptic S3): the Compose shadow node draws at StyleApplier step 3, OUTER of the step-4 margin absolutePadding, so its draw node is the 58x58 margin box; the knockout and the ring must subtract the resolved margin bands first (ShadowGeometry.borderBoxRect(58,58, margins 24) = (24,24)-(34,34)) or the runtime knocks out the whole margin box and reads a 98x98 ring with a 24px ground gap around the 10px fill — 48px off the [50,50] box at tolerance 1, unmissable. No predicted red: the 2026-09 retro fix lands the knockout + group alpha on Compose (R6) and the margin-band subtraction (round-2 F1, with its StyleApplier marginInsets gate seam); iOS and web already render these values (they are the finding's measured iOS/web numbers).",
+  "components": {
+    "BSK_Op55_SpreadRing": {
+      "properties": {
+        "width": "120px",
+        "height": "60px",
+        "background-color": "#e74c3c",
+        "box-shadow": "0 0 0 3px #3498db",
+        "opacity": "0.55"
+      },
+      "_expect": {
+        "fill": [139, 54, 54],
+        "fillTolerance": 2,
+        "box": [120, 60],
+        "boxTolerance": 1,
+        "note": "css-backgrounds-3 §6.1 knockout + css-color-4 §3.3 group alpha: fill@0.55 over ground (26,26,46) = (138.75,53.5,53.7); shadow-under-box reads (150,110,132)"
+      }
+    },
+    "BSK_Op55_RingDominant": {
+      "properties": {
+        "width": "10px",
+        "height": "10px",
+        "margin": "24px",
+        "background-color": "#e74c3c",
+        "box-shadow": "0 0 0 20px #3498db",
+        "opacity": "0.55"
+      },
+      "_expect": {
+        "fill": [40, 95, 141],
+        "fillTolerance": 2,
+        "box": [50, 50],
+        "boxTolerance": 1,
+        "note": "ring dominates the mode (2400 px vs 100 px fill): #3498db@0.55 over ground = (40.3,95.3,141.15); a shadow escaping the opacity group reads (52,152,219). box = 10 + 2*20 spread = 50, hugging the BORDER box — a knockout/perimeter computed from the 58x58 margin box reads box 98 with a 24px ground gap (round-2 F1)"
+      }
+    },
+    "BSK_Op100_Control": {
+      "properties": {
+        "width": "120px",
+        "height": "60px",
+        "background-color": "#e74c3c",
+        "box-shadow": "0 0 0 3px #3498db"
+      },
+      "_expect": {
+        "fill": [231, 76, 60],
+        "fillTolerance": 2,
+        "box": [120, 60],
+        "boxTolerance": 1,
+        "note": "opaque control: the knockout must never eat into the box — fill and box exactly as declared"
+      }
+    }
+  }
+}

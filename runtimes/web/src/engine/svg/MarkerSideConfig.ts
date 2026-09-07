@@ -3,4 +3,3 @@
 // Issue #38 audit: was a coverage-only registry claim with no applier.
 export interface MarkerSideConfig { value?: string }
 export const MARKER_SIDE_PROPERTY_TYPE = 'MarkerSide' as const;
-export type MarkerSidePropertyType = typeof MARKER_SIDE_PROPERTY_TYPE;

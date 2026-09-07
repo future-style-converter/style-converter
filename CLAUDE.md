@@ -22,6 +22,10 @@ generators were removed, and `--to compose` exits non-zero by design.
 Vocabulary (reader / writer / runtime / harness / fixture / golden / …)
 is pinned in `docs/NAMING.md`. Say "runtime", not "engine".
 
+**Working a wave?** `docs/BACKLOG.md` is the single source of truth for
+queued work and standing constraints; `.claude/skills/wave/SKILL.md` is
+the end-to-end wave procedure. Read both before starting.
+
 ## Quick Start
 
 ```bash
@@ -76,7 +80,12 @@ apps/                            # per-platform capture harnesses (not products)
 
 fixtures/                        # test inputs: properties/<category>/ (33 canonical
 │                                #   categories) + components/ (realistic UI
-│                                #   fixtures) + _metric_probes/ (text probes)
+│                                #   fixtures) + combinations/ (interaction-class
+│                                #   fixtures with `_expect` spec oracles) +
+│                                #   fidelity/ (generated suites + PROVENANCE.md) +
+│                                #   _metric_probes/ (text probes) + the top-level
+│                                #   visual-test.json / visual-test-controls.json /
+│                                #   composition-test.json + wpt/ (gitignored)
 tools/
 ├── visual/                      # SSIM compare, coverage-audit, smoke.sh, baseline/
 ├── titan/                       # WPT-corpus harness
@@ -84,8 +93,10 @@ tools/
 
 schema/                          # IR wire-format contract (see below)
 docs/
+├── BACKLOG.md                   # the LIVE QUEUE — single source of truth for wave work
+├── STATUS.md                    # one-page honest status (coverage + tier record)
 ├── NAMING.md                    # the vocabulary glossary
-└── STATUS.md                    # one-page honest status (coverage + tier record)
+└── DYNAMIC_CAPTURE.md           # the forceState / captureWidth capture contract
 test-all.sh                      # convert → render on 3 platforms → compare
 test-ios.sh                      # thin wrapper: SKIP_ANDROID=1 SKIP_WEB=1 test-all.sh
 ```
@@ -142,11 +153,12 @@ cannot be pre-computed and stay unresolved for the runtimes.
 
 All three runtimes share **one** folder structure, locked to the folders
 under `converter/src/main/kotlin/app/irmodels/properties/` and
-`…/parsing/css/properties/longhands/`. These trees — irmodels, parser,
-runtime engines — are kept byte-for-byte parallel: same category paths,
-same property files. If a property lives at
-`irmodels/properties/borders/sides/BorderTopWidth.kt`, its runtime
-implementations live at the mirror paths:
+`…/parsing/css/properties/longhands/`. The parallel is at **category
+level**: every one of the 33 category folders exists under every runtime
+engine root with the same name. It is *not* byte-for-byte — the runtimes
+subdivide two categories that are flat in irmodels (see below). A property
+modelled at `irmodels/properties/borders/BorderTopWidthProperty.kt` ships
+its runtime triplets as:
 
 ```
 runtimes/compose/src/main/java/com/styleconverter/runtime/
@@ -157,20 +169,34 @@ runtimes/web/src/engine/
   └── borders/sides/BorderTopWidth{Config,Extractor,Applier}.ts
 ```
 
-The 33 categories (mirrored 1:1 from irmodels/properties/):
+The 33 categories (the same names under irmodels/properties/ and under
+each runtime engine root):
 
 ```
-animations/ · appearance/ · background/ · borders/ (sides/, radius/, image/)
-color/ · columns/ · container/ · content/ · counters/ · effects/ (clip/, mask/,
-shadow/, filter/, shapes/, blend/) · experimental/ · global/ · images/
-interactions/ · layout/ (advanced/, flexbox/, grid/, position/) · lists/
-math/ · navigation/ · paging/ · performance/ · print/ · regions/ · rendering/
-rhythm/ · scrolling/ · shapes/ · sizing/ · spacing/ · speech/ · svg/ · table/
-transforms/ · typography/
+animations/ · appearance/ · background/ · borders/ · color/ · columns/
+container/ · content/ · counters/ · effects/ · experimental/ · global/
+images/ · interactions/ · layout/ (advanced/, flexbox/, grid/, position/)
+lists/ · math/ · navigation/ · paging/ · performance/ · print/ · regions/
+rendering/ · rhythm/ · scrolling/ · shapes/ · sizing/ · spacing/ · speech/
+svg/ · table/ · transforms/ · typography/
 ```
 
-If a category isn't yet implemented on a platform the folder still exists,
-empty, with a `README.md` stub. This keeps coverage auditable by `ls`.
+Where the trees deliberately diverge:
+
+- `borders/` and `effects/` are **flat** under irmodels (47 and 28 files);
+  all three runtimes subdivide them — `borders/{image,outline,radius,sides}`
+  everywhere, `effects/{backdrop,blend,clip,filter,mask,shadow}` on
+  compose + swiftui, the same minus `backdrop/` on web. There is no
+  `effects/shapes/` on any runtime (the `shapes/` *category* is separate).
+- The runtimes carry support dirs that are **not** IR categories and are
+  not expected under irmodels: `core/` (all three), `visibility/` (all
+  three), `widgets/` (compose + swiftui), `_phase10_shared.ts` (web),
+  plus each platform's `PropertyRegistry` / renderer entry points.
+
+Category folders are never empty stubs to be counted by `ls` — the
+authoritative per-category coverage is `node tools/visual/coverage-audit.mjs`
+(generated output: `tools/visual/COVERAGE.md`), which reports both the
+`registered` facade signal and the stricter `real` dedicated-applier floor.
 
 Each property ships as a **triplet per platform**, in the canonical subfolder:
 
@@ -190,10 +216,17 @@ Each property ships as a **triplet per platform**, in the canonical subfolder:
 - **No silent fallthroughs.** If a value variant isn't supported on this
   platform yet, log it via the PropertyTracker or emit a TODO + keep the
   cross-platform comparison honest.
-- **Registered, not dispatched inline.** Each `Extractor` registers itself
-  with the platform's `PropertyRegistry`; the main `StyleApplier` reads from
-  the registry instead of a giant `switch`. This makes coverage introspectable
-  at runtime (see `PropertyRegistry.allRegistered()`).
+- **Registered, not dispatched inline.** Each `Extractor` claims its IR type
+  names in the platform's `PropertyRegistry`. On iOS and web the renderer
+  CONSULTS that registry at render time (`StyleBuilder`), so the claim gates
+  dispatch. On **Compose it does not**: dispatch is inline in `StyleApplier` /
+  `ComponentRenderer`, and the registry — plus the 28 `*Registration.kt`
+  objects, which only initialise when a test touches them — is a TEST/AUDIT
+  artifact whose per-category tests are the executable check that a category's
+  claims match its IR-name list. Either way the registry is NOT the coverage
+  number: `tools/visual/coverage-audit.mjs` scrapes the IR type name as a
+  quoted string under the engine root, which is why a registration can outlive
+  the applier it named (retro finding A6#8).
 
 Key per-platform files:
 
@@ -254,11 +287,14 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 463 |
-| web runtime (vitest) | `npm -w runtimes/web run test` | 1340 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 2974 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1941 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1877 |
+| converter (Kotlin) | `./gradlew :converter:test` | 514 |
+| web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3143 |
+| android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1979 |
+| web-harness (vitest) | `npm -w apps/web-harness run test` | 276 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1979 |
+| ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 23 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
 (`npm test` at the root runs every workspace's vitest suite — the web
@@ -308,25 +344,26 @@ Three different numbers, all true — do not conflate them:
   type — it does NOT mean a dedicated applier renders the property natively.
   Some registered appliers are intentional no-op + TODO where no mobile
   analogue exists (speech/, regions/, print/, …).
-- **Real-applier floor: Android 19 / 558 · iOS 74 / 558 · Web 516 / 558**.
+- **Real-applier floor: Android 15 / 558 · iOS 70 / 558 · Web 516 / 558**.
   The stricter per-property bar — a dedicated `<Name>Applier.<ext>` file
   exists — is far lower on mobile (`coverage-audit.mjs` prints it as the
   `real:` line, alongside `registered:`). Caveat: `real` under-counts
   grouped appliers — files like Compose `LayoutApplier.kt`, iOS
-  `FlexboxApplier.swift`, or web `ScrollMarginApplier.ts` render many
+  `FlexboxApplier.swift`, or web `PaddingApplier.ts` render many
   properties from one file whose basename matches at most one IR name, so
-  the raw dedicated-applier file counts (Android 60 · iOS 119 · Web 530)
-  sit above this per-property floor. (Web `real` is 508 not 509 because
-  `print/SizeApplier.ts` and `sizing/SizeApplier.ts` both map to the single
-  IR `Size` property and de-dupe.)
+  the raw dedicated-applier file counts (Android 45 · iOS 94 · Web 520)
+  sit above this per-property floor.
 - **Verified rendering coverage: 91/550 (~17%)**. Only 91 properties pass
   the strict bar — SSIM ≥ 0.95 on every value variant on every platform
   pair against committed baselines. Of the rest: 419 blocked-platform
   (need capability tiers the harness doesn't have — animation state,
   scroll, real tables, …), 37 exhausted (no meaningful visual test
-  exists), 3 failing (known real divergences). `docs/STATUS.md` carries
-  the converged headline table, the per-tier record, and how the tracker
-  went from a dishonest "548/548 passing" to this classification.
+  exists), 3 failing (known real divergences). This 91 / 419 / 37 / 3
+  split is the **round-40 record**: the per-property tracker that produced
+  it was retired at round 40 and the counts have not been re-derived
+  since — a dated classification, not a live gauge. `docs/STATUS.md`
+  carries the converged headline table, the per-tier record, and how the
+  tracker went from a dishonest "548/548 passing" to this classification.
 
 ## Roadmap
 
@@ -345,6 +382,16 @@ record lives in git history.
 
 ## Tech stack
 
-Kotlin 2.1.0 · Java 21 · Gradle 8.14 · kotlinx.serialization-json 1.6.3 ·
-Node 24 (npm workspaces) · TypeScript 5 / vitest · Compose BOM 2024.12
-(minSdk 24) · Swift 5.9 language mode / iOS 16+ · xcodegen.
+Kotlin 2.4.10 · JDK 21 (pinned by `jvmToolchain(21)` in
+`converter/build.gradle.kts`, not by a Gradle floor) · Gradle 9.6.1
+(both wrappers) · kotlinx.serialization-json 1.11.0 · JUnit 6.1.2 ·
+Node 24 (npm workspaces) · TypeScript 7 / vitest 4 / React 19 ·
+AGP 9.3.1, Compose BOM 2026.06.01 (compileSdk 37, minSdk 24) ·
+Swift 6.3 toolchain in Swift 5 language mode
+(`Package.swift`: `swift-tools-version:6.3` + `.swiftLanguageMode(.v5)`),
+iOS 16+ · xcodegen.
+
+Derive these rather than trusting them: `gradle/wrapper/gradle-wrapper.properties`,
+`converter/build.gradle.kts`, `runtimes/compose/build.gradle.kts`,
+`apps/android-harness/build.gradle.kts`, `runtimes/web/package.json`,
+`Package.swift`.

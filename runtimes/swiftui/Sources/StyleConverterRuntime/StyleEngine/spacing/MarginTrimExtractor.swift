@@ -10,13 +10,6 @@
 // Foundation only.
 import Foundation
 
-enum MarginTrimProperty {
-    // Single-member list so PropertyRegistry.migrated and StyleBuilder
-    // keep one source of truth. Keeps the API shape symmetric with the
-    // other spacing extractors.
-    static let names: [String] = ["MarginTrim"]
-}
-
 enum MarginTrimExtractor {
 
     // Extract. Treats an unrecognised or non-string payload as `.none`.

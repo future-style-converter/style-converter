@@ -53,7 +53,7 @@ import com.styleconverter.runtime.layout.IntrinsicChannel
  * @param containerCross the container's align-items as a Compose vertical
  *        alignment — the fallback for DEFAULT placements.
  * @param alignContentStretches whether §9.4 step 8 applies at all —
- *        css-align-3 §5.3 / css-flexbox-1 §8.4: the line-growing step is
+ *        css-align-3 §5.1 / css-flexbox-1 §8.4: the line-growing step is
  *        `align-content: normal | stretch` ONLY. With `center`,
  *        `flex-start`, `space-between`, … the lines keep the cross size
  *        step 7 gave them and the leftover stays free space. (Skeptic
@@ -63,7 +63,10 @@ import com.styleconverter.runtime.layout.IntrinsicChannel
  *        the browser leaves them content-sized. Positioning the line BLOCK
  *        for the non-stretch keywords is still unimplemented: lines stack
  *        from the cross-start edge, exactly as the FlowRow path did, so
- *        this gate is a strict no-regression narrowing. TODO(wave26).)
+ *        this gate is a strict no-regression narrowing. STILL OPEN, and
+ *        deliberately unscheduled — retro P2e (finding A6#15) dropped the
+ *        "TODO(wave26)" tag this carried, which had been 23 waves stale and
+ *        read as a commitment nobody had made.)
  */
 @Composable
 fun FlexWrapRow(
@@ -100,9 +103,13 @@ fun FlexWrapRow(
         // right (§9.7 would shrink it too); for `flex-shrink: 0` the
         // browser overflows and this layout does not — the wrapping path
         // runs no §9.7 resolution at all, which is the same limitation the
-        // FlowRow path it replaces had. TODO(wave26): feed FlexSizeResolver
-        // per line, then drop the ceiling the way CAL-RC4 did for the
-        // non-wrapping Row.
+        // FlowRow path it replaces had. STILL OPEN (retro P2e, finding
+        // A6#15: the "TODO(wave26)" label that stood here named a wave that
+        // passed 23 waves ago — the work is real, the date was fiction). The
+        // shape of the fix is unchanged: feed FlexSizeResolver per line, then
+        // drop the ceiling the way CAL-RC4 did for the non-wrapping Row —
+        // FlexSizeResolver is live on that non-wrapping path (ComponentRenderer
+        // calls it), so this is a wiring job, not a new algorithm.
         // Both hypothetical reads go through IntrinsicChannel (campaign audit
         // 2026-08-10): an item whose subtree reaches a SubcomposeLayout-based
         // renderer (multicol's BoxWithConstraints, grid, scroll, …) THROWS on
@@ -112,7 +119,7 @@ fun FlexWrapRow(
         val mainSizes = IntArray(n) {
             IntrinsicChannel.probe(
                 logTag = "FlexWrapLayout",
-                refusalContext = "css-flexbox-1 §9.2.3.E hypothetical main size " +
+                refusalContext = "css-flexbox-1 §9.2 step 3.E hypothetical main size " +
                     "skipped — this wrapping flex item's subtree has no intrinsic " +
                     "channel; the item takes the full line budget as its measure " +
                     "ceiling and §9.3 wraps it onto a line of its own."

@@ -15,9 +15,6 @@ describe('applyVisibilityPhase8', () => {
   it('Visibility COLLAPSE', () => {
     expect(applyVisibilityPhase8([p('Visibility', 'COLLAPSE')])).toEqual({ visibility: 'collapse' });
   });
-  it('Overflow HIDDEN', () => {
-    expect(applyVisibilityPhase8([p('Overflow', 'HIDDEN')])).toEqual({ overflow: 'hidden' });
-  });
   it('OverflowX SCROLL + OverflowY AUTO', () => {
     expect(applyVisibilityPhase8([p('OverflowX', 'SCROLL'), p('OverflowY', 'AUTO')]))
       .toEqual({ overflowX: 'scroll', overflowY: 'auto' });
@@ -26,8 +23,14 @@ describe('applyVisibilityPhase8', () => {
     expect(applyVisibilityPhase8([p('OverflowBlock', 'HIDDEN'), p('OverflowInline', 'AUTO')]))
       .toEqual({ overflowBlock: 'hidden', overflowInline: 'auto' });
   });
-  it('Overflow CLIP', () => {
-    expect(applyVisibilityPhase8([p('Overflow', 'CLIP')])).toEqual({ overflow: 'clip' });
+  // The `overflow` SHORTHAND is deliberately NOT exercised: css-overflow-3
+  // defines it as a shorthand for overflow-x/-y and ShorthandRegistry.kt:88
+  // expands it, so no `Overflow` IR type can ever reach this dispatch. The
+  // two cases that used to synthesise one tested a code path the converter
+  // cannot produce (A6#9). Instead pin that an unknown/never-emitted type is
+  // ignored rather than leaking a bogus declaration.
+  it('an IR type the converter cannot emit (the expanded `Overflow` shorthand) is ignored', () => {
+    expect(applyVisibilityPhase8([p('Overflow', 'HIDDEN')])).toEqual({});
   });
   it('last-write-wins for Visibility', () => {
     const r = applyVisibilityPhase8([p('Visibility', 'HIDDEN'), p('Visibility', 'VISIBLE')]);

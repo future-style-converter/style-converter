@@ -3,4 +3,3 @@
 // IR: 'NONZERO' | 'EVENODD'.
 export interface ClipRuleConfig { value?: string; }
 export const CLIP_RULE_PROPERTY_TYPE = 'ClipRule' as const;
-export type ClipRulePropertyType = typeof CLIP_RULE_PROPERTY_TYPE;

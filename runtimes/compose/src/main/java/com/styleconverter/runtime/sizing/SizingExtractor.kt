@@ -164,6 +164,18 @@ object SizingExtractor {
         // false, so the tri-state pin (`absent stays null`) still holds on
         // every non-WPT path.
         cfg = cfg.copy(boxSizing = SizingApplier.effectiveBoxSizing(cfg.boxSizing, wptCaptureMode))
+        // Retro R2 (A4#7) — css-ui-3 §3.1 border-box content floor: under an
+        // EXPLICIT `box-sizing: border-box` a declared width/height below its
+        // own padding+border band floors to the band sum (content cannot be
+        // negative). Runs on the resolved tri-state, so a WPT-defaulted
+        // CONTENT_BOX (null → content-box above) and the dark-stage null both
+        // stay untouched — only a declared BORDER_BOX arms it, exactly like
+        // the iOS twin. Bands come from the same helper the content-box
+        // inflation uses, so "what counts as a border" has one definition.
+        if (cfg.boxSizing == BoxSizingKeyword.BORDER_BOX) {
+            val (bandX, bandY) = contentBoxInflation(properties)
+            cfg = BorderBoxFloor.apply(cfg, bandX, bandY)
+        }
         // RC-B6b — carry the mode on the config so the Applier can route
         // px-resolvable RELATIVE widths (ch/em/…) through the wave-12
         // overflow-aware exactWidth in WPT capture (see SizingConfig doc).

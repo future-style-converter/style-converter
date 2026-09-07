@@ -1,6 +1,6 @@
 // TabSizeExtractor.ts — folds `TabSize` IR properties into a TabSizeConfig.
 // Family: length-keyword.  IR shapes catalogued during Phase-6 survey of
-// examples/properties/typography/*.json after `./gradlew run` conversion.
+// fixtures/properties/typography/*.json after `./gradlew run` conversion.
 
 import { TabSizeConfig, TAB_SIZE_PROPERTY_TYPE, TabSizePropertyType } from './TabSizeConfig';
 import { lengthCss } from './_shared';

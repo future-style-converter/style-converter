@@ -43,7 +43,7 @@ import kotlinx.serialization.json.jsonPrimitive
  * ## What is admitted (and what still refuses, loudly)
  *   • Color — SpanStyle color over the member range.
  *   • FontSize — px directly; em/% resolve against the PARAGRAPH's
- *     resolved size at the seam (css-values-4 §5.1.1: em on font-size
+ *     resolved size at the seam (css-values-4 §6.1.1: em on font-size
  *     resolves against the inherited size — the fold host IS the parent);
  *     rem against the 16px root the harness pins. Any other unit refuses
  *     (no static base — never forge one).
@@ -113,7 +113,7 @@ object InlineSpanRing {
         val fontSizePx: Float? = null,
         /** Relative font-size FACTOR (em / % / smaller / larger wires) —
          *  multiplied against the paragraph's resolved size at the seam
-         *  (the fold host is the CSS parent, css-values-4 §5.1.1). */
+         *  (the fold host is the CSS parent, css-values-4 §6.1.1). */
         val fontSizeEm: Float? = null,
         /** Numeric weight 100..900 (the wire is pre-normalized). */
         val fontWeight: Int? = null,
@@ -179,7 +179,7 @@ object InlineSpanRing {
     /**
      * Admit one glyph-bearing member's property bag, or refuse with the
      * first offending property named. `Hyphens` is skipped here — the
-     * fold's adoption walk owns it (css-text-3 §6.1).
+     * fold's adoption walk owns it (css-text-3 §5.3).
      *
      * @param tag the member's lowercased source tag (already checked
      *   against [STYLED_MEMBER_TAGS] by the fold).
@@ -221,12 +221,12 @@ object InlineSpanRing {
         for (prop in properties) when (prop.type) {
             // Paragraph policy — the fold's adoption walk owns it.
             "Hyphens" -> {}
-            // The member's own text ink (css-color-4 §3.1).
+            // The member's own text ink (css-color-4 §3.2).
             "Color" -> {
                 ink = extractInk(prop.data)
                     ?: return Admission.Refused("member-prop:Color-unresolved")
             }
-            // css-fonts-4 §2.4 — absolute px or a paragraph-relative factor.
+            // css-fonts-4 §2.5 — absolute px or a paragraph-relative factor.
             "FontSize" -> when (val size = extractFontSize(prop.data)) {
                 is FontSizeValue.Px -> { sizePx = size.px; declaredFontSize = true }
                 is FontSizeValue.Factor -> { sizeEm = size.factor; declaredFontSize = true }
@@ -310,7 +310,7 @@ object InlineSpanRing {
      * nested box inherits the outer's inheritable attributes (css-cascade
      * -4 §7.3) unless it declares its own, decorations accumulate over
      * descendants (css-text-decor-3 §2.1 propagation), and a relative
-     * nested size resolves against the OUTER box (css-values-4 §5.1.1 —
+     * nested size resolves against the OUTER box (css-values-4 §6.1.1 —
      * its parent is the outer member, not the paragraph). Returns null
      * for the one shape no flat span can express: BOTH boxes shifted
      * (vertical-align offsets ADD box-by-box; a compound shift needs the
@@ -415,7 +415,7 @@ object InlineSpanRing {
             data["pixels"]?.jsonPrimitive?.floatOrNull?.let { return FontSizeValue.Px(it) }
             val original = data["original"] as? JsonObject ?: return null
             when (original["type"]?.jsonPrimitive?.contentOrNull) {
-                // css-fonts-4 §2.4 absolute-size ladder (TextStyleApplier's
+                // css-fonts-4 §2.5.1 absolute-size ladder (TextStyleApplier's
                 // exact px values, so the two reads agree to the pixel).
                 "absolute", "absoluteKeyword" -> {
                     return when (original["keyword"]?.jsonPrimitive?.contentOrNull?.lowercase()) {
@@ -438,7 +438,7 @@ object InlineSpanRing {
                         else -> null
                     }
                 }
-                // css-values-4 §5.1.1 — em against the parent (= the fold
+                // css-values-4 §6.1.1 — em against the parent (= the fold
                 // host), rem against the 16px pinned root.
                 "length" -> {
                     val inner = original["original"] as? JsonObject
@@ -449,7 +449,7 @@ object InlineSpanRing {
                         else -> null
                     }
                 }
-                // css-fonts-4 §2.4 <percentage> — against the parent size.
+                // css-fonts-4 §2.5 <percentage> — against the parent size.
                 "percentage" -> {
                     val pct = original["value"]?.jsonPrimitive?.floatOrNull ?: return null
                     return FontSizeValue.Factor(pct / 100f)

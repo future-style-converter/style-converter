@@ -2,7 +2,7 @@
 //  AutoHyphenation.swift
 //  StyleEngine/typography/wrapping — wave 40 (lane T2).
 //
-//  css-text-3 §6.1 `hyphens: auto`, the DICTIONARY half — the wall
+//  css-text-3 §5.3 `hyphens: auto`, the DICTIONARY half — the wall
 //  HyphensApplier and SoftHyphenPolicy have both been naming since
 //  wave 37, now taken down.
 //
@@ -36,7 +36,7 @@
 //
 //  ── THE GATE ────────────────────────────────────────────────────────
 //  `engaged` requires BOTH `hyphens: auto` and a non-blank language tag,
-//  which is §6.1's own condition ("a hyphenation resource appropriate to
+//  which is §5.3's own condition ("a hyphenation resource appropriate to
 //  the LANGUAGE of the text") and the one WPT css-text/hyphens-auto-001
 //  asserts the contrapositive of: "automatic hyphenation must not work
 //  without language tagging". `meta.lang` exists only on IR extracted
@@ -81,7 +81,7 @@ enum AutoHyphenation {
         return lang?.trimmingCharacters(in: .whitespaces)
     }
 
-    /// css-text-4 §6.2 `hyphenate-limit-chars: auto` — the minimum word
+    /// css-text-4 §6.3.4 `hyphenate-limit-chars: auto` — the minimum word
     /// length any engine in this comparison will hyphenate (Chromium 2+2,
     /// Minikin MIN_PREFIX 2 / MIN_SUFFIX 3; five is the shared floor).
     private static let minHyphenatableWord = 5
