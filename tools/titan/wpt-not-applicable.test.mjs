@@ -2230,7 +2230,9 @@ test('retro A5#1: the tagsForTest docstring rule count tracks RULES.length', asy
                        'requires-non-latin-font-parity', 'requires-grid-lanes',
                        'requires-hyphenation-dictionary']) {
         assert.ok(RULES.some((r) => r.tag === tag), `${tag} is enumerated in the docstring`);
-        assert.match(src, new RegExp(tag.replace(/-/g, '-')),
+        // Escape regex metacharacters properly (the previous `.replace(/-/g, '-')` was a
+        // no-op CodeQL flagged); tags are [a-z-]+ so this is belt-and-braces.
+        assert.match(src, new RegExp(tag.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')),
             `${tag} must appear in the docstring enumeration`);
     }
 });

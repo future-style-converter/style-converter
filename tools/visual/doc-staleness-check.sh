@@ -383,7 +383,9 @@ check_real_floor() { # $1=coverage-audit --json output file $2=README.md $3=COVE
         err "$cov: dedicated *Applier file counts are not 'Android $fa · iOS $fi · Web $fw' — regenerate: node tools/visual/coverage-audit.mjs --md"
     fi
 }
-COVERAGE_JSON=$(mktemp -t doc-staleness-coverage)
+# Portable mktemp: GNU mktemp (CI, Linux) rejects `-t name` without X's ("too few X's in template")
+# while BSD/macOS accepts it — the retro PR's first CI run failed exactly here.
+COVERAGE_JSON=$(mktemp "${TMPDIR:-/tmp}/doc-staleness-coverage.XXXXXX")
 if node tools/visual/coverage-audit.mjs --json > "$COVERAGE_JSON" 2>/dev/null; then
     check_real_floor "$COVERAGE_JSON" README.md tools/visual/COVERAGE.md
 else
