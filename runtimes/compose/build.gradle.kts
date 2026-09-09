@@ -55,7 +55,7 @@ tasks.withType<Test>().configureEach {
 
 dependencies {
     // Compose runtime surface used by the per-property Appliers.
-    implementation(platform("androidx.compose:compose-bom:2026.06.01"))
+    implementation(platform("androidx.compose:compose-bom:2026.08.00"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.foundation:foundation")
@@ -72,8 +72,8 @@ dependencies {
     // carries AsyncImage/rememberAsyncImagePainter; the network fetcher
     // moved to a separate artifact in 3.x and self-registers via
     // ServiceLoader, so http(s) URLs keep loading without loader changes.
-    implementation("io.coil-kt.coil3:coil-compose:3.5.0")
-    implementation("io.coil-kt.coil3:coil-network-okhttp:3.5.0")
+    implementation("io.coil-kt.coil3:coil-compose:3.6.2")
+    implementation("io.coil-kt.coil3:coil-network-okhttp:3.6.2")
 
     // Extractor/registry unit tests are plain JVM JUnit4.
     testImplementation("junit:junit:4.13.2")
