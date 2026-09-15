@@ -14,21 +14,27 @@ this file is incomplete.
 
 Corpus history and per-wave findings live in `docs/STATUS.md` (one dated
 paragraph per wave) and `tools/titan/results/corpus-v*.json` (one snapshot
-per wave, `_note` carries the full story). Current: **corpus-v6.16**
-(wave 50, device gate `wave50-final` on a quiet host,
-2026-09-14 — web 1215/1379 88.1%, iOS 1089/1369 79.5%, Android 1077/1369
-78.7%; per cell **40 gained, 3 lost, 6 newly measured**, 4117 scored cells
-with exact column parity, 30/30 sections at 48/48/48 on the first attempt —
-`node tools/titan/score-gate.mjs wave49-final wave50-final`, the per-cell
-method the standing rule below mandates and which is CODE since this wave;
-`tools/titan/results/wave50-gate/{score.json,score.txt}`). The 3 lost cells
-are ONE test family, bisected on device and attributed to neither the
-retro's nor wave 50's Compose code (obligation #1 below); the 6 newly
-measured are the retro-R13 unexclusions, denominator changes by the rule.
-The previous snapshot, **corpus-v6.15** (wave 49 — web 1205/1379, iOS
-1081/1366, Android 1058/1366; 32 gained, zero lost), is what v6.16
-attributes against. All deltas attribute against the most recent snapshot,
-never across the PR-#126 instrument change.
+per wave, `_note` carries the full story). Current: **corpus-v6.17**
+(wave 51 PR 1, device gate `wave51-fix` on a quiet host, 2026-09-15 — web
+1215/1379 88.1%, iOS 1089/1369 79.5%, Android 1080/1369 78.9%; per cell
+**3 gained, 0 lost, 0 movers** against wave50-final — exactly the three
+cells wave 50 lost, recovered by the PercentSizeClamp intrinsic-pass fix
+(queue 0(z)); 30/30 sections at 48/48/48 on the first attempt, fixture net
+exit 0 on all 8; `node tools/titan/score-gate.mjs wave50-final wave51-fix`).
+The wave-51 OPENING gate (`wave51-open`, the unmodified wave-50 tree) came
+first and scored **0 gained / 0 lost / 0 movers over 4117 cells** against
+wave50-final — the pipeline is deterministic run-to-run on this host. The
+previous snapshot, **corpus-v6.16** (wave 50, `wave50-final`, 2026-09-14 —
+web 1215/1379, iOS 1089/1369, Android 1077/1369; **40 gained, 3 lost, 6
+newly measured**, 4117 scored cells with exact column parity), is what
+v6.17 attributes against; its 3 lost cells were bisected on device and
+attributed to neither the retro's nor wave 50's Compose code — a
+conclusion wave 51 OVERTURNED (0(z): the bisection carried no install
+evidence); its 6 newly measured are the retro-R13 unexclusions,
+denominator changes by the rule. Before that, **corpus-v6.15** (wave 49 —
+web 1205/1379, iOS 1081/1366, Android 1058/1366; 32 gained, zero lost).
+All deltas attribute against the most recent snapshot, never across the
+PR-#126 instrument change.
 **Neither the retrospective's device gate nor wave 50's opening gate ran
 before the lanes did.** The retro's 17 attempts (2026-09-05 → 09-07) all
 failed on one cause — the host had no memory headroom (15 GB used, ≤230 MB
@@ -1073,9 +1079,14 @@ platform; they are not folded into a rendering wave.
    -005 8c0056dd8884, -007 e184684d71ce; FIX (APK fe4ec50a…) -003/-004/-006
    sha1 **8c0056dd8884 = the wave-49 GREEN capture byte-for-byte**, -005/-007
    unchanged; fidelity pairs-01 PW_Background_Sizing_04 still 300×80 on
-   Android (the R2 gain kept). Corpus effect: measured by the `wave51-fix`
-   gate (Android css-tables 34 → 37/47; the lane's corpus carriers are
-   exactly these three plus -007).
+   Android (the R2 gain kept). **Corpus effect MEASURED** by the full
+   `wave51-fix` gate (2026-09-15 21:47 → 23:45 UTC, 30/30 at 48/48/48 first
+   attempt, fixture net exit 0 ×8): `score-gate.mjs wave50-final wave51-fix`
+   = **3 gained / 0 lost / 0 movers** — exactly these three cells, f 0.9966
+   → P 0.9954 (the wave-49 score); Android 1077 → 1080/1369, css-tables
+   34 → 37/47; snapshot `tools/titan/results/corpus-v6-17.json`. The
+   lane's corpus carriers are exactly these three plus -007, whose 200px
+   content child keeps the inner node inert.
    **Why the wave-50 bisection said otherwise.** Its four runs recorded
    SCORES ONLY — no APK sha1, no install evidence
    (`tools/titan/results/wave50-gate/lost-cells-bisection.json`, which now

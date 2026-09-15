@@ -1,0 +1,466 @@
+{
+  "_snapshot": "corpus-v6.17",
+  "_note": "Wave 51, PR 1 (2026-09-15/16) — the three lost cells, found in the runtime and fixed: corpus-v6.17.\n\nHEADLINE. Run wave51-fix (tools/titan/gate-driver.sh, quiet host, 2026-09-15 21:47 → 23:45 UTC): 30/30 sections, every column 48/48/48 on the first attempt; fixture net exit 0 on all 8 gate fixtures. Per cell against wave50-final (corpus-v6.16): 3 gained / 0 lost / 0 movers / 0 newly measured — exactly the three cells wave 50 lost, css-tables/height-distribution/percentage-sizing-of-table-cell-children-003/-004/-006 Android, f 0.9966 → P 0.9954 (the wave-49 score). web 1215/1379, iOS 1089/1369, Android 1077 → 1080/1369.\n\nTHE OPENING GATE FIRST. wave51-open (2026-09-15 14:32 → 16:10 UTC) ran the unmodified wave-50 tree 8864f33c: exit 0, fixture net exit 0 on all 8 (the ledger/baseline edits wave 50 made after its gate, and the iOS blend fix, confirmed on device), and 0 gained / 0 lost / 0 movers / 0 newly measured over 4117 cells against wave50-final — the pipeline is deterministic run-to-run on this host and the three lost cells reproduced byte-for-byte.\n\nATTRIBUTION. Retro R2's PercentSizeClamp (runtimes/compose/…/sizing/PercentSizeClamp.kt) routes a percent axis carrying a min/max through one Modifier.layout {} block; Compose answers an INTRINSIC query for such a block with the child's raw intrinsic (the minHeight the block passes is ignored by DefaultIntrinsicMeasurable), so TableApplier's heightAtMinIntrinsic row query saw 0 for the content-less `overflow-y:auto; height:100%; min-height:100px` cell child where the pre-R2 heightIn(min=100) SizeNode answered 100. Fix (commit 962effa5): the min/max SizeNode is chained INSIDE the clamp on both axes — inert at measure time, the floor at intrinsic time. Pin SizingMinMaxClampTest §5, proven able to fail by mutation. On device before the gate, with the installed base.apk sha1 verified against the build: control (APK 984c4a69…) red 19cda0efe724; fix (APK fe4ec50a…) 8c0056dd8884 = the wave-49 green capture byte-for-byte; -005/-007 unchanged; fidelity pairs-01 PW_Background_Sizing_04 still 300×80 (the R2 gain kept).\n\nTHE WAVE-50 BISECTION WAS WRONG. Its four A/B runs recorded scores only — no APK sha1, no install evidence — and two of them (lane disabled; complete wave-49 runtime) contradict the code reading, so their rebuilt APKs most likely never reached the device. lost-cells-bisection.json carries _wave51_correction; BACKLOG gained the standing constraint that a device A/B records the installed APK's sha1.\n\nPROVENANCE. Same emulator AVD (Medium_Phone_API_36.1, one -read-only instance, -gpu swiftshader_indirect), same seed simulator, same corpus mirror (wptRef unchanged) as wave50-final. devSha 8864f33c+wave51pr1 = dev tip 8864f33c plus commits 962effa5 (fix) and 9dde6ec9 (docs) on campaign/wave51. Score files: node tools/titan/score-gate.mjs wave50-final wave51-fix --json … --watch tools/titan/results/wave50-gate/watchlist.txt — every watchlist cell score-identical, the ring-fenced filter-effects/backdrop-filter-basic-blur included.",
+  "artifact": "tools/titan/runs/wave51-fix (gitignored)",
+  "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+  "devSha": "8864f33c+wave51pr1",
+  "date": "2026-09-15",
+  "bucket": "A",
+  "passThreshold": 0.95,
+  "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence + coverage-RATIO (max/min>2) + colorDivergent-with-dE>=2.3 + extraction-wall exclusion + post-load/structure re-admission (corpus-v5.0 gate) + ref-unachievable exclusion (v5.4) + per-platform native-font-parity exclusion (v5.5) + harness-overhaul gate contract (exits 3/4/5/6; pixelmatch 0.02+AA; fuzzy in WPT-native units)",
+  "sampling": "30 sections x 48 bucket-A tests (depth-48)",
+  "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins (v5.5: inherited pins hoisted to :where(html) so ref :root declarations are honored; full ref re-render)",
+  "totals": {
+    "web": {
+      "passing": 1215,
+      "measured": 1379
+    },
+    "ios": {
+      "passing": 1089,
+      "measured": 1369
+    },
+    "android": {
+      "passing": 1080,
+      "measured": 1369
+    }
+  },
+  "sections": {
+    "CSS2": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 47
+      },
+      "android": {
+        "passing": 40,
+        "measured": 47
+      }
+    },
+    "css-anchor-position": {
+      "web": {
+        "passing": 30,
+        "measured": 32
+      },
+      "ios": {
+        "passing": 24,
+        "measured": 32
+      },
+      "android": {
+        "passing": 26,
+        "measured": 32
+      }
+    },
+    "css-backgrounds": {
+      "web": {
+        "passing": 26,
+        "measured": 31
+      },
+      "ios": {
+        "passing": 25,
+        "measured": 31
+      },
+      "android": {
+        "passing": 26,
+        "measured": 31
+      }
+    },
+    "css-break": {
+      "web": {
+        "passing": 37,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 29,
+        "measured": 48
+      },
+      "android": {
+        "passing": 31,
+        "measured": 48
+      }
+    },
+    "css-cascade": {
+      "web": {
+        "passing": 34,
+        "measured": 42
+      },
+      "ios": {
+        "passing": 33,
+        "measured": 42
+      },
+      "android": {
+        "passing": 34,
+        "measured": 42
+      }
+    },
+    "css-color": {
+      "web": {
+        "passing": 39,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 39,
+        "measured": 48
+      },
+      "android": {
+        "passing": 40,
+        "measured": 48
+      }
+    },
+    "css-contain": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 39,
+        "measured": 48
+      },
+      "android": {
+        "passing": 37,
+        "measured": 48
+      }
+    },
+    "css-counter-styles": {
+      "web": {
+        "passing": 37,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 24,
+        "measured": 38
+      },
+      "android": {
+        "passing": 24,
+        "measured": 38
+      }
+    },
+    "css-display": {
+      "web": {
+        "passing": 45,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 47
+      },
+      "android": {
+        "passing": 40,
+        "measured": 47
+      }
+    },
+    "css-flexbox": {
+      "web": {
+        "passing": 47,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 44,
+        "measured": 48
+      },
+      "android": {
+        "passing": 45,
+        "measured": 48
+      }
+    },
+    "css-gaps": {
+      "web": {
+        "passing": 44,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 44,
+        "measured": 48
+      },
+      "android": {
+        "passing": 44,
+        "measured": 48
+      }
+    },
+    "css-grid": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 48
+      },
+      "android": {
+        "passing": 47,
+        "measured": 48
+      }
+    },
+    "css-images": {
+      "web": {
+        "passing": 44,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 48
+      },
+      "android": {
+        "passing": 35,
+        "measured": 48
+      }
+    },
+    "css-lists": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-masking": {
+      "web": {
+        "passing": 41,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 38,
+        "measured": 47
+      },
+      "android": {
+        "passing": 37,
+        "measured": 47
+      }
+    },
+    "css-multicol": {
+      "web": {
+        "passing": 45,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 48
+      },
+      "android": {
+        "passing": 43,
+        "measured": 48
+      }
+    },
+    "css-overflow": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 46,
+        "measured": 47
+      },
+      "android": {
+        "passing": 46,
+        "measured": 47
+      }
+    },
+    "css-position": {
+      "web": {
+        "passing": 35,
+        "measured": 41
+      },
+      "ios": {
+        "passing": 33,
+        "measured": 41
+      },
+      "android": {
+        "passing": 33,
+        "measured": 41
+      }
+    },
+    "css-pseudo": {
+      "web": {
+        "passing": 33,
+        "measured": 42
+      },
+      "ios": {
+        "passing": 32,
+        "measured": 42
+      },
+      "android": {
+        "passing": 31,
+        "measured": 42
+      }
+    },
+    "css-sizing": {
+      "web": {
+        "passing": 47,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 44,
+        "measured": 48
+      },
+      "android": {
+        "passing": 45,
+        "measured": 48
+      }
+    },
+    "css-tables": {
+      "web": {
+        "passing": 41,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 47
+      },
+      "android": {
+        "passing": 37,
+        "measured": 47
+      }
+    },
+    "css-text": {
+      "web": {
+        "passing": 35,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 33,
+        "measured": 48
+      },
+      "android": {
+        "passing": 28,
+        "measured": 48
+      }
+    },
+    "css-text-decor": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 30,
+        "measured": 48
+      },
+      "android": {
+        "passing": 28,
+        "measured": 48
+      }
+    },
+    "css-transforms": {
+      "web": {
+        "passing": 47,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 46,
+        "measured": 48
+      },
+      "android": {
+        "passing": 42,
+        "measured": 48
+      }
+    },
+    "css-ui": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 42,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-values": {
+      "web": {
+        "passing": 44,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 48
+      },
+      "android": {
+        "passing": 40,
+        "measured": 48
+      }
+    },
+    "css-view-transitions": {
+      "web": {
+        "passing": 30,
+        "measured": 46
+      },
+      "ios": {
+        "passing": 24,
+        "measured": 46
+      },
+      "android": {
+        "passing": 26,
+        "measured": 46
+      }
+    },
+    "css-writing-modes": {
+      "web": {
+        "passing": 36,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 26,
+        "measured": 48
+      },
+      "android": {
+        "passing": 24,
+        "measured": 48
+      }
+    },
+    "filter-effects": {
+      "web": {
+        "passing": 40,
+        "measured": 46
+      },
+      "ios": {
+        "passing": 34,
+        "measured": 46
+      },
+      "android": {
+        "passing": 31,
+        "measured": 46
+      }
+    },
+    "selectors": {
+      "web": {
+        "passing": 46,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 48
+      },
+      "android": {
+        "passing": 38,
+        "measured": 48
+      }
+    }
+  },
+  "perCellDiff": {
+    "against": "wave50-final (corpus-v6.16)",
+    "scorer": "node tools/titan/score-gate.mjs wave50-final wave51-fix",
+    "gained": 3,
+    "lost": 0,
+    "newlyMeasured": 0,
+    "unmeasuredNow": 0,
+    "movers": 0,
+    "gainedCells": [
+      "css-tables/css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-003.html android 0.9966 -> 0.9954",
+      "css-tables/css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-004.html android 0.9966 -> 0.9954",
+      "css-tables/css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-006.html android 0.9966 -> 0.9954"
+    ],
+    "lostCells": [],
+    "newlyMeasuredCells": []
+  },
+  "reproduce": "tools/titan/gate-driver.sh wave51-fix  (quiet host: idle load < 6, free+inactive > 2 GB, ONE emulator + ONE simulator; the driver refuses otherwise; per section it runs POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1 section-runner.sh <section> --all-platforms --max-tests 48 --run-id wave51-fix --foreground, then BASELINE=1 ./test-all.sh --gate-set). Score: node tools/titan/score-gate.mjs wave49-final wave51-fix --watch tools/titan/results/wave50-gate/watchlist.txt"
+}
