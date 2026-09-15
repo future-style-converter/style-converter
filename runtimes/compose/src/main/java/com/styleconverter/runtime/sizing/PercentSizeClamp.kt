@@ -33,20 +33,57 @@ package com.styleconverter.runtime.sizing
 // per-test IR docs, percent shape `{"type":"percentage","value":N}`):
 // css-tables height-distribution percentage-sizing-of-table-cell-007
 // (Android FAIL 0.9412) and -children-003/004/006 (Android PASS 0.9954),
-// all `height: 100%; min-height: 100px`. At fraction 1.0 this lane is
-// ARITHMETICALLY IDENTICAL to the fill + heightIn chain it replaces in
-// every constraint case — bounded: round(max × 1) = max ≥ min ? max :
-// (min coerced back into (…, max) = max), exactly FillNode's tight result;
-// unbounded: the (min, ∞) band SizeNode produced — so none of the four can
-// move (pinned: `bounded - the incoming band still coerces the result`,
-// `bounded - no bounds is FillNode parity`, `unbounded - …`). The lane only
-// diverges when min > round(max × fraction) with fraction < 1 (the 179 →
-// 300 case) or when a max caps the percent-resolved size.
+// all `height: 100%; min-height: 100px`. At fraction 1.0 the MEASURE pass of
+// this lane is arithmetically identical to the fill + heightIn chain it
+// replaced — bounded: round(max × 1) = max ≥ min ? max : (min coerced back
+// into (…, max) = max), exactly FillNode's tight result; unbounded: the
+// (min, ∞) band SizeNode produced (pinned: `bounded - the incoming band
+// still coerces the result`, `bounded - no bounds is FillNode parity`,
+// `unbounded - …`). The retro concluded from that arithmetic that "none of
+// the four can move". THREE OF THEM MOVED — next section: the measure pass
+// was identical, the INTRINSIC pass was not.
+//
+// ## The INTRINSIC pass — the wave-50 gate's three lost cells (wave 51, 0(z))
+// wave50-final -children-003/-004/-006 Android went P 0.9954 → f 0.9966: the
+// green `overflow-y: auto; height: 100%; min-height: 100px` cell child
+// rendered 0-tall and the abspos z-index:-1 red square showed. Same per-test
+// IR, same emulator, same harness app as wave 49; sibling -005 (the same
+// child WITHOUT min-height but WITH a 100px content child) never moved. The
+// discriminator is where the ROW gets its height. TableApplier sizes a row
+// with `heightAtMinIntrinsic`, i.e. `measurable.minIntrinsicHeight(w)` over
+// its cells. Compose's `Modifier.layout {}` (LayoutModifierImpl) answers an
+// intrinsic query through MeasuringIntrinsics: it re-runs this measure lambda
+// against a DefaultIntrinsicMeasurable whose `measure(constraints)` returns
+// an EmptyPlaceable sized by the CHILD'S OWN intrinsic — the `minHeight = lo`
+// the lambda passes is IGNORED there. So the floor `band()` computes never
+// reaches the row: -003's child has no content, its intrinsic is 0, the row
+// measures 0 tall, and the real measure pass then gets `band(0, 0, 1f, 100,
+// null)` = max(0, 100) coerced into (0, 0) = 0. The pre-R2 chain had no such
+// hole: `heightIn(min = 100)` is a SizeNode, whose `minIntrinsicHeight` is
+// `constrainHeight(child intrinsic)` — floor 100 — and -005 survives on
+// either chain because its 100px content child IS the intrinsic.
+//
+// The fix keeps the layout step (the §10.4/§10.7 MEASURE semantics R2
+// bought) and chains the min/max SizeNode INSIDE it (`intrinsicFloor`).
+// Measure-time the inner node is inert: the outer band is already tight
+// (bounded) or already (min, targetMax) (unbounded), and SizeNode
+// (enforceIncoming) constrains its target INTO the incoming band, so every
+// number in the previous section is unchanged; intrinsic-time it restores
+// the floor the old chain carried. The wave-50 bisection record
+// (tools/titan/results/wave50-gate/lost-cells-bisection.json) says "lane
+// disabled → still red"; it carries no evidence that its rebuilt APKs were
+// ever installed and it contradicts this code reading, so wave 51 re-ran the
+// A/B with the installed base.apk's sha1 verified against the build
+// (BACKLOG 0(z) carries the numbers).
 
 import androidx.compose.ui.Modifier
 // The custom measure hook (Modifier.layout) — same mechanism as
 // ExactWidthOverflow.exactWidth and the renderer's absposOverflowMeasure.
 import androidx.compose.ui.layout.layout
+// The stock SizeNodes: the ONLY modifier shape whose intrinsic answers
+// constrain the child's intrinsic into the min/max target (see the banner).
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Dp
 import kotlin.math.roundToInt
@@ -113,7 +150,9 @@ internal fun Modifier.percentWidthClamped(fraction: Float, min: Dp?, max: Dp?): 
         // Only the width band changes; the height axis passes through.
         val placeable = measurable.measure(constraints.copy(minWidth = lo, maxWidth = hi))
         layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
-    }
+    // INNER SizeNode — carries the min/max into the intrinsic pass (banner,
+    // "The INTRINSIC pass"); inert at measure time.
+    }.then(intrinsicFloor(min, max, rowAxis = true))
 
 /** Height axis twin of [percentWidthClamped] (CSS 2.1 §10.7). */
 internal fun Modifier.percentHeightClamped(fraction: Float, min: Dp?, max: Dp?): Modifier =
@@ -124,4 +163,22 @@ internal fun Modifier.percentHeightClamped(fraction: Float, min: Dp?, max: Dp?):
         )
         val placeable = measurable.measure(constraints.copy(minHeight = lo, maxHeight = hi))
         layout(placeable.width, placeable.height) { placeable.placeRelative(0, 0) }
-    }
+    // Height twin of the inner SizeNode above — this is the node whose
+    // absence made css-tables -children-003/-004/-006 render 0-tall.
+    }.then(intrinsicFloor(min, max, rowAxis = false))
+
+/**
+ * The min/max SizeNode chained INSIDE the percent clamp so that Compose's
+ * INTRINSIC pass sees the floor/ceiling (a `Modifier.layout {}` block cannot
+ * carry one — banner). The band is [SizingClamps.minMaxBand], the same
+ * min-wins reduction `applyWidthIn`/`applyHeightIn` use on non-percent axes,
+ * so the two lanes can never disagree about what a min/max means; it is
+ * non-null whenever [SizingClamps.percentClampSpec] routed here (at least
+ * one bound resolved), and the `?: Modifier` is only defensive.
+ *
+ * @param rowAxis true → width axis (`widthIn`), false → height (`heightIn`).
+ */
+private fun intrinsicFloor(min: Dp?, max: Dp?, rowAxis: Boolean): Modifier {
+    val (lo, hi) = SizingClamps.minMaxBand(min, max) ?: return Modifier
+    return if (rowAxis) Modifier.widthIn(min = lo, max = hi) else Modifier.heightIn(min = lo, max = hi)
+}

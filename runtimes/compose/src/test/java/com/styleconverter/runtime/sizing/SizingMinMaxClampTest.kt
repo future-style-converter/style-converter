@@ -170,4 +170,55 @@ class SizingMinMaxClampTest {
         assertTrue(src.contains("SizingClamps.minMaxBand(toDpOrNull(min, ctx), toDpOrNull(max, ctx)) ?: return m"))
         assertTrue(!src.contains("max = mx ?: Dp.Infinity"))
     }
+
+    // ── 5. The INTRINSIC pass (wave 51, queue 0(z)) ────────────────────────
+    //
+    // wave50-final lost css-tables/height-distribution/percentage-sizing-of-
+    // table-cell-children-003/-004/-006 on Android (P 0.9954 → f 0.9966): the
+    // `overflow-y: auto; height: 100%; min-height: 100px` cell child rendered
+    // 0-tall. The clamp's `Modifier.layout {}` step cannot carry the min into
+    // Compose's intrinsic pass (MeasuringIntrinsics sizes the fake placeable
+    // by the CHILD'S intrinsic, ignoring the minHeight the lambda passes), so
+    // TableApplier's `heightAtMinIntrinsic` row query saw 0 where the pre-R2
+    // `heightIn(min = 100)` SizeNode answered 100. The fix chains that
+    // SizeNode INSIDE the clamp (`intrinsicFloor`). No Compose layout runs on
+    // the JVM here, so the lock is the pure band + a source scan; the device
+    // proof is the wave-51 gate (PercentSizeClamp.kt banner, BACKLOG 0(z)).
+
+    private fun clampSource(): String {
+        val candidates = listOf(
+            File("src/main/java/com/styleconverter/runtime/sizing/PercentSizeClamp.kt"),
+            File("runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentSizeClamp.kt"),
+            File("../../runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/PercentSizeClamp.kt"),
+        )
+        return candidates.first { it.exists() }.readText()
+    }
+
+    @Test fun `lost cells - the floor the row must see is the min-wins band of min-height 100 and no max`() {
+        // `min-height: 100px`, no max-height → (100, ∞): exactly what the inner
+        // SizeNode is built from, and what `heightIn(min = 100)` gave pre-R2.
+        assertEquals(100.dp to Dp.Infinity, SizingClamps.minMaxBand(100.dp, null))
+        // -005 (no min-height at all) never routed here: no bounds → null.
+        assertNull(SizingClamps.percentClampSpec(
+            LengthValue.Relative(100.0, LengthUnit.PERCENT, null), null, null, SpacingContext()))
+        // -003/-004/-006 DO route here (percent + min) — the lane under test.
+        assertNotNull(SizingClamps.percentClampSpec(
+            LengthValue.Relative(100.0, LengthUnit.PERCENT, null), LengthValue.Exact(100.0), null, SpacingContext()))
+    }
+
+    @Test fun `lost cells - both percent clamps chain the inner SizeNode that answers intrinsic queries`() {
+        val src = clampSource()
+        // Each layout block is followed by the inner SizeNode on its own axis.
+        assertTrue(src.contains("}.then(intrinsicFloor(min, max, rowAxis = true))"))
+        assertTrue(src.contains("}.then(intrinsicFloor(min, max, rowAxis = false))"))
+        // The inner node IS a stock SizeNode (widthIn/heightIn), built from the
+        // same min-wins band the non-percent lane uses — never a second
+        // Modifier.layout block, which would have the same intrinsic hole.
+        assertTrue(src.contains("val (lo, hi) = SizingClamps.minMaxBand(min, max) ?: return Modifier"))
+        assertTrue(src.contains("Modifier.widthIn(min = lo, max = hi)"))
+        assertTrue(src.contains("Modifier.heightIn(min = lo, max = hi)"))
+        // Exactly two layout blocks (the two clamps) — a third would be a new
+        // intrinsic hole nobody pinned.
+        assertEquals(2, Regex("this\\.layout \\{ measurable, constraints ->").findAll(src).count())
+    }
 }

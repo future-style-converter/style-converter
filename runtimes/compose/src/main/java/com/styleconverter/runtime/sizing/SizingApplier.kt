@@ -143,7 +143,11 @@ object SizingApplier {
         // Min/max constraints — kept for the case where no explicit
         // width/height was set (then clamp short-circuits to null and
         // widthIn/heightIn carry the intent). Retro R2: an axis the percent
-        // clamp owns already applied its min/max inside the one layout step.
+        // clamp owns applied its min/max inside the one layout step — and,
+        // since wave 51, carries them into Compose's INTRINSIC pass through
+        // the clamp's own inner SizeNode (PercentSizeClamp.kt, "The INTRINSIC
+        // pass": the three css-tables cells wave 50 lost), so a widthIn/
+        // heightIn here would be a redundant third node on that axis.
         if (pctW == null) r = applyWidthIn(r, minWv, maxWv, ctx)
         if (pctH == null) r = applyHeightIn(r, minHv, maxHv, ctx)
         // calc-size MIN (floor) lane — css-flexbox-1 §4.5 / css-sizing-3
