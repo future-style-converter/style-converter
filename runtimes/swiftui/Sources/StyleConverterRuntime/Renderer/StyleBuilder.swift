@@ -1304,12 +1304,15 @@ extension View {
             // into a single modifier. Attached late so it wraps over the
             // paint chain.
             .engineTypography(style.typography)
-            // Phase 8 — effects chain. Order matters:
+            // Phase 8 — effects chain. Order matters (wave 50 lane B8 moved
+            // step 4 ahead of step 5 — see the block on `.engineVisibility`):
             //   1. mask clips alpha before paint
             //   2. filter applies per-pixel effects to painted pixels
             //   3. clip-path carves the final geometry
-            //   4. transforms warp the finished view (rotate/scale/translate)
-            //   5. visibility/overflow gates what escapes the frame.
+            //   4. visibility/overflow gates what escapes the element's OWN
+            //      (un-transformed) frame — css-overflow-3 §3
+            //   5. transforms warp the finished, already-clipped view into
+            //      the parent's space — css-transforms-1 §6.
             .engineMask(style.mask)
             // Lane BF-I: the radius rides along so a `backdrop-filter`
             // backplate is clipped to the SAME rounded border box the
@@ -1326,6 +1329,99 @@ extension View {
                           elementOpacity: style.opacity?.alpha ?? 1,
                           currentColor: style.text.color)
             .engineClipPath(style.clipPath)
+            // Wave 50 (lane B8, BACKLOG queue 6(d)) — the WHOLE
+            // `.engineVisibility` modifier moves INSIDE the transform, not
+            // merely the overflow clip it carries. That one node also hosts
+            // `visibility: hidden`'s `.opacity(0)` and `visibility:
+            // collapse`'s `.frame(0,0).hidden()` (VisibilityApplier's
+            // VisibilityBoxRules branch), so those two changed side of the
+            // transform as well; and `.engineMotionOffset`, which used to
+            // sit between `.engineTransforms` and this node, is now OUTSIDE
+            // the clip rather than inside it. SwiftUI's
+            // later-wraps-earlier chain had `.engineVisibility` (see
+            // VisibilityApplier: a clipping used value becomes `.clipped()`
+            // or `.clipShape(AxisClipRect)`) AFTER `.engineTransforms`, so
+            // the clip rectangle was evaluated around the ALREADY-rotated
+            // content, in the layout frame the transform never moved
+            // (rotationEffect/offset do not change layout). CSS puts the two
+            // in that order the other way round: css-overflow-3 §3 clips the
+            // element's content to its own padding box, and css-transforms-1
+            // §6 then maps the element's whole rendering — clipped content
+            // included — into the parent's space ("the transform … is
+            // applied to the element's own coordinate system").
+            //
+            // MEASURED on the wave49-final capture of css-backgrounds/
+            // background-attachment-fixed-inside-transform-1 (`#outer`
+            // 300×700, `transform: rotate(45deg); overflow: hidden`, lime
+            // with a radial-gradient blob): the iOS PNG's ink bbox is
+            // cols 216–389 — a narrow parallelogram strip that starts exactly
+            // at the element's un-rotated left frame edge (margin 200) —
+            // against web cols 13–389 and the frozen ref's 16–373, which
+            // paint the whole rotated rectangle. iOS scored 0.9843 P against
+            // the ref: a visibly wrong PASS, the A1#0 class. The gate net's
+            // spec oracle for the same rule is
+            // fixtures/combinations/radius-overflow-transform.json
+            // ROT_SelfRotate_ClippedChild, whose `_expect.box` is the
+            // (80+60)·cos45° = 99×99 diamond and whose note records the
+            // clip-outside reading as 80×60; it is RED on iOS today and is
+            // the executable check this change turns green (no committed
+            // baseline — that fixture is gate-only + oracle).
+            //
+            // BLAST RADIUS (wave49-final per-test IR, every component
+            // declaring a transform AND an overflow on the same element):
+            // 25 tests / 33 components, of which only 5 tests / 7 components
+            // carry a CLIPPING used value and therefore change path —
+            // background-attachment-fixed-inside-transform-1 (rotate 45°,
+            // the target); css-color/clip-opacity-out-of-flow
+            // (translateX(0px) — a transform that maps the frame onto
+            // itself, so geometrically identical; iOS f 0.9271, expected
+            // unchanged); css-transforms/backface-visibility-hidden-006,
+            // composited-under-rotateY-180deg-clip (×2) and
+            // -clip-perspective (×2), all `rotateY(180deg)`, an involution
+            // about the frame's own centre line that likewise maps the clip
+            // rect onto itself — all at iOS 1.0000 P and predicted to stay
+            // there (only edge antialiasing can move). The other 20 tests
+            // declare `overflow: visible` on both axes, where
+            // OverflowClipRules.axisClips is false and no clip is installed
+            // at all, so they are byte-identical.
+            //
+            // BLAST RADIUS of the two RIDERS that moved with the clip,
+            // censused the same way (wave49-final per-test IR, 1435
+            // documents; a "transform" is any of Transform / Rotate /
+            // Scale / Translate, the four names TransformsExtractor
+            // claims — the same predicate that yields the 25/33 above):
+            //
+            // (a) `.engineVisibility` also carries hidden/collapse, and
+            // components declaring a transform AND `visibility: hidden` or
+            // `collapse` number 0 tests / 0 components — no cell can
+            // observe the `.opacity(0)` / `.frame(0,0).hidden()` side-swap.
+            // The corpus declares `Visibility` on 5 components in all, 4 of
+            // them HIDDEN and none of them transformed:
+            // css-anchor-position/anchor-center-visibility-change,
+            // css-lists/counter-reset-reversed-display-none,
+            // css-view-transitions/capture-with-visibility-hidden-child and
+            // .../capture-with-visibility-mixed-descendants.
+            //
+            // (b) `.engineMotionOffset` (offset-path, motion-1 §4) is now
+            // outside the clip, and components declaring a transform AND any
+            // of OffsetPath / OffsetDistance / OffsetRotate / OffsetAnchor /
+            // OffsetPosition (the names MotionOffsetExtractor claims) number
+            // 0 tests / 0 components — indeed NO `Offset*` motion property
+            // appears in any of the 1435 documents at all, so this node is
+            // the identity everywhere in the corpus and its new side of the
+            // clip is unobservable there.
+            //
+            // Both riders are therefore UNTESTED-BY-THE-GATE rather than
+            // proven-safe: their only executable checks are the SwiftUI unit
+            // suite and the fixture net, not a WPT cell.
+            //
+            // Residual (PRE-EXISTING, unchanged by this move, named so it is
+            // not mistaken for a regression): `.engineFilter` and
+            // `.engineClipPath` above are still INNER of this clip, so a
+            // blur()/drop-shadow() halo on an overflow-clipping element is
+            // cut at the padding edge although filter-effects-1 §8 lets it
+            // spill. Zero wave49-final components declare both.
+            .engineVisibility(style.visibility)
             .engineTransforms(style.transforms)
             // Fidelity wave 2 — CSS Motion Path (motion-1 §4). Composes
             // after the transform family, mirroring the css-transforms-2
@@ -1334,7 +1430,6 @@ extension View {
             // relative order is currently unobservable).
             .engineMotionOffset(style.motionOffset, size: style.size,
                                 context: style.spacing.context)
-            .engineVisibility(style.visibility)
             // Wave-18 cleanup (clip-003): the HOISTED outline slot — nil
             // unless the element clips its own overflow (see the helper
             // pair on StyleBuilder). Attached AFTER engineVisibility so

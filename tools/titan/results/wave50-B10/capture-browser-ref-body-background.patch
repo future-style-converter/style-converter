@@ -1,0 +1,57 @@
+diff --git a/tools/titan/capture-browser-ref.mjs b/tools/titan/capture-browser-ref.mjs
+index a90cd2f6..d9cbe6e6 100644
+--- a/tools/titan/capture-browser-ref.mjs
++++ b/tools/titan/capture-browser-ref.mjs
+@@ -459,12 +459,37 @@ export async function interFontFaceCss() {
+  *  byte-identical to before: html gets the pin, body inherits it, every
+  *  descendant inherits it.
+  *  WHAT STAYS ON BODY: `display: flow-root`, `box-sizing`, `min-height` and
+- *  the body half of `margin/padding/background`. All four are NON-inherited,
+- *  so hoisting them would change nothing on body — and flow-root/min-height
+- *  are specifically ABOUT the body box (BFC containment, viewport fill), so
++ *  the body half of `margin/padding`. All three are NON-inherited, so
++ *  hoisting them would change nothing on body — and flow-root/min-height are
++ *  specifically ABOUT the body box (BFC containment, viewport fill), so
+  *  moving them would break the CAL-RC1 geometry contract outright.
+- *  `background` legitimately stays on both (canvas propagation reads the
+- *  root's, then the body's — html.css UA behaviour).
++ *
++ *  ── wave-50 B10: `background` LEAVES THE BODY HALF ────────────────────────
++ *  THE DEFECT (executed, not theoretical). Canvas propagation reads the
++ *  ROOT's background first, and only falls through to the body's when the
++ *  root has none — so `background` on html alone already paints the white
++ *  canvas. Repeating it on BODY additionally paints an opaque box in the
++ *  body's own layer, and CSS 2.1 Appendix E orders the root stacking context
++ *  (1) root background, (2) NEGATIVE-z-index descendants, (3) in-flow block
++ *  backgrounds. The body background is step 3; every `z-index: -1` body child
++ *  is step 2. The recipe therefore ERASED the decoration boxes of every
++ *  reference document that draws them at a negative z-index.
++ *  MEASURED with the live recipe vs the same sheet minus the body half
++ *  (puppeteer, BROWSER_LAUNCH_ARGS, 390×600):
++ *    css-gaps/flex/flex-gap-decorations-033-ref  0 vs 5200 chromatic px
++ *    …-034-ref 0 vs 2500 · …-035-ref 0 vs 4050 · …-036/037-ref 0 vs 2050
++ *    css-text/…/hanging-punctuation-block-bound-001-ref 0 vs 58184
++ *  Corpus-wide: 42 reference files use a negative z-index, 28 of them
++ *  rasterise differently under the fix, and 6 of those are the match target
++ *  of a SCORED wave49-final test (18 cells, 10 of them currently `f` —
++ *  tools/titan/results/wave50-B10/erased-refs.json).
++ *  THE FIX: keep the canvas white where canvas propagation reads it (the
++ *  root) and stop painting a second opaque box over the negative-z-index
++ *  layer. A ref that declares its own `body { background: … }` still wins on
++ *  specificity, so the wave-30 full-bleed cases are untouched.
++ *  COST: this is an INSTRUMENT change — CANVAS_REV must be bumped and the
++ *  affected refs re-frozen, and the resulting cell moves adjudicated as a
++ *  calibration, not as a render delta.
+  *
+  *  async because the embedded @font-face payloads are read from disk once
+  *  per process (interFontFaceCss memoises them). */
+@@ -487,7 +512,8 @@ export async function canvasFrameCss() {
+       :where(html) { color: #000;
+                      font-family: ${notoPilotStack(REF_FONT_STACK)};
+                      line-height: ${REF_LINE_HEIGHT}; }
+-      :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
++      :where(html) { background: ${CANVAS_BG}; }
++      :where(html, body) { margin: 0; padding: 0; }
+       :where(body) { display: flow-root; box-sizing: border-box;
+                      min-height: 100vh; }
+     `;

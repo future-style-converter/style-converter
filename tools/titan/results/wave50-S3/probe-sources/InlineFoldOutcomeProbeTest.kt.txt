@@ -1,0 +1,60 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Dumps the InlineRunFold outcome for every meta.runs host in the frozen
+// corpus, so the run can be diffed against a mutated build.
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.typography.inline.InlineRunFold
+import com.styleconverter.runtime.core.renderer.InlineRunPlan
+import org.junit.Test
+import java.io.File
+
+class InlineFoldOutcomeProbeTest {
+
+    private val repo = File("../../").canonicalFile
+    private val runDir = File(repo, "tools/titan/runs/wave49-final/sections")
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+
+    @Test fun dump() {
+        out.mkdirs()
+        val tag = System.getenv("S3_TAG") ?: "base"
+        val sb = StringBuilder()
+        var hosts = 0
+        runDir.listFiles()!!.sortedBy { it.name }.forEach { sec ->
+            val irDir = File(sec, "per-test-ir")
+            if (!irDir.isDirectory) return@forEach
+            irDir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }.forEach { f ->
+                val testKey = sec.name + "/" + f.name.removeSuffix(".json")
+                val doc = try { IRDocumentDecoder.decode(f.readText()) } catch (e: Exception) { return@forEach }
+                val comps = try { SlotComposer.compose(doc) } catch (e: Exception) { return@forEach }
+                fun walk(c: IRComponent) {
+                    val runs = c.runs
+                    if (runs != null) {
+                        hosts++
+                        val plan = try { InlineRunPlan.resolve(runs, c.children) } catch (e: Exception) { null }
+                        val verdict = if (plan == null) "no-plan" else {
+                            val o = try {
+                                InlineRunFold.fold(plan.entries, c.children!!, c.properties, null)
+                            } catch (e: Exception) { null }
+                            when (o) {
+                                is InlineRunFold.Outcome.Bailed -> "BAILED:" + o.reason
+                                is InlineRunFold.Outcome.Folded -> "FOLDED"
+                                null -> "THREW"
+                                else -> o.javaClass.simpleName
+                            }
+                        }
+                        sb.append("$testKey ${c.id} $verdict\n")
+                    }
+                    c.children?.forEach { walk(it) }
+                }
+                comps.forEach { walk(it) }
+            }
+        }
+        sb.insert(0, "runs-hosts=$hosts\n")
+        File(out, "inline-fold-outcomes-$tag.txt").writeText(sb.toString())
+        println("hosts=$hosts tag=$tag")
+    }
+}

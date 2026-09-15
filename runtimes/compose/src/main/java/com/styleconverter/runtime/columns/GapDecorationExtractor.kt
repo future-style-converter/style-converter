@@ -59,6 +59,15 @@ object GapDecorationExtractor {
         var column = GapRuleSpec()
         var row = GapRuleSpec()
         var overlap = GapRuleOverlap.ROW_OVER_COLUMN
+        // Wave 50 lane B10 — the flex container's OWN gap/alignment facts,
+        // needed by GapDecorationBands to rebuild the §9.4-step-8 line
+        // boxes. Initial values are the CSS initials: `row-gap`/
+        // `column-gap` are `normal`, which is 0 on a flex container
+        // (css-align-3 §8), and `align-content: normal` stretches
+        // (css-align-3 §5.1).
+        var rowGapPx: Float? = 0f
+        var columnGapPx: Float? = 0f
+        var alignContentStretches = true
         for ((type, data) in properties) {
             when (type) {
                 // ── column family ────────────────────────────────────────
@@ -75,10 +84,63 @@ object GapDecorationExtractor {
                 "RowRuleInset" -> row = row.copy(insetPx = inset(data, type))
                 // ── shared ───────────────────────────────────────────────
                 "RuleOverlap" -> overlap = overlapMode(data)
+                // ── container facts (NOT gap-decoration properties) ──────
+                // Read, never CLAIMED: `RowGap`/`ColumnGap`/`AlignContent`
+                // belong to the spacing and flexbox categories and their
+                // own extractors own the registry entries. Reading a
+                // property another extractor owns is what every composite
+                // applier in this runtime does; claiming it would steal
+                // the coverage row.
+                "RowGap" -> rowGapPx = gap(data, type)
+                "ColumnGap" -> columnGapPx = gap(data, type)
+                "AlignContent" -> alignContentStretches = stretches(data)
             }
         }
-        return GapDecorationConfig(column = column, row = row, overlap = overlap)
+        return GapDecorationConfig(
+            column = column,
+            row = row,
+            overlap = overlap,
+            rowGapPx = rowGapPx,
+            columnGapPx = columnGapPx,
+            alignContentStretches = alignContentStretches
+        )
     }
+
+    /**
+     * `row-gap` / `column-gap` as a used LENGTH in IR px.
+     *
+     * css-align-3 §8: the `normal` keyword is 0 for a flex container (only
+     * multicol gives it a non-zero used value), and a percentage resolves
+     * against the container's own content box — which the reader cannot
+     * pre-compute, so it arrives unresolved. Null is the honest answer for
+     * "the gap exists but its used value is not knowable here"; the band
+     * reconstruction refuses to run on it rather than assuming 0, because
+     * assuming 0 would move every rule by half the real gap.
+     */
+    private fun gap(data: JsonElement?, type: String): Float? {
+        if (ValueExtractors.extractKeyword(data)?.lowercase() == "normal") return 0f
+        val dp = ValueExtractors.extractDp(data)
+        if (dp != null) return dp.value
+        PropertyTracker.markUnhandled("$type:non-length")
+        return null
+    }
+
+    /**
+     * Does `align-content` distribute leftover cross space INTO the lines?
+     *
+     * css-align-3 §5.1: `normal` behaves as `stretch` on a flex container,
+     * and those two are the only values that grow the lines. `start`,
+     * `center`, `space-between`, … leave the lines content-sized and
+     * position the line block instead — for which the item-union extent
+     * the painter already computes is the correct line box. The predicate
+     * is the twin of FlexWrapPlan.alignContentStretches on iOS and of the
+     * `alignContentStretches` argument Compose's FlexWrapRow takes.
+     */
+    private fun stretches(data: JsonElement?): Boolean =
+        when (ValueExtractors.extractKeyword(data)?.uppercase()?.replace('-', '_')) {
+            null, "NORMAL", "STRETCH", "AUTO" -> true
+            else -> false
+        }
 
     /**
      * `<line-style>` — same grammar and same enum as `column-rule-style`,

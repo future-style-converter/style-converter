@@ -1,0 +1,9 @@
+percent margin/padding carriers=4  differing-percent-base=4
+CARRIER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-001 abspos-auto-sizing-fit-content-percentage-001__1__0__0-004 elemW=null childW=100.0 MarginLeft=-50
+DIFFER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-001 abspos-auto-sizing-fit-content-percentage-001__1__0__0-004 elemW=null childW=100.0 MarginLeft
+CARRIER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-002 abspos-auto-sizing-fit-content-percentage-002__1__0__0-008 elemW=null childW=100.0 MarginRight=-50
+DIFFER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-002 abspos-auto-sizing-fit-content-percentage-002__1__0__0-008 elemW=null childW=100.0 MarginRight
+CARRIER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-003 abspos-auto-sizing-fit-content-percentage-003__1__0__0-012 elemW=null childW=100.0 PaddingLeft=50
+DIFFER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-003 abspos-auto-sizing-fit-content-percentage-003__1__0__0-012 elemW=null childW=100.0 PaddingLeft
+CARRIER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-004 abspos-auto-sizing-fit-content-percentage-004__1__0__0-016 elemW=null childW=100.0 PaddingRight=50
+DIFFER css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-004 abspos-auto-sizing-fit-content-percentage-004__1__0__0-016 elemW=null childW=100.0 PaddingRight

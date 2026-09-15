@@ -1,0 +1,121 @@
+{
+ "091_Button_Outline": {
+  "web": {
+   "canvas": "390x62",
+   "ink": "115x30",
+   "at": "16,16"
+  },
+  "iOS": {
+   "canvas": "390x62",
+   "ink": "50x30",
+   "at": "16,16"
+  },
+  "Android": {
+   "canvas": "390x58",
+   "ink": "115x26",
+   "at": "16,16"
+  }
+ },
+ "094_Input_Field": {
+  "web": {
+   "canvas": "390x62",
+   "ink": "200x30",
+   "at": "16,16"
+  },
+  "iOS": {
+   "canvas": "390x62",
+   "ink": "200x30",
+   "at": "16,16"
+  },
+  "Android": {
+   "canvas": "390x60",
+   "ink": "200x28",
+   "at": "16,16"
+  }
+ },
+ "105_Edge_DeepNesting": {
+  "web": {
+   "canvas": "390x62",
+   "ink": "115x30",
+   "at": "16,16"
+  },
+  "iOS": {
+   "canvas": "390x62",
+   "ink": "50x30",
+   "at": "16,16"
+  },
+  "Android": {
+   "canvas": "390x58",
+   "ink": "115x26",
+   "at": "16,16"
+  }
+ },
+ "016_Border_Solid": {
+  "web": {
+   "canvas": "390x68",
+   "ink": "97x36",
+   "at": "16,16"
+  },
+  "iOS": {
+   "canvas": "390x68",
+   "ink": "97x36",
+   "at": "16,16"
+  },
+  "Android": {
+   "canvas": "390x68",
+   "ink": "97x36",
+   "at": "16,16"
+  }
+ },
+ "017_Border_Dashed": {
+  "web": {
+   "canvas": "390x66",
+   "ink": "102x34",
+   "at": "16,16"
+  },
+  "iOS": {
+   "canvas": "390x66",
+   "ink": "102x34",
+   "at": "16,16"
+  },
+  "Android": {
+   "canvas": "390x66",
+   "ink": "102x34",
+   "at": "16,16"
+  }
+ },
+ "097_Glass_Effect": {
+  "web": {
+   "canvas": "390x74",
+   "ink": "100x42",
+   "at": "16,16"
+  },
+  "iOS": {
+   "canvas": "390x74",
+   "ink": "50x42",
+   "at": "16,16"
+  },
+  "Android": {
+   "canvas": "390x74",
+   "ink": "100x42",
+   "at": "16,16"
+  }
+ },
+ "090_Button_Primary": {
+  "web": {
+   "canvas": "390x62",
+   "ink": "115x30",
+   "at": "16,16"
+  },
+  "iOS": {
+   "canvas": "390x62",
+   "ink": "50x30",
+   "at": "16,16"
+  },
+  "Android": {
+   "canvas": "390x62",
+   "ink": "115x30",
+   "at": "16,16"
+  }
+ }
+}

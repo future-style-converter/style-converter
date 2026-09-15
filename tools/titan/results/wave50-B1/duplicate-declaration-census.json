@@ -1,0 +1,381 @@
+{
+ "_note": "WAVE-50 LANE B1 — the COMPLETE census of competing declarations in the 1435-test gate corpus: every rule block whose declaration list repeats a property name, i.e. every place tools/titan/extract-fixture.mjs resolves a shadow. 4073 rule blocks scanned across the 30 sections of tools/titan/runs/wave49-final/sections/*/tests.list; 40 shadow sites in 36 tests. EXACTLY ONE of them (css/css-values/angle-units-001.html) has a later declaration that is provably invalid CSS — every other row is a valid-over-valid collapse that the wave-50 B1 oracle deliberately leaves alone. Kept for the NEXT wave: rows here are also the population for the OLDER importance defect B1 did not fix (css-cascade-5 6.4.4 says an important declaration beats a later normal one; the collapse still ends on the later one). Regenerate: scan each tests.list test HTML for style-block rule bodies and group declarations by property name.",
+ "generatedBy": "wave-50 lane B1",
+ "date": "2026-09-14",
+ "corpus": {
+  "runId": "wave49-final",
+  "tests": 1435,
+  "ruleBlocksScanned": 4073,
+  "shadowSites": 40,
+  "testsWithShadowSites": 36
+ },
+ "provablyInvalidShadowSites": [
+  "css/css-values/angle-units-001.html"
+ ],
+ "rows": [
+  {
+   "test": "css/css-cascade/important-prop.html",
+   "selector": "from, to",
+   "property": "border-color",
+   "valuesInAuthorOrder": [
+    "green",
+    "red !important"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-001.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "revert-layer"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-002.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "revert-layer"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-004.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "revert-layer"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-005.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "red !important",
+    "revert-layer !important"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-005.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "red !important"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-006.html",
+   "selector": "#inner",
+   "property": "display",
+   "valuesInAuthorOrder": [
+    "inline",
+    "revert-layer"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-007.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "revert-layer"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-007.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "revert-layer"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-layer-007.html",
+   "selector": "#target",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "revert-layer"
+   ]
+  },
+  {
+   "test": "css/css-cascade/revert-val-001.html",
+   "selector": "#inner",
+   "property": "display",
+   "valuesInAuthorOrder": [
+    "inline",
+    "revert"
+   ]
+  },
+  {
+   "test": "css/css-cascade/unset-val-002.html",
+   "selector": ".fail",
+   "property": "display",
+   "valuesInAuthorOrder": [
+    "inline-block",
+    "unset"
+   ]
+  },
+  {
+   "test": "css/css-color/color-mix-currentcolor-001.html",
+   "selector": "div",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "color-mix(in srgb, currentColor 50%, green)"
+   ]
+  },
+  {
+   "test": "css/css-color/color-mix-currentcolor-002.html",
+   "selector": "div",
+   "property": "background-color",
+   "valuesInAuthorOrder": [
+    "red",
+    "color-mix(in lch, currentColor 50%, blue)"
+   ]
+  },
+  {
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html",
+   "selector": ".child",
+   "property": "background",
+   "valuesInAuthorOrder": [
+    "teal",
+    "yellow"
+   ]
+  },
+  {
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html",
+   "selector": ".child",
+   "property": "background",
+   "valuesInAuthorOrder": [
+    "teal",
+    "yellow"
+   ]
+  },
+  {
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-003.html",
+   "selector": ".child",
+   "property": "background",
+   "valuesInAuthorOrder": [
+    "teal",
+    "yellow"
+   ]
+  },
+  {
+   "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "selector": "li:first-child > *",
+   "property": "list-style-type",
+   "valuesInAuthorOrder": [
+    "lower-alpha",
+    "'marker '"
+   ]
+  },
+  {
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "selector": "li:first-child > *",
+   "property": "list-style-type",
+   "valuesInAuthorOrder": [
+    "lower-alpha",
+    "'marker '"
+   ]
+  },
+  {
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "selector": "li:first-child",
+   "property": "list-style-type",
+   "valuesInAuthorOrder": [
+    "lower-alpha",
+    "'::marker '"
+   ]
+  },
+  {
+   "test": "css/css-text-decor/text-decoration-subelements-003.html",
+   "selector": "div.wrapper",
+   "property": "text-decoration",
+   "valuesInAuthorOrder": [
+    "underline",
+    "underline blue"
+   ]
+  },
+  {
+   "test": "css/css-text-decor/text-decoration-subelements-003.html",
+   "selector": "sup.test",
+   "property": "text-decoration",
+   "valuesInAuthorOrder": [
+    "underline",
+    "underline green"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-auto-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "auto"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-button-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "button"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-checkbox-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "checkbox"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-listbox-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "listbox"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-menulist-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "menulist"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-menulist-button-001.html",
+   "selector": "#container > *:not(#drop-down-select)",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "menulist-button"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-meter-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "meter"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-progress-bar-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "progress-bar"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-radio-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "radio"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-searchfield-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "searchfield"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-textarea-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "textarea"
+   ]
+  },
+  {
+   "test": "css/css-ui/appearance-textfield-001.html",
+   "selector": "#container > *",
+   "property": "appearance",
+   "valuesInAuthorOrder": [
+    "none",
+    "textfield"
+   ]
+  },
+  {
+   "test": "css/css-values/angle-units-001.html",
+   "selector": "div#test-overlapping-green",
+   "property": "background-image",
+   "valuesInAuthorOrder": [
+    "linear-gradient(green, green)",
+    "linear-gradient(90degree, red, red)",
+    "linear-gradient(100gradian, red, red)",
+    "linear-gradient(1.57radian, red, red)",
+    "linear-gradient(0.25turns, red, red)"
+   ]
+  },
+  {
+   "test": "css/css-values/attr-in-slotted.html",
+   "selector": "::slotted(div)",
+   "property": "color",
+   "valuesInAuthorOrder": [
+    "red",
+    "attr(data-color type(<color>), yellow)"
+   ]
+  },
+  {
+   "test": "css/css-values/attr-length-valid-zero-nofallback.html",
+   "selector": "#outer2",
+   "property": "width",
+   "valuesInAuthorOrder": [
+    "200px",
+    "attr(data-test type(<length>))"
+   ]
+  },
+  {
+   "test": "css/css-values/attr-length-valid-zero.html",
+   "selector": "#outer2",
+   "property": "width",
+   "valuesInAuthorOrder": [
+    "200px",
+    "attr(data-test type(<length>), 0)"
+   ]
+  },
+  {
+   "test": "css/css-values/calc-invalid-range-clamping.html",
+   "selector": "#outer",
+   "property": "border-radius",
+   "valuesInAuthorOrder": [
+    "10px",
+    "calc(-10px)"
+   ]
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-edge-behavior.html",
+   "selector": "#scroller",
+   "property": "scrollbar-width",
+   "valuesInAuthorOrder": [
+    "none",
+    "none"
+   ]
+  }
+ ]
+}

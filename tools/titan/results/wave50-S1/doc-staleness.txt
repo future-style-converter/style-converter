@@ -1,0 +1,67 @@
+[1;34m━━━ coverage-audit.mjs vs README/CLAUDE/STATUS ━━━[0m
+[0;32m[doc-check][0m live: android=558 ios=558 web=558
+[0;32m[doc-check][0m ✓ all 3 docs match live coverage
+
+[1;34m━━━ unit-test count vs README/CLAUDE/STATUS ━━━[0m
+[0;32m[doc-check][0m live: 2030 unit tests
+[0;31m[doc-check][0m README.md does NOT mention live tooling test count 2030 in its test-suite table — update it
+[0;31m[doc-check][0m CLAUDE.md does NOT mention live tooling test count 2030 in its test-suite table — update it
+[0;31m[doc-check][0m docs/STATUS.md does NOT mention live tooling test count 2030 in its test-suite table — update it
+
+[1;34m━━━ per-suite test counts vs README/CLAUDE tables ━━━[0m
+[0;32m[doc-check][0m live: converter=526 web=1337 compose=3232 swiftui=2006
+[0;31m[doc-check][0m README.md does NOT mention live converter test count 526 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m CLAUDE.md does NOT mention live converter test count 526 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m docs/STATUS.md does NOT mention live converter test count 526 in its test-suite table/inline count — update it
+[0;32m[doc-check][0m ✓ README.md mentions web=1337
+[0;32m[doc-check][0m ✓ CLAUDE.md mentions web=1337
+[0;32m[doc-check][0m ✓ docs/STATUS.md mentions web=1337
+[0;32m[doc-check][0m ✓ runtimes/web/README.md mentions web=1337
+[0;31m[doc-check][0m README.md does NOT mention live compose test count 3232 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m CLAUDE.md does NOT mention live compose test count 3232 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m docs/STATUS.md does NOT mention live compose test count 3232 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m runtimes/compose/README.md does NOT mention live compose test count 3232 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m apps/android-harness/README.md does NOT mention live compose test count 3232 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m README.md does NOT mention live swiftui test count 2006 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m CLAUDE.md does NOT mention live swiftui test count 2006 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m docs/STATUS.md does NOT mention live swiftui test count 2006 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m runtimes/swiftui/README.md does NOT mention live swiftui test count 2006 in its test-suite table/inline count — update it
+[0;32m[doc-check][0m live: android-harness(:app)=116 web-harness=282
+[0;32m[doc-check][0m ✓ README.md mentions android-harness=116
+[0;32m[doc-check][0m ✓ CLAUDE.md mentions android-harness=116
+[0;32m[doc-check][0m ✓ docs/STATUS.md mentions android-harness=116
+[0;31m[doc-check][0m README.md does NOT mention live web-harness test count 282 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m CLAUDE.md does NOT mention live web-harness test count 282 in its test-suite table/inline count — update it
+[0;31m[doc-check][0m docs/STATUS.md does NOT mention live web-harness test count 282 in its test-suite table/inline count — update it
+[1;33m[doc-check][0m ios-harness XCTest bundle declares 23 tests but no documented sweep row runs it (needs a simulator) — wire it into the tables or delete the target
+
+[1;34m━━━ fixture category count vs README/CLAUDE ━━━[0m
+[0;32m[doc-check][0m live: 33 category directories under fixtures/properties/
+[0;32m[doc-check][0m ✓ README.md mentions 33 categories
+[0;32m[doc-check][0m ✓ CLAUDE.md mentions 33 categories
+
+[1;34m━━━ Round 75 regression-prevention checks ━━━[0m
+[0;32m[doc-check][0m ✓ FixtureCanvas.tsx uses setTimeout (not RAF) — round 75 fix preserved
+[0;32m[doc-check][0m ✓ puppeteer.launch protocolTimeout verified in-call (≥ 5 min) — round 75 fix preserved
+
+[1;34m━━━ verified-coverage consistency (STATUS vs README/CLAUDE) ━━━[0m
+[0;32m[doc-check][0m docs/STATUS.md quotes verified coverage 91/550 (historical denominator; live catalogue is 558)
+[0;32m[doc-check][0m ✓ README.md mentions verified coverage 91/550
+[0;32m[doc-check][0m ✓ CLAUDE.md mentions verified coverage 91/550
+
+[1;34m━━━ newest corpus snapshot vs docs/BACKLOG.md + docs/STATUS.md ━━━[0m
+[0;32m[doc-check][0m live: corpus-v6.15 → web/iOS/Android = 1205/1379 1081/1366 1058/1366
+[0;32m[doc-check][0m ✓ docs/BACKLOG.md Current: names corpus-v6.15
+[0;32m[doc-check][0m ✓ docs/STATUS.md names corpus-v6.15
+
+[1;34m━━━ coverage-audit real/applier-file counts vs README.md + COVERAGE.md ━━━[0m
+[0;32m[doc-check][0m live: real android=15 ios=70 web=516 · applier files android=44 ios=94 web=520
+[0;32m[doc-check][0m ✓ README.md real-applier row matches
+[0;32m[doc-check][0m ✓ tools/visual/COVERAGE.md total row matches
+[0;31m[doc-check][0m tools/visual/COVERAGE.md: dedicated *Applier file counts are not 'Android 44 · iOS 94 · Web 520' — regenerate: node tools/visual/coverage-audit.mjs --md
+
+[1;34m━━━ committed baselines vs fixture components (orphan PNGs) ━━━[0m
+[0;32m[doc-check][0m ✓ all 390 committed baseline PNGs name a component declared by a fixture under fixtures
+
+[0;31m✗ stale-doc claims found — re-run the affected source-of-truth scripts and update the docs[0m
+EXIT=1

@@ -1,0 +1,228 @@
+diff --git a/apps/web-harness/src/sdui/ComponentRenderer.tsx b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+index 4ee754ae..d2397fa9 100644
+--- a/apps/web-harness/src/sdui/ComponentRenderer.tsx
++++ b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+@@ -69,6 +69,7 @@ import type { ComposedNode } from './Composer';
+ // (the harness half of the image()/url() background asset story — see the
+ // module banner for the measured 002-fallbacks case).
+ import { routeCorpusAssetStyles } from './CorpusAssetRoute';
++import { uaBoxlessDisplay } from './UaBoxlessDisplay';
+ 
+ /**
+  * WPT-mode detector — reads the `?wpt=1` query parameter once per module load.
+@@ -789,7 +790,16 @@ const HARNESS_OPTIONS: RendererOptions = {
+   // CorpusAssetRoute.ts for the measured 002-fallbacks case). Identity for
+   // every non-WPT component, so the legacy path is byte-identical.
+   decorateStyles: (styles, ctx) =>
+-    routeCorpusAssetStyles(calibrateStyles(styles, ctx), ctx.component.name),
++    // wave-50 lane B5: the UA `display` of the six internal-layout source
++    // tags (colgroup/col/ruby/rb/rt/rtc) is restored FIRST, so the sizing
++    // calibration below sees the box the reference actually has instead of
++    // the block box divergence #3's <div> demotion invented. Identity for
++    // every other tag and for any component that declares its own display —
++    // see UaBoxlessDisplay for the measured chain.
++    routeCorpusAssetStyles(
++      calibrateStyles(uaBoxlessDisplay(styles, ctx.component.meta?.sourceTag?.toLowerCase()), ctx),
++      ctx.component.name,
++    ),
+   // Divergence #3: allowlist mapping — except `img`, which bypasses the
+   // allowlist into the core's void-element branch (issue #36 web slice:
+   // replaced-element CSS needs a REAL <img> box even on captures), and —
+diff --git a/apps/web-harness/src/sdui/UaBoxlessDisplay.ts b/apps/web-harness/src/sdui/UaBoxlessDisplay.ts
+new file mode 100644
+index 00000000..07cb32fb
+--- /dev/null
++++ b/apps/web-harness/src/sdui/UaBoxlessDisplay.ts
+@@ -0,0 +1,106 @@
++// UaBoxlessDisplay.ts — wave-50 lane B5 seam.
++//
++// THE DEFECT. The harness maps every `meta.sourceTag` outside TAG_ALLOWLIST
++// to a plain `<div>` (ComponentRenderer's divergence #3), and a `<div>` with
++// no declared `display` is a BLOCK box. For most demoted tags that is
++// harmless — they were block-level anyway. For the five tags below it is
++// not: their UA `display` is one of css-display-3 §2.4's INTERNAL layout
++// values, which generate no block box of their own. Demoting them to a
++// block box invents geometry the reference never had.
++//
++// WHY IT MATTERS MOST IN A VERTICAL WRITING MODE. A spurious block box adds
++// its extent along the BLOCK axis, and css-writing-modes-4 §3 turns the
++// block axis HORIZONTAL in `vertical-rl`/`vertical-lr`/`sideways-*`. So each
++// invented box widens the element physically, and a shrink-to-fit box (a
++// float, css-writing-modes-4 §7.3) then clamps at its containing block's
++// inline size and stops sharing a row.
++//
++// MEASURED (wave-50 B5, headless Chrome on the harness's own composed DOM,
++// injected as XHTML so the parser's table foster-parenting cannot move
++// nodes; per-box targets from the same WPT page under capture-browser-ref's
++// frame CSS). css-writing-modes/direction-upright-002, composed canvas
++// height / first float's border box:
++//   as shipped                                   3045 px / 364x230
++//   + colgroup/col at their UA display           3042 px / 330x266
++//   + ruby/rt at their UA display                2769 px / 308x230
++//   + both (this module)                         2766 px / 192x266
++//   + both AND the extractor's 100x100 `<col>`
++//     placeholder removed (seam S2, deferred)    1864 px / 192x184
++//   Chromium ref (the frozen raster's source)     954 px /  98x150
++// Web pixel mismatch vs the frozen ref (±8/channel), base -> with this
++// module, over every wave49-final test that carries one of these tags:
++//   CSS2/borders/border-conflict-style-107     39.276% -> 10.431%  BETTER
++//   css-writing-modes/ch-units-vrl-003         11.497% -> 10.102%  BETTER
++//   css-writing-modes/ch-units-vrl-007         17.226% -> 16.228%  BETTER
++//   css-tables/border-collapse-dynamic-col-001  0.515% ->  0.515%  flat (0 px moved)
++//   css-backgrounds/…-animation-with-table2      0.091% ->  0.090%  flat
++//   css-text-decor/ruby-text-decoration-01       1.374% ->  1.374%  flat (0 px moved)
++// No currently-PASSING web cell degrades; the two that move are failures.
++// direction-upright-002 is excluded from that table on purpose: its canvas
++// height changes, so a top-left-aligned mismatch is not comparable (the
++// gate's frame-aware ssimRefFrame is the metric that judges it).
++//
++// NOT A TAG MAPPING. Promoting these to real `<colgroup>`/`<col>`/`<ruby>`
++// elements would be the other way to get the UA display, but `col` is a
++// VOID element (WHATWG HTML §13.1.2) and the harness gives every component a
++// content wrapper, so the tag route needs the void-element branch AND a
++// content-suppression rule. Declaring the display keeps the change to one
++// style key on the box the renderer already emits.
++
++import type { CSSProperties } from 'react';
++
++/**
++ * `meta.sourceTag` → the UA `display` of that element, for tags whose UA
++ * display is an INTERNAL layout value (css-display-3 §2.4) rather than a
++ * block box.
++ *
++ *  - `colgroup` / `col`: css-tables-3 §2.1 puts column and column-group
++ *    boxes outside the table's content flow — they exist to carry column
++ *    backgrounds and width contributions, and contribute no block-axis
++ *    extent of their own.
++ *  - `ruby` / `rb` / `rt` / `rtc`: css-ruby-1 §2 defines the ruby box model
++ *    — an annotation rides ALONGSIDE its base inside one ruby container,
++ *    it is not a sibling block box after it.
++ *
++ * Deliberately NOT listed: `caption`, `thead`, `tbody`, `tfoot`, `tr`,
++ * `td`, `th` — all of those ARE in TAG_ALLOWLIST already, so the browser
++ * applies their UA display from the real tag.
++ */
++export const UA_BOXLESS_DISPLAY: ReadonlyMap<string, string> = new Map([
++  ['colgroup', 'table-column-group'],
++  ['col', 'table-column'],
++  ['ruby', 'ruby'],
++  ['rb', 'ruby-base'],
++  ['rt', 'ruby-text'],
++  ['rtc', 'ruby-text-container'],
++]);
++
++/**
++ * Add the UA `display` for [sourceTag] when the component declares none.
++ *
++ * The author's own declaration always wins (the cascade: a declared
++ * `display` is a specified value, this is a UA default), so the guard is
++ * `'display' in styles` — the engine writes that key only when the IR
++ * carries a `Display` property. Every other tag, and every component that
++ * declares a display, gets the input object back UNCHANGED (identity, not a
++ * copy), so no non-carrier capture can move.
++ *
++ * @param styles    the engine's computed style object for this component.
++ * @param sourceTag lowercased `meta.sourceTag`, or null/undefined when absent.
++ */
++export function uaBoxlessDisplay(
++  styles: CSSProperties,
++  sourceTag: string | null | undefined,
++): CSSProperties {
++  // No tag on the wire → nothing to default from.
++  if (!sourceTag) return styles;
++  // Not one of the six internal-display tags → identity.
++  const display = UA_BOXLESS_DISPLAY.get(sourceTag);
++  if (display === undefined) return styles;
++  // Declared display wins (cascade) — a `display: block` on a <col> is a
++  // real author choice and this default must not shadow it.
++  if ('display' in styles) return styles;
++  // Spread the default UNDER nothing: styles has no `display` key here, so
++  // key order cannot matter and the result differs by exactly one key.
++  return { ...styles, display };
++}
+diff --git a/apps/web-harness/tests/sdui/ComponentRenderer.uaBoxlessDisplay.test.tsx b/apps/web-harness/tests/sdui/ComponentRenderer.uaBoxlessDisplay.test.tsx
+new file mode 100644
+index 00000000..0a9cf79b
+--- /dev/null
++++ b/apps/web-harness/tests/sdui/ComponentRenderer.uaBoxlessDisplay.test.tsx
+@@ -0,0 +1,80 @@
++// wave-50 lane B5 — DOM pins for the UA internal-display default
++// (apps/web-harness/src/sdui/UaBoxlessDisplay.ts + its decorateStyles hook).
++//
++// THE CONTRACT: a component whose `meta.sourceTag` is one of the six
++// internal-layout tags (css-display-3 §2.4) and that declares no `display`
++// of its own renders with that tag's UA display, so the demoted <div> is
++// not a block box the reference never had. Everything else — a different
++// tag, or a declared display — is byte-identical.
++//
++// Measured chain and per-test blast radius: UaBoxlessDisplay's banner.
++
++import { describe, it, expect } from 'vitest';
++import { renderToStaticMarkup } from 'react-dom/server';
++import { ComponentRenderer } from '../../src/sdui/ComponentRenderer';
++import { uaBoxlessDisplay, UA_BOXLESS_DISPLAY } from '../../src/sdui/UaBoxlessDisplay';
++import type { ComposedNode } from '../../src/sdui/Composer';
++import type { IRComponent } from '@style-converter/web/core/ir/IRModels';
++
++// One component, no scaffolding (same helper shape as the floatRuns suite).
++function node(overrides: Partial<IRComponent>, children: ComposedNode[] = []): ComposedNode {
++  return { component: { id: 'id', name: 'C', properties: [], ...overrides }, children };
++}
++
++describe('uaBoxlessDisplay (the pure map)', () => {
++  it('defaults each internal-layout tag to its UA display', () => {
++    // The six tags and the values css-display-3 §2.4 names for them.
++    expect(uaBoxlessDisplay({}, 'colgroup')).toEqual({ display: 'table-column-group' });
++    expect(uaBoxlessDisplay({}, 'col')).toEqual({ display: 'table-column' });
++    expect(uaBoxlessDisplay({}, 'ruby')).toEqual({ display: 'ruby' });
++    expect(uaBoxlessDisplay({}, 'rb')).toEqual({ display: 'ruby-base' });
++    expect(uaBoxlessDisplay({}, 'rt')).toEqual({ display: 'ruby-text' });
++    expect(uaBoxlessDisplay({}, 'rtc')).toEqual({ display: 'ruby-text-container' });
++  });
++
++  it('is the IDENTITY for a tag outside the map, for no tag, and for a declared display', () => {
++    // Identity, not a copy: a non-carrier capture cannot move at all.
++    const styles = { color: 'red' };
++    expect(uaBoxlessDisplay(styles, 'div')).toBe(styles);
++    expect(uaBoxlessDisplay(styles, null)).toBe(styles);
++    expect(uaBoxlessDisplay(styles, undefined)).toBe(styles);
++    // Cascade: an author-declared display wins over a UA default.
++    const declared = { display: 'block' };
++    expect(uaBoxlessDisplay(declared, 'col')).toBe(declared);
++  });
++
++  it('keeps the table row/cell tags OUT — they carry their UA display from the real tag', () => {
++    // These six are in TAG_ALLOWLIST, so the browser applies their UA
++    // display itself; defaulting them here would be a second owner.
++    for (const tag of ['table', 'thead', 'tbody', 'tfoot', 'tr', 'td', 'th', 'caption']) {
++      expect(UA_BOXLESS_DISPLAY.has(tag)).toBe(false);
++    }
++  });
++});
++
++describe('the decorateStyles hook (end to end through the renderer)', () => {
++  it('emits display:table-column on a <col> component', () => {
++    const html = renderToStaticMarkup(
++      <ComponentRenderer node={node({ meta: { sourceTag: 'col' } } as Partial<IRComponent>)} />,
++    );
++    expect(html).toContain('display:table-column');
++  });
++
++  it('emits display:ruby-text on an <rt> component and ruby on its <ruby> parent', () => {
++    const rt = node({ id: 'rt', name: 'Rt', meta: { sourceTag: 'rt' } } as Partial<IRComponent>);
++    const html = renderToStaticMarkup(
++      <ComponentRenderer node={node({ meta: { sourceTag: 'ruby' } } as Partial<IRComponent>, [rt])} />,
++    );
++    expect(html).toContain('display:ruby;');
++    expect(html).toContain('display:ruby-text');
++  });
++
++  it('leaves a plain div component byte-identical (no display key added)', () => {
++    const html = renderToStaticMarkup(<ComponentRenderer node={node({ text: 'x' })} />);
++    // The renderer writes no `display` on the component box itself for a
++    // tag-less component; the inner content wrapper's own display:block is
++    // a different box and is matched by the more specific assertion below.
++    expect(html).not.toContain('display:table-column');
++    expect(html).not.toContain('display:ruby');
++  });
++});

@@ -5,6 +5,11 @@
 //  Split from LineClampCensus.swift (the verdict) under the ≤200-line
 //  rule; same enum, same folder, SwiftPM picks the file up automatically.
 //
+//  TWIN NOTE: the Compose counterpart `typography/inline/
+//  LineBoxCensusRuns.kt` diverges from `childRun` below on `<br>` — see
+//  divergence (b) in LineClampCensus.swift's header, and the marker at
+//  the explicit-height arm.
+//
 
 import CoreGraphics
 import Foundation
@@ -103,6 +108,15 @@ extension LineClampCensus {
         let lines: Int? = (child.children?.isEmpty ?? true) && lineBox != nil
             ? child.text.flatMap { exactLineCount($0, whiteSpace: ws) } : nil
         // Explicit height: the box is exactly that tall, whatever its text.
+        //
+        // TWIN DIVERGENCE (b), stated where it bites: a `<br>` reaches
+        // this arm on iOS, because the converter stamps a measured height
+        // on it and this reader has no `<br>` branch — so a 20px stamp is
+        // budgeted as a monolithic box here and as ZERO on Compose
+        // (LineBoxCensusRuns.childRun's `tag == "br" || role ==
+        // "line-break"` early return, HTML §4.5.27: a forced break
+        // generates no box). Corpus impact unmeasured — wave 50 ran no
+        // device gate — so the arm is deliberately NOT ported.
         if let h = LineClampChildMetrics.explicitHeightPx(child.properties) {
             return LineClampRun(lineBoxPx: box, exactLines: 0, leadingBandPx: bands?.top,
                                 monolithicPx: bands.map { h + $0.top + $0.bottom })

@@ -1,0 +1,134 @@
+{
+ "_note": "Wave 50, lane B8 \u2014 the measurement that settled BACKLOG queue 6(c) \"Android box-shadow ~2.4x over-blur (MultipleShadowApplier.kt)\". Device Gaussian sigma fitted from the COMMITTED baselines (no device), against css-backgrounds-3 6.1.2: blur radius r means a Gaussian with sigma = r/2 (Blink skia_utils BlurRadiusToStdDev). RESULT: Android is at sigma parity \u2014 on the best-conditioned pair (024_Shadow_Colored, blur 15, target 7.50) Android fits 7.494 against web 7.092 and iOS 7.067; on the inset pair (107, blur 20, target 10.0) Android 9.688 / web 8.498 / iOS 8.274. No platform is 2.4x wide, and Android is never the widest by more than 14% of web. The over-blur (raw CSS radius straight into BlurMaskFilter) existed ONLY in effects/shadow/MultipleShadowApplier.kt, which had ZERO call sites since the initial import (954b38e8) and is listed in the retro's own dead-code census (tools/titan/results/retro-2026-09-04/p2a-compose-dead-remaining.json); the LIVE path has converted through ShadowApplier.blurMaskRadius since wave 2 (0b2313a8, 2026-07-17) \u2014 verified present at 07f75ec9, the very commit whose probe produced the 2.4x reach number. The file is deleted in this wave and the parity is pinned by runtimes/compose/src/test/java/com/styleconverter/runtime/effects/shadow/ShadowBlurSigmaParityTest.kt. WHAT A LATER WAVE MUST ACT ON: (1) the docs/STATUS.md 'Android over-blurs box-shadow by ~2.4x' row states a file attribution that is wrong and a magnitude this measurement does not reproduce \u2014 it should be struck with this artifact as the evidence; (2) the reach excess the 2026-08-28 probe measured (Android 123/131/131/120 bottom-most shadow row vs web 93/101/109/90, box rows 30-70, blur 10, offset-y 10, spread -8/0/+8/-1px; probe fixture not committed, so it cannot be re-run here) is NOT a blur-sigma error. The two mechanisms that DO widen an Android shadow's painted extent were both repaired after that probe and are still corpus-unmeasured: the retro's R6 border-box knockout + opacity attenuation and round-2 F1's margin-box stripping (ShadowGeometry.borderBoxRect / outsetShadowRect). The wave-50 device gate re-measures them; re-probe the reach there before re-opening 6(c).",
+ "measurements": {
+  "023_Shadow_Simple": {
+   "css": "5px 5px 10px rgba(0,0,0,0.3)",
+   "sigmaTarget": 5.0,
+   "wellConditioned": false,
+   "caveat": "the 5px/5px offset parks most of the field under the opaque box; the visible sliver leaves sigma and amplitude correlated",
+   "fit": {
+    "web": {
+     "sigma": 5.653,
+     "amplitude": 1.044,
+     "rms": 0.00631,
+     "rect": [
+      19.7,
+      19.8,
+      70.8,
+      60.8
+     ],
+     "channel": 2
+    },
+    "Android": {
+     "sigma": 4.612,
+     "amplitude": 0.833,
+     "rms": 0.00469,
+     "rect": [
+      20.3,
+      20.4,
+      71.3,
+      61.3
+     ],
+     "channel": 2
+    },
+    "iOS": {
+     "sigma": 4.407,
+     "amplitude": 0.815,
+     "rms": 0.00982,
+     "rect": [
+      20.3,
+      20.9,
+      71.8,
+      61.4
+     ],
+     "channel": 2
+    }
+   }
+  },
+  "024_Shadow_Colored": {
+   "css": "0 4px 15px rgba(52,152,219,0.5)",
+   "sigmaTarget": 7.5,
+   "wellConditioned": true,
+   "fit": {
+    "web": {
+     "sigma": 7.092,
+     "amplitude": 1.039,
+     "rms": 0.00257,
+     "rect": [
+      15.7,
+      19.8,
+      65.3,
+      59.3
+     ],
+     "channel": 2
+    },
+    "Android": {
+     "sigma": 7.494,
+     "amplitude": 1.002,
+     "rms": 0.0012,
+     "rect": [
+      15.5,
+      19.5,
+      65.5,
+      59.5
+     ],
+     "channel": 2
+    },
+    "iOS": {
+     "sigma": 7.067,
+     "amplitude": 0.98,
+     "rms": 0.00728,
+     "rect": [
+      15.3,
+      19.7,
+      66.0,
+      59.6
+     ],
+     "channel": 2
+    }
+   }
+  },
+  "107_Edge_InsetRoundShadow": {
+   "css": "inset 0 0 20px rgba(0,0,0,0.5)",
+   "sigmaTarget": 10.0,
+   "wellConditioned": false,
+   "caveat": "corner squares masked (radius 20px); the fill is read from the capture, so a platform that paints the fill differently shifts the amplitude, not sigma",
+   "fit": {
+    "web": {
+     "sigma": 8.498,
+     "amplitude": 0.767,
+     "rms": 0.00476,
+     "samples": 900,
+     "channel": 0
+    },
+    "Android": {
+     "sigma": 9.688,
+     "amplitude": 0.951,
+     "rms": 0.00305,
+     "samples": 900,
+     "channel": 0
+    },
+    "iOS": {
+     "sigma": 8.274,
+     "amplitude": 0.816,
+     "rms": 0.0063,
+     "samples": 900,
+     "channel": 0
+    }
+   }
+  }
+ },
+ "producedBy": "tools/titan/results/wave50-B8/measure-shadow-sigma.py (rerun: python3 <that file>)",
+ "treeAt": "747b28e4",
+ "inputs": {
+  "tools/visual/baseline/web__023_Shadow_Simple.png": "f169fa137a6807b3c2a763b54d5be6b895c312e8",
+  "tools/visual/baseline/Android__023_Shadow_Simple.png": "e2c84d75cbc805d99a3a6e089c54c593c07ad859",
+  "tools/visual/baseline/iOS__023_Shadow_Simple.png": "2c65fa04db270f8a6392dfcd8dc19e2e8eeaa731",
+  "tools/visual/baseline/web__024_Shadow_Colored.png": "6e199528bd12fe9c347ae30d124f4616f58af89f",
+  "tools/visual/baseline/Android__024_Shadow_Colored.png": "92671272a206fcf8b1905ac76f18ff136fdaad4f",
+  "tools/visual/baseline/iOS__024_Shadow_Colored.png": "84d6dd96a8859e98054bf5d7d520ce5be72fd033",
+  "tools/visual/baseline/web__107_Edge_InsetRoundShadow.png": "0fb27376c41b847bac9faf78590b3ec1bb3c75df",
+  "tools/visual/baseline/Android__107_Edge_InsetRoundShadow.png": "ce7493e82736d5e0e5b31ff1d4e68ca7e4673a3a",
+  "tools/visual/baseline/iOS__107_Edge_InsetRoundShadow.png": "4a08c7de0f3a94c32d4c5b1163e447243a5cdbaa"
+ }
+}

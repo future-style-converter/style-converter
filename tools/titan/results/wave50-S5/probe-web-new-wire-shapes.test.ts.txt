@@ -1,0 +1,22 @@
+// TEMPORARY S5 skeptic probe (_skeptic50) — deleted before the report.
+import { describe, it, expect } from 'vitest';
+import { extractTextDecorationThickness } from '../src/engine/typography/TextDecorationThicknessExtractor';
+import { applyTextDecorationThickness } from '../src/engine/typography/TextDecorationThicknessApplier';
+import { extractTextDecorationColor } from '../src/engine/typography/TextDecorationColorExtractor';
+
+describe('_skeptic50: the NEW wire shapes wave-50 TextDecorationExpander will emit', () => {
+  it('TextDecorationThickness {type:"auto"} / {type:"from-font"}', () => {
+    for (const t of ['auto', 'from-font']) {
+      const cfg = extractTextDecorationThickness([{ type: 'TextDecorationThickness', data: { type: t } }]);
+      // eslint-disable-next-line no-console
+      console.log('_skeptic50 thickness', t, JSON.stringify(cfg), JSON.stringify(applyTextDecorationThickness(cfg)));
+      expect(cfg).toBeDefined();
+    }
+  });
+  it('TextDecorationColor {original:"inherit"} (no srgb) — the shape wave49 emitted for `auto`', () => {
+    const cfg = extractTextDecorationColor([{ type: 'TextDecorationColor', data: { original: 'inherit' } }]);
+    // eslint-disable-next-line no-console
+    console.log('_skeptic50 color-no-srgb', JSON.stringify(cfg));
+    expect(cfg).toBeDefined();
+  });
+});

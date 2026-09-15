@@ -1,0 +1,21 @@
+inline-block, no width | suppresses=true hasExplicitWidth=false → renderer fill removed = true
+inline-block + width:100px | suppresses=true hasExplicitWidth=true → renderer fill removed = false
+inline-block + min-width | suppresses=true hasExplicitWidth=true → renderer fill removed = false
+inline-block, VERTICAL wm | suppresses=false hasExplicitWidth=false → renderer fill removed = false
+inline-block + inline-size (vertical: not a width) | suppresses=false hasExplicitWidth=false → renderer fill removed = false
+inline-flex | suppresses=true hasExplicitWidth=false → renderer fill removed = true
+inline-grid | suppresses=true hasExplicitWidth=false → renderer fill removed = true
+inline-table | suppresses=false hasExplicitWidth=false → renderer fill removed = false
+display:inline | suppresses=false hasExplicitWidth=false → renderer fill removed = false
+inline-block wire {keyword} | suppresses=true hasExplicitWidth=false → renderer fill removed = true
+REPLACED <img> declared inline-block (no intrinsic size on the wire) | suppresses=true hasExplicitWidth=false → renderer fill removed = true
+inline-table role=TABLE shrinkToFitBox=true
+
+=== filter-effects/backdrop-filter-basic-blur (ring-fenced; measured, not carved) ===
+  wpt__filter-effects__backdrop-filter-basic-blur__0-006 declaredDisplay=null suppresses=false
+  backdrop-filter-basic-blur__0__0-007 declaredDisplay=null suppresses=false
+  backdrop-filter-basic-blur__0__1-008 declaredDisplay=null suppresses=false
+  wpt__filter-effects__backdrop-filter-basic-blur__1-009 declaredDisplay=null suppresses=false
+  backdrop-filter-basic-blur__1__0-010 declaredDisplay=BLOCK suppresses=false
+  backdrop-filter-basic-blur__1__1-011 declaredDisplay=BLOCK suppresses=false
+  backdrop-filter-basic-blur__1__2-012 declaredDisplay=BLOCK suppresses=false

@@ -1,0 +1,90 @@
+--- base/tools/titan/extract-fixture.mjs	2026-09-14 20:44:07
++++ patched/tools/titan/extract-fixture.mjs	2026-09-14 20:47:45
+@@ -9486,6 +9486,69 @@
+     if (spacing !== null) out['border-spacing'] = `${spacing}px`;
+   }
+   return Object.keys(out).length > 0 ? { props: out, unmodelled: false } : null;
++}
++
++/**
++ * wave-50 B6: HTML Rendering §15.3 — the `br[clear]` presentational hint.
++ *
++ * The rendering chapter expresses it as a UA stylesheet rule set:
++ *
++ *   br[clear=left i]                 { clear: left; }
++ *   br[clear=right i]                { clear: right; }
++ *   br[clear=all i], br[clear=both i]{ clear: both; }
++ *
++ * WHY THIS EXISTS. Everything above this line models AUTHOR declarations
++ * (matched rules + inline style), so the `clear` ATTRIBUTE — the only place
++ * four WPT corpus tests put their float-row break — never reached the props
++ * bag and the IR carried no Clear wire at all. Measured, wave49-final
++ * per-test-ir wpt__CSS2__floats-clear__floats-clear-multicol-000.json: the
++ * `<br clear="all">` component ships `[Width, Height]` and nothing else.
++ * Two things follow from the miss, both visible in the captures:
++ *   1. the break's CLEARANCE is invisible to every runtime, so all three
++ *      platforms paint the orange rule in column 1 instead of column 3
++ *      (frozen ref …/CSS2/floats-clear__floats-clear-multicol-000.png:
++ *      orange y161-163 x235-334; wave49-final web y131-133 x50-119,
++ *      android/ios y131-133 x35-134);
++ *   2. buildNode's own br height rule reads `'clear' in props` to decide a
++ *      clear-marker br is 0px tall and NOT a 20px blank line box — with the
++ *      attribute dropped, these brs took the 20px line-start branch and
++ *      pushed the rule down another 20px inside the wrong column.
++ *
++ * ORIGIN AND GUARD. The rendering chapter is UA-origin, so any author
++ * `clear` (matched rule or inline style) wins — the same author-wins guard
++ * shape as uaLinkProps / htmlTablePresentationProps / uaHrProps.
++ *
++ * SCOPE, LOUD: an unrecognised `clear=` value maps to NOTHING (the UA rule
++ * set above has no other arm) rather than being passed through as a
++ * `clear` declaration the CSS parser would then drop — `ClearPropertyParser`
++ * accepts none/left/right/both/inline-start/inline-end, so `clear="all"`
++ * passed through verbatim would silently produce no Clear property at all.
++ * The `all`→`both` fold below is what makes the wire survive the converter
++ * (pinned converter-side by ClearPresentationalHintTest).
++ *
++ * @param {string} tag   the element's tag name (already lowercased)
++ * @param {object} attrs the element's own attribute bag
++ * @param {object} props the RESOLVED author bag — the cascade guard
++ * @returns {{clear: string}|null} the declaration to fold, or null
++ */
++export function brClearPresentationProps(tag, attrs, props) {
++  // The hint selects `br` only — no other element maps a `clear` attribute.
++  if (tag !== 'br') return null;
++  // Author-origin `clear` wins over the UA rule set (see ORIGIN above).
++  if (props?.clear !== undefined) return null;
++  const raw = attrs?.clear;
++  // Absent attribute (or a valueless `<br clear>`, which parses to '') —
++  // no rule matches, nothing to fold.
++  if (typeof raw !== 'string') return null;
++  // `i` in the selectors above: ASCII case-insensitive attribute matching.
++  const v = raw.trim().toLowerCase();
++  // The four arms, in the spec's own grouping. `all` and `both` collapse to
++  // the CSS keyword `both`; `none` is NOT in the rule set (a `clear="none"`
++  // matches nothing and is dropped, like any other unrecognised value).
++  if (v === 'left') return { clear: 'left' };
++  if (v === 'right') return { clear: 'right' };
++  if (v === 'all' || v === 'both') return { clear: 'both' };
++  return null;
+ }
+ 
+ // wave-13 KEYFRAMES-SAMPLER: `keyframes` is the parseKeyframes() map for the
+@@ -9912,6 +9975,17 @@
+       node.tag, node.attrs, node.ancestors, props,
+     );
+     if (tablePres) Object.assign(props, tablePres.props);
++    // wave-50 B6: HTML Rendering §15.3 `br[clear]` (see the
++    // brClearPresentationProps banner). Folded in the SAME slot and for the
++    // same reason as the three bakes above — every later pass must see the
++    // final bag — and with one extra reason specific to this hint: the `<br>`
++    // branch further down decides the break's HEIGHT from `'clear' in props`
++    // (0px for a float-row-break marker, 20px for a blank line-start break),
++    // so the fold has to land before that read or the marker keeps claiming a
++    // phantom 20px line box. The author-wins guard is inside the function, so
++    // this assign can never overwrite a declaration.
++    const brClear = brClearPresentationProps(node.tag, node.attrs, props);
++    if (brClear) Object.assign(props, brClear);
+     // wave-36 THE WIDGET-APPEARANCE BAKE (the sixth bake) — same slot, same
+     // reason as the three bakes above: the resolved bag is complete (matched
+     // rules + inline style + the UA folds), so the element's own

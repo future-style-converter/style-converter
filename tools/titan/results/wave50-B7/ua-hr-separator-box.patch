@@ -1,0 +1,346 @@
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -9410,7 +9410,183 @@
+ // baked `font-size: 50px` as an author declaration would be wrong, so the
+ // reason says where it came from.
+ const ROOT_INHERITED_REASON = 'body-inherited-baked';
++
++// ── wave-50 lane B7: UA <hr> SEPARATOR BOX (BACKLOG queue 5(a)) ────────────
++//
++// Blink's html.css gives every <hr> a UA-origin rule that no author sheet
++// has to repeat (HTML Rendering §15.3.11, "The hr element"):
++//   hr { display: block; margin-block: 0.5em; margin-inline: auto;
++//        overflow: hidden; border-style: inset; border-width: 1px }
++// This extractor models AUTHOR declarations only, so a rule-less <hr> fell
++// through to the 100×100 "empty node" placeholder in buildNode — a 100px
++// white square where the browser paints a 2px rule.
++//
++// MEASURED, wave49-final css-images/gradient/gradient-hue-direction (three
++// rule-less <hr>s between four 50px gradient rows): capture 390×894 against
++// the 390×600 frozen ref, i.e. +294px = 3 × (100 − 2) EXACTLY — web f 0.6241
++// · iOS f 0.6235 · Android f 0.6230, all three "structural-divergence".
++//
++// The two colours are MEASURED off the frozen ref PNG, not guessed
++// (tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/
++//  white-black-ink-font-lh-imgpad-htmlpins/css-images/
++//  gradient__gradient-hue-direction.png, the hr at y=188/189, x 16–373):
++// the top border row is rgb(154,154,154), the bottom rgb(238,238,238), and
++// the two mitre corners rgb(196,196,196) = their 45° blend. Under Blink's
++// own two-tone model for `inset` — css-backgrounds-3 §3.2 names the 3D
++// styles but leaves their shading UA-defined, and the arithmetic is
++// box_border_painter.cc CalculateBorderStyleColor + color.cc Color::Dark(),
++// ported in this repo as runtimes/compose/src/main/java/com/styleconverter/
++// runtime/borders/sides/BlinkBorderShade.kt — the TOP edge of an `inset`
++// border is Dark(base) and the BOTTOM edge is the base itself:
++//   v = 238/255 = 0.93333;  Dark multiplier = max(0, (v − 0.33)/v) = 0.64643
++//   238 × 0.64643 = 153.8 → 154  ✓ (the observed top row)
++//   light gate: contrast(#EEE, #9A9A9A) = 2.43 ≥ 1.75 → no lift, so the
++//   bottom edge keeps the declared colour, 238  ✓
++// So the ref's separator is exactly `border: 1px inset #EEEEEE` — the value
++// Chromium's html.css carries for hr in the light colour scheme.
++const UA_HR_PROPS = {
++  // css-display-3 §2.1 ("display: block"): the UA outer display for <hr>.
++  // Stated so a runtime that would otherwise treat an unsized component as
++  // inline lays the rule out on its own line.
++  display: 'block',
++  // CSS 2.1 §10.6.3: a block-level box with no in-flow content has a
++  // content height of 0. Blink's UA sheet declares no height at all and
++  // relies on that used value; we state BOTH dimensions explicitly for the
++  // same reason the <br> branch in buildNode states them ("BOTH dimensions
++  // stay explicit in every case so the 100x100 empty-node placeholder can
++  // never claim a br") — plus neither native runtime derives a 0-height
++  // content box for a childless, textless component.
++  height: '0px',
++  // css-ui-3 §2.1 `box-sizing`: content-box IS the initial value, stated
++  // EXPLICITLY because the Compose runtime only inflates a declared size by
++  // the padding+border band when the keyword is explicitly content-box
++  // (runtimes/compose/.../sizing/SizingConfig.kt `contentBoxInflateY`, armed
++  // by SizingExtractor only for BoxSizingKeyword.CONTENT_BOX). Without it
++  // the 0px above would be the FRAME height on Android and the rule would
++  // paint nothing at all. iOS already defaults an undeclared box-sizing to
++  // .contentBox in WPT capture mode (SizeApplier.swift
++  // `declared ?? (wptCaptureMode ? .contentBox : nil)`) and on web it is the
++  // browser's own initial value — so this key is a no-op on two of the three
++  // platforms and the Android repair on the third.
++  'box-sizing': 'content-box',
++  // border-width: 1px on all four sides (the UA shorthand). Longhands, not
++  // the shorthand, so the per-key author guards below can decline one side
++  // without discarding the rest (css-backgrounds-3 §3.3 `border-width`).
++  'border-top-width': '1px',
++  'border-right-width': '1px',
++  'border-bottom-width': '1px',
++  'border-left-width': '1px',
++  // css-backgrounds-3 §3.2 `border-style: inset` — the two-tone 3D style
++  // whose Blink shading the banner above derives from the ref pixels.
++  'border-style': 'inset',
++  // The base colour the shading is computed FROM (banner arithmetic).
++  'border-color': '#eeeeee',
++  // margin-block: 0.5em, resolved at the 16px root font-size the browser-ref
++  // pins (capture-browser-ref pins font-family + line-height on html/body and
++  // leaves font-size at the UA 16px) — the same reasoning, and the same
++  // reason, as UA_H1_PROPS above: an `em` value lands in the IR as `null`
++  // (schema/spec/02-values.md's runtime-dependent rule) and would collapse
++  // the margin to nothing.
++  'margin-top': '8px',
++  'margin-bottom': '8px',
++  // css-overflow-3 §3 `overflow: hidden` — the UA declaration. Harmless on
++  // a childless box, carried so the bag matches the UA rule it claims to be.
++  overflow: 'hidden',
++  // DELIBERATELY NOT EMITTED: the UA's `margin-inline: auto` and the
++  // `width: auto` it centres. With no width the box fills its containing
++  // block's content edge-to-edge, which is what `auto` inline margins resolve
++  // to for an auto-width block anyway (CSS 2.1 §10.3.3 — auto margins get 0
++  // once width is auto), and it is what the ref shows: the rule spans
++  // x 16–373 of a 390px canvas, exactly the 16px-inset content box.
++};
+ 
++// Per-key author guards. A key is baked ONLY when the element's own
++// declaration bag names none of its guards — same contract as UA_LINK_GUARDS
++// above ("author declarations that mean the UA default is not the used value
++// here"), because these are UA-ORIGIN declarations and any author declaration
++// beats them (css-cascade-5 §6.2 origin order).
++const UA_HR_GUARDS = {
++  display: ['display'],
++  // A declared block size (or either clamp) replaces the 0 used height.
++  height: ['height', 'block-size', 'min-height', 'max-height', 'min-block-size', 'max-block-size'],
++  // box-sizing exists here only to make the UA 0-height inflate by the
++  // border band: if the author gave the box a height of its own, or named
++  // box-sizing, the inflation is not ours to invent.
++  'box-sizing': ['box-sizing', 'height', 'block-size'],
++  // Each side's width: the side longhand, its logical twin, the
++  // per-side/axis shorthands, and the two whole-box shorthands.
++  'border-top-width': ['border', 'border-width', 'border-top', 'border-top-width',
++    'border-block', 'border-block-start', 'border-block-width', 'border-block-start-width'],
++  'border-right-width': ['border', 'border-width', 'border-right', 'border-right-width',
++    'border-inline', 'border-inline-end', 'border-inline-width', 'border-inline-end-width'],
++  'border-bottom-width': ['border', 'border-width', 'border-bottom', 'border-bottom-width',
++    'border-block', 'border-block-end', 'border-block-width', 'border-block-end-width'],
++  'border-left-width': ['border', 'border-width', 'border-left', 'border-left-width',
++    'border-inline', 'border-inline-start', 'border-inline-width', 'border-inline-start-width'],
++  // Style/colour are whole-box in the UA rule, so ANY author border
++  // declaration that could name them declines the bake wholesale — a
++  // half-author half-UA border is the "silent fallthrough" this campaign
++  // forbids, not an approximation.
++  'border-style': ['border', 'border-style', 'border-top-style', 'border-right-style',
++    'border-bottom-style', 'border-left-style', 'border-top', 'border-right',
++    'border-bottom', 'border-left', 'border-block', 'border-inline'],
++  'border-color': ['border', 'border-color', 'border-top-color', 'border-right-color',
++    'border-bottom-color', 'border-left-color', 'border-top', 'border-right',
++    'border-bottom', 'border-left', 'border-block', 'border-inline'],
++  'margin-top': ['margin', 'margin-top', 'margin-block', 'margin-block-start'],
++  'margin-bottom': ['margin', 'margin-bottom', 'margin-block', 'margin-block-end'],
++  overflow: ['overflow', 'overflow-x', 'overflow-y', 'overflow-block', 'overflow-inline'],
++};
++
++// The LOUD marker (same role as UA_LINK_REASON): a component wearing it
++// carries declarations its source element never wrote, so a residual against
++// a ref is OUR UA model, not a renderer divergence.
++const UA_HR_REASON = 'ua-hr-separator-baked';
++// …and the marker for the DECLINED case, so the bail is never silent (the
++// campaign's no-silent-fallthrough rule). A component wearing this one is an
++// <hr> the author re-declared: it keeps its author bag byte-for-byte AND it
++// is missing the UA margins/overflow that the browser would still apply —
++// a STATED modelling gap, not an approximation. Named residual: an author
++// who declares only `margin: 0` on hr loses the UA border too; no corpus
++// test does that today (the census below is exhaustive for the gate set).
++const UA_HR_DECLINED_REASON = 'ua-hr-separator-declined';
++
++/**
++ * UA-origin declarations for an <hr>, or null for anything else / for an
++ * <hr> whose author bag has already redefined part of the separator box.
++ *
++ * ATOMIC BY DESIGN. The UA rule is one box: a 1px inset frame, a 0 content
++ * height, and the 0.5em block margins that space it from its neighbours.
++ * Baking a SUBSET of that produces a box that is neither the author's nor the
++ * browser's — e.g. UA margins moving an author-sized 100px block that carries
++ * no UA rule at all — so any author declaration on any key declines the whole
++ * bake. MEASURED consequence on the gate corpus (the exhaustive `<hr>` census
++ * over the 1435 wave49-final tests: gradient-hue-direction,
++ * active-selection-057, direction-upright-001, direction-upright-002):
++ * active-selection-057 declares `height: 100px` and `border: none 0px` on its
++ * <hr>, so it declines and stays BYTE-IDENTICAL — which matters, because it
++ * is the only one of the four that PASSES today (wave49-final
++ * css-pseudo/active-selection-057 web P 1.0000 · ios P 0.9994 · android
++ * P 0.9986). The other three declare nothing the guards name (two declare
++ * only `clear: both`) and take the full bake.
++ *
++ * @param tag   lowercased element tag.
++ * @param props the element's own (author) declaration bag, post-cascade.
++ * @returns `{ props }` to fold OVER the bag, `{ declined: true }` when an
++ *          author declaration took the box over, or null for a non-<hr>.
++ */
++export function uaHrProps(tag, props) {
++  // Only the separator element has this UA rule.
++  if (tag !== 'hr') return null;
++  // Author-wins, atomically (banner): ANY guard on ANY key declines the box.
++  for (const guards of Object.values(UA_HR_GUARDS)) {
++    if (guards.some((g) => props?.[g] !== undefined)) return { declined: true };
++  }
++  // A fresh copy per call — the caller Object.assigns it into a live bag.
++  return { props: { ...UA_HR_PROPS } };
++}
++
++
+ // ── wave-30 A7: UA LINK STYLING ────────────────────────────────────────────
+ //
+ // HTML Rendering §15.5.2 gives every hyperlink a UA-origin rule:
+@@ -10246,6 +10422,16 @@
+     // so this assign can never overwrite a declaration.
+     const uaLink = uaLinkProps(node.tag, node.attrs, props, uaLinkSuppressed);
+     if (uaLink) Object.assign(props, uaLink);
++    // wave-50 B7: the UA <hr> separator box (HTML Rendering §15.3.11 — see the
++    // UA_HR_PROPS banner). Folded in the SAME slot and for the same reason as
++    // the link bake above: every later pass (sibling-index, attr(), keyframe
++    // sampler, the lossy scan, the 100×100 empty-node placeholder) must see
++    // the final bag. uaHrProps has already applied the author-wins guards, so
++    // this assign can never overwrite a declaration — and because it leaves
++    // `props` non-empty, a rule-less <hr> can no longer reach the placeholder
++    // branch below, which is the whole repair.
++    const uaHr = uaHrProps(node.tag, props);
++    if (uaHr?.props) Object.assign(props, uaHr.props);
+     // wave-36 M6: HTML §15.3.3 table presentational attributes (see the
+     // htmlTablePresentationProps banner). Folded in the SAME slot and for
+     // the same reason as the two UA bakes above — before every later pass —
+@@ -10328,6 +10514,9 @@
+     // component wearing it paints a border/margin geometry its source element
+     // never declared (UA_HR_PROPS, derived from the frozen ref pixels), so a
+     // residual on an <hr> row is OUR UA model and must be read as such.
++    if (uaHr?.props) reasons.push(UA_HR_REASON);
++    // …and the declined half of the same channel (see UA_HR_DECLINED_REASON).
++    if (uaHr?.declined) reasons.push(UA_HR_DECLINED_REASON);
+     // wave-36 M6 — the two LOUD halves of the table presentational bake.
+     // 'baked' is provenance (a 1px cell rule in this fixture came from the
+     // markup's `border=`, not from a stylesheet); 'unmodelled' is the scope
+--- /dev/null
++++ b/tools/titan/extract-fixture-ua-hr.test.mjs
+@@ -0,0 +1,130 @@
++#!/usr/bin/env node
++//
++// Unit tests for the wave-50 lane B7 UA <hr> separator bake in
++// tools/titan/extract-fixture.mjs (BACKLOG ranked-queue item 5(a)).
++//
++// Lives in its OWN file rather than in extract-fixture.test.mjs so the bake
++// can land as a self-contained patch against a file another lane is editing
++// in the same wave; `node --test tools/titan/*.test.mjs` picks it up with no
++// runner change. Same discipline as that suite: pure helpers only, no file
++// IO, <100 ms.
++//
++// Every payload below is VERBATIM from the gate corpus — the four tests that
++// are the complete `<hr>` census over the 1435 wave49-final scored tests
++// (css-images/gradient/gradient-hue-direction, css-pseudo/
++// active-selection-057, css-writing-modes/direction-upright-001 and -002).
++
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++
++import { uaHrProps, parseCss, buildComponents } from './extract-fixture.mjs';
++
++// The twelve declarations the bake stands for. Kept as one literal so a
++// change to UA_HR_PROPS has to be restated here deliberately, not absorbed.
++const UA_HR_BAKE = {
++  display: 'block',
++  height: '0px',
++  'box-sizing': 'content-box',
++  'border-top-width': '1px',
++  'border-right-width': '1px',
++  'border-bottom-width': '1px',
++  'border-left-width': '1px',
++  'border-style': 'inset',
++  'border-color': '#eeeeee',
++  'margin-top': '8px',
++  'margin-bottom': '8px',
++  overflow: 'hidden',
++};
++
++test('uaHrProps: only <hr> carries the UA separator rule', () => {
++  // HTML Rendering §15.3.11 scopes the rule to hr and nothing else — a div or
++  // a br must come back null so the caller's bag is untouched.
++  assert.equal(uaHrProps('div', {}), null);
++  assert.equal(uaHrProps('br', {}), null);
++  assert.equal(uaHrProps('p', {}), null);
++});
++
++test('uaHrProps: a rule-less <hr> takes the full UA box', () => {
++  // gradient-hue-direction's three <hr>s match no author rule at all — the
++  // exact case that used to fall through to the 100×100 empty-node
++  // placeholder (capture 390×894 vs the 390×600 frozen ref).
++  const out = uaHrProps('hr', {});
++  assert.deepEqual(out.props, UA_HR_BAKE);
++  assert.equal(out.declined, undefined);
++});
++
++test('uaHrProps: an author declaration outside the guard set still bakes', () => {
++  // direction-upright-001/-002 declare `hr { clear: both }`. `clear` names no
++  // part of the separator box, so the UA rule applies underneath it exactly
++  // as the browser applies it.
++  const out = uaHrProps('hr', { clear: 'both' });
++  assert.deepEqual(out.props, UA_HR_BAKE);
++});
++
++test('uaHrProps: an author-redefined <hr> declines the whole bake', () => {
++  // active-selection-057, VERBATIM author bag: `background-color: transparent;
++  // height: 100px` plus `border: none 0px`. Two guards fire (height, border),
++  // and the bake is atomic, so NOTHING is emitted — this test passes on all
++  // three platforms today (wave49-final web P 1.0000 · ios P 0.9994 ·
++  // android P 0.9986) and must stay byte-identical.
++  const out = uaHrProps('hr', {
++    'background-color': 'transparent', height: '100px', border: 'none 0px',
++  });
++  assert.equal(out.declined, true);
++  assert.equal(out.props, undefined);
++});
++
++test('uaHrProps: each guard family alone is enough to decline', () => {
++  // One representative per guard family, so a guard list that loses a member
++  // fails here rather than silently half-baking a box in a future wave.
++  for (const bag of [
++    { display: 'none' },                    // display
++    { 'block-size': '4px' },                // height family (logical)
++    { 'box-sizing': 'border-box' },         // box-sizing
++    { 'border-width': '3px' },              // all four side widths
++    { 'border-block': '2px solid red' },    // logical border shorthand
++    { 'border-top-style': 'dashed' },       // style family
++    { 'border-left-color': 'red' },         // colour family
++    { 'margin-block-start': '0' },          // margin-top family
++    { margin: '0' },                        // both margin families
++    { 'overflow-y': 'visible' },            // overflow family
++  ]) {
++    assert.equal(uaHrProps('hr', bag).declined, true,
++      `expected decline for ${JSON.stringify(bag)}`);
++  }
++});
++
++test('buildComponents: a rule-less <hr> emits the UA box, not the 100×100 placeholder', () => {
++  // End-to-end through the component builder, on the shape
++  // gradient-hue-direction has: styled divs around bare <hr>s.
++  const css = 'div { width: 200px; height: 50px; margin: 10px }';
++  const html = '<body><div></div><hr><div></div></body>';
++  const { components } = buildComponents(html, parseCss(css), 'hue');
++  const hr = Object.values(components).find((c) => c._tag === 'hr');
++  assert.ok(hr, 'the <hr> must survive as its own component');
++  // The defect signature: a 100×100 white square where the ref paints 2px.
++  assert.notEqual(hr.properties.width, '100px');
++  assert.notEqual(hr.properties.height, '100px');
++  // The repair: the UA box, plus the LOUD reason so the geometry is never
++  // mistaken for an author declaration.
++  assert.equal(hr.properties.height, '0px');
++  assert.equal(hr.properties['border-style'], 'inset');
++  assert.equal(hr.properties['border-color'], '#eeeeee');
++  assert.equal(hr.properties['box-sizing'], 'content-box');
++  assert.ok(hr._lossyReasons.includes('ua-hr-separator-baked'));
++});
++
++test('buildComponents: an author-sized <hr> keeps its own bag and says so', () => {
++  // active-selection-057's shape. The author bag survives untouched and the
++  // decline is announced — no silent fallthrough.
++  const css = 'hr#subtest2 { background-color: transparent; height: 100px }'
++    + ' hr#subtest2 { border: none 0px }';
++  const html = '<body><hr id="subtest2"></body>';
++  const { components } = buildComponents(html, parseCss(css), 'sel-057');
++  const hr = Object.values(components).find((c) => c._tag === 'hr');
++  assert.equal(hr.properties.height, '100px');
++  assert.equal(hr.properties.border, 'none 0px');
++  assert.equal(hr.properties['border-style'], undefined);
++  assert.equal(hr.properties['margin-top'], undefined);
++  assert.ok(hr._lossyReasons.includes('ua-hr-separator-declined'));
++});

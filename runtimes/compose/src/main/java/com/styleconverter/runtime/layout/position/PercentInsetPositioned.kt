@@ -53,12 +53,28 @@ internal fun Modifier.percentInsetPositioned(config: PositionConfig): Modifier =
         if (com.styleconverter.runtime.core.renderer.LocalWptCaptureMode.current) {
             PercentInsetResolve.resolve(
                 config,
-                // The ancestor's content box, published one level up by
-                // ComponentRenderer from DynamicValueResolver
-                // .childContainingBlock. A null axis means "not
-                // statically definite" — PercentInsetResolve owns what
-                // that means and the guard on it.
-                com.styleconverter.runtime.core.variables.LocalContainingBlock.current,
+                // THIS element's own containing block (CSS 2.1 §10.1), not
+                // the one it publishes for its children.
+                //
+                // Wave 50 (lane B2) — the LEVEL fix. A `composed` factory
+                // materialises inside ComponentRenderer.RenderComponentContent,
+                // which already runs INSIDE this component's own
+                // `LocalContainingBlock provides childContainingBlock`, so the
+                // ambient read below is the block this element establishes for
+                // its CHILDREN — one level too deep. That is why
+                // wave49-final css-position/position-relative-006 android stayed
+                // f 0.9966 after the wave-49 repair: the child's own published
+                // block is (100, 100), so `-10000%` resolved to the same
+                // -10000 px the legacy number-as-pixels path produced.
+                // [ElementContainingBlock] is the correctly-levelled channel;
+                // the ambient value is kept only as the frozen-behaviour
+                // fallback until the renderer seam publishes it, and the
+                // fallback leaves a PropertyTracker breadcrumb.
+                ElementContainingBlock.containingBlockFor(
+                    element = ElementContainingBlock.LocalElementContainingBlock.current,
+                    ambient = com.styleconverter.runtime.core.variables
+                        .LocalContainingBlock.current,
+                ),
             )
         } else {
             config

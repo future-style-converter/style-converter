@@ -1,0 +1,241 @@
+{
+  "_note": "wave-50 skeptic lane S6 — HONESTY AUDIT. Every BACKLOG/STATUS correction the twelve builder lanes proposed, re-verified INDEPENDENTLY from the frozen evidence (wave49-final manifests + capture PNGs, tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins, tools/visual/baseline/, the tree's own source), never from a lane's prose or a lane's census script. The refill writer may use the `correctedText` fields verbatim. Verdict vocabulary: CONFIRMED (measured, the lane's claim holds), CONFIRMED-WITH-CORRECTION (the claim holds but the lane's or the BACKLOG's wording is wrong in a way that matters), PARTIALLY-CONFIRMED (true on some platforms only), REFUTED, UNVERIFIABLE (no device/browser/network on this host). No device and no browser were available: nothing below is a device measurement.",
+  "lane": "S6",
+  "wave": 50,
+  "tree": "campaign/applier-campaign, 747b28e4 + the uncommitted wave-50 tree",
+  "evidence": {
+    "run": "tools/titan/runs/wave49-final",
+    "refCommit": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins",
+    "baselines": "tools/visual/baseline",
+    "scorerIdiom": "skip unless typeof d.ssim === 'number' && !d.scoreExcluded; pass = d.wptPass === true",
+    "denominators": "1435 tests examined; scored web 1379 / iOS 1366 / Android 1366 (re-derived, matches corpus-v6.15)",
+    "s6Scripts": [
+      "tools/titan/results/wave50-S6/cells.mjs",
+      "tools/titan/results/wave50-S6/measure.py",
+      "tools/titan/results/wave50-S6/zneg-census.mjs",
+      "tools/titan/results/wave50-S6/recheck-degenerate-veto.mjs"
+    ],
+    "s6Data": [
+      "tools/titan/results/wave50-S6/zneg-census.json",
+      "tools/titan/results/wave50-S6/blank-capture-census.txt",
+      "tools/titan/results/wave50-S6/blank-capture-vs-inked-ref.json",
+      "tools/titan/results/wave50-S6/blank-vs-blank-passes.json"
+    ]
+  },
+
+  "corrections": [
+
+    {
+      "id": "S6-01",
+      "lane": "B7",
+      "target": "docs/BACKLOG.md queue 5(h)",
+      "claim": "native image() first-src is DONE in wave 49; the brief that re-assigned 5(h) was stale",
+      "verdict": "CONFIRMED",
+      "measurement": "CODE — Compose carries the whole candidate list (color/ColorExtractor.kt:385-394 builds BackgroundImageConfig.ImageNotation(srcs, fallback); ColorApplier.kt:367-368 calls ImageCandidateChain.firstPaintable(image.srcs){…}) and iOS likewise (BackgroundImageConfig.swift:142 `case imageNotation(srcs: [String], fallback: ColorValue?)`; BackgroundImageNotationResolver.swift:42-44 → ImageCandidateChain.firstPaintable). Both walk candidates in author order with the platform's real decoder, which is what 003/004 need (their first src `1x1-green.svg` does not exist). CELLS (wave49-final css-images) — 002/003/004 all P on all three: web 1.0000 · iOS 0.9990 · Android 0.9982. PNG — every capture paints a 40000-px green square at the ref's position with ZERO rgb(255,0,0): 002/003 all three (0,128,0)×40000 (Android dithers 35901+3700+348+50); 004 (0,127,0)×40000. Honest pass, not a red-square degenerate.",
+      "correctedText": "5(h) native image() candidate chain: DONE (wave 49, ImageCandidateChain on both natives; fallbacks-and-annotations 002/003/004 P on all three — web 1.0000 / iOS 0.9990 / Android 0.9982). S6 re-verified the code and PNG-checked the captures: 40000 px of green at the ref's position and zero red on every platform. On 004 ALL THREE platforms — web included — paint the winning gif's (0,127,0) against the ref's (0,128,0); that one-step-off GCT is not a native-only residual.",
+      "laneProseCorrection": "tools/titan/results/wave50-B7/_note.md says 'only 004's natives paint (0,127,0)'. The WEB capture is (0,127,0)×40000 too."
+    },
+
+    {
+      "id": "S6-02",
+      "lane": "B3",
+      "target": "docs/BACKLOG.md queue 2(b) ('both-native zero-width wrap', counter-004)",
+      "claim": "css-lists/counter-004 is NOT a zero-width wrap but 80 inline spans → 80 line boxes (canvas 1784/1704 vs ref 600)",
+      "verdict": "CONFIRMED",
+      "measurement": "SOURCE — tools/wpt/css/css-lists/counter-004.html contains 40 + 40 = 80 `<span>` elements. PNG (min-channel < 250, contiguous ink row-bands): iOS 390x1704 with 81 bands (first 55-71 = the `<p>`, then 80), Android 390x1784 with 81 bands, web 390x600 with 5 bands, ref 390x600 with 5 bands. Native x-extent 16-358 vs ref 16-371. Manifest frame: ios capW/H 390/1704 overflowInkPx 4489, android 390/1784 overflowInkPx 4695. BOTH native cells are scoreExcluded:'native-font-parity' (web f 0.7779 is the only scored cell).",
+      "correctedText": "counter-004 is not a zero-width wrap: the document is 80 inline `<span>`s and both natives give each one its OWN line box — 81 contiguous ink row-bands in the capture (1 for the `<p>` + 80) at 390x1704 (iOS) / 390x1784 (Android) against a 390x600 ref that has 5. Web and the ref agree on 5 bands. Both native cells are scoreExcluded (native-font-parity); only web f 0.7779 is scored."
+    },
+
+    {
+      "id": "S6-03",
+      "lane": "B6",
+      "target": "docs/BACKLOG.md queue 3(b)",
+      "claim": "3(b) is not a measured-height rounding in the Kotlin strip walk but an explicit-height box clamping overflowing content; the paint band is the half-open [-w, 0), w = 3 and 5",
+      "verdict": "CONFIRMED",
+      "measurement": "PNG (orange rgb(255,165,0), tol 40), wave49-final CSS2/floats-clear: multicol-003 — ref y161-163 x235-334 n=300; web y161-163 identical; iOS y161-163 identical; ANDROID y158-160 x235-334 n=300 (shift -3, band 3 px). balancing-003 — ref/web/iOS y171-175 x235-334 n=500; ANDROID y166-170 n=500 (shift -5, band 5 px). Controls: multicol-002 and balancing-002 are ref-exact on Android. SOURCE confirms the mechanism split — 003/balancing-003 put the border on a NESTED `.bar` inside `.clear{clear:left;height:0}` (`border-bottom: orange solid` = medium 3px, and `5px orange solid`), while 002/balancing-002 put `border-bottom: solid orange` on the cleared box ITSELF and declare no height:0. Shift == band width in both movers ⇒ band-width dependent ⇒ not a strip-walk offset error.",
+      "correctedText": "3(b) Compose renders the 003/balancing-003 orange band w px too high, where w is the band's own width (003: Android y158-160 vs ref y161-163, w=3; balancing-003: Android y166-170 vs ref y171-175, w=5; both x235-334, both 300/500 px — measured on the wave49-final Android captures against the frozen refs). It is NOT a measured-height rounding in the Kotlin strip walk: a strip error would be band-width independent and would move columns 1-2, which are ref-exact, and the two siblings that put the border on the cleared box ITSELF (002 / balancing-002, no nested child, no height:0) are ref-exact on Android. The mechanism is an explicit `height:0` box handing its child FIXED 0 constraints (SizingApplier's LengthValue.Exact arm) so the nested `.bar` measures 0 tall, after which BorderSideApplier's `Side.BOTTOM -> Offset(0f, size.height - inset)` centres the stroke on -w/2, i.e. the half-open band [-w, 0). iOS is exact because .frame(height:) positions without shrinking the child. Repair and its blast radius: tools/titan/results/wave50-B6/queue-3b-band-shift.json. Do NOT shift MulticolFloatStripPlan's offsets (MulticolFloatStripRefRowsTest pins them)."
+    },
+
+    {
+      "id": "S6-04",
+      "lane": "B6",
+      "target": "docs/BACKLOG.md queue 3(a) and obligation #3's degenerate-pass list",
+      "claim": "3(a): web is wrong too — web orange at y131-133 x50-119 against the ref's y161-163 x235-334",
+      "verdict": "CONFIRMED-WITH-CORRECTION (the BACKLOG understates the blast radius)",
+      "measurement": "PNG (orange, tol 40), wave49-final CSS2/floats-clear. multicol-000 and -001 (identical pictures): ref y161-163 x235-334 n=300; WEB y131-133 x50-119 n=210; iOS y131-133 x35-134 n=300; Android y131-133 x35-134 n=300. balancing-000 and -001: ref y171-175 x235-334 n=500; WEB y111-115 x50-119 n=350; iOS/Android y111-115 x35-134 n=500. Cells: 000/001 web P 0.9890 · iOS P 0.9871 · Android P 0.9857; balancing-000/001 web P 0.9870 · iOS P 0.9854 · Android P 0.9839 — 12 passing cells, every one of them painting the orange in the wrong column.",
+      "correctedText": "3(a) the converter/inline bake drops `<br clear=\"all\">`: per-test IR for floats-clear-multicol-000/001/balancing-000/001 carries no Clear wire, so ALL THREE platforms put the orange in column 0 where the ref puts it in column 2 — web y131-133 x50-119 (210 px) and y111-115 x50-119 (350 px); both natives y131-133 x35-134 (300 px) and y111-115 x35-134 (500 px); ref y161-163 x235-334 (300 px) and y171-175 x235-334 (500 px). Web is additionally the wrong WIDTH (210/350 against the ref's 300/500). All 12 cells PASS on float-slice dominance (web 0.9890/0.9870, iOS 0.9871/0.9854, Android 0.9857/0.9839) — 12 degenerate-pass cells, not the 8 the previous entry recorded.",
+      "backlogWordingThatIsWrong": "'both natives put the orange at col-0 vs the ref's col-2 and PASS ONLY on float-slice dominance (all 8 cells P 0.984–1.000)' — it is all three platforms and 12 cells."
+    },
+
+    {
+      "id": "S6-05",
+      "lane": "B9",
+      "target": "docs/BACKLOG.md queue 4(b)",
+      "claim": "subelements-003: only Android lacks the wrapper's blue underline",
+      "verdict": "CONFIRMED — and the BACKLOG's 'missing from EVERY render' is REFUTED",
+      "measurement": "PNG, wave49-final css-text-decor/text-decoration-subelements-003, blue-dominant mask (b - max(r,g) >= 25): WEB n=1404 at rows 193-195 and 240-242, x48-324 — BYTE-IDENTICAL to the ref (n=1404, same rows, same x). iOS n=978 at rows 196-198, 236-238 and a spurious third band at 309-311, x48-324. ANDROID: ZERO blue-dominant pixels anywhere on the canvas. (Green-dominant: ref and web both n=270 rows 228-229 x95-229; iOS n=270 rows 268-269 x48-182; Android n=324 rows 273-274 x48-209.) Cells: web P 0.9987 · iOS f 0.9043 · Android f 0.9084.",
+      "correctedText": "4(b) `subelements-003` (wave49-final iOS f 0.9043 / Android f 0.9084; web P 0.9987): the wrapper's blue underline is NOT missing from every render — web reproduces it byte-identically to the ref (1404 blue-dominant px at rows 193-195 / 240-242, x48-324), iOS paints 978 px but at the wrong rows plus a spurious third band at 309-311, and ANDROID paints none at all. What is still needed is block-level text-decoration propagation on Compose and per-range decoration colour on iOS — both outside the fold."
+    },
+
+    {
+      "id": "S6-06",
+      "lane": "B4",
+      "target": "docs/BACKLOG.md queue 2 ('also name-case-sensitivity missing marker content on all three')",
+      "claim": "name-case-sensitivity is a float-placement defect, not a marker defect (14 boxes collapsed onto x16-35 vs ref x17-343)",
+      "verdict": "PARTIALLY-CONFIRMED — true for the natives, NOT true for web",
+      "measurement": "PNG (min-channel < 250), wave49-final css-counter-styles/counter-style-at-rule__name-case-sensitivity, ink clusters per row-band (gaps <= 4 px merged): REF row 20-34 clusters [17-36] [49-132] [144-344] + a SECOND row-band 45-58 cluster [17-78]; total ink 2026 px, x17-344. WEB row 20-34 clusters [17-36] [49-123] [135-246], NO second row; total 1008 px, x17-246. iOS one cluster [16-35], 184 px. ANDROID one cluster [16-35], 204 px. Document: `li, div, p { float: left }` over 8 `<ol><li>` + 2 `<div>` + 4 `<ol><li>` = 14 top-level floats. Cells: web f 0.9593 · iOS f 0.9535 · Android f 0.9542, coverageRatioFailed on all three.",
+      "correctedText": "`name-case-sensitivity` (wave49-final web f 0.9593 / iOS f 0.9535 / Android f 0.9542, cvF) is TWO different defects. On the NATIVES it is float placement: all 14 `float: left` boxes collapse onto a single cluster at x16-35 (184 px iOS / 204 px Android) where the ref runs x17-344 over two line-boxes — every float is placed at its own container's origin instead of continuing the float line across sibling containers, which is outside lists/. On WEB the float line is correct (three clusters at x[17-36] [49-123] [135-246] against the ref's [17-36] [49-132] [144-344]) and the defect IS missing marker content: 1008 px of ink against the ref's 2026, and no second row-band at all.",
+      "laneProseCorrection": "tools/titan/results/wave50-B4/_note.md's headline 'This is a float-placement defect, not a marker defect' is right for the natives only; its own census row already shows web at x18-245 on one line, which is a content defect, not a placement one."
+    },
+
+    {
+      "id": "S6-07",
+      "lane": "B4",
+      "target": "docs/BACKLOG.md queue 2 ('shared — counter-suffix doubled item text + missing korean/RTL markers ... all three platforms')",
+      "claim": "counter-suffix: web renders korean and RTL markers correctly; only the natives lose them",
+      "verdict": "CONFIRMED-WITH-CORRECTION (marker presence confirmed; 'correctly' overstates the RTL half)",
+      "measurement": "PNG, wave49-final css-counter-styles/counter-suffix (all three 390x600; web f 0.8867, iOS/Android scoreExcluded 'native-font-parity' at 0.8883/0.8901). Rendered crops read directly: WEB paints `일, foo` / `이, bar` for the `korean-hangul-formal` list exactly as the ref does, and paints all four RTL markers (`1.` `2.` `א.` `ב.`). BOTH NATIVES fall back to DECIMAL for the korean list (`1. foo` / `2. bar`) and paint NO marker at all on the two `dir=rtl` lists (rows 17-20 carry only `foo`/`bar`: iOS x103-127, Android x151-175). The doubled item text IS shared — all three render 20 ink row-bands against the ref's 12. QUALIFICATION: web's RTL rows are not the ref's picture — the ref right-aligns `foo .1` at x103-145, web places the marker left and the text at x≈46-127 — so web has the markers but not the RTL visual order.",
+      "correctedText": "counter-suffix: the DOUBLED item text is shared by all three (20 ink row-bands against the ref's 12). The missing korean and RTL markers are NATIVE-ONLY — web paints `일, foo` / `이, bar` exactly as the ref and paints all four RTL markers, while both natives fall back to decimal for `korean-hangul-formal` and paint no marker on either `dir=rtl` list. Web's residual on the RTL half is visual ORDER (the ref right-aligns `foo .1`; web keeps the marker left), not marker loss. iOS's korean arm shipped this wave (KoreanHangulFormal.swift); Compose has no korean arm at all (`grep -rn -i korean runtimes/compose/src/main/java/` returns nothing)."
+    },
+
+    {
+      "id": "S6-08",
+      "lane": "B8",
+      "target": "docs/STATUS.md line 1883 ('NEW: Android over-blurs box-shadow by ~2.4x') and docs/BACKLOG.md queue 6(c)",
+      "claim": "the row attributes a dead file and the magnitude is not reproducible on the committed baselines",
+      "verdict": "CONFIRMED (both halves)",
+      "measurement": "DEAD FILE — `git grep -n MultipleShadowApplier 747b28e4` returns only docs/BACKLOG.md:766, docs/STATUS.md:1883, the file's own KDoc (:74) and object declaration (:85), and three rows of the retro's dead-code census. Zero call sites. The file is deleted in this wave (`git status` shows `D`). The LIVE path already converted: `blurMaskRadius` is present and called at 07f75ec9 — the very commit whose probe produced the 2.4x number (ShadowApplier.kt:217, :347, definition :420) — and today routes through OutsetShadowPainter.kt:196 and InsetShadowPainter.kt:143. MAGNITUDE — S6 fitted sigma independently (my own 1-D erfc fit of the vertical penumbra below the box at the box's horizontal centre; a different estimator from lane B8's 2-D separable fit) on the COMMITTED baselines: 024_Shadow_Colored (`0 4px 15px`, css-backgrounds-3 6.1.2 target sigma 7.5) web 7.32 / ANDROID 7.50 / iOS 7.30, with an IDENTICAL 16-row reach below the box on all three; 023_Shadow_Simple (blur 10, target 5.0) web 6.18 / ANDROID 5.44 / iOS 5.26 — Android NARROWER than web. Nothing near 2.4x, and Android is the closest of the three to the spec target on the well-conditioned case.",
+      "correctedText": "STRIKE the docs/STATUS.md row 'NEW: Android over-blurs box-shadow by ~2.4x'. Its file attribution is wrong (`MultipleShadowApplier.kt` had ZERO call sites since the initial import and is deleted in wave 50; the live path has converted through `ShadowApplier.blurMaskRadius` since wave 2 and did so at 07f75ec9, the probe commit itself) and its magnitude does not reproduce: on the committed baselines the fitted Gaussian sigma is web 7.32 / Android 7.50 / iOS 7.30 against a 7.5 target on `024_Shadow_Colored`, with identical reach, and web 6.18 / Android 5.44 / iOS 5.26 against 5.0 on `023_Shadow_Simple`. Evidence: tools/titan/results/wave50-B8/shadow-sigma-baselines.json plus the S6 independent re-fit. STILL OPEN, do not close 6(c) as a REACH question: the 2026-08-28 probe (Android bottom-most shadow row 123/131/131/120 vs web 93/101/109/90) used a fixture that was never committed, so it can be neither re-run nor refuted from this tree; re-probe the reach at a device gate with a COMMITTED fixture before re-opening or closing it."
+    },
+
+    {
+      "id": "S6-09",
+      "lane": "B10",
+      "target": "docs/BACKLOG.md queue 7 (css-gaps residuals) and obligation #3",
+      "claim": "css-gaps flex-gap-decorations-033's native P 1.0000 is a degenerate blank-vs-blank pass",
+      "verdict": "CONFIRMED (the pass is blank-vs-blank); the ref-is-wrong half is UNVERIFIABLE here (needs a browser)",
+      "measurement": "PNG decode: REF 2 distinct colours — white 211500 + item fill (223,232,238) 22500 — and ZERO gap-rule ink. iOS and ANDROID: the SAME 2 colours at the SAME counts, zero rule ink (P 1.0000 both). WEB: 4 colours, (19,28,238) 3000 blue + (223,28,34) 2200 red rule px (f 0.9400). STRUCTURE of the ref defect confirmed WITHOUT a browser: tools/wpt/css/css-gaps/flex/flex-gap-decorations-033-ref.html draws every decoration box with `position: absolute; z-index: -1`, and tools/titan/capture-browser-ref.mjs:490 injects `:where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }` — the BODY half paints at CSS 2.1 Appendix E step 3, after the step-2 negative-z-index descendants. NOT verified: the live-vs-control A/B (0 vs 5200 chromatic px) needs puppeteer; S6 had no browser. CONTEXT S6 adds: the natives DO paint gap rules in 43 of the 48 css-gaps tests, so the 033 pass is not 'the feature is unimplemented' — it is 'both natives painted nothing where Chromium paints 10 px rules in 0 px gaps, against a reference that was erased by our own canvas frame'.",
+      "correctedText": "css-gaps `flex-gap-decorations-033` iOS/Android P 1.0000 is a blank-vs-blank pass: the frozen ref decodes to exactly two colours (white 211500 + item fill (223,232,238) 22500) with zero rule ink, and both native captures decode to the SAME two colours at the SAME counts; web is the only platform that paints rules (3000 blue + 2200 red) and it is the only one scored f (0.9400). The ref's own `-ref.html` draws its rules as `position:absolute; z-index:-1` body children and `capture-browser-ref.mjs:490` injects an opaque body background that paints over them (CSS 2.1 Appendix E: root background, then negative-z descendants, then in-flow block backgrounds), so this is an INSTRUMENT defect, not a runtime one — see tools/titan/results/wave50-B10/capture-browser-ref-body-background.patch, deferred as a CANVAS_REV bump. Do not spend a runtime lane on 033/034/035 until the ref is re-frozen."
+    },
+
+    {
+      "id": "S6-10",
+      "lane": "B10",
+      "target": "docs/BACKLOG.md — the scope line for the body-background instrument fix",
+      "claim": "42 corpus refs use a negative z-index, 28 would rasterise differently under the fix, 6 are the match target of a scored test",
+      "verdict": "42 CONFIRMED · 6 CONFIRMED-IN-STRUCTURE · 28 UNVERIFIABLE (needs a browser)",
+      "measurement": "S6 wrote its own census from scratch (tools/titan/results/wave50-S6/zneg-census.mjs; resolves each test's `<link rel=match>`, follows `<link rel=stylesheet>` and `@import`, matches /z-index\\s*:\\s*-\\s*\\d/i). Results (tools/titan/results/wave50-S6/zneg-census.json): 8088 `*-ref.html` files under tools/wpt/css scanned, **42** declare a negative z-index — EXACTLY B10's number. Over the 1379 web-scored tests, 809 distinct refs, **8** tests have such a ref, carrying **24** cells of which **10** fail — exactly the affectedTests/affectedCells/failingCells in B10's erased-refs.json. Two of the 8 are the css-view-transitions pair whose negative z-index sits inside a `::view-transition` stacking context, leaving **6**. The '28 of the 42 rasterise differently' half is a live-browser A/B and S6 had no browser. Also recorded: B10's own artifact reports `unresolvedMatchLink: 68` (S6's stricter walk reports 33 over the 1379 scored tests) — a blind spot that survives either way.",
+      "correctedText": "Body-background instrument fix, scope (S6-verified): 42 of the 8088 `*-ref.html` files in tools/wpt/css declare a negative z-index; 8 of them are the match target of a scored wave49-final test (24 cells, 10 failing); 6 of those 8 are erased by the injected body background (the other two are css-view-transitions pairs whose negative z-index is inside a `::view-transition` stacking context). B10's 'and 28 of the 42 rasterise differently under the fix' is a live-browser measurement that has NOT been independently re-run. Carry B10's own `unresolvedMatchLink` blind spot forward: 33-68 scored tests have a `rel=match` link the census could not resolve, so the 42 is a lower bound.",
+      "laneProseCorrection": "tools/titan/results/wave50-B10/_note.md says '1435 scored wave49-final tests examined'. 1435 is the number of tests EXAMINED; the scored denominators are 1379 (web) / 1366 (iOS) / 1366 (Android), which is what corpus-v6.15 uses."
+    },
+
+    {
+      "id": "S6-11",
+      "lane": "B12",
+      "target": "docs/BACKLOG.md obligation #3 (the ~35% degenerate pass column) and obligation #4 (the veto)",
+      "claim": "the 100-cell hand-verdict sample (35 wrong / 65 correct) and the degenerate veto's measured precision/recall",
+      "verdict": "CONFIRMED — 12 of 12 spot-checks agree, and the veto's confusion matrix reproduces exactly",
+      "measurement": "SPOT-CHECK — S6 drew 6 of the 35 'wrong' and 6 of the 65 'correct' with its OWN deterministic seed (sha256 over 'S6-wave50|<salt>|<n>|<test>|<platform>'), built a capture|reference composite for each and read it. 6/6 wrong CONFIRMED wrong: 038 iOS css-anchor-position/anchor-name-multicol-003 (three RED bars where the ref paints one GREEN rectangle; the test's own prose says 'no red') · 083 web css-overflow/block-ellipsis-001 (last line clipped mid-word 'uncha', no ellipsis, where the ref ends 'the room…') · 055 Android selectors/nth-child-of-class (ref paints two GREEN 'Not ignored' lines; capture paints all eight black) · 087 web css-pseudo/first-letter-skip-empty-span (first glyph black vs the ref's green — at ssim 0.9999) · 007 web css-writing-modes/baseline-with-orthogonal-flow-001 ('aaa' / 'bbbccc' on two lines, spaces lost, vs the ref's one 'aaa bbb ccc') · 082 iOS filter-effects/backdrop-filter-nested-border-radius-clip-3 (near-black band where the ref is light grey). 6/6 correct CONFIRMED correct: 025 iOS css-contain/contain-html-dir-004, 002 iOS css-display/display-contents-td-001, 073 iOS css-cascade/unset-val-002, 043 web css-lists/change-list-style-type-002, 013 Android css-counter-styles/css3-counter-styles-009, 044 Android css-position/position-absolute-dynamic-static-position-flex — in every one the feature mark matches and the only divergence is prose rasterisation or bold-vs-regular emphasis. VETO — S6 re-derived the confusion matrix from the PNGs with its own script (tools/titan/results/wave50-S6/recheck-degenerate-veto.mjs): 14 fires, 13 true positives, 1 false positive, 22 false negatives, 64 true negatives → precision 0.9286, recall 0.3714. Identical to B12's stated 92.9% / 37.1%. ARMING — `degenerate-veto-probe.mjs:199 isArmed(env) { return env.TITAN_DEGENERATE_VETO === '1' }`; the seam ships disarmed. COST — S6 timed `computeDegenerate` on five real pairs: 6.8 ms (clean 390x600), 43.3 ms (all-black), 119.3 ms (the 390x9470 blank), 13.4 ms, 17.7 ms. Tens of seconds over a 30-section gate; no runtime risk.",
+      "correctedText": "Obligation #3's degenerate-pass rate: the wave-50 hand sample (tools/titan/results/wave50-B12/handverdicts.json, 100 passing cells drawn with mulberry32 seed 20260914 from the 3344-cell wave49-final pass population) puts it at 35/100, Wilson 95% [0.264, 0.448]. S6 independently re-read 12 of the 100 (6 wrong, 6 correct, its own seed) and agreed with every one. The displacement-aware veto (tools/titan/degenerate-veto-probe.mjs, wired into inject-wpt-block.mjs and SHIPPED DISARMED behind TITAN_DEGENERATE_VETO=1) measures precision 0.9286 (13 true / 1 false) and recall 0.3714 (22 missed) on that sample — S6 re-derived both from the PNGs. It missed the pre-registered 95% recall bar, so it stays a triage stamp, exactly like the wave-49 novel-ink veto. Its per-cell cost is 7-120 ms, measured; it is not a gate-runtime risk."
+    },
+
+    {
+      "id": "S6-12",
+      "lane": "B2",
+      "target": "docs/BACKLOG.md queue 0(b) AND tools/titan/results/corpus-v6-15.json's _note",
+      "claim": "0(b)'s blocker was the channel LEVEL, not a declining resolver",
+      "verdict": "CONFIRMED — both the queue entry and the corpus-v6.15 note are wrong as written",
+      "measurement": "SOURCE — `PercentInsetResolve.resolve` returns `config` UNTOUCHED only at `if (cb.widthPx == null && cb.heightPx == null) return config`; with a width and a null height it resolves the block axis to 0.dp (`if (base == null) return 0.dp`). `PercentInsetPositioned.percentInsetPositioned` is a `Modifier.composed { }` factory, which materialises inside ComponentRenderer.RenderComponentContent — already INSIDE `LocalContainingBlock provides childContainingBlock` (ComponentRenderer.kt:1983). ARITHMETIC — position-relative-006's green div declares `width:100px; height:100px`, so the block IT publishes for its children is (100, 100) and `top: -10000%` resolves to 100 x -10000 / 100 = -10000 px; its own containing block is the parent `width:100px; min-height:100px` = (100, null), where the same code yields 0 px. So the resolver never declined on -006 — it resolved against the wrong level. PNG — Android paints 10000 px of (255,0,0) and ZERO green; web, iOS and the ref each paint 10000 px of (0,128,0). Cells: web P 0.9990 · iOS P 0.9974 · Android f 0.9966. NAMED WEAKNESS (B2 states it too): -10000% x 100 px == the legacy number-as-pixels -10000 px, so the capture alone cannot discriminate 'resolved at the wrong level' from 'declined and fell back'; the attribution rests on the code read plus that arithmetic identity, not on the pixel.",
+      "correctedText": "0(b) Compose percentage insets resolve against the WRONG containing block LEVEL. `PercentInsetPositioned` reads `LocalContainingBlock` from inside a `Modifier.composed { }` factory, which materialises inside `ComponentRenderer.RenderComponentContent` — already inside the component's own `LocalContainingBlock provides childContainingBlock` — so it reads the block the element publishes for its CHILDREN. On `css-position/position-relative-006` that is the green div's own (100, 100), and `top: -10000%` resolves to -10000 px; the element's real containing block is the parent's (100, null), where the same code correctly yields 0 px (CSS-indefinite ⇒ zero, css-position-3 relpos-insets). The Android capture paints 10000 px of pure red with zero green where web, iOS and the ref all paint 10000 px of (0,128,0). The wave-49 diagnosis in BOTH this entry and corpus-v6-15.json's _note — '`PercentInsetResolve` declines by design ... the prediction was optimistic; the code is right' — is WRONG: the resolver does not decline on -006 (neither cb axis is null at the level it is handed) and the code has a level bug. Landed: `layout/position/ElementContainingBlock.kt` + the read in `PercentInsetPositioned.kt`; the renderer `provides` line is applied at ComponentRenderer.kt:2001. Note that the -006 pixel cannot by itself distinguish the two hypotheses (-10000% x 100 px equals the legacy number-as-pixels value); the gate should confirm the predicted f -> P. The CSS 2.1 10.1 republish for non-block-container ancestors remains a real, separate gap in `DynamicValueResolver.childContainingBlock` with no corpus carrier that moves."
+    },
+
+    {
+      "id": "S6-13",
+      "lane": "B11",
+      "target": "docs/BACKLOG.md / the ledger (tools/visual/cross-platform-expectations.json)",
+      "claim": "iOS clips the synthesized placeholder label where web/Android let it overflow (090/091/105/097)",
+      "verdict": "CONFIRMED",
+      "measurement": "COMMITTED baselines, ink bounding box against the corner background (26,26,46), max-channel deviation > 6: 090_Button_Primary web 115x30 @16,16 / Android 115x30 @16,16 / iOS 50x30 @16,16. 091_Button_Outline web 115x30 / Android 115x26 / iOS 50x30. 105_Edge_DeepNesting web 115x30 / Android 115x26 / iOS 50x30. 097_Glass_Effect web 100x42 / Android 100x42 / iOS 50x42. CONTROL 094_Input_Field: all three 200x28-30, iOS NOT clipped. Read visually: web and Android paint the whole harness label ('BUTTON PRIMARY', 'GLASS EFFECT') overflowing the box; iOS truncates at the box edge to 'BUT' / 'GLAS'. Reproduces tools/titan/results/wave50-B11/baseline-ink-boxes.json exactly.",
+      "correctedText": "Ledger: iOS CLIPS the harness's synthesized placeholder label at the component box edge where web and Android let it overflow. Committed baselines, ink-box width: 090_Button_Primary / 091_Button_Outline / 105_Edge_DeepNesting — web 115 px, Android 115 px, iOS 50 px; 097_Glass_Effect — web 100, Android 100, iOS 50; control 094_Input_Field — all three 200 (the label fits, so no clip). This is a HARNESS placeholder divergence baked into four committed baselines, not a CSS property defect; every cross-platform number read off these four is measuring the label, not the style."
+    },
+
+    {
+      "id": "S6-14",
+      "lane": "B5",
+      "target": "docs/BACKLOG.md queue 1(c) + obligation #3 (blank-capture guard)",
+      "claim": "blank-captures.json — the Android text-decoration-inset-025 capture is a 390x9470 fully transparent blank, the only one in the corpus",
+      "verdict": "CONFIRMED, and S6 widens it",
+      "measurement": "DECODE — tools/titan/runs/wave49-final/sections/css-text-decor/android-screenshots/wpt__css-text-decor__text-decoration-inset-025.png: mode RGBA, size 390x9470, 14483 bytes, ONE distinct pixel value (0,0,0,0) over all 3693300 pixels. Its cell is scored: android-ref ssim 0, wptPass false, coverageRatioFailed true, pixelMismatchedPct 99.83, capH 9470 vs refH 1230. (web 390x750 f 0.4413, iOS 390x600 f 0.4311.) UNIQUENESS — S6 scanned all 4305 wave49-final captures (2870 of them RGBA): exactly ONE has max alpha <= 8, and it is this file. S6 WIDENS: 79 captures are a single uniform colour; 42 of them are uniform against a ref that HAS ink and are still scored (e.g. css-values/attr-style-sharing-4 Android — a blank white page scored 0.9959; css-counter-styles/cjk-decimal/counter-cjk-decimal Android — blank white 390x696 scored 0.9407; css-masking/clip-path-inset-round-rendering iOS — blank white scored 0.7483). None of those 42 currently PASSES, but each is an SSIM emitted for a picture with no ink in it. Separately, 7 tests are uniform-colour on BOTH sides and pass at ssim 1.0000 on all three platforms = 21 literal blank-vs-blank pass cells (tools/titan/results/wave50-S6/blank-vs-blank-passes.json).",
+      "correctedText": "1(c) `css-text-decor/text-decoration-inset-025` Android is a BLANK CAPTURE, not a tall render: 390x9470 RGBA with one pixel value (0,0,0,0) over all 3.69 M pixels, 14483 bytes, scored ssim 0 / coverageRatioFailed / 99.83% mismatch. S6 confirmed it is the ONLY fully transparent capture among all 4305 wave49-final captures (2870 RGBA). The 9470 px layout blow-up is still undiagnosed and needs Compose layout (no Robolectric in runtimes/compose). BUILD THE BLANK-CAPTURE GUARD ON UNIFORM COLOUR, NOT ALPHA: 42 captures are a single uniform colour against a reference that carries ink and are all still scored as renders (blank white pages carrying scores as high as 0.9959), and 7 more tests are uniform-on-uniform and PASS at 1.0000 on all three platforms — 21 blank-vs-blank pass cells that belong in obligation #3's evidence. Lists: tools/titan/results/wave50-S6/blank-capture-vs-inked-ref.json and blank-vs-blank-passes.json; the alpha-only instance stays in tools/titan/results/wave50-B5/blank-captures.json."
+    },
+
+    {
+      "id": "S6-15",
+      "lane": "B9",
+      "target": "runtimes/compose/.../typography/inline/LineBoxCensus.kt — the twin header",
+      "claim": "the new Compose line-box census is a twin of the wave-46 iOS LineClampCensus with exactly ONE stated divergence",
+      "verdict": "REFUTED — there is a SECOND, unstated divergence",
+      "measurement": "LineBoxCensus.kt's banner says 'Twin of the wave-46 iOS StyleEngine/scrolling/LineClampCensus.swift ... same model, different file home' and names exactly one deliberate divergence (Compose maps Unprovable back onto the wave-41 uniform cap where Swift's `.unbounded` removes the cap). But `LineBoxCensusRuns.childRun` (Compose) carries an arm the Swift twin does not have at all: `if (tag == \"br\" || child.role == \"line-break\") return LineBoxRun(root.lineBoxPx, exactLines = 0, leadingBandPx = 0f)`. `LineClampCensusRuns.childRun` (iOS, lines 90-123) tests only `isDisplayNone`, then typography, then `explicitHeightPx`, then `isScrollContainer` — no tag and no role check — so a `<br>` whose measured `height` the converter stamps (the Compose comment records 0 or 20 px in this corpus) falls to the explicit-height leg and is budgeted as a MONOLITHIC box on iOS while contributing nothing on Compose. Behavioural impact on the corpus is UNMEASURED (no device this wave).",
+      "correctedText": "The Compose `LineBoxCensus` twin banner must name TWO divergences from the wave-46 iOS `LineClampCensus`, not one: (1) the stated Unprovable -> uniform-cap fallback vs Swift's `.unbounded`; and (2) Compose's `<br>` / `role == \"line-break\"` arm in `LineBoxCensusRuns.childRun`, which returns a zero-line zero-height run — the iOS `LineClampCensusRuns.childRun` has no tag or role check at all, so a `<br>` with the converter's stamped height is budgeted there as a monolithic box. Either port the arm to Swift or state the divergence in both headers; and measure it, because no corpus cell has been checked either way."
+    },
+
+    {
+      "id": "S6-16",
+      "lane": "B10",
+      "target": "runtimes/compose/.../columns/GapDecorationBands.kt banner",
+      "claim": "banner pixel ranges for flex-gap-decorations-045/046",
+      "verdict": "CONFIRMED-WITH-CORRECTION (the shifts are right; two literals are not)",
+      "measurement": "PNG, wave49-final css-gaps. 045 red rule (255,0,0) x-runs: ref (76,80) n=2000, web (76,80) n=2000, iOS (72,76) n=2000, Android (72,76) n=2000 — the banner's 'ref x [76,81] ... union model [72,77]' is the same 4 px shift written with an exclusive upper bound. 046 gold (255,215,0) y-runs: ref (73,77) and (134,138) n=1400; web identical; iOS (70,73) and (131,135) n=1260; Android (70,73) and (132,135) n=1120 — the banner's 'ref gold bands at image y [73,78] / [134,139], both natives at [70,74] / [131,136]' is again exclusive-upper, AND it merges two platforms whose second band differs (iOS 131-135, Android 132-135).",
+      "correctedText": "GapDecorationBands.kt's banner writes its image ranges with an EXCLUSIVE upper bound while the surrounding prose reads inclusive. Measured inclusive runs: 045 red rule — ref and web x76-80, both natives x72-76 (4 px left, 2000 px each). 046 gold bands — ref and web y73-77 and y134-138 (1400 px); iOS y70-73 and y131-135 (1260 px); ANDROID y70-73 and y132-135 (1120 px). Say 'both natives' only where they agree: their second band does not."
+    },
+
+    {
+      "id": "S6-17",
+      "lane": "orchestrator / all",
+      "target": "standing constraints — the ring-fence and test-name/colour literals",
+      "claim": "no test-specific code and no ref-fitted literals were introduced this wave",
+      "verdict": "CONFIRMED (one declared exception, correctly declared)",
+      "measurement": "`backdrop-filter-basic-blur` appears ONCE in the wave-50 diff outside tools/titan/results/: a comment at runtimes/compose/.../layout/position/AtomicInlineShrinkToFit.kt:89 recording that the ring-fenced test 'declares no atomic inline-level box at all, so it is untouched by construction' — that is the constraint's own 'reported plainly' clause, not a carve-out; there is no branch on any test name. Grepping every ADDED non-comment line of runtimes/, apps/, converter/, extract-fixture.mjs and inject-wpt-block.mjs for a WPT-shaped test name or a hex/rgb colour returns exactly ONE hit: `'border-color': '#eeeeee'` in the UA `<hr>` bake. Its banner states the value is derived from the frozen ref's own pixels, and S6 re-measured that derivation: the ref `css-images/gradient__gradient-hue-direction.png` paints the rule at y=188 rgb(154,154,154) x16-373, y=189 rgb(238,238,238), with rgb(196,196,196) at exactly the two mitre corners (x16/y189 and x373/y188) — and Blink's Dark(0xEE) = 238 x max(0,(0.93333-0.33)/0.93333) = 238 x 0.64643 = 153.85 -> 154, which is the observed top row. The adjudication IS reference-fitted and the file says so.",
+      "correctedText": "Standing-constraint sweep for wave 50: clean. The ring-fenced `filter-effects/backdrop-filter-basic-blur` is named once, in a comment that reports it untouched (the constraint's own reporting clause); no production code branches on a test name. The one ref-derived colour literal in new production code is the UA `<hr>` bake's `border-color: #eeeeee`, which is explicitly declared as measured off the frozen reference — S6 re-measured 154 / 238 / 196 at y188-189 x16-373 and reproduced the Blink Dark(0xEE) arithmetic to the pixel."
+    },
+
+    {
+      "id": "S6-18",
+      "lane": "all",
+      "target": "COMMENT-VS-MEASUREMENT sweep",
+      "claim": "the numbers quoted in the banners added this wave",
+      "verdict": "CONFIRMED for every cell score; four prose nits",
+      "measurement": "Every wave49-final cell score quoted in a new banner was re-read from the manifests and matched exactly: clip-path-contentBox-1d android f 0.8775 / web P 0.9585 / iOS P 0.9585; -1e android f 0.8875 / web P 0.9696 / iOS P 0.9695; balance-grid-container android f 0.8721; display-contents-before-after-003 android P 0.9713; block-ellipsis-022 android P 0.9863; text-decoration-propagation-02/03 android P 0.9988; backface-visibility-hidden-006 android P 1.0000; backdrop-filter-image-size-filter-size-mismatch android P 0.9841; position-relative-006 web P 0.9990 / iOS P 0.9974 / android f 0.9966; angle-units-001 web f 0.9990 / iOS f 0.9974 / android f 0.9966; counter-suffix f 0.8867 / 0.8883 / 0.8901; contain-html-overflow-002 f 0.8709 / 0.8705 / 0.8698 and its sibling contain-body-overflow-001 P 1.0000 / 0.9996 / 0.9989; s-11-1-1b-005 f 0.0001 x3; gradient-hue-direction f 0.6241 / 0.6235 / 0.6230; active-selection-057 P 1.0000 / 0.9994 / 0.9986; contain-content-004 f 0.8448 / 0.7940 / 0.8286; direction-upright-002 f 0.5826 / 0.5758 / 0.5946; block-ellipsis-032 android f 0.9451; line-clamp-005/006/007 android P 0.9615 / f 0.9446 / f 0.9409 and iOS P 0.9891 / 0.9822 / 0.9822; counter-cjk-decimal android f 0.9407 / iOS P 0.9934; background-attachment-fixed-inside-transform-1 iOS P 0.9843; clip-opacity-out-of-flow iOS f 0.9271; composited-under-rotateY-180deg-clip and -clip-perspective iOS P 1.0000. PIXEL claims also reproduce exactly: contain-content-004 blue px web 29500 / Android 34836 / iOS 34636 / ref 2436, and the green 'PASS' at y226 (web) vs y192 (ref); background-color-animation-with-table1 Android ink == ref ink while web reaches x133 and iOS x39 (cells web f 0.9884 / iOS f 0.9904 / Android P 0.9998); the UA-hr 390x894 captures against a 390x600 ref, +294 = 3 x 98.",
+      "correctedText": "Four prose nits to fix, none of them a number that changes a decision: (1) tools/titan/results/wave50-B7/_note.md 'only 004's natives paint (0,127,0)' — web does too. (2) tools/titan/results/wave50-B10/_note.md '1435 scored wave49-final tests' — 1435 examined, 1379/1366/1366 scored. (3) the counter-cjk-decimal banner's 'semantic presence 0.000 vs the ref's 0.946' — the android-ref row's own bCoveragePct is 0.816 (0.946 is the web/iOS row's); the 0.000 half is exact, and that Android capture is in fact a blank white 390x696 page. (4) GapDecorationBands.kt's exclusive-upper pixel ranges (see S6-16).",
+      "structuralNote": "runtimes/compose/.../layout/position/AtomicInlineShrinkToFit.kt embeds nine wave49-final SSIM values in a production Kotlin banner. tools/visual/doc-staleness-check.sh derives headline numbers in docs/, not in runtime banners, so these will silently rot at the next gate. Either re-derive them at each gate or move the table to tools/titan/results/wave50-B2/ and cite the path."
+    }
+  ],
+
+  "newFindingsForTheRefill": [
+    {
+      "id": "S6-N1",
+      "what": "21 literal blank-vs-blank PASS cells at ssim 1.0000",
+      "detail": "7 tests whose frozen reference is a single uniform colour and whose captures are the SAME single colour on all three platforms, all passing at 1.0000: css-backgrounds/animations/background-color-animation-in-body (olive 100,100,0), .../background-color-transparent-animation-in-body, .../invalidation/background-color-animation-with-zero-alpha, css-cascade/scope-implicit-crash-print, css-flexbox/abspos/flexbox_inline-abspos, css-images/gradient-refcrash, css-transforms/backface-visibility-hidden-006. Data: tools/titan/results/wave50-S6/blank-vs-blank-passes.json.",
+      "useIt": "obligation #3's degenerate-pass evidence; also note that B2's 'at risk' list for the atomic-inline patch includes backface-visibility-hidden-006, a cell with no ink in it that cannot meaningfully move."
+    },
+    {
+      "id": "S6-N2",
+      "what": "42 blank captures scored against an inked reference",
+      "detail": "Uniform-colour captures whose ref carries ink, all still scored: scores range from 0.0001 to 0.9959. Data: tools/titan/results/wave50-S6/blank-capture-vs-inked-ref.json. Notable single-platform ones: counter-cjk-decimal Android (0.9407), attr-style-sharing-4 Android (0.9959), attr-notype-fallback Android (0.9584), clip-path-inset-round-rendering iOS (0.7483), broken-column-rule-1 iOS (0.9752), composited-under-rotateY-180deg-preserve-3d iOS+Android (0.9565).",
+      "useIt": "scope the blank-capture guard B5 proposes; key it on uniform colour, not on alpha."
+    },
+    {
+      "id": "S6-N3",
+      "what": "GapDecorationBands Kotlin/Swift numeric-domain divergence",
+      "detail": "The new pair rounds at different stages: Kotlin rounds every line extent, the gap and the container cross to Int before FlexWrapLines.stretchLines(base: IntArray, containerCross: Int?, gap: Int); Swift stays continuous through FlexWrapPlan.stretchLines(base: [CGFloat], containerCross: CGFloat?, gap: CGFloat). Band edges can therefore differ by up to 1 px on non-integral geometry. Neither file claims a twin header, so nothing is untruthful — but the divergence is unmeasured on device.",
+      "useIt": "a gate lane should diff the two natives' 045/046 bands after the wave-50 gate."
+    }
+  ],
+
+  "couldNotTest": [
+    "Every device-level prediction in the wave (B2's position-relative-006 f->P, B3's pseudo after-fold, B9's line-clamp census, B11's placeholder floor, B7's three extractor flips): no emulator, no simulator, no gradle/xcodebuild for this lane. Reported as predictions, not results.",
+    "B10's live browser A/B (0 vs 5200 chromatic px on the five css-gaps refs and hanging-punctuation-block-bound-001) and its '28 of 42 refs rasterise differently': no browser on this host.",
+    "The semantic correctness of spec citations. tools/visual/spec-cite-validate.mjs passes (4443 citations, 0 unknown sections) but tools/visual/spec-sections.json stores NUMBERS ONLY ('titles are one click away at url'), so it proves a section exists, never that it is the section the claim needs. S6 had no network to fetch the EDs. One pre-existing citation looks wrong on recollection and should be re-checked with network: ImageCandidateChain.kt/.swift (wave 49, not this wave) cite 'css-images-4 2.5' for the image() candidate walk; the image() notation is 'Image Fallbacks and Annotations' (2.2 in the ED as I recall it), with 2.5 being cross-fade().",
+    "Whether Chromium's html.css literally carries #EEEEEE for hr in the light colour scheme (the UA-hr banner asserts it). The DERIVATION from the frozen ref reproduces to the pixel, so the bake is correct for this corpus whatever the attribution."
+  ]
+}

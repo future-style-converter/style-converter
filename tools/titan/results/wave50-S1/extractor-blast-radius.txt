@@ -1,0 +1,24 @@
+{
+ "tested": 1435,
+ "identical": 1418,
+ "irChanged": 17,
+ "throwDiff": 0,
+ "errBoth": 0
+}
+ • IR-DIFF CSS2/inherit-computed-002 head=786B tree=635B
+ • IR-DIFF CSS2/s-11-1-1b-005 head=628B tree=628B
+ • IR-DIFF css-backgrounds/background-color-animation-with-table1 head=1750B tree=1444B
+ • IR-DIFF css-backgrounds/background-color-animation-with-table3 head=1752B tree=1446B
+ • IR-DIFF css-backgrounds/background-color-animation-with-table4 head=1764B tree=1458B
+ • IR-DIFF css-contain/contain-content-004 head=2233B tree=1942B
+ • IR-DIFF css-contain/contain-html-overflow-002 head=762B tree=762B
+ • IR-DIFF css-counter-styles/broken-symbols head=695B tree=536B
+ • IR-DIFF css-counter-styles/descriptor-suffix head=4830B tree=4050B
+ • IR-DIFF css-counter-styles/disclosure-styles head=10099B tree=7810B
+ • IR-DIFF css-counter-styles/counter-suffix head=4936B tree=4162B
+ • IR-DIFF css-images/gradient-hue-direction head=2580B tree=3496B
+ • IR-DIFF css-pseudo/active-selection-057 head=881B tree=965B
+ • IR-DIFF css-tables/border-collapse-dynamic-col-001 head=3168B tree=3072B
+ • IR-DIFF css-values/angle-units-001 head=763B tree=756B
+ • IR-DIFF css-writing-modes/direction-upright-001 head=11769B tree=12124B
+ • IR-DIFF css-writing-modes/direction-upright-002 head=39428B tree=36734B

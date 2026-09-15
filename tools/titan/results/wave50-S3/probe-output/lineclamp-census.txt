@@ -1,0 +1,39 @@
+clamp-carrier docs=34 roots=38 changed=3 threw=0
+CHANGED css-overflow/wpt__css-overflow__line-clamp__line-clamp-005 wpt__css-overflow__line-clamp__line-clamp-005__0-152 uniform=96.0 census=112.0
+CHANGED css-overflow/wpt__css-overflow__line-clamp__line-clamp-006 wpt__css-overflow__line-clamp__line-clamp-006__0-154 uniform=160.0 census=192.0
+CHANGED css-overflow/wpt__css-overflow__line-clamp__line-clamp-007 wpt__css-overflow__line-clamp__line-clamp-007__0-156 uniform=96.0 census=192.0
+carrier docs: 
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-001
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-002
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-003
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-004
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-005
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-006
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-007
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-008
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-009
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-011
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-012
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-013
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-014
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-015.tentative
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-016
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-017
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-022
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-023
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-024
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-025
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-026
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-027
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-028
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-029
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-030
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-031
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-032.tentative
+  css-overflow/wpt__css-overflow__line-clamp__line-clamp-001
+  css-overflow/wpt__css-overflow__line-clamp__line-clamp-002
+  css-overflow/wpt__css-overflow__line-clamp__line-clamp-003
+  css-overflow/wpt__css-overflow__line-clamp__line-clamp-004
+  css-overflow/wpt__css-overflow__line-clamp__line-clamp-005
+  css-overflow/wpt__css-overflow__line-clamp__line-clamp-006
+  css-overflow/wpt__css-overflow__line-clamp__line-clamp-007

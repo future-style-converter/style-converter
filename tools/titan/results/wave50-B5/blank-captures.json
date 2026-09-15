@@ -1,0 +1,10 @@
+[
+ {
+  "sec": "css-text-decor",
+  "plat": "android",
+  "test": "wpt__css-text-decor__text-decoration-inset-025",
+  "w": 390,
+  "h": 9470,
+  "bytes": 14483
+ }
+]

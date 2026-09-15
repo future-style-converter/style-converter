@@ -27,9 +27,11 @@ import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.renderer.InlineRunPlan
 import com.styleconverter.runtime.core.renderer.SlotComposer
+import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -740,4 +742,73 @@ class InlineRunFoldTest {
         // br-stacked-equivalent rule protects).
         private val BLOCK_ELLIPSIS_002 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054","name":"wpt__css-overflow__line-clamp__block-ellipsis-002__0","properties":[{"type":"LineClamp","data":{"type":"lines","count":3}},{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0.5019607843137255},"original":"teal"}},{"type":"FontWeight","data":{"weight":700,"original":"bold"}},{"type":"FontStyle","data":"italic"}],"text":"Line 1 Line 2 Line 3 Line 4","meta":{"runs":[{"text":"Line 1"},{"child":"line-clamp__block-ellipsis-002__0__0"},{"text":" Line 2"},{"child":"line-clamp__block-ellipsis-002__0__1"},{"text":" Line 3"},{"child":"line-clamp__block-ellipsis-002__0__2"},{"text":" Line 4"}]}},{"id":"line-clamp__block-ellipsis-002__0__0-055","name":"line-clamp__block-ellipsis-002__0__0","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":0}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054"},"meta":{"sourceTag":"br","role":"line-break"}},{"id":"line-clamp__block-ellipsis-002__0__1-056","name":"line-clamp__block-ellipsis-002__0__1","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":20}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054"},"meta":{"sourceTag":"br","role":"line-break"}},{"id":"line-clamp__block-ellipsis-002__0__2-057","name":"line-clamp__block-ellipsis-002__0__2","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":20}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-002__0-054"},"meta":{"sourceTag":"br","role":"line-break"}}]}"""
     }
+
+    // ── Wave 50 (lane B9) — the HANGING-WHITESPACE ring ──────────────────
+
+    @Test
+    fun `block-ellipsis-032 - a whitespace-only member carries its white-space and band`() {
+        // block-ellipsis-032's first clamp box, VERBATIM off
+        // wave49-final/sections/css-overflow/per-test-ir (host __1 and its
+        // two members kept; the sibling boxes __2/__3 are byte-identical
+        // copies with a different text-align, and the leading <p> is
+        // unrelated). Its `<span class=hangs>` carries `white-space:
+        // pre-wrap` + `background-color: red` over eight spaces — the two
+        // properties that bailed the whole fold before this ring, leaving
+        // Android painting "This text is" alone and discarding the green
+        // member and "Clamped" under the 1-line cap (android-ref 0.9451 f;
+        // the ref paints "This text is left-aligned…").
+        val host = root(BLOCK_ELLIPSIS_032, 0)
+        val outcome = foldOf(host)
+        assertTrue("the hanging-whitespace member must fold: $outcome", outcome is InlineRunFold.Outcome.Folded)
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        // The merged paragraph keeps the eight PRESERVED spaces verbatim
+        // (css-text-3 §3: `pre-wrap` preserves them) — collapsing them
+        // would move the soft wrap opportunity the clamp breaks at.
+        assertEquals("This text is left-aligned        Clamped", folded.text)
+        // Two spans: the green bold member, then the red band over the
+        // eight spaces (member index order).
+        assertEquals(2, folded.spans.size)
+        val band = folded.spans[1]
+        assertEquals(25, band.start)
+        assertEquals(33, band.end)
+        assertEquals(InlineSpanRing.Ink(1f, 0f, 0f, 1f), band.style.background)
+        // The band member paints no glyphs, so it contributes no ink
+        // attribution beyond the background.
+        assertNull(band.style.ink)
+    }
+
+    @Test
+    fun `a glyph-bearing member still refuses white-space and background`() {
+        // The ring is admitted ONLY for a glyph-less member: a paragraph
+        // lays out under ONE white-space mode, and a band behind real
+        // glyphs is uncalibrated (InlineSpanRing.admit's banner).
+        val ws = listOf(IRProperty("WhiteSpace", JsonPrimitive("PRE_WRAP")))
+        assertEquals(
+            InlineSpanRing.Admission.Refused("member-prop:WhiteSpace"),
+            InlineSpanRing.admit("span", ws, emptyList(), glyphless = false),
+        )
+        val bg = listOf(IRProperty("BackgroundColor", Json.parseToJsonElement("""{"srgb":{"r":1,"g":0,"b":0}}""")))
+        assertEquals(
+            InlineSpanRing.Admission.Refused("member-prop:BackgroundColor"),
+            InlineSpanRing.admit("span", bg, emptyList(), glyphless = false),
+        )
+    }
+
+    @Test
+    fun `a collapsing white-space keyword refuses even on a glyph-less member`() {
+        // `normal` / `nowrap` collapse a space run to ONE space
+        // (css-text-3 §4.1.1); the fold appends the member's text verbatim,
+        // so admitting them would paint a run CSS collapses away.
+        for (kw in listOf("NORMAL", "NOWRAP")) {
+            val p = listOf(IRProperty("WhiteSpace", JsonPrimitive(kw)))
+            assertEquals(
+                InlineSpanRing.Admission.Refused("member-prop:WhiteSpace-collapsing"),
+                InlineSpanRing.admit("span", p, emptyList(), glyphless = true),
+            )
+        }
+    }
+
+    /** block-ellipsis-032's first clamp box, verbatim (minified). */
+    private val BLOCK_ELLIPSIS_032 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116","name":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1","properties":[{"type":"LineClamp","data":{"type":"lines","count":1}},{"type":"BorderTopWidth","data":{"px":1}},{"type":"BorderRightWidth","data":{"px":1}},{"type":"BorderBottomWidth","data":{"px":1}},{"type":"BorderLeftWidth","data":{"px":1}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"FontFamily","data":["monospace"]},{"type":"MarginBottom","data":{"original":{"v":1,"u":"EM"}}},{"type":"Width","data":{"type":"length","original":{"v":29,"u":"CH"}}}],"text":"This text is Clamped","meta":{"role":"ws-after","runs":[{"text":"This text is "},{"child":"line-clamp__block-ellipsis-032.tentative__1__0"},{"child":"line-clamp__block-ellipsis-032.tentative__1__1"},{"text":"Clamped"}]}},{"id":"line-clamp__block-ellipsis-032.tentative__1__0-117","name":"line-clamp__block-ellipsis-032.tentative__1__0","properties":[{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"FontWeight","data":{"weight":700,"original":"bold"}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116"},"text":"left-aligned","meta":{"sourceTag":"span"}},{"id":"line-clamp__block-ellipsis-032.tentative__1__1-118","name":"line-clamp__block-ellipsis-032.tentative__1__1","properties":[{"type":"WhiteSpace","data":"PRE_WRAP"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116"},"text":"        ","meta":{"sourceTag":"span"}}]}"""
+
 }

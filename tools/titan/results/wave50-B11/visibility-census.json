@@ -1,0 +1,49 @@
+[
+ {
+  "section": "css-anchor-position",
+  "test": "wpt__css-anchor-position__anchor-center-visibility-change",
+  "declaredVisibility": [
+   "anchor-center-visibility-change__0__2-513=HIDDEN"
+  ],
+  "hiddenCount": 1,
+  "hiddenWithChildren": [
+   "anchor-center-visibility-change__0__2-513"
+  ],
+  "visibleDescendantsOfHidden": []
+ },
+ {
+  "section": "css-lists",
+  "test": "wpt__css-lists__counter-reset-reversed-display-none",
+  "declaredVisibility": [
+   "counter-reset-reversed-display-none__0__1-357=HIDDEN"
+  ],
+  "hiddenCount": 1,
+  "hiddenWithChildren": [],
+  "visibleDescendantsOfHidden": []
+ },
+ {
+  "section": "css-view-transitions",
+  "test": "wpt__css-view-transitions__capture-with-visibility-hidden-child",
+  "declaredVisibility": [
+   "capture-with-visibility-hidden-child__0__0-057=HIDDEN"
+  ],
+  "hiddenCount": 1,
+  "hiddenWithChildren": [],
+  "visibleDescendantsOfHidden": []
+ },
+ {
+  "section": "css-view-transitions",
+  "test": "wpt__css-view-transitions__capture-with-visibility-mixed-descendants",
+  "declaredVisibility": [
+   "capture-with-visibility-mixed-descendants__0__0-064=HIDDEN",
+   "capture-with-visibility-mixed-descendants__0__0__0-065=VISIBLE"
+  ],
+  "hiddenCount": 1,
+  "hiddenWithChildren": [
+   "capture-with-visibility-mixed-descendants__0__0-064"
+  ],
+  "visibleDescendantsOfHidden": [
+   "capture-with-visibility-mixed-descendants__0__0__0-065"
+  ]
+ }
+]

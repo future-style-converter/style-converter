@@ -177,8 +177,21 @@ enum GapDecorationSegments {
         // Cheapest possible bail — the state every component in the
         // committed corpus is in (no *-rule-* resolves to ink).
         guard config.isActive else { return [] }
-        let lines = GapDecorationLines.lines(from: items, mainHorizontal: mainHorizontal)
-        guard !lines.isEmpty else { return [] }
+        let unions = GapDecorationLines.lines(from: items, mainHorizontal: mainHorizontal)
+        guard !unions.isEmpty else { return [] }
+        // Wave 50 lane B10 — a line's cross extent is its LINE BOX, which
+        // `align-content: stretch` grows past the items standing on it
+        // (css-flexbox-1 §9.4 step 8). GapDecorationBands rebuilds that
+        // box from the same FlexWrapPlan arithmetic FlowLayout runs, and
+        // hands the unions straight back whenever the placed items do not
+        // confirm the reconstruction — so every container that was already
+        // correct paints byte-identical segments.
+        let lines = GapDecorationBands.resolve(
+            lines: unions,
+            contentSize: contentSize,
+            mainHorizontal: mainHorizontal,
+            crossGapPx: config.crossGapPx(mainHorizontal: mainHorizontal),
+            alignContentStretches: config.alignContentStretches)
         // Content extents split into (main, cross) for this axis.
         let mainExtent = GapSpan(start: 0,
                                  end: mainHorizontal ? contentSize.width : contentSize.height)

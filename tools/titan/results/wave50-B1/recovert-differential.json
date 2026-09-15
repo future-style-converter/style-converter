@@ -1,0 +1,104 @@
+{
+ "_note": "WAVE-50 LANE B1 — the full-corpus re-extract + re-convert differential for the declaration-validity oracle added to tools/titan/extract-fixture.mjs (docs/BACKLOG.md ranked item 0(a); the wave-49 patch was lost with its session scratchpad and was re-derived here). THE RESULT IN ONE LINE: across all 1435 gate-corpus tests, re-extracted and re-converted on both sides of the change, exactly ONE fixture, ONE per-test-IR document and ONE component differ — css-values/angle-units-001, whose 100x100 div regains the `background-image: linear-gradient(green, green)` that four INVALID later declarations had deleted. Zero unintended byte changes. The change is NOT device-measured: wave 50 ran no gate, so the three predicted cell flips below are predictions with numbers, adjudicated from the frozen wave49-final captures and the frozen browser ref, not from a run.",
+ "generatedBy": "wave-50 lane B1",
+ "date": "2026-09-14",
+ "attributesAgainst": "tools/titan/runs/wave49-final (corpus-v6.15)",
+ "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+
+ "defect": {
+  "seam": "tools/titan/extract-fixture.mjs — the per-rule declaration collapse was a bare `props[k] = v` (last-wins, no validity oracle), plus the same bare last-wins at the cross-rule merges in propsForElement / propsForBodyRoot and in the style=\"\" bag.",
+  "why": "css-syntax-3 §2.2 (Error Handling): a declaration whose value does not match the property's grammar is ignored, LEAVING THE PREVIOUSLY DECLARED VALUE IN FORCE. The converter implements exactly that (converter/src/main/kotlin/app/parsing/css/properties/PropertiesParser.kt — `Dropped invalid declaration … (css-syntax-3 §2.2)`, InvalidDeclaration sentinel), but never got the chance: the extractor had already deleted the earlier valid declaration.",
+  "carrier": "wave49-final css-values/angle-units-001 web f 0.9990 · ios f 0.9974 · android f 0.9966 (all three cF, novelInkFailed true)"
+ },
+
+ "fix": {
+  "oracle": "provablyInvalidDeclaration(prop, value) — CONSERVATIVE: returns a reason only for a value invalid in EVERY CSS context, null otherwise. One rule today (R1): a <dimension-token> whose unit is outside the closed CSS unit tables (css-values-4 §6.1.1 / §6.1.2 / §6.2 / §7.1 / §7.2 / §7.3 / §7.4, css-grid-2 §7.2.3 <flex>, css-contain-3 container-relative lengths).",
+  "guard": "assignDeclaration(target, key, value) refuses an incoming value ONLY when it is provably invalid AND the value it would overwrite is not. Invalid-over-invalid still ends on the last member (byte-identical to the historical path). A refused declaration contributes neither its value nor its `!important` flag.",
+  "breadcrumb": "Every refusal is pushed onto `invalidShadowDrops` and printed on that test's extract.log line as `[validity: N shadowing declaration(s) refused — <prop>: kept '<v>', dropped '<v>' (<reason>)]`. No silent fallthrough.",
+  "notCovered": [
+   "The LAYERED cascade path (resolveLayeredCascade, css-cascade-5 §6.4.4 + revert-layer) keeps the unguarded sort: zero corpus carriers, and a candidate filter inside that sort could only risk the css-cascade cells. Stated in the code.",
+   "The OLDER importance defect of the same collapse (`a: x !important; a: y` still ends on `y`, where §6.4.4 says the important declaration wins). Zero corpus carriers — see duplicate-declaration-census.json for the population."
+  ]
+ },
+
+ "method": {
+  "isolation": "tools/titan/extract-fixture.mjs is being edited by more than one wave-50 lane at once (lane B4's omitted-end-tag work landed in the same file mid-run). The differential therefore does NOT diff the working tree: it diffs HEAD (747b28e4) against HEAD + ONLY this lane's hunks, each copied into its own runner directory under the session scratchpad, so no other lane's in-flight edit can enter either side.",
+  "extract": "1435 tests (the union of the 30 wave49-final tests.list files), WPT_FIXTURES_ROOT redirected per side; static path only (POST_LOAD_EXTRACT / BIDI_BAKE / VT_BAKE off on BOTH sides) — the host had ~56 MB free and BACKLOG's quiet-host rule says defer browser work rather than retry it.",
+  "convert": "build-combined-fixture.mjs per section on each side, then the converter run from ONE fixed build (converter/build/classes/kotlin/main, built 2026-09-05 22:13) used for both sides, then split-combined-ir.mjs per section.",
+  "bakeArgument": "The static-only run is complete for the baked pipeline too: the oracle fires on exactly 4 declarations in the whole corpus, all in angle-units-001, and that test engaged NO bake in wave49-final (its extract.log line carries no post-load / bidi / counter / vt note). Independently confirmed: this lane's BASE per-test-IR for angle-units-001 is byte-identical to wave49-final's.",
+  "residualRisk": "The 29 unchanged sections were re-converted with a 2026-09-05 converter build, so a corpus-wide base-vs-wave49-final IR comparison is not apples-to-apples (615 of 1435 documents differ from wave49-final, from the retro's 109-file converter change plus the absent bakes). That comparison is NOT part of this differential; the differential is mine-vs-base with the converter held fixed."
+ },
+
+ "differential": {
+  "fixtureFilesCompared": 2870,
+  "fixtureFilesChanged": 1,
+  "combinedConverterInputsCompared": 30,
+  "combinedConverterInputsChanged": 1,
+  "perTestIrDocumentsCompared": 1435,
+  "perTestIrDocumentsChanged": 1,
+  "componentsChanged": 1,
+  "changes": [
+   {
+    "test": "css/css-values/angle-units-001.html",
+    "section": "css-values",
+    "fixture": "fixtures/wpt/css-values/angle-units-001.json",
+    "fixtureDiff": "components['angle-units-001__1'].properties['background-image']: 'linear-gradient(0.25turns, red, red)' -> 'linear-gradient(green, green)'",
+    "perTestIr": "wpt__css-values__angle-units-001.json",
+    "component": "wpt__css-values__angle-units-001__1-002",
+    "irDiff": "GAINS {\"type\":\"BackgroundImage\",\"data\":[{\"type\":\"linear-gradient\",\"stops\":[{\"color\":{\"srgb\":{\"r\":0,\"g\":0.5019607843137255,\"b\":0},\"original\":\"green\"},\"position\":null},{\"color\":{\"srgb\":{\"r\":0,\"g\":0.5019607843137255,\"b\":0},\"original\":\"green\"},\"position\":null}]}]} — Height/Width unchanged, no other property touched, no other component touched",
+    "declarationsRefused": [
+     "background-image: linear-gradient(90degree, red, red)   — unknown dimension unit 'degree'",
+     "background-image: linear-gradient(100gradian, red, red) — unknown dimension unit 'gradian'",
+     "background-image: linear-gradient(1.57radian, red, red) — unknown dimension unit 'radian'",
+     "background-image: linear-gradient(0.25turns, red, red)  — unknown dimension unit 'turns'"
+    ],
+    "pngAdjudication": "TOWARD the ref. Ref (tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-values/angle-units-001.png): a filled GREEN 100x100 square, exactly 10000 px of rgb(0,128,0). All three wave49-final captures paint that same 10000-px square RED (rgb(255,0,0)) — the `z-index:-1` underlay showing through a transparent test div — which is the literal failure the test exists to catch ('no red'). The restored declaration paints the div green, covering the underlay."
+   }
+  ]
+ },
+
+ "corpusCensus": {
+  "declarationsScanned": 15774,
+  "declarationsProvablyInvalid": 4,
+  "allInTest": "css/css-values/angle-units-001.html",
+  "ruleBlocksScanned": 4073,
+  "shadowSites": 40,
+  "shadowSitesWithAnInvalidLaterValue": 1,
+  "allWptSweep": "The same oracle over every .html/.xht in tools/wpt/css (47107 files, 469886 declarations) flags 36 values. Outside the corpus they are genuinely invalid CSS (`color: 1111ff`, `height: 9a6px`, `border-width: 50zu`, `font-family: 5testfoo`) plus two stated blind spots: `unicode-range` hex ranges (only legal inside @font-face, which parseCss skips) and CSS2 escaped-function-name torture tests (`\\url(...)`)."
+ },
+
+ "predictedFlips": {
+  "basis": "No device gate ran this wave. These are computed, not observed: the campaign's own scorer (diffWebVsRef from tools/titan/inject-wpt-block.mjs) re-scored (a) each frozen wave49-final capture — reproducing the recorded manifest numbers exactly — and (b) a SIMULATED post-fix capture built by repainting the capture's 10000 pure-red pixels in the ref's own rgb(0,128,0), which is what a two-stop same-colour linear gradient paints.",
+  "cells": [
+   { "cell": "css-values/angle-units-001 web", "before": "f 0.9990 colorFailed=true novelPx=10000 colorComposite=0.9366 labDeltaE.mean=3.119", "after": "P 0.9990 colorFailed=false novelPx=0 colorComposite=0.9983 labDeltaE.mean=0.034 pixelMismatchedPct 4.339->0.066" },
+   { "cell": "css-values/angle-units-001 ios", "before": "f 0.9974 colorFailed=true novelPx=10000 colorComposite=0.9332 labDeltaE.mean=3.210", "after": "P 0.9974 colorFailed=false novelPx=0 colorComposite=0.9949 labDeltaE.mean=0.125 pixelMismatchedPct 4.443->0.170" },
+   { "cell": "css-values/angle-units-001 android", "before": "f 0.9966 colorFailed=true novelPx=10000 colorComposite=0.9321 labDeltaE.mean=3.223", "after": "P 0.9967 colorFailed=false novelPx=0 colorComposite=0.9939 labDeltaE.mean=0.138 pixelMismatchedPct 4.484->0.211" }
+  ],
+  "capabilityEvidence": [
+   "angle-units-002/003/004/005 are the SAME document with a valid winning declaration (`linear-gradient(90DeG, green, green)`) and already pass on all three at web 0.9990 / ios 0.9974 / android 0.9967 — the same SSIMs 001 fails at. The stacking (position:relative, bottom:100px, z-index:-1), the geometry and the gradient rendering are therefore already correct on all three; 001 differed only in that its winner was invalid.",
+   "A bare 2-stop null-position linear-gradient renders on all three today: css-break/background-image-004/005/006 and css-images/gradient-button pass on all three, and their captures carry the declared gradient colours (rgb(0,128,0) / rgb(255,0,0) / blue-green ramps)."
+  ],
+  "ringFence": "filter-effects/backdrop-filter-basic-blur is untouched — the corpus differential shows one changed file and it is not in filter-effects."
+ },
+
+ "reproduce": {
+  "censusOfShadowSites": "scan each tools/titan/runs/wave49-final/sections/*/tests.list test's <style> rule bodies, group declarations by property name, keep the groups of size > 1 (duplicate-declaration-census.json is that output)",
+  "oracleSweep": "import { provablyInvalidDeclaration } from tools/titan/extract-fixture.mjs and run it over every declaration of every corpus test (inline <style>, linked stylesheets, style=\"\" attributes)",
+  "differential": "copy HEAD's extract-fixture.mjs and HEAD+patch into two runner dirs whose tools/titan/ entries symlink the repo's, run each with WPT_DIR=<repo>/tools/wpt and WPT_FIXTURES_ROOT=<side>, then build-combined-fixture.mjs per section, convert with `java -cp converter/build/classes/kotlin/main:<gradle jars> app.MainKt convert --from css --to ir -i <combined> -o <dir>`, split-combined-ir.mjs, and `diff -rq` the two per-test-ir trees",
+  "pngAdjudication": "node --input-type=module, import diffWebVsRef / computeColorFailed / computeCoverageRatioFailed from tools/titan/inject-wpt-block.mjs and computeNovelInkFailed from tools/titan/novel-ink.mjs; score capture-vs-ref, then repaint the capture's red pixels rgb(0,128,0) and score again"
+ },
+
+ "mutationProofs": [
+  { "mutation": "M1 provablyInvalidDeclaration always returns null", "kills": 4 },
+  { "mutation": "M2 assignDeclaration guard removed (bare last-wins)", "kills": 3 },
+  { "mutation": "M3 <ident-token> no longer consumed whole", "kills": 1 },
+  { "mutation": "M4 `turn` removed from the closed angle table", "kills": 2 },
+  { "mutation": "M5 escape branch removed", "kills": 1 },
+  { "mutation": "M6 `!important` recorded even when the write was refused", "kills": 1 },
+  { "mutation": "M7 <string-token> bodies no longer opaque", "kills": 1 },
+  { "mutation": "M8 url() bodies no longer opaque", "kills": 1 },
+  { "mutation": "M9 <hash-token> no longer skipped", "kills": 1 },
+  { "mutation": "M10 oracle always returns a reason", "kills": 4 },
+  { "mutation": "M11 oracle over-reaches onto calc()/attr()/color-mix()", "kills": 2 }
+ ]
+}

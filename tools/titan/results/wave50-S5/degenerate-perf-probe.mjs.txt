@@ -1,0 +1,29 @@
+import { readFileSync, readdirSync, statSync, existsSync } from 'node:fs';
+import { join } from 'node:path';
+import { PNG } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/node_modules/pngjs/lib/png.js';
+import { computeDegenerate } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/degenerate-veto-probe.mjs';
+import { computeNovelInk } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/novel-ink.mjs';
+const ROOT='/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf';
+const REF=join(ROOT,'tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins');
+const pairs=[
+ ['css-writing-modes','screenshots','wpt__css-writing-modes__direction-upright-002.png','css-writing-modes/direction-upright-002.png'],
+ ['css-writing-modes','android-screenshots','wpt__css-writing-modes__direction-upright-002.png','css-writing-modes/direction-upright-002.png'],
+ ['css-text-decor','android-screenshots','wpt__css-text-decor__text-decoration-inset-025.png','css-text-decor/text-decoration-inset-025.png'],
+ ['CSS2','android-screenshots','wpt__CSS2__borders__border-conflict-style-107.png','CSS2/borders__border-conflict-style-107.png'],
+];
+function load(p){ return PNG.sync.read(readFileSync(p)); }
+function pad(a,b){
+  const W=Math.max(a.width,b.width),H=Math.max(a.height,b.height);
+  const mk=(s)=>{const o=new PNG({width:W,height:H}); o.data.fill(255);
+    for(let y=0;y<s.height;y++){ s.data.copy(o.data, (y*W)*4, (y*s.width)*4, (y*s.width+s.width)*4); } return o;};
+  return [mk(a),mk(b)];
+}
+for(const [sec,dir,cap,ref] of pairs){
+  const cp=join(ROOT,'tools/titan/runs/wave49-final/sections',sec,dir,cap);
+  const rp=join(REF,ref);
+  if(!existsSync(cp)||!existsSync(rp)){ console.log('MISSING',cp,existsSync(cp),rp,existsSync(rp)); continue; }
+  const [A,B]=pad(load(cp),load(rp));
+  let t=Date.now(); const ni=computeNovelInk(A,B); const tn=Date.now()-t;
+  t=Date.now(); const dg=computeDegenerate(A,B); const td=Date.now()-t;
+  console.log(`${sec}/${dir} ${A.width}x${A.height}  novelInk ${tn}ms  computeDegenerate ${td}ms  ratio ${(td/Math.max(tn,1)).toFixed(1)}x  divergentInkPx=${dg?.divergentInkPx} unexplFrac=${dg?.unexplainedInkFraction}`);
+}

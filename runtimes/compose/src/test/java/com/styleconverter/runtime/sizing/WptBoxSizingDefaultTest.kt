@@ -20,6 +20,10 @@ import com.styleconverter.runtime.core.types.LengthValue
 import java.io.File
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
+// Wave-50 lane F1: the threading pin now captures the argument list with a
+// Regex, so it must first assert the call itself was found (null = the seam
+// was renamed or deleted, a different failure from a missing argument).
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -135,9 +139,36 @@ class WptBoxSizingDefaultTest {
             rendererSource.contains("val wptCaptureModeForSizing = LocalWptCaptureMode.current"))
         // …and pass it into applyProperties (the static chain can't read
         // CompositionLocals itself — the collapsedMargin precedent).
-        assertTrue(
-            "applyProperties must receive the threaded wpt flag",
-            rendererSource.contains(
-                "StyleApplier.applyProperties(effectiveProperties, collapsedMargin, wptCaptureModeForSizing)"))
+        //
+        // Wave-50 (lane F1, skeptic S3): this used to assert the LITERAL
+        // one-line call `StyleApplier.applyProperties(effectiveProperties,
+        // collapsedMargin, wptCaptureModeForSizing)`. Lane B9 added a fourth
+        // threaded argument (`lineClampCapPx`) and the call wrapped across
+        // lines, so the literal match went red even though the wiring this
+        // test exists to pin was intact. Capture the ARGUMENT LIST instead
+        // and assert the three names this suite owns are in it: the pin is
+        // about WHAT is threaded, not about the call's line breaks or how
+        // many other lanes thread their own state through the same seam.
+        // `[^)]*` stops at the first `)` — correct here because none of the
+        // arguments is itself a call; DOT_MATCHES_ALL lets `.` (used by the
+        // `StyleApplier\.` literal) and the class span the wrapped lines.
+        val applyArgs = Regex(
+            "StyleApplier\\.applyProperties\\(([^)]*)\\)", RegexOption.DOT_MATCHES_ALL,
+        ).find(rendererSource)?.groupValues?.get(1)
+        assertNotNull(
+            "renderer must still call StyleApplier.applyProperties(...) for the static chain",
+            applyArgs)
+        // The three names this suite owns. `effectiveProperties` is the IR
+        // property list, `collapsedMargin` the CSS2 §8.3.1 override (the
+        // threading precedent this lane copied) and `wptCaptureModeForSizing`
+        // the css-sizing-3 §3 mode flag whose split SizingApplier pins above.
+        // Asserted individually so a failure names the missing argument.
+        for (argument in listOf(
+            "effectiveProperties", "collapsedMargin", "wptCaptureModeForSizing",
+        )) {
+            assertTrue(
+                "applyProperties must receive $argument — got: $applyArgs",
+                applyArgs!!.contains(argument))
+        }
     }
 }

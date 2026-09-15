@@ -1,0 +1,135 @@
+{
+ "components": {
+  "R01_turns": {
+   "properties": {
+    "transform": "rotate(45turns)",
+    "height": "30px"
+   }
+  },
+  "R02_degree": {
+   "properties": {
+    "transform": "rotate(45degree)",
+    "height": "30px"
+   }
+  },
+  "R03_radian": {
+   "properties": {
+    "transform": "rotate(45radian)",
+    "height": "30px"
+   }
+  },
+  "R04_gradian": {
+   "properties": {
+    "transform": "rotate(45gradian)",
+    "height": "30px"
+   }
+  },
+  "R05_qq": {
+   "properties": {
+    "width": "100qq",
+    "height": "30px"
+   }
+  },
+  "R06_foo": {
+   "properties": {
+    "margin-left": "10foo",
+    "height": "30px"
+   }
+  },
+  "R07_ptx": {
+   "properties": {
+    "font-size": "12ptx",
+    "height": "30px"
+   }
+  },
+  "R08_bananas": {
+   "properties": {
+    "letter-spacing": "3bananas",
+    "height": "30px"
+   }
+  },
+  "R09_pxx": {
+   "properties": {
+    "border-top-width": "2pxx",
+    "height": "30px"
+   }
+  },
+  "R10_vhh": {
+   "properties": {
+    "height": "50vhh"
+   }
+  },
+  "A01_px": {
+   "properties": {
+    "width": "100px",
+    "height": "30px"
+   }
+  },
+  "A02_calc": {
+   "properties": {
+    "width": "calc(100% - 2ch)",
+    "height": "30px"
+   }
+  },
+  "A03_deg": {
+   "properties": {
+    "transform": "rotate(45deg)",
+    "height": "30px"
+   }
+  },
+  "A04_fr": {
+   "properties": {
+    "grid-template-columns": "repeat(2, 1fr)",
+    "height": "30px"
+   }
+  },
+  "A05_imageset": {
+   "properties": {
+    "background-image": "image-set(url(a.png) 1x, url(b.png) 2x)",
+    "height": "30px"
+   }
+  },
+  "A06_transition": {
+   "properties": {
+    "transition": "all 1s ease-in 250ms",
+    "height": "30px"
+   }
+  },
+  "A07_cqi": {
+   "properties": {
+    "width": "10cqi",
+    "height": "30px"
+   }
+  },
+  "A08_rlh": {
+   "properties": {
+    "font-size": "2rlh",
+    "height": "30px"
+   }
+  },
+  "A09_hex": {
+   "properties": {
+    "color": "#00ff00",
+    "height": "30px"
+   }
+  },
+  "A10_persp": {
+   "properties": {
+    "transform": "perspective(1px) translate3d(1px,2px,3px)",
+    "height": "30px"
+   }
+  },
+  "X01_custom": {
+   "properties": {
+    "--custom": "3bananas",
+    "height": "30px"
+   }
+  },
+  "X02_st": {
+   "properties": {
+    "voice-pitch": "2st",
+    "height": "30px"
+   }
+  }
+ }
+}

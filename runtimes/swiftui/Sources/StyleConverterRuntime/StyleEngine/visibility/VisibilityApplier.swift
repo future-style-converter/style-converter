@@ -5,7 +5,9 @@
 //  Maps the visibility + overflow aggregate onto SwiftUI modifiers.
 //    visibility: visible → identity
 //    visibility: hidden  → opacity(0) but layout preserved
-//    visibility: collapse → frame(0,0) + .hidden() (layout removed)
+//    visibility: collapse → table row/column: frame(0,0) + .hidden()
+//                           (layout removed, CSS 2.2 §11.2); every other
+//                           box: treated as `hidden` (layout PRESERVED)
 //    overflow (used value ≠ visible on BOTH axes) → .clipped()
 //    overflow (used value ≠ visible on ONE axis) → .clipShape(AxisClipRect)
 //      — axis-selective clip, css-overflow-3 §3/§3.1 (wave 18 RC4)
@@ -49,17 +51,52 @@ struct VisibilityApplier: ViewModifier {
         // axisClips branch above), which matches the unscrolled state.
 
         // Visibility last — it should take precedence over clip.
-        switch cfg.visibility {
-        case .visible, .none:
-            // Nothing to do (or visibility never declared → default visible).
-            break
-        case .hidden:
-            // CSS `hidden` preserves layout; `.opacity(0)` matches that.
-            v = AnyView(v.opacity(0))
-        case .collapse:
-            // `collapse` on non-table elements behaves like hidden but
-            // also removes layout. Approximate with frame(0,0) + hidden().
-            v = AnyView(v.frame(width: 0, height: 0).hidden())
+        //
+        // Wave 50 lane B11: the branch is now the shared rule table
+        // (VisibilityBoxRules.treatment — iOS-only: the Compose twin is
+        // DEFERRED, see that file's TWIN STATUS banner) rather than a
+        // per-keyword switch, because CSS 2.2 §11.2's `collapse` depends on
+        // the BOX TYPE and the old code got the common case backwards — it
+        // removed the layout of every collapsed element, table track or
+        // not, while §11.2 says "for other elements, `collapse` is treated
+        // the same as `hidden`" (layout preserved). Compose folds collapse
+        // into its `isHidden` alpha, so iOS was the divergent twin.
+        // `if let` rather than `switch cfg.visibility` on the Optional: the
+        // extractor's own comment warns about the `.none` pitfall, and this
+        // spelling cannot trip over it. A nil means `visibility` was never
+        // declared on this component — it may still be hidden by
+        // INHERITANCE from an ancestor, but that channel does not exist yet
+        // on either native (this lane's seam patch; the ancestor currently
+        // hides the whole subtree with one opacity layer).
+        if let declared = cfg.visibility {
+            // A declared keyword: ask the rule table what the box does.
+            switch VisibilityBoxRules.treatment(
+                declared, isTableTrackBox: cfg.isTableTrackBox
+            ) {
+            case .painted:
+                // `visibility: visible` — identity.
+                break
+            case .inkSuppressed:
+                // §11.2 "the generated box still affects layout": the box
+                // must keep its slot, so hide ink WITHOUT touching the
+                // frame. `.opacity(0)` is the SwiftUI spelling of that.
+                //
+                // KNOWN GAP, not a silent one: opacity is a subtree layer,
+                // so a descendant that declares `visibility: visible`
+                // cannot paint through it (§11.2 says it must). Measured on
+                // css-view-transitions/capture-with-visibility-mixed-
+                // descendants — see VisibilityBoxRules.swift's header and
+                // `subtreeAlphaEquivalent`, which is the predicate the
+                // renderer seam will consult.
+                v = AnyView(v.opacity(0))
+            case .boxRemoved:
+                // §11.2 on a table row / row group / column / column group:
+                // the track is removed "as if display: none were applied",
+                // without re-laying the rest of the table. frame(0,0) +
+                // .hidden() is the closest SwiftUI equivalent — it is what
+                // this applier used to do for EVERY collapsed element.
+                v = AnyView(v.frame(width: 0, height: 0).hidden())
+            }
         }
 
         return v

@@ -135,6 +135,21 @@ object LineClampCap {
         // A non-positive line box can only come from a broken wire —
         // refuse to build a 0-height cap out of it.
         if (lineBox <= 0f) return null
+        // Sum the block-axis pieces: N line boxes + the container's own
+        // vertical bands (padding + visible border band — see ownBandsPx).
+        return lines * lineBox + ownBandsPx(properties)
+    }
+
+    /**
+     * The container's OWN vertical bands in px: CSS padding + the visible
+     * border band. These are the two pieces [capPx] adds on top of its N
+     * line boxes, because the modifier chain nests them INSIDE the step-7
+     * overflow node the cap measures. Exposed (rather than inlined in
+     * [capPx]) so the wave-50 census route budgets byte the same band —
+     * two cap routes that disagreed about the band would move every
+     * bordered clamp root by the border width.
+     */
+    fun ownBandsPx(properties: List<Pair<String, JsonElement?>>): Float {
         // Vertical CSS padding — resolved EXACTLY like the padding
         // modifier resolves it (same extractor + resolver + the default
         // context StyleApplier.placeholderFloorMinSize uses), so the band
@@ -156,8 +171,7 @@ object LineClampCap {
         val band = StyleApplier.borderBandInsets(
             BorderSideExtractor.extractBorderConfig(properties)
         )
-        // Sum the block-axis pieces: N line boxes + padding + border band.
-        return lines * lineBox + padTop + padBottom + band[1].value + band[3].value
+        return padTop + padBottom + band[1].value + band[3].value
     }
 
     /**

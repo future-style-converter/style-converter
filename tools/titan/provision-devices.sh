@@ -202,7 +202,11 @@ if (( CUR < WANT_ANDROID )); then
   # asymmetric pool still works; section-runner just has fewer Android slots.
   log "waiting up to 240s for $WANT_ANDROID Android instance(s) to boot…"
   READY=0
-  for (( t=0; t<240; t+=5 )); do
+  # Wall-clock budget (retro 2026-09-07): the iteration count (48 x 5 s) stretched to an HOUR
+  # when each bounded adb call inside the loop took 15-40 s on a wedged server — the loop
+  # counted sleeps, not seconds. `SECONDS` is bash's wall clock.
+  _BOOT_T0=$SECONDS
+  while (( SECONDS - _BOOT_T0 < 240 )); do
     READY=0
     for s in $(_booted_serials); do
       # retro 2026-09-06: BOUNDED — an instance whose adbd never answers made this poll hang 30+ min
@@ -228,7 +232,10 @@ for s in $(_booted_serials); do
   # install with retries; a device that never comes up is skipped with a
   # warning (smaller pool beats a dead provisioning run).
   PM_OK=0
-  for (( t=0; t<120; t+=5 )); do
+  # Wall-clock budget (wave-50 S1): the iteration-counted form ran 24 bounded
+  # 10 s probes + 24 sleeps = up to 370 s against a "120 s" comment.
+  _PM_T0=$SECONDS
+  while (( SECONDS - _PM_T0 < 120 )); do
     if _bounded 10 "$ADB" -s "$s" shell pm path android >/dev/null 2>&1; then PM_OK=1; break; fi
     sleep 5
   done
@@ -264,7 +271,9 @@ done
 mv "$POOL_ROOT/provisioned-android.tmp" "$POOL_ROOT/provisioned-android"
 
 # ── 3. iOS fleet ─────────────────────────────────────────────────────────────
-_booted_udids() { xcrun simctl list devices booted | grep -oE '\([0-9A-F-]{36}\)' | tr -d '()'; }
+# Bounded (wave-50 S1): the file's own history records simctl verbs wedging
+# for 38 minutes; one hung `simctl list` must not outlive any caller's budget.
+_booted_udids() { _bounded 20 xcrun simctl list devices booted | grep -oE '\([0-9A-F-]{36}\)' | tr -d '()'; }
 # retro R8b (A9#6): REUSE before CREATE. Every run that found fewer than
 # WANT_IOS booted sims used to `simctl create` new devices — each a fresh
 # CoreSimulator data dir — even when Shutdown titan-pool-* sims from the
@@ -318,7 +327,11 @@ if (( CUR < WANT_IOS )); then
   # 120s; a sim listed as Booted is ready enough for `simctl install`,
   # which fails loudly on a genuinely broken device.
   log "waiting up to 120s for $WANT_IOS simulator(s) to reach Booted…"
-  for (( t=0; t<120; t+=5 )); do
+  # Wall-clock budget (wave-50 S1): same repair as the two Android polls —
+  # count seconds, not iterations, so a slow `simctl list` cannot stretch the
+  # budget 3x.
+  _IOS_T0=$SECONDS
+  while (( SECONDS - _IOS_T0 < 120 )); do
     (( $(_booted_udids | wc -l | tr -d ' ') >= WANT_IOS )) && break
     sleep 5
   done

@@ -1,0 +1,218 @@
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -9779,6 +9779,75 @@
+ // same stylesheet the `rules` came from (parseCss skips @-rules, so the two
+ // are complementary views of one sheet). Null/omitted = sampling disabled —
+ // the legacy byte-identical path for callers without keyframes (unit tests).
++// ── wave-50 lane B7: DUPLICATED TABLE-INTERNAL TEXT (BACKLOG 5(g), 1(b)) ──
++//
++// A `<table>`/`<tr>` component was shipping its CELLS' text a second time, as
++// its own `_text` and as `{text:…}` entries in its `_runs`. The walker's
++// ownText scan hoists descendant text onto the ancestor (the documented
++// collectSubtreeText approximation), which is harmless for a `<div>` whose
++// kept children render inside it — and NOT harmless inside a table, because
++// CSS 2.1 §17.2.1 "Anonymous table objects" wraps any non-cell child of a
++// table-row in an ANONYMOUS TABLE-CELL. So every duplicate mints a phantom
++// column, and every phantom column steals width from the real ones.
++//
++// MEASURED — the census is exhaustive over the 1435 wave49-final scored
++// tests: FIVE documents put ownText on a table-internal box, and in ALL FIVE
++// that text is exactly the concatenation of the box's own children's text
++// (ASCII whitespace aside). Never independent content:
++//   table | "1 2" childText "12"        (css-backgrounds/animations/
++//   tr    | "1"   childText "1"          background-color-animation-with-
++//   tr    | "2"   childText "2"          table1, table3, table4)
++//   table | "    " childText 3×    (css-contain/contain-content-004)
++//   table | "ABC" childText "ABC" ×10   (css-writing-modes/direction-upright-002)
++//   tr    | "ABC" childText "ABC" ×10
++//
++// What the duplicates cost, from the frozen captures:
++//   • contain-content-004 — each `<tr>` gets [td, dup, td, dup]-shaped
++//     children, so `table-layout: fixed` splits the declared 206px over FOUR
++//     columns: (206 − 5 × 2px border-spacing) / 4 = 49px. The web capture's
++//     white cells measure exactly 49px (x 18–66 and 120–168 in row 1; x
++//     69–117 and 120–168 in row 2 — columns 1,3 and 2,3, the real `<td>`s),
++//     with the blue table background showing through the transparent phantom
++//     cells: 29500 blue pixels on web, 34836 Android, 34636 iOS against the
++//     ref's 2436. The `<table>`'s own duplicate adds an anonymous ROW — the
++//     66px blue band above the real ones, and the reason the green "PASS"
++//     sits at y 226 against the ref's y 192. Cells: web f 0.8448 · iOS
++//     f 0.7940 · Android f 0.8286.
++//   • direction-upright-002 — ten tables, each duplicating "ABC" on the table
++//     AND on its row, which is the canvas blow-up BACKLOG item 1(b) asks to
++//     explain: 390×2805 (web) / 2544 (iOS) / 2316 (Android) against a 390×954
++//     ref, the reference-grade web runtime included.
++//
++// THE GUARD IS PROOF-BASED, not a blanket drop: the duplicate is removed only
++// when the parent's text IS its children's text. Real stray text in a table
++// row (which the browser really does wrap in an anonymous cell) does not
++// match and is kept. ASCII whitespace is normalised out of the comparison —
++// css-text-3 §1.1's set, never String.trim(), which would also eat the
++// U+00A0 that IS content — because the hoisting scan inserts separators.
++const TABLE_INTERNAL_TAGS = new Set([
++  'table', 'thead', 'tbody', 'tfoot', 'tr', 'colgroup', 'col',
++]);
++
++/** css-text-3 §1.1 white space removed, so "1 2" and "12" compare equal. */
++const stripAsciiWhitespace = (t) => String(t ?? '').replace(/[ \t\r\n\f]+/g, '');
++
++/**
++ * wave-50 B7 — does this table-internal box's ownText merely repeat the text
++ * its own kept children already carry?
++ *
++ * @param node a walker tree node (needs `.tag`, `.ownText`, `.children`).
++ * @returns true when `_text` and the run list's text entries must be dropped.
++ */
++export function isDuplicatedTableText(node) {
++  if (!node || !TABLE_INTERNAL_TAGS.has(node.tag)) return false;
++  const own = stripAsciiWhitespace(node.ownText);
++  if (own === '') return false;                    // nothing to duplicate
++  const kids = (node.children ?? []).map((c) => stripAsciiWhitespace(c.ownText)).join('');
++  // Equality is the proof. A row with its own stray text yields own !== kids
++  // and keeps it — §17.2.1 gives THAT text an anonymous cell, correctly.
++  return own === kids;
++}
++
+ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes = null) {
+   const components = {};
+   let lossyOverall = false;
+@@ -10486,7 +10555,11 @@
+     // EXTFIX-A part 2: own text → `_text` field. Only emitted when
+     // non-empty so component fixtures without text (visual-test.json,
+     // fixtures/properties/*) stay byte-identical post-rollout.
+-    if (node.ownText) cmp._text = node.ownText;
++    // wave-50 B7: …and never when it is the CELLS' text repeated on the table
++    // or the row (see the DUPLICATED TABLE-INTERNAL TEXT banner) — CSS 2.1
++    // §17.2.1 turns each repeat into a phantom anonymous cell.
++    const tableDupText = isDuplicatedTableText(node);
++    if (node.ownText && !tableDupText) cmp._text = node.ownText;
+     // wave-22 EX2 B-RC4a: the merged decoration list for a collapsed
+     // inline chain — `_decorations` on the fixture wire, forwarded by the
+     // converter as IR v2 `meta.decorations` (the additive omit-when-absent
+@@ -10573,11 +10646,18 @@
+       // before the loop body only in the sense that it reads the same
+       // formula; the loop below is what actually creates the children.
+       if (node.runs) {
+-        cmp._runs = node.runs.map((entry) => (
+-          entry.childIndex === undefined
+-            ? { text: entry.text }
+-            : { child: `${id}__${entry.childIndex}` }
+-        ));
++        cmp._runs = node.runs
++          // wave-50 B7: the run list is the other half of the same drop — a
++          // `{text:'1'}` run beside the child that already renders "1" would
++          // put the duplicate back, and all three renderers read `_runs` in
++          // preference to `_text`. Child entries are untouched, so document
++          // order survives intact.
++          .filter((entry) => entry.childIndex !== undefined || !tableDupText)
++          .map((entry) => (
++            entry.childIndex === undefined
++              ? { text: entry.text }
++              : { child: `${id}__${entry.childIndex}` }
++          ));
+       }
+       // wave-22 BR-LINE-CONTEXT: fresh line state per sibling scope. The
+       // parent's ownText renders BEFORE its element children (the
+--- /dev/null
++++ b/tools/titan/extract-fixture-table-text.test.mjs
+@@ -0,0 +1,100 @@
++#!/usr/bin/env node
++//
++// Unit tests for the wave-50 lane B7 duplicated-table-text drop in
++// tools/titan/extract-fixture.mjs (BACKLOG queue 5(g) and item 1(b);
++// CSS 2.1 §17.2.1 "Anonymous table objects").
++//
++// Own file, same reason as the other two B7 suites: the change lands as a
++// self-contained patch against a file another lane is editing in the same
++// wave, and `node --test tools/titan/*.test.mjs` picks it up unchanged.
++//
++// The markup below is VERBATIM from the gate corpus — the five documents
++// that are the complete census of ownText on a table-internal box over the
++// 1435 wave49-final scored tests.
++
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++
++import {
++  isDuplicatedTableText, parseCss, buildComponents,
++} from './extract-fixture.mjs';
++
++/** Minimal walker-node shape the predicate reads. */
++const node = (tag, ownText, kids = []) =>
++  ({ tag, ownText, children: kids.map((t) => ({ ownText: t })) });
++
++test('isDuplicatedTableText: only table-internal boxes', () => {
++  // A <div> whose kept children render inside it is the case the ownText
++  // hoist was BUILT for — it must never be touched.
++  assert.equal(isDuplicatedTableText(node('div', 'ABC', ['A', 'B', 'C'])), false);
++  // …and a cell is ordinary flow content too (CSS 2.1 §16.6).
++  assert.equal(isDuplicatedTableText(node('td', 'ABC', ['A', 'B', 'C'])), false);
++  assert.equal(isDuplicatedTableText(node('th', 'ABC', ['A', 'B', 'C'])), false);
++  assert.equal(isDuplicatedTableText(node('caption', 'ABC', ['A', 'B', 'C'])), false);
++  for (const tag of ['table', 'thead', 'tbody', 'tfoot', 'tr', 'colgroup', 'col']) {
++    assert.equal(isDuplicatedTableText(node(tag, 'ABC', ['A', 'B', 'C'])), true, tag);
++  }
++});
++
++test('isDuplicatedTableText: equality is the proof, whitespace aside', () => {
++  // background-color-animation-with-table1's <table>: "1 2" over cells "1","2".
++  assert.equal(isDuplicatedTableText(node('table', '1 2', ['1', '2'])), true);
++  // contain-content-004's <table>: three U+00A0 with an ASCII space between.
++  assert.equal(isDuplicatedTableText(
++    node('table', '    ', ['  ', ' '])), true);
++  // STRAY text in a row is NOT a duplicate — §17.2.1 really does wrap it in
++  // an anonymous cell, so it must survive.
++  assert.equal(isDuplicatedTableText(node('tr', 'stray1', ['1'])), false);
++  assert.equal(isDuplicatedTableText(node('tr', '12', ['1'])), false);
++  // Nothing to duplicate.
++  assert.equal(isDuplicatedTableText(node('tr', '', ['1'])), false);
++  assert.equal(isDuplicatedTableText(node('tr', '   ', ['1'])), false);
++  assert.equal(isDuplicatedTableText(null), false);
++});
++
++test('isDuplicatedTableText: U+00A0 is content, not whitespace', () => {
++  // String.trim() would call a lone &nbsp; empty and delete a box the
++  // browser paints; css-text-3 §1.1 white space is space/tab/CR/LF/FF only.
++  assert.equal(isDuplicatedTableText(node('tr', ' ', [])), false);
++});
++
++test('buildComponents: the row carries the cells once, not twice', () => {
++  // background-color-animation-with-table1, VERBATIM markup. Before the drop
++  // each <tr> shipped `_text: "1"` AND a `{text:"1"}` run beside the <td>
++  // that already renders it — an anonymous phantom cell per row. The web and
++  // iOS captures paint that duplicate (ink out to x 132 / x 38 against the
++  // ref's x 26); Android already suppressed it and passes at 0.9998.
++  const html = '<body><table>\n  <tr><td>1\n  <tr><td>2\n</table></body>';
++  const { components } = buildComponents(html, parseCss('table { width: 160px }'), 'tbl1');
++  const table = Object.values(components).find((c) => c._tag === 'table');
++  assert.ok(table, 'the <table> must survive as its own component');
++  assert.equal(table._text, undefined, 'the table must not repeat its cells');
++  const rows = Object.values(table.children ?? {}).filter((c) => c._tag === 'tr');
++  assert.equal(rows.length, 2);
++  const cellTexts = [];
++  for (const row of rows) {
++    assert.equal(row._text, undefined, 'the row must not repeat its cells');
++    for (const entry of row._runs ?? []) {
++      assert.equal(entry.text, undefined,
++        `run list must carry children only, got ${JSON.stringify(entry)}`);
++    }
++    for (const cell of Object.values(row.children ?? {})) cellTexts.push(cell._text);
++  }
++  // The content itself is untouched — dropped ONCE, not lost.
++  assert.deepEqual(cellTexts, ['1', '2']);
++});
++
++test('buildComponents: a cell keeps its own text', () => {
++  // The guard is scoped to table-internal boxes; a <td>'s own text is
++  // ordinary flow content and must still reach the wire.
++  const html = '<body><table>\n  <tr><td>&nbsp;<td>&nbsp;\n</table></body>';
++  const { components } = buildComponents(html, parseCss('td { color: red }'), 'ws');
++  const table = Object.values(components).find((c) => c._tag === 'table');
++  const row = Object.values(table.children ?? {})[0];
++  const cells = Object.values(row.children ?? {});
++  assert.equal(cells.length, 2);
++  for (const cell of cells) {
++    assert.equal(cell._tag, 'td');
++    assert.equal(cell._text, ' ');
++  }
++});

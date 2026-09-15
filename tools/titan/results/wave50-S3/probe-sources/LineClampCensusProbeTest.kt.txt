@@ -1,0 +1,67 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Independent replay of B9's cross-block line-box census over the frozen corpus.
+
+import com.styleconverter.runtime.content.PseudoBoxFold
+import com.styleconverter.runtime.content.PseudoTextFold
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.ContentsUnboxing
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.scrolling.LineClampCap
+import com.styleconverter.runtime.typography.inline.resolveCapPx
+import org.junit.Test
+import java.io.File
+
+class LineClampCensusProbeTest {
+
+    private val repo = File("../../").canonicalFile
+    private val runDir = File(repo, "tools/titan/runs/wave49-final/sections")
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+
+    @Test fun census() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        val carrierDocs = sortedSetOf<String>()
+        var roots = 0
+        var changed = 0
+        var threw = 0
+        runDir.listFiles()!!.sortedBy { it.name }.forEach { sec ->
+            val irDir = File(sec, "per-test-ir")
+            if (!irDir.isDirectory) return@forEach
+            irDir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }.forEach { f ->
+                val testKey = sec.name + "/" + f.name.removeSuffix(".json")
+                val doc = try { IRDocumentDecoder.decode(f.readText()) } catch (e: Exception) { return@forEach }
+                val comps = try { SlotComposer.compose(doc) } catch (e: Exception) { return@forEach }
+                fun walk(c: IRComponent, inherited: List<IRProperty>) {
+                    // Mirror the renderer's component pipeline before the cap read.
+                    val folded = PseudoBoxFold.resolve(PseudoTextFold.resolve(ContentsUnboxing.resolve(c)).component)
+                    val merged = ComponentRenderer.mergeInherited(folded.properties, inherited)
+                    val pairs = merged.map { it.type to it.data }
+                    val uniform = LineClampCap.capPx(pairs)
+                    if (uniform != null) {
+                        roots++
+                        carrierDocs.add(testKey)
+                        val census = try { LineClampCap.resolveCapPx(folded, pairs) } catch (e: Exception) {
+                            threw++; sb.append("THREW $testKey ${c.id} ${e}\n"); null
+                        }
+                        if (census != uniform) {
+                            changed++
+                            sb.append("CHANGED $testKey ${c.id} uniform=$uniform census=$census\n")
+                        }
+                    }
+                    val inh = merged.filter { it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                    folded.children?.forEach { walk(it, inh) }
+                }
+                comps.forEach { walk(it, emptyList()) }
+            }
+        }
+        sb.insert(0, "clamp-carrier docs=${carrierDocs.size} roots=$roots changed=$changed threw=$threw\n")
+        sb.append("carrier docs: " + carrierDocs.joinToString("\n  ", prefix = "\n  ") + "\n")
+        File(out, "lineclamp-census.txt").writeText(sb.toString())
+        println(sb.toString().lines().first())
+    }
+}

@@ -130,6 +130,13 @@ object InlineSpanRing {
          *  for every horizontal member — the pre-wave-48 shapes all carry
          *  null, so [PLAIN] comparisons are untouched by construction. */
         val shift: VerticalShift? = null,
+        /** Wave 50 (lane B9, the HANGING-WHITESPACE ring): the member's own
+         *  `background-color`, admitted ONLY for a GLYPH-LESS member (see
+         *  [admit]) — a solid band behind its advance width, which
+         *  SpanStyle.background and AttributedString.backgroundColor both
+         *  express per-range. Null for every pre-wave-50 shape, so [PLAIN]
+         *  comparisons are untouched by construction. */
+        val background: Ink? = null,
     ) {
         /** True when no attribute differs from plain inherited text. */
         val isPlain: Boolean get() = this == PLAIN
@@ -191,6 +198,7 @@ object InlineSpanRing {
         tag: String,
         properties: List<IRProperty>,
         hostProperties: List<IRProperty>,
+        glyphless: Boolean = false,
     ): Admission {
         // The UA <u> underline (HTML rendering §15.3.3) seeds the style.
         var ink: Ink? = null
@@ -214,6 +222,8 @@ object InlineSpanRing {
         // beats the sup/sub UA `font-size: smaller` seed (cascade origin
         // order, css-cascade-4 §6.1: author over user agent).
         var declaredFontSize = false
+        // Wave 50 (lane B9) — a GLYPH-LESS member's own background band.
+        var background: Ink? = null
         // Border longhands seen — reported as ONE stated loss when any
         // side actually paints (style keyword present; §3.2 initial none).
         var borderStyleSeen = false
@@ -275,6 +285,41 @@ object InlineSpanRing {
                 "solid", null -> {}
                 else -> return Admission.Refused("member-prop:TextDecorationStyle-unsolid")
             }
+            // ── Wave 50 (lane B9) — the HANGING-WHITESPACE ring ────────
+            // `white-space` is a PARAGRAPH policy: Compose lays the merged
+            // string out under ONE mode, so a member cannot carry its own.
+            // The single exception is a member with NO GLYPHS — its text is
+            // white space and nothing else, so the keyword governs only how
+            // that white space is processed, and the fold can honour it
+            // exactly by appending the run verbatim (css-text-3 §3: `pre`,
+            // `pre-wrap`, `pre-line` and `break-spaces` all PRESERVE
+            // spaces). `normal` / `nowrap` COLLAPSE the run to one space
+            // (§4.1.1) — appending it verbatim would paint 8 spaces where
+            // CSS paints 1, so those refuse rather than lie.
+            "WhiteSpace" -> {
+                if (!glyphless) return Admission.Refused("member-prop:WhiteSpace")
+                when (extractKeywordish(prop.data)?.replace('_', '-')) {
+                    "pre", "pre-wrap", "pre-line", "break-spaces" -> {}
+                    else -> return Admission.Refused("member-prop:WhiteSpace-collapsing")
+                }
+            }
+            // A GLYPH-LESS member's `background-color` (css-backgrounds-3
+            // §2.1) is a solid band over its advance width — the painting
+            // area of an inline box is its content area (§2.11) —
+            // expressible per-range as SpanStyle.background, which is why
+            // it rides here while the ATOM ring still refuses it (an atom
+            // has zero advance, so its band would paint nothing). STATED
+            // APPROXIMATION: Compose paints the band over the range's
+            // layout bounds, which follow the LINE height rather than the
+            // font's content area, so a band on a line taller than its own
+            // font is up to the leading taller than CSS's. Glyph-BEARING
+            // members keep refusing: there the same approximation would
+            // ride behind real text, and no corpus member exercises it.
+            "BackgroundColor" -> {
+                if (!glyphless) return Admission.Refused("member-prop:BackgroundColor")
+                background = extractInk(prop.data)
+                    ?: return Admission.Refused("member-prop:BackgroundColor-unresolved")
+            }
             // css-break-4 §5 — fragments a box paint this ring does not
             // paint; inert alongside the border stated-loss below.
             "BoxDecorationBreak" -> {}
@@ -298,7 +343,7 @@ object InlineSpanRing {
         // report the loss when a style keyword makes the box real.
         val stated = if (borderStyleSeen) listOf("border-box-ink(${losses.joinToString(",")})") else emptyList()
         return Admission.Admitted(
-            Style(ink, sizePx, sizeEm, weight, italic, underline, lineThrough, shift),
+            Style(ink, sizePx, sizeEm, weight, italic, underline, lineThrough, shift, background),
             stated,
         )
     }
@@ -361,6 +406,9 @@ object InlineSpanRing {
             underline = outer.underline || nested.underline,
             lineThrough = outer.lineThrough || nested.lineThrough,
             shift = shift,
+            // `background-color` does NOT inherit (css-backgrounds-3 §2.1):
+            // only the nested box's own band paints over its own range.
+            background = nested.background,
         )
     }
 

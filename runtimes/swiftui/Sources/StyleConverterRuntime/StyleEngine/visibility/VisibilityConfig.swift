@@ -32,4 +32,13 @@ struct VisibilityConfig: Equatable {
     var overflowY: OverflowKind? = nil
     // Touched flag — set by the extractor when anything was declared.
     var touched: Bool = false
+    // Wave 50 lane B11: is this component's box a TABLE TRACK (row / row
+    // group / column / column group)? It is the ONLY input `collapse` needs
+    // beyond the keyword itself — CSS 2.2 §11.2 removes a collapsed track
+    // but treats `collapse` on every other box exactly as `hidden`. Read
+    // from the component's declared `Display` by VisibilityBoxRules
+    // .isTableTrackBox; it deliberately does NOT set `touched`, so a plain
+    // `display: table-row` with no visibility/overflow declaration still
+    // yields a nil config and the identity modifier.
+    var isTableTrackBox: Bool = false
 }

@@ -1,0 +1,58 @@
+docs=1435 components=10708
+=== CHANGED (fill removed) : 22 tests, 23 components ===
+CHANGED css-display/wpt__css-display__display-contents-before-after-003  [wpt__css-display__display-contents-before-after-003__3-024]
+CHANGED css-masking/wpt__css-masking__clip-path__clip-path-contentBox-1d  [wpt__css-masking__clip-path__clip-path-contentbox-1d__1-040]
+CHANGED css-masking/wpt__css-masking__clip-path__clip-path-contentBox-1e  [wpt__css-masking__clip-path__clip-path-contentbox-1e__1-043]
+CHANGED css-multicol/wpt__css-multicol__balance-grid-container  [balance-grid-container__0__0__3__0-088]
+CHANGED css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-022  [line-clamp__block-ellipsis-022__0__0-097]
+CHANGED css-tables/wpt__css-tables__collapsed-border-sideways-rl-rtl-overflow  [wpt__css-tables__collapsed-border-sideways-rl-rtl-overflow__1-190]
+CHANGED css-tables/wpt__css-tables__collapsed-border-vertical-lr-rtl-overflow  [wpt__css-tables__collapsed-border-vertical-lr-rtl-overflow__1-199]
+CHANGED css-tables/wpt__css-tables__collapsed-border-vertical-rtl-overflow  [wpt__css-tables__collapsed-border-vertical-rtl-overflow__1-208]
+CHANGED css-text-decor/wpt__css-text-decor__text-decoration-propagation-02  [text-decoration-propagation-02__0__0-216]
+CHANGED css-text-decor/wpt__css-text-decor__text-decoration-propagation-03  [text-decoration-propagation-03__0__0-218]
+CHANGED css-transforms/wpt__css-transforms__backface-visibility-hidden-006  [backface-visibility-hidden-006__0__0-064]
+CHANGED css-writing-modes/wpt__css-writing-modes__baseline-with-orthogonal-flow-001  [wpt__css-writing-modes__baseline-with-orthogonal-flow-001__4-408,wpt__css-writing-modes__baseline-with-orthogonal-flow-001__5-410]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-001  [wpt__css-writing-modes__ch-units-vrl-001__4-445]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-002  [wpt__css-writing-modes__ch-units-vrl-002__4-453]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-003  [wpt__css-writing-modes__ch-units-vrl-003__4-462]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-004  [wpt__css-writing-modes__ch-units-vrl-004__4-471]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-005  [wpt__css-writing-modes__ch-units-vrl-005__3-478]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-006  [wpt__css-writing-modes__ch-units-vrl-006__3-486]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-007  [wpt__css-writing-modes__ch-units-vrl-007__3-495]
+CHANGED css-writing-modes/wpt__css-writing-modes__ch-units-vrl-008  [wpt__css-writing-modes__ch-units-vrl-008__3-504]
+CHANGED css-writing-modes/wpt__css-writing-modes__inline-box-orthogonal-child-with-margins  [wpt__css-writing-modes__inline-box-orthogonal-child-with-margins__0-869]
+CHANGED filter-effects/wpt__filter-effects__backdrop-filter-image-size-filter-size-mismatch  [wpt__filter-effects__backdrop-filter-image-size-filter-size-mismatch__1-139]
+=== DECLARED-ATOMIC auto-width carriers : 33 tests ===
+ATOMIC css-contain/wpt__css-contain__contain-inline-size-intrinsic  contain-inline-size-intrinsic__2__0-148|vwm=true|role=NONE|selfAlign=false ; contain-inline-size-intrinsic__2__1-149|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-display/wpt__css-display__display-contents-before-after-003  wpt__css-display__display-contents-before-after-003__3-024|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-masking/wpt__css-masking__clip-path__clip-path-contentBox-1d  wpt__css-masking__clip-path__clip-path-contentbox-1d__1-040|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-masking/wpt__css-masking__clip-path__clip-path-contentBox-1e  wpt__css-masking__clip-path__clip-path-contentbox-1e__1-043|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-multicol/wpt__css-multicol__balance-grid-container  balance-grid-container__0__0__3__0-088|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-022  line-clamp__block-ellipsis-022__0__0-097|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-tables/wpt__css-tables__collapsed-border-sideways-rl-rtl-overflow  wpt__css-tables__collapsed-border-sideways-rl-rtl-overflow__1-190|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-tables/wpt__css-tables__collapsed-border-vertical-lr-rtl-overflow  wpt__css-tables__collapsed-border-vertical-lr-rtl-overflow__1-199|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-tables/wpt__css-tables__collapsed-border-vertical-rtl-overflow  wpt__css-tables__collapsed-border-vertical-rtl-overflow__1-208|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-text-decor/wpt__css-text-decor__text-decoration-propagation-02  text-decoration-propagation-02__0__0-216|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-text-decor/wpt__css-text-decor__text-decoration-propagation-03  text-decoration-propagation-03__0__0-218|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-transforms/wpt__css-transforms__backface-visibility-hidden-006  backface-visibility-hidden-006__0__0-064|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-001  available-size-001__1__1__0-347|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-002  available-size-002__1__0__1__0-353|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-003  available-size-003__1__1__0__0-359|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-004  available-size-004__1__1__0__0-365|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-005  available-size-005__1__1__1__0-372|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-012  available-size-012__1__1__0-380|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-013  available-size-013__1__1__0__0-386|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-014  available-size-014__1__1__1__0-393|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-017  available-size-017__1__1__0-398|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__available-size-018  available-size-018__1__1__0-403|vwm=true|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__baseline-with-orthogonal-flow-001  wpt__css-writing-modes__baseline-with-orthogonal-flow-001__4-408|vwm=false|role=NONE|selfAlign=false ; wpt__css-writing-modes__baseline-with-orthogonal-flow-001__5-410|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-001  wpt__css-writing-modes__ch-units-vrl-001__4-445|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-002  wpt__css-writing-modes__ch-units-vrl-002__4-453|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-003  wpt__css-writing-modes__ch-units-vrl-003__4-462|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-004  wpt__css-writing-modes__ch-units-vrl-004__4-471|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-005  wpt__css-writing-modes__ch-units-vrl-005__3-478|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-006  wpt__css-writing-modes__ch-units-vrl-006__3-486|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-007  wpt__css-writing-modes__ch-units-vrl-007__3-495|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__ch-units-vrl-008  wpt__css-writing-modes__ch-units-vrl-008__3-504|vwm=false|role=NONE|selfAlign=false
+ATOMIC css-writing-modes/wpt__css-writing-modes__inline-box-orthogonal-child-with-margins  wpt__css-writing-modes__inline-box-orthogonal-child-with-margins__0-869|vwm=false|role=NONE|selfAlign=false
+ATOMIC filter-effects/wpt__filter-effects__backdrop-filter-image-size-filter-size-mismatch  wpt__filter-effects__backdrop-filter-image-size-filter-size-mismatch__1-139|vwm=false|role=NONE|selfAlign=false

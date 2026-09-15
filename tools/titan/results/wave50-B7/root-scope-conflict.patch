@@ -1,0 +1,235 @@
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -6182,6 +6182,35 @@
+  * into the body-root's `cmp._pseudo`, so the generated box renders as a real
+  * pseudo box on the root instead of vandalising the body's bag.
+  */
++// wave-50 B7 — the background family css-backgrounds-3 §2.11.2 propagates
++// from the root element to the canvas. Every spelling a root-scope rule can
++// carry is listed, or half a background would change scope while the other
++// half did not: the shorthand, the eight css-backgrounds-3 longhands, the two
++// css-backgrounds-4 position axes Blink accepts, and `background-blend-mode`
++// (css-compositing-1 §5.2), which propagates with the rest.
++const CANVAS_BACKGROUND_PROPS = new Set([
++  'background', 'background-color', 'background-image', 'background-repeat',
++  'background-attachment', 'background-position', 'background-position-x',
++  'background-position-y', 'background-clip', 'background-origin',
++  'background-size', 'background-blend-mode',
++]);
++
++/**
++ * wave-50 B7 — which of the three root scopes a parsed root-scope compound
++ * belongs to. A bare `:root` (no tag) IS the root element (Selectors-4 §8.1),
++ * so it ranks with `html`; `*` matches both boxes and is tracked separately
++ * so the conflict pass can leave it alone.
++ *
++ * @param parsed a parseCompound() result already accepted as root-scope.
++ * @returns 'star' | 'html' | 'body'
++ */
++function rootScopeOf(parsed) {
++  if (parsed.needTag === 'body') return 'body';
++  if (parsed.needTag === '*') return 'star';
++  // 'html', or a bare `:root` — both name the root element.
++  return 'html';
++}
++
+ export function propsForBodyRoot(rules) {
+   const props = {};
+   // wave-27 A-RC2: per-pseudo-element bucket for root-scope `::before` /
+@@ -6189,6 +6218,20 @@
+   // declaration dict — the same shape (and the same last-write-wins cascade)
+   // `propsForElement` builds, so the emit site can treat both identically.
+   const pseudo = {};
++  // ── wave-50 lane B7: ROOT-SCOPE CONFLICT RESOLUTION (BACKLOG queue 5(g)) ──
++  // The declarations merged below come from TWO DIFFERENT ELEMENTS (<html>
++  // and <body>) that this extractor folds onto ONE synthetic component.
++  // Merging them by source order alone is a category error: css-cascade-5 §6
++  // orders the declarations that apply to a SINGLE element, and an `html`
++  // rule never competes with a `body` rule — they style different boxes. So
++  // whichever rule happened to come LAST silently deleted the other's value.
++  //
++  // These bags record WHICH SCOPE last wrote each key, so the conflicting
++  // keys — and only those — can be re-decided after the loop. `props` itself
++  // keeps accumulating exactly as before, which keeps insertion order (and
++  // therefore the emitted property order, and therefore the IR bytes) stable
++  // for every document that has no conflict.
++  const scoped = { star: {}, html: {}, body: {} };
+   let matchedRules = 0;
+   for (const r of rules) {
+     // We treat body / html / * / :root (and combinations like `html, body`)
+@@ -6277,7 +6320,55 @@
+     // Same guard for the flat body/html root bag: a later root-scope rule
+     // may not delete an earlier valid declaration with an invalid one.
+     assignDeclarations(props, r.props);
++    // wave-50 B7: the same declarations, recorded per SCOPE (same assign, so
++    // the same validity guard and the same last-write-wins WITHIN a scope).
++    assignDeclarations(scoped[rootScopeOf(parsed)], r.props);
+   }
++  // wave-50 B7 — re-decide ONLY the keys that <html> and <body> both declare
++  // (see the ROOT-SCOPE CONFLICT RESOLUTION banner). Overwriting an existing
++  // key leaves its position in the bag untouched, so a document with no
++  // conflict emits byte-identical IR.
++  //
++  // The tie-break is PER FAMILY, because the one component stands in for both
++  // boxes:
++  //   - the CANVAS BACKGROUND is the root element's (css-backgrounds-3
++  //     §2.11.2 — the body's background properties propagate to the canvas
++  //     only when the root's are transparent), so an html-scope background
++  //     declaration wins over a body-scope one;
++  //   - every other property on this component describes the BODY box it
++  //     renders — its size, its clip, its margins — so body scope wins.
++  //
++  // MEASURED, and the census is exhaustive: over the 1435 wave49-final scored
++  // tests exactly THREE documents declare the same property at html scope and
++  // at body scope with different values, and all nine of their cells fail:
++  //   • css-contain/contain-html-overflow-002 — `html { height: 400px }` vs
++  //     `body { height: 200px }`. html won, so the root came out 200×400
++  //     carrying body's `overflow: hidden`; the 200×200 <p> and the 200×200
++  //     red <div> then both FIT and nothing was clipped, which is why the
++  //     capture paints the red square the ref forbids (wave49-final web f
++  //     0.8709 · iOS f 0.8705 · Android f 0.8698, novelInkFailed on all
++  //     three). Its six siblings contain-{body,html}-overflow-001/003/004 are
++  //     byte-identical documents whose <html> rule declares only `contain:`
++  //     — no conflict, so the root keeps body's 200px — and all six PASS at
++  //     1.0000 / 0.9996 / 0.9989. The conflict IS the whole difference.
++  //   • CSS2/css21-errata/s-11-1-1b-005 — `html { background: white }` vs
++  //     `body { background: black }`. body won by source order, so the root
++  //     component flooded the canvas: the web capture is 234000/234000 pixels
++  //     BLACK against a ref that is white with one line of text (web/iOS/
++  //     Android all f 0.0001). The background family reverses the rank, so
++  //     the root's white is restored.
++  //   • css-writing-modes/inline-box-border-vlr-001 — `html { margin: 0 }` vs
++  //     `body { margin: 1em }`; body already won by source order, so it comes
++  //     out byte-identical under this rule.
++  // NAMED RESIDUAL, not silently folded in: a `*` root-scope rule that
++  // conflicts with an `html`/`body` one is still decided by source order, not
++  // by Selectors-4 §17 specificity. Zero documents in the census hit it.
++  for (const key of Object.keys(scoped.body)) {
++    if (scoped.html[key] === undefined) continue;         // no conflict
++    props[key] = CANVAS_BACKGROUND_PROPS.has(key)
++      ? scoped.html[key]                                  // canvas background
++      : scoped.body[key];                                 // the body box
++  }
+   // css-lists-3 §3.1: a `::marker` box is generated ONLY by a box with
+   // `display: list-item`. The acceptance rules above deliberately admit a
+   // BARE `::marker { … }` (no tag ⇒ `hasRootMarker` true), which is a
+--- /dev/null
++++ b/tools/titan/extract-fixture-root-scope.test.mjs
+@@ -0,0 +1,117 @@
++#!/usr/bin/env node
++//
++// Unit tests for the wave-50 lane B7 root-scope conflict resolution in
++// propsForBodyRoot (tools/titan/extract-fixture.mjs; BACKLOG queue 5(g)).
++//
++// Own file, same reason as extract-fixture-ua-hr.test.mjs: the bake lands as
++// a self-contained patch against a file another lane is editing in the same
++// wave, and `node --test tools/titan/*.test.mjs` picks it up with no runner
++// change.
++//
++// Every stylesheet below is VERBATIM from the gate corpus — the three
++// documents that are the complete html-vs-body conflict census over the 1435
++// wave49-final scored tests.
++
++import { test } from 'node:test';
++import assert from 'node:assert/strict';
++
++import { parseCss, propsForBodyRoot } from './extract-fixture.mjs';
++
++/** Merge a stylesheet through the root-scope collector. */
++const root = (css) => propsForBodyRoot(parseCss(css)).props;
++
++test('propsForBodyRoot: <body> wins a geometry conflict with <html>', () => {
++  // css-contain/contain-html-overflow-002, VERBATIM. `html { height: 400px }`
++  // came LAST in source order and used to delete body's 200px, which made the
++  // synthetic root a 200×400 clipper that clipped nothing — so the red <div>
++  // the ref forbids got painted (wave49-final web f 0.8709 · iOS f 0.8705 ·
++  // Android f 0.8698).
++  const props = root(`
++html, body, p, div {
++    margin: 0;
++    width: 200px;
++    height: 200px;
++}
++div { background: red; }
++body {
++    overflow: hidden;
++}
++html {
++    height: 400px;
++    contain: paint;
++}`);
++  assert.equal(props.height, '200px');     // the body box's own height
++  assert.equal(props.width, '200px');      // no conflict — unchanged
++  assert.equal(props.overflow, 'hidden');  // body-only — unchanged
++  assert.equal(props.contain, 'paint');    // html-only — unchanged
++});
++
++test('propsForBodyRoot: <html> wins the canvas background', () => {
++  // CSS2/css21-errata/s-11-1-1b-005, VERBATIM. body's black used to win by
++  // source order and flooded the canvas — the wave49-final web capture is
++  // 234000/234000 pixels black against a white ref (all three f 0.0001).
++  // css-backgrounds-3 §2.11.2 puts the root element's background on the
++  // canvas; body's propagates only when the root's is transparent.
++  const props = root(`
++ html { overflow:hidden; display:table; border-spacing:0; background:white; margin:40px 8px 8px }
++ head { display:caption; margin-bottom:10px }
++ body { display:table-cell; width:20px; height:20px; margin-top:-15px; background:black }
++ p { position:absolute; top:0 }`);
++  assert.equal(props.background, 'white');       // canvas → root element
++  assert.equal(props.display, 'table-cell');     // geometry → body box
++  assert.equal(props.overflow, 'hidden');        // html-only — unchanged
++});
++
++test('propsForBodyRoot: a conflict body already won stays byte-identical', () => {
++  // css-writing-modes/inline-box-border-vlr-001, VERBATIM — body's `margin`
++  // already came last, so this document must not move at all.
++  const props = root(`
++html {
++  margin: 0;
++  font-size: 20px;
++}
++body {
++  margin: 1em;
++  border: 1px solid blue;
++}
++body > div {
++  margin-bottom: 2em;
++  border: 1px solid black;
++}`);
++  assert.equal(props.margin, '1em');
++  assert.equal(props['font-size'], '20px');      // html-only — still folded
++  assert.equal(props.border, '1px solid blue');  // body-only — still folded
++});
++
++test('propsForBodyRoot: no conflict ⇒ source order, and key order, untouched', () => {
++  // contain-html-overflow-001 is byte-identical to -002 except its <html>
++  // rule declares only `contain:` — no conflict, so nothing may change. The
++  // KEY ORDER matters as much as the values: it becomes the emitted IR
++  // property order, so the repair must overwrite in place, never re-merge.
++  const props = root(`
++html, body, p, div {
++    margin: 0;
++    width: 200px;
++    height: 200px;
++}
++div { background: red; }
++body {
++    overflow: hidden;
++}
++html {
++    contain: layout;
++}`);
++  assert.equal(props.height, '200px');
++  assert.deepEqual(Object.keys(props),
++    ['margin', 'width', 'height', 'overflow', 'contain']);
++});
++
++test('propsForBodyRoot: `:root` counts as the html scope', () => {
++  // Selectors-4 §8.1 — `:root` IS the document root element, so a geometry
++  // conflict against `body` resolves the same way a bare `html` one does.
++  const props = root(':root { height: 400px } body { height: 200px }');
++  assert.equal(props.height, '200px');
++  // …and the background family reverses, for `:root` exactly as for `html`.
++  const bg = root(':root { background: white } body { background: black }');
++  assert.equal(bg.background, 'white');
++});

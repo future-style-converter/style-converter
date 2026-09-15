@@ -1,0 +1,244 @@
+{
+  "_note": "wave50-B10 · scored cells whose match reference draws its decoration boxes at a negative z-index",
+  "scoredTestsExamined": 1435,
+  "unresolvedMatchLink": 68,
+  "affectedTests": 8,
+  "erasedTests": 6,
+  "affectedCells": 24,
+  "erasedCells": 18,
+  "failingCells": 10,
+  "rows": [
+    {
+      "section": "css-gaps",
+      "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+      "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-033-ref.html",
+      "pixelProof": {
+        "live": 0,
+        "fixed": 5200,
+        "erased": true
+      },
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.94
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 1,
+        "iOS-web": 0.94,
+        "Android-web": 0.94
+      }
+    },
+    {
+      "section": "css-gaps",
+      "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+      "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-034-ref.html",
+      "pixelProof": {
+        "live": 0,
+        "fixed": 2500,
+        "erased": true
+      },
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.9458
+        },
+        "ios": {
+          "verdict": "f",
+          "ssim": 0.9466
+        },
+        "android": {
+          "verdict": "f",
+          "ssim": 0.9466
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 1,
+        "iOS-web": 0.9968,
+        "Android-web": 0.9968
+      }
+    },
+    {
+      "section": "css-gaps",
+      "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+      "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-035-ref.html",
+      "pixelProof": {
+        "live": 0,
+        "fixed": 4050,
+        "erased": true
+      },
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.9206
+        },
+        "ios": {
+          "verdict": "f",
+          "ssim": 0.922
+        },
+        "android": {
+          "verdict": "f",
+          "ssim": 0.922
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 1,
+        "iOS-web": 0.9951,
+        "Android-web": 0.9951
+      }
+    },
+    {
+      "section": "css-gaps",
+      "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+      "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-036-ref.html",
+      "pixelProof": {
+        "live": 0,
+        "fixed": 2050,
+        "erased": true
+      },
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9557
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9565
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9565
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 1,
+        "iOS-web": 0.9973,
+        "Android-web": 0.9973
+      }
+    },
+    {
+      "section": "css-gaps",
+      "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+      "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-037-ref.html",
+      "pixelProof": {
+        "live": 0,
+        "fixed": 2050,
+        "erased": true
+      },
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9568
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9576
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9576
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 1,
+        "iOS-web": 0.9973,
+        "Android-web": 0.9973
+      }
+    },
+    {
+      "section": "css-text",
+      "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+      "ref": "tools/wpt/css/css-text/hanging-punctuation/reference/hanging-punctuation-block-bound-001-ref.html",
+      "pixelProof": {
+        "live": 0,
+        "fixed": 58184,
+        "erased": true
+      },
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.7567
+        },
+        "ios": {
+          "verdict": "f",
+          "ssim": 0.744
+        },
+        "android": {
+          "verdict": "f",
+          "ssim": 0.6796
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 0.7038,
+        "iOS-web": 0.7018,
+        "Android-web": 0.8426
+      }
+    },
+    {
+      "section": "css-view-transitions",
+      "test": "css/css-view-transitions/css-tags-paint-order-with-entry.html",
+      "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-with-entry-ref.html",
+      "pixelProof": {
+        "live": 234000,
+        "fixed": 234000,
+        "erased": false
+      },
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9791
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9791
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9791
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 1,
+        "iOS-web": 1,
+        "Android-web": 1
+      }
+    },
+    {
+      "section": "css-view-transitions",
+      "test": "css/css-view-transitions/css-tags-paint-order.html",
+      "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-ref.html",
+      "pixelProof": {
+        "live": 234000,
+        "fixed": 234000,
+        "erased": false
+      },
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9791
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9791
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9791
+        }
+      },
+      "nativeParity": {
+        "iOS-Android": 1,
+        "iOS-web": 1,
+        "Android-web": 1
+      }
+    }
+  ]
+}

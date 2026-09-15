@@ -100,10 +100,47 @@ data class GapRuleSpec(
 data class GapDecorationConfig(
     val column: GapRuleSpec = GapRuleSpec(),
     val row: GapRuleSpec = GapRuleSpec(),
-    val overlap: GapRuleOverlap = GapRuleOverlap.ROW_OVER_COLUMN
+    val overlap: GapRuleOverlap = GapRuleOverlap.ROW_OVER_COLUMN,
+    // ── wave 50 lane B10: the three facts GapDecorationBands needs ──────
+    // They are NOT gap-decoration properties; they are the flex container's
+    // own `row-gap` / `column-gap` / `align-content`, read here because the
+    // painter has the component's property list and no other channel to the
+    // layout (see GapDecorationBands' banner for why the band arithmetic is
+    // re-run instead of threaded).
+    /**
+     * Used `row-gap` in IR px (== dp), or null for NOT KNOWN — which is
+     * both the default and what an unresolved wire value (`calc()`, a
+     * percentage, `var()`) decodes to. The extractor supplies 0f for an
+     * absent property, because the CSS initial `normal` is 0 on a flex
+     * container (css-align-3 §8); null is reserved for "cannot say", and
+     * GapDecorationBands refuses to reconstruct on it. Defaulting to null
+     * rather than 0f is deliberate: a caller that constructs a config
+     * without stating the container's gaps keeps the pre-wave-50
+     * item-union geometry instead of silently getting a band
+     * reconstruction built on an invented gap.
+     */
+    val rowGapPx: Float? = null,
+    /** Used `column-gap`; same contract as [rowGapPx]. */
+    val columnGapPx: Float? = null,
+    /**
+     * True when `align-content` DISTRIBUTES leftover cross space into the
+     * lines — `normal` (the flex initial) and `stretch` only, css-align-3
+     * §5.1. Every other keyword positions the line block and leaves the
+     * lines content-sized.
+     */
+    val alignContentStretches: Boolean = true
 ) {
     /** True when this container paints any gap decoration at all. */
     val active: Boolean get() = column.paints || row.paints
+
+    /**
+     * The CROSS-axis gap for a container with this main axis: a
+     * row-direction container's lines are separated by `row-gap`, a
+     * column-direction container's by `column-gap` (css-align-3 §8 names
+     * the gaps after the axis they open, not after the flex axis).
+     */
+    fun crossGapPx(mainHorizontal: Boolean): Float? =
+        if (mainHorizontal) rowGapPx else columnGapPx
 
     /** The spec for a given family — used by the painter's per-segment dispatch. */
     fun specFor(axis: GapAxis): GapRuleSpec = when (axis) {

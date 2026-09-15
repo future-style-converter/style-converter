@@ -1,0 +1,74 @@
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextStyleApplier.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextStyleApplier.kt
+index 15c92de0..b6cf9907 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextStyleApplier.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TextStyleApplier.kt
+@@ -747,7 +747,14 @@ object TextStyleApplier {
+             Shadow(
+                 color = color,
+                 offset = Offset(offsetX, offsetY),
+-                blurRadius = blurRadius
++                // Wave 50 (lane B8) — the CSS→Skia blur conversion, identical
++                // to TextShadowConfig.toShadow (see its KDoc for the full
++                // derivation): css-text-decor-4 §2.6 → css-backgrounds-3
++                // §6.1.2 σ = r/2, while Compose's Shadow.blurRadius reaches
++                // Paint.setShadowLayer raw and Skia reads it as
++                // σ = 0.57735·radius + 0.5.
++                blurRadius = com.styleconverter.runtime.effects.shadow.ShadowApplier
++                    .blurMaskRadius(blurRadius)
+             )
+         } catch (e: Exception) {
+             null
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyConfig.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyConfig.kt
+index 97f7955e..f5cbeba3 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyConfig.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/TypographyConfig.kt
+@@ -175,11 +175,28 @@ data class TextShadowConfig(
+ ) {
+     /**
+      * Convert to Compose Shadow.
++     *
++     * Wave 50 (lane B8) — the blur radius is CONVERTED, not passed through.
++     * css-text-decor-4 §2.6 gives `text-shadow` the same blur semantics as
++     * `box-shadow`, and css-backgrounds-3 §6.1.2 defines that blur radius `r`
++     * as a Gaussian with standard deviation `r / 2` (Blink: skia_utils
++     * BlurRadiusToStdDev). Compose hands `Shadow.blurRadius` straight to
++     * `android.graphics.Paint.setShadowLayer` (AndroidTextPaint.setShadow →
++     * correctBlurRadius, which only replaces an exact 0), and Skia maps THAT
++     * radius to σ = 0.57735·radius + 0.5 (SkBlurMask::ConvertRadiusToSigma).
++     * Passing the CSS radius raw therefore blurred at σ = 0.577·r + 0.5 —
++     * 1.25× too wide at r = 10, 1.4× at r = 4 — against iOS, which divides by
++     * two (`ComponentRenderer.GlyphShadows`: `radius: l.radius / 2`, SwiftUI's
++     * `.shadow(radius:)` parameter IS σ) and against web's native rendering.
++     * [com.styleconverter.runtime.effects.shadow.ShadowApplier.blurMaskRadius]
++     * is the same inversion the box-shadow painters already use; reusing it
++     * keeps ONE definition of the CSS→Skia blur map in the runtime.
+      */
+     fun toShadow(): Shadow = Shadow(
+         color = color,
+         offset = Offset(offsetX.value, offsetY.value),
+-        blurRadius = blurRadius.value
++        blurRadius = com.styleconverter.runtime.effects.shadow.ShadowApplier
++            .blurMaskRadius(blurRadius.value)
+     )
+ }
+ 
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/TypographyWave2Test.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/TypographyWave2Test.kt
+index e4f31573..49eb4b8a 100644
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/TypographyWave2Test.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/TypographyWave2Test.kt
+@@ -106,7 +106,14 @@ class TypographyWave2Test {
+         assertNotNull(shadow)
+         assertEquals(2f, shadow!!.offset.x)
+         assertEquals(2f, shadow.offset.y)
+-        assertEquals(4f, shadow.blurRadius)
++        // Wave 50 (lane B8): the blur is CONVERTED, not passed through.
++        // css-text-decor-4 §2.6 → css-backgrounds-3 §6.1.2 make a 4px blur a
++        // Gaussian with σ = 2; Compose hands this field to
++        // Paint.setShadowLayer, whose Skia map is σ = 0.57735·radius + 0.5, so
++        // the radius that yields σ = 2 is (2 − 0.5) / 0.57735 = 2.598. The old
++        // expectation (4f, the raw CSS radius) pinned σ = 2.81 — 1.4× too wide
++        // against iOS's `radius / 2` and web's native text-shadow.
++        assertEquals(2.598f, shadow.blurRadius, 0.001f)
+     }
+ 
+     // ---- text-emphasis IR shapes (Typography_C16 0.842 / C17 0.898) ----

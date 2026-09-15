@@ -1,0 +1,269 @@
+{
+ "_note": "WAVE-50 SKEPTIC LANE S2 \u2014 the extractor differential. Method reproduced from tools/titan/results/wave50-B1/recovert-differential.json: two runner dirs (HEAD's tools/titan/extract-fixture.mjs vs the working-tree file, every other tools/titan entry symlinked from the repo), WPT_DIR=<repo>/tools/wpt, WPT_FIXTURES_ROOT per side, STATIC path on both sides (POST_LOAD_EXTRACT / BIDI_BAKE / VT_BAKE unset), all 1435 corpus tests (union of the 30 tools/titan/runs/wave49-final/sections/*/tests.list), then build-combined-fixture.mjs per section, `java -cp <converter/build/install/converter/lib/*.jar> app.MainKt convert --from css --to ir` from ONE snapshot of converter/build taken before S5 rebuilt it, split-combined-ir.mjs, diff -rq. Apparatus cross-check: my BASE per-test-IR differs from wave49-final's in 615 of 1435 documents \u2014 B1's exact number \u2014 and my base angle-units-001 IR is byte-identical to wave49-final's, as B1 claimed.",
+ "generatedBy": "wave-50 skeptic lane S2",
+ "date": "2026-09-14",
+ "treeSha256OfExtractFixture": "adb1e195033b32beb3fcbd4fa84a0cdecfc5245c65f964d840530fd9164f4493",
+ "headCommit": "747b28e4",
+ "totals": {
+  "corpusTests": 1435,
+  "fixtureFilesCompared": 2870,
+  "fixtureFilesChanged": 29,
+  "distinctTestsWithChangedTestFixture": 17,
+  "refOnlyFixturesChanged": 1,
+  "perTestIrDocumentsCompared": 1435,
+  "perTestIrDocumentsChanged": 16,
+  "componentsAddedOrRemoved": 0,
+  "irV2SchemaInvalidDocuments": 0
+ },
+ "changedDocuments": [
+  {
+   "test": "css/CSS2/cascade/inherit-computed-002.html",
+   "perTestIr": "wpt__CSS2__cascade__inherit-computed-002.json",
+   "lane": "B4 autoclose",
+   "predicted": true,
+   "change": "root loses duplicated _text 'All borders are the same thickness.' and its meta.runs",
+   "wave49Cells": "web f 0.6001 | ios f 0.6003 | android f 0.6007"
+  },
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "perTestIr": "wpt__CSS2__css21-errata__s-11-1-1b-005.json",
+   "lane": "B7 root-scope",
+   "predicted": true,
+   "change": "root BackgroundColor black -> white",
+   "wave49Cells": "web f 0.0001 | ios f 0.0001 | android f 0.0001"
+  },
+  {
+   "test": "css/css-backgrounds/animations/background-color-animation-with-table1.html",
+   "perTestIr": "wpt__css-backgrounds__animations__background-color-animation-with-table1.json",
+   "lane": "B4 autoclose (B7 table-duplicate-text is a strict subset)",
+   "predicted": true,
+   "change": "table loses text '1 2'; both tr lose text + runs",
+   "wave49Cells": "web f 0.9884 | ios f 0.9904 | android P 0.9998"
+  },
+  {
+   "test": "css/css-backgrounds/animations/background-color-animation-with-table3.html",
+   "perTestIr": "wpt__css-backgrounds__animations__background-color-animation-with-table3.json",
+   "lane": "B4 autoclose (B7 table subset)",
+   "predicted": true,
+   "change": "same as table1",
+   "wave49Cells": "web f 0.9884 | ios f 0.9904 | android P 0.9998"
+  },
+  {
+   "test": "css/css-backgrounds/animations/background-color-animation-with-table4.html",
+   "perTestIr": "wpt__css-backgrounds__animations__background-color-animation-with-table4.json",
+   "lane": "B4 autoclose (B7 table subset)",
+   "predicted": true,
+   "change": "same as table1",
+   "wave49Cells": "web f 0.9884 | ios f 0.9904 | android f 0.9888"
+  },
+  {
+   "test": "css/css-contain/contain-content-004.html",
+   "perTestIr": "wpt__css-contain__contain-content-004.json",
+   "lane": "B4 autoclose (B7 table subset)",
+   "predicted": true,
+   "change": "table + 2 tr lose duplicated U+00A0 text",
+   "wave49Cells": "web f 0.8448 | ios f 0.7940 | android f 0.8286"
+  },
+  {
+   "test": "css/css-contain/contain-html-overflow-002.html",
+   "perTestIr": "wpt__css-contain__contain-html-overflow-002.json",
+   "lane": "B7 root-scope",
+   "predicted": true,
+   "change": "root Height 400px -> 200px",
+   "wave49Cells": "web f 0.8709 | ios f 0.8705 | android f 0.8698"
+  },
+  {
+   "test": "css/css-counter-styles/counter-style-at-rule/broken-symbols.html",
+   "perTestIr": "wpt__css-counter-styles__counter-style-at-rule__broken-symbols.json",
+   "lane": "B4 autoclose",
+   "predicted": true,
+   "change": "ol loses duplicated item text + runs",
+   "wave49Cells": "web P 0.9749 | ios f 0.9486 | android f 0.9490"
+  },
+  {
+   "test": "css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html",
+   "perTestIr": "wpt__css-counter-styles__counter-style-at-rule__descriptor-suffix.json",
+   "lane": "B4 autoclose",
+   "predicted": true,
+   "change": "2 components lose duplicated item text",
+   "wave49Cells": "web f 0.9251 | ios f 0.9317 | android f 0.9323"
+  },
+  {
+   "test": "css/css-counter-styles/counter-style-at-rule/disclosure-styles.html",
+   "perTestIr": "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles.json",
+   "lane": "B4 autoclose",
+   "predicted": true,
+   "change": "9 components lose duplicated item text",
+   "wave49Cells": "see wave49-final manifest"
+  },
+  {
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "perTestIr": "wpt__css-counter-styles__counter-suffix.json",
+   "lane": "B4 autoclose",
+   "predicted": true,
+   "change": "6 components lose duplicated item text",
+   "wave49Cells": "web f 0.8867 | ios x | android x",
+   "caveat": "GATE PATH DIFFERS: wave49-final ran this test through [bidi-bake: baked - 2 roots, 4 runs] [stale-runs dropped: 2] [counter-bake: baked - 10 markers]; the static differential does not predict the baked result."
+  },
+  {
+   "test": "css/css-images/gradient/gradient-hue-direction.html",
+   "perTestIr": "wpt__css-images__gradient__gradient-hue-direction.json",
+   "lane": "B7 ua-hr",
+   "predicted": true,
+   "change": "3 hr components: Width 100px DROPPED, Height 100px -> 0px, + Display BLOCK, BoxSizing CONTENT_BOX, Border{Top,Right,Bottom,Left}{Width 1px, Style INSET, Color #eeeeee}, MarginTop/Bottom 8px, OverflowX/Y HIDDEN",
+   "wave49Cells": "web f 0.6241 | ios f 0.6235 | android f 0.6230"
+  },
+  {
+   "test": "css/css-pseudo/active-selection-057.html",
+   "perTestIr": "(IR BYTE-IDENTICAL)",
+   "lane": "B7 ua-hr (declined breadcrumb only)",
+   "predicted": true,
+   "change": "fixture gains _wpt.lossy=true + _lossyReasons ['ua-hr-separator-declined'] on the hr component; the per-test IR is byte-identical, as B7 claimed",
+   "wave49Cells": "web P 1.0000 | ios P 0.9994 | android P 0.9986"
+  },
+  {
+   "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+   "perTestIr": "wpt__css-tables__border-collapse-dynamic-col-001.json",
+   "lane": "B5 seam-S2 col placeholder",
+   "predicted": false,
+   "change": "3 <col> components lose Width 100px + Height 100px (4 more in the __ref fixture)",
+   "wave49Cells": "web P 1.0000 | ios f 0.9404 | android P 0.9812",
+   "defect": "OUTSIDE THE UNION \u2014 see defects[0]"
+  },
+  {
+   "test": "css/css-values/angle-units-001.html",
+   "perTestIr": "wpt__css-values__angle-units-001.json",
+   "lane": "B1 validity oracle",
+   "predicted": true,
+   "change": "component __1 GAINS BackgroundImage linear-gradient(green, green)",
+   "wave49Cells": "web f 0.9990 | ios f 0.9974 | android f 0.9966"
+  },
+  {
+   "test": "css/css-writing-modes/direction-upright-001.html",
+   "perTestIr": "wpt__css-writing-modes__direction-upright-001.json",
+   "lane": "B7 ua-hr",
+   "predicted": true,
+   "change": "1 hr component takes the UA separator box",
+   "wave49Cells": "web f 0.8095 | ios f 0.5543 | android f 0.4887"
+  },
+  {
+   "test": "css/css-writing-modes/direction-upright-002.html",
+   "perTestIr": "wpt__css-writing-modes__direction-upright-002.json",
+   "lane": "B4 autoclose + B7 ua-hr + B5 seam-S2",
+   "predicted": true,
+   "change": "31 of 192 components: 20 table/tr lose duplicated 'ABC', 10 <col> lose Width/Height 100px, 1 hr takes the UA box",
+   "wave49Cells": "web f 0.5826 | ios f 0.5758 | android f 0.5946"
+  },
+  {
+   "test": "css/css-backgrounds/animations/background-color-animation-with-table2.html",
+   "perTestIr": "(REF FIXTURE ONLY \u2014 not converted)",
+   "lane": "B4 autoclose (B7 table subset)",
+   "predicted": "partially (B4's blast-radius.json lists it; B7's 5-test census does not, because that census was over test documents only)",
+   "change": "the __ref fixture's table/tr lose duplicated '1 2'/'1'/'2' and the root loses _lossy 'inline-run-reordered'",
+   "wave49Cells": "web P 0.9970 | ios P 0.9971 | android P 0.9998"
+  }
+ ],
+ "predictionAccounting": {
+  "B1": {
+   "predicted": [
+    "css-values/angle-units-001"
+   ],
+   "materialised": [
+    "css-values/angle-units-001"
+   ],
+   "unpredicted": [],
+   "verdict": "EXACT"
+  },
+  "B4": {
+   "predictedCount": 10,
+   "materialisedCount": 10,
+   "unpredicted": [],
+   "verdict": "EXACT \u2014 and the 51-components / leafTextIdentical claims reproduce independently"
+  },
+  "B7-ua-hr": {
+   "predictedCount": 4,
+   "materialisedCount": 4,
+   "unpredicted": [],
+   "verdict": "EXACT \u2014 independent source census over 1435 tests finds exactly 4 tests containing <hr>"
+  },
+  "B7-root-scope": {
+   "predictedCount": 2,
+   "materialisedCount": 2,
+   "unpredicted": [],
+   "byteIdenticalAsClaimed": [
+    "css-writing-modes/inline-box-border-vlr-001"
+   ],
+   "verdict": "EXACT"
+  },
+  "B7-table-duplicate-text": {
+   "predictedCount": 5,
+   "materialisedCount": 5,
+   "unpredicted": [],
+   "verdict": "EXACT on its own, but BYTE-FOR-BYTE SUBSUMED by B4's autoclose \u2014 see defects[3]"
+  },
+  "B5-seam-S2": {
+   "predictedCount": 1,
+   "materialisedCount": 2,
+   "unpredicted": [
+    "css-tables/border-collapse-dynamic-col-001"
+   ],
+   "verdict": "DEFECT \u2014 see defects[0]"
+  }
+ },
+ "laneAttributionMethod": "Each change-set was isolated in its own runner dir built from HEAD + exactly one patch (tools/titan/results/wave50-B4/wave50-B4-extract-fixture-autoclose.patch, wave50-B7/{ua-hr-separator-box,root-scope-conflict,table-duplicate-text}.patch, wave50-B5/seam-S2-extractor-col-placeholder.patch) and re-run over all 1435 tests; the ua-hr set was additionally confirmed by a TREE-MINUS-HR dir (reverse patch), which changed exactly the 4 ua-hr tests. B1's set is the residue (angle-units-001) and matches B1's own differential. No interaction-only change exists: the six single-patch change sets union exactly to the 29 changed fixture files.",
+ "independentCensuses": {
+  "testsContainingAnHrElement": 4,
+  "testsWithTableInternalDuplicatedOwnText_staticPath": 5,
+  "testsWith100x100StampOnColColgroupRubyRbRt_staticPath": [
+   "css-writing-modes/direction-upright-002 (10 col)",
+   "css-tables/border-collapse-dynamic-col-001 (3 col)"
+  ],
+  "testsWith100x100StampOnColColgroupRubyRbRt_wave49FinalIr": [
+   "css-writing-modes/direction-upright-002 (10 col)"
+  ],
+  "testsWithStarRuleConflictingWithHtmlOrBodyRule": 0,
+  "testsWithALinkedStylesheet": 0,
+  "testsWithADataUriContainingSemicolonInsideUrl": 0,
+  "myBaseIrVsWave49FinalIr": "615 of 1435 differ (B1's exact number); the gradient-hue-direction delta is component-id ordinal shift only, zero differing property leaves"
+ },
+ "mutationProofs": [
+  {
+   "lane": "B1",
+   "mutation": "provablyInvalidDeclaration: `const unit = unknownDimensionUnit(value);` -> `const unit = null;`",
+   "failingPins": 4
+  },
+  {
+   "lane": "B4",
+   "mutation": "scanOwnText: `const autoCloseTriggers = AUTO_CLOSE_TRIGGERS[tagName];` -> `= null;`",
+   "failingPins": 2
+  },
+  {
+   "lane": "B7-ua-hr",
+   "mutation": "uaHrProps: `if (tag !== 'hr') return null;` -> `'hr_skeptic50'`",
+   "failingPins": 6
+  },
+  {
+   "lane": "B7-root-scope",
+   "mutation": "conflict loop: `if (scoped.html[key] === undefined) continue;` -> `if (true) continue;`",
+   "failingPins": 3
+  },
+  {
+   "lane": "B7-table",
+   "mutation": "isDuplicatedTableText: first line -> `if (true) return false;`",
+   "failingPins": 2
+  },
+  {
+   "lane": "B5-seam-S2",
+   "mutation": "`const NON_BOX_GENERATING_TAGS = new Set(['col','colgroup']);` -> `new Set([])`",
+   "failingPins": 0,
+   "defect": "UNPINNED \u2014 see defects[1]"
+  },
+  {
+   "lane": "B7-root-scope (dead branch)",
+   "mutation": "rootScopeOf: `if (parsed.needTag === '*') return 'star';` -> `return 'body';`",
+   "failingPins": 0,
+   "defect": "DEAD CODE \u2014 see defects[2]"
+  }
+ ],
+ "treeSafety": "tools/titan/extract-fixture.mjs was copied to the scratch dir and sha256-pinned before every mutation and restored + re-verified after each one; its final sha256 is adb1e195033b32beb3fcbd4fa84a0cdecfc5245c65f964d840530fd9164f4493, identical to the pre-lane value. No other tracked file was written. No probe test was left in the tree."
+}

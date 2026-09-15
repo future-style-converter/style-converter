@@ -1,0 +1,144 @@
+# tools/titan/results/wave50-gate/watchlist.txt — the wave-50 gate watchlist.
+#
+# Consumed by `node tools/titan/score-gate.mjs wave49-final <run> --watch
+# tools/titan/results/wave50-gate/watchlist.txt`: one watch per line, either
+# "<substring of sec/test> <platform>" or a bare substring (all platforms).
+# Every cell a builder lane PREDICTED (a flip or a margin gain) or named AT
+# RISK is here, so the gate attributes movement instead of debugging it. The
+# lane's prediction is in the comment; the gate's job is to confirm or refute
+# it per cell and to open the PNG of every one that moved.
+#
+# ── ring-fence (standing constraint): must be byte-identical on all three ──
+filter-effects/backdrop-filter-basic-blur
+#
+# ── B1 (extract-fixture validity oracle) — predicted f→P on all three ──
+css-values/angle-units-001
+# siblings, must not move
+css-values/angle-units-002
+css-values/angle-units-003
+css-values/angle-units-004
+css-values/angle-units-005
+#
+# ── B2 hunk 2 (percent-inset containing-block level) — predicted f→P android ──
+css-position/position-relative-006 android
+# the other percentage-inset carriers must not move
+css-position/position-relative-001 android
+css-position/position-relative-002 android
+css-position/position-relative-003 android
+css-position/position-relative-004 android
+css-position/position-relative-005 android
+css-position/position-relative-008 android
+# ── B2 hunk 1 (§10.3.9 shrink-to-fit) — predicted f→P android ──
+css-masking/clip-path/clip-path-contentBox-1d android
+css-masking/clip-path/clip-path-contentBox-1e android
+# uncertain, already failing
+css-multicol/balance-grid-container android
+# AT RISK (passing today; if more than one drops, narrow the predicate)
+css-display/display-contents-before-after-003 android
+css-overflow/line-clamp/block-ellipsis-022 android
+css-text-decor/text-decoration-propagation-02 android
+css-text-decor/text-decoration-propagation-03 android
+css-transforms/backface-visibility-hidden-006 android
+filter-effects/backdrop-filter-image-size-filter-size-mismatch android
+# wave-50 lane F1 (skeptic S3): the B2 census under-counted this hunk's blast
+# radius by 13 tests — it called a whole DOCUMENT vertical when any component
+# in it declared a vertical mode. Measured split is 22 horizontal / 11
+# vertical (tools/titan/results/wave50-S3/probe-output/atomic-inline-census.txt).
+# These 13 also change. Already failing on android today:
+css-writing-modes/ch-units-vrl-001 android
+css-writing-modes/ch-units-vrl-002 android
+css-writing-modes/ch-units-vrl-003 android
+css-writing-modes/ch-units-vrl-004 android
+css-writing-modes/ch-units-vrl-005 android
+css-writing-modes/ch-units-vrl-006 android
+css-writing-modes/ch-units-vrl-007 android
+css-writing-modes/ch-units-vrl-008 android
+css-tables/collapsed-border-sideways-rl-rtl-overflow android
+css-tables/collapsed-border-vertical-lr-rtl-overflow android
+css-tables/collapsed-border-vertical-rtl-overflow android
+# AT RISK (passing today; the -with-margins carrier paints a dashed border, so
+# its ink WILL move with the used width — the most exposed cell of the 22)
+css-writing-modes/inline-box-orthogonal-child-with-margins android
+css-writing-modes/baseline-with-orthogonal-flow-001 android
+# (ch-units-vrl-003/-004/-007/-008 are also watched all-platform under B5 below;
+# the duplicate is deliberate — B5 and B2 predict different things about them.)
+#
+# ── B3 (Compose ::after text fold) — predicted f→P android (match the iOS twin) ──
+css-counter-styles/cjk-decimal/counter-cjk-decimal android
+css-values/attr-notype-fallback android
+css-values/attr-style-sharing-4 android
+css-lists/counter-reset-reversed-pseudo-001 android
+css-lists/counter-reset-reversed-pseudo-003 android
+# improves, no flip
+css-lists/counter-list-item android
+css-contain/contain-content-011 android
+# direction unknown, already failing
+css-display/display-contents-fieldset-002 android
+css-display/display-contents-dynamic-pseudo-insertion-001 android
+# AT RISK (passing today, expected to stay P and score closer)
+css-display/display-contents-before-after-001 android
+css-display/display-contents-before-after-002 android
+css-display/display-contents-dynamic-before-after-001 android
+#
+# ── B4 (iOS korean-hangul-formal; extractor autoclose via B4 patch) ──
+css-counter-styles/counter-suffix
+css-counter-styles/counter-style-at-rule/broken-symbols
+css-backgrounds/animations/background-color-animation-with-table1
+css-backgrounds/animations/background-color-animation-with-table3
+css-backgrounds/animations/background-color-animation-with-table4
+CSS2/cascade/inherit-computed-002
+css-contain/contain-content-004
+css-counter-styles/counter-style-at-rule/descriptor-suffix
+css-counter-styles/counter-style-at-rule/disclosure-styles
+css-writing-modes/direction-upright-002
+#
+# ── B5 (VerticalRunIntrinsics clamp: zero carriers; seam S1/S2 web + extractor) ──
+CSS2/borders/border-conflict-style-107
+css-writing-modes/ch-units-vrl-003
+css-writing-modes/ch-units-vrl-004
+css-writing-modes/ch-units-vrl-007
+css-writing-modes/ch-units-vrl-008
+css-tables/border-collapse-dynamic-col-001
+css-backgrounds/animations/background-color-animation-with-table2
+css-text-decor/ruby-text-decoration-01
+css-text-decor/text-decoration-inset-025 android
+#
+# ── B6 (converter text-decoration keyword/colour) — passing, should score up ──
+css-text-decor/text-decoration-shorthands-001
+# 3(a)/3(b) NOT landed — these must not move
+CSS2/floats-clear/floats-clear-multicol-000
+CSS2/floats-clear/floats-clear-multicol-001
+CSS2/floats-clear/floats-clear-multicol-003
+CSS2/floats-clear/floats-clear-multicol-balancing-000
+CSS2/floats-clear/floats-clear-multicol-balancing-001
+CSS2/floats-clear/floats-clear-multicol-balancing-003
+#
+# ── B7 (extractor: <hr> UA box, root-scope conflict, table duplicate text) ──
+css-images/gradient/gradient-hue-direction
+css-writing-modes/direction-upright-001
+css-pseudo/active-selection-057
+css-contain/contain-html-overflow-002
+css-contain/contain-html-overflow-001
+CSS2/css21-errata/s-11-1-1b-005
+#
+# ── B8 (iOS overflow clip inside transform; Compose shadow dead-code deletion) ──
+css-backgrounds/background-attachment-fixed-inside-transform-1
+css-color/clip-opacity-out-of-flow
+# AT RISK (iOS 1.0000 today; only antialiasing could move them)
+css-transforms/backface-visibility-hidden-006 ios
+css-transforms/composited-under-rotateY-180deg-clip ios
+css-transforms/composited-under-rotateY-180deg-clip-perspective ios
+#
+# ── B9 (Compose line-clamp census seam; hanging-whitespace ring) ──
+css-overflow/line-clamp/line-clamp-005 android
+css-overflow/line-clamp/line-clamp-006 android
+css-overflow/line-clamp/line-clamp-007 android
+css-overflow/line-clamp/block-ellipsis-032 android
+#
+# ── B10 (gap-decoration line bands) — margin gains only; ANY other css-gaps mover is a regression ──
+css-gaps/flex/flex-gap-decorations-045
+css-gaps/flex/flex-gap-decorations-046
+css-gaps
+#
+# ── B11 (iOS visibility collapse; Compose placeholder floor is a fixture-net item) ──
+css-view-transitions/capture-with-visibility-mixed-descendants

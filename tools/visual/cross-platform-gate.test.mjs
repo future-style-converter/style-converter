@@ -245,19 +245,27 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // css-transforms-1 §8 order), which DELETED both Transform_Combined
   // lines per the exit-5 contract (the recorded cause, per-kind scalar
   // accumulation, was gone), and again in the 2026-09-04 retrospective,
-  // which DELETED both Sepia_Translucent lines (iOS-web, iOS-Android).
-  // Those two are the exit-5 contract applied to the ledger's own numbers:
-  // lane R13 re-measured every line against the committed baselines under
-  // the shipping metric stack and Sepia came back ssim 0.9979 / 0.9986,
-  // dpx 0.858%, ΔE95 0.574 — inside every threshold, i.e. NOT a divergence.
-  // The seed's block (0.95 / 0.0 / 20.0) was round numbers, not a
-  // measurement (finding A12#1). A ledger line that excuses a passing pair
-  // is exactly what the 'every seeded entry actually breaches' test below
-  // exists to forbid, so the line goes rather than the threshold. If the
-  // live gate ever does diverge here it surfaces as a fresh exit 4 with
-  // real numbers, which is strictly better than a pre-excused pair.
-  assert.equal(led.expectations.length, 27,
-    '23 visual-test + 4 composition-test — retro deleted Sepia_Translucent x2 (re-measure: no divergence)');
+  // which DELETED both Sepia_Translucent lines (iOS-web, iOS-Android) —
+  // and then RE-ADDED both at wave 50 with the gate's own live numbers.
+  // That round trip is the lesson. Lane R13 re-measured every line against
+  // the COMMITTED BASELINE PNGs (Sepia came back ssim 0.9979 / 0.9986, dpx
+  // 0.858%) and concluded the divergence was gone — but
+  // tools/visual/baseline/iOS__006_Sepia_Translucent.png is itself stale:
+  // its box is rgb(89,92,95), the REVERTED .plusLighter additive render,
+  // while the shipping src-over FilterApplier paints rgb(95,117,129). The
+  // wave50-final device gate measured the live pair at ssim 0.9931 / 0.9930,
+  // dpx 17.09%, ΔE95 11.50, and a post-gate Catalyst re-render of the same
+  // component reproduced that byte-for-byte (4800 px / 17.094% against the
+  // committed iOS baseline, max channel delta 34). A ledger may only be
+  // re-measured from CAPTURES, never from baselines — a baseline is exactly
+  // as trustworthy as its last refresh. The seed's block (0.95 / 0.0 / 20.0)
+  // was still round numbers rather than a measurement (finding A12#1); the
+  // re-added lines carry the gate's real ones.
+  assert.equal(led.expectations.length, 12,
+    '6 visual-test + 4 composition-test + 2 filter-sepia-amounts — wave 50 deleted the 17 lines the ' +
+    'wave50-final device gate reported STALE (9 ios-borders-radius, 6 android-harness-placeholder-floor, ' +
+    '2 android-effects-blur) per the exit-5 contract, and RE-ADDED the 2 Sepia_Translucent lines the ' +
+    'retro had deleted off a stale iOS baseline, with the gate\'s measured numbers');
   for (const e of led.expectations) {
     // Every field a reviewer needs to judge the line without opening the report.
     assert.ok(e.component && e.component.endsWith('.png'), `bad component: ${e.component}`);
@@ -270,18 +278,22 @@ test('the committed ledger parses and every entry is well-formed', () => {
 });
 
 test('the ledger separates real size bugs from rasterisation noise', () => {
-  // Three Android components render SHORTER than their iOS/web peers
+  // Three Android components rendered SHORTER than their iOS/web peers
   // (091_Button_Outline 58 vs 62, 094_Input_Field 60 vs 62,
   // 105_Edge_DeepNesting 58 vs 62). Every one was invisible until the pad
   // sentinel landed, because the old #1A1A2E fill matched the capture
-  // background. They are bugs to fix, not divergences to excuse — so they
-  // must be labelled as such and carry a shorter expiry than the AA lines.
+  // background. They were bugs to fix, not divergences to excuse — so they
+  // had to be labelled as such and carry a shorter expiry than the AA lines.
+  // WAVE 50 FIXED THE BUG (lane B11, StyleApplier.placeholderFloorInsets:
+  // the harness floor no longer subtracts the border band) and the
+  // wave50-final device gate reported all six lines STALE — deleted per the
+  // exit-5 contract. The rule below therefore pins ZERO size-bug lines; if
+  // one ever returns it must again be filed as a REAL BUG with a short
+  // expiry, never as benign rasterisation noise.
   const led = JSON.parse(readFileSync(resolve(__dirname, 'cross-platform-expectations.json'), 'utf8'));
   const sizeBugs = led.expectations.filter((e) => e.observed?.sizes);
-  assert.equal(sizeBugs.length, 6, 'three components × two affected pairs each');
-  const components = [...new Set(sizeBugs.map((e) => e.component))].sort();
-  assert.deepEqual(components,
-    ['Button_Outline.png', 'Edge_DeepNesting.png', 'Input_Field.png']);
+  assert.equal(sizeBugs.length, 0,
+    'the Android placeholder-floor size bug is fixed (wave 50) — no size-bug line may be excused');
   for (const e of sizeBugs) {
     assert.match(e.reason, /REAL BUG/, `${e.component} must not be filed as benign`);
     // Android is the outlier in all three; iOS and web agree.

@@ -66,8 +66,19 @@ object GapDecorationSegments {
         // existing fixture byte-identical (nothing declares these props).
         if (!config.active || items.isEmpty()) return emptyList()
 
-        val lines = GapDecorationLines.toLines(
+        val unions = GapDecorationLines.toLines(
             GapDecorationLines.groupIntoLines(items, mainHorizontal), mainHorizontal
+        )
+        // Wave 50 lane B10 — a line's cross extent is its LINE BOX, which
+        // `align-content: stretch` grows past the items standing on it
+        // (css-flexbox-1 §9.4 step 8). GapDecorationBands rebuilds that box
+        // from the same pure arithmetic the wrapping layout runs, and hands
+        // the unions straight back whenever the observed item geometry does
+        // not confirm the reconstruction — so every container that was
+        // already correct paints byte-identical segments.
+        val lines = GapDecorationBands.resolve(
+            unions, contentBox, mainHorizontal,
+            config.crossGapPx(mainHorizontal), config.alignContentStretches
         )
         // Which physical family owns which gap kind (see @param above).
         val withinAxis = if (mainHorizontal) GapAxis.COLUMN else GapAxis.ROW

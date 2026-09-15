@@ -457,7 +457,16 @@ object InlineRunFold {
                     // Property admission through the span ring — PLAIN
                     // members (Hyphens / paint-inert colors only) pass
                     // with no attribution, exactly the wave-44 gate.
-                    val admission = InlineSpanRing.admit(tag, child.properties, hostProperties)
+                    // Wave 50 (lane B9) — the HANGING-WHITESPACE ring: a
+                    // FLAT member whose text is white space and nothing
+                    // else paints no glyphs, which is what lets its own
+                    // `white-space` and `background-color` ride the fold
+                    // (InlineSpanRing.admit's glyphless arms). A member
+                    // with a nested subtree is never treated this way: its
+                    // glyphs live in nodes this test cannot see.
+                    val glyphless = !hasNested && text != null && text.isNotEmpty() && text.isBlank()
+                    val admission =
+                        InlineSpanRing.admit(tag, child.properties, hostProperties, glyphless)
                     if (admission is InlineSpanRing.Admission.Refused) {
                         return Outcome.Bailed(admission.reason)
                     }

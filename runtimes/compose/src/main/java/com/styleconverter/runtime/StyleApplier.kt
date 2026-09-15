@@ -315,12 +315,30 @@ object StyleApplier {
         // outline currentColor ink split; default false keeps every non-WPT
         // call site byte-identical.
         wptCaptureMode: Boolean = false,
+        // Wave-50 (lane B9) — the COMPONENT-AWARE line-clamp cap, resolved by
+        // ComponentRenderer (same static-chain-can't-see-the-component
+        // rationale as collapsedMargin and wptCaptureMode). css-overflow-4
+        // §5.2 counts LINE BOXES, and the ones a clamp root's block children
+        // contribute are as tall as THOSE children (CSS 2.1 §10.8) — a fact
+        // that lives on the component, not in a property list, so
+        // OverflowExtractor's uniform LineClampCap.capPx cannot see it.
+        // Null on every path outside the renderer, AND whenever the resolver
+        // itself declines: it returns null exactly when capPx does (no
+        // fixed-count clamp on the wire), so the guard below can never wipe
+        // a cap the extractor legitimately produced.
+        lineClampCapPx: Float? = null,
     ): Modifier {
         // Convert to type/data pairs for extractors
         val pairs = properties.map { it.type to it.data }
 
         // Extract all configurations
-        val config = extractConfig(pairs, wptCaptureMode)
+        val extracted = extractConfig(pairs, wptCaptureMode)
+        // The renderer's census answer replaces the extractor's uniform one
+        // when it has one; every other call site keeps the extractor's
+        // config object byte-identically (no copy, no allocation).
+        val config = if (lineClampCapPx == null) extracted else extracted.copy(
+            overflow = extracted.overflow.copy(lineClampCapPx = lineClampCapPx),
+        )
 
         // Apply in correct order. Wave-43 lane V3: the WPT flag and the
         // declared-`normal` discriminator ride into the spacing context so
@@ -888,17 +906,15 @@ object StyleApplier {
      * web computed max(27.4 + 16, 30) = 43.4px — the systematic +2px
      * canvas delta on every Decorated row (76→78, 84→86, 92→94, 100→102).
      *
-     * Fix: subtract the CSS padding and border band from the 50/30 floor
-     * so the *content-box* minimum equals what web's border-box minimum
-     * leaves for content. The floor stays at its chain position (inside
-     * padding, outside the border-band inset) so margin handling and the
-     * wave-1 "band absorbed by the minimum" behaviour (Input_Field /
-     * Glass_Effect) are unchanged.
-     *
-     * Padding resolution mirrors PaddingApplier.apply: resolveToDp with
-     * the default SpacingContext (px-exact values dominate the fixture
-     * corpus; relative units resolve against the same defaults the
-     * applier uses, so floor and padding never disagree).
+     * Fix: subtract the CSS PADDING from the 50/30 floor so the
+     * *content-box* minimum equals what web's border-box minimum leaves
+     * below it. The floor stays at its chain position (inside padding,
+     * outside the border-band inset) so margin handling and the wave-1
+     * "band absorbed by the minimum" behaviour (Input_Field /
+     * Glass_Effect) are unchanged — the band is inside the floor node, so
+     * it is absorbed by the minimum without being subtracted from it.
+     * [placeholderFloorInsets] carries the chain-position argument and the
+     * measured before/after for the wave-50 band correction.
      */
     fun placeholderFloorMinSize(
         properties: List<IRProperty>,
@@ -908,6 +924,71 @@ object StyleApplier {
         // Both axes explicitly sized → no floor at all (web only injects
         // the 50/30 defaults when width/height are absent).
         if (!applyWidthFloor && !applyHeightFloor) return Modifier
+        // Insets the floor must give back to the border box — padding only.
+        val (horizontalInset, verticalInset) = placeholderFloorInsets(properties)
+        val (minW, minH) = borderBoxFloorMins(
+            horizontalInset = horizontalInset,
+            verticalInset = verticalInset,
+            applyWidthFloor = applyWidthFloor,
+            applyHeightFloor = applyHeightFloor
+        )
+        return Modifier.defaultMinSize(minWidth = minW, minHeight = minH)
+    }
+
+    /**
+     * Pure inset math for [placeholderFloorMinSize] (JVM-pinnable): how much
+     * of web's 50x30 BORDER-box floor is already spent OUTSIDE the Compose
+     * floor node, and therefore has to be subtracted from it.
+     *
+     * The answer is PADDING ONLY, and the reason is the chain position.
+     * ComponentRenderer builds the component as
+     *
+     *     ... .then(baseModifier)          // applyConfig; padding is step 8,
+     *                                      //   i.e. baseModifier's INNERMOST
+     *                                      //   node — so it wraps everything
+     *                                      //   below
+     *         .then(placeholderFloor)      // THIS defaultMinSize
+     *         .then(borderContentInset)    // the per-side band
+     *
+     * and Compose measures outside-in: the floor's child is the band node,
+     * so the band is ALREADY INSIDE the minimum, while padding is added
+     * after it. Total height therefore comes out as
+     *
+     *     padding + max(content + band, minH)
+     *
+     * With minH = 30 - padding that equals max(content + band + padding, 30)
+     * — byte-for-byte web's `box-sizing: border-box` + `min-height: 30px`
+     * (CSS 2.1 §10.7: min-height constrains the box box-sizing selects).
+     *
+     * WAVE-50 FIX (BACKLOG queue 9(f); ledger owner
+     * `android-harness-placeholder-floor`, 6 lines). The band used to be
+     * subtracted here TOO, which made the total `padding + max(content +
+     * band, 30 - padding - band)` = 30 - band whenever the floor bound:
+     * the band was subtracted once and never added back, so every
+     * floor-bound BORDERED placeholder rendered exactly 2x(border-width)
+     * short. MEASURED on the committed baselines (ink bounding boxes of
+     * tools/visual/baseline/{platform}__NNN_Name.png):
+     *
+     *     091_Button_Outline   web 115x30  iOS 50x30   Android 115x26
+     *     094_Input_Field      web 200x30  iOS 200x30  Android 200x28
+     *     105_Edge_DeepNesting web 115x30  iOS 50x30   Android 115x26
+     *
+     * — 4px short at border 2px, 2px short at border 1px, exactly the band.
+     * Border_Solid / Border_Dashed / Glass_Effect are bordered too and are
+     * EXACT on all three, because their padding alone (30/30/40px) already
+     * exceeds the 30px floor, so the minimum never binds and the bug cannot
+     * show. That is the same reason this change moves nothing else: it only
+     * differs from the old math when `content + band + padding < 30` (or
+     * `< 50` horizontally) AND a border exists.
+     *
+     * Padding resolution mirrors PaddingApplier.apply: resolveToDp with the
+     * default SpacingContext (px-exact values dominate the fixture corpus;
+     * relative units resolve against the same defaults the applier uses, so
+     * floor and padding never disagree).
+     *
+     * @return (horizontal, vertical) inset in dp-as-float, CSS axis order.
+     */
+    internal fun placeholderFloorInsets(properties: List<IRProperty>): Pair<Float, Float> {
         val pairs = properties.map { it.type to it.data }
         // CSS padding, resolved exactly like the padding modifier will be.
         val resolved = com.styleconverter.runtime.spacing.SpacingExtractor
@@ -916,23 +997,14 @@ object StyleApplier {
         val ctx = com.styleconverter.runtime.spacing.SpacingContext()
         fun side(v: com.styleconverter.runtime.core.types.LengthValue?): Float =
             com.styleconverter.runtime.spacing.resolveToDp(v, ctx).value.coerceAtLeast(0f)
-        // Border band — the same per-side widths borderContentInset will
-        // chain INSIDE this floor; subtracting them here keeps the band
-        // absorbed by the minimum (web border-box semantics).
-        val sides = com.styleconverter.runtime.borders.sides.BorderSideExtractor
-            .extractBorderConfig(pairs)
-        val band = borderBandInsets(sides)
-        val horizontalInset = side(resolved.left) + side(resolved.right) +
-            band[0].value + band[2].value
-        val verticalInset = side(resolved.top) + side(resolved.bottom) +
-            band[1].value + band[3].value
-        val (minW, minH) = borderBoxFloorMins(
-            horizontalInset = horizontalInset,
-            verticalInset = verticalInset,
-            applyWidthFloor = applyWidthFloor,
-            applyHeightFloor = applyHeightFloor
+        // Deliberately NO borderBandInsets term here — see the note above.
+        // The band is chained INSIDE this floor by borderContentInset, so it
+        // is part of the floor's own child measurement, not of the space the
+        // floor has to give back.
+        return Pair(
+            side(resolved.left) + side(resolved.right),
+            side(resolved.top) + side(resolved.bottom)
         )
-        return Modifier.defaultMinSize(minWidth = minW, minHeight = minH)
     }
 
     /**

@@ -1,0 +1,122 @@
+// THROWAWAY skeptic probe (wave 50 lane S4). DELETE BEFORE REPORTING.
+import Foundation
+import SwiftUI
+import XCTest
+import CryptoKit
+@testable import StyleConverterRuntime
+
+final class Skeptic50OverflowOrderProbeTests: XCTestCase {
+
+    static let repo = "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf"
+
+    // Independently authored from fixtures/combinations/radius-overflow-transform.json
+    static let rotIR = """
+    {"irVersion":2,"minReaderVersion":2,"components":[
+    {"id":"rot-1","name":"ROT_SelfRotate_ClippedChild","properties":[
+      {"type":"Width","data":{"type":"length","px":80.0}},
+      {"type":"Height","data":{"type":"length","px":60.0}},
+      {"type":"OverflowX","data":"HIDDEN"},
+      {"type":"OverflowY","data":"HIDDEN"},
+      {"type":"Transform","data":{"type":"functions","list":[{"fn":"rotate","a":{"deg":45.0}}]}},
+      {"type":"Position","data":"RELATIVE"},
+      {"type":"MarginTop","data":{"px":24.0}},{"type":"MarginRight","data":{"px":24.0}},
+      {"type":"MarginBottom","data":{"px":24.0}},{"type":"MarginLeft","data":{"px":24.0}}]},
+    {"id":"rot-2","name":"bleed","properties":[
+      {"type":"Position","data":"ABSOLUTE"},
+      {"type":"Left","data":{"px":-20.0}},{"type":"Top","data":{"px":-20.0}},
+      {"type":"Width","data":{"type":"length","px":120.0}},
+      {"type":"Height","data":{"type":"length","px":100.0}},
+      {"type":"BackgroundColor","data":{"srgb":{"r":0.9058823529411765,"g":0.2980392156862745,"b":0.23529411764705882},"original":"#e74c3c"}}],
+      "slot":{"parent":"rot-1"}}
+    ]}
+    """
+
+    @MainActor
+    private func raster<V: View>(_ v: V) throws -> (px: [UInt8], w: Int, h: Int) {
+        let r = ImageRenderer(content: v); r.scale = 1
+        let cg = try XCTUnwrap(r.cgImage)
+        let w = cg.width, h = cg.height
+        var buf = [UInt8](repeating: 0, count: w*h*4)
+        let ctx = try XCTUnwrap(CGContext(data: &buf, width: w, height: h, bitsPerComponent: 8,
+                                          bytesPerRow: w*4, space: CGColorSpaceCreateDeviceRGB(),
+                                          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        return (buf, w, h)
+    }
+
+    private func sha(_ b: [UInt8]) -> String {
+        SHA256.hash(data: Data(b)).map { String(format: "%02x", $0) }.joined()
+    }
+
+    /// bbox of pixels matching `near` within tol; nil if none.
+    private func box(_ img: (px: [UInt8], w: Int, h: Int), near: (Int, Int, Int), tol: Int)
+        -> (w: Int, h: Int, minX: Int, minY: Int, count: Int)? {
+        var minX = Int.max, minY = Int.max, maxX = -1, maxY = -1, n = 0
+        for y in 0..<img.h { for x in 0..<img.w {
+            let i = (y*img.w + x)*4
+            let r = Int(img.px[i]), g = Int(img.px[i+1]), b = Int(img.px[i+2])
+            guard abs(r-near.0) < tol, abs(g-near.1) < tol, abs(b-near.2) < tol else { continue }
+            n += 1; minX = min(minX,x); minY = min(minY,y); maxX = max(maxX,x); maxY = max(maxY,y)
+        } }
+        return maxX >= 0 ? (maxX-minX+1, maxY-minY+1, minX, minY, n) : nil
+    }
+
+    /// bbox of non-white ink.
+    private func inkBox(_ img: (px: [UInt8], w: Int, h: Int))
+        -> (w: Int, h: Int, minX: Int, minY: Int, count: Int)? {
+        var minX = Int.max, minY = Int.max, maxX = -1, maxY = -1, n = 0
+        for y in 0..<img.h { for x in 0..<img.w {
+            let i = (y*img.w + x)*4
+            let r = Int(img.px[i]), g = Int(img.px[i+1]), b = Int(img.px[i+2])
+            guard r < 250 || g < 250 || b < 250 else { continue }
+            n += 1; minX = min(minX,x); minY = min(minY,y); maxX = max(maxX,x); maxY = max(maxY,y)
+        } }
+        return maxX >= 0 ? (maxX-minX+1, maxY-minY+1, minX, minY, n) : nil
+    }
+
+    @MainActor
+    private func stage(_ c: IRComponent, w: CGFloat, h: CGFloat) throws -> (px: [UInt8], w: Int, h: Int) {
+        try raster(ComponentRenderer(component: c)
+            .frame(width: w, height: h, alignment: .topLeading)
+            .background(Color.white))
+    }
+
+    private func roots(_ path: String) throws -> [IRComponent] {
+        let data = try Data(contentsOf: URL(fileURLWithPath: path))
+        let doc = try JSONDecoder().decode(IRDocument.self, from: data)
+        return doc.components.filter { $0.slot == nil }
+    }
+
+    // ── PROBE 1: the fixture oracle, measured (not asserted) ────────────────
+    @MainActor
+    func testProbeSelfRotateBBox() throws {
+        let doc = try JSONDecoder().decode(IRDocument.self, from: Data(Self.rotIR.utf8))
+        let root = try XCTUnwrap(doc.components.first { $0.slot == nil })
+        let img = try stage(root, w: 200, h: 200)
+        let b = box(img, near: (231,76,60), tol: 40)
+        let strict = box(img, near: (231,76,60), tol: 3)   // oracle fillTolerance 2
+        print("S4PROBE selfRotate red bbox tol40 = \(String(describing: b))")
+        print("S4PROBE selfRotate red bbox ORACLE tol2 = \(String(describing: strict))  sha=\(sha(img.px))")
+    }
+
+    // ── PROBE 2: the three at-risk rotateY(180deg) carriers + translateX(0) ──
+    @MainActor
+    func testProbeAtRiskCarriersRasterHash() throws {
+        let files = [
+          "css-transforms/wpt__css-transforms__backface-visibility-hidden-006",
+          "css-transforms/wpt__css-transforms__composited-under-rotateY-180deg-clip",
+          "css-transforms/wpt__css-transforms__composited-under-rotateY-180deg-clip-perspective",
+          "css-color/wpt__css-color__clip-opacity-out-of-flow",
+          "css-backgrounds/wpt__css-backgrounds__background-attachment-fixed-inside-transform-1",
+        ]
+        for f in files {
+            let p = "\(Self.repo)/tools/titan/runs/wave49-final/sections/\(f.split(separator: "/")[0])/per-test-ir/\(f.split(separator: "/")[1]).json"
+            let rs = try roots(p)
+            for (i, r) in rs.enumerated() {
+                let img = try stage(r, w: 390, h: 600)
+                let ink = inkBox(img)
+                print("S4PROBE \(f.split(separator: "/")[1]) root#\(i) id=\(r.id) sha=\(sha(img.px)) ink=\(String(describing: ink))")
+            }
+        }
+    }
+}

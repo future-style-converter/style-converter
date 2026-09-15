@@ -1,0 +1,22 @@
+import { readFileSync, existsSync } from 'node:fs';
+import { PNG } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/node_modules/pngjs/lib/png.js';
+const ROOT='/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf';
+const REF=ROOT+'/tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-text-decor/';
+const RUN=ROOT+'/tools/titan/runs/wave49-final/sections/css-text-decor/';
+function green(p,label){
+  if(!existsSync(p)){console.log('MISSING',label,p);return;}
+  const g=PNG.sync.read(readFileSync(p));
+  let n=0; const rows=new Map();
+  for(let y=0;y<g.height;y++)for(let x=0;x<g.width;x++){
+    const i=(y*g.width+x)*4;
+    if(Math.abs(g.data[i]-0)<=8 && Math.abs(g.data[i+1]-128)<=8 && Math.abs(g.data[i+2]-0)<=8){n++;rows.set(y,(rows.get(y)||0)+1);}
+  }
+  const rr=[...rows.entries()].sort((a,b)=>a[0]-b[0]);
+  console.log(`${label.padEnd(34)} ${g.width}x${g.height}  green(0,128,0)+-8 px=${n}  rows=${JSON.stringify(rr.slice(0,6))}`);
+}
+for(const t of ['text-decoration-shorthands-001','text-decoration-shorthands-002']){
+  green(REF+t+'.png', 'ref '+t);
+  green(RUN+'screenshots/wpt__css-text-decor__'+t+'.png','web '+t);
+  green(RUN+'android-screenshots/wpt__css-text-decor__'+t+'.png','android '+t);
+  green(RUN+'ios-screenshots/wpt__css-text-decor__'+t+'.png','ios '+t);
+}

@@ -1,0 +1,259 @@
+{
+ "scoredTestsExamined": 1379,
+ "unresolvedMatchLink": 33,
+ "distinctRefsOfScoredTests": 809,
+ "scoredRefsWithNegativeZ": 8,
+ "scoredTestsWithNegativeZRef": 8,
+ "cellsOnThoseTests": 24,
+ "failingCellsOnThoseTests": 10,
+ "corpusRefFilesScanned": 8088,
+ "corpusRefFilesWithNegativeZ": 42,
+ "scoredRefs": [
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-033-ref.html",
+   "tests": [
+    "css/css-gaps/flex/flex-gap-decorations-033.html"
+   ]
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-034-ref.html",
+   "tests": [
+    "css/css-gaps/flex/flex-gap-decorations-034.html"
+   ]
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-035-ref.html",
+   "tests": [
+    "css/css-gaps/flex/flex-gap-decorations-035.html"
+   ]
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-036-ref.html",
+   "tests": [
+    "css/css-gaps/flex/flex-gap-decorations-036.html"
+   ]
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-037-ref.html",
+   "tests": [
+    "css/css-gaps/flex/flex-gap-decorations-037.html"
+   ]
+  },
+  {
+   "ref": "tools/wpt/css/css-text/hanging-punctuation/reference/hanging-punctuation-block-bound-001-ref.html",
+   "tests": [
+    "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html"
+   ]
+  },
+  {
+   "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-with-entry-ref.html",
+   "tests": [
+    "css/css-view-transitions/css-tags-paint-order-with-entry.html"
+   ]
+  },
+  {
+   "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-ref.html",
+   "tests": [
+    "css/css-view-transitions/css-tags-paint-order.html"
+   ]
+  }
+ ],
+ "rows": [
+  {
+   "section": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-033-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "f",
+     "ssim": 0.94
+    },
+    "ios-ref": {
+     "v": "P",
+     "ssim": 1
+    },
+    "android-ref": {
+     "v": "P",
+     "ssim": 1
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-034-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "f",
+     "ssim": 0.9458
+    },
+    "ios-ref": {
+     "v": "f",
+     "ssim": 0.9466
+    },
+    "android-ref": {
+     "v": "f",
+     "ssim": 0.9466
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-035-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "f",
+     "ssim": 0.9206
+    },
+    "ios-ref": {
+     "v": "f",
+     "ssim": 0.922
+    },
+    "android-ref": {
+     "v": "f",
+     "ssim": 0.922
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-036-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "P",
+     "ssim": 0.9557
+    },
+    "ios-ref": {
+     "v": "P",
+     "ssim": 0.9565
+    },
+    "android-ref": {
+     "v": "P",
+     "ssim": 0.9565
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-037-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "P",
+     "ssim": 0.9568
+    },
+    "ios-ref": {
+     "v": "P",
+     "ssim": 0.9576
+    },
+    "android-ref": {
+     "v": "P",
+     "ssim": 0.9576
+    }
+   }
+  },
+  {
+   "section": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "ref": "tools/wpt/css/css-text/hanging-punctuation/reference/hanging-punctuation-block-bound-001-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "f",
+     "ssim": 0.7567
+    },
+    "ios-ref": {
+     "v": "f",
+     "ssim": 0.744
+    },
+    "android-ref": {
+     "v": "f",
+     "ssim": 0.6796
+    }
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "test": "css/css-view-transitions/css-tags-paint-order-with-entry.html",
+   "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-with-entry-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "P",
+     "ssim": 0.9791
+    },
+    "ios-ref": {
+     "v": "P",
+     "ssim": 0.9791
+    },
+    "android-ref": {
+     "v": "P",
+     "ssim": 0.9791
+    }
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "test": "css/css-view-transitions/css-tags-paint-order.html",
+   "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-ref.html",
+   "cells": {
+    "web-ref": {
+     "v": "P",
+     "ssim": 0.9791
+    },
+    "ios-ref": {
+     "v": "P",
+     "ssim": 0.9791
+    },
+    "android-ref": {
+     "v": "P",
+     "ssim": 0.9791
+    }
+   }
+  }
+ ],
+ "corpusNegRefs": [
+  "tools/wpt/css/css-align/abspos/align-self-static-position-001-ref.html",
+  "tools/wpt/css/css-align/abspos/align-self-static-position-002-ref.html",
+  "tools/wpt/css/css-align/abspos/align-self-static-position-006-ref.html",
+  "tools/wpt/css/css-align/reference/ttwf-reftest-alignContent-ref.html",
+  "tools/wpt/css/css-backgrounds/reference/css3-background-origin-border-box-ref.html",
+  "tools/wpt/css/css-backgrounds/reference/origin-padding-box_with_radius-ref.html",
+  "tools/wpt/css/css-contain/contain-layout-ignored-cases-ib-split-001-ref.html",
+  "tools/wpt/css/css-contain/contain-paint-ignored-cases-ib-split-001-ref.html",
+  "tools/wpt/css/css-flexbox/reference/cross-axis-scrollbar-ref.html",
+  "tools/wpt/css/css-flexbox/reference/flex-box-float-ref.html",
+  "tools/wpt/css/css-gaps/flex/flex-gap-decorations-033-ref.html",
+  "tools/wpt/css/css-gaps/flex/flex-gap-decorations-034-ref.html",
+  "tools/wpt/css/css-gaps/flex/flex-gap-decorations-035-ref.html",
+  "tools/wpt/css/css-gaps/flex/flex-gap-decorations-036-ref.html",
+  "tools/wpt/css/css-gaps/flex/flex-gap-decorations-037-ref.html",
+  "tools/wpt/css/css-gaps/flex/flex-gap-decorations-064-ref.html",
+  "tools/wpt/css/css-gaps/grid/grid-gap-decorations-042-ref.html",
+  "tools/wpt/css/css-gaps/grid/grid-gap-decorations-064-ref.html",
+  "tools/wpt/css/css-gaps/grid/grid-gap-decorations-065-ref.html",
+  "tools/wpt/css/css-grid/reference/display-grid-ref.html",
+  "tools/wpt/css/css-grid/reference/fr-unit-ref.html",
+  "tools/wpt/css/css-grid/reference/fr-unit-with-percentage-ref.html",
+  "tools/wpt/css/css-page/margin-boxes/dimensions-013-print-ref.html",
+  "tools/wpt/css/css-page/margin-boxes/paint-order-003-print-ref.html",
+  "tools/wpt/css/css-page/page-background-001-print-ref.html",
+  "tools/wpt/css/css-page/page-background-002-print-ref.html",
+  "tools/wpt/css/css-page/page-background-003-print-ref.html",
+  "tools/wpt/css/css-page/page-background-005-print-ref.html",
+  "tools/wpt/css/css-paint-api/style-first-letter-pseudo-ref.html",
+  "tools/wpt/css/css-position/invalidate-opacity-negative-z-index-ref.html",
+  "tools/wpt/css/css-shapes/shape-outside/supported-shapes/circle/reference/shape-outside-circle-030-ref.html",
+  "tools/wpt/css/css-shapes/shape-outside/supported-shapes/ellipse/reference/shape-outside-ellipse-030-ref.html",
+  "tools/wpt/css/css-shapes/spec-examples/reference/shape-outside-008-ref.html",
+  "tools/wpt/css/css-text/hanging-punctuation/reference/hanging-punctuation-block-bound-001-ref.html",
+  "tools/wpt/css/css-text/overflow-wrap/reference/overflow-wrap-min-content-size-003-ref.html",
+  "tools/wpt/css/css-text/white-space/reference/trailing-ideographic-space-alt-003-ref.html",
+  "tools/wpt/css/css-transforms/perspective-split-by-zero-w-ref.html",
+  "tools/wpt/css/css-view-transitions/css-tags-paint-order-ref.html",
+  "tools/wpt/css/css-view-transitions/css-tags-paint-order-with-entry-ref.html",
+  "tools/wpt/css/css-viewport/zoom/reference/margin-ref.html",
+  "tools/wpt/css/css-writing-modes/reference/table-cell-001-ref.html",
+  "tools/wpt/css/fill-stroke/reference/paint-order-001-ref.html"
+ ]
+}

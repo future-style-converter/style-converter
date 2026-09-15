@@ -1,0 +1,677 @@
+{
+ "blankCapturesAgainstAnInkedRef": 42,
+ "rows": [
+  {
+   "section": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "web",
+   "captureColour": [
+    0,
+    0,
+    0
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.0001
+  },
+  {
+   "section": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "ios",
+   "captureColour": [
+    0,
+    0,
+    0
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.0001
+  },
+  {
+   "section": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "android",
+   "captureColour": [
+    0,
+    0,
+    0
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.0001
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-visited.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.876
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-visited.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.876
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-visited.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.876
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/color-layers-no-blend-mode.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    680
+   ],
+   "verdict": "f",
+   "ssim": 0.5189
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/color-layers-no-blend-mode.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    788
+   ],
+   "verdict": "f",
+   "ssim": 0.5189
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/color-layers-no-blend-mode.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    788
+   ],
+   "verdict": "f",
+   "ssim": 0.5189
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/cjk-decimal/counter-cjk-decimal.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    696
+   ],
+   "verdict": "f",
+   "ssim": 0.9407
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9925
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9925
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9925
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.8821
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.8821
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.8821
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9925
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9925
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9925
+  },
+  {
+   "section": "css-images",
+   "test": "css/css-images/gradient/gradient-eval-predefined-color-spaces.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9247
+  },
+  {
+   "section": "css-images",
+   "test": "css/css-images/gradient/gradient-eval-predefined-color-spaces.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9247
+  },
+  {
+   "section": "css-images",
+   "test": "css/css-images/gradient/gradient-eval-predefined-color-spaces.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9247
+  },
+  {
+   "section": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-inset-round-rendering.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.7483
+  },
+  {
+   "section": "css-multicol",
+   "test": "css/css-multicol/broken-column-rule-1.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9752
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-of-html-root-refcrash.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "EXCL",
+   "ssim": "excluded"
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-of-html-root-refcrash.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "EXCL",
+   "ssim": "excluded"
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-of-html-root-refcrash.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "EXCL",
+   "ssim": "excluded"
+  },
+  {
+   "section": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-inset-025.html",
+   "platform": "android",
+   "captureColour": [
+    0,
+    0,
+    0
+   ],
+   "size": [
+    390,
+    9470
+   ],
+   "verdict": "f",
+   "ssim": 0
+  },
+  {
+   "section": "css-transforms",
+   "test": "css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9565
+  },
+  {
+   "section": "css-transforms",
+   "test": "css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9565
+  },
+  {
+   "section": "css-values",
+   "test": "css/css-values/attr-notype-fallback.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    1032
+   ],
+   "verdict": "f",
+   "ssim": 0.9584
+  },
+  {
+   "section": "css-values",
+   "test": "css/css-values/attr-style-sharing-4.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9959
+  },
+  {
+   "section": "css-view-transitions",
+   "test": "css/css-view-transitions/empty-render-target-capture.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9565
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/direction-propagation-body-contain-root.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.971
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/direction-propagation-body-contain-root.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.971
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/direction-propagation-body-contain-root.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.971
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-in-shadow-root.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9749
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-in-shadow-root.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9749
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-in-shadow-root.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.9749
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-in-shadow-root.html",
+   "platform": "web",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.97
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-in-shadow-root.html",
+   "platform": "ios",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.97
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-in-shadow-root.html",
+   "platform": "android",
+   "captureColour": [
+    255,
+    255,
+    255
+   ],
+   "size": [
+    390,
+    600
+   ],
+   "verdict": "f",
+   "ssim": 0.97
+  }
+ ]
+}

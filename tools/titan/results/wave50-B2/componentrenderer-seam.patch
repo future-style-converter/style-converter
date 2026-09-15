@@ -1,0 +1,52 @@
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index 18eb24d..30d71c6 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -1457,7 +1457,21 @@ object ComponentRenderer {
+                     Modifier.fillMaxHeight()
+                 else Modifier
+             } else if (composedWpt && !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow &&
+-                !isShrinkToFitTable && !LocalSelfAlignmentHandled.current)
++                !isShrinkToFitTable && !LocalSelfAlignmentHandled.current &&
++                // Wave-50 lane B2 — CSS 2.1 §10.3.9. The fill above emulates
++                // §10.3.3, which is scoped to BLOCK-LEVEL boxes; an atomic
++                // inline-level box (declared inline-block / inline-flex /
++                // inline-grid) uses SHRINK-TO-FIT instead, which is Compose's
++                // wrap-content default. Without this gate the `.clipped`
++                // inline-block of css-masking/clip-path-contentBox-1d/1e
++                // stretched to the whole 358px canvas and painted 24 200 px
++                // of red outside the reference's green square (android f
++                // 0.8775 / 0.8875 vs web+iOS P). `inline-table` stays with
++                // isShrinkToFitTable above and vertical flows stay with the
++                // orthogonal branch — see AtomicInlineShrinkToFit's header
++                // for the enumerated nine-test blast radius.
++                !com.styleconverter.runtime.layout.position.AtomicInlineShrinkToFit
++                    .suppressesBlockAutoWidth(effectiveProperties, verticalWm))
+                 Modifier.fillMaxWidth()
+             else Modifier
+         // The 50×30 placeholder floor — skipped entirely in composed WPT capture
+@@ -1923,6 +1937,24 @@ object ComponentRenderer {
+                 com.styleconverter.runtime.core.variables.LocalCssVariables provides varScope,
+                 // % base channel for descendants' calc()/bare-% resolution.
+                 com.styleconverter.runtime.core.variables.LocalContainingBlock provides childContainingBlock,
++                // Wave-50 lane B2 — the SAME channel at THIS element's own
++                // level. The line above deliberately publishes the block this
++                // component establishes for its CHILDREN, but the component's
++                // own modifier chain materialises INSIDE this provider (the
++                // `content` lambda below is RenderComponentContent), so a
++                // `Modifier.composed` factory in that chain reads the child
++                // value for itself — one level too deep. `containingBlock` is
++                // the value LocalContainingBlock had at the TOP of this
++                // RenderComponent, i.e. the block this element is laid out in
++                // (CSS 2.1 §10.1), and every child re-provides its own on the
++                // way down. Read only through
++                // ElementContainingBlock.containingBlockFor; null until this
++                // line exists, which is why the percentage-inset lane kept its
++                // frozen (wrong-level) geometry and
++                // css-position/position-relative-006 android stayed f 0.9966
++                // through the wave-49 repair.
++                com.styleconverter.runtime.layout.position.ElementContainingBlock
++                    .LocalElementContainingBlock provides containingBlock,
+                 // §8.3.1 collapse channels are strictly one-level: THIS
+                 // component consumed its own override above, and any plan it
+                 // publishes for its children is provided deeper (inside its

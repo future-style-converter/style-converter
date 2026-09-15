@@ -43,6 +43,58 @@ import androidx.compose.ui.unit.Constraints
 import com.styleconverter.runtime.typography.text.LineStack
 import com.styleconverter.runtime.typography.text.VerticalTextFlow
 
+// ── wave-50 lane B5: the intrinsic SUMS are the only place this file can
+// manufacture a number no child ever answered, and Kotlin's `List<Int>.sum()`
+// wraps silently on overflow. Both sums below add per-glyph answers, and an
+// answer of `Constraints.Infinity` (Int.MAX_VALUE) is a legal thing for a
+// child to report on an unbounded axis — the LargeDimension family this file
+// was written to close hands one back through exactly this channel. Two such
+// advances sum to -2 as an Int, and a NEGATIVE intrinsic is worse than a
+// large one: Constraints rejects it, so the capture composition throws
+// instead of mis-sizing one box (the wave-39/42/46 crash family
+// MulticolLineSnap.clampedProbeWidthPx and IntrinsicChannel.packableCap were
+// both written against).
+//
+// The rule: accumulate in Long — which cannot wrap at any glyph count a
+// string can have — then clamp into [0, INTRINSIC_SUM_CAP]. The cap is
+// `IntrinsicChannel.packableCap(Constraints.Infinity)` = 262142, the largest
+// FINITE size Constraints' 31-bit packing can carry on ANY axis (the four
+// focus configurations' capacities are 8190/32766/65534/262142), so an answer
+// above it could not be honoured by the parent's Constraints even if it were
+// arithmetically right. Capping mis-sizes ONE box where the wrap corrupts the
+// whole composition — the same trade IntrinsicChannel's refusal philosophy
+// already makes, and stated there in the packableCap KDoc.
+//
+// ZERO measured carriers today: every glyph slot is a one-code-point Text
+// whose advance is a line height, and the longest corpus upright run is 12
+// glyphs (css-writing-modes/direction-upright-00x). This is the invariant,
+// not a flip — no gate cell is predicted to move.
+//
+// The rotated quartet deliberately does NOT clamp: it only RELAYS a child's
+// own answer on the transposed axis, which is what every ordinary Compose
+// layout does, and clamping a relay would diverge from the platform.
+
+/** The largest finite size Constraints can carry on any axis — see above. */
+internal const val INTRINSIC_SUM_CAP: Int = 262142
+
+/**
+ * Sum [values] without Int wraparound and clamp the result into
+ * [0, INTRINSIC_SUM_CAP].
+ *
+ * Long accumulation is the whole point: `List<Int>.sum()` on two
+ * `Constraints.Infinity` advances returns -2, and Constraints then throws
+ * on the negative. The lower clamp also absorbs a child that mis-reports a
+ * negative intrinsic (the platform allows it; IntrinsicChannel.fixedBand
+ * makes the same defence in its own coerceIn).
+ */
+internal fun sumClampedIntrinsic(values: Iterable<Int>): Int {
+    // Long accumulator: 2^63 cannot be reached by any per-glyph Int sum.
+    var total = 0L
+    for (v in values) total += v.toLong()
+    // Clamp to the representable band; coerceIn on Long, then narrow.
+    return total.coerceIn(0L, INTRINSIC_SUM_CAP.toLong()).toInt()
+}
+
 /**
  * Measure policy for [VerticalRotatedTextRun]: the wave-5 swap/coerce/
  * centre-rotate measure, verbatim, plus the TRANSPOSED intrinsics.
@@ -310,8 +362,9 @@ internal fun uprightFlowMeasurePolicy(
         val plan = VerticalTextFlow.uprightColumnIndices(glyphs, advance, height.toDouble())
             ?: return measurables.first().maxIntrinsicWidth(height)
         // Planned: sum each column's widest glyph — the measure's own
-        // totalW arithmetic, applied to intrinsic widths.
-        return plan.sumOf { line -> line.maxOf { widths[it] } }
+        // totalW arithmetic, applied to intrinsic widths, and
+        // overflow-safe (see sumClampedIntrinsic).
+        return sumClampedIntrinsic(plan.map { line -> line.maxOf { widths[it] } })
     }
 
     override fun IntrinsicMeasureScope.minIntrinsicHeight(
@@ -334,7 +387,8 @@ internal fun uprightFlowMeasurePolicy(
         // Fallback-owned run: same-axis fallback answer (rationale on
         // minIntrinsicWidth).
         if (fallbackOwnsRun(advances)) return measurables.first().maxIntrinsicHeight(width)
-        // The single unwrapped column: every glyph advance, summed.
-        return advances.sum()
+        // The single unwrapped column: every glyph advance, summed —
+        // overflow-safe and clamped (see sumClampedIntrinsic).
+        return sumClampedIntrinsic(advances)
     }
 }

@@ -1,0 +1,3767 @@
+{
+ "_note": "wave-50 skeptic S7: raw stdout of every replay, re-runnable with this script.",
+ "results": {
+  "replay-B1.mjs": {
+   "ms": 4289,
+   "error": null,
+   "json": {
+    "validate": {
+     "web": {
+      "exactMatch": true,
+      "mismatches": []
+     },
+     "ios": {
+      "exactMatch": true,
+      "mismatches": []
+     },
+     "android": {
+      "exactMatch": true,
+      "mismatches": []
+     }
+    },
+    "before": {
+     "web": {
+      "ssim": 0.999,
+      "wptPass": false,
+      "colorFailed": true,
+      "presenceFailed": false,
+      "coverageRatioFailed": false,
+      "novelInkFailed": true,
+      "novelPx": 10000,
+      "colorComposite": 0.9366,
+      "labDeltaEMean": 3.119,
+      "pixelMismatchedPct": 4.339,
+      "wptFuzzyMatch": false
+     },
+     "ios": {
+      "ssim": 0.9974,
+      "wptPass": false,
+      "colorFailed": true,
+      "presenceFailed": false,
+      "coverageRatioFailed": false,
+      "novelInkFailed": true,
+      "novelPx": 10000,
+      "colorComposite": 0.9332,
+      "labDeltaEMean": 3.21,
+      "pixelMismatchedPct": 4.443,
+      "wptFuzzyMatch": false
+     },
+     "android": {
+      "ssim": 0.9966,
+      "wptPass": false,
+      "colorFailed": true,
+      "presenceFailed": false,
+      "coverageRatioFailed": false,
+      "novelInkFailed": true,
+      "novelPx": 10000,
+      "colorComposite": 0.9321,
+      "labDeltaEMean": 3.223,
+      "pixelMismatchedPct": 4.484,
+      "wptFuzzyMatch": false
+     }
+    },
+    "after": {
+     "web": {
+      "repaintedPx": 10000,
+      "ssim": 0.999,
+      "wptPass": true,
+      "colorFailed": false,
+      "presenceFailed": false,
+      "coverageRatioFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "colorComposite": 0.9983,
+      "labDeltaEMean": 0.034,
+      "pixelMismatchedPct": 0.066,
+      "wptFuzzyMatch": false
+     },
+     "ios": {
+      "repaintedPx": 10000,
+      "ssim": 0.9974,
+      "wptPass": true,
+      "colorFailed": false,
+      "presenceFailed": false,
+      "coverageRatioFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "colorComposite": 0.9949,
+      "labDeltaEMean": 0.125,
+      "pixelMismatchedPct": 0.17,
+      "wptFuzzyMatch": false
+     },
+     "android": {
+      "repaintedPx": 10000,
+      "ssim": 0.9967,
+      "wptPass": true,
+      "colorFailed": false,
+      "presenceFailed": false,
+      "coverageRatioFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "colorComposite": 0.9939,
+      "labDeltaEMean": 0.138,
+      "pixelMismatchedPct": 0.211,
+      "wptFuzzyMatch": false
+     }
+    },
+    "siblings": {
+     "002": {
+      "web": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.999,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9983,
+       "labDeltaEMean": 0.034,
+       "pixelMismatchedPct": 0.066,
+       "wptFuzzyMatch": false
+      },
+      "ios": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9974,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9949,
+       "labDeltaEMean": 0.125,
+       "pixelMismatchedPct": 0.17,
+       "wptFuzzyMatch": false
+      },
+      "android": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9967,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9939,
+       "labDeltaEMean": 0.138,
+       "pixelMismatchedPct": 0.211,
+       "wptFuzzyMatch": false
+      }
+     },
+     "003": {
+      "web": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.999,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9983,
+       "labDeltaEMean": 0.034,
+       "pixelMismatchedPct": 0.066,
+       "wptFuzzyMatch": false
+      },
+      "ios": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9974,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9949,
+       "labDeltaEMean": 0.125,
+       "pixelMismatchedPct": 0.17,
+       "wptFuzzyMatch": false
+      },
+      "android": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9967,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9939,
+       "labDeltaEMean": 0.138,
+       "pixelMismatchedPct": 0.211,
+       "wptFuzzyMatch": false
+      }
+     },
+     "004": {
+      "web": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.999,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9983,
+       "labDeltaEMean": 0.034,
+       "pixelMismatchedPct": 0.066,
+       "wptFuzzyMatch": false
+      },
+      "ios": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9974,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9949,
+       "labDeltaEMean": 0.125,
+       "pixelMismatchedPct": 0.17,
+       "wptFuzzyMatch": false
+      },
+      "android": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9967,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9939,
+       "labDeltaEMean": 0.138,
+       "pixelMismatchedPct": 0.211,
+       "wptFuzzyMatch": false
+      }
+     },
+     "005": {
+      "web": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.999,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9983,
+       "labDeltaEMean": 0.034,
+       "pixelMismatchedPct": 0.066,
+       "wptFuzzyMatch": false
+      },
+      "ios": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9974,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9949,
+       "labDeltaEMean": 0.125,
+       "pixelMismatchedPct": 0.17,
+       "wptFuzzyMatch": false
+      },
+      "android": {
+       "exactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9967,
+       "wptPass": true,
+       "colorFailed": false,
+       "presenceFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "novelPx": 0,
+       "colorComposite": 0.9939,
+       "labDeltaEMean": 0.138,
+       "pixelMismatchedPct": 0.211,
+       "wptFuzzyMatch": false
+      }
+     }
+    }
+   }
+  },
+  "replay-B7a.mjs": {
+   "ms": 3239,
+   "error": null,
+   "json": {
+    "web": {
+     "harnessExactMatch": true,
+     "harnessMismatches": [],
+     "before": {
+      "ssim": 0.6241,
+      "wptPass": false,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "pixelMismatchedPct": 26.013,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 894,
+       "overflowInkPx": 27600,
+       "ssimRefFrame": 0.6978
+      },
+      "wptFuzzyMatch": null
+     },
+     "shiftOnly": {
+      "delta8_fullFrame": {
+       "pixelsOverThr": 2148,
+       "anyDiff": 7132,
+       "maxDelta": 101
+      },
+      "delta8_bandsOnly": {
+       "pixelsOverThr": 0,
+       "anyDiff": 4984,
+       "maxDelta": 1
+      },
+      "score": {
+       "ssim": 0.9521,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "presenceFailed": false,
+       "novelInkFailed": false,
+       "pixelMismatchedPct": 0.458,
+       "frame": {
+        "refW": 390,
+        "refH": 600,
+        "capW": 390,
+        "capH": 600,
+        "overflowInkPx": 0,
+        "ssimRefFrame": 0.9521
+       },
+       "wptFuzzyMatch": null
+      }
+     },
+     "shiftPlusRule": {
+      "delta8_fullFrame": {
+       "pixelsOverThr": 0,
+       "anyDiff": 4984,
+       "maxDelta": 1
+      },
+      "score": {
+       "ssim": 1,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "presenceFailed": false,
+       "novelInkFailed": false,
+       "pixelMismatchedPct": 0,
+       "frame": {
+        "refW": 390,
+        "refH": 600,
+        "capW": 390,
+        "capH": 600,
+        "overflowInkPx": 0,
+        "ssimRefFrame": 1
+       },
+       "wptFuzzyMatch": null
+      }
+     }
+    },
+    "ios": {
+     "harnessExactMatch": true,
+     "harnessMismatches": [],
+     "before": {
+      "ssim": 0.6235,
+      "wptPass": false,
+      "colorFailed": true,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "pixelMismatchedPct": 26.024,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 894,
+       "overflowInkPx": 27600,
+       "ssimRefFrame": 0.697
+      },
+      "wptFuzzyMatch": null
+     },
+     "shiftOnly": {
+      "delta8_fullFrame": {
+       "pixelsOverThr": 5764,
+       "anyDiff": 68462,
+       "maxDelta": 130
+      },
+      "delta8_bandsOnly": {
+       "pixelsOverThr": 3616,
+       "anyDiff": 66314,
+       "maxDelta": 130
+      },
+      "score": {
+       "ssim": 0.9491,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "presenceFailed": false,
+       "novelInkFailed": false,
+       "pixelMismatchedPct": 0.537,
+       "frame": {
+        "refW": 390,
+        "refH": 600,
+        "capW": 390,
+        "capH": 600,
+        "overflowInkPx": 0,
+        "ssimRefFrame": 0.9491
+       },
+       "wptFuzzyMatch": null
+      }
+     },
+     "shiftPlusRule": {
+      "delta8_fullFrame": {
+       "pixelsOverThr": 3616,
+       "anyDiff": 66314,
+       "maxDelta": 130
+      },
+      "score": {
+       "ssim": 0.997,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "presenceFailed": false,
+       "novelInkFailed": false,
+       "pixelMismatchedPct": 0.079,
+       "frame": {
+        "refW": 390,
+        "refH": 600,
+        "capW": 390,
+        "capH": 600,
+        "overflowInkPx": 0,
+        "ssimRefFrame": 0.997
+       },
+       "wptFuzzyMatch": null
+      }
+     }
+    },
+    "android": {
+     "harnessExactMatch": true,
+     "harnessMismatches": [],
+     "before": {
+      "ssim": 0.623,
+      "wptPass": false,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "pixelMismatchedPct": 26.039,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 894,
+       "overflowInkPx": 27600,
+       "ssimRefFrame": 0.6965
+      },
+      "wptFuzzyMatch": null
+     },
+     "shiftOnly": {
+      "delta8_fullFrame": {
+       "pixelsOverThr": 5120,
+       "anyDiff": 40706,
+       "maxDelta": 138
+      },
+      "delta8_bandsOnly": {
+       "pixelsOverThr": 2972,
+       "anyDiff": 38558,
+       "maxDelta": 138
+      },
+      "score": {
+       "ssim": 0.9495,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "presenceFailed": false,
+       "novelInkFailed": false,
+       "pixelMismatchedPct": 0.553,
+       "frame": {
+        "refW": 390,
+        "refH": 600,
+        "capW": 390,
+        "capH": 600,
+        "overflowInkPx": 0,
+        "ssimRefFrame": 0.9495
+       },
+       "wptFuzzyMatch": null
+      }
+     },
+     "shiftPlusRule": {
+      "delta8_fullFrame": {
+       "pixelsOverThr": 2972,
+       "anyDiff": 38558,
+       "maxDelta": 138
+      },
+      "score": {
+       "ssim": 0.9973,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "presenceFailed": false,
+       "novelInkFailed": false,
+       "pixelMismatchedPct": 0.095,
+       "frame": {
+        "refW": 390,
+        "refH": 600,
+        "capW": 390,
+        "capH": 600,
+        "overflowInkPx": 0,
+        "ssimRefFrame": 0.9973
+       },
+       "wptFuzzyMatch": null
+      }
+     }
+    }
+   }
+  },
+  "replay-B7a-sensitivity.mjs": {
+   "ms": 3031,
+   "error": null,
+   "json": {
+    "web": {
+     "V3_fullWidthRule": {
+      "ssim": 0.9982,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V4_flatGrayRule": {
+      "ssim": 0.9779,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V5_oneRowOnly": {
+      "ssim": 0.9989,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V6_blackRule": {
+      "ssim": 0.9536,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     }
+    },
+    "ios": {
+     "V3_fullWidthRule": {
+      "ssim": 0.9952,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V4_flatGrayRule": {
+      "ssim": 0.9749,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V5_oneRowOnly": {
+      "ssim": 0.996,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V6_blackRule": {
+      "ssim": 0.9506,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     }
+    },
+    "android": {
+     "V3_fullWidthRule": {
+      "ssim": 0.9956,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V4_flatGrayRule": {
+      "ssim": 0.9753,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V5_oneRowOnly": {
+      "ssim": 0.9963,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     },
+     "V6_blackRule": {
+      "ssim": 0.951,
+      "wptPass": true,
+      "cF": false,
+      "crF": false
+     }
+    }
+   }
+  },
+  "replay-B7b.mjs": {
+   "ms": 3458,
+   "error": null,
+   "json": {
+    "siblingCells": {
+     "contain-html-overflow-001": {
+      "web": {
+       "harnessExactMatch": true,
+       "mismatches": [],
+       "ssim": 1,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "novelPx": 0,
+       "semanticPresence": {
+        "aCoveragePct": 0.529,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 0
+      },
+      "ios": {
+       "harnessExactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9996,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "novelPx": 0,
+       "semanticPresence": {
+        "aCoveragePct": 0.505,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 0.029
+      },
+      "android": {
+       "harnessExactMatch": true,
+       "mismatches": [],
+       "ssim": 0.9989,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "novelPx": 0,
+       "semanticPresence": {
+        "aCoveragePct": 0.503,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 0.074
+      }
+     },
+     "contain-html-overflow-002": {
+      "web": {
+       "harnessExactMatch": true,
+       "mismatches": [],
+       "ssim": 0.8709,
+       "wptPass": false,
+       "colorFailed": true,
+       "coverageRatioFailed": true,
+       "novelInkFailed": true,
+       "presenceFailed": false,
+       "novelPx": 40000,
+       "semanticPresence": {
+        "aCoveragePct": 17.623,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 17.094
+      },
+      "ios": {
+       "harnessExactMatch": true,
+       "mismatches": [],
+       "ssim": 0.8705,
+       "wptPass": false,
+       "colorFailed": true,
+       "coverageRatioFailed": true,
+       "novelInkFailed": true,
+       "presenceFailed": false,
+       "novelPx": 40000,
+       "semanticPresence": {
+        "aCoveragePct": 17.599,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 17.123
+      },
+      "android": {
+       "harnessExactMatch": true,
+       "mismatches": [],
+       "ssim": 0.8698,
+       "wptPass": false,
+       "colorFailed": true,
+       "coverageRatioFailed": true,
+       "novelInkFailed": true,
+       "presenceFailed": false,
+       "novelPx": 40000,
+       "semanticPresence": {
+        "aCoveragePct": 17.597,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 17.168
+      }
+     }
+    },
+    "twoVsOne": {
+     "web": {
+      "size001": [
+       390,
+       600
+      ],
+      "size002": [
+       390,
+       600
+      ],
+      "pixelsDiffering": {
+       "count": 40000,
+       "max": 255,
+       "W": 390,
+       "H": 600
+      },
+      "ink001": {
+       "x0": 16,
+       "y0": 19,
+       "x1": 203,
+       "y1": 52,
+       "inkPx": 1238
+      },
+      "ink002": {
+       "x0": 16,
+       "y0": 19,
+       "x1": 215,
+       "y1": 415,
+       "inkPx": 41238
+      }
+     },
+     "ios": {
+      "size001": [
+       390,
+       600
+      ],
+      "size002": [
+       390,
+       600
+      ],
+      "pixelsDiffering": {
+       "count": 40000,
+       "max": 255,
+       "W": 390,
+       "H": 600
+      },
+      "ink001": {
+       "x0": 16,
+       "y0": 19,
+       "x1": 203,
+       "y1": 52,
+       "inkPx": 1181
+      },
+      "ink002": {
+       "x0": 16,
+       "y0": 19,
+       "x1": 215,
+       "y1": 415,
+       "inkPx": 41181
+      }
+     },
+     "android": {
+      "size001": [
+       390,
+       600
+      ],
+      "size002": [
+       390,
+       600
+      ],
+      "pixelsDiffering": {
+       "count": 40000,
+       "max": 255,
+       "W": 390,
+       "H": 600
+      },
+      "ink001": {
+       "x0": 16,
+       "y0": 19,
+       "x1": 203,
+       "y1": 52,
+       "inkPx": 1177
+      },
+      "ink002": {
+       "x0": 16,
+       "y0": 19,
+       "x1": 215,
+       "y1": 415,
+       "inkPx": 41177
+      }
+     }
+    },
+    "substitution": {
+     "web": {
+      "refsDiffer": true,
+      "score": {
+       "ssim": 1,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "novelPx": 0,
+       "semanticPresence": {
+        "aCoveragePct": 0.529,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 0
+      }
+     },
+     "ios": {
+      "refsDiffer": true,
+      "score": {
+       "ssim": 0.9996,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "novelPx": 0,
+       "semanticPresence": {
+        "aCoveragePct": 0.505,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 0.029
+      }
+     },
+     "android": {
+      "refsDiffer": true,
+      "score": {
+       "ssim": 0.9989,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "novelPx": 0,
+       "semanticPresence": {
+        "aCoveragePct": 0.503,
+        "bCoveragePct": 0.529,
+        "threshold": 5,
+        "tolerance": 8
+       },
+       "pixelMismatchedPct": 0.074
+      }
+     }
+    },
+    "s11": {
+     "web": {
+      "harnessExactMatch": true,
+      "size": [
+       390,
+       600
+      ],
+      "totalPx": 234000,
+      "blackPx": 234000,
+      "nonWhitePx": 234000,
+      "ssim": 0.0001,
+      "wptPass": false,
+      "colorFailed": true,
+      "coverageRatioFailed": true,
+      "novelInkFailed": false,
+      "presenceFailed": false,
+      "novelPx": 0,
+      "semanticPresence": {
+       "aCoveragePct": 100,
+       "bCoveragePct": 1.003,
+       "threshold": 5,
+       "tolerance": 8
+      },
+      "pixelMismatchedPct": 99.482
+     },
+     "ios": {
+      "harnessExactMatch": true,
+      "size": [
+       390,
+       600
+      ],
+      "totalPx": 234000,
+      "blackPx": 234000,
+      "nonWhitePx": 234000,
+      "ssim": 0.0001,
+      "wptPass": false,
+      "colorFailed": true,
+      "coverageRatioFailed": true,
+      "novelInkFailed": false,
+      "presenceFailed": false,
+      "novelPx": 0,
+      "semanticPresence": {
+       "aCoveragePct": 100,
+       "bCoveragePct": 1.003,
+       "threshold": 5,
+       "tolerance": 8
+      },
+      "pixelMismatchedPct": 99.482
+     },
+     "android": {
+      "harnessExactMatch": true,
+      "size": [
+       390,
+       600
+      ],
+      "totalPx": 234000,
+      "blackPx": 234000,
+      "nonWhitePx": 234000,
+      "ssim": 0.0001,
+      "wptPass": false,
+      "colorFailed": true,
+      "coverageRatioFailed": true,
+      "novelInkFailed": false,
+      "presenceFailed": false,
+      "novelPx": 0,
+      "semanticPresence": {
+       "aCoveragePct": 100,
+       "bCoveragePct": 1.003,
+       "threshold": 5,
+       "tolerance": 8
+      },
+      "pixelMismatchedPct": 99.482
+     }
+    }
+   }
+  },
+  "replay-B7c.mjs": {
+   "ms": 5514,
+   "error": null,
+   "json": {
+    "1": {
+     "web": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 18,
+       "y0": 21,
+       "x1": 133,
+       "y1": 80,
+       "inkPx": 316
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9884,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": true,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.124,
+       "semanticPresence": {
+        "aCoveragePct": 0.135,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9945,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.068,
+       "semanticPresence": {
+        "aCoveragePct": 0.066,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "ios": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 18,
+       "y0": 21,
+       "x1": 39,
+       "y1": 80,
+       "inkPx": 312
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9904,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": true,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.121,
+       "semanticPresence": {
+        "aCoveragePct": 0.133,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9943,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.068,
+       "semanticPresence": {
+        "aCoveragePct": 0.063,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "android": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 100
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9998,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.006,
+       "semanticPresence": {
+        "aCoveragePct": 0.043,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9998,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.006,
+       "semanticPresence": {
+        "aCoveragePct": 0.043,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     }
+    },
+    "2": {
+     "web": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 19,
+       "y0": 25,
+       "x1": 27,
+       "y1": 60,
+       "inkPx": 109
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.997,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.042,
+       "semanticPresence": {
+        "aCoveragePct": 0.047,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.997,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.042,
+       "semanticPresence": {
+        "aCoveragePct": 0.047,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "ios": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 19,
+       "y0": 25,
+       "x1": 27,
+       "y1": 60,
+       "inkPx": 104
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9971,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.041,
+       "semanticPresence": {
+        "aCoveragePct": 0.044,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9971,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.041,
+       "semanticPresence": {
+        "aCoveragePct": 0.044,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "android": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 100
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9998,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.006,
+       "semanticPresence": {
+        "aCoveragePct": 0.043,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9998,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.006,
+       "semanticPresence": {
+        "aCoveragePct": 0.043,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     }
+    },
+    "3": {
+     "web": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 18,
+       "y0": 21,
+       "x1": 133,
+       "y1": 80,
+       "inkPx": 316
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9884,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": true,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.124,
+       "semanticPresence": {
+        "aCoveragePct": 0.135,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9945,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.068,
+       "semanticPresence": {
+        "aCoveragePct": 0.066,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "ios": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 18,
+       "y0": 21,
+       "x1": 39,
+       "y1": 80,
+       "inkPx": 312
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9904,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": true,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.121,
+       "semanticPresence": {
+        "aCoveragePct": 0.133,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9943,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.068,
+       "semanticPresence": {
+        "aCoveragePct": 0.063,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "android": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 100
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9998,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.006,
+       "semanticPresence": {
+        "aCoveragePct": 0.043,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9998,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.006,
+       "semanticPresence": {
+        "aCoveragePct": 0.043,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     }
+    },
+    "4": {
+     "web": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 18,
+       "y0": 21,
+       "x1": 133,
+       "y1": 80,
+       "inkPx": 316
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9884,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": true,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.124,
+       "semanticPresence": {
+        "aCoveragePct": 0.135,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9945,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.068,
+       "semanticPresence": {
+        "aCoveragePct": 0.066,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "ios": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 18,
+       "y0": 21,
+       "x1": 39,
+       "y1": 80,
+       "inkPx": 312
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9904,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": true,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.121,
+       "semanticPresence": {
+        "aCoveragePct": 0.133,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9943,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.068,
+       "semanticPresence": {
+        "aCoveragePct": 0.063,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     },
+     "android": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "refInk": {
+       "x0": 19,
+       "y0": 23,
+       "x1": 27,
+       "y1": 58,
+       "inkPx": 109
+      },
+      "capInk": {
+       "x0": 16,
+       "y0": 20,
+       "x1": 110,
+       "y1": 73,
+       "inkPx": 300
+      },
+      "erasedPx": 217200,
+      "before": {
+       "ssim": 0.9888,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": true,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.111,
+       "semanticPresence": {
+        "aCoveragePct": 0.128,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      },
+      "afterErase": {
+       "ssim": 0.9936,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.071,
+       "semanticPresence": {
+        "aCoveragePct": 0.067,
+        "bCoveragePct": 0.047,
+        "threshold": 5,
+        "tolerance": 8
+       }
+      }
+     }
+    }
+   }
+  },
+  "replay-B7c-twin.mjs": {
+   "ms": 1264,
+   "error": null,
+   "json": null,
+   "text": "table1 web now 0.9884 false | android picture scored as this cell -> {\"ssim\":0.9998,\"wptPass\":true,\"crF\":false,\"cF\":false}\ntable1 ios now 0.9904 false | android picture scored as this cell -> {\"ssim\":0.9998,\"wptPass\":true,\"crF\":false,\"cF\":false}\ntable3 web now 0.9884 false | android picture scored as this cell -> {\"ssim\":0.9998,\"wptPass\":true,\"crF\":false,\"cF\":false}\ntable3 ios now 0.9904 false | android picture scored as this cell -> {\"ssim\":0.9998,\"wptPass\":true,\"crF\":false,\"cF\":false}\ntable4 web now 0.9884 false | android picture scored as this cell -> {\"ssim\":0.9888,\"wptPass\":false,\"crF\":true,\"cF\":false}\ntable4 ios now 0.9904 false | android picture scored as this cell -> {\"ssim\":0.9888,\"wptPass\":false,\"crF\":true,\"cF\":false}\n"
+  },
+  "replay-B4.mjs": {
+   "ms": 2890,
+   "error": null,
+   "json": {
+    "brokenSymbols": {
+     "web": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "capBands": [
+       [
+        35,
+        51
+       ],
+       [
+        55,
+        71
+       ]
+      ],
+      "erasedBand": [
+       55,
+       71
+      ],
+      "before": {
+       "ssim": 0.9749,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.447
+      },
+      "afterErase": {
+       "ssim": 1,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0
+      }
+     },
+     "ios": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "capBands": [
+       [
+        35,
+        51
+       ],
+       [
+        55,
+        71
+       ]
+      ],
+      "erasedBand": [
+       55,
+       71
+      ],
+      "before": {
+       "ssim": 0.9486,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.082
+      },
+      "afterErase": {
+       "ssim": 0.9713,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.672
+      }
+     },
+     "android": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "capBands": [
+       [
+        36,
+        51
+       ],
+       [
+        56,
+        71
+       ]
+      ],
+      "erasedBand": [
+       56,
+       71
+      ],
+      "before": {
+       "ssim": 0.949,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.052
+      },
+      "afterErase": {
+       "ssim": 0.9713,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.675
+      }
+     }
+    },
+    "counterSuffix": {
+     "web": {
+      "harnessExactMatch": true,
+      "mismatches": [],
+      "capBandCount": 20,
+      "refBandCount": 12,
+      "keptBandCount": 12,
+      "recordedScoreExcluded": null,
+      "before": {
+       "ssim": 0.8867,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.613
+      },
+      "afterEraseInPlace": {
+       "ssim": 0.8897,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.495
+      },
+      "afterReflow": {
+       "ssim": 0.9818,
+       "wptPass": true,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 0.173
+      }
+     },
+     "ios": {
+      "harnessExactMatch": false,
+      "mismatches": [
+       "wptPass: replay=false manifest=null"
+      ],
+      "capBandCount": 20,
+      "refBandCount": 12,
+      "keptBandCount": 12,
+      "recordedScoreExcluded": "native-font-parity",
+      "before": {
+       "ssim": 0.8883,
+       "wptPass": null,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.614
+      },
+      "afterEraseInPlace": {
+       "ssim": 0.8914,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.499
+      },
+      "afterReflow": {
+       "ssim": 0.9292,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.179
+      }
+     },
+     "android": {
+      "harnessExactMatch": false,
+      "mismatches": [
+       "wptPass: replay=false manifest=null"
+      ],
+      "capBandCount": 20,
+      "refBandCount": 12,
+      "keptBandCount": 12,
+      "recordedScoreExcluded": "native-font-parity",
+      "before": {
+       "ssim": 0.8901,
+       "wptPass": null,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.553
+      },
+      "afterEraseInPlace": {
+       "ssim": 0.8931,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.46
+      },
+      "afterReflow": {
+       "ssim": 0.9044,
+       "wptPass": false,
+       "colorFailed": false,
+       "coverageRatioFailed": false,
+       "novelInkFailed": false,
+       "presenceFailed": false,
+       "pixelMismatchedPct": 1.437
+      }
+     },
+     "_refBands": [
+      [
+       21,
+       34
+      ],
+      [
+       45,
+       58
+      ],
+      [
+       69,
+       82
+      ],
+      [
+       94,
+       106
+      ],
+      [
+       117,
+       130
+      ],
+      [
+       142,
+       154
+      ],
+      [
+       164,
+       180
+      ],
+      [
+       188,
+       204
+      ],
+      [
+       213,
+       226
+      ],
+      [
+       237,
+       250
+      ],
+      [
+       261,
+       274
+      ],
+      [
+       286,
+       298
+      ]
+     ]
+    }
+   }
+  },
+  "replay-B3.mjs": {
+   "ms": 5885,
+   "error": null,
+   "json": {
+    "css/css-counter-styles/cjk-decimal/counter-cjk-decimal.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "harnessMismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       696
+      ],
+      "ios": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9407,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 696,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9407
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": true,
+      "presenceFailed": true,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0,
+       "bCoveragePct": 0.816,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9934,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9934
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.881,
+       "bCoveragePct": 0.946,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.946,
+       "bCoveragePct": 0.946,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureAsAndroidCell": {
+      "ssim": 0.9934,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9934
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.881,
+       "bCoveragePct": 0.946,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureOnAndroidCanvas": {
+      "ssim": 0.9934,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 696,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9934
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.76,
+       "bCoveragePct": 0.816,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "css/css-values/attr-notype-fallback.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "harnessMismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       1032
+      ],
+      "ios": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9584,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 1032,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9584
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": true,
+      "presenceFailed": true,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0,
+       "bCoveragePct": 0.563,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9993,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9993
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.942,
+       "bCoveragePct": 0.968,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.968,
+       "bCoveragePct": 0.968,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureAsAndroidCell": {
+      "ssim": 0.9993,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9993
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.942,
+       "bCoveragePct": 0.968,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureOnAndroidCanvas": {
+      "ssim": 0.9993,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 1032,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9993
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.548,
+       "bCoveragePct": 0.563,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "css/css-values/attr-style-sharing-4.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "harnessMismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       600
+      ],
+      "ios": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9959,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9959
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": true,
+      "presenceFailed": true,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0,
+       "bCoveragePct": 0.045,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.041,
+       "bCoveragePct": 0.045,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.045,
+       "bCoveragePct": 0.045,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureAsAndroidCell": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.041,
+       "bCoveragePct": 0.045,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureOnAndroidCanvas": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.041,
+       "bCoveragePct": 0.045,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "css/css-lists/counter-reset-reversed-pseudo-001.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "harnessMismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       600
+      ],
+      "ios": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9884,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9884
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": true,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.105,
+       "bCoveragePct": 0.228,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9999,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9999
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.217,
+       "bCoveragePct": 0.228,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 0.9867,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9867
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.23,
+       "bCoveragePct": 0.228,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureAsAndroidCell": {
+      "ssim": 0.9999,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9999
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.217,
+       "bCoveragePct": 0.228,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureOnAndroidCanvas": {
+      "ssim": 0.9999,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9999
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.217,
+       "bCoveragePct": 0.228,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "css/css-lists/counter-reset-reversed-pseudo-003.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "harnessMismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       600
+      ],
+      "ios": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9961,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9961
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": true,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.057,
+       "bCoveragePct": 0.128,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9999,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9999
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.12,
+       "bCoveragePct": 0.128,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 0.9936,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9936
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.128,
+       "bCoveragePct": 0.128,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureAsAndroidCell": {
+      "ssim": 0.9999,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9999
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.12,
+       "bCoveragePct": 0.128,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureOnAndroidCanvas": {
+      "ssim": 0.9999,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9999
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 0.12,
+       "bCoveragePct": 0.128,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "css/css-lists/counter-list-item.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "harnessMismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       1028
+      ],
+      "android": [
+       390,
+       1990
+      ],
+      "ios": [
+       390,
+       959
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.7407,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 1028,
+       "capW": 390,
+       "capH": 1990,
+       "overflowInkPx": 4229,
+       "ssimRefFrame": 0.7485
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 1.513,
+       "bCoveragePct": 2.569,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.7518,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 1028,
+       "capW": 390,
+       "capH": 959,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.7518
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 4.625,
+       "bCoveragePct": 4.973,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 0.9975,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 1028,
+       "capW": 390,
+       "capH": 1028,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9975
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 4.944,
+       "bCoveragePct": 4.973,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureAsAndroidCell": {
+      "ssim": 0.7518,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 1028,
+       "capW": 390,
+       "capH": 959,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.7518
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 4.625,
+       "bCoveragePct": 4.973,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosPictureOnAndroidCanvas": {
+      "ssim": 0.7518,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 1028,
+       "capW": 390,
+       "capH": 1990,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.7518
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 2.389,
+       "bCoveragePct": 2.569,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    }
+   }
+  },
+  "replay-B2.mjs": {
+   "ms": 1395,
+   "error": null,
+   "json": {
+    "position-relative-006": {
+     "harnessExactMatch": true,
+     "mismatches": [],
+     "capRedBox": {
+      "x0": 16,
+      "y0": 88,
+      "x1": 115,
+      "y1": 187,
+      "px": 10000
+     },
+     "refGreenBox": {
+      "x0": 16,
+      "y0": 88,
+      "x1": 115,
+      "y1": 187,
+      "px": 10000
+     },
+     "iosNow": {
+      "ssim": 0.9974,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "pixelMismatchedPct": 0.17,
+      "semanticPresence": {
+       "aCoveragePct": 5.256,
+       "bCoveragePct": 5.326,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 0.999,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "pixelMismatchedPct": 0.066,
+      "semanticPresence": {
+       "aCoveragePct": 5.297,
+       "bCoveragePct": 5.326,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "before": {
+      "ssim": 0.9966,
+      "wptPass": false,
+      "colorFailed": true,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": true,
+      "novelPx": 10000,
+      "pixelMismatchedPct": 4.484,
+      "semanticPresence": {
+       "aCoveragePct": 5.244,
+       "bCoveragePct": 5.326,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "afterGreenOverlay": {
+      "ssim": 0.9967,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "pixelMismatchedPct": 0.211,
+      "semanticPresence": {
+       "aCoveragePct": 5.244,
+       "bCoveragePct": 5.326,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "clip-path-contentBox-1d": {
+     "harnessExactMatch": true,
+     "mismatches": [],
+     "capRedBox": {
+      "x0": 124,
+      "y0": 24,
+      "x1": 365,
+      "y1": 123,
+      "px": 24200
+     },
+     "erasedReddishPx": 24200,
+     "webNow": {
+      "ssim": 0.9585,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "pixelMismatchedPct": 1.313,
+      "semanticPresence": {
+       "aCoveragePct": 4.274,
+       "bCoveragePct": 4.274,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9585,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "pixelMismatchedPct": 1.313,
+      "semanticPresence": {
+       "aCoveragePct": 4.274,
+       "bCoveragePct": 4.274,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "before": {
+      "ssim": 0.8775,
+      "wptPass": false,
+      "colorFailed": true,
+      "coverageRatioFailed": true,
+      "presenceFailed": false,
+      "novelInkFailed": true,
+      "novelPx": 24200,
+      "pixelMismatchedPct": 11.655,
+      "semanticPresence": {
+       "aCoveragePct": 14.615,
+       "bCoveragePct": 4.274,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "afterRedErased": {
+      "ssim": 0.9585,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "pixelMismatchedPct": 1.313,
+      "semanticPresence": {
+       "aCoveragePct": 4.274,
+       "bCoveragePct": 4.274,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "clip-path-contentBox-1e": {
+     "harnessExactMatch": true,
+     "mismatches": [],
+     "capRedBox": {
+      "x0": 124,
+      "y0": 24,
+      "x1": 365,
+      "y1": 123,
+      "px": 23078
+     },
+     "erasedReddishPx": 23126,
+     "webNow": {
+      "ssim": 0.9696,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 9,
+      "pixelMismatchedPct": 0.995,
+      "semanticPresence": {
+       "aCoveragePct": 3.421,
+       "bCoveragePct": 3.418,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9695,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 8,
+      "pixelMismatchedPct": 1,
+      "semanticPresence": {
+       "aCoveragePct": 3.415,
+       "bCoveragePct": 3.418,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "before": {
+      "ssim": 0.8875,
+      "wptPass": false,
+      "colorFailed": true,
+      "coverageRatioFailed": true,
+      "presenceFailed": false,
+      "novelInkFailed": true,
+      "novelPx": 23054,
+      "pixelMismatchedPct": 11.297,
+      "semanticPresence": {
+       "aCoveragePct": 13.761,
+       "bCoveragePct": 3.418,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "afterRedErased": {
+      "ssim": 0.9601,
+      "wptPass": true,
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "novelPx": 0,
+      "pixelMismatchedPct": 1.414,
+      "semanticPresence": {
+       "aCoveragePct": 3.878,
+       "bCoveragePct": 3.418,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    }
+   }
+  },
+  "replay-B9.mjs": {
+   "ms": 2104,
+   "error": null,
+   "json": {
+    "css/css-overflow/line-clamp/line-clamp-006.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "mismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       600
+      ],
+      "ios": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9446,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9446
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 24.479,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 29.374,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9822,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9822
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 29.374,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "predictedPicture": "ios",
+     "predictedScoreAsAndroidCell": {
+      "ssim": 0.9822,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9822
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 29.374,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "css/css-overflow/line-clamp/line-clamp-007.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "ios": true
+     },
+     "mismatches": {
+      "android": [],
+      "ios": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       600
+      ],
+      "ios": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9409,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9409
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 14.687,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 1,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 1
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 29.374,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9822,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9822
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 29.374,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "predictedPicture": "ios",
+     "predictedScoreAsAndroidCell": {
+      "ssim": 0.9822,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9822
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 29.374,
+       "bCoveragePct": 29.374,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    },
+    "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html": {
+     "harnessExactMatch": {
+      "android": true,
+      "web": true
+     },
+     "mismatches": {
+      "android": [],
+      "web": []
+     },
+     "sizes": {
+      "ref": [
+       390,
+       600
+      ],
+      "android": [
+       390,
+       600
+      ],
+      "web": [
+       390,
+       600
+      ]
+     },
+     "androidNow": {
+      "ssim": 0.9451,
+      "wptPass": false,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9451
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 3.605,
+       "bCoveragePct": 4.506,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "webNow": {
+      "ssim": 0.9834,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9834
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 4.662,
+       "bCoveragePct": 4.506,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "iosNow": {
+      "ssim": 0.9577,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9577
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 3.614,
+       "bCoveragePct": 4.506,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     },
+     "predictedPicture": "web",
+     "predictedScoreAsAndroidCell": {
+      "ssim": 0.9834,
+      "wptPass": true,
+      "frame": {
+       "refW": 390,
+       "refH": 600,
+       "capW": 390,
+       "capH": 600,
+       "overflowInkPx": 0,
+       "ssimRefFrame": 0.9834
+      },
+      "colorFailed": false,
+      "coverageRatioFailed": false,
+      "presenceFailed": false,
+      "novelInkFailed": false,
+      "semanticPresence": {
+       "aCoveragePct": 4.662,
+       "bCoveragePct": 4.506,
+       "threshold": 5,
+       "tolerance": 8
+      }
+     }
+    }
+   }
+  },
+  "replay-B11.mjs": {
+   "ms": 52,
+   "error": null,
+   "json": {
+    "091_Button_Outline": {
+     "web": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 97.88,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 508
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 499
+      }
+     },
+     "iOS": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 98.49,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 30,
+       "inkPx": 357
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 30,
+       "inkPx": 349
+      }
+     },
+     "Android": {
+      "canvas": "390x58",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 97.92,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 26,
+       "inkPx": 463
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 26,
+       "inkPx": 463
+      }
+     }
+    },
+    "094_Input_Field": {
+     "web": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 75.29,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 200,
+       "h": 30,
+       "inkPx": 5976
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 200,
+       "h": 30,
+       "inkPx": 5976
+      }
+     },
+     "iOS": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 75.27,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 200,
+       "h": 30,
+       "inkPx": 5980
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 200,
+       "h": 30,
+       "inkPx": 5976
+      }
+     },
+     "Android": {
+      "canvas": "390x60",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 76.15,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 200,
+       "h": 28,
+       "inkPx": 5580
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 200,
+       "h": 28,
+       "inkPx": 5580
+      }
+     }
+    },
+    "105_Edge_DeepNesting": {
+     "web": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 93.22,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 1627
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 1599
+      }
+     },
+     "iOS": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 93.96,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 30,
+       "inkPx": 1452
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 30,
+       "inkPx": 1452
+      }
+     },
+     "Android": {
+      "canvas": "390x58",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 94.12,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 26,
+       "inkPx": 1331
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 26,
+       "inkPx": 1331
+      }
+     }
+    },
+    "016_Border_Solid": {
+     "web": {
+      "canvas": "390x68",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 97.54,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 97,
+       "h": 36,
+       "inkPx": 652
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 97,
+       "h": 36,
+       "inkPx": 652
+      }
+     },
+     "iOS": {
+      "canvas": "390x68",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 97.54,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 97,
+       "h": 36,
+       "inkPx": 652
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 97,
+       "h": 36,
+       "inkPx": 652
+      }
+     },
+     "Android": {
+      "canvas": "390x68",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 97.67,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 97,
+       "h": 36,
+       "inkPx": 617
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 97,
+       "h": 36,
+       "inkPx": 617
+      }
+     }
+    },
+    "017_Border_Dashed": {
+     "web": {
+      "canvas": "390x66",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 98.38,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 102,
+       "h": 34,
+       "inkPx": 416
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 102,
+       "h": 34,
+       "inkPx": 416
+      }
+     },
+     "iOS": {
+      "canvas": "390x66",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 98.3,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 102,
+       "h": 34,
+       "inkPx": 437
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 102,
+       "h": 34,
+       "inkPx": 437
+      }
+     },
+     "Android": {
+      "canvas": "390x66",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 98.32,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 102,
+       "h": 34,
+       "inkPx": 432
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 102,
+       "h": 34,
+       "inkPx": 432
+      }
+     }
+    },
+    "090_Button_Primary": {
+     "web": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 93.3,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 1614
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 1614
+      }
+     },
+     "iOS": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 93.96,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 30,
+       "inkPx": 1452
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 30,
+       "inkPx": 1452
+      }
+     },
+     "Android": {
+      "canvas": "390x62",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 93.33,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 1612
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 115,
+       "h": 30,
+       "inkPx": 1612
+      }
+     }
+    },
+    "097_Glass_Effect": {
+     "web": {
+      "canvas": "390x74",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 92.94,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 100,
+       "h": 42,
+       "inkPx": 2014
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 100,
+       "h": 42,
+       "inkPx": 2007
+      }
+     },
+     "iOS": {
+      "canvas": "390x74",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 93.36,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 42,
+       "inkPx": 1901
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 50,
+       "h": 42,
+       "inkPx": 1896
+      }
+     },
+     "Android": {
+      "canvas": "390x74",
+      "bg": [
+       26,
+       26,
+       46
+      ],
+      "bgPct": 93.22,
+      "tol8": {
+       "x": 16,
+       "y": 16,
+       "w": 100,
+       "h": 42,
+       "inkPx": 1948
+      },
+      "tol20": {
+       "x": 16,
+       "y": 16,
+       "w": 100,
+       "h": 42,
+       "inkPx": 1932
+      }
+     }
+    }
+   }
+  },
+  "replay-B11-pairs.mjs": {
+   "ms": 195,
+   "error": null,
+   "json": null,
+   "text": "{\n \"091_Button_Outline\": {\n  \"Android-web (ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 7.457,\n   \"ssim\": 0.9138\n  },\n  \"iOS-Android (ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 8.052,\n   \"ssim\": 0.8671\n  },\n  \"iOS-web (NOT ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 0.608,\n   \"ssim\": 0.954\n  },\n  \"iOS-Android AFTER B11 (android geometry := web)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 0.608,\n   \"ssim\": 0.954\n  }\n },\n \"094_Input_Field\": {\n  \"Android-web (ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 4.036,\n   \"ssim\": 0.899\n  },\n  \"iOS-Android (ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 4.045,\n   \"ssim\": 0.8987\n  },\n  \"iOS-web (NOT ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 0,\n   \"ssim\": 0.9998\n  },\n  \"iOS-Android AFTER B11 (android geometry := web)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 0,\n   \"ssim\": 0.9998\n  }\n },\n \"105_Edge_DeepNesting\": {\n  \"Android-web (ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 8.015,\n   \"ssim\": 0.9137\n  },\n  \"iOS-Android (ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 8.755,\n   \"ssim\": 0.8644\n  },\n  \"iOS-web (NOT ledgered)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 0.753,\n   \"ssim\": 0.951\n  },\n  \"iOS-Android AFTER B11 (android geometry := web)\": {\n   \"W\": 390,\n   \"H\": 62,\n   \"pixelPct\": 0.753,\n   \"ssim\": 0.951\n  }\n }\n}\nDELTA-E\n{\n \"091_Button_Outline\": {\n  \"Android-web\": {\n   \"mean\": 3.785,\n   \"max\": 49.707,\n   \"p95\": 49.707\n  },\n  \"iOS-Android\": {\n   \"mean\": 4.12,\n   \"max\": 54.964,\n   \"p95\": 49.707\n  },\n  \"iOS-web (= post-B11 iOS-Android)\": {\n   \"mean\": 0.343,\n   \"max\": 54.498,\n   \"p95\": 0\n  }\n },\n \"094_Input_Field\": {\n  \"Android-web\": {\n   \"mean\": 2.969,\n   \"max\": 85.705,\n   \"p95\": 13.955\n  },\n  \"iOS-Android\": {\n   \"mean\": 2.958,\n   \"max\": 85.705,\n   \"p95\": 13.955\n  },\n  \"iOS-web (= post-B11 iOS-Android)\": {\n   \"mean\": 0.013,\n   \"max\": 12.949,\n   \"p95\": 0\n  }\n },\n \"105_Edge_DeepNesting\": {\n  \"Android-web\": {\n   \"mean\": 4.131,\n   \"max\": 83.888,\n   \"p95\": 49.707\n  },\n  \"iOS-Android\": {\n   \"mean\": 4.563,\n   \"max\": 83.888,\n   \"p95\": 49.707\n  },\n  \"iOS-web (= post-B11 iOS-Android)\": {\n   \"mean\": 0.436,\n   \"max\": 54.498,\n   \"p95\": 0\n  }\n }\n}\n"
+  },
+  "replay-misc.mjs": {
+   "ms": 1642,
+   "error": null,
+   "json": null,
+   "text": "B8-item {\"recorded\":{\"web\":\"0.9961/true\",\"ios\":\"0.9843/true\"},\"webPictureUnderIosCell\":{\"ssim\":0.9961,\"wptPass\":true,\"lowContentDensity\":true}}\nfloor-not-binding proxy 090_Button_Primary Android-web {\"pixelPct\":0,\"ssim\":0.9999}\nfloor-not-binding proxy 016_Border_Solid Android-web {\"pixelPct\":0.796,\"ssim\":0.9866}\nfloor-not-binding proxy 017_Border_Dashed Android-web {\"pixelPct\":0.758,\"ssim\":0.9624}\nios-vs-android |Δssim| over 1366 scored cell pairs: {\"p50\":0.0008,\"p75\":0.0092,\"p90\":0.0312,\"p95\":0.0479,\"p99\":0.1388,\"max\":0.6855}\n"
+  },
+  "replay-gaps.mjs": {
+   "ms": 122,
+   "error": null,
+   "json": null,
+   "text": "ALL scored cells\n  |ios-android| {\"n\":1366,\"p50\":0.0008,\"p75\":0.0092,\"p90\":0.0312,\"p95\":0.0479,\"max\":0.6855}\n  |web-android| {\"n\":1366,\"p50\":0.0025,\"p75\":0.0222,\"p90\":0.052,\"p95\":0.1043,\"max\":0.6617}\n  |web-ios|     {\"n\":1366,\"p50\":0.0016,\"p75\":0.0152,\"p90\":0.0494,\"p95\":0.0884,\"max\":0.6855}\nCJK-family cells (raw ssim, exclusions included): 10\n  |ios-android| {\"n\":10,\"p50\":0.0189,\"p75\":0.0383,\"p90\":0.0614,\"p95\":0.0614,\"max\":0.0614}\n    css-counter-styles/cjk-decimal/counter-cjk-decimal.html w 1 ios 0.9934 and 0.9407 |Δ| 0.0527 \n    css-counter-styles/cjk-decimal/css3-counter-styles-001.html w 0.9933 ios 0.9653 and 0.9039 |Δ| 0.0614 (excluded)\n    css-counter-styles/cjk-decimal/css3-counter-styles-004.html w 0.9879 ios 0.7098 and 0.6715 |Δ| 0.0383 (excluded)\n    css-counter-styles/cjk-decimal/css3-counter-styles-005.html w 1 ios 0.993 and 0.9759 |Δ| 0.0171 \n    css-counter-styles/cjk-earthly-branch/css3-counter-styles-201.html w 0.9835 ios 0.8613 and 0.8583 |Δ| 0.003 (excluded)\n    css-counter-styles/cjk-earthly-branch/css3-counter-styles-202.html w 0.9687 ios 0.6762 and 0.6573 |Δ| 0.0189 (excluded)\n    css-counter-styles/cjk-earthly-branch/css3-counter-styles-203.html w 1 ios 0.9713 and 0.9695 |Δ| 0.0018 \n    css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html w 0.9964 ios 0.8831 and 0.8805 |Δ| 0.0026 (excluded)\n    css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html w 0.9778 ios 0.6787 and 0.6592 |Δ| 0.0195 (excluded)\n    css-counter-styles/cjk-heavenly-stem/css3-counter-styles-206.html w 0.9967 ios 0.9724 and 0.9707 |Δ| 0.0017 \n"
+  }
+ }
+}

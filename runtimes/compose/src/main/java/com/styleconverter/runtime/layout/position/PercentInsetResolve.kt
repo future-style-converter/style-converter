@@ -57,7 +57,18 @@ package com.styleconverter.runtime.layout.position
 // honest write-up in the lane report. Live corpus witnesses of both
 // shapes, from the frozen wave-48 IR:
 //   • position-relative-006 child → parent has Width=100px + MinHeight,
-//     no Height → cb=(100, null) → case (a) → 0. REPAIRED.
+//     no Height → cb=(100, null) → case (a) → 0.
+//     [WAVE 50, lane B2 — RE-TRUED. This file's decision is correct and was
+//     correct in wave 49; what reached it was not. `PercentInsetPositioned`
+//     read `LocalContainingBlock` from inside a `Modifier.composed` factory,
+//     which materialises INSIDE the component's own
+//     `LocalContainingBlock provides childContainingBlock`, so [resolve] was
+//     handed the block this element publishes for its CHILDREN — (100, 100)
+//     for the green square — not the (100, null) above. -10000 % × 100 is
+//     -10000 px, bit-for-bit the legacy value, which is why wave49-final
+//     css-position/position-relative-006 android stayed f 0.9966 with an
+//     unchanged capture. See ElementContainingBlock.kt for the corpus
+//     discriminator and the seam that publishes the right level.]
 //   • position-relative-002 child → parent is a `<span>` with no size →
 //     cb=(null, null) → case (b) → untouched (and that test passes today
 //     only because its containing block happens to be exactly 100px, so
@@ -140,10 +151,17 @@ object PercentInsetResolve {
         // containing block at all, so we cannot tell CSS-indefinite from
         // channel-gap. Keeping the legacy value is the honest degradation
         // — it can never move a box that renders correctly today.
-        // TODO(wave-49 A7): the spec-true repair is for a non-block-
-        // container ancestor to REPUBLISH its own containing block
-        // (CSS 2.1 §10.1) instead of nulling it; that lives in the
-        // renderer's LocalContainingBlock provider, outside this lane.
+        // TODO(wave-49 A7, re-scoped wave-50 B2): the remaining modelling
+        // gap is that a non-block-container ancestor should REPUBLISH its
+        // own containing block (CSS 2.1 §10.1 puts a static/relative box's
+        // containing block at the nearest BLOCK CONTAINER ancestor) instead
+        // of nulling it; that lives in DynamicValueResolver
+        // .childContainingBlock, outside this lane. It is NOT what blocked
+        // position-relative-006 — that was the channel LEVEL, see this
+        // file's header — and on the frozen wave49-final corpus it moves
+        // nothing: its only two carriers, -002's `<span>` parent and -008's
+        // `<tbody>` parent, resolve to the same used inset with or without
+        // the republish (PercentInsetResolveTest L4/L5).
         if (cb.widthPx == null && cb.heightPx == null) return config
 
         // Axis assignment per CSS 2.1 §9.4.3: left/right (and the inline

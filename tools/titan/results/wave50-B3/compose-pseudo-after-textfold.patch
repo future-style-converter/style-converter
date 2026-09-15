@@ -1,0 +1,684 @@
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoBucketExtractor.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoBucketExtractor.kt
+index 65024f37..c670ec5a 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoBucketExtractor.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoBucketExtractor.kt
+@@ -46,10 +46,19 @@ object PseudoBucketExtractor {
+      *   ROOT-SCOPE generated box and is owned by RootPseudoBox (wave-28
+      *   lane PG) — consuming it here too would double-render the box, the
+      *   exact hazard RootPseudoBox's banner pins. Skipped by design.
++     * @param afterFolded wave-50 lane B3: PseudoTextFold already folded
++     *   this component's `::after` bucket into its own text (CSS 2.1 §12.1
++     *   puts that box INSIDE the originating element, which the Row wrapper
++     *   below cannot express — see PseudoTextFold's banner for the measured
++     *   squeeze). True means the after payload is SPOKEN FOR and must not
++     *   also render here; the caller computes it once, beside the fold,
++     *   because the fold rewrites the `_text` its own styling gate reads.
++     *   Defaulted false so every other caller and pin keeps its behaviour.
+      */
+     fun extractBeforeAfterConfig(
+         pseudos: JsonObject?,
+-        role: String?
++        role: String?,
++        afterFolded: Boolean = false
+     ): ContentApplier.BeforeAfterConfig? {
+         // No bucket → nothing to bridge (every pre-wave-27 document).
+         if (pseudos == null) return null
+@@ -71,8 +80,13 @@ object PseudoBucketExtractor {
+         val before = (pseudos["before"] as? JsonObject)
+             ?.takeIf { PseudoGeneratedBox.claim(it, "before", role) == null }
+             .let { pseudoElementConfig(it, "before") }
++        // …and, wave-50 lane B3, a bucket PseudoTextFold has already folded
++        // into the host's own text run is likewise spoken for: rendering it
++        // here too would paint the same glyphs twice (once inside the host
++        // box, once beside it). One claim, two consumers — the same
++        // discipline the block-box gate above applies.
+         val after = (pseudos["after"] as? JsonObject)
+-            ?.takeIf { PseudoGeneratedBox.claim(it, "after", role) == null }
++            ?.takeIf { !afterFolded && PseudoGeneratedBox.claim(it, "after", role) == null }
+             .let { pseudoElementConfig(it, "after") }
+         // Neither side produced renderable content → hand the seam back
+         // to the legacy channel rather than an inert wrapper.
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoTextBridge.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoTextBridge.kt
+new file mode 100644
+index 00000000..08466d6b
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoTextBridge.kt
+@@ -0,0 +1,173 @@
++package com.styleconverter.runtime.content
++
++// PseudoTextBridge — wave-50 lane B3: the PURE half of the Compose ::after
++// text fold, and the byte-parallel twin of iOS
++// StyleEngine/content/PseudoTextBridge.swift (same name, same gate set, same
++// refusal vocabulary; skeptic probes diff the two).
++//
++// The split mirrors the iOS pair exactly: [PseudoTextFold] owns the COMPONENT
++// rewrite (which bucket may be claimed, and where the glyphs land), this file
++// owns the BUCKET question — can an inline text run honestly express this
++// `pseudos.after` payload at all? Keeping it separate also keeps both files
++// inside the repo's 200-line target and lets the JVM pin table exercise the
++// declaration gate without building a component.
++//
++// WHAT AN INLINE RUN CAN CARRY. The bucket's `properties` map is RAW CSS
++// strings (schema/spec/01-envelope.md forwards the extractor payload
++// verbatim) and this runtime has no CSS parser, so the gate is a whitelist,
++// not a parse: declarations that are inert for a text run pass, the three
++// styling declarations PseudoStyledDeclarations can type pass as typed
++// properties, and EVERYTHING else refuses the whole bucket — named through
++// the PropertyTracker, never silently flattened. A pseudo that asked for a
++// 20x20 tomato square (css-cascade/scope-pseudo-element) must not be folded
++// down to the letter "A".
++
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRLog
++import com.styleconverter.runtime.core.ir.IRProperty
++import kotlinx.serialization.json.JsonObject
++import kotlinx.serialization.json.JsonPrimitive
++import kotlinx.serialization.json.contentOrNull
++
++/** Log tag for this bridge's named refusals — shared with the fold's. */
++private const val TAG = "PseudoTextFold"
++
++object PseudoTextBridge {
++
++    /**
++     * Declarations an inline text run consumes or may ignore without lying.
++     * `content` is the run itself; the counter mutations (css-lists-3 §4)
++     * are INPUTS to the producer's bake and are already resolved inside the
++     * baked `_text`, so re-running them here could only disagree. Byte-
++     * parallel with the iOS twin's `inertDeclarations`.
++     */
++    private val INERT_DECLARATIONS = setOf(
++        "content", "counter-increment", "counter-reset", "counter-set"
++    )
++
++    /**
++     * Box-model declarations that are SPEC-DEAD when the same bucket also
++     * declares `display: contents` — css-display-3 §2.5: a box-less element
++     * has nothing for border/background/size to apply to. Outside that
++     * shape each of these means a real box and refuses the text fold.
++     * Byte-parallel with the iOS twin's `boxUnderContents`.
++     */
++    private val BOX_UNDER_CONTENTS = setOf(
++        "border", "background", "background-color", "width", "height"
++    )
++
++    /** The styling trio [PseudoStyledDeclarations] can type. */
++    private val STYLING_TRIO = setOf("color", "font-size", "font-family")
++
++    /** One foldable run: the baked glyphs plus its typed own styling. */
++    data class InlineRun(val text: String, val styling: List<IRProperty>)
++
++    /**
++     * The bucket's foldable run, or null when there is nothing an inline
++     * text run can honestly express (a declaration outside the consumable
++     * set, an unconvertible style value, or no baked glyphs).
++     */
++    fun inlineRun(bucket: JsonObject, host: IRComponent): InlineRun? {
++        // The raw CSS declarations map — extractor-owned and forwarded
++        // verbatim (schema/spec/01-envelope.md). Absent map = a bare text
++        // bucket: nothing to gate on.
++        val decls = bucket["properties"] as? JsonObject
++        // Pre-scan for `display: contents`, which flips the meaning of the
++        // box set below and so must be known before the walk. The token
++        // test is exact because `contents` is exclusive in the display
++        // grammar (css-display-3 §2 — it never pairs like `block flow`).
++        val displayContents = decls?.entries
++            ?.firstOrNull { it.key.trim().lowercase() == "display" }
++            ?.let { (it.value as? JsonPrimitive)?.contentOrNull?.trim()?.lowercase() == "contents" }
++            ?: false
++        // Does the host declare its own font-size? A RELATIVE pseudo size
++        // resolves against the ORIGINATING ELEMENT's size (css-values-4
++        // §6.1.1), but a FontSize appended to the host's own list resolves
++        // against what the HOST inherited — a different base. Refuse that
++        // combination rather than paint the wrong size (zero carriers in
++        // the wave49-final corpus: contain-content-011's host declares only
++        // `width`, so its `3em` resolves against the 16px default, right).
++        val hostDeclaresFontSize = host.properties.any { it.type == "FontSize" }
++        // Accumulators for the walk.
++        var refused = false
++        val styling = mutableListOf<IRProperty>()
++        // Sorted so a multi-key refusal logs in a deterministic order.
++        if (decls != null) for (prop in decls.keys.sorted()) {
++            // css-syntax-3 §5: property names are ASCII case-insensitive.
++            val key = prop.trim().lowercase()
++            // Consumed by the run itself / already inside the bake.
++            if (key in INERT_DECLARATIONS) continue
++            // `display: contents` IS this fold's own semantics (the element
++            // generates no box, only its content) — consumed. Any OTHER
++            // display value still refuses below: a block/none pseudo is not
++            // an inline text run.
++            if (key == "display" && displayContents) continue
++            // Box declarations are spec-dead under display:contents.
++            if (key in BOX_UNDER_CONTENTS && displayContents) continue
++            // The declaration's raw value; a non-primitive is not a
++            // declarations map at all and refuses like any unknown shape.
++            val raw = (decls[prop] as? JsonPrimitive)?.contentOrNull
++            // The styling trio converts to the typed wire shapes the one
++            // existing text pipeline already resolves.
++            if (raw != null && key in STYLING_TRIO) {
++                when (val conv = PseudoStyledDeclarations.convert(key, raw)) {
++                    // Typed — collected for the caller's uniformity gate.
++                    is PseudoStyledDeclarations.Conversion.Typed -> {
++                        // The em/%/rem base guard above: only a relative
++                        // FontSize is at risk, and only under a host that
++                        // declares its own size.
++                        if (key == "font-size" && hostDeclaresFontSize &&
++                            !raw.trim().lowercase().endsWith("px")
++                        ) {
++                            PropertyTracker.markUnhandled("PseudoText::after/font-size")
++                            IRLog.warn(TAG, "::after 'font-size: $raw' needs the host's own size as its em base — bucket not folded")
++                            refused = true
++                        } else {
++                            styling += conv.property
++                        }
++                        continue
++                    }
++                    // A CSS-wide keyword collapsing to the run's existing
++                    // default — consumed, correctly, as a no-op.
++                    PseudoStyledDeclarations.Conversion.Inert -> continue
++                    // Unparseable flavour (var()/calc()/keyword sizes) —
++                    // falls through to the named refusal below, because
++                    // folding the text with the WRONG ink/size would
++                    // half-render the bucket.
++                    PseudoStyledDeclarations.Conversion.Unsupported -> {}
++                    // convert() returns null only for names outside the
++                    // trio, which this branch has already excluded.
++                    null -> {}
++                }
++            }
++            // No silent fallthrough: name the refused declaration, then
++            // keep scanning so EVERY offending declaration gets a line.
++            PropertyTracker.markUnhandled("PseudoText::after/$key")
++            IRLog.warn(TAG, "::after declaration '$prop' is beyond the inline-text fold — bucket not folded")
++            refused = true
++        }
++        // Any refusal leaves the bucket on its existing wrapper path —
++        // exactly the behaviour this platform had before the seam, now
++        // named instead of silent.
++        if (refused) return null
++        // The baked literal. `_text` is what the WPT extractor emits today;
++        // `text` is the v2 spelling — web tolerates both in exactly this
++        // order (PseudoNodeRenderer's `p._text ?? p.text`), so mirror it.
++        val text = (bucket["_text"] as? JsonPrimitive)?.takeIf { it.isString }?.content
++            ?: (bucket["text"] as? JsonPrimitive)?.takeIf { it.isString }?.content
++        // No bake at all: a `content` the producer could not resolve
++        // (e.g. `attr()` on a subtree that never laid out). Web renders the
++        // empty string for these too — name the gap, fold nothing.
++        if (text == null) {
++            if (decls?.keys?.any { it.trim().lowercase() == "content" } == true) {
++                PropertyTracker.markUnhandled("PseudoText::after/unbaked")
++                IRLog.warn(TAG, "::after content has no baked _text — rendered as empty")
++            }
++            return null
++        }
++        // `content: ""` bakes an EMPTY string: a legal pseudo that paints no
++        // glyphs (css-content-3 §2), so there is nothing to fold.
++        return if (text.isEmpty()) null else InlineRun(text, styling)
++    }
++}
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoTextFold.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoTextFold.kt
+new file mode 100644
+index 00000000..a3a83489
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/content/PseudoTextFold.kt
+@@ -0,0 +1,151 @@
++package com.styleconverter.runtime.content
++
++// PseudoTextFold — wave-50 lane B3: the Compose twin of iOS
++// StyleEngine/content/PseudoTextFold.swift, for the ::after half only.
++//
++// THE MEASURED DEFECT (wave49-final captures, Android column). Compose
++// composes an ordinary element's generated content as a WRAPPER AROUND the
++// host — ContentApplier.ContentWithPseudoElements builds `Row { before,
++// content, after }` — while CSS 2.1 §12.1 / css-pseudo-4 §4.1 put the
++// ::after box INSIDE the originating element, as its LAST child (web spells
++// exactly that: NodeRenderer emits the pseudo span as a positional child;
++// iOS folds it into the host's text run). Outside the host box the ::after
++// has to share the line with the host's own block box, and in composed-WPT
++// capture that box takes `Modifier.fillMaxWidth()` (ComponentRenderer's
++// blockFlowWidth — CSS 2.1 §10.3.3 stretch fit / css-sizing-3 §5 used size).
++// A Compose Row measures unweighted children in order against the space its
++// predecessors left, so the host consumes the whole line and the ::after Text
++// is measured at maxWidth = 0: it still occupies the row (its zero-width
++// layout wraps one grapheme per line) but draws NOTHING.
++//
++// Three capture signatures of that one cause, all in
++// tools/titan/runs/wave49-final/sections/:
++//   * css-lists/counter-reset-reversed-pseudo-001 — Android paints "B7"
++//     and "B4" (the ::before runs) and loses "A5"/"A2"; the ink bands sit
++//     at y20-31 and y60-71, a 40px row pitch, where iOS has them 20px apart
++//     at y20-31 / y40-51. The doubled pitch IS the zero-width wrap of the
++//     two-glyph ::after — proof the run was composed and simply drew
++//     nothing (android f 0.9884 vs iOS P 0.9999).
++//   * css-counter-styles/cjk-decimal/counter-cjk-decimal — every component
++//     is `::after`-ONLY, so the Android capture is BLANK (semantic presence
++//     0.000 against the ref's 0.946) and its canvas grows 600 → 696 px on
++//     the wrapped zero-width rows (android f 0.9407 · iOS P 0.9934).
++//   * css-contain/contain-content-011 — the host declares `width: 100px`,
++//     so there is no squeeze and the defect shows as PLACEMENT instead: the
++//     "25" is painted at x≈118, to the RIGHT of the host's border box,
++//     where web and iOS put it at x≈16 inside it.
++//
++// SCOPE — ::after ONLY, deliberately. The ::before run is composed FIRST in
++// the same Row, so it already lands adjacent to the host's content edge and
++// renders correctly today; folding it too would move 55 corpus tests that
++// carry a before-only bucket, which is a device-A/B change, not a lane
++// change. The ::after side has no such luck: it is the one the stretch-fit
++// host squeezes. Blast radius of this fold, replayed over all 1435
++// wave49-final per-test-ir documents with the gates in this file and in
++// PseudoTextBridge: 13 tests, 78 components — of which 9 Android cells fail
++// today and 4 pass (tools/titan/results/wave50-B3/_note.md has the table).
++//
++// ONE CLAIM, TWO CONSUMERS: a bucket this fold takes must never ALSO render
++// through ContentApplier's wrapper, so [resolve] reports its decision in
++// [Folded.afterFolded] and the renderer passes it to
++// PseudoBucketExtractor.extractBeforeAfterConfig — the same discipline
++// PseudoBoxFold and PseudoBucketExtractor share through
++// PseudoGeneratedBox.claim. The decision is computed ONCE, beside the fold,
++// because the fold rewrites `_text` and the styling gate below reads it.
++//
++// The BUCKET question — can an inline run express this payload? — lives in
++// PseudoTextBridge, exactly as it does on iOS.
++
++import com.styleconverter.runtime.PropertyTracker
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRLog
++import kotlinx.serialization.json.JsonObject
++
++/** Log tag for this fold's named refusals. */
++private const val TAG = "PseudoTextFold"
++
++object PseudoTextFold {
++
++    /**
++     * The fold's outcome: the (possibly rewritten) component plus whether
++     * the `pseudos.after` bucket was CONSUMED here. `afterFolded = true`
++     * obliges the caller to keep ContentApplier's wrapper off that bucket.
++     */
++    data class Folded(val component: IRComponent, val afterFolded: Boolean)
++
++    /**
++     * Fold the component's baked `::after` text onto the END of its own
++     * text, per CSS 2.1 §12.1 order (element content, then ::after).
++     *
++     * Identity — the SAME instance back, `afterFolded = false` — for every
++     * component this fold does not claim, which is every component of the
++     * committed 327-fixture baseline corpus (none carries `pseudos`) and
++     * every before-only bucket. Committed captures are byte-stable by
++     * construction.
++     */
++    fun resolve(component: IRComponent): Folded {
++        // The overwhelmingly common path: no generated content at all.
++        val pseudos = component.pseudos ?: return Folded(component, false)
++        // Root-scope buckets belong to RootPseudoBox (wave-28 lane PG):
++        // that family is `content:"" + width/height/background`, a BOX and
++        // not a text run, and folding here would double-render it. Same
++        // guard direction as RootPseudoBox's banner, from the other shore.
++        if (component.role == "body-root") return Folded(component, false)
++        // No `::after` payload → nothing for this file to do. (`before` and
++        // `marker` are deliberately untouched: the wrapper and the list
++        // marker path own them — see the SCOPE note in the file banner.)
++        val bucket = pseudos["after"] as? JsonObject ?: return Folded(component, false)
++        // A bucket that generates a BLOCK-LEVEL BOX is PseudoBoxFold's, via
++        // the SAME claim function PseudoBucketExtractor consults — so the
++        // one payload can never render through two paths.
++        if (PseudoGeneratedBox.claim(bucket, "after", component.role) != null) {
++            return Folded(component, false)
++        }
++        // `meta.runs` is AUTHORITATIVE over `_text` (schema/spec/03-children.md
++        // §4.1): when a run plan resolves, the renderer paints the listed
++        // entries and drops the text slot, so a fold into `_text` would
++        // silently vanish. Refuse and name it — never a silent fallthrough.
++        if (component.runs != null) {
++            PropertyTracker.markUnhandled("PseudoText::runs")
++            IRLog.warn(TAG, "component carries meta.runs — ::after text not folded (runs own the content slot)")
++            return Folded(component, false)
++        }
++        // css-pseudo-4 §4.1 places ::after AFTER the element's children. A
++        // fold appends to the element's own TEXT, which paints BEFORE the
++        // child stack — the wrong order — so a component with children keeps
++        // the wrapper path it has today. Named, not silently mis-ordered.
++        if (!component.children.isNullOrEmpty()) {
++            PropertyTracker.markUnhandled("PseudoText::after-children")
++            IRLog.warn(TAG, "::after on a component with children is not folded (it must trail the children)")
++            return Folded(component, false)
++        }
++        // The declaration gate + the baked string. Null = nothing an inline
++        // run can honestly express; every refusal inside is already named.
++        val run = PseudoTextBridge.inlineRun(bucket, component)
++            ?: return Folded(component, false)
++        // css-cascade-5 §7.3 / css-pseudo-4 §2: `component._text` is ONE
++        // uniform run, so the bucket's OWN styling may only apply when the
++        // pseudo is the component's SOLE ink. Otherwise the host's text
++        // would be repainted in the pseudo's colour/size — a wrong render
++        // where today's wrapper at least keeps the two runs separate.
++        val hostText = component._text ?: ""
++        if (run.styling.isNotEmpty() && hostText.isNotEmpty()) {
++            PropertyTracker.markUnhandled("PseudoText::styled-nonuniform-after")
++            IRLog.warn(TAG, "::after styling cannot apply — the fold is not the component's sole text run")
++            return Folded(component, false)
++        }
++        // The fold itself. `_text` bakes its own separators (" 1" / "1 "),
++        // so plain concatenation is the whole job; the run is non-empty by
++        // construction (inlineRun never returns an empty string).
++        return Folded(
++            component.copy(
++                _text = hostText + run.text,
++                // Appended LAST so the pseudo's own declarations win the
++                // extractors' last-wins cascade, exactly as the author's
++                // `::after { color: … }` beats the inherited value.
++                properties = component.properties + run.styling
++            ),
++            afterFolded = true
++        )
++    }
++}
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index 18eb24d2..984dbd85 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -962,8 +962,27 @@ object ComponentRenderer {
+         // grid item collection) see the grandchildren as direct children.
+         // Identity for the whole contents-free corpus (same instance out),
+         // so remember{} keys and frozen baselines are untouched.
++        // ── Wave-50 lane B3: the ordinary-element generated-TEXT seam ──
++        // CSS 2.1 §12.1 / css-pseudo-4 §4.1 put the `::after` box INSIDE the
++        // originating element as its LAST child; ContentApplier's wrapper
++        // composes it as a SIBLING in a Row, where the host's stretch-fit
++        // block box (blockFlowWidth below, CSS 2.1 §10.3.3) leaves it zero
++        // width and it draws nothing — measured BLANK on
++        // css-counter-styles/cjk-decimal/counter-cjk-decimal (android f
++        // 0.9407, semantic presence 0.000 vs the ref's 0.946) while iOS,
++        // which folds the run into the host's text, passes at 0.9934. See
++        // PseudoTextFold's banner for the three capture signatures. Computed
++        // HERE, in the same remember as the box fold, because the extractor
++        // seam further down must know whether the bucket was claimed — and
++        // the decision cannot be recomputed there: the fold rewrites the
++        // `_text` its own styling gate reads.
++        val pseudoTextFold = androidx.compose.runtime.remember(component) {
++            com.styleconverter.runtime.content.PseudoTextFold.resolve(
++                ContentsUnboxing.resolve(component)
++            )
++        }
+         @Suppress("NAME_SHADOWING")
+-        val component = androidx.compose.runtime.remember(component) {
++        val component = androidx.compose.runtime.remember(pseudoTextFold) {
+             // ── Wave-49 lane A2: the ordinary-element generated-BOX seam ──
+             // CSS 2.1 §12.1 / css-pseudo-4 §4.1 ("Generated Content
+             // Pseudo-elements: ::before and ::after", a TREE-ABIDING
+@@ -983,9 +1002,12 @@ object ComponentRenderer {
+             // bucket — the committed fixture corpus carries no `pseudos` at
+             // all, and a replay of the claim rules over all 30 frozen
+             // wave48 sections claims exactly ONE component. Runs after
+-            // unboxing so the fold sees the final composed child list.
++            // unboxing (and after the wave-50 text fold, which refuses
++            // every bucket PseudoGeneratedBox.claim takes, so the two are
++            // disjoint by construction) so the fold sees the final composed
++            // child list.
+             com.styleconverter.runtime.content.PseudoBoxFold.resolve(
+-                ContentsUnboxing.resolve(component)
++                pseudoTextFold.component
+             )
+         }
+         // ── Wave-7 dynamic-styling resolution (schema/spec/06-dynamic-styling.md)
+@@ -1684,7 +1706,13 @@ object ComponentRenderer {
+         val beforeAfterConfig = try {
+             (if (engineDecision.kind != com.styleconverter.runtime.layout.ContainerKind.None)
+                 com.styleconverter.runtime.content.PseudoBucketExtractor
+-                    .extractBeforeAfterConfig(component.pseudos, component.role)
++                    .extractBeforeAfterConfig(
++                        component.pseudos, component.role,
++                        // Wave-50 lane B3: an `::after` PseudoTextFold has
++                        // already folded into `_text` must not ALSO render
++                        // through this wrapper — one claim, two consumers.
++                        afterFolded = pseudoTextFold.afterFolded,
++                    )
+             else null)
+                 ?: ContentApplier.extractBeforeAfterConfig(component.selectors)
+         } catch (e: Exception) {
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/content/PseudoTextFoldTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/content/PseudoTextFoldTest.kt
+new file mode 100644
+index 00000000..6e22fbe3
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/content/PseudoTextFoldTest.kt
+@@ -0,0 +1,239 @@
++package com.styleconverter.runtime.content
++
++// Wave-50 lane B3 — pin table for PseudoTextFold, the component rewrite that
++// folds an ordinary element's baked `::after` glyphs onto the END of its own
++// text (CSS 2.1 §12.1 order: element content, then ::after).
++//
++// WHY THESE ROWS. Every `pseudos` payload below is VERBATIM from
++// tools/titan/runs/wave49-final/sections/*/per-test-ir — the same bytes the
++// Android capture consumed when it painted NOTHING for
++// css-counter-styles/cjk-decimal/counter-cjk-decimal (android f 0.9407,
++// semantic presence 0.000 against the ref's 0.946) and lost the "A5"/"A2"
++// runs of css-lists/counter-reset-reversed-pseudo-001 (android f 0.9884 vs
++// iOS P 0.9999). The surrounding IRComponent is built through the runtime's
++// own constructor because the wire→component hop is IRDocumentDecoder's job
++// (it flattens `meta.role` → `role`, `text` → `_text`), not this fold's.
++//
++// The last two rows pin the DOUBLE-RENDER guard: a folded bucket must
++// disappear from ContentApplier's wrapper, or the same glyphs paint twice.
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.core.ir.IRRun
++import kotlinx.serialization.json.Json
++import kotlinx.serialization.json.JsonObject
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertNotNull
++import org.junit.Assert.assertNull
++import org.junit.Assert.assertSame
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class PseudoTextFoldTest {
++
++    /** Parse one wire `pseudos` object exactly as the decoder retains it. */
++    private fun pseudos(json: String): JsonObject =
++        Json.parseToJsonElement(json) as JsonObject
++
++    // ── The corpus payloads, verbatim ───────────────────────────────────
++
++    /** counter-cjk-decimal component __15: an ::after-ONLY CJK counter row. */
++    private val cjkAfterOnly = pseudos(
++        """{"after": {"properties": {"content": "\"一二三四五\""}, "_text": "一二三四五", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
++    )
++
++    /** counter-reset-reversed-pseudo-001 component __0__0: before + after. */
++    private val beforeAndAfter = pseudos(
++        """{"before": {"properties": {"counter-increment": "foo -1", "content": "\"B\" \"7\""}, "_text": "B7", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}, "after": {"properties": {"counter-increment": "foo -2", "content": "\"A\" \"5\""}, "_text": "A5", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
++    )
++
++    /** counter-list-item component __1__0__0: the ::after trails item text. */
++    private val listItemAfter = pseudos(
++        """{"before": {"properties": {"content": "\"1\" \" \""}, "_text": "1 ", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}, "after": {"properties": {"content": "\" \" \"1\""}, "_text": " 1", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
++    )
++
++    /** contain-content-011 component __3: the one STYLED ::after in corpus. */
++    private val styledAfter = pseudos(
++        """{"after": {"properties": {"content": "\"25\"", "font-size": "3em"}, "_lossy": true, "_lossyReasons": ["em/rem", "generated-content-baked"], "_text": "25"}}"""
++    )
++
++    /** scope-pseudo-element component __1__0: a real inline-block BOX. */
++    private val boxAfter = pseudos(
++        """{"after": {"properties": {"content": "\"A\"", "width": "20px", "height": "20px", "display": "inline-block", "background-color": "tomato"}, "_text": "A", "_lossy": true, "_lossyReasons": ["generated-content-baked"]}}"""
++    )
++
++    /** attr-notype-fallback component __4: `content: ""`, no baked `_text`. */
++    private val emptyContentAfter = pseudos(
++        """{"after": {"properties": {"content": "\"\""}, "_lossy": true, "_lossyReasons": ["baked-attr"]}}"""
++    )
++
++    /** A bare host with the given bucket — the corpus shape: no properties. */
++    private fun host(
++        bucket: JsonObject?,
++        text: String? = null,
++        role: String? = "ws-after",
++        children: List<IRComponent>? = null,
++        runs: List<IRRun>? = null,
++        properties: List<IRProperty> = emptyList(),
++    ) = IRComponent(
++        id = "host-1", name = "host", properties = properties,
++        children = children, _text = text, runs = runs,
++        pseudos = bucket, role = role,
++    )
++
++    // ── The fold ────────────────────────────────────────────────────────
++
++    @Test
++    fun `an after-only CJK bucket becomes the component's own text`() {
++        // The counter-cjk-decimal shape: nothing but generated content, which
++        // is exactly why the Android capture was blank.
++        val folded = PseudoTextFold.resolve(host(cjkAfterOnly))
++        assertTrue(folded.afterFolded)
++        assertEquals("一二三四五", folded.component._text)
++        // No styling declarations in this bucket → the host's typed list is
++        // untouched, so nothing about its box changes.
++        assertTrue(folded.component.properties.isEmpty())
++    }
++
++    @Test
++    fun `the after run appends to the host's own text in CSS 2_1 section 12_1 order`() {
++        // counter-list-item: marker "1." + ::before "1 " + text "a" +
++        // ::after " 1" — iOS paints "1. 1 a 1", Android painted "1. 1 a".
++        val folded = PseudoTextFold.resolve(host(listItemAfter, text = "a"))
++        assertTrue(folded.afterFolded)
++        assertEquals("a 1", folded.component._text)
++    }
++
++    @Test
++    fun `the before bucket is left for the wrapper, untouched`() {
++        val folded = PseudoTextFold.resolve(host(beforeAndAfter))
++        // Only the ::after is claimed — this lane deliberately does not move
++        // the ::before run (55 corpus tests carry a before-only bucket).
++        assertEquals("A5", folded.component._text)
++        // The wire object is kept WHOLE — consuming is not erasing: the
++        // `before` side still has to reach the wrapper, and ContentsUnboxing's
++        // `pseudos != null` veto plus the wire's re-derivability both read it.
++        val kept = folded.component.pseudos
++        assertNotNull(kept)
++        assertNotNull(kept!!["before"])
++        assertNotNull(kept["after"])
++    }
++
++    @Test
++    fun `a styled after folds its typed declarations onto the host`() {
++        // contain-content-011: `font-size: 3em` on the sole ink of a host
++        // that declares no size of its own, so the em base is the 16px
++        // document default (css-values-4 section 6.1.1) — the render site
++        // resolves the symbolic wire shape.
++        val folded = PseudoTextFold.resolve(host(styledAfter))
++        assertTrue(folded.afterFolded)
++        assertEquals("25", folded.component._text)
++        val fontSize = folded.component.properties.single { it.type == "FontSize" }
++        assertTrue(fontSize.data.toString().contains("\"EM\""))
++    }
++
++    // ── The refusals, each named rather than silent ──────────────────────
++
++    @Test
++    fun `a bucket that declares a real box is left to PseudoBoxFold's claim path`() {
++        // width/height/background-color on an inline-block ::after is a BOX,
++        // not a text run: folding its "A" would drop the 20x20 tomato square.
++        val folded = PseudoTextFold.resolve(host(boxAfter))
++        assertFalse(folded.afterFolded)
++        assertNull(folded.component._text)
++    }
++
++    @Test
++    fun `meta_runs owns the content slot, so nothing is folded`() {
++        // schema/spec/03-children.md section 4.1: a resolved run plan makes
++        // the renderer drop the text slot — a fold into it would vanish.
++        val folded = PseudoTextFold.resolve(
++            host(cjkAfterOnly, runs = listOf(IRRun(text = "x")))
++        )
++        assertFalse(folded.afterFolded)
++        assertNull(folded.component._text)
++    }
++
++    @Test
++    fun `an after on a parent with children is refused, not mis-ordered`() {
++        // css-pseudo-4 section 4.1 places ::after AFTER the children; the
++        // host's own text paints BEFORE them, so the fold would reverse it.
++        val kid = IRComponent(id = "k", name = "k")
++        val folded = PseudoTextFold.resolve(host(cjkAfterOnly, children = listOf(kid)))
++        assertFalse(folded.afterFolded)
++    }
++
++    @Test
++    fun `a body-root bucket stays with RootPseudoBox`() {
++        val root = host(cjkAfterOnly, role = "body-root")
++        val folded = PseudoTextFold.resolve(root)
++        assertFalse(folded.afterFolded)
++        // Identity, not a copy: RootPseudoBox owns the root-scope bucket and
++        // would double-render anything this fold also claimed.
++        assertSame(root, folded.component)
++        assertNull(folded.component._text)
++    }
++
++    @Test
++    fun `content empty-string bakes no glyphs, so there is nothing to fold`() {
++        // css-content-3 section 2: `content: ""` generates a box with no ink.
++        val folded = PseudoTextFold.resolve(host(emptyContentAfter))
++        assertFalse(folded.afterFolded)
++    }
++
++    @Test
++    fun `styling refuses when the pseudo is not the component's sole ink`() {
++        // One uniform run cannot carry two sizes: the host's "x" would be
++        // repainted at 3em along with the pseudo's "25".
++        val folded = PseudoTextFold.resolve(host(styledAfter, text = "x"))
++        assertFalse(folded.afterFolded)
++        assertEquals("x", folded.component._text)
++    }
++
++    @Test
++    fun `a relative pseudo font-size under a host that declares its own size is refused`() {
++        // css-values-4 section 6.1.1: the pseudo's em resolves against the
++        // ORIGINATING element's size, but a FontSize appended to the host's
++        // own list resolves against what the HOST inherited. Different base
++        // → refuse rather than paint the wrong size. (Zero corpus carriers.)
++        val sized = IRProperty("FontSize", Json.parseToJsonElement("""{"px":32}"""))
++        val folded = PseudoTextFold.resolve(host(styledAfter, properties = listOf(sized)))
++        assertFalse(folded.afterFolded)
++    }
++
++    @Test
++    fun `a component without pseudos comes back as the same instance`() {
++        val bare = host(null)
++        val folded = PseudoTextFold.resolve(bare)
++        assertSame(bare, folded.component)
++        assertFalse(folded.afterFolded)
++    }
++
++    // ── The double-render guard ─────────────────────────────────────────
++
++    @Test
++    fun `a folded after disappears from the wrapper config`() {
++        val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(
++            beforeAndAfter, role = "ws-after", afterFolded = true
++        )
++        // The ::before still rides the wrapper; the ::after does not, or the
++        // glyphs would paint twice — once in the host's text, once beside it.
++        assertNotNull(cfg)
++        assertNotNull(cfg!!.before)
++        assertNull(cfg.after)
++    }
++
++    @Test
++    fun `an unfolded after still rides the wrapper`() {
++        // The default keeps every pre-wave-50 caller byte-identical.
++        val cfg = PseudoBucketExtractor.extractBeforeAfterConfig(
++            beforeAndAfter, role = "ws-after"
++        )
++        assertNotNull(cfg!!.after)
++        assertEquals(
++            listOf<ContentValue>(ContentValue.Text("A5")),
++            cfg.after!!.content
++        )
++    }
++}

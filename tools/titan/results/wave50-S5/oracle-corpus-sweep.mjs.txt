@@ -1,0 +1,39 @@
+// S5 independent oracle sweep — my own scanner, not B1's census script.
+import { readFileSync, existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { provablyInvalidDeclaration } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/extract-fixture.mjs';
+const ROOT='/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf';
+const SEC=join(ROOT,'tools/titan/runs/wave49-final/sections');
+const WPT=join(ROOT,'tools/wpt');
+const tests=[];
+for (const s of readdirSync(SEC)) {
+  const tl=join(SEC,s,'tests.list');
+  if (existsSync(tl)) for (const l of readFileSync(tl,'utf8').split('\n')) if (l.trim()) tests.push(l.trim());
+}
+console.log('tests:',tests.length);
+let decls=0, fired=0; const byTest=new Map();
+const declRe=/([-\w\\]+)\s*:\s*([^;}]*)/g;
+for (const t of tests) {
+  const p=join(WPT,t);
+  if (!existsSync(p)) { continue; }
+  const html=readFileSync(p,'utf8');
+  const bodies=[];
+  for (const m of html.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi)) bodies.push(m[1]);
+  for (const m of html.matchAll(/style\s*=\s*"([^"]*)"/gi)) bodies.push('x{'+m[1]+'}');
+  for (const m of html.matchAll(/style\s*=\s*'([^']*)'/gi)) bodies.push('x{'+m[1]+'}');
+  for (const body of bodies) {
+    // only look inside {...} blocks so selectors/at-rule preludes are skipped
+    for (const b of body.matchAll(/\{([^{}]*)\}/g)) {
+      for (const d of b[1].split(';')) {
+        const i=d.indexOf(':'); if (i<0) continue;
+        const prop=d.slice(0,i).trim(); const val=d.slice(i+1).trim().replace(/!important$/i,'').trim();
+        if (!prop || !val) continue;
+        decls++;
+        const r=provablyInvalidDeclaration(prop,val);
+        if (r) { fired++; const a=byTest.get(t)||[]; a.push(`${prop}: ${val}  [${r.split("'")[1]}]`); byTest.set(t,a); }
+      }
+    }
+  }
+}
+console.log('declarations scanned:',decls,'oracle fired:',fired,'in',byTest.size,'tests');
+for (const [t,a] of byTest) { console.log('  '+t); a.forEach(x=>console.log('     '+x)); }

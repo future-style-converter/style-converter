@@ -1,0 +1,40 @@
+import { provablyInvalidDeclaration, unknownDimensionUnit } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/extract-fixture.mjs';
+const cases = [
+  // ---- expected REFUSED (unknown unit) ----
+  ['transform','rotate(45turns)'],
+  ['transform','rotate(45degree)'],
+  ['transform','rotate(45radian)'],
+  ['transform','rotate(45gradian)'],
+  ['width','100qq'],
+  ['margin-left','10foo'],
+  ['font-size','12ptx'],
+  ['letter-spacing','3bananas'],
+  ['border-top-width','2pxx'],
+  ['height','50vhh'],
+  // ---- expected ACCEPTED ----
+  ['width','100px'],
+  ['width','calc(100% - 2ch)'],
+  ['transform','rotate(45deg)'],
+  ['grid-template-columns','repeat(2, 1fr)'],
+  ['background-image','image-set(url(a.png) 1x, url(b.png) 2x)'],
+  ['transition','all 1s ease-in 250ms'],
+  ['width','10cqi'],
+  ['font-size','2rlh'],
+  ['color','#00ff00'],
+  ['transform','perspective(1px) translate3d(1px,2px,3px)'],
+  // ---- adversarial: VALID CSS the oracle may mis-refuse ----
+  ['--custom','3bananas'],
+  ['unicode-range','U+0-7F'],
+  ['content','"12foo"'],
+  ['font-family','Arial, "12px", serif'],
+  ['grid-template-areas','"a1 b2"'],
+  ['background','url(data:image/gif;base64,R0lGOD1abc) no-repeat'],
+  ['width','1e3px'],
+  ['voice-pitch','2st'],
+  ['font-size','1cap'],
+  ['background-position','2n'],
+];
+for (const [p,v] of cases) {
+  const r = provablyInvalidDeclaration(p,v);
+  console.log(`${r? 'REFUSE':'accept'}  ${p}: ${v}` + (r?`   <-- ${r}`:''));
+}

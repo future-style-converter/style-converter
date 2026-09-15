@@ -1,0 +1,76 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.layout.position.AtomicInlineShrinkToFit
+import com.styleconverter.runtime.table.TableBoxTree
+import com.styleconverter.runtime.typography.text.TextExtractor
+import kotlinx.serialization.json.Json
+import org.junit.Test
+import java.io.File
+
+class AtomicInlineAdversarialProbeTest {
+
+    private val repo = File("../../").canonicalFile
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+    private fun ir(t: String, j: String) = IRProperty(t, Json.parseToJsonElement(j))
+
+    @Test fun adversarial() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        fun p(label: String, props: List<IRProperty>, vwm: Boolean) {
+            val sup = AtomicInlineShrinkToFit.suppressesBlockAutoWidth(props, vwm)
+            val hasExplicitWidth = props.any {
+                it.type in if (vwm) listOf("Width", "MinWidth", "BlockSize", "MinBlockSize")
+                else listOf("Width", "MinWidth", "InlineSize", "MinInlineSize")
+            }
+            sb.append("$label | suppresses=$sup hasExplicitWidth=$hasExplicitWidth " +
+                "→ renderer fill removed = ${sup && !hasExplicitWidth}\n")
+        }
+        p("inline-block, no width", listOf(ir("Display", "\"INLINE_BLOCK\"")), false)
+        p("inline-block + width:100px", listOf(ir("Display", "\"INLINE_BLOCK\""), ir("Width", """{"type":"length","px":100}""")), false)
+        p("inline-block + min-width", listOf(ir("Display", "\"INLINE_BLOCK\""), ir("MinWidth", """{"type":"length","px":10}""")), false)
+        p("inline-block, VERTICAL wm", listOf(ir("Display", "\"INLINE_BLOCK\"")), true)
+        p("inline-block + inline-size (vertical: not a width)", listOf(ir("Display", "\"INLINE_BLOCK\""), ir("InlineSize", """{"type":"length","px":80}""")), true)
+        p("inline-flex", listOf(ir("Display", "\"INLINE_FLEX\"")), false)
+        p("inline-grid", listOf(ir("Display", "\"INLINE_GRID\"")), false)
+        p("inline-table", listOf(ir("Display", "\"INLINE_TABLE\"")), false)
+        p("display:inline", listOf(ir("Display", "\"INLINE\"")), false)
+        p("inline-block wire {keyword}", listOf(ir("Display", """{"keyword":"inline-block"}""")), false)
+        p("REPLACED <img> declared inline-block (no intrinsic size on the wire)",
+            listOf(ir("Display", "\"INLINE_BLOCK\"")), false)
+
+        // inline-table also has to be suppressed by the TABLE gate, else the
+        // fill survives and the box stretches.
+        val tableRole = TableBoxTree.roleOf(
+            IRComponent(id = "t", name = "t", properties = listOf(ir("Display", "\"INLINE_TABLE\""))),
+            useUaTagDefaults = true
+        )
+        sb.append("inline-table role=$tableRole shrinkToFitBox=${TableBoxTree.shrinkToFitBox(tableRole)}\n")
+
+        // The ring-fenced test, reported plainly.
+        val f = File(repo, "tools/titan/runs/wave49-final/sections/filter-effects/per-test-ir/wpt__filter-effects__backdrop-filter-basic-blur.json")
+        sb.append("\n=== filter-effects/backdrop-filter-basic-blur (ring-fenced; measured, not carved) ===\n")
+        if (!f.exists()) sb.append("IR NOT FOUND: ${f.path}\n") else {
+            val doc = IRDocumentDecoder.decode(f.readText())
+            val roots = SlotComposer.compose(doc)
+            fun walk(c: IRComponent, inherited: List<IRProperty>) {
+                val merged = ComponentRenderer.mergeInherited(c.properties, inherited)
+                val vwm = try { TextExtractor.extractWritingModeConfig(merged.map { it.type to it.data }).isVertical } catch (e: Exception) { false }
+                val disp = AtomicInlineShrinkToFit.declaredDisplay(merged)
+                val sup = AtomicInlineShrinkToFit.suppressesBlockAutoWidth(merged, vwm)
+                sb.append("  ${c.id} declaredDisplay=$disp suppresses=$sup\n")
+                val inh = merged.filter { it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                c.children?.forEach { walk(it, inh) }
+            }
+            roots.forEach { walk(it, emptyList()) }
+        }
+        File(out, "atomic-inline-adversarial.txt").writeText(sb.toString())
+        println(sb.toString())
+    }
+}

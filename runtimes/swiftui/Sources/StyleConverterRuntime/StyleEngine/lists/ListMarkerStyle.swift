@@ -40,6 +40,12 @@ enum ListMarkerType: String, Equatable {
     case cjkDecimal
     case hiragana, katakana
     case hiraganaIroha, katakanaIroha
+    // §7.1 longhand East Asian — the ONLY member modelled (wave 50, lane B4:
+    // counter-suffix's fourth `<ol>` is its one corpus carrier; the hanja
+    // siblings keep the documented nil path). It has NO Compose twin yet, so
+    // the 1:1 claim above holds for every case but this one — tracked work,
+    // not drift (KoreanHangulFormal.swift's TWIN DIVERGENCE banner).
+    case koreanHangulFormal
 }
 
 /// css-lists-3 §3.5 — where the marker box sits relative to the item's
@@ -183,6 +189,10 @@ enum ListMarkerResolver {
         case "katakana": return .katakana
         case "hiragana-iroha": return .hiraganaIroha
         case "katakana-iroha": return .katakanaIroha
+        // css-counter-styles-3 §7.1. Before wave 50 this fell to `default:
+        // return nil`, which the resolver reads as "keep the running value" —
+        // the `<ol>` UA `decimal` — so iOS painted "1." for "일,".
+        case "korean-hangul-formal": return .koreanHangulFormal
         default: return nil
         }
     }

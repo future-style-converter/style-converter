@@ -1,0 +1,89 @@
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index 7328545..65d2d10 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -2785,17 +2785,73 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
+         cursor = c.index + c[0].length;
+       }
+     }
+-    // wave-33 lane N (N1): keep this scanner and walkChildren agreeing about
+-    // where an UNCLOSED child ends. walkChildren now grants a load-bearing
+-    // unclosed wrapper the end-of-fragment body (adoptsUnclosedBody); if we
+-    // did not mirror that here, the wrapper's inner text would be counted
+-    // TWICE — once as the parent's own `_text` (this scanner falling through
+-    // with cursor === tagOpenEnd + 1) and once as the adopted child's own
+-    // text in the tree walk. MEASURED on css-break/inline-skipping-
+-    // fragmentainer-001, whose `<span style="position:relative">` loses its
+-    // `</span>` to an outer div's close-pairing: the `&nbsp;` was emitted on
+-    // both the span and its parent. Same gate, same fragment, one answer.
+-    if (lastCloseStart < 0 && adoptsUnclosedBody(tagOpen, innerHtml, tagOpenEnd + 1, n)) {
++    // ── wave-50 lane B4: the SECOND half of the same agreement ────────────
++    //
++    // walkChildren has honoured HTML's OPTIONAL END TAGS (HTML Living
++    // Standard §13.2.6.4 — `<li>`, `<p>`, `<dt>`/`<dd>`, `<option>`,
++    // `<tr>`/`<td>`/`<th>`, `<thead>`/`<tbody>`) since Bug 2b: the next
++    // AUTO_CLOSE_TRIGGERS opener implicitly ends the element, so
++    // `<ol><li>foo<li>bar</ol>` gives the two `<li>` children the bodies
++    // "foo" and "bar". THIS scanner never mirrored that rule — with no
++    // literal `</li>` anywhere the close-pairing loop above breaks out with
++    // `lastCloseStart === -1` and `cursor === tagOpenEnd + 1`, so the scan
++    // resumes INSIDE the child and "foo"/"bar" are counted as the `<ol>`'s
++    // OWN text. Exactly the double-count the wave-33 banner below describes
++    // for unclosed wrappers, on the far more common omitted-end-tag shape.
++    //
++    // MEASURED on css-counter-styles/counter-suffix (wave49-final
++    // web f 0.8867 · iOS f 0.8883 · android f 0.8901, all three): its six
++    // `<ol class="…"><li>foo<li>bar</ol>` lists each ship `_text:"foobar"`
++    // PLUS `_runs:[{child:li0},{text:"foo"},{child:li1},{text:"bar"}]`, and
++    // every renderer paints each item twice — "1. foo" then a bare "foo" on
++    // the next line (tools/titan/runs/wave49-final/sections/
++    // css-counter-styles/ios-screenshots/wpt__css-counter-styles__
++    // counter-suffix.png vs the frozen ref under tools/wpt/refs/
++    // 9b5435e55e0b54a6cd09c1c563861eb3c999cef1/…/counter-suffix.png).
++    //
++    // The three branches below are walkChildren's three, verbatim, with
++    // `cursor` standing in for its `elementEnd`: implicit trigger before any
++    // real close wins; an auto-closing tag with no closer at all runs to
++    // end-of-fragment; otherwise the wave-33 unclosed-wrapper adoption.
++    // Deliberately NOT extended to the merge branch above: it stays gated on
++    // a REAL `lastCloseStart >= 0`, so an implicitly-closed child is never
++    // absorbed into the parent's run. Every tag in AUTO_CLOSE_TRIGGERS is a
++    // block/table/list tag that `isPureInlineMergeable` refuses anyway
++    // (INLINE_MERGE_TAGS is strong/em/b/i/span/code), so the narrower gate
++    // costs nothing and keeps this change to the cursor alone.
++    const autoCloseTriggers = AUTO_CLOSE_TRIGGERS[tagName];
++    let implicitCloseAt = -1;
++    if (autoCloseTriggers) {
++      // One combined opener regex, walked once — the same construction
++      // walkChildren uses, so the two scans can never pick different
++      // trigger positions. Openers only: a closer explicitly ends whatever
++      // is open and is not an implicit-close trigger.
++      const trigRe = new RegExp(`<(?:${[...autoCloseTriggers].join('|')})\\b`, 'gi');
++      trigRe.lastIndex = tagOpenEnd + 1;
++      const t = trigRe.exec(innerHtml);
++      if (t) implicitCloseAt = t.index;
++    }
++    if (autoCloseTriggers && implicitCloseAt >= 0
++        && (lastCloseStart < 0 || implicitCloseAt < lastCloseStart)) {
++      // The implicit close comes first — the child's body ends there and
++      // the parent's own-text scan resumes at that trigger.
++      cursor = implicitCloseAt;
++    } else if (autoCloseTriggers && lastCloseStart < 0) {
++      // Auto-closing tag, no closer and no trigger: body to end-of-fragment
++      // (walkChildren's trailing-`<p>` case in child-indexed-no-parent.html).
++      cursor = n;
++    } else if (lastCloseStart < 0
++               && adoptsUnclosedBody(tagOpen, innerHtml, tagOpenEnd + 1, n)) {
++      // wave-33 lane N (N1): keep this scanner and walkChildren agreeing about
++      // where an UNCLOSED child ends. walkChildren now grants a load-bearing
++      // unclosed wrapper the end-of-fragment body (adoptsUnclosedBody); if we
++      // did not mirror that here, the wrapper's inner text would be counted
++      // TWICE — once as the parent's own `_text` (this scanner falling through
++      // with cursor === tagOpenEnd + 1) and once as the adopted child's own
++      // text in the tree walk. MEASURED on css-break/inline-skipping-
++      // fragmentainer-001, whose `<span style="position:relative">` loses its
++      // `</span>` to an outer div's close-pairing: the `&nbsp;` was emitted on
++      // both the span and its parent. Same gate, same fragment, one answer.
+       cursor = n;
+     }
+     // wave-12 EXTRACTOR-INLINE: pure-inline run merging. When merging is

@@ -1,0 +1,41 @@
+// S5 re-score probe: re-run the scorer's composed path over one wave49-final
+// section and compare the wptPass column + the metric blocks to the manifest.
+import { readFileSync, existsSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+import { diffComposedVsRef, degenerateVetoActive } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/inject-wpt-block.mjs';
+import { safe, fixtureStem } from '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/safe-name.mjs';
+
+const ROOT='/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf';
+const sec = process.argv[2] || 'css-tables';
+const secDir = join(ROOT,'tools/titan/runs/wave49-final/sections',sec);
+const m = JSON.parse(readFileSync(join(secDir,'manifest.json'),'utf8'));
+console.log('degenerateVetoActive(true) with env unset =', degenerateVetoActive(true));
+console.log('TITAN_DEGENERATE_VETO =', JSON.stringify(process.env.TITAN_DEGENERATE_VETO));
+
+const DIRS = { web:'screenshots', ios:'ios-screenshots', android:'android-screenshots' };
+const KEY  = { web:'web-ref', ios:'ios-ref', android:'android-ref' };
+let cmp=0, mismatch=0, absent=0, newBlockOk=0, otherDrift=[];
+const t0=Date.now();
+for (const [testRel, r] of Object.entries(m.wpt.results)) {
+  const br = r.browserRef; if (!br || !br.available) continue;
+  const refPng = resolve(ROOT, br.path);
+  const testKey = `wpt__${sec}__${fixtureStem(testRel)}`;
+  for (const [plat, dir] of Object.entries(DIRS)) {
+    const stored = br.diffs?.[KEY[plat]];
+    if (!stored || typeof stored.ssim !== 'number') continue;
+    const d = await diffComposedVsRef({ platformDir: join(secDir,dir), testKey, refPng, fuzzy: r.fuzzy });
+    if (!d) { absent++; continue; }
+    cmp++;
+    if (d.wptPass !== stored.wptPass) { mismatch++; console.log('WPTPASS MISMATCH', testRel, plat, 'stored', stored.wptPass, 'recomputed', d.wptPass, 'ssim', stored.ssim, d.ssim); }
+    // every key the manifest stored must be byte-equal; the only NEW keys allowed are degenerate*
+    for (const k of Object.keys(stored)) {
+      if (k==='diffImage') continue;
+      const a=JSON.stringify(stored[k]), b=JSON.stringify(d[k]);
+      if (a!==b) otherDrift.push(`${testRel} ${plat} ${k}: stored=${a} recomputed=${b}`);
+    }
+    if (d.degenerate !== undefined && typeof d.degenerateFailed === 'boolean') newBlockOk++;
+  }
+}
+console.log(`\nsection=${sec} compared=${cmp} absent=${absent} wptPassMismatch=${mismatch} degenerateBlockPresent=${newBlockOk} elapsed=${((Date.now()-t0)/1000).toFixed(1)}s`);
+console.log('non-degenerate key drift entries:', otherDrift.length);
+otherDrift.slice(0,12).forEach(x=>console.log('  ',x));

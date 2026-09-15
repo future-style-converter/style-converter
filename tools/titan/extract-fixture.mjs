@@ -657,6 +657,345 @@ export function extractRefHref(html) {
   return (re1.exec(html)?.[1]) || (re2.exec(html)?.[1]) || null;
 }
 
+// ── The declaration-validity oracle (wave 50 lane B1) ────────────────────────
+//
+// WHY. The declaration collapse below is a plain `props[k] = v`: within one
+// rule block the LAST declaration of a property wins, unconditionally. CSS
+// says otherwise. css-syntax-3 §2.2 ("Error Handling") — the section the
+// converter's own InvalidDeclaration sentinel quotes — says a declaration
+// whose value does not match the property's grammar "is invalid, and gets
+// ignored by the UA", LEAVING WHATEVER THE CASCADE DECLARED BEFORE IT IN
+// FORCE. The converter implements exactly that rule (PropertiesParser.kt,
+// "Dropped invalid declaration … (css-syntax-3 §2.2)") — but it never gets
+// the chance, because this extractor has already thrown the earlier, VALID
+// declaration away before the fixture is written.
+//
+// MEASURED CARRIER. `css-values/angle-units-001` (wave49-final: web f 0.9990,
+// iOS f 0.9974, android f 0.9966 — all three fail). Its one rule block reads
+//     background-image: linear-gradient(green, green);
+//     background-image: linear-gradient(90degree,  red, red);   /* invalid */
+//     background-image: linear-gradient(100gradian, red, red);  /* invalid */
+//     background-image: linear-gradient(1.57radian, red, red);  /* invalid */
+//     background-image: linear-gradient(0.25turns,  red, red);  /* invalid */
+// Last-wins kept `0.25turns`; the converter then correctly dropped it as
+// invalid; and the component reached the runtimes with NO background-image at
+// all (tools/titan/runs/wave49-final/sections/css-values/per-test-ir/
+// wpt__css-values__angle-units-001.json — component `…__1` carries only
+// Height/Width), so the red `z-index:-1` underlay showed through where the
+// ref wants a filled green square.
+//
+// WHAT THE ORACLE PROVES, AND WHAT IT DELIBERATELY DOES NOT.
+// It is a CONSERVATIVE oracle: it returns a reason ONLY for a value that is
+// invalid in EVERY CSS context, and null ("no proof" → treat as valid →
+// historical behaviour) for everything else. One rule today:
+//
+//   R1 — UNKNOWN DIMENSION UNIT. A <number> immediately followed by an
+//   identifier is a <dimension-token>, and the unit tables are CLOSED
+//   (css-values-4 §6.1.1 font-relative, §6.1.2 viewport-relative, §6.2
+//   absolute, §7.1 angle, §7.2 duration, §7.3 frequency, §7.4 resolution,
+//   plus the <flex> unit from css-grid-2 §7.2.3 and the container-relative
+//   cq* lengths from css-contain-3). A dimension whose unit is in none of
+//   them matches no production of any property's grammar, so the declaration
+//   is invalid per css-syntax-3 §2.2 — `90degree`, `100gradian`, `1.57radian`
+//   and `0.25turns` alike.
+//
+// NOT proven (and therefore never dropped): unknown property names, unknown
+// keywords, out-of-range numbers, wrong function arity, and attr()/var()/
+// calc() substitutions that only become invalid at computed-value time. Each
+// of those needs the property's own grammar; guessing at them here would
+// shadow a LATER valid declaration with an EARLIER one — the same class of
+// bug in the opposite direction. `1e2deg` is deliberately VALID here
+// (docs/BACKLOG.md ranked item 0(e): the exponent form is real CSS that the
+// converter models as a Raw passthrough — a converter limitation, not
+// invalidity), so this oracle never touches that item's population.
+//
+// AND ONE SHAPE THE ORACLE CANNOT SEE AT ALL — a `;` INSIDE A url() BODY
+// (added in wave 50 by fix lane F6, skeptic S2). The declaration splitter in
+// parseCss is a plain `body.split(';')`, so a data URI tears at its own
+// separator: `background-image: url(data:image/svg+xml;base64,XX)` reaches
+// the collapse as the value `url(data:image/svg+xml` plus an orphan
+// `base64,XX)` fragment with no colon, which is dropped. The torn value
+// carries no dimension token, so the oracle proves nothing about it and it
+// wins the collapse like any other value — which means that in
+// `background-image: url(a.png); background-image: url(data:…;base64,XX)` the
+// TRUNCATED value deletes a valid earlier declaration, the exact failure R1
+// exists to prevent, by a route R1 cannot reach. Executed on this tree:
+// `parseCss("div { background-image: url(a.png); background-image:
+// url(data:image/svg+xml;base64,XX) }")` returns
+// `{'background-image': "url(data:image/svg+xml"}` — the `url(a.png)` is gone.
+// The rule the splitter should follow is css-syntax-3 §4.3.6 (consume a url
+// token): once `url(` is open, everything up to the matching `)` is ONE
+// token, `;` included. MEASURED: exactly two corpus documents tear this way —
+// css-pseudo/first-letter-background-image and its `-dynamic` twin, both
+// `url('data:image/png;base64,…')` — and in neither is there an earlier
+// declaration of the same property to delete, so ZERO corpus carriers of the
+// shadow-collapse shape. No code change this wave: the repair is a different
+// splitter, which moves the byte shape of every fixture rather than these two.
+//
+// THREE CLASSES OF VALID CSS THE ORACLE USED TO REFUSE, closed in wave 50 by
+// fix lane F3 on skeptic S5's adversarial probe
+// (`tools/titan/results/wave50-S5/oracle-probe.mjs.txt` — 30 declarations,
+// 10 refused / 10 accepted / 10 adversarial). None had a corpus carrier, so
+// none was costing ink; all three were the oracle claiming a proof it did not
+// have, which is the one thing a "prove it or say nothing" oracle may never
+// do. Each is now handled at the point named, not by widening the unit table:
+//
+//   1. `<urange>` (`unicode-range: U+0-7F`) is not a dimension grammar at
+//      all, but its hex ranges tokenise as number+ident (`-7F` → unit `F`).
+//      It is STEPPED OVER as one token in the scanner below, the same
+//      treatment strings and url() bodies get. (It could not bite in the
+//      corpus — `unicode-range` is only legal inside `@font-face`, which
+//      parseCss skips; measured zero occurrences in the 1435-test corpus and
+//      every all-WPT hit inside an `@font-face` block — but "cannot bite
+//      today" is not "is right".)
+//   2. CUSTOM PROPERTIES (`--x: 3bananas`) take ANY token stream as their
+//      value (css-variables-1 §2: the grammar is `<declaration-value>`), so
+//      no dimension unit can make one invalid. Refused at the top of
+//      provablyInvalidDeclaration by property name.
+//   3. `st`, the css-speech-1 `<semitones>` unit (`voice-pitch: 2st`), was
+//      simply missing from the closed table below — the converter parses it
+//      and types it as `VoicePitch`, so refusing it here would have deleted a
+//      declaration the pipeline models end to end.
+//
+// NO SILENT FALLTHROUGH. Every drop is pushed onto `invalidShadowDrops` and
+// printed on the test's extract.log line as `[validity: …]`, so a drop is
+// always attributable to a test, a property, a kept value and a reason.
+
+/**
+ * The CLOSED set of CSS dimension units, lower-cased (CSS units are ASCII
+ * case-insensitive). Grouped by the table each unit is defined in, so a
+ * future addition lands next to the spec that admits it.
+ */
+const CSS_DIMENSION_UNITS = new Set([
+  // css-values-4 §6.2 — absolute lengths.
+  'cm', 'mm', 'q', 'in', 'pt', 'pc', 'px',
+  // css-values-4 §6.1.1 — font-relative lengths and their root-relative twins.
+  'em', 'rem', 'ex', 'rex', 'ch', 'rch', 'ic', 'ric', 'lh', 'rlh', 'cap', 'rcap',
+  // css-values-4 §6.1.2 — viewport-relative lengths: the plain set plus the
+  // small / large / dynamic viewport prefixes.
+  'vw', 'vh', 'vi', 'vb', 'vmin', 'vmax',
+  'svw', 'svh', 'svi', 'svb', 'svmin', 'svmax',
+  'lvw', 'lvh', 'lvi', 'lvb', 'lvmin', 'lvmax',
+  'dvw', 'dvh', 'dvi', 'dvb', 'dvmin', 'dvmax',
+  // css-contain-3 container-relative lengths. No § — that spec has no
+  // vendored ED table of contents in tools/visual/spec-sections.json, and an
+  // unvalidatable number is worse than none.
+  'cqw', 'cqh', 'cqi', 'cqb', 'cqmin', 'cqmax',
+  // css-values-4 §7.1 — the CLOSED angle table. `turns` / `degree` /
+  // `radian` / `gradian` are NOT in it; that is the whole point of
+  // css-values/angle-units-001.
+  'deg', 'grad', 'rad', 'turn',
+  // css-values-4 §7.2 duration · §7.3 frequency · §7.4 resolution.
+  's', 'ms', 'hz', 'khz', 'dpi', 'dpcm', 'dppx', 'x',
+  // css-speech-1 <semitones> — the unit of `voice-pitch` / `voice-range`
+  // relative values (`voice-pitch: 2st`). No § because that spec has no
+  // vendored ED table of contents in tools/visual/spec-sections.json, and an
+  // unvalidatable number is worse than none (same rule as the cq* block
+  // above). The converter accepts and types it (`VoicePitch`), so leaving it
+  // out made this oracle refuse a declaration the pipeline models.
+  'st',
+  // css-grid-2 §7.2.3 — the <flex> unit.
+  'fr',
+]);
+
+/**
+ * Scan one declaration VALUE for a dimension token whose unit is outside
+ * {@link CSS_DIMENSION_UNITS}.
+ *
+ * Tokenises only as much as R1 needs (css-syntax-3 §2.2): strings, url()
+ * bodies, escapes and hash tokens are stepped over so their contents can
+ * never be mistaken for a number+ident pair, and an identifier only counts as
+ * a unit when it touches the number with no whitespace between — `1 solid` is
+ * a number followed by a keyword, not a dimension.
+ *
+ * @param   {string} value declaration value, `!important` already stripped
+ * @returns {string|null} the offending unit as authored, or null when none
+ */
+export function unknownDimensionUnit(value) {
+  const n = value.length;
+  let i = 0;
+  while (i < n) {
+    const ch = value[i];
+    // An escape (css-syntax-3 §2.2 "consume an escaped code point"):
+    // backslash + up to six hex digits + one optional whitespace, else
+    // backslash + one literal code point. Consumed WHOLE — a half-consumed
+    // `\000046amilyName` leaves `00046amilyName`, which reads as a number
+    // plus the bogus unit `amilyName` (measured on
+    // css/CSS2/fonts/font-family-name-009.xht in the all-WPT sweep).
+    if (ch === '\\') {
+      const esc = /^\\(?:[0-9a-fA-F]{1,6}\s?|[\s\S])/.exec(value.slice(i));
+      i += esc ? esc[0].length : 1;
+      continue;
+    }
+    // <string-token>: its contents are opaque data (font family names,
+    // `content:` text) and never tokenise as CSS values.
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
+      i++;
+      while (i < n && value[i] !== quote) { i += value[i] === '\\' ? 2 : 1; }
+      i++;                                   // step past the closing quote
+      continue;
+    }
+    // <hash-token> (`#00ff00`): the run after `#` belongs to the hash, not to
+    // a number, so a hex colour can never reach the R1 scan.
+    if (ch === '#') {
+      i++;
+      while (i < n && /[-\w\u0080-\uFFFF\\]/.test(value[i])) i++;
+      continue;
+    }
+    // An UNQUOTED url() body is a <url-token> whose contents are arbitrary —
+    // data: URIs routinely carry byte runs that look like dimensions.
+    if (/^url\(/i.test(value.slice(i, i + 4))) {
+      i += 4;
+      while (i < n && value[i] !== ')') { i += value[i] === '\\' ? 2 : 1; }
+      i++;
+      continue;
+    }
+    // <urange> — css-syntax-3's `<urange>` production, the value grammar of
+    // the css-fonts-4 `unicode-range` descriptor (no § on either: the
+    // `<urange>` section carries no number this repo's vendored ToC can
+    // validate, and an unvalidatable number is worse than none). Spelling:
+    // the `u+`/`U+` prefix, 1–6 hex digits or `?` wildcards, optionally a
+    // `-` and a second 1–6 hex digits. Consumed WHOLE, BEFORE the ident scan,
+    // because the range's own tail tokenises as number+ident: in
+    // `unicode-range: U+0-7F` the scanner would read `-7` as a number and
+    // `F` as its unit and refuse a perfectly valid declaration (measured on
+    // skeptic S5's adversarial probe). Same treatment as strings and url()
+    // bodies above: opaque data, never a dimension.
+    const urange = /^[uU]\+[0-9a-fA-F?]{1,6}(-[0-9a-fA-F]{1,6})?/.exec(value.slice(i));
+    if (urange) { i += urange[0].length; continue; }
+    // <ident-token> FIRST, and consumed WHOLE. css-syntax-3 §2.2: an
+    // identifier may contain digits anywhere after its first code point, so
+    // `preserve-3d`, `rotate3d(`, `a98-rgb` and `display-p3-linear` are ONE
+    // token each. Scanning them character-by-character would restart at the
+    // digit and read the tail (`d`, `-rgb`, `-linear`) as a bogus unit — the
+    // corpus survey caught exactly that on 47 of 49 first-draft hits, in
+    // css-transforms, css-view-transitions, css-color and css-images.
+    const identTok = /^(?:--|-?[A-Za-z_\u0080-\uFFFF\\])[-\w\u0080-\uFFFF\\]*/.exec(value.slice(i));
+    if (identTok) { i += identTok[0].length; continue; }
+    // Does a <number-token> start here? css-values-4 §5.3 spelling: optional
+    // sign, digits with an optional fraction (or a bare `.5`), optional
+    // exponent. A `+`/`-` only opens a number when a digit or `.digit`
+    // follows, so the `-` of `-webkit-foo` is never read as one.
+    const num = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?/.exec(value.slice(i));
+    if (!num || !/\d/.test(num[0])) { i++; continue; }
+    i += num[0].length;
+    // A <dimension-token> is that number IMMEDIATELY followed by an
+    // <ident-token>; anything else (whitespace, `%`, `,`, `)`) ends the
+    // number and belongs to somebody else's grammar.
+    const ident = /^-?[A-Za-z_\u0080-\uFFFF\\][-\w\u0080-\uFFFF\\]*/.exec(value.slice(i));
+    if (!ident) continue;
+    i += ident[0].length;
+    if (!CSS_DIMENSION_UNITS.has(ident[0].toLowerCase())) return ident[0];
+  }
+  return null;
+}
+
+/**
+ * The oracle: can this declaration be PROVEN invalid CSS?
+ *
+ * Mirrors the converter's opt-in InvalidDeclaration discipline — prove it or
+ * say nothing. Property-name aware by signature (a future rule will need the
+ * name) even though R1 alone is property-agnostic.
+ *
+ * @param   {string} prop  longhand or shorthand name, as authored
+ * @param   {string} value the value, `!important` already stripped
+ * @returns {string|null} a human-readable reason, or null when unproven
+ */
+export function provablyInvalidDeclaration(prop, value) {
+  // CUSTOM PROPERTIES ARE NEVER PROVABLY INVALID HERE (wave-50 fix lane F3,
+  // skeptic S5). css-variables-1 §2 defines a custom property's value as
+  // `<declaration-value>` — "almost any sequence of one or more tokens" — so
+  // `--x: 3bananas` is a perfectly valid declaration whose value simply has
+  // no meaning until `var()` substitutes it into some other property, where
+  // THAT property's grammar decides. R1 reasons about dimension units inside
+  // a value; on a custom property there is no unit table to be outside of.
+  // Checked by name, before the scan, so no future rule can reach them either.
+  if (prop.startsWith('--')) return null;
+  const unit = unknownDimensionUnit(value);
+  // R1. Reported WITH the unit so the extract.log line names the exact token
+  // that cost the declaration, never just "invalid".
+  if (unit !== null) {
+    return `unknown dimension unit '${unit}' (css-values-4 §7.1 / §6.2 unit tables are closed)`;
+  }
+  return null;
+}
+
+/**
+ * Every shadowing drop this process has made, in order:
+ * `{ prop, kept, dropped, reason }`. main() splices it per test onto the
+ * `extracted …` log line; the unit tests read it directly. Module-scoped
+ * rather than per-call because the collapse sites are spread across parseCss
+ * and propsForElement.
+ */
+export const invalidShadowDrops = [];
+
+/**
+ * THE GUARDED WRITE. Replaces a bare `target[key] = value` at every point
+ * where a later declaration shadows an earlier one.
+ *
+ * css-syntax-3 §2.2: an invalid declaration is ignored and the earlier one
+ * stays in force. So the incoming value is refused ONLY when it is provably
+ * invalid AND the value it would overwrite is not — an all-invalid run still
+ * ends on its last member, and a valid incoming value always wins.
+ *
+ * CORRECTION (wave-50 fix lane F3, skeptic S5). The clause above used to
+ * justify the all-invalid case with "byte-identical to the historical
+ * behaviour, since the converter drops it either way". The second half is
+ * FALSE: the converter does NOT drop a declaration whose unit it cannot
+ * parse — it emits a `GenericProperty` `_unmapped` passthrough. S5 converted
+ * all ten unknown-unit declarations of its adversarial fixture
+ * (`tools/titan/results/wave50-S5/adversarial-oracle-fixture.json`:
+ * `rotate(45turns)`, `100qq`, `12ptx`, `3bananas`, `2pxx`, `50vhh`, …) and
+ * every one came back Generic, not absent. The BYTE-IDENTITY CLAIM ITSELF
+ * still holds, for a different and weaker reason: in the all-invalid case
+ * this function's OWN behaviour is unchanged (the last member is written
+ * exactly as before), so the converter — whatever it then does with that
+ * value — receives the identical input. What must not be repeated is the
+ * inference that a refused declaration and a dropped declaration are the
+ * same thing downstream: they are not.
+ *
+ * @param {Record<string,string>} target declaration bag being built
+ * @param {string} key   property name
+ * @param {string} value incoming value
+ */
+export function assignDeclaration(target, key, value) {
+  const prev = target[key];
+  if (prev !== undefined) {
+    const reason = provablyInvalidDeclaration(key, value);
+    // Refuse only an invalid value, and only in favour of one that is not
+    // itself provably invalid — otherwise nothing is gained and the
+    // historical last-wins byte shape must be preserved exactly.
+    if (reason !== null && provablyInvalidDeclaration(key, prev) === null) {
+      invalidShadowDrops.push({ prop: key, kept: prev, dropped: value, reason });
+      return;
+    }
+  }
+  target[key] = value;
+}
+
+/**
+ * `Object.assign(target, source)` for declaration bags, guarded declaration by
+ * declaration. Used where a LATER RULE's bag shadows an earlier rule's on the
+ * same element — css-syntax-3 §2.2 ignores an invalid declaration wherever it
+ * appears in the cascade, not only inside one block.
+ *
+ * NOT applied on the LAYERED path (`resolveLayeredCascade`): that path sorts
+ * candidates by the css-cascade-5 §6.4.4 order and resolves `revert-layer`
+ * recursively, so the refusal would have to become a candidate filter inside
+ * the sort. Measured reason to leave it alone: across the 1435-test corpus
+ * the oracle proves exactly four declarations invalid and all four sit in ONE
+ * unlayered rule block (css-values/angle-units-001), so a layered-path filter
+ * would move nothing and could only risk the css-cascade cells. Stated here
+ * rather than left as a silent gap.
+ *
+ * @param {Record<string,string>} target bag being built
+ * @param {Record<string,string>} source bag being merged in
+ */
+export function assignDeclarations(target, source) {
+  for (const [k, v] of Object.entries(source)) assignDeclaration(target, k, v);
+}
+
 // ── Tiny CSS parser ──────────────────────────────────────────────────────────
 //
 // Just enough to handle the WPT reftest subset:
@@ -827,8 +1166,41 @@ export function parseCss(css) {
         v = v.replace(/\s*!important\s*$/i, '').trim();
         // Skip custom properties (the bucketer flagged them as B already).
         if (k.startsWith('--')) continue;
-        props[k] = v;
-        if (bang) important[k] = true;
+        // THE SEAM (wave 50 lane B1). Was a bare `props[k] = v` — an
+        // unconditional last-wins collapse that let a PROVABLY INVALID later
+        // declaration delete an earlier valid one before the converter, which
+        // implements css-syntax-3 §2.2 correctly, ever saw either. The
+        // guarded write refuses only what the oracle can prove is not CSS;
+        // every other declaration still wins exactly as before.
+        assignDeclaration(props, k, v);
+        // A REFUSED declaration is "ignored" in the full §2.2 sense — it
+        // contributes neither its value nor its importance, so the `!important`
+        // flag is recorded only when the write was actually taken. For every
+        // declaration the oracle does not refuse this is byte-identical to the
+        // historical `if (bang) important[k] = true`. Deliberately NOT a
+        // wider importance fix: `a: x !important; a: y` still ends on `y`
+        // here (css-cascade-5 §6.4.4 says the important one should win), an
+        // OLDER defect of this collapse with zero corpus carriers — widening
+        // the seam to cover it would move css-cascade bytes this lane has no
+        // gate for.
+        //
+        // THE SECOND HALF OF THAT SAME DEFECT, recorded in wave 50 by fix
+        // lane F6 (skeptic S2 on lane B1's residual). `a: x !important; a: y`
+        // does not merely end on `y`: `important[a]` was set to true by the
+        // declaration that was then DROPPED, and nothing clears it, so the
+        // surviving NON-important `y` is handed on flagged `!important` and
+        // beats every later author rule (css-cascade-5 §6.4.4 ranks important
+        // author declarations above normal ones — the same ranking that makes
+        // this collapse's first half wrong, now firing in the other
+        // direction). Executed on this tree:
+        // `parseCss('div { color: red !important; color: green }')` returns
+        // `props {color:'green'}` together with `important {color:true}`.
+        // Pre-existing at HEAD, and MEASURED at ZERO corpus carriers — over
+        // the 1435 wave49-final tests no declaration block declares a property
+        // `!important` and then re-declares it without. Still deferred, for
+        // the same reason as the half above: the repair belongs in the
+        // cascade resolution, not in this collapse.
+        if (bang && props[k] === v) important[k] = true;
       }
       if (Object.keys(props).length === 0) continue;
       const hasImportant = Object.keys(important).length > 0;
@@ -2785,17 +3157,73 @@ function scanOwnText(innerHtml, mergeCtx, preserveWhitespace = false) {
         cursor = c.index + c[0].length;
       }
     }
-    // wave-33 lane N (N1): keep this scanner and walkChildren agreeing about
-    // where an UNCLOSED child ends. walkChildren now grants a load-bearing
-    // unclosed wrapper the end-of-fragment body (adoptsUnclosedBody); if we
-    // did not mirror that here, the wrapper's inner text would be counted
-    // TWICE — once as the parent's own `_text` (this scanner falling through
-    // with cursor === tagOpenEnd + 1) and once as the adopted child's own
-    // text in the tree walk. MEASURED on css-break/inline-skipping-
-    // fragmentainer-001, whose `<span style="position:relative">` loses its
-    // `</span>` to an outer div's close-pairing: the `&nbsp;` was emitted on
-    // both the span and its parent. Same gate, same fragment, one answer.
-    if (lastCloseStart < 0 && adoptsUnclosedBody(tagOpen, innerHtml, tagOpenEnd + 1, n)) {
+    // ── wave-50 lane B4: the SECOND half of the same agreement ────────────
+    //
+    // walkChildren has honoured HTML's OPTIONAL END TAGS (HTML Living
+    // Standard §13.2.6.4 — `<li>`, `<p>`, `<dt>`/`<dd>`, `<option>`,
+    // `<tr>`/`<td>`/`<th>`, `<thead>`/`<tbody>`) since Bug 2b: the next
+    // AUTO_CLOSE_TRIGGERS opener implicitly ends the element, so
+    // `<ol><li>foo<li>bar</ol>` gives the two `<li>` children the bodies
+    // "foo" and "bar". THIS scanner never mirrored that rule — with no
+    // literal `</li>` anywhere the close-pairing loop above breaks out with
+    // `lastCloseStart === -1` and `cursor === tagOpenEnd + 1`, so the scan
+    // resumes INSIDE the child and "foo"/"bar" are counted as the `<ol>`'s
+    // OWN text. Exactly the double-count the wave-33 banner below describes
+    // for unclosed wrappers, on the far more common omitted-end-tag shape.
+    //
+    // MEASURED on css-counter-styles/counter-suffix (wave49-final
+    // web f 0.8867 · iOS f 0.8883 · android f 0.8901, all three): its six
+    // `<ol class="…"><li>foo<li>bar</ol>` lists each ship `_text:"foobar"`
+    // PLUS `_runs:[{child:li0},{text:"foo"},{child:li1},{text:"bar"}]`, and
+    // every renderer paints each item twice — "1. foo" then a bare "foo" on
+    // the next line (tools/titan/runs/wave49-final/sections/
+    // css-counter-styles/ios-screenshots/wpt__css-counter-styles__
+    // counter-suffix.png vs the frozen ref under tools/wpt/refs/
+    // 9b5435e55e0b54a6cd09c1c563861eb3c999cef1/…/counter-suffix.png).
+    //
+    // The three branches below are walkChildren's three, verbatim, with
+    // `cursor` standing in for its `elementEnd`: implicit trigger before any
+    // real close wins; an auto-closing tag with no closer at all runs to
+    // end-of-fragment; otherwise the wave-33 unclosed-wrapper adoption.
+    // Deliberately NOT extended to the merge branch above: it stays gated on
+    // a REAL `lastCloseStart >= 0`, so an implicitly-closed child is never
+    // absorbed into the parent's run. Every tag in AUTO_CLOSE_TRIGGERS is a
+    // block/table/list tag that `isPureInlineMergeable` refuses anyway
+    // (INLINE_MERGE_TAGS is strong/em/b/i/span/code), so the narrower gate
+    // costs nothing and keeps this change to the cursor alone.
+    const autoCloseTriggers = AUTO_CLOSE_TRIGGERS[tagName];
+    let implicitCloseAt = -1;
+    if (autoCloseTriggers) {
+      // One combined opener regex, walked once — the same construction
+      // walkChildren uses, so the two scans can never pick different
+      // trigger positions. Openers only: a closer explicitly ends whatever
+      // is open and is not an implicit-close trigger.
+      const trigRe = new RegExp(`<(?:${[...autoCloseTriggers].join('|')})\\b`, 'gi');
+      trigRe.lastIndex = tagOpenEnd + 1;
+      const t = trigRe.exec(innerHtml);
+      if (t) implicitCloseAt = t.index;
+    }
+    if (autoCloseTriggers && implicitCloseAt >= 0
+        && (lastCloseStart < 0 || implicitCloseAt < lastCloseStart)) {
+      // The implicit close comes first — the child's body ends there and
+      // the parent's own-text scan resumes at that trigger.
+      cursor = implicitCloseAt;
+    } else if (autoCloseTriggers && lastCloseStart < 0) {
+      // Auto-closing tag, no closer and no trigger: body to end-of-fragment
+      // (walkChildren's trailing-`<p>` case in child-indexed-no-parent.html).
+      cursor = n;
+    } else if (lastCloseStart < 0
+               && adoptsUnclosedBody(tagOpen, innerHtml, tagOpenEnd + 1, n)) {
+      // wave-33 lane N (N1): keep this scanner and walkChildren agreeing about
+      // where an UNCLOSED child ends. walkChildren now grants a load-bearing
+      // unclosed wrapper the end-of-fragment body (adoptsUnclosedBody); if we
+      // did not mirror that here, the wrapper's inner text would be counted
+      // TWICE — once as the parent's own `_text` (this scanner falling through
+      // with cursor === tagOpenEnd + 1) and once as the adopted child's own
+      // text in the tree walk. MEASURED on css-break/inline-skipping-
+      // fragmentainer-001, whose `<span style="position:relative">` loses its
+      // `</span>` to an outer div's close-pairing: the `&nbsp;` was emitted on
+      // both the span and its parent. Same gate, same fragment, one answer.
       cursor = n;
     }
     // wave-12 EXTRACTOR-INLINE: pure-inline run merging. When merging is
@@ -4175,6 +4603,65 @@ export const FOREIGN_NS_MARKER_ATTR = 'data-sc-foreign-ns';
 
 // ── wave-22 EX2 A-RC1 part 2: rule-less widgets are NOT scaffolding ─────────
 //
+// wave-50 lane B5 — tags whose UA `display` is an INTERNAL layout value
+// (css-display-3 §2.4) and that therefore generate NO box of their own.
+// The "empty node" placeholder below exists to keep a rule-less, text-less
+// element from being invisible on the canvas; for these two the premise is
+// wrong twice over — a `<col>` is never visible in its own right (its whole
+// job is to carry a column's background and width contribution into the
+// table's column, css-tables-3 §2.1), and forcing 100x100 on it PINS THE
+// COLUMN WIDTH the table should have derived from its cells.
+//
+// MEASURED (wave-50 B5; headless Chrome on the harness's own composed DOM,
+// injected as XHTML so the parser's table foster-parenting cannot move
+// nodes). css-writing-modes/direction-upright-002 stamps 10 `<col>`s — the
+// FIRST col of each `<colgroup>`, the only one that matches no rule — and
+// the composed web canvas measures:
+//   as shipped                                   3045 px  (ref 954 px)
+//   without this stamp                           2404 px
+//   with the UA internal displays (seam S1)      2766 px
+//   with BOTH                                    1864 px
+// CORPUS BLAST RADIUS — corrected in wave 50 by skeptic S2 and re-derived
+// independently by fix lane F3. The census must be taken on the path this
+// predicate RUNS on, which is the STATIC walker below, and there it is TWO
+// tests, not one (8 of the 1435 gate-corpus test files carry a `<col>` or
+// `<colgroup>` at all; run the walker over each and ask which stamped
+// 100x100 on one of them):
+//
+//   • css-writing-modes/direction-upright-002 — 10 stamped `<col>`s (the
+//     FIRST col of each `<colgroup>`, the only one that matches no rule).
+//     wave49-final web f 0.5826 · iOS f 0.5758 · Android f 0.5946 — all
+//     three already fail, so nothing can be lost there.
+//   • css-tables/border-collapse-dynamic-col-001 — 3 stamped `<col>`s.
+//     Components `border-collapse-dynamic-col-001__0__0__{0,1,2}` each lose
+//     `Width {px:100}` + `Height {px:100}` (verified by running HEAD's
+//     walker and this one side by side on the verbatim test file; the test
+//     authors 3 `<col>`s and its `-ref` 4). **Its wave49-final cells are
+//     web P 1.0000 · iOS f 0.9404 · Android P 0.9812 — TWO PASSING CELLS
+//     ARE AT RISK HERE**, which the earlier "no passing cell can move"
+//     wording denied.
+//
+// Why the earlier census missed it: it was taken over wave49-final's
+// per-test IR, where this test ran `[post-load: extracted+structure]` and
+// its `<col>`s carry browser-computed props instead of the stamp, so the
+// stamp is invisible there. That is not a safe proxy — post-load is not
+// guaranteed to run: in that same wave49-final it BAILED 49 times and
+// DECLINED 9 times (`grep -ho 'post-load: [a-z+ -]*'
+// tools/titan/runs/wave49-final/sections/*/extract.log | sort | uniq -c`),
+// so bail-to-static is a live path and any test can arrive here.
+// direction-upright-002 itself is on the static path in that run (its
+// extract line reads `[bidi-bake: bailed — element-mapping-mismatch]`).
+//
+// `<hr>` is deliberately NOT here: it IS a box-generating element and its
+// own 100x100 stamp is BACKLOG queue 5(a)'s separate decision (it spreads
+// gradient-hue-direction off-canvas), not this one.
+//
+// Exported for `tools/titan/extract-fixture-col-placeholder.test.mjs`,
+// whose negative pin asserts membership directly — a behavioural pin on
+// `<hr>` cannot see this set any more now that queue 5(a)'s UA bake claims
+// the tag before the placeholder branch is reached.
+export const NON_BOX_GENERATING_TAGS = new Set(['col', 'colgroup']);
+
 // buildNode's "empty node" branch paints a 100x100 placeholder when an
 // element matched no rule, carries no inline style, and has no own text —
 // the honest reading for a bare `<div>` wrapper. It is the WRONG reading
@@ -5815,8 +6302,12 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
       const raw = decl.slice(colon + 1).trim();
       const v = raw.replace(/\s*!important\s*$/i, '').trim();
       if (k && v && !k.startsWith('--')) {
-        inlineProps[k] = v;
-        if (/\s*!important\s*$/i.test(raw)) inlineImportant[k] = true;
+        // Guarded like the parseCss seam: a style="" attribute can repeat a
+        // property too, and css-syntax-3 §2.2 ignores the invalid one there
+        // as well. Importance is recorded only when the write was taken, so
+        // a refused declaration contributes nothing at all.
+        assignDeclaration(inlineProps, k, v);
+        if (inlineProps[k] === v && /\s*!important\s*$/i.test(raw)) inlineImportant[k] = true;
       }
     }
   }
@@ -5828,14 +6319,22 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
     || matchedRules.some((r) => hasRevertLayer(r.props))
     || hasRevertLayer(inlineProps);
   if (!layered) {
-    for (const r of buckets['']) Object.assign(props, r.props);
+    // Guarded merges (wave 50 lane B1): a later RULE's declaration shadows an
+    // earlier rule's by the same last-wins rule the block collapse used, so
+    // the same css-syntax-3 §2.2 refusal applies here. Identity for every bag
+    // in which the oracle proves nothing — which is every bag in the corpus
+    // outside css-values/angle-units-001.
+    for (const r of buckets['']) assignDeclarations(props, r.props);
     for (const [m, rs] of Object.entries(buckets)) {
       if (m === '') continue;
       pseudo[m] = {};
-      for (const r of rs) Object.assign(pseudo[m], r.props);
+      for (const r of rs) assignDeclarations(pseudo[m], r.props);
     }
-    // Inline style="..." trumps everything.
-    Object.assign(props, inlineProps);
+    // Inline style="..." trumps everything — except an INVALID inline
+    // declaration, which §2.2 ignores and so leaves the author sheet's value
+    // in force (the style attribute has no special dispensation from error
+    // handling; css-cascade-5 §6.4.4 only ranks VALID declarations).
+    assignDeclarations(props, inlineProps);
     return { props, matchedRules: matchedRules.length, pseudo };
   }
   // Layered path — css-cascade-5 §6.4.4 sort order, `revert-layer` resolved.
@@ -5898,6 +6397,46 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
  * into the body-root's `cmp._pseudo`, so the generated box renders as a real
  * pseudo box on the root instead of vandalising the body's bag.
  */
+// wave-50 B7 — the background family css-backgrounds-3 §2.11.2 propagates
+// from the root element to the canvas. Every spelling a root-scope rule can
+// carry is listed, or half a background would change scope while the other
+// half did not: the shorthand, the eight css-backgrounds-3 longhands, the two
+// css-backgrounds-4 position axes Blink accepts, and `background-blend-mode`
+// (css-compositing-1 §4, the `background-blend-mode` property), which
+// propagates with the rest.
+const CANVAS_BACKGROUND_PROPS = new Set([
+  'background', 'background-color', 'background-image', 'background-repeat',
+  'background-attachment', 'background-position', 'background-position-x',
+  'background-position-y', 'background-clip', 'background-origin',
+  'background-size', 'background-blend-mode',
+]);
+
+/**
+ * wave-50 B7 — which of the TWO root scopes a parsed root-scope compound
+ * belongs to. A bare `:root` (no tag) IS the root element (Selectors-4 §8.1),
+ * so it ranks with `html`.
+ *
+ * wave-50 fix lane F3 (skeptic S2 defect 3) — THERE IS NO THIRD, `star`
+ * SCOPE, and there never was one. `parseCompound` consumes `*` as "universal
+ * — no constraint" and never writes `needTag`, so the `parsed.needTag === '*'`
+ * arm this function used to carry could not be reached: instrumented over the
+ * synthetic cases and all 1435 corpus tests it fired 0 times (the no-tag
+ * fallthrough below took 41 of them). The dead arm and the `star` bucket it
+ * fed are deleted rather than left as a lie about what the conflict pass
+ * sees — a `*` rule arrives here with `needTag === null` and is therefore
+ * bucketed as HTML scope, exactly like `:root`, and IS re-decided by the
+ * conflict pass. See that pass's own paragraph for the measured behaviour.
+ *
+ * @param parsed a parseCompound() result already accepted as root-scope.
+ * @returns 'html' | 'body'
+ */
+function rootScopeOf(parsed) {
+  if (parsed.needTag === 'body') return 'body';
+  // 'html', a bare `:root`, or `*` (which leaves needTag null) — all name the
+  // root element for this component's purposes.
+  return 'html';
+}
+
 export function propsForBodyRoot(rules) {
   const props = {};
   // wave-27 A-RC2: per-pseudo-element bucket for root-scope `::before` /
@@ -5905,6 +6444,20 @@ export function propsForBodyRoot(rules) {
   // declaration dict — the same shape (and the same last-write-wins cascade)
   // `propsForElement` builds, so the emit site can treat both identically.
   const pseudo = {};
+  // ── wave-50 lane B7: ROOT-SCOPE CONFLICT RESOLUTION (BACKLOG queue 5(g)) ──
+  // The declarations merged below come from TWO DIFFERENT ELEMENTS (<html>
+  // and <body>) that this extractor folds onto ONE synthetic component.
+  // Merging them by source order alone is a category error: css-cascade-5 §6
+  // orders the declarations that apply to a SINGLE element, and an `html`
+  // rule never competes with a `body` rule — they style different boxes. So
+  // whichever rule happened to come LAST silently deleted the other's value.
+  //
+  // These bags record WHICH SCOPE last wrote each key, so the conflicting
+  // keys — and only those — can be re-decided after the loop. `props` itself
+  // keeps accumulating exactly as before, which keeps insertion order (and
+  // therefore the emitted property order, and therefore the IR bytes) stable
+  // for every document that has no conflict.
+  const scoped = { html: {}, body: {} };
   let matchedRules = 0;
   for (const r of rules) {
     // We treat body / html / * / :root (and combinations like `html, body`)
@@ -5984,12 +6537,117 @@ export function propsForBodyRoot(rules) {
     // this branch `html::before { background: orange }` became the BODY's
     // background (see the banner's measured contain-body-dir family).
     if (parsed.pseudoElement) {
-      // Last write wins per pe, mirroring propsForElement's cascade.
+      // Last write wins per pe, mirroring propsForElement's cascade — and
+      // guarded by the same css-syntax-3 §2.2 refusal (wave 50 lane B1).
       if (!pseudo[parsed.pseudoElement]) pseudo[parsed.pseudoElement] = {};
-      Object.assign(pseudo[parsed.pseudoElement], r.props);
+      assignDeclarations(pseudo[parsed.pseudoElement], r.props);
       continue;
     }
-    Object.assign(props, r.props);
+    // Same guard for the flat body/html root bag: a later root-scope rule
+    // may not delete an earlier valid declaration with an invalid one.
+    assignDeclarations(props, r.props);
+    // wave-50 B7: the same declarations, recorded per SCOPE (same assign, so
+    // the same validity guard and the same last-write-wins WITHIN a scope).
+    assignDeclarations(scoped[rootScopeOf(parsed)], r.props);
+  }
+  // wave-50 B7 — re-decide ONLY the keys that <html> and <body> both declare
+  // (see the ROOT-SCOPE CONFLICT RESOLUTION banner). Overwriting an existing
+  // key leaves its position in the bag untouched, so a document with no
+  // conflict emits byte-identical IR.
+  //
+  // The tie-break is PER FAMILY, because the one component stands in for both
+  // boxes:
+  //   - the CANVAS BACKGROUND is the root element's (css-backgrounds-3
+  //     §2.11.2 — the body's background properties propagate to the canvas
+  //     only when the root's are transparent), so an html-scope background
+  //     declaration wins over a body-scope one;
+  //   - every other property on this component describes the BODY box it
+  //     renders — its size, its clip, its margins — so body scope wins.
+  //
+  // MEASURED, and the census is exhaustive: over the 1435 wave49-final scored
+  // tests exactly THREE documents declare the same property at html scope and
+  // at body scope with different values, and all nine of their cells fail:
+  //   • css-contain/contain-html-overflow-002 — `html { height: 400px }` vs
+  //     `body { height: 200px }`. html won, so the root came out 200×400
+  //     carrying body's `overflow: hidden`; the 200×200 <p> and the 200×200
+  //     red <div> then both FIT and nothing was clipped, which is why the
+  //     capture paints the red square the ref forbids (wave49-final web f
+  //     0.8709 · iOS f 0.8705 · Android f 0.8698, novelInkFailed on all
+  //     three). Its six siblings contain-{body,html}-overflow-001/003/004 are
+  //     byte-identical documents whose <html> rule declares only `contain:`
+  //     — no conflict, so the root keeps body's 200px — and all six PASS at
+  //     1.0000 / 0.9996 / 0.9989. The conflict IS the whole difference.
+  //   • CSS2/css21-errata/s-11-1-1b-005 — `html { background: white }` vs
+  //     `body { background: black }`. body won by source order, so the root
+  //     component flooded the canvas: the web capture is 234000/234000 pixels
+  //     BLACK against a ref that is white with one line of text (web/iOS/
+  //     Android all f 0.0001). The background family reverses the rank, so
+  //     the root's white is restored. That document ALSO conflicts on
+  //     `display` — `html { display: table }` vs `body { display: table-cell }`
+  //     (the census counts DOCUMENTS, not keys, so it is one of the three) —
+  //     and that key does NOT move: `display` is not in
+  //     CANVAS_BACKGROUND_PROPS, so the body box wins the re-decision, and
+  //     body's rule is also the later one, so source order already answered
+  //     `table-cell`. Same byte before and after this pass.
+  //   • css-writing-modes/inline-box-border-vlr-001 — `html { margin: 0 }` vs
+  //     `body { margin: 1em }`; body already won by source order, so it comes
+  //     out byte-identical under this rule.
+  // WHAT A `*` ROOT-SCOPE RULE DOES HERE — rewritten in wave 50 by fix lane
+  // F3 (skeptic S2 defect 3). The previous paragraph claimed `*` conflicts
+  // were "still decided by source order"; that was FALSE. `parseCompound`
+  // never sets `needTag` for `*` (see rootScopeOf), so a `*` rule lands in the
+  // HTML bucket and is re-decided by this pass exactly like `:root`. MEASURED
+  // against HEAD (747b28e4), both stylesheets run through parseCss +
+  // propsForBodyRoot on each side:
+  //   `*{background:red} body{background:black}`
+  //       HEAD `black` (source order)  →  here `red`   (canvas family: the
+  //       root element's background wins, and `*` is root scope)
+  //   `body{height:200px} *{height:300px}`
+  //       HEAD `300px` (source order)  →  here `200px` (body-box family: the
+  //       body scope wins)
+  // So the rule IS re-decided, and it is re-decided by FAMILY, not by
+  // Selectors-4 §17 specificity — `*` has specificity 0 and would lose to
+  // both `html` and `body` in a real cascade, which this pass does not model.
+  // That is the honest residual. Corpus exposure is nil: over the 1435
+  // wave49-final tests, 17 carry a bare `*` root-scope rule (24 rules) and
+  // ZERO of them declare a property that an `html`/`body` root-scope rule in
+  // the same document also declares. The census is complete because ZERO
+  // corpus tests link an external stylesheet, so the inline-`<style>` scan
+  // sees every rule.
+  //
+  // THE SECOND NAMED RESIDUAL — CROSS-SCOPE SHORTHAND vs LONGHAND (wave 50,
+  // fix lane F6, on skeptic S1's note). The loop below keys on the EXACT
+  // property name, so `html { margin: 40px 8px 8px }` and
+  // `body { margin-top: -15px }` — both of them in that same s-11-1-1b-005 —
+  // are never seen as a conflict at all: `margin` is no key of `scoped.body`,
+  // `margin-top` is no key of `scoped.html`, and the two survive side by side
+  // in the merged bag, decided by their positions in it. A family-aware rule
+  // would instead give the body scope the whole `margin` shorthand family.
+  // MEASURED over the same 1435 wave49-final tests (same inline-`<style>`
+  // scan as the census above, pairing every html-scope key with every
+  // body-scope key whose name extends it at a `-` boundary): exactly TWO
+  // documents carry the shape, and neither can cost a scored pixel today.
+  //   • css-display/display-flow-root-list-item-001 — `html,body { padding: 0 }`
+  //     then `body { padding-left: 100px }`. The body scope declares the
+  //     SHORTHAND itself, so a family-aware rule keeps the identical pair;
+  //     this one provably changes nothing.
+  //   • CSS2/css21-errata/s-11-1-1b-005 — `margin` vs `margin-top`. Here a
+  //     family-aware rule WOULD differ: the longhand is later in source order
+  //     and already wins the top side, but the other three sides keep the
+  //     shorthand's 8px where body scope alone would leave them 0. The
+  //     difference is unscored — this document's nine cells are the f 0.0001
+  //     black-canvas rows above, and they are that way for the background
+  //     conflict, not for a margin. That is a wave49-final statement, not a
+  //     permanent one: those nine cells get re-scored at this wave's gate now
+  //     that the background conflict is repaired, so if the repaired cells
+  //     land short, this margin residual is the first thing to check.
+  // Not folded in for that reason: a shorthand→longhand family map is a
+  // second closed table to maintain and would buy zero corpus bytes today.
+  for (const key of Object.keys(scoped.body)) {
+    if (scoped.html[key] === undefined) continue;         // no conflict
+    props[key] = CANVAS_BACKGROUND_PROPS.has(key)
+      ? scoped.html[key]                                  // canvas background
+      : scoped.body[key];                                 // the body box
   }
   // css-lists-3 §3.1: a `::marker` box is generated ONLY by a box with
   // `display: list-item`. The acceptance rules above deliberately admit a
@@ -9068,6 +9726,182 @@ export function rootInheritedBakeProps(rootProps, childProps) {
 // reason says where it came from.
 const ROOT_INHERITED_REASON = 'body-inherited-baked';
 
+// ── wave-50 lane B7: UA <hr> SEPARATOR BOX (BACKLOG queue 5(a)) ────────────
+//
+// Blink's html.css gives every <hr> a UA-origin rule that no author sheet
+// has to repeat (HTML Rendering §15.3.11, "The hr element"):
+//   hr { display: block; margin-block: 0.5em; margin-inline: auto;
+//        overflow: hidden; border-style: inset; border-width: 1px }
+// This extractor models AUTHOR declarations only, so a rule-less <hr> fell
+// through to the 100×100 "empty node" placeholder in buildNode — a 100px
+// white square where the browser paints a 2px rule.
+//
+// MEASURED, wave49-final css-images/gradient/gradient-hue-direction (three
+// rule-less <hr>s between four 50px gradient rows): capture 390×894 against
+// the 390×600 frozen ref, i.e. +294px = 3 × (100 − 2) EXACTLY — web f 0.6241
+// · iOS f 0.6235 · Android f 0.6230, all three "structural-divergence".
+//
+// The two colours are MEASURED off the frozen ref PNG, not guessed
+// (tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/
+//  white-black-ink-font-lh-imgpad-htmlpins/css-images/
+//  gradient__gradient-hue-direction.png, the hr at y=188/189, x 16–373):
+// the top border row is rgb(154,154,154), the bottom rgb(238,238,238), and
+// the two mitre corners rgb(196,196,196) = their 45° blend. Under Blink's
+// own two-tone model for `inset` — css-backgrounds-3 §3.2 names the 3D
+// styles but leaves their shading UA-defined, and the arithmetic is
+// box_border_painter.cc CalculateBorderStyleColor + color.cc Color::Dark(),
+// ported in this repo as runtimes/compose/src/main/java/com/styleconverter/
+// runtime/borders/sides/BlinkBorderShade.kt — the TOP edge of an `inset`
+// border is Dark(base) and the BOTTOM edge is the base itself:
+//   v = 238/255 = 0.93333;  Dark multiplier = max(0, (v − 0.33)/v) = 0.64643
+//   238 × 0.64643 = 153.8 → 154  ✓ (the observed top row)
+//   light gate: contrast(#EEE, #9A9A9A) = 2.43 ≥ 1.75 → no lift, so the
+//   bottom edge keeps the declared colour, 238  ✓
+// So the ref's separator is exactly `border: 1px inset #EEEEEE` — the value
+// Chromium's html.css carries for hr in the light colour scheme.
+const UA_HR_PROPS = {
+  // css-display-3 §2.1 ("display: block"): the UA outer display for <hr>.
+  // Stated so a runtime that would otherwise treat an unsized component as
+  // inline lays the rule out on its own line.
+  display: 'block',
+  // CSS 2.1 §10.6.3: a block-level box with no in-flow content has a
+  // content height of 0. Blink's UA sheet declares no height at all and
+  // relies on that used value; we state BOTH dimensions explicitly for the
+  // same reason the <br> branch in buildNode states them ("BOTH dimensions
+  // stay explicit in every case so the 100x100 empty-node placeholder can
+  // never claim a br") — plus neither native runtime derives a 0-height
+  // content box for a childless, textless component.
+  height: '0px',
+  // css-ui-3 §2.1 `box-sizing`: content-box IS the initial value, stated
+  // EXPLICITLY because the Compose runtime only inflates a declared size by
+  // the padding+border band when the keyword is explicitly content-box
+  // (runtimes/compose/.../sizing/SizingConfig.kt `contentBoxInflateY`, armed
+  // by SizingExtractor only for BoxSizingKeyword.CONTENT_BOX). Without it
+  // the 0px above would be the FRAME height on Android and the rule would
+  // paint nothing at all. iOS already defaults an undeclared box-sizing to
+  // .contentBox in WPT capture mode (SizeApplier.swift
+  // `declared ?? (wptCaptureMode ? .contentBox : nil)`) and on web it is the
+  // browser's own initial value — so this key is a no-op on two of the three
+  // platforms and the Android repair on the third.
+  'box-sizing': 'content-box',
+  // border-width: 1px on all four sides (the UA shorthand). Longhands, not
+  // the shorthand, so the per-key author guards below can decline one side
+  // without discarding the rest (css-backgrounds-3 §3.3 `border-width`).
+  'border-top-width': '1px',
+  'border-right-width': '1px',
+  'border-bottom-width': '1px',
+  'border-left-width': '1px',
+  // css-backgrounds-3 §3.2 `border-style: inset` — the two-tone 3D style
+  // whose Blink shading the banner above derives from the ref pixels.
+  'border-style': 'inset',
+  // The base colour the shading is computed FROM (banner arithmetic).
+  'border-color': '#eeeeee',
+  // margin-block: 0.5em, resolved at the 16px root font-size the browser-ref
+  // pins (capture-browser-ref pins font-family + line-height on html/body and
+  // leaves font-size at the UA 16px) — the same reasoning, and the same
+  // reason, as UA_H1_PROPS above: an `em` value lands in the IR as `null`
+  // (schema/spec/02-values.md's runtime-dependent rule) and would collapse
+  // the margin to nothing.
+  'margin-top': '8px',
+  'margin-bottom': '8px',
+  // css-overflow-3 §3 `overflow: hidden` — the UA declaration. Harmless on
+  // a childless box, carried so the bag matches the UA rule it claims to be.
+  overflow: 'hidden',
+  // DELIBERATELY NOT EMITTED: the UA's `margin-inline: auto` and the
+  // `width: auto` it centres. With no width the box fills its containing
+  // block's content edge-to-edge, which is what `auto` inline margins resolve
+  // to for an auto-width block anyway (CSS 2.1 §10.3.3 — auto margins get 0
+  // once width is auto), and it is what the ref shows: the rule spans
+  // x 16–373 of a 390px canvas, exactly the 16px-inset content box.
+};
+
+// Per-key author guards. A key is baked ONLY when the element's own
+// declaration bag names none of its guards — same contract as UA_LINK_GUARDS
+// above ("author declarations that mean the UA default is not the used value
+// here"), because these are UA-ORIGIN declarations and any author declaration
+// beats them (css-cascade-5 §6.2 origin order).
+const UA_HR_GUARDS = {
+  display: ['display'],
+  // A declared block size (or either clamp) replaces the 0 used height.
+  height: ['height', 'block-size', 'min-height', 'max-height', 'min-block-size', 'max-block-size'],
+  // box-sizing exists here only to make the UA 0-height inflate by the
+  // border band: if the author gave the box a height of its own, or named
+  // box-sizing, the inflation is not ours to invent.
+  'box-sizing': ['box-sizing', 'height', 'block-size'],
+  // Each side's width: the side longhand, its logical twin, the
+  // per-side/axis shorthands, and the two whole-box shorthands.
+  'border-top-width': ['border', 'border-width', 'border-top', 'border-top-width',
+    'border-block', 'border-block-start', 'border-block-width', 'border-block-start-width'],
+  'border-right-width': ['border', 'border-width', 'border-right', 'border-right-width',
+    'border-inline', 'border-inline-end', 'border-inline-width', 'border-inline-end-width'],
+  'border-bottom-width': ['border', 'border-width', 'border-bottom', 'border-bottom-width',
+    'border-block', 'border-block-end', 'border-block-width', 'border-block-end-width'],
+  'border-left-width': ['border', 'border-width', 'border-left', 'border-left-width',
+    'border-inline', 'border-inline-start', 'border-inline-width', 'border-inline-start-width'],
+  // Style/colour are whole-box in the UA rule, so ANY author border
+  // declaration that could name them declines the bake wholesale — a
+  // half-author half-UA border is the "silent fallthrough" this campaign
+  // forbids, not an approximation.
+  'border-style': ['border', 'border-style', 'border-top-style', 'border-right-style',
+    'border-bottom-style', 'border-left-style', 'border-top', 'border-right',
+    'border-bottom', 'border-left', 'border-block', 'border-inline'],
+  'border-color': ['border', 'border-color', 'border-top-color', 'border-right-color',
+    'border-bottom-color', 'border-left-color', 'border-top', 'border-right',
+    'border-bottom', 'border-left', 'border-block', 'border-inline'],
+  'margin-top': ['margin', 'margin-top', 'margin-block', 'margin-block-start'],
+  'margin-bottom': ['margin', 'margin-bottom', 'margin-block', 'margin-block-end'],
+  overflow: ['overflow', 'overflow-x', 'overflow-y', 'overflow-block', 'overflow-inline'],
+};
+
+// The LOUD marker (same role as UA_LINK_REASON): a component wearing it
+// carries declarations its source element never wrote, so a residual against
+// a ref is OUR UA model, not a renderer divergence.
+const UA_HR_REASON = 'ua-hr-separator-baked';
+// …and the marker for the DECLINED case, so the bail is never silent (the
+// campaign's no-silent-fallthrough rule). A component wearing this one is an
+// <hr> the author re-declared: it keeps its author bag byte-for-byte AND it
+// is missing the UA margins/overflow that the browser would still apply —
+// a STATED modelling gap, not an approximation. Named residual: an author
+// who declares only `margin: 0` on hr loses the UA border too; no corpus
+// test does that today (the census below is exhaustive for the gate set).
+const UA_HR_DECLINED_REASON = 'ua-hr-separator-declined';
+
+/**
+ * UA-origin declarations for an <hr>, or null for anything else / for an
+ * <hr> whose author bag has already redefined part of the separator box.
+ *
+ * ATOMIC BY DESIGN. The UA rule is one box: a 1px inset frame, a 0 content
+ * height, and the 0.5em block margins that space it from its neighbours.
+ * Baking a SUBSET of that produces a box that is neither the author's nor the
+ * browser's — e.g. UA margins moving an author-sized 100px block that carries
+ * no UA rule at all — so any author declaration on any key declines the whole
+ * bake. MEASURED consequence on the gate corpus (the exhaustive `<hr>` census
+ * over the 1435 wave49-final tests: gradient-hue-direction,
+ * active-selection-057, direction-upright-001, direction-upright-002):
+ * active-selection-057 declares `height: 100px` and `border: none 0px` on its
+ * <hr>, so it declines and stays BYTE-IDENTICAL — which matters, because it
+ * is the only one of the four that PASSES today (wave49-final
+ * css-pseudo/active-selection-057 web P 1.0000 · ios P 0.9994 · android
+ * P 0.9986). The other three declare nothing the guards name (two declare
+ * only `clear: both`) and take the full bake.
+ *
+ * @param tag   lowercased element tag.
+ * @param props the element's own (author) declaration bag, post-cascade.
+ * @returns `{ props }` to fold OVER the bag, `{ declined: true }` when an
+ *          author declaration took the box over, or null for a non-<hr>.
+ */
+export function uaHrProps(tag, props) {
+  // Only the separator element has this UA rule.
+  if (tag !== 'hr') return null;
+  // Author-wins, atomically (banner): ANY guard on ANY key declines the box.
+  for (const guards of Object.values(UA_HR_GUARDS)) {
+    if (guards.some((g) => props?.[g] !== undefined)) return { declined: true };
+  }
+  // A fresh copy per call — the caller Object.assigns it into a live bag.
+  return { props: { ...UA_HR_PROPS } };
+}
+
+
 // ── wave-30 A7: UA LINK STYLING ────────────────────────────────────────────
 //
 // HTML Rendering §15.5.2 gives every hyperlink a UA-origin rule:
@@ -9492,6 +10326,75 @@ export function htmlTablePresentationProps(tag, attrs, ancestors, props) {
 // same stylesheet the `rules` came from (parseCss skips @-rules, so the two
 // are complementary views of one sheet). Null/omitted = sampling disabled —
 // the legacy byte-identical path for callers without keyframes (unit tests).
+// ── wave-50 lane B7: DUPLICATED TABLE-INTERNAL TEXT (BACKLOG 5(g), 1(b)) ──
+//
+// A `<table>`/`<tr>` component was shipping its CELLS' text a second time, as
+// its own `_text` and as `{text:…}` entries in its `_runs`. The walker's
+// ownText scan hoists descendant text onto the ancestor (the documented
+// collectSubtreeText approximation), which is harmless for a `<div>` whose
+// kept children render inside it — and NOT harmless inside a table, because
+// CSS 2.1 §17.2.1 "Anonymous table objects" wraps any non-cell child of a
+// table-row in an ANONYMOUS TABLE-CELL. So every duplicate mints a phantom
+// column, and every phantom column steals width from the real ones.
+//
+// MEASURED — the census is exhaustive over the 1435 wave49-final scored
+// tests: FIVE documents put ownText on a table-internal box, and in ALL FIVE
+// that text is exactly the concatenation of the box's own children's text
+// (ASCII whitespace aside). Never independent content:
+//   table | "1 2" childText "12"        (css-backgrounds/animations/
+//   tr    | "1"   childText "1"          background-color-animation-with-
+//   tr    | "2"   childText "2"          table1, table3, table4)
+//   table | "    " childText 3×    (css-contain/contain-content-004)
+//   table | "ABC" childText "ABC" ×10   (css-writing-modes/direction-upright-002)
+//   tr    | "ABC" childText "ABC" ×10
+//
+// What the duplicates cost, from the frozen captures:
+//   • contain-content-004 — each `<tr>` gets [td, dup, td, dup]-shaped
+//     children, so `table-layout: fixed` splits the declared 206px over FOUR
+//     columns: (206 − 5 × 2px border-spacing) / 4 = 49px. The web capture's
+//     white cells measure exactly 49px (x 18–66 and 120–168 in row 1; x
+//     69–117 and 120–168 in row 2 — columns 1,3 and 2,3, the real `<td>`s),
+//     with the blue table background showing through the transparent phantom
+//     cells: 29500 blue pixels on web, 34836 Android, 34636 iOS against the
+//     ref's 2436. The `<table>`'s own duplicate adds an anonymous ROW — the
+//     66px blue band above the real ones, and the reason the green "PASS"
+//     sits at y 226 against the ref's y 192. Cells: web f 0.8448 · iOS
+//     f 0.7940 · Android f 0.8286.
+//   • direction-upright-002 — ten tables, each duplicating "ABC" on the table
+//     AND on its row, which is the canvas blow-up BACKLOG item 1(b) asks to
+//     explain: 390×2805 (web) / 2544 (iOS) / 2316 (Android) against a 390×954
+//     ref, the reference-grade web runtime included.
+//
+// THE GUARD IS PROOF-BASED, not a blanket drop: the duplicate is removed only
+// when the parent's text IS its children's text. Real stray text in a table
+// row (which the browser really does wrap in an anonymous cell) does not
+// match and is kept. ASCII whitespace is normalised out of the comparison —
+// css-text-3 §1.1's set, never String.trim(), which would also eat the
+// U+00A0 that IS content — because the hoisting scan inserts separators.
+const TABLE_INTERNAL_TAGS = new Set([
+  'table', 'thead', 'tbody', 'tfoot', 'tr', 'colgroup', 'col',
+]);
+
+/** css-text-3 §1.1 white space removed, so "1 2" and "12" compare equal. */
+const stripAsciiWhitespace = (t) => String(t ?? '').replace(/[ \t\r\n\f]+/g, '');
+
+/**
+ * wave-50 B7 — does this table-internal box's ownText merely repeat the text
+ * its own kept children already carry?
+ *
+ * @param node a walker tree node (needs `.tag`, `.ownText`, `.children`).
+ * @returns true when `_text` and the run list's text entries must be dropped.
+ */
+export function isDuplicatedTableText(node) {
+  if (!node || !TABLE_INTERNAL_TAGS.has(node.tag)) return false;
+  const own = stripAsciiWhitespace(node.ownText);
+  if (own === '') return false;                    // nothing to duplicate
+  const kids = (node.children ?? []).map((c) => stripAsciiWhitespace(c.ownText)).join('');
+  // Equality is the proof. A row with its own stray text yields own !== kids
+  // and keeps it — §17.2.1 gives THAT text an anonymous cell, correctly.
+  return own === kids;
+}
+
 export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes = null) {
   const components = {};
   let lossyOverall = false;
@@ -9903,6 +10806,16 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // so this assign can never overwrite a declaration.
     const uaLink = uaLinkProps(node.tag, node.attrs, props, uaLinkSuppressed);
     if (uaLink) Object.assign(props, uaLink);
+    // wave-50 B7: the UA <hr> separator box (HTML Rendering §15.3.11 — see the
+    // UA_HR_PROPS banner). Folded in the SAME slot and for the same reason as
+    // the link bake above: every later pass (sibling-index, attr(), keyframe
+    // sampler, the lossy scan, the 100×100 empty-node placeholder) must see
+    // the final bag. uaHrProps has already applied the author-wins guards, so
+    // this assign can never overwrite a declaration — and because it leaves
+    // `props` non-empty, a rule-less <hr> can no longer reach the placeholder
+    // branch below, which is the whole repair.
+    const uaHr = uaHrProps(node.tag, props);
+    if (uaHr?.props) Object.assign(props, uaHr.props);
     // wave-36 M6: HTML §15.3.3 table presentational attributes (see the
     // htmlTablePresentationProps banner). Folded in the SAME slot and for
     // the same reason as the two UA bakes above — before every later pass —
@@ -9981,6 +10894,13 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // so a purple-vs-blue residual against a ref is OUR approximation and
     // must be read as such, not as a renderer divergence.
     if (uaLink) reasons.push(UA_LINK_REASON);
+    // wave-50 B7 — the same LOUD marker for the UA <hr> separator bake. A
+    // component wearing it paints a border/margin geometry its source element
+    // never declared (UA_HR_PROPS, derived from the frozen ref pixels), so a
+    // residual on an <hr> row is OUR UA model and must be read as such.
+    if (uaHr?.props) reasons.push(UA_HR_REASON);
+    // …and the declined half of the same channel (see UA_HR_DECLINED_REASON).
+    if (uaHr?.declined) reasons.push(UA_HR_DECLINED_REASON);
     // wave-36 M6 — the two LOUD halves of the table presentational bake.
     // 'baked' is provenance (a 1px cell rule in this fixture came from the
     // markup's `border=`, not from a stylesheet); 'unmodelled' is the scope
@@ -10071,6 +10991,7 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       if (lineCtx) lineCtx.hasInline = false;
     } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText
                && !(node.children && node.children.length > 0)
+               && !NON_BOX_GENERATING_TAGS.has(node.tag)
                && !(INTRINSIC_WIDGET_TAGS.has(node.tag)
                     && !(node.attrs && FOREIGN_NS_MARKER_ATTR in node.attrs))) {
       // wave-24 B-RC2: the `!node.children` guard above keeps rule-less
@@ -10195,7 +11116,11 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     // EXTFIX-A part 2: own text → `_text` field. Only emitted when
     // non-empty so component fixtures without text (visual-test.json,
     // fixtures/properties/*) stay byte-identical post-rollout.
-    if (node.ownText) cmp._text = node.ownText;
+    // wave-50 B7: …and never when it is the CELLS' text repeated on the table
+    // or the row (see the DUPLICATED TABLE-INTERNAL TEXT banner) — CSS 2.1
+    // §17.2.1 turns each repeat into a phantom anonymous cell.
+    const tableDupText = isDuplicatedTableText(node);
+    if (node.ownText && !tableDupText) cmp._text = node.ownText;
     // wave-22 EX2 B-RC4a: the merged decoration list for a collapsed
     // inline chain — `_decorations` on the fixture wire, forwarded by the
     // converter as IR v2 `meta.decorations` (the additive omit-when-absent
@@ -10282,11 +11207,18 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // before the loop body only in the sense that it reads the same
       // formula; the loop below is what actually creates the children.
       if (node.runs) {
-        cmp._runs = node.runs.map((entry) => (
-          entry.childIndex === undefined
-            ? { text: entry.text }
-            : { child: `${id}__${entry.childIndex}` }
-        ));
+        cmp._runs = node.runs
+          // wave-50 B7: the run list is the other half of the same drop — a
+          // `{text:'1'}` run beside the child that already renders "1" would
+          // put the duplicate back, and all three renderers read `_runs` in
+          // preference to `_text`. Child entries are untouched, so document
+          // order survives intact.
+          .filter((entry) => entry.childIndex !== undefined || !tableDupText)
+          .map((entry) => (
+            entry.childIndex === undefined
+              ? { text: entry.text }
+              : { child: `${id}__${entry.childIndex}` }
+          ));
       }
       // wave-22 BR-LINE-CONTEXT: fresh line state per sibling scope. The
       // parent's ownText renders BEFORE its element children (the
@@ -10640,6 +11572,11 @@ async function main() {
   try {
     for (const rel of inputs) {
       try {
+        // wave 50 lane B1: the validity oracle's drop log is process-scoped
+        // (the collapse sites are spread across parseCss, propsForElement and
+        // the body-root builder), so it is cleared per test and drained onto
+        // this test's log line below. A drop is NEVER silent.
+        invalidShadowDrops.length = 0;
         const result = await extractFixture(rel);
         // Post-load overlay BEFORE writing so the persisted fixture carries
         // the baked state + `_wpt.postLoadExtracted` stamp atomically.
@@ -10747,9 +11684,18 @@ async function main() {
           }
         }
         const written = await writeFixturePair(result);
+        // `[validity: …]` names every declaration the oracle refused to let
+        // shadow an earlier valid one — property, the value KEPT, the value
+        // DROPPED and the proof. Silent when the oracle proved nothing, so
+        // every log line in the corpus outside css-values/angle-units-001 is
+        // byte-identical to the historical shape.
+        const validityNote = invalidShadowDrops.length
+          ? ` [validity: ${invalidShadowDrops.length} shadowing declaration${invalidShadowDrops.length === 1 ? '' : 's'} refused — ` +
+            invalidShadowDrops.map((d) => `${d.prop}: kept '${d.kept}', dropped '${d.dropped}' (${d.reason})`).join('; ') + ']'
+          : '';
         console.log(`extracted ${rel} → ${relative(REPO_ROOT, written.testPath)}` +
                     (written.refPath ? ` (+ ref)` : ' (ref skipped)')
-                    + postLoadNote + bidiNote + counterNote + vtNote);
+                    + postLoadNote + bidiNote + counterNote + vtNote + validityNote);
         ok++;
       } catch (err) {
         console.error(`FAIL ${rel}: ${err.message ?? err}`);

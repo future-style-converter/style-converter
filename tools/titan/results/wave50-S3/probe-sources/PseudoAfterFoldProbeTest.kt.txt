@@ -1,0 +1,92 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Independent replay of B3's ::after fold blast radius + adversarial census.
+
+import com.styleconverter.runtime.content.PseudoTextFold
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.renderer.ContentsUnboxing
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import kotlinx.serialization.json.JsonObject
+import org.junit.Test
+import java.io.File
+
+class PseudoAfterFoldProbeTest {
+
+    private val repo = File("../../").canonicalFile
+    private val runDir = File(repo, "tools/titan/runs/wave49-final/sections")
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+
+    @Test fun replay() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        val foldedByTest = sortedMapOf<String, MutableList<String>>()
+        val afterBearing = sortedMapOf<String, MutableList<String>>()
+        val styled = mutableListOf<String>()
+        val currentColorRisk = mutableListOf<String>()
+        val emRisk = mutableListOf<String>()
+        var docs = 0
+        runDir.listFiles()!!.sortedBy { it.name }.forEach { sec ->
+            val irDir = File(sec, "per-test-ir")
+            if (!irDir.isDirectory) return@forEach
+            irDir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }.forEach { f ->
+                docs++
+                val testKey = sec.name + "/" + f.name.removeSuffix(".json")
+                val doc = try { IRDocumentDecoder.decode(f.readText()) } catch (e: Exception) { return@forEach }
+                val roots = try { SlotComposer.compose(doc) } catch (e: Exception) { return@forEach }
+                fun walk(c: IRComponent) {
+                    if ((c.pseudos?.get("after") as? JsonObject) != null) {
+                        afterBearing.getOrPut(testKey) { mutableListOf() }.add(c.id)
+                    }
+                    val unboxed = ContentsUnboxing.resolve(c)
+                    val r = PseudoTextFold.resolve(unboxed)
+                    if (r.afterFolded) {
+                        foldedByTest.getOrPut(testKey) { mutableListOf() }.add(c.id)
+                        val added = r.component.properties.size - unboxed.properties.size
+                        if (added > 0) {
+                            val newProps = r.component.properties.takeLast(added)
+                            styled.add("$testKey ${c.id} +${newProps.map { it.type + "=" + it.data }}")
+                            // Adversarial A: an appended Color also repaints the
+                            // HOST's currentColor-dependent box ink.
+                            val types = unboxed.properties.map { it.type }.toSet()
+                            if (newProps.any { it.type == "Color" } &&
+                                types.any {
+                                    it.startsWith("Border") && it.endsWith("Width") ||
+                                        it.startsWith("Outline") || it.startsWith("TextDecoration") ||
+                                        it == "Caret" || it == "CaretColor"
+                                }
+                            ) currentColorRisk.add("$testKey ${c.id} hostTypes=$types")
+                            // Adversarial B: an appended FontSize re-bases the
+                            // HOST's own em/ex/ch lengths.
+                            if (newProps.any { it.type == "FontSize" }) {
+                                val emCarrier = unboxed.properties.any { p ->
+                                    p.data.toString().contains("\"EM\"") ||
+                                        p.data.toString().contains("\"REM\"") ||
+                                        p.data.toString().contains("\"CH\"")
+                                }
+                                if (emCarrier) emRisk.add("$testKey ${c.id}")
+                            }
+                        }
+                    }
+                    c.children?.forEach { walk(it) }
+                }
+                roots.forEach { walk(it) }
+            }
+        }
+        sb.append("docs=$docs\n")
+        sb.append("after-bearing tests=${afterBearing.size} components=${afterBearing.values.sumOf { it.size }}\n")
+        sb.append("FOLDED tests=${foldedByTest.size} components=${foldedByTest.values.sumOf { it.size }}\n")
+        foldedByTest.forEach { (k, v) -> sb.append("FOLD $k n=${v.size}\n") }
+        val refused = afterBearing.keys - foldedByTest.keys
+        sb.append("REFUSED tests (${refused.size}): ${refused.joinToString(", ")}\n")
+        sb.append("=== styling appended to host (${styled.size}) ===\n")
+        styled.forEach { sb.append("STYLED $it\n") }
+        sb.append("=== currentColor host-ink risk (${currentColorRisk.size}) ===\n")
+        currentColorRisk.forEach { sb.append("CCRISK $it\n") }
+        sb.append("=== em re-base risk (${emRisk.size}) ===\n")
+        emRisk.forEach { sb.append("EMRISK $it\n") }
+        File(out, "pseudo-after-fold.txt").writeText(sb.toString())
+        println(sb.toString().lines().take(3).joinToString("\n"))
+    }
+}

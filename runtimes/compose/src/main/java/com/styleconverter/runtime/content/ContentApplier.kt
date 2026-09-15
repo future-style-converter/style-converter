@@ -330,23 +330,64 @@ object ContentApplier {
             }
         } else Modifier
 
-        // Render content
-        Box(modifier = modifier) {
-            when {
-                imageUrl != null -> {
-                    // Render image
-                    PseudoElementImage(url = imageUrl.url)
-                }
-                textContent.isNotEmpty() -> {
-                    // Render text (parity style + ink-only baseline shim —
-                    // both are the identity outside WPT capture, see above).
-                    Text(
-                        text = textContent,
-                        style = effectiveStyle,
-                        // Feed the correction's settle loop.
-                        onTextLayout = { pseudoLayout.value = it },
-                        modifier = pseudoHalfLeading
-                    )
+        // ── Wave-50 lane F4 (skeptic S3) — the pseudo's OWN containing block.
+        // CSS 2.1 §10.1 / css-pseudo-4 §4: a tree-abiding ::before/::after box
+        // is generated INSIDE the originating element, so the block it is laid
+        // out in is the HOST's CONTENT box — one level DEEPER than the host's
+        // own containing block. Lane B2's `LocalElementContainingBlock` is
+        // published by `ComponentRenderer` with the host's own value and this
+        // wrapper composes INSIDE that provider, so without this line a
+        // percentage inset on a pseudo would resolve against the host's
+        // containing block instead of the host's content box — one level too
+        // SHALLOW. `LocalContainingBlock.current` read here IS the host's
+        // child block (the renderer provides it in the same call), i.e. exactly
+        // the pseudo's containing block.
+        //
+        // WHY THE PROVIDER WRAPS THE EMISSION AND NOT THE `applyProperties`
+        // CALL ABOVE: `applyProperties` is a plain function returning a
+        // `Modifier`, and the only reader of this channel
+        // (`PercentInsetPositioned`) sits behind `Modifier.composed { }`,
+        // whose factory runs at MATERIALIZATION — i.e. inside the composable
+        // that hands the chain to a layout node, which is this `Box`. Wrapping
+        // the value-producing call would provide nothing to it.
+        //
+        // REACHABILITY, stated rather than implied: no committed capture and no
+        // corpus cell can move. `PseudoBucketExtractor` types only
+        // color / font-size / font-family into `config.properties` (every other
+        // declaration is named through `PropertyTracker`), so no `Top`/`Left`/
+        // `Right`/`Bottom` entry reaches `applyProperties` from this path today
+        // and the composed inset factory is never built. Census over all 1435
+        // `tools/titan/runs/wave49-final/sections/*/per-test-ir` documents: NINE
+        // components across TWO tests declare a percentage inset inside a
+        // `pseudos` bucket — `css-anchor-position/anchor-name-multicol-003`
+        // (1) and `css-anchor-position/anchor-position-multicol-002` (8), all
+        // `::before`, all `position: absolute` + `top: 50%` / `left: 50%`, and
+        // all currently dropped by that extractor. This provider makes the
+        // LEVEL right for the day the extractor types them; it is not itself a
+        // render change.
+        CompositionLocalProvider(
+            com.styleconverter.runtime.layout.position.ElementContainingBlock
+                .LocalElementContainingBlock provides
+                com.styleconverter.runtime.core.variables.LocalContainingBlock.current
+        ) {
+            // Render content
+            Box(modifier = modifier) {
+                when {
+                    imageUrl != null -> {
+                        // Render image
+                        PseudoElementImage(url = imageUrl.url)
+                    }
+                    textContent.isNotEmpty() -> {
+                        // Render text (parity style + ink-only baseline shim —
+                        // both are the identity outside WPT capture, see above).
+                        Text(
+                            text = textContent,
+                            style = effectiveStyle,
+                            // Feed the correction's settle loop.
+                            onTextLayout = { pseudoLayout.value = it },
+                            modifier = pseudoHalfLeading
+                        )
+                    }
                 }
             }
         }

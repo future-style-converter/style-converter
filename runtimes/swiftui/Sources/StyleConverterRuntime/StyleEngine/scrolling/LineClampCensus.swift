@@ -20,6 +20,41 @@
 //  an under-count would clip a visible line, which is worse than the
 //  drift the census removes.
 //
+//  ## TWIN — Compose `typography/inline/LineBoxCensus.kt` (wave 50, lane
+//  ## B9), with TWO DELIBERATE DIVERGENCES
+//  The Kotlin census is the same model — same run shape, same document
+//  order, same bail-rather-than-under-count discipline — and its own
+//  header states both splits from this side. Recorded here so neither
+//  file reads as unqualified parity (wave 50 fix lane F2, on skeptic S6):
+//
+//   (a) THE UNPROVABLE VERDICT. Here `.unbounded` removes the cap
+//       entirely (LineClampRootMetrics returns nil for it). Compose maps
+//       BOTH non-capped verdicts back onto its wave-41 UNIFORM number
+//       (N × the root's line box), because 24 of the 38 fixed-count
+//       clamp roots in the 34 wave49-final per-test IR documents that
+//       carry one land on an unprovable soft-wrapping text run, and all
+//       but block-ellipsis-032 PASS on Android today — dropping their cap
+//       would also drop the block-axis ink clip that keeps the discarded
+//       lines unpainted. Neither choice is the spec's: css-overflow-4 §5
+//       gives an exact edge that neither reader can compute without a
+//       layout pass, and the two platforms picked opposite safe sides.
+//
+//   (b) A `<br>` RUN. Compose has an explicit branch
+//       (`LineBoxCensusRuns.childRun`: `tag == "br" || role ==
+//       "line-break"`) returning a run of ZERO lines and no height —
+//       HTML §4.5.27's forced break generates no box, and the converter's
+//       measured `height` stamp on it (0 or 20px in the corpus) must not
+//       be budgeted. This side has no such branch: a `<br>` carrying a
+//       stamped height falls into `childRun`'s explicit-height arm and
+//       becomes a MONOLITHIC box of that height, so a 20px stamp costs
+//       the clamp 20px here and 0 on Compose.
+//
+//  CORPUS IMPACT: UNMEASURED. Wave 50 ran no device gate, so neither
+//  divergence has a cell attached to it on this platform. The arm is NOT
+//  ported for that reason — porting (b) is a render change with no gate
+//  to catch it going wrong, which is the one thing this campaign does not
+//  ship. Re-measure at the next gate before deciding which side is right.
+//
 
 import CoreGraphics
 import Foundation

@@ -1,0 +1,204 @@
+{
+ "components": {
+  "A_underline_auto": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline auto"
+   },
+   "_text": "Ag 0123"
+  },
+  "B_underline_from_font": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline from-font"
+   },
+   "_text": "Ag 0123"
+  },
+  "C_underline_2px_red": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline 2px red"
+   },
+   "_text": "Ag 0123"
+  },
+  "D_underline_rgb_slash": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline rgb(0 128 0 / 50%)"
+   },
+   "_text": "Ag 0123"
+  },
+  "E_green_alone": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "green"
+   },
+   "_text": "Ag 0123"
+  },
+  "F_wavy_alone": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "wavy"
+   },
+   "_text": "Ag 0123"
+  },
+  "G_none": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "none"
+   },
+   "_text": "Ag 0123"
+  },
+  "H_inherit": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "inherit"
+   },
+   "_text": "Ag 0123"
+  },
+  "I_three_lines": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline overline line-through"
+   },
+   "_text": "Ag 0123"
+  },
+  "J_underline_3px": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline 3px"
+   },
+   "_text": "Ag 0123"
+  },
+  "K_initial": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "initial"
+   },
+   "_text": "Ag 0123"
+  },
+  "L_unset": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "unset"
+   },
+   "_text": "Ag 0123"
+  },
+  "M_revert_layer": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "revert-layer"
+   },
+   "_text": "Ag 0123"
+  },
+  "N_spelling_error": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "spelling-error"
+   },
+   "_text": "Ag 0123"
+  },
+  "O_green_underline_auto": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "green underline auto"
+   },
+   "_text": "Ag 0123"
+  },
+  "P_var_color": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline var(--c)"
+   },
+   "_text": "Ag 0123"
+  },
+  "Q_calc_thickness": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline calc(1px + 1em)"
+   },
+   "_text": "Ag 0123"
+  },
+  "R_underline_10pct": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline 10%"
+   },
+   "_text": "Ag 0123"
+  },
+  "S_double_color": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "underline red blue"
+   },
+   "_text": "Ag 0123"
+  },
+  "T_none_underline": {
+   "properties": {
+    "width": "200px",
+    "height": "40px",
+    "color": "#111",
+    "font-size": "20px",
+    "text-decoration": "none underline"
+   },
+   "_text": "Ag 0123"
+  }
+ }
+}

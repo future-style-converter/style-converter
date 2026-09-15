@@ -287,13 +287,13 @@ Gradle commands need JDK 21):
 
 | suite | command | tests |
 |---|---|---:|
-| converter (Kotlin) | `./gradlew :converter:test` | 514 |
+| converter (Kotlin) | `./gradlew :converter:test` | 526 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3143 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3228 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 1979 |
-| web-harness (vitest) | `npm -w apps/web-harness run test` | 276 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 1979 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2008 |
+| web-harness (vitest) | `npm -w apps/web-harness run test` | 282 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2040 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 23 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
@@ -351,7 +351,7 @@ Three different numbers, all true — do not conflate them:
   grouped appliers — files like Compose `LayoutApplier.kt`, iOS
   `FlexboxApplier.swift`, or web `PaddingApplier.ts` render many
   properties from one file whose basename matches at most one IR name, so
-  the raw dedicated-applier file counts (Android 45 · iOS 94 · Web 520)
+  the raw dedicated-applier file counts (Android 44 · iOS 94 · Web 520)
   sit above this per-property floor.
 - **Verified rendering coverage: 91/550 (~17%)**. Only 91 properties pass
   the strict bar — SSIM ≥ 0.95 on every value variant on every platform
