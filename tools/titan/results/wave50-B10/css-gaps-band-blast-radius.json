@@ -1,0 +1,1086 @@
+{
+  "_note": "wave50-B10 · which css-gaps cells the §9.4-step-8 line-band reconstruction can move",
+  "source": "tools/titan/runs/wave49-final/sections/css-gaps",
+  "scoredTests": 48,
+  "changing": [
+    "css/css-gaps/flex/flex-gap-decorations-045.html",
+    "css/css-gaps/flex/flex-gap-decorations-046.html"
+  ],
+  "rows": [
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-001.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.999
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9974
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9967
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "items stretch to their line ⇒ union == band ⇒ leftover 0"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-002.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "items stretch to their line ⇒ union == band ⇒ leftover 0"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-003.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9994
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9988
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-004.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9989
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9981
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-005.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9993
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9987
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-006.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "f",
+          "ssim": 0.8266
+        },
+        "android": {
+          "verdict": "f",
+          "ssim": 0.8223
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "align-content:CENTER"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-007.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9998
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9856
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-008.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9996
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9646
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "nowrap",
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-009.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9994
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9988
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-010.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9994
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9988
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-011.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9993
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9987
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-012.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9993
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9987
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-013.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9993
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9987
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-014.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.998
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9974
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-015.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9996
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9992
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "no §9.4 leftover (lines already tile the box)"
+      ],
+      "geometry": {
+        "lines": 2,
+        "base": [
+          50,
+          50
+        ],
+        "containerCross": 120,
+        "crossGap": 20,
+        "leftover": 0
+      }
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-016.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9863
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9861
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "no §9.4 leftover (lines already tile the box)"
+      ],
+      "geometry": {
+        "lines": 2,
+        "base": [
+          50,
+          50
+        ],
+        "containerCross": 120,
+        "crossGap": 20,
+        "leftover": 0
+      }
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-017.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9987
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9984
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "single line"
+      ],
+      "geometry": {
+        "lines": 1,
+        "base": [
+          50
+        ],
+        "containerCross": 50,
+        "crossGap": 0,
+        "leftover": 0
+      }
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-018.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9986
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9984
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "single line"
+      ],
+      "geometry": {
+        "lines": 1,
+        "base": [
+          50
+        ],
+        "containerCross": 50,
+        "crossGap": 0,
+        "leftover": 0
+      }
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-019.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9989
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9972
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9965
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "no flex container paints a rule"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-020.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "items stretch to their line ⇒ union == band ⇒ leftover 0"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-021.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "items stretch to their line ⇒ union == band ⇒ leftover 0"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-022.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "items stretch to their line ⇒ union == band ⇒ leftover 0"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-023.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9737
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9542
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9541
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "no flex container paints a rule"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-024.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9901
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.99
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.99
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "items stretch to their line ⇒ union == band ⇒ leftover 0"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-025.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.9012
+        },
+        "ios": {
+          "verdict": "f",
+          "ssim": 0.903
+        },
+        "android": {
+          "verdict": "f",
+          "ssim": 0.9085
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "nowrap",
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-028.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9994
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9988
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-029.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9962
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9925
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9925
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-030.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9971
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9934
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9934
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-031.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9592
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9585
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "align-content:CENTER"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-032.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9592
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9585
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "align-content:CENTER"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.94
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.9458
+        },
+        "ios": {
+          "verdict": "f",
+          "ssim": 0.9466
+        },
+        "android": {
+          "verdict": "f",
+          "ssim": 0.9466
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+      "cells": {
+        "web": {
+          "verdict": "f",
+          "ssim": 0.9206
+        },
+        "ios": {
+          "verdict": "f",
+          "ssim": 0.922
+        },
+        "android": {
+          "verdict": "f",
+          "ssim": 0.922
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9557
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9565
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9565
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9568
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9576
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9576
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-039.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "no flex container paints a rule"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-040.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9939
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9934
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9934
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-041.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9939
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9934
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9934
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-042.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9939
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9935
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9935
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-043.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9995
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9995
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "no §9.4 leftover (lines already tile the box)"
+      ],
+      "geometry": {
+        "lines": 2,
+        "base": [
+          50,
+          50
+        ],
+        "containerCross": 100,
+        "crossGap": 0,
+        "leftover": 0
+      }
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-044.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.9939
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9939
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9939
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-045.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9549
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9549
+        }
+      },
+      "verdict": "PAINT CHANGES",
+      "why": [],
+      "geometry": {
+        "lines": 2,
+        "base": [
+          50,
+          50
+        ],
+        "containerCross": 120,
+        "crossGap": 5,
+        "leftover": 15
+      }
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-046.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9951
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9908
+        }
+      },
+      "verdict": "PAINT CHANGES",
+      "why": [],
+      "geometry": {
+        "lines": 3,
+        "base": [
+          50,
+          50,
+          50
+        ],
+        "containerCross": 180,
+        "crossGap": 5,
+        "leftover": 20
+      }
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-047.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9989
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9989
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "align-content:SPACE_BETWEEN"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-048.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 1
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "align-content:SPACE_AROUND"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-049.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 1
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9995
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9995
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "align-content:SPACE_EVENLY"
+      ]
+    },
+    {
+      "test": "css/css-gaps/flex/flex-gap-decorations-050.html",
+      "cells": {
+        "web": {
+          "verdict": "P",
+          "ssim": 0.994
+        },
+        "ios": {
+          "verdict": "P",
+          "ssim": 0.9922
+        },
+        "android": {
+          "verdict": "P",
+          "ssim": 0.9922
+        }
+      },
+      "verdict": "unchanged",
+      "why": [
+        "auto cross size"
+      ]
+    }
+  ]
+}

@@ -63,6 +63,12 @@ enum VisibilityExtractor {
             }
         }
 
+        // Wave 50 lane B11: the box-type input `collapse` needs (CSS 2.2
+        // §11.2). Read AFTER the keyword loop and outside it so it can
+        // never set `touched` — a component that declares only
+        // `display: table-row` must still extract to nil.
+        cfg.isTableTrackBox = VisibilityBoxRules.isTableTrackBox(properties)
+
         return cfg.touched ? cfg : nil
     }
 

@@ -1,0 +1,21 @@
+docs=1435
+after-bearing tests=16 components=91
+FOLDED tests=13 components=78
+FOLD css-contain/wpt__css-contain__contain-content-011 n=1
+FOLD css-counter-styles/wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal n=17
+FOLD css-display/wpt__css-display__display-contents-before-after-001 n=1
+FOLD css-display/wpt__css-display__display-contents-before-after-002 n=1
+FOLD css-display/wpt__css-display__display-contents-before-after-003 n=1
+FOLD css-display/wpt__css-display__display-contents-dynamic-before-after-001 n=1
+FOLD css-display/wpt__css-display__display-contents-dynamic-pseudo-insertion-001 n=1
+FOLD css-display/wpt__css-display__display-contents-fieldset-002 n=14
+FOLD css-lists/wpt__css-lists__counter-list-item n=33
+FOLD css-lists/wpt__css-lists__counter-reset-reversed-pseudo-001 n=2
+FOLD css-lists/wpt__css-lists__counter-reset-reversed-pseudo-003 n=1
+FOLD css-values/wpt__css-values__attr-notype-fallback n=3
+FOLD css-values/wpt__css-values__attr-style-sharing-4 n=2
+REFUSED tests (3): css-anchor-position/wpt__css-anchor-position__anchor-function-chain-pseudo-elements, css-anchor-position/wpt__css-anchor-position__anchor-position-multicol-002, css-cascade/wpt__css-cascade__scope-pseudo-element
+=== styling appended to host (1) ===
+STYLED css-contain/wpt__css-contain__contain-content-011 wpt__css-contain__contain-content-011__3-063 +[FontSize={"original":{"type":"length","original":{"v":3.0,"u":"EM"}}}]
+=== currentColor host-ink risk (0) ===
+=== em re-base risk (0) ===

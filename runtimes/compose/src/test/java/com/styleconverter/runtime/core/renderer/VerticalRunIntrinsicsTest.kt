@@ -184,4 +184,54 @@ class VerticalRunIntrinsicsTest {
             assertEquals(10, scope.maxIntrinsicWidth(listOf(fb) + glyphs, 50))
         }
     }
+
+    // ── wave-50 lane B5: the intrinsic SUMS cannot wrap or go negative ──
+
+    @Test
+    fun sumClampedIntrinsicDoesNotWrapAndClampsToTheRepresentableBand() {
+        // The pure helper, first: `listOf(Constraints.Infinity,
+        // Constraints.Infinity).sum()` is -2 as an Int (2 × (2^31 − 1) mod
+        // 2^32). A negative intrinsic is the dangerous answer — Constraints
+        // rejects it, so the whole capture composition throws instead of one
+        // box mis-sizing.
+        assertEquals(-2, listOf(Constraints.Infinity, Constraints.Infinity).sum())
+        assertEquals(
+            INTRINSIC_SUM_CAP,
+            sumClampedIntrinsic(listOf(Constraints.Infinity, Constraints.Infinity)),
+        )
+        // Ordinary sums are untouched — this is a guard, not a policy change.
+        assertEquals(60, sumClampedIntrinsic(listOf(20, 20, 20)))
+        assertEquals(0, sumClampedIntrinsic(emptyList()))
+        // A child that mis-reports a negative intrinsic is floored at 0
+        // (IntrinsicChannel.fixedBand makes the same defence in its coerceIn).
+        assertEquals(0, sumClampedIntrinsic(listOf(-5, -5)))
+        // Exactly at the cap is representable and passes through.
+        assertEquals(INTRINSIC_SUM_CAP, sumClampedIntrinsic(listOf(INTRINSIC_SUM_CAP)))
+    }
+
+    @Test
+    fun uprightMaxHeightNeverAnswersANegativeSumOfInfiniteAdvances() {
+        // The reachable shape: two glyph slots each reporting
+        // Constraints.Infinity on the advance axis — the LargeDimension
+        // family this whole file exists to contain hands exactly that back
+        // through the child intrinsic channel. The run is NOT
+        // fallback-owned (the planner fits both glyphs at the probe budget),
+        // so the sum arm runs.
+        val policy = uprightFlowMeasurePolicy(listOf("A", "B"), LineStack.RIGHT_TO_LEFT) {}
+        val fb = FakeChild(minW = 101, maxW = 103, minH = 107, maxH = 109)
+        val poisoned = List(2) {
+            FakeChild(
+                minW = Constraints.Infinity, maxW = Constraints.Infinity,
+                minH = Constraints.Infinity, maxH = Constraints.Infinity,
+            )
+        }
+        with(policy) {
+            val h = scope.maxIntrinsicHeight(listOf(fb) + poisoned, 500)
+            // Never negative, never past the representable band.
+            assertEquals(INTRINSIC_SUM_CAP, h)
+            // The width arm sums per-column widths and is clamped the same way.
+            val w = scope.maxIntrinsicWidth(listOf(fb) + poisoned, 500)
+            assertEquals(INTRINSIC_SUM_CAP, w)
+        }
+    }
 }

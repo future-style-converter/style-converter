@@ -1,0 +1,47 @@
+--- a/tools/titan/extract-fixture.mjs	2026-09-14 20:58:44
++++ b/tools/titan/extract-fixture.mjs	2026-09-14 20:58:44
+@@ -4174,7 +4174,36 @@
+ export const FOREIGN_NS_MARKER_ATTR = 'data-sc-foreign-ns';
+ 
+ // ── wave-22 EX2 A-RC1 part 2: rule-less widgets are NOT scaffolding ─────────
++//
++// wave-50 lane B5 — tags whose UA `display` is an INTERNAL layout value
++// (css-display-3 §2.4) and that therefore generate NO box of their own.
++// The "empty node" placeholder below exists to keep a rule-less, text-less
++// element from being invisible on the canvas; for these two the premise is
++// wrong twice over — a `<col>` is never visible in its own right (its whole
++// job is to carry a column's background and width contribution into the
++// table's column, css-tables-3 §2.1), and forcing 100x100 on it PINS THE
++// COLUMN WIDTH the table should have derived from its cells.
++//
++// MEASURED (wave-50 B5; headless Chrome on the harness's own composed DOM,
++// injected as XHTML so the parser's table foster-parenting cannot move
++// nodes). css-writing-modes/direction-upright-002 stamps 10 `<col>`s — the
++// FIRST col of each `<colgroup>`, the only one that matches no rule — and
++// the composed web canvas measures:
++//   as shipped                                   3045 px  (ref 954 px)
++//   without this stamp                           2404 px
++//   with the UA internal displays (seam S1)      2766 px
++//   with BOTH                                    1864 px
++// Corpus blast radius, over every wave49-final per-test IR: exactly ONE
++// test carries a 100x100 stamp on one of these tags (direction-upright-002,
++// 10 components, all three platforms currently FAIL 0.5826/0.5758/0.5946).
++// The other eight tests that carry `col`/`colgroup` match a rule and were
++// never stamped, so no passing cell can move.
+ //
++// `<hr>` is deliberately NOT here: it IS a box-generating element and its
++// own 100x100 stamp is BACKLOG queue 5(a)'s separate decision (it spreads
++// gradient-hue-direction off-canvas), not this one.
++const NON_BOX_GENERATING_TAGS = new Set(['col', 'colgroup']);
++
+ // buildNode's "empty node" branch paints a 100x100 placeholder when an
+ // element matched no rule, carries no inline style, and has no own text —
+ // the honest reading for a bare `<div>` wrapper. It is the WRONG reading
+@@ -10071,6 +10100,7 @@
+       if (lineCtx) lineCtx.hasInline = false;
+     } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText
+                && !(node.children && node.children.length > 0)
++               && !NON_BOX_GENERATING_TAGS.has(node.tag)
+                && !(INTRINSIC_WIDGET_TAGS.has(node.tag)
+                     && !(node.attrs && FOREIGN_NS_MARKER_ATTR in node.attrs))) {
+       // wave-24 B-RC2: the `!node.children` guard above keeps rule-less

@@ -150,6 +150,11 @@ object InlineSpanContent {
             // pre-wave-48 SpanStyle byte-identical.
             baselineShift = baselineShift,
             textDecoration = decoration,
+            // Wave 50 (lane B9): a GLYPH-LESS member's own background band
+            // (css-backgrounds-3 §2.1) — Unspecified, hence byte-identical,
+            // for every member the ring admits without one.
+            background = style.background?.let { Color(it.r, it.g, it.b, it.a) }
+                ?: Color.Unspecified,
         )
     }
 }

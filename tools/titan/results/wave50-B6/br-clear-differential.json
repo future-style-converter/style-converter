@@ -1,0 +1,103 @@
+{
+  "_note": "wave-50 lane B6, BACKLOG queue 3(a): the `br[clear]` presentational-hint bake for tools/titan/extract-fixture.mjs, PREPARED AND MEASURED BUT NOT APPLIED. It is not applied because extract-fixture.mjs was owned by another wave-50 lane (queue 5a, the <hr> bake) and because the fold ALONE does not fix the render \u2014 see `verdict` below. Apply with `git apply -p0` against tools/titan/extract-fixture.mjs at 747b28e4 (the patch is a plain `diff -u` of that file, base/ vs patched/).",
+  "wave": 50,
+  "lane": "B6",
+  "backlog_item": "3(a)",
+  "patch": "br-clear-fold.patch",
+  "patch_base_commit": "747b28e4",
+  "what_it_adds": "`brClearPresentationProps(tag, attrs, props)` implementing HTML Rendering \u00a715.3's UA rule set (br[clear=left i]{clear:left} / [right i]{clear:right} / [all i],[both i]{clear:both}), folded in buildNode's presentational-bake slot next to uaLinkProps / uaHrProps / htmlTablePresentationProps, with the same author-wins guard. `all` is FOLDED to `both`, not forwarded: `clear: all` is not CSS and the converter degrades it to an untyped GenericProperty (pinned by ClearPresentationalHintTest).",
+  "differential": {
+    "method": "HEAD's extract-fixture.mjs and the patched copy were run side by side in an isolated sandbox (symlinked sibling modules, WPT_DIR at the real corpus, WPT_FIXTURES_ROOT per variant) over ALL 1435 tests of tools/titan/runs/wave49-final/sections/*/tests.list (2870 fixture files counting __ref.json). `diff -rq` over the two trees.",
+    "corpus_tests_extracted": 1435,
+    "fixtures_changed": 4,
+    "ref_fixtures_changed": 0,
+    "changed_components": {
+      "floats-clear__floats-clear-multicol-000": [
+        {
+          "component": "floats-clear__floats-clear-multicol-000__1__1__0",
+          "before": {
+            "width": "0px",
+            "height": "20px"
+          },
+          "after": {
+            "width": "0px",
+            "height": "0px",
+            "clear": "both"
+          }
+        }
+      ],
+      "floats-clear__floats-clear-multicol-001": [
+        {
+          "component": "floats-clear__floats-clear-multicol-001__1__0__2",
+          "before": {
+            "width": "0px",
+            "height": "20px"
+          },
+          "after": {
+            "width": "0px",
+            "height": "0px",
+            "clear": "both"
+          }
+        }
+      ],
+      "floats-clear__floats-clear-multicol-balancing-000": [
+        {
+          "component": "floats-clear__floats-clear-multicol-balancing-000__1__1__0",
+          "before": {
+            "width": "0px",
+            "height": "20px"
+          },
+          "after": {
+            "width": "0px",
+            "height": "0px",
+            "clear": "both"
+          }
+        }
+      ],
+      "floats-clear__floats-clear-multicol-balancing-001": [
+        {
+          "component": "floats-clear__floats-clear-multicol-balancing-001__1__0__2",
+          "before": {
+            "width": "0px",
+            "height": "20px"
+          },
+          "after": {
+            "width": "0px",
+            "height": "0px",
+            "clear": "both"
+          }
+        }
+      ]
+    },
+    "ir_check": "The four fixtures were converted (`:converter:run --to ir`) in both variants. BASE IR is IDENTICAL to tools/titan/runs/wave49-final/sections/CSS2/per-test-ir/wpt__CSS2__<test>.json for all four (component ids, properties, meta, text, slot parents \u2014 after normalising the single-fixture id prefix and JSON float spelling), so the differential is against the real gate IR. PATCHED IR differs from BASE in exactly one component per test: Height {px:20}->{px:0} and a new {type:'Clear', data:'BOTH'}. Component count 7 -> 7 in all four."
+  },
+  "corpus_carriers": {
+    "in_the_1435_test_gate_set": [
+      "css/CSS2/floats-clear/floats-clear-multicol-000.html",
+      "css/CSS2/floats-clear/floats-clear-multicol-001.html",
+      "css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html",
+      "css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html"
+    ],
+    "elsewhere_in_tools_wpt_css": "87 files carry a <br ... clear=...>; attribute values seen: all x194, both x2, left x1 (plus 2 written `clear =\"all\"`)."
+  },
+  "measured_today": {
+    "frozen_ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/CSS2/",
+    "orange_band_rows": {
+      "000_and_001": {
+        "ref": "y161-163 x235-334 (column 3)",
+        "web": "y131-133 x50-119",
+        "android": "y131-133 x35-134",
+        "ios": "y131-133 x35-134"
+      },
+      "balancing-000_and_-001": {
+        "ref": "y171-175 x235-334 (column 3)",
+        "web": "y111-115 x50-119",
+        "android": "y111-115 x35-134",
+        "ios": "y111-115 x35-134"
+      },
+      "002_and_balancing-002 (CSS `clear` on the box, the control)": "ref == web == android == ios, y161-163 / y171-175 x235-334"
+    },
+    "wave49_final_cells": "all 8 tests x 3 platforms wptPass=true, ssim 0.984-1.000 - the degenerate-pass instance BACKLOG obligation #3 names."
+  },
+  "verdict": "APPLY ONLY TOGETHER WITH THE SECOND HALF. The fold puts `Clear: BOTH` on the <br> COMPONENT and drops that component's height from 20px to 0px. Compose's MulticolFloatStrip.factsFor reads `Clear` off the strip CHILD's own property list, so a wire on the <br> grandchild (-000) or on the <br> that trails the floats inside `.container` (-001) is still ignored, and the orange stays in column 1. PREDICTED, unmeasured on device: the band moves from capture rows 131-133 to 111-113 in column 1 (000/001) and 111-115 -> 91-95 (balancing) - the 20px phantom line box disappears - which is ink moved, not ink fixed, and puts 12 currently passing cells at coin-flip risk for no gain. The missing half is a CSS 2.1 \u00a79.5.2 LINE-BOX clearance rung: the br's line is pushed to the relevant floats' bottom and the CONTAINING BLOCK'S HEIGHT grows to hold it (CSS 2.1 \u00a710.6.3) - the box top does NOT move, which is why the existing `clear`-on-the-box offset jump cannot model it (in -001 the same box also anchors the floats). Growing a box is not something the strip can do from place() offsets alone; it needs the child measured with a minHeight of (clearance line + the box's own trailing band - its offset), which is a MulticolFloatStripMeasure change that cannot be verified without a device."
+}

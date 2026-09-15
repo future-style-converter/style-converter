@@ -176,5 +176,15 @@ fun Modifier.gapDecorations(sink: GapItemSink?): Modifier {
 internal fun scaleToPixels(config: GapDecorationConfig, density: Density): GapDecorationConfig {
     val s = density.density
     fun spec(x: GapRuleSpec) = x.copy(widthPx = x.effectiveWidthPx * s, insetPx = x.insetPx * s)
-    return config.copy(column = spec(config.column), row = spec(config.row))
+    return config.copy(
+        column = spec(config.column),
+        row = spec(config.row),
+        // Wave 50 lane B10 — the gaps ride the SAME conversion as the rule
+        // widths. GapDecorationBands compares them against item rectangles
+        // that arrive from positionInWindow() in real pixels, so a dp-space
+        // gap would mis-size every reconstructed line box by the density
+        // factor (3× on the capture emulator).
+        rowGapPx = config.rowGapPx?.times(s),
+        columnGapPx = config.columnGapPx?.times(s)
+    )
 }

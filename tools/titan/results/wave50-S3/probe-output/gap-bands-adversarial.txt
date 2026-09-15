@@ -1,0 +1,9 @@
+A stretch + resolved gap (items inside the stretched bands) -> REBUILT [GapInterval(start=0.0, end=95.0), GapInterval(start=105.0, end=200.0)]
+A' same but items still content-packed (pre-stretch) -> REFUSED (identity)
+B nowrap-equivalent: a SINGLE line -> REFUSED (identity)
+C align-content: center/space-between (stretches=false) -> REFUSED (identity)
+D null gap (calc/%/var) MUST refuse -> REFUSED (identity)
+E auto cross size: empty content box -> REBUILT [GapInterval(start=0.0, end=95.0), GapInterval(start=105.0, end=200.0)]
+E' zero-height content box -> REFUSED (identity)
+F items packed at the cross-END (wrap-reverse) -> REFUSED (identity)
+G no leftover -> REFUSED (identity)

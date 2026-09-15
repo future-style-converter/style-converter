@@ -1,0 +1,69 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Independent replay of B2 hunk-2: every bare-number (percentage) inset
+// carrier in the frozen wave49-final corpus, resolved at BOTH containing-block
+// levels, using the runtime's own extractor + resolver.
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.core.variables.ContainingBlock
+import com.styleconverter.runtime.core.variables.DynamicValueResolver
+import com.styleconverter.runtime.layout.position.PercentInsetResolve
+import com.styleconverter.runtime.layout.position.PositionExtractor
+import org.junit.Test
+import java.io.File
+
+class PercentInsetLevelProbeTest {
+
+    private val repo = File("../../").canonicalFile
+    private val runDir = File(repo, "tools/titan/runs/wave49-final/sections")
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+
+    @Test fun insets() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        var carriers = 0
+        var differing = 0
+        runDir.listFiles()!!.sortedBy { it.name }.forEach { sec ->
+            val irDir = File(sec, "per-test-ir")
+            if (!irDir.isDirectory) return@forEach
+            irDir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }.forEach { f ->
+                val testKey = sec.name + "/" + f.name.removeSuffix(".json")
+                val doc = try { IRDocumentDecoder.decode(f.readText()) } catch (e: Exception) { return@forEach }
+                val roots = try { SlotComposer.compose(doc) } catch (e: Exception) { return@forEach }
+                // Harness capture root: 358dp content box, height unknown.
+                val rootCb = ContainingBlock(widthPx = 358f)
+                fun walk(c: IRComponent, inherited: List<IRProperty>, elementCb: ContainingBlock) {
+                    val merged = ComponentRenderer.mergeInherited(c.properties, inherited)
+                    val pairs = merged.map { it.type to it.data }
+                    val childCb = DynamicValueResolver.childContainingBlock(merged, elementCb)
+                    val cfg = try { PositionExtractor.extractPositionConfig(pairs) } catch (e: Exception) { null }
+                    if (cfg?.percent != null && cfg.percent!!.any) {
+                        carriers++
+                        val atElement = PercentInsetResolve.resolve(cfg, elementCb)
+                        val atChild = PercentInsetResolve.resolve(cfg, childCb)
+                        val same = atElement == atChild
+                        if (!same) differing++
+                        sb.append(
+                            "CARRIER ${if (same) "same " else "DIFFER"} $testKey ${c.id}\n" +
+                                "   elementCb=$elementCb childCb=$childCb\n" +
+                                "   raw    top=${cfg.top} start=${cfg.start} bottom=${cfg.bottom} end=${cfg.end} pct=${cfg.percent}\n" +
+                                "   @elem  top=${atElement.top} start=${atElement.start} bottom=${atElement.bottom} end=${atElement.end}\n" +
+                                "   @child top=${atChild.top} start=${atChild.start} bottom=${atChild.bottom} end=${atChild.end}\n"
+                        )
+                    }
+                    val inheritForChildren = merged.filter { it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                    c.children?.forEach { walk(it, inheritForChildren, childCb) }
+                }
+                roots.forEach { walk(it, emptyList(), rootCb) }
+            }
+        }
+        sb.insert(0, "percent-inset carriers=$carriers  differing-used-inset=$differing\n")
+        File(out, "percent-inset-levels.txt").writeText(sb.toString())
+        println(sb.toString().lines().first())
+    }
+}

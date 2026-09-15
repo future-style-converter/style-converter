@@ -273,14 +273,21 @@ test('computeEdgeSsim: flat vs flat in different colours → exactly 1.0', async
 
 test('computeEdgeSsim on a real baseline pair is finite, in (0,1], and is not plain SSIM', async () => {
   // Real-data control on two committed captures of the same component from
-  // different platforms — iOS vs Android 090_Button_Primary (a
+  // different platforms — iOS vs Android 098_Neumorphic_Light (a
   // fixtures/visual-test.json component, so its baselines are refreshed by
-  // every UPDATE_BASELINE run and cannot be orphaned), both 390×62 (equal
+  // every UPDATE_BASELINE run and cannot be orphaned), both 390×82 (equal
   // dims by construction of this pair, so no padding step can distort the
-  // comparison), 204 genuinely differing pixels (measured 2026-09-05:
-  // edge 0.9481 vs plain 0.9533). The pair used to be 000_AR_Single1 — an
-  // orphan of a fixture pruned 2026-07-08 whose 36 PNGs the retrospective
-  // removed (A12#4), which is why the pin now rides a LIVE fixture.
+  // comparison), 5761 genuinely differing pixels (measured 2026-09-15 on the
+  // wave-50 refreshed baselines: edge 0.9546 vs plain 0.9714) — the iOS
+  // shadow-σ divergence carried by two ios-effects-shadow-sigma ledger lines,
+  // so the pair stays different by design. The pair used to be
+  // 090_Button_Primary (edge 0.9481 vs plain 0.9533 on 2026-09-05), which the
+  // wave-50 gate CONVERGED — retro R4's iOS clip fix let the label spill like
+  // Android's, leaving 40 differing pixels and both scores at 0.9998 — so a
+  // pin that needs a genuinely divergent pair moved to one that is ledgered
+  // to stay divergent. Before that it was 000_AR_Single1 — an orphan of a
+  // fixture pruned 2026-07-08 whose 36 PNGs the retrospective removed
+  // (A12#4), which is why the pin rides a LIVE fixture.
   //
   // Three pins: (a) the metric survives real render output (no null); (b) a
   // pair with real pixel differences must NOT read exactly 1 — under the
@@ -288,13 +295,13 @@ test('computeEdgeSsim on a real baseline pair is finite, in (0,1], and is not pl
   // alone would have caught it; (c) the edge score differs from plain SSIM
   // of the same pair, proving B3 measures the gradient structure rather
   // than repackaging the base metric.
-  const a = loadBaseline('iOS__090_Button_Primary.png');
-  const b = loadBaseline('Android__090_Button_Primary.png');
+  const a = loadBaseline('iOS__098_Neumorphic_Light.png');
+  const b = loadBaseline('Android__098_Neumorphic_Light.png');
   assert.equal(`${a.width}x${a.height}`, `${b.width}x${b.height}`, 'the control pair must share dimensions (no padding step)');
   const e = await computeEdgeSsim(a, b);
   assert.ok(e !== null && Number.isFinite(e), `expected a finite score, got ${e}`);
   assert.ok(e > 0 && e <= 1, `edge SSIM out of (0,1]: ${e}`);
-  assert.ok(e < 1, `a pair with 204 differing pixels must not score exactly 1, got ${e}`);
+  assert.ok(e < 1, `a pair with 5761 differing pixels must not score exactly 1, got ${e}`);
   const plain = +computeSsim(a, b, { ssim: 'fast' }).mssim.toFixed(4);
   assert.notEqual(e, plain, `edge SSIM (${e}) must not equal plain SSIM (${plain}) on a real pair`);
 });

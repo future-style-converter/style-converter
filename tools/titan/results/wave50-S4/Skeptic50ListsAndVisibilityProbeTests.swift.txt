@@ -1,0 +1,47 @@
+// THROWAWAY skeptic probe (wave 50 lane S4). DELETE BEFORE REPORTING.
+import Foundation
+import XCTest
+@testable import StyleConverterRuntime
+
+final class Skeptic50ListsAndVisibilityProbeTests: XCTestCase {
+
+    /// Print the emitted marker strings 1..12 plus the range edges, so the
+    /// css-counter-styles-3 §7.1 additive-symbols table can be checked
+    /// against EXECUTED output rather than against the source listing.
+    func testPrintKoreanMarkers1to12() {
+        let cfg = ListMarkerConfig(type: .koreanHangulFormal)
+        var out: [String] = []
+        for i in 0..<12 { out.append("\(i+1)=\(ListMarkerText.marker(index: i, config: cfg))") }
+        print("S4KOR " + out.joined(separator: " "))
+        print("S4KOR expand: 9999=\(KoreanHangulFormal.expand(9999)) 10000=\(KoreanHangulFormal.expand(10000)) 0=\(KoreanHangulFormal.expand(0)) -1=\(KoreanHangulFormal.expand(-1)) -5=\(KoreanHangulFormal.expand(-5)) suffix=[\(KoreanHangulFormal.suffix)]")
+    }
+
+    /// `collapse` on a non-table box must behave as `hidden`; on a table
+    /// track it removes the box. Read straight off the rule table AND off
+    /// the extractor, on wire-shaped payloads.
+    func testCollapseTreatmentBothWays() throws {
+        let divCollapse = try JSONDecoder().decode(IRComponent.self, from: Data("""
+        {"id":"d","name":"d","properties":[{"type":"Visibility","data":"COLLAPSE"},{"type":"Display","data":"BLOCK"}]}
+        """.utf8))
+        let rowCollapse = try JSONDecoder().decode(IRComponent.self, from: Data("""
+        {"id":"r","name":"r","properties":[{"type":"Visibility","data":"COLLAPSE"},{"type":"Display","data":"TABLE_ROW"}]}
+        """.utf8))
+        let colGroupHyphen = try JSONDecoder().decode(IRComponent.self, from: Data("""
+        {"id":"c","name":"c","properties":[{"type":"Visibility","data":"COLLAPSE"},{"type":"Display","data":"table-column-group"}]}
+        """.utf8))
+        let cellCollapse = try JSONDecoder().decode(IRComponent.self, from: Data("""
+        {"id":"x","name":"x","properties":[{"type":"Visibility","data":"COLLAPSE"},{"type":"Display","data":"TABLE_CELL"}]}
+        """.utf8))
+        let displayOnly = try JSONDecoder().decode(IRComponent.self, from: Data("""
+        {"id":"y","name":"y","properties":[{"type":"Display","data":"TABLE_ROW"}]}
+        """.utf8))
+        for (label, c) in [("div", divCollapse), ("row", rowCollapse),
+                           ("colgroup-hyphen", colGroupHyphen), ("cell", cellCollapse)] {
+            let cfg = try XCTUnwrap(VisibilityExtractor.extract(from: c.properties))
+            let t = VisibilityBoxRules.treatment(cfg.visibility ?? .visible,
+                                                 isTableTrackBox: cfg.isTableTrackBox)
+            print("S4VIS \(label): track=\(cfg.isTableTrackBox) treatment=\(t) touched=\(cfg.touched)")
+        }
+        print("S4VIS display-only config = \(String(describing: VisibilityExtractor.extract(from: displayOnly.properties)))")
+    }
+}

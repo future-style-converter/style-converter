@@ -1,0 +1,108 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Independent census of the B2 hunk-1 blast radius over the frozen
+// wave49-final per-test IR, using the runtime's OWN decoder + predicates.
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.layout.position.AtomicInlineShrinkToFit
+import com.styleconverter.runtime.table.TableBoxTree
+import com.styleconverter.runtime.typography.text.TextExtractor
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import org.junit.Test
+import java.io.File
+
+class AtomicInlineCensusProbeTest {
+
+    private val repo = File("../../").canonicalFile // apps/android-harness → repo root
+    private val runDir = File(repo, "tools/titan/runs/wave49-final/sections")
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+
+    private fun keyword(data: JsonElement?): String? = when (data) {
+        is JsonPrimitive -> data.contentOrNull?.takeIf { data.isString }
+        is JsonObject -> (data["keyword"] as? JsonPrimitive)?.contentOrNull
+            ?: (data["value"] as? JsonPrimitive)?.contentOrNull
+            ?: (data["original"] as? JsonPrimitive)?.contentOrNull
+        else -> null
+    }?.uppercase()?.replace('-', '_')
+
+    private fun isFlexOrGridContainer(props: List<IRProperty>): Boolean {
+        val d = props.lastOrNull { it.type == "Display" }?.data ?: return false
+        val k = keyword(d) ?: return false
+        return k in setOf("FLEX", "GRID", "INLINE_FLEX", "INLINE_GRID")
+    }
+
+    @Test fun census() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        val changedByTest = sortedMapOf<String, MutableList<String>>()
+        val atomicByTest = sortedMapOf<String, MutableList<String>>()
+        var docs = 0
+        var components = 0
+        runDir.listFiles()!!.sortedBy { it.name }.forEach { sec ->
+            val irDir = File(sec, "per-test-ir")
+            if (!irDir.isDirectory) return@forEach
+            irDir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }.forEach { f ->
+                docs++
+                val testKey = sec.name + "/" + f.name.removeSuffix(".json")
+                val doc = try { IRDocumentDecoder.decode(f.readText()) } catch (e: Exception) {
+                    sb.append("DECODE-FAIL $testKey ${e.message}\n"); return@forEach
+                }
+                val roots = try { SlotComposer.compose(doc) } catch (e: Exception) {
+                    sb.append("COMPOSE-FAIL $testKey ${e.message}\n"); return@forEach
+                }
+                fun walk(c: IRComponent, inherited: List<IRProperty>, parentIsFlexGrid: Boolean) {
+                    components++
+                    val merged = ComponentRenderer.mergeInherited(c.properties, inherited)
+                    val pairs = merged.map { it.type to it.data }
+                    val verticalWm = try {
+                        TextExtractor.extractWritingModeConfig(pairs).isVertical
+                    } catch (e: Exception) { false }
+                    val hasExplicitWidth = merged.any {
+                        it.type in if (verticalWm) listOf("Width", "MinWidth", "BlockSize", "MinBlockSize")
+                        else listOf("Width", "MinWidth", "InlineSize", "MinInlineSize")
+                    }
+                    val hasAspectRatio = merged.any { it.type == "AspectRatio" }
+                    val posKw = merged.firstOrNull { it.type == "Position" }?.data?.let { keyword(it) }
+                    val isOutOfFlow = posKw == "ABSOLUTE" || posKw == "FIXED"
+                    val role = TableBoxTree.roleOf(c, useUaTagDefaults = true)
+                    val isShrinkToFitTable = TableBoxTree.shrinkToFitBox(role)
+                    val suppresses = AtomicInlineShrinkToFit.suppressesBlockAutoWidth(merged, verticalWm)
+                    val declaredAtomic = AtomicInlineShrinkToFit.declaredDisplay(merged) in
+                        setOf("INLINE_BLOCK", "INLINE_FLEX", "INLINE_GRID")
+                    if (declaredAtomic && !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow) {
+                        atomicByTest.getOrPut(testKey) { mutableListOf() }
+                            .add("${c.id}|vwm=$verticalWm|role=$role|selfAlign=$parentIsFlexGrid")
+                    }
+                    // The FULL renderer gate, minus composedWpt (true in capture).
+                    val wasFilled = !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow &&
+                        !isShrinkToFitTable && !parentIsFlexGrid
+                    val nowFilled = wasFilled && !suppresses
+                    if (wasFilled && !nowFilled) {
+                        changedByTest.getOrPut(testKey) { mutableListOf() }.add(c.id)
+                    }
+                    val inheritForChildren = merged.filter {
+                        it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES
+                    }
+                    val flexGrid = isFlexOrGridContainer(merged)
+                    c.children?.forEach { walk(it, inheritForChildren, flexGrid) }
+                }
+                roots.forEach { walk(it, emptyList(), false) }
+            }
+        }
+        sb.append("docs=$docs components=$components\n")
+        sb.append("=== CHANGED (fill removed) : ${changedByTest.size} tests, ${changedByTest.values.sumOf { it.size }} components ===\n")
+        changedByTest.forEach { (k, v) -> sb.append("CHANGED $k  [${v.joinToString(",")}]\n") }
+        sb.append("=== DECLARED-ATOMIC auto-width carriers : ${atomicByTest.size} tests ===\n")
+        atomicByTest.forEach { (k, v) -> sb.append("ATOMIC $k  ${v.joinToString(" ; ")}\n") }
+        File(out, "atomic-inline-census.txt").writeText(sb.toString())
+        println("WROTE ${File(out, "atomic-inline-census.txt")}")
+    }
+}

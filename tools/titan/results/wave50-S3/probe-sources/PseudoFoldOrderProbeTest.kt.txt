@@ -1,0 +1,80 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Ordering hazard: PseudoTextFold folds ::after into _text, then PseudoBoxFold
+// may ADD a ::before box as the first child — _text paints before children, so
+// the ::after glyphs would precede the ::before box.
+
+import com.styleconverter.runtime.content.PseudoBoxFold
+import com.styleconverter.runtime.content.PseudoGeneratedBox
+import com.styleconverter.runtime.content.PseudoTextFold
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ContentsUnboxing
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import java.io.File
+
+class PseudoFoldOrderProbeTest {
+
+    private val repo = File("../../").canonicalFile
+    private val runDir = File(repo, "tools/titan/runs/wave49-final/sections")
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+
+    @Test fun corpusCarriers() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        runDir.listFiles()!!.sortedBy { it.name }.forEach { sec ->
+            val irDir = File(sec, "per-test-ir")
+            if (!irDir.isDirectory) return@forEach
+            irDir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }.forEach { f ->
+                val testKey = sec.name + "/" + f.name.removeSuffix(".json")
+                val doc = try { IRDocumentDecoder.decode(f.readText()) } catch (e: Exception) { return@forEach }
+                val roots = try { SlotComposer.compose(doc) } catch (e: Exception) { return@forEach }
+                fun walk(c: IRComponent) {
+                    val unboxed = ContentsUnboxing.resolve(c)
+                    val folded = PseudoTextFold.resolve(unboxed)
+                    if (folded.afterFolded) {
+                        val beforeClaim = PseudoGeneratedBox.claim(
+                            unboxed.pseudos?.get("before") as? JsonObject, "before", unboxed.role
+                        )
+                        if (beforeClaim != null) {
+                            sb.append("ORDER-HAZARD $testKey ${c.id}\n")
+                        }
+                        val after = PseudoBoxFold.resolve(folded.component)
+                        if (after !== folded.component) {
+                            sb.append("BOXFOLD-ALSO $testKey ${c.id} children=${after.children?.map { it.id }}\n")
+                        }
+                    }
+                    c.children?.forEach { walk(it) }
+                }
+                roots.forEach { walk(it) }
+            }
+        }
+        if (sb.isEmpty()) sb.append("no corpus carrier of the before-box + after-text-fold combination\n")
+        File(out, "pseudo-fold-order.txt").writeText(sb.toString())
+        println(sb.toString())
+    }
+
+    /** Synthetic: the hazard exists structurally even with zero corpus carriers. */
+    @Test fun syntheticHazard() {
+        val pseudos = Json.parseToJsonElement(
+            """{"before":{"properties":{"display":"block","content":"\"\"","width":"20px","height":"20px","background":"#ff6347"},"_text":""},
+                "after":{"properties":{"content":"\"S\""},"_text":"S"}}"""
+        ) as JsonObject
+        val host = IRComponent(id = "h", name = "h", properties = emptyList(), pseudos = pseudos, _text = null)
+        val folded = PseudoTextFold.resolve(host)
+        val boxed = PseudoBoxFold.resolve(folded.component)
+        val claim = PseudoGeneratedBox.claim(pseudos["before"] as JsonObject, "before", null)
+        println("CLAIM=" + claim)
+        val msg = "claim=" + (claim != null) + " afterFolded=${folded.afterFolded} text=${folded.component._text} " +
+            "children=${boxed.children?.map { it.id }}"
+        File(out, "pseudo-fold-order.txt").appendText("SYNTHETIC $msg\n")
+        println("SYNTHETIC $msg")
+    }
+}

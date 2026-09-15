@@ -1,0 +1,41 @@
+{
+  "_note": "wave-50 lane B6, BACKLOG queue 3(b): the diagnosis in the queue entry \u2014 \"a measured-height rounding in the Kotlin strip walk\" \u2014 is WRONG, and this file is the evidence plus the corrected handover. No code change was made for 3(b): the repair is outside this lane's ownership (columns/ only) and cannot be verified without a device.",
+  "wave": 50,
+  "lane": "B6",
+  "backlog_item": "3(b)",
+  "symptom": {
+    "003": {
+      "ref": "orange y161-163",
+      "web": "y161-163",
+      "ios": "y161-163",
+      "android": "y158-160",
+      "band_px": 3,
+      "shift_px": -3
+    },
+    "balancing-003": {
+      "ref": "orange y171-175",
+      "web": "y171-175",
+      "ios": "y171-175",
+      "android": "y166-170",
+      "band_px": 5,
+      "shift_px": -5
+    },
+    "controls_002_and_balancing-002": "android ref-exact (y161-163 / y171-175) \u2014 the band is on the CLEARED BOX ITSELF there, not on a nested child",
+    "wave49_final_cells": "css-multicol family scored under CSS2; 003 android P 0.9881, balancing-003 android P 0.9857 (BACKLOG 3b)",
+    "measurement": "pixel column x=237 (inside the column-3 left aqua float), orange = rgb(255,165,0); captures tools/titan/runs/wave49-final/sections/CSS2/{screenshots,android-screenshots,ios-screenshots}/wpt__CSS2__floats-clear__floats-clear-multicol-{003,balancing-003}.png against tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/CSS2/"
+  },
+  "why_it_is_not_the_strip": [
+    "Columns 1 and 2 are pixel-identical to the ref in BOTH tests; a wrong offset or a wrong C/H would move them too.",
+    "In balancing-003 Android still paints exactly 85 aqua rows in columns 1-2 (y91-175), i.e. it balanced to H=ceil(C/3)=85, which requires C in [253,255] \u2014 the ref's 255. A strip 5px short would have given C=250 and H=84, one row shorter in EVERY column.",
+    "The shift equals the band's own width in both tests (3 and 5) \u2014 a strip error would be band-width independent.",
+    "The pure plan is pinned exact: MulticolFloatStripTest FS-C2/FS-C4 (offsets [0,10,250], C 253/255, H 100/85) and, new this wave, MulticolFloatStripRefRowsTest converts the plan into capture rows and asserts 161-163 / 171-175 against the frozen ref."
+  ],
+  "actual_mechanism": {
+    "shape": ".clear { clear:left; height:0 } > .bar { border-bottom: <w> solid orange } \u2014 the band is on a NESTED child of a zero-height box",
+    "step_1": "runtimes/compose/src/main/java/com/styleconverter/runtime/sizing/SizingApplier.kt, the `is LengthValue.Exact -> m.height(v.px.toFloat().dp)` arm: Modifier.height(0.dp) hands the content FIXED 0 constraints, so `.bar` measures 0 tall instead of its CSS border-box 3px/5px (css-overflow-3 \u00a72: `overflow: visible` content is not clamped by its box).",
+    "step_2": "runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt, the `Side.BOTTOM -> Offset(0f, size.height - inset)` arm (inset = width/2): at size.height == 0 the stroke is centred on -w/2, i.e. the half-open band [-w, 0) \u2014 w px ABOVE the box. w=3 and w=5 reproduce the measured -3 and -5 exactly.",
+    "why_ios_is_exact": "SwiftUI's .frame(height:) positions/clips but does not shrink the child's own measured size, so the twin keeps the 3pt/5pt bar and draws it at [0,w)."
+  },
+  "proposed_repair": "A declared height must not clamp an overflowing child: apply the Compose height with a `wrapContentHeight(Alignment.Top, unbounded = true)` (or equivalent) so the content measures at its own block-size and overflows visibly, then re-measure the whole fixture net. Blast radius is EVERY explicit-height box in the Compose runtime, so this is a measured before/after with a device gate, not a drive-by \u2014 which is exactly why lane B6 did not take it. A narrower alternative, also needing the gate: make BorderSideApplier refuse to draw a side band outside the box (clamp `size.height - inset` at `inset`), which fixes the paint position but leaves the box 3-5px short.",
+  "not_to_do": "Do NOT 'fix' this by shifting MulticolFloatStripPlan's offsets or its trailing-ink term. MulticolFloatStripRefRowsTest now fails on both refs if anyone does \u2014 that pin was mutation-proved by adding `- round(trailingInkPx)` to the offset (2 of 4 tests red)."
+}

@@ -60,6 +60,17 @@ class SkepticGapDecorationProbeTest {
                 "ColumnRuleStyle" to JsonPrimitive("SOLID"),
                 "ColumnRuleColor" to srgb(1.0, 0.0, 0.0),
                 "ColumnRuleWidth" to length(2.0),
+                // Wave 50 lane B10: the live 003-family container wire
+                // carries BOTH gaps (verified in tools/titan/runs/
+                // wave49-final/sections/css-gaps/per-test-ir/
+                // wpt__css-gaps__flex__flex-gap-decorations-003.json).
+                // The probe omitted them, which used to be harmless and
+                // is not any more: GapDecorationBands needs the CROSS gap
+                // to rebuild the css-flexbox-1 §9.4 step 8 line boxes, so
+                // an incomplete wire here would model a container that
+                // does not exist.
+                "ColumnGap" to length(10.0),
+                "RowGap" to length(10.0),
                 "ColumnRuleBreak" to JsonPrimitive("INTERSECTION"),
                 "ColumnRuleInset" to barePx(-2.0)
             )
@@ -101,6 +112,17 @@ class SkepticGapDecorationProbeTest {
                 "ColumnRuleStyle" to JsonPrimitive("SOLID"),
                 "ColumnRuleWidth" to length(2.0),
                 "ColumnRuleColor" to srgb(1.0, 0.0, 0.0),
+                // Wave 50 lane B10: the live 003-family container wire
+                // carries BOTH gaps (verified in tools/titan/runs/
+                // wave49-final/sections/css-gaps/per-test-ir/
+                // wpt__css-gaps__flex__flex-gap-decorations-003.json).
+                // The probe omitted them, which used to be harmless and
+                // is not any more: GapDecorationBands needs the CROSS gap
+                // to rebuild the css-flexbox-1 §9.4 step 8 line boxes, so
+                // an incomplete wire here would model a container that
+                // does not exist.
+                "ColumnGap" to length(10.0),
+                "RowGap" to length(10.0),
                 "RuleOverlap" to JsonPrimitive("COLUMN_OVER_ROW")
             )
         )
@@ -133,6 +155,17 @@ class SkepticGapDecorationProbeTest {
                 "RowRuleWidth" to length(10.0),
                 "RowRuleColor" to srgb(0.0, 0.0, 1.0),
                 "ColumnRuleStyle" to JsonPrimitive("SOLID"),
+                // Wave 50 lane B10: the live 003-family container wire
+                // carries BOTH gaps (verified in tools/titan/runs/
+                // wave49-final/sections/css-gaps/per-test-ir/
+                // wpt__css-gaps__flex__flex-gap-decorations-003.json).
+                // The probe omitted them, which used to be harmless and
+                // is not any more: GapDecorationBands needs the CROSS gap
+                // to rebuild the css-flexbox-1 §9.4 step 8 line boxes, so
+                // an incomplete wire here would model a container that
+                // does not exist.
+                "ColumnGap" to length(10.0),
+                "RowGap" to length(10.0),
                 "ColumnRuleWidth" to length(10.0),
                 "ColumnRuleColor" to srgb(1.0, 0.0, 0.0)
             )
@@ -218,6 +251,11 @@ class SkepticGapDecorationProbeTest {
                 "ColumnRuleStyle" to JsonPrimitive("SOLID"),
                 "ColumnRuleWidth" to length(2.0),
                 "ColumnRuleColor" to srgb(1.0, 0.0, 0.0),
+                // Wave 50 lane B10: this authored layout has 20px gaps —
+                // state them, so the line-box reconstruction sees the
+                // same container the rectangles above describe.
+                "ColumnGap" to length(20.0),
+                "RowGap" to length(20.0),
                 "RowRuleStyle" to JsonPrimitive("SOLID"),
                 "RowRuleWidth" to length(2.0),
                 "RowRuleColor" to srgb(0.0, 0.0, 1.0)

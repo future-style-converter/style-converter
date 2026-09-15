@@ -6469,3 +6469,343 @@ test('wave49-A3: an image()-only value is no longer skipped by the fixture walk'
   assert.equal(fixture.components.square._lossy, undefined);
   await fsp.rm(dir, { recursive: true, force: true });
 });
+
+// ── wave-50 lane B1: the declaration-validity oracle ─────────────────────────
+//
+// A SECOND import block rather than an addition to the shared list at the top:
+// this file is being edited by more than one wave-50 lane at once, and a
+// separate statement cannot collide with theirs. ESM allows any number.
+import {
+  unknownDimensionUnit,
+  provablyInvalidDeclaration,
+  assignDeclaration,
+  assignDeclarations,
+  invalidShadowDrops,
+} from './extract-fixture.mjs';
+
+// The `<style>` rule block of tools/wpt/css/css-values/angle-units-001.html,
+// byte-for-byte (the corpus payload this lane exists for). Read out of the
+// mirror with `/div#test-overlapping-green\s*\{[\s\S]*?\}/` so no hand-typing
+// can drift it from the file the gate extracts.
+const ANGLE_UNITS_001_RULE =
+  'div#test-overlapping-green\n    {\n' +
+  '      background-image: linear-gradient(green, green);\n' +
+  '      background-image: linear-gradient(90degree, red, red);   /* invalid; 90deg is valid */\n' +
+  '      background-image: linear-gradient(100gradian, red, red); /* invalid; 100grad is valid */\n' +
+  '      background-image: linear-gradient(1.57radian, red, red); /* invalid; 1.57rad is valid */\n' +
+  '      background-image: linear-gradient(0.25turns, red, red);  /* invalid; 0.25turn is valid */\n' +
+  '    }';
+
+test('wave50-B1: every unit in the closed CSS tables is recognised', () => {
+  // The whole oracle rests on this table being COMPLETE: a unit missing from
+  // it would be "proven invalid" and could delete a valid declaration. Each
+  // group cites the table it comes from — css-values-4 §6.2 absolute, §6.1.1
+  // font-relative, §6.1.2 viewport-relative, §7.1 angle, §7.2 duration, §7.3
+  // frequency, §7.4 resolution, plus css-grid-2 §7.2.3 <flex> and the
+  // css-contain-3 container-relative lengths.
+  const units = [
+    'cm', 'mm', 'Q', 'in', 'pt', 'pc', 'px',
+    'em', 'rem', 'ex', 'rex', 'ch', 'rch', 'ic', 'ric', 'lh', 'rlh', 'cap', 'rcap',
+    'vw', 'vh', 'vi', 'vb', 'vmin', 'vmax',
+    'svw', 'svh', 'svi', 'svb', 'svmin', 'svmax',
+    'lvw', 'lvh', 'lvi', 'lvb', 'lvmin', 'lvmax',
+    'dvw', 'dvh', 'dvi', 'dvb', 'dvmin', 'dvmax',
+    'cqw', 'cqh', 'cqi', 'cqb', 'cqmin', 'cqmax',
+    'deg', 'grad', 'rad', 'turn',
+    's', 'ms', 'Hz', 'kHz', 'dpi', 'dpcm', 'dppx', 'x', 'fr',
+  ];
+  for (const u of units) {
+    assert.equal(unknownDimensionUnit(`1${u}`), null, `1${u}`);
+    // Units are ASCII case-insensitive, so the shouted spelling must agree.
+    assert.equal(unknownDimensionUnit(`1${u.toUpperCase()}`), null, `1${u.toUpperCase()}`);
+  }
+});
+
+test('wave50-B1: the four angle-units-001 dimensions are proven invalid', () => {
+  // The exact four author values, and the exact unit each one is refused for.
+  assert.equal(unknownDimensionUnit('linear-gradient(90degree, red, red)'), 'degree');
+  assert.equal(unknownDimensionUnit('linear-gradient(100gradian, red, red)'), 'gradian');
+  assert.equal(unknownDimensionUnit('linear-gradient(1.57radian, red, red)'), 'radian');
+  assert.equal(unknownDimensionUnit('linear-gradient(0.25turns, red, red)'), 'turns');
+  // …and the valid spellings the test's own comments name as the fix.
+  for (const ok of ['linear-gradient(90deg, red, red)', 'linear-gradient(100grad, red, red)',
+    'linear-gradient(1.57rad, red, red)', 'linear-gradient(0.25turn, red, red)']) {
+    assert.equal(unknownDimensionUnit(ok), null, ok);
+  }
+});
+
+test('wave50-B1: digits INSIDE an ident never read as a dimension', () => {
+  // The first draft of this scanner restarted at the digit of `preserve-3d`
+  // and refused 47 corpus declarations across css-transforms,
+  // css-view-transitions, css-color and css-images. css-syntax-3 §2.2 makes
+  // an ident one token, digits and all — these five are that measured set.
+  assert.equal(unknownDimensionUnit('preserve-3d'), null);
+  assert.equal(unknownDimensionUnit('rotate(90deg) rotate3d(1, 0, 0, 60deg)'), null);
+  assert.equal(unknownDimensionUnit('color(a98-rgb 0.281363 0.498012 0.116746)'), null);
+  assert.equal(unknownDimensionUnit('color(display-p3-linear 0 1 0)'), null);
+  assert.equal(unknownDimensionUnit('linear-gradient(to right in display-p3-linear, rgb(255, 0, 0), rgb(0, 255, 0))'), null);
+});
+
+test('wave50-B1: strings, url() bodies, hashes and escapes are opaque', () => {
+  // Each of these carries a digit+letter run that is NOT a dimension token.
+  assert.equal(unknownDimensionUnit('"12foo"'), null);                       // <string-token>
+  assert.equal(unknownDimensionUnit("'90degree'"), null);                    // <string-token>
+  assert.equal(unknownDimensionUnit('url(support/1x1-green.png)'), null);    // <url-token>
+  assert.equal(unknownDimensionUnit('url(data:image/gif;base64,R0lGOD1abc)'), null);
+  assert.equal(unknownDimensionUnit('#00ff00'), null);                       // <hash-token>
+  assert.equal(unknownDimensionUnit('CSSTest \\000046amilyName, CSSTest Fallback'), null);
+  // A quoted family name that merely CONTAINS the bytes must not save an
+  // unquoted dimension elsewhere in the same value.
+  assert.equal(unknownDimensionUnit('"12foo" 0.25turns'), 'turns');
+});
+
+test('wave50-B1: the oracle proves nothing it cannot prove', () => {
+  // Scientific notation is REAL CSS (css-values-4 §5.3) — backlog item 0(e)
+  // is a converter modelling gap, not invalidity, so R1 must stay off it.
+  assert.equal(provablyInvalidDeclaration('transform', 'rotate(1e2deg)'), null);
+  // Substitutions that can only fail at computed-value time.
+  assert.equal(provablyInvalidDeclaration('width', 'attr(data-test type(<length>))'), null);
+  assert.equal(provablyInvalidDeclaration('width', 'var(--w)'), null);
+  assert.equal(provablyInvalidDeclaration('border-radius', 'calc(-10px)'), null);
+  // Global keywords and keyword values of any kind.
+  assert.equal(provablyInvalidDeclaration('background-color', 'revert-layer'), null);
+  assert.equal(provablyInvalidDeclaration('appearance', 'menulist-button'), null);
+  assert.equal(provablyInvalidDeclaration('list-style-type', "'marker '"), null);
+  // Unknown PROPERTY names are a different axis entirely — never R1's call.
+  assert.equal(provablyInvalidDeclaration('-vendor-nonsense', 'whatever'), null);
+  // And the positive: the reason names the unit.
+  const why = provablyInvalidDeclaration('background-image', 'linear-gradient(0.25turns, red, red)');
+  assert.match(why, /unknown dimension unit 'turns'/);
+});
+
+test('wave50-B1: assignDeclaration refuses ONLY an invalid shadow', () => {
+  invalidShadowDrops.length = 0;
+  // (a) valid then invalid → the earlier value stays, one breadcrumb.
+  const a = {};
+  assignDeclaration(a, 'background-image', 'linear-gradient(green, green)');
+  assignDeclaration(a, 'background-image', 'linear-gradient(0.25turns, red, red)');
+  assert.equal(a['background-image'], 'linear-gradient(green, green)');
+  assert.equal(invalidShadowDrops.length, 1);
+  assert.equal(invalidShadowDrops[0].kept, 'linear-gradient(green, green)');
+  assert.equal(invalidShadowDrops[0].dropped, 'linear-gradient(0.25turns, red, red)');
+
+  // (b) invalid then valid → the LATER (valid) value wins, exactly as CSS
+  //     says and exactly as the historical collapse did.
+  invalidShadowDrops.length = 0;
+  const b = {};
+  assignDeclaration(b, 'background-image', 'linear-gradient(0.25turns, red, red)');
+  assignDeclaration(b, 'background-image', 'linear-gradient(green, green)');
+  assert.equal(b['background-image'], 'linear-gradient(green, green)');
+  assert.equal(invalidShadowDrops.length, 0);
+
+  // (c) invalid over invalid → last wins, byte-identical to the old path
+  //     (the converter drops it either way, so refusing would change bytes
+  //     for no gain).
+  invalidShadowDrops.length = 0;
+  const c = {};
+  assignDeclaration(c, 'width', '9a6px');
+  assignDeclaration(c, 'width', '50zu');
+  assert.equal(c.width, '50zu');
+  assert.equal(invalidShadowDrops.length, 0);
+
+  // (d) a FIRST declaration is never refused — there is nothing to keep.
+  invalidShadowDrops.length = 0;
+  const d = {};
+  assignDeclaration(d, 'width', '50zu');
+  assert.equal(d.width, '50zu');
+  assert.equal(invalidShadowDrops.length, 0);
+
+  // (e) valid over valid → plain last-wins, the historical identity.
+  invalidShadowDrops.length = 0;
+  const e = {};
+  assignDeclarations(e, { appearance: 'none' });
+  assignDeclarations(e, { appearance: 'textfield' });
+  assert.equal(e.appearance, 'textfield');
+  assert.equal(invalidShadowDrops.length, 0);
+});
+
+test('wave50-B1: parseCss on the VERBATIM angle-units-001 block keeps the green', () => {
+  invalidShadowDrops.length = 0;
+  // stripComments first, exactly as the extractor's own call chain does
+  // (`parseCss(extractInlineStyle(stripComments(html)))`), so the `/* invalid;
+  // … */` trailers are gone before the ';'-split — same bytes, same order.
+  const rules = parseCss(stripComments(ANGLE_UNITS_001_RULE));
+  assert.equal(rules.length, 1);
+  assert.equal(rules[0].selector, 'div#test-overlapping-green');
+  // THE FIX: the one VALID declaration survives all four invalid shadows.
+  assert.equal(rules[0].props['background-image'], 'linear-gradient(green, green)');
+  // …and every refusal is on the record, in author order, with its proof.
+  assert.equal(invalidShadowDrops.length, 4);
+  assert.deepEqual(invalidShadowDrops.map((d) => d.dropped), [
+    'linear-gradient(90degree, red, red)',
+    'linear-gradient(100gradian, red, red)',
+    'linear-gradient(1.57radian, red, red)',
+    'linear-gradient(0.25turns, red, red)',
+  ]);
+  for (const d of invalidShadowDrops) {
+    assert.equal(d.prop, 'background-image');
+    assert.equal(d.kept, 'linear-gradient(green, green)');
+  }
+});
+
+test('wave50-B1: every OTHER corpus duplicate still collapses last-wins', () => {
+  // The census of competing declarations in the 1435-test corpus is 40 rows
+  // across 36 tests; angle-units-001 is the only one whose later declaration
+  // the oracle can prove invalid. These five are the other shapes, verbatim
+  // from their WPT sources — they must all keep the historical winner, or the
+  // oracle has started guessing.
+  invalidShadowDrops.length = 0;
+  const cases = [
+    // css-ui/appearance-textfield-001.html
+    ['#container > *', 'appearance: none; appearance: textfield', 'appearance', 'textfield'],
+    // css-pseudo/first-letter-skip-marker.html
+    ['li:first-child', "list-style-type: lower-alpha; list-style-type: '::marker '", 'list-style-type', "'::marker '"],
+    // css-values/calc-invalid-range-clamping.html — calc() defers, never invalid here
+    ['#outer', 'border-radius: 10px; border-radius: calc(-10px)', 'border-radius', 'calc(-10px)'],
+    // css-values/attr-length-valid-zero.html — attr() is a substitution
+    ['#outer2', 'width: 200px; width: attr(data-test type(<length>), 0)', 'width', 'attr(data-test type(<length>), 0)'],
+    // css-color/color-mix-currentcolor-001.html
+    ['div', 'background-color: red; background-color: color-mix(in srgb, currentColor 50%, green)',
+      'background-color', 'color-mix(in srgb, currentColor 50%, green)'],
+  ];
+  for (const [sel, body, prop, expected] of cases) {
+    const rules = parseCss(`${sel} { ${body} }`);
+    assert.equal(rules[0].props[prop], expected, `${sel} { ${body} }`);
+  }
+  // Not one refusal across the whole set.
+  assert.equal(invalidShadowDrops.length, 0);
+});
+
+test('wave50-B1: a refused declaration leaves no !important behind', () => {
+  invalidShadowDrops.length = 0;
+  // The invalid shadow carries `!important`. It is ignored ENTIRELY per
+  // css-syntax-3 §2.2 — neither its value nor its importance may survive, or
+  // the layered path would rank a value nobody declared.
+  const rules = parseCss('#t { background-image: linear-gradient(green, green);'
+    + ' background-image: linear-gradient(0.25turns, red, red) !important; }');
+  assert.equal(rules[0].props['background-image'], 'linear-gradient(green, green)');
+  assert.equal(rules[0].important, undefined);
+  assert.equal(invalidShadowDrops.length, 1);
+});
+
+// ── wave-50 lane B4: HTML optional end tags must not double-count text ──────
+//
+// scanOwnText (reached through extractOwnTextMerged) never mirrored
+// walkChildren's AUTO_CLOSE_TRIGGERS rule, so an omitted `</li>` / `</p>` /
+// `</td>` left the scan resuming INSIDE the child and the child's text was
+// counted as the PARENT's own text as well. The wire then carried it twice —
+// once on the parent's `_text`/`_runs`, once on the child — and every renderer
+// painted each item twice. MEASURED on css-counter-styles/counter-suffix
+// (wave49-final web f 0.8867 · iOS x 0.8883 · android x 0.8901): its six
+// `<ol><li>foo<li>bar</ol>` lists each rendered "1. foo" then a bare "foo".
+//
+// MUTATION PROOF (run at authoring time, lane B4): deleting the
+// `autoCloseTriggers`/`implicitCloseAt` branch in scanOwnText — i.e. restoring
+// the pre-lane behaviour — turns the first three assertions below red
+// (text "foobar"/"1 2"/"ab" and a non-null runProto reappear) while the
+// closed-tag control stays green, so the pin cannot pass on the old code.
+test('wave50-B4: an omitted end tag does not double-count the child text', () => {
+  const ctx = { styledTags: new Set() };
+  // counter-suffix's own shape, verbatim: two `<li>`s with no `</li>`.
+  const li = extractOwnTextMerged('<li>foo<li>bar', ctx);
+  assert.equal(li.text, '');           // the `<ol>` owns NO text of its own
+  assert.equal(li.runProto, null);     // …so there is no run list either
+  assert.equal(li.reordered, false);   // and nothing was reordered
+  // `<p>` is the other high-frequency omittable end tag (selectors/
+  // child-indexed-no-parent.html writes nine of them in a row).
+  assert.equal(extractOwnTextMerged('<p>a<p>b', ctx).text, '');
+  // Table row/cell chain — background-color-animation-with-table1's shape.
+  assert.equal(extractOwnTextMerged('<tr><td>a<tr><td>b', ctx).text, '');
+  // Control: the SAME content with explicit closers already behaved
+  // correctly, and must still.
+  assert.equal(extractOwnTextMerged('<li>foo</li><li>bar</li>', ctx).text, '');
+});
+
+test('wave50-B4: the auto-close mirror leaves genuine mixed content alone', () => {
+  const ctx = { styledTags: new Set() };
+  // The canonical wave-21 reorder shape: own text on BOTH sides of a kept
+  // child. `u` has no AUTO_CLOSE_TRIGGERS entry, so the new branch cannot
+  // fire and the run list must be byte-identical to its pre-lane value.
+  const mixed = extractOwnTextMerged('the quick <u>brown</u> fox', ctx);
+  assert.equal(mixed.text, 'the quick fox');
+  assert.equal(mixed.reordered, true);
+  assert.deepEqual(mixed.runProto, [
+    { text: 'the quick ' }, { el: 0, tag: 'u' }, { text: ' fox' },
+  ]);
+  // An auto-closing tag that DOES carry its closer keeps the real close as
+  // the element end — the implicit trigger sits after it, so the parent's
+  // trailing text is still its own.
+  const closed = extractOwnTextMerged('<li>foo</li>tail<li>bar', ctx);
+  assert.equal(closed.text, 'tail');
+  // ── the branch-1 discriminator (implicit trigger BEFORE a real closer) ──
+  // `<li>foo<li>bar</li>tail`: the first item's `</li>` is the SECOND item's,
+  // so only the implicit-trigger branch can end item one at the right place.
+  // With that branch alone disabled the scan runs past the real closer and
+  // item one SWALLOWS item two — one element in the proto instead of two —
+  // which is what this assertion catches (mutation-verified, lane B4).
+  const early = extractOwnTextMerged('<li>foo<li>bar</li>tail', ctx);
+  assert.equal(early.text, 'tail');
+  assert.deepEqual(early.runProto, [
+    { el: 0, tag: 'li' }, { el: 1, tag: 'li' }, { text: 'tail' },
+  ]);
+});
+
+// ── wave-50 fix lane F3 (skeptic S5) — three classes of VALID CSS the ───────
+// validity oracle used to refuse.
+//
+// Each pin below is a declaration the oracle proved "invalid" without having
+// a proof. None had a corpus carrier (the oracle fires on exactly 4
+// declarations across the 1435-test gate corpus, all in
+// css-values/angle-units-001, before AND after this change), so none was
+// costing ink — but a conservative oracle that over-reaches is exactly the
+// failure mode its own banner forbids. Source: S5's 30-declaration
+// adversarial probe, `tools/titan/results/wave50-S5/oracle-probe.mjs.txt`.
+
+test('wave50-F3: a custom property is never provably invalid', () => {
+  // css-variables-1 §2 — a custom property's value is <declaration-value>,
+  // "almost any sequence of one or more tokens". There is no unit table for
+  // `3bananas` to be outside of: the value has no meaning until var()
+  // substitutes it somewhere a real grammar applies.
+  assert.equal(provablyInvalidDeclaration('--custom', '3bananas'), null);
+  assert.equal(provablyInvalidDeclaration('--x', '0.25turns'), null);
+  assert.equal(provablyInvalidDeclaration('--x', '90degree 100gradian'), null);
+  // The guard is by NAME, not by value shape — an ordinary property carrying
+  // the identical value is still refused, so this is a carve-out for custom
+  // properties and not a hole in R1.
+  assert.match(provablyInvalidDeclaration('letter-spacing', '3bananas'),
+    /unknown dimension unit 'bananas'/);
+  // …and a custom property with an unimpeachable value is still accepted,
+  // i.e. the early return changes no answer that was already right.
+  assert.equal(provablyInvalidDeclaration('--ok', '10px'), null);
+});
+
+test('wave50-F3: a <urange> is stepped over, not read as number+unit', () => {
+  // `unicode-range: U+0-7F` — the range's tail tokenises as the number `-7`
+  // followed by the ident `F`, so the scanner used to refuse the whole
+  // declaration for the "unit" F. The <urange> production (css-fonts-4's
+  // `unicode-range` descriptor) is opaque data, like a string or a url().
+  assert.equal(unknownDimensionUnit('U+0-7F'), null);
+  assert.equal(provablyInvalidDeclaration('unicode-range', 'U+0-7F'), null);
+  // Every spelling of the production: lower-case prefix, wildcards, a single
+  // code point, the full six-digit range, and a comma list.
+  assert.equal(unknownDimensionUnit('u+0-7f'), null);
+  assert.equal(unknownDimensionUnit('U+0025-00FF'), null);
+  assert.equal(unknownDimensionUnit('U+4??'), null);
+  assert.equal(unknownDimensionUnit('U+A5'), null);
+  assert.equal(unknownDimensionUnit('U+0-7F, U+A5, U+4??'), null);
+  // The step-over is scoped to the token it consumes: a real bad dimension
+  // later in the same value is still caught.
+  assert.equal(unknownDimensionUnit('U+0-7F 0.25turns'), 'turns');
+});
+
+test('wave50-F3: `st` is a real unit — css-speech-1 <semitones>', () => {
+  // `voice-pitch: 2st` is valid CSS the converter parses and types as
+  // VoicePitch, so refusing it here would have deleted a declaration the
+  // pipeline models end to end.
+  assert.equal(unknownDimensionUnit('2st'), null);
+  assert.equal(unknownDimensionUnit('-2ST'), null);               // ASCII case-insensitive
+  assert.equal(provablyInvalidDeclaration('voice-pitch', '2st'), null);
+  assert.equal(provablyInvalidDeclaration('voice-range', 'x-high 4st'), null);
+  // The unit table stays CLOSED around it — one letter more is still unknown.
+  assert.equal(unknownDimensionUnit('2sts'), 'sts');
+});

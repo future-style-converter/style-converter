@@ -69,6 +69,7 @@ import type { ComposedNode } from './Composer';
 // (the harness half of the image()/url() background asset story — see the
 // module banner for the measured 002-fallbacks case).
 import { routeCorpusAssetStyles } from './CorpusAssetRoute';
+import { uaBoxlessDisplay } from './UaBoxlessDisplay';
 
 /**
  * WPT-mode detector — reads the `?wpt=1` query parameter once per module load.
@@ -789,7 +790,16 @@ const HARNESS_OPTIONS: RendererOptions = {
   // CorpusAssetRoute.ts for the measured 002-fallbacks case). Identity for
   // every non-WPT component, so the legacy path is byte-identical.
   decorateStyles: (styles, ctx) =>
-    routeCorpusAssetStyles(calibrateStyles(styles, ctx), ctx.component.name),
+    // wave-50 lane B5: the UA `display` of the six internal-layout source
+    // tags (colgroup/col/ruby/rb/rt/rtc) is restored FIRST, so the sizing
+    // calibration below sees the box the reference actually has instead of
+    // the block box divergence #3's <div> demotion invented. Identity for
+    // every other tag and for any component that declares its own display —
+    // see UaBoxlessDisplay for the measured chain.
+    routeCorpusAssetStyles(
+      calibrateStyles(uaBoxlessDisplay(styles, ctx.component.meta?.sourceTag?.toLowerCase()), ctx),
+      ctx.component.name,
+    ),
   // Divergence #3: allowlist mapping — except `img`, which bypasses the
   // allowlist into the core's void-element branch (issue #36 web slice:
   // replaced-element CSS needs a REAL <img> box even on captures), and —

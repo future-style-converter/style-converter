@@ -139,6 +139,35 @@ struct GapDecorationsConfig: Equatable {
     /// used only for diagnostics; painting is gated on `isActive`.
     var touched: Bool = false
 
+    // ── wave 50 lane B10: the container's OWN gap/alignment facts ───────
+    // Not gap-decoration properties. GapDecorationBands needs them to
+    // rebuild the css-flexbox-1 §9.4 step 8 line boxes, and the painter
+    // has no other channel to the layout (see that file's banner).
+
+    /// Used `row-gap` in px, or nil for NOT KNOWN — which is both the
+    /// default and what an unresolved wire value (`calc()`, a percentage,
+    /// `var()`) decodes to. The extractor supplies 0 for an ABSENT
+    /// property, because the CSS initial `normal` is 0 on a flex
+    /// container (css-align-3 §8). Defaulting to nil rather than 0 is
+    /// deliberate: a config built without stating the container's gaps
+    /// keeps the pre-wave-50 item-union geometry instead of silently
+    /// getting a reconstruction built on an invented gap.
+    var rowGapPx: CGFloat? = nil
+    /// Used `column-gap`; same contract as `rowGapPx`.
+    var columnGapPx: CGFloat? = nil
+    /// True when `align-content` DISTRIBUTES leftover cross space into
+    /// the lines — `normal` (the flex initial) and `stretch` only,
+    /// css-align-3 §5.1. Twin of FlexWrapPlan.alignContentStretches.
+    var alignContentStretches: Bool = true
+
+    /// The CROSS-axis gap for a container with this main axis: a
+    /// row-direction container's lines are separated by `row-gap`, a
+    /// column-direction container's by `column-gap` (css-align-3 §8 names
+    /// the gaps after the axis they open, not after the flex axis).
+    func crossGapPx(mainHorizontal: Bool) -> CGFloat? {
+        mainHorizontal ? rowGapPx : columnGapPx
+    }
+
     /// The paint gate. FALSE for every component in the committed
     /// baseline corpus (no fixture carries a *-rule-* property that
     /// resolves to ink), which is what makes wiring this family into

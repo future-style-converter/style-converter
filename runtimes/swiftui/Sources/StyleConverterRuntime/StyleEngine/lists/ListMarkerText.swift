@@ -7,6 +7,12 @@
 //  overflow-to-decimal behaviour, so a `<li>` renders the same characters
 //  on both natives. css-counter-styles-3 §6 (predefined counter styles).
 //
+//  ONE EXCEPTION since wave 50 (lane B4), stated here so the twin claim
+//  above is not read as unqualified: `.koreanHangulFormal` (§7.1) has no
+//  Compose arm yet, so the two natives answer differently for that single
+//  keyword. The port is tracked work — see KoreanHangulFormal.swift's TWIN
+//  DIVERGENCE banner for the three edits it needs.
+//
 
 import Foundation
 
@@ -41,6 +47,12 @@ enum ListMarkerText {
         case .katakana: return "\(cyclic(index, Self.katakana))."
         case .hiraganaIroha: return "\(cyclic(index, Self.hiraganaIroha))."
         case .katakanaIroha: return "\(cyclic(index, Self.katakanaIroha))."
+        // §7.1 longhand East Asian — the additive expansion and the
+        // suffix decision both live in KoreanHangulFormal (wave 50, lane
+        // B4), which also carries the measured cell, the one-component
+        // corpus census, and the stated Compose-twin divergence.
+        case .koreanHangulFormal:
+            return KoreanHangulFormal.expand(index + 1) + KoreanHangulFormal.suffix
         }
     }
 

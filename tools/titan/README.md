@@ -148,8 +148,20 @@ the parts that are now enforced by tracked code marked ✓:
    css-view-transitions css-writing-modes filter-effects selectors` —
    `tools/titan/section-runner.sh <section> --all-platforms --max-tests 48
    --run-id wave<N>-final --foreground` (depth-48 = 30 × 48 sampled
-   bucket-A tests). Prose still: a 50-min per-section watchdog that kills,
-   reprovisions and retries the section once, then aborts the gate.
+   bucket-A tests). ✓ Since wave 50 the whole loop is CODE:
+   `tools/titan/gate-driver.sh wave<N>-final` refuses a non-quiet host
+   (1-min load ≥ 6 or free+inactive < 2 GB after stopping OUR processes —
+   the 17-attempt lesson; `--force` overrides), stops emulators / Chrome
+   for Testing / Gradle daemons, starts adb detached, provisions ONE
+   emulator + ONE simulator by default (`--android N --ios N`), runs every
+   section in its own process group under a 50-min watchdog
+   (`--section-timeout-min`) that kills the group, reprovisions the Android
+   fleet and retries the section once, verifies the three composed-capture
+   COLUMN COUNTS against `tests.list` after every attempt, aborts after two
+   consecutive failed sections (a wedged pool fails everything after it;
+   `--resume` skips sections already OK), aggregates, then runs the fixture
+   net (step 8) and writes `gate-driver/summary.txt` + per-section
+   `.status` files under the run dir.
    ✓ A section that exits 1 with `NATIVE_SHORT` is a delivery failure —
    refeed, do not average.
 7. `node tools/titan/aggregate-sections.mjs tools/titan/runs/wave<N>-final`
@@ -158,9 +170,17 @@ the parts that are now enforced by tracked code marked ✓:
 8. The 327-net: `BASELINE=1 ./test-all.sh fixtures/visual-test.json`
    (exit 3 non-sRGB · 4 unledgered divergence · 5 stale ledger line — DELETE
    it · 6 spec oracle).
-9. Score (idiom below), diff per section against the previous
-   `results/corpus-v6-<n>.json`, diagnose every LOST cell, write the new
-   snapshot.
+9. Score: ✓ `node tools/titan/score-gate.mjs wave<N-1>-final wave<N>-final
+   [--json out] [--watch tools/titan/results/wave<N>-gate/watchlist.txt]`
+   — the idiom below as code (pinned in `score-gate.test.mjs`): totals per
+   platform and per section for both runs, and the PER-CELL lists the
+   snapshot's `_note` must quote — LOST (P→f), GAINED (f→P), UNMEASURED NOW
+   (scored before, excluded or missing now), NEWLY MEASURED, MOVERS
+   (same verdict, |Δssim| ≥ 0.01), plus MISSING SECTIONS and COLUMN SHORTS
+   (composed PNGs vs `tests.list`). Validated on history: wave48-final →
+   wave49-final reproduces corpus-v6.15's +32 gained / 0 lost exactly.
+   Diagnose every LOST cell, open the PNG of every headline cell, write the
+   new snapshot.
 
 Reproduce line carried by every snapshot (`reproduce` field):
 `node tools/titan/bucket-wpt.mjs; rm -f /tmp/titan-device-pool/provisioned-*;

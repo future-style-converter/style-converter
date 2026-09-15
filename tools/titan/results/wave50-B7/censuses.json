@@ -1,0 +1,265 @@
+{
+ "_note": "wave-50 lane B7 censuses over the 1435 scored tests of tools/titan/runs/wave49-final. Regenerate: the recipes are in _note.md.",
+ "hrCensus": {
+  "rule": "WPT source contains <hr>",
+  "tests": [
+   {
+    "test": "css/css-images/gradient/gradient-hue-direction.html",
+    "authorHrRules": "none",
+    "placeholder": true,
+    "cells": {
+     "web": [
+      "f",
+      0.6241
+     ],
+     "ios": [
+      "f",
+      0.6235
+     ],
+     "android": [
+      "f",
+      0.623
+     ]
+    },
+    "frame": "390x894 vs ref 390x600"
+   },
+   {
+    "test": "css/css-pseudo/active-selection-057.html",
+    "authorHrRules": "background-color/height/border",
+    "placeholder": false,
+    "cells": {
+     "web": [
+      "P",
+      1
+     ],
+     "ios": [
+      "P",
+      0.9994
+     ],
+     "android": [
+      "P",
+      0.9986
+     ]
+    },
+    "frame": "390x600 vs ref 390x600"
+   },
+   {
+    "test": "css/css-writing-modes/direction-upright-001.html",
+    "authorHrRules": "clear:both",
+    "placeholder": false,
+    "cells": {
+     "web": [
+      "f",
+      0.8095
+     ],
+     "ios": [
+      "f",
+      0.5543
+     ],
+     "android": [
+      "f",
+      0.4887
+     ]
+    },
+    "frame": "390x616 vs ref 390x626"
+   },
+   {
+    "test": "css/css-writing-modes/direction-upright-002.html",
+    "authorHrRules": "clear:both",
+    "placeholder": false,
+    "cells": {
+     "web": [
+      "f",
+      0.5826
+     ],
+     "ios": [
+      "f",
+      0.5758
+     ],
+     "android": [
+      "f",
+      0.5946
+     ]
+    },
+    "frame": "390x2805 vs ref 390x954"
+   }
+  ]
+ },
+ "rootScopeConflictCensus": {
+  "rule": "an html-scope AND a body-scope rule declare the same property with different values",
+  "tests": [
+   {
+    "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+    "conflicts": [
+     "display: html=table body=table-cell",
+     "background: html=white body=black"
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.0001
+     ],
+     "ios": [
+      "f",
+      0.0001
+     ],
+     "android": [
+      "f",
+      0.0001
+     ]
+    }
+   },
+   {
+    "test": "css/css-contain/contain-html-overflow-002.html",
+    "conflicts": [
+     "height: html=400px body=200px"
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.8709
+     ],
+     "ios": [
+      "f",
+      0.8705
+     ],
+     "android": [
+      "f",
+      0.8698
+     ]
+    }
+   },
+   {
+    "test": "css/css-writing-modes/inline-box-border-vlr-001.html",
+    "conflicts": [
+     "margin: html=0 body=1em"
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.8919
+     ],
+     "ios": [
+      "f",
+      0.8904
+     ],
+     "android": [
+      "f",
+      0.8474
+     ]
+    },
+    "note": "body already won by source order — byte-identical under the repair"
+   }
+  ]
+ },
+ "tableInternalOwnTextCensus": {
+  "rule": "a component whose _tag is table/thead/tbody/tfoot/tr/colgroup/col carries a non-empty _text",
+  "finding": "in ALL FIVE the _text is exactly the concatenation of the box own children text (ASCII whitespace aside) — a duplicate, never independent content",
+  "tests": [
+   {
+    "test": "css/css-backgrounds/animations/background-color-animation-with-table1.html",
+    "dupes": [
+     "table \"1 2\" over cells 1,2",
+     "tr \"1\"",
+     "tr \"2\""
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.9884
+     ],
+     "ios": [
+      "f",
+      0.9904
+     ],
+     "android": [
+      "P",
+      0.9998
+     ]
+    }
+   },
+   {
+    "test": "css/css-backgrounds/animations/background-color-animation-with-table3.html",
+    "dupes": [
+     "same"
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.9884
+     ],
+     "ios": [
+      "f",
+      0.9904
+     ],
+     "android": [
+      "P",
+      0.9998
+     ]
+    }
+   },
+   {
+    "test": "css/css-backgrounds/animations/background-color-animation-with-table4.html",
+    "dupes": [
+     "same"
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.9884
+     ],
+     "ios": [
+      "f",
+      0.9904
+     ],
+     "android": [
+      "f",
+      0.9888
+     ]
+    }
+   },
+   {
+    "test": "css/css-contain/contain-content-004.html",
+    "dupes": [
+     "table 3xU+00A0",
+     "tr 2xU+00A0",
+     "tr 1xU+00A0"
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.8448
+     ],
+     "ios": [
+      "f",
+      0.794
+     ],
+     "android": [
+      "f",
+      0.8286
+     ]
+    }
+   },
+   {
+    "test": "css/css-writing-modes/direction-upright-002.html",
+    "dupes": [
+     "10 tables x (table \"ABC\" + tr \"ABC\")"
+    ],
+    "cells": {
+     "web": [
+      "f",
+      0.5826
+     ],
+     "ios": [
+      "f",
+      0.5758
+     ],
+     "android": [
+      "f",
+      0.5946
+     ]
+    }
+   }
+  ]
+ }
+}

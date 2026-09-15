@@ -1882,6 +1882,8 @@ test('wave37 W5: the at-HEAD verification runs lost no cells and only strengthen
 
 import {
   NOVEL_INK_VETO_ENABLED, novelInkVetoActive,
+  // wave-50 lane B12's seam, pinned below (wave-50 fix lane F3 / skeptic S5).
+  degenerateVetoActive,
   assertPlatformColumns, PLATFORM_COLUMN_KEYS, NATIVE_PARITY_KEYS,
 } from './inject-wpt-block.mjs';
 
@@ -1912,6 +1914,52 @@ test('computeWptPass: the sixth argument is a real unconditional veto', () => {
   assert.equal(computeWptPass(0.1, true, false, false, false, true), false);
   // Omitting the argument keeps every legacy five-argument call shape passing.
   assert.equal(computeWptPass(1, null, false, false, false), true);
+});
+
+// ── wave-50 DEGENERATE-VETO wiring (lane B12's seam) ───────────────────────
+//
+// Added by wave-50 fix lane F3 on skeptic S5's defect 3: the B12 seam was
+// APPLIED to this module (`degenerateVetoActive` + `computeWptPass`'s SEVENTH
+// argument) with no pin here, while its own novel-ink precedent — the two
+// tests directly above — has one. The probe module carries its metric suite
+// (`tools/titan/degenerate-veto-probe.test.mjs`); these pins cover only what
+// THIS module does with it, exactly mirroring the novel-ink pair.
+//
+// MUTATION PROOF (executed, lane F3; copy → sha256 → edit → run → restore →
+// sha256 re-verified `e9af3a8c…`): replacing `isArmed`'s body in
+// `tools/titan/degenerate-veto-probe.mjs` with `return true;` turns the
+// arming pin red — the disarmed claim is a measurement, not a comment.
+
+import { isArmed as degenerateArmed } from './degenerate-veto-probe.mjs';
+
+test('degenerate veto is OFF unless TITAN_DEGENERATE_VETO=1', () => {
+  // The wave-50 calibration met the false-positive bar at the point estimate
+  // (1/65) but missed the recall bar badly — 13/35 = 37.1 %, interval
+  // 23.2–53.7 %, against the 95 % required — so the campaign rule says ship
+  // it dark (tools/titan/results/wave50-B12/README.md §5.3). This suite runs
+  // without the env var set, so the switch must read false and the gate
+  // helper must swallow even a true stamp.
+  assert.equal(degenerateArmed(), process.env.TITAN_DEGENERATE_VETO === '1');
+  if (!degenerateArmed()) {
+    assert.equal(degenerateVetoActive(true), false, 'a true stamp must not veto while dark');
+  }
+  // Non-true stamps never veto, in either mode.
+  assert.equal(degenerateVetoActive(false), false);
+  assert.equal(degenerateVetoActive(undefined), false);
+});
+
+test('computeWptPass: the seventh argument is a real unconditional veto', () => {
+  // Same shape as the sixth-argument pin above: a switch nobody can flip is
+  // not a switch. A pixel-perfect pair with a DECLARED FUZZY MATCH — the
+  // strongest pass there is — must still fail once the degenerate stamp is
+  // handed in, and must still pass when it is not.
+  assert.equal(computeWptPass(1, true, false, false, false, false, true), false);
+  assert.equal(computeWptPass(1, true, false, false, false, false), true);
+  // Defaults: omitting the argument leaves every six-argument call shape
+  // (novel-ink's own wiring) untouched.
+  assert.equal(computeWptPass(1, null, false, false, false, false), true);
+  // …and the two vetoes are independent — either one alone is fatal.
+  assert.equal(computeWptPass(1, true, false, false, false, true, false), false);
 });
 
 test('assertPlatformColumns: a silently-empty column is a failure, a declared skip is not', () => {

@@ -110,7 +110,68 @@ enum GapDecorationsExtractor {
             }
         }
         // Nothing from the family on this component → no config at all.
-        return cfg.touched ? cfg : nil
+        guard cfg.touched else { return nil }
+        // Wave 50 lane B10 — a SECOND pass for the container's own
+        // `row-gap` / `column-gap` / `align-content`. Deliberately NOT in
+        // `consumed` and NOT setting `touched`: these three belong to the
+        // spacing and flexbox categories, their own extractors own the
+        // PropertyRegistry rows, and a container that declares only a gap
+        // must keep returning nil here. Reading a property another
+        // extractor owns is what every composite applier in this runtime
+        // does; claiming it would steal the coverage row.
+        //
+        // ABSENT means the CSS initial `normal`, which is 0 on a flex
+        // container (css-align-3 §8) — so the used value is KNOWN, and
+        // the two struct defaults (nil = "not known") are replaced here
+        // before the wire can override them. The Compose twin resolves
+        // absence the same way, which is what keeps the two runtimes
+        // painting the same bands.
+        cfg.rowGapPx = 0
+        cfg.columnGapPx = 0
+        for p in properties {
+            switch p.type {
+            case "RowGap":       cfg.rowGapPx = gap(p.data, on: p.type)
+            case "ColumnGap":    cfg.columnGapPx = gap(p.data, on: p.type)
+            case "AlignContent": cfg.alignContentStretches = stretches(p.data)
+            default: break
+            }
+        }
+        return cfg
+    }
+
+    /// `row-gap` / `column-gap` as a used LENGTH in px.
+    ///
+    /// css-align-3 §8: the `normal` keyword is 0 on a flex container
+    /// (only multicol gives it a non-zero used value), and a percentage
+    /// resolves against the container's own content box — which the
+    /// reader cannot pre-compute, so it arrives unresolved. Nil is the
+    /// honest answer for "the gap exists but its used value is not
+    /// knowable here"; GapDecorationBands refuses to rebuild on it
+    /// rather than assuming 0, because assuming 0 would move every rule
+    /// by half the real gap. Twin of the Compose
+    /// GapDecorationExtractor.gap.
+    private static func gap(_ v: IRValue?, on name: String) -> CGFloat? {
+        if let kw = ValueExtractors.extractKeyword(v),
+           ValueExtractors.normalize(kw) == "NORMAL" { return 0 }
+        if let px = ValueExtractors.extractPx(v) { return px }
+        _ = PropertyTracker.logOnce(
+            key: "gapdec.gap.nonlength." + name,
+            message: "\(name): non-length gap — gap-decoration line bands left on the item unions")
+        return nil
+    }
+
+    /// Does `align-content` distribute leftover cross space INTO the
+    /// lines? css-align-3 §5.1: `normal` behaves as `stretch` on a flex
+    /// container and those two are the only values that grow the lines;
+    /// `start`, `center`, `space-between`, … leave the lines
+    /// content-sized and position the line BLOCK, for which the item
+    /// union already IS the line box.
+    private static func stretches(_ v: IRValue?) -> Bool {
+        guard let kw = ValueExtractors.extractKeyword(v) else { return true }
+        switch ValueExtractors.normalize(kw) {
+        case "NORMAL", "STRETCH", "AUTO": return true
+        default: return false
+        }
     }
 
     /// `<line-width>` reader: the css-backgrounds-3 §4.3 keyword ladder

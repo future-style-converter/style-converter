@@ -33,6 +33,8 @@ import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.layout.grid.GridRenderer
 import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.types.ValueExtractors
+import com.styleconverter.runtime.scrolling.LineClampCap
+import com.styleconverter.runtime.typography.inline.resolveCapPx
 import com.styleconverter.runtime.StyleApplier
 import com.styleconverter.runtime.scrolling.OverflowExtractor
 // Wave 25 CAL-RC4 — the unclamped §9.7 main-size pins. Imported (not
@@ -962,8 +964,31 @@ object ComponentRenderer {
         // grid item collection) see the grandchildren as direct children.
         // Identity for the whole contents-free corpus (same instance out),
         // so remember{} keys and frozen baselines are untouched.
+        // ── Wave-50 lane B3: the ordinary-element generated-TEXT seam ──
+        // CSS 2.1 §12.1 / css-pseudo-4 §4.1 put the `::after` box INSIDE the
+        // originating element as its LAST child; ContentApplier's wrapper
+        // composes it as a SIBLING in a Row, where the host's stretch-fit
+        // block box (blockFlowWidth below, CSS 2.1 §10.3.3) leaves it zero
+        // width and it draws nothing — measured BLANK on
+        // css-counter-styles/cjk-decimal/counter-cjk-decimal — whose Android
+        // capture is a single uniform white 390x696 PNG with no ink at all
+        // (android f 0.9407; that row's semantic presence is aCoveragePct
+        // 0.000 for the capture against bCoveragePct 0.816 for the ref in its
+        // own frame — 0.946 is the web-ref/ios-ref figure, wave-50 skeptic
+        // S6-18) — while iOS, which folds the run into the host's text,
+        // passes at 0.9934. See
+        // PseudoTextFold's banner for the three capture signatures. Computed
+        // HERE, in the same remember as the box fold, because the extractor
+        // seam further down must know whether the bucket was claimed — and
+        // the decision cannot be recomputed there: the fold rewrites the
+        // `_text` its own styling gate reads.
+        val pseudoTextFold = androidx.compose.runtime.remember(component) {
+            com.styleconverter.runtime.content.PseudoTextFold.resolve(
+                ContentsUnboxing.resolve(component)
+            )
+        }
         @Suppress("NAME_SHADOWING")
-        val component = androidx.compose.runtime.remember(component) {
+        val component = androidx.compose.runtime.remember(pseudoTextFold) {
             // ── Wave-49 lane A2: the ordinary-element generated-BOX seam ──
             // CSS 2.1 §12.1 / css-pseudo-4 §4.1 ("Generated Content
             // Pseudo-elements: ::before and ::after", a TREE-ABIDING
@@ -983,9 +1008,12 @@ object ComponentRenderer {
             // bucket — the committed fixture corpus carries no `pseudos` at
             // all, and a replay of the claim rules over all 30 frozen
             // wave48 sections claims exactly ONE component. Runs after
-            // unboxing so the fold sees the final composed child list.
+            // unboxing (and after the wave-50 text fold, which refuses
+            // every bucket PseudoGeneratedBox.claim takes, so the two are
+            // disjoint by construction) so the fold sees the final composed
+            // child list.
             com.styleconverter.runtime.content.PseudoBoxFold.resolve(
-                ContentsUnboxing.resolve(component)
+                pseudoTextFold.component
             )
         }
         // ── Wave-7 dynamic-styling resolution (schema/spec/06-dynamic-styling.md)
@@ -1294,8 +1322,39 @@ object ComponentRenderer {
         // 327-pair corpus byte-identical (SizingApplier.effectiveBoxSizing
         // pins the split).
         val wptCaptureModeForSizing = LocalWptCaptureMode.current
+        // Wave-50 (lane B9) — the block-level line-clamp cap, decided HERE
+        // because the cross-block line-box census needs the component's
+        // `runs` + `children`, which no property list carries (css-overflow-4
+        // §5.2 counts line boxes, and a block child's are as tall as that
+        // child — CSS 2.1 §10.8). Returns null for every component without a
+        // fixed-count `line-clamp`, i.e. all but 38 roots in the whole
+        // corpus, and returns the wave-41 uniform number for every container
+        // the census cannot prove — so the style chain below is byte-stable
+        // outside the measured movers (line-clamp-005/-006/-007).
+        // Wave-50 lane F1 (skeptic S3): the guard used to be a bare
+        // `.getOrNull()` — a SILENT fallthrough. The census walks the
+        // component's `runs`/`children` and the root's typography wire, so a
+        // shape no extractor expects throws HERE and the box would quietly
+        // fall back to the wave-41 uniform cap with nothing in the report to
+        // say the census never ran (BACKLOG standing constraint: no silent
+        // fallthroughs). The breadcrumb key is bracketed
+        // (`LineClamp[census-threw]`) so PropertyTracker's report separates
+        // "the census blew up on this document" from the property-level
+        // `LineClamp` coverage claim, and logcat carries the component id +
+        // the throwable so the offending wire is findable on device.
+        // Still `.getOrNull()` at the end: the uniform cap is the correct,
+        // calibrated fallback — this makes the fallback LOUD, not different.
+        val lineClampCapPx = runCatching {
+            LineClampCap.resolveCapPx(component, propertyPairs)
+        }.onFailure { e ->
+            com.styleconverter.runtime.PropertyTracker.markUnhandled("LineClamp[census-threw]")
+            android.util.Log.w(
+                "LineClampCap", "resolveCapPx threw for ${component.id}: ${e.message}", e)
+        }.getOrNull()
         val baseModifier = try {
-            StyleApplier.applyProperties(effectiveProperties, collapsedMargin, wptCaptureModeForSizing)
+            StyleApplier.applyProperties(
+                effectiveProperties, collapsedMargin, wptCaptureModeForSizing, lineClampCapPx,
+            )
         } catch (e: Exception) {
             android.util.Log.w("StyleApplier", "applyProperties threw for ${component.id}: ${e.message}", e)
             Modifier
@@ -1457,7 +1516,21 @@ object ComponentRenderer {
                     Modifier.fillMaxHeight()
                 else Modifier
             } else if (composedWpt && !hasExplicitWidth && !hasAspectRatio && !isOutOfFlow &&
-                !isShrinkToFitTable && !LocalSelfAlignmentHandled.current)
+                !isShrinkToFitTable && !LocalSelfAlignmentHandled.current &&
+                // Wave-50 lane B2 — CSS 2.1 §10.3.9. The fill above emulates
+                // §10.3.3, which is scoped to BLOCK-LEVEL boxes; an atomic
+                // inline-level box (declared inline-block / inline-flex /
+                // inline-grid) uses SHRINK-TO-FIT instead, which is Compose's
+                // wrap-content default. Without this gate the `.clipped`
+                // inline-block of css-masking/clip-path-contentBox-1d/1e
+                // stretched to the whole 358px canvas and painted 24 200 px
+                // of red outside the reference's green square (android f
+                // 0.8775 / 0.8875 vs web+iOS P). `inline-table` stays with
+                // isShrinkToFitTable above and vertical flows stay with the
+                // orthogonal branch — see AtomicInlineShrinkToFit's header
+                // for the enumerated nine-test blast radius.
+                !com.styleconverter.runtime.layout.position.AtomicInlineShrinkToFit
+                    .suppressesBlockAutoWidth(effectiveProperties, verticalWm))
                 Modifier.fillMaxWidth()
             else Modifier
         // The 50×30 placeholder floor — skipped entirely in composed WPT capture
@@ -1684,7 +1757,13 @@ object ComponentRenderer {
         val beforeAfterConfig = try {
             (if (engineDecision.kind != com.styleconverter.runtime.layout.ContainerKind.None)
                 com.styleconverter.runtime.content.PseudoBucketExtractor
-                    .extractBeforeAfterConfig(component.pseudos, component.role)
+                    .extractBeforeAfterConfig(
+                        component.pseudos, component.role,
+                        // Wave-50 lane B3: an `::after` PseudoTextFold has
+                        // already folded into `_text` must not ALSO render
+                        // through this wrapper — one claim, two consumers.
+                        afterFolded = pseudoTextFold.afterFolded,
+                    )
             else null)
                 ?: ContentApplier.extractBeforeAfterConfig(component.selectors)
         } catch (e: Exception) {
@@ -1923,6 +2002,24 @@ object ComponentRenderer {
                 com.styleconverter.runtime.core.variables.LocalCssVariables provides varScope,
                 // % base channel for descendants' calc()/bare-% resolution.
                 com.styleconverter.runtime.core.variables.LocalContainingBlock provides childContainingBlock,
+                // Wave-50 lane B2 — the SAME channel at THIS element's own
+                // level. The line above deliberately publishes the block this
+                // component establishes for its CHILDREN, but the component's
+                // own modifier chain materialises INSIDE this provider (the
+                // `content` lambda below is RenderComponentContent), so a
+                // `Modifier.composed` factory in that chain reads the child
+                // value for itself — one level too deep. `containingBlock` is
+                // the value LocalContainingBlock had at the TOP of this
+                // RenderComponent, i.e. the block this element is laid out in
+                // (CSS 2.1 §10.1), and every child re-provides its own on the
+                // way down. Read only through
+                // ElementContainingBlock.containingBlockFor; null until this
+                // line exists, which is why the percentage-inset lane kept its
+                // frozen (wrong-level) geometry and
+                // css-position/position-relative-006 android stayed f 0.9966
+                // through the wave-49 repair.
+                com.styleconverter.runtime.layout.position.ElementContainingBlock
+                    .LocalElementContainingBlock provides containingBlock,
                 // §8.3.1 collapse channels are strictly one-level: THIS
                 // component consumed its own override above, and any plan it
                 // publishes for its children is provided deeper (inside its

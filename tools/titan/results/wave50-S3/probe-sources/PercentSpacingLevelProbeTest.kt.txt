@@ -1,0 +1,83 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Census of the SAME containing-block level defect in MarginApplier /
+// PaddingApplier (both read LocalContainingBlock inside Modifier.composed).
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.renderer.ComponentRenderer
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import com.styleconverter.runtime.core.variables.ContainingBlock
+import com.styleconverter.runtime.core.variables.DynamicValueResolver
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.JsonPrimitive
+import kotlinx.serialization.json.contentOrNull
+import org.junit.Test
+import java.io.File
+
+class PercentSpacingLevelProbeTest {
+
+    private val repo = File("../../").canonicalFile
+    private val runDir = File(repo, "tools/titan/runs/wave49-final/sections")
+    private val out = File(repo, "tools/titan/results/wave50-S3/_probe-out")
+
+    private val SPACING = listOf(
+        "MarginTop", "MarginRight", "MarginBottom", "MarginLeft",
+        "MarginBlockStart", "MarginBlockEnd", "MarginInlineStart", "MarginInlineEnd",
+        "PaddingTop", "PaddingRight", "PaddingBottom", "PaddingLeft",
+        "PaddingBlockStart", "PaddingBlockEnd", "PaddingInlineStart", "PaddingInlineEnd",
+    )
+
+    private fun isPercent(p: IRProperty): Boolean {
+        (p.data as? JsonPrimitive)?.let { prim ->
+            if (!prim.isString && prim.contentOrNull?.toDoubleOrNull() != null) return true
+        }
+        val o = p.data as? JsonObject ?: return false
+        if ((o["type"] as? JsonPrimitive)?.contentOrNull == "percentage") return true
+        if (o["px"] == null && o["percent"] != null) return true
+        val orig = (o["original"] as? JsonPrimitive)?.contentOrNull
+        return o["px"] == null && orig != null && orig.trim().endsWith("%")
+    }
+
+    @Test fun spacing() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        var carriers = 0
+        var differing = 0
+        runDir.listFiles()!!.sortedBy { it.name }.forEach { sec ->
+            val irDir = File(sec, "per-test-ir")
+            if (!irDir.isDirectory) return@forEach
+            irDir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }.forEach { f ->
+                val testKey = sec.name + "/" + f.name.removeSuffix(".json")
+                val doc = try { IRDocumentDecoder.decode(f.readText()) } catch (e: Exception) { return@forEach }
+                val roots = try { SlotComposer.compose(doc) } catch (e: Exception) { return@forEach }
+                val rootCb = ContainingBlock(widthPx = 358f)
+                fun walk(c: IRComponent, inherited: List<IRProperty>, elementCb: ContainingBlock) {
+                    val merged = ComponentRenderer.mergeInherited(c.properties, inherited)
+                    val childCb = DynamicValueResolver.childContainingBlock(merged, elementCb)
+                    val pct = merged.filter { it.type in SPACING && isPercent(it) }
+                    if (pct.isNotEmpty()) {
+                        carriers++
+                        val differs = elementCb.widthPx != childCb.widthPx
+                        sb.append("CARRIER $testKey ${c.id} elemW=${elementCb.widthPx} childW=${childCb.widthPx} " + pct.joinToString(",") { it.type + "=" + it.data } + "\n")
+                        if (differs) {
+                            differing++
+                            sb.append(
+                                "DIFFER $testKey ${c.id} elemW=${elementCb.widthPx} childW=${childCb.widthPx} " +
+                                    pct.joinToString(",") { it.type } + "\n"
+                            )
+                        }
+                    }
+                    val inh = merged.filter { it.type in ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                    c.children?.forEach { walk(it, inh, childCb) }
+                }
+                roots.forEach { walk(it, emptyList(), rootCb) }
+            }
+        }
+        sb.insert(0, "percent margin/padding carriers=$carriers  differing-percent-base=$differing\n")
+        File(out, "percent-spacing-levels.txt").writeText(sb.toString())
+        println(sb.toString().lines().first())
+    }
+}

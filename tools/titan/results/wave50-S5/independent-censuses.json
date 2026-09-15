@@ -1,0 +1,536 @@
+{
+ "_note": "wave-50 skeptic S5, INDEPENDENT censuses written from scratch (never a builder lane's script). Regenerate: the recipes are in `reproduce` below.",
+ "lane": "S5",
+ "date": "2026-09-14",
+ "run": "wave49-final",
+ "textDecorationCensus": {
+  "docsScanned": 1435,
+  "TextDecorationColor": 70,
+  "lackingSrgb": 1,
+  "lackingSrgbRows": [
+   {
+    "doc": "wpt__css-text-decor__text-decoration-shorthands-001.json",
+    "wire": {
+     "type": "TextDecorationColor",
+     "data": {
+      "original": "auto"
+     }
+    }
+   }
+  ],
+  "TextDecorationThicknessTypes": {
+   "length": 33
+  },
+  "TextDecorationLine": 101,
+  "TextDecorationStyle": 10,
+  "verdict": "B6's claim CONFIRMED: exactly one TextDecorationColor lacking srgb (text-decoration-shorthands-001, data {original:'auto'}); zero auto/from-font thickness wires (all 33 are type=length)."
+ },
+ "uaBoxlessCarriers": {
+  "tests": 9,
+  "rows": [
+   {
+    "test": "wpt__CSS2__borders__border-conflict-style-107",
+    "tags": {
+     "col": 5,
+     "colgroup": 5
+    }
+   },
+   {
+    "test": "wpt__css-backgrounds__animations__background-color-animation-with-table2",
+    "tags": {
+     "colgroup": 1,
+     "col": 1
+    }
+   },
+   {
+    "test": "wpt__css-tables__border-collapse-dynamic-col-001",
+    "tags": {
+     "colgroup": 1,
+     "col": 4
+    }
+   },
+   {
+    "test": "wpt__css-text-decor__ruby-text-decoration-01",
+    "tags": {
+     "ruby": 1,
+     "rb": 6,
+     "rt": 6
+    }
+   },
+   {
+    "test": "wpt__css-writing-modes__ch-units-vrl-003",
+    "tags": {
+     "col": 1
+    }
+   },
+   {
+    "test": "wpt__css-writing-modes__ch-units-vrl-004",
+    "tags": {
+     "colgroup": 1
+    }
+   },
+   {
+    "test": "wpt__css-writing-modes__ch-units-vrl-007",
+    "tags": {
+     "col": 1
+    }
+   },
+   {
+    "test": "wpt__css-writing-modes__ch-units-vrl-008",
+    "tags": {
+     "colgroup": 1
+    }
+   },
+   {
+    "test": "wpt__css-writing-modes__direction-upright-002",
+    "tags": {
+     "colgroup": 20,
+     "col": 20,
+     "ruby": 20,
+     "rt": 40
+    }
+   }
+  ],
+  "verdict": "B5's carriers.json CONFIRMED: 9 carrier tests, identical tag counts, zero `rtc` carriers anywhere in the 1435-test corpus."
+ },
+ "scorerCensus": {
+  "scored": {
+   "web": 1379,
+   "ios": 1366,
+   "android": 1366
+  },
+  "passes": {
+   "web": 1205,
+   "ios": 1081,
+   "android": 1058
+  },
+  "totalScored": 4111,
+  "passingPopulation": 3344,
+  "verdict": "Reproduces corpus-v6.15 exactly (web 1205/1379, iOS 1081/1366, Android 1058/1366, 4111 scored) and B12's passing population of 3344."
+ },
+ "carrierCells": {
+  "CSS2/borders/border-conflict-style-107.html": {
+   "web": {
+    "pass": false,
+    "ssim": 0.782,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.782
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.6564,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 1404,
+     "overflowInkPx": 64400,
+     "ssimRefFrame": 0.8371
+    }
+   },
+   "android": {
+    "pass": false,
+    "ssim": 0.3262,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 1204,
+     "overflowInkPx": 210504,
+     "ssimRefFrame": 0.6196
+    }
+   }
+  },
+  "css-writing-modes/ch-units-vrl-003.html": {
+   "web": {
+    "pass": true,
+    "ssim": 0.9761,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9761
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.8396,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.8396
+    }
+   },
+   "android": {
+    "pass": false,
+    "ssim": 0.8075,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.8075
+    }
+   }
+  },
+  "css-writing-modes/ch-units-vrl-004.html": {
+   "web": {
+    "pass": true,
+    "ssim": 0.9761,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9761
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.8396,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.8396
+    }
+   },
+   "android": {
+    "pass": false,
+    "ssim": 0.8075,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.8075
+    }
+   }
+  },
+  "css-writing-modes/ch-units-vrl-007.html": {
+   "web": {
+    "pass": false,
+    "ssim": 0.917,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.917
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.9159,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9159
+    }
+   },
+   "android": {
+    "pass": false,
+    "ssim": 0.8204,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.8204
+    }
+   }
+  },
+  "css-writing-modes/ch-units-vrl-008.html": {
+   "web": {
+    "pass": false,
+    "ssim": 0.917,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.917
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.9159,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9159
+    }
+   },
+   "android": {
+    "pass": false,
+    "ssim": 0.8204,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.8204
+    }
+   }
+  },
+  "css-tables/border-collapse-dynamic-col-001.html": {
+   "web": {
+    "pass": true,
+    "ssim": 1,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 1
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.9404,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9404
+    }
+   },
+   "android": {
+    "pass": true,
+    "ssim": 0.9812,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9812
+    }
+   }
+  },
+  "css-backgrounds/animations/background-color-animation-with-table2.html": {
+   "web": {
+    "pass": true,
+    "ssim": 0.997,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.997
+    }
+   },
+   "ios": {
+    "pass": true,
+    "ssim": 0.9971,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9971
+    }
+   },
+   "android": {
+    "pass": true,
+    "ssim": 0.9998,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9998
+    }
+   }
+  },
+  "css-text-decor/ruby-text-decoration-01.html": {
+   "web": {
+    "pass": false,
+    "ssim": 0.9491,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9491
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.9289,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 640,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9289
+    }
+   },
+   "android": {
+    "pass": false,
+    "ssim": 0.9375,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 640,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9375
+    }
+   }
+  },
+  "css-writing-modes/direction-upright-002.html": {
+   "web": {
+    "pass": false,
+    "ssim": 0.5826,
+    "frame": {
+     "refW": 390,
+     "refH": 954,
+     "capW": 390,
+     "capH": 2805,
+     "overflowInkPx": 31288,
+     "ssimRefFrame": 0.6316
+    }
+   },
+   "ios": {
+    "pass": false,
+    "ssim": 0.5758,
+    "frame": {
+     "refW": 390,
+     "refH": 954,
+     "capW": 390,
+     "capH": 2544,
+     "overflowInkPx": 26209,
+     "ssimRefFrame": 0.6164
+    }
+   },
+   "android": {
+    "pass": false,
+    "ssim": 0.5946,
+    "frame": {
+     "refW": 390,
+     "refH": 954,
+     "capW": 390,
+     "capH": 2316,
+     "overflowInkPx": 21435,
+     "ssimRefFrame": 0.6289
+    }
+   }
+  },
+  "css-text-decor/text-decoration-shorthands-001.html": {
+   "web": {
+    "pass": true,
+    "ssim": 0.9998,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9998
+    }
+   },
+   "ios": {
+    "pass": true,
+    "ssim": 0.999,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.999
+    }
+   },
+   "android": {
+    "pass": true,
+    "ssim": 0.9979,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9979
+    }
+   }
+  },
+  "css-text-decor/text-decoration-shorthands-002.html": {
+   "web": {
+    "pass": true,
+    "ssim": 1,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 1
+    }
+   },
+   "ios": {
+    "pass": true,
+    "ssim": 0.9988,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9988
+    }
+   },
+   "android": {
+    "pass": true,
+    "ssim": 0.9978,
+    "frame": {
+     "refW": 390,
+     "refH": 600,
+     "capW": 390,
+     "capH": 600,
+     "overflowInkPx": 0,
+     "ssimRefFrame": 0.9978
+    }
+   }
+  }
+ },
+ "reproduce": {
+  "textDecorationCensus": "walk every tools/titan/runs/wave49-final/sections/*/per-test-ir/*.json, collect every object with type TextDecoration{Color,Thickness,Line,Style}",
+  "uaBoxlessCarriers": "same walk, collect every object whose meta.sourceTag is one of col/colgroup/ruby/rb/rt/rtc",
+  "scorerCensus": "for each sections/*/manifest.json, wpt.results[*].browserRef.diffs[{web,ios,android}-ref]; skip unless typeof ssim === number && !scoreExcluded; pass = wptPass === true"
+ }
+}

@@ -336,11 +336,25 @@ class MulticolFloatStripTest {
     @Test
     fun `FS-C5 no clear wire - floats still strip but the sibling stays at the cursor`() {
         // The -000/-001 IR shape: `<br clear=all>` reaches the IR with NO
-        // Clear wire (tools/titan/extract-fixture.mjs:9789 reads only
-        // rule-matched declarations — the HTML clear attribute is lost),
-        // so the sibling stacks at the flush cursor: the aqua geometry
-        // still fixes, the orange line stays misplaced until the feeder
-        // emits the wire (deferred, evidence in the lane report).
+        // Clear wire — `tools/titan/extract-fixture.mjs`'s `buildNode` folds
+        // matched rules + inline style + a NAMED set of presentational bakes
+        // (`uaLinkProps`, `uaHrProps`, `htmlTablePresentationProps`), and
+        // HTML Rendering §15.3's `br[clear]` rule set was not among them, so
+        // the attribute is lost. So the sibling stacks at the flush cursor:
+        // the aqua geometry still fixes, the orange line stays misplaced.
+        //
+        // Wave-50 lane B6 re-measured it and wrote the bake: the seam patch
+        // and its FULL-corpus differential (1435 tests → exactly these four
+        // fixtures change, one `<br>` component each, `height 20px→0px` plus
+        // `clear: both`) are committed under
+        // `tools/titan/results/wave50-B6/`, and the converter contract the
+        // wire must meet is pinned by
+        // `converter/src/test/kotlin/app/parsing/css/properties/ClearPresentationalHintTest.kt`.
+        // The bake ALONE does not move the orange into column 3 — the wire
+        // lands on the `<br>`, and `factsFor` reads `Clear` off the CHILD, so
+        // the strip needs a line-box-clearance rung as well (recorded and
+        // pinned in MulticolFloatStripRefRowsTest, "a Clear wire on a br
+        // child is IGNORED today").
         val noClear = IRComponent(
             id = "clear", name = "clear",
             properties = listOf(prop("BorderBottomStyle", "\"SOLID\"")),

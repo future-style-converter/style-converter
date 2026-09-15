@@ -1,0 +1,48 @@
+// THROWAWAY skeptic probe (wave 50 lane S4). DELETE BEFORE REPORTING.
+// Replays every wave49-final css-gaps per-test IR through the real
+// SwiftUI painter and prints a raster hash, so the band-rebuild blast
+// radius can be measured by byte differential rather than by inspection.
+import Foundation
+import SwiftUI
+import XCTest
+import CryptoKit
+@testable import StyleConverterRuntime
+
+final class Skeptic50CssGapsReplayTests: XCTestCase {
+
+    static let dir = "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave49-final/sections/css-gaps/per-test-ir"
+
+    @MainActor
+    private func raster<V: View>(_ v: V) throws -> [UInt8] {
+        let r = ImageRenderer(content: v); r.scale = 1
+        let cg = try XCTUnwrap(r.cgImage)
+        let w = cg.width, h = cg.height
+        var buf = [UInt8](repeating: 0, count: w*h*4)
+        let ctx = try XCTUnwrap(CGContext(data: &buf, width: w, height: h, bitsPerComponent: 8,
+                                          bytesPerRow: w*4, space: CGColorSpaceCreateDeviceRGB(),
+                                          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        return buf
+    }
+
+    private func sha(_ b: [UInt8]) -> String {
+        SHA256.hash(data: Data(b)).map { String(format: "%02x", $0) }.joined().prefix(16).description
+    }
+
+    @MainActor
+    func testReplayAllCssGaps() throws {
+        let files = try FileManager.default.contentsOfDirectory(atPath: Self.dir).sorted()
+        for f in files where f.hasSuffix(".json") {
+            let data = try Data(contentsOf: URL(fileURLWithPath: "\(Self.dir)/\(f)"))
+            let doc = try JSONDecoder().decode(IRDocument.self, from: data)
+            var acc = ""
+            for r in doc.components.filter({ $0.slot == nil }) {
+                let px = try raster(ComponentRenderer(component: r)
+                    .frame(width: 390, height: 600, alignment: .topLeading)
+                    .background(Color.white))
+                acc += sha(px) + " "
+            }
+            print("S4GAPS \(f.replacingOccurrences(of: "wpt__css-gaps__flex__flex-gap-decorations-", with: "").replacingOccurrences(of: ".json", with: "")) \(acc)")
+        }
+    }
+}

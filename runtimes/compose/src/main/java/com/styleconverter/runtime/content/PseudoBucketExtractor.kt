@@ -46,10 +46,19 @@ object PseudoBucketExtractor {
      *   ROOT-SCOPE generated box and is owned by RootPseudoBox (wave-28
      *   lane PG) — consuming it here too would double-render the box, the
      *   exact hazard RootPseudoBox's banner pins. Skipped by design.
+     * @param afterFolded wave-50 lane B3: PseudoTextFold already folded
+     *   this component's `::after` bucket into its own text (CSS 2.1 §12.1
+     *   puts that box INSIDE the originating element, which the Row wrapper
+     *   below cannot express — see PseudoTextFold's banner for the measured
+     *   squeeze). True means the after payload is SPOKEN FOR and must not
+     *   also render here; the caller computes it once, beside the fold,
+     *   because the fold rewrites the `_text` its own styling gate reads.
+     *   Defaulted false so every other caller and pin keeps its behaviour.
      */
     fun extractBeforeAfterConfig(
         pseudos: JsonObject?,
-        role: String?
+        role: String?,
+        afterFolded: Boolean = false
     ): ContentApplier.BeforeAfterConfig? {
         // No bucket → nothing to bridge (every pre-wave-27 document).
         if (pseudos == null) return null
@@ -71,8 +80,13 @@ object PseudoBucketExtractor {
         val before = (pseudos["before"] as? JsonObject)
             ?.takeIf { PseudoGeneratedBox.claim(it, "before", role) == null }
             .let { pseudoElementConfig(it, "before") }
+        // …and, wave-50 lane B3, a bucket PseudoTextFold has already folded
+        // into the host's own text run is likewise spoken for: rendering it
+        // here too would paint the same glyphs twice (once inside the host
+        // box, once beside it). One claim, two consumers — the same
+        // discipline the block-box gate above applies.
         val after = (pseudos["after"] as? JsonObject)
-            ?.takeIf { PseudoGeneratedBox.claim(it, "after", role) == null }
+            ?.takeIf { !afterFolded && PseudoGeneratedBox.claim(it, "after", role) == null }
             .let { pseudoElementConfig(it, "after") }
         // Neither side produced renderable content → hand the seam back
         // to the legacy channel rather than an inert wrapper.

@@ -1,0 +1,57 @@
+package com.styleconverter.runtime._skeptic50
+
+// THROWAWAY skeptic-S3 probe (wave 50). Deleted before reporting.
+// Adversarial inputs to B10's GapDecorationBands.resolve.
+
+import com.styleconverter.runtime.columns.GapDecorationBands
+import com.styleconverter.runtime.columns.GapFlexLine
+import com.styleconverter.runtime.columns.GapInterval
+import com.styleconverter.runtime.columns.GapRect
+import org.junit.Test
+import java.io.File
+
+class GapBandsAdversarialProbeTest {
+
+    private val out = File(File("../../").canonicalFile, "tools/titan/results/wave50-S3/_probe-out")
+
+    // A 200x200 container, two content-sized lines of 40px each, 10px cross gap.
+    private val content = GapRect(0f, 0f, 200f, 200f)
+    private fun line(y0: Float, y1: Float) = GapFlexLine(
+        items = listOf(GapRect(0f, y0, 100f, y1)),
+        cross = GapInterval(y0, y1),
+        mainGaps = emptyList(),
+    )
+    // Items as they actually sit AFTER a stretch: line 0 at the cross-start,
+    // line 1 inside the second stretched band (§9.4 step 8 on 200px with a
+    // 10px gap gives 95/95, so band 1 starts at 105).
+    private val twoLines = listOf(line(0f, 40f), line(105f, 145f))
+    private val unstretchedTwoLines = listOf(line(0f, 40f), line(50f, 90f))
+
+    @Test fun adversarial() {
+        out.mkdirs()
+        val sb = StringBuilder()
+        fun run(label: String, lines: List<GapFlexLine>, gap: Float?, stretches: Boolean, mainH: Boolean = true) {
+            val r = GapDecorationBands.resolve(lines, content, mainH, gap, stretches)
+            sb.append("$label -> ${if (r === lines) "REFUSED (identity)" else "REBUILT " + r.map { it.cross }}\n")
+        }
+        run("A stretch + resolved gap (items inside the stretched bands)", twoLines, 10f, true)
+        run("A' same but items still content-packed (pre-stretch)", unstretchedTwoLines, 10f, true)
+        run("B nowrap-equivalent: a SINGLE line", listOf(line(0f, 40f)), 10f, true)
+        run("C align-content: center/space-between (stretches=false)", twoLines, 10f, false)
+        run("D null gap (calc/%/var) MUST refuse", twoLines, null, true)
+        run("E auto cross size: empty content box", twoLines, 10f, true, mainH = true)
+        // E properly: an empty container cross extent
+        val degenerate = GapDecorationBands.resolve(twoLines, GapRect(0f, 0f, 200f, 0f), true, 10f, true)
+        sb.append("E' zero-height content box -> ${if (degenerate === twoLines) "REFUSED (identity)" else "REBUILT"}\n")
+        // F: bands that disagree with the items (wrap-reverse shape: items in reverse cross order)
+        val reversed = listOf(line(110f, 150f), line(160f, 200f))
+        val rev = GapDecorationBands.resolve(reversed, content, true, 10f, true)
+        sb.append("F items packed at the cross-END (wrap-reverse) -> ${if (rev === reversed) "REFUSED (identity)" else "REBUILT " + rev.map { it.cross }}\n")
+        // G: no leftover — lines already fill the container
+        val full = listOf(line(0f, 95f), line(105f, 200f))
+        val g = GapDecorationBands.resolve(full, content, true, 10f, true)
+        sb.append("G no leftover -> ${if (g === full) "REFUSED (identity)" else "REBUILT " + g.map { it.cross }}\n")
+        File(out, "gap-bands-adversarial.txt").writeText(sb.toString())
+        println(sb.toString())
+    }
+}

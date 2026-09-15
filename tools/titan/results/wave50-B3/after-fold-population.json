@@ -1,0 +1,567 @@
+{
+ "_note": "wave50-B3: every wave49-final test whose pseudos.after payload the proposed Compose PseudoTextFold would touch, with the per-platform verdicts as of wave49-final. Regenerate by replaying the gate set in runtimes/compose/.../content/PseudoTextBridge.kt over tools/titan/runs/<run-id>/sections/*/per-test-ir/*.json.",
+ "gates": [
+  "meta.role != body-root",
+  "meta.runs == null",
+  "declaration whitelist (content/counter-* inert; display+box only under display:contents; color/font-size/font-family typed; anything else refuses)",
+  "baked _text (or text) non-empty",
+  "component has no children",
+  "styled bucket only when the host carries no own text"
+ ],
+ "totals": {
+  "testsTouched": 16,
+  "testsWithAtLeastOneFold": 13,
+  "foldedComponents": 78
+ },
+ "tests": [
+  {
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-function-chain-pseudo-elements.html",
+   "foldedComponents": 0,
+   "componentIds": [],
+   "refusals": {
+    "declaration-gate": 5
+   },
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9994,
+     "coveragePct": 6.812,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "f",
+     "ssim": 0.9483,
+     "coveragePct": 1.391,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9475,
+     "coveragePct": 1.399,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 6.799
+   }
+  },
+  {
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-002.html",
+   "foldedComponents": 0,
+   "componentIds": [],
+   "refusals": {
+    "declaration-gate": 1
+   },
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 1,
+     "coveragePct": 7.744,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "f",
+     "ssim": 0.9175,
+     "coveragePct": 11.62,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9381,
+     "coveragePct": 8.288,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 7.744
+   }
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-pseudo-element.html",
+   "foldedComponents": 0,
+   "componentIds": [],
+   "refusals": {
+    "declaration-gate": 1
+   },
+   "wave49final": {
+    "web": {
+     "verdict": "f",
+     "ssim": 0.9353,
+     "coveragePct": 4.984,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "f",
+     "ssim": 0.9643,
+     "coveragePct": 1.566,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "P",
+     "ssim": 0.9746,
+     "coveragePct": 3.006,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 3.349
+   }
+  },
+  {
+   "section": "css-contain",
+   "test": "css/css-contain/contain-content-011.html",
+   "foldedComponents": 1,
+   "componentIds": [
+    "wpt__css-contain__contain-content-011__3-063"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9873,
+     "coveragePct": 5.942,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9854,
+     "coveragePct": 5.835,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9164,
+     "coveragePct": 9.875,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 5.815
+   }
+  },
+  {
+   "section": "css-counter-styles",
+   "test": "css/css-counter-styles/cjk-decimal/counter-cjk-decimal.html",
+   "foldedComponents": 17,
+   "componentIds": [
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__0-303",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__1-304",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__2-305",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__3-306",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__4-307",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__5-308",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__6-309",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__7-310",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__8-311",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__9-312",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__10-313",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__11-314",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__12-315",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__13-316",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__14-317",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__15-318",
+    "wpt__css-counter-styles__cjk-decimal__counter-cjk-decimal__16-319"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 1,
+     "coveragePct": 0.946,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9934,
+     "coveragePct": 0.881,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9407,
+     "coveragePct": 0,
+     "frame": "390x696"
+    },
+    "refCoveragePct": 0.946
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-before-after-001.html",
+   "foldedComponents": 1,
+   "componentIds": [
+    "display-contents-before-after-001__1__3__0-017"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9701,
+     "coveragePct": 0.815,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.968,
+     "coveragePct": 0.77,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "P",
+     "ssim": 0.9712,
+     "coveragePct": 0.72,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 0.822
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-before-after-002.html",
+   "foldedComponents": 1,
+   "componentIds": [
+    "wpt__css-display__display-contents-before-after-002__2-020"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9713,
+     "coveragePct": 0.815,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9767,
+     "coveragePct": 0.771,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "P",
+     "ssim": 0.9775,
+     "coveragePct": 0.721,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 0.822
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-before-after-003.html",
+   "foldedComponents": 1,
+   "componentIds": [
+    "wpt__css-display__display-contents-before-after-003__3-024"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9701,
+     "coveragePct": 0.815,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9691,
+     "coveragePct": 0.77,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "P",
+     "ssim": 0.9713,
+     "coveragePct": 0.72,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 0.822
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-dynamic-before-after-001.html",
+   "foldedComponents": 1,
+   "componentIds": [
+    "display-contents-dynamic-before-after-001__1__3__0-053"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9898,
+     "coveragePct": 1.176,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9888,
+     "coveragePct": 1.102,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "P",
+     "ssim": 0.9898,
+     "coveragePct": 1.059,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 1.176
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-dynamic-pseudo-insertion-001.html",
+   "foldedComponents": 1,
+   "componentIds": [
+    "wpt__css-display__display-contents-dynamic-pseudo-insertion-001__0-132"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "f",
+     "ssim": 0.9914,
+     "coveragePct": 0.095,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "f",
+     "ssim": 0.912,
+     "coveragePct": 3.319,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.945,
+     "coveragePct": 2.991,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 0.121
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-fieldset-002.html",
+   "foldedComponents": 14,
+   "componentIds": [
+    "display-contents-fieldset-002__8__0-160",
+    "display-contents-fieldset-002__9__0-162",
+    "display-contents-fieldset-002__10__0-164",
+    "display-contents-fieldset-002__10__1-165",
+    "display-contents-fieldset-002__11__0-167",
+    "display-contents-fieldset-002__11__1-168",
+    "display-contents-fieldset-002__12__0__0-171",
+    "display-contents-fieldset-002__12__1-172",
+    "display-contents-fieldset-002__13__0__0-175",
+    "display-contents-fieldset-002__14__0__0-178",
+    "display-contents-fieldset-002__15__0__0-181",
+    "display-contents-fieldset-002__15__0__1-182",
+    "display-contents-fieldset-002__16__0__0-185",
+    "display-contents-fieldset-002__16__0__1-186"
+   ],
+   "refusals": {
+    "has-children": 3
+   },
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9733,
+     "coveragePct": 14.688,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "f",
+     "ssim": 0.6092,
+     "coveragePct": 16.2,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.4567,
+     "coveragePct": 14.202,
+     "frame": "390x678"
+    },
+    "refCoveragePct": 15.126
+   }
+  },
+  {
+   "section": "css-lists",
+   "test": "css/css-lists/counter-list-item.html",
+   "foldedComponents": 33,
+   "componentIds": [
+    "counter-list-item__1__0__0-281",
+    "counter-list-item__1__0__1-282",
+    "counter-list-item__1__0__2-283",
+    "counter-list-item__1__1__0-285",
+    "counter-list-item__1__1__1-286",
+    "counter-list-item__1__1__2-287",
+    "counter-list-item__1__2__0-289",
+    "counter-list-item__1__2__1-290",
+    "counter-list-item__1__2__2-291",
+    "counter-list-item__1__2__3-292",
+    "counter-list-item__1__2__4-293",
+    "counter-list-item__1__2__5-294",
+    "counter-list-item__2__0__0-297",
+    "counter-list-item__2__0__1-298",
+    "counter-list-item__2__0__2-299",
+    "counter-list-item__2__1__0-301",
+    "counter-list-item__2__1__1-302",
+    "counter-list-item__2__1__2-303",
+    "counter-list-item__2__2__0-305",
+    "counter-list-item__2__2__1-306",
+    "counter-list-item__2__2__2-307",
+    "counter-list-item__2__2__3-308",
+    "counter-list-item__2__2__4-309",
+    "counter-list-item__2__2__5-310",
+    "counter-list-item__3__0__0-313",
+    "counter-list-item__3__0__1-314",
+    "counter-list-item__3__0__2-315",
+    "counter-list-item__3__1__0-317",
+    "counter-list-item__3__1__1-318",
+    "counter-list-item__3__1__2-319",
+    "counter-list-item__3__1__3-320",
+    "counter-list-item__3__1__4-321",
+    "counter-list-item__3__1__5-322"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9975,
+     "coveragePct": 4.944,
+     "frame": "390x1028"
+    },
+    "ios": {
+     "verdict": "f",
+     "ssim": 0.7518,
+     "coveragePct": 4.625,
+     "frame": "390x959"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.7407,
+     "coveragePct": 1.513,
+     "frame": "390x1990"
+    },
+    "refCoveragePct": 4.973
+   }
+  },
+  {
+   "section": "css-lists",
+   "test": "css/css-lists/counter-reset-reversed-pseudo-001.html",
+   "foldedComponents": 2,
+   "componentIds": [
+    "counter-reset-reversed-pseudo-001__0__0-402",
+    "counter-reset-reversed-pseudo-001__0__1-403"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9867,
+     "coveragePct": 0.23,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9999,
+     "coveragePct": 0.217,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9884,
+     "coveragePct": 0.105,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 0.228
+   }
+  },
+  {
+   "section": "css-lists",
+   "test": "css/css-lists/counter-reset-reversed-pseudo-003.html",
+   "foldedComponents": 1,
+   "componentIds": [
+    "wpt__css-lists__counter-reset-reversed-pseudo-003__0-405"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 0.9936,
+     "coveragePct": 0.128,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9999,
+     "coveragePct": 0.12,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9961,
+     "coveragePct": 0.057,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 0.128
+   }
+  },
+  {
+   "section": "css-values",
+   "test": "css/css-values/attr-notype-fallback.html",
+   "foldedComponents": 3,
+   "componentIds": [
+    "wpt__css-values__attr-notype-fallback__0-042",
+    "wpt__css-values__attr-notype-fallback__1-043",
+    "wpt__css-values__attr-notype-fallback__3-045"
+   ],
+   "refusals": {
+    "unbaked": 3
+   },
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 1,
+     "coveragePct": 0.968,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 0.9993,
+     "coveragePct": 0.942,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9584,
+     "coveragePct": 0,
+     "frame": "390x1032"
+    },
+    "refCoveragePct": 0.968
+   }
+  },
+  {
+   "section": "css-values",
+   "test": "css/css-values/attr-style-sharing-4.html",
+   "foldedComponents": 2,
+   "componentIds": [
+    "wpt__css-values__attr-style-sharing-4__0-055",
+    "wpt__css-values__attr-style-sharing-4__1-056"
+   ],
+   "refusals": {},
+   "wave49final": {
+    "web": {
+     "verdict": "P",
+     "ssim": 1,
+     "coveragePct": 0.045,
+     "frame": "390x600"
+    },
+    "ios": {
+     "verdict": "P",
+     "ssim": 1,
+     "coveragePct": 0.041,
+     "frame": "390x600"
+    },
+    "android": {
+     "verdict": "f",
+     "ssim": 0.9959,
+     "coveragePct": 0,
+     "frame": "390x600"
+    },
+    "refCoveragePct": 0.045
+   }
+  }
+ ]
+}

@@ -1,0 +1,3 @@
+no corpus carrier of the before-box + after-text-fold combination
+SYNTHETIC afterFolded=true text=S children=null
+SYNTHETIC claim=true afterFolded=true text=S children=[h::before]

@@ -1,0 +1,487 @@
+{
+ "_note": "wave-50 lane B4 — the FULL corpus-wide blast radius of the extract-fixture.mjs auto-close mirror patch in this directory. Method: static (no-browser) re-extraction of all 1435 wave49-final corpus tests through extractFixture(), sha1 per fixture, before vs after. 1435 in, 10 changed. Every change is the REMOVAL of an ancestor component copy of text its descendants already carry; leafTextIdentical proves no glyph is lost on any of the 10. wave49Final cells are read from tools/titan/runs/wave49-final/sections/<sec>/manifest.json (verdict P=wptPass, f=scored fail, x=scoreExcluded).",
+ "totalCorpusTests": 1435,
+ "changedTests": 10,
+ "currentlyPassingCellsInBlastRadius": [
+  "css/css-backgrounds/animations/background-color-animation-with-table1.html android 0.9998",
+  "css/css-backgrounds/animations/background-color-animation-with-table3.html android 0.9998",
+  "css/css-counter-styles/counter-style-at-rule/broken-symbols.html web 0.9749"
+ ],
+ "rows": [
+  {
+   "test": "css/CSS2/cascade/inherit-computed-002.html",
+   "section": "CSS2",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.6001,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.6003,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.6007,
+     "verdict": "f"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 1,
+   "detail": [
+    {
+     "component": "cascade__inherit-computed-002__0",
+     "droppedText": "All borders are the same thickness.",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-backgrounds/animations/background-color-animation-with-table1.html",
+   "section": "css-backgrounds",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.9884,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.9904,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.9998,
+     "verdict": "P"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 3,
+   "detail": [
+    {
+     "component": "animations__background-color-animation-with-table1__0",
+     "droppedText": "1 2",
+     "hadRuns": false
+    },
+    {
+     "component": "animations__background-color-animation-with-table1__0__0",
+     "droppedText": "1",
+     "hadRuns": true
+    },
+    {
+     "component": "animations__background-color-animation-with-table1__0__1",
+     "droppedText": "2",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-backgrounds/animations/background-color-animation-with-table3.html",
+   "section": "css-backgrounds",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.9884,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.9904,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.9998,
+     "verdict": "P"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 3,
+   "detail": [
+    {
+     "component": "animations__background-color-animation-with-table3__0",
+     "droppedText": "1 2",
+     "hadRuns": false
+    },
+    {
+     "component": "animations__background-color-animation-with-table3__0__0",
+     "droppedText": "1",
+     "hadRuns": true
+    },
+    {
+     "component": "animations__background-color-animation-with-table3__0__1",
+     "droppedText": "2",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-backgrounds/animations/background-color-animation-with-table4.html",
+   "section": "css-backgrounds",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.9884,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.9904,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.9888,
+     "verdict": "f"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 3,
+   "detail": [
+    {
+     "component": "animations__background-color-animation-with-table4__0",
+     "droppedText": "1 2",
+     "hadRuns": false
+    },
+    {
+     "component": "animations__background-color-animation-with-table4__0__0",
+     "droppedText": "1",
+     "hadRuns": true
+    },
+    {
+     "component": "animations__background-color-animation-with-table4__0__1",
+     "droppedText": "2",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-contain/contain-content-004.html",
+   "section": "css-contain",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.8448,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.794,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.8286,
+     "verdict": "f"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 3,
+   "detail": [
+    {
+     "component": "contain-content-004__1",
+     "droppedText": "    ",
+     "hadRuns": false
+    },
+    {
+     "component": "contain-content-004__1__0",
+     "droppedText": "  ",
+     "hadRuns": true
+    },
+    {
+     "component": "contain-content-004__1__1",
+     "droppedText": " ",
+     "hadRuns": false
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-counter-styles/counter-style-at-rule/broken-symbols.html",
+   "section": "css-counter-styles",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.9749,
+     "verdict": "P"
+    },
+    "ios": {
+     "ssim": 0.9486,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.949,
+     "verdict": "f"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 1,
+   "detail": [
+    {
+     "component": "counter-style-at-rule__broken-symbols__0",
+     "droppedText": "Should have \"1.\" as bullet point.",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html",
+   "section": "css-counter-styles",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.9251,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.9317,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.9323,
+     "verdict": "f"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 2,
+   "detail": [
+    {
+     "component": "counter-style-at-rule__descriptor-suffix__0",
+     "droppedText": "-2-1012",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__descriptor-suffix__1",
+     "droppedText": "-2-1012",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-counter-styles/counter-style-at-rule/disclosure-styles.html",
+   "section": "css-counter-styles",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.6348,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.6503,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.6568,
+     "verdict": "f"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 9,
+   "detail": [
+    {
+     "component": "counter-style-at-rule__disclosure-styles__0",
+     "droppedText": "closed ltr closed rtl",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__0__0",
+     "droppedText": "closed ltr open ltr",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__0__1",
+     "droppedText": "closed rtl open rtl",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__1",
+     "droppedText": "closed ltr closed rtl",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__1__0",
+     "droppedText": "closed ltr open ltr",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__1__1",
+     "droppedText": "closed rtl open rtl",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__2",
+     "droppedText": "closed ltr closed rtl",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__2__0",
+     "droppedText": "closed ltr open ltr",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-style-at-rule__disclosure-styles__2__1",
+     "droppedText": "closed rtl open rtl",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "section": "css-counter-styles",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.8867,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.8883,
+     "verdict": "x:native-font-parity"
+    },
+    "android": {
+     "ssim": 0.8901,
+     "verdict": "x:native-font-parity"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 6,
+   "detail": [
+    {
+     "component": "counter-suffix__0__0",
+     "droppedText": "foobar",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-suffix__0__1",
+     "droppedText": "foobar",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-suffix__0__2",
+     "droppedText": "foobar",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-suffix__0__3",
+     "droppedText": "foobar",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-suffix__0__4",
+     "droppedText": "foobar",
+     "hadRuns": true
+    },
+    {
+     "component": "counter-suffix__0__5",
+     "droppedText": "foobar",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  },
+  {
+   "test": "css/css-writing-modes/direction-upright-002.html",
+   "section": "css-writing-modes",
+   "wave49Final": {
+    "web": {
+     "ssim": 0.5826,
+     "verdict": "f"
+    },
+    "ios": {
+     "ssim": 0.5758,
+     "verdict": "f"
+    },
+    "android": {
+     "ssim": 0.5946,
+     "verdict": "f"
+    }
+   },
+   "componentsWhoseDuplicateTextDropped": 20,
+   "detail": [
+    {
+     "component": "direction-upright-002__1__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__1__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__2__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__2__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__3__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__3__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__4__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__4__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__5__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__5__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__7__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__7__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__8__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__8__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__9__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__9__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__10__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__10__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    },
+    {
+     "component": "direction-upright-002__11__0",
+     "droppedText": "ABC",
+     "hadRuns": false
+    },
+    {
+     "component": "direction-upright-002__11__0__2",
+     "droppedText": "ABC",
+     "hadRuns": true
+    }
+   ],
+   "leafTextIdentical": true
+  }
+ ]
+}

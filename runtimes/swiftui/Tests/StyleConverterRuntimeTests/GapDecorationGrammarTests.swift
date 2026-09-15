@@ -116,6 +116,20 @@ final class GapDecorationGrammarTests: XCTestCase {
             IRProperty(type: "ColumnRuleStyle", data: .string("SOLID")),
             IRProperty(type: "ColumnRuleColor", data: .object([
                 "srgb": .object(["r": .double(1), "g": .double(0), "b": .double(0)])])),
+            // Wave 50 lane B10: the live ref-003 container wire carries
+            // BOTH gaps at 10px (verified in tools/titan/runs/wave49-final/
+            // sections/css-gaps/per-test-ir/wpt__css-gaps__flex__
+            // flex-gap-decorations-003.json). Omitting them used to be
+            // harmless and is not any more: GapDecorationBands needs the
+            // CROSS gap to rebuild the css-flexbox-1 §9.4 step 8 line
+            // boxes, so an incomplete wire here would describe a container
+            // that does not exist (three 50pt lines in a 170pt box with NO
+            // gaps leaves 20pt of leftover the real container spends on
+            // its row gaps).
+            IRProperty(type: "ColumnGap", data: .object([
+                "type": .string("length"), "px": .double(10)])),
+            IRProperty(type: "RowGap", data: .object([
+                "type": .string("length"), "px": .double(10)])),
         ]))
         XCTAssertNil(c.column.widthPx, "nothing was declared")
         XCTAssertTrue(c.column.paints)

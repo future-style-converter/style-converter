@@ -1,0 +1,36 @@
+percent-inset carriers=7  differing-used-inset=1
+CARRIER same  css-position/wpt__css-position__position-relative-001 position-relative-001__1__0-191
+   elementCb=ContainingBlock(widthPx=100.0, heightPx=100.0, absHeightPx=null) childCb=ContainingBlock(widthPx=null, heightPx=null, absHeightPx=null)
+   raw    top=100.0.dp start=100.0.dp bottom=null end=null pct=PercentInsets(top=100.0, right=null, bottom=null, left=100.0, insetBlockStart=null, insetBlockEnd=null, insetInlineStart=null, insetInlineEnd=null)
+   @elem  top=100.0.dp start=100.0.dp bottom=null end=null
+   @child top=100.0.dp start=100.0.dp bottom=null end=null
+CARRIER same  css-position/wpt__css-position__position-relative-002 position-relative-002__1__0__0-196
+   elementCb=ContainingBlock(widthPx=null, heightPx=null, absHeightPx=null) childCb=ContainingBlock(widthPx=100.0, heightPx=100.0, absHeightPx=null)
+   raw    top=-100.0.dp start=-100.0.dp bottom=null end=null pct=PercentInsets(top=-100.0, right=null, bottom=null, left=-100.0, insetBlockStart=null, insetBlockEnd=null, insetInlineStart=null, insetInlineEnd=null)
+   @elem  top=-100.0.dp start=-100.0.dp bottom=null end=null
+   @child top=-100.0.dp start=-100.0.dp bottom=null end=null
+CARRIER same  css-position/wpt__css-position__position-relative-003 position-relative-003__1__0-199
+   elementCb=ContainingBlock(widthPx=100.0, heightPx=100.0, absHeightPx=null) childCb=ContainingBlock(widthPx=null, heightPx=null, absHeightPx=null)
+   raw    top=100.0.dp start=100.0.dp bottom=null end=null pct=PercentInsets(top=100.0, right=null, bottom=null, left=100.0, insetBlockStart=null, insetBlockEnd=null, insetInlineStart=null, insetInlineEnd=null)
+   @elem  top=100.0.dp start=100.0.dp bottom=null end=null
+   @child top=100.0.dp start=100.0.dp bottom=null end=null
+CARRIER same  css-position/wpt__css-position__position-relative-004 position-relative-004__1__0-204
+   elementCb=ContainingBlock(widthPx=100.0, heightPx=100.0, absHeightPx=null) childCb=ContainingBlock(widthPx=null, heightPx=null, absHeightPx=null)
+   raw    top=-100.0.dp start=0.0.dp bottom=null end=0.0.dp pct=PercentInsets(top=-100.0, right=null, bottom=null, left=null, insetBlockStart=null, insetBlockEnd=null, insetInlineStart=null, insetInlineEnd=null)
+   @elem  top=-100.0.dp start=0.0.dp bottom=null end=0.0.dp
+   @child top=-100.0.dp start=0.0.dp bottom=null end=0.0.dp
+CARRIER same  css-position/wpt__css-position__position-relative-005 position-relative-005__1__0-209
+   elementCb=ContainingBlock(widthPx=100.0, heightPx=100.0, absHeightPx=null) childCb=ContainingBlock(widthPx=null, heightPx=null, absHeightPx=null)
+   raw    top=-100.0.dp start=0.0.dp bottom=null end=0.0.dp pct=PercentInsets(top=-100.0, right=null, bottom=null, left=null, insetBlockStart=null, insetBlockEnd=null, insetInlineStart=null, insetInlineEnd=null)
+   @elem  top=-100.0.dp start=0.0.dp bottom=null end=0.0.dp
+   @child top=-100.0.dp start=0.0.dp bottom=null end=0.0.dp
+CARRIER DIFFER css-position/wpt__css-position__position-relative-006 position-relative-006__1__0-214
+   elementCb=ContainingBlock(widthPx=100.0, heightPx=null, absHeightPx=null) childCb=ContainingBlock(widthPx=100.0, heightPx=100.0, absHeightPx=null)
+   raw    top=-10000.0.dp start=null bottom=null end=null pct=PercentInsets(top=-10000.0, right=null, bottom=null, left=null, insetBlockStart=null, insetBlockEnd=null, insetInlineStart=null, insetInlineEnd=null)
+   @elem  top=0.0.dp start=null bottom=null end=null
+   @child top=-10000.0.dp start=null bottom=null end=null
+CARRIER same  css-position/wpt__css-position__position-relative-008 position-relative-008__1__0__0-218
+   elementCb=ContainingBlock(widthPx=null, heightPx=null, absHeightPx=null) childCb=ContainingBlock(widthPx=null, heightPx=null, absHeightPx=null)
+   raw    top=100.0.dp start=null bottom=null end=null pct=PercentInsets(top=100.0, right=null, bottom=null, left=null, insetBlockStart=null, insetBlockEnd=null, insetInlineStart=null, insetInlineEnd=null)
+   @elem  top=100.0.dp start=null bottom=null end=null
+   @child top=100.0.dp start=null bottom=null end=null

@@ -1,0 +1,216 @@
+{
+ "_note": "wave-50 gate LOST cells — device bisection of css-tables/height-distribution/percentage-sizing-of-table-cell-children-003/-004/-006 (Android). Every run: the same emulator (Medium_Phone_API_36.1, one -read-only instance), the same harness app source (comment-only diff since 5aa92ed6), byte-identical per-test IR (diff of per-test-ir JSON between wave49-final and wave50-final: 0 lines). The green `overflow-y:auto; height:100%; width:100px; min-height:100px` child of a `height:100%` table cell rendered 98x98 green at the wave-49 gate and renders 0-tall (the abspos z-index:-1 red 100x100 square shows through: novelPx 10000) in EVERY wave-50 run — including A/B 4, the complete wave-49 Compose runtime. The Compose runtime (retro R1-R6/F1-F3 AND wave 50) is therefore EXCLUDED as the cause; so is the IR. Remaining suspects: the build toolchain/dependency resolution, the emulator system image or provisioning flags, or a capture-timing dependency the quiet host exposes. Sibling -005 (no overflow:auto) and -007 (same percent-clamp lane, no overflow) are byte-unchanged across all runs.",
+ "generatedBy": "orchestrator, 2026-09-15",
+ "runs": {
+  "wave49-final": {
+   "label": "wave-49 gate (2026-08-30): wave-49 tree",
+   "androidCells": {
+    "percentage-sizing-of-table-cell-007.html": {
+     "ssim": 0.9412,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-003.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-004.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-005.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-006.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    }
+   }
+  },
+  "wave50-final": {
+   "label": "wave-50 gate: final wave-50 tree",
+   "androidCells": {
+    "percentage-sizing-of-table-cell-007.html": {
+     "ssim": 0.9412,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-003.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-004.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-005.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-006.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    }
+   }
+  },
+  "wave50-ab1": {
+   "label": "A/B 1: wave-50 tree with retro R2 PercentSizeClamp lane disabled (SizingClamps.percentClampSpec -> null)",
+   "androidCells": {
+    "percentage-sizing-of-table-cell-007.html": {
+     "ssim": 0.9412,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-003.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-004.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-005.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-006.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    }
+   }
+  },
+  "wave50-ab2": {
+   "label": "A/B 2: every wave-50 change under runtimes/compose/src/main reverted (Compose main == retro HEAD 747b28e4)",
+   "androidCells": {
+    "percentage-sizing-of-table-cell-007.html": {
+     "ssim": 0.9412,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-003.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-004.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-005.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-006.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    }
+   }
+  },
+  "wave50-ab3": {
+   "label": "A/B 3: wave-49 (5aa92ed6) versions of sizing/*, DynamicValueResolver, LengthValue, layout/{Facade,Applier,Config,Extractor,InlineBlockAtom}, layout/flexbox/*, table/TableBoxTree, scrolling/ScrollExtractor swapped in (26 files)",
+   "androidCells": {
+    "percentage-sizing-of-table-cell-007.html": {
+     "ssim": 0.9412,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-003.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-004.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-005.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-006.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    }
+   }
+  },
+  "wave50-ab4": {
+   "label": "A/B 4: the COMPLETE wave-49 (5aa92ed6) runtimes/compose/src/main (226 files), harness app and IR at the wave-50 tree",
+   "androidCells": {
+    "percentage-sizing-of-table-cell-007.html": {
+     "ssim": 0.9412,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-003.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-004.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    },
+    "percentage-sizing-of-table-cell-children-005.html": {
+     "ssim": 0.9954,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelPx": 0
+    },
+    "percentage-sizing-of-table-cell-children-006.html": {
+     "ssim": 0.9966,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelPx": 10000
+    }
+   }
+  }
+ }
+}

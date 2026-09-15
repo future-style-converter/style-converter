@@ -89,6 +89,15 @@ import { safe, fixtureStem } from './safe-name.mjs';
 // wave-49 calibration MISSED the recall bar (it clears the false-positive bar
 // and the mutation test) — full numbers at NOVEL_INK_VETO_ENABLED.
 import { computeNovelInk, computeNovelInkFailed } from './novel-ink.mjs';
+// wave-50 B12: the DISPLACEMENT-AWARE successor to the novel-ink veto
+// (BACKLOG obligation #4). Same shipped-disarmed contract as novel-ink — the
+// block is always stamped for triage, and only reaches wptPass under
+// TITAN_DEGENERATE_VETO=1. It MISSED its own pre-registered recall bar
+// (37.1 % against 95 %; tools/titan/results/wave50-B12/README.md §5.3), so the
+// default is OFF and the value here is the triage stamp: precision 92.9 % on
+// the hand-verified sample, 13 real degenerate passes surfaced with one false
+// alarm.
+import { computeDegenerate, degenerateVetoFailed, isArmed as degenerateArmed } from './degenerate-veto-probe.mjs';
 
 const pixelmatch = pixelmatchDefault.default ?? pixelmatchDefault;
 
@@ -550,6 +559,11 @@ async function diffWebVsRef(webPath, refPath) {
   // three platforms at ssim 1.0000 and histogramKL max 0.0591, under the 0.1
   // bar). Computed on the SAME padded pair every other metric sees.
   metrics.novelInk = computeNovelInk(A, B);
+  // wave-50 B12: the same question with a DISPLACEMENT-AWARE denominator —
+  // how much of the disagreement survives once every pixel a rigid
+  // translation of reference ink explains has been removed, in both
+  // directions. Computed on the SAME padded pair as everything above.
+  metrics.degenerate = computeDegenerate(A, B);
   return metrics;
 }
 
@@ -612,7 +626,7 @@ function checkFuzzyMatch(metrics, fuzzy) {
  *  rescued by SSIM or by a declared fuzzy budget. */
 function computeWptPass(ssim, fuzzyMatch, presenceFailed = false,
                         colorFailed = false, coverageRatioFailed = false,
-                        novelInkVeto = false) {
+                        novelInkVeto = false, degenerateVeto = false) {
   // The presence veto runs FIRST: a capture that renders none of the ref's
   // ink can never be a pass, whatever the whole-canvas metrics say.
   if (presenceFailed === true) return false;
@@ -628,6 +642,14 @@ function computeWptPass(ssim, fuzzyMatch, presenceFailed = false,
   // 2/12 on an unbiased one, against the 95 % required), so it ships OFF by
   // default rather than as a half-calibrated gate. Numbers below.
   if (novelInkVeto === true) return false;
+  // wave-50 DEGENERATE veto: the capture's disagreement is mostly paint that
+  // no small rigid translation of the reference explains, in either direction.
+  // Callers pass `false` unless TITAN_DEGENERATE_VETO is set — the wave-50
+  // measurement cleared the false-positive bar at the point estimate (1/65)
+  // but missed the recall bar badly (13/35 = 37.1 % against the 95 %
+  // required), so it ships OFF exactly like novel-ink rather than as a
+  // half-calibrated gate. Working: tools/titan/results/wave50-B12/.
+  if (degenerateVeto === true) return false;
   const ssimPass = typeof ssim === 'number' && ssim >= 0.95;
   return ssimPass || fuzzyMatch === true;
 }
@@ -680,6 +702,14 @@ const NOVEL_INK_VETO_ENABLED = process.env.TITAN_NOVEL_INK_VETO === '1';
  *  rule and a unit test can pin it. */
 function novelInkVetoActive(novelInkFailed) {
   return NOVEL_INK_VETO_ENABLED && novelInkFailed === true;
+}
+
+/** Gate the wave-50 displacement-aware stamp behind ITS OWN opt-in switch,
+ *  read through the probe module so there is one definition of "armed". Kept
+ *  as a named helper for the same reason as novelInkVetoActive: both diff
+ *  paths provably apply the same rule and a unit test can pin it. */
+function degenerateVetoActive(degenerateFailed) {
+  return degenerateArmed() && degenerateFailed === true;
 }
 
 /** The WPT capture canvas background — WHITE, the corpus-v4 boundary
@@ -1725,13 +1755,16 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
     // wave-49: the novel-ink verdict is ALWAYS stamped (honest per-cell record
     // + triage), and only reaches wptPass when the operator opted in.
     diff.novelInkFailed = computeNovelInkFailed(diff.novelInk);
+    // wave-50 B12: always stamped, opt-in veto — same contract, own switch.
+    diff.degenerateFailed = degenerateVetoFailed(diff.degenerate);
     // WPT-native pass: raw SSIM ≥ 0.95 OR within the declared fuzzy
     // tolerance — VETOED by the semantic-presence gate (corpus-v4.3: a blank
     // capture can no longer "pass" a mostly-blank ref, see computeWptPass)
     // and by the two wave-25 honesty vetoes above.
     // Raw `diff.ssim` is left untouched so downstream can honour all bars.
     diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
-      diff.colorFailed, diff.coverageRatioFailed, novelInkVetoActive(diff.novelInkFailed));
+      diff.colorFailed, diff.coverageRatioFailed, novelInkVetoActive(diff.novelInkFailed),
+      degenerateVetoActive(diff.degenerateFailed));
     diff.stitchedComponents = matched.length;
     return diff;
   } catch (err) {
@@ -1782,10 +1815,13 @@ async function diffComposedVsRef({ platformDir, testKey, refPng, fuzzy }) {
     // stitch path above. BOTH measured wave-48 wrong-colour lies (the
     // css-view-transitions red squares) came through THIS composed path.
     diff.novelInkFailed = computeNovelInkFailed(diff.novelInk);
+    // wave-50 B12: always stamped, opt-in veto — same contract, own switch.
+    diff.degenerateFailed = degenerateVetoFailed(diff.degenerate);
     // WPT-native pass: raw SSIM ≥ 0.95 OR within fuzzy — presence-, colour-
     // and coverage-ratio-vetoed.
     diff.wptPass = computeWptPass(diff.ssim, diff.wptFuzzyMatch, diff.presenceFailed,
-      diff.colorFailed, diff.coverageRatioFailed, novelInkVetoActive(diff.novelInkFailed));
+      diff.colorFailed, diff.coverageRatioFailed, novelInkVetoActive(diff.novelInkFailed),
+      degenerateVetoActive(diff.degenerateFailed));
     diff.composed = true;                                    // provenance marker
     return diff;
   } catch (err) {
@@ -2391,6 +2427,7 @@ export {
   // applies it, exported so the unit pins can prove the veto is OFF by default
   // and that computeWptPass's sixth argument is a real veto when it is ON.
   NOVEL_INK_VETO_ENABLED, novelInkVetoActive,
+  degenerateVetoActive,
   // wave-49 / BACKLOG #5 column-presence assertion (see its banner).
   assertPlatformColumns, PLATFORM_COLUMN_KEYS, NATIVE_PARITY_KEYS,
 };

@@ -1,0 +1,9 @@
+css-contain/css-contain__contain-content-004.json member=contain-content-004__1__0__0 tag=td text=" " props=[BackgroundColor,PaddingBottom,PaddingLeft,PaddingRight,PaddingTop,VerticalAlign]
+css-contain/css-contain__contain-content-004.json member=contain-content-004__1__0__1 tag=td text=" " props=[BackgroundColor,PaddingBottom,PaddingLeft,PaddingRight,PaddingTop,VerticalAlign]
+css-overflow/css-overflow__line-clamp__block-ellipsis-032.tentative.json member=line-clamp__block-ellipsis-032.tentative__1__1 tag=span text="        " props=[BackgroundColor,WhiteSpace]
+css-overflow/css-overflow__line-clamp__block-ellipsis-032.tentative.json member=line-clamp__block-ellipsis-032.tentative__2__1 tag=span text="        " props=[BackgroundColor,WhiteSpace]
+css-overflow/css-overflow__line-clamp__block-ellipsis-032.tentative.json member=line-clamp__block-ellipsis-032.tentative__3__1 tag=span text="        " props=[BackgroundColor,WhiteSpace]
+css-pseudo/css-pseudo__first-letter-001.json member=first-letter-001__1__0 tag=span text=" " props=[BackgroundColor,BorderBottomColor,BorderBottomStyle,BorderBottomWidth,BorderLeftColor,BorderLeftStyle,BorderLeftWidth,BorderRightColor,BorderRightStyle,BorderRightWidth,BorderTopColor,BorderTopStyle,BorderTopWidth,BoxSizing,Display,MarginBottom,MarginLeft,MarginRight,MarginTop,OverflowX,OverflowY,PaddingBottom,PaddingLeft,PaddingRight,PaddingTop,Position]
+
+--- 298 runs-hosts scanned; 6 whitespace-only glyph members
+property histogram: BackgroundColor×6 PaddingTop×3 PaddingRight×3 PaddingBottom×3 PaddingLeft×3 WhiteSpace×3 VerticalAlign×2 Position×1 BoxSizing×1 MarginTop×1 MarginRight×1 MarginBottom×1 MarginLeft×1 BorderTopWidth×1 BorderRightWidth×1 BorderBottomWidth×1 BorderLeftWidth×1 BorderTopStyle×1 BorderRightStyle×1 BorderBottomStyle×1 BorderLeftStyle×1 BorderTopColor×1 BorderRightColor×1 BorderBottomColor×1 BorderLeftColor×1 Display×1 OverflowX×1 OverflowY×1

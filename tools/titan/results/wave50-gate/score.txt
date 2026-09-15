@@ -1,0 +1,458 @@
+score-gate  prev=wave49-final  cur=wave50-final
+  prev totals: web 1205/1379  ios 1081/1366  android 1058/1366
+  cur  totals: web 1215/1379  ios 1089/1369  android 1077/1369
+  per-cell: gained 40  lost 3  newly-measured 6  unmeasured-now 0  movers(|Δ|>=0.01) 46
+  per section (prev → cur):
+    CSS2                     web 43/47→44/47  ios 40/47→40/47  android 40/47→40/47
+    css-anchor-position      web 30/32→30/32  ios 24/32→24/32  android 26/32→26/32
+    css-backgrounds          web 23/31→26/31  ios 22/31→25/31  android 25/31→26/31
+    css-break                web 37/48→37/48  ios 29/48→29/48  android 31/48→31/48
+    css-cascade              web 34/42→34/42  ios 33/42→33/42  android 34/42→34/42
+    css-color                web 39/48→39/48  ios 39/48→39/48  android 38/48→40/48
+    css-contain              web 46/48→48/48  ios 38/48→39/48  android 36/48→37/48
+    css-counter-styles       web 35/48→37/48  ios 22/36→24/38  android 21/36→24/38
+    css-display              web 45/47→45/47  ios 40/47→40/47  android 40/47→40/47
+    css-flexbox              web 47/48→47/48  ios 44/48→44/48  android 45/48→45/48
+    css-gaps                 web 44/48→44/48  ios 44/48→44/48  android 44/48→44/48
+    css-grid                 web 48/48→48/48  ios 47/48→47/48  android 47/48→47/48
+    css-images               web 43/48→44/48  ios 35/48→36/48  android 34/48→35/48
+    css-lists                web 42/48→42/48  ios 41/47→41/48  android 39/47→41/48
+    css-masking              web 41/47→41/47  ios 38/47→38/47  android 35/47→37/47
+    css-multicol             web 45/48→45/48  ios 40/48→40/48  android 43/48→43/48
+    css-overflow             web 46/47→46/47  ios 46/47→46/47  android 44/47→46/47
+    css-position             web 35/41→35/41  ios 33/41→33/41  android 32/41→33/41
+    css-pseudo               web 33/42→33/42  ios 32/42→32/42  android 31/42→31/42
+    css-sizing               web 47/48→47/48  ios 44/48→44/48  android 45/48→45/48
+    css-tables               web 41/47→41/47  ios 36/47→36/47  android 37/47→34/47
+    css-text                 web 35/48→35/48  ios 33/48→33/48  android 28/48→28/48
+    css-text-decor           web 42/48→42/48  ios 30/48→30/48  android 28/48→28/48
+    css-transforms           web 47/48→47/48  ios 46/48→46/48  android 41/48→42/48
+    css-ui                   web 42/48→42/48  ios 42/48→42/48  android 40/48→41/48
+    css-values               web 43/48→44/48  ios 39/48→40/48  android 37/48→40/48
+    css-view-transitions     web 30/46→30/46  ios 24/46→24/46  android 25/46→26/46
+    css-writing-modes        web 36/48→36/48  ios 26/48→26/48  android 24/48→24/48
+    filter-effects           web 40/46→40/46  ios 34/46→34/46  android 30/46→31/46
+    selectors                web 46/48→46/48  ios 40/48→40/48  android 38/48→38/48
+  LOST (P → f) — diagnose every one:
+    css-tables/css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-003.html android  0.9954 → 0.9966
+    css-tables/css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-004.html android  0.9954 → 0.9966
+    css-tables/css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-006.html android  0.9954 → 0.9966
+  GAINED (f → P):
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table1.html ios  0.9904 → 1
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table1.html web  0.9884 → 1
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table3.html ios  0.9904 → 1
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table3.html web  0.9884 → 1
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table4.html android  0.9888 → 0.9935
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table4.html ios  0.9904 → 1
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table4.html web  0.9884 → 1
+    css-color/css/css-color/currentcolor-001.html android  0.8957 → 0.9982
+    css-color/css/css-color/currentcolor-002.html android  0.8957 → 0.9982
+    css-contain/css/css-contain/contain-content-004.html web  0.8448 → 0.9985
+    css-contain/css/css-contain/contain-html-overflow-002.html android  0.8698 → 0.9989
+    css-contain/css/css-contain/contain-html-overflow-002.html ios  0.8705 → 0.9996
+    css-contain/css/css-contain/contain-html-overflow-002.html web  0.8709 → 1
+    css-counter-styles/css/css-counter-styles/cjk-decimal/counter-cjk-decimal.html android  0.9407 → 0.9777
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html android  0.949 → 0.9713
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html ios  0.9486 → 0.9713
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html android  0.9323 → 0.9593
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html ios  0.9317 → 0.9596
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html web  0.9251 → 0.9533
+    css-counter-styles/css/css-counter-styles/counter-suffix.html web  0.8867 → 0.9818
+    css-images/css/css-images/gradient/gradient-hue-direction.html android  0.623 → 0.9973
+    css-images/css/css-images/gradient/gradient-hue-direction.html ios  0.6235 → 0.997
+    css-images/css/css-images/gradient/gradient-hue-direction.html web  0.6241 → 1
+    css-lists/css/css-lists/counter-reset-reversed-pseudo-001.html android  0.9884 → 0.996
+    css-lists/css/css-lists/counter-reset-reversed-pseudo-003.html android  0.9961 → 0.9975
+    css-masking/css/css-masking/clip-path/clip-path-contentBox-1d.html android  0.8775 → 0.9585
+    css-masking/css/css-masking/clip-path/clip-path-contentBox-1e.html android  0.8875 → 0.9695
+    css-overflow/css/css-overflow/line-clamp/line-clamp-006.html android  0.9446 → 0.9701
+    css-overflow/css/css-overflow/line-clamp/line-clamp-007.html android  0.9409 → 0.9701
+    css-position/css/css-position/position-relative-006.html android  0.9966 → 0.9967
+    css-transforms/css/css-transforms/css3-transform-scale-002.html android  0.9311 → 0.9981
+    css-ui/css/css-ui/box-sizing-026.html android  0.9966 → 0.9967
+    css-values/css/css-values/angle-units-001.html android  0.9966 → 0.9967
+    css-values/css/css-values/angle-units-001.html ios  0.9974 → 0.9974
+    css-values/css/css-values/angle-units-001.html web  0.999 → 0.999
+    css-values/css/css-values/attr-notype-fallback.html android  0.9584 → 0.9983
+    css-values/css/css-values/attr-style-sharing-4.html android  0.9959 → 0.9998
+    css-view-transitions/css/css-view-transitions/3d-transform-incoming.html android  0.8937 → 1
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-005.html web  0.0001 → 0.9947
+    filter-effects/css/filter-effects/backdrop-filter-transform.html android  0.9118 → 0.9609
+  NEWLY MEASURED:
+    css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html android  now f 0.9423
+    css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html ios  now f 0.942
+    css-counter-styles/css/css-counter-styles/counter-suffix.html android  now f 0.9051
+    css-counter-styles/css/css-counter-styles/counter-suffix.html ios  now f 0.9285
+    css-lists/css/css-lists/counter-004.html android  now f 0.7531
+    css-lists/css/css-lists/counter-004.html ios  now f 0.7532
+  MOVERS (same verdict, |Δssim| >= 0.01):
+    css-backgrounds/css/css-backgrounds/background-attachment-fixed-inside-transform-1.html ios  P 0.9843 → 0.9964 (+0.0121)
+    css-break/css/css-break/block-max-height-003.html android  f 0.4627 → 0.41 (-0.0527)
+    css-break/css/css-break/block-max-height-003b.html android  f 0.4481 → 0.4108 (-0.0373)
+    css-contain/css/css-contain/contain-content-004.html ios  f 0.794 → 0.8093 (+0.0153)
+    css-contain/css/css-contain/contain-content-011.html android  f 0.9164 → 0.9284 (+0.012)
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html web  P 0.9749 → 1 (+0.0251)
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html android  f 0.6568 → 0.6242 (-0.0326)
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html ios  f 0.6503 → 0.6127 (-0.0376)
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html web  f 0.6348 → 0.6454 (+0.0106)
+    css-display/css/css-display/display-contents-fieldset-002.html android  f 0.4567 → 0.4786 (+0.0219)
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html android  P 0.9549 → 0.9994 (+0.0445)
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html ios  P 0.9549 → 0.9931 (+0.0382)
+    css-lists/css/css-lists/counter-list-item.html android  f 0.7407 → 0.7064 (-0.0343)
+    css-overflow/css/css-overflow/line-clamp/line-clamp-005.html android  P 0.9615 → 0.982 (+0.0205)
+    css-transforms/css/css-transforms/backface-visibility-hidden-animated-001.html android  P 0.9647 → 0.989 (+0.0243)
+    css-transforms/css/css-transforms/backface-visibility-hidden-animated-002.html android  P 0.9647 → 0.989 (+0.0243)
+    css-transforms/css/css-transforms/css-rotate-2d-3d-001.html android  P 0.9578 → 0.9981 (+0.0403)
+    css-transforms/css/css-transforms/css-scale-of-clip-path.html android  f 0.9303 → 0.9414 (+0.0111)
+    css-transforms/css/css-transforms/css-transform-3d-rotate3d-X-negative.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-3d-rotate3d-X-positive.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-3d-rotate3d-Y-negative.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-3d-rotate3d-Y-positive.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-3d-rotateX-negative.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-3d-rotateX-positive.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-3d-rotateY-negative.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-3d-rotateY-positive.html android  P 0.986 → 0.9975 (+0.0115)
+    css-transforms/css/css-transforms/css-transform-inherit-scale.html android  f 0.9646 → 0.9965 (+0.0319)
+    css-transforms/css/css-transforms/css3-transform-rotateY.html android  P 0.9826 → 0.9981 (+0.0155)
+    css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-new.html android  f 0.9465 → 0.9739 (+0.0274)
+    css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-old.html android  f 0.9465 → 0.9739 (+0.0274)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-001.html android  f 0.8075 → 0.8404 (+0.0329)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-002.html android  f 0.8075 → 0.8404 (+0.0329)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-003.html android  f 0.8075 → 0.8404 (+0.0329)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-004.html android  f 0.8075 → 0.8404 (+0.0329)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-005.html android  f 0.8204 → 0.9103 (+0.0899)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-006.html android  f 0.8204 → 0.9103 (+0.0899)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-007.html android  f 0.8204 → 0.9103 (+0.0899)
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-008.html android  f 0.8204 → 0.9103 (+0.0899)
+    css-writing-modes/css/css-writing-modes/direction-upright-001.html web  f 0.8095 → 0.9269 (+0.1174)
+    css-writing-modes/css/css-writing-modes/direction-upright-002.html ios  f 0.5758 → 0.602 (+0.0262)
+    css-writing-modes/css/css-writing-modes/direction-upright-002.html web  f 0.5826 → 0.7002 (+0.1176)
+    CSS2/css/CSS2/borders/border-conflict-style-107.html web  f 0.782 → 0.9381 (+0.1561)
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-005.html android  f 0.0001 → 0.9309 (+0.9308)
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-005.html ios  f 0.0001 → 0.9538 (+0.9537)
+    filter-effects/css/filter-effects/backdrop-filter-box-shadow.html android  P 0.9823 → 0.9954 (+0.0131)
+    filter-effects/css/filter-effects/backdrop-filter-edge-pixels-2.html android  P 0.9508 → 0.9808 (+0.03)
+  WATCHLIST (tools/titan/results/wave50-gate/watchlist.txt):
+    filter-effects/css/filter-effects/backdrop-filter-basic-blur.html web  P 0.9943 → P 0.9943   [filter-effects/backdrop-filter-basic-blur]
+    filter-effects/css/filter-effects/backdrop-filter-basic-blur.html ios  f 0.9469 → f 0.9469   [filter-effects/backdrop-filter-basic-blur]
+    filter-effects/css/filter-effects/backdrop-filter-basic-blur.html android  f 0.899 → f 0.899   [filter-effects/backdrop-filter-basic-blur]
+    css-values/css/css-values/angle-units-001.html web  f 0.999 → P 0.999   [css-values/angle-units-001]
+    css-values/css/css-values/angle-units-001.html ios  f 0.9974 → P 0.9974   [css-values/angle-units-001]
+    css-values/css/css-values/angle-units-001.html android  f 0.9966 → P 0.9967   [css-values/angle-units-001]
+    css-values/css/css-values/angle-units-002.html web  P 0.999 → P 0.999   [css-values/angle-units-002]
+    css-values/css/css-values/angle-units-002.html ios  P 0.9974 → P 0.9974   [css-values/angle-units-002]
+    css-values/css/css-values/angle-units-002.html android  P 0.9967 → P 0.9967   [css-values/angle-units-002]
+    css-values/css/css-values/angle-units-003.html web  P 0.999 → P 0.999   [css-values/angle-units-003]
+    css-values/css/css-values/angle-units-003.html ios  P 0.9974 → P 0.9974   [css-values/angle-units-003]
+    css-values/css/css-values/angle-units-003.html android  P 0.9967 → P 0.9967   [css-values/angle-units-003]
+    css-values/css/css-values/angle-units-004.html web  P 0.999 → P 0.999   [css-values/angle-units-004]
+    css-values/css/css-values/angle-units-004.html ios  P 0.9974 → P 0.9974   [css-values/angle-units-004]
+    css-values/css/css-values/angle-units-004.html android  P 0.9967 → P 0.9967   [css-values/angle-units-004]
+    css-values/css/css-values/angle-units-005.html web  P 0.999 → P 0.999   [css-values/angle-units-005]
+    css-values/css/css-values/angle-units-005.html ios  P 0.9974 → P 0.9974   [css-values/angle-units-005]
+    css-values/css/css-values/angle-units-005.html android  P 0.9967 → P 0.9967   [css-values/angle-units-005]
+    css-position/css/css-position/position-relative-006.html android  f 0.9966 → P 0.9967   [css-position/position-relative-006 android]
+    css-position/css/css-position/position-relative-001.html android  P 0.9967 → P 0.9967   [css-position/position-relative-001 android]
+    css-position/css/css-position/position-relative-002.html android  P 0.9967 → P 0.9967   [css-position/position-relative-002 android]
+    css-position/css/css-position/position-relative-003.html android  P 0.9589 → P 0.9589   [css-position/position-relative-003 android]
+    css-position/css/css-position/position-relative-004.html android  P 0.9589 → P 0.9589   [css-position/position-relative-004 android]
+    css-position/css/css-position/position-relative-005.html android  P 0.9967 → P 0.9967   [css-position/position-relative-005 android]
+    css-position/css/css-position/position-relative-008.html android  P 0.9984 → P 0.9984   [css-position/position-relative-008 android]
+    css-masking/css/css-masking/clip-path/clip-path-contentBox-1d.html android  f 0.8775 → P 0.9585   [css-masking/clip-path/clip-path-contentBox-1d android]
+    css-masking/css/css-masking/clip-path/clip-path-contentBox-1e.html android  f 0.8875 → P 0.9695   [css-masking/clip-path/clip-path-contentBox-1e android]
+    css-multicol/css/css-multicol/balance-grid-container.html android  f 0.8721 → f 0.8721   [css-multicol/balance-grid-container android]
+    css-display/css/css-display/display-contents-before-after-003.html android  P 0.9713 → P 0.9703   [css-display/display-contents-before-after-003 android]
+    css-overflow/css/css-overflow/line-clamp/block-ellipsis-022.html android  P 0.9863 → P 0.9863   [css-overflow/line-clamp/block-ellipsis-022 android]
+    css-text-decor/css/css-text-decor/text-decoration-propagation-02.html android  P 0.9988 → P 0.9988   [css-text-decor/text-decoration-propagation-02 android]
+    css-text-decor/css/css-text-decor/text-decoration-propagation-03.html android  P 0.9988 → P 0.9988   [css-text-decor/text-decoration-propagation-03 android]
+    css-transforms/css/css-transforms/backface-visibility-hidden-006.html android  P 1 → P 1   [css-transforms/backface-visibility-hidden-006 android]
+    filter-effects/css/filter-effects/backdrop-filter-image-size-filter-size-mismatch.html android  P 0.9841 → P 0.9841   [filter-effects/backdrop-filter-image-size-filter-size-mismatch android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-001.html android  f 0.8075 → f 0.8404   [css-writing-modes/ch-units-vrl-001 android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-002.html android  f 0.8075 → f 0.8404   [css-writing-modes/ch-units-vrl-002 android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-003.html android  f 0.8075 → f 0.8404   [css-writing-modes/ch-units-vrl-003 android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-004.html android  f 0.8075 → f 0.8404   [css-writing-modes/ch-units-vrl-004 android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-005.html android  f 0.8204 → f 0.9103   [css-writing-modes/ch-units-vrl-005 android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-006.html android  f 0.8204 → f 0.9103   [css-writing-modes/ch-units-vrl-006 android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-007.html android  f 0.8204 → f 0.9103   [css-writing-modes/ch-units-vrl-007 android]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-008.html android  f 0.8204 → f 0.9103   [css-writing-modes/ch-units-vrl-008 android]
+    css-tables/css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html android  f 0.8528 → f 0.8528   [css-tables/collapsed-border-sideways-rl-rtl-overflow android]
+    css-tables/css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html android  f 0.8506 → f 0.8506   [css-tables/collapsed-border-vertical-lr-rtl-overflow android]
+    css-tables/css/css-tables/collapsed-border-vertical-rtl-overflow.html android  f 0.8528 → f 0.8528   [css-tables/collapsed-border-vertical-rtl-overflow android]
+    css-writing-modes/css/css-writing-modes/inline-box-orthogonal-child-with-margins.html android  P 0.9709 → P 0.9709   [css-writing-modes/inline-box-orthogonal-child-with-margins android]
+    css-writing-modes/css/css-writing-modes/baseline-with-orthogonal-flow-001.html android  P 0.9817 → P 0.9817   [css-writing-modes/baseline-with-orthogonal-flow-001 android]
+    css-counter-styles/css/css-counter-styles/cjk-decimal/counter-cjk-decimal.html android  f 0.9407 → P 0.9777   [css-counter-styles/cjk-decimal/counter-cjk-decimal android]
+    css-values/css/css-values/attr-notype-fallback.html android  f 0.9584 → P 0.9983   [css-values/attr-notype-fallback android]
+    css-values/css/css-values/attr-style-sharing-4.html android  f 0.9959 → P 0.9998   [css-values/attr-style-sharing-4 android]
+    css-lists/css/css-lists/counter-reset-reversed-pseudo-001.html android  f 0.9884 → P 0.996   [css-lists/counter-reset-reversed-pseudo-001 android]
+    css-lists/css/css-lists/counter-reset-reversed-pseudo-003.html android  f 0.9961 → P 0.9975   [css-lists/counter-reset-reversed-pseudo-003 android]
+    css-lists/css/css-lists/counter-list-item-2.html android  P 0.9811 → P 0.9811   [css-lists/counter-list-item android]
+    css-lists/css/css-lists/counter-list-item-3.html android  P 0.9815 → P 0.9815   [css-lists/counter-list-item android]
+    css-lists/css/css-lists/counter-list-item-slot-order.html android  P 0.9523 → P 0.9523   [css-lists/counter-list-item android]
+    css-lists/css/css-lists/counter-list-item.html android  f 0.7407 → f 0.7064   [css-lists/counter-list-item android]
+    css-contain/css/css-contain/contain-content-011.html android  f 0.9164 → f 0.9284   [css-contain/contain-content-011 android]
+    css-display/css/css-display/display-contents-fieldset-002.html android  f 0.4567 → f 0.4786   [css-display/display-contents-fieldset-002 android]
+    css-display/css/css-display/display-contents-before-after-001.html android  P 0.9712 → P 0.9692   [css-display/display-contents-before-after-001 android]
+    css-display/css/css-display/display-contents-before-after-002.html android  P 0.9775 → P 0.9793   [css-display/display-contents-before-after-002 android]
+    css-display/css/css-display/display-contents-dynamic-before-after-001.html android  P 0.9898 → P 0.9879   [css-display/display-contents-dynamic-before-after-001 android]
+    css-counter-styles/css/css-counter-styles/counter-suffix.html web  f 0.8867 → P 0.9818   [css-counter-styles/counter-suffix]
+    css-counter-styles/css/css-counter-styles/counter-suffix.html ios  unscored → f 0.9285   [css-counter-styles/counter-suffix]
+    css-counter-styles/css/css-counter-styles/counter-suffix.html android  unscored → f 0.9051   [css-counter-styles/counter-suffix]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html web  P 0.9749 → P 1   [css-counter-styles/counter-style-at-rule/broken-symbols]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html ios  f 0.9486 → P 0.9713   [css-counter-styles/counter-style-at-rule/broken-symbols]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html android  f 0.949 → P 0.9713   [css-counter-styles/counter-style-at-rule/broken-symbols]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table1.html web  f 0.9884 → P 1   [css-backgrounds/animations/background-color-animation-with-table1]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table1.html ios  f 0.9904 → P 1   [css-backgrounds/animations/background-color-animation-with-table1]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table1.html android  P 0.9998 → P 0.9998   [css-backgrounds/animations/background-color-animation-with-table1]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table3.html web  f 0.9884 → P 1   [css-backgrounds/animations/background-color-animation-with-table3]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table3.html ios  f 0.9904 → P 1   [css-backgrounds/animations/background-color-animation-with-table3]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table3.html android  P 0.9998 → P 0.9998   [css-backgrounds/animations/background-color-animation-with-table3]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table4.html web  f 0.9884 → P 1   [css-backgrounds/animations/background-color-animation-with-table4]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table4.html ios  f 0.9904 → P 1   [css-backgrounds/animations/background-color-animation-with-table4]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table4.html android  f 0.9888 → P 0.9935   [css-backgrounds/animations/background-color-animation-with-table4]
+    CSS2/css/CSS2/cascade/inherit-computed-002.html web  f 0.6001 → f 0.6068   [CSS2/cascade/inherit-computed-002]
+    CSS2/css/CSS2/cascade/inherit-computed-002.html ios  f 0.6003 → f 0.5945   [CSS2/cascade/inherit-computed-002]
+    CSS2/css/CSS2/cascade/inherit-computed-002.html android  f 0.6007 → f 0.5933   [CSS2/cascade/inherit-computed-002]
+    css-contain/css/css-contain/contain-content-004.html web  f 0.8448 → P 0.9985   [css-contain/contain-content-004]
+    css-contain/css/css-contain/contain-content-004.html ios  f 0.794 → f 0.8093   [css-contain/contain-content-004]
+    css-contain/css/css-contain/contain-content-004.html android  f 0.8286 → f 0.8286   [css-contain/contain-content-004]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html web  f 0.9251 → P 0.9533   [css-counter-styles/counter-style-at-rule/descriptor-suffix]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html ios  f 0.9317 → P 0.9596   [css-counter-styles/counter-style-at-rule/descriptor-suffix]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html android  f 0.9323 → P 0.9593   [css-counter-styles/counter-style-at-rule/descriptor-suffix]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html web  f 0.6348 → f 0.6454   [css-counter-styles/counter-style-at-rule/disclosure-styles]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html ios  f 0.6503 → f 0.6127   [css-counter-styles/counter-style-at-rule/disclosure-styles]
+    css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html android  f 0.6568 → f 0.6242   [css-counter-styles/counter-style-at-rule/disclosure-styles]
+    css-writing-modes/css/css-writing-modes/direction-upright-002.html web  f 0.5826 → f 0.7002   [css-writing-modes/direction-upright-002]
+    css-writing-modes/css/css-writing-modes/direction-upright-002.html ios  f 0.5758 → f 0.602   [css-writing-modes/direction-upright-002]
+    css-writing-modes/css/css-writing-modes/direction-upright-002.html android  f 0.5946 → f 0.5935   [css-writing-modes/direction-upright-002]
+    CSS2/css/CSS2/borders/border-conflict-style-107.html web  f 0.782 → f 0.9381   [CSS2/borders/border-conflict-style-107]
+    CSS2/css/CSS2/borders/border-conflict-style-107.html ios  f 0.6564 → f 0.6564   [CSS2/borders/border-conflict-style-107]
+    CSS2/css/CSS2/borders/border-conflict-style-107.html android  f 0.3262 → f 0.3262   [CSS2/borders/border-conflict-style-107]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-003.html web  P 0.9761 → P 0.9761   [css-writing-modes/ch-units-vrl-003]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-003.html ios  f 0.8396 → f 0.8396   [css-writing-modes/ch-units-vrl-003]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-003.html android  f 0.8075 → f 0.8404   [css-writing-modes/ch-units-vrl-003]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-004.html web  P 0.9761 → P 0.9761   [css-writing-modes/ch-units-vrl-004]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-004.html ios  f 0.8396 → f 0.8396   [css-writing-modes/ch-units-vrl-004]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-004.html android  f 0.8075 → f 0.8404   [css-writing-modes/ch-units-vrl-004]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-007.html web  f 0.917 → f 0.917   [css-writing-modes/ch-units-vrl-007]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-007.html ios  f 0.9159 → f 0.9159   [css-writing-modes/ch-units-vrl-007]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-007.html android  f 0.8204 → f 0.9103   [css-writing-modes/ch-units-vrl-007]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-008.html web  f 0.917 → f 0.917   [css-writing-modes/ch-units-vrl-008]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-008.html ios  f 0.9159 → f 0.9159   [css-writing-modes/ch-units-vrl-008]
+    css-writing-modes/css/css-writing-modes/ch-units-vrl-008.html android  f 0.8204 → f 0.9103   [css-writing-modes/ch-units-vrl-008]
+    css-tables/css/css-tables/border-collapse-dynamic-col-001.html web  P 1 → P 1   [css-tables/border-collapse-dynamic-col-001]
+    css-tables/css/css-tables/border-collapse-dynamic-col-001.html ios  f 0.9404 → f 0.9404   [css-tables/border-collapse-dynamic-col-001]
+    css-tables/css/css-tables/border-collapse-dynamic-col-001.html android  P 0.9812 → P 0.9812   [css-tables/border-collapse-dynamic-col-001]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table2.html web  P 0.997 → P 1   [css-backgrounds/animations/background-color-animation-with-table2]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table2.html ios  P 0.9971 → P 0.9971   [css-backgrounds/animations/background-color-animation-with-table2]
+    css-backgrounds/css/css-backgrounds/animations/background-color-animation-with-table2.html android  P 0.9998 → P 0.9998   [css-backgrounds/animations/background-color-animation-with-table2]
+    css-text-decor/css/css-text-decor/ruby-text-decoration-01.html web  f 0.9491 → f 0.9491   [css-text-decor/ruby-text-decoration-01]
+    css-text-decor/css/css-text-decor/ruby-text-decoration-01.html ios  f 0.9289 → f 0.9289   [css-text-decor/ruby-text-decoration-01]
+    css-text-decor/css/css-text-decor/ruby-text-decoration-01.html android  f 0.9375 → f 0.9375   [css-text-decor/ruby-text-decoration-01]
+    css-text-decor/css/css-text-decor/text-decoration-inset-025.html android  f 0 → f 0   [css-text-decor/text-decoration-inset-025 android]
+    css-text-decor/css/css-text-decor/text-decoration-shorthands-001.html web  P 0.9998 → P 1   [css-text-decor/text-decoration-shorthands-001]
+    css-text-decor/css/css-text-decor/text-decoration-shorthands-001.html ios  P 0.999 → P 0.9991   [css-text-decor/text-decoration-shorthands-001]
+    css-text-decor/css/css-text-decor/text-decoration-shorthands-001.html android  P 0.9979 → P 0.9981   [css-text-decor/text-decoration-shorthands-001]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-000.html web  P 0.989 → P 0.989   [CSS2/floats-clear/floats-clear-multicol-000]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-000.html ios  P 0.9871 → P 0.9871   [CSS2/floats-clear/floats-clear-multicol-000]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-000.html android  P 0.9857 → P 0.9857   [CSS2/floats-clear/floats-clear-multicol-000]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-001.html web  P 0.989 → P 0.989   [CSS2/floats-clear/floats-clear-multicol-001]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-001.html ios  P 0.9871 → P 0.9871   [CSS2/floats-clear/floats-clear-multicol-001]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-001.html android  P 0.9857 → P 0.9857   [CSS2/floats-clear/floats-clear-multicol-001]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-003.html web  P 1 → P 1   [CSS2/floats-clear/floats-clear-multicol-003]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-003.html ios  P 0.9981 → P 0.9981   [CSS2/floats-clear/floats-clear-multicol-003]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-003.html android  P 0.9881 → P 0.9881   [CSS2/floats-clear/floats-clear-multicol-003]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html web  P 0.987 → P 0.987   [CSS2/floats-clear/floats-clear-multicol-balancing-000]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html ios  P 0.9854 → P 0.9854   [CSS2/floats-clear/floats-clear-multicol-balancing-000]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html android  P 0.9839 → P 0.9839   [CSS2/floats-clear/floats-clear-multicol-balancing-000]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html web  P 0.987 → P 0.987   [CSS2/floats-clear/floats-clear-multicol-balancing-001]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html ios  P 0.9854 → P 0.9854   [CSS2/floats-clear/floats-clear-multicol-balancing-001]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html android  P 0.9839 → P 0.9839   [CSS2/floats-clear/floats-clear-multicol-balancing-001]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html web  P 1 → P 1   [CSS2/floats-clear/floats-clear-multicol-balancing-003]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html ios  P 0.9985 → P 0.9985   [CSS2/floats-clear/floats-clear-multicol-balancing-003]
+    CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html android  P 0.9857 → P 0.9857   [CSS2/floats-clear/floats-clear-multicol-balancing-003]
+    css-images/css/css-images/gradient/gradient-hue-direction.html web  f 0.6241 → P 1   [css-images/gradient/gradient-hue-direction]
+    css-images/css/css-images/gradient/gradient-hue-direction.html ios  f 0.6235 → P 0.997   [css-images/gradient/gradient-hue-direction]
+    css-images/css/css-images/gradient/gradient-hue-direction.html android  f 0.623 → P 0.9973   [css-images/gradient/gradient-hue-direction]
+    css-writing-modes/css/css-writing-modes/direction-upright-001.html web  f 0.8095 → f 0.9269   [css-writing-modes/direction-upright-001]
+    css-writing-modes/css/css-writing-modes/direction-upright-001.html ios  f 0.5543 → f 0.5528   [css-writing-modes/direction-upright-001]
+    css-writing-modes/css/css-writing-modes/direction-upright-001.html android  f 0.4887 → f 0.4874   [css-writing-modes/direction-upright-001]
+    css-pseudo/css/css-pseudo/active-selection-057.html web  P 1 → P 1   [css-pseudo/active-selection-057]
+    css-pseudo/css/css-pseudo/active-selection-057.html ios  P 0.9994 → P 0.9994   [css-pseudo/active-selection-057]
+    css-pseudo/css/css-pseudo/active-selection-057.html android  P 0.9986 → P 0.9986   [css-pseudo/active-selection-057]
+    css-contain/css/css-contain/contain-html-overflow-002.html web  f 0.8709 → P 1   [css-contain/contain-html-overflow-002]
+    css-contain/css/css-contain/contain-html-overflow-002.html ios  f 0.8705 → P 0.9996   [css-contain/contain-html-overflow-002]
+    css-contain/css/css-contain/contain-html-overflow-002.html android  f 0.8698 → P 0.9989   [css-contain/contain-html-overflow-002]
+    css-contain/css/css-contain/contain-html-overflow-001.html web  P 1 → P 1   [css-contain/contain-html-overflow-001]
+    css-contain/css/css-contain/contain-html-overflow-001.html ios  P 0.9996 → P 0.9996   [css-contain/contain-html-overflow-001]
+    css-contain/css/css-contain/contain-html-overflow-001.html android  P 0.9989 → P 0.9989   [css-contain/contain-html-overflow-001]
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-005.html web  f 0.0001 → P 0.9947   [CSS2/css21-errata/s-11-1-1b-005]
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-005.html ios  f 0.0001 → f 0.9538   [CSS2/css21-errata/s-11-1-1b-005]
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-005.html android  f 0.0001 → f 0.9309   [CSS2/css21-errata/s-11-1-1b-005]
+    css-backgrounds/css/css-backgrounds/background-attachment-fixed-inside-transform-1.html web  P 0.9961 → P 0.9961   [css-backgrounds/background-attachment-fixed-inside-transform-1]
+    css-backgrounds/css/css-backgrounds/background-attachment-fixed-inside-transform-1.html ios  P 0.9843 → P 0.9964   [css-backgrounds/background-attachment-fixed-inside-transform-1]
+    css-backgrounds/css/css-backgrounds/background-attachment-fixed-inside-transform-1.html android  P 0.9629 → P 0.9629   [css-backgrounds/background-attachment-fixed-inside-transform-1]
+    css-color/css/css-color/clip-opacity-out-of-flow.html web  f 0.9271 → f 0.9271   [css-color/clip-opacity-out-of-flow]
+    css-color/css/css-color/clip-opacity-out-of-flow.html ios  f 0.9271 → f 0.9271   [css-color/clip-opacity-out-of-flow]
+    css-color/css/css-color/clip-opacity-out-of-flow.html android  f 0.9271 → f 0.9271   [css-color/clip-opacity-out-of-flow]
+    css-transforms/css/css-transforms/backface-visibility-hidden-006.html ios  P 1 → P 1   [css-transforms/backface-visibility-hidden-006 ios]
+    css-transforms/css/css-transforms/composited-under-rotateY-180deg-clip-perspective.html ios  P 1 → P 1   [css-transforms/composited-under-rotateY-180deg-clip ios]
+    css-transforms/css/css-transforms/composited-under-rotateY-180deg-clip.html ios  P 1 → P 1   [css-transforms/composited-under-rotateY-180deg-clip ios]
+    css-transforms/css/css-transforms/composited-under-rotateY-180deg-clip-perspective.html ios  P 1 → P 1   [css-transforms/composited-under-rotateY-180deg-clip-perspective ios]
+    css-overflow/css/css-overflow/line-clamp/line-clamp-005.html android  P 0.9615 → P 0.982   [css-overflow/line-clamp/line-clamp-005 android]
+    css-overflow/css/css-overflow/line-clamp/line-clamp-006.html android  f 0.9446 → P 0.9701   [css-overflow/line-clamp/line-clamp-006 android]
+    css-overflow/css/css-overflow/line-clamp/line-clamp-007.html android  f 0.9409 → P 0.9701   [css-overflow/line-clamp/line-clamp-007 android]
+    css-overflow/css/css-overflow/line-clamp/block-ellipsis-032.tentative.html android  f 0.9451 → f 0.9397   [css-overflow/line-clamp/block-ellipsis-032 android]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html web  P 1 → P 1   [css-gaps/flex/flex-gap-decorations-045]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html ios  P 0.9549 → P 0.9931   [css-gaps/flex/flex-gap-decorations-045]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html android  P 0.9549 → P 0.9994   [css-gaps/flex/flex-gap-decorations-045]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-046.html web  P 1 → P 1   [css-gaps/flex/flex-gap-decorations-046]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-046.html ios  P 0.9951 → P 0.9998   [css-gaps/flex/flex-gap-decorations-046]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-046.html android  P 0.9908 → P 0.996   [css-gaps/flex/flex-gap-decorations-046]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-001.html web  P 0.999 → P 0.999   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-001.html ios  P 0.9974 → P 0.9974   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-001.html android  P 0.9967 → P 0.9967   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-002.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-002.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-002.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-003.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-003.html ios  P 0.9994 → P 0.9994   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-003.html android  P 0.9988 → P 0.9988   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-004.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-004.html ios  P 0.9989 → P 0.9989   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-004.html android  P 0.9981 → P 0.9981   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-005.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-005.html ios  P 0.9993 → P 0.9993   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-005.html android  P 0.9987 → P 0.9987   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-006.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-006.html ios  f 0.8266 → f 0.8266   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-006.html android  f 0.8223 → f 0.8223   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-007.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-007.html ios  P 0.9998 → P 0.9998   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-007.html android  P 0.9856 → P 0.9856   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-008.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-008.html ios  P 0.9996 → P 0.9996   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-008.html android  P 0.9646 → P 0.9646   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-009.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-009.html ios  P 0.9994 → P 0.9994   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-009.html android  P 0.9988 → P 0.9988   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-010.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-010.html ios  P 0.9994 → P 0.9994   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-010.html android  P 0.9988 → P 0.9988   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-011.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-011.html ios  P 0.9993 → P 0.9993   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-011.html android  P 0.9987 → P 0.9987   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-012.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-012.html ios  P 0.9993 → P 0.9993   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-012.html android  P 0.9987 → P 0.9987   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-013.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-013.html ios  P 0.9993 → P 0.9993   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-013.html android  P 0.9987 → P 0.9987   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-014.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-014.html ios  P 0.998 → P 0.998   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-014.html android  P 0.9974 → P 0.9974   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-015.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-015.html ios  P 0.9996 → P 0.9996   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-015.html android  P 0.9992 → P 0.9992   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-016.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-016.html ios  P 0.9863 → P 0.9863   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-016.html android  P 0.9861 → P 0.9861   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-017.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-017.html ios  P 0.9987 → P 0.9987   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-017.html android  P 0.9984 → P 0.9984   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-018.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-018.html ios  P 0.9986 → P 0.9986   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-018.html android  P 0.9984 → P 0.9984   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-019.html web  P 0.9989 → P 0.9989   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-019.html ios  P 0.9972 → P 0.9972   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-019.html android  P 0.9965 → P 0.9965   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-020.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-020.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-020.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-021.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-021.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-021.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-022.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-022.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-022.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-023.html web  P 0.9737 → P 0.9737   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-023.html ios  P 0.9542 → P 0.9542   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-023.html android  P 0.9541 → P 0.9541   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-024.html web  P 0.9901 → P 0.9901   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-024.html ios  P 0.99 → P 0.99   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-024.html android  P 0.99 → P 0.99   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-025.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-025.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-025.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-027.html web  f 0.9012 → f 0.9012   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-027.html ios  f 0.903 → f 0.903   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-027.html android  f 0.9085 → f 0.9085   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-028.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-028.html ios  P 0.9994 → P 0.9994   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-028.html android  P 0.9988 → P 0.9988   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-029.html web  P 0.9962 → P 0.9962   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-029.html ios  P 0.9925 → P 0.9925   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-029.html android  P 0.9925 → P 0.9925   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-030.html web  P 0.9971 → P 0.9971   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-030.html ios  P 0.9934 → P 0.9934   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-030.html android  P 0.9934 → P 0.9934   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-031.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-031.html ios  P 0.9592 → P 0.9592   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-031.html android  P 0.9585 → P 0.9585   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-032.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-032.html ios  P 0.9592 → P 0.9592   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-032.html android  P 0.9585 → P 0.9585   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html web  f 0.94 → f 0.94   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html web  f 0.9458 → f 0.9458   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html ios  f 0.9466 → f 0.9466   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html android  f 0.9466 → f 0.9466   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html web  f 0.9206 → f 0.9206   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html ios  f 0.922 → f 0.922   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html android  f 0.922 → f 0.922   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-036.html web  P 0.9557 → P 0.9557   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-036.html ios  P 0.9565 → P 0.9565   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-036.html android  P 0.9565 → P 0.9565   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-037.html web  P 0.9568 → P 0.9568   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-037.html ios  P 0.9576 → P 0.9576   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-037.html android  P 0.9576 → P 0.9576   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-039.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-039.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-039.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-040.html web  P 0.9939 → P 0.9939   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-040.html ios  P 0.9934 → P 0.9934   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-040.html android  P 0.9934 → P 0.9934   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-041.html web  P 0.9939 → P 0.9939   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-041.html ios  P 0.9934 → P 0.9934   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-041.html android  P 0.9934 → P 0.9934   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-042.html web  P 0.9939 → P 0.9939   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-042.html ios  P 0.9935 → P 0.9935   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-042.html android  P 0.9935 → P 0.9935   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-043.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-043.html ios  P 0.9995 → P 0.9995   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-043.html android  P 0.9995 → P 0.9995   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-044.html web  P 0.9939 → P 0.9939   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-044.html ios  P 0.9939 → P 0.9939   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-044.html android  P 0.9939 → P 0.9939   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html ios  P 0.9549 → P 0.9931   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-045.html android  P 0.9549 → P 0.9994   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-046.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-046.html ios  P 0.9951 → P 0.9998   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-046.html android  P 0.9908 → P 0.996   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-047.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-047.html ios  P 0.9989 → P 0.9989   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-047.html android  P 0.9989 → P 0.9989   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-048.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-048.html ios  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-048.html android  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-049.html web  P 1 → P 1   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-049.html ios  P 0.9995 → P 0.9995   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-049.html android  P 0.9995 → P 0.9995   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-050.html web  P 0.994 → P 0.994   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-050.html ios  P 0.9922 → P 0.9922   [css-gaps]
+    css-gaps/css/css-gaps/flex/flex-gap-decorations-050.html android  P 0.9922 → P 0.9922   [css-gaps]
+    css-view-transitions/css/css-view-transitions/capture-with-visibility-mixed-descendants.html web  f 0.9215 → f 0.9215   [css-view-transitions/capture-with-visibility-mixed-descendants]
+    css-view-transitions/css/css-view-transitions/capture-with-visibility-mixed-descendants.html ios  f 0.9196 → f 0.9196   [css-view-transitions/capture-with-visibility-mixed-descendants]
+    css-view-transitions/css/css-view-transitions/capture-with-visibility-mixed-descendants.html android  f 0.9196 → f 0.9196   [css-view-transitions/capture-with-visibility-mixed-descendants]
+  json → tools/titan/results/wave50-gate/score.json

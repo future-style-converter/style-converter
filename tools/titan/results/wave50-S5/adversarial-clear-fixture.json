@@ -1,0 +1,74 @@
+{
+ "components": {
+  "clear_all": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "all"
+   }
+  },
+  "clear_left": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "left"
+   }
+  },
+  "clear_right": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "right"
+   }
+  },
+  "clear_both": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "both"
+   }
+  },
+  "clear_none": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "none"
+   }
+  },
+  "clear_up": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "up"
+   }
+  },
+  "clear_object": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "object"
+   }
+  },
+  "clear_inherit": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "inherit"
+   }
+  },
+  "clear_inline_start": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "inline-start"
+   }
+  },
+  "clear_ALL_upper": {
+   "properties": {
+    "width": "0px",
+    "height": "0px",
+    "clear": "ALL"
+   }
+  }
+ }
+}
