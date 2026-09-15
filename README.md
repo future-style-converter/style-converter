@@ -209,7 +209,7 @@ the point.
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 526 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3228 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3230 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2008 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 282 |

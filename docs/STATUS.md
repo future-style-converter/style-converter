@@ -2327,10 +2327,13 @@ block-ellipsis-032 Android 0.9451 → 0.9397, still f. **The 3 losses** —
 css-tables percentage-sizing-of-table-cell-children-003/-004/-006 Android,
 the green `overflow-y:auto; height:100%; min-height:100px` table-cell child
 now 0-tall — were bisected on device in four runs down to "not the retro's
-Compose code, not wave 50's, not the IR, not the harness source"; the
-complete wave-49 runtime reproduces the red render on this host, so the
-cause is toolchain, emulator image or capture timing, and it is ranked
-first for wave 51 with the recipe. Fixture net: exactly the pre-announced
+Compose code, not wave 50's, not the IR, not the harness source", a
+conclusion **wave 51 overturned**: the cause is retro R2's percent clamp
+dropping the min-height floor in Compose's intrinsic pass (the row-height
+query saw 0), fixed and proven on device with the installed APK's sha1
+verified against the build; the wave-50 A/B runs had recorded no install
+evidence (BACKLOG 0(z), `lost-cells-bisection.json` `_wave51_correction`).
+Fixture net: exactly the pre-announced
 exits — 17 stale ledger lines and 3 stale nested-transforms waivers
 deleted, radius-overflow-transform passing on iOS — plus two iOS exit-4s:
 blend-isolation 003_wrapper (0.9492) was a real defect, FIXED — SwiftUI's
@@ -2362,7 +2365,7 @@ over-blurs box-shadow 2.4×" row attributed a dead file and does not
 reproduce (struck above). Gate tooling is code now:
 `tools/titan/gate-driver.sh` and `tools/titan/score-gate.mjs` (per-cell diff,
 pinned; reproduces corpus-v6.15's +32/0 from history). Suites on the
-integrated tree, single writer: converter 526 · web 1337 · compose 3228 ·
+integrated tree, single writer: converter 526 · web 1337 · compose 3230 ·
 android-harness 116 · swiftui 2008 · web-harness 282 · tooling 2040 (4
 skipped) · IR conformance green; `doc-staleness-check.sh` exit 0.
 
@@ -2373,7 +2376,7 @@ skipped) · IR conformance green; `doc-staleness-check.sh` exit 0.
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 526 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3228 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3230 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2008 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 282 |
