@@ -131,6 +131,22 @@ toolchain/dependency drift, the emulator system image or provisioning
 flags, a capture-timing dependency the quiet host exposes). Siblings -005
 (no overflow:auto) and -007 (same lane, no overflow) are byte-unchanged.
 
+**Wave-51 correction (2026-09-15).** The paragraph above is wrong in its
+conclusion. The cause IS runtime code: retro R2's `PercentSizeClamp` is a
+`Modifier.layout {}` block, and Compose answers an intrinsic query for such
+a block with the child's raw intrinsic, so the min-height floor never
+reached `TableApplier`'s `heightAtMinIntrinsic` row query (0 where the
+pre-R2 `heightIn(min = 100)` SizeNode answered 100). The inner SizeNode is
+now chained inside the clamp; on device, with the installed `base.apk`
+sha1 verified against the build, control renders the red (PNG sha1
+19cda0efe724) and the fix renders the wave-49 green byte-for-byte
+(8c0056dd8884), -005/-007 unchanged, pairs-01 PW_Background_Sizing_04
+still 300×80. The four A/B runs in `lost-cells-bisection.json` recorded
+scores only — no install evidence — and two of them contradict the code,
+so their rebuilt APKs most likely never reached the device
+(`_wave51_correction` in that file; BACKLOG 0(z) and the new standing
+constraint on installed-APK hashes).
+
 **Fixture net (`BASELINE=1 ./test-all.sh --gate-set`, rc 5):**
 visual-test.json exit 5 (17 stale ledger lines — DELETED: 9
 ios-borders-radius, the 6 android-harness-placeholder-floor, 2

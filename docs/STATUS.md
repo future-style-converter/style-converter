@@ -2327,10 +2327,13 @@ block-ellipsis-032 Android 0.9451 → 0.9397, still f. **The 3 losses** —
 css-tables percentage-sizing-of-table-cell-children-003/-004/-006 Android,
 the green `overflow-y:auto; height:100%; min-height:100px` table-cell child
 now 0-tall — were bisected on device in four runs down to "not the retro's
-Compose code, not wave 50's, not the IR, not the harness source"; the
-complete wave-49 runtime reproduces the red render on this host, so the
-cause is toolchain, emulator image or capture timing, and it is ranked
-first for wave 51 with the recipe. Fixture net: exactly the pre-announced
+Compose code, not wave 50's, not the IR, not the harness source", a
+conclusion **wave 51 overturned**: the cause is retro R2's percent clamp
+dropping the min-height floor in Compose's intrinsic pass (the row-height
+query saw 0), fixed and proven on device with the installed APK's sha1
+verified against the build; the wave-50 A/B runs had recorded no install
+evidence (BACKLOG 0(z), `lost-cells-bisection.json` `_wave51_correction`).
+Fixture net: exactly the pre-announced
 exits — 17 stale ledger lines and 3 stale nested-transforms waivers
 deleted, radius-overflow-transform passing on iOS — plus two iOS exit-4s:
 blend-isolation 003_wrapper (0.9492) was a real defect, FIXED — SwiftUI's
@@ -2366,6 +2369,36 @@ integrated tree, single writer: converter 526 · web 1337 · compose 3228 ·
 android-harness 116 · swiftui 2008 · web-harness 282 · tooling 2040 (4
 skipped) · IR conformance green; `doc-staleness-check.sh` exit 0.
 
+**Wave 51, PR 1 (2026-09-15 → 16) — the lost cells were runtime code
+after all.** corpus-v6.17: web 1215/1379 88.1%, iOS 1089/1369 79.5%,
+Android 1080/1369 78.9%; **3 cells gained, 0 lost, 0 movers** against
+wave50-final — exactly the three css-tables cells wave 50 lost, back at
+their wave-49 score. The wave opened with the full gate on the unmodified
+wave-50 tree (`wave51-open`, quiet host, 30/30 at 48/48/48 first attempt,
+fixture net exit 0 on all 8): **0 gained / 0 lost / 0 movers over 4117
+cells**, so the pipeline is deterministic run-to-run on this host, wave
+50's post-gate ledger and baseline edits and its iOS blend fix are
+confirmed on device, and the three lost cells reproduced byte-for-byte.
+Cause, read from the code and then proven: retro R2's `PercentSizeClamp`
+routes a percent axis carrying a min/max through one `Modifier.layout {}`
+block, and Compose answers an intrinsic query for such a block with the
+child's raw intrinsic, so `TableApplier`'s row-height query saw 0 for the
+content-less `overflow-y:auto; height:100%; min-height:100px` cell child
+where the pre-R2 `heightIn(min = 100)` SizeNode answered 100. The min/max
+SizeNode is now chained inside the clamp on both axes (inert at measure
+time, the floor at intrinsic time), pinned by mutation. Verified on device
+BEFORE the gate with the installed `base.apk` sha1 checked against the
+build — control renders the wave-50 red, the fix renders the wave-49 green
+byte-for-byte, the R2 gain (pairs-01 PW_Background_Sizing_04, 300×80) is
+kept — and then by the full `wave51-fix` gate (30/30 at 48/48/48, fixture
+net exit 0 ×8). **The wave-50 bisection that "excluded" runtime code was
+wrong**: its four A/B runs recorded scores only, no install evidence, and
+two contradicted the code; the record carries a correction and BACKLOG a
+new standing constraint (a device A/B records the installed APK's sha1).
+Suites on the PR-1 tree, single writer: compose 3230 · android-harness
+116 (the converter, web, swiftui, web-harness and tooling suites are
+untouched by this PR and run in CI); `doc-staleness-check.sh` exit 0.
+
 
 ## Test suites
 
@@ -2373,7 +2406,7 @@ skipped) · IR conformance green; `doc-staleness-check.sh` exit 0.
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 526 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3228 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3230 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2008 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 282 |

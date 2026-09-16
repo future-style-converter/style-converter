@@ -14,21 +14,27 @@ this file is incomplete.
 
 Corpus history and per-wave findings live in `docs/STATUS.md` (one dated
 paragraph per wave) and `tools/titan/results/corpus-v*.json` (one snapshot
-per wave, `_note` carries the full story). Current: **corpus-v6.16**
-(wave 50, device gate `wave50-final` on a quiet host,
-2026-09-14 — web 1215/1379 88.1%, iOS 1089/1369 79.5%, Android 1077/1369
-78.7%; per cell **40 gained, 3 lost, 6 newly measured**, 4117 scored cells
-with exact column parity, 30/30 sections at 48/48/48 on the first attempt —
-`node tools/titan/score-gate.mjs wave49-final wave50-final`, the per-cell
-method the standing rule below mandates and which is CODE since this wave;
-`tools/titan/results/wave50-gate/{score.json,score.txt}`). The 3 lost cells
-are ONE test family, bisected on device and attributed to neither the
-retro's nor wave 50's Compose code (obligation #1 below); the 6 newly
-measured are the retro-R13 unexclusions, denominator changes by the rule.
-The previous snapshot, **corpus-v6.15** (wave 49 — web 1205/1379, iOS
-1081/1366, Android 1058/1366; 32 gained, zero lost), is what v6.16
-attributes against. All deltas attribute against the most recent snapshot,
-never across the PR-#126 instrument change.
+per wave, `_note` carries the full story). Current: **corpus-v6.17**
+(wave 51 PR 1, device gate `wave51-fix` on a quiet host, 2026-09-15 — web
+1215/1379 88.1%, iOS 1089/1369 79.5%, Android 1080/1369 78.9%; per cell
+**3 gained, 0 lost, 0 movers** against wave50-final — exactly the three
+cells wave 50 lost, recovered by the PercentSizeClamp intrinsic-pass fix
+(queue 0(z)); 30/30 sections at 48/48/48 on the first attempt, fixture net
+exit 0 on all 8; `node tools/titan/score-gate.mjs wave50-final wave51-fix`).
+The wave-51 OPENING gate (`wave51-open`, the unmodified wave-50 tree) came
+first and scored **0 gained / 0 lost / 0 movers over 4117 cells** against
+wave50-final — the pipeline is deterministic run-to-run on this host. The
+previous snapshot, **corpus-v6.16** (wave 50, `wave50-final`, 2026-09-14 —
+web 1215/1379, iOS 1089/1369, Android 1077/1369; **40 gained, 3 lost, 6
+newly measured**, 4117 scored cells with exact column parity), is what
+v6.17 attributes against; its 3 lost cells were bisected on device and
+attributed to neither the retro's nor wave 50's Compose code — a
+conclusion wave 51 OVERTURNED (0(z): the bisection carried no install
+evidence); its 6 newly measured are the retro-R13 unexclusions,
+denominator changes by the rule. Before that, **corpus-v6.15** (wave 49 —
+web 1205/1379, iOS 1081/1366, Android 1058/1366; 32 gained, zero lost).
+All deltas attribute against the most recent snapshot, never across the
+PR-#126 instrument change.
 **Neither the retrospective's device gate nor wave 50's opening gate ran
 before the lanes did.** The retro's 17 attempts (2026-09-05 → 09-07) all
 failed on one cause — the host had no memory headroom (15 GB used, ≤230 MB
@@ -108,6 +114,15 @@ cell flips await the wave-50 gate.
   wave-40 flow-root rule and the wave-49 root-clip web rule, and were
   outside every documented sweep until the retro (A8#4;
   `doc-staleness-check.sh` now derives both counts).
+- **A device A/B that claims to EXCLUDE a code change records the installed
+  `base.apk` sha1 against the APK it built** (`adb shell pm path <app>` →
+  `adb pull` → `shasum -a 1`, compared with
+  `apps/android-harness/app/build/outputs/apk/debug/app-debug.apk`), per run,
+  in the committed record — and the iOS twin hashes the installed `.app`
+  container. The wave-50 lost-cells bisection recorded scores only; two of
+  its four runs contradicted the code, and the mechanism it "excluded"
+  (retro R2's percent clamp) was the cause (queue 0(z), wave 51). A run
+  without that hash is a score, not evidence.
 - **Evidence pointers in this file are repo paths or gate cells — never a
   session scratchpad.** The wave-49 refill pointed obligation #3 and queue
   0(a) at a session-scratchpad `wave49-i1/handverdicts.json` and
@@ -227,20 +242,25 @@ cell flips await the wave-50 gate.
    rotate3d family +0.01 toward web. MISSES: block-ellipsis-032 Android
    0.9451 → 0.9397 still f (B9's ring, the thin claim); ch-units-vrl ×8
    Android +0.03..+0.09 no flip; direction-upright-002 web 0.58 → 0.70 /
-   iOS → 0.60 no flip. **LOST — 3 cells, one family, OPEN and ranked first
-   below (queue 0(z)):** css-tables/height-distribution/
+   iOS → 0.60 no flip. **LOST — 3 cells, one family (queue 0(z) — FOUND
+   AND FIXED in wave 51):** css-tables/height-distribution/
    percentage-sizing-of-table-cell-children-003/-004/-006 Android (P 0.9954
    → f 0.9966 colorFailed: the `overflow-y:auto; height:100%; min-height:
    100px` child of a `height:100%` table cell renders 0-tall and the abspos
-   z-index:-1 red square shows). Bisected ON DEVICE, four runs, same
-   emulator/harness/byte-identical IR (`tools/titan/results/wave50-gate/
-   lost-cells-bisection.json`): retro R2's percent lane disabled → red;
-   every wave-50 Compose change reverted → red; wave-49 sizing/layout/
-   table/scroll files → red; the COMPLETE wave-49 Compose runtime → red.
-   Neither the retro's nor wave 50's Compose code is the cause; suspects
-   are the build toolchain / dependency resolution, the emulator image or
-   provisioning flags, or a capture-timing dependency the quiet host
-   exposes. Fixture net: exactly the pre-announced exits (17 stale ledger
+   z-index:-1 red square shows). ~~Bisected ON DEVICE, four runs … Neither
+   the retro's nor wave 50's Compose code is the cause~~ — **that bisection
+   was WRONG** (`lost-cells-bisection.json` `_wave51_correction`): the cause
+   is retro R2's `PercentSizeClamp` dropping the min floor in Compose's
+   INTRINSIC pass, fixed in wave 51 and proven on device with the installed
+   APK's sha1 verified against the build; the wave-50 A/B runs had recorded
+   no install evidence. **Wave-51 opening gate — DONE** (`wave51-open`,
+   2026-09-15 14:32 → 16:10 UTC, quiet host, `gate-driver.sh`): 30/30
+   sections at 48/48/48 on the first attempt, fixture net **exit 0 on all
+   8 fixtures** (the post-gate ledger/baseline edits and the iOS blend fix
+   confirmed on device), and `score-gate.mjs wave50-final wave51-open` =
+   **0 gained / 0 lost / 0 movers / 0 newly measured over 4117 cells** —
+   the pipeline is deterministic run-to-run on this host, and the 3 lost
+   cells reproduced byte-for-byte. Fixture net: exactly the pre-announced exits (17 stale ledger
    lines and 3 stale nested-transforms waivers DELETED, radius-overflow-
    transform passes on iOS) plus two iOS-only exit-4s — filter-sepia-amounts
    006_Sepia_Translucent (0.9931 / Δpx 17 % / ΔE95 11.5) and blend-isolation
@@ -1019,42 +1039,70 @@ platform; they are not folded into a rendering wave.
    silently by shipping a guard**: the blank-capture guard under "Instrument
    decisions pending" addresses the 42 (a capture FAILURE), not these 21 (a
    test that cannot discriminate).
-   (z) **RANKED FIRST — the wave-50 gate's only losses: 3 Android cells,
-   one test family, cause NOT in any runtime code.** `wave50-final`
-   css-tables/height-distribution/percentage-sizing-of-table-cell-children-
-   003 / -004 / -006 android **P 0.9954 → f 0.9966**, colorFailed +
-   novelInkFailed (10000 novel red px): the green `overflow-y: auto; height:
-   100%; width: 100px; min-height: 100px` child of a `display: table-cell;
-   height: 100%` cell rendered 98×98 green at the wave-49 gate and renders
-   0-tall now, so the sibling `position: absolute; z-index: -1` red 100×100
-   square shows. Byte-identical per-test IR (diff of the two gates'
-   per-test-ir JSON: 0 lines); harness app differs from wave 49 by comment
-   lines only. Bisected ON DEVICE on the same emulator, harness and IR —
-   `tools/titan/results/wave50-gate/lost-cells-bisection.json`, four runs:
-   retro R2's PercentSizeClamp lane disabled → still red; every wave-50
-   change under `runtimes/compose/src/main` reverted → still red; the
-   wave-49 versions of `sizing/*`, DynamicValueResolver, LengthValue,
-   LayoutFacade/Applier/Config/Extractor, InlineBlockAtom, flexbox/*,
-   TableBoxTree, ScrollExtractor → still red; the COMPLETE wave-49
-   `runtimes/compose/src/main` (226 files) → still red. So neither the
-   retrospective's nor wave 50's Compose code is the cause. Siblings -005
-   (no overflow:auto) and -007 (same percent lane, no overflow) are
-   byte-unchanged across all runs, so the discriminator is `overflow-y:
-   auto` on a percentage-height, min-height-floored block inside a table
-   cell. Remaining suspects, in order: (i) build toolchain / dependency
-   resolution drift between the wave-49 and wave-50 builds (Kotlin/AGP/
-   Compose BOM are pinned, but the wave-49 APK bytes are gone — rebuild the
-   wave-49 commit in a scratch worktree and feed this one fixture first);
-   (ii) the emulator system image / provisioning flags (`-read-only
-   -no-window -gpu swiftshader_indirect`, API 36.1 AVD — the retro made the
-   read-only instance the default); (iii) a capture-timing dependency the
-   quiet host exposes (ScreenshotCaptureScreen captures 400 ms after layout;
-   a scroll container that needs a second measure pass would show exactly
-   this). Recipe: feed only `wpt__css-tables__height-distribution__
-   percentage-sizing-of-table-cell-children-003.json` via
-   `tools/titan/feed-android.mjs --fixtures … --composed` on a cold process
-   and on a warm one; then the wave-49 APK. Owner needed; this is the first
-   item wave 51 opens after its gate.
+   (z) ~~**RANKED FIRST — the wave-50 gate's only losses: 3 Android cells,
+   one test family, cause NOT in any runtime code.**~~ **FOUND AND FIXED
+   (wave 51, commit 962effa5, measured on device with a VERIFIED install) —
+   and the wave-50 bisection that "excluded" runtime code was wrong.**
+   `wave50-final` css-tables/height-distribution/percentage-sizing-of-
+   table-cell-children-003 / -004 / -006 android **P 0.9954 → f 0.9966**,
+   colorFailed + novelInkFailed (10000 novel red px): the green `overflow-y:
+   auto; height: 100%; width: 100px; min-height: 100px` child of a `display:
+   table-cell; height: 100%` cell rendered 98×98 green at the wave-49 gate
+   and 0-tall from wave 50 on, so the sibling `position: absolute; z-index:
+   -1` red 100×100 square showed. The wave-51 opening gate (`wave51-open`,
+   exit 0, ZERO per-cell diff against wave50-final over 4117 cells)
+   reproduced the red byte-for-byte, so the defect was deterministic on
+   this host, not timing.
+   **Cause** — read from the code, then proven: retro R2's
+   `runtimes/compose/…/sizing/PercentSizeClamp.kt` routes a PERCENT axis
+   that also carries a min/max through ONE `Modifier.layout {}` block, and
+   Compose answers an INTRINSIC query for such a block with the child's raw
+   intrinsic (MeasuringIntrinsics / DefaultIntrinsicMeasurable ignores the
+   `minHeight` the block passes). `TableApplier` sizes a row with
+   `heightAtMinIntrinsic`, so the row asked the content-less green child for
+   its min intrinsic height and got 0 — where the pre-R2 `heightIn(min =
+   100)` SizeNode answered 100 — and the measure pass then clamped 100 into
+   a (0, 0) band. -005 (same child WITHOUT min-height but WITH a 100px
+   content child) never moved because its content IS the intrinsic; -007's
+   200px child makes it inert too. The clamp file's own banner had named
+   these exact three cells as carriers that "cannot move", from measure-pass
+   arithmetic alone. **Fix**: the min/max SizeNode (`SizingClamps.minMaxBand`)
+   is chained INSIDE the clamp on both axes — inert at measure time (the
+   outer band is already tight or already (min, targetMax) and SizeNode
+   constrains INTO the incoming band), the floor at intrinsic time; banner
+   section "The INTRINSIC pass". Pin: `SizingMinMaxClampTest` §5, proven
+   able to fail (dropping the height-axis inner node fails exactly one
+   test). **A/B with the installed `base.apk` sha1 verified against the
+   build** (one -read-only emulator, the provision flags, `feed-android.mjs
+   --composed` over the five carriers, 2026-09-15): CONTROL (8864f33c, APK
+   984c4a69…) -003/-004/-006 PNG sha1 19cda0efe724 = the wave-50 red,
+   -005 8c0056dd8884, -007 e184684d71ce; FIX (APK fe4ec50a…) -003/-004/-006
+   sha1 **8c0056dd8884 = the wave-49 GREEN capture byte-for-byte**, -005/-007
+   unchanged; fidelity pairs-01 PW_Background_Sizing_04 still 300×80 on
+   Android (the R2 gain kept). **Corpus effect MEASURED** by the full
+   `wave51-fix` gate (2026-09-15 21:47 → 23:45 UTC, 30/30 at 48/48/48 first
+   attempt, fixture net exit 0 ×8): `score-gate.mjs wave50-final wave51-fix`
+   = **3 gained / 0 lost / 0 movers** — exactly these three cells, f 0.9966
+   → P 0.9954 (the wave-49 score); Android 1077 → 1080/1369, css-tables
+   34 → 37/47; snapshot `tools/titan/results/corpus-v6-17.json`. The
+   lane's corpus carriers are exactly these three plus -007, whose 200px
+   content child keeps the inner node inert.
+   **Why the wave-50 bisection said otherwise.** Its four runs recorded
+   SCORES ONLY — no APK sha1, no install evidence
+   (`tools/titan/results/wave50-gate/lost-cells-bisection.json`, which now
+   carries `_wave51_correction`) — and two of them (A/B 1 "lane disabled",
+   A/B 4 "complete wave-49 runtime") contradict the code reading, so their
+   rebuilt APKs most likely never reached the device. That is now a
+   standing constraint (installed-APK sha1 in every device A/B record). The
+   three hypotheses the record left open were each read against the tree
+   on 2026-09-15 and none had evidence: every Gradle/npm/toolchain file is
+   byte-identical between 5aa92ed6 and 8864f33c and `~/.gradle` holds ONE
+   version of every Compose/Kotlin/AGP artifact (downloaded before both
+   gates); the emulator launch line, AVD config and system image are
+   unchanged; the capture settle is a fixed wall-clock delay with no
+   host-speed term. What that reading DID show, worth keeping: the
+   wave-49 gate captured an UNCOMMITTED tree (5aa92ed6 was squashed after
+   the run), so "the wave-49 tree" is reconstructable only as that commit.
 
 1. **Vertical-wedge residuals** (the wave-47 wedges are FIXED as
    mechanisms — W1 wave 48): (a) `css-break/background-image-006` **scores
