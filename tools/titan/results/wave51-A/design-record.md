@@ -55,10 +55,15 @@ childless and textless) carries a label, so any origin change moves all
   it no longer does. The only text-transform stem in the four baselined
   fixtures, 065_Typography_Uppercase, is glyph-neutral (normalize
   upper-cases) → zero extra movers from text parity.
-- Colour: rgba(237,237,237, 179/255) on the natives → (174,174,180) over
-  the ground; web used α 0.7 → (173,173,179), one LSB darker (measured on
-  every unfiltered spill: 107 ×257 px, 108 ×281, 009 ×48). Web moves to
-  179/255 so the composited byte is identical on all three.
+- Colour — the contract is the COMPOSITED byte: (174,174,180) over the
+  `#1A1A2E` ground on all three. The natives get there with alpha 179/255
+  (Compose `0xB3EDEDED`, SwiftUI `179.0/255.0`). Web used α 0.7 →
+  (173,173,179), one LSB darker (measured on every unfiltered spill: 107
+  ×257 px, 108 ×281, 009 ×48); the first fix, α 0.70196 (= 179/255), still
+  composited to 173 in the capture pipeline's Chromium (skeptic-web.md), so
+  web ships CSS α **0.706** — alpha byte 180, mid-window of [0.704, 0.7078]
+  — which composites to (174,174,180); pinned by a puppeteer raster test.
+  One LSB of drift is a defect, not a tolerance.
 - Exactly one label per capture, iff the COMPOSED root of that capture
   (post `composeTree` / `SlotComposer.compose` / IRComposer) has zero
   composed children and no non-empty text, and the run is not

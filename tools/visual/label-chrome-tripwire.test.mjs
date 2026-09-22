@@ -11,8 +11,10 @@
 //   (i)   every p ∈ P is non-ground (not #1A1A2E ±1/channel) on all three PNGs.
 //   (ii)  on stems whose rows 0..15 OUTSIDE P are ground on all three, rows 0..15 are
 //         byte-identical across the three PNGs — the label is the only paint in the
-//         band and rgba(237,237,237,179/255) over #1A1A2E is (174,174,180) everywhere
-//         (web moved from alpha 0.7 = (173,173,179) to 179/255 in this PR).
+//         band and the label's COMPOSITED byte over #1A1A2E is (174,174,180) everywhere
+//         (natives: alpha 179/255; web: CSS alpha 0.706 = alpha byte 180, because
+//         Chromium rounds CSS alpha to 8 bits and byte 179 lands at (173,173,179) — the
+//         0.7 and 0.70196 spellings both did; measured in skeptic-web.md, this PR).
 //   (iii) on the other stems (shadows, outlines, transforms, negative offsets reaching
 //         the band) the P-mask bytes agree across platforms within ±1/channel.
 // Colour is never counted (review C39): the checks are positional, so ink left at the
