@@ -278,3 +278,9 @@ the atlas, `block-font.json`, `gen-block-font.mjs`, the ink colour value.
   0.7 vs 179/255 parity, folded into §2).
 - Built 2026-09-16 by four lanes (`lane-reports.json`); skeptics with
   executed repros follow.
+
+## 10. Refresh outcome (2026-09-22, `refresh/`)
+- Measure run (`BASELINE=1` per baselined fixture, fixed harnesses, no refresh yet): visual-test **exit 5** naming the two `Edge_GradientWithRadius` ledger lines (0.9995 / 0.9996 — deleted, 12 → 10), with 92 relocation exit-1s behind it; filter-sepia-amounts, aspect-ratio, filter-grayscale-basis **exit 1** (relocation). `refresh-check.mjs`: S1 dimensions unchanged on all 390 (008_Ratio_Auto_With_Explicit's web 144 vs native 145 pre-exists); 109 visual-test stems = 90 band-identical + 19 glyph-mask (the design's list exactly); band byte-identical ×3 on 93; S4b ink-over-committed within 1 LSB on every glyph-mask stem except 31 Android pixels on 023/024/025 (Δ ≤ 1.8, see the review).
+- PNG review (`refresh/review.md`, six reviewers, 390 sheets): 385 clean, 5 flagged, none a chrome defect — four Android blurred-shadow stems with the +1-LSB column beside strokes (pre-existing beside the old label; BACKLOG 0(aa)) and web 046's rotated-layer edge re-anti-aliasing (1–5 levels, no shift).
+- Decision taken on clause (iii): the tripwire asserts POSITION only on glyph-mask stems (the paint under the glyphs legitimately differs per platform; the cross-platform spread is printed, never asserted); band-identical stems keep byte identity.
+- Refresh: `UPDATE_BASELINE=1` on all four baselined fixtures (exit 0 ×4), `baseline-stats.mjs`, `BASELINE=1 ./test-all.sh --gate-set` **exit 0 ×8**, `label-chrome-tripwire.test.mjs` **136/136** (6/136 before the refresh). 390 PNGs + `baseline-stats.json` committed.
