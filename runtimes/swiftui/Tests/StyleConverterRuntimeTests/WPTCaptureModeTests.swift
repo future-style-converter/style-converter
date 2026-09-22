@@ -14,9 +14,12 @@
 //    1. The pure static predicate — deterministic, no render surface
 //       (exactly the style of FidelityWave3Tests' isOutOfFlow pins).
 //    2. An end-to-end ImageRenderer pixel pass through the real capture
-//       canvas (the EmptyFlexContainerTests approach), proving the name
-//       glyphs actually vanish only in the nameless-empty WPT case and
-//       that the flag defaults OFF keep the placeholder byte-for-byte.
+//       canvas (the EmptyFlexContainerTests approach). Since wave 51 PR (A)
+//       the synthesized name label is HARNESS CHROME (HarnessLabelChrome,
+//       drawn by the capture canvas, never by the runtime), so the pixel
+//       pass proves the runtime paints NO name glyphs in either mode while
+//       real element text still renders (and flips to spec-black ink in
+//       WPT mode). Label presence/geometry: HarnessLabelChromeRasterTests.
 //
 
 import XCTest
@@ -34,16 +37,16 @@ final class WPTCaptureModeTests: XCTestCase {
     }
 
     /// A childless box with an explicit 120×40 size and a DARK (#222)
-    /// background. The block-font name label (applier campaign) paints the
-    /// FIXED rgba(237,237,237,0.7) ink — BlockLabel.labelColor, no
-    /// luminance contrast pick anymore — so glyph ink only separates from
-    /// the fill on a dark background (over the old #eee fill it composited
-    /// to ≈237 vs 238: invisible to a pixel probe). Real text in WPT mode
+    /// background. The block-font name label's FIXED rgba(237,237,237,
+    /// 179/255) ink (BlockLabel.labelColor) would separate from this fill
+    /// where it would vanish over #eee — the light band below is where
+    /// such ink lands, so the runtime pin can prove it is ABSENT (the label
+    /// is harness chrome since wave 51 PR (A)). Real text in WPT mode
     /// paints the corpus-v4.1 spec-BLACK default ink (WPTCanvas.textInk
     /// via PlaceholderLabel.resolvedColor), so the pixel probes use TWO
-    /// bands: the light band for the non-WPT name label, the dark band for
+    /// bands: the light band for would-be name-label ink, the dark band for
     /// WPT-mode prose (see labelInkPixelCount). The explicit height pins
-    /// the box size whether or not the label is present. `text` verbatim.
+    /// the box size whether or not any glyphs render. `text` verbatim.
     private func boxJSON(name: String, text: String? = nil) -> String {
         let textField = text.map { ",\"text\":\"\($0)\"" } ?? ""
         return """
@@ -139,8 +142,9 @@ final class WPTCaptureModeTests: XCTestCase {
     /// Render a component through the capture-canvas contract (390pt width,
     /// 16pt padding, top-leading, scale 1) with the WPT flag set as given,
     /// and count pixels in the given channel-sum band. Two bands are in
-    /// use: the default light-ink band (the non-WPT name label's fixed
-    /// rgba(237,237,237,0.7) over the #222 fill) and a dark band for
+    /// use: the default light-ink band (where a block-font name label's
+    /// fixed rgba(237,237,237,179/255) would land over the #222 fill — the
+    /// runtime must paint NONE there since PR (A)) and a dark band for
     /// corpus-v4.1 WPT-mode prose (spec-black glyphs over the same fill) —
     /// see the band rationale at the counting loop below.
     @MainActor
@@ -182,19 +186,27 @@ final class WPTCaptureModeTests: XCTestCase {
         return count
     }
 
-    /// Nameless-empty leaf: flag OFF paints the name glyphs, flag ON drops
-    /// them — the glyph ink must go from "present" to "none".
+    /// Wave 51 PR (A): the RUNTIME paints NO name label in EITHER mode. The
+    /// label is harness chrome now — HarnessLabelChrome, drawn by the
+    /// capture canvas as a sibling overlay over the root (presence and
+    /// geometry pinned in HarnessLabelChromeRasterTests). Until (A) the
+    /// flag-OFF arm of this test asserted the glyphs WERE painted through
+    /// this very path; that arm is now the pin that ComponentRenderer's
+    /// nameless-leaf branch stays EmptyView(). Mutation-proven (EXECUTED,
+    /// wave 51): restoring `BlockLabel(label: …, componentWidth: nil)` in
+    /// that branch → `off` > 0, red.
     @MainActor
-    func testNamelessEmptyGlyphsVanishOnlyInWptMode() throws {
+    func testRuntimePaintsNoNameLabelInEitherMode() throws {
         let box = try component(boxJSON(name: "background color rgb 001"))
         let off = try labelInkPixelCount(box, wpt: false)
         let on  = try labelInkPixelCount(box, wpt: true)
-        // Baseline path must still paint the placeholder glyphs.
-        XCTAssertGreaterThan(off, 0,
-            "flag OFF must keep painting the name placeholder (baseline behaviour)")
-        // WPT path must leave a clean box — zero glyph ink.
+        // Baseline path: the runtime paints no label — the harness does.
+        XCTAssertEqual(off, 0,
+            "the runtime must not paint the name label (it is harness chrome " +
+            "since wave 51 PR (A)) — \(off) glyph pixels painted with the flag OFF")
+        // WPT path: still a clean box — zero glyph ink.
         XCTAssertEqual(on, 0,
-            "WPT mode must suppress the synthesized name placeholder entirely " +
+            "WPT mode must paint no synthesized name placeholder " +
             "— \(on) glyph pixels still painted")
     }
 

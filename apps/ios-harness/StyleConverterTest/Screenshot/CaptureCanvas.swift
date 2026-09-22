@@ -19,9 +19,17 @@
 //  - Padding              : 16 px on all sides
 //  - Scale                : 1 px per logical pixel
 //
-//  No card header, no footer, no border, no name label — just the
-//  rendered component on a known background. That keeps the pixel diff
-//  focused on the component itself rather than the test chrome.
+//  No card header, no footer, no border — just the rendered component on
+//  a known background, plus ONE piece of chrome: the block-font name
+//  label at frame (8, 6) (wave 51 PR (A); docs/DYNAMIC_CAPTURE.md section
+//  "Harness label chrome"). The label is drawn HERE, as a sibling overlay
+//  over the whole root AFTER its paint chain (HarnessLabelChrome in the
+//  runtime package), never by the runtime inside the element — so it can
+//  never ride an element's blend / opacity / filter / clip / transform,
+//  and the three platforms paint byte-identical label rects. It shows
+//  only on the bundled/baseline path for a childless, textless root
+//  (gated inside HarnessLabelChrome on !wptCaptureMode); WPT/inbox/
+//  composed captures stay label-free.
 //
 
 import SwiftUI
@@ -171,6 +179,21 @@ struct CaptureCanvas: View {
                 // Mode-split stage: dark for baseline, white in WPT capture
                 // (canvasBackground above — the corpus-v4 contract).
                 .background(canvasBackground)
+                // Wave 51 PR (A) — the harness debug label as CHROME: one
+                // block-font name label at frame (8, 6), a SIBLING overlay
+                // over the whole card, mounted OUTSIDE ComponentHost so no
+                // runtime modifier (blend / opacity / filter / clip /
+                // transform) and not even the card's `.clipped()` above can
+                // touch it. `.overlay` never sizes its host, and the nodes
+                // below (environment, hooks, coordinateSpace) are
+                // paint-neutral. HarnessLabelChrome reads wptCaptureMode
+                // from the environment the caller publishes on this canvas
+                // and shows only for a childless, textless root. Normative
+                // home: docs/DYNAMIC_CAPTURE.md "Harness label chrome".
+                .overlay(alignment: .topLeading) {
+                    HarnessLabelChrome(component: component,
+                                       frameWidth: CaptureCanvas.width)
+                }
                 // #39: the harness supplies the capture geometry — the
                 // runtime no longer assumes a 390×844 canvas on its own.
                 .environment(\.styleViewport, CaptureCanvas.viewport)
@@ -218,6 +241,19 @@ struct CaptureCanvas: View {
             // Mode-split stage: dark for baseline, white in WPT capture
             // (canvasBackground above — the corpus-v4 contract).
             .background(canvasBackground)
+            // Wave 51 PR (A) — the harness debug label as CHROME (see the
+            // out-of-flow branch above for the full rationale): a SIBLING
+            // overlay over the whole padded root, mounted right after the
+            // stage background so it paints AFTER the element's entire
+            // paint chain and OUTSIDE ComponentHost. Glyph rows 6..12 sit
+            // in the 16px top pad band, so on an in-flow root with a
+            // non-negative margin-top the ink never overlaps the border
+            // box (which starts at y = 16). Normative home:
+            // docs/DYNAMIC_CAPTURE.md "Harness label chrome".
+            .overlay(alignment: .topLeading) {
+                HarnessLabelChrome(component: component,
+                                   frameWidth: CaptureCanvas.width)
+            }
             // #39: the harness supplies the capture geometry — the
             // runtime no longer assumes a 390×844 canvas on its own.
             .environment(\.styleViewport, CaptureCanvas.viewport)

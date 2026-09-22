@@ -20,6 +20,7 @@ import {
   BLOCK_FONT_GLYPHS,
 } from '../../src/renderer/BlockFont.gen';
 import {
+  BLOCK_LABEL_FILL,
   BLOCK_LABEL_ORIGIN_X,
   BLOCK_LABEL_ORIGIN_Y,
   blockFontCanonicalSerialization,
@@ -158,5 +159,42 @@ describe('shared-spec constants', () => {
         expect(row).toBeLessThan(1 << BLOCK_FONT_CELL_W);
       }
     }
+  });
+
+  it('pins the fill spelling: alpha BYTE 180 on web (0.706), never 0.7 / 179-alpha', () => {
+    // The contract is the composited byte (174,174,180) over #1A1A2E, the
+    // natives' alpha-179 result; Chromium's CPU raster lands alpha byte 179
+    // one LSB dark (173,173,179 — measured for 0.7 AND 0.70196 by the
+    // wave-51 web skeptic), so web spells alpha byte 180. This guards the
+    // string from a "tidy" re-spelling; the byte itself is pinned by
+    // apps/web-harness/tests/ui/LabelChrome.raster.test.tsx through Chrome.
+    // MUTATIONS (2026-09-22, source restored sha256-exact; the fix-pass
+    // numbers also stand in tools/titan/results/wave51-A/skeptic-web.md,
+    // "Re-verify" item 4): `0.70196` → red on the window's lower edge
+    // ("expected 0.70196 to be greater than or equal to 0.704"), and on the
+    // string pin below when the window is bypassed; raster (8,6) =
+    // (173,173,179). `0.7079` (polish pass — one ten-thousandth past the
+    // upper edge) → red on "expected 0.7079 to be less than or equal to
+    // 0.7078", and on the string pin; raster (8,6) = (175,175,181).
+    //
+    // THE BYTE-180 WINDOW, asserted first so a re-spelling fails on the
+    // reason, not on the letters. Chromium rounds the CSS alpha to 8 bits
+    // at the .5 boundaries (re-verify probe: 0.7039 → 173, 0.704 … 0.7078
+    // → 174, 0.7079 → 175), i.e. round(α × 255) = 180 ⇔ α ∈ [179.5/255,
+    // 180.5/255) = [0.70392…, 0.70784…) — [0.704, 0.7078] at CSS-literal
+    // precision. 0.706 sits mid-window (~0.002 from either edge) and is
+    // byte 180 under floor as well (180.03).
+    const alpha = Number(/,\s*([\d.]+)\)$/.exec(BLOCK_LABEL_FILL)![1]);
+    expect(alpha).toBeGreaterThanOrEqual(0.704);
+    expect(alpha).toBeLessThanOrEqual(0.7078);
+    expect(Math.round(alpha * 255)).toBe(180);
+    expect(Math.floor(alpha * 255)).toBe(180);
+    // The window edges themselves, executed: 0.0001 outside either edge is the next byte.
+    expect(Math.round(0.7039 * 255)).toBe(179);
+    expect(Math.round(0.704 * 255)).toBe(180);
+    expect(Math.round(0.7078 * 255)).toBe(180);
+    expect(Math.round(0.7079 * 255)).toBe(181);
+    // And the exact spelling the harness svg carries (LabelChrome.style pins it on `fill`).
+    expect(BLOCK_LABEL_FILL).toBe('rgba(237, 237, 237, 0.706)');
   });
 });

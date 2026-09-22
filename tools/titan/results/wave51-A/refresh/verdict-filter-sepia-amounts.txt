@@ -1,0 +1,11 @@
+  000_Sepia_Zero.png… REGRESSION
+  001_Sepia_Half.png… REGRESSION
+  002_Sepia_Fixture.png… REGRESSION
+  003_Sepia_Full.png… REGRESSION
+  004_Sepia_ExtendedRange.png… REGRESSION
+  006_Sepia_Translucent.png… REGRESSION
+  007_Sepia_OverClamp.png… REGRESSION
+· cross-platform gate: 24 pair(s) · 2 known divergence(s) · 0 unexpected
+✗ 7 component(s) regressed beyond thresholds (24 platform-comparisons ran)
+  [1;33m✗ comparison failed: a platform regressed against its committed baseline[0m
+     (or a baseline exists for a component its PARTIAL column did not capture — see the ✗ rows above)

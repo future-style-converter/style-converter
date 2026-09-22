@@ -1,0 +1,8 @@
+  000_GrayBasis_Red.png… REGRESSION
+  001_GrayBasis_Green.png… REGRESSION
+  002_GrayBasis_Blue.png… REGRESSION
+  003_GrayBasis_Mixed.png… REGRESSION
+· cross-platform gate: 12 pair(s) · 0 known divergence(s) · 0 unexpected
+✗ 4 component(s) regressed beyond thresholds (12 platform-comparisons ran)
+  [1;33m✗ comparison failed: a platform regressed against its committed baseline[0m
+     (or a baseline exists for a component its PARTIAL column did not capture — see the ✗ rows above)

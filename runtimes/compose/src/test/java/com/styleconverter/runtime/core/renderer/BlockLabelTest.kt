@@ -7,8 +7,13 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 /**
- * Pin suite for the block-font placeholder label (BlockLabel.kt +
- * BlockFont.gen.kt — the cross-platform glyph-wall fix).
+ * Pin suite for the block-font label GEOMETRY (BlockLabel.kt +
+ * BlockFont.gen.kt — the cross-platform glyph-wall fix). Since wave 51
+ * PR A the runtime draws no label: the harness paints these rects as
+ * chrome over the capture root (docs/DYNAMIC_CAPTURE.md "Harness label
+ * chrome"; the Android drawer is pinned by the harness's
+ * HarnessLabelChromeTest (geometry) and HarnessLabelChromeSourceTest
+ * (wiring, draw order, colour use)). This suite pins the shared math.
  *
  * The MANDATORY test here is the atlas checksum pin: it recomputes the
  * sha256 of the CANONICAL serialization from the EMBEDDED Kotlin constants
@@ -18,10 +23,11 @@ import org.junit.Test
  * platform — the atlas can only change via tools/visual/gen-block-font.mjs
  * regenerating all three files together.
  *
- * The remaining tests pin the pure layout math the composable draws with:
- * normalize (uppercase + unknown→'-'), truncation, and the per-bit rect
- * list — the SAME functions the draw phase consumes, so a green suite
- * means the pixels match the shared spec.
+ * The remaining tests pin the pure layout math the harness chrome draws
+ * with: normalize (uppercase + unknown→'-'), truncation against the FRAME
+ * width, and the per-bit rect list — the SAME functions the harness's
+ * draw node consumes, so a green suite means the pixels match the shared
+ * spec.
  */
 class BlockLabelTest {
 
@@ -108,8 +114,11 @@ class BlockLabelTest {
 
     @Test
     fun truncation_unboundedWidth_neverTruncates() {
-        // The composable passes Int.MAX_VALUE for unbounded constraints —
-        // the whole label survives (and the math must not overflow).
+        // No live caller passes Int.MAX_VALUE any more (the deleted in-
+        // component placeholder did, for unbounded constraints; the harness
+        // chrome always passes the real frame width) — kept so the math is
+        // proven not to overflow for any future caller: the whole label
+        // survives an unbounded budget.
         assertEquals(5, BlockLabel.truncatedCount(5, Int.MAX_VALUE))
     }
 
@@ -148,21 +157,24 @@ class BlockLabelTest {
     @Test
     fun rects_truncatedCount_dropsTrailingCells() {
         // Drawing "HI" clamped to 1 char paints only H's 17 bits — the
-        // exact list the drawBehind consumes after width-derived clamping.
+        // exact list the harness draw node consumes after frame-width
+        // truncation (harnessLabelRects in ScreenshotCaptureScreen.kt).
         assertEquals(17, BlockLabel.rects("HI", 1).size)
-        // A count beyond the string length re-clamps (coerced layout
-        // widths from parent min constraints must never overrun).
+        // A count beyond the string length re-clamps (an over-large count
+        // must degrade to "whole label", never overrun the string).
         assertEquals(28, BlockLabel.rects("HI", 99).size)
     }
 
-    // ── Ink color: rgba(237,237,237,0.7) with the 179/255 alpha pin ────
+    // ── Ink color: the native alpha byte behind the (174,174,180) contract ─
 
     @Test
     fun labelColor_isTheSharedArgbLiteral() {
         // 0xB3EDEDED: RGB 237 (0xED) per channel; alpha 0.7×255 = 178.5
-        // rounded HALF-UP to 179 (0xB3) — the documented shared rounding.
+        // rounded HALF-UP to 179 (0xB3) — the byte Compose and SwiftUI need
+        // to composite (174,174,180) over #1A1A2E (BlockLabel.COLOR's doc:
+        // the composited byte is the contract; web reaches it at byte 180).
         assertEquals(0xB3EDEDED.toInt(), BlockLabel.COLOR.toArgb())
-        // Pin the effective alpha byte explicitly: 179, never 178.
+        // Pin the native alpha byte explicitly: 179, never 178 (→ 173).
         assertEquals(179, (BlockLabel.COLOR.toArgb() ushr 24) and 0xFF)
     }
 }

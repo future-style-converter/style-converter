@@ -13,7 +13,7 @@ iOS 16+, Swift 5 language mode.
 # from the repo root — needs Xcode 26 (Swift 6.3 toolchain) or newer:
 # Package.swift declares `// swift-tools-version:6.3`
 xcodebuild test -scheme StyleConverterRuntime \
-  -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'   # XCTest suite (2008 tests)
+  -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'   # XCTest suite (2020 tests)
 ```
 
 Rendered and screenshot-tested by [`apps/ios-harness/`](../../apps/ios-harness/)

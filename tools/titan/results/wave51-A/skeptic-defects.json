@@ -1,0 +1,218 @@
+{
+  "_note": "Wave 51 PR 3 — skeptic defects (all severities) from the 2026-09-22 run, plus the fix-pass and re-verify verdicts; the per-platform narratives are skeptic-<platform>.md beside this file.",
+  "skeptics": [
+    {
+      "skeptic": "ios",
+      "mustFixBeforeGate": false,
+      "defects": [
+        {
+          "severity": "should-fix",
+          "file": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift",
+          "claim": "The ink-byte pin (lines 125 and 131) accepts ±1 per channel, so it cannot see the exact defect class the design names (α 0.7 vs 179/255 → one LSB) and contradicts docs/DYNAMIC_CAPTURE.md §5 ('one LSB of drift is a defect, not a tolerance'). Tighten both probes to exact equality with (174,174,180).",
+          "evidence": "Mutation M-α (opacity 179/255 → 0.7) left all 18 pins GREEN (ios-mut-Malpha.log). My exact-ink probe measured 178/178 pixels EXACTLY (174,174,180) in three separate runs (ios-probe.log, ios-mut-Malpha-probe.log, ios-probe2.log), so the raster supports an exact assertion; the tolerance protects nothing on Catalyst (the only destination this test runs on)."
+        },
+        {
+          "severity": "nit",
+          "file": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift",
+          "claim": "Header (lines 19-33) records M5 as red on (a)/(f)/(g)/clip only and points mutation logs at 'lane notes' in a purged scratchpad; on re-execution testRootWithChildrenPaintsNoLabel is also red (43 px — the child's own in-element label). Repoint the record to tools/titan/results/wave51-A/ and add the children case.",
+          "evidence": "ios-mut-M5.log: 5 chrome failures incl. 'testRootWithChildrenPaintsNoLabel : (\"43\") is not equal to (\"0\")'; lane-reports.json iOS M5 says 'chrome 4 red'."
+        },
+        {
+          "severity": "nit",
+          "file": "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/BlockLabel.swift",
+          "claim": "labelColor comment (lines 147-153) claims 0.7 'would hand SwiftUI 178.5/255 and leave the final byte to per-platform rounding'; measured, 0.7 composites to the identical byte on the Catalyst raster. Keep 179/255 (cross-platform readability) but reword the unmeasured rationale.",
+          "evidence": "ios-mut-Malpha-probe.log: with opacity 0.7, '[probe] exact-ink pixels 178/178' at (174,174,180)."
+        },
+        {
+          "severity": "nit",
+          "file": "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/BlockLabel.swift",
+          "claim": "glyphString (lines 69-75) iterates Swift Character (grapheme clusters) while the tripwire's normalize and web/Kotlin iterate code points: a combining sequence in a component name (e.g. e + U+0301) yields one '-' on iOS and two elsewhere — a glyph-count divergence. Outside the corpus today; normalise over unicodeScalars or document the ASCII-name assumption.",
+          "evidence": "tools/visual/label-chrome-tripwire.test.mjs:55 `Array.from(label.toUpperCase())`; BlockLabel.swift:72 `label.uppercased().map { ch in … }` over Character; all 130 baseline stems are within [A-Z0-9 %.-] after transform (ls tools/visual/baseline census), so no current fixture is affected."
+        }
+      ],
+      "openQuestionAnswers": [
+        "iOS Q1 (BlockLabel.swift comment 'web moves to α 179/255 in PR (A)'): TRUE in this tree — runtimes/web/src/renderer/BlockFontLabel.ts:61 is `rgba(237, 237, 237, 0.70196)` = 179/255, and design §3.4 lands all four lanes in one PR; keep the comment.",
+        "iOS Q2 (mutation logs live in a purged scratchpad): superseded — this skeptic re-executed M2 and M5 and added M-origin and M-α, with the records in tools/titan/results/wave51-A/skeptic-ios.md; the test-file header should point there (nit above).",
+        "iOS Q3 (BlockLabel.swift 209 lines): accept — an existing file, the ≤200 rule targets new files (130/136/200 here) and CLAUDE.md splits at ~300; the header rewrite is the contract's documentation, not bloat.",
+        "iOS Q4 (`flowCanvasView(c, withLabelChrome: true)` vs design §4's `flowCanvas(c) + .overlay(…)`): accept the flag form — it mounts the chrome at the harness's exact point (after `.background`, before the environment nodes), and probe 2 shows the `false` arm is byte-neutral, so BlendGroupCompositingTests' chains are unchanged; the design's form would mount after the environment nodes, paint-equivalent but less faithful.",
+        "Tooling Q (clause (iii) ±1 red on 4/19 glyph-mask stems) as it concerns iOS: the iOS raster is exact and deterministic — (174,174,180) over ground and (176,176,176) over #222 in every run — so any ±1 disagreement on those stems is a device/compositor property of what lies UNDER the glyphs, not iOS label code; iOS has no objection to dropping (iii) to positional-only per design v3 §4(c). The tripwire's expectations (origin (8,6), normalize, floor((w−16)/6), INK_ALPHA 179, PNG width = CaptureOverrides.captureWidth) match what iOS draws.",
+        "Tooling Q (CI red until the refresh lands): confirmed from the iOS side — the chrome code is correct but every iOS baseline PNG still carries the in-box label, so tools/visual/label-chrome-tripwire.test.mjs must ship in the same PR as the UPDATE_BASELINE refresh (design §5), sequenced after the device review."
+      ]
+    },
+    {
+      "skeptic": "android",
+      "mustFixBeforeGate": true,
+      "defects": [
+        {
+          "severity": "must-fix",
+          "file": "README.md:213, CLAUDE.md:293, docs/STATUS.md:2425 (+2283/2369/2399/2414), apps/android-harness/README.md:31",
+          "claim": "CI doc-staleness job is red on HEAD: the android-harness :app suite now has 127 tests (HarnessLabelChromeTest adds 11) while every doc row still says 116; the same run is also red for the other lanes' counts (web-harness 297, swiftui 2019, tooling 2176). A number restamp in the same PR, no Android code change.",
+          "evidence": "bash tools/visual/doc-staleness-check.sh → exit 1; lines 'live: android-harness(:app)=127 web-harness=297' and 'README.md / CLAUDE.md / docs/STATUS.md does NOT mention live android-harness test count 127 in its test-suite table/inline count — update it'. grep -rE '@Test' apps/android-harness/app/src/test → 127. compose=3232 still ✓ in all five docs."
+        },
+        {
+          "severity": "should-fix",
+          "file": "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt:142 (drawNode_sitsBetweenOnGloballyPositionedAndPadding)",
+          "claim": "Draw ORDER is unpinned: moving `drawContent()` after the label loop (label painted UNDER the component) passes all 11 tests. On the 19 band-paint stems (shadows/outlines/transforms/negative offsets into rows 0..15) Android would then differ from web/iOS under the glyphs; only the post-refresh tripwire glyph-mask clause would notice. Add to P2: index of `drawContent()` < index of `if (showsLabel)` inside the `.drawWithContent {` block of the CaptureCanvas slice.",
+          "evidence": "Mutation S4 executed: android-skeptic-mut-S4.log → `> Task :app:testDebugUnitTest` BUILD SUCCESSFUL, GRADLE_EXIT=0, 0 failures; file restored byte-exact. Design §3.2/§2 lists `drawContent()` running first as load-bearing ('the chrome composited over' band paint)."
+        },
+        {
+          "severity": "should-fix",
+          "file": "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt:135 (captureCanvas_consumesTheSharedGeometry)",
+          "claim": "Colour USE is unpinned: the harness can paint any colour — `drawRect(Color(0xB2EDEDED), …)` (alpha 178 → (173,173,179), the exact web defect this PR fixes) — and all 11 + 14 tests stay green, because BlockLabelTest pins the constant's VALUE but nothing pins that CaptureCanvas paints with `BlockLabel.COLOR`. Add to P2: the slice contains `drawRect(BlockLabel.COLOR,`.",
+          "evidence": "Mutation S5 executed: android-skeptic-mut-S5.log → BUILD SUCCESSFUL, GRADLE_EXIT=0; BlockLabelTest.kt:173-175 pins 0xB3EDEDED / alpha 179 only on the object; ScreenshotCaptureScreen.kt:1023 is the only place the byte reaches the PNG."
+        },
+        {
+          "severity": "nit",
+          "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt:6305",
+          "claim": "`if (!hasRawText) return` is left at the old branch position, so every nameless leaf still runs placeholderDisplayText / applyTabSize / SoftHyphenPolicy / AutoHyphenation and discards the result (and the `hyphens: auto` PropertyTracker breadcrumb can still log for a component that renders no text — unchanged from before). Hoist to just after the WPT gate at :6207 when the file is next touched.",
+          "evidence": "sed -n 6200,6310p ComponentRenderer.kt: gate at 6207, displayText work 6208-6280, return at 6305; lane report designDeviations acknowledges 'deliberately minimal'. Fresh compile shows no unused-variable warning (displayText is used by the real-text path)."
+        },
+        {
+          "severity": "nit",
+          "file": "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt",
+          "claim": "Not literally every-line-commented: 109 code lines vs 65 comment lines (imports, assertion lines bare), though every test method and helper carries a why-comment and the header records the executed mutations. Within the ≤200-line rule (195).",
+          "evidence": "awk comment/blank/code census over the file → comment=65 blank=21 code=109; wc -l → 195."
+        }
+      ],
+      "openQuestionAnswers": [
+        "Android Q1 (widthPx vs PNG width; grep logcat in §5?): `Modifier.width(canvasWidth)` fixes the Box's px width to `canvasWidth.roundToPx()` == `widthPx`, and PixelCopy's `bounds` come from `onGloballyPositioned` on the SAME node, so `size.width` in the draw scope equals the PNG width unless the parent's max constraint is narrower than the canvas (a device narrower than 390dp) — exactly the case the Log.w names. YES: the §5 refresh should run `adb logcat -d | grep 'Harness label chrome:'` and stop on any hit; test-all.sh already greps logcat for `Capture run config:` (lines 1116-1130), so adding this grep there is a small tooling follow-up.",
+        "Android Q2 (`--tests '*WptCaptureModeTest*'` on :runtime matches nothing): confirmed by listing — the class is apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/WptCaptureModeTest.kt (:app); Gradle tolerates a non-matching filter beside matching ones, which is why the lane's command passed. Move it to the :app command or simply run the whole :app suite (127 tests, ~2 s executed with --rerun).",
+        "Android Q3 (BlockLabel.kt location if 'relocate label machinery into the harnesses' lands): agree it is a follow-up; nothing in this PR blocks moving BlockLabel.kt + BlockFont.gen.kt (+ BlockLabelTest and its checksum pin) into apps/android-harness, and the ComponentRenderer.kt:6281-6304 comment would follow.",
+        "Tooling lane cross-check (tripwire expectations vs what Android draws): origin (8,6) = BlockLabel.ORIGIN_X/Y; glyph set = all 41 embedded Kotlin rows identical to tools/visual/block-font.json (0 mismatches; CHECKSUM cb3c6e411c7b2859 recipe matches gen-block-font.mjs:34); colour byte 179/255 SrcOver on 0xFF1A1A2E → (174,174,180); truncation floor((pngWidth−16)/6) with the ≤0 → 0 branch is the same expression as truncatedCount; PNG width = the unscaled PixelCopy crop of the chrome node. The tripwire's (iii) ±1 decision (027/037/082/098) is a tooling/refresh call, not an Android defect — Android's contribution to those stems is byte-identical draw geometry.",
+        "iOS lane openQuestion about the web α move being in the same PR: from the Android side, BlockLabel.kt:451-460 makes the same cross-lane statement; git diff b8f3593e --stat confirms runtimes/web/src/renderer/BlockFontLabel.ts is in the WIP commit, so the statement is true on this tree."
+      ]
+    },
+    {
+      "skeptic": "web",
+      "mustFixBeforeGate": true,
+      "defects": [
+        {
+          "severity": "must-fix",
+          "file": "runtimes/web/src/renderer/BlockFontLabel.ts",
+          "claim": "BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.70196)' (line 61) does not reach the natives' composited byte: in the capture pipeline it renders (173,173,179), identical to the old 0.7 and to the committed web baselines, while Android/iOS paint (174,174,180). The parity change is vacuous; docs/DYNAMIC_CAPTURE.md §5 ('web included … (174,174,180) on all three'), Android BlockLabel.kt:57-65 and iOS BlockLabel.swift:153 assert a parity that does not exist, and the tripwire's clause (ii) would be red on all 111 band-identical stems after the §5 refresh. Fix: web alpha byte must be 180 — measured window 0.704…0.706 → (174,174,180); 0.706 (180.03) survives both floor and round. Follow through: LabelChrome.test.tsx:120 string pin, the BlockFontLabel.ts comment (its 'round(0.70196×255)=179 reaches the native byte' rationale is wrong in effect — Chromium's CPU-raster src-over renders alpha byte 179 one LSB darker than Compose/SwiftUI), docs §5 wording, the two native comments (say 'the composited byte (174,174,180)', not '179/255 on every platform').",
+          "evidence": "Chromium raster probe with capture-screenshots.mjs's exact launch flags and a CaptureCanvas-replica DOM: pixel (8,6) = (173,173,179) for 0.7 (control, equal to HEAD web baselines 009/107/108), (173,173,179) for 0.70196 / 0.7019607843 / 0.702 / 0.703 / 0.7035 / 0.7039, (174,174,180) for 0.704 / 0.705 / 0.7058 / 0.706, (175,175,181) for 0.71; HEAD baseline census: web ink (173,173,179) ×48/276/282 vs Android+iOS (174,174,180) on 009/107/108; the break between 0.7039 (179.49) and 0.704 (179.52) shows alpha byte 179 composites to 173 on web."
+        },
+        {
+          "severity": "should-fix",
+          "file": "apps/web-harness/tests/ui/LabelChrome.test.tsx",
+          "claim": "The only colour pin (line 120) is a string equality on the rgba literal; it was green while the composited byte never moved, so the parity claim was untested. Land the raster probe as a test (puppeteer is already a dependency of the harness; ~40 lines pinning (8,6) == (174,174,180) over #1A1A2E with the capture flags) or state explicitly that the post-refresh tripwire is the only colour gate.",
+          "evidence": "MUT-6 (fill back to 0.7) went red only on the string pin; runtimes/web BlockFontLabel.test.ts stayed 12/12; the probe shows the string change from 0.7 to 0.70196 produced no byte change."
+        },
+        {
+          "severity": "should-fix",
+          "file": "runtimes/web/src/renderer/RendererOptions.ts",
+          "claim": "renderEmptyContent doc (lines 92-98) still says the harness substitutes 'PlaceholderContent (name label + bg-luminance contrast colour)'; the name label is canvas chrome now (the lane's own open question #1, confirmed; owned path, one-line fix).",
+          "evidence": "sed -n 88,104p runtimes/web/src/renderer/RendererOptions.ts shows the stale 'name label' wording; ComponentRenderer.tsx PlaceholderContent no longer takes name (line 1210)."
+        },
+        {
+          "severity": "nit",
+          "file": "apps/web-harness/src/ui/LabelChrome.tsx",
+          "claim": "console.warn for the no-glyph case (lines 100-103) runs in the render body on every render, not once per (name, width) as the natives' Log.w/logOnce do; harmless in capture, noisy in a live gallery. A data-label-chrome-dropped canvas attribute would also make the case greppable by tooling (lane open question #2).",
+          "evidence": "The warn sits before the early return inside the function component body with no memo/ref guard; Android logs inside remember(component.name, widthPx), iOS via PropertyTracker.logOnce."
+        },
+        {
+          "severity": "nit",
+          "file": "tools/visual/gen-control-fixture.mjs",
+          "claim": "Comment at line 95 names `isBlockLabel`, which the lane renamed to `isLabelSlot` in ComponentRenderer.tsx (tooling path, comment-only).",
+          "evidence": "grep isBlockLabel → only tools/visual/gen-control-fixture.mjs:95 and the rename note at ComponentRenderer.tsx:1287."
+        },
+        {
+          "severity": "nit",
+          "file": "runtimes/web/tests/renderer/BlockFontLabel.test.ts",
+          "claim": "The runtime's own test pins no BLOCK_LABEL_FILL value; the constant is pinned only at the harness level.",
+          "evidence": "Under MUT-6 (fill = 0.7) the file stayed 12/12 green."
+        },
+        {
+          "severity": "nit",
+          "file": "apps/web-harness/tests/ui/LabelChrome.test.tsx",
+          "claim": "New test file is 219 lines, over the ≤200 target (under the ~300 split threshold).",
+          "evidence": "wc -l → 219."
+        }
+      ],
+      "openQuestionAnswers": [
+        "web Q1 (RendererOptions.ts:92-101 renderEmptyContent doc): confirmed stale at lines 92-98 — it still describes a name label the skin no longer draws; fix in this PR (owned path, one comment line).",
+        "web Q2 (console.warn vs a data-attribute marker): acceptable as the Log.w twin, but it fires on every render rather than once; a data-label-chrome-dropped attribute on the canvas would let the capture manifest/tripwire assert the <22px case — nit, not gate-blocking.",
+        "iOS lane Q ('web moves to α 179/255 in PR (A)' comment): false in effect with the current web spelling — web still composites (173,173,179); after the fix web will use alpha byte 180 (0.704–0.706), so the iOS BlockLabel.swift:153 and Android BlockLabel.kt:57-65 comments and docs §5 must state 'web pins the composited byte (174,174,180), which needs alpha byte 180 under Chromium's CPU raster', not '179/255 on every platform'.",
+        "tooling lane Q (clause (iii) ±1 decision): the web fix is compatible with keeping MASK_TOL=1 — alpha 180 vs 179 differs by at most (237−c)/255 < 1 LSB per channel over any backdrop; the four predicted (iii) reds are from under-glyph paint differences, unrelated to the web colour. Clause (ii) however is exact and would be red ×111 with the current 0.70196.",
+        "tooling lane expectation 'web moved from alpha 0.7 = (173,173,179) to 179/255': the move happened in source but not in pixels — measured (173,173,179) at 0.70196; the tripwire will only go green post-refresh once web lands the byte-180 alpha.",
+        "Android lane Q1 (is the frame width the PNG width?): the web twin holds by construction — one captureWidth feeds CANVAS_WIDTH_PX (CaptureGallery.tsx:88 via ?width=, capture-url.mjs:115) and the puppeteer clip width (capture-screenshots.mjs:681/699); no runtime check is needed on web.",
+        "Android lane Q2 (*WptCaptureModeTest* filter matching nothing in :runtime): not a web matter; noting for the wave procedure that the web equivalent is URL-scoped per vitest file and the three files run in the CI `npm test` glob.",
+        "Tree note: at the end of my run `git status` showed `M apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt` — not mine (my four mutated files are sha256-verified byte-exact and were clean at my script's end); a concurrent Android skeptic's in-flight mutation in the shared tree."
+      ]
+    }
+  ],
+  "fixPasses": [
+    {
+      "lane": "android",
+      "summary": "Must-fix (doc-staleness red on android-harness count) FIXED. The live `:app` JUnit suite is 127 tests (HarnessLabelChromeTest +11); restamped 116→127 in the four live quoting sites the defect names: the `| android-harness app (JUnit) | … | N |` row in README.md:213, CLAUDE.md:293 and docs/STATUS.md:2425 (the only context `doc_quotes_suite_count` in tools/visual/doc-staleness-lib.sh holds those docs to), and the inline `(127 tests — …` phrase in apps/android-harness/README.md:31, whose coverage list on :33 now also names \"harness label chrome\" (what the +11 tests pin). Each sed was anchored on line number AND row text so a shifted line could not be edited silently. The four dated per-wave prose records in docs/STATUS.md (2283 wave-49 tree, 2369 wave-50 tree, 2399 PR-1 tree, 2414 PR-2 tree) deliberately KEEP 116: each states what that PR tree measured at the time (HarnessLabelChromeTest did not exist), the matcher does not read them, and restamping would falsify the record. Verification: `./gradlew :app:testDebugUnitTest --rerun` (JDK 21) → BUILD SUCCESSFUL, 11 JUnit XMLs, executed 127 / failures 0 / errors 0 / skipped 0 (before this run the results dir held only the 11-test HarnessLabelChromeTest XML from a 17:19 filtered mutation run, so the check had been falling back to the annotation count); `bash tools/visual/doc-staleness-check.sh` → `live: android-harness(:app)=127`, `✓ README.md / CLAUDE.md / docs/STATUS.md mentions android-harness=127`. All four edits re-verified present after the web lane's concurrent edits landed in the shared tree. No Android code touched, no pin touched (pins array empty by design), nothing in runtimes/compose changed. The check as a whole is still exit 1 on the OTHER lanes' counts only (see notVerified) — none of which has a fix lane this round and two of which moved during this task, so they belong to the ship-time single-writer sweep.",
+      "filesChanged": [
+        "README.md",
+        "CLAUDE.md",
+        "docs/STATUS.md",
+        "apps/android-harness/README.md"
+      ]
+    },
+    {
+      "lane": "web",
+      "summary": "Must-fix closed. BLOCK_LABEL_FILL (runtimes/web/src/renderer/BlockFontLabel.ts) moved from 'rgba(237, 237, 237, 0.70196)' to 'rgba(237, 237, 237, 0.706)' — alpha BYTE 180 (0.706×255 = 180.03 under floor and round). Reproduced the skeptic's Chromium probe on this machine with the capture script's flags (headless 'new', --disable-gpu, --force-color-profile=srgb, 390×dsf1): 0.7 / 0.70196 / 0.7039 → (173,173,179); 0.704 / 0.705 / 0.706 → (174,174,180); 0.71 → (175,175,181). The comment block now states the contract as the COMPOSITED byte (174,174,180), records the measurement, and says why Chromium's CPU-raster src-over needs byte 180 where Compose/SwiftUI use 179 (the old 'round(0.70196×255)=179 reaches the native byte' rationale is gone). LabelChrome.tsx header comment corrected the same way (no longer claims '179/255 — the natives' exact alpha byte'). The colour pin is no longer string-only: NEW apps/web-harness/tests/ui/LabelChrome.raster.test.tsx pushes the REAL CaptureGallery markup (renderToStaticMarkup → CaptureCanvas → LabelChrome) through headless Chrome with the capture flags, crops each canvas to its bounding rect exactly as capture-screenshots.mjs does, and asserts on the PNG bytes: 390-px frame, pixel (8,6) EXACTLY (174,174,180), and a full pad-band sweep (rows 0..15 × 390 cols) that must be ink exactly on P = layoutBlockLabel(name,390)@(8,6) and ground (26,26,46) everywhere else — pinning origin, crispEdges, frame-width truncation (100-glyph name → 62 glyphs, last ink col 378) and the byte in one pass. It skips LOUDLY (console.warn) when Chromium is absent (CI's PUPPETEER_SKIP_DOWNLOAD=1 install) and LABEL_CHROME_RASTER_REQUIRED=1 turns that into a failure. The string pin in LabelChrome.test.tsx:120 now expects 0.706 with a comment saying it guards the spelling only; a fill-spelling pin was added to runtimes/web BlockFontLabel.test.ts. All pins mutation-proven (three mutations executed, sources restored sha256-exact, header records carry the measured numbers). Also fixed the skeptic's SHOULD-FIX in my path: RendererOptions.ts renderEmptyContent doc no longer says the harness draws a name label through the hook. Green: harness LabelChrome ×4 files 19/19, the six harness suites the skeptic ran 63/63, runtime BlockFontLabel 13/13, both typechecks exit 0. Out of my paths and NOT touched: docs/DYNAMIC_CAPTURE.md §5 lines 266-269, Android BlockLabel.kt:57-65, iOS BlockLabel.swift:148-153, tools/visual/label-chrome-tripwire.test.mjs:14-15 header, design-record.md §2 — all still say web moved to 179/255; they must say 'the composited byte (174,174,180); web spells alpha byte 180 (0.706)'. Unrelated concurrent modifications seen in the shared tree (CLAUDE.md, README.md, apps/android-harness/README.md, docs/STATUS.md) were left alone.",
+      "filesChanged": [
+        "runtimes/web/src/renderer/BlockFontLabel.ts",
+        "runtimes/web/src/renderer/RendererOptions.ts",
+        "runtimes/web/tests/renderer/BlockFontLabel.test.ts",
+        "apps/web-harness/src/ui/LabelChrome.tsx",
+        "apps/web-harness/tests/ui/LabelChrome.test.tsx",
+        "apps/web-harness/tests/ui/LabelChrome.raster.test.tsx"
+      ]
+    }
+  ],
+  "reverify": [
+    {
+      "skeptic": "android",
+      "verdict": "RE-VERIFY: must-fix 1 (doc-staleness red on the android-harness count) is FIXED by executed check, and the fix introduced no regression. The diff of README.md / CLAUDE.md / docs/STATUS.md / apps/android-harness/README.md is exactly the four claimed hunks (three `| android-harness app (JUnit) | … | 127 |` rows + the `(127 tests —` phrase and the three-word coverage addition); no Android source, test or pin moved (`git status --short -- runtimes/compose apps/android-harness` → only the README). A fresh JDK-21 `:app:testDebugUnitTest --rerun` executed 127 tests / 0 failures / 0 errors / 0 skipped (11 XMLs dated 17:40, newer than the newest test source), the `@Test` grep is also 127, and `bash tools/visual/doc-staleness-check.sh` now prints `live: android-harness(:app)=127` with ✓ for all three gated docs and ✓ `apps/android-harness/README.md mentions compose=3232` (the `(3232 tests)` phrase beside the edited lines survived). CI's node-only doc-staleness job has no gradle build dir so it takes the annotation path → the same 127. The four STATUS.md prose lines left at 116 are accurate dated records: `git grep -cE '@Test' b8f3593e` sums to 116, and `doc_quotes_suite_count` only reads the table row / `(N tests` phrase, never prose. The check as a whole is still exit 1 on the OTHER lanes' counts only (tooling 2176, web 1338, swiftui 2019, web-harness 301; two of them moved during the fix pass) — the ship-time single-writer sweep's restamp, not an Android defect and not a device-gate blocker. New should-fix, comment-only: BlockLabel.kt:61-65 still says web moved to 179/255, but web now ships alpha 0.706 (byte 180) to reach the same composited byte (174,174,180). Should-fix 2/3 (S4/S5 P2 assertions) carried, untouched. Android half ships once the sweep restamps the other lanes' counts. Verdict appended to tools/titan/results/wave51-A/skeptic-android.md under \"## Re-verify\" (102 lines total); working log in scratchpad wave51/prA/skeptic-android.md.",
+      "defects": [
+        {
+          "severity": "must-fix",
+          "file": "README.md:214-216, CLAUDE.md:294-296, docs/STATUS.md:2426-2428, runtimes/web/README.md, runtimes/swiftui/README.md (cross-lane; owner = ship-time single-writer sweep, NOT Android)",
+          "claim": "The CI doc-staleness job is still exit 1 on HEAD+fix, but now only on the OTHER lanes' counts: tooling 2176 (docs say 2040), web runtime 1338 (docs say 1337), swiftui 2019 (docs say 2008), web-harness 301 (docs say 282). The Android row is green. This blocks merge (CI), not the device gate; two of the four numbers moved during the fix pass (web-harness 297→301, web 1337→1338), so restamping before the web lane settles would drift again — it belongs to the sweep from the FINAL tree, which STATUS.md already records as the point where `doc-staleness-check.sh exit 0` is asserted.",
+          "evidence": "bash tools/visual/doc-staleness-check.sh → exit 1; lines 7-9 (tooling 2176 ×3 docs), 16-19 (web 1338 ×4), 25-28 (swiftui 2019 ×4), 33-35 (web-harness 301 ×3) red; lines 30-32 `✓ … mentions android-harness=127` green. Full log: scratchpad/android-reverify-staleness.log."
+        },
+        {
+          "severity": "should-fix",
+          "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/BlockLabel.kt:61-65",
+          "claim": "The COLOR doc comment now asserts a false parity mechanism: \"the effective alpha every platform must rasterize with is exactly 179/255 … which is why the web harness moved to 179/255 in the same PR\". The web lane ships alpha 0.706 (byte 180), because Chromium composites byte 179 to (173,173,179). The contract that actually holds across the three platforms is the composited byte (174,174,180), reached at alpha byte 179 on Compose/SwiftUI and byte 180 on web. Comment-only; `COLOR = 0xB3EDEDED` is unchanged and still pinned by BlockLabelTest, so no render, pin or byte diverges. Replace the last two sentences with: \"the composited byte (174,174,180) is the contract, not the alpha: Compose and SwiftUI reach it at alpha byte 179, web at alpha byte 180 (CSS 0.706) because Chromium composites byte 179 one LSB darker — see runtimes/web/src/renderer/BlockFontLabel.ts.\"",
+          "evidence": "sed -n 57,66p BlockLabel.kt shows the quoted sentences; grep -n BLOCK_LABEL_FILL runtimes/web/src/renderer/BlockFontLabel.ts → line 72 `export const BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.706)';` with lines 55-66 documenting the measured (173,173,179) at 0.70196 and (174,174,180) at 0.704-0.706."
+        },
+        {
+          "severity": "should-fix",
+          "file": "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt (P2 slice assertions)",
+          "claim": "Carried from the first pass, untouched by the fix pass (no Android test changed): draw ORDER is unpinned (mutation S4 — `drawContent()` moved after the label loop, label painted under the component — stayed GREEN 11/11) and colour USE is unpinned (mutation S5 — harness paints `Color(0xB2EDEDED)` instead of `BlockLabel.COLOR` — stayed GREEN 11/11). Add to P2: index of `drawContent()` < index of `if (showsLabel)` inside the `.drawWithContent {` block of the CaptureCanvas slice, and that the slice contains `drawRect(BlockLabel.COLOR,`.",
+          "evidence": "git status --short -- apps/android-harness → only README.md modified; the S4/S5 mutation records (each restored byte-exact) are in the first-pass section of tools/titan/results/wave51-A/skeptic-android.md lines 21-22."
+        }
+      ]
+    },
+    {
+      "skeptic": "web",
+      "verdict": "RE-VERIFY: the MUST-FIX is CLOSED with executed evidence and no regression was found — gate-ready on the web half. BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.706)' composites to the natives' (174,174,180) in the capture pipeline's Chromium (my independent probe puts the byte-180 window at [0.704, 0.7078] — Chromium rounds the CSS alpha to 8 bits at the .5 boundaries — so 0.706 sits mid-window with ~0.002 margin each side; the bytes match a premultiplied-source-truncated model exactly: 237·179/255→166 + 26·76/255→7 = 173 at byte 179, 167+7 = 174 at byte 180). The colour pin is no longer vacuous: apps/web-harness/tests/ui/LabelChrome.raster.test.tsx pushes the REAL CaptureGallery markup through headless Chrome with the capture flags and is red on both old spellings (M1 0.70196 and M2 0.7 → (8,6) = [173,173,179], 117 / 1116 band mismatches; my extra 0.71 → [175,175,181]); the CI skip path was executed both ways (empty PUPPETEER_CACHE_DIR → 4 skipped exit 0; LABEL_CHROME_RASTER_REQUIRED=1 → exit 1). Full harness suite 35 files / 301 green, runtime BlockFontLabel 13/13, both typechecks exit 0, sources restored sha-exact after every mutation. Residual: five OUT-OF-LANE files (docs/DYNAMIC_CAPTURE.md §5:266-269 — the normative clause —, design-record.md:58-61/:140, Android BlockLabel.kt:57-65, iOS BlockLabel.swift:147-153, label-chrome-tripwire.test.mjs:14-15) still say web moved to 179/255; comment/doc only, no byte effect, but the normative §5 must be reworded in the same PR (should-fix, owners: tooling/docs + android + ios lanes). Nits: the raster test has two type errors invisible to CI (headless 'new' vs puppeteer 25's `boolean | 'shell'`; pngjs untyped — tests/ is outside the harness tsconfig include; runtime identical since ChromeLauncher maps 'new' → --headless=new), is 224 lines, and its shell() comment mis-attributes the border-box reset. The committed web baselines still carry (173,173,179) until the §5 UPDATE_BASELINE refresh (device run, out of scope), which is when tripwire clause (ii) goes green. Verdict block appended under '## Re-verify' in tools/titan/results/wave51-A/skeptic-web.md (89 lines total).",
+      "defects": [
+        {
+          "severity": "should-fix",
+          "file": "docs/DYNAMIC_CAPTURE.md",
+          "claim": "The normative §5 colour clause (lines 266-269: 'rgba(237, 237, 237, 179/255) — alpha 0.7 rounded HALF-UP to 179 on every platform, web included … (174, 174, 180) on all three') still states a parity-by-spelling that the fix pass just disproved: web now spells alpha byte 180 (0.706) and byte 179 composites to (173,173,179) in Chromium. Same stale sentence in design-record.md:58-61 and :140 ('0.7 → 0.70196 (179/255)'), Android runtimes/compose/.../core/renderer/BlockLabel.kt:57-65 ('the web harness moved to 179/255 in the same PR'), iOS runtimes/swiftui/.../Renderer/BlockLabel.swift:147-153 ('web moves to α 179/255 in PR (A) for the same byte'), tools/visual/label-chrome-tripwire.test.mjs:14-15. Outside the web lane's paths; comment/doc only, zero byte effect. Reword to: the contract is the composited byte (174,174,180); the natives paint it at alpha 179/255, web at alpha byte 180 ('rgba(237, 237, 237, 0.706)') because Chromium's CPU raster composites byte 179 to (173,173,179).",
+          "evidence": "sed -n 262,272p docs/DYNAMIC_CAPTURE.md; grep -n -A4 '^- Colour' design-record.md; sed -n 55,66p BlockLabel.kt; sed -n 146,158p BlockLabel.swift; sed -n 10,20p label-chrome-tripwire.test.mjs — all quoted in the scratchpad; git status --short on the five files is empty (untouched by the fix pass). The live value is runtimes/web/src/renderer/BlockFontLabel.ts:72 'rgba(237, 237, 237, 0.706)'; probe: 0.70196 → (173,173,179), 0.706 → (174,174,180)."
+        },
+        {
+          "severity": "nit",
+          "file": "apps/web-harness/tests/ui/LabelChrome.raster.test.tsx",
+          "claim": "Two latent type errors invisible to CI: `headless: 'new'` (line 152) is not assignable to puppeteer 25's LaunchOptions `headless?: boolean | 'shell'`, and `import { PNG } from 'pngjs'` (line 51) has no declaration file (@types/pngjs absent). No effect on CI or bytes: apps/web-harness/tsconfig.json include = ['src'] so tests are never typechecked, and ChromeLauncher.js:203 maps any non-'shell' truthy value to --headless=new (same as the capture script's own untyped 'new'). Use `headless: true` (same flag) and a `declare module 'pngjs'` or @types/pngjs if tests ever join the typecheck. Also: 224 lines (> 200 target, < 300 split point), ~93 code lines without an adjacent comment (the same block-comment style as the other harness tests in this PR), and the shell() comment (lines 80-83) calls the `* { box-sizing: border-box }` reset load-bearing for the 390 crop, but canvasStyle (CaptureGallery.tsx:538-539) already sets `boxSizing: 'border-box'` inline on the canvas.",
+          "evidence": "npx tsc --noEmit -p <scratch tsconfig including only the raster test> → TS2322 at (152,7), TS7016 at (51,21), exit 1; the same focused tsc on LabelChrome.test.tsx → exit 0; node_modules/puppeteer-core/lib/types.d.ts:5191 `headless?: boolean | 'shell'`; ls node_modules/@types/pngjs → missing; wc -l → 224; awk uncommented-line audit → 93."
+        },
+        {
+          "severity": "nit",
+          "file": "tools/visual/baseline",
+          "claim": "Unchanged by design, recorded so nobody reads it as a fix-pass regression: the committed web baselines (009/107/108 census) still carry the old (173,173,179) label ink and the old in-box footprint; only the §5 UPDATE_BASELINE refresh (a device / quiet-host run, out of this lane and this re-verify) moves them, and tools/visual/label-chrome-tripwire.test.mjs stays red on HEAD until then (its own header says so). The refresh must land in the same PR because the tripwire is in CI's `node --test tools/visual/*.test.mjs` glob.",
+          "evidence": "Original skeptic repro 4 (pngjs census) still holds — no baseline file is modified in git status; design-record §3.4 and §5 state the tripwire goes green only after the refresh."
+        }
+      ]
+    }
+  ]
+}

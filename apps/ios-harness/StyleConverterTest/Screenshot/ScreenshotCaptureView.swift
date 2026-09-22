@@ -272,8 +272,13 @@ func captureAllComponents(_ document: IRDocument) {
     // contract (the host also clears before each push).
     ScreenshotManager.reset()
     // Same flattened capture list the auto-capture flow renders. In IR v2
-    // children is always nil (flat doc), so this is document.components in
-    // declared order — matching the order the feeder derives host-side.
+    // the decoder's IRComposer rebuilds `children` from the flat doc's slot
+    // refs (IRModels.swift), so a slot-linked doc DOES carry composed
+    // children and flatten() walks them under the same paint-context rules
+    // as captureNext; a doc without slot refs is document.components in
+    // declared order — either way matching the order the feeder derives
+    // host-side (wave 51 C27: the old "children is always nil" note was
+    // wrong for slot-linked v2 docs).
     let flat = flatten(document.components)
     for (index, component) in flat.enumerated() {
         // Identical to ScreenshotCaptureView.captureNext: the chromeless

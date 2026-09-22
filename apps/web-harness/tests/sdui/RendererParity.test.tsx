@@ -23,6 +23,18 @@
 // change and a 3-platform visual-baseline event, so the golden was
 // regenerated against the block-font renderer; it now pins the NEW label
 // DOM byte-for-byte (text/suppression branches were byte-unchanged).
+//
+// REGENERATED AGAIN (wave 51 PR (A) — label as harness chrome): the label
+// svg LEFT the renderer. The debug name is now drawn by the capture canvas
+// as a SIBLING of the component (apps/web-harness/src/ui/LabelChrome.tsx,
+// mounted by CaptureGallery / FixtureCanvas; docs/DYNAMIC_CAPTURE.md
+// "Harness label chrome"), so a childless textless leaf renders ONLY the
+// 0-height label-slot <span> — same geometry bytes as before, empty
+// inside. Again an intentional DOM-contract change and a 3-platform
+// baseline event (390 PNGs refreshed in that PR). Text / suppression /
+// children branches were byte-unchanged; the diff to the previous golden
+// is exactly "the <svg…>…</svg> between <span…> and </span> is gone" on
+// the label-bearing cases.
 import { describe, it, expect } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { readFileSync, writeFileSync } from 'node:fs';

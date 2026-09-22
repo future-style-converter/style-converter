@@ -1,0 +1,312 @@
+{
+  "_note": "Wave 51 PR 3 (label chrome) — the four builder lanes' reports as returned on 2026-09-16, verbatim except that absolute tree paths are made repo-relative and the purged session-scratchpad paths are marked. Design: design-record.md beside this file.",
+  "lanes": [
+    {
+      "lane": "tooling",
+      "summary": "Tooling+docs lane for wave-51 PR (A). (1) NEW tools/visual/label-chrome-tripwire.test.mjs (197 lines, every line commented, node --test, pngjs from the tools workspace): per baseline stem it derives P from tools/visual/block-font.json for normalize(name with _→space) at frame origin (8,6) truncated to floor((pngWidth−16)/6) glyphs, decides the mode per stem (band-identical when rows 0..15 outside P are ground #1A1A2E±1 on all three, else glyph-mask), and asserts (i) every p∈P non-ground ×3, (ii) rows 0..15 byte-identical (RGBA) ×3 in band-identical mode, (iii) P-mask bytes within ±1/channel ×3 in glyph-mask mode; missing platform / unparseable name / width mismatch fail the stem, every stem prints its verdict. Six PNG-independent controls: atlas geometry (first 'L' pixel (8,6), truncation 62/39/1/0, normalize) and synthetic triplets — a correct triplet green in both modes ('Test_Comp' = 117 glyph px, hand-verified), one platform at alpha 178/255 (the review-measured web 0.7 defect) → (ii) red, origin off by one → (i)+(iii) on one platform / (i)×3 on all three, label at the old (24,22) footprint → (i)×3, platform-different under-glyph paint → (iii) red. NEGATIVE CONTROL executed on HEAD 8c4ad393 pre-refresh baselines: 136 tests, 6 pass, 130 fail — 130/130 stems red on (i); 111 band-identical + 19 glyph-mask, the 19 = exactly the design's committed band-paint list; 6 of the 19 also red on (iii) today. Recorded in the header with the statement that it goes green only after the PR's UPDATE_BASELINE refresh. (2) docs/DYNAMIC_CAPTURE.md: appended normative section '## 5. Harness label chrome' (59 lines incl. heading, in the file's numbered-section voice): chrome over the capture root at (8,6) in the frame, atlas metrics (cell 5×7, advance 6, line height 10), text = plain name _→space normalized, frame-width truncation (62/39/0), colour rgba(237,237,237,179/255) → (174,174,180) over #1A1A2E on all three (web moved off 0.7), the composed-root predicate + WPT/inbox/composed gate, byte identity as the contract, runtimes render no label, a per-platform table pointing at LabelChrome.tsx / ScreenshotCaptureScreen.kt harnessLabelRects / HarnessLabelChrome.swift and their mount points, and the tripwire. Cross-checked read-only against the other lanes' landed files (web fill 0.70196 = 179/255, FixtureCanvas literal 390, iOS reads wptCaptureMode+backdropPass, Android showsLabel+drawWithContent+harnessLabelRects) — consistent. Notes at scratchpad/wave51/prA/tooling.md; negative-control log and the (iii) projection script/output alongside.",
+      "filesChanged": [
+        "tools/visual/label-chrome-tripwire.test.mjs",
+        "docs/DYNAMIC_CAPTURE.md"
+      ],
+      "pins": [
+        {
+          "file": "tools/visual/label-chrome-tripwire.test.mjs",
+          "test": "label chrome <stem> ×130 (one test per baseline stem)",
+          "mutation": "Negative control: run against the PRE-refresh committed baselines (label inside the box at its content-box origin) — the design's named proof-of-teeth",
+          "result": "RED: 130/130 stem tests fail, every one on clause (i) (all glyph pixels ground on all three PNGs); 111 stems band-identical mode, 19 glyph-mask mode (= the design's 19-stem band-paint list); 6 of the 19 also red on (iii). Recorded in the header (136 tests, 6 pass, 130 fail). No source restored — the 'source' is the PNGs, untouched."
+        },
+        {
+          "file": "tools/visual/label-chrome-tripwire.test.mjs",
+          "test": "synthetic: a correct triplet is green in both modes",
+          "mutation": "Positive control (proves the checker is not vacuously red): three synthetic canvases with the label composited at 179/255 over ground, and again over identical band paint",
+          "result": "GREEN: {mode:'band-identical', glyphs:117, problems:[]} and {mode:'glyph-mask', glyphs:117, problems:[]}"
+        },
+        {
+          "file": "tools/visual/label-chrome-tripwire.test.mjs",
+          "test": "mutation: one platform at alpha 0.7 (178/255 → 173,173,179) is red on (ii)",
+          "mutation": "web canvas composited at alpha 178/255 (the review-measured pre-PR web colour) while natives at 179/255",
+          "result": "RED on (ii) only — tags ['(ii)']; (i) still passes, proving colour drift is caught by byte identity, not by the positional check"
+        },
+        {
+          "file": "tools/visual/label-chrome-tripwire.test.mjs",
+          "test": "mutation: origin off by one — on one platform (i)+(iii), on all three (i) ×3",
+          "mutation": "glyphs drawn from (9,6) on one platform; then on all three",
+          "result": "RED: one platform → ['(i)','(iii)'] (its ink outside P demotes the stem to glyph-mask, P differs); all three consistently → ['(i)','(i)','(i)'] (the leftmost bit of every glyph row is ground)"
+        },
+        {
+          "file": "tools/visual/label-chrome-tripwire.test.mjs",
+          "test": "mutation: label left at the old in-box footprint (24,22) is red on (i) ×3",
+          "mutation": "glyphs drawn from (24,22) on all three canvases — the pre-refresh geometry",
+          "result": "RED: ['(i)','(i)','(i)']"
+        },
+        {
+          "file": "tools/visual/label-chrome-tripwire.test.mjs",
+          "test": "mutation: platform-different paint UNDER the glyphs is red on (iii)",
+          "mutation": "web band paint +10 on the red channel under P (≈+3 after compositing), natives unchanged",
+          "result": "RED: ['(iii)']"
+        },
+        {
+          "file": "tools/visual/label-chrome-tripwire.test.mjs",
+          "test": "label geometry: origin (8,6), advance 6, truncation 62/39/1/0, normalize",
+          "mutation": "Authoring error caught on first run: my expected 'I' bit count (17) and 'TEST COMP' count (129) were wrong — the assertions failed against the checker (actual 11 and 117, hand-verified from the atlas) and were corrected; the checker code was unchanged",
+          "result": "GREEN after correcting the expected values; demonstrates the geometry assertions are live (they failed on wrong constants)"
+        }
+      ],
+      "commandsRun": [
+        "node --test tools/visual/label-chrome-tripwire.test.mjs  # first run: 136 tests, 2 pass, 134 fail (130 stems + 4 authoring errors in my own controls)",
+        "node --test tools/visual/label-chrome-tripwire.test.mjs  # after fixing the controls: 136 tests, 6 pass, 130 fail, exit 1 (the recorded negative control; re-run twice, identical)",
+        "node --test tools/visual/pad-canvas.test.mjs tools/visual/png-color-space.test.mjs  # neighbour sanity: 24 pass",
+        "node --input-type=module < scratchpad/wave51/prA/project-iii.mjs  # read-only projection of clause (iii) on a correct refresh (output: scratchpad/wave51/prA/project-iii.out)",
+        "wc -l tools/visual/label-chrome-tripwire.test.mjs  # 197",
+        "awk section-length check on docs/DYNAMIC_CAPTURE.md  # 59 lines heading..EOF",
+        "git status --short / git diff --stat -- docs/DYNAMIC_CAPTURE.md  # read-only tree checks",
+        "node -e pngjs width census over tools/visual/baseline  # all 390 PNGs are 390 wide, 20 distinct dims"
+      ],
+      "notVerified": [
+        "Post-refresh GREEN of the tripwire — no device, no UPDATE_BASELINE run in this lane; green is a prediction (126/130 expected green, 4 expected red on (iii) — see openQuestions).",
+        "tools/visual/doc-staleness-check.sh was not run (not owned; the orchestrator's sweep restamps counts). The new section adds no headline number.",
+        "The full tooling glob `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` was not run in whole (host shared with other lanes); only the new file plus two neighbours.",
+        "The other lanes' implementations were only READ to confirm the doc's mount-point/colour claims; their tests were not run by this lane."
+      ],
+      "designDeviations": [
+        "Doc heading is `## 5. Harness label chrome` (numbered, matching the file's `## 1.`–`## 4.` voice) rather than a bare `## Harness label chrome`; the heading text contains the exact phrase, so a grep for \"Harness label chrome\" matches.",
+        "The brief's clause (iii) is implemented literally (P-mask bytes within ±1/channel across platforms in glyph-mask mode) even though design v3 §4(c)/C39 specified glyph-mask stems be checked positionally only; I did not deviate from the brief but measured the consequence (openQuestions #1) and exposed MASK_TOL as the single knob.",
+        "The 'origin off by one' mutation reads (i)+(iii) on a single platform, not the design's '(b) red (L ≠ P)': in this formulation shifted ink outside P demotes the stem to glyph-mask mode, then (i) and (iii) catch it; the consistent ×3 shift is also asserted red on (i). Recorded as such in the test.",
+        "The synthetic positive control and in-file mutation tests were added beyond the brief's per-stem checks, so the checker is proven able to PASS (not only red on everything) and each named mutation is executed in-file rather than by hand-editing source."
+      ],
+      "openQuestions": [
+        "DECISION NEEDED — clause (iii) at ±1 will be RED on a byte-perfect chrome for 4/19 glyph-mask stems. Measured by compositing 237@179/255 over TODAY's under-glyph bytes (band paint does not move when the in-box label leaves): 027_Shadow_Spread 4/203 px (raw spread 173 → 52: one platform paints there, another not), 037_Transform_Rotate 5/237 (max 4), 082_Outline_Dashed 15/203 (raw 173 → 52: dash phase differs), 098_Neumorphic_Light 155/225 (raw up to 37 → 11). 024/032 drop to ≤1 (green); the other 13 have 0. This is the defect class review C39 removed from v2. Options: keep ±1 and accept 4 red stems post-refresh; raise MASK_TOL (cannot save 027/082 at spread 52); or drop (iii) to (i)-only per design §4(c) — a one-branch edit in checkTriplet. Recommendation: the third.",
+        "CI consequence: the file is in the `node --test tools/visual/*.test.mjs` glob (ci.yml:101, smoke.sh:217) and is red on HEAD by design — the PR cannot be green unless the UPDATE_BASELINE refresh of all 390 PNGs lands in the SAME PR (intended, but must be sequenced).",
+        "Post-refresh (ii) depends only on the glyph bytes: today's rows 0..15 are already byte-identical ×3 on all 111 band-identical stems, so any (ii) red after the refresh is a platform colour/geometry defect, not pre-existing band noise."
+      ],
+      "seamPatches": []
+    },
+    {
+      "lane": "android",
+      "summary": "Implemented design v3 §3.2 + the Android pins of §4 with the r3 corrections. Runtime: ComponentRenderer.kt's block-font label branch is now a bare `if (!hasRawText) return` (WPT gate, placeholderDisplayText, applyTabSize untouched for real `_text`; non-comment delta is exactly the 4-line branch → 1 line); BlockLabel.kt loses the @Composable BlockLabelPlaceholder, `object BlockLabel` goes public (harness is module :app), and every kdoc (object header, ORIGIN_X/ORIGIN_Y/EDGE_MARGIN, COLOR, normalize, truncatedCount, rects) is rewritten to the capture-frame rule pointing at docs/DYNAMIC_CAPTURE.md \"Harness label chrome\" (heading confirmed present as \"## 5. Harness label chrome\"). BlockFont.gen.kt stays internal. Harness: in the per-component CaptureCanvas only, a hoisted `showsLabel = !LocalWptCaptureMode.current && component.children.isNullOrEmpty() && component._text.isNullOrEmpty()` (component IS the SlotComposer root), `widthPx` from LocalDensity, `labelRects = remember(component.name, widthPx) { … }` with one Log.w when the frame is < 22px, and a `.drawWithContent { drawContent(); if (showsLabel) … drawRect(BlockLabel.COLOR, Offset(x,y), Size(1f,1f)) }` node inserted BETWEEN `.onGloballyPositioned` and `.padding(CaptureCanvasPadding)`; pure `internal fun harnessLabelRects(name, frameWidthPx)` = normalize(name with _→space) → rects(truncatedCount against the FRAME width), defined outside the CaptureCanvas slice so P2's hit is the call; ComposedCaptureCanvas untouched; CaptureCanvas kdoc updated. New JVM HarnessLabelChromeTest (195 lines, 11 tests: P1 geometry, P2 sliced source scan, P3 runtime scan); BlockLabelTest comments reworded. Three mutations executed, each red, each restored byte-exact (cmp), control green. Prescribed chain (runtime focused tests && app focused tests && assembleDebug) exit 0 on the final tree. Notes at scratchpad/wave51/prA/android.md; logs android-mutations.log, android-chain.log.",
+      "filesChanged": [
+        "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+        "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/BlockLabel.kt",
+        "runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/BlockLabelTest.kt",
+        "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+        "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt (NEW)"
+      ],
+      "pins": [
+        {
+          "file": "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt",
+          "test": "drawNode_sitsBetweenOnGloballyPositionedAndPadding (P2)",
+          "mutation": "M1: the `.drawWithContent { … }` node in CaptureCanvas moved AFTER `.padding(CaptureCanvasPadding)` (ScreenshotCaptureScreen.kt), test class run alone via `./gradlew :app:testDebugUnitTest --tests '*HarnessLabelChromeTest*'`",
+          "result": "RED — 'HarnessLabelChromeTest > drawNode_sitsBetweenOnGloballyPositionedAndPadding FAILED, AssertionError at HarnessLabelChromeTest.kt:160', 11 tests completed, 1 failed. Source restored from the edited snapshot, `cmp` byte-exact; recorded in the test header."
+        },
+        {
+          "file": "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt",
+          "test": "predicate_isGatedByTheWptCaptureFlag (P2)",
+          "mutation": "M2: `!LocalWptCaptureMode.current &&` dropped from `showsLabel` in CaptureCanvas (ScreenshotCaptureScreen.kt), same focused run",
+          "result": "RED — 'HarnessLabelChromeTest > predicate_isGatedByTheWptCaptureFlag FAILED, AssertionError at HarnessLabelChromeTest.kt:173', 11 tests completed, 1 failed. Restored byte-exact (cmp ok); recorded in the test header."
+        },
+        {
+          "file": "apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/HarnessLabelChromeTest.kt",
+          "test": "geometry_firstRectIsTheCaptureFrameOrigin (P1) — plus geometry_defaultFrameKeepsSixtyTwoGlyphs, geometry_captureWidth250KeepsThirtyNineGlyphs, geometry_frameBelowTwentyTwoDrawsNothing_andTwentyTwoDrawsOneGlyph",
+          "mutation": "M3: BlockLabel.ORIGIN_X = 24 and ORIGIN_Y = 22 (the old in-component footprint) in runtimes/compose/…/BlockLabel.kt, same focused run (runtime recompiled)",
+          "result": "RED — 4 of 11 failed: geometry_firstRectIsTheCaptureFrameOrigin (kt:49, expected (8,6)), geometry_defaultFrameKeepsSixtyTwoGlyphs (kt:57), geometry_captureWidth250KeepsThirtyNineGlyphs (kt:73), geometry_frameBelowTwentyTwoDrawsNothing_andTwentyTwoDrawsOneGlyph (kt:85). Restored byte-exact (cmp ok); control run on the restored tree BUILD SUCCESSFUL; recorded in the test header as 4/11."
+        }
+      ],
+      "commandsRun": [
+        "export JAVA_HOME=$(/usr/libexec/java_home -v 21)   # → /Users/dranak/Library/Java/JavaVirtualMachines/temurin-21.jdk/Contents/Home",
+        "(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '*BlockLabelTest*' --tests '*WptCaptureModeTest*' --tests '*SeamReachabilityTest*' --tests '*BlockBoxAlignItemsTest*')   # BUILD SUCCESSFUL in 11s; XML: BlockLabelTest 14/0, SeamReachabilityTest 3/0, BlockBoxAlignItemsTest 2/0 (no :runtime class matches *WptCaptureModeTest*)",
+        "(cd apps/android-harness && ./gradlew :app:testDebugUnitTest --tests '*HarnessLabelChromeTest*' --tests '*ComposedFullHeightCaptureTest*')   # first attempt: 19 tests, 1 failed (runtime_noLongerComposesTheLabel — my own BlockLabel.kt kdoc contained the literal `@Composable`; prose reworded, pin kept); second attempt: BUILD SUCCESSFUL",
+        "M1/M2/M3 mutation script (python3 edits + `./gradlew :app:testDebugUnitTest --tests '*HarnessLabelChromeTest*'` per mutation + cp-restore + cmp)   # log: scratchpad/wave51/prA/android-mutations.log — M1 1/11 red, M2 1/11 red, M3 4/11 red, all restores cmp-identical, control run BUILD SUCCESSFUL",
+        "(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '*BlockLabelTest*' --tests '*WptCaptureModeTest*' --tests '*SeamReachabilityTest*' --tests '*BlockBoxAlignItemsTest*' && ./gradlew :app:testDebugUnitTest --tests '*HarnessLabelChromeTest*' --tests '*ComposedFullHeightCaptureTest*' && ./gradlew :app:assembleDebug --quiet)   # final tree: chain exit=0; app XML HarnessLabelChromeTest 11/0/0, ComposedFullHeightCaptureTest 8/0/0; app-debug.apk 16309531 B; log: scratchpad/wave51/prA/android-chain.log",
+        "git status --short; git diff --stat -- runtimes/compose apps/android-harness   # 4 modified + 1 new under owned paths; other lanes' files (ios/web/docs/tools) present in the shared tree, untouched by me",
+        "grep -rn 'BlockLabelPlaceholder\\|internal object BlockLabel' runtimes/compose/src apps/android-harness/app/src   # only the P3 test's assertion strings remain",
+        "wc -l BlockLabel.kt HarnessLabelChromeTest.kt   # 169 / 195"
+      ],
+      "notVerified": [
+        "On-device behaviour: PNG (8,6) placement, (174,174,180) over the #1A1A2E ground, the two Log.w lines (frame < 22px; measured width != widthPx), and size-neutrality of the removed 0×0 placeholder node — all device-gated, belong to the §5 refresh (no emulator in this lane).",
+        "The `--tests '*WptCaptureModeTest*'` filter matches NO class in :runtime (the class lives in apps/android-harness :app); the :runtime command passed on the other three filters — the design's pin list names it as 'unchanged', which it is, but the prescribed runtime command does not exercise it.",
+        "In the final chain :runtime:testDebugUnitTest was UP-TO-DATE (Gradle re-used the 00:15:23Z run over byte-identical sources — the M3 restore is cmp-identical); the :app tests and assembleDebug executed fresh.",
+        "Full :runtime (3232) and :app (116) suites not run here, per the brief (orchestrator's sweep).",
+        "Kotlin compiler warnings: grep for `^w:` on the chain log found none, but I did not run a warnings-as-errors build.",
+        "The ScreenshotCaptureScreen.kt `.drawWithContent` node's coordinate space equals the PixelCopy rect by construction (same Modifier node as `.onGloballyPositioned`, outer to `.padding`) — pinned by source order only, not by a raster."
+      ],
+      "designDeviations": [
+        "Q1 runtime check added exactly as design §3.2 spells it (`if (size.width.toInt() != widthPx) Log.w(TAG, …)` inside drawWithContent) even though the lane brief's (c) did not list it — it is the design's own line and costs nothing when widths agree.",
+        "The frame<22px Log.w is emitted from the `remember(component.name, widthPx)` block (once per (name, width)) rather than from the draw lambda, because android.util.Log cannot run on the plain JVM the pure `harnessLabelRects` is tested on, and `remember` is the natural 'exactly once' site; condition is `BlockLabel.truncatedCount(1, widthPx) == 0` (⇔ width < 22).",
+        "`BlockLabel.truncatedCount`'s parameter renamed `componentWidthPx` → `frameWidthPx` (kdoc accuracy; every caller — BlockLabelTest, harnessLabelRects — is positional, so no call site changes).",
+        "P2 anchors on the literal `.drawWithContent {` (the code node) AND additionally asserts EVERY `drawWithContent` mention in the CaptureCanvas slice lies between `.onGloballyPositioned` and `.padding(CaptureCanvasPadding)` — a superset of the design's indexOf check (my explanatory comment above the node also names `Modifier.drawWithContent`, so the plain-indexOf check alone would have been satisfied by prose).",
+        "P3 additionally asserts BlockLabel.kt contains no `@Composable` and no `fun BlockLabelPlaceholder` (the composable is deleted, not just un-called); P1 additionally pins `_`→space (`harnessLabelRects(\"A_B\",390) == BlockLabel.rects(\"A B\")` and != rects(\"A_B\"), since the atlas has a `_` glyph).",
+        "BlockLabel.kt kdoc rewritten per the r3 platform-semantics correction (:15-27 object kdoc and :30-37 origin kdocs, plus COLOR/normalize/truncatedCount/rects docs which referenced the deleted composable); the COLOR kdoc records the web move to α 179/255 (the r3 blast-radius option the brief adopted) — a cross-lane statement of the contract, not a change to Compose's byte.",
+        "The `if (!hasRawText) return` stays at the ORIGINAL branch position (after placeholderDisplayText/applyTabSize/hyphens breadcrumb), as the brief specifies, rather than being hoisted to just after the WPT gate — so `displayText` is still computed for the synthesized-name case and discarded; deliberately minimal, noted in the comment."
+      ],
+      "seamPatches": [],
+      "openQuestions": [
+        "Design Q1: `widthPx` is `canvasWidth.roundToPx()` at LocalDensity; the PNG width is the PixelCopy bounds width from onGloballyPositioned. They coincide at density 160 (px==dp); the added Log.w is the only runtime check — should the §5 refresh grep logcat for 'Harness label chrome:' to prove it stayed silent?",
+        "The `--tests '*WptCaptureModeTest*'` filter in the prescribed :runtime command matches nothing in :runtime — should the wave procedure move it to the :app command (where the class lives) or drop it?",
+        "Comment in ComponentRenderer.kt says the label 'is now HARNESS CHROME' drawn by the android-harness — if the roadmap item 'relocate label machinery into the harnesses' lands, BlockLabel.kt moves out of the runtime and this comment plus BlockLabelTest's location follow."
+      ]
+    },
+    {
+      "lane": "web",
+      "summary": "Web half of wave 51 PR (A): the harness debug label is now CAPTURE CHROME. New apps/web-harness/src/ui/LabelChrome.tsx (149 lines) draws the block-font svg (data-label-chrome, role=img, aria-label = plain name with _→space, shapeRendering crispEdges, fill BLOCK_LABEL_FILL, position:absolute left:8px top:6px z-index 2147483647 pointer-events:none) from layoutBlockLabel(label, frameWidth); returns null + console.warn when no glyph fits. CaptureGallery.CaptureCanvas mounts it as the LAST child of [data-capture-canvas] after </RootErrorBoundary>, gated by showLabel = !WPT_MODE && node.children.length === 0 && !(typeof component.text === 'string' && component.text.length > 0), frameWidth = CANVAS_WIDTH_PX. FixtureCanvas mounts it after <ComponentRenderer/> with its OWN predicate on the ComposedNode (component.children / component.component.text), no WPT term, frameWidth = its literal 390 (named FIXTURE_FRAME_WIDTH_PX, also feeding canvasStyle.width — emitted CSS byte-identical). ComponentRenderer.tsx: removed the BlockFontLabel import, blockLayout, the svg branch, the componentWidth prop + plumbing and usedPxWidth/parsePx; kept the 0-height wrapper span (padding 0, height 0, position relative, overflow visible) keyed on the renamed isLabelSlot = text === undefined && !WPT_MODE, branch renders null (no name text node); renderEmptyContent hook contract untouched. BlockFontLabel.ts: BLOCK_LABEL_FILL alpha 0.7 → 0.70196 (179/255) with the measurement comment; docs updated to the capture-frame rule; signature/body unchanged. Tests: three URL-scoped jsdom files (LabelChrome.test.tsx ?mode=capture 11 tests; LabelChrome.width250.test.tsx ?mode=capture&width=250 2 tests; LabelChrome.wpt.test.tsx ?mode=capture&wpt=1 2 tests), ComponentRenderer.test.tsx :72-83/:108-119 rewritten to \"empty slot span, no svg, no name text\", the widgets aria-label pin relocated to the canvas level, RendererParity header + golden regenerated (verified: 7 cases byte-identical, 12 differ exactly by the svg run's removal, 0 other diffs). All three design mutations executed, confirmed red, sources restored byte-exact (sha256-verified), recorded in the test headers. Harness suite 34 files / 297 tests green (282 + 15), runtime BlockFontLabel 12 green, npm -ws typecheck exit 0. Notes at scratchpad/wave51/prA/web.md.",
+      "filesChanged": [
+        "apps/web-harness/src/ui/LabelChrome.tsx (NEW)",
+        "apps/web-harness/src/ui/CaptureGallery.tsx",
+        "apps/web-harness/src/ui/FixtureCanvas.tsx",
+        "apps/web-harness/src/sdui/ComponentRenderer.tsx",
+        "runtimes/web/src/renderer/BlockFontLabel.ts",
+        "apps/web-harness/tests/ui/LabelChrome.test.tsx (NEW)",
+        "apps/web-harness/tests/ui/LabelChrome.width250.test.tsx (NEW)",
+        "apps/web-harness/tests/ui/LabelChrome.wpt.test.tsx (NEW)",
+        "apps/web-harness/tests/sdui/ComponentRenderer.test.tsx",
+        "apps/web-harness/tests/sdui/ComponentRenderer.widgets.test.tsx",
+        "apps/web-harness/tests/sdui/RendererParity.test.tsx",
+        "apps/web-harness/tests/sdui/__fixtures__/renderer-parity-golden.json (regenerated via REGEN_PARITY_GOLDEN=1)",
+        "<scratchpad, purged>/prA/web.md (lane notes, outside the tree)"
+      ],
+      "pins": [
+        {
+          "file": "apps/web-harness/tests/ui/LabelChrome.test.tsx",
+          "test": "the chrome is a SIBLING of the component, never a descendant, and paints LAST / the component element carries NO svg and NO name text (?mode=capture)",
+          "mutation": "1a: <LabelChrome> mounted INSIDE the component element through the skin's renderEmptyContent (the old label site, next to the slot span), canvas mount removed",
+          "result": "RED — 7 of 11 tests failed: sibling pin failed at svg.closest('[data-component-id]') (\"expected <div …> to be null\"), no-svg-under-component pin failed (SVGSVGElement found), FixtureCanvas/container/composed-guard pins red too. Restored byte-exact (sha256 OK); 11/11 green after restore."
+        },
+        {
+          "file": "apps/web-harness/tests/ui/LabelChrome.test.tsx",
+          "test": "the chrome is a SIBLING of the component (the brief's literal wording: mount inside RootErrorBoundary)",
+          "mutation": "1b: <LabelChrome> moved INSIDE <RootErrorBoundary> as a sibling of <ComponentRenderer/> (removed from the canvas level)",
+          "result": "NOT OBSERVABLE — 11/11 stayed green. RootErrorBoundary renders no DOM of its own (transparent passthrough), so the DOM shape is identical; recorded in the header, 1a executed as the DOM-observable form of the intent. Restored byte-exact (sha256 OK)."
+        },
+        {
+          "file": "apps/web-harness/tests/ui/LabelChrome.width250.test.tsx",
+          "test": "a 100-char name keeps 39 glyphs on a 250 frame: width attribute 38*6+5 (?mode=capture&width=250); plus LabelChrome.test.tsx 'truncates against the 390 frame … 62 glyphs (width 371)'",
+          "mutation": "2: frameWidth={Infinity} instead of frameWidth={CANVAS_WIDTH_PX} in CaptureGallery.CaptureCanvas",
+          "result": "RED — width250: \"expected '599' to be '233'\"; LabelChrome.test 62-glyph pin: \"expected '599' to be '371'\" (all 100 glyphs kept). The FixtureCanvas width250 pin stayed green (its own literal 390 — the independence it asserts). Restored byte-exact (sha256 OK)."
+        },
+        {
+          "file": "apps/web-harness/tests/ui/LabelChrome.wpt.test.tsx",
+          "test": "CaptureGallery emits zero [data-label-chrome] under ?wpt=1 (?mode=capture&wpt=1)",
+          "mutation": "3: `!WPT_MODE &&` dropped from CaptureCanvas.showLabel",
+          "result": "RED — \"expected … to have a length of +0 but got 2\" (one chrome per root). LabelChrome.test.tsx stayed 11/11 green under the same mutation (its URL has no wpt), which is why the URL-scoped file exists. Restored byte-exact (sha256 OK)."
+        }
+      ],
+      "commandsRun": [
+        "npm -w apps/web-harness run typecheck",
+        "cd apps/web-harness && npx vitest run tests/ui/LabelChrome.test.tsx tests/ui/LabelChrome.width250.test.tsx tests/ui/LabelChrome.wpt.test.tsx  (3 files / 15 tests green, pre-mutation)",
+        "cd apps/web-harness && REGEN_PARITY_GOLDEN=1 npx vitest run tests/sdui/RendererParity.test.tsx",
+        "node -e '<classify new golden vs `git show HEAD:apps/web-harness/tests/sdui/__fixtures__/renderer-parity-golden.json`>'  → unchanged 7, svg-removed-only 12, OTHER DIFF 0",
+        "npm -w apps/web-harness run test  → Test Files 34 passed, Tests 297 passed (run twice: before and after the mutation round)",
+        "npm -w runtimes/web run test -- BlockFontLabel  → 1 file / 12 tests passed",
+        "npm -ws run typecheck --if-present  → @style-converter/web tsc --noEmit + web-harness tsc --noEmit, exit 0",
+        "shasum -a 256 apps/web-harness/src/ui/CaptureGallery.tsx apps/web-harness/src/sdui/ComponentRenderer.tsx (snapshot) and shasum -a 256 -c after each restore (OK ×4)",
+        "mutation 1a: python3 edit of CaptureGallery.tsx + ComponentRenderer.tsx; cd apps/web-harness && npx vitest run tests/ui/LabelChrome.test.tsx  → 7 failed | 4 passed",
+        "mutation 1b: python3 edit of CaptureGallery.tsx; npx vitest run tests/ui/LabelChrome.test.tsx  → 11 passed",
+        "mutation 2: python3 edit (Infinity); npx vitest run tests/ui/LabelChrome.width250.test.tsx tests/ui/LabelChrome.test.tsx  → 2 failed | 11 passed",
+        "mutation 3: python3 edit (drop !WPT_MODE); npx vitest run tests/ui/LabelChrome.wpt.test.tsx tests/ui/LabelChrome.test.tsx  → 1 failed | 12 passed",
+        "git status --short / git diff --stat / git diff (read-only)"
+      ],
+      "notVerified": [
+        "Actual PNG bytes in Chromium: the (8,6) landing, the (174,174,180) byte at alpha 0.70196 over #1A1A2E, the overflow:hidden frame clip and the z-index paint order — pinned at the DOM level only; pixel truth comes from the §5 baseline refresh and the tooling lane's positional tripwire (no browser/device in this lane).",
+        "A live puppeteer capture run (apps/web-harness/capture-screenshots.mjs) and the Tier-5 tools/visual/interaction-states.mjs driver against the new FixtureCanvas DOM.",
+        "SVG `style` property access in JSDOM was not relied on — the style pins read getAttribute('style') tokens (React's serialised inline style), which is what the capture DOM carries."
+      ],
+      "designDeviations": [
+        "FixtureCanvas: the literal 390 became a named constant FIXTURE_FRAME_WIDTH_PX used by both canvasStyle.width (template literal, emits `width:390px` byte-identically — pinned in LabelChrome.width250.test.tsx) and the chrome; the design said 'the literal 390 it hardcodes'.",
+        "PlaceholderContent lost its `name` prop entirely (interface, destructure, call site) — the design only said the branch returns null. Once the label left, nothing read `name`; leaving it would trip `noUnusedParameters` on the destructure. `visibleText` simplified to `text ?? ''` (the name branch was dead code).",
+        "The brief's mutation 'mount the chrome inside RootErrorBoundary → sibling pin red' is not DOM-observable because RootErrorBoundary is a transparent passthrough; executed it anyway (1b, stayed green, recorded) and executed the DOM-observable equivalent 1a (chrome inside the component element via renderEmptyContent) as the red proof.",
+        "BlockFontLabel.ts doc comments (header, origin, layoutBlockLabel param) were rewritten to the capture-frame rule; the design listed the function as 'unchanged' — signature and body are unchanged, only comments moved."
+      ],
+      "openQuestions": [
+        "runtimes/web/src/renderer/RendererOptions.ts:92-101 renderEmptyContent doc still reads 'the harness substitutes its PlaceholderContent (name label + bg-luminance contrast colour)' — left untouched per 'hook contract unchanged'; a one-line comment refresh ('text in the contrast colour; the name label is canvas chrome') is a follow-up nit in this lane's paths.",
+        "LabelChrome.tsx's frame-too-narrow / empty-name path logs via console.warn (no web PropertyTracker exists for harness UI) — acceptable as the natives' Log.w twin, but the orchestrator may prefer a data-attribute marker on the canvas for tooling to grep."
+      ],
+      "seamPatches": []
+    },
+    {
+      "lane": "ios",
+      "summary": "iOS half of wave 51 PR (A) implemented: the harness debug label is now CHROME drawn by apps/ios-harness CaptureCanvas as a sibling `.overlay(alignment: .topLeading)` immediately after `.background(canvasBackground)` on both root branches (out-of-flow: after `.clipped()`), via the new public `HarnessLabelChrome(component:frameWidth:)` view in the runtime (reads `@Environment(\\.wptCaptureMode)` and `@Environment(\\.backdropPass)` itself; shows iff !wpt && pass != .sampling && composed root has no children and no non-empty text; text = plain name with _→space; truncation against CaptureCanvas.width; the `.sampling` guard labelled defence-in-depth per C32). `BlockLabelLayout`/`BlockLabel` are public with an explicit `public init(label:componentWidth:)`, header rewritten to the capture-frame rule + docs/DYNAMIC_CAPTURE.md \"Harness label chrome\" pointer (section exists at docs/DYNAMIC_CAPTURE.md:238), zero-glyph case logged once via PropertyTracker. ComponentRenderer's nameless-leaf branch renders `EmptyView()` (usedWidth + BlockLabel removed, branch kept so real-text leaves reach PlaceholderLabel); C27 comment fixed in ScreenshotCaptureView.swift. Tests: new CaptureCanvasMirror.swift (hoisted raster/count + VIEW-returning flowCanvasView/outOfFlowCanvasView with `withLabelChrome:` inserting the overlay at the harness's exact mounting point, per the r3 harness-contract correction), new HarnessLabelChromeRasterTests (variants a–g, negative wpt pin, children pin, predicate + frame-truncation pins; band rows 6..12 × cols 8..<80 byte-equal to (a) for b–f, ink (174,174,180) measured, zero lit pixels outside the band), BlendGroupCompositingTests pin 2 re-targeted on a 20×20 #00ffff child (group value (0,26,46) measured EXACT at the child centre, ≥380 px; leak value (0,8,11) == 0; box fill (24,8,11)), WPTCaptureModeTests flag-OFF arm re-targeted to \"runtime paints no name label in either mode\", EmptyFlexContainerTests belt-and-braces pin re-targeted on a real-`text` container. Five mutations executed and restored byte-exact (cmp-verified): all red as designed. Focused Catalyst run: 53 tests, 0 failures. Harness app built for iphonesimulator with provision-devices.sh's exact invocation: BUILD SUCCEEDED. Notes: <scratchpad, purged>/prA/ios.md (logs ios-run*.log, ios-mut-M1..M5.log, ios-harness-build*.log alongside).",
+      "filesChanged": [
+        "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/BlockLabel.swift",
+        "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/HarnessLabelChrome.swift",
+        "runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift",
+        "apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift",
+        "apps/ios-harness/StyleConverterTest/Screenshot/ScreenshotCaptureView.swift",
+        "runtimes/swiftui/Tests/StyleConverterRuntimeTests/CaptureCanvasMirror.swift",
+        "runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift",
+        "runtimes/swiftui/Tests/StyleConverterRuntimeTests/BlendGroupCompositingTests.swift",
+        "runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift",
+        "runtimes/swiftui/Tests/StyleConverterRuntimeTests/EmptyFlexContainerTests.swift",
+        "runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransitionDeclaredFlipRasterTests.swift",
+        "runtimes/swiftui/Tests/StyleConverterRuntimeTests/MulticolDistributionTests.swift"
+      ],
+      "pins": [
+        {
+          "file": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift",
+          "test": "testPlainLeafPaintsTheLabelAtFrameOriginInInkColour + test{Multiply,Opacity,Rotated,ClipPath,OverflowHidden}LeafBandEqualsPlain (variants a–f)",
+          "mutation": "M1: chrome overlay moved onto the ComponentHost VIEW in CaptureCanvasMirror.flowCanvasView (the harness CaptureCanvas.swift is not in the Catalyst target, so the byte-mirror carries the mutation); canvas-level overlay disabled",
+          "result": "RED — 18 failures: band ink 0 on every variant, 178 lit pixels outside the band, first lit pixel (24,22) on all six; (8,6)/(12,12) read the stage (26,26,46). Restored byte-exact (cmp). Green: 11/11 after restore."
+        },
+        {
+          "file": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift",
+          "test": "testWptCaptureModePaintsNoLabel (negative pin; the chrome reads \\.wptCaptureMode from the environment set on the canvas)",
+          "mutation": "M2: `guard !wptCaptureMode else { return false }` deleted from HarnessLabelChrome.showsLabel (HarnessLabelChrome.swift)",
+          "result": "RED — 178 lit pixels under `.environment(\\.wptCaptureMode, true)`; testShowsLabelPredicate also red. Restored byte-exact."
+        },
+        {
+          "file": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/HarnessLabelChromeRasterTests.swift",
+          "test": "testSamplingPassPaintsNoLabel (variant g, defence-in-depth guard)",
+          "mutation": "M3: `guard backdropPass != .sampling else { return false }` deleted from HarnessLabelChrome.showsLabel",
+          "result": "RED — 178 lit pixels under `.environment(\\.backdropPass, .sampling)`; predicate pin also red. Restored byte-exact."
+        },
+        {
+          "file": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/BlendGroupCompositingTests.swift",
+          "test": "testBlendedElementDoesNotMultiplyItsOwnInk (re-targeted on a 20×20 #00ffff child inside the multiply box)",
+          "mutation": "M4: BlendModeApplier.swift:66 `content.compositingGroup().blendMode(m)` → `content.blendMode(m)`",
+          "result": "RED on all three assertions — child centre (46,46) = (0,8,11) exact (vs the group value (0,26,46) measured exact on the correct render), 400 px of (0,8,11), 0 px of (0,26,46); pin 1 (isolation equality) stayed GREEN under the same mutation (no second primitive — as the design predicted); chrome tests unaffected. Restored byte-exact; BlendModeApplier.swift == HEAD."
+        },
+        {
+          "file": "runtimes/swiftui/Tests/StyleConverterRuntimeTests/WPTCaptureModeTests.swift",
+          "test": "testRuntimePaintsNoNameLabelInEitherMode (re-target of testNamelessEmptyGlyphsVanishOnlyInWptMode, whose flag-OFF arm asserted runtime label ink and is red by design after (A))",
+          "mutation": "M5: `BlockLabel(label: component.name.replacingOccurrences(of: \"_\", with: \" \"), componentWidth: nil)` restored in ComponentRenderer.swift's nameless-leaf branch in place of EmptyView()",
+          "result": "RED — 271 light-band pixels with the flag OFF; HarnessLabelChromeRasterTests additionally 4 red (a second label inside the element: 178 stray px on (a)/(f)/(g), 91 on clip-path — the old per-effect footprint); EmptyFlexContainerTests stayed green (real-text pin). Restored byte-exact."
+        }
+      ],
+      "commandsRun": [
+        "cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf && xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -derivedDataPath <scratchpad, purged>/prA/dd-ios -only-testing:StyleConverterRuntimeTests/HarnessLabelChromeRasterTests -only-testing:StyleConverterRuntimeTests/BlendGroupCompositingTests -only-testing:StyleConverterRuntimeTests/BlockLabelTests -only-testing:StyleConverterRuntimeTests/WPTCaptureModeTests -only-testing:StyleConverterRuntimeTests/EmptyFlexContainerTests   # run1: compile error BlockLabel.swift:177 (statement in ViewBuilder) → fixed; run2: compile error (tuple XCTAssertEqual) → fixed; run3: 53 tests, 0 failures; final (after test-file rewrites): 53 tests, 0 failures (ios-run-final.log)",
+        "<scratchpad, purged>/prA/ios-mutate.sh M1 runtimes/swiftui/Tests/StyleConverterRuntimeTests/CaptureCanvasMirror.swift mut1-overlay-on-host.py HarnessLabelChromeRasterTests BlendGroupCompositingTests   # snapshot→python mutate→xcodebuild test (same scheme/destination/derivedDataPath, -only-testing the named classes)→cp restore→cmp; 18 failures, restored byte-exact",
+        "<scratchpad, purged>/prA/ios-mutate.sh M2 runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/HarnessLabelChrome.swift mut2-drop-wpt-guard.py HarnessLabelChromeRasterTests   # 2 failures (testWptCaptureModePaintsNoLabel 178 px, testShowsLabelPredicate), restored",
+        "<scratchpad, purged>/prA/ios-mutate.sh M3 runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/HarnessLabelChrome.swift mut3-drop-sampling-guard.py HarnessLabelChromeRasterTests   # 2 failures (testSamplingPassPaintsNoLabel 178 px, predicate), restored",
+        "<scratchpad, purged>/prA/ios-mutate.sh M4 runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/effects/blend/BlendModeApplier.swift mut4-drop-compositing-group.py BlendGroupCompositingTests HarnessLabelChromeRasterTests   # pin 2: 3 failures (centre (0,8,11), 400 px leak, 0 px group); pin 1 green; chrome 11/11 green; restored",
+        "<scratchpad, purged>/prA/ios-mutate.sh M5 runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift mut5-restore-runtime-label.py WPTCaptureModeTests EmptyFlexContainerTests HarnessLabelChromeRasterTests   # 5 failures (WPT re-target 271 px; chrome 4 red), EmptyFlex 3/3 green; restored",
+        "cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf && xcodebuild -project apps/ios-harness/StyleConverterTest.xcodeproj -target StyleConverterTest -configuration Debug -sdk iphonesimulator -arch arm64 \"CONFIGURATION_BUILD_DIR=apps/ios-harness/build/Build/Products/Debug-iphonesimulator\" CODE_SIGNING_ALLOWED=NO build   # RELATIVE paths: runtime package compiled, app target failed 'unable to resolve module dependency: StyleConverterRuntime' (invocation error, see next)",
+        "cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf && IOS_DIR=\"$PWD/apps/ios-harness\" && xcodebuild -project \"$IOS_DIR/StyleConverterTest.xcodeproj\" -target StyleConverterTest -configuration Debug -sdk iphonesimulator -arch arm64 \"CONFIGURATION_BUILD_DIR=$IOS_DIR/build/Build/Products/Debug-iphonesimulator\" CODE_SIGNING_ALLOWED=NO build   # exactly tools/titan/provision-devices.sh:102-107 (absolute paths) → ** BUILD SUCCEEDED **, EXIT=0, fresh StyleConverterTest.app binary",
+        "git status --short; git diff --stat; git diff -- apps/ios-harness/...; git diff --quiet HEAD -- runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/effects/blend/BlendModeApplier.swift (== HEAD); cmp snapshot vs restored for the 4 mutated files (all OK); wc -l on the new files (130 / 136 / 200; BlockLabel.swift 209)"
+      ],
+      "notVerified": [
+        "No device or simulator capture (lane rule 3): the CaptureCanvas.swift overlay wiring is compile-checked only (harness .app built for iphonesimulator); its runtime check is the fixture net + the §5 refresh audit, as design §4 states ('The CaptureCanvas wiring itself … is unpinned').",
+        "The full 2008-test SwiftUI suite was not run (orchestrator's sweep). Other raster tests were grep-scanned for dependence on the runtime-drawn label: only WPTCaptureModeTests and EmptyFlexContainerTests asserted on it (both re-targeted); TransitionDeclaredFlipRasterTests / MulticolDistributionTests only mentioned it in comments (reworded). Residual risk: an un-grepped pixel probe that happened to sit on the old label footprint.",
+        "The zero-glyph PropertyTracker.logOnce path (frame < 22 px) is not exercised by a raster test; only BlockLabelLayout.truncatedCount(…, 21) == 0 / (…, 22) == 1 are pinned.",
+        "EmptyFlexContainerTests.testChildlessFlexPlaceholderSitsAtTop re-target (real `text`): the original wave-2 regression mutation (CSSFlexLayout treating the placeholder as a flex item) was not re-executed this lane; the test is green and stays green under M5 as expected.",
+        "Ink byte (174,174,180) and the blend bytes (0,26,46)/(24,8,11) were measured on the Mac Catalyst raster (in-gamut sRGB); per the swiftui-tests-catalyst note the simulator can differ for out-of-range renders — device bytes come with the baseline refresh (design §5 S4).",
+        "BlockLabel.swift is 209 lines (existing file; the ≤200 hard rule is for new files, which are 130/136/200)."
+      ],
+      "designDeviations": [
+        "BlockLabelLayout/BlockLabel made public with an explicit public init as the brief instructs, although the r3 harness-contract correction's optional corollary notes they no longer need a cross-module consumer (the chrome lives in the runtime). Harmless; done as instructed.",
+        "CaptureCanvasMirror: instead of view-builders that the test decorates afterwards, `flowCanvasView(_:withLabelChrome:)` / `outOfFlowCanvasView(_:withLabelChrome:)` take a flag (default false → byte-identical to the pre-(A) chains for BlendGroupCompositingTests) that inserts the overlay at the harness's EXACT mounting point (after `.background`, before the environment nodes), so the chrome test measures the harness's mounting position rather than an overlay appended after the environment nodes. `flowCanvas` / `outOfFlowCanvas` kept as raster conveniences; `rgb(_:_:_:)` probe added.",
+        "HarnessLabelChrome exposes the predicate as a pure static `showsLabel(_:wptCaptureMode:backdropPass:)` and the text rule as `labelText(for:)` (unit-pinnable without a render surface, the suppressesNamePlaceholder pattern); body behaviour is exactly the design's `if … { BlockLabel } else { EmptyView }`.",
+        "Added a once-only `PropertyTracker.logOnce` for the zero-glyph case (frame < 22 px) in `BlockLabel.shownGlyphs` — house rule 5 (no silent fallthrough; Android's twin logs the same case); not in the design.",
+        "The design listed WPTCaptureModeTests as unchanged, but its `testNamelessEmptyGlyphsVanishOnlyInWptMode` asserted `off > 0` (runtime paints label ink with the flag OFF) and is red by design after (A); re-targeted and renamed to `testRuntimePaintsNoNameLabelInEitherMode` (both arms == 0), which also pins 'the label must no longer be rendered by the runtimes' (mutation M5 proves it). Likewise EmptyFlexContainerTests.testChildlessFlexPlaceholderSitsAtTop lost its subject and was re-targeted on a real-`text` container (ink = any non-fill, non-canvas pixel in the box rows).",
+        "Executed two mutations beyond the brief's three: dropping the `.sampling` guard (design §4 names it) and M5 (restoring BlockLabel in the leaf branch). M1 was executed on the mirror's chain, not on CaptureCanvas.swift (not in the Catalyst target) — as design §4 anticipates.",
+        "Blend pin 2: the child-centre probe asserts EXACT equality with (0,26,46) (the raster measurement the brief asked for) while the pixel counts keep tol 1; the box-fill probe (24,8,11) at (20,20) is added.",
+        "The HarnessLabelChromeRasterTests mutation record notes per-effect signatures only as observed incidentally under M5 (clip-path kept 91/178 lit px; multiply/opacity darken theirs below the lit threshold), per the r3 correction that the band pins do not observe them.",
+        "ComponentRenderer.swift: also reworded the stale 'renders via BlockLabel above' comment in the real-text leaf branch (not named in the design)."
+      ],
+      "seamPatches": [],
+      "openQuestions": [
+        "The BlockLabel.swift labelColor comment states 'web moves to α 179/255 in PR (A) (design r3)' — true only if the web lane's BlockFontLabel.ts change lands in the same PR (git status shows runtimes/web/src/renderer/BlockFontLabel.ts modified by that lane).",
+        "HarnessLabelChromeRasterTests' header says the mutation logs are in the lane notes (scratchpad, not repo); if the PR wants the record in-repo, copy ios.md's mutation section to tools/titan/results/wave51-A/ or the PR description.",
+        "BlockLabel.swift is 209 lines after the header rewrite — split or accept (existing file, target ≤200)?",
+        "Design §4 iOS pin list calls for `flowCanvas(c) + .overlay(…)`; implemented as `flowCanvasView(c, withLabelChrome: true)` (r3 correction) — confirm the orchestrator's review accepts the flag form."
+      ]
+    }
+  ]
+}

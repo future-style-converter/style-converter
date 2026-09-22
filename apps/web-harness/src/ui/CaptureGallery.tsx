@@ -9,7 +9,11 @@
  *   - natural height (no clamping)
  *   - solid #1A1A2E background (no alpha compositing)
  *   - 16 px padding on all sides
- *   - no gallery chrome (no card header / footer / border / label)
+ *   - no gallery chrome (no card header / footer / border) EXCEPT one
+ *     debug label drawn as HARNESS CHROME at frame (8,6) — a sibling of
+ *     the component, after its whole paint chain, only on a childless
+ *     textless root and never in WPT mode (LabelChrome.tsx; normative
+ *     home docs/DYNAMIC_CAPTURE.md "Harness label chrome")
  *   - a data-capture-canvas marker with index + name for Puppeteer
  *
  * Matches the iOS `CaptureCanvas.swift` and Android `CaptureCanvas`
@@ -22,6 +26,11 @@ import type { IRComponent, IRDocument } from '@style-converter/web/core/ir/IRMod
 import { RootErrorBoundary } from '@style-converter/web/renderer/RootErrorBoundary';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 import { composeTree, type ComposedNode } from '../sdui/Composer';
+// The debug label as capture chrome (wave 51 PR (A)) — mounted below as a
+// SIBLING of the component inside the canvas, never inside the element;
+// labelChromeFits is the chrome's own drop predicate, so the canvas can
+// stamp the svg-less case (`data-label-chrome-dropped`) from one truth.
+import { LabelChrome, labelChromeFits } from './LabelChrome';
 
 interface CaptureGalleryProps {
   document: IRDocument;
@@ -430,12 +439,37 @@ export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
   // index.html `body.wpt-mode` selector (Bug 1 fix), which scopes the
   // override to `[data-component-id]` descendants only.
   const style = WPT_MODE ? wptCanvasStyle : canvasStyle;
+  // Label-chrome predicate (docs/DYNAMIC_CAPTURE.md "Harness label chrome"
+  // — the same test iOS `HarnessLabelChrome` and Compose `showsLabel` make):
+  // exactly one label per capture iff the COMPOSED root has zero composed
+  // children AND no non-empty text AND the run is not WPT. The children
+  // test is on the ComposedNode (the v2 IRComponent has NO `children`
+  // field — reading `component.children` would be undefined for every
+  // root and label every container on web only); the text test mirrors
+  // the skin's `hasText` (a non-string or empty `text` is "no text"). In
+  // legacy mode the flatten() walk emits nested leaves as their own
+  // canvases, so a container's children keep a band tag on THEIR captures
+  // while the container itself stays unlabelled.
+  const showLabel = !WPT_MODE
+    && node.children.length === 0
+    && !(typeof component.text === 'string' && component.text.length > 0);
+  // The svg-less case, stamped on the canvas so tooling can grep a capture
+  // that carries no label (frame narrower than 22 px, or a name that lays
+  // out no rect) instead of inferring it from a missing svg: true iff the
+  // label was DUE and nothing fits — a text root or container is unlabelled
+  // by the predicate, not dropped. LabelChrome logs the same decision once
+  // per (name, width); the two must agree (LabelChrome.dropped.test.tsx).
+  const labelDropped = showLabel && !labelChromeFits(component.name, CANVAS_WIDTH_PX);
   return (
     <div
       data-capture-canvas
       data-capture-index={index}
       data-capture-id={component.id}
       data-capture-name={component.name}
+      // Label-chrome drop marker: present (empty value) iff the label was
+      // due and nothing fits — absent otherwise (React drops undefined-
+      // valued data attributes), so "dropped" and "drawn" never coexist.
+      data-label-chrome-dropped={labelDropped ? '' : undefined}
       // Forced-state marker (spec 06 §6 / docs/DYNAMIC_CAPTURE.md §1):
       // present on EVERY canvas when the run is forced, absent otherwise
       // (React drops null-valued data attributes). The web engine reads
@@ -457,6 +491,15 @@ export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
       <RootErrorBoundary componentId={component.id}>
         <ComponentRenderer node={node} />
       </RootErrorBoundary>
+      {/* HARNESS LABEL CHROME — a SIBLING after the component, so it paints
+          after the component's whole chain (blend / opacity / filter / clip
+          / transform apply to the element's subtree only, never to this
+          svg). The canvas supplies everything the chrome needs: containing
+          block (`position: relative` → left/top are frame coords), stacking
+          root (`translateZ(0)`) and the frame clip (`overflow: hidden`).
+          frameWidth = the canvas width the PNG is cut to, so truncation
+          matches iOS/Android (62 glyphs at 390, 39 at `?width=250`). */}
+      {showLabel ? <LabelChrome name={component.name} frameWidth={CANVAS_WIDTH_PX} /> : null}
     </div>
   );
 }

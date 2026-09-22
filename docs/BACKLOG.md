@@ -219,8 +219,32 @@ cell flips await the wave-50 gate.
   capture the gate made (`observedFrom` names the run), and a "now passing"
   verdict that did not come from a live gate is not a deletion warrant.
 
-## Next-wave obligations (wave 51 opens with these)
+## Next-wave obligations (wave 52 opens with these)
 
+0. **Wave 51 shipped as three PRs, each measured on device before merge**
+   (2026-09-15 → 22): PR 1 the lost cells (queue 0(z): retro R2's percent
+   clamp dropped the min floor in Compose's intrinsic pass — fixed, +3
+   Android, `corpus-v6.17`, run `wave51-fix`), PR 2 the 9(g) one-liner
+   (`align-items` no longer moves a non-flex block's content on Android —
+   two layout.combos pairs to 1.0000), PR 3 the harness label as
+   capture-frame chrome on all three platforms (decided-PR (A) below: 390
+   baselines refreshed after a 390-sheet review, two ledger lines deleted,
+   gate set exit 0 ×8, tripwire 136/136, 14 spill rows to ≥ 0.997).
+   Three device gates ran this wave: `wave51-open` (the unmodified wave-50
+   tree — 0/0/0/0 against wave50-final, run-to-run determinism proven),
+   `wave51-fix` (corpus-v6.17), and PR 3's fixture-net measure/refresh
+   runs; wave 52 therefore opens, as always, with the FULL gate on a quiet
+   host (`tools/titan/gate-driver.sh wave52-open`, scored against
+   `wave51-fix` with the wave-50 watchlist) — expected: zero per-cell
+   change (PR 3 cannot reach the corpus by construction; PR 2's carriers are
+   off-corpus), fixture net exit 0 ×8, and the two iOS blend carriers
+   (obligation #1 below) still 1.0000. The first divergence from that
+   expectation is the first item of wave 52. Standing constraints added
+   this wave: a device A/B records the installed APK's sha1 (0(z)); and —
+   learned the hard way when a six-day gap purged the session scratchpad —
+   design documents, lane reports and review verdicts are committed under
+   `tools/titan/results/<wave>-<lane>/` the moment they exist
+   (`wave51-A/` is the template).
 1. **The wave-50 gate RAN (run `wave50-final`, 2026-09-14 21:14 → 22:44 UTC,
    quiet host, `tools/titan/gate-driver.sh`): 30/30 sections, every column
    48/48/48 on the first attempt; `score-gate.mjs` wave49-final →
@@ -586,14 +610,70 @@ cell flips await the wave-50 gate.
    deleted them. `--gate-set` (standing constraint above) is what makes
    exit 5 able to reach fixture-scoped lines, and the Sepia adjudication
    was the first result of looking.
+   **Wave 51 PR 3 (label chrome):** the refresh's MEASURE run named the
+   two `Edge_GradientWithRadius` lines (Android-web, iOS-web) stale at
+   0.9995 / 0.9996 — their reason was the web label painted past the
+   rounded box, and no platform paints a label inside a box any more —
+   DELETED per the contract, **12 → 10 lines**; the count pin in
+   `cross-platform-gate.test.mjs` moved with it and says why. The
+   remaining ten: `Edge_InsetRoundShadow` ×2, `Neumorphic_Light` ×2
+   (penumbra / Δpx lines whose HEAD PNGs carry the chrome identically ×3 —
+   staleness is a measurement at the next gate), 4 `harness-composed-capture`
+   (backdrop-filter colour drift, composition-test.json), 2
+   `Sepia_Translucent` (iOS filter-composite drift).
 
 ## Decided, and still unstarted — the first PRs of wave 51, in this order
 
 These are their OWN PRs because each moves every committed baseline of a
 platform; they are not folded into a rendering wave.
 
-- **(A) Harness debug-label chrome drawn OUTSIDE the paint chain on all
-  three platforms** (A11#8). The shared spec promises byte-identical label
+- **(A) ~~Harness debug-label chrome drawn OUTSIDE the paint chain on all
+  three platforms~~ — DONE (wave 51 PR 3, branch `campaign/wave51-labels`).**
+  The label is capture-frame chrome on all three: a sibling layer over the
+  capture root at (8,6), text = the plain component name, truncated to the
+  frame width, gated by the existing WPT/composed flags, composited byte
+  (174,174,180) on all three (natives α 179/255, web CSS α 0.706 because
+  Chromium rounds α to 8 bits — the 179/255 spelling composited to 173);
+  the runtimes render no label. Design, reviews, lane reports, skeptic
+  verdicts and the refresh record: `tools/titan/results/wave51-A/`
+  (design-record.md, lane-reports.json, skeptic-*.md, skeptic-defects.json,
+  refresh/review.md). Measured: the refresh MEASURE run (`BASELINE=1` on
+  the fixed harnesses before any refresh) returned exactly the predicted
+  exits — visual-test exit 5 naming the two `Edge_GradientWithRadius`
+  ledger lines (DELETED, 12 → 10), then 92 relocation exit-1s; sepia /
+  aspect-ratio / grayscale exit 1 — with S1 dimensions unchanged on all
+  390, the band byte-identical across platforms on 93 of 109 visual-test
+  stems (the 16 others are the design's glyph-mask stems, where component
+  paint reaches the band), and every glyph pixel on every glyph-mask stem
+  equal to ink-over-that-platform's-own-band-paint within 1 LSB
+  (refresh-check.mjs S4b). PNG review: 390 sheets, 385 clean, 5 flagged
+  and adjudicated (refresh/review.md): four Android blurred-shadow stems
+  carry a +1-LSB column beside vertical glyph strokes that the committed
+  baselines already showed beside the OLD label (an Android capture
+  resampling property, queued below as a residual), and web
+  046_Perspective_Rotate's rotated layer re-anti-aliased two 1-px edge
+  columns once the label child left it. Then `UPDATE_BASELINE=1` on all
+  four baselined fixtures (visual-test, filter-sepia-amounts, and the
+  off-gate-list aspect-ratio and filter-grayscale-basis), baseline-stats
+  regenerated, `BASELINE=1 ./test-all.sh --gate-set` **exit 0 on all 8**,
+  `tools/visual/label-chrome-tripwire.test.mjs` **136/136 green** (it was
+  6/136 on the pre-refresh baselines — its proof of teeth). Corpus impact:
+  zero by construction (§6 of the design record). **The fidelity win,
+  measured** (`tools/titan/results/wave51-A/refresh/fidelity-compare.txt`,
+  18 combos/pairwise fixtures captured on all three platforms with the
+  chrome, "before" = the retro's 2026-09-04 classification): all **14
+  WEB-LABEL-SPILL rows** go from iOS-web 0.919–0.950 / Android-web
+  0.921–0.949 to **0.9991–0.9998 / 0.9971–0.9996**; **38 rows moved by
+  ≥ 0.005 on some pair, none downward** — among them every iOS
+  "label truncated at the box edge" row in pairs-02 (PW_Borders_Color_01
+  0.9137 → 1.0000, Images_03 0.8882 → 0.9999, Sizing_01 0.8774 → 1.0000,
+  Typography_01 0.9781 → 1.0000), Borders_Transforms_03 iOS-Android
+  0.8225 → 0.9965, Background_Decorated three-way 0.92 → 0.997, and the
+  two 9(g) carriers now 1.0000 on every pair. Caveat stated: the "before"
+  predates waves 50–51's runtime changes, so a row's movement is
+  attributable to the chrome only where its class or `label_ink` named the
+  label — which is every row listed. The original brief
+  follows for the record. The shared spec promises byte-identical label
   rects at (8,6), but today the label is composited by the component:
   iOS draws it INSIDE the element's `.blendMode` group
   (`runtimes/swiftui/.../Renderer/ComponentRenderer.swift`, the `BlockLabel(`
@@ -1105,6 +1185,28 @@ platform; they are not folded into a rendering wave.
    host-speed term. What that reading DID show, worth keeping: the
    wave-49 gate captured an UNCOMMITTED tree (5aa92ed6 was squashed after
    the run), so "the wave-49 tree" is reconstructable only as that commit.
+   (aa) **Android resamples the capture by a sub-pixel amount on stems with
+   a BLURRED box-shadow** (wave 51 PR 3 PNG review,
+   `tools/titan/results/wave51-A/refresh/review.md`): on
+   023_Shadow_Simple / 024_Shadow_Colored / 025_Shadow_Multiple /
+   093_Avatar_Circle the Android capture carries a +1-LSB column
+   immediately right of every vertical high-contrast stroke (the new label's
+   glyphs; the committed baselines showed the same bleed beside the OLD
+   in-box label's strokes) and on 093 the glyph ink itself reads 173 where
+   web/iOS read 174 on 46 pixels; absent on 027_Shadow_Spread (spread only,
+   no blur) and on every stem without a blurred shadow. Invisible, below
+   every gate threshold, and the reason the label tripwire asserts POSITION
+   only on glyph-mask stems. Suspect: the elevation/blur path puts the
+   component in a hardware layer whose composite into the PixelCopy source
+   is sampled at a fractional offset. Owner `android-effects-shadow`; a
+   fix is measured by those four stems' band bytes becoming identical ×3.
+   (ab) **Relocate the label machinery into the harnesses** (wave 51 PR 3
+   design record §7): after (A) the block-font atlas code (`BlockLabel.kt`,
+   `BlockLabel.swift`, `BlockFontLabel.ts`, `BlockFont.gen.*` from
+   `gen-block-font.mjs`) is harness-only yet still lives in the three
+   product runtimes (the iOS chrome view too, for Catalyst testability).
+   Nothing blocks moving it (the harnesses already import the runtimes);
+   the checksum pins and `HarnessLabelChrome*` tests move with it.
 
 1. **Vertical-wedge residuals** (the wave-47 wedges are FIXED as
    mechanisms — W1 wave 48): (a) `css-break/background-image-006` **scores
@@ -2182,9 +2284,15 @@ platform; they are not folded into a rendering wave.
    the padding, under-clamping an animation-supplied width/height by it. Zero
    fixture carriers, zero corpus carriers. Needs its own call-site-aware
    entry point.
-   (f″) **NEW — iOS draws the synthesized placeholder label at HALF the
-   width web and Android draw it at, and NO ledger line names a width
-   divergence** (skeptic S7 re-measured the committed baselines from scratch;
+   (f″) ~~**NEW — iOS draws the synthesized placeholder label at HALF the
+   width web and Android draw it at**~~ **CLOSED by construction (wave 51
+   PR 3)** — no platform draws a placeholder label inside the box any more;
+   the harness label is capture-frame chrome truncated against the FRAME
+   width on all three (decided-PR (A) above), so the per-component width
+   channel that produced the 50×30 iOS ink box is deleted. The record of
+   the defect follows. (Original text:) iOS drew the synthesized placeholder
+   label at HALF the width web and Android drew it at, and NO ledger line
+   named a width divergence (skeptic S7 re-measured the committed baselines from scratch;
    S6-13 CONFIRMED). Ink boxes: `090_Button_Primary` web 115×30 / Android
    115×30 / **iOS 50×30**; `091_Button_Outline` 115×30 / 115×26 (→ 115×30
    after the fix) / **50×30**; `105_Edge_DeepNesting` the same;

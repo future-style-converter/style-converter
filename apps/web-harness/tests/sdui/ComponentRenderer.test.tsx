@@ -69,17 +69,24 @@ describe('ComponentRenderer — composed-children recursion (swarm-001 css-overf
       .toBeLessThan(html.indexOf('data-component-id="child-1"'));
   });
 
-  it('falls back to PlaceholderContent for a leaf node (327-pair compat)', () => {
+  // Wave 51 PR (A): the debug NAME label is harness CHROME drawn by the
+  // capture canvas (ui/LabelChrome.tsx — pinned in tests/ui/LabelChrome*),
+  // never by this skin. A legacy leaf renders the empty 0-height label
+  // SLOT span: no svg, no name text under [data-component-id].
+  it('renders the empty label slot for a leaf node — no svg, no name text (327-pair compat)', () => {
     const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(makeComp())} />);
-    // Placeholder span renders the underscore-stripped name in legacy mode.
-    expect(html).toContain('<span');
-    expect(html).toContain('Test Comp');
+    // The slot span survives with its byte-identical geometry…
+    expect(html).toMatch(/<span style="display:block;padding:0;height:0;position:relative;overflow:visible;[^"]*"><\/span>/);
+    // …and nothing else: the name is not rendered here any more.
+    expect(html).not.toContain('<svg');
+    expect(html).not.toContain('Test Comp');
   });
 
-  it('falls back to PlaceholderContent when the composed child list is empty', () => {
+  it('renders the same empty slot when the composed child list is empty', () => {
     const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(makeComp(), [])} />);
-    expect(html).toContain('<span');
-    expect(html).toContain('Test Comp');
+    expect(html).toMatch(/<span style="display:block;padding:0;height:0;[^"]*"><\/span>/);
+    expect(html).not.toContain('<svg');
+    expect(html).not.toContain('Test Comp');
   });
 });
 
@@ -105,17 +112,23 @@ describe('ComponentRenderer — text rendering (swarm-001 css-color__color-001)'
     expect(html).toContain('real content');
   });
 
-  it('empty text falls back to placeholder name (back-compat)', () => {
-    // hasText guard treats empty string as "no text"; placeholder name wins.
+  it('empty text falls back to the empty label slot (back-compat)', () => {
+    // hasText guard treats empty string as "no text" → the slot branch:
+    // the empty 0-height span, no svg, no name text (the name is canvas
+    // chrome since wave 51 PR (A)).
     const comp = makeComp({ text: '' });
     const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
-    expect(html).toContain('Test Comp');
+    expect(html).toMatch(/<span style="display:block;padding:0;height:0;[^"]*"><\/span>/);
+    expect(html).not.toContain('<svg');
+    expect(html).not.toContain('Test Comp');
   });
 
-  it('absent text renders the placeholder name (327-pair compat)', () => {
+  it('absent text renders the empty label slot (327-pair compat)', () => {
     const comp = makeComp({});
     const html = renderToStaticMarkup(<ComponentRenderer node={makeNode(comp)} />);
-    expect(html).toContain('Test Comp');
+    expect(html).toMatch(/<span style="display:block;padding:0;height:0;[^"]*"><\/span>/);
+    expect(html).not.toContain('<svg');
+    expect(html).not.toContain('Test Comp');
   });
 });
 

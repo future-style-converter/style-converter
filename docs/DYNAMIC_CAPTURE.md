@@ -234,3 +234,73 @@ CAPTURE_FORCE_STATE=hover CAPTURE_ANIMATION_TIME=0.5 \
 Gating rules mirror §1/§2: one variable combination per run, one
 report per run, and `UPDATE_BASELINE=1` must never be combined with
 `CAPTURE_ANIMATION_TIME` (baselines are motion-free by contract).
+
+## 5. Harness label chrome
+
+Every per-component capture carries **one** debug label — the component's
+name. The label is **harness chrome**: the capture app draws it AFTER the
+element's whole paint chain, as a sibling layer over the capture root —
+never a descendant of the styled element, never inside any runtime
+modifier / CSS box. **The runtimes render no label.** (The old in-component
+placeholder was composited BY the component, so root filters, blends,
+transforms, clips and `align-items` moved or faded it — never the property
+under test.)
+
+### Contract
+
+- **Placement**: block top-left at **(8, 6) in the capture frame** — inside
+  the 16 px top pad over the `#1A1A2E` ground, so glyph rows 6..12 sit above
+  the border box of every in-flow root with non-negative `margin-top`/`top`.
+  Paint that does reach rows 0..15 (shadows, outlines, transforms, negative
+  offsets) gets the label composited OVER it — identically placed ×3.
+- **Glyphs**: `tools/visual/block-font.json`, the one atlas every platform's
+  embedded copy is generated from (`tools/visual/gen-block-font.mjs`,
+  checksum-pinned): cell 5×7, advance 6, line height 10, one 1×1 px rect
+  per set bit at integer coordinates — no font stack, no anti-aliasing.
+- **Text**: the plain component name with `_`→space, then the shared
+  normalize (upper-case; any character without an atlas glyph → `-`). The
+  component's own `text-transform` / `tab-size` do NOT apply — it is chrome.
+- **Truncation against the FRAME width**, never the component's: the largest
+  n with `8 + 6n ≤ frameWidth − 8` — 62 glyphs at the default 390, 39 at
+  `CAPTURE_WIDTH=250` (§2), 0 below 22. Trailing characters drop; no ellipsis.
+- **Colour**: the contract is the **composited byte**, not the alpha
+  spelling — over the `#1A1A2E` ground every glyph pixel reads
+  `(174, 174, 180)` on all three. The natives get there at alpha 179/255
+  (`rgba(237, 237, 237, 179/255)`: Compose `0xB3EDEDED`, SwiftUI
+  `opacity: 179.0 / 255.0`). Web ships CSS alpha `0.706`
+  (`rgba(237, 237, 237, 0.706)`, `BlockFontLabel.ts`), because Chromium
+  rounds the CSS alpha to 8 bits and its CPU-raster src-over composites
+  alpha byte 179 to `(173, 173, 179)`: the `0.70196` (= 179/255) spelling
+  landed exactly there, one LSB dark, as did the old `0.7`. Byte 180 is
+  the window `[0.704, 0.7078]` (round(α × 255) = 180); `0.706` sits
+  mid-window. On web the byte is read back from a real headless-Chrome
+  raster of the gallery markup
+  (`apps/web-harness/tests/ui/LabelChrome.raster.test.tsx`); one LSB of
+  drift on any platform is a defect, not a tolerance.
+- **When**: exactly one label per capture, **iff** the COMPOSED root of that
+  capture (after slot composition, before any runtime fold) has zero
+  composed children AND no non-empty `text`, AND the run is not a WPT /
+  TITAN-inbox / composed run (web `WPT_MODE`, iOS `wptCaptureMode`, Android
+  `LocalWptCaptureMode` — the corpus stays label-free). Containers and
+  text-bearing roots get none; nested leaves get none inside their parent.
+- **The contract is byte identity**: same atlas, origin, truncation and
+  colour ⇒ identical label pixels on all three platforms by construction.
+  One LSB, one column or one glyph of drift is a defect, not a tolerance.
+
+### Implementations and the tripwire
+
+| platform | drawer | mount point |
+|---|---|---|
+| web | `apps/web-harness/src/ui/LabelChrome.tsx` — an absolutely positioned `<svg>` at left 8 / top 6, laid out by `runtimes/web/src/renderer/BlockFontLabel.ts` | `CaptureGallery.tsx` `CaptureCanvas` (and `FixtureCanvas.tsx` for the `?fixture=` path): a sibling of the root inside `[data-capture-canvas]` |
+| Android | `apps/android-harness/…/screenshot/ScreenshotCaptureScreen.kt` `harnessLabelRects` — pure name → rect list through the runtime's `BlockLabel` normalize / truncate / rects | the `CaptureCanvas` Box's `drawWithContent { drawContent(); … }` — the PixelCopy node itself, outside the padding and every child |
+| iOS | `runtimes/swiftui/…/Renderer/HarnessLabelChrome.swift` — reads `\.wptCaptureMode` itself, `EmptyView` under the backdrop `.sampling` pass | `apps/ios-harness/…/Screenshot/CaptureCanvas.swift` `.overlay(alignment: .topLeading)` after `.background(canvasBackground)`, both root branches |
+
+`tools/visual/label-chrome-tripwire.test.mjs` (CI glob `node --test
+tools/visual/*.test.mjs`) re-derives the expected glyph pixel set P per
+committed baseline stem from the atlas + file name and asserts POSITIONALLY
+on all three PNGs: every p ∈ P is non-ground; where rows 0..15 outside P are
+pure ground on all three, the band is byte-identical across platforms;
+elsewhere the P-mask bytes agree within ±1 per channel. It is red on
+pre-chrome baselines by design (its header records that negative control).
+`UPDATE_BASELINE=1` runs carry the label (part of the historical capture
+path); a `CAPTURE_WIDTH` run truncates it to that width on all three.

@@ -99,6 +99,24 @@ final class EmptyFlexContainerTests: XCTestCase {
      ]}
     """
 
+    /// The same childless flex container WITH real element text (the IR
+    /// `text` channel) — wave 51 PR (A): the synthesized name label no
+    /// longer renders in the runtime, so the "content sits at top" pin
+    /// needs content the runtime still paints.
+    private let flexAlignCenterWithTextJSON = """
+    {"id":"t-flex-text","name":"Flex AlignCenter","text":"Flex AlignCenter",
+     "properties":[
+       {"type":"Display","data":"FLEX"},
+       {"type":"AlignItems","data":"CENTER"},
+       {"type":"Height","data":{"type":"length","px":80.0}},
+       {"type":"BackgroundColor","data":{"srgb":{"r":0.7411764705882353,"g":0.7647058823529411,"b":0.7803921568627451},"original":"#bdc3c7"}},
+       {"type":"PaddingTop","data":{"px":10.0}},
+       {"type":"PaddingRight","data":{"px":10.0}},
+       {"type":"PaddingBottom","data":{"px":10.0}},
+       {"type":"PaddingLeft","data":{"px":10.0}}
+     ]}
+    """
+
     /// The block-flow control: IDENTICAL box minus Display/AlignItems.
     /// Per the web harness's childless display→block rewrite these two
     /// must render pixel-identically. Same `name` → same placeholder run.
@@ -161,29 +179,33 @@ final class EmptyFlexContainerTests: XCTestCase {
                        "— \(diffBytes) bytes differ from the block control")
     }
 
-    /// Belt-and-braces on the same render: the placeholder glyphs sit in
-    /// the TOP portion of the 80px box (block flow), not centred. The
-    /// block-font label (applier campaign) paints the FIXED
-    /// rgba(237,237,237,0.7) ink — lighter than the #bdc3c7 fill but
-    /// darker than the white canvas, so the probe hunts that middle band.
+    /// Belt-and-braces on the same shape with REAL element text: the
+    /// PlaceholderLabel glyphs sit in the TOP portion of the 80px box
+    /// (block flow), not centred. Wave 51 PR (A) moved the synthesized NAME
+    /// label out of the runtime (it is harness chrome now), so a childless,
+    /// textless container paints nothing align-items could displace; the
+    /// pin keeps its subject through the IR `text` channel, which still
+    /// takes the leaf PlaceholderLabel path. Ink = any pixel inside the box
+    /// rows that is neither the #bdc3c7 fill nor the white canvas (box
+    /// edges are integer-aligned at scale 1, so no fractional-coverage
+    /// blend pixel can masquerade as text).
     @MainActor
     func testChildlessFlexPlaceholderSitsAtTop() throws {
-        let img = try render(try component(flexAlignCenterJSON))
+        let img = try render(try component(flexAlignCenterWithTextJSON))
         // Container band: canvas pad 16 → box rows 16..<96 (height 80).
-        // Label ink over #bdc3c7 composites to ≈(223,225,226) — sum ≈ 673
-        // — strictly between the box fill (583) and the white canvas
-        // (765); box edges are integer-aligned at scale 1, so no
-        // fractional-coverage blend pixel can fall inside the band.
+        let isFill: (UInt8, UInt8, UInt8) -> Bool = { r, g, b in
+            abs(Int(r) - 189) <= 1 && abs(Int(g) - 195) <= 1 && abs(Int(b) - 199) <= 1
+        }
+        let isCanvas: (UInt8, UInt8, UInt8) -> Bool = { r, g, b in r == 255 && g == 255 && b == 255 }
         let textRows = try XCTUnwrap(
-            rows(in: img) { r, g, b in (640..<720).contains(Int(r) + Int(g) + Int(b)) },
-            "no placeholder glyphs found in render")
-        // Box top = 16 (canvas padding). Block flow puts the label run
-        // right after the 10px container padding (+ the label's fixed 6px
-        // top inset → ink starts at row ≈32); glyph ink must start well
-        // above the vertical middle (16 + 40 = 56). The regression
-        // rendered the run vertically centred — comfortably caught.
+            rows(in: img) { r, g, b in !isFill(r, g, b) && !isCanvas(r, g, b) },
+            "no text glyphs found in render")
+        // Box top = 16 (canvas padding). Block flow puts the text run right
+        // after the 10px container padding (ink from row ≈ 26 on); glyph
+        // ink must start well above the vertical middle (16 + 40 = 56). The
+        // regression rendered the run vertically centred — comfortably caught.
         XCTAssertLessThan(textRows.lowerBound, 40,
-                          "placeholder vertically displaced — align-items " +
+                          "text vertically displaced — align-items " +
                           "leaked into the childless flex container")
     }
 

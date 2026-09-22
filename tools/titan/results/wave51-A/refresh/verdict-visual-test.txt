@@ -1,0 +1,20 @@
+  [phase-b] web/089_Card_Complete.png: divergence=structural-divergence · pHash=11 · edgeSsim=0.9473
+  090_Button_Primary.png… REGRESSION
+  091_Button_Outline.png… REGRESSION
+  092_Badge_Success.png… REGRESSION
+  096_Tooltip_Style.png… REGRESSION
+  097_Glass_Effect.png… REGRESSION
+  098_Neumorphic_Light.png… REGRESSION
+  099_Edge_NegativeOffset.png… REGRESSION
+  100_Edge_PercentRadius.png… REGRESSION
+  101_Edge_VeryLargeRadius.png… REGRESSION
+  103_Edge_TinyText.png… REGRESSION
+  104_Edge_HugeText.png… REGRESSION
+  105_Edge_DeepNesting.png… REGRESSION
+  106_Edge_MultiTransform.png… REGRESSION
+  107_Edge_InsetRoundShadow.png… REGRESSION
+  108_Edge_GradientWithRadius.png… REGRESSION
+· cross-platform gate: 327 pair(s) · 4 known divergence(s) · 0 unexpected
+✗ 2 stale expectation(s) — the ledger no longer matches reality:
+  An expectation that outlives the divergence it excused is how the ledger rots.
+  [1;33m✗ comparison failed: stale cross-platform expectation(s) or stale oracle waiver(s)[0m

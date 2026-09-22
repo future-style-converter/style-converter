@@ -1,0 +1,4 @@
+fixtures/visual-test.json exit 5
+fixtures/properties/effects/filter-sepia-amounts.json exit 1
+fixtures/properties/sizing/aspect-ratio.json exit 1
+fixtures/properties/effects/filter-grayscale-basis.json exit 1

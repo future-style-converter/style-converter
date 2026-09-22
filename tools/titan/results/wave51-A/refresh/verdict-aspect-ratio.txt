@@ -1,0 +1,20 @@
+  000_Ratio_16_9.png…   [phase-b] iOS/000_Ratio_16_9.png: divergence=mixed · pHash=7
+  [phase-b] Android/000_Ratio_16_9.png: divergence=mixed · pHash=7
+  [phase-b] web/000_Ratio_16_9.png: divergence=mixed · pHash=7
+  001_Ratio_1_1.png…   [phase-b] iOS/001_Ratio_1_1.png: divergence=mixed · pHash=10
+  [phase-b] Android/001_Ratio_1_1.png: divergence=mixed · pHash=10
+  [phase-b] web/001_Ratio_1_1.png: divergence=mixed · pHash=10
+  002_Ratio_4_3.png…   [phase-b] iOS/002_Ratio_4_3.png: divergence=mixed · pHash=6
+  [phase-b] Android/002_Ratio_4_3.png: divergence=mixed · pHash=6
+  [phase-b] web/002_Ratio_4_3.png: divergence=mixed · pHash=6
+  005_Ratio_Numeric_1_5.png…   [phase-b] iOS/005_Ratio_Numeric_1_5.png: divergence=mixed · pHash=6
+  [phase-b] Android/005_Ratio_Numeric_1_5.png: divergence=mixed · pHash=6
+  [phase-b] web/005_Ratio_Numeric_1_5.png: divergence=mixed · pHash=6
+  007_Ratio_Height_Only.png…   [phase-b] iOS/007_Ratio_Height_Only.png: divergence=structural-divergence · pHash=21 · edgeSsim=0.9469
+  [phase-b] Android/007_Ratio_Height_Only.png: divergence=structural-divergence · pHash=21 · edgeSsim=0.947
+  [phase-b] web/007_Ratio_Height_Only.png: divergence=structural-divergence · pHash=21 · edgeSsim=0.947
+  008_Ratio_Auto_With_Explicit.png… REGRESSION
+· cross-platform gate: 27 pair(s) · 0 known divergence(s) · 0 unexpected
+✗ 1 component(s) regressed beyond thresholds (27 platform-comparisons ran)
+  [1;33m✗ comparison failed: a platform regressed against its committed baseline[0m
+     (or a baseline exists for a component its PARTIAL column did not capture — see the ✗ rows above)
