@@ -12,7 +12,8 @@ import org.junit.Test
  * PR A the runtime draws no label: the harness paints these rects as
  * chrome over the capture root (docs/DYNAMIC_CAPTURE.md "Harness label
  * chrome"; the Android drawer is pinned by the harness's
- * HarnessLabelChromeTest). This suite pins the shared math itself.
+ * HarnessLabelChromeTest (geometry) and HarnessLabelChromeSourceTest
+ * (wiring, draw order, colour use)). This suite pins the shared math.
  *
  * The MANDATORY test here is the atlas checksum pin: it recomputes the
  * sha256 of the CANONICAL serialization from the EMBEDDED Kotlin constants
@@ -164,14 +165,16 @@ class BlockLabelTest {
         assertEquals(28, BlockLabel.rects("HI", 99).size)
     }
 
-    // ── Ink color: rgba(237,237,237,0.7) with the 179/255 alpha pin ────
+    // ── Ink color: the native alpha byte behind the (174,174,180) contract ─
 
     @Test
     fun labelColor_isTheSharedArgbLiteral() {
         // 0xB3EDEDED: RGB 237 (0xED) per channel; alpha 0.7×255 = 178.5
-        // rounded HALF-UP to 179 (0xB3) — the documented shared rounding.
+        // rounded HALF-UP to 179 (0xB3) — the byte Compose and SwiftUI need
+        // to composite (174,174,180) over #1A1A2E (BlockLabel.COLOR's doc:
+        // the composited byte is the contract; web reaches it at byte 180).
         assertEquals(0xB3EDEDED.toInt(), BlockLabel.COLOR.toArgb())
-        // Pin the effective alpha byte explicitly: 179, never 178.
+        // Pin the native alpha byte explicitly: 179, never 178 (→ 173).
         assertEquals(179, (BlockLabel.COLOR.toArgb() ushr 24) and 0xFF)
     }
 }

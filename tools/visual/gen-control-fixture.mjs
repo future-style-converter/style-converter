@@ -80,9 +80,10 @@ const APPEARANCE = new Set([
  * Text pinned onto BOTH case and control. This is the load-bearing detail of
  * the whole method, and getting it wrong silently invalidates every result.
  *
- * A component with no `_text` renders its own NAME as a label —
- * `visibleText = name.replace(/_/g, ' ')` in
- * apps/web-harness/src/sdui/ComponentRenderer.tsx:1274-1276. A control's key
+ * A component with no `_text` gets its NAME drawn as the harness label —
+ * since wave 51 as canvas chrome over the capture, gated on the root having
+ * no non-empty text (apps/web-harness/src/ui/LabelChrome.tsx; before that the
+ * renderer skin drew it inside the element). A control's key
  * necessarily differs from its case's (`X` vs `X__no_filter`), so without
  * this pin the two render DIFFERENT label strings and every pair reports
  * "differs" — for a reason that has nothing to do with the property.
@@ -92,12 +93,13 @@ const APPEARANCE = new Set([
  * font's cell height. That was the label, not the property.
  *
  * Pinning identical text on both sides removes the confound. It also flips
- * components onto the REAL text path (`isBlockLabel` requires
- * `text === undefined`), which is a feature here: it makes typography
- * declarations genuinely testable instead of inert against a fixed-pitch
- * bitmap. The cross-platform glyph wall does not interfere, because a
- * control comparison is always WITHIN one platform — same text, same
- * renderer, same run.
+ * components onto the REAL text path (`isLabelSlot` in ComponentRenderer.tsx
+ * requires `text === undefined`, and the chrome's own gate requires no
+ * non-empty text — pinned text removes the label entirely), which is a
+ * feature here: it makes typography declarations genuinely testable instead
+ * of inert against a fixed-pitch bitmap. The cross-platform glyph wall does
+ * not interfere, because a control comparison is always WITHIN one platform
+ * — same text, same renderer, same run.
  */
 const PINNED_TEXT = 'Hamburg 123';
 

@@ -71,6 +71,28 @@ import {
  */
 const LABEL_CHROME_Z_INDEX = 2147483647;
 
+/**
+ * Once-only guard for the "no glyph fits" warning, keyed on (name, frame
+ * width) — the twin of Android's `remember(component.name, widthPx)` Log.w
+ * and iOS's `PropertyTracker.logOnce`: a capture re-render (force-state,
+ * animation seize, a live-gallery hover) must not repeat the line, while a
+ * NEW name or a NEW frame width is a new decision and logs again. Module-
+ * level so it spans every canvas of the gallery for the page's life.
+ */
+const warnedDrops = new Set<string>();
+
+/**
+ * Does the chrome for `name` paint at least one pixel at `frameWidth`? The
+ * SAME predicate LabelChrome's null branch takes (rects, not chars: an
+ * all-space name lays out zero rects even at 390), exported so the canvases
+ * can stamp `data-label-chrome-dropped` on the svg-less case and tooling can
+ * grep a label-less capture instead of inferring it from a missing svg.
+ */
+export function labelChromeFits(name: string, frameWidth: number): boolean {
+  // The component's own `_` → space transform, then the pure layout.
+  return layoutBlockLabel(name.replace(/_/g, ' '), frameWidth).rects.length > 0;
+}
+
 /** Props: the two inputs the shared contract needs, and nothing else. */
 export interface LabelChromeProps {
   /** The component's wire `name` — `_` → space happens here, once. */
@@ -86,9 +108,11 @@ export interface LabelChromeProps {
 
 /**
  * Draw one label as harness chrome. Returns null (no DOM at all) when the
- * frame is too narrow for a single glyph or the name is empty — and says
- * so on the console, because a capture that silently lost its tag is the
- * "silent fallthrough" the house rules forbid.
+ * frame is too narrow for a single glyph or the name lays out no ink — and
+ * says so on the console, ONCE per (name, frameWidth), because a capture
+ * that silently lost its tag is the "silent fallthrough" the house rules
+ * forbid (the canvas stamps the same case as `data-label-chrome-dropped`
+ * through labelChromeFits, so tooling need not parse logs).
  */
 export function LabelChrome({ name, frameWidth }: LabelChromeProps): React.ReactElement | null {
   // Shared-spec input: the plain name, underscores → spaces. Uppercasing
@@ -102,8 +126,13 @@ export function LabelChrome({ name, frameWidth }: LabelChromeProps): React.React
   // svg. Log it — a label-less capture must be a loud decision, mirroring
   // the natives' Log.w on `truncatedCount == 0` (design C5).
   if (layout.rects.length === 0) {
-    // console.warn is the harness's tracker: capture logs keep the line.
-    console.warn(`[LabelChrome] no glyph fits: name="${name}" frameWidth=${frameWidth} — capture carries no label`);
+    // One line per (name, frameWidth) for the page's life — see warnedDrops.
+    const key = `${name}\u0000${frameWidth}`;
+    if (!warnedDrops.has(key)) {
+      warnedDrops.add(key);
+      // console.warn is the harness's tracker: capture logs keep the line.
+      console.warn(`[LabelChrome] no glyph fits: name="${name}" frameWidth=${frameWidth} — capture carries no label`);
+    }
     return null;
   }
   return (

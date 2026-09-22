@@ -6205,6 +6205,37 @@ object ComponentRenderer {
         // is never suppressed. Default mode → LocalWptCaptureMode is false →
         // this is a no-op, keeping the 327-pair baseline byte-identical.
         if (shouldSuppressSynthesizedName(LocalWptCaptureMode.current, rawText)) return
+        // ── No synthesized-name label in the runtime (wave 51, PR A) ─────
+        // A component with NO real leading text (`_text` null/empty) renders
+        // NO text at all here: its styled box is painted by the modifier
+        // chain above, and nothing stands in for the missing content. The
+        // component-name debug label that used to be composed further down
+        // this function (first a font-stack Text, then a block-font
+        // placeholder Layout node from BlockLabel.kt) is now HARNESS CHROME —
+        // the android-harness's `CaptureCanvas` draws it as a sibling layer
+        // over the whole capture root, AFTER this component's paint, from
+        // the PLAIN component name, at the capture frame's (8,6), gated by
+        // the same `LocalWptCaptureMode` flag `shouldSuppressSynthesizedName`
+        // reads above. Drawing it INSIDE the element (here) put the ink
+        // through the element's own paint chain — offset by margin/relative
+        // insets/translate, rotated and zoomed with it, clipped by filter and
+        // blend layers, truncated at the CONTENT width where web/iOS used the
+        // border-box width — so the three platforms' captures disagreed on
+        // where the label sat. Normative rule: docs/DYNAMIC_CAPTURE.md
+        // "Harness label chrome". Not a silent fallthrough: the label is
+        // drawn elsewhere, not dropped.
+        //
+        // The return sits HERE, directly after the WPT gate (wave 51 PR A
+        // skeptic nit), so a nameless leaf leaves BEFORE placeholderDisplayText
+        // / applyTabSize / SoftHyphenPolicy / AutoHyphenation below run: each
+        // of those shapes a display string this branch would only discard,
+        // and the `hyphens: auto` PropertyTracker breadcrumb below must not
+        // fire for a component that paints no text. Every REAL-`_text` path
+        // is byte-identical: that work now runs iff hasRawText, i.e. exactly
+        // when its result is painted. The gate above stays as the named seam
+        // WptCaptureModeTest pins; it never fires for real text, so this
+        // return only subsumes the nameless case it already covered.
+        if (!hasRawText) return
         var displayText = placeholderDisplayText(name, rawText, properties)
 
         // Extract tab-size and process tabs in text
@@ -6280,29 +6311,6 @@ object ComponentRenderer {
                     "(this run carries no language tag); falls back to the " +
                     "explicit opportunities `manual` allows")
         }
-
-        // ── No synthesized-name label in the runtime (wave 51, PR A) ─────
-        // A component with NO real leading text (`_text` null/empty) renders
-        // NO text at all here: its styled box is painted by the modifier
-        // chain above, and nothing stands in for the missing content. The
-        // component-name debug label that used to be composed at this point
-        // (first a font-stack Text, then a block-font placeholder Layout
-        // node from BlockLabel.kt) is now HARNESS CHROME — the android-
-        // harness's `CaptureCanvas` draws it as a sibling layer over the
-        // whole capture root, AFTER this component's paint, from the PLAIN
-        // component name, at the capture frame's (8,6), gated by the same
-        // `LocalWptCaptureMode` flag `shouldSuppressSynthesizedName` reads
-        // above. Drawing it INSIDE the element (here) put the ink through
-        // the element's own paint chain — offset by margin/relative insets/
-        // translate, rotated and zoomed with it, clipped by filter and blend
-        // layers, truncated at the CONTENT width where web/iOS used the
-        // border-box width — so the three platforms' captures disagreed on
-        // where the label sat. Normative rule: docs/DYNAMIC_CAPTURE.md
-        // "Harness label chrome". `placeholderDisplayText` + `applyTabSize`
-        // above still shape REAL `_text` (text-transform / tab-size are the
-        // COMPONENT's styles); the WPT gate above is unchanged. Not a
-        // silent fallthrough: the label is drawn elsewhere, not dropped.
-        if (!hasRawText) return
 
         // Note: list-style markers are not prepended to placeholder text
         // to match web renderer behavior (web shows plain component name)

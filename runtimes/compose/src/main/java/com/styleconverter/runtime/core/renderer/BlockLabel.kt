@@ -54,15 +54,26 @@ object BlockLabel {
     const val EDGE_MARGIN = 8
 
     /**
-     * The label ink: rgba(237, 237, 237, 179/255) — the debug-label colour
-     * all three harnesses composite over the #1A1A2E ground. 0xED == 237 for
-     * each RGB channel. Alpha ROUNDING CONTRACT (shared across platforms):
-     * the historical 0.7 × 255 = 178.5 is rounded HALF-UP to 179 == 0xB3, so
-     * the effective alpha every platform must rasterize with is exactly
-     * 179/255 (~0.70196) → (174,174,180) over the ground; a platform that
-     * used 178, or CSS `0.7` (which Chromium quantises one LSB darker to
-     * (173,173,179)), diverges by one blend step on every lit pixel — which
-     * is why the web harness moved to 179/255 in the same PR.
+     * The label ink. THE CONTRACT IS THE COMPOSITED BYTE, NOT THE ALPHA:
+     * every lit label pixel over the #1A1A2E capture ground must read
+     * exactly (174, 174, 180) in the PNG on all three platforms — one LSB
+     * of drift is a defect, not a tolerance (docs/DYNAMIC_CAPTURE.md
+     * "Harness label chrome"; tools/titan/results/wave51-A/design-record.md
+     * §2). How each platform reaches that byte differs, and only the byte is
+     * shared:
+     *  - Compose (here) and SwiftUI paint source rgba(237, 237, 237, 179/255):
+     *    0xED == 237 per RGB channel, alpha 0xB3 == 179 (0.7 × 255 = 178.5
+     *    rounded half-up). Skia / CoreGraphics SrcOver on (26, 26, 46) gives
+     *    (174.11, 174.11, 180.07) → (174, 174, 180).
+     *  - Web ships CSS alpha 0.706 (byte 180), NOT 179/255, because Chromium
+     *    rounds CSS alpha to 8 bits and its CPU-raster src-over composites
+     *    byte 179 one LSB dark: the wave-51 web skeptic measured (173,173,179)
+     *    for 0.7 AND for the 0.70196 (= 179/255) spelling, (174,174,180) from
+     *    0.704 up — runtimes/web/src/renderer/BlockFontLabel.ts.
+     * So a platform that paints alpha 178 here (→ (173,173,179)), or web at
+     * byte 179, diverges by one blend step on every lit pixel. The VALUE of
+     * this constant is pinned by BlockLabelTest; that the harness paints
+     * WITH it is pinned by the android-harness's HarnessLabelChromeSourceTest.
      */
     val COLOR = Color(0xB3EDEDED)
 

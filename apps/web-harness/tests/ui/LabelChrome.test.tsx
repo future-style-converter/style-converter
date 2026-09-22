@@ -1,31 +1,34 @@
 // @vitest-environment jsdom
 // @vitest-environment-options { "url": "http://localhost:3000/?mode=capture" }
 //
-// LabelChrome.test.tsx — the web pins for wave 51 PR (A): the harness debug
-// label is CAPTURE CHROME drawn by the canvas as a SIBLING of the component
-// at frame (8,6), never a descendant of the styled element, exactly one per
-// childless textless root, and never emitted by the renderer skin
-// (docs/DYNAMIC_CAPTURE.md section "Harness label chrome").
+// LabelChrome.test.tsx — the width-INDEPENDENT structural pins for wave 51
+// PR (A): the harness debug label is CAPTURE CHROME drawn by the canvas as a
+// SIBLING of the component, never a descendant of the styled element,
+// exactly one per childless textless root, and never emitted by the
+// renderer skin (docs/DYNAMIC_CAPTURE.md section "Harness label chrome").
+// The svg's OWN attributes — the (8,6) style tokens, crispEdges, the fill
+// spelling and the 390-frame truncation geometry — are pinned by
+// LabelChrome.style.test.tsx (split out 2026-09-22 to keep both files under
+// the 200-line target); the svg-less case by LabelChrome.dropped.test.tsx.
 //
 // The environment URL is `?mode=capture` with NO `wpt` and NO `width`, so
 // the module-scope WPT_MODE / CANVAS_WIDTH_PX constants (CaptureGallery.tsx,
 // ComponentRenderer.tsx — read ONCE from window.location at import) resolve
 // to the 327-pair baseline boot: legacy flatten() flow, 390 px frame. The
-// `?width=250` and `?wpt=1` boots live in their own files
-// (LabelChrome.width250.test.tsx / LabelChrome.wpt.test.tsx) — one URL per
-// file is the only way to vary a read-once constant.
+// `?width=250`, `?wpt=1` and `?width=20` boots live in their own files
+// (LabelChrome.width250 / .wpt / .dropped.test.tsx) — one URL per file is
+// the only way to vary a read-once constant.
 //
 // Markup is produced by renderToStaticMarkup and parsed by JSDOM so the
 // pins are DOM-structural (closest / parentElement / querySelector), not
 // string greps — the sibling-vs-descendant distinction IS the design.
 //
-// MUTATION RECORD (executed 2026-09-16 on this tree, source restored
-// byte-exact afterwards — the OverflowClipTransformOrderTests.swift:34-39
-// style):
-//   1. `<LabelChrome>` mounted INSIDE the component element through the
-//      skin's renderEmptyContent (the old label site, next to the slot
-//      span) with the canvas mount removed → 7 of 11 red: "the chrome is
-//      a SIBLING of the component" failed at `svg.closest('[data-
+// MUTATION RECORD (executed on this tree, source restored byte-exact
+// afterwards; counts as recorded before the 2026-09-22 split):
+//   1. (2026-09-16) `<LabelChrome>` mounted INSIDE the component element
+//      through the skin's renderEmptyContent (the old label site, next to
+//      the slot span) with the canvas mount removed → 7 of 11 red: "the
+//      chrome is a SIBLING of the component" failed at `svg.closest('[data-
 //      component-id]')` ("expected <div …> to be null" — the component
 //      div), "the component element carries NO svg" failed at the
 //      `[data-component-id] svg[role="img"]` query (an SVGSVGElement),
@@ -35,20 +38,16 @@
 //      ComponentRenderer) is NOT observable here and stayed 11/11 green —
 //      the boundary renders no DOM of its own (RootErrorBoundary.ts
 //      "transparent passthrough"), so the DOM shape is identical.
-//   2. `!WPT_MODE` dropped from CaptureCanvas.showLabel → this file stayed
-//      11/11 green (no wpt here); LabelChrome.wpt.test.tsx went red.
-//   3. `Infinity` passed as frameWidth → this file's "62 glyphs at 390"
-//      pin red ("expected '599' to be '371'" — all 100 glyphs kept);
-//      LabelChrome.width250.test.tsx red on the same run ('599' vs '233').
-//   4. (fix lane, 2026-09-22) BLOCK_LABEL_FILL re-spelt `0.70196` and then
-//      `0.7` → the fill STRING pin below red both times ("expected
-//      'rgba(237, 237, 237, 0.70196)' to be 'rgba(237, 237, 237, 0.706)'"),
-//      as is the runtimes/web BlockFontLabel.test.ts fill pin. This string
-//      pin is deliberately NOT the colour gate: both spellings composite
-//      to the same (173,173,179) in Chromium, so the same two mutations
-//      were also run against LabelChrome.raster.test.tsx, where they turn
-//      the composited byte red ((8,6) = [173,173,179] on the real gallery
-//      markup) — that file's header carries the full record.
+//   2. (2026-09-16) `!WPT_MODE` dropped from CaptureCanvas.showLabel → this
+//      file stayed green (no wpt here); LabelChrome.wpt.test.tsx went red.
+//   3. (polish pass, 2026-09-22, restored sha256-exact) CaptureCanvas
+//      stamping `data-label-chrome-dropped=""` UNCONDITIONALLY → the "no
+//      dropped marker on a labelled canvas" line below red (2 marked, 0
+//      expected) and LabelChrome.dropped.test.tsx's "NOT due a label" pin
+//      red (a text root marked); its FixtureCanvas pins stayed green (the
+//      wrapper stamps from its own predicate).
+//   The fill / origin / Infinity mutations moved with their pins to
+//   LabelChrome.style.test.tsx, whose header carries them.
 import { describe, it, expect, afterEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactElement } from 'react';
@@ -77,12 +76,6 @@ function mount(el: ReactElement): HTMLElement {
 function canvases(root: HTMLElement): HTMLElement[] {
   return Array.from(root.querySelectorAll<HTMLElement>('[data-capture-canvas]'));
 }
-/** Count distinct 6-px glyph cells the svg's rects occupy (block-local x). */
-function glyphColumns(svg: Element): number {
-  const cells = new Set<number>();
-  svg.querySelectorAll('rect').forEach((r) => cells.add(Math.floor(Number(r.getAttribute('x')) / 6)));
-  return cells.size;
-}
 
 // A clean body between tests — the pins count elements.
 afterEach(() => { document.body.innerHTML = ''; });
@@ -97,6 +90,9 @@ describe('LabelChrome — one label per capture, as canvas chrome (?mode=capture
     expect(cs[1].querySelectorAll('svg[data-label-chrome][role="img"][aria-label="Other One"]')).toHaveLength(1);
     // And no other chrome anywhere (one per capture, not one per node).
     expect(root.querySelectorAll('[data-label-chrome]')).toHaveLength(2);
+    // The svg-less marker (LabelChrome.dropped.test.tsx) is ABSENT on a
+    // labelled canvas: "dropped" and "drawn" are mutually exclusive.
+    expect(root.querySelectorAll('[data-capture-canvas][data-label-chrome-dropped]')).toHaveLength(0);
   });
 
   it('the chrome is a SIBLING of the component, never a descendant, and paints LAST', () => {
@@ -111,28 +107,6 @@ describe('LabelChrome — one label per capture, as canvas chrome (?mode=capture
     // child paints last in the canvas's stacking context.
     expect(canvas.lastElementChild).toBe(svg);
     expect(svg.previousElementSibling?.getAttribute('data-component-id')).toBe('test-id');
-  });
-
-  it('is pinned at frame (8,6): absolute, z-index set, pointer-inert, crisp', () => {
-    const root = mount(<CaptureGallery document={doc([comp()])} />);
-    const svg = canvases(root)[0].querySelector(CHROME)!;
-    // React serialises the style object verbatim — assert the tokens.
-    const style = svg.getAttribute('style') ?? '';
-    expect(style).toContain('position:absolute');
-    expect(style).toContain('left:8px');
-    expect(style).toContain('top:6px');
-    expect(style).toMatch(/z-index:\d+/);
-    expect(style).toContain('pointer-events:none');
-    expect(style).toContain('display:block');
-    // Integer-grid rendering and the pinned fill SPELLING. Alpha 0.706 is
-    // alpha BYTE 180 (0.706 × 255 = 180.03 under floor and round), the
-    // value Chromium's CPU raster needs to composite the natives' byte
-    // (174,174,180) over the ground — 179/255 (0.70196) rendered the SAME
-    // (173,173,179) as the old 0.7 (wave-51 web skeptic). This string pin
-    // only guards the spelling; the composited byte is pinned by
-    // LabelChrome.raster.test.tsx through headless Chrome.
-    expect(svg.getAttribute('shape-rendering')).toBe('crispEdges');
-    expect(svg.getAttribute('fill')).toBe('rgba(237, 237, 237, 0.706)');
   });
 
   it('the component element carries NO svg and NO name text (the skin no longer labels)', () => {
@@ -174,17 +148,6 @@ describe('LabelChrome — one label per capture, as canvas chrome (?mode=capture
     // …and the leaf's standalone capture carries its own band tag.
     expect(cs[1].getAttribute('data-capture-id')).toBe('c');
     expect(cs[1].querySelectorAll('svg[data-label-chrome][aria-label="Child 1"]')).toHaveLength(1);
-  });
-
-  it('truncates against the 390 frame: a 100-char name keeps 62 glyphs (width 371)', () => {
-    const root = mount(<CaptureGallery document={doc([comp({ name: 'A'.repeat(100) })])} />);
-    const svg = canvases(root)[0].querySelector(CHROME)!;
-    // 8 + n*6 <= 390 - 8 → n = 62; tight width (n-1)*6 + 5 = 371, one cell tall.
-    expect(svg.getAttribute('width')).toBe(String(61 * 6 + 5));
-    expect(svg.getAttribute('height')).toBe('7');
-    expect(glyphColumns(svg)).toBe(62);
-    // The a11y name is the UNtruncated label (tooling identity).
-    expect(svg.getAttribute('aria-label')).toBe('A'.repeat(100));
   });
 
   it('a legacy-demoted widget root is labelled at the CANVAS level (relocated widgets pin)', () => {

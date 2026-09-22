@@ -14,6 +14,16 @@
 //       (the wave-3 lesson: a Canvas can silently produce an empty layer
 //       under ImageRenderer, so the pixel probe is mandatory).
 //
+//  MUTATIONS EXECUTED (wave 51 polish, Catalyst; each reverted byte-exact
+//  by sha256; the skeptic's own records live in
+//  tools/titan/results/wave51-A/skeptic-ios.md): glyphString reverted from
+//  the unicodeScalars walk to a `Character` walk →
+//  testGlyphStringWalksUnicodeScalarsNotGraphemes red 2 ("-" for "E-",
+//  "CAF--" for "CAFE--"); the precomposed U+00E9 case and every other pin
+//  stayed green. originY 6 → 7 (HarnessLabelChromeRasterTests' M-origin) →
+//  testCanvasRendersSetAndClearBitsUnderImageRenderer red 3 ((8,6) and
+//  (12,12) alpha 0, (8,13) alpha 0.70).
+//
 
 import XCTest
 import SwiftUI
@@ -60,6 +70,22 @@ final class BlockLabelTests: XCTestCase {
         // 'é' uppercases to 'É' (no glyph) and '?' has no glyph → both '-';
         // digits and '%' pass through untouched.
         XCTAssertEqual(BlockLabelLayout.glyphString("é?a 10%"), "--A 10%")
+    }
+
+    /// Code-point parity (wave 51 polish; skeptic-ios.md nit): web/tooling
+    /// walk `Array.from(str)` (code points) and Kotlin walks chars, so the
+    /// combining sequence e + U+0301 is TWO units everywhere — 'E' (atlas
+    /// hit) then '-' (no glyph for the mark). A `Character` (grapheme) walk
+    /// folds it into ONE '-', a glyph-count divergence the truncation
+    /// formula would then see. Precomposed U+00E9 is one scalar on every
+    /// platform and stays one '-'.
+    func testGlyphStringWalksUnicodeScalarsNotGraphemes() {
+        // Decomposed: two scalars → two glyphs, the first a real 'E'.
+        XCTAssertEqual(BlockLabelLayout.glyphString("e\u{301}"), "E-")
+        // Precomposed: one scalar → one '-' (same count on web / Kotlin).
+        XCTAssertEqual(BlockLabelLayout.glyphString("\u{E9}"), "-")
+        // Inside a name: the count the truncation sees is 6 ('CAFE--'), not 5.
+        XCTAssertEqual(BlockLabelLayout.glyphString("Cafe\u{301}!"), "CAFE--")
     }
 
     // MARK: - 2b. Truncation

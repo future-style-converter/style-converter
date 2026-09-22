@@ -17,7 +17,9 @@
 //  CaptureCanvas — with the chrome at the harness's exact mounting point.
 //
 //  MUTATIONS EXECUTED (wave 51, Catalyst ImageRenderer at scale 1; each
-//  reverted byte-exact before the green run — lane notes hold the logs):
+//  reverted byte-exact (sha256) before the green run; the skeptic's logs
+//  and re-executions are recorded in
+//  tools/titan/results/wave51-A/skeptic-ios.md, never in a scratchpad):
 //   * chrome overlay moved onto the ComponentHost VIEW in the mirror chain
 //     (CaptureCanvas.swift itself is not in this target): band ink 0 on
 //     (a)–(f), all 178 "LABEL CHROME" pixels at the old footprint from
@@ -26,11 +28,22 @@
 //     style chain. The per-effect signatures live in that old footprint
 //     (seen incidentally under the next mutation: clip-path kept 91 of 178,
 //     multiply/opacity darkened them below the lit threshold).
-//   * `BlockLabel` restored in ComponentRenderer's nameless-leaf branch →
-//     178 (91 under clip) stray lit pixels from (8,6) inside the element.
-//   * `guard !wptCaptureMode` dropped → testWptCaptureModePaintsNoLabel red
-//     (178 px); `guard backdropPass != .sampling` dropped →
+//   * M5: `BlockLabel` restored in ComponentRenderer's nameless-leaf branch
+//     → red on (a) 178, (f) 178, (e) 91 under clip, (g) 178 stray lit pixels
+//     from (8,6) inside the element, AND on testRootWithChildrenPaintsNoLabel
+//     (43 px — the child's own in-element label; skeptic re-execution).
+//   * M2: `guard !wptCaptureMode` dropped → testWptCaptureModePaintsNoLabel
+//     red (178 px); `guard backdropPass != .sampling` dropped →
 //     testSamplingPassPaintsNoLabel red (178 px).
+//   * M-origin: originY 6 → 7 → red 11: (8,6)/(12,12) read the stage
+//     (26,26,46), 38 px outside the band first at (8,7), BlockLabelTests 3.
+//   * Polish pass (exact-ink pins, post-skeptic): labelColor opacity
+//     179/255 → 178/255 → red 180 ((8,6), (12,12) and all 178 band pixels
+//     read (173,173,179)); → 180/255 → red 180 (all read (175,175,181)).
+//     Both were GREEN under the earlier ±1 pin. 179/255 → 0.7 stays GREEN
+//     51/51 even under exact equality: on the Catalyst raster 0.7 composites
+//     to the identical (174,174,180) (skeptic M-α measured the same), so the
+//     pin holds the COMPOSITED-byte contract, not the alpha spelling.
 //
 
 import Foundation
@@ -118,17 +131,22 @@ final class HarnessLabelChromeRasterTests: XCTestCase {
     @MainActor
     func testPlainLeafPaintsTheLabelAtFrameOriginInInkColour() throws {
         let img = try render(try leaf())
-        // 'L' row 0 = 10000 → (8,6) ink, (9,6) stage; row 6 → (12,12) ink. ±1
-        // per channel on the ink byte (Catalyst raster, in-gamut sRGB).
+        // 'L' row 0 = 10000 → (8,6) ink, (9,6) stage; row 6 → (12,12) ink.
+        // EXACT equality, no ±1: the Catalyst raster is deterministic
+        // (skeptic-ios.md probes: 178/178 at (174,174,180), three runs) and
+        // DYNAMIC_CAPTURE.md §5 says one LSB of drift is a defect, not a
+        // tolerance — measured: alpha byte 178 → (173,173,179), 180 →
+        // (175,175,181), both invisible to a ±1 pin (header records).
         for (x, y) in [(8, 6), (12, 12)] {
             let p = M.rgb(img, x, y)
-            XCTAssertTrue(abs(p.0 - 174) <= 1 && abs(p.1 - 174) <= 1 && abs(p.2 - 180) <= 1, "(\(x),\(y)) is \(p), not (174,174,180)±1")
+            XCTAssertTrue(p == Self.ink, "(\(x),\(y)) is \(p), not exactly (174,174,180)")
         }
         XCTAssertTrue(M.rgb(img, 9, 6) == Self.stage, "(9,6) is \(M.rgb(img, 9, 6)), must be the bare stage — glyph shifted or smeared?")
-        // Every lit band pixel is the shared ink byte — no other colour lit.
+        // Every lit band pixel is EXACTLY the shared ink byte — no other
+        // colour lit, no LSB drift anywhere along the run.
         for y in Self.bandRows { for x in Self.bandCols where isLit(M.rgb(img, x, y)) {
             let p = M.rgb(img, x, y)
-            XCTAssertTrue(abs(p.0 - 174) <= 1 && abs(p.1 - 174) <= 1 && abs(p.2 - 180) <= 1, "band ink at (\(x),\(y)) is \(p)")
+            XCTAssertTrue(p == Self.ink, "band ink at (\(x),\(y)) is \(p), not exactly (174,174,180)")
         } }
         assertBand(img, "(a) plain 120×40 #222222 leaf")
         // The element itself is untouched: the #222 box still starts at (16,16).

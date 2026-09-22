@@ -168,12 +168,33 @@ describe('shared-spec constants', () => {
     // wave-51 web skeptic), so web spells alpha byte 180. This guards the
     // string from a "tidy" re-spelling; the byte itself is pinned by
     // apps/web-harness/tests/ui/LabelChrome.raster.test.tsx through Chrome.
-    // MUTATION (2026-09-22, restored byte-exact): 0.70196 → red here, and
-    // (173,173,179) at (8,6) in the raster pin.
+    // MUTATIONS (2026-09-22, source restored sha256-exact; the fix-pass
+    // numbers also stand in tools/titan/results/wave51-A/skeptic-web.md,
+    // "Re-verify" item 4): `0.70196` → red on the window's lower edge
+    // ("expected 0.70196 to be greater than or equal to 0.704"), and on the
+    // string pin below when the window is bypassed; raster (8,6) =
+    // (173,173,179). `0.7079` (polish pass — one ten-thousandth past the
+    // upper edge) → red on "expected 0.7079 to be less than or equal to
+    // 0.7078", and on the string pin; raster (8,6) = (175,175,181).
+    //
+    // THE BYTE-180 WINDOW, asserted first so a re-spelling fails on the
+    // reason, not on the letters. Chromium rounds the CSS alpha to 8 bits
+    // at the .5 boundaries (re-verify probe: 0.7039 → 173, 0.704 … 0.7078
+    // → 174, 0.7079 → 175), i.e. round(α × 255) = 180 ⇔ α ∈ [179.5/255,
+    // 180.5/255) = [0.70392…, 0.70784…) — [0.704, 0.7078] at CSS-literal
+    // precision. 0.706 sits mid-window (~0.002 from either edge) and is
+    // byte 180 under floor as well (180.03).
+    const alpha = Number(/,\s*([\d.]+)\)$/.exec(BLOCK_LABEL_FILL)![1]);
+    expect(alpha).toBeGreaterThanOrEqual(0.704);
+    expect(alpha).toBeLessThanOrEqual(0.7078);
+    expect(Math.round(alpha * 255)).toBe(180);
+    expect(Math.floor(alpha * 255)).toBe(180);
+    // The window edges themselves, executed: 0.0001 outside either edge is the next byte.
+    expect(Math.round(0.7039 * 255)).toBe(179);
+    expect(Math.round(0.704 * 255)).toBe(180);
+    expect(Math.round(0.7078 * 255)).toBe(180);
+    expect(Math.round(0.7079 * 255)).toBe(181);
+    // And the exact spelling the harness svg carries (LabelChrome.style pins it on `fill`).
     expect(BLOCK_LABEL_FILL).toBe('rgba(237, 237, 237, 0.706)');
-    // 0.706 × 255 = 180.03: byte 180 under both floor and round — inside the
-    // measured (174,174,180) window 0.704…0.706, off its 0.7039 edge.
-    expect(Math.floor(0.706 * 255)).toBe(180);
-    expect(Math.round(0.706 * 255)).toBe(180);
   });
 });

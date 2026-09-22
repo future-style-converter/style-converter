@@ -24,8 +24,9 @@ import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 import { composeTree, findNode } from '../sdui/Composer';
 // The debug label as capture chrome (wave 51 PR (A)) — a SIBLING of the
-// component inside the wrapper, gated by this file's OWN predicate below.
-import { LabelChrome } from './LabelChrome';
+// component inside the wrapper, gated by this file's OWN predicate below;
+// labelChromeFits stamps the svg-less case on the wrapper from one truth.
+import { LabelChrome, labelChromeFits } from './LabelChrome';
 
 /**
  * The Tier-5 frame width in px — the literal 390 `canvasStyle.width`
@@ -94,12 +95,19 @@ export function FixtureCanvas({ document, fixtureName }: FixtureCanvasProps) {
   // runs a WPT capture, so the gate is children + text alone.
   const showLabel = component.children.length === 0
     && !(typeof component.component.text === 'string' && component.component.text.length > 0);
+  // The svg-less case (CaptureCanvas's twin): the label was due but the
+  // name lays out no rect at this canvas's literal 390 — stamped on the
+  // wrapper so tooling can grep it; LabelChrome warns once for the same.
+  const labelDropped = showLabel && !labelChromeFits(component.component.name, FIXTURE_FRAME_WIDTH_PX);
 
   return (
     <div
       ref={wrapperRef}
       data-testid={fixtureName}
       data-fixture-name={fixtureName}
+      // Present (empty value) iff the label was due and nothing fits;
+      // absent otherwise (React drops undefined-valued data attributes).
+      data-label-chrome-dropped={labelDropped ? '' : undefined}
       tabIndex={0}
       style={canvasStyle}
     >

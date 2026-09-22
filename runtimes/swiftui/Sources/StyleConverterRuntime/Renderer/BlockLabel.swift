@@ -32,8 +32,8 @@
 //    * truncation against the FRAME width: largest n with
 //      8 + n*ADVANCE <= frameWidth - 8 → 62 glyphs at 390, 39 at 250,
 //      0 below 22 px (zero glyphs, logged once).
-//    * color = rgba(237,237,237, 179/255) → (174,174,180) over #1A1A2E;
-//      the alpha BYTE is pinned (see labelColor), not 0.7
+//    * color = rgba(237,237,237, 179/255); the CONTRACT is the COMPOSITED
+//      byte, exactly (174,174,180) over #1A1A2E on all three (labelColor)
 //    * NO antialiasing: integer coordinates only.
 //
 //  Glyph data comes from BlockFont.gen.swift (GENERATED — checksum
@@ -62,15 +62,17 @@ public enum BlockLabelLayout {
 
     /// The label transform: uppercase the WHOLE string first (Swift's
     /// ICU-backed `uppercased()` matches JS `toUpperCase()` / Kotlin
-    /// `uppercase()` for the ASCII names the harness emits, so all three
-    /// platforms agree on the post-transform character count), then map
-    /// every character the atlas has no glyph for to '-' — a visible,
-    /// deterministic stand-in instead of a silent drop.
+    /// `uppercase()` for the ASCII names the harness emits), then map every
+    /// unicode SCALAR the atlas has no glyph for to '-' — a visible stand-in,
+    /// never a silent drop. Scalars, NOT `Character`s: web/tooling walk code
+    /// points (`Array.from`) and Kotlin walks chars, so e + U+0301 must give
+    /// TWO glyphs ('E','-') here too, not one grapheme '-' (BlockLabelTests).
     public static func glyphString(_ label: String) -> String {
-        // Per-character atlas lookup AFTER the whole-string uppercase;
-        // '-' is guaranteed present in the atlas (BlockFont.gen.swift).
-        return String(label.uppercased().map { ch in
-            BlockFont.glyphs[ch] != nil ? ch : "-"
+        // Per-scalar atlas lookup AFTER the whole-string uppercase; every
+        // atlas key is one ASCII scalar, so Character(s) is the exact key,
+        // and '-' is guaranteed present in the atlas (BlockFont.gen.swift).
+        return String(label.uppercased().unicodeScalars.map { s in
+            BlockFont.glyphs[Character(s)] != nil ? Character(s) : "-"
         })
     }
 
@@ -144,13 +146,14 @@ public struct BlockLabel: View {
         self.componentWidth = componentWidth
     }
 
-    /// rgba(237, 237, 237, 0.7) — the legacy default placeholder color
-    /// (Color(white: 0.93) == 237/255). Alpha is 179/255, NOT 0.7: Compose
-    /// stores the color as packed ARGB 0xB3EDEDED where the alpha byte is
-    /// round(0.7 * 255) = 179; 0.7 here would hand SwiftUI 178.5/255 and
-    /// leave the final byte to per-platform rounding. 179/255 pins the
-    /// exact blended bytes Android paints ((174,174,180) over #1A1A2E);
-    /// web moves to α 179/255 in PR (A) for the same byte (design r3).
+    /// rgba(237,237,237, 179/255). The CONTRACT is the COMPOSITED byte: ink
+    /// over the #1A1A2E stage reads exactly (174,174,180) on all three
+    /// platforms (design-record §2, docs/DYNAMIC_CAPTURE.md §5). 179/255 is
+    /// spelled as the byte for cross-platform readability (Compose packs
+    /// 0xB3EDEDED, 0xB3 = 179); measured on the Catalyst raster, 0.7
+    /// composites to the same byte (skeptic-ios.md M-α), so it is not a
+    /// rounding fix. Web spells it 0.706 (byte 180): Chromium rounds CSS
+    /// alpha to 8 bits first and byte 179 lands one LSB dark (173,173,179).
     static let labelColor = Color(red: 237.0 / 255.0,
                                   green: 237.0 / 255.0,
                                   blue: 237.0 / 255.0,

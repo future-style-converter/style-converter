@@ -1,49 +1,37 @@
 // @vitest-environment node
+/// <reference path="../pngjs.d.ts" />
 //
-// LabelChrome.raster.test.tsx — the COMPOSITED-BYTE pin for the harness
-// label chrome (wave 51 PR (A) fix lane; docs/DYNAMIC_CAPTURE.md "Harness
-// label chrome"). The contract is byte identity ×3: over the #1A1A2E ground
-// every glyph pixel reads (174,174,180) on Android (BlockLabel.COLOR, alpha
-// 179) and iOS (HarnessLabelChromeRasterTests.ink). LabelChrome.test.tsx
-// pins the fill STRING, and the wave-51 web skeptic showed why that is not
-// enough: `rgba(237,237,237,0.70196)` (= 179/255) rendered the SAME
-// (173,173,179) as the old `0.7` in the capture pipeline's Chromium, so the
-// string moved while the byte never did. This file closes that gap by
-// pushing the REAL gallery markup (CaptureGallery → CaptureCanvas →
-// LabelChrome, renderToStaticMarkup) through headless Chrome with the
-// capture script's raster-relevant launch flags and reading the PNG back.
+// LabelChrome.raster.test.tsx — the COMPOSITED-BYTE pin for the harness label
+// chrome (wave 51 PR (A); docs/DYNAMIC_CAPTURE.md "Harness label chrome").
+// The contract is the byte over the #1A1A2E ground, (174,174,180) on all
+// three: the natives at alpha 179/255, web at CSS alpha 0.706 — Chromium
+// rounds the CSS alpha to 8 bits and its CPU-raster src-over composites byte
+// 179 to (173,173,179), so `0.70196` (= 179/255) rendered the SAME byte as
+// the old `0.7` while the fill STRING pin (LabelChrome.style.test.tsx) stayed
+// green (the wave-51 web skeptic). This file pushes the REAL gallery markup
+// (CaptureGallery → CaptureCanvas → LabelChrome, renderToStaticMarkup) through
+// headless Chrome with the capture script's raster flags and reads the PNG:
+// per canvas (a) the crop is the 390 px frame, (b) pixel (8,6) is EXACTLY
+// (174,174,180), (c) the 16 px pad band (rows 0..15) is ink exactly on
+// P = layoutBlockLabel(name, 390) at (8,6) and pure ground elsewhere — origin,
+// crispEdges, frame truncation (100 glyphs → 62, last ink column 378) and the
+// byte in one sweep.
 //
-// What it asserts, per canvas, on the real bytes: (a) the crop is the 390 px
-// frame; (b) pixel (8,6) — the first ink of every label — is EXACTLY the
-// natives' (174,174,180); (c) the whole 16 px pad band (rows 0..15 × cols
-// 0..389) is ink exactly on the derived glyph set P = layoutBlockLabel(name,
-// 390) placed at (8,6), and pure ground everywhere else — which pins origin,
-// crispEdges (no AA neighbours), truncation against the FRAME width (the
-// 100-glyph name keeps 62, last ink column 378) and the byte, in one sweep.
+// CI installs with PUPPETEER_SKIP_DOWNLOAD=1 (no Chromium): the suite SKIPS
+// there with a printed reason and runs on every machine that captures (whose
+// PNGs tools/visual/label-chrome-tripwire.test.mjs compares ×3);
+// LABEL_CHROME_RASTER_REQUIRED=1 turns a missing browser into a failure.
 //
-// CI: the web-runtime job installs with PUPPETEER_SKIP_DOWNLOAD=1 (no
-// Chromium), so the suite SKIPS there with a printed reason and runs on every
-// machine that captures — the same machines whose PNGs the tripwire
-// (tools/visual/label-chrome-tripwire.test.mjs) compares ×3. Set
-// LABEL_CHROME_RASTER_REQUIRED=1 to turn a missing browser into a failure.
-//
-// MUTATION RECORD (executed 2026-09-22 on this tree, sources restored
-// byte-exact afterwards — sha256 checked before and after each one):
-//   M1. BLOCK_LABEL_FILL re-spelt `0.70196` (the builder lane's value) →
-//       3 of 4 RED: "(8,6) is EXACTLY (174,174,180)" got [173,173,179];
-//       band sweep 117 mismatches on Test_Comp and 1116 on the 100-glyph
-//       name — every ink pixel of P, each [173,173,179] want [174,174,180]
-//       (= |P|: the byte is one LSB dark on EVERY glyph pixel, nowhere
-//       else). LabelChrome.test.tsx's string pin red on the spelling;
-//       runtimes/web BlockFontLabel.test.ts fill pin red.
-//   M2. BLOCK_LABEL_FILL back to `0.7` → RED with bytes IDENTICAL to M1
-//       ([173,173,179], 117 / 1116) — the defect the skeptic measured (the
-//       179/255 spelling was vacuous), now caught by a test.
-//   M3. LabelChrome.tsx origin (24,22) instead of (8,6) → 3 of 4 RED:
-//       (8,6) is ground [26,26,46]; band sweep 117 / 1116 — P missing
-//       (the stray ink at row 22 lies below the band, so the sweep and the
-//       (8,6) pin catch the move by ABSENCE, not by the stray). The
-//       harness structural pin ('left:8px') red on the same run.
+// MUTATION RECORD (executed 2026-09-22, sources restored sha256-exact; the
+// fix-pass numbers also stand in tools/titan/results/wave51-A/skeptic-web.md,
+// "Re-verify" item 4). BLOCK_LABEL_FILL `0.70196` and `0.7` → 3 of 4 RED with
+// identical bytes: (8,6) = [173,173,179], 117 / 1116 band mismatches (= |P|:
+// every glyph pixel one LSB dark, nowhere else). LabelChrome.tsx origin
+// (24,22) → 3 of 4 RED: (8,6) ground [26,26,46], P absent from the band (the
+// stray ink at row 22 lies BELOW it — caught by absence). Polish pass, under
+// the typed `headless: true`: `0.70196` → identical to the above (same paint
+// path as the untyped `'new'`); `0.7079` (just past the byte-180 window) →
+// (8,6) = [175,175,181], 117 / 1116; origin (24,22) → as above.
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { existsSync } from 'node:fs';
@@ -57,14 +45,10 @@ import {
   layoutBlockLabel,
 } from '@style-converter/web/renderer/BlockFontLabel';
 
-/** The natives' composited ink byte over the ground — the contract value. */
-const INK: readonly [number, number, number] = [174, 174, 180];
-/** The capture ground, #1A1A2E, as bytes. */
-const GROUND: readonly [number, number, number] = [26, 26, 46];
-/** The default capture frame width — CANVAS_WIDTH_PX without `?width=`. */
-const FRAME_WIDTH = 390;
-/** The pad band: rows 0..15 hold the label (rows 6..12) and nothing else. */
-const BAND_ROWS = 16;
+const INK: readonly [number, number, number] = [174, 174, 180]; // the natives' composited ink byte — the contract
+const GROUND: readonly [number, number, number] = [26, 26, 46];  // the capture ground #1A1A2E as bytes
+const FRAME_WIDTH = 390;                                          // CANVAS_WIDTH_PX without `?width=`
+const BAND_ROWS = 16;                                             // rows 0..15: the label (rows 6..12) and nothing else
 
 /** Minimal decoded v2 document (flat list; composition via `slot`). */
 function doc(components: IRComponent[]): IRDocument {
@@ -76,11 +60,10 @@ function comp(overrides: Partial<IRComponent> = {}): IRComponent {
 }
 
 /**
- * The page shell the gallery markup needs to lay out as the capture does:
- * index.html's universal `box-sizing: border-box` reset is load-bearing
- * (without it `width: 390px` + 16 px padding crops to 422 px) and the
- * `capture-mode` body/root ground matches the real boot. Fonts, WPT
- * overrides and the app chrome are irrelevant to a textless leaf.
+ * The page shell: index.html's universal `box-sizing: border-box` reset (so
+ * the DOM under test lays out as the capture boot does — the canvas's own 390
+ * crop does NOT depend on it, canvasStyle sets boxSizing inline) and the
+ * capture-mode ground. Fonts / WPT overrides are moot for a textless leaf.
  */
 function shell(markup: string): string {
   return `<!doctype html><html><head><meta charset="utf-8"><style>
@@ -104,11 +87,8 @@ function expectedInk(name: string): Set<string> {
   return new Set(layout.rects.map((r) => `${BLOCK_LABEL_ORIGIN_X + r.x},${BLOCK_LABEL_ORIGIN_Y + r.y}`));
 }
 
-/**
- * Sweep the pad band: every pixel must be INK exactly where P says and GROUND
- * exactly everywhere else. Returns the mismatches (empty = pass) so the
- * failure message names coordinates and bytes instead of a bare count.
- */
+/** Sweep the pad band: INK exactly on P, GROUND everywhere else. Returns the
+ *  mismatches (empty = pass) so a failure names pixels and bytes, not a count. */
 function bandMismatches(png: PNG, ink: Set<string>): string[] {
   const out: string[] = [];
   for (let y = 0; y < BAND_ROWS; y++) {
@@ -123,9 +103,8 @@ function bandMismatches(png: PNG, ink: Set<string>): string[] {
   return out;
 }
 
-// Chromium presence — puppeteer's resolver (v25 returns a promise). CI skips
-// the download, so a missing browser is a loud SKIP, not a silent pass; an
-// explicit env flag turns it into a failure for machines that must raster.
+// Chromium presence (puppeteer 25's resolver returns a promise). CI skips the
+// download → loud SKIP, never a silent pass; the env flag makes it a failure.
 const chromePath = await Promise.resolve(puppeteer.executablePath());
 const chromeAvailable = typeof chromePath === 'string' && existsSync(chromePath);
 if (!chromeAvailable) {
@@ -143,22 +122,21 @@ describe.skipIf(!chromeAvailable)('LabelChrome — composited byte parity throug
   const pngs = new Map<string, PNG>();
 
   beforeAll(async () => {
-    // The raster-relevant subset of capture-screenshots.mjs's launch flags:
-    // `headless: 'new'` (the modern paint path), `--disable-gpu` (CPU raster
-    // — the blend that lands alpha byte 179 one LSB dark, the whole point)
-    // and the pinned sRGB profile; the remaining flags there are focus /
-    // throttling hygiene with no effect on bytes.
+    // capture-screenshots.mjs's launch flags, raster-relevant subset.
+    // `headless: true` is puppeteer 25's typed spelling (`boolean | 'shell'`)
+    // of modern headless: ChromeLauncher.js:203 maps every non-'shell' truthy
+    // value to `--headless=new`, the flag the script's untyped `'new'` yields
+    // — same paint path, byte for byte (mutation record). `--disable-gpu`
+    // forces CPU raster (the blend under test), the sRGB profile pins the
+    // colour space; the rest is focus / throttling hygiene with no byte effect.
     browser = await puppeteer.launch({
-      headless: 'new',
+      headless: true,
       args: [
         '--disable-gpu',
         '--force-color-profile=srgb',
-        '--disable-background-timer-throttling',
-        '--disable-renderer-backgrounding',
-        '--disable-backgrounding-occluded-windows',
-        '--no-default-browser-check',
-        '--no-first-run',
-        '--disable-features=Translate,MediaRouter,OptimizationHints',
+        '--disable-background-timer-throttling', '--disable-renderer-backgrounding',
+        '--disable-backgrounding-occluded-windows', '--no-default-browser-check',
+        '--no-first-run', '--disable-features=Translate,MediaRouter,OptimizationHints',
       ],
     });
     page = await browser.newPage();
@@ -183,9 +161,7 @@ describe.skipIf(!chromeAvailable)('LabelChrome — composited byte parity throug
     }
   }, 60_000);
 
-  afterAll(async () => {
-    await browser?.close();
-  });
+  afterAll(async () => { await browser?.close(); }); // never leak a Chromium
 
   it('crops to the 390 px frame with the band inside it', () => {
     // Two canvases captured; each is the frame wide and at least pad-band tall.

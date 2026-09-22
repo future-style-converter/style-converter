@@ -60,14 +60,17 @@ export const BLOCK_LABEL_ORIGIN_Y = 6;
  * — the wave-51 web skeptic rastered the CaptureCanvas DOM with the
  * capture script's exact launch flags and read pixel (8,6) = (173,173,179)
  * for 0.7 AND for 0.70196 (= 179/255, the spelling the builder lane
- * shipped, vacuous), (174,174,180) for 0.704 … 0.706, (175,175,181) for
- * 0.71. The break between 0.7039 (×255 = 179.49) and 0.704 (179.52) shows
- * the alpha is quantised to 8 bits first and byte 179 composites to 173,
- * so web needs alpha BYTE 180: 0.706 × 255 = 180.03 survives both floor
- * and round, and sits inside the measured window. The byte itself is
+ * shipped, vacuous), (174,174,180) for 0.704 … 0.7078, (175,175,181) from
+ * 0.7079. The break between 0.7039 (×255 = 179.49) and 0.704 (179.52) shows
+ * the alpha is rounded to 8 bits first and byte 179 composites to 173, so
+ * web needs alpha BYTE 180: round(α × 255) = 180 is the window
+ * [0.704, 0.7078] (the wave-51 re-verify probe) and 0.706 (× 255 = 180.03,
+ * byte 180 under floor as well) sits mid-window, ~0.002 from either edge.
+ * The byte itself is
  * pinned by apps/web-harness/tests/ui/LabelChrome.raster.test.tsx (real
- * gallery markup through headless Chrome); this string is pinned by
- * LabelChrome.test.tsx so a re-spelling cannot land unnoticed.
+ * gallery markup through headless Chrome); the string is pinned by
+ * LabelChrome.style.test.tsx and tests/renderer/BlockFontLabel.test.ts
+ * (which also pins the window) so a re-spelling cannot land unnoticed.
  */
 export const BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.706)';
 

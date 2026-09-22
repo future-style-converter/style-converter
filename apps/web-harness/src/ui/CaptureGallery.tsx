@@ -27,8 +27,10 @@ import { RootErrorBoundary } from '@style-converter/web/renderer/RootErrorBounda
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 import { composeTree, type ComposedNode } from '../sdui/Composer';
 // The debug label as capture chrome (wave 51 PR (A)) — mounted below as a
-// SIBLING of the component inside the canvas, never inside the element.
-import { LabelChrome } from './LabelChrome';
+// SIBLING of the component inside the canvas, never inside the element;
+// labelChromeFits is the chrome's own drop predicate, so the canvas can
+// stamp the svg-less case (`data-label-chrome-dropped`) from one truth.
+import { LabelChrome, labelChromeFits } from './LabelChrome';
 
 interface CaptureGalleryProps {
   document: IRDocument;
@@ -451,12 +453,23 @@ export function CaptureCanvas({ node, index }: CaptureCanvasProps) {
   const showLabel = !WPT_MODE
     && node.children.length === 0
     && !(typeof component.text === 'string' && component.text.length > 0);
+  // The svg-less case, stamped on the canvas so tooling can grep a capture
+  // that carries no label (frame narrower than 22 px, or a name that lays
+  // out no rect) instead of inferring it from a missing svg: true iff the
+  // label was DUE and nothing fits — a text root or container is unlabelled
+  // by the predicate, not dropped. LabelChrome logs the same decision once
+  // per (name, width); the two must agree (LabelChrome.dropped.test.tsx).
+  const labelDropped = showLabel && !labelChromeFits(component.name, CANVAS_WIDTH_PX);
   return (
     <div
       data-capture-canvas
       data-capture-index={index}
       data-capture-id={component.id}
       data-capture-name={component.name}
+      // Label-chrome drop marker: present (empty value) iff the label was
+      // due and nothing fits — absent otherwise (React drops undefined-
+      // valued data attributes), so "dropped" and "drawn" never coexist.
+      data-label-chrome-dropped={labelDropped ? '' : undefined}
       // Forced-state marker (spec 06 §6 / docs/DYNAMIC_CAPTURE.md §1):
       // present on EVERY canvas when the run is forced, absent otherwise
       // (React drops null-valued data attributes). The web engine reads

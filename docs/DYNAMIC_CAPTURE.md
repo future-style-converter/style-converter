@@ -263,10 +263,20 @@ under test.)
 - **Truncation against the FRAME width**, never the component's: the largest
   n with `8 + 6n ≤ frameWidth − 8` — 62 glyphs at the default 390, 39 at
   `CAPTURE_WIDTH=250` (§2), 0 below 22. Trailing characters drop; no ellipsis.
-- **Colour**: `rgba(237, 237, 237, 179/255)` — alpha 0.7 rounded HALF-UP to
-  179 on every platform, web included (a literal `0.7` composites one LSB
-  darker in Chromium) — so over the ground every glyph pixel reads
-  `(174, 174, 180)` on all three.
+- **Colour**: the contract is the **composited byte**, not the alpha
+  spelling — over the `#1A1A2E` ground every glyph pixel reads
+  `(174, 174, 180)` on all three. The natives get there at alpha 179/255
+  (`rgba(237, 237, 237, 179/255)`: Compose `0xB3EDEDED`, SwiftUI
+  `opacity: 179.0 / 255.0`). Web ships CSS alpha `0.706`
+  (`rgba(237, 237, 237, 0.706)`, `BlockFontLabel.ts`), because Chromium
+  rounds the CSS alpha to 8 bits and its CPU-raster src-over composites
+  alpha byte 179 to `(173, 173, 179)`: the `0.70196` (= 179/255) spelling
+  landed exactly there, one LSB dark, as did the old `0.7`. Byte 180 is
+  the window `[0.704, 0.7078]` (round(α × 255) = 180); `0.706` sits
+  mid-window. On web the byte is read back from a real headless-Chrome
+  raster of the gallery markup
+  (`apps/web-harness/tests/ui/LabelChrome.raster.test.tsx`); one LSB of
+  drift on any platform is a defect, not a tolerance.
 - **When**: exactly one label per capture, **iff** the COMPOSED root of that
   capture (after slot composition, before any runtime fold) has zero
   composed children AND no non-empty `text`, AND the run is not a WPT /
