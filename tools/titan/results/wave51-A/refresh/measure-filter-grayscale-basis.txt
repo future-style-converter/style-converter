@@ -1,0 +1,5 @@
+000_GrayBasis_Red                  S1:ok band-identical S2[w:196/196 i:196/196 A:196/196] band×3:identical  S3[w:196out(196ink)@24,22,100,28 i:196out(196ink)@24,22,100,28 A:196out(196ink)@24,22,100,28]
+001_GrayBasis_Green                S1:ok band-identical S2[w:230/230 i:230/230 A:230/230] band×3:identical  S3[w:230out(230ink)@24,22,112,28 i:230out(230ink)@24,22,112,28 A:230out(230ink)@24,22,112,28]
+002_GrayBasis_Blue                 S1:ok band-identical S2[w:206/206 i:206/206 A:206/206] band×3:identical  S3[w:206out(206ink)@24,22,106,28 i:206out(206ink)@24,22,106,28 A:206out(206ink)@24,22,106,28]
+003_GrayBasis_Mixed                S1:ok band-identical S2[w:220/220 i:220/220 A:220/220] band×3:identical  S3[w:220out(220ink)@24,22,112,28 i:220out(220ink)@24,22,112,28 A:220out(220ink)@24,22,112,28]
+stems: 4; band-identical: 4; glyph-mask: 0; cross-band identical: 4; S1 issues: 0

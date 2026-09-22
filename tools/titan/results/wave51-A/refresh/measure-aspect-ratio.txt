@@ -1,0 +1,10 @@
+000_Ratio_16_9                     S1:ok band-identical S2[w:116/116 i:116/116 A:116/116] band×3:identical  S3[w:116out(0ink)@24,22,82,28 i:116out(0ink)@24,22,82,28 A:116out(0ink)@24,22,82,28]
+001_Ratio_1_1                      S1:ok band-identical S2[w:94/94 i:94/94 A:94/94] band×3:identical  S3[w:94out(0ink)@24,22,75,28 i:94out(0ink)@24,22,75,28 A:94out(0ink)@24,22,75,28]
+002_Ratio_4_3                      S1:ok band-identical S2[w:102/102 i:102/102 A:102/102] band×3:identical  S3[w:102out(0ink)@24,22,76,28 i:102out(0ink)@24,22,76,28 A:102out(0ink)@24,22,76,28]
+003_Ratio_3_4                      S1:ok band-identical S2[w:102/102 i:102/102 A:102/102] band×3:identical  S3[w:102out(0ink)@24,22,76,28 i:102out(0ink)@24,22,76,28 A:102out(0ink)@24,22,76,28]
+004_Ratio_Auto                     S1:ok band-identical S2[w:134/134 i:134/134 A:134/134] band×3:identical  S3[w:134out(0ink)@24,22,82,28 i:134out(0ink)@24,22,82,28 A:134out(0ink)@24,22,82,28]
+005_Ratio_Numeric_1_5              S1:ok band-identical S2[w:211/211 i:211/211 A:211/211] band×3:identical  S3[w:211out(0ink)@24,22,124,28 i:211out(0ink)@24,22,124,28 A:211out(0ink)@24,22,124,28]
+006_Ratio_Width_Only               S1:ok band-identical S2[w:202/202 i:202/202 A:202/202] band×3:identical  S3[w:202out(0ink)@24,22,118,28 i:202out(0ink)@24,22,118,28 A:202out(0ink)@24,22,118,28]
+007_Ratio_Height_Only              S1:ok band-identical S2[w:219/219 i:219/219 A:219/219] band×3:identical  S3[w:219out(0ink)@24,22,124,28 i:219out(0ink)@24,22,124,28 A:219out(0ink)@24,22,124,28]
+008_Ratio_Auto_With_Explicit       S1:{"web":"390x144","iOS":"390x145","Android":"390x145","equalAcross":false} band-identical S2[w:293/293 i:293/293 A:293/293] band×3:identical  S3[w:293out(0ink)@24,22,166,28 i:293out(0ink)@24,22,166,28 A:293out(0ink)@24,22,166,28]
+stems: 9; band-identical: 9; glyph-mask: 0; cross-band identical: 9; S1 issues: 1
