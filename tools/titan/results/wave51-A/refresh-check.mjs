@@ -71,8 +71,25 @@ for (const file of stems) {
   let bandDiff = 0;
   for (let y = 0; y < Math.min(BAND, fresh.web.height); y++) for (let x = 0; x < fresh.web.width; x++) { const a = px(fresh.web, x, y); if (!eq(a, px(fresh.iOS, x, y)) || !eq(a, px(fresh.Android, x, y))) bandDiff++; }
   row.crossBandIdentical = bandDiff === 0 ? true : `${bandDiff} px differ`;
-  // S4 — glyph-mask agreement within one rounding step (only meaningful in glyph-mask mode).
-  if (row.mode === 'glyph-mask') { let off = 0; for (const key of P) { const [x, y] = key.split(',').map(Number); const a = px(fresh.web, x, y); if (!eq(a, px(fresh.iOS, x, y), 1) || !eq(a, px(fresh.Android, x, y), 1)) off++; } row.s4 = off === 0 ? 'ok' : `${off} glyph px differ by >1`; }
+  // S4 — glyph-mask stems: the paint UNDER the glyphs legitimately differs per platform
+  // (penumbra, blur, transforms), so cross-platform byte agreement is informational only.
+  // The real check (S4b) is per platform: every fresh glyph pixel must equal the label ink
+  // (237,237,237) src-over composited at that platform's alpha byte (web 180, natives 179)
+  // onto the COMMITTED twin's pixel at the same spot — the committed baselines carry no
+  // chrome in the band, so that pixel IS the platform's own underlying paint — within ±1.
+  if (row.mode === 'glyph-mask') {
+    let off = 0; for (const key of P) { const [x, y] = key.split(',').map(Number); const a = px(fresh.web, x, y); if (!eq(a, px(fresh.iOS, x, y), 1) || !eq(a, px(fresh.Android, x, y), 1)) off++; }
+    row.s4 = off === 0 ? 'ok' : `${off} glyph px differ by >1 across platforms (informational)`;
+    row.s4b = {};
+    for (const p of PLATFORMS) {
+      if (!old[p] || old[p].width !== fresh[p].width || old[p].height !== fresh[p].height) { row.s4b[p] = 'no comparable baseline'; continue; }
+      const alpha = p === 'web' ? 180 : 179; let bad = 0, worst = 0;
+      for (const key of P) { const [x, y] = key.split(',').map(Number); const u = px(old[p], x, y), a = px(fresh[p], x, y);
+        const expect = u.map((c) => (237 * alpha + c * (255 - alpha)) / 255); const d = Math.max(...expect.map((e, i) => Math.abs(e - a[i])));
+        if (d > 1.5) bad++; if (d > worst) worst = d; }
+      row.s4b[p] = bad === 0 ? 'ok' : `${bad}/${P.size} glyph px are not ink-over-committed (worst Δ ${worst.toFixed(1)})`;
+    }
+  }
   // S3 — diff vs the committed twin, split by region.
   for (const p of PLATFORMS) {
     if (!old[p] || old[p].width !== fresh[p].width || old[p].height !== fresh[p].height) { row.s3[p] = old[p] ? 'dims differ — see S1' : 'no baseline'; continue; }
@@ -95,7 +112,7 @@ for (const r of report) {
   const s2 = PLATFORMS.map((p) => `${p[0]}:${r.s2[p].exact}/${r.s2[p].P}`).join(' ');
   const s3 = PLATFORMS.map((p) => (typeof r.s3[p] === 'string' ? `${p[0]}:${r.s3[p]}` : `${p[0]}:${r.s3[p].outside}out(${r.s3[p].oldInkLike}ink)${r.s3[p].bbox ? '@' + r.s3[p].bbox.join(',') : ''}`)).join(' ');
   const s1 = r.s1.equalAcross && !Object.values(r.s1).some((v) => typeof v === 'string' && v.includes('WAS')) ? 'ok' : JSON.stringify(r.s1);
-  console.log(`${r.stem.padEnd(34)} S1:${s1} ${r.mode.padEnd(14)} S2[${s2}] band×3:${r.crossBandIdentical === true ? 'identical' : r.crossBandIdentical} ${r.s4 ? 'S4:' + r.s4 : ''} S3[${s3}]`);
+  console.log(`${r.stem.padEnd(34)} S1:${s1} ${r.mode.padEnd(14)} S2[${s2}] band×3:${r.crossBandIdentical === true ? 'identical' : r.crossBandIdentical} ${r.s4 ? 'S4:' + r.s4 + ' S4b[' + PLATFORMS.map((p) => p[0] + ':' + r.s4b[p]).join(' ') + ']' : ''} S3[${s3}]`);
 }
 if (OUT) writeFileSync(OUT, JSON.stringify(report, null, 1) + '\n');
 console.log(`stems: ${report.length}; band-identical: ${report.filter((r) => r.mode === 'band-identical').length}; glyph-mask: ${report.filter((r) => r.mode === 'glyph-mask').length}; cross-band identical: ${report.filter((r) => r.crossBandIdentical === true).length}; S1 issues: ${report.filter((r) => !r.error && (!r.s1.equalAcross || Object.values(r.s1).some((v) => typeof v === 'string' && v.includes('WAS')))).length}`);

@@ -261,8 +261,11 @@ test('the committed ledger parses and every entry is well-formed', () => {
   // as trustworthy as its last refresh. The seed's block (0.95 / 0.0 / 20.0)
   // was still round numbers rather than a measurement (finding A12#1); the
   // re-added lines carry the gate's real ones.
-  assert.equal(led.expectations.length, 12,
-    '6 visual-test + 4 composition-test + 2 filter-sepia-amounts — wave 50 deleted the 17 lines the ' +
+  assert.equal(led.expectations.length, 10,
+    '4 visual-test + 4 composition-test + 2 filter-sepia-amounts — wave 51 PR 3 (label chrome) deleted the ' +
+    '2 Edge_GradientWithRadius lines (Android-web, iOS-web) the refresh measure run reported STALE ' +
+    '(0.9995/0.9996: their reason was the web label painted past the box, and the label is capture-frame ' +
+    'chrome now); wave 50 deleted the 17 lines the ' +
     'wave50-final device gate reported STALE (9 ios-borders-radius, 6 android-harness-placeholder-floor, ' +
     '2 android-effects-blur) per the exit-5 contract, and RE-ADDED the 2 Sepia_Translucent lines the ' +
     'retro had deleted off a stale iOS baseline, with the gate\'s measured numbers');
