@@ -33,8 +33,12 @@
  *   - truncation: against the FRAME width — largest n with
  *     `8 + n*6 <= frameWidth - 8` → 62 glyphs at 390, 39 at 250, 0 below
  *     22 (BlockFontLabel.layoutBlockLabel). Never the component width.
- *   - colour: BLOCK_LABEL_FILL = rgba(237,237,237, 179/255) — the natives'
- *     exact alpha byte, (174,174,180) over the #1A1A2E ground.
+ *   - colour: BLOCK_LABEL_FILL — rgba(237,237,237) at the alpha that makes
+ *     Chromium's CPU raster composite (174,174,180) over the #1A1A2E
+ *     ground, the byte the natives paint at alpha 179/255. That is alpha
+ *     byte 180 on web, NOT 179 (Chromium lands 179 one LSB darker —
+ *     BlockFontLabel.ts has the measurement); the contract is the
+ *     composited byte, and LabelChrome.raster.test.tsx reads it back.
  *   - stacking: `z-index: 2147483647` (the CSS int32 max) inside the
  *     canvas's own stacking context (`transform: translateZ(0)` on the
  *     canvas — CSS Transforms 1 §3: any transform creates one), so no

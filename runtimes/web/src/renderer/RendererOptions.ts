@@ -94,9 +94,12 @@ export interface RendererOptions {
    * ::after when pseudos exist). Default: the component's text when
    * present, otherwise nothing — an empty component renders an empty
    * element. HARNESS DIVERGENCE: the harness substitutes its
-   * PlaceholderContent (name label + bg-luminance contrast colour) so
-   * empty capture fixtures stay visually identifiable against the
-   * iOS/Android placeholder labels.
+   * PlaceholderContent, which since wave 51 PR (A) renders only the
+   * 0-height label SLOT span (byte-identical geometry so the component's
+   * auto-height does not move) — the name label itself is HARNESS
+   * CHROME drawn by the capture canvas as a sibling of the component
+   * (apps/web-harness/src/ui/LabelChrome.tsx; docs/DYNAMIC_CAPTURE.md
+   * "Harness label chrome"), never through this hook.
    */
   renderEmptyContent?: (ctx: RenderContext) => ReactNode;
 

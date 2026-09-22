@@ -46,19 +46,30 @@ export const BLOCK_LABEL_ORIGIN_X = 8;
 export const BLOCK_LABEL_ORIGIN_Y = 6;
 
 /**
- * Shared-spec fill — the light placeholder-label colour (237,237,237) at
- * alpha 179/255, the ONLY label colour on every platform: a single fill
- * everywhere is what keeps the rects byte-identical (the old per-platform
- * bg-luminance flip stays for real TEXT content, which the block font
- * never touches). Alpha is written as 179/255 = 0.70196 rather than 0.7
- * for byte parity with the natives' 179/255 (Compose `Color(0xB3EDEDED)`,
- * SwiftUI `opacity: 179.0 / 255.0`): the wave-51 review measured web at
- * 0.7 painting (173,173,179) over the #1A1A2E ground where the natives
- * paint (174,174,180) — one blend step off on every lit pixel. Chromium
- * quantises the CSS alpha to 8 bits (round(0.70196 × 255) = 179), so this
- * spelling reaches the exact native byte.
+ * Shared-spec fill — the light placeholder-label colour (237,237,237),
+ * the ONLY label colour on every platform: a single fill everywhere is
+ * what keeps the rects byte-identical (the old per-platform bg-luminance
+ * flip stays for real TEXT content, which the block font never touches).
+ *
+ * THE CONTRACT IS THE COMPOSITED BYTE, NOT THE ALPHA SPELLING: over the
+ * #1A1A2E capture ground every glyph pixel must read (174,174,180) — the
+ * byte Compose (`Color(0xB3EDEDED)`, alpha 179) and SwiftUI (`opacity:
+ * 179.0 / 255.0`) paint. Chromium does NOT reach that byte at alpha 179:
+ * its CPU-raster src-over (the capture pipeline runs `--disable-gpu`)
+ * lands alpha byte 179 one LSB darker than Skia-on-Android / CoreGraphics
+ * — the wave-51 web skeptic rastered the CaptureCanvas DOM with the
+ * capture script's exact launch flags and read pixel (8,6) = (173,173,179)
+ * for 0.7 AND for 0.70196 (= 179/255, the spelling the builder lane
+ * shipped, vacuous), (174,174,180) for 0.704 … 0.706, (175,175,181) for
+ * 0.71. The break between 0.7039 (×255 = 179.49) and 0.704 (179.52) shows
+ * the alpha is quantised to 8 bits first and byte 179 composites to 173,
+ * so web needs alpha BYTE 180: 0.706 × 255 = 180.03 survives both floor
+ * and round, and sits inside the measured window. The byte itself is
+ * pinned by apps/web-harness/tests/ui/LabelChrome.raster.test.tsx (real
+ * gallery markup through headless Chrome); this string is pinned by
+ * LabelChrome.test.tsx so a re-spelling cannot land unnoticed.
  */
-export const BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.70196)';
+export const BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.706)';
 
 /**
  * Rebuild the canonical atlas serialization from the EMBEDDED constants

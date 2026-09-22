@@ -40,6 +40,15 @@
 //   3. `Infinity` passed as frameWidth → this file's "62 glyphs at 390"
 //      pin red ("expected '599' to be '371'" — all 100 glyphs kept);
 //      LabelChrome.width250.test.tsx red on the same run ('599' vs '233').
+//   4. (fix lane, 2026-09-22) BLOCK_LABEL_FILL re-spelt `0.70196` and then
+//      `0.7` → the fill STRING pin below red both times ("expected
+//      'rgba(237, 237, 237, 0.70196)' to be 'rgba(237, 237, 237, 0.706)'"),
+//      as is the runtimes/web BlockFontLabel.test.ts fill pin. This string
+//      pin is deliberately NOT the colour gate: both spellings composite
+//      to the same (173,173,179) in Chromium, so the same two mutations
+//      were also run against LabelChrome.raster.test.tsx, where they turn
+//      the composited byte red ((8,6) = [173,173,179] on the real gallery
+//      markup) — that file's header carries the full record.
 import { describe, it, expect, afterEach } from 'vitest';
 import { renderToStaticMarkup } from 'react-dom/server';
 import type { ReactElement } from 'react';
@@ -115,9 +124,15 @@ describe('LabelChrome — one label per capture, as canvas chrome (?mode=capture
     expect(style).toMatch(/z-index:\d+/);
     expect(style).toContain('pointer-events:none');
     expect(style).toContain('display:block');
-    // Integer-grid rendering and the pinned fill (179/255 alpha byte).
+    // Integer-grid rendering and the pinned fill SPELLING. Alpha 0.706 is
+    // alpha BYTE 180 (0.706 × 255 = 180.03 under floor and round), the
+    // value Chromium's CPU raster needs to composite the natives' byte
+    // (174,174,180) over the ground — 179/255 (0.70196) rendered the SAME
+    // (173,173,179) as the old 0.7 (wave-51 web skeptic). This string pin
+    // only guards the spelling; the composited byte is pinned by
+    // LabelChrome.raster.test.tsx through headless Chrome.
     expect(svg.getAttribute('shape-rendering')).toBe('crispEdges');
-    expect(svg.getAttribute('fill')).toBe('rgba(237, 237, 237, 0.70196)');
+    expect(svg.getAttribute('fill')).toBe('rgba(237, 237, 237, 0.706)');
   });
 
   it('the component element carries NO svg and NO name text (the skin no longer labels)', () => {

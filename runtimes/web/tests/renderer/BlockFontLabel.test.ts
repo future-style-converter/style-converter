@@ -20,6 +20,7 @@ import {
   BLOCK_FONT_GLYPHS,
 } from '../../src/renderer/BlockFont.gen';
 import {
+  BLOCK_LABEL_FILL,
   BLOCK_LABEL_ORIGIN_X,
   BLOCK_LABEL_ORIGIN_Y,
   blockFontCanonicalSerialization,
@@ -158,5 +159,21 @@ describe('shared-spec constants', () => {
         expect(row).toBeLessThan(1 << BLOCK_FONT_CELL_W);
       }
     }
+  });
+
+  it('pins the fill spelling: alpha BYTE 180 on web (0.706), never 0.7 / 179-alpha', () => {
+    // The contract is the composited byte (174,174,180) over #1A1A2E, the
+    // natives' alpha-179 result; Chromium's CPU raster lands alpha byte 179
+    // one LSB dark (173,173,179 — measured for 0.7 AND 0.70196 by the
+    // wave-51 web skeptic), so web spells alpha byte 180. This guards the
+    // string from a "tidy" re-spelling; the byte itself is pinned by
+    // apps/web-harness/tests/ui/LabelChrome.raster.test.tsx through Chrome.
+    // MUTATION (2026-09-22, restored byte-exact): 0.70196 → red here, and
+    // (173,173,179) at (8,6) in the raster pin.
+    expect(BLOCK_LABEL_FILL).toBe('rgba(237, 237, 237, 0.706)');
+    // 0.706 × 255 = 180.03: byte 180 under both floor and round — inside the
+    // measured (174,174,180) window 0.704…0.706, off its 0.7039 edge.
+    expect(Math.floor(0.706 * 255)).toBe(180);
+    expect(Math.round(0.706 * 255)).toBe(180);
   });
 });
