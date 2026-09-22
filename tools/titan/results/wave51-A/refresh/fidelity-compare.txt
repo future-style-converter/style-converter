@@ -1,0 +1,76 @@
+
+=== fixtures/fidelity/animations.combos.json (11 components)
+  010_Animations_Decorated.png         WEB-LABEL-SPILL  iOS-Android 0.9988/0.36% → 0.9987/0.11% | iOS-web 0.9371/1.13% → 0.9998/0.00% | Android-web 0.9371/1.16% → 0.9981/0.11%
+
+=== fixtures/fidelity/appearance.combos.json (4 components)
+  003_Appearance_Decorated.png         WEB-LABEL-SPILL  iOS-Android 0.9977/0.35% → 0.9996/0.00% | iOS-web 0.9190/1.41% → 0.9995/0.01% | Android-web 0.9205/1.47% → 0.9996/0.01%
+
+=== fixtures/fidelity/background.combos.json (6 components)
+  005_Background_Decorated.png         THREE-WAY-ODD    iOS-Android 0.9922/4.69% → 0.9971/0.07% | iOS-web 0.9235/2.01% → 0.9968/0.47% | Android-web 0.9204/5.07% → 0.9987/0.03%
+
+=== fixtures/fidelity/borders.combos.json (17 components)
+  013_Borders_C14_CornerShape.png      THREE-WAY-ODD    iOS-Android 0.9809/2.76% → 1.0000/0.00% | iOS-web 0.9753/6.86% → 0.9970/4.11% | Android-web 0.9968/4.11% → 0.9970/4.11%
+  016_Borders_Decorated.png            THREE-WAY-ODD    iOS-Android 0.9894/7.46% → 0.9946/0.22% | iOS-web 0.9313/1.25% → 0.9818/0.28% | Android-web 0.9338/8.15% → 0.9844/0.24%
+
+=== fixtures/fidelity/color.combos.json (5 components)
+  004_Color_Decorated.png              WEB-LABEL-SPILL  iOS-Android 0.9975/0.91% → 0.9980/0.71% | iOS-web 0.9487/0.92% → 0.9996/0.00% | Android-web 0.9489/1.70% → 0.9978/0.75%
+
+=== fixtures/fidelity/container.combos.json (4 components)
+  003_Container_Decorated.png          WEB-LABEL-SPILL  iOS-Android 0.9990/0.14% → 0.9990/0.00% | iOS-web 0.9496/0.83% → 0.9996/0.00% | Android-web 0.9492/1.17% → 0.9982/0.02%
+
+=== fixtures/fidelity/counters.combos.json (4 components)
+  003_Counters_Decorated.png           WEB-LABEL-SPILL  iOS-Android 0.9965/1.31% → 0.9972/1.07% | iOS-web 0.9298/1.18% → 0.9998/0.00% | Android-web 0.9285/2.23% → 0.9971/1.13%
+
+=== fixtures/fidelity/experimental.combos.json (4 components)
+  003_Experimental_Decorated.png       WEB-LABEL-SPILL  iOS-Android 0.9966/1.30% → 0.9972/1.07% | iOS-web 0.9237/1.37% → 0.9998/0.00% | Android-web 0.9216/2.52% → 0.9971/1.12%
+
+=== fixtures/fidelity/interactions.combos.json (6 components)
+  005_Interactions_Decorated.png       WEB-LABEL-SPILL  iOS-Android 0.9985/0.17% → 0.9991/0.00% | iOS-web 0.9342/0.96% → 0.9996/0.00% | Android-web 0.9352/1.03% → 0.9989/0.00%
+
+=== fixtures/fidelity/layout.combos.json (22 components)
+  000_Layout_C01_AlignContent.png      THREE-WAY-ODD    iOS-Android 0.9018/1.92% → 1.0000/0.00% | iOS-web 0.9067/1.92% → 1.0000/0.00% | Android-web 0.9168/1.92% → 1.0000/0.00%
+  010_Layout_C11_InsetInlineStart.png  WEB-ODD          iOS-Android 1.0000/0.00% → 1.0000/0.00% | iOS-web 0.9401/1.20% → 1.0000/0.00% | Android-web 0.9404/1.20% → 1.0000/0.00%
+  013_Layout_C14_OffsetPath.png        IOS-ODD          iOS-Android 0.9304/4.43% → 0.9463/5.05% | iOS-web 0.9300/4.26% → 0.9464/4.94% | Android-web 0.9982/0.20% → 1.0000/0.00%
+  020_Layout_TextBlock.png             ANDROID-ODD      iOS-Android 0.8911/1.53% → 1.0000/0.00% | iOS-web 1.0000/0.00% → 1.0000/0.00% | Android-web 0.8912/1.53% → 1.0000/0.00%
+  021_Layout_Decorated.png             WEB-LABEL-SPILL  iOS-Android 0.9951/1.86% → 0.9973/1.66% | iOS-web 0.9408/1.03% → 0.9997/0.00% | Android-web 0.9396/2.68% → 0.9972/1.72%
+
+=== fixtures/fidelity/navigation.combos.json (4 components)
+  003_Navigation_Decorated.png         WEB-LABEL-SPILL  iOS-Android 0.9970/0.99% → 0.9979/0.63% | iOS-web 0.9265/1.26% → 0.9996/0.00% | Android-web 0.9265/2.04% → 0.9978/0.76%
+
+=== fixtures/fidelity/pairwise/pairs-02.json (44 components)
+  000_PW_Borders_Color_01.png          IOS-ODD          iOS-Android 0.9137/5.00% → 1.0000/0.00% | iOS-web 0.9137/5.00% → 1.0000/0.00% | Android-web 1.0000/0.00% → 1.0000/0.00%
+  001_PW_Borders_Color_02.png          ANDROID-ODD      iOS-Android 0.9657/4.44% → 0.9708/4.44% | iOS-web 0.9987/0.00% → 0.9991/0.00% | Android-web 0.9602/5.85% → 0.9660/5.69%
+  003_PW_Borders_Color_04.png          IOS-ODD          iOS-Android 0.9542/3.39% → 0.9999/0.00% | iOS-web 0.9536/3.39% → 0.9993/0.00% | Android-web 0.9994/0.00% → 0.9994/0.00%
+  005_PW_Borders_Effects_02.png        THREE-WAY-ODD    iOS-Android 0.8823/8.12% → 0.8908/8.11% | iOS-web 0.8354/11.63% → 0.8495/11.60% | Android-web 0.9050/7.91% → 0.9163/7.90%
+  006_PW_Borders_Effects_03.png        PARTIAL:IOS-WEB-ODD iOS-Android 0.9760/1.99% → 0.9994/0.00% | iOS-web 0.9714/2.02% → 0.9949/0.02% | Android-web 0.9949/0.02% → 0.9949/0.02%
+  010_PW_Borders_Images_03.png         IOS-ODD          iOS-Android 0.8882/5.27% → 0.9999/0.00% | iOS-web 0.8881/5.29% → 0.9999/0.00% | Android-web 0.9999/0.00% → 0.9999/0.00%
+  020_PW_Borders_Shapes_01.png         IOS-ODD          iOS-Android 0.9088/3.25% → 0.9993/0.00% | iOS-web 0.9090/3.26% → 0.9996/0.00% | Android-web 0.9998/0.00% → 0.9998/0.00%
+  024_PW_Borders_Sizing_01.png         IOS-ODD          iOS-Android 0.8774/2.16% → 1.0000/0.00% | iOS-web 0.8775/2.16% → 1.0000/0.00% | Android-web 1.0000/0.00% → 1.0000/0.00%
+  025_PW_Borders_Sizing_02.png         IOS-ODD          iOS-Android 0.9573/3.78% → 1.0000/0.00% | iOS-web 0.9578/3.77% → 0.9997/0.02% | Android-web 0.9997/0.02% → 0.9997/0.02%
+  026_PW_Borders_Sizing_03.png         WEB-ODD          iOS-Android 1.0000/0.00% → 1.0000/0.00% | iOS-web 0.8757/2.20% → 1.0000/0.00% | Android-web 0.8757/2.20% → 1.0000/0.00%
+  027_PW_Borders_Sizing_04.png         IOS-ODD          iOS-Android 0.9637/3.40% → 1.0000/0.00% | iOS-web 0.9640/3.41% → 0.9999/0.01% | Android-web 0.9999/0.01% → 0.9999/0.01%
+  034_PW_Borders_Transforms_03.png     THREE-WAY-ODD    iOS-Android 0.8225/7.46% → 0.9965/1.36% | iOS-web 0.9663/3.23% → 0.9978/0.65% | Android-web 0.8276/6.43% → 0.9968/0.81%
+  036_PW_Borders_Typography_01.png     IOS-ODD          iOS-Android 0.9781/2.31% → 1.0000/0.00% | iOS-web 0.9781/2.31% → 1.0000/0.00% | Android-web 1.0000/0.00% → 1.0000/0.00%
+
+=== fixtures/fidelity/pairwise/pairs-03.json (44 components)
+  006_PW_Color_Layout_03.png           THREE-WAY-ODD    iOS-Android 0.9926/22.65% → 0.9990/6.54% | iOS-web 0.9966/22.38% → 0.9972/21.61% | Android-web 0.9902/26.46% → 0.9975/18.19%
+  007_PW_Color_Layout_04.png           ANDROID-ODD      iOS-Android 0.8749/20.66% → 0.8834/17.93% | iOS-web 0.9983/1.49% → 0.9987/0.07% | Android-web 0.8642/22.04% → 0.8733/20.24%
+  030_PW_Color_Typography_03.png       ANDROID-ODD      iOS-Android 0.9318/1.15% → 1.0000/0.00% | iOS-web 0.9587/0.91% → 1.0000/0.00% | Android-web 0.9319/1.15% → 1.0000/0.00%
+
+=== fixtures/fidelity/performance.combos.json (5 components)
+  004_Performance_Decorated.png        WEB-LABEL-SPILL  iOS-Android 0.9975/0.89% → 0.9982/0.86% | iOS-web 0.9282/1.34% → 0.9998/0.00% | Android-web 0.9273/2.19% → 0.9981/0.97%
+
+=== fixtures/fidelity/scrolling.combos.json (15 components)
+  014_Scrolling_Decorated.png          WEB-LABEL-SPILL  iOS-Android 0.9978/0.27% → 0.9997/0.00% | iOS-web 0.9418/0.86% → 0.9995/0.00% | Android-web 0.9419/1.02% → 0.9990/0.00%
+
+=== fixtures/fidelity/shapes.combos.json (4 components)
+  003_Shapes_Decorated.png             WEB-LABEL-SPILL  iOS-Android 0.9980/0.89% → 0.9981/0.65% | iOS-web 0.9386/1.16% → 0.9995/0.04% | Android-web 0.9383/1.84% → 0.9983/0.70%
+
+=== fixtures/fidelity/transforms.combos.json (6 components)
+  005_Transforms_Decorated.png         WEB-LABEL-SPILL  iOS-Android 0.9995/0.08% → 0.9991/0.12% | iOS-web 0.9437/1.33% → 0.9991/0.16% | Android-web 0.9432/1.46% → 0.9983/0.28%
+
+=== fixtures/fidelity/typography.combos.json (25 components)
+  001_Typography_C02_Direction.png     THREE-WAY-ODD    iOS-Android 0.9024/1.62% → 1.0000/0.00% | iOS-web 0.9329/1.38% → 1.0000/0.00% | Android-web 0.9027/1.62% → 1.0000/0.00%
+  024_Typography_Decorated.png         WEB-LABEL-SPILL  iOS-Android 0.9982/0.25% → 0.9991/0.00% | iOS-web 0.9393/1.06% → 0.9996/0.00% | Android-web 0.9402/1.19% → 0.9990/0.00%
+
+label-attributed rows printed: 14; rows moved ≥ 0.005 on any pair: 38
