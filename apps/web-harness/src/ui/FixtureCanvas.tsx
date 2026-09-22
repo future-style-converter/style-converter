@@ -23,6 +23,18 @@ import React from 'react';
 import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 import { composeTree, findNode } from '../sdui/Composer';
+// The debug label as capture chrome (wave 51 PR (A)) — a SIBLING of the
+// component inside the wrapper, gated by this file's OWN predicate below.
+import { LabelChrome } from './LabelChrome';
+
+/**
+ * The Tier-5 frame width in px — the literal 390 `canvasStyle.width`
+ * hardcodes (the shared capture contract, docs/DYNAMIC_CAPTURE.md). The
+ * label chrome truncates against THIS number, never CaptureGallery's
+ * `?width=`-driven CANVAS_WIDTH_PX: this canvas is always 390 wide, so a
+ * `?width=250` Tier-5 URL must not truncate to 39 glyphs on a 390 frame.
+ */
+const FIXTURE_FRAME_WIDTH_PX = 390;
 
 interface FixtureCanvasProps {
   document: IRDocument;
@@ -73,6 +85,16 @@ export function FixtureCanvas({ document, fixtureName }: FixtureCanvasProps) {
     );
   }
 
+  // Label-chrome predicate (docs/DYNAMIC_CAPTURE.md "Harness label chrome"),
+  // this canvas's OWN copy: `component` here is the ComposedNode, so the
+  // children test reads its composed list and the text test reads the wire
+  // component underneath (`component.component.text`) — reading `.text` on
+  // the node itself would be undefined and label every root. No WPT term:
+  // this file carries no WPT flag and the Tier-5 `?fixture=` path never
+  // runs a WPT capture, so the gate is children + text alone.
+  const showLabel = component.children.length === 0
+    && !(typeof component.component.text === 'string' && component.component.text.length > 0);
+
   return (
     <div
       ref={wrapperRef}
@@ -82,6 +104,11 @@ export function FixtureCanvas({ document, fixtureName }: FixtureCanvasProps) {
       style={canvasStyle}
     >
       <ComponentRenderer node={component} />
+      {/* HARNESS LABEL CHROME — a SIBLING after the component (the wrapper
+          mirrors CaptureCanvas: position relative → frame coords, overflow
+          hidden → frame clip, translateZ(0) → stacking root). frameWidth is
+          this canvas's literal 390, matching canvasStyle.width below. */}
+      {showLabel ? <LabelChrome name={component.component.name} frameWidth={FIXTURE_FRAME_WIDTH_PX} /> : null}
     </div>
   );
 }
@@ -100,7 +127,9 @@ export function FixtureCanvas({ document, fixtureName }: FixtureCanvasProps) {
  *  way it closed the gallery one.
  */
 const canvasStyle: React.CSSProperties = {
-  width: '390px',
+  // The literal 390 (FIXTURE_FRAME_WIDTH_PX) — emits `width:390px` exactly
+  // as before; the constant only keeps the chrome's truncation in lockstep.
+  width: `${FIXTURE_FRAME_WIDTH_PX}px`,
   boxSizing: 'border-box',
   padding: '16px',
   background: '#1A1A2E',

@@ -1,26 +1,39 @@
 //
 //  BlockLabel.swift
-//  Renderer — the harness-label block-font canvas (applier campaign).
+//  Renderer — the harness-label block-font canvas (applier campaign;
+//  wave 51 PR (A): drawn as HARNESS CHROME, never by the runtime).
 //
-//  Replaces the SYNTHESIZED component-name placeholder's `Text` with a
-//  deterministic 5x7 block-font raster: every glyph is a fixed bit grid
+//  A deterministic 5x7 block-font raster: every glyph is a fixed bit grid
 //  drawn as 1x1 integer-coordinate rect fills, so the label rasterizes
-//  PIXEL-IDENTICALLY on all three platforms. This is the fix for the
-//  cross-platform glyph wall — real font stacks antialias differently on
-//  web/Android/iOS and capped ~50 label-bearing fixtures at SSIM
-//  0.90-0.949 no matter how well the boxes matched. Real element text
-//  (the IR `text` channel) is NOT routed here: it keeps the full
-//  PlaceholderLabel typography path (fonts are the thing under test there).
+//  PIXEL-IDENTICALLY on all three platforms (real font stacks antialias
+//  differently per platform and capped ~50 label-bearing fixtures at SSIM
+//  0.90-0.949 however well the boxes matched). Real element text (the IR
+//  `text` channel) is NOT routed here: it keeps PlaceholderLabel's full
+//  typography path — fonts are the thing under test there.
+//
+//  WHO DRAWS IT (wave 51 PR (A); normative home: docs/DYNAMIC_CAPTURE.md,
+//  section "Harness label chrome"): the capture HARNESS, as a sibling
+//  overlay over the whole capture root — HarnessLabelChrome.swift, mounted
+//  by apps/ios-harness/…/Screenshot/CaptureCanvas.swift right after the
+//  root's `.background(…)`. Until (A) ComponentRenderer's leaf branch drew
+//  this view INSIDE the styled element, so the ink rode the element's blend
+//  group / opacity / filter / clip / transform and sat at the content-box
+//  origin after the element's own layout — the platforms could not agree
+//  on effect-bearing fixtures. The runtime now paints NO name label.
 //
 //  Geometry contract (shared verbatim with Compose's BlockLabel and web's
-//  renderer — all three MUST produce byte-identical output):
-//    * input = the label string the platform showed before (name with
-//      underscores → spaces); transform = uppercase, unknown glyph → '-'
-//    * single line at integer origin (8, 6) from the component top-left
-//      (the same slot the placeholder Text occupied); char i's cell
-//      starts at x = 8 + i*ADVANCE
-//    * truncation drops trailing chars so 8 + n*ADVANCE <= width - 8
-//    * color = rgba(237,237,237,0.7) — the legacy default label color
+//  BlockFontLabel.ts — all three MUST produce byte-identical output):
+//    * input = the PLAIN component name, underscores → spaces; transform
+//      = uppercase, unknown glyph → '-'
+//    * single line at integer origin (8, 6) in the CAPTURE FRAME; char i's
+//      cell starts at x = 8 + i*ADVANCE. Rows 6..12 lie inside the 16px
+//      top pad band, so on an in-flow root with non-negative margin-top
+//      the ink never overlaps the border box (frame y >= 16).
+//    * truncation against the FRAME width: largest n with
+//      8 + n*ADVANCE <= frameWidth - 8 → 62 glyphs at 390, 39 at 250,
+//      0 below 22 px (zero glyphs, logged once).
+//    * color = rgba(237,237,237, 179/255) → (174,174,180) over #1A1A2E;
+//      the alpha BYTE is pinned (see labelColor), not 0.7
 //    * NO antialiasing: integer coordinates only.
 //
 //  Glyph data comes from BlockFont.gen.swift (GENERATED — checksum
@@ -34,16 +47,18 @@ import SwiftUI
 /// Pure layout math for the block label, split from the View so XCTest
 /// pins transform/truncation/bit-geometry without a render surface (the
 /// same pattern as StyleBuilder.minFloor / suppressesNamePlaceholder).
-enum BlockLabelLayout {
+// public: the label contract's harness-visible geometry (design C23).
+public enum BlockLabelLayout {
 
-    /// Fixed label origin inside the component: 8px from the left edge.
+    /// Fixed label origin in the capture frame: 8px from the left edge.
     /// Part of the shared spec — web/Compose place the run at the same x.
-    static let originX: CGFloat = 8
-    /// Fixed label origin inside the component: 6px from the top edge.
-    static let originY: CGFloat = 6
+    public static let originX: CGFloat = 8
+    /// Fixed label origin in the capture frame: 6px from the top edge —
+    /// inside the canvas's 16px top pad band, clear of the border box.
+    public static let originY: CGFloat = 6
     /// Symmetric right margin: the truncation bound keeps the glyph run
-    /// out of the last 8px of the component (mirror of originX).
-    static let rightMargin: CGFloat = 8
+    /// out of the last 8px of the frame (mirror of originX).
+    public static let rightMargin: CGFloat = 8
 
     /// The label transform: uppercase the WHOLE string first (Swift's
     /// ICU-backed `uppercased()` matches JS `toUpperCase()` / Kotlin
@@ -51,7 +66,7 @@ enum BlockLabelLayout {
     /// platforms agree on the post-transform character count), then map
     /// every character the atlas has no glyph for to '-' — a visible,
     /// deterministic stand-in instead of a silent drop.
-    static func glyphString(_ label: String) -> String {
+    public static func glyphString(_ label: String) -> String {
         // Per-character atlas lookup AFTER the whole-string uppercase;
         // '-' is guaranteed present in the atlas (BlockFont.gen.swift).
         return String(label.uppercased().map { ch in
@@ -60,10 +75,12 @@ enum BlockLabelLayout {
     }
 
     /// How many leading characters fit: largest n with
-    /// 8 + n*ADVANCE <= componentWidth - 8 (no ellipsis — trailing chars
-    /// just drop, per the shared spec). nil width = fit-content: the box
-    /// grows around the label, so the full run always fits.
-    static func truncatedCount(_ glyphCount: Int, componentWidth: CGFloat?) -> Int {
+    /// 8 + n*ADVANCE <= width - 8 (no ellipsis — trailing chars just
+    /// drop, per the shared spec). `componentWidth` is the FRAME width
+    /// under PR (A) (the parameter keeps its historical name so the
+    /// cross-platform math reads the same); nil = no bound, so the full
+    /// run always fits (unit tests, fit-content callers).
+    public static func truncatedCount(_ glyphCount: Int, componentWidth: CGFloat?) -> Int {
         // No statically-known width → no truncation by construction.
         guard let w = componentWidth else { return glyphCount }
         // n <= (W - leftInset - rightMargin) / ADVANCE, floored to an
@@ -74,11 +91,11 @@ enum BlockLabelLayout {
 
     /// One 1x1 rect per SET bit, in CANVAS-LOCAL coordinates (the canvas
     /// itself is offset to (originX, originY) by the view below, which
-    /// puts char i's cell at component-space x = 8 + i*ADVANCE, y = 6
-    /// exactly as the shared spec requires). Row 0 is the top row; bit 4
-    /// of each row int is the LEFTMOST of the 5 columns (generator
-    /// contract, BlockFont.gen.swift header).
-    static func bitRects(_ glyphs: String) -> [CGRect] {
+    /// puts char i's cell at frame-space x = 8 + i*ADVANCE, y = 6 exactly
+    /// as the shared spec requires). Row 0 is the top row; bit 4 of each
+    /// row int is the LEFTMOST of the 5 columns (generator contract,
+    /// BlockFont.gen.swift header).
+    public static func bitRects(_ glyphs: String) -> [CGRect] {
         // Flat rect list — order is irrelevant (all fills are the same
         // color), only the covered pixel set matters.
         var rects: [CGRect] = []
@@ -103,41 +120,65 @@ enum BlockLabelLayout {
     }
 }
 
-/// The block-font label view: a Canvas of 1x1 rect fills sitting in the
-/// exact layout slot the placeholder `Text` occupied (leaf branch of
-/// ComponentRenderer.contentOrPlaceholder). Frame = truncated run width
-/// x LINE_HEIGHT; the (8, 6) origin is applied as top/leading padding so
-/// the component's intrinsic (fit-content) size still hugs the label.
-struct BlockLabel: View {
+/// The block-font label view: a Canvas of 1x1 rect fills that collapses
+/// to a 0×0 layout slot and hangs its ink at (8, 6) from that slot's
+/// top-leading corner. Hosted ONLY by HarnessLabelChrome inside the
+/// harness's `.overlay(alignment: .topLeading)` over the capture root, so
+/// the slot's corner IS the frame origin and the ink lands at frame (8, 6).
+// public: a public struct's synthesized memberwise init is INTERNAL, so
+// the init below is spelled out (design C23; the ComponentHost precedent).
+public struct BlockLabel: View {
 
-    /// The label string exactly as the old placeholder Text showed it
-    /// (component name, underscores already replaced by spaces) — the
-    /// spec's "do not change what is labeled".
-    let label: String
+    /// The PLAIN component name with underscores already replaced by
+    /// spaces (HarnessLabelChrome.labelText).
+    public let label: String
 
-    /// The component's resolved CSS width in px, when statically known
-    /// (explicit/percent/stretch-injected width) — drives truncation.
-    /// nil = fit-content: the box hugs the label, nothing to truncate.
-    let componentWidth: CGFloat?
+    /// The width the run truncates against — the capture FRAME width
+    /// (CaptureCanvas.width) under PR (A). nil = no bound (unit tests).
+    public let componentWidth: CGFloat?
+
+    // public: explicit memberwise init for cross-module callers (the
+    // harness app's plain `import StyleConverterRuntime`).
+    public init(label: String, componentWidth: CGFloat?) {
+        self.label = label
+        self.componentWidth = componentWidth
+    }
 
     /// rgba(237, 237, 237, 0.7) — the legacy default placeholder color
-    /// (Color(white: 0.93) == 237/255). Alpha is 179/255, NOT 0.7:
-    /// Compose stores the color as packed ARGB 0xB3EDEDED where the
-    /// alpha byte is round(0.7 * 255) = 179; writing 0.7 here would
-    /// hand SwiftUI 178.5/255 and leave the final byte to per-platform
-    /// rounding. 179/255 pins the exact same blended bytes as Android.
+    /// (Color(white: 0.93) == 237/255). Alpha is 179/255, NOT 0.7: Compose
+    /// stores the color as packed ARGB 0xB3EDEDED where the alpha byte is
+    /// round(0.7 * 255) = 179; 0.7 here would hand SwiftUI 178.5/255 and
+    /// leave the final byte to per-platform rounding. 179/255 pins the
+    /// exact blended bytes Android paints ((174,174,180) over #1A1A2E);
+    /// web moves to α 179/255 in PR (A) for the same byte (design r3).
     static let labelColor = Color(red: 237.0 / 255.0,
                                   green: 237.0 / 255.0,
                                   blue: 237.0 / 255.0,
                                   opacity: 179.0 / 255.0)
 
-    var body: some View {
-        // Transform once per render: uppercase + unknown→'-' (pure).
+    /// The glyph run that actually draws: transform (uppercase, unknown →
+    /// '-') then truncation against `width` (shared-spec formula). Also
+    /// the ONE place the zero-glyph case is reported — a frame narrower
+    /// than 22 px drops every glyph (design C5: zero glyphs, no crash; the
+    /// Android twin logs the same case). Logged once per label so a blank
+    /// band is explainable; a statement, so it lives outside the ViewBuilder.
+    static func shownGlyphs(label: String, width: CGFloat?) -> String {
         let glyphs = BlockLabelLayout.glyphString(label)
-        // Truncate against the component width (shared-spec formula).
-        let shown = String(glyphs.prefix(
-            BlockLabelLayout.truncatedCount(glyphs.count,
-                                            componentWidth: componentWidth)))
+        let count = BlockLabelLayout.truncatedCount(glyphs.count, componentWidth: width)
+        if count == 0 && !glyphs.isEmpty {
+            PropertyTracker.logOnce(
+                key: "blocklabel.zero-glyphs.\(label)",
+                message: "[BlockLabel] frame \(width.map { "\($0)" } ?? "nil")px "
+                    + "too narrow for any glyph of \"\(label)\" — label dropped")
+        }
+        return String(glyphs.prefix(count))
+    }
+
+    // public: View protocol witness on a public type must be public.
+    public var body: some View {
+        // Transform + truncate once per render (pure apart from the
+        // once-only zero-glyph log above).
+        let shown = Self.shownGlyphs(label: label, width: componentWidth)
         // Precompute the pixel set outside the draw closure — the draw
         // closure then only replays fills (cheap + deterministic).
         let rects = BlockLabelLayout.bitRects(shown)
@@ -152,24 +193,16 @@ struct BlockLabel: View {
                 context.fill(Path(r), with: .color(Self.labelColor))
             }
         }
-        // ZERO LAYOUT FOOTPRINT: the label is dev chrome, not content — it
-        // must not contribute to the component's auto/fit-content size.
-        // The first block-font cut framed the canvas in-flow with padding,
-        // and because the three platforms' OLD text line boxes all differed
-        // (~19px web vs ~13px natives), auto-height components rendered
-        // different canvas heights per platform and every pixel below the
-        // label shifted (X-web pairs cratered while iOS-Android agreed at
-        // 1.000). All three platforms now report ZERO label size and draw
-        // the ink as out-of-flow overlay at the shared (8, 6) origin.
-        // The canvas itself still spans the truncated run; the zero frame +
-        // topLeading overlay keeps it anchored without occupying space.
+        // ZERO LAYOUT FOOTPRINT: the label is chrome, not content — it
+        // must never contribute to the capture's size. The canvas spans
+        // the truncated run × LINE_HEIGHT …
         .frame(width: CGFloat(shown.count * BlockFont.advance),
                height: CGFloat(BlockFont.lineHeight))
-        // Out-of-flow: collapse the label's layout slot to 0x0 and hang
-        // the (already-framed) canvas off its top-leading corner at the
-        // spec origin. `overlay` content never influences the host's size
-        // (the wave-3 CaptureCanvas lesson), and Canvas draws are not
-        // clipped by the zero frame.
+        // … then the layout slot collapses to 0×0 and the (already-framed)
+        // canvas hangs off its top-leading corner at the spec origin.
+        // `overlay` content never influences the host's size (the wave-3
+        // CaptureCanvas lesson), and Canvas draws are not clipped by the
+        // zero frame — so under the harness overlay this is frame (8, 6).
         .offset(x: BlockLabelLayout.originX, y: BlockLabelLayout.originY)
         .frame(width: 0, height: 0, alignment: .topLeading)
     }

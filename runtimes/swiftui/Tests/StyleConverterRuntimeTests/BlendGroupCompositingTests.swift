@@ -1,7 +1,7 @@
 //
 //  BlendGroupCompositingTests.swift
 //  Wave 50, post-gate iOS FIX lane — the raster pin under BlendModeApplier's
-//  `.compositingGroup()`.
+//  `.compositingGroup()`. Re-targeted in wave 51 PR (A), see below.
 //
 //  THE RULE. compositing-1 §5.1: a non-`normal` `mix-blend-mode` makes the
 //  element a stacking context, so the element's OWN paint — background,
@@ -13,26 +13,37 @@
 //  including the element's own earlier primitives. `.compositingGroup()`
 //  flattens the subtree first, which is exactly the §3.1/§5.1 split.
 //
-//  WHAT WAS WRONG (measured this lane on the Catalyst raster, on a byte
+//  WHAT WAS WRONG (measured in wave 50 on the Catalyst raster, on a byte
 //  mirror of the harness CaptureCanvas that is byte-IDENTICAL to the
 //  simulator captures it predicts — 5/5 opacity-blend crops and both
 //  committed visual-test blend baselines diffed at 0 px):
 //  a blended box multiplied its own label glyphs against its own background
 //  rectangle. The wave-50 device gate failed on exactly that, at
 //  fixtures/combinations/blend-isolation.json 003_wrapper —
-//  iOS-Android / iOS-web SSIM 0.9492, Δpx 0.60%, ΔE95 0.00: the flat fill
-//  already agreed on all three platforms and ONLY the 75 glyph pixels did
-//  not (0.60% of that 390×32 crop).
+//  iOS-Android / iOS-web SSIM 0.9492, Δpx 0.60%, ΔE95 0.00.
 //
-//  THE TWO PINS BELOW are the two halves of the fixture's own contract and
-//  of the committed web baseline. Both were EXECUTED red before the fix and
-//  green after (mutation: drop `.compositingGroup()` from BlendModeApplier
-//  → pin 1 reports 75 differing pixels, pin 2 finds the self-multiplied ink
-//  (23,8,10) and none of the group ink (24,19,33)).
+//  WAVE 51 PR (A) RE-TARGET. The label is harness CHROME now — drawn by the
+//  capture canvas as a sibling overlay, never inside the element — so the
+//  element's own paint no longer contains label glyphs and pin 2's original
+//  subject (label ink at (24,19,33)) is gone by design; pin 1's flat #66ccff
+//  layer has no second primitive either, so it lost its mutation power. Pin
+//  2 therefore gets a REAL second primitive: a 20×20 `#00ffff` child inside
+//  the multiply box. Correct group render: child src-over onto the box →
+//  (0,255,255), then the GROUP × the #1A1A2E stage → (0,26,46); the box
+//  fill itself stays (24,8,11). Mutation (drop `.compositingGroup()` at
+//  BlendModeApplier.swift:66, EXECUTED wave 51 on the Catalyst raster):
+//  child centre (46,46) read (0,8,11) exactly, 400 px of (0,8,11), 0 px of
+//  (0,26,46) — pin 2 red on all three assertions; pin 1 stayed green under
+//  the same mutation, which is why it is no longer the guard. Bytes below
+//  are read off the raster (the exact centre probe is the measurement).
+//
+//  The mirror plumbing lives in CaptureCanvasMirror.swift (hoisted so the
+//  PR (A) chrome pins compose onto the same chain).
 //
 //  Payload: the converter's verbatim IR (`./gradlew :converter:run
 //  --args="convert --from css --to ir -i <fixture> -o <dir>"`, committed
-//  converter @ this tree), whitespace compacted, one component per line.
+//  converter @ this tree), whitespace compacted, one component per line;
+//  the cyan child is hand-added in the same wire shape (slot-linked).
 //
 
 import Foundation
@@ -41,6 +52,7 @@ import XCTest
 @testable import StyleConverterRuntime
 
 final class BlendGroupCompositingTests: XCTestCase {
+    typealias M = CaptureCanvasMirror
 
     /// blend-isolation's `BI_Isolate` and `BI_NoBlend_Control` subtrees. The
     /// two wrappers carry the SAME 188×68 `#66ccff` child; the only
@@ -59,13 +71,16 @@ final class BlendGroupCompositingTests: XCTestCase {
     ]}
     """
 
-    /// visual-test.json's `BlendMode_Multiply` — the committed-baseline row
-    /// (`tools/visual/baseline/{iOS,web}__087_BlendMode_Multiply.png`). Its
-    /// label ink is the whole pin: 59 glyph pixels that the fix moves onto
-    /// the web baseline's value exactly.
+    /// visual-test.json's `BlendMode_Multiply` (087: padding-only `#e74c3c`
+    /// box, `mix-blend-mode: multiply`) PLUS a 20×20 `#00ffff` in-flow child
+    /// (wave 51 re-target, design C46) — the second primitive inside the
+    /// group whose colour tells "grouped then blended" from "each primitive
+    /// blended in turn". Box = 20 pad + 20 child = 60×60 at canvas (16,16);
+    /// the child fills (36,36)…(55,55).
     static let blendMultiplyIR = """
     {"irVersion":2,"minReaderVersion":2,"components":[
-    {"id":"blendmode_multiply-087","name":"BlendMode_Multiply","properties":[{"type":"MixBlendMode","data":"MULTIPLY"},{"type":"BackgroundColor","data":{"srgb":{"r":0.9058823529411765,"g":0.2980392156862745,"b":0.23529411764705882},"original":"#e74c3c"}},{"type":"PaddingTop","data":{"px":20.0}},{"type":"PaddingRight","data":{"px":20.0}},{"type":"PaddingBottom","data":{"px":20.0}},{"type":"PaddingLeft","data":{"px":20.0}}]}
+    {"id":"blendmode_multiply-087","name":"BlendMode_Multiply","properties":[{"type":"MixBlendMode","data":"MULTIPLY"},{"type":"BackgroundColor","data":{"srgb":{"r":0.9058823529411765,"g":0.2980392156862745,"b":0.23529411764705882},"original":"#e74c3c"}},{"type":"PaddingTop","data":{"px":20.0}},{"type":"PaddingRight","data":{"px":20.0}},{"type":"PaddingBottom","data":{"px":20.0}},{"type":"PaddingLeft","data":{"px":20.0}}]},
+    {"id":"cyan-088","name":"cyan","properties":[{"type":"Width","data":{"type":"length","px":20.0}},{"type":"Height","data":{"type":"length","px":20.0}},{"type":"BackgroundColor","data":{"srgb":{"r":0.0,"g":1.0,"b":1.0},"original":"#00ffff"}}],"slot":{"parent":"blendmode_multiply-087"}}
     ]}
     """
 
@@ -86,78 +101,18 @@ final class BlendGroupCompositingTests: XCTestCase {
         return try XCTUnwrap(find(doc.components), "no component \(id)")
     }
 
-    /// Rasterise at scale 1 and read the bytes back through a CGContext
-    /// redraw, because ImageRenderer's native buffer layout is not
-    /// guaranteed (the Backface3DSubtreeRasterTests pattern).
-    @MainActor
-    private func raster<V: View>(_ view: V) throws -> (px: [UInt8], w: Int, h: Int) {
-        let renderer = ImageRenderer(content: view)
-        renderer.scale = 1
-        let cg = try XCTUnwrap(renderer.cgImage, "ImageRenderer produced no image")
-        let w = cg.width, h = cg.height
-        var buf = [UInt8](repeating: 0, count: w * h * 4)
-        let ctx = try XCTUnwrap(CGContext(
-            data: &buf, width: w, height: h, bitsPerComponent: 8,
-            bytesPerRow: w * 4, space: CGColorSpaceCreateDeviceRGB(),
-            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
-        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
-        return (buf, w, h)
-    }
-
-    /// apps/ios-harness `CaptureCanvas.backgroundColor` — the #1A1A2E stage
-    /// every committed baseline was captured on.
-    private static let ground = Color(red: 0x1A / 255.0, green: 0x1A / 255.0, blue: 0x2E / 255.0)
-    /// The harness's published capture geometry (390×844, 358 root CB).
-    private static let viewport = StyleViewport(width: 390, height: 844, rootContainingBlock: 358)
-
-    /// CaptureCanvas's in-flow branch: 390 wide, 16pt pad, natural height.
-    @MainActor
-    private func flowCanvas(_ c: IRComponent) throws -> (px: [UInt8], w: Int, h: Int) {
-        try raster(ComponentHost(component: c)
-            .frame(maxWidth: 390 - 32, alignment: RootAlignment.alignment(for: c))
-            .padding(16)
-            .frame(width: 390, alignment: .topLeading)
-            .fixedSize(horizontal: false, vertical: true)
-            .background(Self.ground)
-            .environment(\.styleViewport, Self.viewport))
-    }
-
-    /// CaptureCanvas's out-of-flow branch: the collapsed 390×32 card an
-    /// abspos capture subject gets, anchored at the card corner because both
-    /// axes declare an inset (CSS 2.1 §10.3.7 / §10.6.4).
-    @MainActor
-    private func outOfFlowCanvas(_ c: IRComponent) throws -> (px: [UInt8], w: Int, h: Int) {
-        try raster(Color.clear
-            .frame(width: 390, height: 32)
-            .overlay(alignment: .topLeading) { ComponentHost(component: c) }
-            .clipped()
-            .background(Self.ground)
-            .environment(\.styleViewport, Self.viewport))
-    }
-
-    /// Pixels within `tol` per channel of `rgb`.
-    private func count(_ img: (px: [UInt8], w: Int, h: Int),
-                       _ rgb: (Int, Int, Int), tol: Int) -> Int {
-        var n = 0
-        for i in stride(from: 0, to: img.w * img.h * 4, by: 4)
-        where abs(Int(img.px[i]) - rgb.0) <= tol
-            && abs(Int(img.px[i + 1]) - rgb.1) <= tol
-            && abs(Int(img.px[i + 2]) - rgb.2) <= tol { n += 1 }
-        return n
-    }
-
     // MARK: - Pin 1: the isolation equality the gate row broke
 
     /// compositing-1 §3 + §5.1: an isolated group's backdrop is transparent
     /// black, alpha_b = 0 collapses `co = alpha_s · B(Cb,Cs) + …` to
     /// `alpha_s · Cs`, and the inner layer therefore paints UNCHANGED — the
-    /// same pixels the blend-normal control paints. Without the group the
-    /// multiply still reached the layer's own label ink and 75 pixels
-    /// disagreed, which is the 0.60% / SSIM 0.9492 the gate reported.
+    /// same pixels the blend-normal control paints. Kept as the fixture's
+    /// own contract; since PR (A) the flat layer carries no second primitive,
+    /// so pin 2 below is the executable guard of the wave-50 fix.
     @MainActor
     func testIsolatedWrapperRendersLikeTheBlendNormalControl() throws {
-        let iso  = try outOfFlowCanvas(try comp(Self.blendIsolationIR, "wrapper-005"))
-        let ctrl = try outOfFlowCanvas(try comp(Self.blendIsolationIR, "wrapper-008"))
+        let iso  = try M.outOfFlowCanvas(try comp(Self.blendIsolationIR, "wrapper-005"))
+        let ctrl = try M.outOfFlowCanvas(try comp(Self.blendIsolationIR, "wrapper-008"))
         XCTAssertEqual(iso.w, ctrl.w); XCTAssertEqual(iso.h, ctrl.h)
         var diff = 0
         for i in stride(from: 0, to: iso.w * iso.h * 4, by: 4)
@@ -171,28 +126,32 @@ final class BlendGroupCompositingTests: XCTestCase {
 
     // MARK: - Pin 2: a blended element does not blend with itself
 
-    /// The element's own label ink must composite NORMALLY against its own
-    /// background and only then multiply with the backdrop. Measured values
-    /// on the #e74c3c box over the #1A1A2E stage: the group result is
-    /// (24,19,33) — byte-equal to `tools/visual/baseline/web__087_
-    /// BlendMode_Multiply.png` — while the per-primitive leak darkens the
-    /// same glyphs to (23,8,10), the value the committed iOS baseline still
-    /// carries and the one this pin forbids.
+    /// The element's in-flow child must composite NORMALLY against the
+    /// element's own background and only then multiply with the backdrop.
+    /// Measured on the raster (wave 51): the grouped cyan child over the
+    /// #1A1A2E stage is (0,26,46) — 400 px, the whole 20×20 child — and the
+    /// box fill around it is (24,8,11). Without the group the child
+    /// multiplies against the already-multiplied box and reads (0,8,11):
+    /// that value is forbidden outright, and the group value must be there.
     @MainActor
     func testBlendedElementDoesNotMultiplyItsOwnInk() throws {
-        let img = try flowCanvas(try comp(Self.blendMultiplyIR, "blendmode_multiply-087"))
-        // The GROUP ink is the discriminator: (24,19,33) differs from the
-        // box fill (24,8,11) by 11 on green and 22 on blue, while the
-        // leaked per-primitive ink (23,8,10) is within one LSB of that fill
-        // and so cannot be told apart from it by colour alone. Assert the
-        // group ink is THERE (the mutation deletes it outright: 0 px) and
-        // that the exact leaked value is absent.
-        XCTAssertGreaterThan(count(img, (24, 19, 33), tol: 1), 40,
-                             "the group-composited label ink (the web "
-                             + "baseline's value) is not on the canvas — "
-                             + ".compositingGroup() is missing")
-        XCTAssertEqual(count(img, (23, 8, 10), tol: 0), 0,
-                       "found ink multiplied against the element's OWN "
-                       + "background")
+        let img = try M.flowCanvas(try comp(Self.blendMultiplyIR, "blendmode_multiply-087"))
+        // Probe the child's centre first, EXACT, so a failure names the actual
+        // byte (this is the raster measurement the header quotes).
+        let centre = M.rgb(img, 46, 46)
+        XCTAssertTrue(centre == (0, 26, 46),
+                      "child centre (46,46) is \(centre), expected the GROUP value (0,26,46)")
+        // The group value covers the whole child (400 px; ≥ 380 tolerates
+        // nothing but a stray edge byte) …
+        XCTAssertGreaterThanOrEqual(M.count(img, (0, 26, 46), tol: 1), 380,
+                                    "the group-composited child (0,26,46) is not on the canvas — "
+                                    + ".compositingGroup() is missing")
+        // … and the per-primitive leak value is absent everywhere.
+        XCTAssertEqual(M.count(img, (0, 8, 11), tol: 1), 0,
+                       "found the child multiplied against the element's OWN "
+                       + "already-multiplied background")
+        // The box fill is unaffected by grouping (a flat rect has nothing of
+        // its own beneath it) — the wave-50 measurement, still true.
+        XCTAssertTrue(M.rgb(img, 20, 20) == (24, 8, 11), "box fill at (20,20) is \(M.rgb(img, 20, 20))")
     }
 }

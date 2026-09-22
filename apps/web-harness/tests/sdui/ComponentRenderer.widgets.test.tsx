@@ -217,9 +217,14 @@ describe('wave-20 W1 — legacy (327-pair) flow byte-stability', () => {
     expect(out).not.toContain('type="checkbox"');
     expect(out).not.toContain('checked');
     expect(out).not.toContain('inert');
-    // …and the placeholder label machinery still renders (the name label
-    // block-font svg — `role="img"` with the underscore-stripped name;
-    // uppercasing happens only inside the block-glyph layout, not here).
-    expect(out).toContain('aria-label="Widget Comp"');
+    // …and the placeholder SLOT still renders: the empty 0-height span the
+    // legacy leaf always had. The name tag itself is CANVAS chrome since
+    // wave 51 PR (A) — the `aria-label="Widget Comp"` pin moved to the
+    // canvas level in tests/ui/LabelChrome.test.tsx ("a legacy-demoted
+    // widget root is labelled at the CANVAS level"); here the div must
+    // carry neither an svg nor the name text.
+    expect(out).toMatch(/<span style="display:block;padding:0;height:0;[^"]*"><\/span>/);
+    expect(out).not.toContain('<svg');
+    expect(out).not.toContain('Widget Comp');
   });
 });

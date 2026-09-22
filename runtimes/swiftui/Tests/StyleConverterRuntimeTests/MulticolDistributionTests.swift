@@ -195,8 +195,9 @@ final class MulticolDistributionTests: XCTestCase {
              {"type":"BackgroundColor","data":{"srgb":{"r":0.0,"g":0.0,"b":1.0},"original":"#0000ff"}}]}
          ]}
         """.utf8))
-        // Child A (red) — top of column 0. Probe near its corner, away
-        // from the centered block-font label glyphs.
+        // Child A (red) — top of column 0. Probe near its corner (the
+        // runtime paints no name label since wave 51 PR (A); the corner
+        // probe simply avoids any box edge).
         let a = try pixel(comp, x: 5, y: 5)
         XCTAssertGreaterThan(a.r, 192, "child A must paint red at column 0's top")
         XCTAssertLessThan(a.g, 64, "the column-0 top probe must be red, not white/green")

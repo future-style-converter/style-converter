@@ -40,8 +40,9 @@ final class TransitionDeclaredFlipRasterTests: XCTestCase {
 
     /// MT_BgFade: a 140×48 box, `background-color: #7f8c8d`,
     /// `transition: background-color 1s linear`, `:hover { #c0392b }`.
-    /// Named "B" so the leaf's synthesized name placeholder — which hugs
-    /// TOP-LEADING — stays far from the probes below.
+    /// Named "B" so that, were a name placeholder ever painted in the leaf
+    /// again (it is harness chrome since wave 51 PR (A), drawn outside the
+    /// runtime), it would hug TOP-LEADING and stay far from the probes below.
     private func bgFade() throws -> IRComponent {
         try JSONDecoder().decode(IRComponent.self, from: Data("""
         {"id":"mt-bgfade","name":"B",

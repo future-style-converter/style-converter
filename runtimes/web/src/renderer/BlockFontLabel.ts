@@ -10,8 +10,14 @@
  * the ~50 text-bearing 327-pair fixtures stop capping at SSIM 0.90-0.949.
  *
  * This module is framework-free on purpose (no React, no DOM): the
- * harness skin builds the actual <svg>/<rect> elements from the layout
- * it returns, and the vitest suite pins the math without rendering.
+ * harness builds the actual <svg>/<rect> elements from the layout it
+ * returns, and the vitest suite pins the math without rendering.
+ *
+ * Since wave 51 PR (A) the label is HARNESS CHROME: the capture canvas
+ * (apps/web-harness/src/ui/LabelChrome.tsx, mounted by CaptureGallery /
+ * FixtureCanvas) draws it as a SIBLING over the component at frame (8,6),
+ * truncated against the frame width — the renderer skin no longer emits
+ * it. Normative home: docs/DYNAMIC_CAPTURE.md "Harness label chrome".
  */
 
 // The embedded atlas — GENERATED, never edited by hand; the checksum
@@ -26,25 +32,33 @@ import {
 } from './BlockFont.gen';
 
 /**
- * Shared-spec label origin: the block's top-left sits at (8, 6) from the
- * component's top-left, in the SAME coordinate space the old text span
- * occupied (so component padding etc. keeps shifting it identically on
- * every platform). Pinned cross-platform — all three runtimes hardcode
- * the same pair, so the rects land on the same device pixels.
+ * Shared-spec label origin: the block's top-left sits at (8, 6) in the
+ * CAPTURE FRAME (the PNG's own pixel grid — wave 51 PR (A), normative
+ * home docs/DYNAMIC_CAPTURE.md section "Harness label chrome"). The label
+ * is harness chrome drawn by the capture canvas as a SIBLING over the
+ * component, never a descendant of the styled element, so no component
+ * padding / margin / transform / blend / clip can move or recolour it.
+ * Pinned cross-platform — all three harnesses hardcode the same pair, so
+ * the rects land on the same device pixels.
  */
 export const BLOCK_LABEL_ORIGIN_X = 8;
 /** Vertical half of the shared-spec origin (see BLOCK_LABEL_ORIGIN_X). */
 export const BLOCK_LABEL_ORIGIN_Y = 6;
 
 /**
- * Shared-spec fill — the light placeholder-label color all three
- * platforms already used for the dark-bg branch (iOS
- * Color(white:0.93).opacity(0.7)). The block font pins it as the ONLY
- * label color: a single fill on every platform is what keeps the rects
- * byte-identical (the old per-platform bg-luminance flip stays for
- * real TEXT content, which the block font never touches).
+ * Shared-spec fill — the light placeholder-label colour (237,237,237) at
+ * alpha 179/255, the ONLY label colour on every platform: a single fill
+ * everywhere is what keeps the rects byte-identical (the old per-platform
+ * bg-luminance flip stays for real TEXT content, which the block font
+ * never touches). Alpha is written as 179/255 = 0.70196 rather than 0.7
+ * for byte parity with the natives' 179/255 (Compose `Color(0xB3EDEDED)`,
+ * SwiftUI `opacity: 179.0 / 255.0`): the wave-51 review measured web at
+ * 0.7 painting (173,173,179) over the #1A1A2E ground where the natives
+ * paint (174,174,180) — one blend step off on every lit pixel. Chromium
+ * quantises the CSS alpha to 8 bits (round(0.70196 × 255) = 179), so this
+ * spelling reaches the exact native byte.
  */
-export const BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.7)';
+export const BLOCK_LABEL_FILL = 'rgba(237, 237, 237, 0.70196)';
 
 /**
  * Rebuild the canonical atlas serialization from the EMBEDDED constants
@@ -101,7 +115,7 @@ export interface BlockLabelLayout {
 
 /**
  * Lay out one label as the shared-spec block: normalize, truncate to the
- * component width, then emit one rect per set atlas bit.
+ * given width, then emit one rect per set atlas bit.
  *
  * Coordinates are BLOCK-LOCAL (the block's own top-left is 0,0): the
  * spec's absolute rule "cell origin x = 8 + i*ADVANCE, y = 6" is
@@ -110,10 +124,14 @@ export interface BlockLabelLayout {
  * <svg>. Keeping the rects origin-relative lets the svg carry tight
  * width/height while the margin supplies the shared origin.
  *
- * @param componentWidth the component's px width for the shared-spec
- *   truncation `8 + n*ADVANCE <= componentWidth - 8`; pass Infinity
- *   (the default) when the box is content-sized (fit-content hugs the
- *   label, so nothing can overflow and no truncation applies).
+ * @param componentWidth the px width the shared-spec truncation
+ *   `8 + n*ADVANCE <= width - 8` runs against. Since wave 51 PR (A) the
+ *   harness passes the CAPTURE-FRAME width (390 by default, the `?width=`
+ *   override otherwise — docs/DYNAMIC_CAPTURE.md "Harness label chrome"),
+ *   never a component width: 62 glyphs fit at 390, 39 at 250, none below
+ *   22. Infinity (the default) disables truncation and exists for the
+ *   pure-layout tests only — the chrome must never pass it (the
+ *   LabelChrome.width250 pin is red if it does).
  */
 export function layoutBlockLabel(label: string, componentWidth: number = Infinity): BlockLabelLayout {
   // Shared-spec transform first — truncation counts NORMALIZED chars.

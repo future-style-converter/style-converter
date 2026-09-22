@@ -22,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+// wave-51 PR A — the harness label chrome paints 1x1-px rects (Size(1f, 1f)).
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidBitmap
 // Pass A's snapshot crosses from the capture path (android.graphics.Bitmap)
@@ -45,6 +47,10 @@ import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.typography.font.DocumentFontRegistry
 // wave-39 lane A2 — the replaced-element image channel's device-side half.
 import com.styleconverter.runtime.images.DocumentImageRegistry
+// wave-51 PR A — the shared block-font label GEOMETRY (pure: normalize /
+// truncatedCount / rects / COLOR). The runtime no longer draws the label;
+// this harness does, as chrome over the capture root (see CaptureCanvas).
+import com.styleconverter.runtime.core.renderer.BlockLabel
 import com.styleconverter.runtime.core.renderer.ComponentHost
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.renderer.LocalWptComposedMode
@@ -858,7 +864,15 @@ private fun CaptureView(
  *                        web/iOS WPT canvases so white WPT ink vanishes
  *                        identically on every surface)
  *   - Padding          : 16dp on all sides
- *   - No header, footer, border, or label — just the component.
+ *   - No header, footer, or border. ONE debug label, drawn as HARNESS
+ *                        CHROME over the finished component paint (never
+ *                        inside the component's paint chain): the plain
+ *                        component name (`_` → space) in the shared 5x7
+ *                        block font at frame (8,6), truncated against
+ *                        the FRAME width, colour rgba(237,237,237,179/255),
+ *                        only when the composed root has no children and
+ *                        no `_text`, and never in WPT/inbox capture mode
+ *                        (docs/DYNAMIC_CAPTURE.md "Harness label chrome").
  *
  * PixelCopy captures exactly this surface by using `onGloballyPositioned` to
  * report the canvas rect in window coordinates. The outer `CaptureView` must
@@ -912,6 +926,36 @@ private fun CaptureCanvas(
         onRendered()
     }
 
+    // ── Harness label chrome (wave 51, PR A) ───────────────────────────
+    // Exactly one debug label per capture, iff the COMPOSED root this canvas
+    // renders (`component` IS the SlotComposer output the capture loop hands
+    // us — the same object ComponentHost.Render receives) has zero composed
+    // children and no non-empty `_text`, and the run is not a WPT / TITAN-
+    // inbox capture. The WPT term is the SAME ambient flag the runtime's
+    // `shouldSuppressSynthesizedName` reads, so TITAN stays label-free on
+    // exactly the runs it always was. Web (`!WPT_MODE && node.children.length
+    // === 0 && !text`) and iOS (`!wptCaptureMode && children.isEmpty &&
+    // text.isEmpty`) apply the identical predicate — a container root or a
+    // root with real text gets no tag on any platform.
+    val showsLabel = !LocalWptCaptureMode.current &&
+        component.children.isNullOrEmpty() && component._text.isNullOrEmpty()
+    // The FRAME width in raw pixels — the width PixelCopy cuts the PNG to.
+    // px == dp at the harness's `wm density 160`, so this is 390 by default
+    // and the CAPTURE_WIDTH override otherwise; the truncation rule below
+    // is defined against THIS number, never a component/content-box width.
+    val widthPx = with(LocalDensity.current) { canvasWidth.roundToPx() }
+    // The rect list is pure in (name, frame width) → remembered on exactly
+    // those keys so recomposition never re-derives it (C28).
+    val labelRects = remember(component.name, widthPx) {
+        // No silent fallthrough (C5): a frame narrower than 22px has no
+        // glyph budget at all (8px origin + 8px margin + one 6px advance),
+        // so the capture carries no label — say so once, naming the width.
+        if (BlockLabel.truncatedCount(1, widthPx) == 0) {
+            Log.w(TAG, "Harness label chrome: frame width ${widthPx}px < 22px leaves no glyph budget — capture of '${component.name}' carries no label")
+        }
+        harnessLabelRects(component.name, widthPx)
+    }
+
     // `onGloballyPositioned` must come BEFORE `.padding()` in the modifier
     // chain so it reports the full 390dp outer rect (including padding +
     // background), not the post-padding inner content-box. Using the inner
@@ -943,6 +987,42 @@ private fun CaptureCanvas(
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
                 onPositioned(pos, coords.size.width.toFloat(), coords.size.height.toFloat())
+            }
+            // Harness label chrome — drawn HERE and nowhere else. This node's
+            // coordinate space is the unpadded 390dp outer rect, i.e. exactly
+            // the rect `onGloballyPositioned` above reports and PixelCopy
+            // crops (captureWithPixelCopy(window, bounds)), so (8,6) here IS
+            // PNG (8,6). It sits OUTSIDE `.padding` and every descendant
+            // (ComponentHost.Render), and `drawContent()` runs first, so the
+            // ink lands over the finished component paint as a sibling
+            // layer — no runtime modifier (transform, filter, blend, clip,
+            // opacity, margin/inset offset) can move, fade or clip it.
+            // `Modifier.drawWithContent` (androidx.compose.ui.draw) is the
+            // documented "decorate after content" hook; `drawRect` with an
+            // integer Offset and Size(1f, 1f) covers exactly one device
+            // pixel with full Skia coverage — no antialiased edge pixels —
+            // so every lit pixel is COLOR source-over the pixel beneath.
+            .drawWithContent {
+                // The component's whole paint (background, ComponentHost
+                // subtree, every runtime modifier) lands FIRST…
+                drawContent()
+                // …then the chrome, only under the composed-root predicate
+                // (no children, no `_text`, not WPT/inbox) hoisted above.
+                if (showsLabel) {
+                    // Runtime check of the frame-width assumption (Q1): the
+                    // rects were derived from `widthPx`; if the Box measured
+                    // to a different width the truncation would be against
+                    // the wrong frame — log, never silently mis-truncate.
+                    if (size.width.toInt() != widthPx) {
+                        Log.w(TAG, "Harness label chrome: canvas measured ${size.width.toInt()}px wide but rects were derived for ${widthPx}px")
+                    }
+                    // One rect per set atlas bit, already in frame pixels.
+                    for ((x, y) in labelRects) {
+                        // DrawScope.drawRect: integer top-left, 1x1 size →
+                        // exactly one device pixel, COLOR source-over.
+                        drawRect(BlockLabel.COLOR, Offset(x.toFloat(), y.toFloat()), Size(1f, 1f))
+                    }
+                }
             }
             .padding(CaptureCanvasPadding)
     ) {
@@ -1072,6 +1152,30 @@ internal fun hasHorizontalInset(component: IRComponent): Boolean =
  *  both `auto` → static block position) — same presence rule per axis. */
 internal fun hasVerticalInset(component: IRComponent): Boolean =
     component.properties.any { it.type in VerticalInsetTypes }
+
+/**
+ * wave-51 PR A — the harness label chrome's GEOMETRY, as a pure function so
+ * the JVM suite (HarnessLabelChromeTest) pins the exact rect list the
+ * `CaptureCanvas` draw node paints.
+ *
+ * Input contract, byte-identical on web / iOS / Android: the PLAIN component
+ * [name] with `_` → space — NOT `placeholderDisplayText` (no text-transform),
+ * NOT `applyTabSize`. Those are the COMPONENT's styles and the label is not
+ * part of the component; `BlockLabel.normalize` uppercases everything anyway,
+ * so a `text-transform: uppercase` root yields the same rects as its plain
+ * name (the C51 parity argument). Truncation is against [frameWidthPx] — the
+ * CAPTURE FRAME width the PNG is cut to (390 default, `CAPTURE_WIDTH`
+ * otherwise): 62 glyphs at 390, 39 at 250, none below 22. Every returned pair
+ * is a CAPTURE-FRAME pixel; the first possible rect is (8, 6). Normative
+ * home: docs/DYNAMIC_CAPTURE.md "Harness label chrome".
+ */
+internal fun harnessLabelRects(name: String, frameWidthPx: Int): List<Pair<Int, Int>> =
+    // `_` → space FIRST (the atlas has a `_` glyph, so normalize alone would
+    // keep underscores and the label would read LAYOUT_C01 on Android only).
+    BlockLabel.normalize(name.replace('_', ' ')).let { normalized ->
+        // Drop trailing glyphs that do not fit the frame budget, no ellipsis.
+        BlockLabel.rects(normalized, BlockLabel.truncatedCount(normalized.length, frameWidthPx))
+    }
 
 // Shared capture-canvas constants. Kept at file scope so tests, debug tools,
 // and future capture modes can reference the same values.
