@@ -634,7 +634,21 @@ platform; they are not folded into a rendering wave.
   regenerated, `BASELINE=1 ./test-all.sh --gate-set` **exit 0 on all 8**,
   `tools/visual/label-chrome-tripwire.test.mjs` **136/136 green** (it was
   6/136 on the pre-refresh baselines — its proof of teeth). Corpus impact:
-  zero by construction (§6 of the design record). The original brief
+  zero by construction (§6 of the design record). **The fidelity win,
+  measured** (`tools/titan/results/wave51-A/refresh/fidelity-compare.txt`,
+  18 combos/pairwise fixtures captured on all three platforms with the
+  chrome, "before" = the retro's 2026-09-04 classification): all **14
+  WEB-LABEL-SPILL rows** go from iOS-web 0.919–0.950 / Android-web
+  0.921–0.949 to **0.9991–0.9998 / 0.9971–0.9996**; **38 rows moved by
+  ≥ 0.005 on some pair, none downward** — among them every iOS
+  "label truncated at the box edge" row in pairs-02 (PW_Borders_Color_01
+  0.9137 → 1.0000, Images_03 0.8882 → 0.9999, Sizing_01 0.8774 → 1.0000,
+  Typography_01 0.9781 → 1.0000), Borders_Transforms_03 iOS-Android
+  0.8225 → 0.9965, Background_Decorated three-way 0.92 → 0.997, and the
+  two 9(g) carriers now 1.0000 on every pair. Caveat stated: the "before"
+  predates waves 50–51's runtime changes, so a row's movement is
+  attributable to the chrome only where its class or `label_ink` named the
+  label — which is every row listed. The original brief
   follows for the record. The shared spec promises byte-identical label
   rects at (8,6), but today the label is composited by the component:
   iOS draws it INSIDE the element's `.blendMode` group

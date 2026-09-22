@@ -2414,6 +2414,36 @@ web's label spill, the label PR's half. Pin `BlockBoxAlignItemsTest`,
 mutation-proven; compose 3232 · android-harness 116 on the PR tree;
 `doc-staleness-check.sh` exit 0.
 
+**Wave 51, PR 3 (2026-09-16 → 22) — the harness label is capture-frame
+chrome on all three platforms.** The debug label every capture carries
+used to be composited INSIDE the styled component, so the element's
+blend, opacity, clip, transform, filter and alignment moved or recoloured
+it and the three platforms disagreed about a mark that is not CSS (14
+web-label-spill fidelity rows, iOS truncating it at the box edge, Android
+clipping it under filters and truncating it at the content width). It is
+now drawn by each capture app as a sibling layer over the capture root at
+(8,6) in the pad band, the plain component name truncated to the frame
+width, gated by the existing WPT/composed flags, and its composited byte
+is (174,174,180) on all three — the natives at alpha 179/255, web at CSS
+alpha 0.706 because Chromium rounds alpha to 8 bits (the 179/255 spelling
+composited one LSB dark; a puppeteer raster test pins the byte). The
+runtimes render no label. Built by four disjoint-ownership lanes,
+reviewed by three per-platform skeptics with executed repros (the web
+colour parity was found vacuous and fixed), polished, then measured:
+the refresh's measure run returned exactly the predicted exits (exit 5
+naming two `Edge_GradientWithRadius` ledger lines, deleted, 12 → 10; then
+relocation regressions), 390 review sheets were inspected (385 clean, 5
+flagged and adjudicated as pre-existing Android capture resampling on
+blurred-shadow stems and a re-anti-aliased rotated edge), all 390
+baselines were refreshed, the gate set is exit 0 on all 8 fixtures and the
+positional tripwire over the committed PNGs is 136/136 (6/136 before the
+refresh). Fidelity, measured on 18 combos/pairwise fixtures: all 14
+spill rows to ≥ 0.997 on both web pairs, 38 rows moved on some pair,
+none down. Corpus impact zero by construction (TITAN captures run under
+the flags that suppress the chrome). Design, reviews, lane reports,
+skeptic verdicts and the refresh record are in
+`tools/titan/results/wave51-A/`.
+
 
 ## Test suites
 
