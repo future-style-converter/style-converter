@@ -2395,9 +2395,24 @@ net exit 0 ×8). **The wave-50 bisection that "excluded" runtime code was
 wrong**: its four A/B runs recorded scores only, no install evidence, and
 two contradicted the code; the record carries a correction and BACKLOG a
 new standing constraint (a device A/B records the installed APK's sha1).
-Suites on the PR-1 tree, single writer: compose 3230 · android-harness
+Suites on the PR-1 tree, single writer: compose 3232 · android-harness
 116 (the converter, web, swiftui, web-harness and tooling suites are
 untouched by this PR and run in CI); `doc-staleness-check.sh` exit 0.
+
+**Wave 51, PR 2 (2026-09-16) — `align-items` stops moving a non-flex
+block's content on Android (BACKLOG 9(g)).** The block-flow fallback Box
+mapped `align-items` onto its `contentAlignment`, so `end` placed a block's
+content bottom-right and `center` centred it, where CSS gives the property
+no effect outside flex and grid; the Box is TopStart unconditionally and
+the callerless mapping is deleted. Landed as its own PR before the label
+chrome PR so the gate records a runtime fix, not a side effect. Measured
+on device on `fixtures/fidelity/layout.combos.json`, three platforms,
+before → after: Layout_C01_AlignContent iOS-Android 0.9018 → 1.0000,
+Layout_TextBlock iOS-Android 0.8911 → 1.0000 and Android-web 0.8912 →
+1.0000; no other component moved. C01's remaining Android-web 0.9067 is
+web's label spill, the label PR's half. Pin `BlockBoxAlignItemsTest`,
+mutation-proven; compose 3232 · android-harness 116 on the PR tree;
+`doc-staleness-check.sh` exit 0.
 
 
 ## Test suites
@@ -2406,7 +2421,7 @@ untouched by this PR and run in CI); `doc-staleness-check.sh` exit 0.
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 526 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1337 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3230 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3232 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 116 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2008 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 282 |

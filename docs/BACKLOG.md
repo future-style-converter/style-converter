@@ -627,12 +627,14 @@ platform; they are not folded into a rendering wave.
   "BORDERRADIUS UNIFORM" elsewhere). That fix is why 10 ledger lines are
   EXPECTED STALE (obligation #7). What remains for this PR is the
   COMPOSITING half — the blend-group, the align-driven placement and the
-  web spill. Independent runtime bug surfaced alongside: Android applies
-  `align-items:end` HORIZONTALLY to a non-flex Box (`ComponentRenderer.kt`,
-  the `contentAlignment = displayConfig.alignItems.toBoxAlignment()` call —
-  cite the call site by that expression; the line has now moved twice,
-  2820→2845 between R12 and the retro ship and 2845→**2942** in wave 50,
-  which is why it is a symbol pointer) — queue 9(g).
+  web spill. Independent runtime bug surfaced alongside — **FIXED FIRST, as
+  its own PR (wave 51 PR 2, commit e88dec76), so the gate records it as a
+  runtime fix and not as a side effect of (A)**: Android applied
+  `align-items:end` HORIZONTALLY to a non-flex Box; the block-flow fallback
+  Box in `ComponentRenderer.kt` is now `contentAlignment = Alignment.TopStart`
+  unconditionally and the callerless `toBoxAlignment()` is deleted (queue
+  9(g) carries the device numbers). What (A) still owes on those two
+  components is the label itself, not its placement.
 - **(B) Drop the web-harness `width: fit-content` initialiser for
   flex/grid items whose cross axis is `auto`** (A11#12; the initialiser is
   the unconditional `width: 'fit-content'` in
@@ -2194,12 +2196,21 @@ platform; they are not folded into a rendering wave.
    cross-platform number read off these four components is measuring the
    label rather than the style** — and it is independent of the height bug
    9(f) fixed. The ledger consequence is in obligation #7; decided-PR (A) is
-   its natural home; (g) Android `align-items` applied as Box
-   `contentAlignment` on NON-flex containers (`ComponentRenderer.kt`, the
-   `contentAlignment = displayConfig.alignItems.toBoxAlignment()` call site —
-   cite it by that expression; the line has now moved twice, 2820→2845 at the
-   retro and 2845→**2942** in wave 50; A11#8 — Layout_C01_AlignContent label
-   lands bottom-right); (h) **iOS
+   its natural home; (g) ~~Android `align-items` applied as Box
+   `contentAlignment` on NON-flex containers~~ **DONE (wave 51 PR 2, commit
+   e88dec76)** — the block-flow fallback Box in `ComponentRenderer.kt` is
+   `Alignment.TopStart` unconditionally and the callerless
+   `AlignItems.toBoxAlignment()` is deleted (A11#8: `align-items: end` had
+   put Layout_C01_AlignContent's content bottom-right, `center` had centred
+   Layout_TextBlock's). Measured on device, `fixtures/fidelity/layout.combos.json`
+   on all three platforms, before → after: Layout_C01_AlignContent
+   iOS-Android **0.9018 → 1.0000**, Layout_TextBlock iOS-Android **0.8911 →
+   1.0000** and Android-web **0.8912 → 1.0000**; no other component moved
+   (22 components × 3 pairs). C01's Android-web went 0.9168 → 0.9067 and
+   its iOS-web stayed 0.9067: Android now matches iOS pixel-for-pixel and web
+   is the odd platform there through its label spill — decided-PR (A)'s
+   half, not this one's. Pin `BlockBoxAlignItemsTest` (source scan;
+   mutation `TopStart → Center` executed, one test red); (h) **iOS
    `calc(var(--u)*10)` standalone** resolves to 50px where web/Android give
    `auto` (358) — `fixtures/fidelity/tokens/calc-units.json` 008_tokenMath
    (A11#13; align the calc(var()) fallback semantics across twins); (i)

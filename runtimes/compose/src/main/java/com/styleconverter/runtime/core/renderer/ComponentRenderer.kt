@@ -2937,9 +2937,25 @@ object ComponentRenderer {
                         }
                     }
                 } else {
+                    // Wave 51 (BACKLOG 9(g), retro A11#8): this is the block-flow
+                    // fallback for a non-flex, non-grid, non-BLOCK display type
+                    // with in-flow content. CSS block flow places that content
+                    // at the top-left of the content box, and `align-items`
+                    // has NO effect here — css-align-3 ("Self-Alignment")
+                    // makes it the default `align-self` of flex/grid ITEMS,
+                    // and a block container's children are not items. Web and
+                    // iOS ignore it on this path; Compose alone used to map it
+                    // through `toBoxAlignment()` (now deleted, sole caller), so
+                    // `align-items: end` put a block's content bottom-RIGHT
+                    // (layout.combos Layout_C01_AlignContent, three-way-odd
+                    // 0.90) and `center` centred it (Layout_TextBlock,
+                    // Android-odd 0.89). TopStart is also what the flex/grid
+                    // empty-container demotion above already relies on ("Box's
+                    // default contentAlignment is TopStart"). Pinned by
+                    // BlockBoxAlignItemsTest (source scan; JVM-only module).
                     Box(
                         modifier = modifier,
-                        contentAlignment = displayConfig.alignItems.toBoxAlignment()
+                        contentAlignment = Alignment.TopStart
                     ) {
                         RenderContent(component, textColor, displayConfig)
                     }
@@ -8074,20 +8090,13 @@ object ComponentRenderer {
         AlignItems.STRETCH -> Alignment.CenterHorizontally
     }
 
-    private fun AlignItems.toBoxAlignment(): Alignment = when (this) {
-        AlignItems.FLEX_START -> Alignment.TopStart
-        AlignItems.FLEX_END -> Alignment.BottomEnd
-        AlignItems.CENTER -> Alignment.Center
-        AlignItems.BASELINE -> Alignment.TopStart
-        // Default `align-items: stretch` for a non-flex Box has no real
-        // analog in Compose (Box has no stretch alignment). CSS block-flow
-        // default places contents top-LEFT (the implicit `text-align: start`
-        // inside the box), so use TopStart. Was TopCenter, which centred
-        // every placeholder horizontally — Card_Complete / Input_Field /
-        // Tag_Chip rendered with text mid-card while iOS/web rendered
-        // them at the top-left of the padding band.
-        AlignItems.STRETCH -> Alignment.TopStart
-    }
+    // `AlignItems.toBoxAlignment()` used to live here, mapping `align-items`
+    // onto the block-flow fallback Box's contentAlignment (FLEX_END →
+    // BottomEnd, CENTER → Center; STRETCH had already been corrected from
+    // TopCenter to TopStart because Card_Complete / Input_Field / Tag_Chip
+    // rendered their text mid-card). Wave 51 (BACKLOG 9(g)) deleted it: on a
+    // non-flex, non-grid container `align-items` has no layout effect in
+    // CSS, so the Box is TopStart unconditionally — see the call site.
 }
 
 /**
