@@ -219,8 +219,32 @@ cell flips await the wave-50 gate.
   capture the gate made (`observedFrom` names the run), and a "now passing"
   verdict that did not come from a live gate is not a deletion warrant.
 
-## Next-wave obligations (wave 51 opens with these)
+## Next-wave obligations (wave 52 opens with these)
 
+0. **Wave 51 shipped as three PRs, each measured on device before merge**
+   (2026-09-15 → 22): PR 1 the lost cells (queue 0(z): retro R2's percent
+   clamp dropped the min floor in Compose's intrinsic pass — fixed, +3
+   Android, `corpus-v6.17`, run `wave51-fix`), PR 2 the 9(g) one-liner
+   (`align-items` no longer moves a non-flex block's content on Android —
+   two layout.combos pairs to 1.0000), PR 3 the harness label as
+   capture-frame chrome on all three platforms (decided-PR (A) below: 390
+   baselines refreshed after a 390-sheet review, two ledger lines deleted,
+   gate set exit 0 ×8, tripwire 136/136, 14 spill rows to ≥ 0.997).
+   Three device gates ran this wave: `wave51-open` (the unmodified wave-50
+   tree — 0/0/0/0 against wave50-final, run-to-run determinism proven),
+   `wave51-fix` (corpus-v6.17), and PR 3's fixture-net measure/refresh
+   runs; wave 52 therefore opens, as always, with the FULL gate on a quiet
+   host (`tools/titan/gate-driver.sh wave52-open`, scored against
+   `wave51-fix` with the wave-50 watchlist) — expected: zero per-cell
+   change (PR 3 cannot reach the corpus by construction; PR 2's carriers are
+   off-corpus), fixture net exit 0 ×8, and the two iOS blend carriers
+   (obligation #1 below) still 1.0000. The first divergence from that
+   expectation is the first item of wave 52. Standing constraints added
+   this wave: a device A/B records the installed APK's sha1 (0(z)); and —
+   learned the hard way when a six-day gap purged the session scratchpad —
+   design documents, lane reports and review verdicts are committed under
+   `tools/titan/results/<wave>-<lane>/` the moment they exist
+   (`wave51-A/` is the template).
 1. **The wave-50 gate RAN (run `wave50-final`, 2026-09-14 21:14 → 22:44 UTC,
    quiet host, `tools/titan/gate-driver.sh`): 30/30 sections, every column
    48/48/48 on the first attempt; `score-gate.mjs` wave49-final →
