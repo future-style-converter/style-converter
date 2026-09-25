@@ -1,0 +1,1431 @@
+{
+ "_lane": "wave52-plan / absence-only-denominator",
+ "_run": "wave51-fix (tools/titan/runs/wave51-fix/sections/<section>/manifest.json + {web,ios,android}-screenshots; refs tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins)",
+ "_method": "every capture PNG and every frozen ref PNG decoded; uniform = min==max on every channel; ink = manifest semanticPresence (deviation from white > 8/channel, the wave-13 predicate)",
+ "tests": 1435,
+ "uniformRefs": 13,
+ "predicates": {
+  "absenceOnly": "wptPass === true && semanticPresence.bCoveragePct < WPT_PRESENCE_REF_MIN_PCT (0.02) — the pass a capture with no ink at all would also receive (the null-renderer control)",
+  "blankCaptureVsInkedRef": "capture buffer uniform (one RGBA value) && semanticPresence.bCoveragePct >= 0.02"
+ },
+ "populations": {
+  "absenceOnly": {
+   "cells": 19,
+   "tests": 7,
+   "rows": [
+    {
+     "cell": "wave51-fix css-backgrounds/animations/background-color-transparent-animation-in-body.html web P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-backgrounds/animations/background-color-transparent-animation-in-body.html ios P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-backgrounds/animations/background-color-transparent-animation-in-body.html android P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html web P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html ios P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html android P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-cascade/scope-implicit-crash-print.html web P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-cascade/scope-implicit-crash-print.html ios P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-cascade/scope-implicit-crash-print.html android P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-flexbox/abspos/flexbox_inline-abspos.html web P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-flexbox/abspos/flexbox_inline-abspos.html ios P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-flexbox/abspos/flexbox_inline-abspos.html android P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-images/gradient-refcrash.html web P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-images/gradient-refcrash.html ios P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-images/gradient-refcrash.html android P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-transforms/backface-visibility-hidden-006.html web P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-transforms/backface-visibility-hidden-006.html ios P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-transforms/backface-visibility-hidden-006.html android P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    },
+    {
+     "cell": "wave51-fix css-view-transitions/animation-name-ua-prefix.html web P 1.0000",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "aCov": 0,
+     "bCov": 0
+    }
+   ]
+  },
+  "uniformSameColourNotCanvasStaysCounted": {
+   "cells": 3,
+   "rows": [
+    {
+     "cell": "wave51-fix css-backgrounds/animations/background-color-animation-in-body.html web P 1.0000",
+     "colour": [
+      100,
+      100,
+      0,
+      255
+     ],
+     "bCov": 100
+    },
+    {
+     "cell": "wave51-fix css-backgrounds/animations/background-color-animation-in-body.html ios P 1.0000",
+     "colour": [
+      100,
+      100,
+      0,
+      255
+     ],
+     "bCov": 100
+    },
+    {
+     "cell": "wave51-fix css-backgrounds/animations/background-color-animation-in-body.html android P 1.0000",
+     "colour": [
+      100,
+      100,
+      0,
+      255
+     ],
+     "bCov": 100
+    }
+   ]
+  },
+  "uniformSameColourAlreadyExcluded": {
+   "cells": 3,
+   "rows": [
+    {
+     "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop-entry.html web EXCL(true) 1.0000",
+     "colour": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "scoreExcluded": true
+    },
+    {
+     "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop-entry.html ios EXCL(true) 1.0000",
+     "colour": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "scoreExcluded": true
+    },
+    {
+     "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop-entry.html android EXCL(true) 1.0000",
+     "colour": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "scoreExcluded": true
+    }
+   ]
+  },
+  "uniformDifferentColourHonestFails": {
+   "cells": 9,
+   "rows": [
+    {
+     "cell": "wave51-fix css-cascade/initial-background-color.html web f 0.5414",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      0,
+      128,
+      0
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-cascade/initial-background-color.html ios f 0.5414",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-cascade/initial-background-color.html android f 0.5414",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-values/calc-in-media-queries-001.html web f 0.5535",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      0,
+      0
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-values/calc-in-media-queries-001.html ios f 0.5535",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      0,
+      0,
+      255
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-values/calc-in-media-queries-001.html android f 0.5535",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      0,
+      0,
+      255
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-values/calc-in-media-queries-002.html web f 0.5535",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      0,
+      0
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-values/calc-in-media-queries-002.html ios f 0.5535",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      0,
+      0,
+      255
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-values/calc-in-media-queries-002.html android f 0.5535",
+     "refPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capPixel": [
+      255,
+      0,
+      0,
+      255
+     ],
+     "colorFailed": true,
+     "coverageRatioFailed": true
+    }
+   ]
+  },
+  "uniformDifferentColourAlreadyExcluded": {
+   "cells": 3,
+   "rows": [
+    {
+     "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop.html web EXCL(true) 0.5414",
+     "refPixel": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255
+     ]
+    },
+    {
+     "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop.html ios EXCL(true) 0.5414",
+     "refPixel": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ]
+    },
+    {
+     "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop.html android EXCL(true) 0.5414",
+     "refPixel": [
+      0,
+      128,
+      0,
+      255
+     ],
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ]
+    }
+   ]
+  },
+  "blankCaptureVsInkedRef": {
+   "cellsScored": 33,
+   "cellsExcluded": 3,
+   "tests": 15,
+   "passing": 0,
+   "rows": [
+    {
+     "cell": "wave51-fix css-cascade/scope-visited.html web f 0.8760",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 5.396,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-cascade/scope-visited.html ios f 0.8760",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 5.396,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-cascade/scope-visited.html android f 0.8760",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 5.396,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-color/color-layers-no-blend-mode.html web f 0.5189",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      680
+     ],
+     "refSize": [
+      390,
+      680
+     ],
+     "bCov": 72.587,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": true
+    },
+    {
+     "cell": "wave51-fix css-color/color-layers-no-blend-mode.html ios f 0.5189",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      788
+     ],
+     "refSize": [
+      390,
+      680
+     ],
+     "bCov": 62.638,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": true
+    },
+    {
+     "cell": "wave51-fix css-color/color-layers-no-blend-mode.html android f 0.5189",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      788
+     ],
+     "refSize": [
+      390,
+      680
+     ],
+     "bCov": 62.638,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": true
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html web f 0.9925",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.102,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html ios f 0.9925",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.102,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html android f 0.9925",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.102,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html web f 0.8821",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 2.444,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html ios f 0.8821",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 2.444,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html android f 0.8821",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 2.444,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/shadow-dom-part.html web f 0.9925",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.102,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/shadow-dom-part.html ios f 0.9925",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.102,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-counter-styles/counter-style-at-rule/shadow-dom-part.html android f 0.9925",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.102,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-images/gradient/gradient-eval-predefined-color-spaces.html web f 0.9247",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 12.821,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": true
+    },
+    {
+     "cell": "wave51-fix css-images/gradient/gradient-eval-predefined-color-spaces.html ios f 0.9247",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 12.821,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": true
+    },
+    {
+     "cell": "wave51-fix css-images/gradient/gradient-eval-predefined-color-spaces.html android f 0.9247",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 12.821,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": true
+    },
+    {
+     "cell": "wave51-fix css-masking/clip-path/clip-path-inset-round-rendering.html ios f 0.7483",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 37.823,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": true
+    },
+    {
+     "cell": "wave51-fix css-multicol/broken-column-rule-1.html ios f 0.9752",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.214,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-pseudo/first-letter-of-html-root-refcrash.html web EXCL(true) 0.9936",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.121,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-pseudo/first-letter-of-html-root-refcrash.html ios EXCL(true) 0.9936",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.121,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-pseudo/first-letter-of-html-root-refcrash.html android EXCL(true) 0.9936",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.121,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-text-decor/text-decoration-inset-025.html android f 0.0000",
+     "capPixel": [
+      0,
+      0,
+      0,
+      0
+     ],
+     "capSize": [
+      390,
+      9470
+     ],
+     "refSize": [
+      390,
+      1230
+     ],
+     "bCov": 1.652,
+     "presenceFailed": false,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-transforms/composited-under-rotateY-180deg-preserve-3d.html ios f 0.9565",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 4.274,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-transforms/composited-under-rotateY-180deg-preserve-3d.html android f 0.9565",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 4.274,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-view-transitions/empty-render-target-capture.html android f 0.9565",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 4.274,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-writing-modes/direction-propagation-body-contain-root.html web f 0.9710",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.595,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-writing-modes/direction-propagation-body-contain-root.html ios f 0.9710",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.595,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix css-writing-modes/direction-propagation-body-contain-root.html android f 0.9710",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.595,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix selectors/invalidation/nth-child-in-shadow-root.html web f 0.9749",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.604,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix selectors/invalidation/nth-child-in-shadow-root.html ios f 0.9749",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.604,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix selectors/invalidation/nth-child-in-shadow-root.html android f 0.9749",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.604,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix selectors/invalidation/nth-child-of-in-shadow-root.html web f 0.9700",
+     "capPixel": [
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.689,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix selectors/invalidation/nth-child-of-in-shadow-root.html ios f 0.9700",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.689,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    },
+    {
+     "cell": "wave51-fix selectors/invalidation/nth-child-of-in-shadow-root.html android f 0.9700",
+     "capPixel": [
+      255,
+      255,
+      255,
+      255
+     ],
+     "capSize": [
+      390,
+      600
+     ],
+     "refSize": [
+      390,
+      600
+     ],
+     "bCov": 0.689,
+     "presenceFailed": true,
+     "coverageRatioFailed": true,
+     "colorFailed": false
+    }
+   ]
+  },
+  "inkedCaptureVsBlankRef": {
+   "cells": 2,
+   "rows": [
+    {
+     "cell": "wave51-fix css-view-transitions/animation-name-ua-prefix.html ios f 0.9570",
+     "aCov": 4.274,
+     "coverageRatioFailed": true
+    },
+    {
+     "cell": "wave51-fix css-view-transitions/animation-name-ua-prefix.html android f 0.9570",
+     "aCov": 4.274,
+     "coverageRatioFailed": true
+    }
+   ]
+  },
+  "erasedAllGreenRefs": {
+   "note": "ref source is <html style=\"background: green\"> (css-cascade/reference/all-green.html, css-values/reference/all-green.html) but the frozen PNG is uniform white: canvasFrameCss :where(html, body) { background: #FFFFFF } paints an opaque white body over the root canvas — the B10 erased-reference family, a sub-mechanism its negative-z-index census does not count",
+   "tests": [
+    "css/css-cascade/initial-background-color.html",
+    "css/css-values/calc-in-media-queries-001.html",
+    "css/css-values/calc-in-media-queries-002.html"
+   ]
+  }
+ },
+ "denominators": {
+  "web": {
+   "before": {
+    "passing": 1215,
+    "measured": 1379,
+    "pct": 88.11
+   },
+   "absenceOnlyCells": 7,
+   "after": {
+    "passing": 1208,
+    "measured": 1372,
+    "pct": 88.05
+   }
+  },
+  "ios": {
+   "before": {
+    "passing": 1089,
+    "measured": 1369,
+    "pct": 79.55
+   },
+   "absenceOnlyCells": 6,
+   "after": {
+    "passing": 1083,
+    "measured": 1363,
+    "pct": 79.46
+   }
+  },
+  "android": {
+   "before": {
+    "passing": 1080,
+    "measured": 1369,
+    "pct": 78.89
+   },
+   "absenceOnlyCells": 6,
+   "after": {
+    "passing": 1074,
+    "measured": 1363,
+    "pct": 78.8
+   }
+  }
+ },
+ "wave49ToWave51": {
+  "blankVsBlankPasses": "21 cells / 7 tests (wave50-S6) → 22 cells / 8 tests uniform-on-uniform PASS on wave51-fix (+animation-name-ua-prefix web); of which 19 cells / 7 tests are absence-only (the 3 olive background-color-animation-in-body cells are a positive assertion a null renderer fails)",
+  "blankCaptureVsInkedRef": "42 (wave50-S6 on wave49-final) → 36 on wave51-fix; the 6 departures are RUNTIME/PIPELINE FIXES that registered as gains: s-11-1-1b-005 ×3 (black canvas → inked), counter-cjk-decimal android (f 0.9407 → P 0.9777), attr-notype-fallback android (P 0.9983), attr-style-sharing-4 android (P 0.9998)"
+ }
+}

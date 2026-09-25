@@ -1,0 +1,38 @@
+{
+  "_note": "wave-52 plan, family counters-and-multicol. Every number read from tools/titan/runs/wave51-fix/sections/*/per-test-ir/*.json (1435 docs, 10708 components) or measured with pngjs on the run PNGs vs tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/. Nothing built or run.",
+  "run": "wave51-fix",
+  "multicol_family_px": {
+    "measure": "orange = rgb(255,165,0)+-10; aqua columns x35-134 / 135-234 / 235-334; capture 390x600",
+    "000_and_001": {"ref": "orange n=300 x235-334 y161-163; aqua y111-210|y111-210|y111-160", "web": "orange n=210 x50-119 y131-133", "ios": "orange n=300 x35-134 y131-133", "android": "orange n=300 x35-134 y131-133"},
+    "002": {"ref=web=ios=android": "orange x235-334 y161-163"},
+    "003": {"ref/web/ios": "orange x235-334 y161-163; aqua col3 y111-160", "android": "orange x235-334 y158-160; aqua col3 y111-157"},
+    "balancing-000_and_001": {"ref": "orange n=500 x235-334 y171-175; aqua y91-175|y91-175|y91-170", "web": "orange n=350 x50-119 y111-115; aqua y91-173 x3", "ios": "orange n=500 x35-134 y111-115; aqua y91-174|y91-174|y91-172", "android": "same as ios"},
+    "balancing-002": {"ref=web=ios=android": "orange x235-334 y171-175"},
+    "balancing-003": {"ref/web/ios": "orange x235-334 y171-175; aqua col3 y91-170", "android": "orange x235-334 y166-170; aqua col3 y91-165"},
+    "cells": {"000": "web P 0.9890 ios P 0.9871 android P 0.9857", "001": "same", "002": "web P 1 ios P 0.9981 android P 0.9968", "003": "web P 1 ios P 0.9981 android P 0.9881", "balancing-000": "web P 0.9870 ios P 0.9854 android P 0.9839", "balancing-001": "same", "balancing-002": "web P 1 ios P 0.9985 android P 0.9970", "balancing-003": "web P 1 ios P 0.9985 android P 0.9857"}
+  },
+  "counter_cells_ink_bands": {
+    "counter-reset-reversed-list-item": {"ref": "2 bands: y36-48 x16-288; y72-83 x16-24", "web": "8 bands: y56-68 x16-288; y112-123 x0-32; then 6 bullets x0-3 every 20px from y137", "ios": "2 bands y36-48, y72-83", "android": "2 bands y36-48, y72-83", "cells": "web f 0.9369 ios P 0.9991 android P 0.9982"},
+    "armenian-008": {"ref": "6 bands; row2 marker y124-143 x217-293; wrapped text y156-175 x217-287; row4 y187-206 x217-363", "web": "5 bands; rows y121-149 x219-317 and y152-180 x219-332 (28px tall, tofu x220-228)", "ios": "5 bands; row2 y124-143 x217-371 (155px, one line)", "android": "same as ios", "line_width_px": 158, "cells": "web f 0.9435 ios f 0.9420 android f 0.9423"},
+    "counter-suffix": {"ref_row1_runs": "x46-58 marker, x64-87 text", "web_row1_runs": "x46-58, x64-87", "ios_row1_runs": "x64-73, x80-103", "android_row1_runs": "x64-73, x80-103", "rtl_rows": {"ref": "x103-145", "web": "x46-127 (left-aligned, marker left)", "ios": "x103-127 text only", "android": "x151-175 text only"}, "cells": "web P 0.9818 ios f 0.9285 android f 0.9051"},
+    "counter-list-item-2_row1": {"ref": "x38-61", "web": "x38-61", "ios": "x56-77", "android": "x56-77"},
+    "cssom-pad-setter": {"ref": "3 bands y35-48/55-68/75-88 x56-89 (641px)", "web": "3 bands y36-47/135-147/235-248 x57-69 (206px)", "cells": "f 0.9821/0.9819/0.9820, coverageRatioFailed a/b 0.089/0.274"},
+    "cssom-negative-setter": {"ref": "(3). (2). (1). 440px", "web": "-3. -2. -1. at 100px pitch 239px P 0.984", "ios/android": "206px f 0.9849/0.9848 coverageRatioFailed"},
+    "cssom-prefix-suffix-setter": {"ref": "(A) (B) (C) 478px", "captures": "1. 2. 3. at 100px pitch 206/186/175px f 0.9844/0.9848/0.9849"},
+    "override-in-shadow-dom": {"ref": "9 bands A-I", "captures": "3 bands 1. 2. 3.", "cells": "f 0.9816/0.9808/0.9805 coverageRatioFailed"},
+    "access-from-shadow-dom_and_shadow-dom-part": {"ref": "3 bands A. B. C.", "captures": "blank", "cells": "f 0.9925 x3 presenceFailed"}
+  },
+  "corpus_census": {
+    "T2_static_rows_parent_exact_smaller_than_child_border_extent": {"rows": 147, "tests": 17, "effective_layout_height_below_band_width": ["CSS2/floats-clear-multicol-003 (parent H=0, bb=3)", "CSS2/floats-clear-multicol-balancing-003 (parent H=0, bb=5)", "css-display/display-contents-dynamic-generated-content-fieldset-001 (parent H=0, bb=10; android P 0.9981)"]},
+    "Clear_wires": {"total": 195, "by_section": {"css-grid": 120, "CSS2": 26, "css-flexbox": 23, "css-writing-modes": 18, "css-anchor-position": 8}},
+    "br_shaped_0x20_childless_components": 130,
+    "br_clear_fold_carriers": ["CSS2/floats-clear/floats-clear-multicol-000", "-001", "-balancing-000", "-balancing-001"],
+    "meta_markerText": {"components": 194, "tests": 26, "web_pass": 25, "web_fail": ["css-counter-styles/armenian/css3-counter-styles-008 f 0.9435"]},
+    "Display_LIST_ITEM_without_markerText": {"components": 83, "by_section": {"css-pseudo": 47, "css-lists": 30, "css-counter-styles": 3, "css-cascade": 2, "css-anchor-position": 1}},
+    "outside_position_list_items": {"items": 127, "tests": 26, "inside_items": 385, "thin_native_passes": ["css-lists/counter-list-item-slot-order 0.9517/0.9523", "css-lists/counter-reset-reversed-nested 0.9551/0.9509", "css-lists/change-list-style-type-002 0.9547/0.958", "css-cascade/all-prop-001 0.964/0.9641", "css-ui/appearance-auto-details-list-item 0.9676/0.9679", "css-cascade/scope-pseudo-element android 0.9746"]},
+    "li_100x100_placeholders": {"li": 51, "tests": 15, "all_under": "css-counter-styles/cssom/"},
+    "at_counter_style_source_carriers": {"tests": 26, "dirs": {"counter-style-at-rule": 8, "cssom": 15, "css-lists/content-property/marker-text-matches-{circle,disc,square}": 3}},
+    "marker_pseudo_source_carriers": {"tests": 10, "list": ["css-anchor-position/anchor-position-multicol-011", "css-cascade/scope-pseudo-element", "css-counter-styles/counter-style-at-rule/disclosure-styles", "css-lists/counter-reset-reversed-list-item", "css-lists/counter-reset-reversed-list-item-start", "css-pseudo/first-letter-exclude-block-child-marker", "css-pseudo/first-letter-exclude-inline-child-marker", "css-pseudo/first-letter-exclude-inline-marker", "css-pseudo/first-letter-skip-marker", "css-pseudo/first-line-and-marker"]},
+    "korean_hangul_formal_carriers": {"tests": 1, "components": 2, "test": "css-counter-styles/counter-suffix"}
+  }
+}

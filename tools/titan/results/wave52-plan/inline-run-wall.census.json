@@ -1,0 +1,1061 @@
+{
+ "run": "wave51-fix",
+ "docs": 1435,
+ "lineClamp": {
+  "markerDrawnSoftWrapped": [
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-001.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9975
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9894
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9836
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-002.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9868
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9813
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9884
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-003.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9999
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9918
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9861
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-004.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9737
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9704
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.98
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-005.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9735
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.97
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9789
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-006.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9735
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.97
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9789
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-007.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9841
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9843
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9844
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-008.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9841
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9843
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9844
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-009.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.984
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9839
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9795
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-011.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.994
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9863
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-012.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9982
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9975
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9911
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-016.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9901
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9883
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.981
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-022.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9939
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9863
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9765
+     },
+     "ios": {
+      "pass": false,
+      "ssim": 0.9495
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9607
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-027.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9914
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9905
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9818
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9992
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9906
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9847
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-029.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9994
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9991
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9906
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9996
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9983
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9942
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-031.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9993
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9843
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9779
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9834
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9577
+     },
+     "android": {
+      "pass": false,
+      "ssim": 0.9397
+     }
+    }
+   }
+  ],
+  "preOrNowrap": [
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-013.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.979
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9787
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.973
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-014.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.979
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9787
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.973
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-015.tentative.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.979
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9787
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.973
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-017.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.979
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9787
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.973
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-026.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9992
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9907
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9818
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/line-clamp-001.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9905
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9809
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/line-clamp-002.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9881
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9766
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/line-clamp-003.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9881
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9766
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/line-clamp-004.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9902
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9802
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/line-clamp-005.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9891
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.982
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/line-clamp-006.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9822
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9701
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/line-clamp-007.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 1
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9822
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.9701
+     }
+    }
+   }
+  ],
+  "markerSuppressed": [
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-023.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9965
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9931
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.972
+     }
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-024.html",
+    "cells": {
+     "web": {
+      "pass": true,
+      "ssim": 0.9965
+     },
+     "ios": {
+      "pass": true,
+      "ssim": 0.9931
+     },
+     "android": {
+      "pass": true,
+      "ssim": 0.972
+     }
+    }
+   }
+  ]
+ },
+ "glyphlessWhitespaceMembers": [
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1",
+   "member": "line-clamp__block-ellipsis-032.tentative__1__1",
+   "tag": "span",
+   "props": [
+    "WhiteSpace",
+    "BackgroundColor"
+   ],
+   "textLength": 8,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9834
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9577
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9397
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__2",
+   "member": "line-clamp__block-ellipsis-032.tentative__2__1",
+   "tag": "span",
+   "props": [
+    "WhiteSpace",
+    "BackgroundColor"
+   ],
+   "textLength": 8,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9834
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9577
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9397
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__3",
+   "member": "line-clamp__block-ellipsis-032.tentative__3__1",
+   "tag": "span",
+   "props": [
+    "WhiteSpace",
+    "BackgroundColor"
+   ],
+   "textLength": 8,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9834
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9577
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9397
+    }
+   }
+  },
+  {
+   "test": "css/css-pseudo/first-letter-001.html",
+   "host": "wpt__css-pseudo__first-letter-001__1",
+   "member": "first-letter-001__1__0",
+   "tag": "span",
+   "props": [
+    "Position",
+    "BoxSizing",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "PaddingTop",
+    "PaddingRight",
+    "PaddingBottom",
+    "PaddingLeft",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "Display",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "textLength": 1,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9806
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9726
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9717
+    }
+   }
+  }
+ ],
+ "hangingPunctuationMembers": [
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "host": "wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2",
+   "member": "hanging-punctuation__hanging-punctuation-inline-001__2__0",
+   "tag": "span",
+   "props": [
+    "HangingPunctuation"
+   ],
+   "text": "」",
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9849
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9756
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9495
+    }
+   }
+  }
+ ],
+ "softHyphenCarriers": [
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-014.html",
+   "softHyphens": 1,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.979
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9787
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.973
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+   "softHyphens": 1,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9992
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9906
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9847
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-001.html",
+   "softHyphens": 12,
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.935
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.9287
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9128
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-003.html",
+   "softHyphens": 12,
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.8812
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.9337
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9089
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-004.html",
+   "softHyphens": 12,
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.9249
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.9134
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9059
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-005.html",
+   "softHyphens": 1,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.974
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.945
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9474
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-auto-control.html",
+   "softHyphens": 3,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9731
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9623
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-011.html",
+   "softHyphens": 2,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9998
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9951
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9811
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-012.html",
+   "softHyphens": 4,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9998
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9951
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9811
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-013.html",
+   "softHyphens": 1,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9992
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.994
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9822
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-inline-011.html",
+   "softHyphens": 2,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9998
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.993
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9739
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-inline-012.html",
+   "softHyphens": 4,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9984
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9905
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9419
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-none-011.html",
+   "softHyphens": 2,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9874
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9717
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html",
+   "softHyphens": 4,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9988
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.998
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "softHyphens": 7,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.8862
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9218
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-span-001.html",
+   "softHyphens": 9,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.8558
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9166
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-vertical-001.html",
+   "softHyphens": 1,
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.8909
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.8801
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.8795
+    }
+   }
+  }
+ ],
+ "summary": {
+  "lineClampTests": 34,
+  "markerDrawnSoftWrapped": 20,
+  "preOrNowrap": 12,
+  "markerSuppressed": 2,
+  "glyphlessWhitespaceMembers": 4,
+  "hangingPunctuationMembers": 1,
+  "softHyphenCarrierTests": 17,
+  "softHyphenAndroidPassing": 9,
+  "markerDrawnAndroidPassing": 19
+ }
+}

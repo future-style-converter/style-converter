@@ -1,0 +1,27 @@
+{
+ "method": "old body.split(\";\") vs a css-syntax-3 splitter (top-level ; only: paren depth 0, outside <string-token>/<url-token>, backslash escapes honoured inside AND outside strings), over every {…} body of comment-stripped <style> CSS and every style attribute of the 1435 wave51-fix tests; compared as ordered k=v bags. First draft WITHOUT comment stripping / outside-string escapes reported 22 tests, 20 of them artefacts (an apostrophe in a comment such as doesn't opened a string; css-view-transitions/escaped-name secon\\'d is an escape, not a quote) — both are pins the real splitter needs.",
+ "ruleBodies": 4127,
+ "styleAttrs": 2070,
+ "changed": [
+  {
+   "t": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "diffs": [
+    {
+     "where": "block",
+     "old": "[\"background-image=url('data:image/png\"]",
+     "new": "[\"background-image=url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/wHwAEBgIApD"
+    }
+   ]
+  },
+  {
+   "t": "css/css-pseudo/first-letter-background-image.html",
+   "diffs": [
+    {
+     "where": "block",
+     "old": "[\"color=lime\",\"background-image=url('data:image/png\"]",
+     "new": "[\"color=lime\",\"background-image=url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+"
+    }
+   ]
+  }
+ ]
+}

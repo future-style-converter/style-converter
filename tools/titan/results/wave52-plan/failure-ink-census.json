@@ -1,0 +1,4006 @@
+{
+ "_note": "failure-ink lane census over tools/titan/runs/wave51-fix (4305 browser-ref cells, 1435 tests). \"red\" = novelInk.novelClasses entries with rgb r>=200,g<=80,b<=80 (the WPT failure-indicator class). Verdicts in failingRedCells.mechanism were assigned by LOOKING at every capture next to its frozen ref (contact sheets), not from the score.",
+ "run": "wave51-fix",
+ "totals": {
+  "cells": 4305,
+  "failing": 733,
+  "passing": 3384,
+  "failingWithRedNovelInk": 80,
+  "passingWithRedNovelInk": 237,
+  "passingWithRedNovelInk_ge1000px": 175
+ },
+ "sampledCellsFromHandverdicts": {
+  "012": {
+   "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+   "cells": [
+    {
+     "platform": "web",
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 0
+    },
+    {
+     "platform": "ios",
+     "ssim": 0.999,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": true,
+     "redPx": 10000
+    },
+    {
+     "platform": "android",
+     "ssim": 0.998,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "redPx": 10000
+    }
+   ]
+  },
+  "031": {
+   "test": "css/css-writing-modes/available-size-014.html",
+   "cells": [
+    {
+     "platform": "web",
+     "ssim": 0.9879,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 178
+    },
+    {
+     "platform": "ios",
+     "ssim": 0.9771,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 219
+    },
+    {
+     "platform": "android",
+     "ssim": 0.978,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 585
+    }
+   ]
+  },
+  "038": {
+   "test": "css/css-anchor-position/anchor-name-multicol-003.html",
+   "cells": [
+    {
+     "platform": "web",
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "redPx": 1500
+    },
+    {
+     "platform": "ios",
+     "ssim": 0.9804,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "redPx": 3000
+    },
+    {
+     "platform": "android",
+     "ssim": 0.9598,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "redPx": 3000
+    }
+   ]
+  },
+  "046": {
+   "test": "css/css-break/block-in-inline-009.html",
+   "cells": [
+    {
+     "platform": "web",
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 0
+    },
+    {
+     "platform": "ios",
+     "ssim": 0.9907,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 500
+    },
+    {
+     "platform": "android",
+     "ssim": 0.9966,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 500
+    }
+   ]
+  },
+  "068": {
+   "test": "css/css-writing-modes/available-size-001.html",
+   "cells": [
+    {
+     "platform": "web",
+     "ssim": 0.9881,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 0
+    },
+    {
+     "platform": "ios",
+     "ssim": 0.9771,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 219
+    },
+    {
+     "platform": "android",
+     "ssim": 0.9791,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 585
+    }
+   ]
+  },
+  "091": {
+   "test": "css/css-multicol/column-height-007.html",
+   "cells": [
+    {
+     "platform": "web",
+     "ssim": 0.9831,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 2500
+    },
+    {
+     "platform": "ios",
+     "ssim": 0.9749,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 4000
+    },
+    {
+     "platform": "android",
+     "ssim": 0.9716,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 4000
+    }
+   ]
+  },
+  "098": {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-008.html",
+   "cells": [
+    {
+     "platform": "web",
+     "ssim": 0.9941,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 180
+    },
+    {
+     "platform": "ios",
+     "ssim": 0.9962,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 100
+    },
+    {
+     "platform": "android",
+     "ssim": 0.9953,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "redPx": 100
+    }
+   ]
+  }
+ },
+ "failingRedCells": [
+  {
+   "cite": "wave51-fix CSS2/CSS2/abspos/between-float-and-text.html android f 0.9527",
+   "section": "CSS2",
+   "test": "css/CSS2/abspos/between-float-and-text.html",
+   "platform": "android",
+   "ssim": 0.9527,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 40000,
+   "novelPx": 40000,
+   "mechanism": "abspos static position after text before float (CSS2 \u00a710.3.7)",
+   "owner": "static-position lane 0(j)"
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/abspos/between-float-and-text.html ios f 0.922",
+   "section": "CSS2",
+   "test": "css/CSS2/abspos/between-float-and-text.html",
+   "platform": "ios",
+   "ssim": 0.922,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 12000,
+   "novelPx": 12000,
+   "mechanism": "abspos static position after text before float (CSS2 \u00a710.3.7)",
+   "owner": "static-position lane 0(j)"
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/borders/border-conflict-style-107.html android f 0.3262",
+   "section": "CSS2",
+   "test": "css/CSS2/borders/border-conflict-style-107.html",
+   "platform": "android",
+   "ssim": 0.3262,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 232300,
+   "novelPx": 232300,
+   "mechanism": "collapsed-border conflict style",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/borders/border-conflict-style-107.html ios f 0.6564",
+   "section": "CSS2",
+   "test": "css/CSS2/borders/border-conflict-style-107.html",
+   "platform": "ios",
+   "ssim": 0.6564,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 77500,
+   "novelPx": 77500,
+   "mechanism": "collapsed-border conflict style",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/borders/border-conflict-style-107.html web f 0.9381",
+   "section": "CSS2",
+   "test": "css/CSS2/borders/border-conflict-style-107.html",
+   "platform": "web",
+   "ssim": 0.9381,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 2500,
+   "novelPx": 2500,
+   "mechanism": "collapsed-border conflict style",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-005.html ios f 0.9417",
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-005.html",
+   "platform": "ios",
+   "ssim": 0.9417,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "anchor() insets in RTL",
+   "owner": "anchor lane"
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-grid-001.html ios f 0.9089",
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-grid-001.html",
+   "platform": "ios",
+   "ssim": 0.9089,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 1472,
+   "novelPx": 1472,
+   "mechanism": "anchor() in grid + multicol",
+   "owner": "anchor lane"
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-002.html android f 0.9381",
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-002.html",
+   "platform": "android",
+   "ssim": 0.9381,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 13228,
+   "novelPx": 15028,
+   "mechanism": "anchor() inside multicol",
+   "owner": "anchor lane"
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-002.html ios f 0.9175",
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-002.html",
+   "platform": "ios",
+   "ssim": 0.9175,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 14750,
+   "novelPx": 19250,
+   "mechanism": "anchor() inside multicol",
+   "owner": "anchor lane"
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-007.html android f 0.9499",
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+   "platform": "android",
+   "ssim": 0.9499,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 800,
+   "novelPx": 800,
+   "mechanism": "position-area + anchor(inside) in vertical-rl multicol",
+   "owner": "anchor lane"
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-007.html ios f 0.9379",
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+   "platform": "ios",
+   "ssim": 0.9379,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 1400,
+   "novelPx": 1400,
+   "mechanism": "position-area + anchor(inside) in vertical-rl multicol",
+   "owner": "anchor lane"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-334.html android f 0.9759",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-334.html",
+   "platform": "android",
+   "ssim": 0.9759,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 23940,
+   "novelPx": 23940,
+   "mechanism": "background shorthand layer \u2014 all three platforms red",
+   "owner": "backgrounds lane (converter?)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-334.html ios f 0.9777",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-334.html",
+   "platform": "ios",
+   "ssim": 0.9777,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 23892,
+   "novelPx": 23892,
+   "mechanism": "background shorthand layer \u2014 all three platforms red",
+   "owner": "backgrounds lane (converter?)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-334.html web f 0.9794",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-334.html",
+   "platform": "web",
+   "ssim": 0.9794,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 23884,
+   "novelPx": 23884,
+   "mechanism": "background shorthand layer \u2014 all three platforms red",
+   "owner": "backgrounds lane (converter?)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-attachment-350.html android f 0.9535",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-350.html",
+   "platform": "android",
+   "ssim": 0.9535,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "background-attachment: fixed vs scrolled viewport \u2014 ref paints nothing",
+   "owner": "structural (capture cannot scroll)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-attachment-350.html ios f 0.9543",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-350.html",
+   "platform": "ios",
+   "ssim": 0.9543,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "background-attachment: fixed vs scrolled viewport \u2014 ref paints nothing",
+   "owner": "structural (capture cannot scroll)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-attachment-350.html web f 0.955",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-350.html",
+   "platform": "web",
+   "ssim": 0.955,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "background-attachment: fixed vs scrolled viewport \u2014 ref paints nothing",
+   "owner": "structural (capture cannot scroll)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-clip-006.html android f 0.9052",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-clip-006.html",
+   "platform": "android",
+   "ssim": 0.9052,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 15600,
+   "novelPx": 15600,
+   "mechanism": "background-clip \u2014 all three platforms paint the red frame",
+   "owner": "backgrounds lane (converter?)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-clip-006.html ios f 0.906",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-clip-006.html",
+   "platform": "ios",
+   "ssim": 0.906,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 15600,
+   "novelPx": 15600,
+   "mechanism": "background-clip \u2014 all three platforms paint the red frame",
+   "owner": "backgrounds lane (converter?)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-clip-006.html web f 0.9076",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-clip-006.html",
+   "platform": "web",
+   "ssim": 0.9076,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 15600,
+   "novelPx": 15600,
+   "mechanism": "background-clip \u2014 all three platforms paint the red frame",
+   "owner": "backgrounds lane (converter?)"
+  },
+  {
+   "cite": "wave51-fix css-backgrounds/css-backgrounds/background-clip-content-box-002.html ios f 0.9992",
+   "section": "css-backgrounds",
+   "test": "css/css-backgrounds/background-clip-content-box-002.html",
+   "platform": "ios",
+   "ssim": 0.9992,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 8900,
+   "novelPx": 8900,
+   "mechanism": "background-clip: content-box with padding (iOS only)",
+   "owner": "backgrounds lane"
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/abspos-in-offset-relpos.html android f 0.9966",
+   "section": "css-break",
+   "test": "css/css-break/abspos-in-offset-relpos.html",
+   "platform": "android",
+   "ssim": 0.9966,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "multicol parallel flow (0-height child overflow into col 2) + relpos abspos",
+   "owner": "fragmentation, XL"
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/block-in-inline-001.html ios f 0.9459",
+   "section": "css-break",
+   "test": "css/css-break/block-in-inline-001.html",
+   "platform": "ios",
+   "ssim": 0.9459,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 7500,
+   "novelPx": 7500,
+   "mechanism": "multicol parallel flows (overflowing block-in-inline)",
+   "owner": "fragmentation, XL"
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/block-in-inline-002.html ios f 0.9459",
+   "section": "css-break",
+   "test": "css/css-break/block-in-inline-002.html",
+   "platform": "ios",
+   "ssim": 0.9459,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 7500,
+   "novelPx": 7500,
+   "mechanism": "multicol parallel flows (overflowing block-in-inline)",
+   "owner": "fragmentation, XL"
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/block-in-inline-003.html ios f 0.9459",
+   "section": "css-break",
+   "test": "css/css-break/block-in-inline-003.html",
+   "platform": "ios",
+   "ssim": 0.9459,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 7500,
+   "novelPx": 7500,
+   "mechanism": "multicol parallel flows (overflowing block-in-inline)",
+   "owner": "fragmentation, XL"
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/block-in-inline-011.html ios f 0.9339",
+   "section": "css-break",
+   "test": "css/css-break/block-in-inline-011.html",
+   "platform": "ios",
+   "ssim": 0.9339,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 4250,
+   "novelPx": 4250,
+   "mechanism": "multicol parallel flows + float un-floated by script",
+   "owner": "fragmentation, XL"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/import-conditional-001.html android f 0.9966",
+   "section": "css-cascade",
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "android",
+   "ssim": 0.9966,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 9822,
+   "novelPx": 9822,
+   "mechanism": "@import supports()/media condition \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/import-conditional-001.html ios f 0.9974",
+   "section": "css-cascade",
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "ios",
+   "ssim": 0.9974,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 9829,
+   "novelPx": 9829,
+   "mechanism": "@import supports()/media condition \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/import-conditional-001.html web f 0.999",
+   "section": "css-cascade",
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "web",
+   "ssim": 0.999,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 9814,
+   "novelPx": 9814,
+   "mechanism": "@import supports()/media condition \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/import-conditional-002.html android f 0.9966",
+   "section": "css-cascade",
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "android",
+   "ssim": 0.9966,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "@import supports()/media condition \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/import-conditional-002.html ios f 0.9974",
+   "section": "css-cascade",
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "ios",
+   "ssim": 0.9974,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "@import supports()/media condition \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/import-conditional-002.html web f 0.999",
+   "section": "css-cascade",
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "web",
+   "ssim": 0.999,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "@import supports()/media condition \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/scope-implicit-006-print.html android f 0.9076",
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-006-print.html",
+   "platform": "android",
+   "ssim": 0.9076,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "@scope + print media \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/scope-implicit-006-print.html ios f 0.9065",
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-006-print.html",
+   "platform": "ios",
+   "ssim": 0.9065,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "@scope + print media \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/scope-implicit-006-print.html web f 1",
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-006-print.html",
+   "platform": "web",
+   "ssim": 1,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "@scope + print media \u2014 all three platforms",
+   "owner": "converter/cascade lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-animation-001.html android f 0.9162",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-animation-001.html",
+   "platform": "android",
+   "ssim": 0.9162,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": true,
+   "redPx": 3625,
+   "novelPx": 3625,
+   "mechanism": "containment + animation state",
+   "owner": "containment/animation lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-animation-001.html ios f 0.9169",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-animation-001.html",
+   "platform": "ios",
+   "ssim": 0.9169,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": true,
+   "redPx": 3625,
+   "novelPx": 3625,
+   "mechanism": "containment + animation state",
+   "owner": "containment/animation lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-content-003.html android f 0.9405",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-content-003.html",
+   "platform": "android",
+   "ssim": 0.9405,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "contain: content (Android only)",
+   "owner": "containment lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-content-004.html android f 0.8286",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-content-004.html",
+   "platform": "android",
+   "ssim": 0.8286,
+   "colorFailed": true,
+   "novelInkFailed": false,
+   "coverageRatioFailed": true,
+   "redPx": 1441,
+   "novelPx": 1441,
+   "mechanism": "contain: content in table",
+   "owner": "containment lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-content-004.html ios f 0.8093",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-content-004.html",
+   "platform": "ios",
+   "ssim": 0.8093,
+   "colorFailed": true,
+   "novelInkFailed": false,
+   "coverageRatioFailed": true,
+   "redPx": 2112,
+   "novelPx": 2112,
+   "mechanism": "contain: content in table",
+   "owner": "containment lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-content-011.html android f 0.9284",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-content-011.html",
+   "platform": "android",
+   "ssim": 0.9284,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "contain: content + counters (Android only)",
+   "owner": "containment lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-inline-size-legend.html android f 0.8479",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-inline-size-legend.html",
+   "platform": "android",
+   "ssim": 0.8479,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 32400,
+   "novelPx": 32400,
+   "mechanism": "contain: inline-size on fieldset legend",
+   "owner": "containment lane"
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-inline-size-legend.html ios f 0.8562",
+   "section": "css-contain",
+   "test": "css/css-contain/contain-inline-size-legend.html",
+   "platform": "ios",
+   "ssim": 0.8562,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 32400,
+   "novelPx": 32400,
+   "mechanism": "contain: inline-size on fieldset legend",
+   "owner": "containment lane"
+  },
+  {
+   "cite": "wave51-fix css-display/css-display/display-contents-float-001.html android f 0.941",
+   "section": "css-display",
+   "test": "css/css-display/display-contents-float-001.html",
+   "platform": "android",
+   "ssim": 0.941,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 6904,
+   "novelPx": 6904,
+   "mechanism": "display:contents unboxing refused on float",
+   "owner": "THIS LANE"
+  },
+  {
+   "cite": "wave51-fix css-display/css-display/display-contents-float-001.html ios f 0.9417",
+   "section": "css-display",
+   "test": "css/css-display/display-contents-float-001.html",
+   "platform": "ios",
+   "ssim": 0.9417,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 6891,
+   "novelPx": 6891,
+   "mechanism": "display:contents unboxing refused on float",
+   "owner": "THIS LANE"
+  },
+  {
+   "cite": "wave51-fix css-flexbox/css-flexbox/align-items-007.html android f 0.9966",
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "android",
+   "ssim": 0.9966,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "replaced item (SVG, no intrinsic size) fit-content cross-size in column flex",
+   "owner": "flex sizing lane"
+  },
+  {
+   "cite": "wave51-fix css-flexbox/css-flexbox/align-items-007.html ios f 0.9974",
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "ios",
+   "ssim": 0.9974,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "replaced item (SVG, no intrinsic size) fit-content cross-size in column flex",
+   "owner": "flex sizing lane"
+  },
+  {
+   "cite": "wave51-fix css-flexbox/css-flexbox/align-self-016.html android f 0.9202",
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/align-self-016.html",
+   "platform": "android",
+   "ssim": 0.9202,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "column-wrap line cross-size re-resolution (csswg 11784) \u2014 web fails too",
+   "owner": "flex algorithm, exclude"
+  },
+  {
+   "cite": "wave51-fix css-flexbox/css-flexbox/align-self-016.html ios f 0.9209",
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/align-self-016.html",
+   "platform": "ios",
+   "ssim": 0.9209,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "column-wrap line cross-size re-resolution (csswg 11784) \u2014 web fails too",
+   "owner": "flex algorithm, exclude"
+  },
+  {
+   "cite": "wave51-fix css-gaps/css-gaps/flex/flex-gap-decorations-033.html web f 0.94",
+   "section": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "web",
+   "ssim": 0.94,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 2200,
+   "novelPx": 5200,
+   "mechanism": "flex gap decorations (web only \u2014 Chrome gap-decoration support)",
+   "owner": "gaps lane"
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/abspos-containing-block-outside-spanner.html ios f 0.9553",
+   "section": "css-multicol",
+   "test": "css/css-multicol/abspos-containing-block-outside-spanner.html",
+   "platform": "ios",
+   "ssim": 0.9553,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 20000,
+   "novelPx": 20000,
+   "mechanism": "spanner containing-block chain (iOS twin missing)",
+   "owner": "THIS LANE"
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/abspos-multicol-in-second-outer-clipped.html android f 0.9966",
+   "section": "css-multicol",
+   "test": "css/css-multicol/abspos-multicol-in-second-outer-clipped.html",
+   "platform": "android",
+   "ssim": 0.9966,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "nested multicol slicing + abspos multicol in relpos (Android only)",
+   "owner": "fragmentation, L"
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-005.html ios f 0.9459",
+   "section": "css-multicol",
+   "test": "css/css-multicol/column-height-005.html",
+   "platform": "ios",
+   "ssim": 0.9459,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 7500,
+   "novelPx": 7500,
+   "mechanism": "css-multicol-2 column-height/column-wrap \u2014 web (Chrome) fails too",
+   "owner": "spec-ahead, exclude"
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-005.html web f 0.9476",
+   "section": "css-multicol",
+   "test": "css/css-multicol/column-height-005.html",
+   "platform": "web",
+   "ssim": 0.9476,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 7500,
+   "novelPx": 7500,
+   "mechanism": "css-multicol-2 column-height/column-wrap \u2014 web (Chrome) fails too",
+   "owner": "spec-ahead, exclude"
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/anonymous-table-cell-margin-collapsing.html android f 0.9953",
+   "section": "css-tables",
+   "test": "css/css-tables/anonymous-table-cell-margin-collapsing.html",
+   "platform": "android",
+   "ssim": 0.9953,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 9604,
+   "novelPx": 9604,
+   "mechanism": "anonymous table cell margin collapse (Android only)",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/baseline-vertical.html android f 0.5727",
+   "section": "css-tables",
+   "test": "css/css-tables/baseline-vertical.html",
+   "platform": "android",
+   "ssim": 0.5727,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 60600,
+   "novelPx": 60600,
+   "mechanism": "vertical-writing-mode table baseline",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/baseline-vertical.html ios f 0.6209",
+   "section": "css-tables",
+   "test": "css/css-tables/baseline-vertical.html",
+   "platform": "ios",
+   "ssim": 0.6209,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 26800,
+   "novelPx": 26800,
+   "mechanism": "vertical-writing-mode table baseline",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/border-collapse-dynamic-oof.html ios f 0.9367",
+   "section": "css-tables",
+   "test": "css/css-tables/border-collapse-dynamic-oof.html",
+   "platform": "ios",
+   "ssim": 0.9367,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 2500,
+   "novelPx": 2500,
+   "mechanism": "border-collapse dynamic OOF (iOS only)",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/border-conflict-resolution.html android f 0.8392",
+   "section": "css-tables",
+   "test": "css/css-tables/border-conflict-resolution.html",
+   "platform": "android",
+   "ssim": 0.8392,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 104,
+   "novelPx": 104,
+   "mechanism": "collapsed-border conflict resolution",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/border-conflict-resolution.html ios f 0.8539",
+   "section": "css-tables",
+   "test": "css/css-tables/border-conflict-resolution.html",
+   "platform": "ios",
+   "ssim": 0.8539,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": false,
+   "redPx": 598,
+   "novelPx": 1007,
+   "mechanism": "collapsed-border conflict resolution",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/colspan-004.html web f 0.999",
+   "section": "css-tables",
+   "test": "css/css-tables/colspan-004.html",
+   "platform": "web",
+   "ssim": 0.999,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "colspan (web only)",
+   "owner": "table lane"
+  },
+  {
+   "cite": "wave51-fix css-transforms/css-transforms/backface-visibility-hidden-004.html android f 0.998",
+   "section": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-004.html",
+   "platform": "android",
+   "ssim": 0.998,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "backface-visibility (Android only)",
+   "owner": "transforms lane"
+  },
+  {
+   "cite": "wave51-fix css-transforms/css-transforms/css-transform-inherit-scale.html android f 0.9965",
+   "section": "css-transforms",
+   "test": "css/css-transforms/css-transform-inherit-scale.html",
+   "platform": "android",
+   "ssim": 0.9965,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 30000,
+   "novelPx": 30000,
+   "mechanism": "transform inheritance (Android only)",
+   "owner": "transforms lane"
+  },
+  {
+   "cite": "wave51-fix css-transforms/css-transforms/css-transform-scale-001-manual.html android f 0.9039",
+   "section": "css-transforms",
+   "test": "css/css-transforms/css-transform-scale-001-manual.html",
+   "platform": "android",
+   "ssim": 0.9039,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 9604,
+   "novelPx": 9604,
+   "mechanism": ":hover-driven manual test \u2014 never passes without hover",
+   "owner": "structural, exclude"
+  },
+  {
+   "cite": "wave51-fix css-transforms/css-transforms/css-transform-scale-001-manual.html ios f 0.9053",
+   "section": "css-transforms",
+   "test": "css/css-transforms/css-transform-scale-001-manual.html",
+   "platform": "ios",
+   "ssim": 0.9053,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 9604,
+   "novelPx": 9604,
+   "mechanism": ":hover-driven manual test \u2014 never passes without hover",
+   "owner": "structural, exclude"
+  },
+  {
+   "cite": "wave51-fix css-transforms/css-transforms/css-transform-scale-001-manual.html web f 0.9067",
+   "section": "css-transforms",
+   "test": "css/css-transforms/css-transform-scale-001-manual.html",
+   "platform": "web",
+   "ssim": 0.9067,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 9604,
+   "novelPx": 9604,
+   "mechanism": ":hover-driven manual test \u2014 never passes without hover",
+   "owner": "structural, exclude"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/calc-in-media-queries-001.html android f 0.5535",
+   "section": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "android",
+   "ssim": 0.5535,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 234000,
+   "novelPx": 234000,
+   "mechanism": "calc() in media query \u2014 full-canvas red on all three",
+   "owner": "converter/media lane"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/calc-in-media-queries-001.html ios f 0.5535",
+   "section": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "ios",
+   "ssim": 0.5535,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 234000,
+   "novelPx": 234000,
+   "mechanism": "calc() in media query \u2014 full-canvas red on all three",
+   "owner": "converter/media lane"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/calc-in-media-queries-001.html web f 0.5535",
+   "section": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "web",
+   "ssim": 0.5535,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 234000,
+   "novelPx": 234000,
+   "mechanism": "calc() in media query \u2014 full-canvas red on all three",
+   "owner": "converter/media lane"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/calc-in-media-queries-002.html android f 0.5535",
+   "section": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "android",
+   "ssim": 0.5535,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 234000,
+   "novelPx": 234000,
+   "mechanism": "calc() in media query \u2014 full-canvas red on all three",
+   "owner": "converter/media lane"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/calc-in-media-queries-002.html ios f 0.5535",
+   "section": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "ios",
+   "ssim": 0.5535,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 234000,
+   "novelPx": 234000,
+   "mechanism": "calc() in media query \u2014 full-canvas red on all three",
+   "owner": "converter/media lane"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/calc-in-media-queries-002.html web f 0.5535",
+   "section": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "web",
+   "ssim": 0.5535,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 234000,
+   "novelPx": 234000,
+   "mechanism": "calc() in media query \u2014 full-canvas red on all three",
+   "owner": "converter/media lane"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/ch-unit-001.html android f 0.8362",
+   "section": "css-values",
+   "test": "css/css-values/ch-unit-001.html",
+   "platform": "android",
+   "ssim": 0.8362,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 35370,
+   "novelPx": 35370,
+   "mechanism": "ch advance resolution (ctx.chAdvancePx ?? 0.5em) + float shrink-to-fit",
+   "owner": "sizing/units lane"
+  },
+  {
+   "cite": "wave51-fix css-values/css-values/ch-unit-001.html ios f 0.8294",
+   "section": "css-values",
+   "test": "css/css-values/ch-unit-001.html",
+   "platform": "ios",
+   "ssim": 0.8294,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 29973,
+   "novelPx": 29973,
+   "mechanism": "ch advance resolution (ctx.chAdvancePx ?? 0.5em) + float shrink-to-fit",
+   "owner": "sizing/units lane"
+  },
+  {
+   "cite": "wave51-fix css-view-transitions/css-view-transitions/animation-name-ua-prefix.html android f 0.957",
+   "section": "css-view-transitions",
+   "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+   "platform": "android",
+   "ssim": 0.957,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "UA-prefixed animation-name must hide the red \u2014 animation state",
+   "owner": "animation lane / structural"
+  },
+  {
+   "cite": "wave51-fix css-view-transitions/css-view-transitions/animation-name-ua-prefix.html ios f 0.957",
+   "section": "css-view-transitions",
+   "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+   "platform": "ios",
+   "ssim": 0.957,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "UA-prefixed animation-name must hide the red \u2014 animation state",
+   "owner": "animation lane / structural"
+  },
+  {
+   "cite": "wave51-fix css-writing-modes/css-writing-modes/flexbox_align-items-stretch-writing-modes.html ios f 0.999",
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+   "platform": "ios",
+   "ssim": 0.999,
+   "colorFailed": true,
+   "novelInkFailed": true,
+   "coverageRatioFailed": false,
+   "redPx": 10000,
+   "novelPx": 10000,
+   "mechanism": "vertical-block-flow / Z2 baked-guard misfire",
+   "owner": "THIS LANE"
+  },
+  {
+   "cite": "wave51-fix selectors/selectors/featureless-002.html android f 0.9631",
+   "section": "selectors",
+   "test": "css/selectors/featureless-002.html",
+   "platform": "android",
+   "ssim": 0.9631,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 2500,
+   "novelPx": 2500,
+   "mechanism": "featureless :host selector matching (Android only fails; web/iOS pass with red)",
+   "owner": "selectors lane"
+  },
+  {
+   "cite": "wave51-fix selectors/selectors/featureless-003.html android f 0.9631",
+   "section": "selectors",
+   "test": "css/selectors/featureless-003.html",
+   "platform": "android",
+   "ssim": 0.9631,
+   "colorFailed": false,
+   "novelInkFailed": true,
+   "coverageRatioFailed": true,
+   "redPx": 2500,
+   "novelPx": 2500,
+   "mechanism": "featureless :host selector matching",
+   "owner": "selectors lane"
+  },
+  {
+   "cite": "wave51-fix selectors/selectors/featureless-004.html android f 0.9597",
+   "section": "selectors",
+   "test": "css/selectors/featureless-004.html",
+   "platform": "android",
+   "ssim": 0.9597,
+   "colorFailed": false,
+   "novelInkFailed": false,
+   "coverageRatioFailed": true,
+   "redPx": 1000,
+   "novelPx": 1000,
+   "mechanism": "featureless :host selector matching",
+   "owner": "selectors lane"
+  }
+ ],
+ "passingRedCellsTop": [
+  {
+   "cite": "wave51-fix CSS2/CSS2/abspos/static-inside-inline-002.html web P 0.963",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/abspos/static-inside-inline-002.html ios P 0.9622",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/abspos/static-inside-inline-002.html android P 0.9617",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/unset-val-001.html ios P 0.9539",
+   "redPx": 10000,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/unset-val-001.html android P 0.9532",
+   "redPx": 10000,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-inline-size-flex.html ios P 0.9535",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-inline-size-flex.html android P 0.9528",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-inline-size-grid.html ios P 0.9535",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-contain/css-contain/contain-inline-size-grid.html android P 0.9528",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-001.html web P 0.9559",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-010.html web P 0.9559",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-relative-002.html ios P 0.9539",
+   "redPx": 10000,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-relative-008.html ios P 0.9558",
+   "redPx": 10000,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-tables/css-tables/collapsed-border-paint-phase-002.html android P 0.9534",
+   "redPx": 10000,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-view-transitions/css-view-transitions/hit-test-unrelated-element.html web P 1",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-view-transitions/css-view-transitions/hit-test-unrelated-element.html ios P 1",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-view-transitions/css-view-transitions/hit-test-unrelated-element.html android P 1",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-writing-modes/css-writing-modes/flexbox_align-items-stretch-writing-modes.html android P 0.998",
+   "redPx": 10000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-cascade/css-cascade/revert-val-002.html web P 0.999",
+   "redPx": 8460,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-002.html web P 0.9624",
+   "redPx": 8400,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-002.html android P 0.96",
+   "redPx": 8400,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/floats-clear/adjoining-float-nested-forced-clearance-003.html ios P 0.9557",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-013.html android P 0.9807",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-014.html android P 0.9807",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-015.html android P 0.9871",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-016.html android P 0.9871",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-017.html android P 0.9823",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/balance-orphans-widows-000.html ios P 0.9973",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-004.html android P 0.9861",
+   "redPx": 8000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-017.html ios P 0.9511",
+   "redPx": 7800,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/block-in-inline-003.html android P 0.9966",
+   "redPx": 7500,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/balance-break-avoidance-000.html ios P 0.9973",
+   "redPx": 7500,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/balance-break-avoidance-000.html android P 0.9966",
+   "redPx": 7500,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/abspos/remove-block-between-inline-and-abspos.html ios P 0.9625",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-name-005.html ios P 0.9643",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/change-insets-inside-strict-containment-nested.html ios P 0.9594",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/change-insets-inside-strict-containment-nested.html android P 0.9589",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-relative-003.html ios P 0.9594",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-relative-003.html android P 0.9589",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-relative-004.html ios P 0.9594",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-relative-004.html android P 0.9589",
+   "redPx": 7200,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-008.html ios P 0.9699",
+   "redPx": 7160,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/background-image-006.html android P 0.9966",
+   "redPx": 7100,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-003.html android P 0.9899",
+   "redPx": 7000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-grid-002.html ios P 0.962",
+   "redPx": 6500,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-grid-002.html android P 0.9603",
+   "redPx": 6500,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-absolute-center-002.html ios P 0.9919",
+   "redPx": 6400,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/abspos-inside-relpos-inside-monolithic.html android P 0.9966",
+   "redPx": 6000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-flexbox/css-flexbox/abspos/abspos-autopos-htb-rtl.html android P 0.9869",
+   "redPx": 6000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-004.html web P 0.96",
+   "redPx": 6000,
+   "novelInkFailed": false
+  },
+  {
+   "cite": "wave51-fix css-multicol/css-multicol/column-height-004.html ios P 0.9973",
+   "redPx": 6000,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-013.html ios P 0.9762",
+   "redPx": 5600,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-014.html ios P 0.9741",
+   "redPx": 5600,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-position/css-position/position-absolute-center-001.html ios P 0.9907",
+   "redPx": 5500,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/background-image-006.html ios P 0.9712",
+   "redPx": 5460,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/background-image-005.html ios P 0.9815",
+   "redPx": 5450,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix CSS2/CSS2/floats-clear/adjoining-float-nested-forced-clearance-003.html android P 0.9776",
+   "redPx": 5250,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-break/css-break/block-in-inline-011.html android P 0.976",
+   "redPx": 5250,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-015.html ios P 0.9689",
+   "redPx": 5100,
+   "novelInkFailed": true
+  },
+  {
+   "cite": "wave51-fix css-anchor-position/css-anchor-position/anchor-position-multicol-016.html ios P 0.9689",
+   "redPx": 5100,
+   "novelInkFailed": true
+  }
+ ],
+ "carriers": {
+  "guardCarriers": [
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-007.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9379,
+     "android": 0.9499
+    },
+    "component": "anchor-position-multicol-007__1__2-672",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 2,
+    "widthHeightKids": 2,
+    "bakedSigHits": 18
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-008.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9699,
+     "android": 0.9804
+    },
+    "component": "anchor-position-multicol-008__1__0-681",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 2,
+    "widthHeightKids": 2,
+    "bakedSigHits": 18
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-013.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9762,
+     "android": 0.9807
+    },
+    "component": "wpt__css-anchor-position__anchor-position-multicol-013__1-706",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 2,
+    "widthHeightKids": 2,
+    "bakedSigHits": 18
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-014.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9741,
+     "android": 0.9807
+    },
+    "component": "wpt__css-anchor-position__anchor-position-multicol-014__1-714",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 2,
+    "widthHeightKids": 2,
+    "bakedSigHits": 18
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-015.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9689,
+     "android": 0.9871
+    },
+    "component": "wpt__css-anchor-position__anchor-position-multicol-015__1-723",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 2,
+    "widthHeightKids": 2,
+    "bakedSigHits": 18
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-016.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9689,
+     "android": 0.9871
+    },
+    "component": "wpt__css-anchor-position__anchor-position-multicol-016__1-733",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 2,
+    "widthHeightKids": 2,
+    "bakedSigHits": 18
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-017.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9511,
+     "android": 0.9823
+    },
+    "component": "wpt__css-anchor-position__anchor-position-multicol-017__1-743",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 1,
+    "widthHeightKids": 1,
+    "bakedSigHits": 9
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-colspan-003.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9768,
+     "android": 0.9919
+    },
+    "component": "wpt__css-anchor-position__anchor-position-multicol-colspan-003__1-752",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 1,
+    "widthHeightKids": 1,
+    "bakedSigHits": 9
+   },
+   {
+    "section": "css-flexbox",
+    "test": "css-flexbox/alignment/flex-align-baseline-column-vert-lr-rtl-wrap-reverse.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9721,
+     "android": 0.9713
+    },
+    "component": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-lr-rtl-wrap-reverse__1-455",
+    "writingMode": "VERTICAL_LR",
+    "inflow": 1,
+    "widthHeightKids": 1,
+    "bakedSigHits": 0
+   },
+   {
+    "section": "css-flexbox",
+    "test": "css-flexbox/alignment/flex-align-baseline-column-vert-rl-rtl-wrap-reverse.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9721,
+     "android": 0.9713
+    },
+    "component": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-rl-rtl-wrap-reverse__1-459",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 1,
+    "widthHeightKids": 1,
+    "bakedSigHits": 0
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/abs-pos-border-offset-003.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9342,
+     "android": 0.9262
+    },
+    "component": "abs-pos-border-offset-003__0__0-320",
+    "writingMode": "VERTICAL_LR",
+    "inflow": 1,
+    "widthHeightKids": 1,
+    "bakedSigHits": 0
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.999,
+     "android": 0.998
+    },
+    "component": "flexbox_align-items-stretch-writing-modes__1__1__1-776",
+    "writingMode": "VERTICAL_RL",
+    "inflow": 2,
+    "widthHeightKids": 2,
+    "bakedSigHits": 0
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/forms/input-range-zero-inline-size.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.9964,
+     "ios": 0.9747,
+     "android": 0.9743
+    },
+    "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__2-813",
+    "writingMode": "VERTICAL_LR",
+    "inflow": 1,
+    "widthHeightKids": 1,
+    "bakedSigHits": 9
+   }
+  ],
+  "multicolChildHeightExceedsParent": [
+   {
+    "section": "css-break",
+    "test": "css-break/block-in-inline-009.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9907,
+     "android": 0.9966
+    },
+    "component": "block-in-inline-009__1__0-149",
+    "height": 200,
+    "parentHeight": 100,
+    "children": 3
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/block-in-inline-013.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "block-in-inline-013__1__0-168",
+    "height": 400,
+    "parentHeight": 100,
+    "children": 4
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/block-in-inline-014.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "block-in-inline-014__1__0-179",
+    "height": 400,
+    "parentHeight": 100,
+    "children": 4
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/broken-column-rule-1.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9895,
+     "ios": 0.9752,
+     "android": 0.9895
+    },
+    "component": "broken-column-rule-1__0__0-174",
+    "height": 250,
+    "parentHeight": 100,
+    "children": 1
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/change-transform-in-nested.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "change-transform-in-nested__1__0__1-184",
+    "height": 200,
+    "parentHeight": 100,
+    "children": 2
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/column-height-005.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": false,
+     "ios": false,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9476,
+     "ios": 0.9459,
+     "android": 0.9966
+    },
+    "component": "column-height-005__1__0-248",
+    "height": 400,
+    "parentHeight": 100,
+    "children": 1
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/column-height-007.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9831,
+     "ios": 0.9749,
+     "android": 0.9716
+    },
+    "component": "column-height-007__1__0-272",
+    "height": 150,
+    "parentHeight": 100,
+    "children": 1
+   }
+  ],
+  "displayContents": [
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-alignment-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9989,
+     "android": 0.9976
+    },
+    "component": "display-contents-alignment-001__1__0-003",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-alignment-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9987,
+     "android": 0.9975
+    },
+    "component": "display-contents-alignment-002__1__0-007",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-before-after-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9701,
+     "ios": 0.968,
+     "android": 0.9692
+    },
+    "component": "wpt__css-display__display-contents-before-after-001__2-011",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-block-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9988,
+     "android": 0.9979
+    },
+    "component": "display-contents-block-001__1__0-028",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-block-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9984,
+     "android": 0.9974
+    },
+    "component": "display-contents-block-002__1__0-032",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-button.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9765,
+     "ios": 0.9692,
+     "android": 0.9705
+    },
+    "component": "wpt__css-display__display-contents-button__2-036",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-details-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9849,
+     "android": 0.9851
+    },
+    "component": "display-contents-details-001__0__0-038",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-details.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9724,
+     "ios": 0.968,
+     "android": 0.9693
+    },
+    "component": "wpt__css-display__display-contents-details__3-043",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-dynamic-before-after-001.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9898,
+     "ios": 0.9888,
+     "android": 0.9879
+    },
+    "component": "wpt__css-display__display-contents-dynamic-before-after-001__1-047",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-dynamic-fieldset-legend-001.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.7224,
+     "android": 0.5239
+    },
+    "component": "display-contents-dynamic-fieldset-legend-001__3__0-068",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-dynamic-flex-001-inline.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9977,
+     "android": 0.9899
+    },
+    "component": "display-contents-dynamic-flex-001-inline__1__0-115",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-dynamic-flex-001-none.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9977,
+     "android": 0.9899
+    },
+    "component": "display-contents-dynamic-flex-001-none__1__0-123",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-dynamic-generated-content-fieldset-001.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9991,
+     "android": 0.9981
+    },
+    "component": "display-contents-dynamic-generated-content-fieldset-001__1__0-131",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-dynamic-pseudo-insertion-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": null,
+     "ios": null,
+     "android": null
+    },
+    "ssim": {
+     "web": 0.9914,
+     "ios": 0.912,
+     "android": 0.9137
+    },
+    "component": "wpt__css-display__display-contents-dynamic-pseudo-insertion-001__0-132",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-fieldset-002.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.9733,
+     "ios": 0.6092,
+     "android": 0.4786
+    },
+    "component": "display-contents-fieldset-002__0__0-134",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-fieldset-nested-legend.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.9997,
+     "ios": 0.9451,
+     "android": 0.9453
+    },
+    "component": "display-contents-fieldset-nested-legend__0__0-188",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-fieldset.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9716,
+     "ios": 0.968,
+     "android": 0.9693
+    },
+    "component": "wpt__css-display__display-contents-fieldset__3-193",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-first-letter-001.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9999,
+     "ios": 0.9907,
+     "android": 0.9937
+    },
+    "component": "display-contents-first-letter-001__1__0-197",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-first-letter-002.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9987,
+     "android": 0.9977
+    },
+    "component": "display-contents-first-letter-002__1__0-201",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-first-line-001.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9997,
+     "ios": 0.9986,
+     "android": 0.9978
+    },
+    "component": "display-contents-first-line-001__1__0-204",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-first-line-002.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9907,
+     "android": 0.9936
+    },
+    "component": "display-contents-first-line-002__1__0-207",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-flex-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9917,
+     "android": 0.9904
+    },
+    "component": "display-contents-flex-001__1__0-211",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-float-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9417,
+     "android": 0.941
+    },
+    "component": "wpt__css-display__display-contents-float-001__1-218",
+    "float": "RIGHT",
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-inline-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9903,
+     "ios": 0.9891,
+     "android": 0.9886
+    },
+    "component": "display-contents-inline-001__1__0-221",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-inline-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9903,
+     "ios": 0.9891,
+     "android": 0.9886
+    },
+    "component": "display-contents-inline-002__1__0__0-225",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-line-height.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9889,
+     "android": 0.997
+    },
+    "component": "wpt__css-display__display-contents-line-height__1-227",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-oof-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9843,
+     "android": 0.9837
+    },
+    "component": "wpt__css-display__display-contents-oof-001__1-231",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-oof-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9843,
+     "android": 0.9837
+    },
+    "component": "wpt__css-display__display-contents-oof-002__1-233",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-root-background.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9994,
+     "android": 0.9988
+    },
+    "component": "wpt__css-display__display-contents-root-background__0-234",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-shadow-host-whitespace.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9926,
+     "ios": 0.9913,
+     "android": 0.9903
+    },
+    "component": "wpt__css-display__display-contents-shadow-host-whitespace__1-237",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-sharing-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": false,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.6891,
+     "ios": 0.6891,
+     "android": 0.6892
+    },
+    "component": "wpt__css-display__display-contents-sharing-001__0-239",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-state-change-001.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9985,
+     "android": 0.9985
+    },
+    "component": "display-contents-state-change-001__0__1-246",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-td-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.968,
+     "ios": 0.9762,
+     "android": 0.9753
+    },
+    "component": "display-contents-td-001__1__0__0-253",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-text-inherit-002.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9902,
+     "ios": 0.989,
+     "android": 0.9881
+    },
+    "component": "display-contents-text-inherit-002__1__0-259",
+    "float": null,
+    "bg": true
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-text-inherit.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9985,
+     "android": 0.9973
+    },
+    "component": "wpt__css-display__display-contents-text-inherit__1-261",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-text-only-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.999,
+     "android": 0.9979
+    },
+    "component": "wpt__css-display__display-contents-text-only-001__0-262",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-tr-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9937,
+     "ios": 0.9924,
+     "android": 0.992
+    },
+    "component": "display-contents-tr-001__1__0-267",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-display",
+    "test": "css-display/display-contents-whitespace-inside-inline.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9926,
+     "ios": 0.9959,
+     "android": 0.9947
+    },
+    "component": "display-contents-whitespace-inside-inline__1__0-273",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-lists",
+    "test": "css-lists/counter-increment-inside-display-contents.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9991,
+     "android": 0.9982
+    },
+    "component": "counter-increment-inside-display-contents__1__1-258",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-lists",
+    "test": "css-lists/counter-order-display-contents.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9715,
+     "ios": 0.9903,
+     "android": 0.9866
+    },
+    "component": "wpt__css-lists__counter-order-display-contents__0-323",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-lists",
+    "test": "css-lists/counter-reset-increment-set-display-contents.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9958,
+     "ios": 0.995,
+     "android": 0.9945
+    },
+    "component": "counter-reset-increment-set-display-contents__1__1-340",
+    "float": null,
+    "bg": false
+   },
+   {
+    "section": "css-lists",
+    "test": "css-lists/counter-reset-inside-display-contents.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9991,
+     "android": 0.9982
+    },
+    "component": "counter-reset-inside-display-contents__1__1-352",
+    "float": null,
+    "bg": false
+   }
+  ],
+  "spannerWithPositioned": [
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/abspos-containing-block-outside-spanner.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9553,
+     "android": 0.999
+    },
+    "component": "abspos-containing-block-outside-spanner__8__0__0-034",
+    "positionedDescendants": 2
+   }
+  ],
+  "tableWithCaptionAndOverflowHidden": [
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9941,
+     "ios": 0.9962,
+     "android": 0.9953
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-001__1-118",
+    "captions": 1
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9891,
+     "ios": 0.9875,
+     "android": 0.9866
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-002__1-124",
+    "captions": 1
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-003.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9905,
+     "ios": 0.9917,
+     "android": 0.9908
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-003__1-130",
+    "captions": 0
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-004.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9905,
+     "ios": 0.9917,
+     "android": 0.9908
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-004__1-135",
+    "captions": 0
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-006.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.9656,
+     "ios": 0.9321,
+     "android": 0.9332
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-006__0-141",
+    "captions": 0
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-007.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.994,
+     "ios": 0.9992,
+     "android": 0.9983
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-007__1-146",
+    "captions": 0
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-008.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9941,
+     "ios": 0.9962,
+     "android": 0.9953
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-008__1-151",
+    "captions": 1
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/css21-errata/s-11-1-1b-009.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9938,
+     "ios": 0.9962,
+     "android": 0.9953
+    },
+    "component": "wpt__css2__css21-errata__s-11-1-1b-009__1-157",
+    "captions": 1
+   }
+  ],
+  "orthogonalChildOfSized": [
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-007.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9379,
+     "android": 0.9499
+    },
+    "component": "anchor-position-multicol-007__1__2-672",
+    "sizedAncestor": "wpt__css-anchor-position__anchor-position-multicol-007__1-669"
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-008.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9699,
+     "android": 0.9804
+    },
+    "component": "anchor-position-multicol-008__1__0-681",
+    "sizedAncestor": "wpt__css-anchor-position__anchor-position-multicol-008__1-680"
+   },
+   {
+    "section": "css-gaps",
+    "test": "css-gaps/flex/flex-gap-decorations-031.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9592,
+     "android": 0.9585
+    },
+    "component": "flex__flex-gap-decorations-031__0__0-227",
+    "sizedAncestor": "wpt__css-gaps__flex__flex-gap-decorations-031__1-226"
+   },
+   {
+    "section": "css-gaps",
+    "test": "css-gaps/flex/flex-gap-decorations-032.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9592,
+     "android": 0.9585
+    },
+    "component": "flex__flex-gap-decorations-032__0__0-235",
+    "sizedAncestor": "wpt__css-gaps__flex__flex-gap-decorations-032__1-234"
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/column-fill-balance-orthog-block-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.944,
+     "android": 0.9531
+    },
+    "component": "column-fill-balance-orthog-block-001__1__0-226",
+    "sizedAncestor": "wpt__css-multicol__column-fill-balance-orthog-block-001__1-225"
+   },
+   {
+    "section": "css-position",
+    "test": "css-position/position-absolute-center-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9919,
+     "android": 0.991
+    },
+    "component": "position-absolute-center-002__1__0__0-049",
+    "sizedAncestor": "wpt__css-position__position-absolute-center-002__1-047"
+   },
+   {
+    "section": "css-sizing",
+    "test": "css-sizing/aspect-ratio/abspos-004.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "aspect-ratio__abspos-004__2__0-052",
+    "sizedAncestor": "wpt__css-sizing__aspect-ratio__abspos-004__2-051"
+   },
+   {
+    "section": "css-sizing",
+    "test": "css-sizing/aspect-ratio/abspos-015.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "aspect-ratio__abspos-015__1__0-097",
+    "sizedAncestor": "wpt__css-sizing__aspect-ratio__abspos-015__1-096"
+   },
+   {
+    "section": "css-sizing",
+    "test": "css-sizing/aspect-ratio/abspos-020.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "aspect-ratio__abspos-020__1__0-116",
+    "sizedAncestor": "wpt__css-sizing__aspect-ratio__abspos-020__1-115"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9881,
+     "ios": 0.9771,
+     "android": 0.9791
+    },
+    "component": "available-size-001__1__0-345",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-001__1-344"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9879,
+     "ios": 0.9796,
+     "android": 0.9799
+    },
+    "component": "available-size-002__1__0__0-351",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-002__1-349"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-003.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9831,
+     "ios": 0.9771,
+     "android": 0.9791
+    },
+    "component": "available-size-003__1__0-356",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-003__1-355"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-004.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9879,
+     "ios": 0.9796,
+     "android": 0.9799
+    },
+    "component": "available-size-004__1__0-362",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-004__1-361"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-005.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9879,
+     "ios": 0.9771,
+     "android": 0.978
+    },
+    "component": "available-size-005__1__0-368",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-005__1-367"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-011.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9427,
+     "android": 0.9297
+    },
+    "component": "available-size-011__1__0-375",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-011__1-374"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-012.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9881,
+     "ios": 0.9771,
+     "android": 0.9791
+    },
+    "component": "available-size-012__1__0-378",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-012__1-377"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-013.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9831,
+     "ios": 0.9771,
+     "android": 0.9791
+    },
+    "component": "available-size-013__1__0-383",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-013__1-382"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-014.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9879,
+     "ios": 0.9771,
+     "android": 0.978
+    },
+    "component": "available-size-014__1__0-389",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-014__1-388"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-017.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9881,
+     "ios": 0.9785,
+     "android": 0.9799
+    },
+    "component": "available-size-017__1__0-396",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-017__1-395"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/available-size-018.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9881,
+     "ios": 0.9785,
+     "android": 0.9799
+    },
+    "component": "available-size-018__1__0-401",
+    "sizedAncestor": "wpt__css-writing-modes__available-size-018__1-400"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/float-in-htb-in-vrl.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "float-in-htb-in-vrl__1__0-784",
+    "sizedAncestor": "wpt__css-writing-modes__float-in-htb-in-vrl__1-783"
+   },
+   {
+    "section": "css-writing-modes",
+    "test": "css-writing-modes/inline-box-orthogonal-child-with-margins.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9911,
+     "ios": 0.9597,
+     "android": 0.9709
+    },
+    "component": "inline-box-orthogonal-child-with-margins__0__1-871",
+    "sizedAncestor": "wpt__css-writing-modes__inline-box-orthogonal-child-with-margins__0-869"
+   }
+  ],
+  "multicolFillAutoMultiChild": [
+   {
+    "section": "CSS2",
+    "test": "CSS2/floats-clear/floats-clear-multicol-000.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.989,
+     "ios": 0.9871,
+     "android": 0.9857
+    },
+    "component": "wpt__css2__floats-clear__floats-clear-multicol-000__1-261",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/floats-clear/floats-clear-multicol-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.989,
+     "ios": 0.9871,
+     "android": 0.9857
+    },
+    "component": "wpt__css2__floats-clear__floats-clear-multicol-001__1-268",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/floats-clear/floats-clear-multicol-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9981,
+     "android": 0.9968
+    },
+    "component": "wpt__css2__floats-clear__floats-clear-multicol-002__1-275",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "CSS2",
+    "test": "CSS2/floats-clear/floats-clear-multicol-003.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9981,
+     "android": 0.9881
+    },
+    "component": "wpt__css2__floats-clear__floats-clear-multicol-003__1-281",
+    "inflow": 3,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-grid-001.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9966,
+     "ios": 0.9089,
+     "android": 0.9518
+    },
+    "component": "wpt__css-anchor-position__anchor-position-grid-001__1-610",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-002.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9175,
+     "android": 0.9381
+    },
+    "component": "anchor-position-multicol-002__1__1-631",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-004.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9896,
+     "ios": 0.9712,
+     "android": 0.9686
+    },
+    "component": "anchor-position-multicol-004__1__0-653",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-007.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9379,
+     "android": 0.9499
+    },
+    "component": "anchor-position-multicol-007__1__2-672",
+    "inflow": 2,
+    "height": 230,
+    "parentHeight": 240,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-008.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9699,
+     "android": 0.9804
+    },
+    "component": "anchor-position-multicol-008__1__0-681",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-anchor-position",
+    "test": "css-anchor-position/anchor-position-multicol-011.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.987,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "anchor-position-multicol-011__1__0-692",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/abspos-in-offset-relpos.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": false
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9706,
+     "android": 0.9966
+    },
+    "component": "wpt__css-break__abspos-in-offset-relpos__1-002",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/abspos-in-opacity-003.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9992,
+     "ios": 0.993,
+     "android": 0.9967
+    },
+    "component": "wpt__css-break__abspos-in-opacity-003__1-023",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/avoid-border-break.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9992,
+     "android": 0.9984
+    },
+    "component": "wpt__css-break__avoid-border-break__1-035",
+    "inflow": 2,
+    "height": 200,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/background-image-005.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9815,
+     "android": 0.9965
+    },
+    "component": "wpt__css-break__background-image-005__1-076",
+    "inflow": 3,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/background-image-006.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9712,
+     "android": 0.9966
+    },
+    "component": "wpt__css-break__background-image-006__1-081",
+    "inflow": 3,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/block-in-inline-004.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "wpt__css-break__block-in-inline-004__1-135",
+    "inflow": 3,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/block-in-inline-009.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9907,
+     "android": 0.9966
+    },
+    "component": "block-in-inline-009__1__0-149",
+    "inflow": 3,
+    "height": 200,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/block-in-inline-013.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "block-in-inline-013__1__0-168",
+    "inflow": 4,
+    "height": 400,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/block-in-inline-014.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "block-in-inline-014__1__0-179",
+    "inflow": 4,
+    "height": 400,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/borders-000.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9981,
+     "android": 0.9976
+    },
+    "component": "wpt__css-break__borders-000__1-312",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/borders-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9678,
+     "android": 0.9948
+    },
+    "component": "wpt__css-break__borders-001__1-316",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-break",
+    "test": "css-break/borders-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.9646,
+     "ios": 0.9002,
+     "android": 0.9594
+    },
+    "component": "wpt__css-break__borders-002__1-320",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/abspos-after-spanner.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "wpt__css-multicol__abspos-after-spanner__1-010",
+    "inflow": 3,
+    "height": null,
+    "parentHeight": null,
+    "spanner": true,
+    "breakAfter": false
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/always-balancing-before-column-span.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "wpt__css-multicol__always-balancing-before-column-span__1-046",
+    "inflow": 2,
+    "height": null,
+    "parentHeight": null,
+    "spanner": true,
+    "breakAfter": false
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/baseline-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9991,
+     "android": 0.9986
+    },
+    "component": "baseline-001__1__1-122",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/change-intrinsic-width.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "wpt__css-multicol__change-intrinsic-width__1-177",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/change-transform-in-nested.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "change-transform-in-nested__1__0-182",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": true
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/change-transform-in-nested.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "change-transform-in-nested__1__0__1-184",
+    "inflow": 2,
+    "height": 200,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": true
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/change-transform-in-second-column.html",
+    "postLoadExtracted": true,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9967
+    },
+    "component": "change-transform-in-second-column__1__0-190",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": 100,
+    "spanner": false,
+    "breakAfter": true
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/column-balancing-with-span-and-oof-001.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": false,
+     "android": false
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9451,
+     "android": 0.9443
+    },
+    "component": "wpt__css-multicol__column-balancing-with-span-and-oof-001__1-211",
+    "inflow": 3,
+    "height": null,
+    "parentHeight": null,
+    "spanner": true,
+    "breakAfter": false
+   },
+   {
+    "section": "css-multicol",
+    "test": "css-multicol/column-balancing-with-span-and-oof-002.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": true,
+     "ios": true,
+     "android": true
+    },
+    "ssim": {
+     "web": 1,
+     "ios": 0.9718,
+     "android": 0.9709
+    },
+    "component": "wpt__css-multicol__column-balancing-with-span-and-oof-002__1-218",
+    "inflow": 3,
+    "height": null,
+    "parentHeight": null,
+    "spanner": true,
+    "breakAfter": false
+   },
+   {
+    "section": "css-overflow",
+    "test": "css-overflow/column-style-change-triggers-relayout.html",
+    "postLoadExtracted": false,
+    "wptPass": {
+     "web": null,
+     "ios": null,
+     "android": null
+    },
+    "ssim": {
+     "web": 0.999,
+     "ios": 0.9974,
+     "android": 0.9966
+    },
+    "component": "wpt__css-overflow__column-style-change-triggers-relayout__1-050",
+    "inflow": 2,
+    "height": 100,
+    "parentHeight": null,
+    "spanner": false,
+    "breakAfter": false
+   }
+  ],
+  "_docs": 1435
+ }
+}

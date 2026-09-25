@@ -1,0 +1,56 @@
+{
+  "family": "vertical-wedges",
+  "run": "wave51-fix",
+  "section": "css-writing-modes",
+  "refVariant": "white-black-ink-font-lh-imgpad-htmlpins",
+  "passRule": "inject-wpt-block.mjs:653 ssim >= 0.95 AND no presence/colour/coverage veto (computeWptPass :627-636)",
+  "chUnitsMeasurements": {
+    "note": "bounding boxes of green/blue/orange in image px (390 wide, 16px frame); ch upright ref = 24px, horizontal/sideways = 12.6px at 20px Inter",
+    "ref": {"001-004": {"green": "120x120@(16,184)", "blue": "120x120@(16,304)", "orange": "63x63@(16,424)"},
+            "005-008": {"green": "63x63@(16,184)", "blue": "63x63@(16,247)", "orange": "120x120@(16,310)"}},
+    "web": {"001/002": {"green": "6x120", "blue": "120x120", "orange": "63x63", "ssim": 0.9254, "pass": false},
+            "003/004": {"green": "120x120", "blue": "120x120", "orange": "63x63", "ssim": 0.9761, "pass": true},
+            "005/006": {"green": "6x63", "blue": "63x63", "orange": "120x120", "ssim": 0.9578, "pass": true},
+            "007/008": {"green": "63x120", "blue": "63x63@(16,304)", "orange": "120x120@(16,367)", "ssim": 0.9170, "pass": false}},
+    "ios": {"001-004": {"green": "6x60", "blue": "60x25", "orange": "64x60", "ssim": 0.8396, "colorFailed": true},
+            "005-008": {"green": "6x60", "blue": "64x60", "orange": "60x25", "ssim": 0.9159, "colorFailed": true}},
+    "android": {"001-004": {"green": "6x55", "blue": "55x72", "orange": "64x55", "ssim": 0.8404, "colorFailed": true},
+                "005-008": {"green": "6x55", "blue": "64x55", "orange": "55x72", "ssim": 0.9103}}
+  },
+  "absPosBorderOffset003": {
+    "ref":     ["30x35@(81,26)", "30x35@(71,156)", "30x35@(71,266)", "30x35@(71,376)", "30x35@(81,501)", "30x35@(81,576)"],
+    "ios":     ["30x35@(41,26)", "30x35@(41,136)", "30x35@(41,246)", "30x35@(41,356)", "30x35@(11,466)", "30x35@(71,576)"],
+    "android": ["30x35@(41,46)", "30x35@(41,156)", "30x35@(41,266)", "30x35@(41,376)", "30x35@(31,486)", "30x35@(41,596)"]
+  },
+  "otherGe090Cells": {
+    "flexbox_align-items-stretch-writing-modes ios": {"ssim": 0.9990, "veto": "colorFailed+novelInk", "diffPx": 11676, "topDiff": "ref green -> cap red x10000 (100x100)"},
+    "forms/input-range-zero-inline-size ios/android": {"ssim": [0.9747, 0.9743], "diffPx": [3461, 3506], "bbox": "(16,35)-(240,105)", "topDiff": "ref white -> cap accent 0,117,255 slider"},
+    "direction-propagation-body-contain-root x3": {"ssim": 0.9710, "diffPx": 1372, "bbox": "(16,19)-(251,35)", "cause": "script-inserted text node absent from 1-component IR (extractor)"},
+    "bidi-plaintext-br-001 android": {"ssim": 0.9482, "diffPx": 7873, "cause": "Hebrew fallback glyph metrics (font parity)"},
+    "available-size-011 ios/android": {"ssim": [0.9427, 0.9297], "cause": "prose wrap around fullwidth quotes (font fallback); iOS upright decline (M-C)"},
+    "abs-pos-border-offset-003 ios/android": {"ssim": [0.9342, 0.9262], "cause": "block static position in vertical-rl container with orthogonal parent"},
+    "direction-upright-001 web": {"ssim": 0.9269, "cause": "per-line glyph order in vertical rtl upright columns (harness structure)"},
+    "direction-upright-002 web/ios/android": {"ssim": [0.7002, 0.6020, 0.5935], "frames": ["390x953", "390x2302", "390x2318"], "cause": "queue-diagnosed structure gaps; natives one float per row"}
+  },
+  "carrierCensus": {
+    "docs": 1435,
+    "sections": 30,
+    "chLengths": {"count": 74, "noFontFamily": 18,
+      "noFontFamilyDocs": ["css-text/hyphens/hyphens-auto-001 [wIA]", "css-text/hyphens/hyphens-auto-last-word-001 [wia]", "css-text/hyphens/hyphens-none-shy-on-2nd-line-001 [WIA]", "css-text/hyphens/hyphens-out-of-flow-001 [Wia]", "css-text/hyphens/hyphens-out-of-flow-002 [wIa]", "css-text/hyphens/hyphens-punctuation-001 [WIa]", "css-text/hyphens/hyphens-span-001 [Wia]", "css-text/hyphens/hyphens-span-002 [WIA]", "css-text-decor/text-decoration-inset-004 [WIA]", "css-values/ch-unit-001 [Wia]", "css-writing-modes/ch-units-vrl-001..008"],
+      "passingNativeCellsAtRisk": 10},
+    "uprightVerticalTextLeaves": {"count": 10, "docs": ["css-writing-modes/ch-units-vrl-001..008", "css-writing-modes/direction-upright-001", "css-writing-modes/direction-upright-002"], "passingNativeCellsAtRisk": 0},
+    "mixedCjkVerticalTextLeaves": {"count": 5, "docs": ["css-writing-modes/available-size-011", "css-writing-modes/forms/checkbox-appearance-native-vertical-lr-baseline.optional", "css-writing-modes/forms/checkbox-appearance-native-vertical-rl-baseline.optional", "css-writing-modes/forms/radio-appearance-native-vertical-lr-baseline.optional", "css-writing-modes/forms/radio-appearance-native-vertical-rl-baseline.optional"], "passingNativeCellsAtRisk": 0},
+    "verticalLineHeight": {"count": 8},
+    "colWithWidth": {"count": 5, "docs": ["css-tables/border-collapse-dynamic-col-001 [WiA PL]", "css-writing-modes/ch-units-vrl-003/004/007/008"], "passingAtRisk": ["border-collapse-dynamic-col-001 android P 0.9812", "border-collapse-dynamic-col-001 web P"]},
+    "verticalContainerWithWidthHeightChildrenNotPostLoad": {"count": 11, "iosPassingAtRisk": ["css-flexbox/alignment/flex-align-baseline-column-vert-lr-rtl-wrap-reverse", "css-flexbox/alignment/flex-align-baseline-column-vert-rl-rtl-wrap-reverse", "css-tables/height-distribution/td-different-subpixel-padding-in-same-row-vertical-rl", "css-writing-modes/float-vlr-014"]},
+    "rangeInputZeroBox": {"count": 1, "docs": ["css-writing-modes/forms/input-range-zero-inline-size [Wia PL]"]}
+  },
+  "grepShapes": {
+    "ch": "\"u\":\"CH\" in any property data; FontFamily presence on any component",
+    "upright": "text leaf whose slot.parent chain resolves WritingMode VERTICAL_* and TextOrientation UPRIGHT",
+    "mixedCjk": "text leaf under VERTICAL_* with TextOrientation absent/MIXED and a code point > U+2E7F",
+    "col": "meta.sourceTag in {col,colgroup} with a Width property",
+    "bakedGuard": "component with inherited VERTICAL_* WritingMode whose non-abspos child carries both Width and Height, in a doc whose manifest postLoadExtracted is false",
+    "rangeZero": "meta.sourceTag input, meta.attrs.type range, Width or Height data.px === 0"
+  }
+}
