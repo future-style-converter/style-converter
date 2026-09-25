@@ -1,0 +1,16 @@
+· cross-platform gate: 327 pair(s) · 4 known divergence(s) · 0 unexpected
+· cross-platform gate: 96 pair(s) · 4 known divergence(s) · 0 unexpected
+· cross-platform gate: 24 pair(s) · 2 known divergence(s) · 0 unexpected
+· cross-platform gate: 24 pair(s) · 0 known divergence(s) · 0 unexpected
+· cross-platform gate: 12 pair(s) · 0 known divergence(s) · 0 unexpected
+· cross-platform gate: 36 pair(s) · 0 known divergence(s) · 0 unexpected
+· cross-platform gate: 21 pair(s) · 0 known divergence(s) · 0 unexpected
+· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected
+  exit 0  fixtures/visual-test.json
+  exit 0  fixtures/composition-test.json   (gate-only: no committed baseline)
+  exit 0  fixtures/properties/effects/filter-sepia-amounts.json
+  exit 0  fixtures/combinations/nested-transforms.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/radius-overflow-transform.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/transform-abspos-pivot.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/blend-isolation.json   (gate-only: no committed baseline)
+  exit 0  fixtures/combinations/opacity-blend.json   (gate-only: no committed baseline)
