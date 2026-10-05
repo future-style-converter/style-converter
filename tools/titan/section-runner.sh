@@ -73,6 +73,10 @@ set -euo pipefail
 # at the end (Step 5 closeout) using SECTION_START.
 SECTION_START=$(date +%s)
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
+# The only code allowed to kill a process on a vite port (wave 52): it kills a
+# vite dev server of THIS checkout and nothing else.
+# shellcheck source=tools/visual/web-port-guard.sh
+source "$PROJECT_ROOT/tools/visual/web-port-guard.sh"
 TOOLS_DIR="$PROJECT_ROOT/tools"
 TITAN_DIR="$TOOLS_DIR/titan"
 WPT_DIR="$TOOLS_DIR/wpt"
@@ -501,7 +505,9 @@ _cleanup_vite() {
     kill -TERM "-$VITE_PID" 2>/dev/null || kill -TERM "$VITE_PID" 2>/dev/null || true
     wait "$VITE_PID" 2>/dev/null || true
   fi
-  lsof -ti:"$PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
+  # Only a vite of THIS checkout is ever killed (wave 52, web-port-guard.sh) —
+  # never another program that happens to listen on the section's port.
+  wpg_kill_our_vite_on_port "$PORT" >/dev/null 2>&1 || true
 }
 # Chain into the lock-release trap installed at top of script. EXIT-only:
 # the INT/TERM/HUP traps installed up top keep routing signals through
