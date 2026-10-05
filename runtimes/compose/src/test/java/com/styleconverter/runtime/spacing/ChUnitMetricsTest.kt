@@ -49,6 +49,8 @@ class ChUnitMetricsTest {
     // The production probe (Paint.FontMetrics — throws on the JVM), restored
     // after every test so the suite order can never leak a stub.
     private val productionProbe = ChUnitMetrics.verticalMetricsProbe
+    // Same for the density probe (null on the JVM — no bound Context).
+    private val productionDensity = ChUnitMetrics.devicePixelsPerPx
 
     @Before
     fun reset() {
@@ -59,6 +61,7 @@ class ChUnitMetricsTest {
     @After
     fun restore() {
         ChUnitMetrics.verticalMetricsProbe = productionProbe
+        ChUnitMetrics.devicePixelsPerPx = productionDensity
         ChUnitMetrics.installDefaultTypeface(null)
     }
 
@@ -156,5 +159,106 @@ class ChUnitMetricsTest {
         // each half separately (0 + 1 = 1), not the sum (1.0).
         ChUnitMetrics.verticalMetricsProbe = { _, _ -> 10.4f to 10.6f }
         assertEquals(21f, ChUnitMetrics.verticalAdvance(null, 16f))
+    }
+
+    // ── wave-52 closing gate: ch is the FONT's advance, not a rasteriser's ──
+    // The probe itself needs android.graphics (device-only), so the JVM pins
+    // what it can see: the flag value, and — by source — that the production
+    // probe measures under those flags through getRunAdvance. The device
+    // evidence is the gate: css-text/hyphens/hyphens-manual-011 android,
+    // `width: 10ch` box 194 px wide → the ref's 197.
+    // MUTATIONS EXECUTED (2026-10-05, each restored): `Paint(ADVANCE_PAINT_FLAGS)`
+    // → `Paint()` and `getRunAdvance("0", 0, 1, 0, 1, false, 1)` →
+    // `measureText("0")` each turn the source pin red; dropping
+    // LINEAR_TEXT_FLAG from the constant turns the flag pin red.
+
+    @Test
+    fun `the advance probe asks for linear sub-pixel metrics`() {
+        // 0x40 | 0x80 — android.graphics.Paint.LINEAR_TEXT_FLAG and
+        // SUBPIXEL_TEXT_FLAG (compile-time constants, so readable on the JVM).
+        assertEquals(
+            android.graphics.Paint.LINEAR_TEXT_FLAG or android.graphics.Paint.SUBPIXEL_TEXT_FLAG,
+            ChUnitMetrics.ADVANCE_PAINT_FLAGS)
+        assertEquals(0xC0, ChUnitMetrics.ADVANCE_PAINT_FLAGS)
+    }
+
+    @Test
+    fun `the production probe measures the font advance - no hinting, no ceil`() {
+        // Walk up to the repo root (the test's working dir is the module).
+        var dir: java.io.File? = java.io.File(System.getProperty("user.dir") ?: ".").absoluteFile
+        val rel = "runtimes/compose/src/main/java/com/styleconverter/runtime/spacing/ChUnitMetrics.kt"
+        while (dir != null && !java.io.File(dir, rel).exists()) dir = dir.parentFile
+        val source = java.io.File(requireNotNull(dir) { "repo root not found" }, rel).readText()
+        // The body of horizontalAdvance: from its signature to the next KDoc.
+        val body = source.substringAfter("private fun horizontalAdvance(").substringBefore("/**")
+        val code = body.lines().filterNot { it.trim().startsWith("//") }.joinToString("\n")
+        // A plain Paint() hints the advance to a whole pixel…
+        assertEquals(true, code.contains("android.graphics.Paint(ADVANCE_PAINT_FLAGS)"))
+        // …and measureText ceils the run; getRunAdvance returns it as measured.
+        assertEquals(true, code.contains("getRunAdvance(\"0\", 0, 1, 0, 1, false, 1)"))
+        assertEquals(false, code.contains("measureText("))
+    }
+
+    // ── wave-52 closing gate: an N-ch box holds its N glyphs (fitSafePx) ──
+    // The gate's density is 2.625 (420 dpi). MUTATIONS EXECUTED (2026-10-05,
+    // closing-fixes-mutations.py F1–F4, each restored): fitSafePx → identity
+    // or "strictly above" (an exact tie grows a pixel), and either `ch` arm
+    // of SpacingResolve stripped of the snap, each turn the tests below red.
+
+    @Test
+    fun `a ch length is rounded up to a whole device pixel and an exact one stays`() {
+        ChUnitMetrics.devicePixelsPerPx = { 2.625f }
+        // css-overflow/line-clamp/block-ellipsis-023: `width: 32ch`, 13 px
+        // monospace, '0' = 7.8 px → 249.6 px = 655.2 device px. Compose
+        // rounded that box to 655 under a 655.2-px line; rounded UP it is 656.
+        assertEquals(656f, ChUnitMetrics.fitSafePx(32f * 7.8f) * 2.625f, 1e-3f)
+        // A length already on a device pixel does not move — the upright
+        // `5ch` = 120 px = 315-device-px squares of ch-units-vrl-003/-004
+        // (316 cost both cells their pass on wave52-probe2)…
+        assertEquals(120f, ChUnitMetrics.fitSafePx(120f))
+        // …and hyphens-manual-011's `10ch` at 32 px (19.2) = 192 px = 504.
+        assertEquals(504f, ChUnitMetrics.fitSafePx(192f) * 2.625f, 1e-3f)
+        // Float noise just above a whole pixel is that pixel, not the next one.
+        assertEquals(504f, ChUnitMetrics.fitSafePx(504.0003f / 2.625f) * 2.625f, 1e-3f)
+        // Always up, never by a whole device pixel.
+        for (px in listOf(1f, 63f, 120.4f, 249.6f, 631f)) {
+            val grown = (ChUnitMetrics.fitSafePx(px) - px) * 2.625f
+            assertEquals("$px grew by $grown device px", true, grown > -1e-3f && grown < 1f)
+        }
+    }
+
+    @Test
+    fun `the snap leaves non-boxes and density-less callers alone`() {
+        // No density (the JVM default, a caller outside the renderer): identity.
+        assertEquals(249.6f, ChUnitMetrics.fitSafePx(249.6f))
+        ChUnitMetrics.devicePixelsPerPx = { 2.625f }
+        // A negative ch margin, a zero and a non-finite length do not move.
+        assertEquals(-12.5f, ChUnitMetrics.fitSafePx(-12.5f))
+        assertEquals(0f, ChUnitMetrics.fitSafePx(0f))
+        assertEquals(true, ChUnitMetrics.fitSafePx(Float.NaN).isNaN())
+        // A broken density is no density.
+        ChUnitMetrics.devicePixelsPerPx = { 0f }
+        assertEquals(249.6f, ChUnitMetrics.fitSafePx(249.6f))
+        ChUnitMetrics.devicePixelsPerPx = { throw IllegalStateException("no display") }
+        assertEquals(249.6f, ChUnitMetrics.fitSafePx(249.6f))
+    }
+
+    @Test
+    fun `both ch resolution paths go through the snap`() {
+        ChUnitMetrics.devicePixelsPerPx = { 2.625f }
+        val ctx = SpacingContext(fontSizePx = 13f, chAdvancePx = 7.8f)
+        // The bare unit — the exact wire shape of block-ellipsis-023's width.
+        val bare = resolveToDp(
+            com.styleconverter.runtime.core.types.LengthValue.Relative(
+                32.0, com.styleconverter.runtime.core.types.LengthUnit.CH, null), ctx)
+        assertEquals(656f, bare.value * 2.625f, 1e-3f)
+        // …and the calc() mirror: the ch term is snapped, then 4 px are added.
+        assertEquals(656f / 2.625f + 4f, evalCalc("calc(32ch + 4px)", ctx), 1e-3f)
+        // The spec's 0.5em fallback (no measured advance) is a box too.
+        val fallback = resolveToDp(
+            com.styleconverter.runtime.core.types.LengthValue.Relative(
+                10.0, com.styleconverter.runtime.core.types.LengthUnit.CH, null),
+            SpacingContext(fontSizePx = 16.2f))
+        assertEquals(213f, fallback.value * 2.625f, 1e-3f)   // 81 px = 212.6 → 213
     }
 }

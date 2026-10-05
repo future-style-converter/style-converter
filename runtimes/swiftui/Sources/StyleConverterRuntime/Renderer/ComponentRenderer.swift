@@ -3801,7 +3801,13 @@ public struct ComponentRenderer: View {
                 // per-counter-style marker padding.
                 // (v2 rename: the tag hint lives at meta.sourceTag.)
                 let parentTag = (component.meta?.sourceTag ?? "").lowercased()
+                // Wave-52 closing gate: an `<li>` whose OWN authored
+                // `display` is not list-item generates no marker
+                // (css-lists-3 §3.1 — ListItemMarkerGate
+                // .displayTakesMarkerAway; css-lists/
+                // counter-reset-reversed-nested painted a stray `1.`).
                 let isListItem = (child.meta?.sourceTag ?? "").lowercased() == "li"
+                    && !ListItemMarkerGate.displayTakesMarkerAway(child.properties)
                 // "" whenever no marker box exists: not a list item, not a
                 // list container, or `list-style-type: none` (css-lists-3
                 // §3.1 — the item then has NO marker at all, so its content

@@ -74,6 +74,48 @@ final class ListItemMarkerGateTests: XCTestCase {
             [prop("Display", "BLOCK"), prop("Display", "LIST_ITEM")]))
     }
 
+    // MARK: - displayTakesMarkerAway: the mirror of §3.1 for a tagged <li>
+    // Wave-52 closing gate — TWIN of the Compose cases of the same names.
+
+    func testAnLiTheAuthorMadeDisplayBlockOrFlexHasNoMarker() {
+        // The EXACT payload of every <li> in the live
+        // wpt__css-lists__counter-reset-reversed-nested document
+        // (`li { display: block }`), where both natives painted a stray
+        // `1.`…`5.` in front of the authored ::before counters…
+        XCTAssertTrue(ListItemMarkerGate.displayTakesMarkerAway(
+            [prop("Display", "BLOCK")]))
+        // …and of the gradient-powerless-hue-* documents (`display: flex`).
+        for keyword in ["FLEX", "INLINE", "INLINE_BLOCK", "GRID", "NONE"] {
+            XCTAssertTrue(ListItemMarkerGate.displayTakesMarkerAway(
+                [prop("Display", keyword)]), keyword)
+        }
+    }
+
+    func testAnLiWithNoDisplayEntryKeepsTheUADefaultMarker() {
+        // HTML §15.3.7's `li { display: list-item }` is not on the wire —
+        // the shape of every other <li> in the corpus. Must stay marked.
+        XCTAssertFalse(ListItemMarkerGate.displayTakesMarkerAway([]))
+        XCTAssertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            [prop("ListStyleType", "square")]))
+    }
+
+    func testAnExplicitListItemDisplayKeepsTheMarkerInBothSpellings() {
+        // change-list-style-type-002, add-inline-child-after-marker-001/002
+        // and change-list-style-position-001 carry it on the <li> itself.
+        XCTAssertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            [prop("Display", "LIST_ITEM")]))
+        XCTAssertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            [prop("Display", "list-item")]))
+    }
+
+    func testTheLastDisplayEntryDecidesWhetherTheMarkerIsTakenAway() {
+        // Last-wins, the same fold as isListItemDisplay.
+        XCTAssertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            [prop("Display", "BLOCK"), prop("Display", "LIST_ITEM")]))
+        XCTAssertTrue(ListItemMarkerGate.displayTakesMarkerAway(
+            [prop("Display", "LIST_ITEM"), prop("Display", "BLOCK")]))
+    }
+
     // MARK: - ownMarkerConfig / ownMarkerText
 
     func testASelfMarkingItemWithNoTypeDeclarationTakesTheInitialDisc() {

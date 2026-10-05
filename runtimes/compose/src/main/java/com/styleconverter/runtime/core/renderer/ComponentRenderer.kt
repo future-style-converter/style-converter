@@ -3518,7 +3518,7 @@ object ComponentRenderer {
                         if (childPosition == PositionType.ABSOLUTE || childPosition == PositionType.FIXED) {
                             // Render absolutely positioned child with offset
                             RenderAbsoluteChild(child)
-                        } else if (isListParent && child._tag?.lowercase() == "li") {
+                        } else if (isListParent && child._tag?.lowercase() == "li" && liKeepsItsMarker(child)) {
                             // Wave 43 (lane V4): the marker numbers from the
                             // HTML ordinal plan, not the raw loop index —
                             // see the listOrdinals hoist above.
@@ -3567,7 +3567,7 @@ object ComponentRenderer {
                     // and the per-component inbox path keep their exact
                     // composition shape, not merely their pixels.
                     ProvidingRowPitch(rowPitchAccumulator) {
-                    if (isListParent && child._tag?.lowercase() == "li") {
+                    if (isListParent && child._tag?.lowercase() == "li" && liKeepsItsMarker(child)) {
                         // Wave 43 (lane V4): same ordinal bridge as the
                         // positioned-container branch — one plan, two loops.
                         RenderListItemMarker(
@@ -4007,6 +4007,22 @@ object ComponentRenderer {
      * content down — the same rule [ListMarkerLineBox] imposes on the
      * marker rows.
      */
+    /**
+     * Wave-52 closing gate — does this `<li>` still generate the marker the
+     * parent loop is about to paint? Yes unless its OWN authored `display`
+     * is not list-item (css-lists-3 §3.1: the marker follows the box, not
+     * the tag — see ListItemMarkerGate.displayTakesMarkerAway for the
+     * measured carrier, css-lists/counter-reset-reversed-nested). A BAKED
+     * `meta.markerText` keeps the marker regardless: the extractor only
+     * bakes one the browser really generated, and RenderListItemMarker
+     * lets it win outright (wave 27). Plain function, consulted once per
+     * `<li>` child and only under a list container.
+     */
+    private fun liKeepsItsMarker(child: IRComponent): Boolean =
+        child.markerText != null ||
+            !com.styleconverter.runtime.lists.ListItemMarkerGate
+                .displayTakesMarkerAway(child.properties.map { it.type to it.data })
+
     @Composable
     private fun RenderOwnListMarker(component: IRComponent, textColor: Color?) {
         val pairs = component.properties.map { it.type to it.data }

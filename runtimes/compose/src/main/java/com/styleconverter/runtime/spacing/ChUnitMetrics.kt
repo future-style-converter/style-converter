@@ -246,14 +246,94 @@ object ChUnitMetrics {
         null
     }
 
-    /** The x-advance of '0': Paint.measureText returns the run's advance —
-     *  exactly css-values-4's "advance measure" — in px because textSize is
-     *  set in px (the runtime's px==dp space). */
+    /**
+     * The paint flags [horizontalAdvance] measures under — wave-52 closing
+     * gate. css-values-4 §6.1.1's "advance measure" is a FONT metric, and
+     * the pre-fix probe answered a rasteriser's instead, twice over: a
+     * plain `Paint()` HINTS its advances to whole pixels, and
+     * `Paint.measureText` then returns `Math.ceil` of the run. Measured on
+     * the wave52-final gate: '0' of the 0.6em monospace face at 32 px
+     * answered 19 (font: 19.2), so `width: 10ch` was 190 px around a ref
+     * box of 192 (css-text/hyphens/hyphens-manual-011 android: dark bbox
+     * 194 px wide against the ref's 197) and an N-ch box held N−1 glyphs;
+     * Inter's '0' at 20 px answered 13 (font: 12.6), so every `5ch` box of
+     * css-writing-modes/ch-units-vrl-005..008 was 65 px against the ref's
+     * 63. LINEAR_TEXT asks for the font's unhinted advance and
+     * SUBPIXEL_TEXT keeps its fraction. Internal so the JVM suite can pin
+     * the value (android.graphics constants are compile-time ints).
+     */
+    internal const val ADVANCE_PAINT_FLAGS: Int =
+        android.graphics.Paint.LINEAR_TEXT_FLAG or android.graphics.Paint.SUBPIXEL_TEXT_FLAG
+
+    /**
+     * Device pixels per runtime px (the display density) — wave-52 closing
+     * gate, the basis of [fitSafePx]. Read from the Context the renderer
+     * bound ([bindInterFace]); null before any render and on the JVM, where
+     * [fitSafePx] is then the identity. Injectable for the unit suite,
+     * exactly like [verticalMetricsProbe].
+     */
+    internal var devicePixelsPerPx: () -> Float? =
+        { boundContext?.resources?.displayMetrics?.density }
+
+    /** Float noise just above a whole device pixel that [fitSafePx] still
+     *  reads as that pixel (504.0003 is "504", not "504 and a bit"). */
+    private const val SNAP_NOISE = 1e-3f
+
+    /**
+     * A `ch`-derived length, rounded UP to a whole DEVICE pixel — wave-52
+     * closing gate.
+     *
+     * `width: Nch` is written to hold exactly N glyphs of a fixed-pitch
+     * face, and with the font's own advance ([ADVANCE_PAINT_FLAGS]) the two
+     * sides are EQUAL in real numbers: N × advance. Compose then rounds the
+     * box to the NEAREST whole device pixel while Minikin compares the
+     * unrounded line against it, with no tolerance — so a box that rounds
+     * DOWN pushes the last word to the next line. Measured on the
+     * wave52-probe run, css-overflow/line-clamp/block-ellipsis-023/-024
+     * (`width: 32ch`, 13 px monospace, '0' = 7.8): 249.6 px = 655.2 device
+     * px rounded to 655 under a 655.2-px line, and "…are 4 lines" broke
+     * after "4" (android P 0.9736 → f 0.9496). Rounding UP instead is the
+     * whole fix; the box grows by LESS than one device pixel (0.38 px at
+     * the gate's density) — before wave 52 the same boxes were up to 6 px
+     * off the reference.
+     *
+     * A length already ON a device pixel is left exactly there. The first
+     * draft added a pixel to those too ("strictly above", against float
+     * noise in an exact tie — Chromium's NGLineBreaker fits against
+     * `available_width.AddEpsilon()`), and the wave52-probe2 run measured
+     * the price: the upright `5ch` = 120 px = 315-device-px squares of
+     * css-writing-modes/ch-units-vrl-003/-004 became 316 and both cells
+     * fell from P 0.9504 to f 0.9440. KNOWN GAP, therefore: an exact tie
+     * (N × advance × density a whole number, e.g. `10ch` at 32 px
+     * monospace = 504) has no headroom, and holds only while Minikin's
+     * summed advances do not exceed it by float noise. No corpus document
+     * is observed to break there (hyphens-manual-011, the 504 tie, fits).
+     *
+     * Identity for a non-positive / non-finite length (a negative ch margin
+     * must not move) and when the density is unknown (JVM tests, a caller
+     * outside the renderer): there the pre-snap value stands.
+     */
+    fun fitSafePx(px: Float): Float {
+        // No density → nothing to snap against (see [devicePixelsPerPx]).
+        val scale = runCatching { devicePixelsPerPx() }.getOrNull()
+            ?.takeIf { it.isFinite() && it > 0f } ?: return px
+        // Only a real, positive extent is a box that has to hold glyphs.
+        if (!px.isFinite() || px <= 0f) return px
+        // ceil(−noise): up to the next device pixel, exact ties stay put.
+        return kotlin.math.ceil(px * scale - SNAP_NOISE) / scale
+    }
+
+    /** The x-advance of '0' — css-values-4's "advance measure" — in px
+     *  because textSize is set in px (the runtime's px==dp space). */
     private fun horizontalAdvance(typeface: android.graphics.Typeface?, sizePx: Float): Float? {
-        val paint = android.graphics.Paint().apply { this.typeface = typeface; textSize = sizePx }
+        // Linear, sub-pixel metrics: the font's own advance (see the flags).
+        val paint = android.graphics.Paint(ADVANCE_PAINT_FLAGS).apply { this.typeface = typeface; textSize = sizePx }
+        // Paint.getRunAdvance (API 23), NOT measureText: measureText rounds
+        // the run UP to a whole pixel, which is the second half of the
+        // defect above. One glyph, no context, LTR, advance at its end.
         // Non-positive/NaN results mean the stub or a broken font — treat
         // as unavailable so the caller uses the 0.5em spec fallback.
-        return paint.measureText("0").takeIf { it.isFinite() && it > 0f }
+        return paint.getRunAdvance("0", 0, 1, 0, 1, false, 1).takeIf { it.isFinite() && it > 0f }
     }
 
     /** M-B: the vertical advance of an upright '0' = round(ascent) +

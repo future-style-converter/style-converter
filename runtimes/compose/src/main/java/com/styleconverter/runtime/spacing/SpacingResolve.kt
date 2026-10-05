@@ -163,7 +163,10 @@ private fun resolveRelative(r: LengthValue.Relative, ctx: SpacingContext): Float
         // own 0.5em fallback. This branch previously fell into the
         // else→0 arm, collapsing `width: 63.1ch` boxes to nothing
         // (css-overflow block-ellipsis-001 rendered a blank canvas).
-        LengthUnit.CH -> v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx)
+        // Wave-52 closing gate: rounded UP to a whole device pixel so an
+        // N-ch box holds its N glyphs (ChUnitMetrics.fitSafePx — identity
+        // when the density is unknown, e.g. every JVM test).
+        LengthUnit.CH -> ChUnitMetrics.fitSafePx(v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx))
         // Pin P2 — `ex`: x-height. §6.1.1 mandates a 0.5em assumption
         // when the metric can't be determined; we don't measure x-height
         // yet, so the spec constant is the honest resolution.
@@ -371,7 +374,7 @@ private class CalcParser(private val src: String, private val ctx: SpacingContex
         // no-channel fallback), rlh = 1.2rem — kept in lockstep per the
         // file rule "any new unit added to resolveRelative Just Works
         // here too": a calc(1lh + 2px) and a bare 1lh must agree.
-        "ch" -> v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx)
+        "ch" -> ChUnitMetrics.fitSafePx(v * (ctx.chAdvancePx ?: 0.5f * ctx.fontSizePx))
         "ex" -> v * 0.5f * ctx.fontSizePx
         "ic", "cap" -> v * ctx.fontSizePx
         "lh" -> v * (ctx.lineHeightPx ?: 1.2f * ctx.fontSizePx)

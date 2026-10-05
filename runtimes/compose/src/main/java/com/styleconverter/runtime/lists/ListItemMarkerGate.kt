@@ -75,6 +75,50 @@ object ListItemMarkerGate {
     }
 
     /**
+     * Has an `<li>`'s OWN `display` taken its marker away — wave-52 closing
+     * gate. css-lists-3 §3.1 attaches the `::marker` to the BOX ("an
+     * element with `display: list-item`"), never to the tag, in BOTH
+     * directions: wave 30 taught the natives that a `<div
+     * style="display:list-item">` gets one ([isListItemDisplay]); this is
+     * the mirror — an `<li>` the author made `display: block` (or `flex`,
+     * `inline`, …) gets none. HTML §15.3.7 only gives `li` its `display:
+     * list-item` as a UA DEFAULT, so an author declaration replaces it.
+     *
+     * Measured on the wave52-final gate, css-lists/
+     * counter-reset-reversed-nested (`li { display: block }` + an authored
+     * `li::before { content: counter(foo) ". " }`): both natives painted a
+     * stray native `1.`…`5.` in front of the generated `12.`…`8.` — ink
+     * columns 57–65 before the `::before` text at 73 (wave52-calib), and
+     * once L6's outside hang landed the stray marker moved to 38–49. Web
+     * and the reference paint no marker. The corpus's other carriers are
+     * the four css-images/gradient/gradient-powerless-hue-* documents
+     * (`li { display: flex }`).
+     *
+     * TRUE only for an authored `Display` that is not list-item: NO
+     * `Display` entry is the UA default and keeps the marker (every other
+     * `<li>` in the corpus), and `LIST_ITEM` keeps it explicitly. Last-wins
+     * and both wire spellings, exactly as [isListItemDisplay]. The callers
+     * are the parent-loop marker gates (ComponentRenderer's two
+     * `isListParent` branches; `isListItem` on iOS), which let a BAKED
+     * `meta.markerText` through first — the extractor only bakes a marker
+     * the browser really generated.
+     *
+     * KNOWN GAP, unchanged: ListOrdinal still counts such an `<li>` as an
+     * item, although css-lists-3 §4.6 increments `list-item` only on
+     * list-item boxes. No corpus list MIXES the two kinds, so no ordinal is
+     * observably wrong today.
+     */
+    fun displayTakesMarkerAway(properties: List<Pair<String, JsonElement?>>): Boolean {
+        var takenAway = false
+        for ((type, data) in properties) {
+            if (type != "Display") continue
+            val keyword = ValueExtractors.extractKeyword(data) ?: continue
+            takenAway = keyword.lowercase().replace('-', '_') != LIST_ITEM_KEYWORD
+        }
+        return takenAway
+    }
+
+    /**
      * The marker state a SELF-MARKING list item resolves, i.e. with no
      * list container to supply a UA default.
      *
