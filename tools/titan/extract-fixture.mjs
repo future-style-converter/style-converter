@@ -687,7 +687,7 @@ export function extractRefHref(html) {
 // WHAT THE ORACLE PROVES, AND WHAT IT DELIBERATELY DOES NOT.
 // It is a CONSERVATIVE oracle: it returns a reason ONLY for a value that is
 // invalid in EVERY CSS context, and null ("no proof" → treat as valid →
-// historical behaviour) for everything else. One rule today:
+// historical behaviour) for everything else. Two rules today:
 //
 //   R1 — UNKNOWN DIMENSION UNIT. A <number> immediately followed by an
 //   identifier is a <dimension-token>, and the unit tables are CLOSED
@@ -699,15 +699,21 @@ export function extractRefHref(html) {
 //   is invalid per css-syntax-3 §2.2 — `90degree`, `100gradian`, `1.57radian`
 //   and `0.25turns` alike.
 //
+//   R2 — COLOR-MIX() PERCENTAGE OUTSIDE [0,100] (wave-52 lane L5 F-C). The
+//   range is written into the css-color-5 §3.1 grammar (`<percentage
+//   [0,100]>`), so `color-mix(in lch, purple 125%, plum 125%)` parses in no
+//   context at all; colorMixPercentOutOfRange states the exact shape.
+//
 // NOT proven (and therefore never dropped): unknown property names, unknown
-// keywords, out-of-range numbers, wrong function arity, and attr()/var()/
-// calc() substitutions that only become invalid at computed-value time. Each
-// of those needs the property's own grammar; guessing at them here would
+// keywords, out-of-range numbers (save R2's one GRAMMAR-level range), wrong
+// function arity, and attr()/var()/calc() substitutions that only become
+// invalid at computed-value time. Each of those needs the property's own
+// grammar; guessing at them here would
 // shadow a LATER valid declaration with an EARLIER one — the same class of
-// bug in the opposite direction. `1e2deg` is deliberately VALID here
-// (docs/BACKLOG.md ranked item 0(e): the exponent form is real CSS that the
-// converter models as a Raw passthrough — a converter limitation, not
-// invalidity), so this oracle never touches that item's population.
+// bug in the opposite direction. `1e2deg` is deliberately VALID here: the
+// exponent form is real CSS (css-values-4 §5.3; docs/BACKLOG.md ranked item
+// 0(e)), which the converter's AngleParser reads since wave-52 lane L5 F4 —
+// so this oracle never touches that item's population.
 //
 // AND ONE SHAPE THE ORACLE CANNOT SEE AT ALL — a `;` INSIDE A url() BODY
 // (added in wave 50 by fix lane F6, skeptic S2). The declaration splitter in
@@ -729,8 +735,10 @@ export function extractRefHref(html) {
 // css-pseudo/first-letter-background-image and its `-dynamic` twin, both
 // `url('data:image/png;base64,…')` — and in neither is there an earlier
 // declaration of the same property to delete, so ZERO corpus carriers of the
-// shadow-collapse shape. No code change this wave: the repair is a different
-// splitter, which moves the byte shape of every fixture rather than these two.
+// shadow-collapse shape. REPAIRED in wave 52 (lane L5 F2, BACKLOG 0(a″)):
+// every declaration list — rule bodies, `style=""`, @keyframes frames and
+// @font-face descriptors — now goes through ONE css-syntax-3 splitter,
+// `splitDeclarations` below, so the tear cannot reach this oracle at all.
 //
 // THREE CLASSES OF VALID CSS THE ORACLE USED TO REFUSE, closed in wave 50 by
 // fix lane F3 on skeptic S5's adversarial probe
@@ -760,6 +768,81 @@ export function extractRefHref(html) {
 // NO SILENT FALLTHROUGH. Every drop is pushed onto `invalidShadowDrops` and
 // printed on the test's extract.log line as `[validity: …]`, so a drop is
 // always attributable to a test, a property, a kept value and a reason.
+
+/**
+ * wave-52 lane L5 F2 (BACKLOG 0(a″)) — THE declaration splitter. Splits one
+ * declaration list (a rule body, a `style=""` attribute, a @keyframes frame,
+ * a @font-face block) on its top-level `;` the way the css-syntax-3 §5.4
+ * parser algorithms do, over the tokens of §4.3:
+ *   • a `;` inside any `(…)` belongs to that function's component value
+ *     (§5.4 consumes a function as ONE component value) — `fn(1;2)` is one
+ *     value;
+ *   • a `<string-token>` (§4.3.5) is opaque — `content: ";"` is one
+ *     declaration; an unescaped newline ends a string as a <bad-string>, so
+ *     one unterminated quote cannot swallow the rest of the list;
+ *   • an UNQUOTED `url(` opens a `<url-token>` (§4.3.6) that runs to its own
+ *     `)` with no nesting and no strings — `url(data:image/svg+xml;base64,XX)`
+ *     is one value (a quoted `url("…")` is an ordinary function holding a
+ *     string, handled by the two rules above); `url` must start its ident, so
+ *     `image-url(` is an ordinary function;
+ *   • a backslash escape (§4.3.7) consumes the next code point as a pair,
+ *     inside AND outside strings — `view-transition-name: secon\'d` is an
+ *     escaped quote, not a string opener (css-view-transitions/escaped-name).
+ * Comments are NOT tokenised here: every caller receives comment-stripped
+ * text (`stripComments` runs over the whole document, `style=""` attributes
+ * included, before any of them), and an apostrophe inside a surviving
+ * `/* … *\/` would otherwise open a string — measured: 20 of the 22
+ * first-draft hits of the comment-blind census splitter were exactly that or
+ * the escaped quote named above (`wave52-plan/splitter-differential.json`).
+ *
+ * Replaces four private splitters: parseCss's and the style attribute's
+ * `split(';')` (quote- and url-blind — the tear documented on the oracle
+ * banner above), the @keyframes frame split, and @font-face's
+ * `splitDescriptors` (paren- and quote-aware but escape-blind).
+ *
+ * @param   {string} body declaration list text, comments already stripped
+ * @returns {string[]} the declarations, trimmed, empties dropped (what every
+ *   caller's `!k || !v` guard dropped after the old split)
+ */
+export function splitDeclarations(body) {
+  const s = String(body ?? '');
+  const n = s.length;
+  const out = [];
+  let start = 0;        // where the current declaration began
+  let depth = 0;        // `(` nesting outside strings and url-tokens
+  let quote = null;     // the open string's quote, or null
+  const flush = (end) => { const d = s.slice(start, end).trim(); if (d) out.push(d); };
+  for (let i = 0; i < n; i++) {
+    const ch = s[i];
+    // §4.3.7: an escape is a PAIR — the escaped code point never acts as a
+    // quote, a paren or a separator, in a string or out of one.
+    if (ch === '\\') { i++; continue; }
+    if (quote) {
+      // §4.3.5: the matching quote closes; a raw newline makes a bad-string.
+      if (ch === quote || ch === '\n') quote = null;
+      continue;
+    }
+    if (ch === '"' || ch === "'") { quote = ch; continue; }
+    // §4.3.6: `url(` at the START of an ident, not followed (after
+    // whitespace) by a quote, is one <url-token> up to its `)`.
+    if ((ch === 'u' || ch === 'U') && /^url\(/i.test(s.slice(i, i + 4))
+        && !/[-\w\u0080-\uFFFF\\]/.test(s[i - 1] ?? '')) {
+      let j = i + 4;
+      while (j < n && /\s/.test(s[j])) j++;
+      if (s[j] !== '"' && s[j] !== "'") {
+        j = i + 4;
+        while (j < n && s[j] !== ')') j += s[j] === '\\' ? 2 : 1;
+        i = j;                                   // on the closing `)` (or past the end)
+        continue;
+      }
+    }
+    if (ch === '(') depth++;
+    else if (ch === ')') depth = Math.max(0, depth - 1);   // a stray `)` never goes negative
+    else if (ch === ';' && depth === 0) { flush(i); start = i + 1; }
+  }
+  flush(n);
+  return out;
+}
 
 /**
  * The CLOSED set of CSS dimension units, lower-cased (CSS units are ASCII
@@ -918,6 +1001,59 @@ export function provablyInvalidDeclaration(prop, value) {
   if (unit !== null) {
     return `unknown dimension unit '${unit}' (css-values-4 §7.1 / §6.2 unit tables are closed)`;
   }
+  // R2 (wave-52 lane L5 F-C) — reported with the authored percentage.
+  const pct = colorMixPercentOutOfRange(value);
+  if (pct !== null) {
+    return `color-mix() percentage ${pct} outside [0,100] (css-color-5 §3.1 <percentage [0,100]>)`;
+  }
+  return null;
+}
+
+/**
+ * R2 — a `color-mix()` whose colour operand carries a percentage outside
+ * [0,100]. css-color-5 §3.1 writes the operand as `<color> && <percentage
+ * [0,100]>?`, so the range is part of the GRAMMAR, not a computed-value
+ * clamp: `purple 125%` fails to parse, the declaration is invalid
+ * (css-syntax-3 §2.2) and an earlier valid value stays in force. MEASURED
+ * carrier: css-color/color-mix-percents-02, whose `.t6`/`.t7` rows
+ * (`125%`, `9999%`) shadowed the valid `rgb(…)` of `.negative-test`, and the
+ * web capture painted two white rows (Blink refused them, the wire still
+ * carried them) where the ref is uniform purple.
+ *
+ * Conservative like R1: only a value that IS one `color-mix(…)` call, only
+ * percentages at the TOP level of an operand (a percentage inside a nested
+ * `rgb(…)`/`calc(…)` belongs to that function's grammar), and an unbalanced
+ * call proves nothing.
+ *
+ * @param   {string} value declaration value, `!important` already stripped
+ * @returns {string|null} the first out-of-range percentage as authored
+ */
+function colorMixPercentOutOfRange(value) {
+  const v = value.trim();
+  if (!/^color-mix\(/i.test(v)) return null;
+  // The call's own closing paren must end the value.
+  let depth = 0;
+  let end = -1;
+  for (let i = 'color-mix('.length; i < v.length; i++) {
+    if (v[i] === '(') depth++;
+    else if (v[i] === ')') { if (depth === 0) { end = i; break; } depth--; }
+  }
+  if (end !== v.length - 1) return null;
+  // Argument 0 is the `in <colorspace>` interpolation clause; the rest are
+  // the colour operands.
+  const operands = splitTopLevel(v.slice('color-mix('.length, end), ',').slice(1);
+  for (const op of operands) {
+    // Drop every nested function's argument list (innermost first) so only
+    // the operand's own top-level tokens remain.
+    let top = op;
+    for (let prev = null; prev !== top; ) { prev = top; top = top.replace(/\([^()]*\)/g, ''); }
+    // A <percentage-token> (css-values-4 §5.3 number spelling + `%`) that
+    // starts its own token, not the tail of an ident or hash.
+    for (const m of top.matchAll(/(^|[\s,])([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)%/g)) {
+      const n = Number(m[2]);
+      if (n < 0 || n > 100) return `${m[2]}%`;
+    }
+  }
   return null;
 }
 
@@ -958,6 +1094,11 @@ export const invalidShadowDrops = [];
  * @param {Record<string,string>} target declaration bag being built
  * @param {string} key   property name
  * @param {string} value incoming value
+ * @returns {boolean} true when the write was TAKEN, false when refused —
+ *   wave-52 lane L5 F1: the block collapse records `!important` only for a
+ *   write that was taken, so it needs the answer rather than re-probing the
+ *   bag (the old `props[k] === v` probe could not tell "taken" from "an
+ *   earlier declaration happened to carry the same text").
  */
 export function assignDeclaration(target, key, value) {
   const prev = target[key];
@@ -968,10 +1109,44 @@ export function assignDeclaration(target, key, value) {
     // historical last-wins byte shape must be preserved exactly.
     if (reason !== null && provablyInvalidDeclaration(key, prev) === null) {
       invalidShadowDrops.push({ prop: key, kept: prev, dropped: value, reason });
-      return;
+      return false;
     }
   }
   target[key] = value;
+  return true;
+}
+
+/**
+ * wave-52 lane L5 F1 (BACKLOG 0(a′)) — ONE declaration of a block or a
+ * `style=""` attribute, collapsed with importance compared BEFORE order of
+ * appearance (css-cascade-5 §6.1 "Cascade Sorting Order": origin and
+ * importance come first, order of appearance last).
+ *
+ * Two rules, both from that sort:
+ *   1. a NORMAL declaration never displaces an IMPORTANT one already in the
+ *      bag — unless that important value is provably invalid, in which case
+ *      css-syntax-3 §2.2 says it was never in the cascade at all;
+ *   2. the importance flag follows the write that was TAKEN: set for an
+ *      important write, CLEARED for a normal one (which can only be taken
+ *      over a normal or an invalid value). This retires the wave-50
+ *      promotion defect, where a surviving normal declaration was handed on
+ *      flagged important because nothing ever cleared the flag.
+ *
+ * @param {Record<string,string>} props     the bag being collapsed
+ * @param {Record<string,true>}   important which of its keys are important
+ * @param {string}  k    property name
+ * @param {string}  v    value, `!important` already stripped
+ * @param {boolean} bang whether the declaration carried `!important`
+ */
+function collapseDeclaration(props, important, k, v, bang) {
+  // Rule 1 — a normal declaration loses to a VALID important one, whatever
+  // the order; the earlier important value stays in force.
+  if (important[k] && !bang && provablyInvalidDeclaration(k, props[k]) === null) return;
+  // The guarded write (wave-50 B1) still decides validity; rule 2 then
+  // records importance only for the write it actually took.
+  if (!assignDeclaration(props, k, v)) return;
+  if (bang) important[k] = true;
+  else delete important[k];
 }
 
 /**
@@ -980,14 +1155,16 @@ export function assignDeclaration(target, key, value) {
  * same element — css-syntax-3 §2.2 ignores an invalid declaration wherever it
  * appears in the cascade, not only inside one block.
  *
- * NOT applied on the LAYERED path (`resolveLayeredCascade`): that path sorts
- * candidates by the css-cascade-5 §6.4.4 order and resolves `revert-layer`
- * recursively, so the refusal would have to become a candidate filter inside
- * the sort. Measured reason to leave it alone: across the 1435-test corpus
- * the oracle proves exactly four declarations invalid and all four sit in ONE
- * unlayered rule block (css-values/angle-units-001), so a layered-path filter
- * would move nothing and could only risk the css-cascade cells. Stated here
- * rather than left as a silent gap.
+ * The LAYERED path (`resolveLayeredCascade`) sorts candidates by the
+ * css-cascade-5 §6.4.4 order and resolves `revert-layer` recursively, so
+ * there the refusal is a CANDIDATE FILTER inside the sort (wave-52 lane L5
+ * F3, BACKLOG 0(a‴)) with the same two clauses as the guarded write: a
+ * provably invalid candidate is set aside only when some other candidate in
+ * its window survives the oracle, and every set-aside that changed the
+ * winner is logged on `invalidShadowDrops`. Measured: across the 1435-test
+ * corpus the oracle proves exactly four declarations invalid and all four
+ * sit in ONE unlayered rule block (css-values/angle-units-001), so the
+ * filter moves no corpus document (extract+convert differential, lane note).
  *
  * @param {Record<string,string>} target bag being built
  * @param {Record<string,string>} source bag being merged in
@@ -1026,10 +1203,11 @@ export function assignDeclarations(target, source) {
 // Every OTHER at-rule (@media, @supports, @font-face, @keyframes, …) keeps
 // the byte-identical skip, so no non-layer/non-scope fixture moves.
 //
-// Returns: Array<{ selector, props, layerName?, layerIdx?, important? }>
+// Returns: Array<{ selector, props, specificity, layerName?, layerIdx?, important? }>
 //   `layerName`/`layerIdx` appear ONLY on rules that came from a `@layer`
-//   block and `important` ONLY when the rule carries `!important`, so a
-//   sheet with neither produces the exact historical object shape.
+//   block and `important` ONLY when the rule carries `!important`;
+//   `specificity` (wave-52 lane L5 F-D) is on every rule — a `[a,b,c]`
+//   triple, or null for a selector selectorSpecificity cannot rank.
 export function parseCss(css) {
   const rules = [];
   // Layer names in DECLARATION order — the css-cascade-5 §6.4.1 layer order.
@@ -1155,7 +1333,9 @@ export function parseCss(css) {
       // because css-cascade-5 §6.4.4 REVERSES layer order for important
       // declarations — revert-layer-005/012 turn entirely on that.
       const important = {};
-      for (const decl of body.split(';')) {
+      // wave-52 lane L5 F2: the css-syntax-3 splitter, not `split(';')` —
+      // a `;` inside url()/strings/functions no longer tears a value.
+      for (const decl of splitDeclarations(body)) {
         const colon = decl.indexOf(':');
         if (colon < 0) continue;
         const k = decl.slice(0, colon).trim();
@@ -1166,41 +1346,21 @@ export function parseCss(css) {
         v = v.replace(/\s*!important\s*$/i, '').trim();
         // Skip custom properties (the bucketer flagged them as B already).
         if (k.startsWith('--')) continue;
-        // THE SEAM (wave 50 lane B1). Was a bare `props[k] = v` — an
-        // unconditional last-wins collapse that let a PROVABLY INVALID later
-        // declaration delete an earlier valid one before the converter, which
-        // implements css-syntax-3 §2.2 correctly, ever saw either. The
-        // guarded write refuses only what the oracle can prove is not CSS;
-        // every other declaration still wins exactly as before.
-        assignDeclaration(props, k, v);
-        // A REFUSED declaration is "ignored" in the full §2.2 sense — it
-        // contributes neither its value nor its importance, so the `!important`
-        // flag is recorded only when the write was actually taken. For every
-        // declaration the oracle does not refuse this is byte-identical to the
-        // historical `if (bang) important[k] = true`. Deliberately NOT a
-        // wider importance fix: `a: x !important; a: y` still ends on `y`
-        // here (css-cascade-5 §6.4.4 says the important one should win), an
-        // OLDER defect of this collapse with zero corpus carriers — widening
-        // the seam to cover it would move css-cascade bytes this lane has no
-        // gate for.
-        //
-        // THE SECOND HALF OF THAT SAME DEFECT, recorded in wave 50 by fix
-        // lane F6 (skeptic S2 on lane B1's residual). `a: x !important; a: y`
-        // does not merely end on `y`: `important[a]` was set to true by the
-        // declaration that was then DROPPED, and nothing clears it, so the
-        // surviving NON-important `y` is handed on flagged `!important` and
-        // beats every later author rule (css-cascade-5 §6.4.4 ranks important
-        // author declarations above normal ones — the same ranking that makes
-        // this collapse's first half wrong, now firing in the other
-        // direction). Executed on this tree:
-        // `parseCss('div { color: red !important; color: green }')` returns
-        // `props {color:'green'}` together with `important {color:true}`.
-        // Pre-existing at HEAD, and MEASURED at ZERO corpus carriers — over
-        // the 1435 wave49-final tests no declaration block declares a property
-        // `!important` and then re-declares it without. Still deferred, for
-        // the same reason as the half above: the repair belongs in the
-        // cascade resolution, not in this collapse.
-        if (bang && props[k] === v) important[k] = true;
+        // THE SEAM (wave 50 lane B1; importance added by wave-52 lane L5 F1).
+        // Was a bare `props[k] = v` — an unconditional last-wins collapse
+        // that let a PROVABLY INVALID later declaration delete an earlier
+        // valid one, and (the wave-50 F6 / skeptic S2 residual) let a later
+        // NORMAL declaration displace an earlier IMPORTANT one and then be
+        // handed on flagged `!important` itself: `parseCss('div { color: red
+        // !important; color: green }')` returned `{color:'green'}` with
+        // `important {color:true}`. collapseDeclaration compares importance
+        // before order (css-cascade-5 §6.1) and keeps the flag on the write
+        // that was taken; a REFUSED declaration still contributes neither
+        // its value nor its importance (css-syntax-3 §2.2). Measured: zero
+        // corpus blocks re-declare an important property without the bang,
+        // so this hunk moves no document (the CROSS-RULE half below in
+        // propsForElement is the one with a carrier).
+        collapseDeclaration(props, important, k, v, bang);
       }
       if (Object.keys(props).length === 0) continue;
       const hasImportant = Object.keys(important).length > 0;
@@ -1212,7 +1372,13 @@ export function parseCss(css) {
         if (!s) continue;
         const scoped = applyScope(s, ctx);
         if (scoped === null) continue;
-        const rule = { selector: scoped, props };
+        // wave-52 lane L5 F-D: the rule's Selectors-4 §17 specificity,
+        // taken from the selector AS WRITTEN inside any `@scope` block — the
+        // scoping root contributes nothing (css-cascade-6: an implicitly
+        // scoped selector ranks as if prefixed by `:where(:scope)`, and an
+        // explicit `:scope` counts as the one pseudo-class it is), so the
+        // `.test input` the matcher sees still ranks as `input` (0,0,1).
+        const rule = { selector: scoped, props, specificity: selectorSpecificity(s) };
         if (layerName != null) rule.layerName = layerName;
         if (hasImportant) rule.important = important;
         rules.push(rule);
@@ -1247,7 +1413,9 @@ const REVERT_LAYER = 'revert-layer';
  *
  * Sort order per property (highest wins): important > normal; within each,
  * inline > layered; within layered, LATER layer for normal declarations and
- * EARLIER layer for important ones; ties broken by document order.
+ * EARLIER layer for important ones; inside one layer, higher specificity
+ * (wave-52 lane L5 F-D, each group's optional `specificity` triple); ties
+ * broken by document order.
  *
  * `revert-layer` then re-runs the same resolution over only the declarations
  * from layers declared EARLIER than the winner's — recursively, which is
@@ -1266,10 +1434,24 @@ export function resolveLayeredCascade(groups, layerCount) {
         name, value, rank: g.rank, order: order++,
         important: !!(g.important && g.important[name]),
         inline: !!g.inline,
+        // wave-52 lane L5 F-D: the group's Selectors-4 §17 triple (absent on
+        // the style attribute and on hand-built groups → ranks as (0,0,0)).
+        specificity: g.specificity,
       });
     }
   }
-  const names = new Set(cands.filter((c) => c.name !== 'all').map((c) => c.name));
+  // Every declared name in first-appearance order — the key order the
+  // unlayered last-wins merge produces, which the output below keeps.
+  const declared = [...new Set(cands.map((c) => c.name))];
+  const names = new Set(declared.filter((n) => n !== 'all'));
+  // wave-52 lane L5 F1: an `all` declaration whose value is NOT revert-layer
+  // (`all: initial`, css-cascade-5 §5) is an ordinary declaration of the
+  // `all` shorthand and must reach the bag like any other — the unlayered
+  // merge always passed it through. Before F1 widened the gate to importance
+  // carriers, only `@layer` sheets reached this resolver and none in the
+  // corpus declares a non-revert-layer `all`; after it, dropping `all` here
+  // would silently diverge from the merge it replaces.
+  const keepAll = cands.some((c) => c.name === 'all' && c.value !== REVERT_LAYER);
   // `all: revert-layer` is a revert-layer declaration for EVERY property the
   // element has a declaration for (revert-layer-003 reverts width, height and
   // background-color in one line).
@@ -1282,25 +1464,65 @@ export function resolveLayeredCascade(groups, layerCount) {
     if (a.important !== b.important) return a.important;
     if (a.inline !== b.inline) return a.inline;
     if (a.rank !== b.rank) return a.important ? a.rank < b.rank : a.rank > b.rank;
+    // wave-52 lane L5 F-D: inside ONE layer rank, specificity decides before
+    // order of appearance (css-cascade-5 §6.1). Importance does not reverse
+    // it — only origin and layer order flip for important declarations.
+    const bySpec = compareSpecificity(a.specificity, b.specificity);
+    if (bySpec !== 0) return bySpec > 0;
     return a.order > b.order;
   };
+  // wave-52 lane L5 F3 (BACKLOG 0(a‴)) — THE CANDIDATE FILTER. css-syntax-3
+  // §2.2: a provably invalid declaration is ignored, so it never enters the
+  // cascade at all and cannot outrank anything. The oracle's verdict is
+  // memoised per candidate (`c.invalid`: string reason | null) because a
+  // revert-layer chain re-runs the selection over the same candidates.
+  const invalidReason = (c) => {
+    if (c.invalid === undefined) c.invalid = provablyInvalidDeclaration(c.name, c.value);
+    return c.invalid;
+  };
+  // Candidates the filter set aside AND that would otherwise have won their
+  // pass — the only skips that changed an outcome, the same "log what the
+  // refusal cost" rule assignDeclaration follows. A Set, because a
+  // revert-layer chain can meet the same important candidate in two passes
+  // and one refusal must be logged once.
+  const skipped = new Set();
   const resolveOne = (name, maxRank, depth) => {
     // A pathological revert-layer cycle cannot happen (maxRank strictly
     // decreases) but the guard keeps a malformed sheet from spinning.
     if (depth > 32) return undefined;
+    // The window: every declaration of this property below `maxRank`.
+    const win = cands.filter((c) => c.name === name && c.rank < maxRank);
+    if (win.length === 0) return undefined;
+    // Filter ONLY when at least one candidate survives it — the exact
+    // assignDeclaration semantics: an all-invalid window keeps the sort's own
+    // winner, so the converter receives the byte-identical input it always
+    // did (and decides for itself what an invalid value means).
+    const valid = win.filter((c) => invalidReason(c) === null);
+    const pool = valid.length > 0 ? valid : win;
     let best = null;
-    for (const c of cands) {
-      if (c.name !== name || c.rank >= maxRank) continue;
-      if (best === null || better(c, best)) best = c;
+    for (const c of pool) if (best === null || better(c, best)) best = c;
+    // Every set-aside candidate that `better` would have preferred is a
+    // refusal that changed this pass's result — recorded for the log below.
+    if (pool !== win) {
+      for (const c of win) if (invalidReason(c) !== null && better(c, best)) skipped.add(c);
     }
-    if (best === null) return undefined;
     if (best.value === REVERT_LAYER) return resolveOne(name, best.rank, depth + 1);
     return best.value;
   };
   const out = {};
-  for (const name of names) {
+  for (const name of declared) {
+    // `all: revert-layer` alone was expanded onto `names` above and is not
+    // itself an output key (historical shape).
+    if (name === 'all' && !keepAll) continue;
+    skipped.clear();
     const v = resolveOne(name, layerCount + 2, 0);
     if (v !== undefined) out[name] = v;
+    // NO SILENT FALLTHROUGH: every refusal lands on the same
+    // `invalidShadowDrops` log the unlayered collapse feeds (printed per test
+    // as `[validity: …]`), naming the value that finally stayed in force.
+    for (const c of skipped) {
+      invalidShadowDrops.push({ prop: name, kept: v, dropped: c.value, reason: c.invalid });
+    }
   }
   return out;
 }
@@ -1311,6 +1533,150 @@ export function resolveLayeredCascade(groups, layerCount) {
 function hasRevertLayer(props) {
   for (const v of Object.values(props)) if (v === REVERT_LAYER) return true;
   return false;
+}
+
+// ── wave-52 lane L5 F-D: Selectors-4 §17 specificity ─────────────────────────
+//
+// css-cascade-5 §6.1 sorts declarations by origin+importance → context →
+// element-attached → layers → SPECIFICITY → order of appearance. The
+// unlayered merge in propsForElement used to skip the specificity step and
+// went straight to order, so a more specific rule written EARLIER lost to a
+// less specific one written later. MEASURED carriers: css-cascade/
+// import-conditional-001/-002 — the @import resolver inlines `.test {
+// background: green }` where the import stood, ABOVE the local `div {
+// background: red }`, and the wire carried red (web f 0.999, the whole
+// square the wrong colour). Every value below is a `[a, b, c]` triple.
+
+/** Lexicographic comparison of two specificity triples (Selectors-4 §17:
+ *  "compare a, then b, then c"). A missing triple ranks as (0,0,0). */
+export function compareSpecificity(x, y) {
+  const p = x ?? [0, 0, 0];
+  const q = y ?? [0, 0, 0];
+  for (let i = 0; i < 3; i++) if (p[i] !== q[i]) return p[i] - q[i];
+  return 0;
+}
+
+/** Pseudo-classes whose specificity is that of their MOST SPECIFIC argument
+ *  (Selectors-4 §17 for :is/:not/:has; `:matches` / `:-webkit-any` /
+ *  `:-moz-any` are the historical spellings of :is). */
+const SPECIFICITY_MAX_ARG_PSEUDOS = new Set(['is', 'matches', '-webkit-any', '-moz-any', 'not', 'has']);
+
+/**
+ * Selectors-4 §17 specificity of ONE complex selector (no top-level comma):
+ * (a) ids; (b) classes, attribute selectors and pseudo-classes; (c) type
+ * selectors and pseudo-elements. `*` and `:where()` add nothing; `:is()`,
+ * `:not()`, `:has()` add their most specific argument; `:nth-child(An+B of
+ * S)` / `:nth-last-child(… of S)` add one pseudo-class plus the most
+ * specific S; css-scoping-1's `:host(S)` / `:host-context(S)` add one
+ * pseudo-class plus S and `::slotted(S)` one pseudo-element plus S. The CSS2
+ * one-colon pseudo-elements (`:before`, `:after`, `:first-line`,
+ * `:first-letter`) count as pseudo-elements (Selectors-4 §3.6.1).
+ *
+ * @param {string}  sel      the selector, as authored
+ * @param {boolean} relative true for a `:has()` argument, where a
+ *   <relative-selector> may open with a combinator (Selectors-4 §4.4)
+ * @returns {[number,number,number]|null} null for a malformed selector
+ *   (leading/trailing/doubled combinator, unbalanced brackets, a character
+ *   no simple selector starts with) — such a rule never matches, so it has
+ *   no rank to give
+ */
+export function selectorSpecificity(sel, relative = false) {
+  const s = String(sel ?? '').trim();
+  const n = s.length;
+  const sp = [0, 0, 0];
+  let i = 0;
+  let seenSimple = false;     // any simple selector read yet
+  let pendingComb = false;    // an explicit combinator still waiting for its compound
+  let leadingComb = false;    // a relative selector's one leading combinator
+  // An <ident-token> body (css-syntax-3 §4.3.11), escapes consumed whole so
+  // `.a\:b` is ONE class, not a class plus a pseudo-class.
+  const readIdent = () => {
+    const start = i;
+    while (i < n) {
+      if (s[i] === '\\') { const m = /^\\(?:[0-9a-fA-F]{1,6}\s?|[\s\S])/.exec(s.slice(i)); i += m[0].length; continue; }
+      if (/[-\w\u0080-￿]/.test(s[i])) { i++; continue; }
+      break;
+    }
+    return s.slice(start, i);
+  };
+  // A bracketed run starting at `s[i]` (`(` or `[`), quotes and escapes
+  // honoured; returns the inner text and leaves `i` after the closer, or
+  // null when it never closes.
+  const readBracket = (open, close) => {
+    let depth = 0; let quote = null; const start = i + 1;
+    for (; i < n; i++) {
+      const ch = s[i];
+      if (ch === '\\') { i++; continue; }
+      if (quote) { if (ch === quote) quote = null; continue; }
+      if (ch === '"' || ch === "'") { quote = ch; continue; }
+      if (ch === open) depth++;
+      else if (ch === close && --depth === 0) { i++; return s.slice(start, i - 1); }
+    }
+    return null;
+  };
+  // The most specific member of a selector list (malformed members carry no
+  // rank — :is()/:where() lists are forgiving, Selectors-4 §3.9).
+  const maxOf = (list, rel) => {
+    let best = [0, 0, 0];
+    for (const part of splitTopLevel(list, ',')) {
+      const v = selectorSpecificity(part, rel);
+      if (v && compareSpecificity(v, best) > 0) best = v;
+    }
+    return best;
+  };
+  const add = (v) => { sp[0] += v[0]; sp[1] += v[1]; sp[2] += v[2]; };
+  while (i < n) {
+    const ch = s[i];
+    if (/\s/.test(ch)) { i++; continue; }                         // descendant combinator / padding
+    const twoBar = ch === '|' && s[i + 1] === '|';                // the `||` column combinator
+    if (ch === '>' || ch === '+' || ch === '~' || twoBar) {
+      // A combinator needs a compound on its left — except the ONE leading
+      // combinator of a relative selector — and one on its right.
+      if (pendingComb) return null;
+      if (!seenSimple) { if (!relative || leadingComb) return null; leadingComb = true; }
+      pendingComb = true;
+      i += twoBar ? 2 : 1;
+      continue;
+    }
+    seenSimple = true; pendingComb = false;
+    if (ch === '*') { i++; continue; }                             // universal: (0,0,0)
+    if (ch === '|') { i++; continue; }                             // namespace separator (`*|div`, `|div`)
+    if (ch === '#') { i++; readIdent(); sp[0]++; continue; }      // (a) id
+    if (ch === '.') { i++; readIdent(); sp[1]++; continue; }      // (b) class
+    if (ch === '[') { if (readBracket('[', ']') === null) return null; sp[1]++; continue; } // (b) attribute
+    if (ch === ':') {
+      const isElement = s[i + 1] === ':';
+      i += isElement ? 2 : 1;
+      const name = readIdent().toLowerCase();
+      let arg = null;
+      if (s[i] === '(') { arg = readBracket('(', ')'); if (arg === null) return null; }
+      if (isElement || (arg === null && LEGACY_ONE_COLON_PSEUDO_ELEMENTS.has(name))) {
+        sp[2]++;                                                   // (c) pseudo-element
+        if (isElement && name === 'slotted' && arg !== null) add(maxOf(arg, false));
+        continue;
+      }
+      if (name === 'where') continue;                              // :where() — always zero
+      if (SPECIFICITY_MAX_ARG_PSEUDOS.has(name) && arg !== null) { add(maxOf(arg, name === 'has')); continue; }
+      sp[1]++;                                                     // (b) any other pseudo-class
+      if ((name === 'nth-child' || name === 'nth-last-child') && arg !== null) {
+        const { ofSelectors } = splitAnBOfSelector(arg);
+        if (ofSelectors) add(maxOf(ofSelectors.join(','), false));
+      } else if ((name === 'host' || name === 'host-context') && arg !== null) {
+        add(maxOf(arg, false));
+      }
+      continue;
+    }
+    if (ch === '\\' || /[-_A-Za-z\u0080-￿]/.test(ch)) {
+      readIdent();
+      // `ns|tag`: the ident before a lone `|` is a namespace prefix, not a type.
+      if (s[i] === '|' && s[i + 1] !== '|') continue;
+      sp[2]++;                                                     // (c) type selector
+      continue;
+    }
+    return null;                                                   // nothing a simple selector starts with
+  }
+  if (!seenSimple || pendingComb) return null;                     // empty / trailing combinator
+  return sp;
 }
 
 // ── Body element walker ──────────────────────────────────────────────────────
@@ -4688,6 +5054,19 @@ export const INTRINSIC_WIDGET_TAGS = new Set([
   'input', 'select', 'textarea', 'button', 'meter', 'progress',
 ]);
 
+// wave-52 lane L5 F-E (= counters-and-multicol T6) — LIST ITEMS ARE NEVER
+// CONTENT-LESS. css-lists-3 §2/§3: an element whose display is `list-item`
+// generates a ::marker box, so an empty `<li></li>` still paints its marker
+// on a line of its own; the HTML UA sheet gives `li` and `summary`
+// `display: list-item`. The 100x100 placeholder below assumed "no rules, no
+// text, no children" meant "nothing to render" — false here. MEASURED: 51
+// empty `<li>` in 15 css-counter-styles/cssom/* tests matched no rule (their
+// `<ol>` is styled inline) and became 100x100 boxes, so their markers sat at
+// a 100-px pitch against a ref whose rows are 20 px apart. Exempt by TAG,
+// the same narrow shape as INTRINSIC_WIDGET_TAGS; a rule-less empty element
+// of any other tag keeps the placeholder.
+export const LIST_ITEM_TAGS = new Set(['li', 'summary']);
+
 // A floating-point number token (HTML §2.3.4.2 valid floating-point
 // number, plus scientific notation) — the gate for the numeric wire lanes.
 const WIDGET_NUMERIC_RX = /^-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
@@ -6232,6 +6611,32 @@ export function countUnsupportedRules(rules) {
   return n;
 }
 
+/** wave-52 lane L5 F-D — a rule's specificity: the triple parseCss stamped,
+ *  or (for a rule built outside parseCss, e.g. a unit-test literal or a
+ *  bake's synthetic rule) one computed from its selector. */
+function ruleSpecificity(r) {
+  return r.specificity !== undefined ? r.specificity : selectorSpecificity(r.selector);
+}
+
+/** wave-52 lane L5 F-D — the rules in css-cascade-5 §6.1 merge order:
+ *  ascending specificity, document order between equals (Array.prototype.sort
+ *  is stable, ES2019 §23.1.3.30). A copy — the caller's array keeps document
+ *  order for the key-order pass. */
+function bySpecificity(rs) {
+  return [...rs].sort((x, y) => compareSpecificity(ruleSpecificity(x), ruleSpecificity(y)));
+}
+
+/** wave-52 lane L5 F-D — copy `merged` into `target` with keys in their
+ *  FIRST-APPEARANCE order across `bags` (document order). Every key of every
+ *  bag is in `merged` (assignDeclaration always writes a key's first value),
+ *  so this is a pure re-ordering — the key order the historical document-
+ *  order merge produced, whatever order the specificity sort merged in. */
+function copyInDocumentOrder(target, merged, bags) {
+  for (const bag of bags) {
+    for (const k of Object.keys(bag)) if (!(k in target) && k in merged) target[k] = merged[k];
+  }
+}
+
 /** Compute IR property dict for a body element by collecting every CSS
  *  rule whose selector matches it, plus its inline `style="…"`.
  *  Last-write-wins matches CSS cascade for same-specificity rules.
@@ -6295,46 +6700,75 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
   const inlineProps = {};
   const inlineImportant = {};
   if (attrs.style) {
-    for (const decl of attrs.style.split(';')) {
+    // wave-52 lane L5 F2: the same css-syntax-3 splitter as rule bodies.
+    for (const decl of splitDeclarations(attrs.style)) {
       const colon = decl.indexOf(':');
       if (colon < 0) continue;
       const k = decl.slice(0, colon).trim();
       const raw = decl.slice(colon + 1).trim();
       const v = raw.replace(/\s*!important\s*$/i, '').trim();
       if (k && v && !k.startsWith('--')) {
-        // Guarded like the parseCss seam: a style="" attribute can repeat a
-        // property too, and css-syntax-3 §2.2 ignores the invalid one there
-        // as well. Importance is recorded only when the write was taken, so
-        // a refused declaration contributes nothing at all.
-        assignDeclaration(inlineProps, k, v);
-        if (inlineProps[k] === v && /\s*!important\s*$/i.test(raw)) inlineImportant[k] = true;
+        // Collapsed exactly like a rule block (wave-52 lane L5 F1): a
+        // style="" attribute can repeat a property too, css-syntax-3 §2.2
+        // ignores the invalid one, and css-cascade-5 §6.1 keeps an important
+        // declaration over a later normal one — importance recorded only
+        // for the write that was taken.
+        collapseDeclaration(inlineProps, inlineImportant, k, v, /\s*!important\s*$/i.test(raw));
       }
     }
   }
   // THE GATE. Unless a `@layer` rule matched, or some declaration says
-  // `revert-layer`, nothing about this element's cascade is layered — take
-  // the historical last-write-wins path so every non-layer fixture in the
-  // corpus stays byte-identical.
+  // `revert-layer`, or (wave-52 lane L5 F1) some matched declaration is
+  // `!important`, nothing about this element's cascade needs more than
+  // order of appearance — take the historical last-write-wins path so every
+  // such fixture in the corpus stays byte-identical.
+  //
+  // WHY importance joins the gate (BACKLOG 0(a′), the CROSS-RULE half): the
+  // last-wins merge below never reads `rule.important`, so on
+  // css-gaps/flex/flex-gap-decorations-024 `.flex-container { column-rule:
+  // 10px solid pink !important }` lost to the LATER `#container {
+  // column-rule: 9px dotted blue }` and the wire painted blue dots where the
+  // ref has a solid pink rule. The layered resolver already ranks importance
+  // first (css-cascade-5 §6.1) and, with every unlayered rule at the one rank
+  // `layerCount`, falls back to order of appearance between normal
+  // declarations — the same answer as the merge below — so only
+  // important-vs-normal pairs change.
   const layered = matchedRules.some((r) => typeof r.layerIdx === 'number')
     || matchedRules.some((r) => hasRevertLayer(r.props))
-    || hasRevertLayer(inlineProps);
+    || hasRevertLayer(inlineProps)
+    || matchedRules.some((r) => r.important !== undefined)
+    || Object.keys(inlineImportant).length > 0;
   if (!layered) {
     // Guarded merges (wave 50 lane B1): a later RULE's declaration shadows an
     // earlier rule's by the same last-wins rule the block collapse used, so
     // the same css-syntax-3 §2.2 refusal applies here. Identity for every bag
     // in which the oracle proves nothing — which is every bag in the corpus
     // outside css-values/angle-units-001.
-    for (const r of buckets['']) assignDeclarations(props, r.props);
+    //
+    // wave-52 lane L5 F-D: the rules are merged in css-cascade-5 §6.1 order —
+    // ascending SPECIFICITY, then order of appearance (a stable sort keeps
+    // document order between equal triples, so a sheet whose specificities
+    // never disagree with its order merges exactly as before). Inline
+    // style="…" is element-attached, which §6.1 ranks above every rule, so
+    // it still merges last — except an INVALID inline declaration, which
+    // §2.2 ignores and so leaves the author sheet's value in force (the
+    // style attribute has no special dispensation from error handling).
+    // The bag's KEY order stays first appearance in DOCUMENT order, so the
+    // IR property order of every unchanged declaration does not move.
+    const merged = {};
+    for (const r of bySpecificity(buckets[''])) assignDeclarations(merged, r.props);
+    assignDeclarations(merged, inlineProps);
+    copyInDocumentOrder(props, merged, [...buckets[''].map((r) => r.props), inlineProps]);
     for (const [m, rs] of Object.entries(buckets)) {
       if (m === '') continue;
+      // A pseudo-element bucket ranks by the same §6.1 order (`.a::before`
+      // (0,1,1) beats a later `div::before` (0,0,2)); it has no style
+      // attribute of its own.
+      const mergedPe = {};
+      for (const r of bySpecificity(rs)) assignDeclarations(mergedPe, r.props);
       pseudo[m] = {};
-      for (const r of rs) assignDeclarations(pseudo[m], r.props);
+      copyInDocumentOrder(pseudo[m], mergedPe, rs.map((r) => r.props));
     }
-    // Inline style="..." trumps everything — except an INVALID inline
-    // declaration, which §2.2 ignores and so leaves the author sheet's value
-    // in force (the style attribute has no special dispensation from error
-    // handling; css-cascade-5 §6.4.4 only ranks VALID declarations).
-    assignDeclarations(props, inlineProps);
     return { props, matchedRules: matchedRules.length, pseudo };
   }
   // Layered path — css-cascade-5 §6.4.4 sort order, `revert-layer` resolved.
@@ -6343,6 +6777,8 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
     rank: typeof r.layerIdx === 'number' ? r.layerIdx : layerCount,
     props: r.props,
     important: r.important,
+    // wave-52 lane L5 F-D: the tie-break inside one layer rank.
+    specificity: ruleSpecificity(r),
   });
   Object.assign(props, resolveLayeredCascade(
     [...buckets[''].map(toGroup),
@@ -7092,7 +7528,7 @@ function parseKeyframeBody(body) {
     const decls = body.slice(declStart, i - 1);    // raw declaration text
     const props = {};                              // animatable declarations of this frame
     let easing;                                    // frame-level animation-timing-function, if any
-    for (const decl of decls.split(';')) {         // same ';'-split model as parseCss
+    for (const decl of splitDeclarations(decls)) { // the parseCss splitter (wave-52 L5 F2)
       const colon = decl.indexOf(':');             // property/value divider
       if (colon < 0) continue;                     // not a declaration
       const k = decl.slice(0, colon).trim().toLowerCase(); // property name (CSS is ci)
@@ -8300,32 +8736,6 @@ function unquoteCssString(tok) {
   return t;
 }
 
-/** Split one @font-face body into its descriptor declarations on top-level
- *  `;`. Paren depth and quote state are tracked because CSS Syntax 3
- *  §4.3.5-6 make a ';' inside `url(…)` or inside a `<string>` a LITERAL —
- *  a naive `body.split(';')` would shred `src: url(a;b.woff)` into two
- *  unusable halves and silently lose the face. */
-function splitDescriptors(body) {
-  const out = [];
-  let cur = '';
-  let depth = 0;      // '(' nesting
-  let quote = null;   // active quote char, or null
-  for (const ch of String(body ?? '')) {
-    if (quote) {
-      cur += ch;
-      if (ch === quote) quote = null;   // (no escape handling: CSS escapes
-      continue;                          //  in a font path are not a WPT shape)
-    }
-    if (ch === '"' || ch === "'") { quote = ch; cur += ch; continue; }
-    if (ch === '(') { depth++; cur += ch; continue; }
-    if (ch === ')') { depth = Math.max(0, depth - 1); cur += ch; continue; }
-    if (ch === ';' && depth === 0) { if (cur.trim()) out.push(cur.trim()); cur = ''; continue; }
-    cur += ch;
-  }
-  if (cur.trim()) out.push(cur.trim());
-  return out;
-}
-
 /**
  * Scan a stylesheet for `@font-face` blocks and return one raw entry per
  * block, in document order.
@@ -8364,10 +8774,11 @@ export function scanFontFaces(css) {
     re.lastIndex = i;                               // resume after this block
     // Descriptor split. NOT splitTopLevel — that helper only implements
     // comma and whitespace modes. A ';' inside `url(...)` or a quoted
-    // string is a literal (CSS Syntax 3 §4.3.5-6), so the split tracks
-    // paren depth and quote state; everything else is a separator.
+    // string is a literal (CSS Syntax 3 §4.3.5-6): the shared
+    // splitDeclarations (wave-52 lane L5 F2, which retired this block's
+    // private, escape-blind `splitDescriptors`) honours both.
     const desc = {};
-    for (const declRaw of splitDescriptors(body)) {
+    for (const declRaw of splitDeclarations(body)) {
       const colon = declRaw.indexOf(':');
       if (colon < 0) continue;
       const k = declRaw.slice(0, colon).trim().toLowerCase();
@@ -10055,6 +10466,19 @@ export function uaLinkProps(tag, attrs, props, suppressed = null) {
   // Hyperlink identity per HTML §4.6.1 / Selectors-4 §11.1 — an <a> with an
   // href attribute, whatever its value (`href=""` is still a hyperlink).
   if (tag !== 'a' || attrs?.href === undefined) return null;
+  // wave-52 lane L11: an author `all` decides EVERY UA link property too —
+  // css-cascade-4 §3.1 (`all` resets every property except direction /
+  // unicode-bidi) + §6.1 (author origin beats UA origin): `a { all: initial }`
+  // computes no underline and the initial colour (css-cascade/
+  // all-prop-initial-visited). This bake is APPENDED after the author bag, so
+  // it lands AFTER `all` in IR order — harmless while the runtimes dropped
+  // every declaration beside an `all`, but since the wave-52 order-aware
+  // reset keeps declarations that follow `all`, the UA underline would paint
+  // on all three platforms against a ref that has none. `revert` /
+  // `revert-layer` roll back TO the UA origin, so for those the UA values
+  // stand and the bake proceeds.
+  const authorAll = String(props?.all ?? '').trim().toLowerCase();
+  if (authorAll !== '' && authorAll !== 'revert' && authorAll !== 'revert-layer') return null;
   const out = {};
   for (const [key, value] of Object.entries(UA_LINK_PROPS)) {
     // Author-origin beats UA-origin (CSS Cascade 5 §6.1): skip any UA
@@ -10992,6 +11416,7 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
     } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText
                && !(node.children && node.children.length > 0)
                && !NON_BOX_GENERATING_TAGS.has(node.tag)
+               && !LIST_ITEM_TAGS.has(node.tag)
                && !(INTRINSIC_WIDGET_TAGS.has(node.tag)
                     && !(node.attrs && FOREIGN_NS_MARKER_ATTR in node.attrs))) {
       // wave-24 B-RC2: the `!node.children` guard above keeps rule-less
@@ -11017,7 +11442,8 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       // wave-22 EX2 A-RC1 part 2: the `!INTRINSIC_WIDGET_TAGS` guard above
       // keeps rule-less form controls OUT of this branch — see that set's
       // banner for why a 100x100 <select> is worse than the UA chrome it
-      // would replace.
+      // would replace. wave-52 lane L5 F-E: `!LIST_ITEM_TAGS` does the same
+      // for list items, which always have a ::marker to paint.
       // Bug 1 honest fallback: no matching rules + no inline style + no
       // own text — this is the genuine "human instruction" case (or
       // scaffolding wrappers). Still emit a 100x100 placeholder so the
@@ -11642,7 +12068,11 @@ async function main() {
         // applyViewTransitionBakePlan), so running it last means the passes
         // above never operate on the synthetic pseudo-tree subtree and the
         // synthetic subtree is never re-walked by a pass that expects real
-        // elements. Skips/declines/bails leave the fixture byte-identical.
+        // elements. Skips/declines/bails leave the fixture byte-identical,
+        // with ONE exception (wave-52 L1 F-B): a solve-class bail on a clean
+        // drive whose MEASURED settled ring is a uniform non-white colour gains
+        // only the body-root frame-ring stamp (view-transition-bake.mjs
+        // applyBailFrameRingStamp); the reason then ends `(frame-ring … stamped)`.
         let vtNote = '';
         if (vtBake) {
           // The bake THROWS on a browser fault rather than dressing one up as

@@ -1,7 +1,7 @@
 //
 //  ContentsUnboxingTests.swift
 //  Wave 18 (RC6, lane 1) — `display: contents` unboxing pins
-//  (css-display-3 §2.5/§2.7), plus the ported `all:<global>` reset drop.
+//  (css-display-3 §2.5/§2.7), plus the order-aware `all` reset (wave 52).
 //
 //  Twin of Compose's ContentsUnboxingTest.kt — the gate and splice rules
 //  are the shared cross-native contract. Property shapes are copied from
@@ -167,19 +167,26 @@ final class ContentsUnboxingTests: XCTestCase {
         XCTAssertNil(ContentsUnboxing.resolve(parent).children)
     }
 
-    // MARK: - The ported all-reset (RC6 companion — Compose parity)
+    // MARK: - The `all` reset (RC6 companion — Compose parity)
 
-    /// `all: <global>` present → EVERY other declaration drops (the
-    /// Compose allReset semantics, css-cascade-4 §3.2 observable
-    /// behaviour the audit fixtures pinned).
-    func testAllResetDropsEveryOtherDeclaration() throws {
+    /// Wave 52 (lane L11, rewritten from the wave-18 "drops every other
+    /// declaration" pin) — the reset is ORDER-AWARE (css-cascade-4 §6.4):
+    /// declarations BEFORE the last `all` drop, declarations AFTER it are
+    /// kept — here the 40px width precedes `all: initial` and goes, the
+    /// 160px width and the blue background follow it and stay. The full
+    /// verbatim-IR pin set is AllResetTests.swift.
+    func testAllResetDropsDeclarationsBeforeAllOnly() throws {
         let comp = try component(#"""
         {"id":"a","name":"a","properties":[
+           {"type":"Width","data":{"type":"length","px":40}},
            {"type":"All","data":"INITIAL"},
            {"type":"Width","data":{"type":"length","px":160}},
            {"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":1}}}]}
         """#)
-        XCTAssertTrue(GlobalExtractor.applyingAllReset(to: comp.properties).isEmpty)
+        let r = GlobalExtractor.applyingAllReset(own: comp.properties, inherited: [])
+        XCTAssertEqual(r.own.map(\.type), ["Width", "BackgroundColor"])
+        // The surviving width is the one AFTER `all`.
+        XCTAssertEqual(r.own.first?.data["px"]?.doubleValue, 160)
     }
 
     /// All-free lists flow through verbatim — the whole existing corpus
@@ -187,7 +194,7 @@ final class ContentsUnboxingTests: XCTestCase {
     func testAllFreeListIsUntouched() throws {
         let comp = try component(
             #"{"id":"b","name":"b","properties":[{"type":"Width","data":{"type":"length","px":10}}]}"#)
-        XCTAssertEqual(GlobalExtractor.applyingAllReset(to: comp.properties).map(\.type),
+        XCTAssertEqual(GlobalExtractor.applyingAllReset(own: comp.properties, inherited: []).own.map(\.type),
                        ["Width"])
     }
 

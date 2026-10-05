@@ -1458,10 +1458,14 @@ test('wave48 W2: the refusal list is exactly pinned — no silent widening or sh
   // 10 members since retro R13 (A12#5): the wave48-w2 table minus the three
   // re-labelled below. Every retained line is still face-bound on its PNGs
   // (cjk-decimal-001 and arabic-indic-102 spot-checked at the retrospective:
-  // same glyph rows, different stroke forms).
+  // same glyph rows, different stroke forms). 11 since wave 52: armenian-008
+  // RE-ADDED by lane L6's adjudication A with the new measurement R13 asked
+  // for (row 3 `10001. 10001` 143 px natives vs 146 px ref → the row-2 wrap
+  // is the face's advance widths; the measurement is on the module line).
   assert.deepEqual([...NATIVE_FONT_PARITY_REFUSED_TESTS].sort(), [
     'css/css-counter-styles/arabic-indic/css3-counter-styles-102.html',
     'css/css-counter-styles/armenian/css3-counter-styles-007.html',
+    'css/css-counter-styles/armenian/css3-counter-styles-008.html',
     'css/css-counter-styles/bengali/css3-counter-styles-117.html',
     'css/css-counter-styles/cambodian/css3-counter-styles-159.html',
     'css/css-counter-styles/cjk-decimal/css3-counter-styles-001.html',
@@ -1471,7 +1475,8 @@ test('wave48 W2: the refusal list is exactly pinned — no silent widening or sh
     'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
     'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
   ]);
-  // The 18 unexcluded tests must NEVER quietly re-enter: 15 were measured
+  // The 17 unexcluded tests (18 until wave 52's armenian-008 re-add) must
+  // NEVER quietly re-enter: 15 were measured
   // clear of the font boundary at wave48-w2 (13 with both natives ≥0.95;
   // name-case-sensitivity failing only the shared coverage veto web fails
   // too; counter-cjk-decimal an Android blank-paint bug, not a face), and 3
@@ -1497,8 +1502,9 @@ test('wave48 W2: the refusal list is exactly pinned — no silent widening or sh
     'css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html',
     'css/css-lists/content-property/marker-text-matches-armenian.html',
     'css/css-lists/content-property/marker-text-matches-georgian.html',
-    // retro R13 (A12#5) re-labels — non-font defects, scored honestly:
-    'css/css-counter-styles/armenian/css3-counter-styles-008.html',
+    // retro R13 (A12#5) re-labels — non-font defects, scored honestly
+    // (armenian-008 LEFT this list in wave 52: re-measured, re-added — the
+    // deepEqual above now pins it as a member):
     'css/css-counter-styles/counter-suffix.html',
     'css/css-lists/counter-004.html',
   ]) {

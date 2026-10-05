@@ -90,7 +90,7 @@ deferred}`. The COMMON preamble every lane gets:
   `sections/<sec>/manifest.json` (scorer idiom: skip unless
   `typeof x.ssim==="number" && !x.scoreExcluded`; pass =
   `wptPass===true`), capture PNG dirs, `per-test-ir/`, frozen refs at
-  `tools/wpt/refs/<sha>/white-black-ink-font-lh-imgpad-htmlpins/`.
+  `tools/wpt/refs/<sha>/white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin/`.
 - **LOOK AT THE PNGS** before claiming any fix; name the visible defect.
 - Hard rules: ownership lists; every line commented (why + spec/API
   citation); ≤200-line file targets; no silent fallthroughs; registry
@@ -198,7 +198,7 @@ rules from the retrospective, none optional:
   "zero regressions" over per-section drops their own snapshots show).
 - **Every headline cell gets a PNG check**: before writing "PASSES on all
   three" or naming a mechanism's flips, open the capture next to the frozen
-  ref (`tools/wpt/refs/<sha>/white-black-ink-font-lh-imgpad-htmlpins/<sec>/`).
+  ref (`tools/wpt/refs/<sha>/white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin/<sec>/`).
   ~35% of PASS cells are visibly wrong renders and the red-square class is
   the committed proof (`node tools/titan/red-square-census.mjs <run-id>`) —
   a currently-passing cell that MOVES is not automatically a regression

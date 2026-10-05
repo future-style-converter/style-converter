@@ -150,6 +150,10 @@ public struct ComponentRenderer: View {
     // band + between its rows), so it travels one level down as ambient
     // state. Nil outside any table. See TableSeparatedLayout.swift.
     @Environment(\.tableBorderSpacing) private var tableBorderSpacing
+    // Wave 52 lane L8 (M-E) — css-tables-3 §3.2: the enclosing table's
+    // cell id → column width map (TableBoxTree.cellColumnWidths), published
+    // by the TABLE below and folded by each cell into an unset min-width.
+    @Environment(\.tableCellColumnWidths) private var tableCellColumnWidths
 
     // Wave 8 (#35) — motion inputs. The document keyframes map arrives
     // from the host (spec 07 §1.2 — @keyframes are document-scoped)…
@@ -292,18 +296,19 @@ public struct ComponentRenderer: View {
     /// merged-list consumer (glyph color, border/outline currentColor)
     /// resolves against it instead of the placeholder contrast pick.
     private func mergedProperties(now: Date?) -> [IRProperty] {
-        // Wave 18 (RC6 companion) — the `all: <global>` sole-override
-        // drop, ported from Compose (ComponentRenderer.kt's allReset) so
-        // reset semantics match across natives: when `All` survives to
-        // the merged list, EVERY other declaration (inherited entries
-        // included — the merge runs first, exactly like Compose's
-        // rawProperties ordering) drops, collapsing the element to its
-        // untouched defaults — the observable web behaviour the audit
-        // fixtures pinned. iOS previously extracted All into an inert
-        // GlobalConfig, so `all:initial` boxes kept painting their other
-        // declarations. Note: an unboxed `display:contents` element never
-        // reaches here with All (the RC6 strip removes non-inherited
-        // declarations first), matching Compose's evaluation order.
+        // Wave 52 (lane L11) — the ORDER-AWARE `all` reset, run FIRST on
+        // the OWN list and the inherited channel kept apart (twin of
+        // Compose global/AllReset.kt; replaces the wave-18 post-merge
+        // drop-everything): css-cascade-4 §6.4 makes declarations AFTER
+        // `all` win over it (`all: initial; color: green` computes green —
+        // all-prop-initial-color painted black under the old drop), §3.1
+        // exempts `direction` / `unicode-bidi`, and §7.3 decides the
+        // channel per keyword (`initial` drops it, `inherit` / `unset` /
+        // `revert*` keep it) — a decision the old post-merge position
+        // could not make. Identity for every All-free list. Note: an
+        // unboxed `display:contents` element never reaches here with All
+        // (the RC6 strip in init removes non-inherited declarations
+        // first), matching Compose's evaluation order.
         //
         // Wave 25 (lane LF follow-up) — the UA `list-style-type` rule runs
         // HERE, the last point that still holds the element's OWN list and
@@ -330,16 +335,20 @@ public struct ComponentRenderer: View {
         // ref-pixel measurements and the named gaps. Returns its input
         // unchanged for every untagged component and every tag outside the
         // table, so the whole 327-pair baseline is byte-identical.
-        let ownProperties = motionEffectiveProperties(now: now)
+        let reset = GlobalExtractor.applyingAllReset(own: motionEffectiveProperties(now: now),
+                                                     inherited: inheritedTextProperties)
+        // The UA tag rules and the merge below all read the POST-reset own
+        // list (identical to the old list for every All-free element).
+        let ownProperties = reset.own
         return UAElementFontRule.apply(
             sourceTag: component.meta?.sourceTag,
             own: ownProperties,
             merged: ListStyleUaRule.apply(
                 sourceTag: component.meta?.sourceTag,
                 own: ownProperties,
-                merged: GlobalExtractor.applyingAllReset(to: InheritedText.merge(
+                merged: InheritedText.merge(
                     own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
-                    inherited: inheritedTextProperties))),
+                    inherited: reset.inherited)),
             // The heading half stands down for a heading that hosts child
             // boxes — this container stacks them, and a 2em face only
             // magnifies that (UAElementFontRule.headingAppliesTo carries the
@@ -1062,6 +1071,14 @@ public struct ComponentRenderer: View {
                 s.size.width = .exact(px: SizeApplierMath.declaredFromFrame(
                     w, inflate: StyleBuilder.contentBoxInflation(s).h))
             }
+            // Wave 52 lane L8 (M-E) — css-tables-3 §3.2: a cell's column
+            // width is its floor. Folded into an UNSET min-width (an author
+            // min-width wins), same frame→declared conversion as above.
+            // Empty map (no table above, or no harvested column) → no-op.
+            if let w = tableCellColumnWidths[component.id], s.size.minWidth == nil {
+                s.size.minWidth = .exact(px: SizeApplierMath.declaredFromFrame(
+                    w, inflate: StyleBuilder.contentBoxInflation(s).h))
+            }
             // TITAN Round 4 (GAP 1, WIDTH half) — composed-WPT block-flow
             // fill. A block box with width:auto fills its containing block
             // (CSS 2.1 §10.3.3); iOS hugs by default, so in composed WPT
@@ -1665,6 +1682,14 @@ public struct ComponentRenderer: View {
                 // below it; a row / row group publishes nothing and lets
                 // its table's value flow through untouched.
                 .environment(\.tableBorderSpacing, track.publish ?? tableBorderSpacing)
+                // Wave 52 L8 (M-E): only the TABLE (the one plan that
+                // publishes spacing) harvests its UA-only <col>/<colgroup>
+                // widths; row groups and rows pass the map through.
+                .environment(\.tableCellColumnWidths, track.publish != nil
+                    ? TableBoxTree.cellColumnWidths(
+                        table: component,
+                        inherited: InheritedText.inheritable(from: resolvedProperties))
+                    : tableCellColumnWidths)
             } else if multicolDistributes(style: style) {
                 // ── X3 (wave 45): the iOS FLOAT-STRIP seam ──────────────
                 // The wave-44 U8 strip model (CSS 2.1 §9.5 floats +
@@ -2104,12 +2129,22 @@ public struct ComponentRenderer: View {
                 : (wptCaptureMode
                     // Full resolver: raw container wire (the resolved
                     // declarations — same list the flex container reads)
-                    // + the §3.1 padding-box channels already computed.
+                    // + the CONTENT-box extents. Wave 52 (lane L7, T2):
+                    // the sole-flex-item alignment container is the
+                    // content box (css-flexbox-1 §4.1), not the §3.1
+                    // padding box childCB/childCBH stay for percent bases;
+                    // staticOffset adds the padding-start edge itself. The
+                    // height keeps the wave-33 used-height fallback
+                    // (absposUsedPaddingBoxHeight minus its padding band =
+                    // the used content height, CSS 2.2 §10.6.3).
                     ? AbsposStaticPosition.staticOffset(
                         containerProperties: resolvedProperties,
                         childProperties: child.properties,
-                        containerW: childCB,
-                        containerH: childCBH,
+                        containerW: flexContentSize(style: style, vertical: false),
+                        containerH: flexContentSize(style: style, vertical: true)
+                            ?? absposUsedPaddingBoxHeight(style: style).map {
+                                $0 - ContainingBlockBasis.paddingBand(style: style, vertical: true)
+                            },
                         wptCaptureMode: true)
                     // Wave-18 machinery, byte-identical for dark stage.
                     : AbsposStaticAlignment.staticCrossOffset(
@@ -2458,6 +2493,10 @@ public struct ComponentRenderer: View {
         let g = GapApplier.resolve(style.spacing.gap, context: ctx)
         let gap = column ? g.row : g.column
         var items: [CSSFlexMath.ItemInput] = []
+        // Wave 52 (lane L10, 7(b)): per item, the border + padding band
+        // the injected (border-box FRAME) width adds to a percent arm's
+        // content-box size; 0 for every pre-wave-52 arm.
+        var frameBand: [CGFloat] = []
         for child in children {
             // Flex factors from the child's aggregate.
             var a = LayoutAggregate()
@@ -2466,6 +2505,12 @@ public struct ComponentRenderer: View {
                 if case .px(let p)? = a.flexBasis { return p }
                 return nil
             }()
+            // Wave 52 (lane L10, 7(b)): the child's flex claim — a percent
+            // basis resolves against this definite content main size
+            // (css-flexbox-1 §9.2 step 3.A); nil keeps the old bail below.
+            let claim = ItemPlacementExtractor.extract(from: child.properties).flex
+            let pct = basisPx == nil
+                ? CSSFlexMath.percentBasis(claim, available: available) : nil
             // Explicit main size fallback (css-flexbox-1 §9.2 step 3.A —
             // basis auto defers to the main-size property).
             let cs = SizeExtractor.extract(from: child.properties)
@@ -2482,18 +2527,33 @@ public struct ComponentRenderer: View {
                                            parent: ctx.containingBlockWidth)
             // Content-derived basis (text measurement) is not statically
             // knowable — bail to the dynamic path.
-            guard let basis = basisPx ?? explicit else { return nil }
+            guard let basis = basisPx ?? pct ?? explicit else { return nil }
             // The web harness's 50×30 min floor applies per axis when
             // the child declares nothing there (StyleBuilder.minFloor)
             // — it clamps flexed sizes in the browser too (a browser
             // min-width beats flex shrink/grow, §9.7 min violation).
             let floor = StyleBuilder.minFloor(for: cs)
-            let minMain = (column ? floor.height : floor.width) ?? 0
+            // Wave 52 (lane L10): the percent arm is new, so it takes the
+            // paint chain's own rule — no harness floor in WPT capture
+            // (StyleBuilder drops it there); the px / explicit arms keep
+            // their pre-wave-52 floor byte-identically.
+            let minMain = (pct != nil && wptCaptureMode) ? 0
+                : ((column ? floor.height : floor.width) ?? 0)
             items.append(.init(basis: basis, min: minMain,
                                grow: CGFloat(a.flexGrow ?? 0),
-                               shrink: CGFloat(a.flexShrink ?? 1)))
+                               shrink: CGFloat(a.flexShrink ?? 1),
+                               // Outer extent: negative margins (M2) and,
+                               // for the percent arm, the content-box
+                               // extras — the same value the Layout uses.
+                               outer: CSSFlexMath.outer(claim, horizontal: !column,
+                                                        percentResolved: pct != nil)))
+            frameBand.append(pct == nil ? 0
+                : CSSFlexMath.frameExtra(claim, horizontal: !column, borderBoxOnly: true))
         }
-        return CSSFlexMath.mainSizes(items: items, available: available, gap: gap)
+        // The flexed CONTENT sizes → the border-box frames the paint
+        // chain's fold expects (identity unless a percent arm resolved).
+        return zip(CSSFlexMath.mainSizes(items: items, available: available, gap: gap),
+                   frameBand).map { $0 + $1 }
     }
 
     // MARK: - Wrap-flex cross stretch (wave 25, lane ISTRETCH — CAL-RC5)
@@ -3132,6 +3192,10 @@ public struct ComponentRenderer: View {
             // language (`meta.lang`), the input the `hyphens: auto`
             // dictionary gate needs. nil for every CSS-envelope fixture.
             lang: component.meta?.lang,
+            // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
+            // bakes; nil for no clamp / a suppressed marker / bare max-lines.
+            blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
+                limit: style.text.lineClampLimit, properties: component.properties),
         )
     }
 
@@ -3414,7 +3478,11 @@ public struct ComponentRenderer: View {
                     // string surgery, so the split happens in there).
                     // nil for every span-less fold keeps the label
                     // byte-identical to wave 45.
-                    inlineSpans: flow.spans.isEmpty ? nil : flow.spans
+                    inlineSpans: flow.spans.isEmpty ? nil : flow.spans,
+                    // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
+                    // bakes; nil for no clamp / a suppressed marker / bare max-lines.
+                    blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
+                        limit: style.text.lineClampLimit, properties: component.properties)
                 )
             }
             if let t = component.text, !t.isEmpty, runPlan == nil,
@@ -3466,7 +3534,11 @@ public struct ComponentRenderer: View {
                     // sibling of the leaf site below. Nil for every
                     // non-collapsed component.
                     decorations: DecorationWire.decorationLines(
-                        from: component.meta?.decorations)
+                        from: component.meta?.decorations),
+                    // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
+                    // bakes; nil for no clamp / a suppressed marker / bare max-lines.
+                    blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
+                        limit: style.text.lineClampLimit, properties: component.properties)
                 )
             }
             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
@@ -3719,13 +3791,14 @@ public struct ComponentRenderer: View {
                 // move or resize it — css-lists-3 §3.5 makes it the item's
                 // first inline box. Everything else keeps the HStack.
                 //
-                // STILL DEFERRED — the rest of B-RC3 part 3: `outside` is
-                // painted as a leading inline box rather than hung in the
-                // item's margin area, an `inside` marker on an item that
-                // DOES have text still displaces that item's box, and the
-                // gap is the fixed ListMarkerRow.gapPt rather than the
-                // UA's per-counter-style marker padding. Those need a
-                // custom Layout — out of scope here.
+                // Wave 52 (lane L6, T5): an `outside` marker now HANGS in
+                // the item's margin area (css-lists-3 §3.5) through
+                // ListMarkerOutsideHangLayout — see markerPlacement.
+                //
+                // STILL DEFERRED — an `inside` marker on an item that DOES
+                // have text still displaces that item's box, and the gap
+                // is the fixed ListMarkerRow.gapPt rather than the UA's
+                // per-counter-style marker padding.
                 // (v2 rename: the tag hint lives at meta.sourceTag.)
                 let parentTag = (component.meta?.sourceTag ?? "").lowercased()
                 let isListItem = (child.meta?.sourceTag ?? "").lowercased() == "li"
@@ -3773,9 +3846,20 @@ public struct ComponentRenderer: View {
                 // in the row placement, the cross-axis alignment.
                 let markerExposesBaseline =
                     ListMarkerRow.itemExposesTextBaseline(child)
-                let markerInsideOverlay = ListMarkerRow.rendersInsideOverlay(
-                    position: markerConfig?.position,
-                    itemExposesTextBaseline: markerExposesBaseline)
+                // Wave 52 (lane L6, T7 native half): an EMPTY item (no text,
+                // children, generated content or declared block size —
+                // ListMarkerEmptyItem.isEmpty) takes the HStack, where its
+                // inside marker sizes the item's one line box (css-lists-3
+                // §3.5, CSS 2.1 §10.6.3); the zero-size overlay collapsed the
+                // post-F-E cssom rows onto one (probed).
+                let markerInsideOverlay = ListMarkerEmptyItem.rendersInsideOverlay(
+                    position: markerConfig?.position, item: child)
+                // Wave 52 (lane L6, T5) — the third placement: an `outside`
+                // marker hangs in the margin area instead of leading the
+                // HStack. Disjoint with the overlay by construction (that
+                // one is `inside`-only); nil position keeps the HStack.
+                let markerHangsOutside = ListMarkerRow.hangsOutside(
+                    position: markerConfig?.position)
                 // Wave 10 — the fragmentation contract (css-break-3 §4):
                 // a multicol container's single in-flow child whose
                 // block-size C exceeds the column block-size H breaks
@@ -3855,6 +3939,7 @@ public struct ComponentRenderer: View {
                         // ListMarkerRow.
                         markerPlacement(child: child, markerText: markerText,
                                         insideOverlay: markerInsideOverlay,
+                                        hangsOutside: markerHangsOutside,
                                         exposesBaseline: markerExposesBaseline,
                                         // Wave 30 (lane 3, fix B6) — the
                                         // resolved counter style and the
@@ -4003,7 +4088,16 @@ public struct ComponentRenderer: View {
                 // (anchorPreference changes neither layout nor paint),
                 // and only attached at all when the container declares
                 // gap decorations — see gapDecorationItemFrame.
-                .gapDecorationItemFrame(index: index, active: gapDecorActive)
+                // Wave 52 (lane L10, M2): the anchor follows the item's
+                // PAINTED box — a negative-margin child is drawn shifted
+                // (MarginApplier's offset), and its gap starts there. A
+                // zero shift (every other child) is the wave-24 modifier.
+                .gapDecorationItemFrame(
+                    index: index, active: gapDecorActive,
+                    paintShift: gapDecorActive
+                        ? GapDecorationsPainter.paintShift(
+                            ItemPlacementExtractor.extract(from: child.properties).flex)
+                        : .zero)
             }
             // Wave-32 lane R: runs after the LAST referenced child. Empty for
             // every plan that ends on a child (and for every container that
@@ -4161,6 +4255,10 @@ public struct ComponentRenderer: View {
                 // per-line overlay from here.
                 decorations: DecorationWire.decorationLines(
                     from: component.meta?.decorations),
+                // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
+                // bakes; nil for no clamp / a suppressed marker / bare max-lines.
+                blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
+                    limit: style.text.lineClampLimit, properties: component.properties),
                 // Wave 35 (lane B5) — the upright-vertical gate. Reads the
                 // MERGED list because `writing-mode` / `text-orientation` are
                 // inherited and normally sit on an ancestor. nil for every run
@@ -4168,7 +4266,15 @@ public struct ComponentRenderer: View {
                 // `vertical-*` mode, i.e. for every other component in the
                 // frozen corpus, which therefore renders byte-identically.
                 verticalUprightStack: VerticalUprightGate.stack(
-                    properties: resolvedProperties, text: component.text)
+                    properties: resolvedProperties, text: component.text),
+                // Wave 52 lane L8 (M-C) — css-writing-modes-4 §7.3.1: the
+                // upright run's wrap budget when the label's proposal is
+                // indefinite (its `.fixedSize(vertical: true)` erases it):
+                // own definite height → ancestor's → the capture's ICB.
+                // nil outside WPT capture (byte-identical decline there).
+                verticalUprightBudgetPx: VerticalUprightGate.budgetPx(
+                    style: style, viewport: styleViewport,
+                    wptCaptureMode: wptCaptureMode)
             )
         }
     }
@@ -4352,13 +4458,21 @@ public struct ComponentRenderer: View {
             // float-in-htb-in-vrl).
             if child.properties.contains(where: { $0.type == "WritingMode" }) { return nil }
             // BAKED-LAYOUT guard: post-load-extracted wires carry the
-            // browser's used physical Width+Height on every box — that
-            // layout already encodes vertical flow AND fragmentation, and
-            // the frozen VStack render of it passes today (the
+            // browser's used physical layout on every box — that layout
+            // already encodes vertical flow AND fragmentation, and the
+            // frozen VStack render of it passes today (the
             // anchor-position-multicol family). Twin of the Compose
             // seam's anyBakedChild / ChildSpec.bakedPhysicalSize gates.
-            if child.properties.contains(where: { $0.type == "Width" }),
-               child.properties.contains(where: { $0.type == "Height" }) { return nil }
+            // Wave 52 (lane L3, F1): read through the ONE shared
+            // BakedLayoutSignature predicate (Width ∧ Height ∧ BoxSizing ∧
+            // (PaddingTop ∨ BorderTopStyle)) — the two-property
+            // "Width ∧ Height" heuristic it replaces also matched an
+            // authored `.square{width:50px; height:50px}` and froze the
+            // VStack on flexbox_align-items-stretch-writing-modes (the
+            // flex items' squares stacked vertically, ios f 0.999,
+            // colorFailed). Census F1 (used writing mode, as read here):
+            // all 23 baked containers (9 docs) read true.
+            if BakedLayoutSignature.bakedPhysicalBox(child.properties) { return nil }
         }
         // The seam owns this container — name its one modeled gap.
         PropertyTracker.logOnce(
@@ -4401,9 +4515,16 @@ public struct ComponentRenderer: View {
     /// swaps the glyph's INK for the painted Chromium symbol while keeping
     /// the box the glyph measured (see ListMarkerSymbol) — a no-op for
     /// every other counter style.
+    ///
+    /// Wave 52 (lane L6, T5) — a THIRD placement, `hangsOutside`: the
+    /// marker hangs in the item's margin area (css-lists-3 §3.5) through
+    /// `ListMarkerOutsideHangLayout`, which reports the ITEM's size and
+    /// places the marker at x = −(markerWidth + gap). Staged as a device
+    /// A/B (tools/titan/results/wave52-counters-and-lists/seam-2.patch).
     @ViewBuilder
     private func markerPlacement(child: IRComponent, markerText: String,
-                                 insideOverlay: Bool, exposesBaseline: Bool,
+                                 insideOverlay: Bool, hangsOutside: Bool,
+                                 exposesBaseline: Bool,
                                  markerType: ListMarkerType,
                                  markerFontSizePx: CGFloat,
                                  isCSSFlex: Bool,
@@ -4450,9 +4571,37 @@ public struct ComponentRenderer: View {
                                           markerText: markerText,
                                           fontSizePx: markerFontSizePx)
                 }
+        } else if hangsOutside {
+            // Wave 52 (lane L6, T5) — `list-style-position: outside`: the
+            // item lays out as if it had no marker (its content edge does
+            // not move, css-lists-3 §3.5) and the marker hangs before its
+            // start edge. The baseline decision is the HStack's own per-item
+            // rule (B-RC6), handed to the Layout as a Bool because a Layout
+            // reads the guides itself.
+            ListMarkerOutsideHangLayout(
+                gap: ListMarkerRow.gapPt,
+                alignsByBaseline: ListMarkerRow.rowAlignment(
+                    itemExposesTextBaseline: exposesBaseline) == .firstTextBaseline,
+                // An EMPTY item's one line box is the marker's (seam-4's
+                // ListMarkerEmptyItem rule, outside half).
+                itemIsEmpty: ListMarkerEmptyItem.isEmpty(child)) {
+                // Subview 0 — the marker, the HStack's Text byte-for-byte
+                // (per-script runs, shrink-to-fit, painted symbol).
+                Text(ScriptFallbackFonts.annotate(markerText,
+                                                  enabled: wptCaptureMode,
+                                                  size: markerFontSizePx))
+                    .fixedSize(horizontal: true, vertical: true)
+                    .listMarkerSymbol(type: markerType,
+                                      markerText: markerText,
+                                      fontSizePx: markerFontSizePx)
+                // Subview 1 — the item, exactly as the HStack hosts it.
+                markerItemView(child: child, isCSSFlex: isCSSFlex,
+                               childAgg: childAgg, parentAgg: parentAgg)
+            }
         } else {
-            // `outside`, or an item whose in-flow text the marker must
-            // push along the line: the leading-inline-box row. Its
+            // An `inside` item whose in-flow text the marker must push
+            // along the line, or an unknown position (a baked marker under
+            // a non-list parent): the leading-inline-box row. Its
             // cross-axis alignment is still chosen per item (B-RC6) —
             // SwiftUI falls back to a baseline-less view's BOTTOM edge,
             // which would hang the marker's ascent outside the item.
@@ -4646,12 +4795,31 @@ private struct PlaceholderLabel: View {
     // label byte-identical to wave 45.
     var inlineSpans: [InlineRunFlow.Span]? = nil
 
+    // Wave 52 (lane L9, F4) — the drawn-marker `line-clamp` this label's
+    // greedy pre-break bakes (css-overflow-4 §5.1 `line-clamp: <n>` ⇒
+    // `block-ellipsis: auto`; §4.2 places the UA ellipsis so it FITS the
+    // last line, hiding content at soft wrap opportunities). Decided ONCE
+    // at the call site by GreedyLineBreaker.drawnClamp (nil for no clamp,
+    // a suppressed marker, or the bare `max-lines` longhand). nil — the
+    // default, every caller that does not pass it — keeps the pre-break
+    // byte-identical to wave 51, where SwiftUI's `.lineLimit` tail
+    // truncation appended "…" AFTER an overlong word that had to be
+    // displaced (css-overflow/line-clamp/block-ellipsis-025 ios f 0.9495).
+    var blockEllipsisClamp: GreedyLineBreaker.Clamp? = nil
+
     // Wave 35 (lane B5) — non-nil ⇒ this run is an UPRIGHT vertical run
     // (css-writing-modes-4 §5.1) and the value is the side line 1 stacks on.
     // Decided ONCE at the call site by `VerticalUprightGate.stack`, which
     // reads the MERGED property list; nil (the default, and every call site
     // that does not pass it) keeps the frozen horizontal chain byte for byte.
     var verticalUprightStack: LineStack? = nil
+
+    // Wave 52 lane L8 (M-C) — the css-writing-modes-4 §7.3.1 wrap budget for
+    // that upright run when this label's proposal is indefinite, resolved at
+    // the call site by `VerticalUprightGate.budgetPx(style:viewport:
+    // wptCaptureMode:)`. nil (the default, and every non-capture caller)
+    // keeps the pre-wave-52 decline to the horizontal label.
+    var verticalUprightBudgetPx: CGFloat? = nil
 
     var body: some View {
         // Resolve the visible string: rawText wins when present (the IR
@@ -4784,7 +4952,16 @@ private struct PlaceholderLabel: View {
                 // contribution (the keyword never reaches TextConfig), so
                 // routing it is a separate, wire-side change — deliberately
                 // NOT smuggled in here.
-                hyphenChar: AutoHyphenation.defaultHyphenCharacter)
+                hyphenChar: AutoHyphenation.defaultHyphenCharacter,
+                // Wave 52 (lane L9, F4) — the drawn-marker clamp: keep
+                // lines 1…N, the marker baked onto line N after hiding
+                // trailing words until it fits (alone if nothing does).
+                // With exactly N hard lines left, the `.lineLimit(N)`
+                // below is inert, so TextKit never adds a second "…"
+                // (SwiftUI's default truncation mode is `.tail` anyway,
+                // so TypographyApplier's TruncationMod needs no change).
+                // nil = every pre-wave-52 run, byte-identical.
+                clamp: blockEllipsisClamp)
             // Hard newlines force TextKit to OUR break positions — its
             // push-out strategy only relocates SOFT breaks, and every
             // pre-broken line fits `avail` by construction EXCEPT the
@@ -4905,8 +5082,14 @@ private struct PlaceholderLabel: View {
         // Anything else (unknown wrap width, preserved-whitespace modes)
         // stays UNPINNED — an under-counted pin would ride the next sibling
         // up, which is worse than the drift it would remove.
-        let lineCountIsExact = singleLineText || textConfig.noWrap
-            || wptUnbreakableRun || broken.preBroken
+        // Wave 52 lane L8 (M-C): an upright vertical run that will PLAN
+        // (a §7.3.1 budget rides in) stacks its glyphs DOWN the box, so the
+        // horizontal line count says nothing about its block extent — the
+        // N × L pin would clamp five 24 px upright line boxes to one 25 px
+        // row (measured: ch-units-vrl-005's orange div 120×25, ref 120×120).
+        let uprightPlans = verticalUprightStack != nil && verticalUprightBudgetPx != nil
+        let lineCountIsExact = (singleLineText || textConfig.noWrap
+            || wptUnbreakableRun || broken.preBroken) && !uprightPlans
         let pinnedBoxHeight = LineBoxMetrics.pinnedBoxHeight(
             lineHeightPx: effectiveLineHeight,
             // `line-clamp` truncates the block to N line boxes (css-overflow-4
@@ -4967,7 +5150,10 @@ private struct PlaceholderLabel: View {
             // frozen branches below, verbatim — whenever it declines, so a
             // run this gate admits can never render WORSE than before.
             if let stack = verticalUprightStack {
-                VerticalUprightTextFlow(text: displayText, stack: stack) {
+                // Wave 52 L8 (M-C): the §7.3.1 fallback budget rides in as
+                // the layout's override; a bounded proposal still wins.
+                VerticalUprightTextFlow(text: displayText, stack: stack,
+                                        budgetOverridePx: verticalUprightBudgetPx) {
                     if let g = clipTextGradient {
                         textView.foregroundStyle(g)
                     } else {
@@ -5514,6 +5700,24 @@ private struct PlaceholderLabel: View {
             let piece = String(chars[range])
             var t = wordSpacedText(piece)
             if let style {
+                // Wave 52 (lane L9, F2) — a GLYPH-LESS member's own band
+                // (css-backgrounds-3 §2.1: the inline box's background over
+                // its content area — for preserved spaces, their advance).
+                // Only the hanging-whitespace ring admits one, so the
+                // piece is white space: rebuilt through the SAME kern
+                // builder wordSpacedText used (script faces are moot for
+                // spaces) with the band as a per-range attribute, which
+                // keeps the `Text + Text` concatenation one paragraph. On
+                // block-ellipsis-032 the range collapses into the
+                // pre-break's line break and the clamp's hidden tail, so
+                // nothing paints there (no red, as the ref).
+                if style.background != nil {
+                    let run = WordSpacingApplier.kernedRun(
+                        text: piece,
+                        letterSpacingPx: textConfig.letterSpacing,
+                        wordSpacingPx: textConfig.wordSpacingPx) ?? AttributedString(piece)
+                    t = Text(TypographyApplier.bandedRun(run, band: style.background))
+                }
                 // The member's own ink (css-color-4 §3.2) — inner
                 // foregroundColor wins over the label's outer one.
                 if let ink = style.ink {

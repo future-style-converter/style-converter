@@ -30,3 +30,4 @@ fixtures/combinations/radius-overflow-transform.json
 fixtures/combinations/transform-abspos-pivot.json   # retro F3: the A11#0 abspos-pivot pin (4 TAP_* rows, no waivers; no committed baseline yet -> gate-only + oracle until seeded)
 fixtures/combinations/blend-isolation.json
 fixtures/combinations/opacity-blend.json
+fixtures/combinations/all-then-color.json   # wave 52 L11: the order-aware `all` reset pin (4 ATC_* rows, no waivers; NO committed baseline -> gate-only + oracle until seeded: expect 18 pairs / 0 unexpected, 12 oracle checks / 0 violations, exit 0). Needs L11's web F1 (StyleBuilder.ts) AND seam-4.patch (web-harness calibrateStyles) in the same tree, else ATC_AllThenProps / ATC_DirectionSurvives fail the oracle on web (358 px wide).

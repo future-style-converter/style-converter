@@ -173,6 +173,13 @@ class SeamReachabilityTest {
             // A4 — the root/document-element clip and its subtree scope.
             "effects/clip/ClipPathSubtreeScope.kt",
             "effects/clip/RootCanvasClip.kt",
+            // Wave 52 (lane L4) — the backface split StyleApplier calls, and
+            // the `transform: inherit` channel whose ONLY caller is the
+            // renderer seam (seam-1): this line lands in the SAME commit as
+            // that seam, so a merge without it fails here instead of shipping
+            // dead runtime code (the wave-49 S5 class).
+            "transforms/BackfaceCull.kt",
+            "transforms/TransformInheritance.kt",
         )
         val dead = modules.filterNot { File(runtimeTree, it) in reachable }
         assertTrue(

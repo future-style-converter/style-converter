@@ -394,6 +394,36 @@ const SIZING_TYPES = ['Width', 'Height', 'MinWidth', 'MaxWidth', 'MinHeight', 'M
   'InlineSize', 'BlockSize', 'MinInlineSize', 'MaxInlineSize', 'MinBlockSize', 'MaxBlockSize'];
 
 /**
+ * Wave 52 (lane L11) — the harness defaults under an author `all`.
+ *
+ * `buildStyles` emits `all` as the FIRST style key (css-cascade-4 §6.4 order
+ * of appearance: a declaration that FOLLOWS `all` must win over it), and
+ * React's style writer applies keys in object order. calibrateStyles spreads
+ * its sizing defaults BEFORE `...styles`, so a default key is created first and
+ * the author's same-named key then overwrites it IN PLACE — ES2015 ordinary
+ * own-property order keeps a re-assigned key in its FIRST insertion slot. The
+ * author's `width` therefore lands BEFORE `all`, and `all` resets it (measured
+ * on the real harness: `all: initial; display: block; width: 160px` painted
+ * 358 px wide — fixtures/combinations/all-then-color.json ATC_AllThenProps,
+ * tools/titan/results/wave52-all-reset-postload-colour/fixture-oracle-probe.mjs).
+ * With `all` present, a default the author re-declares is dropped so the
+ * author's key keeps its own slot; defaults the author does not declare stay
+ * before `all` and are reset by it exactly as before. An `all`-free style
+ * object returns the defaults untouched, so every other component's object
+ * (the 327-pair baseline, the composed WPT corpus) keeps its byte-identical
+ * key order.
+ */
+function harnessDefaultsUnderAll(styles: CSSStyles, defaults: CSSStyles): CSSStyles {
+  // No `all` → nothing can reset the author's keys; the historical order stands.
+  if (styles.all === undefined) return defaults;
+  const kept: CSSStyles = {};
+  // Keep only the defaults the author does not declare: an author key must
+  // be created by the `...styles` spread, i.e. AFTER `all`, never in a default's slot.
+  for (const [key, value] of Object.entries(defaults)) if (!(key in styles)) kept[key] = value;
+  return kept;
+}
+
+/**
  * The harness sizing calibration — the decorateStyles hook. Byte-for-byte
  * the containerStyles computation the pre-#41 renderer inlined; the
  * RendererParity suite pins the resulting HTML against the pre-refactor
@@ -497,14 +527,21 @@ function calibrateStyles(styles: CSSStyles, ctx: RenderContext): CSSStyles {
     // (background-image-000/002 web 0.33/0.53 with assets delivered).
     // Per-element WPT mode (non-composed) keeps the clamp: its capture
     // crops per component, where 100% still mirrors the ref viewport.
-    ...(WPT_COMPOSED_MODE ? {} : { maxWidth: '100%' }),
+    // Wave 52 (L11): routed through harnessDefaultsUnderAll so an author key
+    // that follows `all` is never parked in this default's slot (above).
+    ...harnessDefaultsUnderAll(styles, WPT_COMPOSED_MODE ? {} : { maxWidth: '100%' }),
     ...styles,
   } : {
     // Skip the `fit-content` initialiser when aspect-ratio needs to drive
     // the inline axis — see the block above. For every other component
     // (the 327-pair baseline) the existing default applies unchanged.
-    ...(aspectRatioInlineUnconstrained ? {} : { width: 'fit-content' }),
-    maxWidth: '100%',
+    // Wave 52 (L11): the same two defaults, routed through
+    // harnessDefaultsUnderAll so an author `width` / `max-width` that follows
+    // `all` keeps its own slot after `all` instead of this default's (above).
+    ...harnessDefaultsUnderAll(styles, {
+      ...(aspectRatioInlineUnconstrained ? {} : { width: 'fit-content' }),
+      maxWidth: '100%',
+    }),
     ...styles,
     // Ensure minimum dimensions for visibility, but ONLY when the IR
     // didn't declare an explicit max-width/max-height. Previously this

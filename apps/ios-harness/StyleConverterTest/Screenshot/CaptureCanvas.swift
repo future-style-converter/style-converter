@@ -928,7 +928,7 @@ struct ComposedCaptureCanvas: View {
         // is clipped to the ICB's padding edges on the INLINE axis only
         // (the Shape extends far past both y-edges: the ref's second
         // viewport is max(scrollHeight, 568) and never crops the bottom).
-        // Attached BEFORE `.background(canvasBackground)` so the background
+        // Attached BEFORE the canvas-background modifier below so the background
         // stays outside the clip and the frame keeps the propagated body
         // colour. The band is the runtime's pure WPTCanvas.icbClipBand
         // (Catalyst-pinned in ComposedIcbClipTests), fed the FRAME —

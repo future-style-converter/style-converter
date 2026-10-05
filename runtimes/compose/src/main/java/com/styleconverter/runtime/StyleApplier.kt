@@ -826,8 +826,18 @@ object StyleApplier {
         return com.styleconverter.runtime.spacing.SpacingContext(
             fontSizePx = fontSizePx,
             chAdvancePx = if (needsCh) {
-                com.styleconverter.runtime.spacing.ChUnitMetrics
-                    .measure(config.typography.fontFamily, fontSizePx)
+                com.styleconverter.runtime.spacing.ChUnitMetrics.measure(
+                    config.typography.fontFamily, fontSizePx,
+                    // Wave 52 lane L8 (M-B) — css-values-4 §6.1.1: `ch` is the
+                    // '0' advance "in the inline axis of the element"; under
+                    // `vertical-*` + `text-orientation: upright` that is the
+                    // VERTICAL advance (24 px at 20 px Inter, so the
+                    // ch-units-vrl orange `width: 5ch` box is the ref's 120).
+                    // `config` is extracted from the MERGED list, so an
+                    // inherited writing-mode reaches the decision.
+                    inlineAxisUpright = com.styleconverter.runtime.typography.text.VerticalInlineAxis
+                        .chAdvanceIsVertical(config.writingMode.writingMode, config.writingMode.textOrientation),
+                )
             } else null,
             // The lh basis: declared line-height (Sp-typed — every shape
             // the typography extractor emits) wins; declared-`normal` and

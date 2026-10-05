@@ -934,6 +934,15 @@ object ComponentRenderer {
                         // ancestor's `Modifier.clip`.
                         hoistHasTransformedAncestor,
                         hoistHasClippingAncestor,
+                        // Wave 52 (lane L7, T1): the css-grid-1 §9.2 overlay
+                        // (GridRenderer) already places THIS instance at its
+                        // static position by its real size — a zero-flow
+                        // mount here would hand that Box a 0×0 placeable
+                        // (ink at factor × content: +25/+50 px on the 16
+                        // grid-abspos-staticpos Android cells). Identity, so
+                        // nested static-position boxes keep the mount.
+                        staticPositionOwned = com.styleconverter.runtime.layout.position
+                            .CanvasRootHoist.LocalStaticPositionOwner.current === component,
                     )
             ) {
                 // Outermost slot, exactly like the overlay's canvasAnchor.
@@ -1105,6 +1114,20 @@ object ComponentRenderer {
         // Uses the DYNAMIC-RESOLVED list so bucket overrides and resolved
         // light-dark colors participate in inheritance like any other value.
         val inheritedProperties = LocalInheritedProperties.current
+        // Wave 52 (lane L11) — the ORDER-AWARE `all` reset runs FIRST, on the
+        // element's OWN list and the inherited channel kept apart: css-cascade-4
+        // §6.4 makes declarations AFTER `all` win over it (`all: initial;
+        // color: green` computes green — all-prop-initial-color painted black
+        // under the old post-merge drop-everything), §3.1 exempts `direction` /
+        // `unicode-bidi`, and §7.3 decides the channel per keyword (`initial`
+        // drops it, `inherit` / `unset` / `revert*` keep it) — a decision the
+        // old post-merge position could not make. Same list instances for
+        // every All-free element, so the identity fast paths below hold. See
+        // global/AllReset.kt (twin of iOS GlobalExtractor.applyingAllReset).
+        val allReset = com.styleconverter.runtime.global.AllReset.apply(
+            schemeResolvedProperties,
+            inheritedProperties
+        )
         // Wave 25 (lane LF follow-up) — the UA `list-style-type` rule runs
         // HERE, the last point that still holds the element's OWN list and
         // the inherited channel separately. On a list container with no own
@@ -1117,24 +1140,12 @@ object ComponentRenderer {
         // argument and the nested-list KNOWN GAP.
         val rawProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
             component._tag,
-            schemeResolvedProperties,
-            mergeInherited(schemeResolvedProperties, inheritedProperties)
+            allReset.own,
+            mergeInherited(allReset.own, allReset.inherited)
         )
-
-        // CSS `all: initial|inherit|unset|revert|revert-layer` resets every
-        // other property to its respective global value. We can't synthesize
-        // a per-property reset on Compose at runtime, but for the common
-        // case where `all` is the SOLE override on an isolated element, the
-        // simplest faithful behaviour is to drop every other declaration so
-        // the element collapses to its untouched defaults — which on web is
-        // exactly what these audit fixtures expect (no width / height / bg).
-        // We only apply this when no parent-cascade context is wired in
-        // (true today on Android), so `inherit` falls back to "no styling"
-        // — same observable result as the audit's `All_Inherit` web render.
-        val allReset = rawProperties.firstOrNull { it.type == "All" }?.let { p ->
-            (p.data as? JsonPrimitive)?.contentOrNull?.uppercase()
-        }
-        val unresolvedProperties = if (allReset != null) emptyList() else rawProperties
+        // The `all` reset already ran above (AllReset, before the merge); the
+        // post-merge drop-everything it replaced is gone.
+        val unresolvedProperties = rawProperties
 
         // ── Wave-6 dynamic-value resolution ────────────────────────────
         // Merge this component's custom-property definitions (the decoded
@@ -1238,7 +1249,7 @@ object ComponentRenderer {
         // pre-wave-18 list byte-identical (AbsposInsetStretch.inject is
         // additionally identity whenever nothing stretches).
         val wptCaptureModeForStretch = LocalWptCaptureMode.current
-        val effectiveProperties =
+        val effectivePropertiesBeforeTransformInherit =
             if (isOutOfFlowChild(animatedProperties)) {
                 // Wave-33 lane C — the ABSPOS view of the containing block.
                 // css-position-3 §3.1 makes an out-of-flow box's containing
@@ -1281,6 +1292,31 @@ object ComponentRenderer {
                         .inject(stretched, absposCb)
                 } else pctResolved
             } else animatedProperties
+        // Wave 52 (lane L4, native-near-misses T7) — `transform: inherit`
+        // (css-cascade-4 §7.3.2: the child's computed value IS the parent's
+        // computed value). The extractor is a pure function of one list and
+        // cannot see the parent, so the keyword is substituted HERE, before
+        // any extractor runs, from the channel the parent's RenderComponent
+        // provided below — the same substitution idiom mergeInherited uses
+        // for `color: currentColor`. Identity (same instance) for every
+        // list without the keyword: 1434 of the 1435 wave51-fix documents.
+        // Sole carrier: css-transforms/css-transform-inherit-scale (android
+        // f 0.9965 — the child's own scale(2) was dropped, 100×100 green
+        // centred on the 200×200 red instead of covering it).
+        val effectiveProperties =
+            if (com.styleconverter.runtime.transforms.TransformInheritance
+                    .carriesInherit(effectivePropertiesBeforeTransformInherit)) {
+                // Read the channel ONLY on the keyword's carrier: an
+                // unconditional read would subscribe EVERY element to its
+                // parent's (possibly animating) transform and recompose it
+                // each frame for nothing. A null read means UNPROVIDED, and
+                // resolve then leaves the keyword for the extractor's
+                // PropertyTracker breadcrumb instead of guessing `none`.
+                com.styleconverter.runtime.transforms.TransformInheritance.resolve(
+                    effectivePropertiesBeforeTransformInherit,
+                    com.styleconverter.runtime.transforms.TransformInheritance.LocalInheritedTransform.current,
+                )
+            } else effectivePropertiesBeforeTransformInherit
 
         // Extract property pairs for extractors
         val propertyPairs = effectiveProperties.map { it.type to it.data }
@@ -1351,6 +1387,14 @@ object ComponentRenderer {
             android.util.Log.w(
                 "LineClampCap", "resolveCapPx threw for ${component.id}: ${e.message}", e)
         }.getOrNull()
+        // Wave 52 lane L8 (M-A) — css-values-4 §6.1.1 measures `ch` "in the
+        // font used to render it", and a face-less label paints the bundled
+        // Inter (`?: InterFontFamily` in the label paint). The static chain under
+        // applyProperties cannot hold a Context, so the renderer binds one
+        // for ChUnitMetrics' Inter loader here — idempotent (one install
+        // per process), lazy (the font loads on the first face-less ch).
+        com.styleconverter.runtime.spacing.ChUnitMetrics.bindInterFace(
+            androidx.compose.ui.platform.LocalContext.current)
         val baseModifier = try {
             StyleApplier.applyProperties(
                 effectiveProperties, collapsedMargin, wptCaptureModeForSizing, lineClampCapPx,
@@ -2020,6 +2064,18 @@ object ComponentRenderer {
                 // through the wave-49 repair.
                 com.styleconverter.runtime.layout.position.ElementContainingBlock
                     .LocalElementContainingBlock provides containingBlock,
+                // Wave 52 (lane L4, T7) — THIS element's COMPUTED `Transform`
+                // wire (resolved above, so a chain of `inherit` carries the
+                // same value down — css-cascade-4 §7.3.2 per element), or
+                // TransformInheritance.NONE when it declares none (computed
+                // `none`, css-transforms-1 §3) — never the unprovided null.
+                // Provided at EVERY RenderComponent, so a child's
+                // `transform: inherit` under an untransformed parent reads
+                // `none` rather than the nearest transformed ancestor. Read
+                // only through TransformInheritance.resolve.
+                com.styleconverter.runtime.transforms.TransformInheritance
+                    .LocalInheritedTransform provides
+                    com.styleconverter.runtime.transforms.TransformInheritance.published(effectiveProperties),
                 // §8.3.1 collapse channels are strictly one-level: THIS
                 // component consumed its own override above, and any plan it
                 // publishes for its children is provided deeper (inside its
@@ -2199,6 +2255,12 @@ object ComponentRenderer {
                 .FlexAxes.of(flexDecision, rowGap, columnGap)
             when (flexDecision.kind) {
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Row -> {
+                    // Wave 52 (lane L10, M2/M3) — the GATED nowrap line: a
+                    // fixed-size line Row would squeeze (overflow with every
+                    // shrink factor 0) or mis-advance (negative main-axis
+                    // margin) goes through FlexNowrapLine; every other row
+                    // falls through to the Row below unchanged.
+                    if (RenderNowrapLine(component, modifier, rowAxis = true, gap = columnGap)) return
                     // Gap + justify-content COMPOSE, they don't compete:
                     // a distributing justify (space-between/around/evenly)
                     // owns the free space — the old `gap > 0 → spacedBy`
@@ -2224,6 +2286,9 @@ object ComponentRenderer {
                     return
                 }
                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Column -> {
+                    // Wave 52 (lane L10): the Row branch's gated line, on
+                    // the block axis (row-gap is the main-axis gap here).
+                    if (RenderNowrapLine(component, modifier, rowAxis = false, gap = rowGap)) return
                     // Same gap/justify composition as the Row branch —
                     // hoisted for the intrinsic path too.
                     val columnArrangement = axes.mainVertical
@@ -2772,15 +2837,24 @@ object ComponentRenderer {
                         child.properties.any { it.type == "WritingMode" }
                     }
                     // BAKED-LAYOUT guard: post-load-extracted wires carry
-                    // the browser's used physical Width+Height on every
-                    // box — that layout already encodes vertical flow AND
+                    // the browser's used physical layout on every box —
+                    // that layout already encodes vertical flow AND
                     // fragmentation, and the frozen Column render of it
                     // passes today (the anchor-position-multicol family);
                     // re-stacking would break passing cells (the same
                     // protection as ChildSpec.bakedPhysicalSize).
+                    // Wave 52 (lane L3, F1): read through the ONE shared
+                    // BakedLayoutSignature predicate (Width ∧ Height ∧
+                    // BoxSizing ∧ (PaddingTop ∨ BorderTopStyle)) — the
+                    // two-property "Width ∧ Height" heuristic it replaces
+                    // also matched an authored `.square{width:50px;
+                    // height:50px}` and froze the Column on
+                    // flexbox_align-items-stretch-writing-modes (the flex
+                    // items' squares stacked vertically, ios f 0.999).
+                    // Census F1 (this seam reads the USED writing mode):
+                    // all 23 baked containers (9 docs) read true.
                     val anyBakedChild = seamInFlowChildren.any { child ->
-                        child.properties.any { it.type == "Width" } &&
-                            child.properties.any { it.type == "Height" }
+                        BakedLayoutSignature.bakedPhysicalBox(child.properties)
                     }
                     // TEXT-ONLY-LEAVES guard (wave-47 skeptic S3 D1): a
                     // container whose EVERY in-flow child is a text-only
@@ -3024,6 +3098,16 @@ object ComponentRenderer {
         val tableEstablishes = com.styleconverter.runtime.layout.position.CanvasRootHoist
             .LocalHasPositionedAncestor.current ||
             com.styleconverter.runtime.table.TableBoxTree.establishesContainingBlock(component)
+        // Wave 52 lane L8 (M-E) — css-tables-3 §2.1/§3.2: the UA-only
+        // `<col>`/`<colgroup>` boxes the splice above drops still carry
+        // their column's specified width; it becomes each cell's minimum
+        // (wave51-fix ch-units-vrl-003/-004: the green td stayed 6 px wide
+        // under a `width: 5ch` upright col, ref 120). Same capture gate as
+        // the drop; the table's inheritable set resolves the col's 5ch.
+        val columnWidthsPx = if (LocalWptCaptureMode.current)
+            com.styleconverter.runtime.table.TableBoxTree.columnWidthsPx(
+                component.children, LocalInheritedProperties.current)
+        else emptyList()
         if (rows.isNotEmpty()) {
             rows.forEach { rowComponent ->
                 // Each child is a table row. A row group that was spliced
@@ -3034,7 +3118,7 @@ object ComponentRenderer {
                         .establishesContainingBlock(rowComponent)
                 TableApplier.TableRow {
                     if (!rowComponent.children.isNullOrEmpty()) {
-                        rowComponent.children.forEach { cellComponent ->
+                        rowComponent.children.forEachIndexed { cellIndex, cellComponent ->
                             // Each grandchild is a table cell. The cell's
                             // OWN RenderComponent runs below and publishes
                             // its own flag for the cell's subtree; what this
@@ -3045,7 +3129,15 @@ object ComponentRenderer {
                                     com.styleconverter.runtime.layout.position.CanvasRootHoist
                                         .LocalHasPositionedAncestor provides rowEstablishes
                                 ) {
-                                    RenderComponent(cellComponent)
+                                    // M-E: the column's width as the cell's
+                                    // floor (prepended, so a cell's own
+                                    // definite width still wins); no
+                                    // harvested width → the frozen call.
+                                    RenderComponent(
+                                        cellComponent,
+                                        itemModifier = columnWidthsPx.getOrNull(cellIndex)
+                                            ?.let { Modifier.widthIn(min = it.dp) } ?: Modifier,
+                                    )
                                 }
                             }
                         }
@@ -4008,14 +4100,18 @@ object ComponentRenderer {
      * a zero-size overlay that cannot move or resize it — css-lists-3 §3.5
      * makes it the item's first inline box. Everything else keeps the Row.
      *
-     * STILL DEFERRED — the rest of B-RC3 part 3. `outside` is still
-     * painted as a leading inline box rather than hung in the item's
-     * margin area (marker box outside the principal box, aligned on the
-     * first line's baseline), an `inside` marker on an item that DOES have
-     * text still displaces that item's box, and the gap is still the fixed
-     * [ListMarkerRow.gapDp] rather than the UA's per-counter-style marker
-     * padding. Those need a custom Layout and the item's resolved box
-     * metrics at this call site.
+     * Wave 52 (lane L6, T5): an `outside` marker now HANGS in the item's
+     * margin area (css-lists-3 §3.5) through
+     * [com.styleconverter.runtime.lists.ListMarkerOutsideHang] — the item
+     * is laid out as if it had no marker and the marker is placed at
+     * x = −(markerWidth + gap), so the item's content edge no longer moves
+     * by `markerWidth + gap` (measured +18 px on counter-suffix /
+     * counter-list-item-2). Staged as a device A/B (seam-1.patch).
+     *
+     * STILL DEFERRED — an `inside` marker on an item that DOES have text
+     * still displaces that item's box (the Row below), and the gap is
+     * still the fixed [ListMarkerRow.gapDp] rather than the UA's
+     * per-counter-style marker padding.
      */
     @Composable
     private fun RenderListItemMarker(
@@ -4181,8 +4277,15 @@ object ComponentRenderer {
         // all? Drives BOTH wave-28 decisions (which placement, and — in
         // the row — whether a baseline claim is meaningful).
         val exposesBaseline = ListMarkerRow.itemExposesTextBaseline(child)
-        if (ListMarkerRow.rendersInsideOverlay(
-                listConfig?.listStylePosition, exposesBaseline)) {
+        // Wave 52 (lane L6, T7 native half) — an EMPTY item (no text, no
+        // children, no generated content, no declared block size —
+        // ListMarkerEmptyItem.isEmpty) does NOT take the zero-size overlay:
+        // its inside marker is the only content of its one line box
+        // (css-lists-3 §3.5, CSS 2.1 §10.6.3), so the Row below, where the
+        // marker sizes the line, is that layout. Probed: the post-F-E
+        // cssom items collapsed onto ONE row under the overlay.
+        if (com.styleconverter.runtime.lists.ListMarkerEmptyItem.rendersInsideOverlay(
+                listConfig?.listStylePosition, child)) {
             // Wave 28 (lane MC), defect 1 — `list-style-position: inside`
             // on an item with no in-flow content. css-lists-3 §3.5 makes
             // the marker the item's FIRST INLINE BOX: it lives INSIDE the
@@ -4266,6 +4369,53 @@ object ComponentRenderer {
                         .then(markerSymbolPaint)
                 )
             }
+            return
+        }
+        // Wave 52 (lane L6, T5) — `list-style-position: outside`: the marker
+        // HANGS in the item's margin area instead of being a Row sibling
+        // (css-lists-3 §3.5: the marker box sits outside the principal box,
+        // before its start edge; the item's content edge does not move).
+        // ListMarkerOutsideHang.Hang measures the marker UNBOUNDED, lays the
+        // item out with the pair's full constraints, reports the ITEM's size
+        // and places the marker at x = −(markerWidth + gap). Gated on the
+        // resolved position alone (ListMarkerRow.hangsOutside); `inside`
+        // with text and an unknown position keep the Row below unchanged.
+        if (ListMarkerRow.hangsOutside(listConfig?.listStylePosition)) {
+            // The same per-item baseline decision the Row makes (wave 28 /
+            // wave 47 table on ListMarkerRow.alignsByBaseline): the Layout
+            // reads both FirstBaselines only when it is true.
+            val hangAligns = ListMarkerRow.alignsByBaseline(
+                exposesBaseline, markerSharesSnappedLineGrid)
+            com.styleconverter.runtime.lists.ListMarkerOutsideHang.Hang(
+                // ONE gap constant for both placements: the Row's
+                // `padding(end = gapDp)` becomes the hang's offset.
+                gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },
+                alignsByBaseline = hangAligns,
+                // An EMPTY item's one line box is the marker's (seam-3's
+                // ListMarkerEmptyItem rule, outside half).
+                itemIsEmpty = com.styleconverter.runtime.lists.ListMarkerEmptyItem.isEmpty(child),
+                marker = {
+                    // The Row's marker Text, minus the two Row-only parts:
+                    // the RowScope baseline claim (the Layout aligns by
+                    // reading FirstBaseline itself) and the end padding (the
+                    // gap is the hang offset). Glyph fallback, typography,
+                    // one-line run, painted symbol, line-box snap and
+                    // half-leading layer are byte-for-byte the Row's chain.
+                    Text(
+                        text = com.styleconverter.runtime.typography.font
+                            .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
+                        style = markerStyle,
+                        softWrap = false,
+                        onTextLayout = { markerLayout.value = it },
+                        modifier = Modifier
+                            .then(markerSymbolPaint)
+                            .then(markerLineBoxSnapModifier)
+                            .then(markerHalfLeadingCompensation)
+                    )
+                },
+                // The item renders exactly as an unmarked child would.
+                item = { RenderComponent(child) }
+            )
             return
         }
         Row(verticalAlignment = Alignment.Top) {
@@ -5011,6 +5161,41 @@ object ComponentRenderer {
             }
         }
         return PositionType.STATIC
+    }
+
+    /**
+     * Wave 52 (lane L10, M2/M3) — render [component] through
+     * FlexNowrapLine when its gate admits the container (css-flexbox-1
+     * §9.5 by outer size, overflow visible); returns false — having
+     * emitted NOTHING — for every other container, so the caller's
+     * Row/Column path runs exactly as before.
+     */
+    @Composable
+    private fun RenderNowrapLine(component: IRComponent, modifier: Modifier,
+                                 rowAxis: Boolean, gap: androidx.compose.ui.unit.Dp): Boolean {
+        // `order` is refused by the gate, so slot order IS flex order.
+        val children = component.children.orEmpty()
+        val nowrap = com.styleconverter.runtime.layout.flexbox.FlexNowrapLine
+        // The container's own-or-inherited `direction` (RenderComponent's
+        // LocalLayoutDirection provider): the gate refuses Rtl, where Row
+        // mirrors the line to the right edge and the Line would not.
+        val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+        if (!nowrap.engages(component.properties, children.map { it.properties },
+                rowAxis = rowAxis, hasText = !component._text.isNullOrEmpty(), rtl = rtl)) return false
+        nowrap.Line(
+            modifier = modifier, rowAxis = rowAxis, gap = gap,
+            // Negative main-axis margins shorten each OUTER size (§9.2 step 3).
+            outerDeltas = children.map { nowrap.outerDeltaPx(it.properties, rowAxis).dp }
+        ) {
+            // Flex items ignore justify-self (css-align-3 §6) — the same
+            // self-alignment hand-off RenderRowContent makes.
+            CompositionLocalProvider(LocalSelfAlignmentHandled provides true) {
+                // One Box per child keeps the measurables 1:1 with the
+                // outer deltas, whatever the child renders to.
+                children.forEach { child -> Box { RenderComponent(child, Modifier) } }
+            }
+        }
+        return true
     }
 
     /**
@@ -6848,6 +7033,17 @@ object ComponentRenderer {
             // would hard-newline the run with softWrap OFF — suppressing
             // the hyphenation we just switched on.
             dictionaryHyphenation = dictionaryHyphenation,
+            // Wave 52 (lane L9, F4) — a DRAWN-marker fixed-count clamp
+            // (css-overflow-4 §5.1 → §4.2 `auto`) bakes its UA ellipsis into
+            // a FIRED run, trimmed to the cap (PreBreakPipeline's banner: a
+            // fired run renders with softWrap = false, where Ellipsis is the
+            // wave-39 finalMaxLines landmine and Clip paints no marker —
+            // block-ellipsis-025 android: overlong lines clipped, no "…").
+            // Null for a suppressed marker, the bare `max-lines` longhand
+            // and no clamp, so every other run answers exactly as before;
+            // a run that does not fire keeps Minikin's wrapping and gets its
+            // marker from placeholderOverflow below (F3) — one owner each.
+            clampLines = com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties),
             // Single-line advance through the EXACT render style and the
             // EXACT run transform (runAnnotated), so measure and paint can
             // never disagree. getLineWidth(0) is the raw float advance —
@@ -6977,7 +7173,18 @@ object ComponentRenderer {
             // clamp was being dropped, so this wave moves exactly ONE thing
             // for them (the line cap) and leaves the horizontal-overflow
             // paint the wave38-final captures recorded untouched.
-            unclippedLineWidths = !wrapConfig.softWrap
+            // Wave 52 (lane L9, F3) — the gate is the Text's ACTUAL softWrap
+            // (`ruleBSoftWrap`, :6868), not the declared `wrapConfig.softWrap`:
+            // a rule-B pre-broken run and a B-RC7 unbreakable run render with
+            // softWrap = false too, and there the wave-39 banner's landmine
+            // is live — `Ellipsis` would collapse `finalMaxLines` to 1 and
+            // re-wrap the run. Those runs lay their lines out at intrinsic
+            // width exactly like `pre`, so Visible is the CSS 2.1 §11.1.1
+            // answer for them as well (block-ellipsis-025 android: the
+            // overlong lines now PAINT past the box as the ref does, instead
+            // of being clipped at its edge). Only a genuinely soft-wrapped
+            // clamp reaches the Ellipsis arm placeholderOverflow now has.
+            unclippedLineWidths = !ruleBSoftWrap
         )
 
         // text-emphasis marks (css-text-decor-3 §3). Compose has no native
@@ -7799,7 +8006,27 @@ object ComponentRenderer {
         // in either direction.
         if (properties.any { it.type == "TextOverflow" }) return declared
         if (effectiveMaxLines != Int.MAX_VALUE) {
-            return if (unclippedLineWidths) TextOverflow.Visible else declared
+            // Intrinsic-width lines (`pre`/`nowrap`, a rule-B pre-broken or
+            // B-RC7 unbreakable run — softWrap off): Visible, wave 39's rule
+            // and the landmine guard (Ellipsis here collapses finalMaxLines).
+            if (unclippedLineWidths) return TextOverflow.Visible
+            // Wave 52 (lane L9, F3) — css-overflow-4 §5.1: `line-clamp: <n>`
+            // expands to `block-ellipsis: auto`, and §4.2 makes `auto` the
+            // UA ellipsis — a bare clamp on a soft-wrapped run MUST paint the
+            // "…". `declared` here is Compose's Clip default (no
+            // `text-overflow` on the wire — the arm above returned for one),
+            // which is why NO Compose clamp in the corpus ever painted a
+            // marker (block-ellipsis-001 android P 0.9836 = `…room uncha`
+            // clipped; -032 android f 0.9397: fold landed, no "…" in any
+            // box) while the config-driven path (LineClampApplier
+            // .getTextOverflow) has said Ellipsis all along. Safe on THIS
+            // path only because the run soft-wraps: finalMaxLines keeps the
+            // cap and finalMaxWidth stays bounded (the wave-39 banner's
+            // table). The `max-lines` longhand alone keeps `declared`:
+            // its block-ellipsis is the initial `none` (DrawnLineClamp.cap —
+            // the ONE reader PreBreakPipeline consults too, so F3 and F4 can
+            // never disagree about which clamp draws a marker).
+            return if (com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties) != null) TextOverflow.Ellipsis else declared
         }
         return TextOverflow.Visible
     }
@@ -7930,13 +8157,13 @@ object ComponentRenderer {
                 }
                 "AlignItems" -> {
                     val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
-                    alignItems = when (keyword) {
-                        "CENTER" -> AlignItems.CENTER
-                        "FLEX_START", "FLEX-START", "START" -> AlignItems.FLEX_START
-                        "FLEX_END", "FLEX-END", "END" -> AlignItems.FLEX_END
-                        "BASELINE" -> AlignItems.BASELINE
-                        else -> AlignItems.STRETCH
-                    }
+                    // Wave 52 (lane L7): the ONE fold, now with the
+                    // css-align-3 §6.1 self-start/self-end arms (they fell
+                    // to STRETCH → the align-items-self-end abspos mark at
+                    // START, −50 px android); pure + JVM-pinned in
+                    // GridAbsposPartitionTest.
+                    alignItems = com.styleconverter.runtime.layout.grid.GridRenderer
+                        .foldAlignItems(keyword)
                 }
                 "AlignContent" -> {
                     val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()

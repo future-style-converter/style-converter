@@ -60,7 +60,11 @@ test('capture-browser-ref: white CANVAS_BG + cache keyed by CANVAS_REV', () => {
   // pinned by noto-pilot.test.mjs, which also pins the default expanded
   // string byte-for-byte), so the production rev is unchanged and pilot
   // refs live in their own '…-notopilot' tree.
-  assert.match(s, /export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins\$\{notoPilotRevSuffix\(\)\}`/, 'cache revision segment missing');
+  // wave-52 L12-B: '…-rootbg-uamargin' == the sixth leg — the canvas
+  // background on :where(html) only (the body half erased z-index:-1 ref ink
+  // and author html canvases) + the UA body box for test-declares/ref-relies-
+  // on-UA pairs (capture-browser-ref.mjs UA_BODY_CSS).
+  assert.match(s, /export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin\$\{notoPilotRevSuffix\(\)\}`/, 'cache revision segment missing');
   assert.match(s, /join\(REFS_ROOT, wptRef, CANVAS_REV, section/, 'cachePathFor must key on CANVAS_REV');
 });
 
@@ -89,7 +93,7 @@ test('the shell --refs-root literal is normalised by inject-wpt-block, not pinne
     for (const seg of segs) {
       // Either it already IS the live rev, or the normaliser knows how to
       // upgrade it. Nothing else may ship — on EVERY occurrence.
-      assert.ok(seg === 'white-black-ink-font-lh-imgpad-htmlpins' || stale.includes(`'${seg}'`),
+      assert.ok(seg === 'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin' || stale.includes(`'${seg}'`),
         `${sh}: refs-root segment '${seg}' is neither the live rev nor a KNOWN_STALE_CANVAS_REVS entry`);
     }
     // Every --refs-root in the file must have been captured by the pattern
@@ -617,8 +621,15 @@ test('wave-21 box model: the ref injection frames only html/body — UA control 
   // The box-model rules are EXACTLY the zero-specificity html/body frame —
   // pin both literals so any widening (extra selectors, changed values)
   // fails here rather than silently re-boxing the ref.
-  assert.ok(injected.includes(':where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }'),
+  // wave-52 L12-B (wave-50 B10's patch): the canvas `background` sits on the
+  // ROOT only — on body it painted an opaque box (CSS 2.1 Appendix E step 3)
+  // over every z-index:-1 body child and over author html canvases.
+  assert.ok(injected.includes(':where(html) { background: ${CANVAS_BG}; }'),
+    'ref root canvas rule missing/changed');
+  assert.ok(injected.includes(':where(html, body) { margin: 0; padding: 0; }'),
     'ref html/body frame rule missing/changed');
+  assert.doesNotMatch(injected, /:where\([^)]*body[^)]*\)\s*\{[^}]*background/,
+    'the canvas background came back on a body rule — it erases z-index:-1 ref ink');
   // wave-25 CAL-RC1: the 16px canvas pad is GONE from CSS — it is applied to
   // the raster (padPngBuffer) so abspos/fixed overlays translate with the
   // in-flow content instead of staying pinned to the ICB origin. `flow-root`

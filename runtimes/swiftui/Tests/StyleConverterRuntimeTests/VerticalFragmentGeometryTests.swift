@@ -142,14 +142,19 @@ final class VerticalFragmentGeometryTests: XCTestCase {
             "no capture → the pre-wave-47 bail, byte-identical")
     }
 
-    /// A post-load-extracted child (baked physical Width AND Height) keeps
-    /// the frozen path — its baked geometry already encodes the browser's
-    /// fragmentation (the anchor-position-multicol protection).
+    /// A post-load-extracted child keeps the frozen path — its baked
+    /// geometry already encodes the browser's fragmentation (the
+    /// anchor-position-multicol protection). Wave 52 (lane L3): the shape is
+    /// the BakedLayoutSignature (Width + Height + BoxSizing + a padding
+    /// band), not bare Width + Height — VerticalMulticolBakeGateTests pins
+    /// the verbatim -017 child and the authored Width + Height rows.
     func testVerticalPlanDeclinesBakedLayout() throws {
         let baked = try props(#"""
             [{"type":"BlockSize","data":{"px":350.0}},
              {"type":"Width","data":{"type":"length","px":450.0}},
-             {"type":"Height","data":{"type":"length","px":20.0}}]
+             {"type":"Height","data":{"type":"length","px":20.0}},
+             {"type":"BoxSizing","data":"CONTENT_BOX"},
+             {"type":"PaddingTop","data":{"px":0}}]
             """#)
         XCTAssertNil(ColumnsApplier.verticalFragmentPlan(
             columns: threeColumns(), siblingCount: 1,

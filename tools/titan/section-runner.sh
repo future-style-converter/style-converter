@@ -374,8 +374,11 @@ fi
 
 # ── Step 2: browser-ref capture (cached) ─────────────────────────────────────
 #
-# Cache lives at tools/wpt/refs/<sha>/white-black-ink-font-lh/<section>/<stem>.png —
-# the `white-black-ink-font-lh` segment is capture-browser-ref.mjs's CANVAS_REV
+# Cache lives at tools/wpt/refs/<sha>/<CANVAS_REV>/<section>/<stem>.png — the live rev is
+# `white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin` (wave 52: canvas background on
+# :where(html) only, UA body margin when the test declares one); the bare
+# `white-black-ink-font-lh` literal further down is a KNOWN_STALE_CANVAS_REVS entry that
+# inject-wpt-block.mjs rewrites to LIVE_CANVAS_REV. The original rev was capture-browser-ref.mjs.s CANVAS_REV
 # (the corpus-v4.1 contract: white canvas + spec-BLACK injected default
 # ink + the harness Inter font stack + the deterministic REF_LINE_HEIGHT
 # line-height pin on the ref; the line-height-less black-ink scratch refs

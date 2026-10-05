@@ -96,20 +96,4 @@ enum GlobalExtractor {
         // Source order preserved within each half.
         return (Array(before) + Array(after), keptInherited)
     }
-
-    /// LEGACY merged-list drop (wave 18): any keyword `all` drops EVERY
-    /// declaration. Its renderer caller moves to `applyingAllReset(own:
-    /// inherited:)` with lane L11's seam patch (seam-2.patch); it survives
-    /// ONLY for the two ContentsUnboxingTests pins (`:175-192`, lane L3's
-    /// file), which L11's hunk-for-L3-1.patch rewrites onto the order-aware
-    /// rule and which deletes this function in the same commit — so the
-    /// Catalyst suite stays green at every step (PLAN.md §9 C5).
-    static func applyingAllReset(to properties: [IRProperty]) -> [IRProperty] {
-        // Same trigger as before: any recognizable keyword `All`.
-        let hasAllKeyword = properties.contains { p in
-            p.type == "All" && ValueExtractors.extractKeyword(p.data) != nil
-        }
-        // Drop everything (the `All` entry included) — the pre-wave-52 shape.
-        return hasAllKeyword ? [] : properties
-    }
 }

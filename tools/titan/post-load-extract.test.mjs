@@ -50,6 +50,8 @@ import {
   buildSyntheticHtml, adoptReExtractedFixture, CANVAS_FRAME_STYLE_ID,
 } from './post-load-extract.mjs';
 import { extractBodyTreeNested, buildComponents, parseCss, stripComments, extractInlineStyle, collectStyledTags } from './extract-fixture.mjs';
+// wave-52 lane L11 (seam-3): the UA link bake's author-`all` guard.
+import { uaLinkProps } from './extract-fixture.mjs';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, '..', '..');
@@ -1798,4 +1800,21 @@ test('wave52 L11: a top-level element compares against the BODY snapshot', () =>
   const without = fx();
   mergePostLoadIntoFixture(without, 't', rec);
   assert.equal('color' in without.components.t__0.properties, false);
+});
+
+// wave-52 lane L11 (seam-3, extract-fixture.mjs uaLinkProps) — the F1
+// interplay: the UA link bake is appended AFTER the author bag, i.e. after an
+// author `all`, and the order-aware runtime reset keeps what follows `all`.
+// VERBATIM css/css-cascade/all-prop-initial-visited.html (`a { all: initial }
+// a:visited { color: green }`, `<a href="">`): its wave51-fix IR carries
+// `[All INITIAL, TextDecorationLine UNDERLINE, …]` — the underline is this
+// bake. MUTATION RECORD (executed 2026-10-05, extract-fixture.mjs restored to
+// HEAD byte-exact, mutations.log): guard removed → this pin FAILS.
+test('wave52 L11: an author `all` (not revert) suppresses the UA link bake', () => {
+  assert.equal(uaLinkProps('a', { href: '' }, { all: 'initial' }), null);
+  assert.equal(uaLinkProps('a', { href: '' }, { all: 'unset' }), null);
+  assert.equal(uaLinkProps('a', { href: '' }, { all: 'inherit' }), null);
+  // `revert` / `revert-layer` roll back TO the UA origin: the bake stands.
+  assert.equal(uaLinkProps('a', { href: '' }, { all: 'revert' })?.['text-decoration-line'], 'underline');
+  assert.equal(uaLinkProps('a', { href: '' }, { all: 'revert-layer' })?.['text-decoration-line'], 'underline');
 });

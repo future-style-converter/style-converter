@@ -1352,6 +1352,21 @@ export const NATIVE_FONT_PARITY_REFUSED_TESTS = Object.freeze(new Set([
   'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
   // ios 0.6787 / android 0.6592 — §6.3 complex CJK, both bounded.
   'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
+  // RE-ADDED wave 52 (lane L6, adjudication A — plan-skeptic-1 C3) with the
+  // NEW measurement R13 asked for, and a face-bound residual. wave51-fix
+  // ios f 0.9420 / android f 0.9423. pngjs ink bands over the run PNGs
+  // (tools/titan/results/wave52-counters-and-lists/_note.md): the natives
+  // print the §7.1.4 fallback row `10000. 10000` on ONE line, ink x 217–370
+  // (154 px) in the 158-px line (390 − 2·16 frame − 8em·25px padding), where
+  // the ref wraps it (`10000.` x 217–293, `10000` on the next line). The
+  // marker STRING is correct on both natives (the baked `10000.`), and row
+  // 3 shows why the wrap differs: `10001. 10001` is 143 px on both natives
+  // and 146 px in the ref (×1.021) — scaling row 2's 154 px by the same
+  // ratio gives ≈157.5 px, i.e. the ref's face sits on the 158-px boundary
+  // and the natives' sits under it. No runtime code decides that: the
+  // advance widths of the system face do. The WEB cell stays scored and is
+  // the measuring platform (L6 T3 replays it at SSIM 1.0000 vs this ref).
+  'css/css-counter-styles/armenian/css3-counter-styles-008.html',
   // UNEXCLUDED 2026-09-04 (retro R13, A12#5) — three former members whose
   // side-by-side PNGs (ref | web | iOS | Android) show NON-font defects, so
   // the 'native-font-parity' stamp mislabelled two native layout bugs and
@@ -1361,7 +1376,8 @@ export const NATIVE_FONT_PARITY_REFUSED_TESTS = Object.freeze(new Set([
   //     print the §7.1.4 fallback row '10000. 10000' on ONE line where the
   //     ref wraps it to two (line breaking); web fails the same test at
   //     0.9435 for its own reason (black tofu boxes). ios 0.9420 / android
-  //     0.9423.
+  //     0.9423. RE-ADDED wave 52 (see its line above): re-measured, the
+  //     wrap is the face's advance widths, not a runtime line breaker.
   //   css-counter-styles/counter-suffix — every item's text painted twice
   //     ('foo / foo') and the Korean + RTL marker rows missing on web, iOS
   //     AND Android alike: a shared upstream marker/extraction defect. ios

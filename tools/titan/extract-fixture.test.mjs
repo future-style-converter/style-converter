@@ -7316,3 +7316,48 @@ test('wave52-L5 F-C: css-color/color-mix-percents-02 (VERBATIM) — rows t6/t7 k
   assert.equal(invalidShadowDrops.length, 2);
   invalidShadowDrops.length = 0;
 });
+
+// ── F-E (web-tail) = T6 (counters-and-multicol): no 100×100 placeholder on a list item ──
+//
+// This block ships INSIDE seam-6-FE-li.patch (appended to this file), never on
+// its own: F-E lands in the same step as lane L6's seam-3/seam-4, which route an
+// EMPTY inside list item to the marker Row/HStack. Without them both native
+// runtimes stack an empty list's markers on one band (zero-size overlay) and the
+// coverage-ratio veto fails 18 passing native cssom cells (fe-native-replay.json).
+
+test('wave52-L5 F-E: a rule-less empty <li> keeps an EMPTY bag, not the 100x100 placeholder', () => {
+  // web-tail §7 F-E / counters §7 T6. css-lists-3 §2 + §3: a list item
+  // generates a ::marker box, so it is never content-less. The verbatim
+  // body of css-counter-styles/cssom/cssom-pad-setter-invalid.html (three
+  // `<li>` under an inline-styled `<ol>`, no matching rule) — 51 such items
+  // in 15 tests carried `Width 100 / Height 100` in the wave51-fix IR.
+  // Mutation M24: drop `li` from LIST_ITEM_TAGS → `{width:'100px',height:'100px'}`.
+  const { LIST_ITEM_TAGS } = EF52;
+  assert.deepEqual([...LIST_ITEM_TAGS].sort(), ['li', 'summary']);
+  const { components } = buildComponents(
+    '<body><ol style="list-style-type: foo; list-style-position: inside">\n  <li></li>\n  <li></li>\n  <li></li>\n</ol></body>', [], 'l');
+  const ol = components['l__0'];
+  assert.equal(ol._tag, 'ol');
+  const items = Object.values(ol.children);
+  assert.equal(items.length, 3);
+  for (const li of items) {
+    assert.equal(li._tag, 'li');
+    assert.deepEqual(li.properties, {}, 'a list item must not be stamped 100x100');
+  }
+  // The bare shape from the web-tail brief, and a <summary> (the HTML
+  // Rendering section's UA sheet makes it display: list-item too).
+  const bare = buildComponents('<body><ol><li></li></ol></body>', [], 'm');
+  assert.deepEqual(Object.values(bare.components['m__0'].children)[0].properties, {});
+  const det = buildComponents('<body><details><summary></summary></details></body>', [], 's');
+  assert.deepEqual(Object.values(det.components['s__0'].children)[0].properties, {});
+  // The exemption is NARROW: the existing "rule-less LEAF <div> still IS a
+  // placeholder" pin above stays green (mutation M25: add `div` to the set →
+  // it fails), and a rule-less empty <section> — the third-largest stamped tag
+  // in the web-tail census (5 stamps) — keeps the placeholder too. (Not a
+  // <span>: a rule-less empty span is inline-MERGED into its parent before
+  // this branch, so it never reaches the exemption at all.)
+  const section = buildComponents('<body><div><section></section></div></body>', [], 'p');
+  const sec = Object.values(section.components['p__0'].children)[0];
+  assert.equal(sec._tag, 'section');
+  assert.deepEqual(sec.properties, { width: '100px', height: '100px' });
+});
