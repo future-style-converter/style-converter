@@ -1,0 +1,1161 @@
+{
+ "fa": [
+  {
+   "test": "display-p3-linear-001",
+   "plat": "web",
+   "predictedSrgb8": [
+    0,
+    128,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 192
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    128,
+    0
+   ],
+   "before": {
+    "ssim": 0.8775,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 7.668,
+    "fuzzyDifferingPixels": 36865
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 1
+   }
+  },
+  {
+   "test": "display-p3-linear-001",
+   "plat": "ios",
+   "predictedSrgb8": [
+    0,
+    128,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 192
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    128,
+    0
+   ],
+   "before": {
+    "ssim": 0.8764,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 7.749,
+    "fuzzyDifferingPixels": 38965
+   },
+   "after": {
+    "ssim": 0.999,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.082,
+    "fuzzyDifferingPixels": 2101
+   }
+  },
+  {
+   "test": "display-p3-linear-001",
+   "plat": "android",
+   "predictedSrgb8": [
+    0,
+    128,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 192
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    128,
+    0
+   ],
+   "before": {
+    "ssim": 0.8756,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 7.763,
+    "fuzzyDifferingPixels": 38934
+   },
+   "after": {
+    "ssim": 0.9982,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.095,
+    "fuzzyDifferingPixels": 2070
+   }
+  },
+  {
+   "test": "display-p3-linear-002",
+   "plat": "web",
+   "predictedSrgb8": [
+    0,
+    0,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 192
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    0,
+    0
+   ],
+   "before": {
+    "ssim": 0.7977,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 15.754,
+    "fuzzyDifferingPixels": 36866
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 2
+   }
+  },
+  {
+   "test": "display-p3-linear-002",
+   "plat": "ios",
+   "predictedSrgb8": [
+    0,
+    0,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 192
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    0,
+    0
+   ],
+   "before": {
+    "ssim": 0.7966,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 15.836,
+    "fuzzyDifferingPixels": 38946
+   },
+   "after": {
+    "ssim": 0.9989,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.082,
+    "fuzzyDifferingPixels": 2082
+   }
+  },
+  {
+   "test": "display-p3-linear-002",
+   "plat": "android",
+   "predictedSrgb8": [
+    0,
+    0,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 192
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    0,
+    0
+   ],
+   "before": {
+    "ssim": 0.7959,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 15.853,
+    "fuzzyDifferingPixels": 38904
+   },
+   "after": {
+    "ssim": 0.9981,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.099,
+    "fuzzyDifferingPixels": 2040
+   }
+  },
+  {
+   "test": "display-p3-linear-003",
+   "plat": "web",
+   "predictedSrgb8": [
+    255,
+    255,
+    255
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "128,128,128",
+   "refCentre": [
+    255,
+    255,
+    255
+   ],
+   "before": {
+    "ssim": 0.9484,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.634,
+    "fuzzyDifferingPixels": 36864
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.016,
+    "fuzzyDifferingPixels": 18432
+   }
+  },
+  {
+   "test": "display-p3-linear-003",
+   "plat": "ios",
+   "predictedSrgb8": [
+    255,
+    255,
+    255
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "128,128,128",
+   "refCentre": [
+    255,
+    255,
+    255
+   ],
+   "before": {
+    "ssim": 0.9474,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.678,
+    "fuzzyDifferingPixels": 38898
+   },
+   "after": {
+    "ssim": 0.999,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.06,
+    "fuzzyDifferingPixels": 20466
+   }
+  },
+  {
+   "test": "display-p3-linear-003",
+   "plat": "android",
+   "predictedSrgb8": [
+    255,
+    255,
+    255
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "128,128,128",
+   "refCentre": [
+    255,
+    255,
+    255
+   ],
+   "before": {
+    "ssim": 0.9468,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.684,
+    "fuzzyDifferingPixels": 38896
+   },
+   "after": {
+    "ssim": 0.9984,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.066,
+    "fuzzyDifferingPixels": 20464
+   }
+  },
+  {
+   "test": "display-p3-linear-004",
+   "plat": "web",
+   "predictedSrgb8": [
+    0,
+    255,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    255,
+    0
+   ],
+   "before": {
+    "ssim": 0.9548,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.62,
+    "fuzzyDifferingPixels": 18434
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 2
+   }
+  },
+  {
+   "test": "display-p3-linear-004",
+   "plat": "ios",
+   "predictedSrgb8": [
+    0,
+    255,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    255,
+    0
+   ],
+   "before": {
+    "ssim": 0.9532,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.768,
+    "fuzzyDifferingPixels": 21923
+   },
+   "after": {
+    "ssim": 0.9984,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.149,
+    "fuzzyDifferingPixels": 3491
+   }
+  },
+  {
+   "test": "display-p3-linear-004",
+   "plat": "android",
+   "predictedSrgb8": [
+    0,
+    255,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    0,
+    255,
+    0
+   ],
+   "before": {
+    "ssim": 0.9522,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.789,
+    "fuzzyDifferingPixels": 21842
+   },
+   "after": {
+    "ssim": 0.9973,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.169,
+    "fuzzyDifferingPixels": 3410
+   }
+  },
+  {
+   "test": "display-p3-linear-005",
+   "plat": "web",
+   "predictedSrgb8": [
+    255,
+    255,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "128,128,128",
+   "refCentre": [
+    255,
+    255,
+    0
+   ],
+   "before": {
+    "ssim": 0.9547,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 3.463,
+    "fuzzyDifferingPixels": 18432
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 0
+   }
+  },
+  {
+   "test": "display-p3-linear-005",
+   "plat": "ios",
+   "predictedSrgb8": [
+    255,
+    255,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "128,128,128",
+   "refCentre": [
+    255,
+    255,
+    0
+   ],
+   "before": {
+    "ssim": 0.9538,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 3.509,
+    "fuzzyDifferingPixels": 20510
+   },
+   "after": {
+    "ssim": 0.999,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.046,
+    "fuzzyDifferingPixels": 2078
+   }
+  },
+  {
+   "test": "display-p3-linear-005",
+   "plat": "android",
+   "predictedSrgb8": [
+    255,
+    255,
+    0
+   ],
+   "box": {
+    "x": 16,
+    "y": 184,
+    "w": 192,
+    "h": 96
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "128,128,128",
+   "refCentre": [
+    255,
+    255,
+    0
+   ],
+   "before": {
+    "ssim": 0.9531,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 3.514,
+    "fuzzyDifferingPixels": 20528
+   },
+   "after": {
+    "ssim": 0.9984,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.051,
+    "fuzzyDifferingPixels": 2096
+   }
+  },
+  {
+   "test": "display-p3-linear-006",
+   "plat": "web",
+   "predictedSrgb8": [
+    114,
+    137,
+    73
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 64
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    114,
+    137,
+    73
+   ],
+   "before": {
+    "ssim": 0.9568,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.078,
+    "fuzzyDifferingPixels": 24578
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.021,
+    "fuzzyDifferingPixels": 12290
+   }
+  },
+  {
+   "test": "display-p3-linear-006",
+   "plat": "ios",
+   "predictedSrgb8": [
+    114,
+    137,
+    73
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 64
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    114,
+    137,
+    73
+   ],
+   "before": {
+    "ssim": 0.9556,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.197,
+    "fuzzyDifferingPixels": 39244
+   },
+   "after": {
+    "ssim": 0.9988,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.14,
+    "fuzzyDifferingPixels": 26956
+   }
+  },
+  {
+   "test": "display-p3-linear-006",
+   "plat": "android",
+   "predictedSrgb8": [
+    114,
+    137,
+    73
+   ],
+   "box": {
+    "x": 16,
+    "y": 88,
+    "w": 192,
+    "h": 64
+   },
+   "capDistinctColoursInBox": 1,
+   "capColourInBox": "255,255,255",
+   "refCentre": [
+    114,
+    137,
+    73
+   ],
+   "before": {
+    "ssim": 0.9548,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 2.188,
+    "fuzzyDifferingPixels": 26894
+   },
+   "after": {
+    "ssim": 0.998,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.131,
+    "fuzzyDifferingPixels": 14606
+   }
+  }
+ ],
+ "fb": [
+  {
+   "test": "fractional-box-with-shadow-new",
+   "plat": "web",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 219115,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9763,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 22.681,
+    "fuzzyDifferingPixels": 219115
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 0
+   }
+  },
+  {
+   "test": "fractional-box-with-shadow-new",
+   "plat": "ios",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 219163,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9749,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 22.703,
+    "fuzzyDifferingPixels": 219267
+   },
+   "after": {
+    "ssim": 0.998,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.025,
+    "fuzzyDifferingPixels": 152
+   }
+  },
+  {
+   "test": "fractional-box-with-shadow-new",
+   "plat": "android",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 219177,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9739,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 22.721,
+    "fuzzyDifferingPixels": 219418
+   },
+   "after": {
+    "ssim": 0.9966,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.044,
+    "fuzzyDifferingPixels": 303
+   }
+  },
+  {
+   "test": "fractional-box-with-shadow-old",
+   "plat": "web",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 219115,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9763,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 22.681,
+    "fuzzyDifferingPixels": 219115
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 0
+   }
+  },
+  {
+   "test": "fractional-box-with-shadow-old",
+   "plat": "ios",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 219163,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9749,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 22.703,
+    "fuzzyDifferingPixels": 219267
+   },
+   "after": {
+    "ssim": 0.998,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.025,
+    "fuzzyDifferingPixels": 152
+   }
+  },
+  {
+   "test": "fractional-box-with-shadow-old",
+   "plat": "android",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 219177,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9739,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 22.721,
+    "fuzzyDifferingPixels": 219418
+   },
+   "after": {
+    "ssim": 0.9966,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.044,
+    "fuzzyDifferingPixels": 303
+   }
+  },
+  {
+   "test": "fractional-box-with-overflow-children-new",
+   "plat": "web",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 222874,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9757,
+    "wptPass": false,
+    "presenceFailed": true,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 23.069,
+    "fuzzyDifferingPixels": 222874
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 0
+   }
+  },
+  {
+   "test": "fractional-box-with-overflow-children-new",
+   "plat": "ios",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 222874,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9757,
+    "wptPass": false,
+    "presenceFailed": true,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 23.069,
+    "fuzzyDifferingPixels": 222874
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 0
+   }
+  },
+  {
+   "test": "fractional-box-with-overflow-children-new",
+   "plat": "android",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 222900,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9753,
+    "wptPass": false,
+    "presenceFailed": true,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 23.075,
+    "fuzzyDifferingPixels": 222900
+   },
+   "after": {
+    "ssim": 0.9996,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.008,
+    "fuzzyDifferingPixels": 26
+   }
+  },
+  {
+   "test": "fractional-box-with-overflow-children-old",
+   "plat": "web",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 222874,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9757,
+    "wptPass": false,
+    "presenceFailed": true,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 23.069,
+    "fuzzyDifferingPixels": 222874
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 0
+   }
+  },
+  {
+   "test": "fractional-box-with-overflow-children-old",
+   "plat": "ios",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 222874,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9757,
+    "wptPass": false,
+    "presenceFailed": true,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 23.069,
+    "fuzzyDifferingPixels": 222874
+   },
+   "after": {
+    "ssim": 1,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0,
+    "fuzzyDifferingPixels": 0
+   }
+  },
+  {
+   "test": "fractional-box-with-overflow-children-old",
+   "plat": "android",
+   "backdrop": [
+    255,
+    182,
+    193
+   ],
+   "recolouredPx": 222900,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9753,
+    "wptPass": false,
+    "presenceFailed": true,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 23.075,
+    "fuzzyDifferingPixels": 222900
+   },
+   "after": {
+    "ssim": 0.9996,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.008,
+    "fuzzyDifferingPixels": 26
+   }
+  },
+  {
+   "test": "column-span-during-transition-doesnt-skip",
+   "plat": "web",
+   "backdrop": [
+    255,
+    192,
+    203
+   ],
+   "recolouredPx": 159200,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9879,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.666,
+    "fuzzyDifferingPixels": 3200
+   },
+   "after": {
+    "ssim": 0.9743,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 15.733,
+    "fuzzyDifferingPixels": 162400
+   }
+  },
+  {
+   "test": "column-span-during-transition-doesnt-skip",
+   "plat": "ios",
+   "backdrop": [
+    255,
+    192,
+    203
+   ],
+   "recolouredPx": 159200,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9879,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.666,
+    "fuzzyDifferingPixels": 3200
+   },
+   "after": {
+    "ssim": 0.9743,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 15.733,
+    "fuzzyDifferingPixels": 162400
+   }
+  },
+  {
+   "test": "column-span-during-transition-doesnt-skip",
+   "plat": "android",
+   "backdrop": [
+    255,
+    192,
+    203
+   ],
+   "recolouredPx": 159200,
+   "totalPx": 234000,
+   "before": {
+    "ssim": 0.9879,
+    "wptPass": true,
+    "presenceFailed": false,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "labDeltaEMean": 0.666,
+    "fuzzyDifferingPixels": 3200
+   },
+   "after": {
+    "ssim": 0.9743,
+    "wptPass": false,
+    "presenceFailed": false,
+    "colorFailed": true,
+    "coverageRatioFailed": true,
+    "labDeltaEMean": 15.733,
+    "fuzzyDifferingPixels": 162400
+   }
+  }
+ ]
+}

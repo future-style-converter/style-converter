@@ -1,0 +1,107 @@
+{
+ "cmd": [
+  "xcodebuild",
+  "test",
+  "-scheme",
+  "StyleConverterRuntime",
+  "-destination",
+  "platform=macOS,variant=Mac Catalyst,arch=arm64",
+  "-derivedDataPath",
+  "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/dd",
+  "-only-testing:StyleConverterRuntimeTests/InlineSpanRingTests",
+  "-only-testing:StyleConverterRuntimeTests/InlineRunFlowTests",
+  "-only-testing:StyleConverterRuntimeTests/GreedyLineBreakerTests"
+ ],
+ "cwd": ".",
+ "mutations": [
+  {
+   "id": "S1-hanging-punctuation-arm",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "old": "            case \"HangingPunctuation\":\n                hangingKeywords = extractHangingKeywords(prop.data)\n",
+   "new": "",
+   "expectFail": [
+    "testHangingPunctuationIsAdmittedInertWithItsKeywordsNamed",
+    "testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine"
+   ]
+  },
+  {
+   "id": "S2-glyphless-whitespace-guard",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "old": "guard glyphless else { return .refused(\"member-prop:WhiteSpace\") }",
+   "new": "guard false else { return .refused(\"member-prop:WhiteSpace\") }",
+   "expectFail": [
+    "testGlyphlessPreWrapMemberAdmitsItsPreservedSpacesAndBand",
+    "testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless",
+    "testBlockEllipsis032HangingWhitespaceMemberFolds"
+   ]
+  },
+  {
+   "id": "S3-glyphless-default-true",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "old": "glyphless: Bool = false) -> Admission {",
+   "new": "glyphless: Bool = true) -> Admission {",
+   "expectFail": [
+    "testBordersAreAStatedLossStylelessBordersInertUnknownPropsRefuse"
+   ]
+  },
+  {
+   "id": "S4-fold-glyphless-predicate",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineRunFlow.swift",
+   "old": "let glyphless = !hasNested && !(text ?? \"\").isEmpty\n                && (text ?? \"\").allSatisfy { $0.isWhitespace }",
+   "new": "let glyphless = false",
+   "expectFail": [
+    "testBlockEllipsis032HangingWhitespaceMemberFolds"
+   ]
+  },
+  {
+   "id": "S5-alignment-clamp-tail",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "old": "            ?? clampedAlignment(original: original, transformed: transformed)\n",
+   "new": "",
+   "expectFail": [
+    "testClampTrimmed032ParagraphStillAlignsItsMembers",
+    "testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery"
+   ]
+  },
+  {
+   "id": "S6-band-attribute",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/TypographyApplier.swift",
+   "old": "        out.backgroundColor = Color(.sRGB, red: band.r, green: band.g, blue: band.b, opacity: band.a)\n",
+   "new": "",
+   "expectFail": [
+    "testGlyphlessBandRidesTheRunAsABackgroundAttribute"
+   ]
+  },
+  {
+   "id": "S7-drawn-clamp-extractor-guard",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "        guard let cfg = LineClampExtractor.extract(from: properties),\n              cfg.lines != nil, !cfg.markerSuppressed else { return nil }\n",
+   "new": "",
+   "expectFail": [
+    "testDrawnClampOnlyForAFixedCountLineClampWithAMarker"
+   ]
+  },
+  {
+   "id": "S8-f4-fit-loop",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "while !last.isEmpty, measure(last + clamp.marker) > maxWidth {",
+   "new": "while false, !last.isEmpty, measure(last + clamp.marker) > maxWidth {",
+   "expectFail": [
+    "testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone",
+    "testClampDropsTrailingWordsUntilTheMarkerFits",
+    "testClampMeasuresACustomMarkerAsARealGlyphRun"
+   ]
+  },
+  {
+   "id": "S9-f4-trim-skipped",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "guard clamp.lines > 0, lines.count > clamp.lines else { return lines }",
+   "new": "guard false else { return lines }",
+   "expectFail": [
+    "testClampAppendsTheMarkerToAFittingLastLine",
+    "testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone",
+    "testClampCountsHardBrokenLinesTowardTheCap"
+   ]
+  }
+ ]
+}

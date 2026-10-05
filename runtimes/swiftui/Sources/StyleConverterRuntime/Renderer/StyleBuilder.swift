@@ -383,7 +383,26 @@ enum StyleBuilder {
                 documentFaceName: s.typography?.fontFamilyNames
                     .lazy
                     .compactMap { DocumentFontRegistry.shared.resolvedName(for: $0) }
-                    .first)
+                    .first,
+                // Wave 52 lane L8 (M-B) — css-values-4 §6.1.1: `ch` is the
+                // advance of '0' "in the inline axis of the element". Under
+                // `vertical-*` + `text-orientation: upright` that axis is
+                // vertical and the upright '0' advances by its em box, so the
+                // basis is round(ascent)+round(descent), not the x-advance
+                // (wave51-fix ch-units-vrl-005..008: the orange `width: 5ch`
+                // box drew 60 px against the ref's 120). This list is the
+                // merged one, so an inherited `writing-mode` reaches the
+                // decision; `text-orientation` is NOT in either native's
+                // inherited set (InheritedText.inheritedTypes / Compose
+                // INHERITED_PROPERTY_TYPES), so only an OWN `upright` counts
+                // — twin-identical, and a known gap for ch-units-vrl-001/002's
+                // td (lane note). The pure decision is the twin-pinned
+                // `VerticalInlineAxis.chAdvanceIsVertical`; absent keywords
+                // fall to the initial values (`horizontal-tb`, `mixed`) and
+                // keep the x-advance — every pre-wave-52 style byte-identical.
+                inlineAxisUpright: VerticalInlineAxis.chAdvanceIsVertical(
+                    writingMode: WritingModeExtractor.extract(from: properties)?.mode ?? .horizontalTb,
+                    textOrientation: TextOrientationExtractor.extract(from: properties)?.value ?? .mixed))
         }
 
         // Phase 7 step 2 — layout aggregate (flexbox sub-step). The

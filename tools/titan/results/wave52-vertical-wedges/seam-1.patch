@@ -1,0 +1,21 @@
+# seam-1 (wave52 lane L8 vertical-wedges, M-A) — Compose ComponentRenderer.kt: bind the renderer's Context to
+# ChUnitMetrics' Inter loader just before StyleApplier.applyProperties in RenderComponent.
+# Cut against HEAD 7d9c22a7 (no prior lane's patch required; touches no line of another lane's §3 hunk).
+# Needs the L8 ChUnitMetrics.kt (bindInterFace) in the tree.
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt	2026-10-05 17:16:34
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt	2026-10-05 17:16:34
+@@ -1351,6 +1351,14 @@
+             android.util.Log.w(
+                 "LineClampCap", "resolveCapPx threw for ${component.id}: ${e.message}", e)
+         }.getOrNull()
++        // Wave 52 lane L8 (M-A) — css-values-4 §6.1.1 measures `ch` "in the
++        // font used to render it", and a face-less label paints the bundled
++        // Inter (`?: InterFontFamily` in the label paint). The static chain under
++        // applyProperties cannot hold a Context, so the renderer binds one
++        // for ChUnitMetrics' Inter loader here — idempotent (one install
++        // per process), lazy (the font loads on the first face-less ch).
++        com.styleconverter.runtime.spacing.ChUnitMetrics.bindInterFace(
++            androidx.compose.ui.platform.LocalContext.current)
+         val baseModifier = try {
+             StyleApplier.applyProperties(
+                 effectiveProperties, collapsedMargin, wptCaptureModeForSizing, lineClampCapPx,

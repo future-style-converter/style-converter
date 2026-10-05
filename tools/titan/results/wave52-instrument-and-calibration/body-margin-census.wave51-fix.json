@@ -1,0 +1,46 @@
+{
+ "_lane": "wave52 L12 instrument-and-calibration / Part B Fix B census",
+ "_run": "wave51-fix",
+ "tests": 1435,
+ "unresolvedRefs": 0,
+ "inline": {
+  "testDeclares": 150,
+  "refDeclares": 149,
+  "mismatchPairs": 19,
+  "fires": 10,
+  "reverse": 9
+ },
+ "shipped": {
+  "testDeclares": 150,
+  "refDeclares": 149,
+  "mismatchPairs": 19,
+  "fires": 10
+ },
+ "firesShipped": [
+  "css/CSS2/css21-errata/s-11-1-1b-005.html",
+  "css/CSS2/css21-errata/s-11-1-1b-006.html",
+  "css/css-anchor-position/anchor-position-circular.html",
+  "css/css-cascade/initial-background-color.html",
+  "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+  "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+  "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+  "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+  "css/css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html",
+  "css/css-position/hypothetical-dynamic-change-003.html"
+ ],
+ "vsPlan": {
+  "firesOnlyHere": [],
+  "firesOnlyInPlan": [],
+  "reverseOnlyHere": [],
+  "reverseOnlyInPlan": []
+ },
+ "refsFiring": [
+  "css/CSS2/css21-errata/s-11-1-1b-005-ref.html",
+  "css/css-anchor-position/reference/anchor-position-circular-ref.html",
+  "css/css-cascade/reference/all-green.html",
+  "css/css-masking/clip-path/reference/green-100x100.html",
+  "css/css-masking/clip-path/reference/green-circle-100x100.html",
+  "css/css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height-ref.html",
+  "css/css-position/hypothetical-dynamic-change-001-ref.html"
+ ]
+}

@@ -1,0 +1,111 @@
+Wave 52 · lane L3 (failure-ink) · seam-2 — FIX-PASS RE-CUT (2026-10-05). Base: HEAD 7d9c22a7 (ComponentRenderer.swift blob 97993624);
+no prior lane's patch needed; independent of hunk-for-orchestrator-1 (verified with it applied). Changes vs the first-pass text (sha
+83defc39…): (1) the carrier-count comment quotes the USED-writing-mode census (23 baked containers, 9 docs; was the own-mode 12);
+(2) NEW VerticalBlockFlowSeamWiringTests.swift — the source pin (skeptic should-fix 2): verticalBlockFlowZ2's guard section must call
+BakedLayoutSignature.bakedPhysicalBox and must no longer read the Width∧Height heuristic. Verification + negative control:
+_seam2-private-verify.log (private package copy) and _seam2-verify.log (shared tree, lock wave52-lock/ComponentRenderer.swift).
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+index 9799362..16c371a 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -4352,13 +4352,21 @@ public struct ComponentRenderer: View {
+             // float-in-htb-in-vrl).
+             if child.properties.contains(where: { $0.type == "WritingMode" }) { return nil }
+             // BAKED-LAYOUT guard: post-load-extracted wires carry the
+-            // browser's used physical Width+Height on every box — that
+-            // layout already encodes vertical flow AND fragmentation, and
+-            // the frozen VStack render of it passes today (the
++            // browser's used physical layout on every box — that layout
++            // already encodes vertical flow AND fragmentation, and the
++            // frozen VStack render of it passes today (the
+             // anchor-position-multicol family). Twin of the Compose
+             // seam's anyBakedChild / ChildSpec.bakedPhysicalSize gates.
+-            if child.properties.contains(where: { $0.type == "Width" }),
+-               child.properties.contains(where: { $0.type == "Height" }) { return nil }
++            // Wave 52 (lane L3, F1): read through the ONE shared
++            // BakedLayoutSignature predicate (Width ∧ Height ∧ BoxSizing ∧
++            // (PaddingTop ∨ BorderTopStyle)) — the two-property
++            // "Width ∧ Height" heuristic it replaces also matched an
++            // authored `.square{width:50px; height:50px}` and froze the
++            // VStack on flexbox_align-items-stretch-writing-modes (the
++            // flex items' squares stacked vertically, ios f 0.999,
++            // colorFailed). Census F1 (used writing mode, as read here):
++            // all 23 baked containers (9 docs) read true.
++            if BakedLayoutSignature.bakedPhysicalBox(child.properties) { return nil }
+         }
+         // The seam owns this container — name its one modeled gap.
+         PropertyTracker.logOnce(
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalBlockFlowSeamWiringTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalBlockFlowSeamWiringTests.swift
+new file mode 100644
+index 0000000..db96f61
+--- /dev/null
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalBlockFlowSeamWiringTests.swift
+@@ -0,0 +1,68 @@
++//
++//  VerticalBlockFlowSeamWiringTests.swift
++//  StyleConverterRuntimeTests
++//
++//  Wave 52 (lane L3 · failure-ink, fix F1) — the SEAM WIRING pin, shipped
++//  inside seam-2.patch together with the seam it pins. Twin of Compose
++//  VerticalBlockFlowSeamWiringTest.kt (shipped inside seam-1.patch).
++//
++//  WHY THIS EXISTS (wave-52 skeptic, should-fix 2): VerticalBlockFlowSeamGuardTests
++//  pins the PREDICATE (BakedLayoutSignature.bakedPhysicalBox) but nothing
++//  pinned that ComponentRenderer.verticalBlockFlowZ2() CALLS it. With seam-2
++//  dropped or mis-merged (many lanes deliver hunks into that one file) every
++//  predicate pin stays green and
++//  css-writing-modes/flexbox_align-items-stretch-writing-modes silently keeps
++//  its frozen VStack. The guard sits inside a private method of a View, so a
++//  SOURCE-level read (the ChUnitInlineAxisTests / ConformanceTests #filePath
++//  walk) is the honest unit-level check.
++//
++//  NEGATIVE CONTROL, EXECUTED (fix pass 2026-10-05, log
++//  results/wave52-failure-ink/_seam2-verify.log): with ComponentRenderer.swift
++//  at HEAD 7d9c22a7 bytes (seam-2 NOT applied) both tests FAIL.
++//
++
++import XCTest
++
++final class VerticalBlockFlowSeamWiringTests: XCTestCase {
++
++    /// ComponentRenderer.swift, resolved from this file's own path:
++    /// Tests/StyleConverterRuntimeTests/ → runtimes/swiftui/ → Sources/….
++    private func rendererSource() throws -> String {
++        let url = URL(fileURLWithPath: #filePath)
++            .deletingLastPathComponent()   // StyleConverterRuntimeTests/
++            .deletingLastPathComponent()   // Tests/
++            .deletingLastPathComponent()   // runtimes/swiftui/
++            .appendingPathComponent(
++                "Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift")
++        return try String(contentsOf: url, encoding: .utf8)
++    }
++
++    /// The Z2 seam's guard section: from the method's declaration to the
++    /// "seam owns this container" breadcrumb that follows its last guard.
++    private func z2Guards() throws -> Substring {
++        let src = try rendererSource()
++        // The method's declaration — the seam's own name since wave 47.
++        let start = try XCTUnwrap(
++            src.range(of: "private func verticalBlockFlowZ2() -> Bool?"),
++            "verticalBlockFlowZ2() is missing from ComponentRenderer.swift")
++        // The breadcrumb after the guards bounds the section.
++        let end = try XCTUnwrap(
++            src.range(of: "// The seam owns this container",
++                      range: start.upperBound..<src.endIndex),
++            "the post-guard breadcrumb no longer follows verticalBlockFlowZ2()")
++        return src[start.lowerBound..<end.lowerBound]
++    }
++
++    /// The baked guard reads the ONE shared post-load signature predicate.
++    func testZ2BakedGuardReadsBakedLayoutSignature() throws {
++        XCTAssertTrue(try z2Guards().contains(
++            "if BakedLayoutSignature.bakedPhysicalBox(child.properties) { return nil }"),
++            "verticalBlockFlowZ2 must decline through BakedLayoutSignature (seam-2)")
++    }
++
++    /// The wave-47 two-property heuristic (authored squares trip it) is gone.
++    func testZ2DropsTheWave47WidthHeightHeuristic() throws {
++        XCTAssertFalse(try z2Guards().contains(#"$0.type == "Height""#),
++            "verticalBlockFlowZ2 still reads the bare Width ∧ Height heuristic")
++    }
++}

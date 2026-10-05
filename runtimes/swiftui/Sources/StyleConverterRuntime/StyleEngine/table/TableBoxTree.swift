@@ -32,6 +32,9 @@
 //  because both runtimes must agree on what a table-internal box IS.
 //
 
+// SwiftUI for the M-E environment channel (EnvironmentKey / CGFloat).
+import SwiftUI
+
 /// The css-tables-3 §2.1 internal table roles this runtime distinguishes.
 enum TableBoxTree {
 
@@ -175,9 +178,11 @@ enum TableBoxTree {
     /// UA-only `<col>` — which has no other reason to be in the box tree
     /// — is skipped by the caller.
     ///
-    /// NO iOS CALLER TODAY — stated plainly rather than left to be
-    /// discovered (wave-38 finish pass F1). The Kotlin twin needs it
-    /// because Compose SPLICES a row group's children into one flat row
+    /// ONE iOS CALLER SINCE WAVE 52 (lane L8, M-E): `columnChains` uses it
+    /// to find the UA-only column boxes whose `width` it harvests. It is
+    /// still NOT wired into `inFlowChildren` — stated plainly rather than
+    /// left to be discovered (wave-38 finish pass F1). The Kotlin twin needs
+    /// it there because Compose SPLICES a row group's children into one flat row
     /// list (`TableBoxTree.rowsOf`), so a `<colgroup>` would land in that
     /// list and paint as a row of cells; this runtime never splices —
     /// `tableTrackPlan` gives the row group its own `.blockStack` plan and
@@ -218,4 +223,96 @@ enum TableBoxTree {
     /// A ROW is deliberately NOT shrink-to-fit: §17.5.2 sizes rows to the
     /// table's used width.
     static func shrinkToFitBox(_ role: Role) -> Bool { role == .table }
+
+    // MARK: - Wave 52 lane L8 (M-E): column width contributions
+
+    // css-tables-3 §2.1: a column box "does not render", but §3.2 makes its
+    // specified `width` an input to the column's min/max width. MEASURED on
+    // wave51-fix css-writing-modes/ch-units-vrl-003/-004: the upright
+    // `<col style="width: 5ch">` (120) never reached the green `<td>`, which
+    // stayed 6 px wide on both natives (ref 120×120). Twin of the Kotlin
+    // `TableBoxTree.columnChains` / `columnWidthsPx` — same chains, same
+    // exclusion of a DECLARED `display` (css-tables/border-collapse-dynamic-
+    // col-001's `table-column` boxes harvest nothing, so it cannot move).
+
+    /// The table's column boxes in column order, each as the chain its width
+    /// is read from: `[col]`, `[col, colgroup]` (group width = fallback), or
+    /// `[colgroup]` for an empty group. UA-only boxes (no declared Display).
+    static func columnChains(_ children: [IRComponent]?) -> [[IRComponent]] {
+        // The same tag rule `generatesNoBoxes` states, with no declared role.
+        let uaColumn = { (c: IRComponent) -> Bool in
+            !c.properties.contains { $0.type == "Display" } && generatesNoBoxes(c.meta?.sourceTag)
+        }
+        var out: [[IRComponent]] = []
+        for child in (children ?? []) where uaColumn(child) {
+            // A `<colgroup>` with `<col>` children: one column per col.
+            let cols = (child.children ?? []).filter { uaColumn($0) && $0.meta?.sourceTag?.lowercased() == "col" }
+            if child.meta?.sourceTag?.lowercased() == "colgroup", !cols.isEmpty {
+                out += cols.map { [$0, child] }
+            } else {
+                // A bare `<col>`, or an empty `<colgroup>`: one column.
+                out.append([child])
+            }
+        }
+        return out
+    }
+
+    /// Each column's specified width in px (nil = auto), in column order.
+    /// `inherited` is the table's inheritable set — the column box inherits
+    /// `font-size` / `writing-mode` like any element (the ch-units-vrl tests
+    /// assert exactly that), and StyleBuilder measures its `ch` along the
+    /// column's OWN inline axis (upright col: 5ch = 120).
+    static func columnWidthsPx(_ children: [IRComponent]?, inherited: [IRProperty]) -> [CGFloat?] {
+        columnChains(children).map { chain in
+            // The col's own width first, the group's as the fallback.
+            chain.lazy.compactMap { columnWidthPx($0, inherited: inherited) }.first
+        }
+    }
+
+    /// One column box's declared `width` in px through the production
+    /// StyleBuilder + SpacingResolver lane, or nil (no width / unresolvable).
+    static func columnWidthPx(_ column: IRComponent, inherited: [IRProperty]) -> CGFloat? {
+        // Own declarations win; inherited types fill the gaps.
+        let style = StyleBuilder.build(from: InheritedText.merge(own: column.properties, inherited: inherited))
+        guard let width = style.size.width else { return nil }
+        // `isPadding: true` = never negative, `auto` = nothing to give.
+        guard case .px(let px) = SpacingResolver.resolve(width, ctx: style.spacing.context, isPadding: true),
+              px.isFinite, px > 0 else { return nil }
+        return px
+    }
+
+    /// The renderer's lookup: cell component id → its column's width, for
+    /// every cell of every row (row groups looked through, §2.1), by the
+    /// cell's index in its row. Empty when the table has no column widths.
+    static func cellColumnWidths(table: IRComponent, inherited: [IRProperty]) -> [String: CGFloat] {
+        let widths = columnWidthsPx(table.children, inherited: inherited)
+        guard widths.contains(where: { $0 != nil }) else { return [:] }
+        var map: [String: CGFloat] = [:]
+        // Rows: direct table-row children, or the rows inside a row group.
+        let rows = (table.children ?? []).flatMap { child -> [IRComponent] in
+            roleOf(child.properties, sourceTag: child.meta?.sourceTag) == .rowGroup ? (child.children ?? []) : [child]
+        }.filter { roleOf($0.properties, sourceTag: $0.meta?.sourceTag) == .row }
+        for row in rows {
+            for (i, cell) in (row.children ?? []).enumerated() where i < widths.count {
+                if let w = widths[i] { map[cell.id] = w }
+            }
+        }
+        return map
+    }
+}
+
+/// Environment channel for M-E: the enclosing table's `cellColumnWidths`
+/// map. Published by the TABLE's ComponentRenderer (seam patch), read by
+/// each cell, which folds its column's width into an unset `min-width`.
+/// Default empty = no table above → nothing to fold (byte-identical).
+private struct TableCellColumnWidthsKey: EnvironmentKey {
+    static let defaultValue: [String: CGFloat] = [:]
+}
+
+extension EnvironmentValues {
+    /// Cell id → its column's specified width (css-tables-3 §3.2), in px.
+    var tableCellColumnWidths: [String: CGFloat] {
+        get { self[TableCellColumnWidthsKey.self] }
+        set { self[TableCellColumnWidthsKey.self] = newValue }
+    }
 }

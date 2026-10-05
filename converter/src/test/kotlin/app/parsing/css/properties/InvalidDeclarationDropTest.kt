@@ -133,13 +133,23 @@ class InvalidDeclarationDropTest {
         // e/E exponent; css-syntax-3 §4.3.13 ("Consume a number") folds it
         // into the <number-token> before §4.3.3 attaches the unit, so
         // `4.5e1deg` is ONE dimension whose unit is the perfectly ordinary
-        // `deg`. AngleParser cannot read the exponent yet — a modelling gap
-        // that must cost a Raw passthrough, never a deleted declaration.
-        for (angle in listOf("4.5e1deg", "1e2deg", "4.5e+1deg", "4.5e-1turn", "45e0deg")) {
+        // `deg`. Until wave 52 AngleParser could not read the exponent and
+        // this pin asserted the Raw passthrough that modelling gap cost;
+        // wave-52 lane L5 F4 (BACKLOG 0(e)) closed the gap, so the pin now
+        // asserts the TYPED gradient with the angle resolved to degrees
+        // (Chrome/151 computes `linear-gradient(4.5e1deg, …)` to `45deg`).
+        // Mutation F4-a (drop the exponent group from AngleParser) turns
+        // every row back into Raw and fails here.
+        val expected = mapOf(
+            "4.5e1deg" to 45.0, "1e2deg" to 100.0, "4.5e+1deg" to 45.0,
+            "4.5e-1turn" to 162.0, "45e0deg" to 45.0,
+        )
+        for ((angle, degrees) in expected) {
             val out = parse("background-image" to "linear-gradient($angle, red, blue)")
             assertEquals(1, out.size, "linear-gradient($angle, …) must survive, got $out")
             val prop = assertIs<BackgroundImageProperty>(out[0])
-            assertIs<BackgroundImageProperty.BackgroundImage.Raw>(prop.images[0])
+            val grad = assertIs<BackgroundImageProperty.BackgroundImage.LinearGradient>(prop.images[0])
+            assertEquals(degrees, grad.angle?.degrees ?: Double.NaN, 1e-9, "angle of linear-gradient($angle, …)")
         }
     }
 

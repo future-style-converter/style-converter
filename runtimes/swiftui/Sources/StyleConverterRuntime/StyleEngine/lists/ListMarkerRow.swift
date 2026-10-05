@@ -199,4 +199,32 @@ enum ListMarkerRow {
                                      itemExposesTextBaseline: Bool) -> Bool {
         position == .inside && !itemExposesTextBaseline
     }
+
+    /// Wave 52 (lane L6, T5) — the FOURTH decision, the deferred B-RC3
+    /// part 3: must this item's marker HANG in the item's margin area
+    /// (css-lists-3 §3.5 — an `outside` marker box is positioned outside
+    /// the principal box, before its start edge, and the item's content
+    /// edge does not move) instead of being prepended as an HStack
+    /// sibling? Twin of Compose's `ListMarkerRow.hangsOutside`.
+    ///
+    /// MEASURED on wave51-fix css-counter-styles/counter-suffix (`ios f
+    /// 0.9285`): rows 1–8 start at x 64–65 (marker `1.` at x 64–73, text
+    /// at 80–103) where the ref's row 1 ink runs x 46–58 (marker, hanging
+    /// in the `<ol>`'s 48 px padding) and x 64–87 (text) — the HStack
+    /// displaces every item by `markerWidth + gapPt` = 18 px. Same on
+    /// counter-list-item-2 (ref x 38–61, iOS x 56–77).
+    ///
+    /// `.outside` only. An `inside` marker on an item WITH text keeps the
+    /// HStack (the leading-inline-box shape is right for it — the marker
+    /// pushes the text along the line), and `nil` keeps it too (unknown
+    /// position ⇒ unchanged behaviour — reachable here for a baked marker
+    /// under a non-list parent). The geometry lives in
+    /// `ListMarkerOutsideHang`; this predicate is the gate the renderer's
+    /// `markerPlacement` seam consults. Staged as a device A/B (the seam
+    /// patch is applied by the orchestrator, never blind-lifted): 100
+    /// `<li>` items in 19 tests carry an outside marker, several passing within
+    /// 0.003 of 0.95 (census in the lane note).
+    static func hangsOutside(position: ListMarkerPosition?) -> Bool {
+        position == .outside
+    }
 }

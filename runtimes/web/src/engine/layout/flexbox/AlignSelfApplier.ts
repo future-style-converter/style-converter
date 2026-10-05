@@ -16,5 +16,8 @@ export function applyAlignSelf(config: AlignSelfConfig): AlignSelfStyles {
   // ref (`align-self: center`).  Matches the AlignSelfApplier behaviour on
   // Android (FlexExtractor.parseAlignSelf) and iOS (FlexboxExtractor.mapAlignment).
   const out = config.value === 'anchor-center' ? 'center' : config.value;
+  // Wave 52 (lane L7, T3): `out` may be a two-token css-align-3 §4.2 value
+  // ('last baseline') — the extractor already produced the CSS spelling, so
+  // it is emitted verbatim (never re-kebabed: 'last-baseline' is not CSS).
   return { alignSelf: out } as AlignSelfStyles;                             // typed single-key
 }

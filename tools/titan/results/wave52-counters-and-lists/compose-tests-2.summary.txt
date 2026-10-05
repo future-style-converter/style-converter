@@ -1,0 +1,5 @@
+Compose focused run 2026-10-05 17:16 CEST (no seam): ./gradlew :runtime:testDebugUnitTest --tests 'com.styleconverter.runtime.lists.*' --tests 'com.styleconverter.runtime.borders.sides.*' --offline → exit 0
+BorderSideZeroTallBandTest 6/0 · ComposedRowPitchTest 7/0 · KoreanHangulFormalTest 5/0 · ListItemMarkerGateTest 11/0 · ListMarkerLineBoxTest 11/0 ·
+ListMarkerOutsideHangTest 6/0 · ListMarkerResolutionTest 24/0 · ListMarkerRowTest 12/0 · ListMarkerSymbolTest 9/0 · ListMarkerTextStyleTest 9/0 ·
+ListOrdinalTest 14/0 · ListStyleApplierTest 6/0 · ListsRegistryTest 1/0   (tests/failures, from the JUnit XML)
+(run 1 at 17:05 could not compile the TEST source set: VerticalRunIntrinsicsTest.kt — another lane's in-flight edit, not L6's; cleared by 17:16.)

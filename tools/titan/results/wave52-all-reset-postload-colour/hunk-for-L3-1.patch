@@ -1,0 +1,68 @@
+# hunk-for-L3-1.patch — lane L11 → applied IN L11's PR, same commit as GlobalExtractor.swift (PLAN.md §2 L11 / §9 C5).
+# Context: 1 line on the test file so it applies on HEAD's file AND on L3's in-flight one (both checked). Cut against: the working tree of 2026-10-05 = HEAD 7d9c22a7 + L3's in-flight ContentsUnboxingTests.swift (L3 does not touch :175-192) + L11's GlobalExtractor.swift.
+# Apply AFTER L3 has merged. Effect: rewrites ContentsUnboxingTests :175-192 onto applyingAllReset(own:inherited:) and deletes the legacy applyingAllReset(to:)
+# (its last caller). REQUIRES seam-2.patch applied first (seam-2 removes the renderer's call to the legacy function).
+# The Catalyst suite is green before (legacy fn + old pins) and after (seam-2 + this hunk: new pins, no legacy fn).
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ContentsUnboxingTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ContentsUnboxingTests.swift
+@@ -3,3 +3,3 @@
+ //  Wave 18 (RC6, lane 1) — `display: contents` unboxing pins
+-//  (css-display-3 §2.5/§2.7), plus the ported `all:<global>` reset drop.
++//  (css-display-3 §2.5/§2.7), plus the order-aware `all` reset (wave 52).
+ //
+@@ -169,10 +169,14 @@
+ 
+-    // MARK: - The ported all-reset (RC6 companion — Compose parity)
++    // MARK: - The `all` reset (RC6 companion — Compose parity)
+ 
+-    /// `all: <global>` present → EVERY other declaration drops (the
+-    /// Compose allReset semantics, css-cascade-4 §3.2 observable
+-    /// behaviour the audit fixtures pinned).
+-    func testAllResetDropsEveryOtherDeclaration() throws {
++    /// Wave 52 (lane L11, rewritten from the wave-18 "drops every other
++    /// declaration" pin) — the reset is ORDER-AWARE (css-cascade-4 §6.4):
++    /// declarations BEFORE the last `all` drop, declarations AFTER it are
++    /// kept — here the 40px width precedes `all: initial` and goes, the
++    /// 160px width and the blue background follow it and stay. The full
++    /// verbatim-IR pin set is AllResetTests.swift.
++    func testAllResetDropsDeclarationsBeforeAllOnly() throws {
+         let comp = try component(#"""
+         {"id":"a","name":"a","properties":[
++           {"type":"Width","data":{"type":"length","px":40}},
+            {"type":"All","data":"INITIAL"},
+@@ -181,3 +185,6 @@
+         """#)
+-        XCTAssertTrue(GlobalExtractor.applyingAllReset(to: comp.properties).isEmpty)
++        let r = GlobalExtractor.applyingAllReset(own: comp.properties, inherited: [])
++        XCTAssertEqual(r.own.map(\.type), ["Width", "BackgroundColor"])
++        // The surviving width is the one AFTER `all`.
++        XCTAssertEqual(r.own.first?.data["px"]?.doubleValue, 160)
+     }
+@@ -189,3 +196,3 @@
+             #"{"id":"b","name":"b","properties":[{"type":"Width","data":{"type":"length","px":10}}]}"#)
+-        XCTAssertEqual(GlobalExtractor.applyingAllReset(to: comp.properties).map(\.type),
++        XCTAssertEqual(GlobalExtractor.applyingAllReset(own: comp.properties, inherited: []).own.map(\.type),
+                        ["Width"])
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/global/GlobalExtractor.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/global/GlobalExtractor.swift
+@@ -96,20 +96,4 @@
+         // Source order preserved within each half.
+         return (Array(before) + Array(after), keptInherited)
+     }
+-
+-    /// LEGACY merged-list drop (wave 18): any keyword `all` drops EVERY
+-    /// declaration. Its renderer caller moves to `applyingAllReset(own:
+-    /// inherited:)` with lane L11's seam patch (seam-2.patch); it survives
+-    /// ONLY for the two ContentsUnboxingTests pins (`:175-192`, lane L3's
+-    /// file), which L11's hunk-for-L3-1.patch rewrites onto the order-aware
+-    /// rule and which deletes this function in the same commit — so the
+-    /// Catalyst suite stays green at every step (PLAN.md §9 C5).
+-    static func applyingAllReset(to properties: [IRProperty]) -> [IRProperty] {
+-        // Same trigger as before: any recognizable keyword `All`.
+-        let hasAllKeyword = properties.contains { p in
+-            p.type == "All" && ValueExtractors.extractKeyword(p.data) != nil
+-        }
+-        // Drop everything (the `All` entry included) — the pre-wave-52 shape.
+-        return hasAllKeyword ? [] : properties
+-    }
+ }

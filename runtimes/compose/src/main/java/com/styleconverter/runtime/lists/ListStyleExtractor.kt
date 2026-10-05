@@ -173,6 +173,13 @@ object ListStyleExtractor {
             "katakana" -> ListStyleType.KATAKANA
             "hiragana_iroha" -> ListStyleType.HIRAGANA_IROHA
             "katakana_iroha" -> ListStyleType.KATAKANA_IROHA
+            // Wave 52 (lane L6, T1) — the key is the UNDERSCORED spelling
+            // because the normaliser above has already replaced the wire's
+            // hyphens (`korean-hangul-formal`, what the live counter-suffix
+            // IR carries on its fourth `<ol>`). Before this arm the keyword
+            // fell to `null`, the `<ol>` UA `decimal` stood, and Android
+            // painted "1." / "2." where the ref paints "일," / "이,".
+            "korean_hangul_formal" -> ListStyleType.KOREAN_HANGUL_FORMAL
             else -> null
         }
     }

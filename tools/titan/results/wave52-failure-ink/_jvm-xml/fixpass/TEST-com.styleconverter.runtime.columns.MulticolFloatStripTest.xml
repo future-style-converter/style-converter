@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolFloatStripTest" tests="21" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:47:05.799Z" hostname="mac-1.home" time="0.007">
+  <properties/>
+  <testcase name="FS-B2 float-less containers and unproven children never engage" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.001"/>
+  <testcase name="FS-C2 fill 003 - step then floats then clearance, same three slices" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-C5 no clear wire - floats still strip but the sibling stays at the cursor" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.001"/>
+  <testcase name="FS-E2 the conservative side of the gate, stated honestly" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-B1 the 002 shape engages and zero-flows exactly the two floats" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-A4 step facts - declared height is the ink floor, side borders add none" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="specsFor feeds the strip facts through the shared classifier" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.001"/>
+  <testcase name="FS-A1 container facts - two 250px floats anchored at content top" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-C1 fill 002 - cleared box at 250, C 253, three 100px slices" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="the zero-flow paint half is provided around the multicol content" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-E3 a provable ink floor keeps the balance strip engaged" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.001"/>
+  <testcase name="FS-C7 geometry bails - one column, misaligned inputs, degenerate H" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-E1 the S5 shape declines PRE-measure under balance, never after" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-A3 height-0 cleared box - the inner bar's border is the trailing ink" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.001"/>
+  <testcase name="FS-C3 balance 002 - the 5px border joins C and the columns balance to 85" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-A2 cleared box facts - clear left plus the medium 3px border ink" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-C6 balance cannot exceed the definite height - the fill cap" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-E4 every measure-pass decline is decided before the measure loop" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.001"/>
+  <testcase name="FS-C4 balance 003 - height-0 cleared box still carries the 5px band into C" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="the applier consults the float strip BEFORE the run pass" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <testcase name="FS-A5 strict bails - unproven shapes project to null" classname="com.styleconverter.runtime.columns.MulticolFloatStripTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

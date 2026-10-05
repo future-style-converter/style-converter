@@ -1,0 +1,17 @@
+# wave-52 lane L10 (flex-nowrap-gaps) — watch lines NOT already in wave52-plan/watchlist.txt.
+# Source: png-replay.json "snapMovers" (7(a′) band snap + Kotlin fractional share; web-oracle upper bound),
+# every row a scored wave51-fix cell; predicted P→P rises ≤ 0.002, none predicted to fall below 0.95.
+css-gaps/flex/flex-gap-decorations-014 ios
+css-gaps/flex/flex-gap-decorations-014 android
+css-gaps/flex/flex-gap-decorations-029 ios
+css-gaps/flex/flex-gap-decorations-029 android
+css-gaps/flex/flex-gap-decorations-030 ios
+css-gaps/flex/flex-gap-decorations-030 android
+css-gaps/flex/flex-gap-decorations-043 ios
+css-gaps/flex/flex-gap-decorations-043 android
+css-gaps/flex/flex-gap-decorations-047 ios
+css-gaps/flex/flex-gap-decorations-047 android
+css-gaps/flex/flex-gap-decorations-049 ios
+css-gaps/flex/flex-gap-decorations-049 android
+css-gaps/flex/flex-gap-decorations-050 ios
+css-gaps/flex/flex-gap-decorations-050 android

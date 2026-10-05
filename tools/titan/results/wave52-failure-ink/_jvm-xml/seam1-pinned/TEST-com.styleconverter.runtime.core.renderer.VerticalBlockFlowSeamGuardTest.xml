@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamGuardTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:53:14.087Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="td-different-subpixel row is protected by the table path, not the guard" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamGuardTest" time="0.001"/>
+  <testcase name="BoxSizing alone or a band alone does not fake the signature" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamGuardTest" time="0.0"/>
+  <testcase name="the post-load-extracted 013 box IS a baked box" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamGuardTest" time="0.0"/>
+  <testcase name="ChildSpec bakedPhysicalSize follows the shared predicate" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamGuardTest" time="0.0"/>
+  <testcase name="authored Width+Height alone is NOT a baked box - the 012 square" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamGuardTest" time="0.0"/>
+  <testcase name="authored 10x20 sibling of abs-pos-border-offset-003 is NOT baked either" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamGuardTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

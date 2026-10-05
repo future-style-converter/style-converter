@@ -1,0 +1,127 @@
+wave-52 lane L7 · static-position — seam-1 (Compose, T1): ComponentRenderer.kt
+two hunks — (1) the RC1 branch's fifth argument `staticPositionOwned` to
+CanvasRootHoist.rendersInFlowAsStaticPosition (PLAN §3 row `:927-950`);
+(2) the AlignItems fold delegated to GridRenderer.foldAlignItems, which adds
+the SELF_END/SELF_START arms (PLAN §3 row `:7931-7939`).
+
+BASE: cut against HEAD 7d9c22a7 with lane L2's patches applied (L2 delivered
+NONE for this file — wave52-composed-canvas/_note.md §1 "there is no L2 hunk in
+:921-948", so HEAD is the L2-applied tree; the C6 overlap is gone) and lane
+L3's tools/titan/results/wave52-failure-ink/seam-1.patch applied (its hunk is
+at :2772-2785, far from both of these). Applies clean on bare HEAD too (both
+checked). Requires the L7-owned CanvasRootHoist.kt (LocalStaticPositionOwner,
+the defaulted `staticPositionOwned` parameter) and GridRenderer.kt
+(foldAlignItems) from the same lane — compile-coupled.
+Also ADDS runtimes/compose/src/test/.../core/renderer/StaticPositionSeamWiringTest.kt
+— the source pins SW1/SW2 for these two hunks (they need the hunks, so they ship
+with them). When verifying a STACK, apply prior lanes' patches with
+git apply --include=<seam path> (L3's seam-1 also creates a test file).
+
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -934,6 +934,15 @@
+                         // ancestor's `Modifier.clip`.
+                         hoistHasTransformedAncestor,
+                         hoistHasClippingAncestor,
++                        // Wave 52 (lane L7, T1): the css-grid-1 §9.2 overlay
++                        // (GridRenderer) already places THIS instance at its
++                        // static position by its real size — a zero-flow
++                        // mount here would hand that Box a 0×0 placeable
++                        // (ink at factor × content: +25/+50 px on the 16
++                        // grid-abspos-staticpos Android cells). Identity, so
++                        // nested static-position boxes keep the mount.
++                        staticPositionOwned = com.styleconverter.runtime.layout.position
++                            .CanvasRootHoist.LocalStaticPositionOwner.current === component,
+                     )
+             ) {
+                 // Outermost slot, exactly like the overlay's canvasAnchor.
+@@ -7938,13 +7947,13 @@
+                 }
+                 "AlignItems" -> {
+                     val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
+-                    alignItems = when (keyword) {
+-                        "CENTER" -> AlignItems.CENTER
+-                        "FLEX_START", "FLEX-START", "START" -> AlignItems.FLEX_START
+-                        "FLEX_END", "FLEX-END", "END" -> AlignItems.FLEX_END
+-                        "BASELINE" -> AlignItems.BASELINE
+-                        else -> AlignItems.STRETCH
+-                    }
++                    // Wave 52 (lane L7): the ONE fold, now with the
++                    // css-align-3 §6.1 self-start/self-end arms (they fell
++                    // to STRETCH → the align-items-self-end abspos mark at
++                    // START, −50 px android); pure + JVM-pinned in
++                    // GridAbsposPartitionTest.
++                    alignItems = com.styleconverter.runtime.layout.grid.GridRenderer
++                        .foldAlignItems(keyword)
+                 }
+                 "AlignContent" -> {
+                     val keyword = ValueExtractors.extractKeyword(prop.data)?.uppercase()
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/StaticPositionSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/StaticPositionSeamWiringTest.kt
+new file mode 100644
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/StaticPositionSeamWiringTest.kt
+@@ -0,0 +1,63 @@
++package com.styleconverter.runtime.core.renderer
++
++// Wave 52 (lane L7, static-position T1) — SOURCE pins for the two seam hunks
++// lane L7 delivers in tools/titan/results/wave52-static-position/seam-1.patch
++// (this file ships INSIDE that patch, so it lands with the hunks it pins).
++// RenderComponent's RC1 branch and extractDisplayConfig are private and need
++// a composition to execute, which this JVM suite has no Robolectric for; the
++// pure halves are pinned in AbsposOverflowMeasureTest (K1a–K1c) and
++// GridAbsposPartitionTest (K2a/K2b). These pins prove the seam CALLS them:
++//   SW1 the RC1 call passes `staticPositionOwned =` the identity test
++//       against CanvasRootHoist.LocalStaticPositionOwner (never a Boolean
++//       local, never LocalHasPositionedAncestor);
++//   SW2 the AlignItems fold delegates to GridRenderer.foldAlignItems and the
++//       pre-wave-52 inline table (no self-end arm) is gone.
++// NEGATIVE CONTROL EXECUTED: run on bare HEAD (seam not applied) → SW1 and
++// SW2 fail (tools/titan/results/wave52-static-position/_seam1-verify.log).
++
++import java.io.File
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class StaticPositionSeamWiringTest {
++
++    /** ComponentRenderer.kt, found by walking up from the JVM working dir to
++     *  the repo root (the module's Gradle rootDir is apps/android-harness). */
++    private val renderer: File by lazy {
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/" +
++            "core/renderer/ComponentRenderer.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, anchor)
++    }
++
++    /** The text between [from] and the next [to] after it (the hunk's block). */
++    private fun block(text: String, from: String, to: String): String {
++        val start = text.indexOf(from)
++        assertTrue("anchor not found: $from", start >= 0)
++        val end = text.indexOf(to, start + from.length)
++        assertTrue("end anchor not found: $to", end > start)
++        return text.substring(start, end)
++    }
++
++    @Test
++    fun `SW1 the RC1 branch passes the grid overlay's ownership by identity`() {
++        // The `val itemModifier = if (hoistHostActive && … )` expression.
++        val rc1 = block(renderer.readText(), ".rendersInFlowAsStaticPosition(", "zeroFlowAnchor(")
++        assertTrue("fifth argument missing", rc1.contains("staticPositionOwned ="))
++        assertTrue("must compare the owner local to THIS instance",
++            rc1.contains("LocalStaticPositionOwner.current === component"))
++        assertFalse("must not reuse the positioned-ancestor channel",
++            rc1.contains("staticPositionOwned = hoistHasPositionedAncestor"))
++    }
++
++    @Test
++    fun `SW2 the AlignItems fold delegates to the pinned pure table`() {
++        val fold = block(renderer.readText(), "\"AlignItems\" -> {", "\"AlignContent\" -> {")
++        assertTrue("fold must call GridRenderer.foldAlignItems",
++            fold.contains("GridRenderer") && fold.contains(".foldAlignItems(keyword)"))
++        assertFalse("the inline table without self-end must be gone",
++            fold.contains("\"FLEX_END\", \"FLEX-END\", \"END\" -> AlignItems.FLEX_END"))
++    }
++}

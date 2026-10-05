@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.GapDecorationLinesTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.247Z" hostname="mac-1.home" time="0.0">
+  <properties/>
+  <testcase name="touching cut intervals merge into one hole" classname="com.styleconverter.runtime.columns.GapDecorationLinesTest" time="0.0"/>
+  <testcase name="an inset larger than the segment drops it instead of inverting it" classname="com.styleconverter.runtime.columns.GapDecorationLinesTest" time="0.0"/>
+  <testcase name="a main-axis backtrack also starts a new line" classname="com.styleconverter.runtime.columns.GapDecorationLinesTest" time="0.0"/>
+  <testcase name="lines come back in cross order regardless of placement order" classname="com.styleconverter.runtime.columns.GapDecorationLinesTest" time="0.0"/>
+  <testcase name="column-direction flex swaps the two rule families" classname="com.styleconverter.runtime.columns.GapDecorationLinesTest" time="0.0"/>
+  <testcase name="cross disjointness splits a wrapped row into lines" classname="com.styleconverter.runtime.columns.GapDecorationLinesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

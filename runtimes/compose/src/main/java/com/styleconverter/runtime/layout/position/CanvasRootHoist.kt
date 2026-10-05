@@ -158,6 +158,38 @@ object CanvasRootHoist {
     internal val LocalHasClippingAncestor = compositionLocalOf { false }
 
     /**
+     * Wave 52 (lane L7, static-position T1) — the out-of-flow child whose
+     * STATIC POSITION its parent layout already owns, or null.
+     *
+     * css-grid-1 §9.2 makes a grid container the owner of its inset-less
+     * absolute children's static position: "as if it were the sole grid
+     * item in a grid area whose edges coincide with the content edges of
+     * the grid container", aligned by align-self / justify-self. The §9.2
+     * overlay in GridRenderer does exactly that with a `contentAlignment`
+     * Box — which aligns the child's REPORTED size. The wave-18 RC1 branch
+     * in ComponentRenderer mounted the same child through [zeroFlowAnchor]
+     * (reports 0×0), so the Box aligned a zero-size placeable and the ink
+     * landed at factor × content instead of factor × (content − child):
+     * measured +25 px (center) / +50 px (end) on 16 Android cells of
+     * css-grid/abspos/grid-abspos-staticpos-* (web/iOS 1.0000).
+     *
+     * IDENTITY, not a Boolean: a CompositionLocal reaches the provider's
+     * whole subtree, so a `true` flag would also cancel the zero-flow mount
+     * of a NESTED static-position box inside the overlay child (which must
+     * keep reserving no space in its own block parent, css-position-3
+     * §2.1). Comparing the instance — the same discipline as [LocalBypass]
+     * — confines the release to the one child the overlay aligns. Deliberately
+     * NOT [LocalHasPositionedAncestor]: that would also cancel the canvas
+     * hoist of an inset child whose containing block is the ICB.
+     *
+     * Provided by GridRenderer around each §9.2 overlay child; read by
+     * ComponentRenderer's RC1 branch as the `staticPositionOwned` argument
+     * of [rendersInFlowAsStaticPosition]. Default null ⇒ every other path
+     * keeps the exact wave-18/49 truth table.
+     */
+    internal val LocalStaticPositionOwner = compositionLocalOf<IRComponent?> { null }
+
+    /**
      * The component's resolved position keyword, via the same
      * PositionExtractor the live style chain uses — one decoder for the
      * wire keyword, so the hoist decision can never disagree with the
@@ -341,7 +373,15 @@ object CanvasRootHoist {
         // exact wave-18 RC1 truth table.
         hasTransformedAncestor: Boolean = false,
         hasClippingAncestor: Boolean = false,
-    ): Boolean =
+        // Wave 52 (lane L7, T1) — true when the PARENT layout already places
+        // this box at its static position by its real size (the css-grid-1
+        // §9.2 overlay, see [LocalStaticPositionOwner]). The zero-flow mount
+        // would hand that parent a 0×0 placeable to align, so it stands down
+        // entirely: the parent's own unbounded measure (absposOverflowMeasure)
+        // already keeps the box out of flow. Defaulted false so the harness's
+        // root-level gap fold and every pre-wave-52 caller are unchanged.
+        staticPositionOwned: Boolean = false,
+    ): Boolean = !staticPositionOwned && (
         // Wave-18 RC1, verbatim: an all-auto-inset absolute box with no
         // positioned ancestor paints at its STATIC position, not the canvas
         // origin (css-position-3 §3.1).
@@ -386,6 +426,8 @@ object CanvasRootHoist {
                         hasClippingAncestor = false,
                     )
                 )
+        // Closes the wave-52 `!staticPositionOwned && (…)` gate.
+        )
 
     /**
      * The in-flow interception decision ComponentRenderer applies at the top

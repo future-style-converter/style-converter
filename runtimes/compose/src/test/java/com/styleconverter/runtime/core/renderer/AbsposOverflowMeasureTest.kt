@@ -12,9 +12,21 @@ package com.styleconverter.runtime.core.renderer
 //     constraint envelope, so the parent's flow geometry is untouched
 //     while the ink overflows (the flex-abspos-staticpos-align-self-safe
 //     fixtures: a 69px child of a 50px container reports 50 and draws 69).
+//  3. (wave 52, lane L7, static-position T1) the RC1 zero-flow mount stands
+//     down for the child the css-grid-1 §9.2 overlay owns, on the VERBATIM
+//     wave51-fix IR of css-grid/abspos/grid-abspos-staticpos-align-self-
+//     center (child __0__0-242). MUTATION EXECUTED
+//     (tools/titan/results/wave52-static-position/mutations.log):
+//     M-K1 ignore `staticPositionOwned` in rendersInFlowAsStaticPosition →
+//     K1a/K1c fail (the RC1 branch would re-mount the 0×0 anchor).
 
 import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
+import com.styleconverter.runtime.layout.position.CanvasRootHoist
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
@@ -151,5 +163,58 @@ class AbsposOverflowMeasureTest {
         val out = ComponentRenderer.resolveOutOfFlowPercentSizes(
             props, com.styleconverter.runtime.core.variables.ContainingBlock(320f, 200f))
         assertTrue(props === out)
+    }
+
+    // ── 3. wave 52 (lane L7, T1): the §9.2 overlay owns the static position ──
+
+    // The verbatim `properties` array of the abspos child in
+    // tools/titan/runs/wave51-fix/sections/css-grid/per-test-ir/
+    // wpt__css-grid__abspos__grid-abspos-staticpos-align-self-center.json.
+    private val alignSelfCenterChild: List<IRProperty> = Json.parseToJsonElement(
+        """[{"type":"Position","data":"ABSOLUTE"},""" +
+            """{"type":"Width","data":{"type":"length","px":50}},""" +
+            """{"type":"Height","data":{"type":"length","px":50}},""" +
+            """{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},""" +
+            """{"type":"AlignSelf","data":"CENTER"}]"""
+    ).jsonArray.map { IRProperty(it.jsonObject["type"]!!.jsonPrimitive.content, it.jsonObject["data"]!!) }
+
+    @Test
+    fun `K1a the owned grid child is not mounted through the zero-flow anchor`() {
+        // Today's truth (RC1): unpositioned grid parent, no inset → the
+        // zero-flow mount fires and reports 0×0 to the overlay Box.
+        assertTrue(CanvasRootHoist.rendersInFlowAsStaticPosition(alignSelfCenterChild, false, false, false))
+        // With the overlay as owner the mount stands down (css-grid-1 §9.2).
+        assertFalse(
+            CanvasRootHoist.rendersInFlowAsStaticPosition(
+                alignSelfCenterChild, false, false, false, staticPositionOwned = true,
+            )
+        )
+    }
+
+    @Test
+    fun `K1b the pure twin - a 0x0 placeable lands factor x content, the real box factor x free`() {
+        // The +25/+50 px Android defect, as the shared math sees it: content
+        // 100, child 50. OLD (0×0 report): center 50, end 100 — NEW: 25, 50.
+        val center = AbsposStaticAlignment.Spec(AbsposStaticAlignment.Base.CENTER, safe = false)
+        val end = AbsposStaticAlignment.Spec(AbsposStaticAlignment.Base.END, safe = false)
+        assertEquals(50.0, AbsposStaticAlignment.crossOffset(0.0, 100.0, center), 1e-9)
+        assertEquals(100.0, AbsposStaticAlignment.crossOffset(0.0, 100.0, end), 1e-9)
+        assertEquals(25.0, AbsposStaticAlignment.crossOffset(50.0, 100.0, center), 1e-9)
+        assertEquals(50.0, AbsposStaticAlignment.crossOffset(50.0, 100.0, end), 1e-9)
+        // Twin of iOS AbsposGridStaticPositionTests' plain-variant table:
+        // ref green y 42..91 = 16 + 1 border + 25 (center), 67..116 (+50, end).
+    }
+
+    @Test
+    fun `K1c ownership also releases the clip-veto clause, and nothing else`() {
+        // Wave-49 A4 clause: an INSET abspos under a clip-path ancestor
+        // would have hoisted, so RC1 claims it — unless the parent owns it.
+        val insetChild = alignSelfCenterChild + IRProperty("Top", Json.parseToJsonElement("{\"px\":10}"))
+        assertTrue(CanvasRootHoist.rendersInFlowAsStaticPosition(insetChild, false, false, true))
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(insetChild, false, false, true, staticPositionOwned = true))
+        // The default (no owner) keeps the wave-18 table: a positioned
+        // ancestor still vetoes, a static box is still not RC1.
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(alignSelfCenterChild, true))
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(position("STATIC"), false))
     }
 }

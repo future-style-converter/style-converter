@@ -887,4 +887,108 @@ final class InlineRunFlowTests: XCTestCase {
         XCTAssertEqual(spans[0].style.fontSizeEm.map { Double($0) } ?? 0, 1.0 / 1.2, accuracy: 1e-6)
         XCTAssertFalse(spans[0].style.italic)
     }
+
+    // MARK: - Wave 52 (lane L9): the two inline-run-wall victims, verbatim wire
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, Catalyst, mutate.py —
+    // tools/titan/results/wave52-inline-run-wall/mutations-swift.result
+    // .json): the 032 fold fails under S2 (ring's `guard glyphless` → false)
+    // and S4 (this fold's glyphless predicate → false); the hanging-
+    // punctuation fold fails under S1 (the ring's arm removed). Restored
+    // byte-exact, sha256-verified.
+
+    func testBlockEllipsis032HangingWhitespaceMemberFolds() {
+        // css-overflow/line-clamp/block-ellipsis-032.tentative's first
+        // clamp box, VERBATIM off wave51-fix/sections/css-overflow/
+        // per-test-ir (host __1 + its two members; __2/__3 are the same
+        // shape under text-align right/justify). The `<span class=hangs>`
+        // carries `white-space: pre-wrap` + `background-color: red` over
+        // eight spaces — the two properties whose refusal bailed the whole
+        // host to the stacked path, leaving `This text is` alone under the
+        // 1-line cap (ios P 0.9577 on the wrong render; the ref paints
+        // `This text is left-aligned…`). Compose has folded it since wave
+        // 50; this is the Swift twin (InlineRunFoldTest.kt's 032 pin).
+        let green = member("line-clamp__block-ellipsis-032.tentative__1__0",
+                           text: "left-aligned",
+                           props: [IRProperty(type: "Color",
+                                              data: .object(["srgb": .object(["r": .int(0), "g": .double(0.5019607843137255), "b": .int(0)]),
+                                                             "original": .string("green")])),
+                                   IRProperty(type: "FontWeight",
+                                              data: .object(["weight": .int(700), "original": .string("bold")]))])
+        let hangs = member("line-clamp__block-ellipsis-032.tentative__1__1",
+                           text: "        ",
+                           props: [IRProperty(type: "WhiteSpace", data: .string("PRE_WRAP")),
+                                   IRProperty(type: "BackgroundColor",
+                                              data: .object(["srgb": .object(["r": .int(1), "g": .int(0), "b": .int(0)]),
+                                                             "original": .string("red")]))])
+        // The host's merged list as the seam passes it (LineClamp 1, the
+        // 1px black border, monospace, 29ch) — none of it gates admission.
+        let host: [IRProperty] = [
+            IRProperty(type: "LineClamp", data: .object(["type": .string("lines"), "count": .int(1)])),
+            IRProperty(type: "FontFamily", data: .array([.string("monospace")])),
+            IRProperty(type: "Width", data: .object(["type": .string("length"),
+                                                     "original": .object(["v": .int(29), "u": .string("CH")])])),
+        ]
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "This text is "),
+                   IRRun(child: "line-clamp__block-ellipsis-032.tentative__1__0"),
+                   IRRun(child: "line-clamp__block-ellipsis-032.tentative__1__1"),
+                   IRRun(text: "Clamped")],
+            children: [green, hangs], totalChildCount: 2, containerProperties: host,
+            containerLang: nil)
+        // The merged paragraph keeps the eight PRESERVED spaces verbatim
+        // (css-text-3 §3: `pre-wrap` preserves them) — collapsing them
+        // would move the soft wrap opportunity the clamp breaks at.
+        XCTAssertEqual(folded?.text, "This text is left-aligned        Clamped")
+        // Two spans: the green bold member, then the red band over the
+        // eight spaces (member order), offsets in the merged string.
+        XCTAssertEqual(folded?.spans.count, 2)
+        XCTAssertEqual(folded?.spans.first?.start, 13)
+        XCTAssertEqual(folded?.spans.first?.end, 25)
+        XCTAssertEqual(folded?.spans.first?.style.fontWeight, 700)
+        let band = folded?.spans.last
+        XCTAssertEqual(band?.start, 25)
+        XCTAssertEqual(band?.end, 33)
+        XCTAssertEqual(band?.style.background, InlineSpanRing.Ink(r: 1, g: 0, b: 0, a: 1))
+        XCTAssertNil(band?.style.ink)
+        XCTAssertEqual(folded?.droppedEmptyMembers, 0)
+    }
+
+    func testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine() {
+        // css-text/hanging-punctuation/hanging-punctuation-inline-001's
+        // runs host, VERBATIM off wave51-fix/sections/css-text/per-test-ir:
+        // runs [text "字字字字", child span], the span's ONE property
+        // `HangingPunctuation=["LAST"]` over `」`. The wave-44 refusal
+        // (`member-prop:HangingPunctuation`) stacked the bracket as its own
+        // block in the default ink (ios P 0.9756 on that wrong render,
+        // android f 0.9495); css-text-3 §8.3 makes the property a line-end
+        // behaviour neither native implements, so the folded line — the
+        // blue reference div's exact glyphs — is what the test asks for.
+        let span = member("hanging-punctuation__hanging-punctuation-inline-001__2__0",
+                          text: "」",
+                          props: [IRProperty(type: "HangingPunctuation", data: .array([.string("LAST")]))],
+                          lang: "en")
+        let host: [IRProperty] = [
+            IRProperty(type: "FontSize", data: .object(["original": .object([
+                "type": .string("length"), "original": .object(["v": .int(2), "u": .string("EM")])])])),
+            IRProperty(type: "Width", data: .object(["type": .string("length"),
+                                                     "original": .object(["v": .int(4), "u": .string("EM")])])),
+            IRProperty(type: "Color", data: .object(["srgb": .object(["r": .int(1), "g": .double(0.6470588235294118), "b": .int(0)]),
+                                                     "original": .string("orange")])),
+        ]
+        let folded = InlineRunFlow.fold(
+            runs: [IRRun(text: "字字字字"),
+                   IRRun(child: "hanging-punctuation__hanging-punctuation-inline-001__2__0")],
+            children: [span], totalChildCount: 1, containerProperties: host,
+            containerLang: "en")
+        XCTAssertEqual(folded?.text, "字字字字」")
+        // A PLAIN member with a stated loss still records one span, so the
+        // seam's breadcrumb can name the un-hung punctuation.
+        XCTAssertEqual(folded?.spans.count, 1)
+        XCTAssertEqual(folded?.spans.first?.style.isPlain, true)
+        XCTAssertEqual(folded?.spans.first?.statedLossTypes, ["hanging-punctuation(last)"])
+        XCTAssertEqual(folded?.spans.first?.start, 4)
+        XCTAssertEqual(folded?.spans.first?.end, 5)
+        XCTAssertEqual(folded?.droppedEmptyMembers, 0)
+    }
 }

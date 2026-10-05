@@ -152,12 +152,20 @@ class LineClampUnderPreWave39Test {
     }
 
     @Test
-    fun `a clamped soft-wrapping run keeps the frozen clipping`() {
-        // The default parameter value: every call site that existed before
-        // wave 39 answers byte-identically, so the block-ellipsis family
-        // that already passes cannot move.
+    fun `a clamped soft-wrapping run draws the UA marker`() {
+        // Wave 39 pinned this as "keeps the frozen clipping" — the default
+        // parameter value answering Clip so the block-ellipsis family could
+        // not move. That pinned a DEFECT: css-overflow-4 §5.1 expands
+        // `line-clamp: <n>` to `block-ellipsis: auto`, and §4.2 makes `auto`
+        // the UA ellipsis, so a bare clamp on a soft-wrapped run MUST paint
+        // "…" — which no Compose clamp in the corpus ever did (block-
+        // ellipsis-001 android P 0.9836 = `…room uncha` clipped). Wave 52
+        // (lane L9, F3) rewrites the pin — not deletes it: the soft-wrapped
+        // default now answers Ellipsis, and the `pre` arm right above keeps
+        // its Visible untouched (softWrap off is where Ellipsis is the
+        // finalMaxLines landmine this file's banner documents).
         assertEquals(
-            TextOverflow.Clip,
+            TextOverflow.Ellipsis,
             ComponentRenderer.placeholderOverflow(
                 properties = listOf(lineClamp(2)),
                 effectiveMaxLines = 2,

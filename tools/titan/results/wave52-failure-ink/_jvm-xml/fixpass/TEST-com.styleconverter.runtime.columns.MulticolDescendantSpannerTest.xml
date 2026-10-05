@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolDescendantSpannerTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:47:05.785Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="DS4 non-qualifying wrappers keep the frozen render" classname="com.styleconverter.runtime.columns.MulticolDescendantSpannerTest" time="0.001"/>
+  <testcase name="DS3 bare relative wrapper around a spanner promotes" classname="com.styleconverter.runtime.columns.MulticolDescendantSpannerTest" time="0.0"/>
+  <testcase name="DS2 ancestor-toggle-spanner-002 transform ancestor blocks promotion" classname="com.styleconverter.runtime.columns.MulticolDescendantSpannerTest" time="0.001"/>
+  <testcase name="DS5 promoted wrapper plans as a full-width spanner at the origin" classname="com.styleconverter.runtime.columns.MulticolDescendantSpannerTest" time="0.0"/>
+  <testcase name="DS1 ancestor-toggle-spanner-001 wrapper promotes and sheds its sizing" classname="com.styleconverter.runtime.columns.MulticolDescendantSpannerTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

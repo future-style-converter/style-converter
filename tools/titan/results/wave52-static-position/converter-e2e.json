@@ -1,0 +1,86 @@
+{
+ "note": "wave-52 L7 end-to-end converter check (./gradlew :converter:run --args=\"convert --from css --to ir\"), 2026-10-05",
+ "input": {
+  "components": {
+   "LastBaseline": {
+    "properties": {
+     "position": "absolute",
+     "width": "8px",
+     "align-self": "last baseline"
+    }
+   },
+   "Normal": {
+    "properties": {
+     "align-self": "normal"
+    }
+   },
+   "Left": {
+    "properties": {
+     "align-self": "left",
+     "width": "8px"
+    }
+   },
+   "SafeCenter": {
+    "properties": {
+     "align-self": "safe center"
+    }
+   }
+  }
+ },
+ "output": [
+  {
+   "id": "lastbaseline-001",
+   "properties": [
+    {
+     "type": "Position",
+     "data": "ABSOLUTE"
+    },
+    {
+     "type": "Width",
+     "data": {
+      "type": "length",
+      "px": 8.0
+     }
+    },
+    {
+     "type": "AlignSelf",
+     "data": "LAST_BASELINE"
+    }
+   ]
+  },
+  {
+   "id": "normal-002",
+   "properties": [
+    {
+     "type": "AlignSelf",
+     "data": "NORMAL"
+    }
+   ]
+  },
+  {
+   "id": "left-003",
+   "properties": [
+    {
+     "type": "Width",
+     "data": {
+      "type": "length",
+      "px": 8.0
+     }
+    }
+   ]
+  },
+  {
+   "id": "safecenter-004",
+   "properties": [
+    {
+     "type": "Generic",
+     "data": {
+      "propertyName": "align-self",
+      "rawValue": "safe center",
+      "_unmapped": true
+     }
+    }
+   ]
+  }
+ ]
+}

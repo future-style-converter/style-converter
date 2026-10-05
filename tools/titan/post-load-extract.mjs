@@ -282,7 +282,10 @@ export const POST_LOAD_COMPUTED_PROPERTIES = [
   // post-load fixtures, and a `deleteWhen: 'rgb(0, 0, 0)'` rule would be
   // WRONG for an inherited property (an explicit `color: black` under a red
   // ancestor would be deleted and then inherit red). Repair-only is the shape
-  // that fixes the stale bake and changes nothing else.
+  // that fixes the stale bake and changes nothing else. Wave 52 (lane L11)
+  // adds ONE introduce route on top — only where the computed colour differs
+  // from the parent element's (proof of a cascaded declaration); see the
+  // `color` entry in WRITE_RULES and introducesOverParent.
   'color',
 ];
 
@@ -356,8 +359,62 @@ export const WRITE_RULES = {
   // differs? test would make the overlay do colour parsing it has no business
   // doing — while writing the resolved value is a semantic no-op exactly when
   // they already agree, and the repair when they do not.
-  color: { repairOnly: true },
+  //
+  // wave-52 lane L11 (brief colour-not-reaching-text F2) — repair-only could
+  // not INTRODUCE `color` where the stale static bake never matched the live
+  // rule: selectors/invalidation/nth-child-of-class (`p:nth-child(even of .c)
+  // { color: green }`, the script toggles `.c` off p[3]) baked black onto the
+  // pre-script matches __3/__5 (repaired, correctly) and NOTHING onto the live
+  // matches __4/__6, so all three runtimes painted lines 5 and 7 black against
+  // a green ref. `introduceWhenParentDiffers` adds exactly one route: write
+  // the computed colour onto a component WITHOUT a static key iff it differs
+  // from the PARENT element's computed colour. css-color-4 §3.2: `color` is
+  // inherited, so a child whose computed value differs from its parent's has
+  // one only through a declaration cascaded onto the child — precisely the
+  // fact a stale bake misses, whatever the selector (the attribute-selector
+  // twins the static parser rejects included). Both strings come from one
+  // getComputedStyle serialisation, so textual inequality IS semantic
+  // inequality here (the `green` vs `rgb(0, 128, 0)` objection above cannot
+  // arise parent-vs-child). Guarded by UA_COLOURED_TAGS and by the fold mode
+  // (see introducesOverParent).
+  color: { repairOnly: true, introduceWhenParentDiffers: true },
 };
+
+// wave-52 lane L11 — tags whose computed colour comes from the UA sheet
+// (`a:any-link` link colours — computed as UNVISITED for privacy, so a
+// `:visited` ink can never be baked honestly; `button` / `input` / `select` /
+// `textarea` buttontext / fieldtext; `mark` marktext; `hr` — html.css
+// `hr { color: gray }`). The runtimes model these separately (e.g.
+// extract-fixture's uaLink), so a parent-differs colour on them is UA ink,
+// not an author declaration — never introduced. 17 post-load tests carry one
+// of the first six (census postLoadTestsWithUaColouredTags); `hr` joined after
+// the executed 277-test replay (replay-f2-all.json) showed it as the ONE
+// UA-ink introduction outside them (css-pseudo/active-selection-057's empty
+// <hr>, gray, no paint either way).
+export const UA_COLOURED_TAGS = new Set(['a', 'button', 'input', 'select', 'textarea', 'mark', 'hr']);
+
+/**
+ * wave-52 lane L11 — may the overlay INTRODUCE `name` (no static key) on this
+ * component? Only when the rule opts in, outside the absorbed-wrapper fold
+ * (an absorbed <s>/<u>'s colour belongs to ITS run, never to the host), when
+ * the parent's snapshot is known (a top-level element's parent is the body —
+ * mergePostLoadIntoFixture passes its snapshot; no snapshot ⇒ no proof ⇒ no
+ * write), off the UA-coloured tags, and when the two computed strings differ.
+ */
+export function introducesOverParent(rule, name, cmp, value, opts = {}) {
+  // The rule must opt in (only `color` does).
+  if (!rule?.introduceWhenParentDiffers) return false;
+  // Fold mode: the absorbing host's own record already decided its colour.
+  if (opts.onlyMissing) return false;
+  // The parent's computed value — absent ⇒ inheritance cannot be ruled out.
+  const parent = opts.parentStyles?.[name];
+  if (typeof parent !== 'string' || parent === '') return false;
+  // UA-coloured elements: their difference is UA ink, not a declaration.
+  const tag = String(opts.tag ?? cmp?._tag ?? '').toLowerCase();
+  if (UA_COLOURED_TAGS.has(tag)) return false;
+  // Inherited + equal ⇒ nothing cascaded onto the child; different ⇒ it did.
+  return value !== parent;
+}
 
 // Static shorthands the computed longhands displace. When the overlay writes
 // any longhand of a family, the family's shorthand keys are deleted from the
@@ -615,6 +672,10 @@ function inPageWalker(params) {
   walk(document.body, [], 0);
   return {
     records,
+    // wave-52 lane L11 — the BODY's computed colour: the parent snapshot of
+    // every top-level record (the colour introduce route compares a child
+    // with its parent; the body is never a record itself).
+    bodyStyles: { color: document.body ? getComputedStyle(document.body).color : '' },
     // Document-level scroll — a scrolled viewport is equally undeliverable.
     docScrollTop:  document.scrollingElement ? document.scrollingElement.scrollTop  : 0,
     docScrollLeft: document.scrollingElement ? document.scrollingElement.scrollLeft : 0,
@@ -938,7 +999,8 @@ async function structureExtractFromLivePage(page, fixture, testRel, testAbs, ste
   // 5. Adopt the post-script tree, then bake the post-script state onto it —
   //    both structure AND state are now from the same settled live page.
   adoptReExtractedFixture(fixture, reResult.fixture);
-  const overlaid = mergePostLoadIntoFixture(fixture, stem, snap3.records);
+  const overlaid = mergePostLoadIntoFixture(fixture, stem, snap3.records,
+    { bodyStyles: snap3.bodyStyles });
   return { status: 'extracted', structure: true, overlaid,
            elements: newPaths.length, records: snap3.records };
 }
@@ -1307,7 +1369,9 @@ export function barControlAuthorBoxSuppression(cmp, styles, props) {
  *   - wave-44 lane H2: a `repairOnly` property (`color`) is written only
  *     where the static bake already asserted the key — the live value wins
  *     over a provably-wrong static one, and components that never carried
- *     the key are left exactly as they were;
+ *     the key are left exactly as they were — EXCEPT (wave-52 lane L11)
+ *     when `opts.parentStyles` proves a cascaded declaration: the computed
+ *     colour differs from the parent element's (introducesOverParent);
  *   - the computed `box-sizing` is baked alongside width/height because gCS
  *     expresses those sizes in the element's OWN basis (border-box elements
  *     report border-box px — the block-axis-constraint parents are exactly
@@ -1355,7 +1419,10 @@ export function overlayComputedOnComponent(cmp, styles, opts = {}) {
     // rule-kind doc on WRITE_RULES). Placed BEFORE deleteWhen/requirePx so a
     // repair-only property can never delete a key either: the contract is
     // "overwrite what the bake got wrong", full stop.
-    if (rule?.repairOnly && props[name] === undefined) continue;
+    // wave-52 lane L11: …unless the parent-differs proof holds (see
+    // introducesOverParent) — then the live value is introduced.
+    if (rule?.repairOnly && props[name] === undefined &&
+        !introducesOverParent(rule, name, cmp, v, opts)) continue;
     // deleteWhen: the computed default carries no declaration.
     if (rule?.deleteWhen !== undefined && v === rule.deleteWhen) { delete props[name]; continue; }
     // requirePx: keyword sizes ('auto', 'fit-content(…)') are not concrete
@@ -1383,8 +1450,16 @@ export function overlayComputedOnComponent(cmp, styles, opts = {}) {
  * The notApplicable tag itself is deliberately NOT touched anywhere: it
  * stays in wpt-buckets.json as provenance of WHY post-load ran.
  */
-export function mergePostLoadIntoFixture(fixture, stem, records) {
+export function mergePostLoadIntoFixture(fixture, stem, records, opts = {}) {
   let overlaid = 0; // how many components actually received computed state
+  // wave-52 lane L11 — every record by its walk path, so each element's
+  // PARENT snapshot is one lookup away (the walker recurses only into kept
+  // elements, so a kept element's DOM parent is a record — or the body,
+  // whose snapshot the walker returns beside the records: opts.bodyStyles).
+  const byPath = new Map(records.map((r) => [r.path.join('.'), r]));
+  const parentStylesOf = (rec) => (rec.path.length > 1
+    ? byPath.get(rec.path.slice(0, -1).join('.'))?.styles // nearest kept parent
+    : opts.bodyStyles);                                   // top level: <body>
   for (const rec of records) {
     let cmp = componentAtPath(fixture, stem, rec.path);
     // Wave 22 — the inline-chain collapse (extract-fixture collapseInlineRun)
@@ -1415,7 +1490,10 @@ export function mergePostLoadIntoFixture(fixture, stem, records) {
       // under-overlaying.
       throw new Error(`post-load merge: no component at path ${rec.path.join('.')}`);
     }
-    overlayComputedOnComponent(cmp, rec.styles);
+    // wave-52 lane L11: the parent snapshot + DOM tag feed the colour
+    // introduce route (introducesOverParent); nothing else reads them.
+    overlayComputedOnComponent(cmp, rec.styles,
+      { parentStyles: parentStylesOf(rec), tag: rec.tag });
     overlaid++;
   }
   // The delivery stamp (gate contract; see inject-wpt-block.applyNaScoreGate).
@@ -1713,7 +1791,8 @@ async function postLoadAugmentOnce(fixture, testRel) {
     // reconstructs ids as `<stem>__N…`, so the stem must be the SAME
     // subdir-encoded fixtureStem() the fixture's ids were built from.
     const stem = fixtureStem(testRel);
-    const overlaid = mergePostLoadIntoFixture(fixture, stem, snap2.records);
+    const overlaid = mergePostLoadIntoFixture(fixture, stem, snap2.records,
+      { bodyStyles: snap2.bodyStyles });
     return { status: 'extracted', overlaid, records: snap2.records,
              // Surfaced in the CLI/extract-fixture log line so a bag repair
              // is visible in a batch run rather than silent.

@@ -21,6 +21,23 @@ package com.styleconverter.runtime.spacing
 // usesContainingBlockPercent so committed baselines keep the exact modifier
 // values they were captured with.
 //
+// Wave 52 (lane L4, queue 0(b″)) — WHICH containing block. The composed
+// factory materialises INSIDE this element's own CompositionLocalProvider
+// (ComponentRenderer.inheritanceWrappedContent), so a bare
+// `LocalContainingBlock.current` there is the block this element publishes
+// for its CHILDREN — one level too deep, the same defect wave 50 (B2) fixed
+// for percentage insets. On css-sizing/abspos-auto-sizing-fit-content-
+// percentage-003/004 (android P 0.9984) the `.child` (Width 100 × Height
+// 100, `padding-left: 50%` / `padding-right: 50%`) sits in a fit-content
+// abspos `.abs` that publishes (null, null): CSS 2.1 §8.4 + css-sizing-3
+// §5.2.1 give 0 px, the child-level read gave 50 % of its OWN 100 px = 50 px
+// — INSIDE the fixed 100 px box (content 50, not 100), which the picture
+// never showed because the box paints nothing and has no children, while
+// SizingExtractor's frame-inflation lane (P13) already used 0 for the same
+// box. The percent lane now reads the ELEMENT-level channel through
+// ElementContainingBlock.containingBlockFor; the WPT gate and the tri-state
+// are untouched, so outside WPT capture nothing changes.
+//
 // Call sites: LayoutFacade.applyToModifier, SpacingApplier (back-compat shim).
 
 import androidx.compose.foundation.layout.padding
@@ -30,6 +47,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.variables.LocalContainingBlock
+// Wave 52 (b″): the element-level containing-block channel + its breadcrumb.
+import com.styleconverter.runtime.layout.position.ElementContainingBlock
 
 object PaddingApplier {
 
@@ -54,8 +73,15 @@ object PaddingApplier {
             return modifier.composed {
                 // Read the renderer-provided channels (additive reads only —
                 // the channels are owned/provided by ComponentRenderer and
-                // the harness capture root).
-                val cb = LocalContainingBlock.current
+                // the harness capture root). The ELEMENT-level block (CSS 2.1
+                // §10.1 — the block this padding's box is laid out in); the
+                // child-level ambient read is kept only as the breadcrumbed
+                // fallback for paths the renderer's provider never wraps.
+                val cb = ElementContainingBlock.containingBlockFor(
+                    element = ElementContainingBlock.LocalElementContainingBlock.current,
+                    ambient = LocalContainingBlock.current,
+                    breadcrumb = ElementContainingBlock.SPACING_UNPUBLISHED_BREADCRUMB,
+                )
                 val wpt = LocalWptCaptureMode.current
                 // WPT capture only: definite channel width as the percent
                 // base (P10), indefinite base → 0 (P11). Outside WPT the

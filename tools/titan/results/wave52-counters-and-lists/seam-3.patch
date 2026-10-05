@@ -1,0 +1,31 @@
+seam-3.patch — wave 52, lane L6 (counters-and-lists), T7 native half: the EMPTY list item on Compose.
+Seam: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+      (RenderListItemMarker — the inside-overlay condition, one expression; §3 registry row ":4021ff").
+Base: HEAD 7d9c22a7 — applies with NO prior lane patch; `git apply --check` verified on HEAD.
+Needs (in the tree, lane-owned): lists/ListMarkerEmptyItem.kt (+ ListMarkerEmptyItemTest).
+Why: after L5's seam-6-FE-li.patch the 51 cssom <li> are EMPTY inside items; the zero-size overlay
+      stacks all their markers on ONE row (iOS probe: one band y16–28 vs the ref's 3 rows at 20 px).
+      This makes them take the Row, where the marker sizes the line. Apply WITH (or after) L5's F-E.
+ORDER: seam-3 BEFORE seam-1 (seam-1 is cut against HEAD+seam-3).
+Apply: git apply tools/titan/results/wave52-counters-and-lists/seam-3.patch
+
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -4181,8 +4181,15 @@
+         // all? Drives BOTH wave-28 decisions (which placement, and — in
+         // the row — whether a baseline claim is meaningful).
+         val exposesBaseline = ListMarkerRow.itemExposesTextBaseline(child)
+-        if (ListMarkerRow.rendersInsideOverlay(
+-                listConfig?.listStylePosition, exposesBaseline)) {
++        // Wave 52 (lane L6, T7 native half) — an EMPTY item (no text, no
++        // children, no generated content, no declared block size —
++        // ListMarkerEmptyItem.isEmpty) does NOT take the zero-size overlay:
++        // its inside marker is the only content of its one line box
++        // (css-lists-3 §3.5, CSS 2.1 §10.6.3), so the Row below, where the
++        // marker sizes the line, is that layout. Probed: the post-F-E
++        // cssom items collapsed onto ONE row under the overlay.
++        if (com.styleconverter.runtime.lists.ListMarkerEmptyItem.rendersInsideOverlay(
++                listConfig?.listStylePosition, child)) {
+             // Wave 28 (lane MC), defect 1 — `list-style-position: inside`
+             // on an item with no in-flow content. css-lists-3 §3.5 makes
+             // the marker the item's FIRST INLINE BOX: it lives INSIDE the

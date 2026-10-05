@@ -1,0 +1,307 @@
+wave-52 lane L5 (extractor-cascade) — seam-3-FD-specificity
+
+F-D (web-tail) — Selectors-4 §17 selectorSpecificity / compareSpecificity, a per-rule `specificity` stamp in parseCss, the specificity-ordered unlayered merge (bag key order kept in document order) and the in-rank tie-break in the layered resolver.
+
+Applies on: HEAD 7d9c22a7 (tools/titan/extract-fixture.mjs blob 104ef672) with, applied first IN ORDER: seam-1-F3-oracle-filter.patch seam-2-F1-importance.patch.
+Ordered patch set (PLAN.md §2 L5 / §3): seam-1 → seam-2 → seam-3 → seam-4 → seam-5 → seam-6; each is cut against the tree the previous ones leave.
+Only L5 patches this seam file this wave. Verification record: tools/titan/results/wave52-extractor-cascade/_note.md.
+
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index 742298b..5eb8a1d 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -1067,10 +1067,11 @@ export function assignDeclarations(target, source) {
+ // Every OTHER at-rule (@media, @supports, @font-face, @keyframes, …) keeps
+ // the byte-identical skip, so no non-layer/non-scope fixture moves.
+ //
+-// Returns: Array<{ selector, props, layerName?, layerIdx?, important? }>
++// Returns: Array<{ selector, props, specificity, layerName?, layerIdx?, important? }>
+ //   `layerName`/`layerIdx` appear ONLY on rules that came from a `@layer`
+-//   block and `important` ONLY when the rule carries `!important`, so a
+-//   sheet with neither produces the exact historical object shape.
++//   block and `important` ONLY when the rule carries `!important`;
++//   `specificity` (wave-52 lane L5 F-D) is on every rule — a `[a,b,c]`
++//   triple, or null for a selector selectorSpecificity cannot rank.
+ export function parseCss(css) {
+   const rules = [];
+   // Layer names in DECLARATION order — the css-cascade-5 §6.4.1 layer order.
+@@ -1233,7 +1234,13 @@ export function parseCss(css) {
+         if (!s) continue;
+         const scoped = applyScope(s, ctx);
+         if (scoped === null) continue;
+-        const rule = { selector: scoped, props };
++        // wave-52 lane L5 F-D: the rule's Selectors-4 §17 specificity,
++        // taken from the selector AS WRITTEN inside any `@scope` block — the
++        // scoping root contributes nothing (css-cascade-6: an implicitly
++        // scoped selector ranks as if prefixed by `:where(:scope)`, and an
++        // explicit `:scope` counts as the one pseudo-class it is), so the
++        // `.test input` the matcher sees still ranks as `input` (0,0,1).
++        const rule = { selector: scoped, props, specificity: selectorSpecificity(s) };
+         if (layerName != null) rule.layerName = layerName;
+         if (hasImportant) rule.important = important;
+         rules.push(rule);
+@@ -1268,7 +1275,9 @@ const REVERT_LAYER = 'revert-layer';
+  *
+  * Sort order per property (highest wins): important > normal; within each,
+  * inline > layered; within layered, LATER layer for normal declarations and
+- * EARLIER layer for important ones; ties broken by document order.
++ * EARLIER layer for important ones; inside one layer, higher specificity
++ * (wave-52 lane L5 F-D, each group's optional `specificity` triple); ties
++ * broken by document order.
+  *
+  * `revert-layer` then re-runs the same resolution over only the declarations
+  * from layers declared EARLIER than the winner's — recursively, which is
+@@ -1287,6 +1296,9 @@ export function resolveLayeredCascade(groups, layerCount) {
+         name, value, rank: g.rank, order: order++,
+         important: !!(g.important && g.important[name]),
+         inline: !!g.inline,
++        // wave-52 lane L5 F-D: the group's Selectors-4 §17 triple (absent on
++        // the style attribute and on hand-built groups → ranks as (0,0,0)).
++        specificity: g.specificity,
+       });
+     }
+   }
+@@ -1314,6 +1326,11 @@ export function resolveLayeredCascade(groups, layerCount) {
+     if (a.important !== b.important) return a.important;
+     if (a.inline !== b.inline) return a.inline;
+     if (a.rank !== b.rank) return a.important ? a.rank < b.rank : a.rank > b.rank;
++    // wave-52 lane L5 F-D: inside ONE layer rank, specificity decides before
++    // order of appearance (css-cascade-5 §6.1). Importance does not reverse
++    // it — only origin and layer order flip for important declarations.
++    const bySpec = compareSpecificity(a.specificity, b.specificity);
++    if (bySpec !== 0) return bySpec > 0;
+     return a.order > b.order;
+   };
+   // wave-52 lane L5 F3 (BACKLOG 0(a‴)) — THE CANDIDATE FILTER. css-syntax-3
+@@ -1380,6 +1397,150 @@ function hasRevertLayer(props) {
+   return false;
+ }
+ 
++// ── wave-52 lane L5 F-D: Selectors-4 §17 specificity ─────────────────────────
++//
++// css-cascade-5 §6.1 sorts declarations by origin+importance → context →
++// element-attached → layers → SPECIFICITY → order of appearance. The
++// unlayered merge in propsForElement used to skip the specificity step and
++// went straight to order, so a more specific rule written EARLIER lost to a
++// less specific one written later. MEASURED carriers: css-cascade/
++// import-conditional-001/-002 — the @import resolver inlines `.test {
++// background: green }` where the import stood, ABOVE the local `div {
++// background: red }`, and the wire carried red (web f 0.999, the whole
++// square the wrong colour). Every value below is a `[a, b, c]` triple.
++
++/** Lexicographic comparison of two specificity triples (Selectors-4 §17:
++ *  "compare a, then b, then c"). A missing triple ranks as (0,0,0). */
++export function compareSpecificity(x, y) {
++  const p = x ?? [0, 0, 0];
++  const q = y ?? [0, 0, 0];
++  for (let i = 0; i < 3; i++) if (p[i] !== q[i]) return p[i] - q[i];
++  return 0;
++}
++
++/** Pseudo-classes whose specificity is that of their MOST SPECIFIC argument
++ *  (Selectors-4 §17 for :is/:not/:has; `:matches` / `:-webkit-any` /
++ *  `:-moz-any` are the historical spellings of :is). */
++const SPECIFICITY_MAX_ARG_PSEUDOS = new Set(['is', 'matches', '-webkit-any', '-moz-any', 'not', 'has']);
++
++/**
++ * Selectors-4 §17 specificity of ONE complex selector (no top-level comma):
++ * (a) ids; (b) classes, attribute selectors and pseudo-classes; (c) type
++ * selectors and pseudo-elements. `*` and `:where()` add nothing; `:is()`,
++ * `:not()`, `:has()` add their most specific argument; `:nth-child(An+B of
++ * S)` / `:nth-last-child(… of S)` add one pseudo-class plus the most
++ * specific S; css-scoping-1's `:host(S)` / `:host-context(S)` add one
++ * pseudo-class plus S and `::slotted(S)` one pseudo-element plus S. The CSS2
++ * one-colon pseudo-elements (`:before`, `:after`, `:first-line`,
++ * `:first-letter`) count as pseudo-elements (Selectors-4 §3.6.1).
++ *
++ * @param {string}  sel      the selector, as authored
++ * @param {boolean} relative true for a `:has()` argument, where a
++ *   <relative-selector> may open with a combinator (Selectors-4 §4.4)
++ * @returns {[number,number,number]|null} null for a malformed selector
++ *   (leading/trailing/doubled combinator, unbalanced brackets, a character
++ *   no simple selector starts with) — such a rule never matches, so it has
++ *   no rank to give
++ */
++export function selectorSpecificity(sel, relative = false) {
++  const s = String(sel ?? '').trim();
++  const n = s.length;
++  const sp = [0, 0, 0];
++  let i = 0;
++  let seenSimple = false;     // any simple selector read yet
++  let pendingComb = false;    // an explicit combinator still waiting for its compound
++  let leadingComb = false;    // a relative selector's one leading combinator
++  // An <ident-token> body (css-syntax-3 §4.3.11), escapes consumed whole so
++  // `.a\:b` is ONE class, not a class plus a pseudo-class.
++  const readIdent = () => {
++    const start = i;
++    while (i < n) {
++      if (s[i] === '\\') { const m = /^\\(?:[0-9a-fA-F]{1,6}\s?|[\s\S])/.exec(s.slice(i)); i += m[0].length; continue; }
++      if (/[-\w\u0080-￿]/.test(s[i])) { i++; continue; }
++      break;
++    }
++    return s.slice(start, i);
++  };
++  // A bracketed run starting at `s[i]` (`(` or `[`), quotes and escapes
++  // honoured; returns the inner text and leaves `i` after the closer, or
++  // null when it never closes.
++  const readBracket = (open, close) => {
++    let depth = 0; let quote = null; const start = i + 1;
++    for (; i < n; i++) {
++      const ch = s[i];
++      if (ch === '\\') { i++; continue; }
++      if (quote) { if (ch === quote) quote = null; continue; }
++      if (ch === '"' || ch === "'") { quote = ch; continue; }
++      if (ch === open) depth++;
++      else if (ch === close && --depth === 0) { i++; return s.slice(start, i - 1); }
++    }
++    return null;
++  };
++  // The most specific member of a selector list (malformed members carry no
++  // rank — :is()/:where() lists are forgiving, Selectors-4 §3.9).
++  const maxOf = (list, rel) => {
++    let best = [0, 0, 0];
++    for (const part of splitTopLevel(list, ',')) {
++      const v = selectorSpecificity(part, rel);
++      if (v && compareSpecificity(v, best) > 0) best = v;
++    }
++    return best;
++  };
++  const add = (v) => { sp[0] += v[0]; sp[1] += v[1]; sp[2] += v[2]; };
++  while (i < n) {
++    const ch = s[i];
++    if (/\s/.test(ch)) { i++; continue; }                         // descendant combinator / padding
++    const twoBar = ch === '|' && s[i + 1] === '|';                // the `||` column combinator
++    if (ch === '>' || ch === '+' || ch === '~' || twoBar) {
++      // A combinator needs a compound on its left — except the ONE leading
++      // combinator of a relative selector — and one on its right.
++      if (pendingComb) return null;
++      if (!seenSimple) { if (!relative || leadingComb) return null; leadingComb = true; }
++      pendingComb = true;
++      i += twoBar ? 2 : 1;
++      continue;
++    }
++    seenSimple = true; pendingComb = false;
++    if (ch === '*') { i++; continue; }                             // universal: (0,0,0)
++    if (ch === '|') { i++; continue; }                             // namespace separator (`*|div`, `|div`)
++    if (ch === '#') { i++; readIdent(); sp[0]++; continue; }      // (a) id
++    if (ch === '.') { i++; readIdent(); sp[1]++; continue; }      // (b) class
++    if (ch === '[') { if (readBracket('[', ']') === null) return null; sp[1]++; continue; } // (b) attribute
++    if (ch === ':') {
++      const isElement = s[i + 1] === ':';
++      i += isElement ? 2 : 1;
++      const name = readIdent().toLowerCase();
++      let arg = null;
++      if (s[i] === '(') { arg = readBracket('(', ')'); if (arg === null) return null; }
++      if (isElement || (arg === null && LEGACY_ONE_COLON_PSEUDO_ELEMENTS.has(name))) {
++        sp[2]++;                                                   // (c) pseudo-element
++        if (isElement && name === 'slotted' && arg !== null) add(maxOf(arg, false));
++        continue;
++      }
++      if (name === 'where') continue;                              // :where() — always zero
++      if (SPECIFICITY_MAX_ARG_PSEUDOS.has(name) && arg !== null) { add(maxOf(arg, name === 'has')); continue; }
++      sp[1]++;                                                     // (b) any other pseudo-class
++      if ((name === 'nth-child' || name === 'nth-last-child') && arg !== null) {
++        const { ofSelectors } = splitAnBOfSelector(arg);
++        if (ofSelectors) add(maxOf(ofSelectors.join(','), false));
++      } else if ((name === 'host' || name === 'host-context') && arg !== null) {
++        add(maxOf(arg, false));
++      }
++      continue;
++    }
++    if (ch === '\\' || /[-_A-Za-z\u0080-￿]/.test(ch)) {
++      readIdent();
++      // `ns|tag`: the ident before a lone `|` is a namespace prefix, not a type.
++      if (s[i] === '|' && s[i + 1] !== '|') continue;
++      sp[2]++;                                                     // (c) type selector
++      continue;
++    }
++    return null;                                                   // nothing a simple selector starts with
++  }
++  if (!seenSimple || pendingComb) return null;                     // empty / trailing combinator
++  return sp;
++}
++
+ // ── Body element walker ──────────────────────────────────────────────────────
+ //
+ // We need top-level <body> children to map to components. The test corpus
+@@ -6299,6 +6460,32 @@ export function countUnsupportedRules(rules) {
+   return n;
+ }
+ 
++/** wave-52 lane L5 F-D — a rule's specificity: the triple parseCss stamped,
++ *  or (for a rule built outside parseCss, e.g. a unit-test literal or a
++ *  bake's synthetic rule) one computed from its selector. */
++function ruleSpecificity(r) {
++  return r.specificity !== undefined ? r.specificity : selectorSpecificity(r.selector);
++}
++
++/** wave-52 lane L5 F-D — the rules in css-cascade-5 §6.1 merge order:
++ *  ascending specificity, document order between equals (Array.prototype.sort
++ *  is stable, ES2019 §23.1.3.30). A copy — the caller's array keeps document
++ *  order for the key-order pass. */
++function bySpecificity(rs) {
++  return [...rs].sort((x, y) => compareSpecificity(ruleSpecificity(x), ruleSpecificity(y)));
++}
++
++/** wave-52 lane L5 F-D — copy `merged` into `target` with keys in their
++ *  FIRST-APPEARANCE order across `bags` (document order). Every key of every
++ *  bag is in `merged` (assignDeclaration always writes a key's first value),
++ *  so this is a pure re-ordering — the key order the historical document-
++ *  order merge produced, whatever order the specificity sort merged in. */
++function copyInDocumentOrder(target, merged, bags) {
++  for (const bag of bags) {
++    for (const k of Object.keys(bag)) if (!(k in target) && k in merged) target[k] = merged[k];
++  }
++}
++
+ /** Compute IR property dict for a body element by collecting every CSS
+  *  rule whose selector matches it, plus its inline `style="…"`.
+  *  Last-write-wins matches CSS cascade for same-specificity rules.
+@@ -6405,17 +6592,31 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
+     // the same css-syntax-3 §2.2 refusal applies here. Identity for every bag
+     // in which the oracle proves nothing — which is every bag in the corpus
+     // outside css-values/angle-units-001.
+-    for (const r of buckets['']) assignDeclarations(props, r.props);
++    //
++    // wave-52 lane L5 F-D: the rules are merged in css-cascade-5 §6.1 order —
++    // ascending SPECIFICITY, then order of appearance (a stable sort keeps
++    // document order between equal triples, so a sheet whose specificities
++    // never disagree with its order merges exactly as before). Inline
++    // style="…" is element-attached, which §6.1 ranks above every rule, so
++    // it still merges last — except an INVALID inline declaration, which
++    // §2.2 ignores and so leaves the author sheet's value in force (the
++    // style attribute has no special dispensation from error handling).
++    // The bag's KEY order stays first appearance in DOCUMENT order, so the
++    // IR property order of every unchanged declaration does not move.
++    const merged = {};
++    for (const r of bySpecificity(buckets[''])) assignDeclarations(merged, r.props);
++    assignDeclarations(merged, inlineProps);
++    copyInDocumentOrder(props, merged, [...buckets[''].map((r) => r.props), inlineProps]);
+     for (const [m, rs] of Object.entries(buckets)) {
+       if (m === '') continue;
++      // A pseudo-element bucket ranks by the same §6.1 order (`.a::before`
++      // (0,1,1) beats a later `div::before` (0,0,2)); it has no style
++      // attribute of its own.
++      const mergedPe = {};
++      for (const r of bySpecificity(rs)) assignDeclarations(mergedPe, r.props);
+       pseudo[m] = {};
+-      for (const r of rs) assignDeclarations(pseudo[m], r.props);
++      copyInDocumentOrder(pseudo[m], mergedPe, rs.map((r) => r.props));
+     }
+-    // Inline style="..." trumps everything — except an INVALID inline
+-    // declaration, which §2.2 ignores and so leaves the author sheet's value
+-    // in force (the style attribute has no special dispensation from error
+-    // handling; css-cascade-5 §6.4.4 only ranks VALID declarations).
+-    assignDeclarations(props, inlineProps);
+     return { props, matchedRules: matchedRules.length, pseudo };
+   }
+   // Layered path — css-cascade-5 §6.4.4 sort order, `revert-layer` resolved.
+@@ -6424,6 +6625,8 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
+     rank: typeof r.layerIdx === 'number' ? r.layerIdx : layerCount,
+     props: r.props,
+     important: r.important,
++    // wave-52 lane L5 F-D: the tie-break inside one layer rank.
++    specificity: ruleSpecificity(r),
+   });
+   Object.assign(props, resolveLayeredCascade(
+     [...buckets[''].map(toGroup),

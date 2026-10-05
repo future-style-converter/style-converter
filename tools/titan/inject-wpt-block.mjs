@@ -129,11 +129,16 @@ function arg(name) {
 //     never silent.
 //   * a root already on the live rev, a null root, and a root with no rev tail
 //     all pass through untouched.
-export const LIVE_CANVAS_REV = 'white-black-ink-font-lh-imgpad-htmlpins';
+export const LIVE_CANVAS_REV = 'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin';
 // Every canvas contract that has ever produced a refs tree, newest first.
 // Pinned against capture-browser-ref.mjs's CANVAS_REV in the unit tests, so a
 // future bump that forgets to append here fails `node --test`.
 export const KNOWN_STALE_CANVAS_REVS = [
+  // wave-52 L12-B: the body half of the frame still painted `background`,
+  // erasing z-index:-1 ref ink and author html canvases, and every ref's body
+  // margin was zeroed even where the pair relies on the UA 8 px
+  // (capture-browser-ref.mjs canvasFrameCss B10 note + UA_BODY_CSS).
+  'white-black-ink-font-lh-imgpad-htmlpins',
   // wave-30 A5: inherited text pins still on :where(body), so any ref
   // declaring color/font-family/line-height at :root/html rasterised the
   // CLOBBERED value (capture-browser-ref.mjs canvasFrameCss A5 note).
@@ -420,6 +425,13 @@ export function countOverflowInk(img, W, H, tolerance = SEMANTIC_PRESENCE_TOLERA
 async function diffWebVsRef(webPath, refPath) {
   const a = await loadPng(webPath);
   const b = await loadPng(refPath);
+  // wave-52 L12-A Decision B: read the capture's uniformity on the RAW decoded
+  // bitmap, BEFORE padToCanvas — padding a short uniform capture with white
+  // would make a black (or transparent) blank read as non-uniform and hide it.
+  const captureUniform = uniformColour(a);
+  // …and the ref's, so a capture that equals a full-bleed uniform ref is not
+  // misnamed a blank (computeBlankCaptureVsInkedRef's third clause).
+  const refUniform = uniformColour(b);
   const W = Math.max(a.width, b.width);
   const H = Math.max(a.height, b.height);
   const A = await padToCanvas(a, W, H);
@@ -564,6 +576,12 @@ async function diffWebVsRef(webPath, refPath) {
   // translation of reference ink explains has been removed, in both
   // directions. Computed on the SAME padded pair as everything above.
   metrics.degenerate = computeDegenerate(A, B);
+  // wave-52 L12-A Decision B: the capture's single RGBA value, or null —
+  // triage only, feeds neither wptPass nor scoreExcluded (see uniformColour).
+  metrics.captureUniform = captureUniform;
+  // The ref's single RGBA value, or null — triage only (13 uniform refs on
+  // wave51-fix: the blank-ref tests plus the full-bleed fills).
+  metrics.refUniform = refUniform;
   return metrics;
 }
 
@@ -1530,6 +1548,197 @@ export function applyNativeFontParityGate(naTags, diffsByPlatform, testRel) {
   return stamped;
 }
 
+// ── wave-52 L12-A: the ABSENCE-ONLY per-cell exclusion (BACKLOG queue 0(n)) ──
+//
+// THE CLASS (measured on wave51-fix, tools/titan/results/wave52-plan/
+// absence-only-denominator.md §2 T1): 19 scored PASS cells / 7 tests whose
+// frozen ref carries NO ink (bCoveragePct 0 — e.g. /css/reference/blank.html,
+// "Intentionally blank") and whose capture carries none either. The presence
+// gate is disarmed on a blank ref by design (WPT_PRESENCE_REF_MIN_PCT's banner:
+// "A blank ref therefore never arms the gate: blank-vs-blank stays a pass"),
+// the coverage-ratio gate is disarmed when both sides are under the same floor,
+// and SSIM of two constant white images is 1 — so the pass is decided by the
+// ref's blankness ALONE. A capture with no ink at all (the null renderer) would
+// receive exactly the same pass, while the SAME corpus holds 33 cells where a
+// runtime painted nothing against an inked ref. A pass in the numerator claims
+// the runtime rendered the assertion; here the scorer cannot tell, so the cell
+// leaves the denominator with a NAMED reason instead of counting.
+//
+// DECISION RULE (pre-registered in the brief, §4 Decision A): stamp a cell iff
+// `wptPass === true && semanticPresence.bCoveragePct < WPT_PRESENCE_REF_MIN_PCT`
+// — mechanism-free (no hue, no test name, no new constant: the instrument's own
+// blank-ref floor). A FAIL on a blank ref stays scored (it IS information: the
+// capture painted ink the ref does not have), so the cut is per CELL, never per
+// test — mirroring applyNativeFontParityGate's per-platform string stamp.
+// Cost, named so it is never rediscovered as a surprise: the ratchet. A runtime
+// that repairs a blank-ref FAIL moves to 'absence-only', never to P; and per the
+// standing constraint a cell whose stamp is later REMOVED prints as NEWLY
+// MEASURED in score-gate.mjs, never as LOST (score-gate.mjs is deliberately
+// unchanged — plan-skeptic-1 C2).
+
+/** The `scoreExcluded` value for this family. A STRING for the same reason as
+ *  NATIVE_FONT_PARITY_STAMP: every aggregator filters on truthiness, so the
+ *  cell drops out byte-for-byte, while a manifest reader can read WHY. */
+export const ABSENCE_ONLY_STAMP = 'absence-only';
+
+/** The per-diff platform keys the absence-only gate inspects — all three:
+ *  unlike the font-parity family, a blank-vs-blank pass is undiscriminating on
+ *  web exactly as on the natives (the web-only `animation-name-ua-prefix` cell
+ *  is one of the 19). Frozen so a pin can hold the list. */
+export const ABSENCE_ONLY_PLATFORMS = Object.freeze(['web-ref', 'ios-ref', 'android-ref']);
+
+/** The absence-only predicate (pure + exported for the unit pins).
+ *  True iff the diff PASSED and its ref is under the presence floor — "the
+ *  pass a capture with no ink at all would also have received". Strict
+ *  `=== true` on wptPass so a null (already neutralised) or false verdict can
+ *  never qualify, and a strict numeric check on the ref coverage so an absent
+ *  presence block (size-mismatch guard, pre-v4.3 diff) declines: unknown
+ *  presence is not blank presence — the isColorDivergent stance. */
+export function isAbsenceOnly(diff) {
+  // Absent platforms and error-shaped diffs carry no verdict to judge.
+  if (!diff || typeof diff !== 'object' || diff.error) return false;
+  // Only a PASS can be undiscriminating; a fail on a blank ref is a measurement.
+  if (diff.wptPass !== true) return false;
+  // The ref-side ink % computeSemanticPresence stamped (b = the browser ref).
+  const ref = diff.semanticPresence?.bCoveragePct;
+  // Unknown ref ink → decline (never stamp on missing evidence).
+  if (typeof ref !== 'number' || !Number.isFinite(ref)) return false;
+  // Strictly under the floor, the SAME comparison computePresenceFailed uses
+  // to disarm itself — so this fires exactly where that veto cannot.
+  return ref < WPT_PRESENCE_REF_MIN_PCT;
+}
+
+/** wave-52 L12-A per-cell gate (pure — exported for unit tests).
+ *
+ *  Neutralises the SCORING fields (`wptPass` → null, `scoreExcluded` →
+ *  ABSENCE_ONLY_STAMP) on every browser-ref diff isAbsenceOnly accepts; raw
+ *  metrics (ssim, semanticPresence, …) survive so the cell stays readable.
+ *
+ *  NEVER OVERWRITES an existing `scoreExcluded` stamp (`true` from
+ *  applyNaScoreGate, 'native-font-parity' from the font gate): a wall-excluded
+ *  or font-excluded cell must not be downgraded to "absence-only" — the first
+ *  reason recorded is the one that explains the exclusion. In practice such a
+ *  cell already has `wptPass === null` and isAbsenceOnly declines it, but the
+ *  guard is explicit so the contract does not hinge on that coupling.
+ *
+ *  @param {Object<string,object|null>} diffsByPlatform  diffs keyed by the
+ *         manifest labels ('web-ref' / 'ios-ref' / 'android-ref'); mutated in
+ *         place. Absent (null) and error-shaped diffs are skipped.
+ *  @returns {string[]} the platform keys stamped, in ABSENCE_ONLY_PLATFORMS
+ *         order (empty ⇒ the gate did not fire on this test). */
+export function applyAbsenceOnlyGate(diffsByPlatform) {
+  // Collected in platform order so the manifest field is deterministic.
+  const stamped = [];
+  for (const key of ABSENCE_ONLY_PLATFORMS) {
+    // Look the diff up by its manifest label; a missing platform is null.
+    const d = diffsByPlatform?.[key];
+    // Skip absent/error diffs — nothing to neutralise (same as the font gate).
+    if (!d || typeof d !== 'object' || d.error) continue;
+    // Never downgrade an earlier, more specific exclusion reason.
+    if (d.scoreExcluded) continue;
+    // The pre-registered predicate; everything else stays scored.
+    if (!isAbsenceOnly(d)) continue;
+    d.wptPass = null;                       // undiscriminating: not a pass, not a fail
+    d.scoreExcluded = ABSENCE_ONLY_STAMP;   // aggregators filter on truthiness
+    stamped.push(key);                      // reported per test in the manifest
+  }
+  return stamped;
+}
+
+// ── wave-52 L12-A Decision B: the blank-capture TRIAGE stamp ────────────────
+//
+// BACKLOG "Instrument decisions pending" asked for a blank-capture guard keyed
+// on UNIFORM COLOUR (not alpha). Decided: a triage stamp plus a loud listing,
+// scoring UNCHANGED. Every scored blank-capture-vs-inked-ref cell already FAILS
+// via computePresenceFailed (33/33 on wave51-fix; the transparent Android
+// capture via coverageRatioFailed + ssim 0), so a capture-failure escalation
+// (exit 7) would only move runtime-defect MEASUREMENTS out of the denominator —
+// a later fix would print as NEWLY MEASURED instead of GAINED (the
+// counter-cjk-decimal wave-50 gain would have been hidden). The stamp names the
+// class so the summary can list it and the "excluded tests whose platforms
+// disagree" report can consume it.
+
+/** One pixel value over the WHOLE decoded image, or null (pure + exported).
+ *  Reads RGBA from a pngjs-shaped `{ width, height, data }`; alpha is part of
+ *  the key on purpose — a fully transparent capture ((0,0,0,0), the one
+ *  text-decoration-inset-025 Android capture) and a solid-white or solid-green
+ *  one are the same CLASS (no structure at all), but the listing must say
+ *  which colour it was. Early-exits on the first differing pixel, so an inked
+ *  capture costs one short scan. */
+export function uniformColour(img) {
+  // A missing or empty bitmap has no colour to report.
+  if (!img || !img.data || !img.width || !img.height) return null;
+  // Every pixel is 4 bytes (pngjs always decodes to RGBA, even for RGB PNGs).
+  const d = img.data;
+  // The reference value: the first pixel.
+  const r = d[0], g = d[1], b = d[2], a = d[3];
+  // Walk the remaining pixels; any channel difference ends the scan.
+  for (let i = 4; i < img.width * img.height * 4; i += 4) {
+    if (d[i] !== r || d[i + 1] !== g || d[i + 2] !== b || d[i + 3] !== a) return null;
+  }
+  // The whole capture is one value — the triage stamp's payload.
+  return [r, g, b, a];
+}
+
+/** True iff the CAPTURE is uniform, the REF carries visible ink, and the
+ *  capture is not simply the ref's own picture (pure + exported). The ref
+ *  floor is WPT_PRESENCE_REF_MIN_PCT — the same "the ref visibly carries ink"
+ *  bar the presence gate arms on — so on scored cells this names exactly the
+ *  population that gate already fails.
+ *  The third clause, measured on wave51-fix: "ink" is deviation from WHITE, so
+ *  a full-bleed uniform ref (background-color-animation-in-body's olive, the
+ *  overlay-transition-backdrop-entry green) reads bCoveragePct 100, and a
+ *  capture that paints that SAME uniform colour is a correct render of a
+ *  positive assertion, not a blank — 6 such cells. A uniform capture of a
+ *  DIFFERENT colour than a uniform ref (overlay-transition-backdrop: white
+ *  capture, green ref) stays in the class: the runtime painted nothing where
+ *  the ref painted. Unknown inputs decline (no uniform reading, no numeric
+ *  ref coverage) — unknown is not blank.
+ *  @param {number[]|null} captureUniform  uniformColour(capture)
+ *  @param {object|null} semanticPresence  the diff's presence block
+ *  @param {number[]|null} [refUniform]     uniformColour(ref), null if the ref
+ *         has structure (or was not measured — then the clause never fires) */
+export function computeBlankCaptureVsInkedRef(captureUniform, semanticPresence, refUniform = null) {
+  // Not uniform (or never measured) → not a blank capture.
+  if (!Array.isArray(captureUniform)) return false;
+  // The ref-side ink % (b = the browser ref, diffWebVsRef argument order).
+  const ref = semanticPresence?.bCoveragePct;
+  // No numeric ref coverage → cannot say the ref is inked.
+  if (typeof ref !== 'number' || !Number.isFinite(ref)) return false;
+  // Blank (sub-floor) ref → that is the absence-only side, not this class.
+  if (ref < WPT_PRESENCE_REF_MIN_PCT) return false;
+  // The capture IS the ref's own uniform picture (all four channels equal):
+  // agreement on a full-bleed fill, not a blank capture.
+  const same = Array.isArray(refUniform) && refUniform.length === 4
+    && refUniform.every((v, i) => v === captureUniform[i]);
+  // Uniform capture, inked ref, and they disagree — the triage class.
+  return !same;
+}
+
+/** Collect the two L12-A populations from a buildResults map for the inject
+ *  summary (pure + exported). Returns cell labels "<test> <platform-key>" in
+ *  manifest order — absence-only cells from each result's
+ *  `absenceOnlyExcluded`, blank captures from every diff carrying
+ *  `blankCaptureVsInkedRef: true` (scored or excluded alike: the stamp is
+ *  triage, and the census counts both). */
+export function summarizeInstrumentStamps(results) {
+  // Two flat lists; the caller prints counts and the blank-capture names.
+  const absenceOnly = [], blankCaptures = [];
+  for (const [testKey, r] of Object.entries(results ?? {})) {
+    // The gate's own per-test record — the authoritative stamped list.
+    for (const key of Array.isArray(r?.absenceOnlyExcluded) ? r.absenceOnlyExcluded : []) {
+      absenceOnly.push(`${testKey} ${key}`);
+    }
+    // Diffs may be null for extraction misses; nothing to list then.
+    const diffs = r?.browserRef?.diffs ?? {};
+    for (const [key, d] of Object.entries(diffs)) {
+      // Strict true: the stamp is boolean on every diff this module writes.
+      if (d && d.blankCaptureVsInkedRef === true) blankCaptures.push(`${testKey} ${key}`);
+    }
+  }
+  return { absenceOnly, blankCaptures };
+}
+
 /** wave-8 corpus-honesty gate (pure — exported for unit tests): when a test
  *  carries ≥1 HARNESS-DELIVERY tag (SCORE_EXCLUDED_TAGS — not every
  *  notApplicable tag), its browser-ref diffs are EXCLUDED from scoring:
@@ -1747,6 +1956,9 @@ async function diffPlatformVsRef({ platformDir, matchingKeys, refPng, fuzzy, cac
     // wave-13 presence gate: stamped on EVERY diff (true/false, uniform for
     // triage queries — "presenceFailed:true" is the blank-capture beacon).
     diff.presenceFailed = computePresenceFailed(diff.semanticPresence);
+    // wave-52 L12-A Decision B: the NAMED blank-capture stamp, beside the veto
+    // that already fails the scored members of its class — triage only.
+    diff.blankCaptureVsInkedRef = computeBlankCaptureVsInkedRef(diff.captureUniform, diff.semanticPresence, diff.refUniform);
     // wave-25 CAL-RC6 vetoes: stamped on EVERY diff (true/false, uniform for
     // triage queries) so a manifest row says WHY it failed without re-running
     // the metrics. See computeWptPass for what each one means.
@@ -1806,6 +2018,9 @@ async function diffComposedVsRef({ platformDir, testKey, refPng, fuzzy }) {
     // wave-13 presence gate (same stamp + veto as the stitch path — the two
     // measured wave12 vacuous passes came through THIS composed path).
     diff.presenceFailed = computePresenceFailed(diff.semanticPresence);
+    // wave-52 L12-A Decision B: same named blank-capture stamp as the stitch
+    // path — every wave51-fix diff (4305/4305) came through THIS composed path.
+    diff.blankCaptureVsInkedRef = computeBlankCaptureVsInkedRef(diff.captureUniform, diff.semanticPresence, diff.refUniform);
     // wave-25 CAL-RC6 vetoes — same stamps as the stitch path. BOTH measured
     // css-gaps scoring lies (001's red-square colour flip, 002's 9.4× ink
     // deficit) came through THIS composed path.
@@ -2032,6 +2247,14 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
     const fontParityExcluded = isNa ? [] : applyNativeFontParityGate(naTags, {
       'web-ref': webRefDiff, 'ios-ref': iosRefDiff, 'android-ref': androidRefDiff,
     }, testRel);  // wave-48 W2: the gate is per-test — see the refusal list.
+    // wave-52 L12-A per-CELL absence-only gate, AFTER both earlier families:
+    // a wholly-excluded test is skipped outright (`isNa ? [] :`, the same
+    // caller contract as the font gate), and the gate itself never overwrites
+    // the font stamp — so the first, more specific reason always survives.
+    // scoreEligible below stays `!isNa`: the test IS scored where it can fail.
+    const absenceOnlyExcluded = isNa ? [] : applyAbsenceOnlyGate({
+      'web-ref': webRefDiff, 'ios-ref': iosRefDiff, 'android-ref': androidRefDiff,
+    });  // wave-52 L12-A: blank-ref passes leave the denominator by name.
 
     results[testRel] = {
       // wave-8: the one boolean scoring paths filter on. false ⇔ the test
@@ -2109,6 +2332,11 @@ async function buildResults({ tests, manifest, keyMap, bucketsIdx, refsRoot, web
       // `scoreEligible: true` next to a two-entry array here is looking at a
       // test scored on web only, which is exactly what happened.
       nativeFontParityExcluded: fontParityExcluded,
+      // wave-52 L12-A: the platform keys whose PASS was decided by a blank
+      // ref alone and was therefore stamped 'absence-only'. Always present
+      // (empty array = the gate did not fire), the same no-null-check
+      // convention as nativeFontParityExcluded beside it.
+      absenceOnlyExcluded,
       // wave-13 NATIVE-PARITY secondary metric: for capability-walled tests
       // (≥1 notApplicable tag) surface the already-computed cross-platform
       // pair SSIMs so "browser parity blocked by <tag>" runs are visibly
@@ -2201,8 +2429,14 @@ function assertPlatformColumns(results, env = process.env) {
     // Per-test parity: anchored on a SCORED web-ref (same idiom), so
     // whole-test exclusions and extraction misses (no web-ref at all) never
     // enter — those are not native delivery failures.
+    // wave-52 L12-A: a web-ref stamped 'absence-only' still ANCHORS — that
+    // stamp is an analysis verdict on a DELIVERED capture (numeric ssim, the
+    // pass was merely undiscriminating), not a delivery gap, so its test must
+    // keep the native-presence check it had before the stamp existed.
     const web = diffs['web-ref'];
-    if (!(web && typeof web.ssim === 'number' && !web.scoreExcluded)) continue;
+    const webDelivered = web && typeof web.ssim === 'number'
+      && (!web.scoreExcluded || web.scoreExcluded === ABSENCE_ONLY_STAMP);
+    if (!webDelivered) continue;
     const stamped = new Set(Array.isArray(r?.nativeFontParityExcluded) ? r.nativeFontParityExcluded : []);
     for (const key of NATIVE_PARITY_KEYS) {
       if (env[PLATFORM_COLUMN_KEYS[key]] === '1') continue;   // declared skip: intentional absence
@@ -2355,11 +2589,27 @@ async function main() {
   // run as a result. See assertPlatformColumns' banner for why this is
   // "column at zero while siblings have data", not "3 × N".
   const columns = assertPlatformColumns(results);
+  // wave-52 L12-A: the two instrument populations, counted on the summary line
+  // (plan §7 reads `absence-only=<n> blank-captures=<n>` off the gate log).
+  const stamps = summarizeInstrumentStamps(results);
   process.stderr.write(
     `inject-wpt-block: wrote v4 manifest (totalTests=${tests.length} ` +
     `A=${totals.A} B=${totals.B} C=${totals.C}) scored-cells ` +
-    Object.entries(columns.counts).map(([k, n]) => `${k}=${n}`).join(' ') + '\n'
+    Object.entries(columns.counts).map(([k, n]) => `${k}=${n}`).join(' ') +
+    ` absence-only=${stamps.absenceOnly.length} blank-captures=${stamps.blankCaptures.length}\n`
   );
+  // Decision B's LOUD listing: every uniform capture against an inked ref is
+  // named, one line each, so the class is read off the log and never has to be
+  // re-derived from PNGs. Not a failure — the presence veto already fails the
+  // scored ones; this is the triage record the BACKLOG asked for.
+  for (const cell of stamps.blankCaptures) {
+    process.stderr.write(`inject-wpt-block: blank capture vs inked ref: ${cell}\n`);
+  }
+  // The absence-only cells are named too: they left the denominator, and a
+  // cell that leaves a denominator is always listed by name (BACKLOG rule).
+  for (const cell of stamps.absenceOnly) {
+    process.stderr.write(`inject-wpt-block: absence-only (excluded): ${cell}\n`);
+  }
   if (columns.missing.length > 0) {
     // WARN by default, FATAL on opt-in. Why not fatal outright: section-runner
     // --web-only legitimately runs inject with empty native dirs and does NOT

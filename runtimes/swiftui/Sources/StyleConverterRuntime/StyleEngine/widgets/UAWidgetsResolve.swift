@@ -121,6 +121,28 @@ enum UAWidgetsResolve {
         // not appearance-controlled (see kindFor).
         let special = kind == .hidden || kind == .image || kind == .file
         if !special && !appearanceIsNative(properties) { return nil }
+        // Wave 52 lane L8 (M-G) — the ZERO-BOX gate. css-sizing-3 §5.1 / CSS
+        // 2.1 §10.2: a used `width` or `height` of 0px is a real box of zero
+        // extent, and a replaced element's content is painted INSIDE that
+        // box — there is nothing to paint the fixed 129×21 atom into.
+        // MEASURED on wave51-fix css-writing-modes/forms/input-range-zero-
+        // inline-size (post-load wire: every `input[type=range]` carries
+        // `Width 16px × Height 0` under a vertical flex parent, `0 × 16`
+        // under the horizontal one, and the extractor dropped its
+        // `visibility: hidden`): both natives painted a 224×70 slider group
+        // where the ref shows only the parents' 1px green borders — iOS f
+        // 0.9747, Android f 0.9743. Returning nil hands the component to the
+        // ordinary box path, whose size chain already makes it 16×0 / 0×16.
+        // Blast radius (census.json `anyWidgetZeroBox`): ONE document.
+        if hasZeroUsedBox(properties) {
+            // No silent fallthrough: the mount branch's caller sees a plain
+            // box, so say once per process why the replica went away.
+            _ = PropertyTracker.logOnce(
+                key: "widget:zero-used-box",
+                message: "\(component.meta?.sourceTag ?? "?")[\(attrs?.type ?? "")] has a 0px used " +
+                    "width or height; no UA replica is painted (css-sizing-3 §5.1)")
+            return nil
+        }
         // Value fraction for the position-taking widgets (twin table).
         let fraction: CGFloat?
         switch kind {
@@ -183,6 +205,25 @@ enum UAWidgetsResolve {
             options: options,
             accent: accentFor(properties)
         )
+    }
+
+    /// Wave 52 lane L8 (M-G) — does the MERGED list give this box a used
+    /// `width` or `height` of exactly 0px?
+    ///
+    /// Only an ABSOLUTE zero counts (`.exact(px: 0)`): `auto`, a percentage,
+    /// `calc()` or an em value may still resolve to a non-zero box at layout
+    /// time, and the post-load wire the target carries is absolute px anyway
+    /// (`Width {"type":"length","px":0}`). Reads the same property list
+    /// `resolve` reads, so the gate and the replica can never describe
+    /// different elements. Twin: Kotlin `UAWidgetsResolve.hasZeroUsedBox`.
+    static func hasZeroUsedBox(_ properties: [IRProperty]) -> Bool {
+        ["Width", "Height"].contains { type in
+            // First declaration wins — the converter emits post-cascade lists.
+            guard let data = properties.first(where: { $0.type == type })?.data else { return false }
+            // Exact 0px only; every other shape keeps the atom (see doc).
+            if case .exact(let px) = extractLength(data) { return px == 0 }
+            return false
+        }
     }
 
     /// Wave-38 lane N1 — the IR-reading half of the block-context line box

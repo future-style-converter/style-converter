@@ -107,6 +107,14 @@ enum InlineSpanRing {
         /// for every horizontal member — the pre-wave-48 shapes all carry
         /// nil, so `isPlain` comparisons are untouched by construction.
         var shift: VerticalShift? = nil
+        /// Wave 52 (lane L9, the HANGING-WHITESPACE ring ported from
+        /// Compose wave 50 / lane B9): the member's own `background-color`,
+        /// admitted ONLY for a GLYPH-LESS member (see `admit`) — a solid
+        /// band behind its advance width (css-backgrounds-3 §2.1), which
+        /// AttributedString.backgroundColor expresses per-range. nil for
+        /// every pre-wave-52 shape, so `isPlain` is untouched by
+        /// construction. Twin: InlineSpanRing.kt `Style.background`.
+        var background: Ink? = nil
 
         /// True when no attribute differs from plain inherited text.
         var isPlain: Bool { self == Style() }
@@ -155,9 +163,17 @@ enum InlineSpanRing {
     /// first offending property named. `Hyphens` is skipped — the fold's
     /// adoption walk owns it (css-text-3 §5.3). Byte-parallel with
     /// InlineSpanRing.kt's admit.
+    ///
+    /// - Parameter glyphless: wave 52 (lane L9) — true when the member's
+    ///   text is white space and nothing else (the fold computes it, twin
+    ///   of InlineRunFold.kt's predicate). Only then may `white-space`
+    ///   (preserving keywords) and `background-color` ride — see the two
+    ///   arms below. Defaults false so every pre-wave-52 caller and pin
+    ///   answers byte-identically.
     static func admit(tag: String,
                       properties: [IRProperty],
-                      hostProperties: [IRProperty]) -> Admission {
+                      hostProperties: [IRProperty],
+                      glyphless: Bool = false) -> Admission {
         // The UA <u> underline (HTML rendering §15.3.3) seeds the style;
         // wave 48 (lane W4) seeds the UA-italic slant and the sup/sub
         // shift the same way (§15.3.4 — a DIRECT member's shift parent is
@@ -176,6 +192,9 @@ enum InlineSpanRing {
         // makes any side real (§3.2 initial `none` paints nothing).
         var borderStyleSeen = false
         var losses: [String] = []
+        // Wave 52 (lane L9) — the member's `hanging-punctuation` keywords,
+        // kept only to NAME the stated loss below (nil = not declared).
+        var hangingKeywords: String? = nil
         for prop in properties {
             switch prop.type {
             // Paragraph policy — the fold's adoption walk owns it.
@@ -241,6 +260,73 @@ enum InlineSpanRing {
                 case "solid", nil: break
                 default: return .refused("member-prop:TextDecorationStyle-unsolid")
                 }
+            // ── Wave 52 (lane L9) — the HANGING-WHITESPACE ring (twin of
+            // InlineSpanRing.kt wave 50 / lane B9) ─────────────────────────
+            // `white-space` is a PARAGRAPH policy: the label lays the merged
+            // string out under ONE mode, so a member cannot carry its own.
+            // The single exception is a member with NO GLYPHS — its text is
+            // white space and nothing else, so the keyword governs only how
+            // that white space is processed, and the fold honours it exactly
+            // by appending the run verbatim (css-text-3 §3: `pre`,
+            // `pre-wrap` and `break-spaces` PRESERVE spaces). `normal`,
+            // `nowrap` and `pre-line` COLLAPSE the run to one space
+            // (§4.1.1 — `pre-line` is `white-space-collapse: preserve-
+            // breaks`, which keeps segment breaks only; skeptic S3) —
+            // appending it verbatim would paint 8 spaces where CSS paints
+            // 1, so those refuse rather than lie. Measured victim:
+            // css-overflow/line-clamp/block-ellipsis-032's `<span
+            // class=hangs>` (8 × U+0020, `white-space: pre-wrap` +
+            // `background-color: red`), whose refusal here bailed the whole
+            // host to the stacked path — ios P 0.9577 on a WRONG render
+            // (`This text is` alone in each 1-line box; the ref paints
+            // `This text is left-aligned…`), while Android folds it since
+            // wave 50.
+            case "WhiteSpace":
+                guard glyphless else { return .refused("member-prop:WhiteSpace") }
+                switch ValueExtractors.extractKeyword(prop.data)?.lowercased()
+                    .replacingOccurrences(of: "_", with: "-") {
+                case "pre", "pre-wrap", "break-spaces": break
+                default: return .refused("member-prop:WhiteSpace-collapsing")
+                }
+            // A GLYPH-LESS member's `background-color` (css-backgrounds-3
+            // §2.1) is a solid band over its advance width — the painting
+            // area of an inline box is its content area (§2.11) —
+            // expressible per-range as AttributedString.backgroundColor,
+            // which is why it rides here while the ATOM ring still refuses
+            // it (an atom has zero advance, so its band would paint
+            // nothing). Glyph-BEARING members keep refusing: there the band
+            // would ride behind real text, and no corpus member exercises
+            // it (the wave-50 census, re-derived for wave 52: 3 glyphless
+            // carriers, all in -032).
+            case "BackgroundColor":
+                guard glyphless else { return .refused("member-prop:BackgroundColor") }
+                guard let band = extractInk(prop.data) else {
+                    return .refused("member-prop:BackgroundColor-unresolved")
+                }
+                style.background = band
+            // ── Wave 52 (lane L9) — `hanging-punctuation` is INERT ───────
+            // css-text-3 §8.3: the property governs whether a punctuation
+            // glyph at the START/END of a LINE hangs outside the line box —
+            // a line-end behaviour of the member's own glyphs, not a paint
+            // or a paragraph policy. Neither native implements it (parse-
+            // only: UnsupportedRubyEmphasisExtractor here, TypographyExtractor's
+            // long-tail list on Compose), so the STACKED block the wave-44
+            // refusal produced — the member on its own line, in the default
+            // ink — is less faithful than a folded line that merely does not
+            // hang: the folded `」` keeps its inherited ink and obeys UAX #14
+            // LB13 (no break before a closing bracket), exactly as web —
+            // which does not hang either — paints it (`字字字` / `字」`,
+            // css-text/hanging-punctuation/hanging-punctuation-inline-001
+            // web P 0.9849). HONEST SCORE NOTE: the ref HANGS the bracket
+            // (one line), and the lane's PNG replay predicts the folded
+            // shape scores LOWER than the stacked one on both natives (ios
+            // 0.9756 → ≈0.969 P, android 0.9495 → ≈0.945 f — tools/titan/
+            // results/wave52-inline-run-wall/replay.json): a correctness
+            // change, not a flip, gated by the device A/B. The keyword list
+            // is kept so the un-hung punctuation is a STATED loss in the
+            // seam's breadcrumb, never a silent drop.
+            case "HangingPunctuation":
+                hangingKeywords = extractHangingKeywords(prop.data)
             // css-break-4 §5 — fragments a box paint this ring does not
             // paint; inert alongside the border stated-loss below.
             case "BoxDecorationBreak":
@@ -264,7 +350,10 @@ enum InlineSpanRing {
         // `smaller` factor — unless the author declared a size (§6.1).
         if uaShiftTags.contains(tag), !declaredFontSize { style.fontSizeEm = 1.0 / 1.2 }
         // A styleless border never paints — only report a REAL box.
-        let stated = borderStyleSeen ? ["border-box-ink(\(losses.joined(separator: ",")))"] : []
+        var stated: [String] = borderStyleSeen ? ["border-box-ink(\(losses.joined(separator: ",")))"] : []
+        // Wave 52 (lane L9): the un-hung punctuation, named per keyword so
+        // the breadcrumb can tell `first` from `last` (css-text-3 §8.3).
+        if let hangingKeywords { stated.append("hanging-punctuation(\(hangingKeywords))") }
         return .admitted(style, statedLossTypes: stated)
     }
 
@@ -446,6 +535,23 @@ enum InlineSpanRing {
         return ValueExtractors.extractKeyword(data).map { [canon($0)] }
     }
 
+    /// Wave 52 (lane L9) — the HangingPunctuation wire: an array of
+    /// keywords (`["LAST"]`, `["FIRST","ALLOW_END"]`, css-text-3 §8.3) or
+    /// one bare keyword (`"none"`), lowercased and comma-joined for the
+    /// stated-loss label. Never refuses: the wire is what the converter
+    /// emitted for a parse-only property, and an unreadable shape simply
+    /// names the loss without keywords (the label is diagnostic only).
+    /// Twin: InlineSpanRing.kt `extractHangingKeywords`.
+    private static func extractHangingKeywords(_ data: IRValue) -> String {
+        if case .array(let items) = data {
+            return items.compactMap { item -> String? in
+                guard case .string(let s) = item else { return nil }
+                return s.lowercased()
+            }.joined(separator: ",")
+        }
+        return ValueExtractors.extractKeyword(data)?.lowercased() ?? ""
+    }
+
     /// Map span offsets from the fold's MERGED string into the label's
     /// final display string. Between the two, the label's only
     /// character-level rewrites are (verified against the actual surgery
@@ -461,7 +567,46 @@ enum InlineSpanRing {
     /// glyphs, logged). Offsets are Character counts; returns the
     /// transformed offset for each original offset 0...count (inclusive
     /// end sentinel). Twin: InlineSpanRing.kt `alignment`.
+    ///
+    /// Wave 52 (lane L9, F4) adds ONE more surgery, tried only when the op
+    /// set above cannot explain the string (every pre-wave-52 answer is
+    /// byte-identical): the drawn-marker clamp's `kept lines + "…"` — see
+    /// `clampedAlignment`.
     static func alignment(original: String, transformed: String) -> [Int]? {
+        // The plain op set first — the wave-47 walk, unchanged — then the
+        // clamp's hidden tail (nil when no marker ends the string).
+        walk(original: original, transformed: transformed, hideTail: false)
+            ?? clampedAlignment(original: original, transformed: transformed)
+    }
+
+    /// Wave 52 (lane L9, F4) — the drawn-marker CLAMP's surgery. The label
+    /// renders a clamped run as `kept lines + "…"` (GreedyLineBreaker
+    /// .clampLines): every original character past the kept prefix is
+    /// HIDDEN — css-overflow-4 §4.2 hides content at the end of the last
+    /// line, at soft wrap opportunities, to make room for the ellipsis —
+    /// and the marker is inserted. Without this arm the walk ran off the
+    /// end of the prefix and answered nil, so block-ellipsis-032's green
+    /// bold member would render un-styled (the seam's fallback) the moment
+    /// the clamp baked its marker. Hidden characters map onto the marker's
+    /// offset, so a wholly hidden member (032's red pre-wrap band) styles
+    /// nothing; the end sentinel stops BEFORE the marker, which is styled
+    /// as the block container's own anonymous inline (css-overflow-4
+    /// §4.2), never as a member's. Twin: InlineSpanRing.kt
+    /// `clampedAlignment`.
+    private static func clampedAlignment(original: String, transformed: String) -> [Int]? {
+        // The ONE marker string the clamp bakes (css-overflow-4 §4.2 `auto`).
+        let marker = GreedyLineBreaker.blockEllipsisMarker
+        // No trailing marker → no clamp surgery to explain: stay unalignable.
+        guard transformed.hasSuffix(marker) else { return nil }
+        // Align against the kept prefix; whatever the prefix leaves is hidden.
+        return walk(original: original,
+                    transformed: String(transformed.dropLast(marker.count)),
+                    hideTail: true)
+    }
+
+    /// The alignment walk proper — see `alignment`; `hideTail` admits the
+    /// clamp's hidden tail once the transformed string is exhausted.
+    private static func walk(original: String, transformed: String, hideTail: Bool) -> [Int]? {
         let orig = Array(original)
         let trans = Array(transformed)
         var map = [Int](repeating: 0, count: orig.count + 1)
@@ -488,6 +633,12 @@ enum InlineSpanRing {
             // materialized hyphen (UA U+2010, ASCII '-').
             if j < trans.count, trans[j] == "\n" || trans[j] == "\u{2010}" || trans[j] == "-" {
                 j += 1
+                continue
+            }
+            // Wave 52 (lane L9, F4): past the clamp's kept prefix every
+            // original char is hidden — it maps onto the marker's offset.
+            if hideTail, j >= trans.count {
+                map[i] = j; i += 1
                 continue
             }
             // Anything else is surgery this map does not model.

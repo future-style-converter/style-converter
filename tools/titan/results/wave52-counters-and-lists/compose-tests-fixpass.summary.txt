@@ -1,0 +1,8 @@
+2026-10-05 19:05 Compose focused run after the skeptic-M1 fix pass (no seam): --tests 'lists.*' 'borders.*' '*MulticolFloatStrip*'
+31 classes, 283 tests, 0 failed (JUnit XML timestamps 17:05:58Z-17:05:59Z; gradle log compose-tests-fixpass.log)
+Delta vs compose-tests-final.summary.txt (281): BorderSideZeroTallBandTest 6 -> 8 (helper-only pins replaced by stroke-line pins).
+Mutations (mutations.log, fix pass, all restores sha256 9f806563... byte-exact):
+  side-bottom   (skeptic mutation 5) -> 3 red (3/5/10 px BOTTOM: was [-3,-2,-1] etc.)
+  side-end                           -> 1 red (0-wide END: was [-3,-2,-1])
+  double-bottom                      -> 2 red (double [-1,-3], groove [-2,-1])
+  band-clamp    (helper body)        -> 6 red (first attempt INVALID: XML not refreshed; re-run log mutation-band-clamp-fixpass.log)

@@ -1,0 +1,485 @@
+{
+ "run": "wave51-fix",
+ "docs": 1435,
+ "m1": [
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "web": "P 0.9656",
+   "ios": "f 0.9321",
+   "android": "f 0.9332",
+   "margin": {
+    "top": 40,
+    "right": 8,
+    "bottom": 8,
+    "left": 8
+   },
+   "display": "TABLE"
+  },
+  {
+   "test": "css/css-backgrounds/background-attachment-margin-root-001.html",
+   "web": "f 0.4511",
+   "ios": "f 0.5031",
+   "android": "f 0.451",
+   "margin": {
+    "top": 50,
+    "right": 50,
+    "bottom": 50,
+    "left": 50
+   },
+   "display": null
+  },
+  {
+   "test": "css/css-backgrounds/background-attachment-margin-root-002.html",
+   "web": "f 0.339",
+   "ios": "f 0.3653",
+   "android": "f 0.3389",
+   "margin": {
+    "top": 50,
+    "right": 50,
+    "bottom": 50,
+    "left": 50
+   },
+   "display": null
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "web": "f 0.9012",
+   "ios": "f 0.903",
+   "android": "f 0.9085",
+   "margin": {
+    "top": 0,
+    "right": 0,
+    "bottom": 0,
+    "left": 200
+   },
+   "display": null
+  },
+  {
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "web": "f 0.9324",
+   "ios": "f 0.9363",
+   "android": "f 0.9372",
+   "margin": {
+    "top": 0,
+    "right": 0,
+    "bottom": 0,
+    "left": 100
+   },
+   "display": null
+  },
+  {
+   "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+   "web": "f 0.8733",
+   "ios": "f 0.8582",
+   "android": "f 0.8528",
+   "margin": {
+    "top": 60,
+    "right": 60,
+    "bottom": 60,
+    "left": 60
+   },
+   "display": null
+  },
+  {
+   "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+   "web": "f 0.8741",
+   "ios": "f 0.8573",
+   "android": "f 0.8506",
+   "margin": {
+    "top": 60,
+    "right": 60,
+    "bottom": 60,
+    "left": 60
+   },
+   "display": null
+  },
+  {
+   "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+   "web": "f 0.8733",
+   "ios": "f 0.8582",
+   "android": "f 0.8528",
+   "margin": {
+    "top": 60,
+    "right": 60,
+    "bottom": 60,
+    "left": 60
+   },
+   "display": null
+  }
+ ],
+ "t1": [
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-006.html",
+   "web": "P 1",
+   "ios": "f 0.9488",
+   "android": "f 0.948",
+   "root": 1,
+   "tag": null,
+   "old": 66,
+   "new": 82,
+   "delta": 16
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-007.html",
+   "web": "P 1",
+   "ios": "f 0.9488",
+   "android": "f 0.948",
+   "root": 1,
+   "tag": null,
+   "old": 66,
+   "new": 82,
+   "delta": 16
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-008.html",
+   "web": "P 1",
+   "ios": "f 0.9488",
+   "android": "f 0.948",
+   "root": 1,
+   "tag": null,
+   "old": 66,
+   "new": 82,
+   "delta": 16
+  }
+ ],
+ "t1UaOnly": [],
+ "t2": [
+  {
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "web": "P 1",
+   "ios": "f 0.9484",
+   "android": "f 0.9486",
+   "root": 1,
+   "tag": null,
+   "old": 32,
+   "new": 16,
+   "delta": -16
+  },
+  {
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "web": "P 1",
+   "ios": "f 0.9484",
+   "android": "f 0.9486",
+   "root": 2,
+   "tag": "p",
+   "old": 48,
+   "new": 32,
+   "delta": -16
+  }
+ ],
+ "t3": [
+  {
+   "test": "css/CSS2/abspos/static-inside-inline-001.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "later-step8-root"
+  },
+  {
+   "test": "css/CSS2/abspos/static-inside-inline-002.html",
+   "web": "P 0.963",
+   "ios": "P 0.9622",
+   "android": "P 0.9617",
+   "root": 1,
+   "why": "later-step8-root"
+  },
+  {
+   "test": "css/CSS2/abspos/static-inside-inline-003.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "later-step8-root"
+  },
+  {
+   "test": "css/CSS2/abspos/table-caption-is-containing-block-001.html",
+   "web": "P 0.992",
+   "ios": "P 0.9903",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/CSS2/abspos/table-caption-passes-abspos-up-001.html",
+   "web": "P 0.9955",
+   "ios": "P 0.9903",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-003.html",
+   "web": "-",
+   "ios": "-",
+   "android": "-",
+   "root": 1,
+   "why": "declared-z 1"
+  },
+  {
+   "test": "css/css-cascade/unset-val-002.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "content-bearing"
+  },
+  {
+   "test": "css/css-flexbox/align-items-007.html",
+   "web": "P 0.999",
+   "ios": "f 0.9974",
+   "android": "f 0.9966",
+   "root": 1,
+   "why": "lifted"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-path-with-zoom.html",
+   "web": "P 1",
+   "ios": "P 1",
+   "android": "P 1",
+   "root": 0,
+   "why": "later-step8-root"
+  },
+  {
+   "test": "css/css-position/overlay/author-overlay-top-layer-removal.html",
+   "web": "-",
+   "ios": "-",
+   "android": "-",
+   "root": 1,
+   "why": "declared-z 999"
+  },
+  {
+   "test": "css/css-position/position-absolute-in-inline-margin-top.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-sizing/aspect-ratio/abspos-011.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "lifted"
+  },
+  {
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-001.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9952",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-002.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9952",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-005.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9952",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-003.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9954",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-004.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9954",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-005.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9954",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-006.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9954",
+   "root": 1,
+   "why": "declared-z -1"
+  },
+  {
+   "test": "css/css-transforms/css-scale-nested-001.html",
+   "web": "P 1",
+   "ios": "P 0.999",
+   "android": "P 0.9981",
+   "root": 1,
+   "why": "content-bearing"
+  },
+  {
+   "test": "css/css-transforms/css-scale-nested-001.html",
+   "web": "P 1",
+   "ios": "P 0.999",
+   "android": "P 0.9981",
+   "root": 0,
+   "why": "later-step8-root"
+  },
+  {
+   "test": "css/css-ui/box-sizing-026.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "root": 1,
+   "why": "declared-z -1"
+  }
+ ],
+ "t3Nested": [
+  {
+   "test": "css/CSS2/abspos/between-float-and-text.html",
+   "web": "P 0.999",
+   "ios": "f 0.922",
+   "android": "f 0.9527",
+   "comp": 2
+  },
+  {
+   "test": "css/css-anchor-position/anchor-center-scroll-001.html",
+   "web": "-",
+   "ios": "-",
+   "android": "-",
+   "comp": 3
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-grid-indefinite-height-min-height-flex-row.html",
+   "web": "P 0.9729",
+   "ios": "P 0.9721",
+   "android": "P 0.9713",
+   "comp": 2
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-grid-stretches-auto-rows.html",
+   "web": "P 1",
+   "ios": "P 0.9721",
+   "android": "P 0.9713",
+   "comp": 2
+  },
+  {
+   "test": "css/css-multicol/abspos-after-spanner-static-pos.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "comp": 6
+  },
+  {
+   "test": "css/css-multicol/abspos-after-spanner.html",
+   "web": "P 0.999",
+   "ios": "P 0.9974",
+   "android": "P 0.9967",
+   "comp": 3
+  },
+  {
+   "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+   "web": "P 1",
+   "ios": "f 0.999",
+   "android": "P 0.998",
+   "comp": 2
+  }
+ ],
+ "t6": [
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "web": "P 0.9656",
+   "ios": "f 0.9321",
+   "android": "f 0.9332",
+   "root": 3,
+   "tag": "p"
+  }
+ ],
+ "flaggedEm": [
+  "css/CSS2/floats-clear/floats-clear-multicol-000.html",
+  "css/CSS2/floats-clear/floats-clear-multicol-001.html",
+  "css/CSS2/floats-clear/floats-clear-multicol-002.html",
+  "css/CSS2/floats-clear/floats-clear-multicol-003.html",
+  "css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html",
+  "css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html",
+  "css/CSS2/floats-clear/floats-clear-multicol-balancing-002.html",
+  "css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html",
+  "css/css-break/block-max-height-001.html",
+  "css/css-break/block-max-height-001b.html",
+  "css/css-break/block-max-height-002.html",
+  "css/css-break/block-max-height-002b.html",
+  "css/css-break/block-max-height-003.html",
+  "css/css-break/block-max-height-003b.html",
+  "css/css-break/block-min-height-001.html",
+  "css/css-break/block-min-height-001b.html",
+  "css/css-cascade/all-prop-001.html",
+  "css/css-color/a98rgb-001.html",
+  "css/css-color/a98rgb-002.html",
+  "css/css-color/a98rgb-003.html",
+  "css/css-color/a98rgb-004.html",
+  "css/css-color/at-color-profile-001.html",
+  "css/css-color/color-mix-percents-01.html",
+  "css/css-color/color-mix-percents-02.html",
+  "css/css-color/display-p3-001.html",
+  "css/css-color/display-p3-002.html",
+  "css/css-color/display-p3-003.html",
+  "css/css-color/display-p3-004.html",
+  "css/css-color/display-p3-005.html",
+  "css/css-color/display-p3-006.html",
+  "css/css-color/display-p3-linear-001.html",
+  "css/css-color/display-p3-linear-002.html",
+  "css/css-color/display-p3-linear-003.html",
+  "css/css-color/display-p3-linear-004.html",
+  "css/css-color/display-p3-linear-005.html",
+  "css/css-color/display-p3-linear-006.html",
+  "css/css-color/hex-001.html",
+  "css/css-color/hex-002.html",
+  "css/css-counter-styles/counter-style-at-rule/disclosure-styles.html",
+  "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+  "css/css-overflow/line-clamp/block-ellipsis-029.html",
+  "css/css-overflow/line-clamp/block-ellipsis-030.html",
+  "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+  "css/css-overflow/line-clamp/discard/discard-multicol-001.html",
+  "css/css-overflow/line-clamp/discard/discard-multicol-002.html",
+  "css/css-overflow/line-clamp/discard/discard-multicol-003.html",
+  "css/css-overflow/line-clamp/discard/discard-multicol-004.html",
+  "css/css-text/hyphens/hyphens-manual-010.html",
+  "css/css-text/hyphens/hyphens-manual-inline-010.html",
+  "css/css-text/hyphens/hyphens-none-011.html",
+  "css/css-text-decor/text-decoration-dotted-001.html",
+  "css/css-text-decor/text-decoration-dotted-002.html",
+  "css/css-text-decor/text-decoration-propagation-04.html",
+  "css/css-writing-modes/direction-upright-001.html",
+  "css/css-writing-modes/direction-upright-002.html",
+  "css/css-writing-modes/inline-box-border-vlr-001.html",
+  "css/selectors/has-style-sharing-001.html",
+  "css/selectors/has-style-sharing-002.html"
+ ],
+ "fixATripwire": {
+  "overrun-right": {
+   "web": 73,
+   "ios": 63,
+   "android": 72
+  },
+  "overrun-left": {
+   "ios": 42,
+   "web": 29,
+   "android": 13
+  },
+  "sameSize": {
+   "overrun-right": 192,
+   "overrun-left": 82
+  }
+ }
+}

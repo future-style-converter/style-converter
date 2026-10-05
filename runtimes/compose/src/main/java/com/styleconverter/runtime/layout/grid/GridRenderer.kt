@@ -381,7 +381,17 @@ object GridRenderer {
                         // block-level self-alignment wrapper inside
                         // RenderComponent, same rule as the placed cells.
                         androidx.compose.runtime.CompositionLocalProvider(
-                            ComponentRenderer.LocalSelfAlignmentHandled provides true
+                            ComponentRenderer.LocalSelfAlignmentHandled provides true,
+                            // Wave 52 (lane L7, T1): this overlay OWNS the
+                            // child's static position (css-grid-1 §9.2), so
+                            // the RC1 zero-flow mount must stand down for
+                            // exactly this instance — otherwise the Box above
+                            // aligns a 0×0 placeable (ink at factor × content,
+                            // +25/+50 px on the grid-abspos-staticpos family).
+                            // Identity-scoped: nested static-position boxes
+                            // inside the child keep their zero-flow mount.
+                            com.styleconverter.runtime.layout.position.CanvasRootHoist
+                                .LocalStaticPositionOwner provides child
                         ) {
                             ComponentRenderer.RenderComponent(
                                 child,
@@ -857,11 +867,41 @@ object GridRenderer {
     }
 
     /**
+     * Wave 52 (lane L7, T1 sub-defect) — the ONE `align-items` keyword fold
+     * into the renderer enum, called by ComponentRenderer's display-config
+     * extraction for every container (flex, grid, block) and pinned here.
+     * css-align-3 §6.1 / §4.3: `self-start` / `self-end` are positional
+     * keywords; for a box whose writing mode matches its container's — the
+     * runtime's LTR horizontal-tb normalization — they equal start / end.
+     * Before wave 52 the inline fold had no arm for them, so they fell to
+     * STRETCH and the abspos mark of grid-abspos-staticpos-align-items-self-end
+     * painted at START (−50 px, android P 0.9715; census: the only two
+     * corpus carriers are that test and its -large-border-padding twin).
+     * Accepts the typed UPPER_SNAKE wire and the hyphenated CSS spelling.
+     */
+    internal fun foldAlignItems(keyword: String?): ComponentRenderer.AlignItems =
+        when (keyword?.uppercase()) {
+            // The lone center keyword.
+            "CENTER" -> ComponentRenderer.AlignItems.CENTER
+            // start family (+ self-start, wave 52).
+            "FLEX_START", "FLEX-START", "START", "SELF_START", "SELF-START" ->
+                ComponentRenderer.AlignItems.FLEX_START
+            // end family (+ self-end, wave 52).
+            "FLEX_END", "FLEX-END", "END", "SELF_END", "SELF-END" ->
+                ComponentRenderer.AlignItems.FLEX_END
+            // First-baseline alignment (unchanged).
+            "BASELINE" -> ComponentRenderer.AlignItems.BASELINE
+            // normal / stretch / unknown → the initial stretch behaviour.
+            else -> ComponentRenderer.AlignItems.STRETCH
+        }
+
+    /**
      * Container align-items → static-position Base for the block axis.
      * STRETCH (the initial value) and BASELINE make no positional claim for
      * an abspos box (stretch cannot stretch an out-of-flow child —
      * css-flexbox-1 §4.1's precedent, same as the flex path) → null lets
-     * the chain hit the START default.
+     * the chain hit the START default. Its input is already folded by
+     * [foldAlignItems] (self-start/self-end arrive as FLEX_START/FLEX_END).
      */
     internal fun alignItemsBase(
         a: ComponentRenderer.AlignItems

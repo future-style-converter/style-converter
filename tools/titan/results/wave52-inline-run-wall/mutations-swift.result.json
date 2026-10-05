@@ -1,0 +1,212 @@
+{
+ "cmd": [
+  "xcodebuild",
+  "test",
+  "-scheme",
+  "StyleConverterRuntime",
+  "-destination",
+  "platform=macOS,variant=Mac Catalyst,arch=arm64",
+  "-derivedDataPath",
+  "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/dd",
+  "-only-testing:StyleConverterRuntimeTests/InlineSpanRingTests",
+  "-only-testing:StyleConverterRuntimeTests/InlineRunFlowTests",
+  "-only-testing:StyleConverterRuntimeTests/GreedyLineBreakerTests"
+ ],
+ "results": [
+  {
+   "id": "S1-hanging-punctuation-arm",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "exit": 65,
+   "sha256Before": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "sha256After": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "expectFail": {
+    "testHangingPunctuationIsAdmittedInertWithItsKeywordsNamed": true,
+    "testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:977: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(\"\u5b57\u5b57\u5b57\u5b57\u300d\")\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:980: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(1)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:981: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(true)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:982: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional([\"hanging-punctuation(last)\"])\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:983: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(4)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:984: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(5)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:985: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(0)\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineRunFlowTests testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine]' failed (2.642 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:275: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testHangingPunctuationIsAdmittedInertWithItsKeywordsNamed] : failed - expected admission, got refused(\"member-prop:HangingPunctuation\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testHangingPunctuationIsAdmittedInertWithItsKeywordsNamed]' failed (0.001 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S2-glyphless-whitespace-guard",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "exit": 65,
+   "sha256Before": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "sha256After": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "expectFail": {
+    "testGlyphlessPreWrapMemberAdmitsItsPreservedSpacesAndBand": true,
+    "testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless": true,
+    "testBlockEllipsis032HangingWhitespaceMemberFolds": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:935: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(\"This text is left-aligned        Clamped\")\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:938: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(2)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:939: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(13)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:940: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(25)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:941: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(700)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:943: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(25)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:944: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(33)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:945: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(StyleConverterRuntime.InlineSpanRing.Ink(r: 1.0, g: 0.0, b: 0.0, a: 1.0))\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:947: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(0)\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds]' failed (0.883 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:253: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless] : XCTAssertEqual failed: (\"Optional(\"member-prop:WhiteSpace\")\") is not equal to (\"Optional(\"member-prop:WhiteSpace-collapsing\")\") - NORMAL",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:253: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless] : XCTAssertEqual failed: (\"Optional(\"member-prop:WhiteSpace\")\") is not equal to (\"Optional(\"member-prop:WhiteSpace-collapsing\")\") - NOWRAP",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless]' failed (0.003 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:206: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testGlyphlessPreWrapMemberAdmitsItsPreservedSpacesAndBand] : failed - expected admission, got refused(\"member-prop:WhiteSpace\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testGlyphlessPreWrapMemberAdmitsItsPreservedSpacesAndBand]' failed (0.001 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S3-glyphless-default-true",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "exit": 65,
+   "sha256Before": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "sha256After": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "expectFail": {
+    "testBordersAreAStatedLossStylelessBordersInertUnknownPropsRefuse": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:181: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testBordersAreAStatedLossStylelessBordersInertUnknownPropsRefuse] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(\"member-prop:WhiteSpace\")\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testBordersAreAStatedLossStylelessBordersInertUnknownPropsRefuse]' failed (1.818 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S4-fold-glyphless-predicate",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineRunFlow.swift",
+   "exit": 65,
+   "sha256Before": "ecbeea811026c1874705eb5df7dbee1b84bd58b64b0180d5e53d4ad1435ec577",
+   "sha256After": "ecbeea811026c1874705eb5df7dbee1b84bd58b64b0180d5e53d4ad1435ec577",
+   "expectFail": {
+    "testBlockEllipsis032HangingWhitespaceMemberFolds": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:935: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(\"This text is left-aligned        Clamped\")\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:938: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(2)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:939: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(13)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:940: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(25)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:941: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(700)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:943: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(25)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:944: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(33)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:945: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(StyleConverterRuntime.InlineSpanRing.Ink(r: 1.0, g: 0.0, b: 0.0, a: 1.0))\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift:947: error: -[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(0)\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineRunFlowTests testBlockEllipsis032HangingWhitespaceMemberFolds]' failed (1.885 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S5-alignment-clamp-tail",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "exit": 65,
+   "sha256Before": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "sha256After": "b8e6ecfa2e0a71de2308a6ae6d9144858a841707944ca9f900b1128290a56608",
+   "expectFail": {
+    "testClampTrimmed032ParagraphStillAlignsItsMembers": true,
+    "testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:502: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(5)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:503: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(6)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:504: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(8)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:505: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(8)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:506: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(8)\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery]' failed (5.436 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:488: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTrimmed032ParagraphStillAlignsItsMembers] : XCTAssertNotNil failed",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:490: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTrimmed032ParagraphStillAlignsItsMembers] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(13)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:491: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTrimmed032ParagraphStillAlignsItsMembers] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(25)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:493: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTrimmed032ParagraphStillAlignsItsMembers] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(25)\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:495: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testClampTrimmed032ParagraphStillAlignsItsMembers] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(25)\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testClampTrimmed032ParagraphStillAlignsItsMembers]' failed (0.011 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S6-band-attribute",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/TypographyApplier.swift",
+   "exit": 65,
+   "sha256Before": "42674a22ddcba667422b4b528ed31951f715adb96b878078c0402e563902c42b",
+   "sha256After": "42674a22ddcba667422b4b528ed31951f715adb96b878078c0402e563902c42b",
+   "expectFail": {
+    "testGlyphlessBandRidesTheRunAsABackgroundAttribute": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:517: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testGlyphlessBandRidesTheRunAsABackgroundAttribute] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(#FF0000FF)\")",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testGlyphlessBandRidesTheRunAsABackgroundAttribute]' failed (2.733 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S7-drawn-clamp-extractor-guard",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "ee9502b8d5b9b897bc63df5580b47160e8eb6d83ad068392627056993ebb56bb",
+   "sha256After": "ee9502b8d5b9b897bc63df5580b47160e8eb6d83ad068392627056993ebb56bb",
+   "expectFail": {
+    "testDrawnClampOnlyForAFixedCountLineClampWithAMarker": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:130: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testDrawnClampOnlyForAFixedCountLineClampWithAMarker] : XCTAssertNil failed: \"Clamp(lines: 5, marker: \"\u2026\")\"",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:135: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testDrawnClampOnlyForAFixedCountLineClampWithAMarker] : XCTAssertNil failed: \"Clamp(lines: 4, marker: \"\u2026\")\"",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testDrawnClampOnlyForAFixedCountLineClampWithAMarker]' failed (0.675 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S8-f4-fit-loop",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "ee9502b8d5b9b897bc63df5580b47160e8eb6d83ad068392627056993ebb56bb",
+   "sha256After": "ee9502b8d5b9b897bc63df5580b47160e8eb6d83ad068392627056993ebb56bb",
+   "expectFail": {
+    "testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone": true,
+    "testClampDropsTrailingWordsUntilTheMarkerFits": true,
+    "testClampMeasuresACustomMarkerAsARealGlyphRun": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:68: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDropsTrailingWordsUntilTheMarkerFits] : XCTAssertEqual failed: (\"[\"aa bb\", \"cc dd\u2026\"]\") is not equal to (\"[\"aa bb\", \"cc\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDropsTrailingWordsUntilTheMarkerFits]' failed (2.084 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:92: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampMeasuresACustomMarkerAsARealGlyphRun] : XCTAssertEqual failed: (\"[\"aa bb\", \"cc dd[more]\"]\") is not equal to (\"[\"aa bb\", \"[more]\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampMeasuresACustomMarkerAsARealGlyphRun]' failed (0.002 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:43: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone] : XCTAssertEqual failed: (\"[\"Test passes if there are 4 lines\", \"and the last one only contains \u2026\", \"supercalifragilisticexpialidocious\", \"supercalifragilisticexpialidocious\u2026\"]\") is not equal to (\"[\"Test passes if there are 4 lines\", \"and the last one only contains \u2026\", \"supercalifragilisticexpialidocious\", \"\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone]' failed (0.001 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "S9-f4-trim-skipped",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "ee9502b8d5b9b897bc63df5580b47160e8eb6d83ad068392627056993ebb56bb",
+   "sha256After": "ee9502b8d5b9b897bc63df5580b47160e8eb6d83ad068392627056993ebb56bb",
+   "expectFail": {
+    "testClampAppendsTheMarkerToAFittingLastLine": true,
+    "testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone": true,
+    "testClampCountsHardBrokenLinesTowardTheCap": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:57: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampAppendsTheMarkerToAFittingLastLine] : XCTAssertEqual failed: (\"[\"aa bb\", \"cc dd\", \"ee ff\"]\") is not equal to (\"[\"aa bb\", \"cc dd\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampAppendsTheMarkerToAFittingLastLine]' failed (1.210 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:104: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampCountsHardBrokenLinesTowardTheCap] : XCTAssertEqual failed: (\"[\"Line 1\", \"Line 2\", \"Line 3\", \"Line 4\"]\") is not equal to (\"[\"Line 1\", \"Line 2\", \"Line 3\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampCountsHardBrokenLinesTowardTheCap]' failed (0.001 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:68: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDropsTrailingWordsUntilTheMarkerFits] : XCTAssertEqual failed: (\"[\"aa bb\", \"cc dd\", \"ee\"]\") is not equal to (\"[\"aa bb\", \"cc\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDropsTrailingWordsUntilTheMarkerFits]' failed (0.002 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:92: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampMeasuresACustomMarkerAsARealGlyphRun] : XCTAssertEqual failed: (\"[\"aa bb\", \"cc dd\", \"ee\"]\") is not equal to (\"[\"aa bb\", \"[more]\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampMeasuresACustomMarkerAsARealGlyphRun]' failed (0.001 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:43: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone] : XCTAssertEqual failed: (\"[\"Test passes if there are 4 lines\", \"and the last one only contains \u2026\", \"supercalifragilisticexpialidocious\", \"supercalifragilisticexpialidocious\", \"Test fails: this should not be\", \"visible\"]\") is not equal to (\"[\"Test passes if there are 4 lines\", \"and the last one only contains \u2026\", \"supercalifragilisticexpialidocious\", \"\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone]' failed (0.002 seconds)."
+   ],
+   "proven": true
+  }
+ ]
+}

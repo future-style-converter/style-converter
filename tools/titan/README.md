@@ -214,6 +214,19 @@ with ΔE ≥ 2.3), and `novelInkFailed` only when `TITAN_NOVEL_INK_VETO=1`
 (shipped DISARMED: 66.7 % / 16.7 % recall, BACKLOG obligation #4). The
 `divergence` label on each cell is TRIAGE ONLY — it never feeds `wptPass`.
 
+`scoreExcluded` is `true` (a whole-test exclusion family) or a per-cell STRING
+naming the reason — `'native-font-parity'` (the two native cells of a listed
+test) and, from wave 52 (corpus-v6.18), `'absence-only'`: a PASS whose ref
+carries no ink (`semanticPresence.bCoveragePct < 0.02`, the presence gate's own
+floor) is the pass a capture with no ink at all would also receive, so it is
+stamped `wptPass: null` and leaves numerator and denominator by name (19 cells
+on wave51-fix; a FAIL on a blank ref stays scored). The truthiness test above
+drops every stamp byte-for-byte; a cell whose stamp is later REMOVED prints as
+NEWLY MEASURED in `score-gate.mjs`, never LOST. Every diff also carries the
+triage-only `captureUniform` / `refUniform` (one RGBA value, or null) and
+`blankCaptureVsInkedRef`; the inject log prints `absence-only=<n>
+blank-captures=<n>` and names every cell of both classes.
+
 A PASS is not a correct render. Wave-49 lane I1 opened 78 randomly drawn
 passing cells by eye and found 27 visibly wrong (BACKLOG obligation #3); the
 committed red-square census below is the one slice of that class a rule
@@ -231,7 +244,7 @@ One file per gated wave, same shape every time (verified on `corpus-v6-15`):
 | `wptRef`, `devSha`, `date` | corpus pin, tree, date |
 | `bucket`, `sampling` | `A`; `30 sections x 48 bucket-A tests (depth-48)` |
 | `passThreshold`, `criterion` | 0.95 and the prose of `computeWptPass` + the exclusion families in force |
-| `canvasBoundary` | the ref canvas contract (`CANVAS_REV`, currently `white-black-ink-font-lh-imgpad-htmlpins`) |
+| `canvasBoundary` | the ref canvas contract (`CANVAS_REV`, currently `white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin` — wave 52: the canvas background on the root only, and the UA body box for test-declares/ref-relies-on-UA pairs) |
 | `totals`, `sections` | `{web,ios,android: {passing, measured}}` overall and per section, by the idiom above |
 | `reproduce` | the exact command line |
 

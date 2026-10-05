@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.FragmentGeometryTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.229Z" hostname="mac-1.home" time="0.008">
+  <properties/>
+  <testcase name="S3 - C 240 uses exactly two of three columns" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <testcase name="near-max child height does not overflow the ceiling math" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <testcase name="S5 - single column keeps one fragment and clips the tail" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <testcase name="S1 - C 350 in three 120-tall columns fragments into all three" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <testcase name="S4 - C 500 caps at three fragments with the tail clipped" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <testcase name="overflowing child is measured once with unbounded block-size" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.005"/>
+  <testcase name="S2 - C 100 fits in one column - single identity fragment" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <testcase name="extractor flags vertical writing modes so the layout can bail" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.002"/>
+  <testcase name="bails are logged once instead of silently falling through" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.001"/>
+  <testcase name="applier replays one child draw per fragment via clip plus translate" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <testcase name="degenerate inputs are floored defensively" classname="com.styleconverter.runtime.columns.FragmentGeometryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

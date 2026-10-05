@@ -35,6 +35,224 @@ package com.styleconverter.runtime.typography.wrapping
  */
 object GreedyLineBreaker {
 
+    /** css-overflow-4 §4.2 — the UA `block-ellipsis: auto` string. U+2026
+     *  HORIZONTAL ELLIPSIS is what Chromium paints, hence what every
+     *  frozen line-clamp ref carries (block-ellipsis-025's fourth line is
+     *  this one glyph alone). */
+    const val BLOCK_ELLIPSIS_MARKER: String = "…"
+
+    /**
+     * Wave 52 (lane L9) — a fixed-count `line-clamp` whose marker is DRAWN
+     * (css-overflow-4 §5.1: `line-clamp: <n>` expands to `max-lines: <n>` +
+     * `block-ellipsis: auto`; §4.2: `auto` = the UA ellipsis). The caller
+     * passes null for a marker-suppressed clamp (`no-ellipsis` / `""`,
+     * LineClampWire.markerSuppressed) and for the `max-lines` longhand
+     * alone (block-ellipsis initial `none` — no marker).
+     *
+     * @property lines the cap N — lines past it are hidden.
+     * @property marker the string placed at the end of line N; a REAL
+     *   character in the returned string, measured and rendered like any
+     *   other glyph — the fit test is honest only because of that.
+     */
+    data class Clamp(val lines: Int, val marker: String = BLOCK_ELLIPSIS_MARKER)
+
+    /**
+     * Wave 52 (lane L9) — apply a drawn-marker [clamp] to greedy [lines]:
+     * keep lines 1…N and, on line N, hide content back to the LATEST soft
+     * wrap opportunity at which `kept + marker` fits [maxWidth]
+     * ([clampHead]); when none fits the line is the marker alone. This is css-overflow-4
+     * §4.2's placement rule as Chromium performs it — content at the end of
+     * the last line is hidden at soft wrap opportunities until the ellipsis
+     * FITS, never a character-level truncation: block-ellipsis-025's ref
+     * shows the whole 34ch `supercalifragilisticexpialidocious` displaced
+     * off line 4 (it overflows the 32.5ch box, so even "word + …" cannot
+     * fit) leaving `…` alone, where SwiftUI's tail truncation appended `…`
+     * AFTER the full word (ios f 0.9495) and Compose's Clip painted no
+     * marker at all (android P 0.9607, the wrong picture).
+     *
+     * Identity — the SAME list instance — when the paragraph fits the cap
+     * (a clamp only ever REMOVES lines) or the cap is non-positive, so a
+     * caller can detect "the clamp trimmed" by reference (PreBreakPipeline
+     * pairs a trimmed result with `softWrap = false` + Visible, the marker
+     * being baked into the string; TextOverflow.Ellipsis there would trip
+     * the finalMaxLines landmine the wave-39 banner documents). ALSO the
+     * same instance when line N's hidden tail would cross an opportunity
+     * the walk does not model ([clampHead] → null): the fired run then
+     * keeps its wave-51 shape (no marker baked), logged once.
+     *
+     * @param source wave 52 fix pass (skeptic M1) — the run's text as the
+     *   fold received it, so line N's whole words get back the U+00AD soft
+     *   hyphens the display string dropped ([markedLine]):
+     *   block-ellipsis-028's ref hides `cally` at `uncharacteristi<U+00AD>cally`'s
+     *   soft hyphen and paints `uncharacteristi‐…`. null = no soft hyphens.
+     * @param hyphenChar the glyph a soft-hyphen cut paints (css-text-3
+     *   §5.3) — the same one the fold paints at a taken soft hyphen.
+     */
+    @JvmStatic
+    fun clampLines(
+        lines: List<String>,
+        clamp: Clamp,
+        maxWidth: Float,
+        measure: (String) -> Float,
+        source: String? = null,
+        hyphenChar: String = WordBreakOpportunities.DEFAULT_HYPHEN_CHARACTER
+    ): List<String> {
+        // Nothing hidden → nothing to mark (a 4-line clamp on a 3-line
+        // paragraph paints no ellipsis, css-overflow-4 §4.2 "if content
+        // overflows").
+        if (clamp.lines <= 0 || lines.size <= clamp.lines) return lines
+        val kept = lines.subList(0, clamp.lines).toMutableList()
+        val last = kept[clamp.lines - 1]
+        // The whole of line N plus the marker fits: nothing to hide.
+        if (measure(last + clamp.marker) <= maxWidth) {
+            kept[clamp.lines - 1] = last + clamp.marker
+            return kept
+        }
+        // Hide back to the latest opportunity that leaves room, or decline.
+        val head = clampHead(markedLine(last, source), clamp.marker, maxWidth, measure, hyphenChar)
+        if (head == null) {
+            // No silent fallthrough: the wave-51 shape stays, named once.
+            warnUnmodelledOnce()
+            return lines
+        }
+        kept[clamp.lines - 1] = head + clamp.marker
+        return kept
+    }
+
+    /**
+     * Wave 52 fix pass (skeptic M1) — the longest prefix of [marked] (line
+     * N, untaken soft hyphens restored) that ends at a soft wrap
+     * opportunity and fits beside [marker]; "" when none does; null =
+     * DECLINE. css-overflow-4 §4.2 hides content "at soft wrap
+     * opportunities", and the fold's U+0020-only word split is coarser than
+     * UAX #14: block-ellipsis-030 is `123<U+1680>5 789` at 5ch, whose OGHAM
+     * SPACE MARK (class BA) the ref breaks at (`123…`), where a U+0020-only
+     * cut found nothing and baked `…` alone. The walk goes from the END,
+     * boundary by boundary, so the first fit is the latest. It declines the
+     * moment the hidden tail holds an ideograph or an SA-script letter
+     * (UAX #14 ID / SA: opportunities between letters, which only a class
+     * table or a dictionary can place) — a later opportunity might exist
+     * there. Twin: GreedyLineBreaker.swift `clampHead`.
+     */
+    @JvmStatic
+    fun clampHead(
+        marked: String,
+        marker: String,
+        maxWidth: Float,
+        measure: (String) -> Float,
+        hyphenChar: String
+    ): String? {
+        // Code points, not UTF-16 units, so both twins index identically.
+        val s = marked.codePoints().toArray()
+        var p = s.size - 1
+        // Boundary p sits between s[p-1] and s[p]; s[p..] is hidden.
+        while (p >= 1) {
+            // The hidden tail just grew by s[p] — an unmodelled class ends it.
+            if (unmodelledOpportunity(s[p])) return null
+            val head = cutHead(s, p, hyphenChar)
+            if (head != null && measure(head + marker) <= maxWidth) return head
+            p--
+        }
+        // Nothing fits: the whole line is hidden (025's 34ch word), unless
+        // its first code point is itself an unmodelled opportunity.
+        if (s.isNotEmpty() && unmodelledOpportunity(s[0])) return null
+        return ""
+    }
+
+    /** Break-after hyphens and dashes (UAX #14 HY / BA / B2). */
+    private val CLAMP_DASHES = intArrayOf(0x2D, 0x2010, 0x2013, 0x2014)
+
+    /** The kept DISPLAY text when line N breaks at boundary [p], or null when
+     *  UAX #14 (as approximated here) gives no opportunity there. */
+    private fun cutHead(s: IntArray, p: Int, hyphenChar: String): String? {
+        val before = s[p - 1]
+        val after = s[p]
+        // §5.3: a soft-hyphen break paints the hyphenate character.
+        var suffix = ""
+        when {
+            // Before a space run (SP / BA spaces): it hangs and is hidden
+            // with the tail (css-text-3 §4.1.3) — 030's U+1680, 029's U+0020.
+            isClampSeparator(after) && !isClampSeparator(before) -> Unit
+            // ZERO WIDTH SPACE (ZW): breaks after it; inkless, so cutting
+            // before it paints the same picture.
+            after == 0x200B -> Unit
+            // An untaken soft hyphen (manual): taken here, so it paints —
+            // unless a literal hyphen already ends the head (`analyze`'s rule).
+            after == 0xAD && !isClampSeparator(before) ->
+                suffix = if (before == 0x2D || before == 0x2010) "" else hyphenChar
+            // Break AFTER a hyphen or dash — not word-initial (UAX #14
+            // LB20.1) and not HY × NU (`1-2`), as `analyze` rules.
+            before in CLAMP_DASHES && p >= 2 && !isClampSeparator(after) &&
+                !isClampSeparator(s[p - 2]) &&
+                !((before == 0x2D || before == 0x2010) && after in 0x30..0x39) -> Unit
+            // Anything else: no opportunity at this boundary.
+            else -> return null
+        }
+        // Remaining soft hyphens have no advance; trailing spaces/ZWSP hang.
+        val head = s.copyOfRange(0, p).filter { it != 0xAD }.toMutableList()
+        while (head.isNotEmpty() && (isClampSeparator(head.last()) || head.last() == 0x200B)) {
+            head.removeAt(head.size - 1)
+        }
+        // Rebuild the display string code point by code point.
+        val out = StringBuilder()
+        head.forEach { out.appendCodePoint(it) }
+        return out.toString() + suffix
+    }
+
+    /** UAX #14 space separators that are break opportunities (SP and the
+     *  BA-class Zs), i.e. Zs minus the no-break U+00A0 / U+2007 / U+202F. */
+    private fun isClampSeparator(c: Int): Boolean =
+        c == 0x20 || c == 0x09 || c == 0x1680 || c in 0x2000..0x2006 ||
+            c in 0x2008..0x200A || c == 0x205F || c == 0x3000
+
+    /** Code points whose opportunities sit BETWEEN letters (ID ideographs,
+     *  Hangul, fullwidth forms; SA Thai/Lao/Myanmar/Khmer/Tai) — the classes
+     *  the walk cannot place, so a hidden tail holding one declines. */
+    private fun unmodelledOpportunity(c: Int): Boolean =
+        (c in 0x2E80..0x9FFF && c != 0x3000) || c in 0xAC00..0xD7AF ||
+            c in 0xF900..0xFAFF || c in 0xFF00..0xFFEF || c in 0x20000..0x3FFFF ||
+            c in 0x0E00..0x0EFF || c in 0x1000..0x109F || c in 0x1780..0x17FF ||
+            c in 0x1950..0x19DF || c in 0x1A20..0x1AAF || c in 0xAA60..0xAADF
+
+    /**
+     * Line N with each WHOLE word's untaken soft hyphens restored from
+     * [source] (the display word → its raw spelling). A word split across
+     * lines N-1/N matches nothing and keeps its display text — its soft
+     * hyphens are a stated loss (the clamp then hides it whole).
+     */
+    @JvmStatic
+    fun markedLine(line: String, source: String?): String {
+        // No soft hyphen anywhere → the display line IS the marked line.
+        if (source == null || source.indexOf('\u00AD') < 0) return line
+        val raw = HashMap<String, String>()
+        // The fold's own word split (U+0020, paragraphs at "\n").
+        for (word in source.split(' ', '\n')) {
+            // Only soft-hyphen carriers differ from their display text.
+            if (word.indexOf('\u00AD') < 0) continue
+            // First spelling wins; analyze() is the fold's display mapping.
+            raw.getOrPut(WordBreakOpportunities.analyze(word).text) { word }
+        }
+        // Token-wise: the fold joins every line's words with ONE U+0020.
+        return line.split(' ').joinToString(" ") { raw[it] ?: it }
+    }
+
+    /** Set once the decline below has been logged (warn once, not per frame). */
+    private val unmodelledWarned = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /** The decline's breadcrumb — guarded because the JVM suite has no
+     *  android.util.Log (the runCatching idiom LineClampCapResolve uses). */
+    private fun warnUnmodelledOnce() {
+        // First sighting only.
+        if (!unmodelledWarned.compareAndSet(false, true)) return
+        runCatching {
+            android.util.Log.w(
+                "LineClamp",
+                "line-clamp: the hidden tail crosses an ideographic / SA-script break " +
+                    "opportunity the clamp walk does not model; no marker is baked",
+            )
+        }
+    }
+
     /**
      * Break [text] into greedy lines at [maxWidth]: words accumulate
      * left-to-right and a word moves to the next line the moment the
@@ -73,6 +291,10 @@ object GreedyLineBreaker {
      *   would override). A REAL character in the returned string, so it
      *   is measured and rendered like any other glyph — a line that ends
      *   in a hyphen must fit WITH the hyphen.
+     * @param clamp wave 52 (lane L9) — a drawn-marker `line-clamp`, or
+     *   null (every pre-wave-52 caller): the greedy lines are trimmed to
+     *   the cap with the marker placed by [clampLines]. Both twins take it
+     *   in the same position with the same default.
      */
     @JvmStatic
     @JvmOverloads
@@ -80,7 +302,22 @@ object GreedyLineBreaker {
         text: String,
         maxWidth: Float,
         measure: (String) -> Float,
-        hyphenChar: String = WordBreakOpportunities.DEFAULT_HYPHEN_CHARACTER
+        hyphenChar: String = WordBreakOpportunities.DEFAULT_HYPHEN_CHARACTER,
+        clamp: Clamp? = null
+    ): List<String> {
+        // The fold proper (below), then the wave-52 clamp trim over it —
+        // identity when no clamp rides, byte-for-byte the wave-41 result.
+        val folded = fold(text, maxWidth, measure, hyphenChar)
+        // `text` rides along so the clamp sees line N's soft hyphens.
+        return clamp?.let { clampLines(folded, it, maxWidth, measure, text, hyphenChar) } ?: folded
+    }
+
+    /** The greedy fold itself — see [lines] for the contract. */
+    private fun fold(
+        text: String,
+        maxWidth: Float,
+        measure: (String) -> Float,
+        hyphenChar: String
     ): List<String> {
         val out = ArrayList<String>()
         // Hard breaks split paragraphs; each wraps independently.

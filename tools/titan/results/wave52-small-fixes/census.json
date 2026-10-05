@@ -1,0 +1,434 @@
+{
+ "run": "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave51-fix",
+ "docs": 1435,
+ "t5": {
+  "hiddenTotal": 18,
+  "hiddenPreserve3d": 1,
+  "hiddenPreserve3dWithChildren": 1,
+  "hiddenFlat": 17,
+  "hiddenFlatWithChildren": 11,
+  "backFacingHidden": 12,
+  "ownDecorationOnCulledPreserve3d": 0,
+  "carriers": [
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__composited-under-rotateY-180deg-preserve-3d",
+    "id": "wpt__css-transforms__composited-under-rotatey-180deg-preserve-3d__0-091",
+    "backFacing": true,
+    "children": 1,
+    "ownDecoration": {
+     "background": false,
+     "backgroundImage": false,
+     "border": false,
+     "text": false,
+     "boxShadow": false,
+     "outline": false
+    }
+   }
+  ],
+  "flatBackFacingCarriers": [
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__backface-visibility-hidden-001",
+    "id": "backface-visibility-hidden-001__1__0__0-043",
+    "children": 0
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__backface-visibility-hidden-002",
+    "id": "wpt__css-transforms__backface-visibility-hidden-002__1-046",
+    "children": 0
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__backface-visibility-hidden-004",
+    "id": "backface-visibility-hidden-004__1__0-055",
+    "children": 0
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__backface-visibility-hidden-005",
+    "id": "wpt__css-transforms__backface-visibility-hidden-005__2-060",
+    "children": 1
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__backface-visibility-hidden-006",
+    "id": "wpt__css-transforms__backface-visibility-hidden-006__0-063",
+    "children": 1
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__backface-visibility-hidden-child-translate",
+    "id": "backface-visibility-hidden-child-translate__1__0-073",
+    "children": 1
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__backface-visibility-hidden-child-will-change-transform",
+    "id": "backface-visibility-hidden-child-will-change-transform__1__0-077",
+    "children": 1
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__composited-under-rotateY-180deg-clip-perspective",
+    "id": "composited-under-rotatey-180deg-clip-perspective__0__1-082",
+    "children": 0
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__composited-under-rotateY-180deg-clip",
+    "id": "wpt__css-transforms__composited-under-rotatey-180deg-clip__1-085",
+    "children": 1
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__composited-under-rotateY-180deg-perspective",
+    "id": "wpt__css-transforms__composited-under-rotatey-180deg-perspective__1-089",
+    "children": 1
+   },
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__composited-under-rotateY-180deg",
+    "id": "wpt__css-transforms__composited-under-rotatey-180deg__1-095",
+    "children": 1
+   }
+  ]
+ },
+ "t7": {
+  "inheritCarriers": [
+   {
+    "sec": "css-transforms",
+    "test": "wpt__css-transforms__css-transform-inherit-scale",
+    "id": "css-transform-inherit-scale__1__1__0-156",
+    "keyword": "inherit",
+    "parentHasTransform": true
+   }
+  ],
+  "otherKeywordCarriers": []
+ },
+ "b2": {
+  "carriers": 4,
+  "tests": [
+   "css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-001",
+   "css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-002",
+   "css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-003",
+   "css-sizing/wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-004"
+  ],
+  "cbDiffer": 4,
+  "usedDiffer": 4,
+  "rows": [
+   {
+    "sec": "css-sizing",
+    "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-001",
+    "id": "abspos-auto-sizing-fit-content-percentage-001__1__0__0-004",
+    "side": "MarginLeft",
+    "pct": -50,
+    "elementCb": [
+     null,
+     null
+    ],
+    "childCb": [
+     100,
+     100
+    ],
+    "elementPx": 0,
+    "childPx": -50,
+    "paints": false,
+    "children": 0,
+    "text": false
+   },
+   {
+    "sec": "css-sizing",
+    "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-002",
+    "id": "abspos-auto-sizing-fit-content-percentage-002__1__0__0-008",
+    "side": "MarginRight",
+    "pct": -50,
+    "elementCb": [
+     null,
+     null
+    ],
+    "childCb": [
+     100,
+     100
+    ],
+    "elementPx": 0,
+    "childPx": -50,
+    "paints": false,
+    "children": 0,
+    "text": false
+   },
+   {
+    "sec": "css-sizing",
+    "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-003",
+    "id": "abspos-auto-sizing-fit-content-percentage-003__1__0__0-012",
+    "side": "PaddingLeft",
+    "pct": 50,
+    "elementCb": [
+     null,
+     null
+    ],
+    "childCb": [
+     100,
+     100
+    ],
+    "elementPx": 0,
+    "childPx": 50,
+    "paints": false,
+    "children": 0,
+    "text": false
+   },
+   {
+    "sec": "css-sizing",
+    "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-004",
+    "id": "abspos-auto-sizing-fit-content-percentage-004__1__0__0-016",
+    "side": "PaddingRight",
+    "pct": 50,
+    "elementCb": [
+     null,
+     null
+    ],
+    "childCb": [
+     100,
+     100
+    ],
+    "elementPx": 0,
+    "childPx": 50,
+    "paints": false,
+    "children": 0,
+    "text": false
+   }
+  ],
+  "shapes": {
+   "px": 24274,
+   "object": 544,
+   "string": 91,
+   "bare-number": 4
+  }
+ },
+ "b1": {
+  "percentCarriers": 105,
+  "nonBlockContainerParents": [
+   {
+    "sec": "css-break",
+    "test": "wpt__css-break__block-in-inline-000",
+    "id": "block-in-inline-000__1__0__1-110",
+    "parentId": "block-in-inline-000__1__0-106",
+    "parentTag": "span",
+    "consumers": [
+     "Width={\"type\":\"percentage\",\"value\":100}"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-break",
+    "test": "wpt__css-break__block-in-inline-001",
+    "id": "block-in-inline-001__1__0__0-114",
+    "parentId": "block-in-inline-001__1__0-113",
+    "parentTag": "span",
+    "consumers": [
+     "Width={\"type\":\"percentage\",\"value\":100}"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-break",
+    "test": "wpt__css-break__block-in-inline-001",
+    "id": "block-in-inline-001__1__0__2-118",
+    "parentId": "block-in-inline-001__1__0-113",
+    "parentTag": "span",
+    "consumers": [
+     "Width={\"type\":\"percentage\",\"value\":100}"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-break",
+    "test": "wpt__css-break__block-in-inline-002",
+    "id": "block-in-inline-002__1__0__0-122",
+    "parentId": "block-in-inline-002__1__0-121",
+    "parentTag": "span",
+    "consumers": [
+     "Width={\"type\":\"percentage\",\"value\":100}"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-break",
+    "test": "wpt__css-break__block-in-inline-002",
+    "id": "block-in-inline-002__1__0__2-126",
+    "parentId": "block-in-inline-002__1__0-121",
+    "parentTag": "span",
+    "consumers": [
+     "Width={\"type\":\"percentage\",\"value\":100}"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-break",
+    "test": "wpt__css-break__block-in-inline-003",
+    "id": "block-in-inline-003__1__0__0-130",
+    "parentId": "block-in-inline-003__1__0-129",
+    "parentTag": "span",
+    "consumers": [
+     "Width={\"type\":\"percentage\",\"value\":100}"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-break",
+    "test": "wpt__css-break__block-in-inline-004",
+    "id": "block-in-inline-004__1__1__0-138",
+    "parentId": "block-in-inline-004__1__1-137",
+    "parentTag": "span",
+    "consumers": [
+     "Width={\"type\":\"percentage\",\"value\":100}"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-position",
+    "test": "wpt__css-position__position-relative-002",
+    "id": "position-relative-002__1__0__0-196",
+    "parentId": "position-relative-002__1__0-195",
+    "parentTag": "span",
+    "consumers": [
+     "Top=-100",
+     "Left=-100"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     100,
+     100
+    ],
+    "baseWouldChange": true
+   },
+   {
+    "sec": "css-position",
+    "test": "wpt__css-position__position-relative-008",
+    "id": "position-relative-008__1__0__0-218",
+    "parentId": "position-relative-008__1__0-217",
+    "parentTag": "tbody",
+    "consumers": [
+     "Top=100"
+    ],
+    "elementCb": [
+     null,
+     null
+    ],
+    "parentOwnCb": [
+     null,
+     null
+    ],
+    "baseWouldChange": false
+   }
+  ],
+  "parentTags": {
+   "(untagged)": 70,
+   "span": 8,
+   "BLOCK": 5,
+   "(root)": 2,
+   "FLEX": 7,
+   "INLINE_BLOCK": 1,
+   "tbody": 1,
+   "table": 3,
+   "td": 1,
+   "TABLE": 3,
+   "TABLE_CELL": 4
+  }
+ },
+ "summary": {
+  "docs": 1435,
+  "t5": {
+   "carriers": 1,
+   "hiddenTotal": 18,
+   "hiddenFlat": 17,
+   "flatBackFacing": 11,
+   "ownDecorationOnCulledPreserve3d": 0
+  },
+  "t7": {
+   "inheritCarriers": 1,
+   "otherKeywordCarriers": 0
+  },
+  "b2": {
+   "carriers": 4,
+   "tests": 4,
+   "cbDiffer": 4,
+   "usedDiffer": 4,
+   "unpaintedChildless": 4
+  },
+  "b1": {
+   "percentCarriers": 105,
+   "nonBlockContainerParents": 9,
+   "baseWouldChange": 8,
+   "tests": [
+    "css-break/wpt__css-break__block-in-inline-000",
+    "css-break/wpt__css-break__block-in-inline-001",
+    "css-break/wpt__css-break__block-in-inline-002",
+    "css-break/wpt__css-break__block-in-inline-003",
+    "css-break/wpt__css-break__block-in-inline-004",
+    "css-position/wpt__css-position__position-relative-002",
+    "css-position/wpt__css-position__position-relative-008"
+   ]
+  }
+ }
+}

@@ -1,0 +1,3 @@
+L9PROBE Courier ch=9.6015625 ogham=7.203125 030=["123…"] 029=["123…"] 028=["This time, Mark, who had always been the center of attention in", "any social gathering, walked into the room uncharacteristi‐…"]
+L9PROBE Menlo ch=9.6328125 ogham=7.203125 030=["123…"] 029=["123…"] 028=["This time, Mark, who had always been the center of attention in", "any social gathering, walked into the room uncharacteristi‐…"]
+L9PROBE SF Mono ch=9.890625 ogham=7.203125 030=["123…"] 029=["123…"] 028=["This time, Mark, who had always been the center of attention in", "any social gathering, walked into the room uncharacteristi‐…"]

@@ -180,6 +180,37 @@ final class UAWidgetsTests: XCTestCase {
         try JSONDecoder().decode(IRComponent.self, from: Data(json.utf8))
     }
 
+    // MARK: - wave 52 lane L8 (M-G): the zero-used-box gate
+    // MUTATION EXECUTED (2026-10-05, isolated HEAD export, restored byte-exact,
+    // sha-256 verified — _mutations-swift.log S5): the `if hasZeroUsedBox(…)`
+    // gate disabled → `testZeroBoxPaintsNoAtom` fails (a .range Spec ≠ nil).
+
+    func testZeroBoxPaintsNoAtom() throws {
+        let range = try comp(#"{"id":"r","name":"r","meta":{"sourceTag":"input","attrs":{"type":"range"}}}"#)
+        // The exact post-load shapes of wave51-fix css-writing-modes/forms/
+        // input-range-zero-inline-size: the four vertical parents' ranges
+        // carry Width 16 × Height 0, the horizontal one's Width 0 × Height 16.
+        let vertical = [try prop("Width", #"{"type":"length","px":16}"#),
+                        try prop("Height", #"{"type":"length","px":0}"#)]
+        let horizontal = [try prop("Width", #"{"type":"length","px":0}"#),
+                          try prop("Height", #"{"type":"length","px":16}"#)]
+        XCTAssertNil(UAWidgetsResolve.resolve(component: range, properties: vertical))
+        XCTAssertNil(UAWidgetsResolve.resolve(component: range, properties: horizontal))
+        // The gate is about the BOX, not the kind: a zero-height button goes too.
+        let button = try comp(#"{"id":"b","name":"b","text":"b","meta":{"sourceTag":"button"}}"#)
+        XCTAssertNil(UAWidgetsResolve.resolve(component: button, properties: horizontal))
+        // Falsifiers: an unsized range keeps its atom, and a NON-ZERO declared
+        // box (the UA 129×21) keeps it too — the gate reads exact zero only.
+        XCTAssertEqual(UAWidgetsResolve.resolve(component: range, properties: [])?.kind, .range)
+        let ua = [try prop("Width", #"{"type":"length","px":129}"#),
+                  try prop("Height", #"{"type":"length","px":21}"#)]
+        XCTAssertEqual(UAWidgetsResolve.resolve(component: range, properties: ua)?.kind, .range)
+        // A relative or keyword size is not a zero box (it resolves at layout).
+        XCTAssertFalse(UAWidgetsResolve.hasZeroUsedBox([try prop("Width", #""auto""#)]))
+        XCTAssertFalse(UAWidgetsResolve.hasZeroUsedBox(
+            [try prop("Width", #"{"type":"length","original":{"v":0,"u":"PERCENT"}}"#)]))
+    }
+
     func testKindTableFromWireShapes() throws {
         // <a> is no widget — normal text path (appearance-checkbox-001's
         // first child renders plain "a" even with appearance: checkbox).

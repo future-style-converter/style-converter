@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.048Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="012 column-over-row flips order and keeps the line-exact extents" classname="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" time="0.0"/>
+  <testcase name="default rule-break keeps a shared band per-line, matching Chromium" classname="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" time="0.0"/>
+  <testcase name="a trailing call after a block-bodied if binds to the whole if" classname="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" time="0.0"/>
+  <testcase name="column direction transposes the 009 geometry exactly" classname="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" time="0.0"/>
+  <testcase name="003 column-rule slack versus the ref lies inside the row rule band" classname="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" time="0.0"/>
+  <testcase name="011 live IR shapes drive the negative-inset geometry" classname="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" time="0.0"/>
+  <testcase name="reversed report order paints NOTHING - documented limitation" classname="com.styleconverter.runtime.columns.SkepticGapDecorationProbeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

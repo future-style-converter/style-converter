@@ -395,13 +395,21 @@ object TransformExtractor {
         // fallthrough.
         //
         // `inherit` (css-cascade-4 §7.3.2 — the parent's computed value)
-        // CANNOT be resolved from here: a Modifier is parents-ignorant and
-        // Compose's provider would have to live in
-        // core/renderer/ComponentRenderer.kt. The iOS twin resolves it
-        // through an ambient channel the transforms folder owns outright
-        // (StyleEngine/transforms/TransformInheritance.swift, wave 49);
-        // Compose has no equivalent without that renderer seam. Sole
-        // corpus carrier: css-transforms/css-transform-inherit-scale.
+        // CANNOT be resolved from here: this extractor is a pure function
+        // of ONE element's list. Wave 52 (lane L4, T7): the renderer
+        // resolves it BEFORE extraction — `TransformInheritance.resolve`
+        // substitutes the parent's computed `Transform` wire, read from the
+        // `TransformInheritance.LocalInheritedTransform` channel that every
+        // `ComponentRenderer.RenderComponent` provides (seam patch
+        // tools/titan/results/wave52-small-fixes/seam-1.patch) — so a
+        // resolved list never reaches this branch. The iOS twin does the
+        // same through its ambient channel (StyleEngine/transforms/
+        // TransformInheritance.swift, wave 49). Reaching this branch
+        // therefore means the keyword was NOT resolved (a path that
+        // renders without RenderComponent, or the seam not applied): the
+        // breadcrumb keeps that visible instead of dropping the value
+        // silently. Sole corpus carrier: css-transforms/
+        // css-transform-inherit-scale.
         if (type == "keyword") {
             val keyword = obj["keyword"]?.jsonPrimitive?.contentOrNull?.lowercase()
             if (keyword == "inherit") {

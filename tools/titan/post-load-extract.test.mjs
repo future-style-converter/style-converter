@@ -145,6 +145,8 @@ test('post-load: WRITE_RULES delete-not-write defaults are pinned', () => {
   assert.equal(WRITE_RULES.color.repairOnly, true);
   assert.equal(WRITE_RULES.color.deleteWhen, undefined);
   assert.equal(WRITE_RULES.color.requirePx, undefined);
+  // wave-52 L11: the one introduce route (parent-differs) — see section 11.
+  assert.equal(WRITE_RULES.color.introduceWhenParentDiffers, true);
 });
 
 test('post-load h2: a stale static color is REPAIRED to the live computed one', () => {
@@ -163,11 +165,13 @@ test('post-load h2: a stale static color is REPAIRED to the live computed one', 
   assert.equal(cmp.properties.color, 'rgb(0, 128, 0)');
 });
 
-test('post-load h2: repairOnly NEVER introduces a color key', () => {
+test('post-load h2: without a parent snapshot repairOnly never introduces a color key', () => {
   // The blast-radius guarantee. `color` is inherited and always has a
   // computed value ('rgb(0, 0, 0)' by default), so an unconditional write
   // would stamp a key onto every component of all 1,188 delivered post-load
-  // fixtures. A component the static bake never gave a colour keeps none.
+  // fixtures. A component the static bake never gave a colour keeps none —
+  // unless (wave-52 L11, section 11) its parent's snapshot PROVES a
+  // declaration; with no parent snapshot there is no proof.
   const cmp = { properties: { display: 'block' } };
   overlayComputedOnComponent(cmp, { color: 'rgb(0, 0, 0)', display: 'block' });
   assert.equal('color' in cmp.properties, false);
@@ -1674,4 +1678,124 @@ test('wedge recovery: discardPostLoadBrowser is a no-op when nothing launched', 
   // close() either, so the recovery path must not await one. With no
   // instance at all this must simply return.
   await discardPostLoadBrowser();
+});
+
+// ── 11. wave-52 lane L11 (brief colour-not-reaching-text F2) ────────────────
+//
+// The parent-differs introduce route for `color` (WRITE_RULES.color
+// .introduceWhenParentDiffers / introducesOverParent). css-color-4 §3.2:
+// `color` inherits, so a child whose computed colour differs from its
+// parent's carries a declaration cascaded onto it — the fact a stale static
+// bake (pre-script selector matches) misses.
+//
+// MUTATION RECORD (executed 2026-10-05 by mutate-postload.sh in
+// tools/titan/results/wave52-all-reset-postload-colour/, the module restored
+// byte-exact — sha256 before == after, mutations.log): P1 the introduce
+// branch removed (`return false` first) → the introduce, nth-child-of-class
+// and body-snapshot pins FAIL; P2 the equality test removed (introduce
+// whenever a parent snapshot exists) → the equal-parent and verbatim pins
+// FAIL; P3 the UA tag skip removed → the seven-tag pin FAILS; P4 the fold-mode
+// guard removed → the onlyMissing pin FAILS.
+
+test('wave52 L11: a colour differing from the PARENT is introduced', () => {
+  const cmp = { properties: {} };
+  overlayComputedOnComponent(cmp, { color: 'rgb(0, 128, 0)' },
+    { parentStyles: { color: 'rgb(0, 0, 0)' } });
+  assert.equal(cmp.properties.color, 'rgb(0, 128, 0)');
+});
+
+test('wave52 L11: a colour EQUAL to the parent is not introduced (it is inherited)', () => {
+  const cmp = { properties: {} };
+  overlayComputedOnComponent(cmp, { color: 'rgb(0, 0, 0)' },
+    { parentStyles: { color: 'rgb(0, 0, 0)' } });
+  assert.equal('color' in cmp.properties, false);
+});
+
+test('wave52 L11: an existing static colour is still REPAIRED (the H2 route, unchanged)', () => {
+  // Equal to the parent or not, a key the bake asserted is overwritten live.
+  const cmp = { properties: { color: 'green' } };
+  overlayComputedOnComponent(cmp, { color: 'rgb(0, 0, 0)' },
+    { parentStyles: { color: 'rgb(0, 0, 0)' } });
+  assert.equal(cmp.properties.color, 'rgb(0, 0, 0)');
+});
+
+test('wave52 L11: the seven UA-coloured tags never gain an introduced colour', () => {
+  // UA ink (link / buttontext / fieldtext / marktext / hr gray), not a
+  // declaration — and a link's computed colour is the UNVISITED one by
+  // privacy rule.
+  for (const tag of ['a', 'button', 'input', 'select', 'textarea', 'mark', 'hr']) {
+    const cmp = { _tag: tag, properties: {} };
+    overlayComputedOnComponent(cmp, { color: 'rgb(0, 0, 238)' },
+      { parentStyles: { color: 'rgb(0, 0, 0)' }, tag });
+    assert.equal('color' in cmp.properties, false, tag);
+  }
+});
+
+test('wave52 L11: the absorbed-wrapper fold never introduces a colour onto its host', () => {
+  // An absorbed <s>/<u>'s colour belongs to its own run, not the host's.
+  const cmp = { properties: {} };
+  overlayComputedOnComponent(cmp, { color: 'rgb(255, 0, 0)' },
+    { onlyMissing: true, parentStyles: { color: 'rgb(0, 0, 0)' } });
+  assert.equal('color' in cmp.properties, false);
+});
+
+// VERBATIM css/selectors/invalidation/nth-child-of-class.html (the brief's
+// 055 cell: wave51-fix android P 0.9965 · ios P 0.9976 · web P 0.999, lines
+// 5 and 7 black where the ref is green).
+const NTH_CHILD_OF_CLASS_HTML = `<!DOCTYPE html>
+<meta charset="utf-8" />
+<title>CSS Selectors Invalidation: :nth-child(... of class)</title>
+<style>
+  p:nth-child(even of .c) {
+    color: green;
+  }
+</style>
+<div>
+  <p>Ignored</p>
+  <p>Ignored</p>
+  <p class="c">Not ignored</p>
+  <p class="c" id="toggler">Selectively ignored</p>
+  <p class="c">Not ignored</p>
+  <p class="c">Not ignored</p>
+  <p class="c">Not ignored</p>
+  <p>Ignored</p>
+</div>
+<script>
+  document.documentElement.offsetTop;
+  toggler.classList.toggle("c");
+</script>`;
+
+test('wave52 L11: nth-child-of-class — live matches p[4]/p[6] gain green, stale p[3]/p[5] repair to black', () => {
+  // Static bake: the PRE-script matches (p[3], p[5]) carry `color: green`.
+  const cleaned = stripComments(NTH_CHILD_OF_CLASS_HTML);
+  const rules = parseCss(extractInlineStyle(cleaned));
+  const { components } = buildComponents(cleaned, rules, 'nth');
+  const fixture = { _wpt: {}, components };
+  const p = (k) => fixture.components.nth__0.children[`nth__0__${k}`];
+  assert.equal(p(3).properties.color, 'green');
+  assert.equal(p(4).properties.color, undefined);
+  // The live snapshot MEASURED by replay-f2.mjs on the pinned headless build:
+  // after the toggle the even `.c` matches are p[4] and p[6].
+  const BLACK = 'rgb(0, 0, 0)', GREEN = 'rgb(0, 128, 0)';
+  const records = [{ path: [0], tag: 'div', styles: { color: BLACK } }];
+  for (let k = 0; k < 8; k++) {
+    records.push({ path: [0, k], tag: 'p', styles: { color: k === 4 || k === 6 ? GREEN : BLACK } });
+  }
+  mergePostLoadIntoFixture(fixture, 'nth', records, { bodyStyles: { color: BLACK } });
+  // Exactly the ref: green on the two live matches, nothing introduced elsewhere.
+  assert.deepEqual([0, 1, 2, 3, 4, 5, 6, 7].map((k) => p(k).properties.color ?? null),
+    [null, null, null, BLACK, GREEN, BLACK, GREEN, null]);
+});
+
+test('wave52 L11: a top-level element compares against the BODY snapshot', () => {
+  // class-id-attr shape: top-level <p>s whose parent is <body> (no record).
+  const fx = () => ({ _wpt: {}, components: { t__0: { properties: {} } } });
+  const rec = [{ path: [0], tag: 'p', styles: { color: 'rgb(0, 128, 0)' } }];
+  const withBody = fx();
+  mergePostLoadIntoFixture(withBody, 't', rec, { bodyStyles: { color: 'rgb(0, 0, 0)' } });
+  assert.equal(withBody.components.t__0.properties.color, 'rgb(0, 128, 0)');
+  // No body snapshot → no proof → nothing introduced.
+  const without = fx();
+  mergePostLoadIntoFixture(without, 't', rec);
+  assert.equal('color' in without.components.t__0.properties, false);
 });

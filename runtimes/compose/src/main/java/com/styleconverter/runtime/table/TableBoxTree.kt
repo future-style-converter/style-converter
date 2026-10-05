@@ -451,4 +451,83 @@ object TableBoxTree {
     fun establishesContainingBlock(component: IRComponent): Boolean =
         com.styleconverter.runtime.layout.position.CanvasRootHoist
             .establishesContainingBlock(component.properties)
+
+    // ── Wave 52 lane L8 (M-E): column width contributions ──────────────
+    //
+    // css-tables-3 §2.1: a column box "does not render", but it is not
+    // nothing — §3.2 makes a column's specified `width` one of the inputs
+    // to that column's min/max width. [rowsOf] drops the UA-only
+    // `<col>`/`<colgroup>` boxes and, until wave 52, their `width` with
+    // them. MEASURED on wave51-fix css-writing-modes/ch-units-vrl-003/-004:
+    // `<col style="width: 5ch">` (upright → 120) never reached the green
+    // `<td>`, which stayed 6 px wide on both natives (ref 120×120). The
+    // census (census.json `colWithWidth`) finds 5 such documents; the 5th,
+    // css-tables/border-collapse-dynamic-col-001, DECLARES `display:
+    // table-column`, which [columnChains] excludes exactly as [rowsOf] does,
+    // so that frozen capture cannot move.
+
+    /**
+     * The table's column boxes in column order, each as the chain its width
+     * is read from: `[col]` for a direct `<col>`, `[col, colgroup]` for a
+     * `<col>` inside a `<colgroup>` (the group's width is the fallback),
+     * `[colgroup]` for an empty `<colgroup>` (one column of its own, §2.1).
+     * UA-only boxes only (no declared `Display`) — the [rowsOf] drop rule.
+     */
+    fun columnChains(children: List<IRComponent>?): List<List<IRComponent>> {
+        // The same predicate [rowsOf] drops by, with the UA channel on.
+        val uaColumn = { c: IRComponent -> c.properties.none { it.type == "Display" } && generatesNoBoxes(c._tag) }
+        val out = mutableListOf<List<IRComponent>>()
+        for (child in children.orEmpty().filter(uaColumn)) {
+            // A `<colgroup>` with `<col>` children: one column per col.
+            val cols = child.children.orEmpty().filter { uaColumn(it) && it._tag?.lowercase() == "col" }
+            if (child._tag?.lowercase() == "colgroup" && cols.isNotEmpty()) cols.forEach { out += listOf(it, child) }
+            // A bare `<col>`, or an empty `<colgroup>`: one column.
+            else out += listOf(child)
+        }
+        return out
+    }
+
+    /**
+     * Each column's specified width in px (null = auto / unresolvable), in
+     * column order — the minimum the renderer gives every cell of that
+     * column. [inherited] is the table's inheritable set (the column box
+     * inherits `font-size`, `writing-mode`, … like any element: the
+     * ch-units-vrl tests assert exactly that).
+     */
+    fun columnWidthsPx(
+        children: List<IRComponent>?,
+        inherited: List<com.styleconverter.runtime.core.ir.IRProperty>,
+    ): List<Float?> = columnChains(children).map { chain ->
+        // The col's own width first, the group's as the fallback.
+        chain.firstNotNullOfOrNull { columnWidthPx(it, inherited) }
+    }
+
+    /** One column box's declared `width` in px, resolved like any element's
+     *  sizing value — the `ch` basis included, measured along the column's
+     *  OWN inline axis (an upright col's 5ch is 120, a sideways one's 63). */
+    internal fun columnWidthPx(
+        column: IRComponent,
+        inherited: List<com.styleconverter.runtime.core.ir.IRProperty>,
+    ): Float? {
+        // No declared width → this box contributes nothing.
+        if (column.properties.none { it.type == "Width" }) return null
+        // Own declarations win; inherited types fill the gaps (the channel
+        // RenderComponent itself uses, so a col resolves like its cells).
+        val merged = com.styleconverter.runtime.core.renderer.ComponentRenderer.mergeInherited(column.properties, inherited)
+        val config = com.styleconverter.runtime.StyleApplier.extractConfig(merged.map { it.type to it.data })
+        val width = config.layout.sizing.width ?: return null
+        val base = com.styleconverter.runtime.StyleApplier.buildSpacingContext(config)
+        // css-values-4 §6.1.1: the ch basis along THIS box's inline axis —
+        // computed here so the harvest does not depend on the call-site flag.
+        val ctx = if (com.styleconverter.runtime.spacing.usesChUnit(width)) base.copy(
+            chAdvancePx = com.styleconverter.runtime.spacing.ChUnitMetrics.measure(
+                config.typography.fontFamily, base.fontSizePx,
+                com.styleconverter.runtime.typography.text.VerticalInlineAxis.chAdvanceIsVertical(
+                    config.writingMode.writingMode, config.writingMode.textOrientation),
+            ),
+        ) else base
+        // px == dp in this runtime; a zero / negative / non-finite answer
+        // (an unresolvable percentage) is "auto", not a 0-wide column.
+        return com.styleconverter.runtime.spacing.resolveToDp(width, ctx).value.takeIf { it.isFinite() && it > 0f }
+    }
 }

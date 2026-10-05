@@ -1,0 +1,100 @@
+{
+ "cmd": [
+  "./gradlew",
+  ":runtime:testDebugUnitTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.GreedyLineBreakerTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.PreBreakPipelineTest",
+  "--continue"
+ ],
+ "results": [
+  {
+   "id": "K1-separators-narrowed-to-U+0020",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "exit": 1,
+   "sha256Before": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "sha256After": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "expectFail": {
+    "clampHidesAtTheOghamSpaceMarkOfBlockEllipsis030": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "GreedyLineBreakerTest > clampHidesAtTheOghamSpaceMarkOfBlockEllipsis030 FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "K2-soft-hyphens-not-restored",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "exit": 1,
+   "sha256Before": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "sha256After": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "expectFail": {
+    "clampHidesAtTheSoftHyphenOfBlockEllipsis028": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "GreedyLineBreakerTest > clampHidesAtTheSoftHyphenOfBlockEllipsis028 FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "K3-ideograph-decline-off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "exit": 1,
+   "sha256Before": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "sha256After": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "expectFail": {
+    "clampDeclinesWhenTheHiddenTailHoldsAnIdeograph": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "GreedyLineBreakerTest > clampDeclinesWhenTheHiddenTailHoldsAnIdeograph FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "K4-dash-break-after-off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "exit": 1,
+   "sha256Before": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "sha256After": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "expectFail": {
+    "clampHidesAfterAHyphenAndAtAZeroWidthSpace": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "GreedyLineBreakerTest > clampHidesAfterAHyphenAndAtAZeroWidthSpace FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "K5-fit-test-off (M4 re-cut on the new clampLines)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "exit": 1,
+   "sha256Before": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "sha256After": "7b3414ba5cb1ff8476aab17489f59eda57b7757abdb9a71cc6c91b782fd92bf3",
+   "expectFail": {
+    "clampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone": true,
+    "clampDropsTrailingWordsUntilTheMarkerFits": true,
+    "clampMeasuresACustomMarkerAsARealGlyphRun": true,
+    "clampHidesAtTheOghamSpaceMarkOfBlockEllipsis030": true,
+    "clampHidesAtTheSoftHyphenOfBlockEllipsis028": true,
+    "aFiredRunUnderADrawnMarkerClampBakesTheEllipsis": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "GreedyLineBreakerTest > clampDropsTrailingWordsUntilTheMarkerFits FAILED",
+    "GreedyLineBreakerTest > clampHidesAfterAHyphenAndAtAZeroWidthSpace FAILED",
+    "GreedyLineBreakerTest > clampMeasuresACustomMarkerAsARealGlyphRun FAILED",
+    "GreedyLineBreakerTest > clampDeclinesWhenTheHiddenTailHoldsAnIdeograph FAILED",
+    "GreedyLineBreakerTest > clampHidesAtTheSoftHyphenOfBlockEllipsis028 FAILED",
+    "GreedyLineBreakerTest > clampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone FAILED",
+    "GreedyLineBreakerTest > clampHidesAtTheOghamSpaceMarkOfBlockEllipsis030 FAILED",
+    "PreBreakPipelineTest > aFiredRunUnderADrawnMarkerClampBakesTheEllipsis FAILED"
+   ],
+   "proven": true
+  }
+ ]
+}

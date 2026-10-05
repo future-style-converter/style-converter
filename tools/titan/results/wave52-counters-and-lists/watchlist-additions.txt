@@ -1,0 +1,43 @@
+# tools/titan/results/wave52-counters-and-lists/watchlist-additions.txt — lane L6's NEW watch cells (not already matched by a
+# tools/titan/results/wave52-plan/watchlist.txt line). Same grammar: "<substring of section/manifest-key> <platform>"; the `.html`
+# suffix makes each line match exactly one test. Verified: WATCH=<this file> node tools/titan/results/wave52-plan/watchlist-check.mjs
+# T5 outside-marker hang (seam-1/seam-2, DEVICE A/B — move only if the orchestrator applies the seams): carriers the plan list missed.
+# Thin / near-threshold passes first (can be LOST), then the fails that can move either way.
+css-lists/counter-list-item-2.html android
+css-lists/counter-list-item-2.html ios
+css-lists/counter-list-item-3.html android
+css-lists/counter-list-item-3.html ios
+css-lists/add-inline-child-after-marker-001.html android
+css-lists/add-inline-child-after-marker-001.html ios
+css-lists/add-inline-child-after-marker-002.html android
+css-lists/add-inline-child-after-marker-002.html ios
+css-pseudo/first-line-and-marker.html android
+css-pseudo/first-line-and-marker.html ios
+css-pseudo/first-letter-exclude-inline-marker.html android
+css-pseudo/first-letter-exclude-inline-marker.html ios
+css-lists/counter-list-item.html android
+css-lists/counter-list-item.html ios
+css-lists/change-list-style-type-001.html android
+css-lists/change-list-style-type-001.html ios
+css-cascade/scope-pseudo-element.html ios
+css-images/gradient/gradient-powerless-hue-hsl.html android
+css-images/gradient/gradient-powerless-hue-hsl.html ios
+css-images/gradient/gradient-powerless-hue-hwb.html android
+css-images/gradient/gradient-powerless-hue-hwb.html ios
+css-images/gradient/gradient-powerless-hue-lch.html android
+css-images/gradient/gradient-powerless-hue-lch.html ios
+css-images/gradient/gradient-powerless-hue-oklch.html android
+css-images/gradient/gradient-powerless-hue-oklch.html ios
+# T2 BorderSideApplier clamp, extended census (own Height/Width below the own far border, END via parent Width): passing Android
+# cells the plan list missed. The clamp only repaints a box whose LAID-OUT extent is below its stroke width — expected unchanged.
+css-backgrounds/background-clip-009.html android
+css-tables/border-collapse-dynamic-section.html android
+css-tables/border-collapse-dynamic-col-001.html android
+css-images/gradient/gradient-hue-direction.html android
+css-ui/box-sizing-026.html android
+css-anchor-position/anchor-position-multicol-007.html android
+css-writing-modes/direction-upright-001.html android
+css-writing-modes/direction-upright-002.html android
+# T7 native half (ListMarkerEmptyItem via seam-3/seam-4): the 12 EMPTY inside <li> on today's wire (floated, failing x3) leave the
+# zero-size overlay for the Row — a mover either way (the cssom tests it targets after L5 F-E are already `css-counter-styles/cssom/`).
+css-counter-styles/counter-style-at-rule/name-case-sensitivity.html

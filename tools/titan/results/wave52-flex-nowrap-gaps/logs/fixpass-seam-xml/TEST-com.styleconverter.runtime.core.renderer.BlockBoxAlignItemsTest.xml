@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.core.renderer.BlockBoxAlignItemsTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.308Z" hostname="mac-1.home" time="0.006">
+  <properties/>
+  <testcase name="align-items no longer reaches a non-flex Box - the renderer's toBoxAlignment is gone" classname="com.styleconverter.runtime.core.renderer.BlockBoxAlignItemsTest" time="0.003"/>
+  <testcase name="the block-flow fallback Box aligns its content TopStart regardless of align-items" classname="com.styleconverter.runtime.core.renderer.BlockBoxAlignItemsTest" time="0.003"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

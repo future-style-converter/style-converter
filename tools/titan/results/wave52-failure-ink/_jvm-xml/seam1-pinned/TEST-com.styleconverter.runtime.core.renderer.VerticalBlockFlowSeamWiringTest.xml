@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamWiringTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:53:14.089Z" hostname="mac-1.home" time="0.006">
+  <properties/>
+  <testcase name="the vertical seam's baked guard reads BakedLayoutSignature" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamWiringTest" time="0.002"/>
+  <testcase name="the wave-47 Width-and-Height heuristic is gone from the guard" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamWiringTest" time="0.003"/>
+  <testcase name="the seam's engage condition still consumes the guard" classname="com.styleconverter.runtime.core.renderer.VerticalBlockFlowSeamWiringTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

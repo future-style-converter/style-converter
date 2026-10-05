@@ -1,0 +1,9 @@
+# L7 static-position — cells the lane's own census found that the plan watchlist does not already match
+# T1 mover (18 components move on Android; proxy: android≡ios outside mark ink, ios P 0.9821)
+css-grid/abspos/grid-abspos-staticpos-justify-self-002 android
+# T3 iOS movers on the grid overlay (typed BASELINE → safe self-start; dropped `right` → start)
+css-grid/abspos/grid-abspos-staticpos-align-self ios
+# T3 web: `normal` now emitted (was dropped → auto → container align-items center)
+css-grid/abspos/grid-abspos-staticpos-align-self-00 web
+# T3 web: the in-flow grid item's `last baseline` now reaches the browser (predicted 1.0000; residual 2 px outside green)
+css-contain/contain-inline-size-grid-indefinite-height-min-height-flex-row web

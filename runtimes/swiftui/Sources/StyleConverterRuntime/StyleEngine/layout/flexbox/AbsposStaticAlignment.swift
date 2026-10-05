@@ -22,6 +22,10 @@
 //    align-self: safe end      → Generic, rawValue "safe end"
 //  (The converter's AlignSelfPropertyParser recognises only bare
 //  keywords, so every overflow-modifier value ships via Generic.)
+//  Wave 52 (lane L7, T3): the converter now also types `normal` → NORMAL,
+//  `first baseline` → BASELINE and `last baseline` → LAST_BASELINE and
+//  drops the invalid `left`/`right`; the <baseline-position> values
+//  resolve to their css-align-3 §4.2 FALLBACK alignment (baselineFallback).
 //
 //  Shared-semantics contract: the Compose runtime carries the twin
 //  AbsposStaticAlignment.kt; both platforms' crossOffset compute
@@ -52,9 +56,10 @@ enum AbsposStaticAlignment {
     /// child's IR list, reading BOTH wire channels (typed AlignSelf +
     /// the Generic escape hatch — see the pinned shapes above). Nil
     /// when the child declares no align-self, or a value with no
-    /// static-position mapping (auto/stretch/baseline keep the caller's
+    /// static-position mapping (auto/normal/stretch keep the caller's
     /// legacy start anchor — css-flexbox-1 §4.1 treats them as
-    /// flex-start for abspos children).
+    /// flex-start for abspos children; since wave 52 the baseline
+    /// positions claim their §4.2 fallback).
     static func resolveCross(from properties: [IRProperty]) -> Spec? {
         // Delegates to the generalized reader with the align-self wire
         // names — kept as the flex lane's entry point so every existing
@@ -73,13 +78,23 @@ enum AbsposStaticAlignment {
                             cssName: String) -> Spec? {
         // Channel 1 — typed wire: bare keyword primitive ("CENTER").
         if let prop = properties.first(where: { $0.type == typedType }) {
+            // Wave 52 (T3): BASELINE / LAST_BASELINE claim their §4.2
+            // fallback alignment (safe self-start / safe self-end) — on the
+            // align-self wire only: the Compose twin's justify-self reader
+            // (GridRenderer.justifyBase) has no baseline arm, so a
+            // justify-self fallback here would split the natives
+            // (grid-abspos-staticpos-justify-self-001/002; not staffed).
+            if cssName == "align-self",
+               let fallback = baselineFallback(ValueExtractors.extractKeyword(prop.data)) {
+                return fallback
+            }
             // Same keyword reader the flexbox extractor uses.
             if let base = baseOf(ValueExtractors.extractKeyword(prop.data)) {
                 // Typed keywords never carry an overflow modifier (the
                 // parser rejects two-token values) → safe is false.
                 return Spec(base: base, safe: false)
             }
-            // Typed but unmappable (STRETCH/BASELINE/AUTO) → fall
+            // Typed but unmappable (STRETCH/NORMAL/AUTO) → fall
             // through; the converter never emits typed AND Generic for
             // the same declaration, so this cannot double-read.
         }
@@ -89,6 +104,14 @@ enum AbsposStaticAlignment {
             guard case .object(let o) = p.data,
                   o["propertyName"]?.stringValue == cssName,
                   let raw = o["rawValue"]?.stringValue else { continue }
+            // Wave 52 (T3): a <baseline-position> on the raw align-self
+            // wire (pre-wave-52 IR carries `last baseline` as Generic) →
+            // its §4.2 fallback. Here, not in parseRaw: parseRaw also reads
+            // justify-content, whose grammar has no baseline.
+            let tokens = raw.lowercased().split(whereSeparator: { $0 == " " || $0 == "\t" })
+            if cssName == "align-self", tokens.contains("baseline") {
+                return baselineFallback(tokens.contains("last") ? "LAST_BASELINE" : "BASELINE")
+            }
             // First matching Generic wins (cascade already resolved).
             return parseRaw(raw)
         }
@@ -114,6 +137,29 @@ enum AbsposStaticAlignment {
         return Spec(base: base, safe: safe)
     }
 
+    /// Wave 52 (lane L7, T3) — css-align-3 §4.2: "If a box does not
+    /// participate in baseline alignment, it uses its fallback alignment"
+    /// — `safe self-start` for `first baseline` (≡ `baseline`), `safe
+    /// self-end` for `last baseline`. An absolutely-positioned box shares
+    /// no baseline alignment context, so the fallback IS its static
+    /// position (refs: rtl-last-baseline-002 → grid-area block END;
+    /// vertWM-003 `baseline` → START). self-start/self-end fold to
+    /// start/end (LTR horizontal-tb, same fold as baseOf). Nil for any
+    /// other keyword. Twin: AbsposStaticAlignment.kt `baselineFallback`.
+    static func baselineFallback(_ kw: String?) -> Spec? {
+        switch kw?.uppercased().replacingOccurrences(of: "-", with: "_") {
+        // `baseline` / `first baseline` → safe self-start.
+        case "BASELINE", "FIRST_BASELINE":
+            return Spec(base: .start, safe: true)
+        // `last baseline` → safe self-end.
+        case "LAST_BASELINE":
+            return Spec(base: .end, safe: true)
+        // Not a <baseline-position>.
+        default:
+            return nil
+        }
+    }
+
     /// Keyword → Base. Accepts the converter's UPPER_SNAKE typed
     /// spelling AND raw CSS hyphenated spelling so both wires share one
     /// table. self-start/self-end fold to start/end — no writing-mode
@@ -135,7 +181,8 @@ enum AbsposStaticAlignment {
         case "FLEX-END", "FLEX_END", "END", "SELF-END", "SELF_END",
              "RIGHT":
             return .end
-        // auto/stretch/baseline/unknown → no static-position claim.
+        // auto/normal/stretch/unknown → no static-position claim (the
+        // baseline positions are claimed earlier by baselineFallback).
         default:
             return nil
         }

@@ -1,0 +1,152 @@
+{
+ "generated": "2026-10-05T16:43:15.450Z",
+ "fixture": "fixtures/combinations/all-then-color.json",
+ "runs": {
+  "harness": {
+   "ATC_AllThenProps": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_PropsThenAll_InGreenParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_InitialUnderRedParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     200,
+     60
+    ],
+    "expectBox": [
+     200,
+     60
+    ]
+   },
+   "ATC_DirectionSurvives": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     200,
+     40
+    ],
+    "expectBox": [
+     200,
+     40
+    ]
+   }
+  },
+  "harness_M2_displayBeforeAll": {
+   "ATC_AllThenProps": {
+    "ok": false,
+    "fill": [
+     175,
+     175,
+     181
+    ],
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_PropsThenAll_InGreenParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_InitialUnderRedParent": {
+    "ok": false,
+    "fill": [
+     52,
+     152,
+     219
+    ],
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     200,
+     60
+    ]
+   },
+   "ATC_DirectionSurvives": {
+    "ok": false,
+    "fill": [
+     255,
+     255,
+     255
+    ],
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     200,
+     40
+    ]
+   }
+  }
+ },
+ "verdict": {
+  "harness": {
+   "violations": [],
+   "green": true
+  },
+  "harness_M2_displayBeforeAll": {
+   "violations": [
+    "ATC_AllThenProps",
+    "ATC_InitialUnderRedParent",
+    "ATC_DirectionSurvives"
+   ],
+   "caught": true
+  }
+ }
+}

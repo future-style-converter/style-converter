@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" tests="25" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:47:06.948Z" hostname="mac-1.home" time="0.005">
+  <properties/>
+  <testcase name="RC1 no-inset absolute root does NOT hoist — it renders at its static position" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.001"/>
+  <testcase name="RC1 any single inset keeps the canvas hoist — mixed-axis pins the documented approximation" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="hostless paths never intercept — the frozen-baseline identity pin" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="RC1 fixed keeps the wave-17 canvas anchor even with no inset — kept behavior" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="S5 fixed sibling is intercepted while its in-flow sibling is not" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="frame origin translates an end-anchored hoisted box" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.001"/>
+  <testcase name="the static-position mount keeps a zero origin" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="S4 absolute with positioned ancestor is NOT hoisted — existing containing-block machinery owns it" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="walk returns EMPTY for an out-of-flow-free document — the host identity fast path" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="S3 fixed hoists even under a positioned ancestor — anchor is inset, not parent+inset" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="B-RC3 the overlay's zero-flow report is unchanged by end anchoring" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.001"/>
+  <testcase name="RC1 walk drops the no-inset absolute root from the overlay — no doubled render" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="a box wider than the ICB still overflows toward the start edge" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="B-RC3 an end-only-inset absolute root still hoists to the canvas overlay" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="walk recurses INTO hoisted subtrees — fixed inside fixed both anchor at the canvas" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="walk splits absolute by positioned ancestry exactly like the interception" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="every non-static position establishes a containing block for descendants" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="walk collects fixed at depth 2 under static ancestors, in document order" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.001"/>
+  <testcase name="frame origin translates a start-anchored hoisted box" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="S2 root-level absolute hoists to the same unpadded anchor" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="S5 overlay slots report ZERO flow size — hoisted ink never grows the canvas" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="the overlay's own render bypasses interception by INSTANCE identity" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="RC1 static-position branch defers to a positioned ancestor — wave-8-9 overlay owns it" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="S1 root-level fixed hoists and anchors at canvas (100,0)" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <testcase name="RC1 logical insets anchor exactly like physical ones" classname="com.styleconverter.runtime.layout.position.CanvasRootHoistTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

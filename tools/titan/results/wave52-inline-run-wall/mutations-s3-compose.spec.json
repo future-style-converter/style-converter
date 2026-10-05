@@ -1,0 +1,24 @@
+{
+ "_why": "Wave 52 L9 fix pass (skeptic S3): `pre-line` collapses spaces (css-text-3 \u00a74.1.1); putting it back into the glyph-less preserving arm must fail the collapsing pin.",
+ "cmd": [
+  "./gradlew",
+  ":runtime:testDebugUnitTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineRunFoldTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineSpanRingTest",
+  "--continue"
+ ],
+ "cwd": "apps/android-harness",
+ "mutations": [
+  {
+   "id": "K6-pre-line-readmitted",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt",
+   "old": "                    \"pre\", \"pre-wrap\", \"break-spaces\" -> {}",
+   "new": "                    \"pre\", \"pre-wrap\", \"pre-line\", \"break-spaces\" -> {}",
+   "expectFail": [
+    "a collapsing white-space keyword refuses even on a glyph-less member"
+   ]
+  }
+ ]
+}

@@ -57,6 +57,42 @@ struct ItemPlacement: Equatable {
         var basisPercent: CGFloat? = nil
         /// `align-self` override; nil/auto → container align-items.
         var alignSelf: AlignmentKeyword? = nil
+        /// Wave 52 (lane L10, M2) — each physical margin in px, signed
+        /// (0 for a side that is auto, a percentage or absent).
+        /// css-flexbox-1 §9.2 step 3 sizes an item by its OUTER
+        /// hypothetical main size (size + margins), so a negative
+        /// main-axis margin shrinks its footprint and pulls the next item
+        /// back (§9.5). The positive part already rides the item's own
+        /// frame (MarginApplier pads outward); see `negativeMargins`.
+        var margins = FlexMarginSides()
+        /// The negative part of `margins` (min(0, side) per side) — the
+        /// only part that is NOT already inside the subview's frame.
+        var negativeMargins: FlexMarginSides {
+            .init(top: min(0, margins.top), right: min(0, margins.right),
+                  bottom: min(0, margins.bottom), left: min(0, margins.left))
+        }
+        /// Wave 52 (lane L10, 7(b)) — painted border widths + padding on
+        /// the horizontal axis, px: the band between a CONTENT-box basis
+        /// and the border-box frame. A `flex-basis: <percentage>` sizes
+        /// the content box (css-flexbox-1 §7.2.3, css-box-sizing-3 §3.1);
+        /// 0 under `box-sizing: border-box` (the basis contains them).
+        var boxExtraWidth: CGFloat = 0
+        /// Block-axis twin of `boxExtraWidth` (column containers).
+        var boxExtraHeight: CGFloat = 0
+    }
+
+    /// Four signed-or-zero physical sides (Wave 52, L10) — kept as a tiny
+    /// struct so the claim stays Equatable and axis-agnostic: the
+    /// container picks left/right (row) or top/bottom (column).
+    struct FlexMarginSides: Equatable {
+        /// Top side, px (≤ 0 for negativeMargins).
+        var top: CGFloat = 0
+        /// Right side, px.
+        var right: CGFloat = 0
+        /// Bottom side, px.
+        var bottom: CGFloat = 0
+        /// Left side, px.
+        var left: CGFloat = 0
     }
 
     /// Paint-order claim (design §4.3): z-index is ITEM-scoped. Carried
@@ -157,6 +193,11 @@ enum ItemPlacementExtractor {
         // (css-flexbox-1 §7.2.3), which the child cannot know here.
         if case .percent(let pct)? = flexAgg.flexBasis { p.flex.basisPercent = pct }
         p.flex.alignSelf = flexAgg.alignSelf
+        // Wave 52 (lane L10): outer-size facts for the consuming layout
+        // (css-flexbox-1 §9.2 step 3) — raw IR px, see FlexOuterFacts.
+        p.flex.margins = FlexOuterFacts.margins(properties)
+        p.flex.boxExtraWidth = FlexOuterFacts.boxExtra(properties, horizontal: true)
+        p.flex.boxExtraHeight = FlexOuterFacts.boxExtra(properties, horizontal: false)
         // Size facts — presence checks identical to the pre-v2 renderer's
         // crossAuto (Width/InlineSize vs Height/BlockSize) and gridPlan's
         // hasHeight stretch precondition.
@@ -167,5 +208,57 @@ enum ItemPlacementExtractor {
             $0.type == "Height" || $0.type == "BlockSize"
         }
         return p
+    }
+}
+
+// MARK: - Outer-size facts (wave 52, lane L10)
+
+/// Raw-IR readers for the two outer-size facts FlexClaim carries. Only
+/// CONCRETE px leaves count: an `auto` / `%` / `em` side is left at 0 —
+/// the same "static facts only" rule the claim's basisPx follows — so a
+/// side the extractor could not resolve can never invent a footprint.
+enum FlexOuterFacts {
+
+    /// The concrete px value of one IR property, or nil when absent or
+    /// not a plain px leaf (MarginLeft wire: `{"px": -150}`).
+    private static func px(_ props: [IRProperty], _ type: String) -> CGFloat? {
+        // Last declaration wins, like the cascade the extractor emitted.
+        guard let p = props.last(where: { $0.type == type }) else { return nil }
+        // `.object(["px": n])` and bare numbers both decode through here.
+        return ValueExtractors.extractPx(p.data)
+    }
+
+    /// css-flexbox-1 §9.2 step 3: every margin side, signed, concrete px.
+    static func margins(_ props: [IRProperty]) -> ItemPlacement.FlexMarginSides {
+        // A non-px side (auto / % / em) contributes nothing here.
+        func side(_ name: String) -> CGFloat { px(props, "Margin" + name) ?? 0 }
+        return .init(top: side("Top"), right: side("Right"),
+                     bottom: side("Bottom"), left: side("Left"))
+    }
+
+    /// Painted border + padding on one physical axis (the content-box →
+    /// border-box band). css-backgrounds-3 §4.3: a `none` / `hidden` (or
+    /// absent — the initial) border style computes the width to 0.
+    static func boxExtra(_ props: [IRProperty], horizontal: Bool) -> CGFloat {
+        // `box-sizing: border-box` folds border + padding INTO the basis
+        // (css-box-sizing-3 §3.1), so nothing lies between the two boxes.
+        let borderBox = props.contains {
+            $0.type == "BoxSizing"
+                && ValueExtractors.normalize(ValueExtractors.extractKeyword($0.data)) == "BORDER_BOX"
+        }
+        if borderBox { return 0 }
+        var total: CGFloat = 0
+        // The two physical sides of this axis.
+        for side in horizontal ? ["Left", "Right"] : ["Top", "Bottom"] {
+            // Padding is never negative (CSS 2.1 §8.4).
+            total += max(0, px(props, "Padding" + side) ?? 0)
+            // A border paints only under a visible style keyword.
+            let style = ValueExtractors.normalize(
+                ValueExtractors.extractKeyword(props.last { $0.type == "Border\(side)Style" }?.data))
+            if !style.isEmpty, style != "NONE", style != "HIDDEN" {
+                total += max(0, px(props, "Border\(side)Width") ?? 0)
+            }
+        }
+        return total
     }
 }

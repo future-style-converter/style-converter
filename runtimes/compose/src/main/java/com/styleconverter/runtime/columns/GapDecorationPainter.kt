@@ -50,7 +50,8 @@ object GapDecorationPainter {
         style: ColumnRuleStyle,
         color: Color
     ) {
-        val r = segment.rect
+        // Wave 52 (lane L10, 7(a′)): whole-pixel edges first (see snapped).
+        val r = snapped(segment.rect)
         val vertical = segment.axis == GapAxis.COLUMN
         // Thickness runs across the bar, length along it.
         val thickness = if (vertical) r.width else r.height
@@ -79,6 +80,26 @@ object GapDecorationPainter {
                 PropertyTracker.markUnhandled("GapRuleStyle3D:$style"); fill(scope, r, color)
             }
         }
+    }
+
+    /**
+     * Wave 52 (lane L10, queue 7(a′)) — snap a rule rect to whole pixels the
+     * way Chromium's `PixelSnappedIntRect` snaps a LayoutRect: each EDGE
+     * rounds half-up (floor(v + 0.5)), so the width is round(x + w) −
+     * round(x). The cross bands used to be drawn at `Offset(r.left, r.top)`
+     * unsnapped — flex-gap-decorations-045's gold rows came out as 4 solid
+     * + 2 half-covered rows where the ref paints 5 crisp ones. Integral
+     * rects come back unchanged; half-pixel-centred rules ((gap − width)/2
+     * not whole: 024/029/030/034–037/050) move ≤ 0.5 px. Twin of the
+     * SwiftUI `GapDecorationsPainter.snapped`, pinned with the same table.
+     */
+    internal fun snapped(r: GapRect): GapRect {
+        // Half-up rounding of one coordinate (Math.round's rule, spelled out
+        // so the Swift twin can mirror it exactly).
+        fun snap(v: Float): Float = kotlin.math.floor(v + 0.5f)
+        // Degenerate rects carry no ink; paintOne drops them unchanged.
+        if (r.right <= r.left || r.bottom <= r.top) return r
+        return GapRect(snap(r.left), snap(r.top), snap(r.right), snap(r.bottom))
     }
 
     /** Fill a whole segment rectangle. */

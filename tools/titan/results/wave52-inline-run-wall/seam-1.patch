@@ -1,0 +1,84 @@
+Wave 52 · lane L9 (inline-run-wall) · seam-1 — Compose ComponentRenderer.kt
+Applies on: HEAD 7d9c22a7 (campaign/wave52) — NO prior lane patch needed; its three hunks (:6848 pre-break
+call, :6977 placeholderOverflow call, :7799 the function) touch none of the other lanes' registered Compose
+hunks (L2/L7 :911-950, L11 :1134, L4 :1886/:1983, L10 :2213/:2508, L3 :2781, L6 :4021, L8 :7622, L7 :7931).
+What: F3 — placeholderOverflow answers TextOverflow.Ellipsis for a soft-wrapped run under a drawn-marker
+`line-clamp` (css-overflow-4 §5.1/§4.2; DrawnLineClamp.cap is the one reader), and the call site threads
+`unclippedLineWidths = !ruleBSoftWrap` (the Text's ACTUAL softWrap) instead of `!wrapConfig.softWrap`, so a
+rule-B pre-broken / B-RC7 run keeps Visible (the wave-39 finalMaxLines landmine). F4 — the pre-break call
+passes `clampLines = DrawnLineClamp.cap(properties)` so a FIRED run bakes its "…" (PreBreakPipeline).
+Depends on (non-seam, lane-owned, in the tree): typography/wrapping/DrawnLineClamp.kt (new),
+PreBreakPipeline.kt (`clampLines`), GreedyLineBreaker.kt (`clampLines`, `Clamp`).
+Verification: _note.md "Seam verification" (shared tree under the lock, sha256 equal before/after).
+
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index c25311b..9a0524a 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -6848,6 +6848,17 @@ object ComponentRenderer {
+             // would hard-newline the run with softWrap OFF — suppressing
+             // the hyphenation we just switched on.
+             dictionaryHyphenation = dictionaryHyphenation,
++            // Wave 52 (lane L9, F4) — a DRAWN-marker fixed-count clamp
++            // (css-overflow-4 §5.1 → §4.2 `auto`) bakes its UA ellipsis into
++            // a FIRED run, trimmed to the cap (PreBreakPipeline's banner: a
++            // fired run renders with softWrap = false, where Ellipsis is the
++            // wave-39 finalMaxLines landmine and Clip paints no marker —
++            // block-ellipsis-025 android: overlong lines clipped, no "…").
++            // Null for a suppressed marker, the bare `max-lines` longhand
++            // and no clamp, so every other run answers exactly as before;
++            // a run that does not fire keeps Minikin's wrapping and gets its
++            // marker from placeholderOverflow below (F3) — one owner each.
++            clampLines = com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties),
+             // Single-line advance through the EXACT render style and the
+             // EXACT run transform (runAnnotated), so measure and paint can
+             // never disagree. getLineWidth(0) is the raw float advance —
+@@ -6977,7 +6988,18 @@ object ComponentRenderer {
+             // clamp was being dropped, so this wave moves exactly ONE thing
+             // for them (the line cap) and leaves the horizontal-overflow
+             // paint the wave38-final captures recorded untouched.
+-            unclippedLineWidths = !wrapConfig.softWrap
++            // Wave 52 (lane L9, F3) — the gate is the Text's ACTUAL softWrap
++            // (`ruleBSoftWrap`, :6868), not the declared `wrapConfig.softWrap`:
++            // a rule-B pre-broken run and a B-RC7 unbreakable run render with
++            // softWrap = false too, and there the wave-39 banner's landmine
++            // is live — `Ellipsis` would collapse `finalMaxLines` to 1 and
++            // re-wrap the run. Those runs lay their lines out at intrinsic
++            // width exactly like `pre`, so Visible is the CSS 2.1 §11.1.1
++            // answer for them as well (block-ellipsis-025 android: the
++            // overlong lines now PAINT past the box as the ref does, instead
++            // of being clipped at its edge). Only a genuinely soft-wrapped
++            // clamp reaches the Ellipsis arm placeholderOverflow now has.
++            unclippedLineWidths = !ruleBSoftWrap
+         )
+ 
+         // text-emphasis marks (css-text-decor-3 §3). Compose has no native
+@@ -7799,7 +7821,27 @@ object ComponentRenderer {
+         // in either direction.
+         if (properties.any { it.type == "TextOverflow" }) return declared
+         if (effectiveMaxLines != Int.MAX_VALUE) {
+-            return if (unclippedLineWidths) TextOverflow.Visible else declared
++            // Intrinsic-width lines (`pre`/`nowrap`, a rule-B pre-broken or
++            // B-RC7 unbreakable run — softWrap off): Visible, wave 39's rule
++            // and the landmine guard (Ellipsis here collapses finalMaxLines).
++            if (unclippedLineWidths) return TextOverflow.Visible
++            // Wave 52 (lane L9, F3) — css-overflow-4 §5.1: `line-clamp: <n>`
++            // expands to `block-ellipsis: auto`, and §4.2 makes `auto` the
++            // UA ellipsis — a bare clamp on a soft-wrapped run MUST paint the
++            // "…". `declared` here is Compose's Clip default (no
++            // `text-overflow` on the wire — the arm above returned for one),
++            // which is why NO Compose clamp in the corpus ever painted a
++            // marker (block-ellipsis-001 android P 0.9836 = `…room uncha`
++            // clipped; -032 android f 0.9397: fold landed, no "…" in any
++            // box) while the config-driven path (LineClampApplier
++            // .getTextOverflow) has said Ellipsis all along. Safe on THIS
++            // path only because the run soft-wraps: finalMaxLines keeps the
++            // cap and finalMaxWidth stays bounded (the wave-39 banner's
++            // table). The `max-lines` longhand alone keeps `declared`:
++            // its block-ellipsis is the initial `none` (DrawnLineClamp.cap —
++            // the ONE reader PreBreakPipeline consults too, so F3 and F4 can
++            // never disagree about which clamp draws a marker).
++            return if (com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties) != null) TextOverflow.Ellipsis else declared
+         }
+         return TextOverflow.Visible
+     }

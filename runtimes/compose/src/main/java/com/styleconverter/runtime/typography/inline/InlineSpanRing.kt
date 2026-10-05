@@ -228,6 +228,9 @@ object InlineSpanRing {
         // side actually paints (style keyword present; §3.2 initial none).
         var borderStyleSeen = false
         val losses = mutableListOf<String>()
+        // Wave 52 (lane L9) — the member's `hanging-punctuation` keywords,
+        // kept only to NAME the stated loss below (null = not declared).
+        var hangingKeywords: String? = null
         for (prop in properties) when (prop.type) {
             // Paragraph policy — the fold's adoption walk owns it.
             "Hyphens" -> {}
@@ -292,14 +295,17 @@ object InlineSpanRing {
             // white space and nothing else, so the keyword governs only how
             // that white space is processed, and the fold can honour it
             // exactly by appending the run verbatim (css-text-3 §3: `pre`,
-            // `pre-wrap`, `pre-line` and `break-spaces` all PRESERVE
-            // spaces). `normal` / `nowrap` COLLAPSE the run to one space
-            // (§4.1.1) — appending it verbatim would paint 8 spaces where
-            // CSS paints 1, so those refuse rather than lie.
+            // `pre-wrap` and `break-spaces` PRESERVE spaces). `normal`,
+            // `nowrap` and `pre-line` COLLAPSE the run to one space
+            // (§4.1.1 — `pre-line` is `white-space-collapse: preserve-
+            // breaks`, which keeps segment breaks only; wave 52 skeptic S3
+            // corrected the wave-50 claim) — appending it verbatim would
+            // paint 8 spaces where CSS paints 1, so those refuse rather
+            // than lie.
             "WhiteSpace" -> {
                 if (!glyphless) return Admission.Refused("member-prop:WhiteSpace")
                 when (extractKeywordish(prop.data)?.replace('_', '-')) {
-                    "pre", "pre-wrap", "pre-line", "break-spaces" -> {}
+                    "pre", "pre-wrap", "break-spaces" -> {}
                     else -> return Admission.Refused("member-prop:WhiteSpace-collapsing")
                 }
             }
@@ -323,6 +329,31 @@ object InlineSpanRing {
             // css-break-4 §5 — fragments a box paint this ring does not
             // paint; inert alongside the border stated-loss below.
             "BoxDecorationBreak" -> {}
+            // ── Wave 52 (lane L9) — `hanging-punctuation` is INERT ───────
+            // css-text-3 §8.3: the property governs whether a punctuation
+            // glyph at the START/END of a LINE hangs outside the line box —
+            // a line-end behaviour of the member's own glyphs, not a paint
+            // or a paragraph policy. Neither native implements it (parse-
+            // only: TypographyExtractor's "CSS-Text-4 long tail" list on
+            // Compose, UnsupportedRubyEmphasisExtractor on iOS), so the
+            // STACKED block the wave-44 refusal produced — the member on
+            // its own line, in the default ink — is less faithful than a
+            // folded line that merely does not hang: the folded `」` keeps
+            // its inherited ink and obeys UAX #14 LB13 (no break before a
+            // closing bracket), exactly as web — which does not hang either
+            // — paints it (`字字字` / `字」`, css-text/hanging-punctuation/
+            // hanging-punctuation-inline-001 web P 0.9849). HONEST SCORE
+            // NOTE: the ref HANGS the bracket (one line), and the lane's PNG
+            // replay predicts the folded shape scores LOWER than the
+            // stacked one on both natives (android 0.9495 → ≈0.945 f, ios
+            // 0.9756 → ≈0.969 P — tools/titan/results/wave52-inline-run-
+            // wall/replay.json): a correctness change, not a flip, gated by
+            // the device A/B. The keyword list is kept so the un-hung
+            // punctuation is a STATED loss in the seam's log (repo
+            // no-silent-fallthrough), never a silent drop.
+            "HangingPunctuation" -> {
+                hangingKeywords = extractHangingKeywords(prop.data)
+            }
             // The border box — a stated loss, not a refusal (banner).
             in BORDER_LOSS_TYPES -> {
                 if (prop.type.endsWith("Style")) borderStyleSeen = true
@@ -341,7 +372,12 @@ object InlineSpanRing {
         if (tag in UA_SHIFT_TAGS && !declaredFontSize) sizeEm = 1f / 1.2f
         // A styleless border never paints (css-backgrounds-3 §3.2) — only
         // report the loss when a style keyword makes the box real.
-        val stated = if (borderStyleSeen) listOf("border-box-ink(${losses.joinToString(",")})") else emptyList()
+        val stated = buildList {
+            if (borderStyleSeen) add("border-box-ink(${losses.joinToString(",")})")
+            // Wave 52 (lane L9): the un-hung punctuation, named per keyword
+            // so logcat can tell `first` from `last` (css-text-3 §8.3).
+            hangingKeywords?.let { add("hanging-punctuation($it)") }
+        }
         return Admission.Admitted(
             Style(ink, sizePx, sizeEm, weight, italic, underline, lineThrough, shift, background),
             stated,
@@ -532,6 +568,19 @@ object InlineSpanRing {
     private fun extractKeywordish(data: kotlinx.serialization.json.JsonElement): String? =
         ValueExtractors.extractKeyword(data)?.lowercase()
 
+    /** Wave 52 (lane L9) — the HangingPunctuation wire: a JsonArray of
+     *  keywords (`["LAST"]`, `["FIRST","ALLOW_END"]`, css-text-3 §8.3) or
+     *  one bare keyword (`"none"`), lowercased and comma-joined for the
+     *  stated-loss label. Never refuses: the wire is what the converter
+     *  emitted for a parse-only property, and an unreadable shape simply
+     *  names the loss without keywords (the label is diagnostic only). */
+    private fun extractHangingKeywords(data: kotlinx.serialization.json.JsonElement): String =
+        when (data) {
+            is JsonArray -> data.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.lowercase() }
+                .joinToString(",")
+            else -> ValueExtractors.extractKeyword(data)?.lowercase() ?: ""
+        }
+
     /** TextDecorationLine wire: a JsonArray of keywords or one bare
      *  keyword — normalized lowercase with the wire's LINE_THROUGH
      *  underscore turned back into the css hyphen (the same
@@ -564,10 +613,47 @@ object InlineSpanRing {
      * ops (the caller logs and falls back to an un-spanned render:
      * degraded STYLE, never wrong GLYPHS).
      *
+     * Wave 52 (lane L9, F4) adds ONE more surgery, tried only when the
+     * op set above cannot explain the string (so every pre-wave-52 answer
+     * is byte-identical): the drawn-marker clamp's `kept lines + "…"`
+     * (see [clampedAlignment]).
+     *
      * @return transformed-string index for each original index 0..len
      *   (inclusive end sentinel), or null when unalignable.
      */
-    fun alignment(original: String, transformed: String): IntArray? {
+    fun alignment(original: String, transformed: String): IntArray? =
+        // The plain op set first — the wave-47 walk, unchanged.
+        walk(original, transformed, hideTail = false)
+            // Only then the clamp's hidden tail (null when no marker ends it).
+            ?: clampedAlignment(original, transformed)
+
+    /**
+     * Wave 52 (lane L9, F4) — the drawn-marker CLAMP's surgery. A fired run
+     * under a `line-clamp` whose marker is drawn renders
+     * `kept lines + "…"` (GreedyLineBreaker.clampLines via PreBreakPipeline):
+     * every original character past the kept prefix is HIDDEN —
+     * css-overflow-4 §4.2 hides content at the end of the last line, at
+     * soft wrap opportunities, to make room for the ellipsis — and the
+     * marker is inserted. Without this arm the walk ran off the end of the
+     * prefix and answered null, so a styled member ahead of the clamp lost
+     * its style (the seam's un-styled fallback). Hidden characters map onto
+     * the marker's offset, so a wholly hidden member styles nothing; the
+     * end sentinel stops BEFORE the marker, which is styled as the block
+     * container's own anonymous inline (css-overflow-4 §4.2), never as a
+     * member's. Twin: InlineSpanRing.swift `clampedAlignment`.
+     */
+    private fun clampedAlignment(original: String, transformed: String): IntArray? {
+        // The ONE marker string the clamp bakes (css-overflow-4 §4.2 `auto`).
+        val marker = com.styleconverter.runtime.typography.wrapping.GreedyLineBreaker.BLOCK_ELLIPSIS_MARKER
+        // No trailing marker → no clamp surgery to explain: stay unalignable.
+        if (!transformed.endsWith(marker)) return null
+        // Align against the kept prefix; whatever the prefix leaves is hidden.
+        return walk(original, transformed.dropLast(marker.length), hideTail = true)
+    }
+
+    /** The alignment walk proper — see [alignment]; [hideTail] admits the
+     *  clamp's hidden tail once the transformed string is exhausted. */
+    private fun walk(original: String, transformed: String, hideTail: Boolean): IntArray? {
         val map = IntArray(original.length + 1)
         var i = 0 // original cursor
         var j = 0 // transformed cursor
@@ -593,6 +679,11 @@ object InlineSpanRing {
                 j < transformed.length && (transformed[j] == '\n' ||
                     transformed[j] == '\u2010' || transformed[j] == '-') -> {
                     j++
+                }
+                // Wave 52 (lane L9, F4): past the clamp's kept prefix every
+                // original char is hidden — it maps onto the marker's offset.
+                hideTail && j >= transformed.length -> {
+                    map[i] = j; i++
                 }
                 // Anything else is surgery this map does not model.
                 else -> return null

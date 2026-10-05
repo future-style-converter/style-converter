@@ -253,6 +253,12 @@ object ColorParser {
                 "display-p3" -> ColorConversion.displayP3ToSrgb(v1, v2, v3, alpha).clamped()
                 "a98-rgb" -> ColorConversion.a98RgbToSrgb(v1, v2, v3, alpha).clamped()
                 "rec2020" -> ColorConversion.rec2020ToSrgb(v1, v2, v3, alpha).clamped()
+                // Linear-light twins (css-color-4 §10.2): same primaries, NO transfer
+                // decode. Before wave-52 L1 these fell to `else -> null`, so the
+                // runtimes painted nothing (wave51-fix css-color/display-p3-linear-001..003).
+                "display-p3-linear" -> ColorConversion.displayP3LinearToSrgb(v1, v2, v3, alpha).clamped()
+                "a98-rgb-linear" -> ColorConversion.a98RgbLinearToSrgb(v1, v2, v3, alpha).clamped()
+                "rec2020-linear" -> ColorConversion.rec2020LinearToSrgb(v1, v2, v3, alpha).clamped()
                 // CIE XYZ inputs — xyz defaults to D65; xyz-d50 needs Bradford adaptation.
                 "xyz", "xyz-d65" -> ColorConversion.xyzD65ToSrgb(v1, v2, v3, alpha).clamped()
                 "xyz-d50" -> ColorConversion.xyzD50ToSrgb(v1, v2, v3, alpha).clamped()

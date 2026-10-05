@@ -1,0 +1,8 @@
+flex-gap-decorations-033-ref.html                    live chroma=0      ctrl chroma=5200   live nonwhite=22500   ctrl nonwhite=22500  ERASED-BY-RECIPE
+flex-gap-decorations-034-ref.html                    live chroma=0      ctrl chroma=2500   live nonwhite=51000   ctrl nonwhite=53500  ERASED-BY-RECIPE
+flex-gap-decorations-035-ref.html                    live chroma=0      ctrl chroma=4050   live nonwhite=90000   ctrl nonwhite=94050  ERASED-BY-RECIPE
+flex-gap-decorations-036-ref.html                    live chroma=0      ctrl chroma=2050   live nonwhite=57000   ctrl nonwhite=59050  ERASED-BY-RECIPE
+flex-gap-decorations-037-ref.html                    live chroma=0      ctrl chroma=2050   live nonwhite=58000   ctrl nonwhite=60050  ERASED-BY-RECIPE
+hanging-punctuation-block-bound-001-ref.html         live chroma=0      ctrl chroma=58184  live nonwhite=9695    ctrl nonwhite=68049  ERASED-BY-RECIPE
+css-tags-paint-order-ref.html                        live chroma=234000 ctrl chroma=234000 live nonwhite=234000  ctrl nonwhite=234000  unaffected
+css-tags-paint-order-with-entry-ref.html             live chroma=234000 ctrl chroma=234000 live nonwhite=234000  ctrl nonwhite=234000  unaffected

@@ -1,0 +1,511 @@
+{
+ "_lane": "wave52 L12-B skeptic re-run of wave50-B10 \"28 of 42\"",
+ "refs": 42,
+ "differs": 28,
+ "rows": [
+  {
+   "ref": "tools/wpt/css/css-align/abspos/align-self-static-position-001-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 18490,
+    "nonwhite": 21076
+   },
+   "after": {
+    "chroma": 18490,
+    "nonwhite": 21076
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-align/abspos/align-self-static-position-002-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 18555,
+    "nonwhite": 21123
+   },
+   "after": {
+    "chroma": 18555,
+    "nonwhite": 21123
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-align/abspos/align-self-static-position-006-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 19177,
+    "nonwhite": 21709
+   },
+   "after": {
+    "chroma": 19177,
+    "nonwhite": 21709
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-align/reference/ttwf-reftest-alignContent-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 4900,
+    "nonwhite": 6574
+   },
+   "after": {
+    "chroma": 4900,
+    "nonwhite": 6574
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-backgrounds/reference/css3-background-origin-border-box-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 8841
+   },
+   "after": {
+    "chroma": 2592,
+    "nonwhite": 11433
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-backgrounds/reference/origin-padding-box_with_radius-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 126670,
+    "nonwhite": 126883
+   },
+   "after": {
+    "chroma": 151854,
+    "nonwhite": 152033
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-contain/contain-layout-ignored-cases-ib-split-001-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 62800,
+    "nonwhite": 62800
+   },
+   "after": {
+    "chroma": 78000,
+    "nonwhite": 78000
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-contain/contain-paint-ignored-cases-ib-split-001-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 62800,
+    "nonwhite": 62800
+   },
+   "after": {
+    "chroma": 78000,
+    "nonwhite": 78000
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-flexbox/reference/cross-axis-scrollbar-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 27600,
+    "nonwhite": 29202
+   },
+   "after": {
+    "chroma": 31500,
+    "nonwhite": 33102
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-flexbox/reference/flex-box-float-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 18000,
+    "nonwhite": 22836
+   },
+   "after": {
+    "chroma": 20700,
+    "nonwhite": 20700
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-033-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 22500
+   },
+   "after": {
+    "chroma": 5200,
+    "nonwhite": 22500
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-034-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 51000
+   },
+   "after": {
+    "chroma": 2500,
+    "nonwhite": 53500
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-035-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 90000
+   },
+   "after": {
+    "chroma": 4050,
+    "nonwhite": 94050
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-036-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 57000
+   },
+   "after": {
+    "chroma": 2050,
+    "nonwhite": 59050
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-037-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 58000
+   },
+   "after": {
+    "chroma": 2050,
+    "nonwhite": 60050
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/flex/flex-gap-decorations-064-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 57000
+   },
+   "after": {
+    "chroma": 3375,
+    "nonwhite": 60375
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/grid/grid-gap-decorations-042-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 156000
+   },
+   "after": {
+    "chroma": 7855,
+    "nonwhite": 156000
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/grid/grid-gap-decorations-064-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 66000
+   },
+   "after": {
+    "chroma": 3000,
+    "nonwhite": 67200
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-gaps/grid/grid-gap-decorations-065-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 66000
+   },
+   "after": {
+    "chroma": 6528,
+    "nonwhite": 70728
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-grid/reference/display-grid-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 2418
+   },
+   "after": {
+    "chroma": 38594,
+    "nonwhite": 41418
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-grid/reference/fr-unit-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 2170
+   },
+   "after": {
+    "chroma": 20191,
+    "nonwhite": 23173
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-grid/reference/fr-unit-with-percentage-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 2170
+   },
+   "after": {
+    "chroma": 20191,
+    "nonwhite": 23173
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-page/margin-boxes/dimensions-013-print-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 38042,
+    "nonwhite": 39448
+   },
+   "after": {
+    "chroma": 157964,
+    "nonwhite": 159280
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-page/margin-boxes/paint-order-003-print-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 49000,
+    "nonwhite": 150500
+   },
+   "after": {
+    "chroma": 59000,
+    "nonwhite": 160500
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-page/page-background-001-print-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 18,
+    "nonwhite": 6278
+   },
+   "after": {
+    "chroma": 18,
+    "nonwhite": 6278
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-page/page-background-002-print-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 18,
+    "nonwhite": 4162
+   },
+   "after": {
+    "chroma": 18,
+    "nonwhite": 4162
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-page/page-background-003-print-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 90,
+    "nonwhite": 21366
+   },
+   "after": {
+    "chroma": 90,
+    "nonwhite": 21366
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-page/page-background-005-print-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 59400,
+    "nonwhite": 102800
+   },
+   "after": {
+    "chroma": 59436,
+    "nonwhite": 107261
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-paint-api/style-first-letter-pseudo-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 64,
+    "nonwhite": 78
+   },
+   "after": {
+    "chroma": 154,
+    "nonwhite": 160
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-position/invalidate-opacity-negative-z-index-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 2500,
+    "nonwhite": 2500
+   },
+   "after": {
+    "chroma": 2500,
+    "nonwhite": 2500
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-shapes/shape-outside/supported-shapes/circle/reference/shape-outside-circle-030-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 496,
+    "nonwhite": 3686
+   },
+   "after": {
+    "chroma": 496,
+    "nonwhite": 3686
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-shapes/shape-outside/supported-shapes/ellipse/reference/shape-outside-ellipse-030-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 300,
+    "nonwhite": 3426
+   },
+   "after": {
+    "chroma": 300,
+    "nonwhite": 3426
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-shapes/spec-examples/reference/shape-outside-008-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 2450,
+    "nonwhite": 10574
+   },
+   "after": {
+    "chroma": 16724,
+    "nonwhite": 24473
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-text/hanging-punctuation/reference/hanging-punctuation-block-bound-001-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 9695
+   },
+   "after": {
+    "chroma": 58184,
+    "nonwhite": 68049
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-text/overflow-wrap/reference/overflow-wrap-min-content-size-003-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 448,
+    "nonwhite": 2748
+   },
+   "after": {
+    "chroma": 2048,
+    "nonwhite": 4228
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-text/white-space/reference/trailing-ideographic-space-alt-003-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 5658
+   },
+   "after": {
+    "chroma": 160,
+    "nonwhite": 5818
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-transforms/perspective-split-by-zero-w-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 109295,
+    "nonwhite": 234000
+   },
+   "after": {
+    "chroma": 109295,
+    "nonwhite": 234000
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 234000,
+    "nonwhite": 234000
+   },
+   "after": {
+    "chroma": 234000,
+    "nonwhite": 234000
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-view-transitions/css-tags-paint-order-with-entry-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 234000,
+    "nonwhite": 234000
+   },
+   "after": {
+    "chroma": 234000,
+    "nonwhite": 234000
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-viewport/zoom/reference/margin-ref.html",
+   "differs": false,
+   "before": {
+    "chroma": 83077,
+    "nonwhite": 86000
+   },
+   "after": {
+    "chroma": 83077,
+    "nonwhite": 86000
+   }
+  },
+  {
+   "ref": "tools/wpt/css/css-writing-modes/reference/table-cell-001-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 0,
+    "nonwhite": 2280
+   },
+   "after": {
+    "chroma": 8000,
+    "nonwhite": 10280
+   }
+  },
+  {
+   "ref": "tools/wpt/css/fill-stroke/reference/paint-order-001-ref.html",
+   "differs": true,
+   "before": {
+    "chroma": 28749,
+    "nonwhite": 53245
+   },
+   "after": {
+    "chroma": 40273,
+    "nonwhite": 62766
+   }
+  }
+ ]
+}

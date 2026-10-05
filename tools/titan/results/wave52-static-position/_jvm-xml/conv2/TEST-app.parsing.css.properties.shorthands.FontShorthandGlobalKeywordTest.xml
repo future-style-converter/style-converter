@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:11:12.117Z" hostname="mac-1.home" time="0.007">
+  <properties/>
+  <testcase name="all-prop-001 shorthand yields a typed FontVariantCaps instead of a Generic()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.003"/>
+  <testcase name="font inherit forwards to every longhand and never to the font-variant shorthand()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.0"/>
+  <testcase name="font-variant shorthand with a CSS-wide keyword expands to its seven longhands()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.001"/>
+  <testcase name="keyword is forwarded as authored not lowercased()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.0"/>
+  <testcase name="initial unset revert and revert-layer take the same path()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.0"/>
+  <testcase name="non-keyword font shorthand sets font-variant-caps not font-variant()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.0"/>
+  <testcase name="selector bucket font initial emits only longhand names()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.002"/>
+  <testcase name="base bucket font inherit emits no property named font-variant()" classname="app.parsing.css.properties.shorthands.FontShorthandGlobalKeywordTest" time="0.001"/>
+  <system-out><![CDATA[[CSS Parser] Expanded 'font: bold italic small-caps 20px monospace' → font-weight, font-style, font-variant-caps, font-size, font-family, line-height
+[CSS Parser] Parsed 6 properties (0 generic)
+[CSS Parser] Expanded 'font: initial' → font-style, font-variant-ligatures, font-variant-position, font-variant-caps, font-variant-numeric, font-variant-alternates, font-variant-east-asian, font-variant-emoji, font-weight, font-stretch, font-size, line-height, font-family
+[CSS Parser] No parser for 'font-style', using GenericProperty
+[CSS Parser] No parser for 'font-variant-ligatures', using GenericProperty
+[CSS Parser] No parser for 'font-variant-position', using GenericProperty
+[CSS Parser] No parser for 'font-variant-caps', using GenericProperty
+[CSS Parser] No parser for 'font-variant-numeric', using GenericProperty
+[CSS Parser] No parser for 'font-variant-alternates', using GenericProperty
+[CSS Parser] No parser for 'font-variant-east-asian', using GenericProperty
+[CSS Parser] No parser for 'font-variant-emoji', using GenericProperty
+[CSS Parser] No parser for 'font-weight', using GenericProperty
+[CSS Parser] Parsed 13 properties (9 generic)
+[CSS Parser] Expanded 'font: inherit' → font-style, font-variant-ligatures, font-variant-position, font-variant-caps, font-variant-numeric, font-variant-alternates, font-variant-east-asian, font-variant-emoji, font-weight, font-stretch, font-size, line-height, font-family
+[CSS Parser] Resolved redundant 'inherit' on inherited-by-default properties (drop == natural inheritance): font-style, font-weight, font-stretch, font-size, line-height, font-family
+[CSS Parser] No parser for 'font-variant-ligatures', using GenericProperty
+[CSS Parser] No parser for 'font-variant-position', using GenericProperty
+[CSS Parser] No parser for 'font-variant-caps', using GenericProperty
+[CSS Parser] No parser for 'font-variant-numeric', using GenericProperty
+[CSS Parser] No parser for 'font-variant-alternates', using GenericProperty
+[CSS Parser] No parser for 'font-variant-east-asian', using GenericProperty
+[CSS Parser] No parser for 'font-variant-emoji', using GenericProperty
+[CSS Parser] Parsed 7 properties (7 generic)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

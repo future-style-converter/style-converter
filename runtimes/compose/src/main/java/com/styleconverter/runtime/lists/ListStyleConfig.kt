@@ -40,6 +40,11 @@ enum class ListStyleType {
     KATAKANA,
     HIRAGANA_IROHA,
     KATAKANA_IROHA,
+    // Wave 52 (lane L6, T1): css-counter-styles-3 §7.1 longhand East Asian
+    // style, the iOS twin's `.koreanHangulFormal` (wave 50). The expansion
+    // lives in KoreanHangulFormal; the hanja siblings stay unmodelled
+    // (zero corpus carriers — see that file's scope boundary).
+    KOREAN_HANGUL_FORMAL,
 
     // Custom
     CUSTOM

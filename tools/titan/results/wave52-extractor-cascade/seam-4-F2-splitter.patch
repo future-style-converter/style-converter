@@ -1,0 +1,200 @@
+wave-52 lane L5 (extractor-cascade) — seam-4-F2-splitter
+
+F2 (BACKLOG 0(a″)) — ONE css-syntax-3 declaration splitter, splitDeclarations, at parseCss, style="", @keyframes frames and @font-face (splitDescriptors retired); oracle banner updated.
+
+Applies on: HEAD 7d9c22a7 (tools/titan/extract-fixture.mjs blob 104ef672) with, applied first IN ORDER: seam-1-F3-oracle-filter.patch seam-2-F1-importance.patch seam-3-FD-specificity.patch.
+Ordered patch set (PLAN.md §2 L5 / §3): seam-1 → seam-2 → seam-3 → seam-4 → seam-5 → seam-6; each is cut against the tree the previous ones leave.
+Only L5 patches this seam file this wave. Verification record: tools/titan/results/wave52-extractor-cascade/_note.md.
+
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index 5eb8a1d..b4bfed6 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -704,10 +704,10 @@ export function extractRefHref(html) {
+ // calc() substitutions that only become invalid at computed-value time. Each
+ // of those needs the property's own grammar; guessing at them here would
+ // shadow a LATER valid declaration with an EARLIER one — the same class of
+-// bug in the opposite direction. `1e2deg` is deliberately VALID here
+-// (docs/BACKLOG.md ranked item 0(e): the exponent form is real CSS that the
+-// converter models as a Raw passthrough — a converter limitation, not
+-// invalidity), so this oracle never touches that item's population.
++// bug in the opposite direction. `1e2deg` is deliberately VALID here: the
++// exponent form is real CSS (css-values-4 §5.3; docs/BACKLOG.md ranked item
++// 0(e)), which the converter's AngleParser reads since wave-52 lane L5 F4 —
++// so this oracle never touches that item's population.
+ //
+ // AND ONE SHAPE THE ORACLE CANNOT SEE AT ALL — a `;` INSIDE A url() BODY
+ // (added in wave 50 by fix lane F6, skeptic S2). The declaration splitter in
+@@ -729,8 +729,10 @@ export function extractRefHref(html) {
+ // css-pseudo/first-letter-background-image and its `-dynamic` twin, both
+ // `url('data:image/png;base64,…')` — and in neither is there an earlier
+ // declaration of the same property to delete, so ZERO corpus carriers of the
+-// shadow-collapse shape. No code change this wave: the repair is a different
+-// splitter, which moves the byte shape of every fixture rather than these two.
++// shadow-collapse shape. REPAIRED in wave 52 (lane L5 F2, BACKLOG 0(a″)):
++// every declaration list — rule bodies, `style=""`, @keyframes frames and
++// @font-face descriptors — now goes through ONE css-syntax-3 splitter,
++// `splitDeclarations` below, so the tear cannot reach this oracle at all.
+ //
+ // THREE CLASSES OF VALID CSS THE ORACLE USED TO REFUSE, closed in wave 50 by
+ // fix lane F3 on skeptic S5's adversarial probe
+@@ -761,6 +763,81 @@ export function extractRefHref(html) {
+ // printed on the test's extract.log line as `[validity: …]`, so a drop is
+ // always attributable to a test, a property, a kept value and a reason.
+ 
++/**
++ * wave-52 lane L5 F2 (BACKLOG 0(a″)) — THE declaration splitter. Splits one
++ * declaration list (a rule body, a `style=""` attribute, a @keyframes frame,
++ * a @font-face block) on its top-level `;` the way the css-syntax-3 §5.4
++ * parser algorithms do, over the tokens of §4.3:
++ *   • a `;` inside any `(…)` belongs to that function's component value
++ *     (§5.4 consumes a function as ONE component value) — `fn(1;2)` is one
++ *     value;
++ *   • a `<string-token>` (§4.3.5) is opaque — `content: ";"` is one
++ *     declaration; an unescaped newline ends a string as a <bad-string>, so
++ *     one unterminated quote cannot swallow the rest of the list;
++ *   • an UNQUOTED `url(` opens a `<url-token>` (§4.3.6) that runs to its own
++ *     `)` with no nesting and no strings — `url(data:image/svg+xml;base64,XX)`
++ *     is one value (a quoted `url("…")` is an ordinary function holding a
++ *     string, handled by the two rules above); `url` must start its ident, so
++ *     `image-url(` is an ordinary function;
++ *   • a backslash escape (§4.3.7) consumes the next code point as a pair,
++ *     inside AND outside strings — `view-transition-name: secon\'d` is an
++ *     escaped quote, not a string opener (css-view-transitions/escaped-name).
++ * Comments are NOT tokenised here: every caller receives comment-stripped
++ * text (`stripComments` runs over the whole document, `style=""` attributes
++ * included, before any of them), and an apostrophe inside a surviving
++ * `/* … *\/` would otherwise open a string — measured: 20 of the 22
++ * first-draft hits of the comment-blind census splitter were exactly that or
++ * the escaped quote below (`wave52-plan/splitter-differential.json`).
++ *
++ * Replaces four private splitters: parseCss's and the style attribute's
++ * `split(';')` (quote- and url-blind — the tear documented on the oracle
++ * banner above), the @keyframes frame split, and @font-face's
++ * `splitDescriptors` (paren- and quote-aware but escape-blind).
++ *
++ * @param   {string} body declaration list text, comments already stripped
++ * @returns {string[]} the declarations, trimmed, empties dropped (what every
++ *   caller's `!k || !v` guard dropped after the old split)
++ */
++export function splitDeclarations(body) {
++  const s = String(body ?? '');
++  const n = s.length;
++  const out = [];
++  let start = 0;        // where the current declaration began
++  let depth = 0;        // `(` nesting outside strings and url-tokens
++  let quote = null;     // the open string's quote, or null
++  const flush = (end) => { const d = s.slice(start, end).trim(); if (d) out.push(d); };
++  for (let i = 0; i < n; i++) {
++    const ch = s[i];
++    // §4.3.7: an escape is a PAIR — the escaped code point never acts as a
++    // quote, a paren or a separator, in a string or out of one.
++    if (ch === '\\') { i++; continue; }
++    if (quote) {
++      // §4.3.5: the matching quote closes; a raw newline makes a bad-string.
++      if (ch === quote || ch === '\n') quote = null;
++      continue;
++    }
++    if (ch === '"' || ch === "'") { quote = ch; continue; }
++    // §4.3.6: `url(` at the START of an ident, not followed (after
++    // whitespace) by a quote, is one <url-token> up to its `)`.
++    if ((ch === 'u' || ch === 'U') && /^url\(/i.test(s.slice(i, i + 4))
++        && !/[-\w\u0080-\uFFFF\\]/.test(s[i - 1] ?? '')) {
++      let j = i + 4;
++      while (j < n && /\s/.test(s[j])) j++;
++      if (s[j] !== '"' && s[j] !== "'") {
++        j = i + 4;
++        while (j < n && s[j] !== ')') j += s[j] === '\\' ? 2 : 1;
++        i = j;                                   // on the closing `)` (or past the end)
++        continue;
++      }
++    }
++    if (ch === '(') depth++;
++    else if (ch === ')') depth = Math.max(0, depth - 1);   // a stray `)` never goes negative
++    else if (ch === ';' && depth === 0) { flush(i); start = i + 1; }
++  }
++  flush(n);
++  return out;
++}
++
+ /**
+  * The CLOSED set of CSS dimension units, lower-cased (CSS units are ASCII
+  * case-insensitive). Grouped by the table each unit is defined in, so a
+@@ -1197,7 +1274,9 @@ export function parseCss(css) {
+       // because css-cascade-5 §6.4.4 REVERSES layer order for important
+       // declarations — revert-layer-005/012 turn entirely on that.
+       const important = {};
+-      for (const decl of body.split(';')) {
++      // wave-52 lane L5 F2: the css-syntax-3 splitter, not `split(';')` —
++      // a `;` inside url()/strings/functions no longer tears a value.
++      for (const decl of splitDeclarations(body)) {
+         const colon = decl.indexOf(':');
+         if (colon < 0) continue;
+         const k = decl.slice(0, colon).trim();
+@@ -6549,7 +6628,8 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
+   const inlineProps = {};
+   const inlineImportant = {};
+   if (attrs.style) {
+-    for (const decl of attrs.style.split(';')) {
++    // wave-52 lane L5 F2: the same css-syntax-3 splitter as rule bodies.
++    for (const decl of splitDeclarations(attrs.style)) {
+       const colon = decl.indexOf(':');
+       if (colon < 0) continue;
+       const k = decl.slice(0, colon).trim();
+@@ -7376,7 +7456,7 @@ function parseKeyframeBody(body) {
+     const decls = body.slice(declStart, i - 1);    // raw declaration text
+     const props = {};                              // animatable declarations of this frame
+     let easing;                                    // frame-level animation-timing-function, if any
+-    for (const decl of decls.split(';')) {         // same ';'-split model as parseCss
++    for (const decl of splitDeclarations(decls)) { // the parseCss splitter (wave-52 L5 F2)
+       const colon = decl.indexOf(':');             // property/value divider
+       if (colon < 0) continue;                     // not a declaration
+       const k = decl.slice(0, colon).trim().toLowerCase(); // property name (CSS is ci)
+@@ -8584,32 +8664,6 @@ function unquoteCssString(tok) {
+   return t;
+ }
+ 
+-/** Split one @font-face body into its descriptor declarations on top-level
+- *  `;`. Paren depth and quote state are tracked because CSS Syntax 3
+- *  §4.3.5-6 make a ';' inside `url(…)` or inside a `<string>` a LITERAL —
+- *  a naive `body.split(';')` would shred `src: url(a;b.woff)` into two
+- *  unusable halves and silently lose the face. */
+-function splitDescriptors(body) {
+-  const out = [];
+-  let cur = '';
+-  let depth = 0;      // '(' nesting
+-  let quote = null;   // active quote char, or null
+-  for (const ch of String(body ?? '')) {
+-    if (quote) {
+-      cur += ch;
+-      if (ch === quote) quote = null;   // (no escape handling: CSS escapes
+-      continue;                          //  in a font path are not a WPT shape)
+-    }
+-    if (ch === '"' || ch === "'") { quote = ch; cur += ch; continue; }
+-    if (ch === '(') { depth++; cur += ch; continue; }
+-    if (ch === ')') { depth = Math.max(0, depth - 1); cur += ch; continue; }
+-    if (ch === ';' && depth === 0) { if (cur.trim()) out.push(cur.trim()); cur = ''; continue; }
+-    cur += ch;
+-  }
+-  if (cur.trim()) out.push(cur.trim());
+-  return out;
+-}
+-
+ /**
+  * Scan a stylesheet for `@font-face` blocks and return one raw entry per
+  * block, in document order.
+@@ -8648,10 +8702,11 @@ export function scanFontFaces(css) {
+     re.lastIndex = i;                               // resume after this block
+     // Descriptor split. NOT splitTopLevel — that helper only implements
+     // comma and whitespace modes. A ';' inside `url(...)` or a quoted
+-    // string is a literal (CSS Syntax 3 §4.3.5-6), so the split tracks
+-    // paren depth and quote state; everything else is a separator.
++    // string is a literal (CSS Syntax 3 §4.3.5-6): the shared
++    // splitDeclarations (wave-52 lane L5 F2, which retired this block's
++    // private, escape-blind `splitDescriptors`) honours both.
+     const desc = {};
+-    for (const declRaw of splitDescriptors(body)) {
++    for (const declRaw of splitDeclarations(body)) {
+       const colon = declRaw.indexOf(':');
+       if (colon < 0) continue;
+       const k = declRaw.slice(0, colon).trim().toLowerCase();

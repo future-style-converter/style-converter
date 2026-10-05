@@ -1,0 +1,19 @@
+{
+ "sideA": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/diff/base",
+ "sideB": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/diff/s1",
+ "fixtures": {
+  "compared": 2870,
+  "changed": 0,
+  "onlyA": [],
+  "onlyB": [],
+  "changedFiles": []
+ },
+ "perTestIr": {
+  "compared": 1435,
+  "changed": 0,
+  "onlyA": [],
+  "onlyB": [],
+  "changedDocs": [],
+  "deltas": {}
+ }
+}

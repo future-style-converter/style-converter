@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" tests="10" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.264Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="config with malformed non-positive column-count is coerced to one" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="auto count with negative gap does not zero the divisor" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="negative available width and invalid count or gap are floored defensively" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="wpt z-ordering-003 cube - 15px container with count 5 and default 16px gap collapses to one full-width column" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.001"/>
+  <testcase name="available width exactly equal to total gap keeps the count with zero-width columns" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="zero available width degrades to a single zero-width column" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="comfortable container is unchanged by the guard" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="near-infinite available width does not overflow" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="huge requested count is reduced to what the gaps allow" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <testcase name="zero gap keeps the requested count without dividing by zero" classname="com.styleconverter.runtime.columns.MultiColumnUsedValuesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

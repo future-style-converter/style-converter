@@ -171,10 +171,43 @@ struct TransformsApplier: ViewModifier {
         // goes negative (BackfaceCulling.backfaceZ — the WebKit cofactor
         // test). Replaces the old own-angles-only heuristic, which both
         // ignored ancestors AND mis-summed mixed X/Y rotations.
-        if BackfaceCulling.isCulled(agg: c, inherited: inherited3D) {
+        //
+        // Wave 52 (lane L4, T5) — the culling decision is now split by
+        // `transform-style` (BackfaceCulling.decide, css-transforms-2
+        // §4.1.2). Under FLAT the flattened subtree IS the back face and
+        // the whole content collapses as before; under PRESERVE_3D the
+        // children are their own planes with their own `backface-visibility`
+        // and must keep painting — the wave51-fix capture of
+        // css-transforms/composited-under-rotateY-180deg-preserve-3d
+        // (ios f 0.9565) blanked a green child the ref paints.
+        switch BackfaceCulling.decide(agg: c, inherited: inherited3D) {
+        case .hideSubtree:
             // Collapse to zero opacity but keep layout (SwiftUI has no
             // first-class backface-culling hook).
             v = AnyView(v.opacity(0))
+        case .cullOwnFace:
+            // DOCUMENTED APPROXIMATION, not a silent drop: `content` here is
+            // the fully composed element — its own `.engineBackground*` /
+            // `.engineBorder*` decoration is applied INNER of this modifier
+            // (StyleBuilder.applyStyle) and cannot be separated from the
+            // children by an outer modifier, so the element's own back face
+            // (its background + borders) is left painted while the children
+            // paint as the spec requires. The wave51-fix corpus has exactly
+            // ONE culled preserve-3d carrier and it declares no background,
+            // border or text (tools/titan/results/wave52-small-fixes/
+            // census.json `t5.ownDecorationOnCulledPreserve3d = 0`), so no
+            // cell observes the approximation; the breadcrumb below makes
+            // the day one does visible in the capture log. Compose culls the
+            // own face for real (BackfaceCull.stripOwnFace) — a divergence
+            // stated here rather than hidden.
+            _ = PropertyTracker.logOnce(
+                key: "BackfaceVisibility[preserve-3d-own-face-approximated]",
+                message: "backface-visibility: hidden under transform-style: "
+                    + "preserve-3d — children painted (css-transforms-2 §4.1.2); "
+                    + "the element's own background/border back face is NOT culled "
+                    + "on iOS (decoration is inner of TransformsApplier)")
+        case .none:
+            break
         }
 
         // Step 4b — context propagation for DESCENDANTS: an element that

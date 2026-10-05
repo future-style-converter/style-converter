@@ -1,0 +1,111 @@
+{
+ "cmd": [
+  "xcodebuild",
+  "test",
+  "-scheme",
+  "StyleConverterRuntime",
+  "-destination",
+  "platform=macOS,variant=Mac Catalyst,arch=arm64",
+  "-derivedDataPath",
+  "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/dd",
+  "-only-testing:StyleConverterRuntimeTests/GreedyLineBreakerTests"
+ ],
+ "results": [
+  {
+   "id": "W1-separators-narrowed-to-U+0020",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "sha256After": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "expectFail": {
+    "testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:123: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030] : XCTAssertEqual failed: (\"[\"\u2026\"]\") is not equal to (\"[\"123\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030]' failed (1.238 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "W2-soft-hyphens-not-restored",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "sha256After": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "expectFail": {
+    "testClampHidesAtTheSoftHyphenOfBlockEllipsis028": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:137: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheSoftHyphenOfBlockEllipsis028] : XCTAssertEqual failed: (\"[\"This time, Mark, who had always been the center of attention in\", \"any social gathering, walked into the room\u2026\"]\") is not equal to (\"[\"This time, Mark, who had always been the center of attention in\", \"any social gathering, walked into the room uncharacteristi\u2010\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheSoftHyphenOfBlockEllipsis028]' failed (0.924 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "W3-ideograph-decline-off",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "sha256After": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "expectFail": {
+    "testClampDeclinesWhenTheHiddenTailHoldsAnIdeograph": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:149: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDeclinesWhenTheHiddenTailHoldsAnIdeograph] : XCTAssertEqual failed: (\"[\"aa bb\", \"\u2026\"]\") is not equal to (\"[\"aa bb\", \"\u5b57\u5b57\u5b57\u5b57\u5b57\u5b57\", \"cc\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDeclinesWhenTheHiddenTailHoldsAnIdeograph]' failed (0.818 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "W4-dash-break-after-off",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "sha256After": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "expectFail": {
+    "testClampHidesAfterAHyphenAndAtAZeroWidthSpace": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:162: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAfterAHyphenAndAtAZeroWidthSpace] : XCTAssertEqual failed: (\"[\"x\", \"\u2026\"]\") is not equal to (\"[\"x\", \"foo-\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAfterAHyphenAndAtAZeroWidthSpace]' failed (0.861 seconds)."
+   ],
+   "proven": true
+  },
+  {
+   "id": "W5-fit-test-off (S8 re-cut on the new clampLines)",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "exit": 65,
+   "sha256Before": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "sha256After": "f791a5f4e164f8f2bfdbf7d07fea4b2b20b40d53a5068cfe767a23422bbb2062",
+   "expectFail": {
+    "testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone": true,
+    "testClampDropsTrailingWordsUntilTheMarkerFits": true,
+    "testClampMeasuresACustomMarkerAsARealGlyphRun": true,
+    "testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030": true,
+    "testClampHidesAtTheSoftHyphenOfBlockEllipsis028": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:149: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDeclinesWhenTheHiddenTailHoldsAnIdeograph] : XCTAssertEqual failed: (\"[\"aa bb\", \"\u5b57\u5b57\u5b57\u5b57\u5b57\u5b57\u2026\"]\") is not equal to (\"[\"aa bb\", \"\u5b57\u5b57\u5b57\u5b57\u5b57\u5b57\", \"cc\"]\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:151: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDeclinesWhenTheHiddenTailHoldsAnIdeograph] : XCTAssertEqual failed: (\"[\"x\", \"\u5b57\u5b57 aa bb\u2026\"]\") is not equal to (\"[\"x\", \"\u5b57\u5b57 aa\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDeclinesWhenTheHiddenTailHoldsAnIdeograph]' failed (1.210 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:63: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDropsTrailingWordsUntilTheMarkerFits] : XCTAssertEqual failed: (\"[\"aa bb\", \"cc dd\u2026\"]\") is not equal to (\"[\"aa bb\", \"cc\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampDropsTrailingWordsUntilTheMarkerFits]' failed (0.001 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:162: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAfterAHyphenAndAtAZeroWidthSpace] : XCTAssertEqual failed: (\"[\"x\", \"foo-barbaz\u2026\"]\") is not equal to (\"[\"x\", \"foo-\u2026\"]\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:163: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAfterAHyphenAndAtAZeroWidthSpace] : XCTAssertEqual failed: (\"[\"x\", \"foo\u200bbarbaz\u2026\"]\") is not equal to (\"[\"x\", \"foo\u2026\"]\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:164: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAfterAHyphenAndAtAZeroWidthSpace] : XCTAssertEqual failed: (\"[\"x\", \"foo-1234\u2026\"]\") is not equal to (\"[\"x\", \"\u2026\"]\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:165: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAfterAHyphenAndAtAZeroWidthSpace] : XCTAssertEqual failed: (\"[\"x\", \"-foobarbaz\u2026\"]\") is not equal to (\"[\"x\", \"\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAfterAHyphenAndAtAZeroWidthSpace]' failed (0.005 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:123: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030] : XCTAssertEqual failed: (\"[\"123\u16805\u2026\"]\") is not equal to (\"[\"123\u2026\"]\")",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:125: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030] : XCTAssertEqual failed: (\"[\"123 5\u2026\"]\") is not equal to (\"[\"123\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030]' failed (0.003 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:137: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheSoftHyphenOfBlockEllipsis028] : XCTAssertEqual failed: (\"[\"This time, Mark, who had always been the center of attention in\", \"any social gathering, walked into the room uncharacteristically\u2026\"]\") is not equal to (\"[\"This time, Mark, who had always been the center of attention in\", \"any social gathering, walked into the room uncharacteristi\u2010\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampHidesAtTheSoftHyphenOfBlockEllipsis028]' failed (0.001 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:87: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampMeasuresACustomMarkerAsARealGlyphRun] : XCTAssertEqual failed: (\"[\"aa bb\", \"cc dd[more]\"]\") is not equal to (\"[\"aa bb\", \"[more]\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampMeasuresACustomMarkerAsARealGlyphRun]' failed (0.001 seconds).",
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift:38: error: -[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone] : XCTAssertEqual failed: (\"[\"Test passes if there are 4 lines\", \"and the last one only contains \u2026\", \"supercalifragilisticexpialidocious\", \"supercalifragilisticexpialidocious\u2026\"]\") is not equal to (\"[\"Test passes if there are 4 lines\", \"and the last one only contains \u2026\", \"supercalifragilisticexpialidocious\", \"\u2026\"]\")",
+    "Test Case '-[StyleConverterRuntimeTests.GreedyLineBreakerTests testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone]' failed (0.002 seconds)."
+   ],
+   "proven": true
+  }
+ ]
+}

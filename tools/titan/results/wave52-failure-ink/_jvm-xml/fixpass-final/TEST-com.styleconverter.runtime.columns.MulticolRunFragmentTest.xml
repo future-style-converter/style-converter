@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolRunFragmentTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:09:47.663Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="R5 monolithic child is pushed whole into the next column" classname="com.styleconverter.runtime.columns.MulticolRunFragmentTest" time="0.0"/>
+  <testcase name="R1 run fitting the column stacks in column 0 with no fragments" classname="com.styleconverter.runtime.columns.MulticolRunFragmentTest" time="0.0"/>
+  <testcase name="R2 overflowing run slices exactly like a sole child of height T" classname="com.styleconverter.runtime.columns.MulticolRunFragmentTest" time="0.0"/>
+  <testcase name="R3 negative child heights floor to zero in the strip" classname="com.styleconverter.runtime.columns.MulticolRunFragmentTest" time="0.0"/>
+  <testcase name="R6 breakable children split while an over-tall monolith breaks after its push" classname="com.styleconverter.runtime.columns.MulticolRunFragmentTest" time="0.0"/>
+  <testcase name="R4 zero column block-size produces no fragments" classname="com.styleconverter.runtime.columns.MulticolRunFragmentTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

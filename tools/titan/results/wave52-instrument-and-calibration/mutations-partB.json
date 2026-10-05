@@ -1,0 +1,42 @@
+[
+ [
+  "MB1",
+  "tools/titan/capture-browser-ref.mjs",
+  ":where(html) { background: ${CANVAS_BG}; }\n      :where(html, body) { margin: 0; padding: 0; }",
+  ":where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }",
+  "tools/titan/capture-browser-ref.test.mjs",
+  "L12-B rootbg"
+ ],
+ [
+  "MB2",
+  "tools/titan/capture-browser-ref.mjs",
+  "                     min-height: 100vh; }\n    `;\n}",
+  "                     min-height: 100vh; }\n      ${UA_BODY_CSS}\n    `;\n}",
+  "tools/titan/capture-browser-ref.test.mjs",
+  "L12-B uamargin"
+ ],
+ [
+  "MB3",
+  "tools/titan/capture-browser-ref.mjs",
+  "  return pageDeclaresBodyMargin(testAbs, wptDir) && !pageDeclaresBodyMargin(refAbs, wptDir);",
+  "  return pageDeclaresBodyMargin(testAbs, wptDir);",
+  "tools/titan/capture-browser-ref.test.mjs",
+  "L12-B direction"
+ ],
+ [
+  "MB4",
+  "tools/titan/capture-browser-ref.mjs",
+  "  if (/^\\*(?![\\w-])/.test(last)) return parts.slice(0, -1).every((p) => /^(html|:root)$/i.test(p));",
+  "  if (/^\\*(?![\\w-])/.test(last)) return true;",
+  "tools/titan/capture-browser-ref.test.mjs",
+  "L12-B selector rule"
+ ],
+ [
+  "MB5",
+  "tools/titan/capture-browser-ref.mjs",
+  "  if (uaBodyMargin) await page.addStyleTag({ content: UA_BODY_CSS });",
+  "  await page.addStyleTag({ content: UA_BODY_CSS });",
+  "tools/titan/capture-browser-ref.test.mjs",
+  "L12-B source"
+ ]
+]

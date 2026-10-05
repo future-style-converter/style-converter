@@ -1,0 +1,428 @@
+{
+ "generated": "2026-10-05T15:33:04.987Z",
+ "run": "wave51-fix",
+ "perTestIrDocs": 1435,
+ "inheritedTypes": 42,
+ "testsWithAll": 11,
+ "allCarrierComponents": 28,
+ "testsWithNativeChange": 6,
+ "nativeChangedComponents": 7,
+ "rc6StrippedCarriers": 0,
+ "tests": [
+  {
+   "test": "css-cascade/all-prop-001",
+   "doc": "css-cascade/per-test-ir/wpt__css-cascade__all-prop-001.json",
+   "cells": {
+    "web": "P 0.9689",
+    "ios": "P 0.964",
+    "android": "P 0.9641"
+   },
+   "carriers": 2,
+   "webDroppedBeforeAll": 60,
+   "webAfterKeptAfterAll": [
+    0,
+    1
+   ],
+   "nativeChangedComponents": [
+    {
+     "component": "wpt__css-cascade__all-prop-001__1-002",
+     "tag": null,
+     "text": "321",
+     "rc6": false,
+     "carrier": true,
+     "keyword": "INITIAL",
+     "before": [
+      "Direction",
+      "UnicodeBidi",
+      "BorderTopStyle",
+      "BorderRightStyle",
+      "BorderBottomStyle",
+      "BorderLeftStyle",
+      "BorderTopColor",
+      "BorderRightColor",
+      "BorderBottomColor",
+      "BorderLeftColor",
+      "BackgroundColor",
+      "Color",
+      "TextDecorationLine",
+      "FontWeight",
+      "FontStyle",
+      "FontVariantCaps",
+      "FontSize",
+      "FontFamily",
+      "LineHeight",
+      "OutlineStyle",
+      "OutlineColor",
+      "Float",
+      "LetterSpacing",
+      "Display",
+      "TextAlign",
+      "Width",
+      "MarginTop",
+      "MarginRight",
+      "MarginBottom",
+      "MarginLeft",
+      "OverflowX",
+      "OverflowY"
+     ],
+     "after": [],
+     "oldEffective": [],
+     "newEffective": [
+      "Direction",
+      "UnicodeBidi"
+     ]
+    },
+    {
+     "component": "all-prop-001__1__0-003",
+     "tag": "bdo",
+     "text": "987 654",
+     "rc6": false,
+     "carrier": true,
+     "keyword": "INITIAL",
+     "before": [
+      "BorderTopStyle",
+      "BorderRightStyle",
+      "BorderBottomStyle",
+      "BorderLeftStyle",
+      "BorderTopColor",
+      "BorderRightColor",
+      "BorderBottomColor",
+      "BorderLeftColor",
+      "BackgroundColor",
+      "Color",
+      "TextDecorationLine",
+      "FontWeight",
+      "FontStyle",
+      "FontVariantCaps",
+      "FontSize",
+      "FontFamily",
+      "LineHeight",
+      "OutlineStyle",
+      "OutlineColor",
+      "Float",
+      "LetterSpacing",
+      "Display",
+      "TextAlign",
+      "Width",
+      "MarginTop",
+      "MarginRight",
+      "MarginBottom",
+      "MarginLeft",
+      "OverflowX",
+      "OverflowY"
+     ],
+     "after": [
+      "Direction"
+     ],
+     "oldEffective": [],
+     "newEffective": [
+      "Direction"
+     ]
+    }
+   ]
+  },
+  {
+   "test": "css-cascade/all-prop-002",
+   "doc": "css-cascade/per-test-ir/wpt__css-cascade__all-prop-002.json",
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9709",
+    "android": "P 0.9702"
+   },
+   "carriers": 2,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    0,
+    0
+   ],
+   "nativeChangedComponents": []
+  },
+  {
+   "test": "css-cascade/all-prop-inherit-color",
+   "doc": "css-cascade/per-test-ir/wpt__css-cascade__all-prop-inherit-color.json",
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9989",
+    "android": "P 0.9993"
+   },
+   "carriers": 1,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    1
+   ],
+   "nativeChangedComponents": [
+    {
+     "component": "all-prop-inherit-color__0__0-013",
+     "tag": "span",
+     "text": "Test passes if this text is green.",
+     "rc6": false,
+     "carrier": true,
+     "keyword": "INHERIT",
+     "before": [],
+     "after": [
+      "Color"
+     ],
+     "oldEffective": [],
+     "newEffective": [
+      "Color"
+     ]
+    }
+   ]
+  },
+  {
+   "test": "css-cascade/all-prop-initial-color",
+   "doc": "css-cascade/per-test-ir/wpt__css-cascade__all-prop-initial-color.json",
+   "cells": {
+    "web": "P 0.9783",
+    "ios": "P 0.9989",
+    "android": "P 0.9993"
+   },
+   "carriers": 1,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    1
+   ],
+   "nativeChangedComponents": [
+    {
+     "component": "all-prop-initial-color__0__0-015",
+     "tag": "span",
+     "text": "Test passes if this text is green.",
+     "rc6": false,
+     "carrier": true,
+     "keyword": "INITIAL",
+     "before": [],
+     "after": [
+      "Color"
+     ],
+     "oldEffective": [],
+     "newEffective": [
+      "Color"
+     ]
+    }
+   ]
+  },
+  {
+   "test": "css-cascade/all-prop-initial-visited",
+   "doc": "css-cascade/per-test-ir/wpt__css-cascade__all-prop-initial-visited.json",
+   "cells": {
+    "web": "P 0.9839",
+    "ios": "P 0.999",
+    "android": "P 0.9995"
+   },
+   "carriers": 1,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    27
+   ],
+   "nativeChangedComponents": [
+    {
+     "component": "wpt__css-cascade__all-prop-initial-visited__0-016",
+     "tag": "a",
+     "text": "This text must be green.",
+     "rc6": false,
+     "carrier": true,
+     "keyword": "INITIAL",
+     "before": [],
+     "after": [
+      "TextDecorationLine",
+      "Position",
+      "BoxSizing",
+      "MarginTop",
+      "MarginRight",
+      "MarginBottom",
+      "MarginLeft",
+      "PaddingTop",
+      "PaddingRight",
+      "PaddingBottom",
+      "PaddingLeft",
+      "BorderTopWidth",
+      "BorderRightWidth",
+      "BorderBottomWidth",
+      "BorderLeftWidth",
+      "BorderTopStyle",
+      "BorderRightStyle",
+      "BorderBottomStyle",
+      "BorderLeftStyle",
+      "BorderTopColor",
+      "BorderRightColor",
+      "BorderBottomColor",
+      "BorderLeftColor",
+      "BackgroundColor",
+      "Display",
+      "OverflowX",
+      "OverflowY"
+     ],
+     "oldEffective": [],
+     "newEffective": [
+      "TextDecorationLine",
+      "Position",
+      "BoxSizing",
+      "MarginTop",
+      "MarginRight",
+      "MarginBottom",
+      "MarginLeft",
+      "PaddingTop",
+      "PaddingRight",
+      "PaddingBottom",
+      "PaddingLeft",
+      "BorderTopWidth",
+      "BorderRightWidth",
+      "BorderBottomWidth",
+      "BorderLeftWidth",
+      "BorderTopStyle",
+      "BorderRightStyle",
+      "BorderBottomStyle",
+      "BorderLeftStyle",
+      "BorderTopColor",
+      "BorderRightColor",
+      "BorderBottomColor",
+      "BorderLeftColor",
+      "BackgroundColor",
+      "Display",
+      "OverflowX",
+      "OverflowY"
+     ]
+    }
+   ]
+  },
+  {
+   "test": "css-cascade/all-prop-revert-color",
+   "doc": "css-cascade/per-test-ir/wpt__css-cascade__all-prop-revert-color.json",
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9989",
+    "android": "P 0.9993"
+   },
+   "carriers": 1,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    1
+   ],
+   "nativeChangedComponents": [
+    {
+     "component": "all-prop-revert-color__0__0-018",
+     "tag": "span",
+     "text": "Test passes if this text is green.",
+     "rc6": false,
+     "carrier": true,
+     "keyword": "REVERT",
+     "before": [],
+     "after": [
+      "Color"
+     ],
+     "oldEffective": [],
+     "newEffective": [
+      "Color"
+     ]
+    }
+   ]
+  },
+  {
+   "test": "css-cascade/all-prop-unset-color",
+   "doc": "css-cascade/per-test-ir/wpt__css-cascade__all-prop-unset-color.json",
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9989",
+    "android": "P 0.9993"
+   },
+   "carriers": 1,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    1
+   ],
+   "nativeChangedComponents": [
+    {
+     "component": "all-prop-unset-color__0__0-022",
+     "tag": "span",
+     "text": "Test passes if this text is green.",
+     "rc6": false,
+     "carrier": true,
+     "keyword": "UNSET",
+     "before": [],
+     "after": [
+      "Color"
+     ],
+     "oldEffective": [],
+     "newEffective": [
+      "Color"
+     ]
+    }
+   ]
+  },
+  {
+   "test": "css-display/display-contents-button",
+   "doc": "css-display/per-test-ir/wpt__css-display__display-contents-button.json",
+   "cells": {
+    "web": "P 0.9765",
+    "ios": "P 0.9692",
+    "android": "P 0.9705"
+   },
+   "carriers": 1,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    15
+   ],
+   "nativeChangedComponents": []
+  },
+  {
+   "test": "css-display/display-contents-details",
+   "doc": "css-display/per-test-ir/wpt__css-display__display-contents-details.json",
+   "cells": {
+    "web": "P 0.9724",
+    "ios": "P 0.968",
+    "android": "P 0.9693"
+   },
+   "carriers": 2,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    26,
+    26
+   ],
+   "nativeChangedComponents": []
+  },
+  {
+   "test": "css-display/display-contents-fieldset",
+   "doc": "css-display/per-test-ir/wpt__css-display__display-contents-fieldset.json",
+   "cells": {
+    "web": "P 0.9716",
+    "ios": "P 0.968",
+    "android": "P 0.9693"
+   },
+   "carriers": 2,
+   "webDroppedBeforeAll": 0,
+   "webAfterKeptAfterAll": [
+    13,
+    13
+   ],
+   "nativeChangedComponents": []
+  },
+  {
+   "test": "css-ui/appearance-revert-001.tentative",
+   "doc": "css-ui/per-test-ir/wpt__css-ui__appearance-revert-001.tentative.json",
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9897",
+    "android": "P 0.9895"
+   },
+   "carriers": 14,
+   "webDroppedBeforeAll": 70,
+   "webAfterKeptAfterAll": [
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0,
+    0
+   ],
+   "nativeChangedComponents": []
+  }
+ ]
+}

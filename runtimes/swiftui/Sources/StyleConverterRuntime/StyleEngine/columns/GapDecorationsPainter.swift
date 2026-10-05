@@ -68,7 +68,12 @@ struct GapDecorationsPainter: View {
                 // origin is the union's, not (0,0), so every rect moves
                 // by exactly −origin and relative geometry is preserved.
                 var local = seg
-                local.rect = seg.rect.offsetBy(dx: -stage.minX, dy: -stage.minY)
+                // Wave 52 (lane L10, 7(a′)): snap to whole points FIRST
+                // (Chromium's PixelSnappedIntRect, see `snapped`), then
+                // translate — the stage origin is integral, so the snap
+                // survives the translate exactly.
+                local.rect = Self.snapped(seg.rect)
+                    .offsetBy(dx: -stage.minX, dy: -stage.minY)
                 Self.draw(&ctx, local, inherited: inheritedColor)
             }
         }
@@ -99,6 +104,38 @@ struct GapDecorationsPainter: View {
         }
         // No ink at all → an empty stage; the Canvas draws nothing.
         return union.isNull ? .zero : union.integral
+    }
+
+    /// Wave 52 (lane L10, queue 7(a′)) — snap a rule rect to whole points
+    /// the way Chromium's `PixelSnappedIntRect` snaps a LayoutRect: each
+    /// EDGE rounds half-up (floor(v + 0.5)), so the width is
+    /// round(x + w) − round(x). A 5-px rule centred in a 10-px gap at
+    /// x 75.5 (flex-gap-decorations-045) or a §9.4-stretched line band at
+    /// y 56.67 (046) used to rasterize as four solid + two half-covered
+    /// rows; the ref paints five crisp ones. Integral rects come back
+    /// unchanged; a rule centred at a half pixel ((gap − width)/2 not whole:
+    /// 024/029/030/034–037/050) moves ≤ 0.5 px (any-hue replay: ≤ 0.0014 SSIM).
+    static func snapped(_ r: CGRect) -> CGRect {
+        // Half-up rounding of one coordinate (Swift's `.rounded()` would
+        // round −0.5 away from zero; floor(v + 0.5) matches LayoutUnit).
+        func snap(_ v: CGFloat) -> CGFloat { (v + 0.5).rounded(.down) }
+        // Degenerate rects stay as they are (draw() drops them anyway).
+        guard r.width > 0, r.height > 0 else { return r }
+        let x0 = snap(r.minX), y0 = snap(r.minY)
+        // Far edges snap independently — the size follows from them.
+        return CGRect(x: x0, y: y0, width: snap(r.maxX) - x0, height: snap(r.maxY) - y0)
+    }
+
+    /// Wave 52 (lane L10, M2) — the paint-time shift MarginApplier gives a
+    /// child with negative margins (`.offset(pullX, pullY)`, pullX =
+    /// min(0, left) − min(0, right)), from the same concrete-px facts the
+    /// flex claim reads. The gap anchor must follow the PAINTED box: a
+    /// −150 margin-left item's border box sits at its slot − 150, and the
+    /// gap after it starts at its painted right edge (§9.5 outer sizes).
+    static func paintShift(_ claim: ItemPlacement.FlexClaim) -> CGSize {
+        // The negative parts only — positive margins pad inside the slot.
+        let m = claim.negativeMargins
+        return CGSize(width: m.left - m.right, height: m.top - m.bottom)
     }
 
     /// One segment. `isRowRule == false` ⇒ a VERTICAL line (thickness on
@@ -230,6 +267,37 @@ struct GapDecorationsPainter: View {
                 ? CGRect(x: r.minX, y: r.minY + at, width: w, height: w)
                 : CGRect(x: r.minX + at, y: r.minY, width: w, height: w)
             ctx.fill(Path(ellipseIn: dot), with: .color(colour))
+        }
+    }
+}
+
+// MARK: - Painted-bounds item anchor (wave 52, lane L10, M2)
+
+extension View {
+    /// `gapDecorationItemFrame(index:active:)` for a child whose margins
+    /// shift its PAINT (MarginApplier's negative-margin `.offset`). The
+    /// plain anchor reads the LAYOUT slot, so flex-gap-decorations-027's
+    /// −150 margin-left "One" reported x 0…50 while painting at −150…−100
+    /// — and once the layout advances by outer size the next item's slot
+    /// starts BEFORE that, which GapDecorationLines reads as a wrap. Here
+    /// the anchor rides a clear background moved by the same shift, so
+    /// the painter groups and gaps the boxes the user actually sees.
+    /// A zero shift (every other child) is the original modifier, so
+    /// every other decorated container keeps its exact view tree.
+    @ViewBuilder
+    func gapDecorationItemFrame(index: Int, active: Bool, paintShift: CGSize) -> some View {
+        if active && paintShift != .zero {
+            // The background is sized to this view's frame; its anchor is
+            // resolved THROUGH the offset, i.e. at the painted position.
+            background(
+                Color.clear
+                    .gapDecorationItemFrame(index: index, active: true)
+                    .offset(x: paintShift.width, y: paintShift.height)
+                    // A layout-free probe — never take a tap from the item.
+                    .allowsHitTesting(false))
+        } else {
+            // Unshifted or inactive: exactly the wave-24 modifier.
+            gapDecorationItemFrame(index: index, active: active)
         }
     }
 }

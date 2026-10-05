@@ -1,0 +1,4977 @@
+{
+ "generated": "2026-10-05T15:47:52.583Z",
+ "run": "wave51-fix",
+ "tests": 277,
+ "extracted": 277,
+ "errors": 0,
+ "testsWithIntroducedColour": 13,
+ "componentsIntroduced": 27,
+ "byTest": [
+  {
+   "rel": "css/CSS2/abspos/remove-block-between-inline-and-abspos.html",
+   "section": "CSS2",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9625",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/CSS2/abspos/static-inside-table-cell.html",
+   "section": "CSS2",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-center-002.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9932",
+    "ios": "P 0.993",
+    "android": "P 0.9927"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-center-no-default.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9865",
+    "ios": "f 0.9864",
+    "android": "f 0.9865"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-center-safe.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9987",
+    "ios": "P 0.9978",
+    "android": "P 0.9522"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "anchor-center-safe__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "white",
+     "now": "rgb(255, 255, 255)",
+     "text": "Anchor"
+    },
+    {
+     "id": "anchor-center-safe__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "darkblue",
+     "now": "rgb(0, 0, 139)",
+     "text": ""
+    },
+    {
+     "id": "anchor-center-safe__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "white",
+     "now": "rgb(255, 255, 255)",
+     "text": "Anchor2"
+    },
+    {
+     "id": "anchor-center-safe__3",
+     "tag": null,
+     "kind": "repaired",
+     "was": "darkblue",
+     "now": "rgb(0, 0, 139)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-css-zoom.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-fieldset-001.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9966",
+    "ios": "P 0.9628",
+    "android": "P 0.9629"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-fixed-pos-descendant.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9988",
+    "ios": "P 0.9987",
+    "android": "P 0.9987"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-function-chain-pseudo-elements.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9994",
+    "ios": "f 0.9483",
+    "android": "f 0.9475"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-in-css-min-max-function.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.998"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-name-005.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9643",
+    "android": "P 0.9979"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-name-006.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-name-007.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-name-multicol-003.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9804",
+    "android": "P 0.9598"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-name-multicol-004.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9966"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-005-print.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8783",
+    "ios": "f 0.8778",
+    "android": "f 0.8778"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-005.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9417",
+    "android": "P 0.9889"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-circular.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-dynamic-005.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-grid-001.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9966",
+    "ios": "f 0.9089",
+    "android": "P 0.9518"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-grid-002.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.962",
+    "android": "P 0.9603"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-002.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9175",
+    "android": "f 0.9381"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-004.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9896",
+    "ios": "P 0.9712",
+    "android": "P 0.9686"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-007.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9379",
+    "android": "f 0.9499"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-008.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9699",
+    "android": "P 0.9804"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-011.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.987",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "anchor-position-multicol-011__1__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-012.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9706",
+    "android": "P 0.9699"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-013.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9762",
+    "android": "P 0.9807"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-014.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9741",
+    "android": "P 0.9807"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-015.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9689",
+    "android": "P 0.9871"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-016.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9689",
+    "android": "P 0.9871"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-017.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9511",
+    "android": "P 0.9823"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-colspan-003.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9768",
+    "android": "P 0.9919"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-anchor-position/anchor-position-multicol-nested-001.html",
+   "section": "css-anchor-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9742",
+    "ios": "f 0.9703",
+    "android": "f 0.9573"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-break/block-end-aligned-abspos-nested.html",
+   "section": "css-break",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-break/block-in-inline-011.html",
+   "section": "css-break",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9339",
+    "android": "P 0.976"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/all-prop-initial-visited.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9839",
+    "ios": "P 0.999",
+    "android": "P 0.9995"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/all-prop-revert-visited.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9995",
+    "ios": "P 0.9989",
+    "android": "P 0.9988"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "all-prop-revert-visited__0",
+     "tag": "a",
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(0, 0, 238)",
+     "text": "Test passes if this text has UA style fo"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-cascade/all-prop-unset-visited.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9993",
+    "ios": "P 0.999",
+    "android": "P 0.9989"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "all-prop-unset-visited__0",
+     "tag": "a",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 238)",
+     "text": "Test passes if this text is green."
+    }
+   ]
+  },
+  {
+   "rel": "css/css-cascade/import-removal.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/layer-slotted-rule.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/revert-layer-004.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/revert-layer-013.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/revert-layer-014.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/revert-layer-015.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9755",
+    "ios": "f 0.9663",
+    "android": "f 0.9663"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/scope-part.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "f 0.7946",
+    "ios": "f 0.7946",
+    "android": "f 0.7946"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-cascade/scope-visited.html",
+   "section": "css-cascade",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "f 0.876",
+    "ios": "f 0.876",
+    "android": "f 0.876"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-color/color-layers-no-blend-mode.html",
+   "section": "css-color",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "f 0.5189",
+    "ios": "f 0.5189",
+    "android": "f 0.5189"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-color/color-mix-basic-001.html",
+   "section": "css-color",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-color/color-mix-currentcolor-visited.html",
+   "section": "css-color",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9975",
+    "ios": "P 0.9904",
+    "android": "P 0.9929"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-color/color-mix-non-srgb-001.html",
+   "section": "css-color",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-color/currentcolor-003.html",
+   "section": "css-color",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9862",
+    "ios": "f 0.7604",
+    "android": "f 0.7655"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "currentcolor-003__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": ""
+    },
+    {
+     "id": "currentcolor-003__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/css-color/currentcolor-004.html",
+   "section": "css-color",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9913",
+    "android": "P 0.9901"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "currentcolor-004__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "currentcolor",
+     "now": "rgb(0, 0, 0)",
+     "text": ""
+    },
+    {
+     "id": "currentcolor-004__0__0",
+     "tag": "a",
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": ""
+    },
+    {
+     "id": "currentcolor-004__0__0__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "currentcolor",
+     "now": "rgb(255, 0, 0)",
+     "text": "This should be green and not red."
+    }
+   ]
+  },
+  {
+   "rel": "css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html",
+   "section": "css-counter-styles",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9925",
+    "ios": "f 0.9925",
+    "android": "f 0.9925"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html",
+   "section": "css-counter-styles",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8821",
+    "ios": "f 0.8821",
+    "android": "f 0.8821"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-counter-styles/counter-style-at-rule/override-in-shadow-dom.html",
+   "section": "css-counter-styles",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9816",
+    "ios": "f 0.9808",
+    "android": "f 0.9805"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html",
+   "section": "css-counter-styles",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9925",
+    "ios": "f 0.9925",
+    "android": "f 0.9925"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-details.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9724",
+    "ios": "P 0.968",
+    "android": "P 0.9693"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-dynamic-before-after-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9898",
+    "ios": "P 0.9888",
+    "android": "P 0.9879"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "display-contents-dynamic-before-after-001__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "display-contents-dynamic-before-after-001__1__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "display-contents-dynamic-before-after-001__1__0__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "display-contents-dynamic-before-after-001__1__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "display-contents-dynamic-before-after-001__1__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "display-contents-dynamic-before-after-001__1__3",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "S"
+    },
+    {
+     "id": "display-contents-dynamic-before-after-001__1__3__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/css-display/display-contents-dynamic-before-after-first-letter-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9987",
+    "android": "P 0.9965"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "display-contents-dynamic-before-after-first-letter-001__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/css-display/display-contents-dynamic-fieldset-legend-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.7224",
+    "android": "f 0.5239"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-dynamic-flex-001-inline.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9977",
+    "android": "P 0.9899"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-dynamic-flex-001-none.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9977",
+    "android": "P 0.9899"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-dynamic-generated-content-fieldset-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9991",
+    "android": "P 0.9981"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-fieldset-002.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 0.9733",
+    "ios": "f 0.6092",
+    "android": "f 0.4786"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-first-letter-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9907",
+    "android": "P 0.9937"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "display-contents-first-letter-001__1__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "ASS"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-display/display-contents-first-letter-002.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9987",
+    "android": "P 0.9977"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "display-contents-first-letter-002__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": ""
+    },
+    {
+     "id": "display-contents-first-letter-002__1__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "PASS"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-display/display-contents-first-line-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9997",
+    "ios": "P 0.9986",
+    "android": "P 0.9978"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-first-line-002.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9907",
+    "android": "P 0.9936"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "display-contents-first-line-002__1__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "P"
+    },
+    {
+     "id": "display-contents-first-line-002__1__1",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "ASS"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-display/display-contents-shadow-host-whitespace.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9926",
+    "ios": "P 0.9913",
+    "android": "P 0.9903"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-slot-attach-whitespace.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9987",
+    "android": "P 0.9975"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-state-change-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9985",
+    "android": "P 0.9985"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "display-contents-state-change-001__0__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(0, 128, 0)",
+     "text": "This text should be green, there should "
+    }
+   ]
+  },
+  {
+   "rel": "css/css-display/display-contents-suppression-dynamic-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9986"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-contents-text-inherit-002.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9902",
+    "ios": "P 0.989",
+    "android": "P 0.9881"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-first-line-002.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 0.9975",
+    "ios": "P 0.9959",
+    "android": "P 0.9945"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-display/display-inline-dynamic-001.html",
+   "section": "css-display",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.995",
+    "ios": "P 0.9901",
+    "android": "P 0.9944"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-flexbox/abspos/dynamic-align-self-001.html",
+   "section": "css-flexbox",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-flexbox/align-items-008.html",
+   "section": "css-flexbox",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-flexbox/anonymous-flex-item-001.html",
+   "section": "css-flexbox",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9987",
+    "android": "P 0.9975"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-gaps/flex/flex-gap-decorations-023.html",
+   "section": "css-gaps",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9737",
+    "ios": "P 0.9542",
+    "android": "P 0.9541"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-images/gradient/gradient-eval-predefined-color-spaces.html",
+   "section": "css-images",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "f 0.9247",
+    "ios": "f 0.9247",
+    "android": "f 0.9247"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-lists/add-inline-child-after-marker-001.html",
+   "section": "css-lists",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9925",
+    "ios": "P 0.9871",
+    "android": "P 0.9859"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-lists/add-inline-child-after-marker-002.html",
+   "section": "css-lists",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9919",
+    "android": "P 0.991"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-lists/change-list-style-position-001.html",
+   "section": "css-lists",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9876",
+    "android": "P 0.9868"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-lists/change-list-style-position-002.html",
+   "section": "css-lists",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9981",
+    "ios": "P 0.9949",
+    "android": "P 0.995"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-lists/change-list-style-position-003.html",
+   "section": "css-lists",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9941",
+    "ios": "P 0.9929",
+    "android": "P 0.9955"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-lists/change-list-style-type-002.html",
+   "section": "css-lists",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9547",
+    "android": "P 0.958"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-lists/counter-list-item-slot-order.html",
+   "section": "css-lists",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9509",
+    "ios": "P 0.9517",
+    "android": "P 0.9523"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-multicol/ancestor-toggle-spanner-001.html",
+   "section": "css-multicol",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-multicol/ancestor-toggle-spanner-002.html",
+   "section": "css-multicol",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-multicol/change-intrinsic-width.html",
+   "section": "css-multicol",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-multicol/change-transform-in-nested.html",
+   "section": "css-multicol",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-multicol/change-transform-in-second-column.html",
+   "section": "css-multicol",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-multicol/change-transform-in-spanner.html",
+   "section": "css-multicol",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-multicol/change-transform.html",
+   "section": "css-multicol",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-overflow/line-clamp/block-ellipsis-007.html",
+   "section": "css-overflow",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9841",
+    "ios": "P 0.9843",
+    "android": "P 0.9844"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "line-clamp__block-ellipsis-007__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "teal",
+     "now": "rgb(0, 128, 128)",
+     "text": "Line 1 Line 2"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-overflow/line-clamp/block-ellipsis-008.html",
+   "section": "css-overflow",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9841",
+    "ios": "P 0.9843",
+    "android": "P 0.9844"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "line-clamp__block-ellipsis-008__0__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "teal",
+     "now": "rgb(0, 128, 128)",
+     "text": "Line 1 Line 2"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-overflow/line-clamp/block-ellipsis-009.html",
+   "section": "css-overflow",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.984",
+    "ios": "P 0.9839",
+    "android": "P 0.9795"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "line-clamp__block-ellipsis-009__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "teal",
+     "now": "rgb(0, 128, 128)",
+     "text": "Line 1 Line 2"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/block-axis-constraint-changes-for-out-of-flow-box.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/change-insets-inside-strict-containment-nested.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9594",
+    "android": "P 0.9589"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/containing-block-change-button.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 0.9752",
+    "ios": "P 0.9713",
+    "android": "P 0.9621"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/hypothetical-dynamic-change-001.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/hypothetical-dynamic-change-002.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/hypothetical-dynamic-change-003.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-dynamic-auto-overflow.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-dynamic-relayout-002.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-dynamic-relayout-003.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-dynamic-relayout-004.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9966"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-dynamic-static-position-flex.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-dynamic-static-position-inline.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-dynamic-static-position-table-cell.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-absolute-scrollable-overflow-zero.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-fixed-dynamic-transformed-sibling.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-relative-004.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9594",
+    "android": "P 0.9589"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-position/position-relative-005.html",
+   "section": "css-position",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/active-selection-051.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9086",
+    "ios": "f 0.9073",
+    "android": "f 0.906"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "active-selection-051__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "transparent",
+     "now": "rgba(0, 0, 0, 0)",
+     "text": "Selected Text"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/active-selection-053.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9086",
+    "ios": "f 0.9073",
+    "android": "f 0.906"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "active-selection-053__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "transparent",
+     "now": "rgba(0, 0, 0, 0)",
+     "text": "Selected Text"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/active-selection-054.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9086",
+    "ios": "f 0.9073",
+    "android": "f 0.906"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "active-selection-054__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "transparent",
+     "now": "rgba(0, 0, 0, 0)",
+     "text": "Selected Text"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/active-selection-056.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9994",
+    "android": "P 0.9986"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/active-selection-057.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9994",
+    "android": "P 0.9986"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/before-dynamic-display-none.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9991",
+    "android": "P 0.9979"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/before-preceding-whitespace-dynamic.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 0.9884",
+    "ios": "P 0.9949",
+    "android": "P 0.9931"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-001.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9806",
+    "ios": "P 0.9726",
+    "android": "P 0.9717"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-002.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9821",
+    "ios": "P 0.9807",
+    "android": "P 0.9799"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "first-letter-002__1__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": "a"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-003.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9849",
+    "ios": "P 0.9835",
+    "android": "P 0.9826"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "first-letter-003__2__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "a"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-004.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9985",
+    "ios": "P 0.9794",
+    "android": "P 0.9617"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-005.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9247",
+    "ios": "f 0.9054",
+    "android": "f 0.9224"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-and-sibling-display-change.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9993",
+    "android": "P 0.9993"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "first-letter-and-sibling-display-change__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "This text should be green."
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-and-whitespace.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9981",
+    "ios": "P 0.9966",
+    "android": "P 0.9952"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9977",
+    "android": "P 0.9976"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-background-image.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9978",
+    "ios": "P 0.9977",
+    "android": "P 0.9976"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-block-to-inline.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9989",
+    "ios": "P 0.999",
+    "android": "P 0.9995"
+   },
+   "introduced": 1,
+   "colour": [
+    {
+     "id": "first-letter-block-to-inline__0__0",
+     "tag": "span",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "This text should be green."
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-capitalize-supplementary-char.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9996",
+    "ios": "P 0.9925",
+    "android": "P 0.9747"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-digraph.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9778",
+    "ios": "f 0.932",
+    "android": "P 0.9679"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "first-letter-digraph__1__0",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "IJsselmeer"
+    },
+    {
+     "id": "first-letter-digraph__1__1",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "ijsselmeer"
+    },
+    {
+     "id": "first-letter-digraph__1__2",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "“IJsselmeer”"
+    },
+    {
+     "id": "first-letter-digraph__2__0",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "IJsselmeer"
+    },
+    {
+     "id": "first-letter-digraph__2__1",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "IJsselmeer"
+    },
+    {
+     "id": "first-letter-digraph__4__0",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "IJsselmeer"
+    },
+    {
+     "id": "first-letter-digraph__4__1",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "ijsselmeer"
+    },
+    {
+     "id": "first-letter-digraph__4__2",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "“IJsselmeer”"
+    },
+    {
+     "id": "first-letter-digraph__5__0",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "lightgray",
+     "now": "rgb(211, 211, 211)",
+     "text": "Ijotalen"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8489",
+    "ios": "f 0.86",
+    "android": "f 0.8525"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.7361",
+    "ios": "f 0.7363",
+    "android": "f 0.7551"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8311",
+    "ios": "f 0.8407",
+    "android": "f 0.8554"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-insert-text-node-dynamic.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9031",
+    "ios": "f 0.9024",
+    "android": "f 0.9018"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9995",
+    "android": "P 0.9987"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-opacity-001.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9982",
+    "ios": "P 0.9982",
+    "android": "P 0.9983"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-opacity-float-001.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 0.9974",
+    "ios": "P 0.9975",
+    "android": "P 0.9974"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-punctuation-and-space.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9986",
+    "ios": "P 0.9834",
+    "android": "P 0.9931"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-punctuation-dynamic.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9957",
+    "ios": "P 0.9947",
+    "android": "P 0.9944"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-skip-empty-span-nested.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9993",
+    "android": "P 0.999"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-skip-empty-span.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9993",
+    "android": "P 0.999"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-skip-marker.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9324",
+    "ios": "f 0.9363",
+    "android": "f 0.9372"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-text-and-display-change.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9882",
+    "ios": "P 0.987",
+    "android": "P 0.9822"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-width-2.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9994",
+    "android": "P 0.999"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "first-letter-width-2__1__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "transparent",
+     "now": "rgba(0, 0, 0, 0)",
+     "text": "Test"
+    },
+    {
+     "id": "first-letter-width-2__1__1",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "transparent",
+     "now": "rgba(0, 0, 0, 0)",
+     "text": "Test."
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-width.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9994",
+    "android": "P 0.999"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "first-letter-width__1__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "transparent",
+     "now": "rgba(0, 0, 0, 0)",
+     "text": "Test"
+    },
+    {
+     "id": "first-letter-width__1__1",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "transparent",
+     "now": "rgba(0, 0, 0, 0)",
+     "text": "Test."
+    }
+   ]
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-with-before-after.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9907",
+    "ios": "P 0.9988",
+    "android": "P 0.993"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-with-preceding-new-line.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9834",
+    "android": "P 0.998"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-with-quote.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9948",
+    "android": "P 0.9948"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-letter-with-span.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9999",
+    "android": "P 0.9998"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-line-and-marker.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9538",
+    "ios": "f 0.945",
+    "android": "f 0.9434"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-line-and-placeholder.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9834",
+    "ios": "P 0.9743",
+    "android": "P 0.9743"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-line-inherited-no-transition.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9927",
+    "ios": "P 0.9593",
+    "android": "f 0.9755"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-line-inherited-with-transition.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9853",
+    "ios": "P 0.9504",
+    "android": "f 0.9299"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-line-insert-text-node-dynamic.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8983",
+    "ios": "f 0.8967",
+    "android": "f 0.8973"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-pseudo/first-line-line-height-001.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.6781",
+    "ios": "f 0.6858",
+    "android": "f 0.6881"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/abspos-container-change-dynamic-001.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9654"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/border-collapse-dynamic-col-001.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9404",
+    "android": "P 0.9812"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/border-collapse-dynamic-oof.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9367",
+    "android": "P 0.9692"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/border-collapse-dynamic-section.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9949"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/collapsed-border-color-change-with-compositing.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.986",
+    "android": "P 0.9822"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/collapsed-border-remove-row-group.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9853",
+    "android": "P 0.9972"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/fixup-dynamic-anonymous-inline-table-001.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9456",
+    "android": "f 0.944"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/fixup-dynamic-anonymous-inline-table-002.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9456",
+    "android": "f 0.9434"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/fixup-dynamic-anonymous-inline-table-003.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9827",
+    "android": "P 0.9984"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-tables/fixup-dynamic-anonymous-table-001.html",
+   "section": "css-tables",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9451",
+    "android": "P 0.9709"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-text-decor/text-decoration-color-recalc-002.html",
+   "section": "css-text-decor",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9991",
+    "android": "P 0.9991"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "text-decoration-color-recalc-002__0",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(0, 128, 0)",
+     "text": "Text passes if strikethrough color is gr"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-text-decor/text-decoration-color-recalc.html",
+   "section": "css-text-decor",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9819",
+    "android": "P 0.9849"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-text-decor/text-decoration-color-selection-pseudo-01.html",
+   "section": "css-text-decor",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9896",
+    "ios": "P 0.9892",
+    "android": "P 0.99"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-text-decor/text-decoration-line-recalc.html",
+   "section": "css-text-decor",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9634",
+    "ios": "P 0.9557",
+    "android": "P 0.9596"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "section": "css-text-decor",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9484",
+    "android": "f 0.9486"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-text-decor/text-decoration-style-recalc.html",
+   "section": "css-text-decor",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9964",
+    "ios": "P 0.9805",
+    "android": "P 0.9833"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-text/hanging-punctuation/hanging-scrollable-001.html",
+   "section": "css-text",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 0.9914",
+    "ios": "P 0.9912",
+    "android": "P 0.9742"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "hanging-punctuation__hanging-scrollable-001__1__0__0__0",
+     "tag": "td",
+     "kind": "repaired",
+     "was": "red",
+     "text": ""
+    },
+    {
+     "id": "hanging-punctuation__hanging-scrollable-001__1__0__0__0__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "white",
+     "now": "rgb(255, 0, 0)",
+     "text": "X"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-transforms/backface-visibility-hidden-animated-001.html",
+   "section": "css-transforms",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9905",
+    "ios": "P 0.9646",
+    "android": "P 0.989"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-transforms/backface-visibility-hidden-animated-002.html",
+   "section": "css-transforms",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9904",
+    "ios": "P 0.9646",
+    "android": "P 0.989"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-transforms/css-transform-scale-001-manual.html",
+   "section": "css-transforms",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9067",
+    "ios": "f 0.9053",
+    "android": "f 0.9039"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-ui/accent-color-visited.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "accent-color-visited__0",
+     "tag": "a",
+     "kind": "repaired",
+     "was": "#0000EE",
+     "now": "rgb(0, 0, 238)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/css-ui/appearance-auto-non-html-namespace-001.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9988"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-ui/appearance-progress-bar-002.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9845",
+    "android": "P 0.9845"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-ui/caret-color-bar-shape-text-color.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9907",
+    "android": "P 0.998"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "caret-color-bar-shape-text-color__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "black",
+     "now": "rgb(0, 0, 0)",
+     "text": "abc"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-ui/caret-color-block-shape-text-color-001.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8608",
+    "ios": "f 0.8615",
+    "android": "f 0.8631"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-ui/caret-color-block-shape-text-color-002.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9674",
+    "ios": "f 0.962",
+    "android": "f 0.9666"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "caret-color-block-shape-text-color-002__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": "abc"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-ui/caret-color-block-shape-text-color-004.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9635",
+    "ios": "P 0.9583",
+    "android": "P 0.9626"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "caret-color-block-shape-text-color-004__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "abc"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-ui/caret-color-underscore-shape-text-color.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9907",
+    "android": "P 0.998"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "caret-color-underscore-shape-text-color__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "black",
+     "now": "rgb(0, 0, 0)",
+     "text": "abc"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-ui/caret-shape-block-color-001.html",
+   "section": "css-ui",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9842",
+    "ios": "f 0.9758",
+    "android": "f 0.9822"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/3d-transform-incoming.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9328",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/3d-transform-outgoing.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9488",
+    "android": "P 0.9504"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/animating-new-content-subset.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9957",
+    "ios": "P 0.9954",
+    "android": "P 0.9849"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/animating-new-content.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9715",
+    "ios": "P 0.9714",
+    "android": "P 0.9643"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/auto-name-from-id-shadow.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "f 0.5621",
+    "ios": "f 0.5621",
+    "android": "f 0.5621"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/auto-name-from-id.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.555",
+    "ios": "f 0.555",
+    "android": "f 0.555"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/auto-name.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.555",
+    "ios": "f 0.555",
+    "android": "f 0.555"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/break-inside-avoid-child.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9872",
+    "ios": "P 0.9735",
+    "android": "P 0.9735"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/capture-with-offscreen-child-translated.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.986",
+    "ios": "P 0.986",
+    "android": "P 0.986"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/capture-with-offscreen-child.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/capture-with-opacity-zero-child.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/capture-with-visibility-hidden-child.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/capture-with-visibility-mixed-descendants.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9215",
+    "ios": "f 0.9196",
+    "android": "f 0.9196"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/class-specificity.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8773",
+    "ios": "f 0.8773",
+    "android": "f 0.8773"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9067",
+    "ios": "f 0.9067",
+    "android": "f 0.9067"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9879",
+    "ios": "P 0.9879",
+    "android": "P 0.9879"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/content-smaller-than-box-size.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/content-visibility-auto-shared-element.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/content-with-child-with-transparent-background.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9977",
+    "ios": "P 0.9977",
+    "android": "P 0.9977"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/content-with-transform-new-image.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9746",
+    "ios": "f 0.7892",
+    "android": "P 0.9743"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/content-with-transparent-background.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/css-tags-paint-order-with-entry.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/css-tags-paint-order.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/css-tags-shared-element.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/element-is-grouping-during-animation.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/element-stops-grouping-after-animation.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9639",
+    "ios": "P 0.9639",
+    "android": "P 0.9639"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/element-with-overflow.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8497",
+    "ios": "f 0.8497",
+    "android": "f 0.8483"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/empty-render-target-capture.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "f 0.9565"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/escaped-name.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/far-away-capture.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.2117",
+    "ios": "f 0.2118",
+    "android": "f 0.2118"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-new.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-old.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9757",
+    "ios": "f 0.9757",
+    "android": "f 0.9753"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9757",
+    "ios": "f 0.9757",
+    "android": "f 0.9753"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9763",
+    "ios": "f 0.9749",
+    "android": "f 0.9739"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9763",
+    "ios": "f 0.9749",
+    "android": "f 0.9739"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fragmented-at-start-ignored.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9684",
+    "ios": "P 0.9684",
+    "android": "P 0.9684"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/fragmented-during-transition-skips.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9196",
+    "ios": "f 0.9196",
+    "android": "f 0.9246"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/hit-test-unpainted-element.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9656",
+    "ios": "P 0.9656",
+    "android": "P 0.9656"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/hit-test-unrelated-element.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/html-becomes-fixed.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.9969",
+    "ios": "f 0.9969",
+    "android": "f 0.9968"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-view-transitions/inline-child-with-composited-filter.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9956",
+    "ios": "P 0.9931",
+    "android": "P 0.9941"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "inline-child-with-composited-filter__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "lightgreen",
+     "now": "rgb(144, 238, 144)",
+     "text": "INLINEBOX"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-view-transitions/inline-child-with-filter.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9956",
+    "ios": "P 0.9931",
+    "android": "P 0.9941"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "inline-child-with-filter__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "lightgreen",
+     "now": "rgb(144, 238, 144)",
+     "text": "INLINEBOX"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-view-transitions/inline-child-with-overflow-shadow.html",
+   "section": "css-view-transitions",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.5653",
+    "ios": "f 0.5627",
+    "android": "f 0.5557"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/direction-propagation-body-contain-root.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.971",
+    "ios": "f 0.971",
+    "android": "f 0.971"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/dynamic-offset-rtl-001.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9955",
+    "android": "P 0.9952"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/dynamic-offset-rtl-002.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9956",
+    "ios": "P 0.9966",
+    "android": "P 0.9953"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/dynamic-offset-vrl-001.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/dynamic-offset-vrl-002.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9956",
+    "ios": "P 0.9956",
+    "android": "P 0.9956"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/dynamic-offset-vrl-rtl-001.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9955",
+    "android": "P 0.9952"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/dynamic-offset-vrl-rtl-002.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9955",
+    "ios": "P 0.9955",
+    "android": "P 0.9952"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+   "section": "css-writing-modes",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9964",
+    "ios": "f 0.9747",
+    "android": "f 0.9743"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/filter-effects/backdrop-filter-border-radius-change.html",
+   "section": "filter-effects",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.6636",
+    "android": "f 0.5977"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/filter-effects/backdrop-filter-corner-shape-change.html",
+   "section": "filter-effects",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "f 0.8454",
+    "ios": "f 0.5503",
+    "android": "f 0.4904"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/caret-color-visited-inheritance.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9988",
+    "ios": "P 0.9933",
+    "android": "P 0.995"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "caret-color-visited-inheritance__0__0",
+     "tag": "a",
+     "kind": "repaired",
+     "was": "#0000EE",
+     "now": "rgb(0, 0, 238)",
+     "text": "link"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/dir-pseudo-update-document-element.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-selector-auto-direction-change-001.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9677",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-selector-change-001.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9993",
+    "android": "P 0.9885"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-selector-change-002.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-selector-change-003.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9994"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-selector-change-004.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9958",
+    "android": "P 0.9944"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-selector-ltr-002.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-selector-ltr-003.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/dir-style-01a.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9564",
+    "ios": "f 0.8479",
+    "android": "f 0.8172"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "dir-style-01a__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element has default direction."
+    },
+    {
+     "id": "dir-style-01a__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element is ltr."
+    },
+    {
+     "id": "dir-style-01a__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element is rtl."
+    },
+    {
+     "id": "dir-style-01a__3",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": ""
+    },
+    {
+     "id": "dir-style-01a__3__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element should inherit ltr."
+    },
+    {
+     "id": "dir-style-01a__3__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element is ltr."
+    },
+    {
+     "id": "dir-style-01a__3__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element is rtl."
+    },
+    {
+     "id": "dir-style-01a__3__3",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "."
+    },
+    {
+     "id": "dir-style-01a__3__3__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "Every"
+    },
+    {
+     "id": "dir-style-01a__3__3__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "word"
+    },
+    {
+     "id": "dir-style-01a__3__3__0__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "in"
+    },
+    {
+     "id": "dir-style-01a__4",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": ""
+    },
+    {
+     "id": "dir-style-01a__4__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element should inherit rtl."
+    },
+    {
+     "id": "dir-style-01a__4__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element is ltr."
+    },
+    {
+     "id": "dir-style-01a__4__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element is rtl."
+    },
+    {
+     "id": "dir-style-01a__4__3",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "."
+    },
+    {
+     "id": "dir-style-01a__4__3__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "Every"
+    },
+    {
+     "id": "dir-style-01a__4__3__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "word"
+    },
+    {
+     "id": "dir-style-01a__4__3__0__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "in"
+    },
+    {
+     "id": "dir-style-01a__5",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element has an invalid dir attribut"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/dir-style-02a.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9455",
+    "android": "f 0.9423"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "dir-style-02a__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element has default direction."
+    },
+    {
+     "id": "dir-style-02a__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element is ltr."
+    },
+    {
+     "id": "dir-style-02a__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element is rtl."
+    },
+    {
+     "id": "dir-style-02a__3",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": ""
+    },
+    {
+     "id": "dir-style-02a__3__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element should inherit ltr."
+    },
+    {
+     "id": "dir-style-02a__3__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element is ltr."
+    },
+    {
+     "id": "dir-style-02a__3__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element is rtl."
+    },
+    {
+     "id": "dir-style-02a__4",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": ""
+    },
+    {
+     "id": "dir-style-02a__4__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element should inherit rtl."
+    },
+    {
+     "id": "dir-style-02a__4__1",
+     "tag": null,
+     "kind": "repaired",
+     "was": "blue",
+     "now": "rgb(0, 0, 255)",
+     "text": "This element is ltr."
+    },
+    {
+     "id": "dir-style-02a__4__2",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element is rtl."
+    },
+    {
+     "id": "dir-style-02a__5",
+     "tag": null,
+     "kind": "repaired",
+     "was": "lime",
+     "now": "rgb(0, 255, 0)",
+     "text": "This element has an invalid dir attribut"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/has-style-sharing-003.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/has-style-sharing-004.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/has-style-sharing-005.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/has-style-sharing-006.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/has-visited.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9854",
+    "ios": "f 0.9469",
+    "android": "P 0.9509"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "has-visited__0__0",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "has-visited__0__2",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(154, 205, 50)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/i18n/lang-pseudo-class-across-shadow-boundaries.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9818",
+    "ios": "P 0.9804",
+    "android": "P 0.9794"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/invalidation/any-link-attribute-removal.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9995"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "invalidation__any-link-attribute-removal__1",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "This should be green"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/class-id-attr.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9987",
+    "ios": "P 0.9989",
+    "android": "P 0.9993"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__class-id-attr__0",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "This should be green"
+    },
+    {
+     "id": "invalidation__class-id-attr__1",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "And this too"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/has-with-nth-child-sibling-remove.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/invalidation/negated-nth-child-when-ancestor-changes.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9981",
+    "ios": "P 0.9978",
+    "android": "P 0.9981"
+   },
+   "introduced": 4,
+   "colour": [
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__0",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    },
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__1",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__3",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__5",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/negated-nth-last-child-when-ancestor-changes.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9981",
+    "ios": "P 0.9978",
+    "android": "P 0.9981"
+   },
+   "introduced": 4,
+   "colour": [
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__0",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    },
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__2",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__5",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-containing-ancestor.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9993",
+    "ios": "P 0.9992",
+    "android": "P 0.9996"
+   },
+   "introduced": 1,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-containing-ancestor__0__0__0__0",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Should be green"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-in-shadow-root.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "f 0.9749",
+    "ios": "f 0.9749",
+    "android": "f 0.9749"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-in-shadow-root__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "green",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-attr-largedom.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9863",
+    "android": "f 0.9441"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-attr.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-attr__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-attr__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-class-prefix.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-class-prefix__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class-prefix__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-class.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-class__0__3",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Selectively ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class__0__5",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-has.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9371",
+    "android": "P 0.96"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-has__0__3",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Selectively ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-has__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not"
+    },
+    {
+     "id": "invalidation__nth-child-of-has__0__5",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Not"
+    },
+    {
+     "id": "invalidation__nth-child-of-has__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-id-prefix.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-id-prefix__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-id-prefix__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-ids.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9995",
+    "ios": "P 0.9976",
+    "android": "P 0.9964"
+   },
+   "introduced": 1,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-ids__0__3",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Selectively ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-ids__0__4",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-ids__0__5",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-ids__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-in-ancestor.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9387",
+    "android": "f 0.9606"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-in-ancestor__0__0__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-in-ancestor__0__2__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "text": "ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-in-ancestor__0__4__0",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "text": "ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-in-is.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-in-is__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-in-is__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-in-shadow-root.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": true,
+   "cells": {
+    "web": "f 0.97",
+    "ios": "f 0.97",
+    "android": "f 0.97"
+   },
+   "introduced": 0,
+   "colour": []
+  }
+ ]
+}

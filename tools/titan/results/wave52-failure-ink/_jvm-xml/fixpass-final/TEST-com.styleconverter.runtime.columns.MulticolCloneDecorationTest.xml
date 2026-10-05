@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:09:47.631Z" hostname="mac-1.home" time="0.005">
+  <properties/>
+  <testcase name="D7 - a percentage corner radius resolves only at paint time - null bails to slice" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.003"/>
+  <testcase name="D1 - borders-008 resolves 10px bands with the end band widened to the 50px bottom arc" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.0"/>
+  <testcase name="D2 - background-image-007's bandless clone child resolves zero bands" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.001"/>
+  <testcase name="D5 - a border side styled none has USED width zero" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.0"/>
+  <testcase name="D6 - a non-px padding band is not statically resolvable - null bails to slice" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.0"/>
+  <testcase name="D8 - specsFor carries the clone signal and bands on the ChildSpec" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.001"/>
+  <testcase name="D3 - slice (declared or default) never builds bands" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.0"/>
+  <testcase name="D4 - padding joins the bands - physical first then the logical fallback" classname="com.styleconverter.runtime.columns.MulticolCloneDecorationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

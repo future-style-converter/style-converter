@@ -1,0 +1,61 @@
+# seam-2.patch — lane L11 (all-reset-postload-colour), iOS ComponentRenderer.swift :294-345 (mergedProperties)
+# Applies on: HEAD 7d9c22a7 (no prior lane patch needed). Registry row: §3 ':330-345 applyingAllReset(own:inherited:)'.
+# Effect: GlobalExtractor.applyingAllReset(own:inherited:) runs BEFORE InheritedText.merge; the post-merge applyingAllReset(to:) call is removed.
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -292,18 +292,19 @@
+     /// merged-list consumer (glyph color, border/outline currentColor)
+     /// resolves against it instead of the placeholder contrast pick.
+     private func mergedProperties(now: Date?) -> [IRProperty] {
+-        // Wave 18 (RC6 companion) — the `all: <global>` sole-override
+-        // drop, ported from Compose (ComponentRenderer.kt's allReset) so
+-        // reset semantics match across natives: when `All` survives to
+-        // the merged list, EVERY other declaration (inherited entries
+-        // included — the merge runs first, exactly like Compose's
+-        // rawProperties ordering) drops, collapsing the element to its
+-        // untouched defaults — the observable web behaviour the audit
+-        // fixtures pinned. iOS previously extracted All into an inert
+-        // GlobalConfig, so `all:initial` boxes kept painting their other
+-        // declarations. Note: an unboxed `display:contents` element never
+-        // reaches here with All (the RC6 strip removes non-inherited
+-        // declarations first), matching Compose's evaluation order.
++        // Wave 52 (lane L11) — the ORDER-AWARE `all` reset, run FIRST on
++        // the OWN list and the inherited channel kept apart (twin of
++        // Compose global/AllReset.kt; replaces the wave-18 post-merge
++        // drop-everything): css-cascade-4 §6.4 makes declarations AFTER
++        // `all` win over it (`all: initial; color: green` computes green —
++        // all-prop-initial-color painted black under the old drop), §3.1
++        // exempts `direction` / `unicode-bidi`, and §7.3 decides the
++        // channel per keyword (`initial` drops it, `inherit` / `unset` /
++        // `revert*` keep it) — a decision the old post-merge position
++        // could not make. Identity for every All-free list. Note: an
++        // unboxed `display:contents` element never reaches here with All
++        // (the RC6 strip in init removes non-inherited declarations
++        // first), matching Compose's evaluation order.
+         //
+         // Wave 25 (lane LF follow-up) — the UA `list-style-type` rule runs
+         // HERE, the last point that still holds the element's OWN list and
+@@ -330,16 +331,20 @@
+         // ref-pixel measurements and the named gaps. Returns its input
+         // unchanged for every untagged component and every tag outside the
+         // table, so the whole 327-pair baseline is byte-identical.
+-        let ownProperties = motionEffectiveProperties(now: now)
++        let reset = GlobalExtractor.applyingAllReset(own: motionEffectiveProperties(now: now),
++                                                     inherited: inheritedTextProperties)
++        // The UA tag rules and the merge below all read the POST-reset own
++        // list (identical to the old list for every All-free element).
++        let ownProperties = reset.own
+         return UAElementFontRule.apply(
+             sourceTag: component.meta?.sourceTag,
+             own: ownProperties,
+             merged: ListStyleUaRule.apply(
+                 sourceTag: component.meta?.sourceTag,
+                 own: ownProperties,
+-                merged: GlobalExtractor.applyingAllReset(to: InheritedText.merge(
++                merged: InheritedText.merge(
+                     own: InheritedText.resolvingCurrentColorOnColor(ownProperties),
+-                    inherited: inheritedTextProperties))),
++                    inherited: reset.inherited)),
+             // The heading half stands down for a heading that hosts child
+             // boxes — this container stacks them, and a 2em face only
+             // magnifies that (UAElementFontRule.headingAppliesTo carries the

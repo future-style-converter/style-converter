@@ -45,12 +45,18 @@ class ContentsUnboxingTest {
         assertFalse(ContentsUnboxing.isUnboxable(comp("none", emptyList())))
     }
 
-    @Test fun `positioned or floated contents is blockified and keeps its box`() {
-        // css-display-3 §2.7: absolute/fixed positioning and float blockify
+    @Test fun `positioned contents keeps its box - floated contents unboxes`() {
+        // css-display-3 §2.7: absolute/fixed positioning blockifies
         // `display: contents` — the wrapper box must stay.
         assertFalse(ContentsUnboxing.isUnboxable(
             comp("abs", listOf(displayContents, prop("Position", "\"ABSOLUTE\"")))))
-        assertFalse(ContentsUnboxing.isUnboxable(
+        // Wave 52 (lane L3, F2): a FLOAT does NOT — §2.7's blockification
+        // "has no effect on display types that generate no box at all
+        // (none, contents)". The wave-18 clause that kept the box here is
+        // what painted display-contents-float-001's red bar (see the row
+        // below). MUTATION RECORD (executed 2026-09-25): Float clause
+        // re-added → this assertion and the verbatim row FAIL; restored.
+        assertTrue(ContentsUnboxing.isUnboxable(
             comp("float", listOf(displayContents, prop("Float", "\"LEFT\"")))))
         // ANY non-static position keeps the box — deliberately wider than
         // §2.7 (which blockifies abspos/float only): stripping a
@@ -167,6 +173,41 @@ class ContentsUnboxingTest {
         val resolved = ContentsUnboxing.resolve(button)
         assertEquals("PASS", resolved._text)
         assertTrue(resolved.properties.none { it.type == "All" || it.type.startsWith("Border") || it.type == "Display" })
+    }
+
+    // ── Wave 52 (lane L3, F2) — the display-contents-float-001 root ───────
+
+    @Test fun `display-contents-float-001 root - float RIGHT contents unboxes and self-strips`() {
+        // VERBATIM wave51-fix IR: tools/titan/runs/wave51-fix/sections/
+        // css-display/per-test-ir/wpt__css-display__display-contents-float-001
+        // .json, component `…__1-218`: `display:contents; float:right;
+        // background:red` around the text "PASS". With the Float clause the
+        // box was kept and its red background painted a full-width 358×20
+        // bar behind the word — ios f 0.9417 · android f 0.941 against a
+        // ref that is the word alone (web P 1.0000). Now the root
+        // self-strips: nothing box-generating survives, the text stays.
+        val root = comp(
+            "wpt__css-display__display-contents-float-001__1-218",
+            listOf(
+                displayContents,
+                prop("Float", "\"RIGHT\""),
+                prop("BackgroundColor", """{"srgb":{"r":1,"g":0,"b":0},"original":"red"}"""),
+            ),
+            text = "PASS",
+        )
+        assertTrue(ContentsUnboxing.isUnboxable(root))
+        val resolved = ContentsUnboxing.resolve(root)
+        // Display, Float and BackgroundColor are all non-inherited — gone.
+        assertTrue(resolved.properties.none {
+            it.type == "Display" || it.type == "Float" || it.type == "BackgroundColor"
+        })
+        // The text node the browser keeps is the whole remaining render.
+        assertEquals("PASS", resolved._text)
+        assertNull(resolved.children)
+        // `float: none` is the initial value: also unboxable, byte-parity
+        // with the non-float gate (the keyword never mattered).
+        assertTrue(ContentsUnboxing.isUnboxable(
+            comp("fn", listOf(displayContents, prop("Float", "\"NONE\"")))))
     }
 
     // ── Identity + normalization pins ──────────────────────────────────────

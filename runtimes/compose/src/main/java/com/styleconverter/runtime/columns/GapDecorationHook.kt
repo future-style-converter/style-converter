@@ -36,7 +36,9 @@ import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import com.styleconverter.runtime.core.ir.IRComponent
 
 /**
@@ -52,7 +54,11 @@ import com.styleconverter.runtime.core.ir.IRComponent
 class GapItemSink(
     val childIds: List<String>,
     val config: GapDecorationConfig,
-    val mainHorizontal: Boolean
+    val mainHorizontal: Boolean,
+    // Wave 52 (lane L10, M2): per child id, the paint shift MarginApplier
+    // gives a negative-margin item (IR px == dp; FlexNowrapLine
+    // .paintShiftPx). Empty for every container whose items have none.
+    val paintShiftsDp: Map<String, Pair<Float, Float>> = emptyMap()
 ) {
     // Window-space item rectangles, keyed by IR id. A snapshot map so the
     // container's draw phase re-runs when a child is (re)placed.
@@ -63,11 +69,20 @@ class GapItemSink(
     // converts item rects into the DrawScope's coordinate space.
     internal val origin = mutableStateOf(Offset.Zero)
 
-    /** Item rectangles in document order, origin-relative. Empty until placed. */
-    internal fun placedItems(): List<GapRect> {
+    /**
+     * Item rectangles in document order, origin-relative. Empty until placed.
+     * Wave 52 (lane L10, M2): the probe sits OUTSIDE MarginApplier's
+     * `Modifier.offset`, so it reports a negative-margin item's SLOT; the
+     * box the user sees (and the gap after it, §9.5 outer sizes) is that
+     * slot moved by the item's paint shift — 027's "One" at −150, not 0.
+     * [density] converts the dp shift into the probes' real pixels.
+     */
+    internal fun placedItems(density: Float = 1f): List<GapRect> {
         val o = origin.value
-        return childIds.mapNotNull { rects[it] }.map {
-            GapRect(it.left - o.x, it.top - o.y, it.right - o.x, it.bottom - o.y)
+        return childIds.mapNotNull { id -> rects[id]?.let { id to it } }.map { (id, r) ->
+            // No entry → no shift (every item without a negative margin).
+            val (dx, dy) = paintShiftsDp[id]?.let { it.first * density to it.second * density } ?: (0f to 0f)
+            GapRect(r.left - o.x + dx, r.top - o.y + dy, r.right - o.x + dx, r.bottom - o.y + dy)
         }
     }
 }
@@ -79,6 +94,17 @@ class GapItemSink(
  * and every lookup is a miss.
  */
 private val sinkByChildId = java.util.Collections.synchronizedMap(HashMap<String, GapItemSink>())
+
+/**
+ * Wave 52 (lane L10, M2): child id → MarginApplier's paint shift
+ * (FlexNowrapLine.paintShiftPx, x mirrored under [rtl]); only children that
+ * actually shift are recorded, so the map is empty without negative margins.
+ */
+internal fun paintShiftsFor(children: List<IRComponent>, rtl: Boolean): Map<String, Pair<Float, Float>> =
+    // One entry per child, then drop the zero shifts (byte-stable sinks).
+    children.associate {
+        it.id to com.styleconverter.runtime.layout.flexbox.FlexNowrapLine.paintShiftPx(it.properties, rtl)
+    }.filterValues { it.first != 0f || it.second != 0f }
 
 /**
  * Build (and publish) the sink for [component] if it is a flex container
@@ -94,15 +120,21 @@ fun rememberGapDecorationSink(
     isFlex: Boolean,
     mainHorizontal: Boolean
 ): GapItemSink? {
+    // Wave 52 (lane L10): the container's layout direction (own or inherited
+    // `direction`, provided by ComponentRenderer) — the items' Dp
+    // `Modifier.offset` mirrors under Rtl, so their paint shifts do too.
+    val rtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     // Decode once per component identity; extraction is cheap but this
     // also keeps the sink (and its rect map) stable across recomposition.
-    val sink = remember(component.id, isFlex, mainHorizontal) {
+    val sink = remember(component.id, isFlex, mainHorizontal, rtl) {
         val children = component.children.orEmpty()
         // Fewer than two items opens no gap, so nothing could be painted.
         if (!isFlex || children.size < 2) return@remember null
         val config = GapDecorationExtractor.extract(component.properties.map { it.type to it.data })
         if (!config.active) return@remember null
-        GapItemSink(children.map { it.id }, config, mainHorizontal).also { made ->
+        // Wave 52 (lane L10, M2): the per-item paint shifts (empty for the
+        // whole corpus but 027).
+        GapItemSink(children.map { it.id }, config, mainHorizontal, paintShiftsFor(children, rtl)).also { made ->
             // Publish INSIDE remember, i.e. during this container's own
             // composition — the children compose after this point but
             // before any DisposableEffect fires, so registering in an
@@ -153,7 +185,7 @@ fun Modifier.gapDecorations(sink: GapItemSink?): Modifier {
     return this
         .onGloballyPositioned { coords -> sink.origin.value = coords.positionInWindow() }
         .drawWithContent {
-            val items = sink.placedItems()
+            val items = sink.placedItems(density)
             // All children must have reported before the geometry means
             // anything; a partial set would invent gaps that do not exist.
             if (items.size == sink.childIds.size) {

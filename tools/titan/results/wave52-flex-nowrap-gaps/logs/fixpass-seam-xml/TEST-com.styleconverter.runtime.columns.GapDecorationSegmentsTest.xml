@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.247Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="013 positive column inset shortens both ends" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.001"/>
+  <testcase name="column rule intersection is a proven no-op in flex" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.0"/>
+  <testcase name="011 negative column inset extends past the content box" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.0"/>
+  <testcase name="003 solid rules span the line cross extent and the content box" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.0"/>
+  <testcase name="spanning-item break equals normal in flex" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.0"/>
+  <testcase name="012 column-over-row reverses paint order without moving anything" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.0"/>
+  <testcase name="inert config paints nothing" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.0"/>
+  <testcase name="009 row rules break at the union of both adjacent lines column gaps" classname="com.styleconverter.runtime.columns.GapDecorationSegmentsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

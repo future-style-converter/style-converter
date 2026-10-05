@@ -1,0 +1,70 @@
+{
+  "_comment": "The `all` shorthand x declaration ORDER (css-cascade-4 §6.4 order of appearance; §3.1 the direction/unicode-bidi exemption; §7.3 the per-keyword inherited value) — wave 52 lane L11, brief colour-not-reaching-text F1. Before wave 52 every runtime was order-blind: Compose/iOS dropped EVERY declaration (own and inherited) when any `all` keyword appeared, and web emitted `all` as the LAST style key so the browser reset everything written before it. The rule now: declarations BEFORE the last `all` drop (except direction / unicode-bidi), declarations AFTER it are kept; `initial` drops the inherited channel, inherit/unset/revert keep it. Property ORDER in each `properties` object below IS the source order the converter preserves (pinned by tools/titan/results/wave52-all-reset-postload-colour/order-premise.mjs). HAND DERIVATION — `all: initial` resets every property except direction / unicode-bidi to its INITIAL value (§3.1), and that includes `display`, whose initial value is `inline` (css-display-3 §2 property table); width / height do not apply to a non-replaced inline box (CSS 2.1 §10.3.1 / §10.6.1), so an `all: initial` element paints NO box unless something AFTER `all` makes it a block again. Every component below that must keep its box therefore re-declares `display: block` immediately AFTER `all` — itself the §6.4 ordering under test (a `display: block` written BEFORE `all` is reset back to inline and the box vanishes: mutation M2 of tools/titan/results/wave52-all-reset-postload-colour/fixture-oracle-probe.mjs). ATC_AllThenProps: `all: initial; display: block` then 160x60 #2ecc71 — a block, width 160 and height 60 apply, so the dominant fill is green over a 160x60 bbox (old order-blind rule: nothing painted). ATC_PropsThenAll_InGreenParent: a #2ecc71 160x60 parent (9600 px) holds a 150x50 #e74c3c child (7500 px) whose `all: initial` comes LAST — the child's display returns to inline, its width / height / background are reset, and an empty inline box paints nothing; only the parent's green 160x60 paints. The child is sized to cover MOST of the parent on purpose: a runtime that wrongly keeps the declarations before `all` paints 7500 red px against 2100 green, so the dominant fill turns red and the oracle fires (mutation M3 of the probe) — a 120x40 child (4800 vs 4800, a tie the oracle breaks to green) could never fail. ATC_InitialUnderRedParent: the all-prop-initial-color shape — a #3498db 200x60 parent with red text colour; the child's `all: initial; display: block` then white 20px text on #2ecc71 200x60: a block of width 200 / height 60 inside a 200-px-wide parent covers the blue exactly, so the fill is green over 200x60; the inherited red is dropped by `initial` (§7.3.1) and the own white follows `all`, so the glyphs are white (interior pixels: they never move the green bbox). ATC_DirectionSurvives: `direction: rtl` BEFORE `all: initial` survives (§3.1) — the white digits sit at the RIGHT edge (inline-start in rtl) of the green 200x40 block; v1 `_expect` cannot see position, so fill / box only. Text faces: `all: initial` also resets font-family to its UA-dependent initial value, so the two text rows legitimately differ in glyph shape across platforms (web: the browser's initial face) — the oracle asserts fill and box only. Baselines: NOT captured by lane L11 (the build lanes ran device-free); capture + LOOK before committing baselines.",
+  "components": {
+    "ATC_AllThenProps": {
+      "properties": {
+        "all": "initial",
+        "display": "block",
+        "width": "160px",
+        "height": "60px",
+        "background-color": "#2ecc71"
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [160, 60], "boxTolerance": 1, "note": "css-cascade-4 §6.4: the longhands FOLLOW `all: initial` and win — `display: block` undoes the initial `inline` (css-display-3 §2), so the 160x60 green block paints" }
+    },
+    "ATC_PropsThenAll_InGreenParent": {
+      "properties": {
+        "width": "160px",
+        "height": "60px",
+        "background-color": "#2ecc71"
+      },
+      "children": {
+        "reset": {
+          "properties": {
+            "width": "150px",
+            "height": "50px",
+            "background-color": "#e74c3c",
+            "all": "initial"
+          }
+        }
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [160, 60], "boxTolerance": 1, "note": "css-cascade-4 §6.4: `all: initial` FOLLOWS the child's red box and resets it (display back to inline, no background) — only the parent's green 160x60 paints" }
+    },
+    "ATC_InitialUnderRedParent": {
+      "properties": {
+        "color": "#e74c3c",
+        "width": "200px",
+        "height": "60px",
+        "background-color": "#3498db"
+      },
+      "children": {
+        "span": {
+          "_text": "Hamburg 123",
+          "properties": {
+            "all": "initial",
+            "display": "block",
+            "color": "#ffffff",
+            "width": "200px",
+            "height": "60px",
+            "background-color": "#2ecc71",
+            "font-size": "20px"
+          }
+        }
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [200, 60], "boxTolerance": 1, "note": "all-prop-initial-color shape: the child's `display: block` + green 200x60 (all AFTER `all`) covers the blue parent; its text is the own white, never the inherited red (§7.3.1)" }
+    },
+    "ATC_DirectionSurvives": {
+      "_text": "123",
+      "properties": {
+        "direction": "rtl",
+        "all": "initial",
+        "display": "block",
+        "width": "200px",
+        "height": "40px",
+        "background-color": "#2ecc71",
+        "color": "#ffffff",
+        "font-size": "20px"
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [200, 40], "boxTolerance": 1, "note": "css-cascade-4 §3.1: `all` never resets direction — the digits sit at the block's RIGHT (inline-start in rtl); `display: block` after `all` keeps the 200x40 box; fill/box only (position is v2)" }
+    }
+  }
+}

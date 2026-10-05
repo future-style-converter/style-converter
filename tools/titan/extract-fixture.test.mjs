@@ -6809,3 +6809,510 @@ test('wave50-F3: `st` is a real unit — css-speech-1 <semitones>', () => {
   // The unit table stays CLOSED around it — one letter more is still unknown.
   assert.equal(unknownDimensionUnit('2sts'), 'sts');
 });
+
+// ── wave-52 lane L5 (extractor-cascade): the importance / validity / specificity
+// half of the cascade, the css-syntax-3 declaration splitter, oracle rule R2 and
+// the list-item placeholder exemption ─────────────────────────────────────────
+//
+// Briefs: tools/titan/results/wave52-plan/cascade-and-splitter.md §7 pins 1–8,
+// web-tail.md §7 F-C/F-D/F-E, counters-and-multicol.md §7 T6. Every pin below
+// was proven able to fail by an EXECUTED one-line mutation of the shipped
+// extractor, named at each pin by its id (M1…M25): the table, the exact
+// before/after source text, the failing pins and the sha-256 of the restored
+// file are in tools/titan/results/wave52-extractor-cascade/mutations.json,
+// produced by that directory's mutations.mjs (re-runnable against any copy of
+// the patched extractor; it never touches the working tree).
+//
+// The F-E pin (the list-item placeholder exemption, mutations M24/M25) is NOT
+// in this file: it rides INSIDE seam-6-FE-li.patch, appended at the end of
+// this file, because F-E must land in the SAME step as lane L6's seam-3 /
+// seam-4 (the empty-item Row/HStack). On its own, F-E puts the three markers
+// of every empty cssom list on ONE band on both native runtimes (the zero-size
+// inside overlay), and the scorer's coverage-ratio veto then fails all 18
+// passing native cssom cells (fe-native-replay.json in the same directory).
+//
+// The new exports are read off a namespace import so that, on a tree where the
+// seam patches have NOT yet been applied (the orchestrator lands them), only
+// these pins go red and the rest of this suite still loads and runs.
+import * as EF52 from './extract-fixture.mjs';
+
+// ── F3 (BACKLOG 0(a‴)): the layered sort gains the §2.2 candidate filter ─────
+
+test('wave52-L5 F3: a provably invalid declaration in a LATER layer does not outrank a valid earlier one', () => {
+  // cascade-and-splitter §7 pin 7. css-syntax-3 §2.2: the invalid
+  // declaration never enters the cascade, so `a`'s green stays in force
+  // even though layer `b` outranks `a`. Mutation M1: no filter in
+  // resolveOne (`pool = win`) → `linear-gradient(0.25turns, red, red)`.
+  invalidShadowDrops.length = 0;
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { 'background-image': 'linear-gradient(green, green)' } },
+    { rank: 1, props: { 'background-image': 'linear-gradient(0.25turns, red, red)' } },
+  ], 2);
+  assert.equal(out['background-image'], 'linear-gradient(green, green)');
+  // NO SILENT FALLTHROUGH: the skipped candidate is logged like every other
+  // refusal, naming the unit that proved it invalid.
+  assert.equal(invalidShadowDrops.length, 1);
+  assert.equal(invalidShadowDrops[0].prop, 'background-image');
+  assert.equal(invalidShadowDrops[0].kept, 'linear-gradient(green, green)');
+  assert.match(invalidShadowDrops[0].reason, /'turns'/);
+  invalidShadowDrops.length = 0;
+});
+
+test('wave52-L5 F3: an ALL-invalid window still ends on the sort\'s own winner (byte parity)', () => {
+  // cascade-and-splitter §7 pin 7, second half. Nothing valid to prefer →
+  // the historical winner (later layer) is kept and nothing is logged, so
+  // the converter receives exactly the input it received before.
+  // Mutation M2: drop the "some other candidate is valid" clause (always
+  // use the filtered list) → the empty pool has no winner and throws.
+  invalidShadowDrops.length = 0;
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { 'background-image': 'linear-gradient(1turns, red, red)' } },
+    { rank: 1, props: { 'background-image': 'linear-gradient(2turns, red, red)' } },
+  ], 2);
+  assert.equal(out['background-image'], 'linear-gradient(2turns, red, red)');
+  assert.equal(invalidShadowDrops.length, 0);
+});
+
+test('wave52-L5 F3: revert-layer recursion runs through the filter and logs a candidate once', () => {
+  // `#t { background-image: revert-layer }` (unlayered, rank 2) rolls back
+  // into the layers, where `b`'s invalid gradient is set aside for `a`'s
+  // green, logged once, naming the value that finally stayed in force.
+  // Mutation M3: filter only at depth 0 (the revert-layer re-run unfiltered)
+  // → `linear-gradient(0.25turns, red, red)`.
+  invalidShadowDrops.length = 0;
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { 'background-image': 'linear-gradient(green, green)' } },
+    { rank: 1, props: { 'background-image': 'linear-gradient(0.25turns, red, red)' } },
+    { rank: 2, props: { 'background-image': 'revert-layer' } },
+  ], 2);
+  assert.equal(out['background-image'], 'linear-gradient(green, green)');
+  assert.equal(invalidShadowDrops.length, 1);
+  invalidShadowDrops.length = 0;
+});
+
+test('wave52-L5 F3 anchor: css-values/angle-units-001 still refuses exactly four declarations (VERBATIM)', () => {
+  // cascade-and-splitter §7 pin 8 — the regression anchor: the only
+  // document the oracle fires on in the 1435-test corpus (extract.log
+  // `[validity: 4 shadowing declarations refused …]`). The <style> below is
+  // the test's, verbatim (tools/wpt/css/css-values/angle-units-001.html).
+  // It is unlayered and importance-free, so F1's gate widening must NOT
+  // route it through the layered sort, and its bag must be byte-identical.
+  // Mutation M4: make assignDeclaration write unconditionally → 0 refusals.
+  invalidShadowDrops.length = 0;
+  const css = `
+  div
+    {
+      height: 100px;
+      width: 100px;
+    }
+
+  div#test-overlapping-green
+    {
+      background-image: linear-gradient(green, green);
+      background-image: linear-gradient(90degree, red, red);   
+      background-image: linear-gradient(100gradian, red, red); 
+      background-image: linear-gradient(1.57radian, red, red); 
+      background-image: linear-gradient(0.25turns, red, red);  
+    }
+
+  div#reference-overlapped-red
+    {
+      background-color: red;
+      bottom: 100px;
+      position: relative;
+      z-index: -1;
+    }`;
+  const rules = parseCss(css);
+  const { props } = propsForElement(rules, 'div', { id: 'test-overlapping-green' }, []);
+  assert.deepEqual(props, { height: '100px', width: '100px', 'background-image': 'linear-gradient(green, green)' });
+  assert.equal(invalidShadowDrops.length, 4);
+  assert.deepEqual(invalidShadowDrops.map((d) => /'(\w+)'/.exec(d.reason)[1]), ['degree', 'gradian', 'radian', 'turns']);
+  invalidShadowDrops.length = 0;
+});
+
+// ── F1 (BACKLOG 0(a′)): importance before order, in-block and cross-rule ─────
+
+test('wave52-L5 F1: an important declaration is not displaced by a later normal one in the same block', () => {
+  // cascade-and-splitter §7 pin 1. css-cascade-5 §6.1 compares importance
+  // before order of appearance. Mutation M5: delete collapseDeclaration's
+  // rule-1 refusal (`important[k] && !bang …`) → `green`.
+  const rules = parseCss('div { color: red !important; color: green }');
+  assert.equal(rules[0].props.color, 'red');
+  assert.deepEqual(rules[0].important, { color: true });
+});
+
+test('wave52-L5 F1: the importance flag follows the write that was taken (no promotion)', () => {
+  // cascade-and-splitter §7 pin 2 — wave-50 skeptic S2's finding: at HEAD
+  // the surviving NORMAL declaration was handed on flagged important.
+  // Mutation M6: restore the old flag probe (`if (bang && props[k] === v)
+  // important[k] = true`, nothing ever cleared) → the `1foo` mirror below
+  // hands the normal `green` on still flagged `{color:true}`. Mutation M9:
+  // let an INVALID important value refuse the later normal one → `1foo`.
+  const rules = parseCss('div { color: red; color: green !important; color: blue }');
+  assert.equal(rules[0].props.color, 'green');
+  assert.deepEqual(rules[0].important, { color: true });
+  // The mirror: a normal write that legitimately displaces an INVALID
+  // important value (css-syntax-3 §2.2 ignores it entirely) clears the flag.
+  invalidShadowDrops.length = 0;
+  const r2 = parseCss('div { color: 1foo !important; color: green }');
+  assert.equal(r2[0].props.color, 'green');
+  assert.equal(r2[0].important, undefined);
+  invalidShadowDrops.length = 0;
+  // A normal declaration alone never carries a flag (historical shape).
+  assert.equal(parseCss('div { color: green }')[0].important, undefined);
+});
+
+test('wave52-L5 F1: an important declaration in an EARLIER rule beats a later normal one on the same element', () => {
+  // cascade-and-splitter §7 pin 3 — the cross-rule half, the
+  // flex-gap-decorations-024 shape. Mutation M7: drop the gate widening
+  // (the two importance clauses) → `9px dotted blue`.
+  const rules = parseCss('.a { column-rule: 10px solid pink !important } #b { column-rule: 9px dotted blue }');
+  const { props } = propsForElement(rules, 'div', { class: 'a', id: 'b' }, []);
+  assert.equal(props['column-rule'], '10px solid pink');
+  // The negative — byte parity for the 1434 others: WITHOUT `!important`
+  // the later `#b` (also the more specific) still wins.
+  const plain = parseCss('.a { column-rule: 10px solid pink } #b { column-rule: 9px dotted blue }');
+  assert.equal(propsForElement(plain, 'div', { class: 'a', id: 'b' }, []).props['column-rule'], '9px dotted blue');
+});
+
+test('wave52-L5 F1: css-gaps/flex/flex-gap-decorations-024 (VERBATIM) hands the solid pink rule to the wire, key order unchanged', () => {
+  // The one static-path corpus carrier, its <style> verbatim
+  // (tools/wpt/css/css-gaps/flex/flex-gap-decorations-024.html). wave51-fix
+  // per-test IR read `ColumnRuleWidth 9px / DOTTED / rgb(0,0,1)`. The bag's
+  // key order must stay first-appearance order so the IR property order does
+  // not move for the other properties. Mutation M7: drop the gate widening
+  // → `9px dotted blue`.
+  const css = `
+  body {
+    margin: 0px;
+  }
+  .flex-container {
+    height: 110px;
+    width: 110px;
+    display: flex;
+    column-gap: 10px;
+    row-gap: 10px;
+    column-rule: 10px solid pink !important;
+    row-rule-color: green;
+    row-rule-style: solid;
+    row-rule-width: 10px;
+    flex-wrap: wrap;
+  }
+  #container {
+    column-rule: 9px dotted blue;
+  }
+  .flex-item {
+    background: skyblue;
+    width: 50px;
+  }`;
+  const { props } = propsForElement(parseCss(css), 'div', { class: 'flex-container', id: 'container' }, []);
+  assert.equal(props['column-rule'], '10px solid pink');
+  assert.deepEqual(Object.keys(props), ['height', 'width', 'display', 'column-gap', 'row-gap', 'column-rule',
+    'row-rule-color', 'row-rule-style', 'row-rule-width', 'flex-wrap']);
+});
+
+test('wave52-L5 F1: css-cascade/revert-val-002 (VERBATIM) — `display: block !important` beats a later `display: revert`', () => {
+  // The SECOND corpus mover the differential census found (predicted by no
+  // brief; read and listed): the test's own comment says "This should win
+  // over `revert`". wave51-fix IR carried `display: revert` as an unmapped
+  // Generic. Mutation M7: drop the gate widening → `revert`.
+  const css = `
+#outer {
+  background-color: red;
+  width: 100px;
+  height: 100px;
+  overflow: hidden;
+}
+#inner {
+  display: block !important;
+}
+#inner {
+  color: green;
+  background-color: green;
+  display: revert;
+}`;
+  const { props } = propsForElement(parseCss(css), 'span', { id: 'inner' }, []);
+  assert.equal(props.display, 'block');
+  assert.deepEqual(Object.keys(props), ['display', 'color', 'background-color']);
+});
+
+test('wave52-L5 F1: the style attribute obeys the same rule, and an important RULE beats a normal inline declaration', () => {
+  // In-attribute: `style="a: x !important; a: y"` keeps x (§6.1).
+  // Mutation M5 (the style attribute shares collapseDeclaration) → green.
+  const inline = propsForElement([], 'div', { style: 'color: red !important; color: green' }, []);
+  assert.equal(inline.props.color, 'red');
+  // Cross-origin-of-declaration: an important author RULE outranks a normal
+  // style attribute (css-cascade-5 §6.1 importance before the element-attached
+  // step). Before F1 the unlayered merge always let the attribute win.
+  // Mutation M7: drop the gate widening → green.
+  const rules = parseCss('.a { color: red !important }');
+  assert.equal(propsForElement(rules, 'div', { class: 'a', style: 'color: green' }, []).props.color, 'red');
+  // …and an important style attribute still beats an important rule
+  // (element-attached before layers, at equal importance).
+  assert.equal(propsForElement(rules, 'div', { class: 'a', style: 'color: green !important' }, []).props.color, 'green');
+});
+
+test('wave52-L5 F1: a non-revert-layer `all` survives the widened gate (the layered resolver keeps it)', () => {
+  // The gate widening routes every importance carrier through
+  // resolveLayeredCascade, which historically dropped `all` from its output
+  // (only `all: revert-layer` was meaningful on @layer sheets). An ordinary
+  // `all: initial` (css-cascade-5 §5) must reach the bag exactly as the
+  // unlayered merge always passed it, at its first-appearance position.
+  // Mutation M8: skip `all` unconditionally in the output loop → absent.
+  const rules = parseCss('.a { all: initial; color: red !important } .a { color: green }');
+  const { props } = propsForElement(rules, 'div', { class: 'a' }, []);
+  assert.equal(props.all, 'initial');
+  assert.equal(props.color, 'red');
+  assert.deepEqual(Object.keys(props), ['all', 'color']);
+  // `all: revert-layer` alone is still expanded, never itself a key.
+  const out = resolveLayeredCascade([
+    { rank: 0, props: { color: 'green' } },
+    { rank: 1, props: { all: 'revert-layer' } },
+  ], 2);
+  assert.deepEqual(out, { color: 'green' });
+});
+
+// ── F-D (web-tail): Selectors-4 §17 specificity in the cascade ───────────────
+
+test('wave52-L5 F-D: selectorSpecificity follows Selectors-4 §17', () => {
+  // (a) ids, (b) classes / attributes / pseudo-classes, (c) types / pseudo-
+  // elements; `*` and `:where()` zero; `:is/:not/:has` = most specific
+  // argument; `:nth-child(An+B of S)` = one pseudo-class + most specific S.
+  // Mutation M10: count a pseudo-element under (b) → `p::before` fails.
+  const { selectorSpecificity } = EF52;
+  assert.deepEqual(selectorSpecificity('div'), [0, 0, 1]);
+  assert.deepEqual(selectorSpecificity('.test'), [0, 1, 0]);
+  assert.deepEqual(selectorSpecificity('#x'), [1, 0, 0]);
+  assert.deepEqual(selectorSpecificity('*'), [0, 0, 0]);
+  assert.deepEqual(selectorSpecificity('div.a.b#c'), [1, 2, 1]);
+  assert.deepEqual(selectorSpecificity('ul li:first-child'), [0, 1, 2]);
+  assert.deepEqual(selectorSpecificity('p::before'), [0, 0, 2]);
+  assert.deepEqual(selectorSpecificity('p:before'), [0, 0, 2]);          // Selectors-3 §7 legacy alias
+  assert.deepEqual(selectorSpecificity('a[href]'), [0, 1, 1]);
+  assert.deepEqual(selectorSpecificity(':where(#a, .b)'), [0, 0, 0]);
+  assert.deepEqual(selectorSpecificity(':is(#a, .b) span'), [1, 0, 1]);
+  assert.deepEqual(selectorSpecificity('div:not(.x)'), [0, 1, 1]);
+  assert.deepEqual(selectorSpecificity(':has(> .a) .b'), [0, 2, 0]);     // has-style-sharing-003's rule
+  assert.deepEqual(selectorSpecificity('li:nth-child(2n+1 of .x, #y)'), [1, 1, 1]);
+  assert.deepEqual(selectorSpecificity('.flex > div'), [0, 1, 1]);
+  // Malformed chains never match, so they carry no rank.
+  assert.equal(selectorSpecificity('> .a'), null);
+});
+
+test('wave52-L5 F-D: a more specific EARLIER rule beats a less specific later one', () => {
+  // web-tail §7 F-D pins, the import-conditional-001/-002 shape:
+  // `.test{background:green}` inlined by the @import resolver, then the local
+  // `div{background:red}` LATER in the sheet. css-cascade-5 §6.1 ranks
+  // specificity before order. Mutation M11: merge `buckets['']` unsorted
+  // → case 1 fails (the id cases agree with document order either way).
+  const on = (css, tag, attrs) => propsForElement(parseCss(css), tag, attrs, []).props.background;
+  assert.equal(on('.test{background:green} div{background:red}', 'div', { class: 'test' }), 'green');
+  assert.equal(on('div{background:red} .test{background:green}', 'div', { class: 'test' }), 'green');
+  // Equal specificity: order of appearance still decides (byte parity).
+  assert.equal(on('div{background:red} div{background:green}', 'div', { class: 'test' }), 'green');
+  // An id outranks a class whatever the order.
+  assert.equal(on('#x{background:red} .test{background:green}', 'div', { id: 'x', class: 'test' }), 'red');
+  assert.equal(on('.test{background:green} #x{background:red}', 'div', { id: 'x', class: 'test' }), 'red');
+});
+
+test('wave52-L5 F-D: css-cascade/import-conditional-002 (VERBATIM, imports resolved) hands green to the wire', () => {
+  // The sheet EXACTLY as the wave-38 @import resolver leaves it — captured
+  // by running `resolveImports(extractInlineStyle(stripComments(html)))` on
+  // tools/wpt/css/css-cascade/import-conditional-002.html (whitespace kept):
+  // the bare `@import "support/test-red.css"` is inlined (red `.test`), the
+  // `supports(display: block)` import is proven and inlined (green `.test`),
+  // the `supports(foo: bar)` import is left as an @import statement that
+  // parseCss skips, then the local `div` rule. Correct cascade (css-cascade-5
+  // §6.1): both `.test` rules (0,1,0) beat `div` (0,0,1) whatever the order,
+  // and the LATER `.test` wins between them → green. wave51-fix IR carried
+  // `BackgroundColor red` (the later `div` won on order alone).
+  // (Corrected on resume: an earlier draft of this pin hand-wrote the sheet
+  // with the red import declined; it was re-derived from the resolver and
+  // checked whitespace-normalised against it.)
+  // Mutation M11: merge unsorted → `red`. Mutation M15: copy the merged
+  // bag in MERGE order → the key-order assertion fails.
+  const css = `
+
+  
+.test {
+  background: red;
+  color: red;
+}
+
+
+  
+.test {
+  background: green;
+  color: green;
+}
+
+
+  @import "support/test-red.css"
+    supports(foo: bar);
+  div {
+    box-sizing: border-box;
+    width: 100px;
+    height: 100px;
+    padding: 5px;  
+    background: red;
+  }
+  `;
+  const { props } = propsForElement(parseCss(css), 'div', { class: 'test' }, []);
+  assert.equal(props.background, 'green');
+  assert.equal(props.color, 'green');
+  // Key order = first appearance in DOCUMENT order, not merge order, so the
+  // IR property order for the unchanged declarations does not move.
+  assert.deepEqual(Object.keys(props), ['background', 'color', 'box-sizing', 'width', 'height', 'padding']);
+});
+
+test('wave52-L5 F-D: pseudo-element buckets and the layered path take the same specificity tie-break', () => {
+  // `::before` bucket: `.a::before` (0,1,1) beats a later `div::before` (0,0,2).
+  // Mutation M12: merge pseudo buckets in document order → `"B"`.
+  const rules = parseCss('.a::before{content:"A"} div::before{content:"B"}');
+  const { pseudo } = propsForElement(rules, 'div', { class: 'a' }, []);
+  assert.equal(pseudo.before.content, '"A"');
+  // Layered: inside ONE layer rank, specificity decides before order;
+  // across ranks the later layer still wins regardless of specificity.
+  // Mutation M13: drop the specificity step in `better` → `red`.
+  const layered = parseCss('@layer x { .a{color:green} div{color:red} }');
+  assert.equal(propsForElement(layered, 'div', { class: 'a' }, []).props.color, 'green');
+  const twoLayers = parseCss('@layer x { .a{color:red} } @layer y { div{color:green} }');
+  assert.equal(propsForElement(twoLayers, 'div', { class: 'a' }, []).props.color, 'green');
+});
+
+test('wave52-L5 F-D: an @scope rule\'s specificity is its own selector\'s, not the rewritten chain\'s', () => {
+  // css-cascade-6 (Scoped Styles): the scoping root's selector adds nothing,
+  // `:scope` counts as one pseudo-class. `@scope (.test) { input {…} }` is
+  // rewritten to `.test input` for MATCHING but must rank as (0,0,1), so a
+  // later unscoped `input.x` (0,1,1) still beats it.
+  // Mutation M14: stamp `selectorSpecificity(scoped)` instead of `(s)` →
+  // [0,1,1], and the tie falls to order → red.
+  const rules = parseCss('@scope (.test) { input { color: red } } input.x { color: green }');
+  assert.deepEqual(rules[0].specificity, [0, 0, 1]);
+  assert.deepEqual(rules[1].specificity, [0, 1, 1]);
+  const { props } = propsForElement(rules, 'input', { class: 'x' },
+    [{ tag: 'div', attrs: { class: 'test' } }]);
+  assert.equal(props.color, 'green');
+});
+
+// ── F2 (BACKLOG 0(a″)): ONE css-syntax-3 declaration splitter ────────────────
+
+test('wave52-L5 F2: a `;` inside an unquoted url() no longer tears the declaration', () => {
+  // cascade-and-splitter §7 pin 4. css-syntax-3 §4.3.6: `url(` not followed
+  // by a quote consumes to the matching `)` as ONE <url-token>, so the LATER
+  // valid value wins WHOLE — at HEAD the value became `url(data:image/svg+xml`
+  // and the orphan `base64,XX)` (no colon) was dropped. Mutation M16:
+  // revert parseCss to `body.split(';')` → the torn head.
+  const rules = parseCss('div { background-image: url(a.png); background-image: url(data:image/svg+xml;base64,XX) }');
+  assert.equal(rules[0].props['background-image'], 'url(data:image/svg+xml;base64,XX)');
+});
+
+test('wave52-L5 F2: strings, escapes and the QUOTED url form each survive their own `;`', () => {
+  // cascade-and-splitter §7 pin 5 — one case per branch of the splitter.
+  // Mutations: M17 remove quote tracking → the `content: ";"` case splits;
+  // M18 remove the escape branch → `secon\'d` opens a string and swallows
+  // the rest; M19 remove the url-token branch → the two bad-url cases at
+  // the end fuse into one piece (a balanced `url(x;y.png)` survives on paren
+  // depth alone, so the url-token branch is pinned where it is load-bearing).
+  const { splitDeclarations } = EF52;
+  // Quoted <url-token> argument (the css-pseudo/first-letter-background-image
+  // shape, splitter-differential.json): intact through the string branch.
+  assert.deepEqual(splitDeclarations("color: lime; background-image: url('data:image/png;base64,AA')"),
+    ['color: lime', "background-image: url('data:image/png;base64,AA')"]);
+  // <string-token> (§4.3.5).
+  assert.deepEqual(splitDeclarations('content: ";"; color: red'), ['content: ";"', 'color: red']);
+  // Escaped quote OUTSIDE a string (§4.3.7) — css-view-transitions/escaped-name.
+  assert.deepEqual(splitDeclarations("view-transition-name: secon\\'d; color: red"),
+    ["view-transition-name: secon\\'d", 'color: red']);
+  // Unquoted <url-token> (§4.3.6) and a `;` inside any other function (§5.4).
+  assert.deepEqual(splitDeclarations('a: url(x;y.png); b: fn(1;2); c: 3'), ['a: url(x;y.png)', 'b: fn(1;2)', 'c: 3']);
+  // `url` as the TAIL of a longer ident is an ordinary function.
+  assert.deepEqual(splitDeclarations('a: image-url("p;q"); b: 1'), ['a: image-url("p;q")', 'b: 1']);
+  // The escape branch consumes a pair INSIDE a string too: `"a\";b"` is one
+  // string, so the `;` after the escaped quote does not separate.
+  assert.deepEqual(splitDeclarations('content: "a\\";b"; c: 1'), ['content: "a\\";b"', 'c: 1']);
+  // Comments are stripped BEFORE splitting by every caller; the splitter
+  // itself is comment-blind, and an apostrophe inside one would open a
+  // string — pinned so the contract is visible.
+  assert.deepEqual(splitDeclarations(stripComments("a: 1; /* doesn't */ b: 2")), ['a: 1', 'b: 2']);
+  // Empties and whitespace-only pieces are dropped, as the old split's
+  // callers did through their `!k || !v` guard.
+  assert.deepEqual(splitDeclarations(';; a: 1 ;  ; b : 2;'), ['a: 1', 'b : 2']);
+  // Where the url-token rule is LOAD-BEARING: inside an unquoted url() a quote
+  // or a `(` makes a <bad-url-token> whose remnants still run to the first
+  // `)` (§4.3.6, "consume the remnants of a bad url"), so the
+  // declaration still ends there. Without the branch the apostrophe opens a
+  // string and the `(` leaves the depth at 1 — both swallow the next
+  // declaration.
+  assert.deepEqual(splitDeclarations("a: url(it's;x.png); b: 1"), ["a: url(it's;x.png)", 'b: 1']);
+  assert.deepEqual(splitDeclarations('a: url(a(b.png); b: 1'), ['a: url(a(b.png)', 'b: 1']);
+});
+
+test('wave52-L5 F2: the style attribute and @keyframes frames go through the same splitter', () => {
+  // cascade-and-splitter §7 pin 6 (keyframes) + the `style=""` site.
+  // Mutation M20: leave parseKeyframeBody on `split(';')` → the frame keeps
+  // a torn `url(a` value; M21: leave the style attribute on `split(';')` →
+  // the data URI tears.
+  const kf = parseKeyframes('@keyframes k { 0% { background: url(a;b.png) } 100% { background: url(c.png) } }');
+  const frames = kf.get ? kf.get('k') : kf.k;
+  assert.equal(frames[0].props.background, 'url(a;b.png)');
+  const { props } = propsForElement([], 'div', { style: 'background-image: url(data:image/svg+xml;base64,XX); color: red' }, []);
+  assert.equal(props['background-image'], 'url(data:image/svg+xml;base64,XX)');
+  assert.equal(props.color, 'red');
+});
+
+// ── F-C (web-tail): oracle rule R2 — color-mix() percentage outside [0,100] ──
+
+test('wave52-L5 F-C: an out-of-range color-mix() percentage is provably invalid and cannot shadow a valid value', () => {
+  // web-tail §7 F-C. css-color-5 §3.1: `<percentage [0,100]>` is in the
+  // grammar, so `purple 125%` fails to parse (css-syntax-3 §2.2) and the
+  // earlier valid rgb() stays in force. Mutations: M22 `> 100` → `>= 100` fails
+  // the 100 % case below; M23 deleting R2 fails this first assertion.
+  invalidShadowDrops.length = 0;
+  const bag = { 'background-color': 'rgb(68.4898% 36.015% 68.3102%)' };
+  assert.equal(assignDeclaration(bag, 'background-color', 'color-mix(in lch, purple 125%, plum 125%)'), false);
+  assert.equal(bag['background-color'], 'rgb(68.4898% 36.015% 68.3102%)');
+  assert.equal(invalidShadowDrops.length, 1);
+  assert.match(invalidShadowDrops[0].reason, /125% outside \[0,100\] \(css-color-5 §3\.1/);
+  // In range → overwrites, whichever spelling.
+  for (const v of ['color-mix(in lch, purple 50%, plum 50%)', 'color-mix(in srgb, red 100%, blue)',
+    'color-mix(in srgb, red 0%, blue)', 'color-mix(in lch, purple, plum)']) {
+    const b = { 'background-color': 'red' };
+    assert.equal(assignDeclaration(b, 'background-color', v), true, v);
+    assert.equal(b['background-color'], v);
+  }
+  // Negative percentages are outside the range too; a percentage INSIDE a
+  // nested colour function belongs to that function and is not read; a
+  // custom property is never provably invalid.
+  assert.match(provablyInvalidDeclaration('background-color', 'color-mix(in srgb, red -5%, blue)'), /-5%/);
+  assert.equal(provablyInvalidDeclaration('background-color', 'color-mix(in srgb, rgb(150% 0% 0%) 50%, blue)'), null);
+  assert.equal(provablyInvalidDeclaration('--x', 'color-mix(in srgb, red 125%, blue)'), null);
+  assert.equal(provablyInvalidDeclaration('background-color', 'color-mix(in srgb, red 9999%, blue'), null); // unbalanced: left alone
+  invalidShadowDrops.length = 0;
+});
+
+test('wave52-L5 F-C: css-color/color-mix-percents-02 (VERBATIM) — rows t6/t7 keep the purple rgb(), t1–t5 unchanged', () => {
+  // The <style> verbatim (tools/wpt/css/css-color/color-mix-percents-02.html).
+  // wave51-fix IR carried `{type:"color-mix", percent1:125}` / `9999` for
+  // components 6–7, which Blink rejects → two white rows (web f 0.9514).
+  // Mutation M23: delete R2 → t6 reads the color-mix.
+  invalidShadowDrops.length = 0;
+  const css = `
+    .test { background-color: red; width: 14em; height: 2em; margin-top: 0; margin-bottom: 0;}
+    .negative-test { background-color: rgb(68.4898% 36.015% 68.3102%); width: 14em; height: 2em; margin-top: 0; margin-bottom: 0;}
+    .t1 { background-color: rgb(68.4898% 36.015% 68.3102%); }
+    .t2 { background-color: color-mix(in lch, purple 50%, plum 50%);}
+    .t3 { background-color: color-mix(in lch, purple 55%, plum 55%);}
+    .t4 { background-color: color-mix(in lch, purple 70%, plum 70%); }
+    .t5 { background-color: color-mix(in lch, purple 95%, plum 95%);}
+    .t6 { background-color: color-mix(in lch, purple 125%, plum 125%);}
+    .t7 { background-color: color-mix(in lch, purple 9999%, plum 9999%);}`;
+  const rules = parseCss(css);
+  const bg = (cls) => propsForElement(rules, 'div', { class: cls }, []).props['background-color'];
+  assert.equal(bg('test t2'), 'color-mix(in lch, purple 50%, plum 50%)');
+  assert.equal(bg('test t5'), 'color-mix(in lch, purple 95%, plum 95%)');
+  assert.equal(bg('negative-test t6'), 'rgb(68.4898% 36.015% 68.3102%)');
+  assert.equal(bg('negative-test t7'), 'rgb(68.4898% 36.015% 68.3102%)');
+  assert.equal(invalidShadowDrops.length, 2);
+  invalidShadowDrops.length = 0;
+});

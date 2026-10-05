@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.parsing.css.properties.InvalidDeclarationDropTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:11:11.938Z" hostname="mac-1.home" time="0.157">
+  <properties/>
+  <testcase name="a scientific-notation angle is valid CSS and must not be dropped()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.127"/>
+  <testcase name="the InvalidDeclaration sentinel is never emitted as a property()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.004"/>
+  <testcase name="a conic from-angle the converter cannot evaluate stays Raw, not a drop()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.001"/>
+  <testcase name="the valid declaration the invalid ones must not shadow still parses()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.0"/>
+  <testcase name="an unknown function head stays a Raw passthrough, not a drop()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.0"/>
+  <testcase name="all four invalid angle units from the WPT source are dropped()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.002"/>
+  <testcase name="a direction keyword written with extra whitespace is valid CSS and must not be dropped()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.001"/>
+  <testcase name="conic from-angle with an invalid unit is dropped too()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.0"/>
+  <testcase name="a radial gradient the parser cannot model stays Raw — radii are unmodelled, not invalid()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.005"/>
+  <testcase name="valid-but-unmodelled values keep their author bytes()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.003"/>
+  <testcase name="the parser itself returns the sentinel for a provably invalid gradient()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.0"/>
+  <testcase name="a var-bearing gradient stays a Raw passthrough for the web runtime()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.0"/>
+  <testcase name="valid angle units keep rendering — the drop is unit-table-driven, not blanket()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.001"/>
+  <testcase name="a scientific-notation angle survives beside an interpolation method and in conic()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.003"/>
+  <testcase name="angle-units-001 component drops the invalid gradient and keeps its box()" classname="app.parsing.css.properties.InvalidDeclarationDropTest" time="0.002"/>
+  <system-out><![CDATA[[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Dropped invalid declaration 'background-image: linear-gradient(0.25turns, red, red)' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 0 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Dropped invalid declaration 'background-image: linear-gradient(90degree, red, red)' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 0 properties (0 generic)
+[CSS Parser] Dropped invalid declaration 'background-image: linear-gradient(100gradian, red, red)' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 0 properties (0 generic)
+[CSS Parser] Dropped invalid declaration 'background-image: linear-gradient(1.57radian, red, red)' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 0 properties (0 generic)
+[CSS Parser] Dropped invalid declaration 'background-image: linear-gradient(0.25turns, red, red)' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 0 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Dropped invalid declaration 'background-image: conic-gradient(from 0.25turns, red, blue)' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 0 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Dropped invalid declaration 'background-image: linear-gradient(0.25turns, red, red)' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 2 properties (0 generic)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

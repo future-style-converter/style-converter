@@ -1,0 +1,380 @@
+{
+ "generated": "2026-10-05T15:41:06.555Z",
+ "rows": [
+  {
+   "cell": "css/css-cascade/all-prop-initial-color.html web",
+   "manifestSsim": 0.9783,
+   "rescoredSsim": 0.9783,
+   "reproduces": true,
+   "allBands": 1,
+   "bands": [
+    [
+     36,
+     51
+    ]
+   ],
+   "recolouredPx": [
+    1151
+   ],
+   "predictedSsim": 0.9786,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.324,
+   "labDeltaEMeanAfter": 0.235,
+   "pixelMismatchedBefore": 1350,
+   "pixelMismatchedAfter": 1197
+  },
+  {
+   "cell": "css/css-cascade/all-prop-initial-color.html ios",
+   "manifestSsim": 0.9989,
+   "rescoredSsim": 0.9989,
+   "reproduces": true,
+   "allBands": 1,
+   "bands": [
+    [
+     35,
+     51
+    ]
+   ],
+   "recolouredPx": [
+    1357
+   ],
+   "predictedSsim": 0.9993,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.172,
+   "labDeltaEMeanAfter": 0.044,
+   "pixelMismatchedBefore": 466,
+   "pixelMismatchedAfter": 76
+  },
+  {
+   "cell": "css/css-cascade/all-prop-initial-color.html android",
+   "manifestSsim": 0.9993,
+   "rescoredSsim": 0.9993,
+   "reproduces": true,
+   "allBands": 1,
+   "bands": [
+    [
+     36,
+     51
+    ]
+   ],
+   "recolouredPx": [
+    1329
+   ],
+   "predictedSsim": 0.9984,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.159,
+   "labDeltaEMeanAfter": 0.059,
+   "pixelMismatchedBefore": 263,
+   "pixelMismatchedAfter": 117
+  },
+  {
+   "cell": "css/selectors/invalidation/nth-child-of-class.html web",
+   "manifestSsim": 0.999,
+   "rescoredSsim": 0.999,
+   "reproduces": true,
+   "allBands": 8,
+   "bands": [
+    [
+     179,
+     195
+    ],
+    [
+     251,
+     267
+    ]
+   ],
+   "recolouredPx": [
+    549,
+    549
+   ],
+   "predictedSsim": 0.9999,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.149,
+   "labDeltaEMeanAfter": 0.012,
+   "pixelMismatchedBefore": 462,
+   "pixelMismatchedAfter": 0
+  },
+  {
+   "cell": "css/selectors/invalidation/nth-child-of-class.html ios",
+   "manifestSsim": 0.9976,
+   "rescoredSsim": 0.9976,
+   "reproduces": true,
+   "allBands": 8,
+   "bands": [
+    [
+     179,
+     195
+    ],
+    [
+     251,
+     267
+    ]
+   ],
+   "recolouredPx": [
+    533,
+    533
+   ],
+   "predictedSsim": 0.9977,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.274,
+   "labDeltaEMeanAfter": 0.17,
+   "pixelMismatchedBefore": 819,
+   "pixelMismatchedAfter": 531
+  },
+  {
+   "cell": "css/selectors/invalidation/nth-child-of-class.html android",
+   "manifestSsim": 0.9965,
+   "rescoredSsim": 0.9965,
+   "reproduces": true,
+   "allBands": 8,
+   "bands": [
+    [
+     180,
+     195
+    ],
+    [
+     252,
+     267
+    ]
+   ],
+   "recolouredPx": [
+    528,
+    528
+   ],
+   "predictedSsim": 0.9955,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.281,
+   "labDeltaEMeanAfter": 0.204,
+   "pixelMismatchedBefore": 630,
+   "pixelMismatchedAfter": 546
+  },
+  {
+   "cell": "css/selectors/has-visited.html web",
+   "manifestSsim": 0.9854,
+   "rescoredSsim": 0.9854,
+   "reproduces": true,
+   "allBands": 7,
+   "bands": [
+    [
+     19,
+     35
+    ],
+    [
+     79,
+     95
+    ]
+   ],
+   "recolouredPx": [
+    2073,
+    2023
+   ],
+   "predictedSsim": 0.9977,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.748,
+   "labDeltaEMeanAfter": 0.32,
+   "pixelMismatchedBefore": 2248,
+   "pixelMismatchedAfter": 830
+  },
+  {
+   "cell": "css/selectors/has-visited.html ios",
+   "manifestSsim": 0.9469,
+   "rescoredSsim": 0.9469,
+   "reproduces": true,
+   "allBands": 7,
+   "bands": [
+    [
+     19,
+     35
+    ],
+    [
+     79,
+     95
+    ]
+   ],
+   "recolouredPx": [
+    1460,
+    1763
+   ],
+   "predictedSsim": 0.9566,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 1.174,
+   "labDeltaEMeanAfter": 0.743,
+   "pixelMismatchedBefore": 3995,
+   "pixelMismatchedAfter": 2480
+  },
+  {
+   "cell": "css/selectors/has-visited.html android",
+   "manifestSsim": 0.9509,
+   "rescoredSsim": 0.9509,
+   "reproduces": true,
+   "allBands": 6,
+   "bands": [
+    [
+     20,
+     35
+    ],
+    [
+     80,
+     95
+    ]
+   ],
+   "recolouredPx": [
+    1429,
+    1729
+   ],
+   "predictedSsim": 0.9557,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 1.06,
+   "labDeltaEMeanAfter": 0.72,
+   "pixelMismatchedBefore": 3351,
+   "pixelMismatchedAfter": 2314
+  },
+  {
+   "cell": "css/selectors/invalidation/nth-child-of-has.html web",
+   "manifestSsim": 0.999,
+   "rescoredSsim": 0.999,
+   "reproduces": true,
+   "allBands": 8,
+   "bands": [
+    [
+     179,
+     195
+    ],
+    [
+     251,
+     267
+    ]
+   ],
+   "recolouredPx": [
+    551,
+    551
+   ],
+   "predictedSsim": 0.9999,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.152,
+   "labDeltaEMeanAfter": 0.017,
+   "pixelMismatchedBefore": 492,
+   "pixelMismatchedAfter": 30
+  },
+  {
+   "cell": "css/selectors/invalidation/nth-child-of-has.html ios",
+   "manifestSsim": 0.9371,
+   "rescoredSsim": 0.9371,
+   "reproduces": true,
+   "allBands": 8,
+   "bands": [
+    [
+     164,
+     191
+    ],
+    [
+     236,
+     263
+    ]
+   ],
+   "recolouredPx": [
+    547,
+    547
+   ],
+   "predictedSsim": 0.9376,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.957,
+   "labDeltaEMeanAfter": 0.859,
+   "pixelMismatchedBefore": 3186,
+   "pixelMismatchedAfter": 3032
+  },
+  {
+   "cell": "css/selectors/invalidation/nth-child-of-has.html android",
+   "manifestSsim": 0.96,
+   "rescoredSsim": 0.96,
+   "reproduces": true,
+   "allBands": 8,
+   "bands": [
+    [
+     180,
+     191
+    ],
+    [
+     252,
+     263
+    ]
+   ],
+   "recolouredPx": [
+    161,
+    161
+   ],
+   "predictedSsim": 0.9595,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.535,
+   "labDeltaEMeanAfter": 0.513,
+   "pixelMismatchedBefore": 1807,
+   "pixelMismatchedAfter": 1783
+  },
+  {
+   "cell": "css/css-pseudo/first-letter-block-to-inline.html web",
+   "manifestSsim": 0.9989,
+   "rescoredSsim": 0.9989,
+   "reproduces": true,
+   "allBands": 1,
+   "bands": [
+    [
+     19,
+     35
+    ]
+   ],
+   "recolouredPx": [
+    1141
+   ],
+   "predictedSsim": 0.9999,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.149,
+   "labDeltaEMeanAfter": 0.012,
+   "pixelMismatchedBefore": 440,
+   "pixelMismatchedAfter": 0
+  },
+  {
+   "cell": "css/css-pseudo/first-letter-block-to-inline.html ios",
+   "manifestSsim": 0.999,
+   "rescoredSsim": 0.999,
+   "reproduces": true,
+   "allBands": 1,
+   "bands": [
+    [
+     19,
+     35
+    ]
+   ],
+   "recolouredPx": [
+    1088
+   ],
+   "predictedSsim": 0.9993,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.148,
+   "labDeltaEMeanAfter": 0.039,
+   "pixelMismatchedBefore": 430,
+   "pixelMismatchedAfter": 87
+  },
+  {
+   "cell": "css/css-pseudo/first-letter-block-to-inline.html android",
+   "manifestSsim": 0.9995,
+   "rescoredSsim": 0.9995,
+   "reproduces": true,
+   "allBands": 1,
+   "bands": [
+    [
+     20,
+     35
+    ]
+   ],
+   "recolouredPx": [
+    1089
+   ],
+   "predictedSsim": 0.9986,
+   "predictedWptPass": null,
+   "labDeltaEMeanBefore": 0.132,
+   "labDeltaEMeanAfter": 0.048,
+   "pixelMismatchedBefore": 218,
+   "pixelMismatchedAfter": 101
+  }
+ ]
+}

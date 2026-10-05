@@ -44,7 +44,7 @@ test('CANVAS_BG is the corpus-v4 white canvas', () => {
   assert.equal(CANVAS_BG, '#FFFFFF');
 });
 
-test('CANVAS_REV names the wave-30 html-pins cache revision', () => {
+test('CANVAS_REV names the wave-52 rootbg-uamargin cache revision', () => {
   // The ONE literal pin on the rev string — every other assertion in this
   // file interpolates CANVAS_REV, so a deliberate bump costs one line here
   // and a drifted one fails loudly.
@@ -60,7 +60,11 @@ test('CANVAS_REV names the wave-30 html-pins cache revision', () => {
   // `:where(html)`, so a ref declaring color/font-family/line-height at
   // :root/html is no longer clobbered by a specified value on <body>. Every
   // pre-htmlpins ref of such a page rasterised the WRONG ink and is stale.
-  assert.equal(CANVAS_REV, 'white-black-ink-font-lh-imgpad-htmlpins');
+  // '-rootbg-uamargin' = the wave-52 L12-B sixth leg: the canvas background
+  // lives on :where(html) only (the body half erased z-index:-1 ref ink and
+  // author html canvases), and a test-declares/ref-relies-on-UA pair keeps the
+  // UA body box. Every '…-htmlpins' ref of such a page is stale.
+  assert.equal(CANVAS_REV, 'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin');
 });
 
 test('REF_RENDER_WIDTH + REF_MIN_CANVAS_H reproduce the historical canvas', () => {
@@ -137,10 +141,10 @@ test('wave-30 A5: the NON-inherited body frame is untouched by the hoist', async
   assert.match(body, /display:\s*flow-root;/, 'body BFC lost');
   assert.match(body, /box-sizing:\s*border-box;/, 'body box-sizing lost');
   assert.match(body, /min-height:\s*100vh;/, 'body viewport fill lost');
-  // margin/padding/background legitimately stay on BOTH (canvas propagation
-  // reads the root's background then the body's — html.css UA behaviour).
-  assert.ok(css.includes(':where(html, body) { margin: 0; padding: 0; background: '),
-    'the shared html/body box+canvas rule must survive the hoist');
+  // margin/padding stay on BOTH (the frame zero); `background` moved to the
+  // root alone at wave-52 L12-B (pinned in its own test below).
+  assert.ok(css.includes(':where(html, body) { margin: 0; padding: 0; }'),
+    'the shared html/body box rule must survive the hoist');
 });
 
 // ── wave-25 CAL-RC1: the image-space frame ──────────────────────────────────
@@ -410,4 +414,114 @@ test('resolveRefPath keeps the plain error for tests with NO ref link at all', {
       return true;
     },
   );
+});
+
+// ── wave-52 L12-B: the sixth canvas leg ('-rootbg-uamargin') ─────────────────
+//
+// (1) ROOTBG — wave-50 B10's verified patch: the canvas background lives on
+// :where(html) only. On the body it painted an opaque box at CSS 2.1 Appendix E
+// step 3, over every z-index:-1 body child (step 2) and over an author html
+// canvas (all-green.html froze WHITE). (2) UAMARGIN — page-padding-overrun Fix
+// B: a test-declares/ref-relies-on-UA pair renders its ref with the UA body box
+// (UA_BODY_CSS, a SEPARATE second sheet so no other ref can see it).
+// Mutations executed against these pins (restored byte-exact, sha-256 checked;
+// ledger: tools/titan/results/wave52-instrument-and-calibration/mutations.json):
+//   MB1 background back on :where(html, body)          → "rootbg" pin fails
+//   MB2 UA_BODY_CSS interpolated into canvasFrameCss   → "never leaks" pin fails
+//   MB3 uaBodyMarginFor drops the `!ref declares` arm  → "direction" pin fails
+//   MB4 a universal subject matches under any ancestor → "selector" pin fails
+//   MB5 the UA sheet injected unconditionally          → "source" pin fails
+
+import {
+  UA_BODY_CSS, UA_BODY_MARGIN_PX, bodyDeclaresMargin, pageDeclaresBodyMargin, uaBodyMarginFor,
+} from './capture-browser-ref.mjs';
+import { readFileSync as _readFileSyncB } from 'node:fs';
+
+test('L12-B rootbg: the canvas background sits on :where(html) and on no rule that reaches body', async () => {
+  const css = await canvasFrameCss();
+  // The root carries the white canvas (canvas propagation reads it first).
+  assert.match(css, /:where\(html\) \{ background: #FFFFFF; \}/, 'the canvas background left the root');
+  // No :where(...) rule whose selector list names body may set a background.
+  for (const m of css.matchAll(/:where\(([^)]*)\)\s*\{([^}]*)\}/g)) {
+    if (/\bbody\b/.test(m[1])) assert.doesNotMatch(m[2], /background/, `background is back on :where(${m[1]}) — it erases z-index:-1 ref ink`);
+  }
+});
+
+test('L12-B uamargin: the UA body sheet is the UA box and never leaks into the shared frame', async () => {
+  // Exactly the three UA html.css values the frame overrode on body.
+  assert.equal(UA_BODY_MARGIN_PX, 8);
+  assert.equal(UA_BODY_CSS, ':where(body) { margin: 8px; display: block; min-height: auto; }');
+  // The shared frame (refs AND both bake paths) keeps the zero margin and the
+  // flow-root/min-height geometry — the UA box is a ref-only, per-test second sheet.
+  const css = await canvasFrameCss();
+  assert.ok(!css.includes(UA_BODY_CSS), 'UA_BODY_CSS leaked into canvasFrameCss — every page would move');
+  assert.doesNotMatch(css, /margin:\s*8px/, 'the shared frame must keep the zero body margin');
+  assert.match(css, /:where\(html, body\) \{ margin: 0; padding: 0; \}/, 'the html margin zero must stay');
+});
+
+test('L12-B selector rule: bodyDeclaresMargin reads author body margins and nothing else', () => {
+  const page = (style, bodyAttr = '') => `<!doctype html><style>${style}</style><body${bodyAttr}><div></div></body>`;
+  // Hits: the type selector (with qualifiers / ancestors) and html-rooted universals.
+  assert.equal(bodyDeclaresMargin(page('body { margin: 0 }')), true);
+  assert.equal(bodyDeclaresMargin(page('html > body.x:not(.y) { margin-top: -15px }')), true);
+  assert.equal(bodyDeclaresMargin(page('* { margin: 0; padding: 0 }')), true);
+  assert.equal(bodyDeclaresMargin(page(':root * { margin-inline-start: 2px }')), true);
+  assert.equal(bodyDeclaresMargin(page('@media screen { body { margin: 0 } }')), true);
+  assert.equal(bodyDeclaresMargin(page('', ' style="color:red; margin: 0"')), true);
+  // Misses: other subjects, pseudo-elements, non-margin properties, print, comments.
+  assert.equal(bodyDeclaresMargin(page('div * { margin: 0 }')), false, 'div * cannot reach body (MB4)');
+  assert.equal(bodyDeclaresMargin(page('body > div { margin: 0 }')), false);
+  assert.equal(bodyDeclaresMargin(page('body::before { margin: 1px }')), false);
+  assert.equal(bodyDeclaresMargin(page('body { padding: 0; scroll-margin: 4px }')), false);
+  assert.equal(bodyDeclaresMargin(page('body { display: contents }')), false);
+  assert.equal(bodyDeclaresMargin(page('@media print { body { margin: 0 } }')), false);
+  assert.equal(bodyDeclaresMargin(page('/* body { margin: 0 } */ p { margin: 0 }')), false);
+  assert.equal(bodyDeclaresMargin(page('@font-face { font-family: x; } p { color: red }')), false);
+  // Linked sheets the caller resolved count like inline ones.
+  assert.equal(bodyDeclaresMargin('<body></body>', ['body{margin:0}']), true);
+});
+
+// The real pairs (skipped without the WPT checkout, like resolveRefPath's pins).
+const WPT_ROOT_B = join(REPO_ROOT, 'tools', 'wpt');
+const MASKING = ['paddingBox-1d', 'paddingBox-1e', 'contentBox-1d', 'contentBox-1e']
+  .map((s) => `css/css-masking/clip-path/clip-path-${s}.html`);
+test('L12-B direction: the four css-masking pairs fire; undeclared and both-declared pairs do not', { skip: !existsSync(join(WPT_ROOT_B, MASKING[0])) }, async () => {
+  for (const t of MASKING) {
+    // The test declares body { margin: 0 } and its ref relies on the UA 8 px.
+    assert.equal(pageDeclaresBodyMargin(join(WPT_ROOT_B, t)), true, `${t} declares a body margin`);
+    assert.equal(uaBodyMarginFor(join(WPT_ROOT_B, t), await resolveRefPath(t)), true, `${t} must get the UA body box`);
+  }
+  // Undeclared tests keep today's sheet (the plan's two named negatives).
+  for (const t of ['css/css-overflow/line-clamp/block-ellipsis-001.html', 'css/css-display/display-contents-text-only-001.html']) {
+    assert.equal(pageDeclaresBodyMargin(join(WPT_ROOT_B, t)), false, `${t} declares no body margin`);
+    assert.equal(uaBodyMarginFor(join(WPT_ROOT_B, t), await resolveRefPath(t)), false);
+  }
+  // Both sides declare (ref inline margin:0) → the ref's own rule decides: no variant (MB3).
+  const both = 'css/css-anchor-position/anchor-center-scroll-001.html';
+  assert.equal(uaBodyMarginFor(join(WPT_ROOT_B, both), await resolveRefPath(both)), false);
+});
+
+test('L12-B source: renderRefPng adds the UA body sheet second, and only on the Fix-B switch', async () => {
+  const src = _readFileSyncB(new URL('./capture-browser-ref.mjs', import.meta.url), 'utf8');
+  // The shared frame first, then the UA box, guarded by the per-test switch (MB5).
+  assert.match(src, /content: await canvasFrameCss\(\),\s*\n\s*\}\);\s*\n(?:\s*\/\/[^\n]*\n)*\s*if \(uaBodyMargin\) await page\.addStyleTag\(\{ content: UA_BODY_CSS \}\);/,
+    'UA_BODY_CSS must be a second, conditional style tag after canvasFrameCss()');
+  // The switch is computed from the two sources by the exported rule.
+  assert.match(src, /const uaBodyMargin = uaBodyMarginFor\(join\(WPT_DIR, testRel\), refAbs\);/);
+});
+
+// The re-frozen refs themselves (gitignored tree — skipped when absent): the
+// falsifier the page-padding brief pre-registered for Fix B ("the re-frozen
+// paddingBox-1d ref's green bbox is not (24,24)-(123,123), or the PNG is 616 tall").
+test('L12-B re-freeze: the masking refs moved by exactly the UA 8 px and stayed 390×600', { skip: !existsSync(cachePathFor('9b5435e55e0b54a6cd09c1c563861eb3c999cef1', MASKING[0])) }, () => {
+  for (const t of MASKING) {
+    const png = PNG.sync.read(_readFileSyncB(cachePathFor('9b5435e55e0b54a6cd09c1c563861eb3c999cef1', t)));
+    assert.deepEqual([png.width, png.height], [390, 600], `${t}: the UA margin must not grow the PNG`);
+    let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+    for (let y = 0; y < png.height; y++) for (let x = 0; x < png.width; x++) {
+      const i = (y * png.width + x) * 4;
+      if (png.data[i + 1] > 100 && png.data[i] < 50 && png.data[i + 2] < 50) { x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+    }
+    assert.deepEqual([x0, y0, x1, y1], [24, 24, 123, 123], `${t}: green must sit at the UA-margin origin`);
+  }
 });

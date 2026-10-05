@@ -1,0 +1,24 @@
+# ma-exclude-ios (wave52 lane L8) — the M-A EXCLUDE-direction build for the closing-gate device A/B (PLAN §4 step 5):
+# the iOS default design measures SF again (pre-wave-52) while M-B/M-C stay. Apply on top of the L8 tree, build,
+# record the installed .app hash, capture, then REVERSE it. Never committed: ChUnitInlineAxisTests' Inter pins go
+# red under it by design. Compose's M-A exclude-direction is simply 'seam-1 not applied'.
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/ChUnitMetrics.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/ChUnitMetrics.swift
+@@ -115,7 +115,7 @@
+     /// system font, the pre-wave-52 measurement). Internal so the Catalyst
+     /// pin can observe which face the default design measures.
+     internal static func defaultMeasuringFaceKey(sizePx: Double) -> String {
+-        interFont(size: CGFloat(sizePx)) == nil ? "default" : "inter"
++        "default"
+     }
+ 
+     /// M-A: the registered Inter face by name — the same lookup the label
+@@ -205,7 +205,7 @@
+         // (ComponentRenderer's bottom-out), so measure Inter when the process
+         // has it; the plain system font (SF) otherwise, exactly as before.
+         default:
+-            return interFont(size: size) ?? (UIFont.systemFont(ofSize: size) as CTFont)
++            return UIFont.systemFont(ofSize: size) as CTFont
+         }
+         #else
+         // Non-UIKit fallback (defensive — every supported platform has

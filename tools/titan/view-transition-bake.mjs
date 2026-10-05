@@ -85,8 +85,9 @@
 // then "pass" by the harness re-displaying pixels Chromium rasterised from the
 // page under test. That is a different signal wearing this section's name. A
 // leaf whose snapshot is not flat colour BAILS the whole test (bail reason
-// `non-uniform-snapshot`), the fixture stays byte-identical, and the failure
-// stays visible as what it is. The population is stated in the log so a
+// `non-uniform-snapshot`), the fixture keeps its static boxes (since wave-52
+// L1 it may gain ONLY the measured frame-ring body-root stamp — see
+// applyBailFrameRingStamp), and the failure stays visible as what it is. The population is stated in the log so a
 // future wave can weigh a real snapshot channel with the numbers in hand.
 //
 // WAVE-40 lane T4 took that stated population and moved the part of it that
@@ -110,8 +111,12 @@
 // pixels.
 //
 // SCOPE BOUNDARY (documented, enforced, never silent). Every one of these is
-// a loud bail that leaves the fixture byte-identical — the bail-to-static
-// contract the other five bakes share:
+// a loud bail that leaves the fixture's static boxes untouched — the
+// bail-to-static contract the other five bakes share. The ONE exception
+// (wave-52 L1 F-B): a solve-class bail (isSolveClassBail) on a clean drive
+// whose MEASURED settled ring is a uniform non-white colour gains exactly the
+// body-root frame-ring stamp and nothing else; every other bail, and every
+// solve-class bail whose ring reads white or non-uniform, stays byte-identical:
 //   - NO ACTIVE TRANSITION AT SETTLE (`:active-view-transition` false). 42 of
 //     195, dominated by the `view-transition-name: auto` family (css-view-
 //     transitions-2), which THIS Chromium does not implement: the names never
@@ -1730,36 +1735,10 @@ export function applyViewTransitionBakePlan(fixture, stem, plan, frameRing = nul
   //     defect). The composed canvases paint their 16px frame from the
   //     body-root component's background — a PROPERTY read that step 1's
   //     `display: none` deliberately does not disturb — so the settled ring
-  //     colour is delivered by writing exactly that property.
-  if (frameRing) {
-    // The static extraction mints at most one body-root (`<stem>__body`,
-    // extract-fixture.mjs); find it by ROLE, not id, because the role is the
-    // contract the canvases resolve by.
-    const bodyRoot = Object.values(fixture.components)
-      .find((c) => c && typeof c === 'object' && c._role === 'body-root');
-    if (bodyRoot) {
-      // Override, never merge: the ring IS the visible canvas colour of the
-      // settled state (the author's own body background sits UNDER the
-      // top-layer backdrop whenever the two differ, so the ring wins).
-      (bodyRoot.properties ??= {})['background-color'] = frameRing;
-    } else {
-      // No body-root minted — the page had no body/html-scoped CSS. Create
-      // the minimal one: role marker (the canvases' lookup key), the ring as
-      // its background, and `display: none` so the component paints nothing
-      // itself, exactly like every step-1-retired box. Same id shape the
-      // extractor uses, which cannot collide (only the extractor mints it,
-      // and it did not).
-      fixture.components[`${stem}__body`] = {
-        properties: { display: 'none', 'background-color': frameRing },
-        _role: 'body-root',
-        // Honesty stamp: this component exists only because the bake
-        // measured the ring — same provenance the wrapper subtree carries.
-        _lossy: true,
-        _lossyReasons: [VT_BAKE_LOSSY_REASON],
-      };
-    }
-    written++;
-  }
+  //     colour is delivered by writing exactly that property. Factored into
+  //     applyFrameRingStamp (wave-52 L1) so the bail path below can deliver
+  //     the SAME stamp without the pseudo tree; null → 0 written, byte-identical.
+  written += applyFrameRingStamp(fixture, stem, frameRing);
 
   // 3. Honesty stamps: the delivery record plus the fixture-level roll-up.
   fixture._wpt ??= {};
@@ -1770,6 +1749,110 @@ export function applyViewTransitionBakePlan(fixture, stem, plan, frameRing = nul
       [...new Set([...(fixture._wpt.lossyReasons ?? []), VT_BAKE_LOSSY_REASON])];
   }
   return written;
+}
+
+/**
+ * Step 2c on its own (wave-52 L1 F-B; body verbatim from the wave-41 stamp).
+ * Writes `frameRing` as the `_role: 'body-root'` component's background —
+ * the ONE channel all three composed canvases read their frame colour from
+ * (`ComposedCaptureGallery.tsx resolveCanvasBackground`, the Android
+ * `ScreenshotCaptureScreen.kt` and iOS `CaptureCanvas.swift` twins) — minting
+ * the minimal body-root when the static extraction produced none. Returns the
+ * number of components written: 1 for a stamp, 0 for a null/absent ring, so
+ * `written += applyFrameRingStamp(…)` is byte-identical to the inline block.
+ */
+export function applyFrameRingStamp(fixture, stem, frameRing) {
+  // A null ring is frameRingColor's "the default already matches" answer
+  // (white or non-uniform) — nothing to deliver, nothing written.
+  if (!frameRing) return 0;
+  // The static extraction mints at most one body-root (`<stem>__body`,
+  // extract-fixture.mjs); find it by ROLE, not id, because the role is the
+  // contract the canvases resolve by.
+  const bodyRoot = Object.values(fixture.components ??= {})
+    .find((c) => c && typeof c === 'object' && c._role === 'body-root');
+  if (bodyRoot) {
+    // Override, never merge: the ring IS the visible canvas colour of the
+    // settled state (the author's own body background sits UNDER the
+    // top-layer backdrop whenever the two differ, so the ring wins).
+    (bodyRoot.properties ??= {})['background-color'] = frameRing;
+  } else {
+    // No body-root minted — the page had no body/html-scoped CSS. Create
+    // the minimal one: role marker (the canvases' lookup key), the ring as
+    // its background, and `display: none` so the component paints nothing
+    // itself, exactly like every step-1-retired box. Same id shape the
+    // extractor uses, which cannot collide (only the extractor mints it,
+    // and it did not).
+    fixture.components[`${stem}__body`] = {
+      properties: { display: 'none', 'background-color': frameRing },
+      _role: 'body-root',
+      // Honesty stamp: this component exists only because the bake
+      // measured the ring — same provenance the wrapper subtree carries.
+      _lossy: true,
+      _lossyReasons: [VT_BAKE_LOSSY_REASON],
+    };
+  }
+  return 1;
+}
+
+// ── The bail-path frame-ring stamp (wave-52 L1 F-B) ─────────────────────────
+//
+// THE MEASURED DEFECT. wave51-fix css-view-transitions/fractional-box-with-
+// {shadow,overflow-children}-{new,old}: web f 0.9763/0.9763/0.9757/0.9757
+// (natives 0.9749/0.9739), each diff 100 % CANVAS — 219 115 / 222 874 px of
+// white where the frozen ref is lightpink (255,182,193), 0 box pixels. The
+// snapshot solve bailed (`snapshot overflows its 101x51 box (624px|225px of
+// ink outside it)`) and the bail returned BEFORE the ring sample and the 2c
+// stamp, so the author's `html::view-transition { background: lightpink }`
+// never reached the composed canvas — while the live page painted the
+// frozen state's boxes in place, already pixel-identical to the ref.
+//
+// WHY THIS IS CSS-CORRECT AND NOT A SHORTCUT. css-view-transitions-1
+// §"::view-transition": the pseudo is `position: fixed; inset: 0` in the top
+// layer; its author background paints UNDER every group and reaches the
+// viewport edge whenever the transition is ACTIVE — regardless of whether
+// this module can express the groups' snapshots as flat boxes. A solve-class
+// bail is a statement about the SNAPSHOTS (raster, overflow, window), not
+// about the backdrop, so the backdrop's one delivery channel (the body-root
+// stamp) is still owed. It is MEASURED off the frozen live page, never read
+// from the author sheet: a visible root group covering the ring yields a
+// non-uniform or white ring → null → no stamp (frameRingColor's rule).
+//
+// WHAT IT DOES NOT DO. Never step 1 (`display: none` on the live boxes) and
+// never the pseudo tree — the page keeps painting in place exactly as every
+// bail did before; only the canvas colour is added. Not for non-solve bails
+// (`no-active-transition`, `transition-not-frozen`, `root-not-captured`,
+// `generated-names`, …): those say the page is NOT in a frozen active state,
+// so the backdrop is not on screen. Not on a dirty-probe drive: the outer
+// re-drive loop must always restart from an unmutated fixture.
+//
+// The full fix — a shadow-aware overflow window (css-backgrounds-3 §7.1:
+// extent = |offset| + blur + spread) so these groups BAKE instead of bailing
+// — is the later, larger change; this is its honest subset.
+
+/** The bail classes that describe the SNAPSHOTS while the transition is
+ *  frozen and active — the backdrop is on screen behind them. Matched on the
+ *  reason strings planViewTransitionBake emits, verbatim. */
+export function isSolveClassBail(reason) {
+  const r = String(reason ?? '');
+  return /^snapshot solve failed for /.test(r)      // overflow / object-fit / window errors
+    || /^non-uniform-snapshot /.test(r)             // the raster refusal
+    || /^missing snapshot solve for /.test(r)       // a painted leaf never solved
+    || /isolation window \d+x\d+ exceeds/.test(r);  // the window class, named in the brief
+}
+
+/**
+ * Deliver ONLY the frame-ring stamp for a bailed drive. Pure over plain data
+ * so the decision surface is unit-testable without a browser:
+ *   - `walk.active !== true` → 0 (no frozen active state → no backdrop);
+ *   - a non-solve-class bail → 0 (the page is not in the state the ring
+ *     would describe);
+ *   - a null ring (white / non-uniform) → 0 (the default already matches).
+ * Otherwise exactly applyFrameRingStamp: 1 written, no `display` touched.
+ */
+export function applyBailFrameRingStamp(fixture, stem, walk, bail, frameRing) {
+  if (walk?.active !== true) return 0;
+  if (!isSolveClassBail(bail)) return 0;
+  return applyFrameRingStamp(fixture, stem, frameRing);
 }
 
 // ── In-page walker ──────────────────────────────────────────────────────────
@@ -2045,7 +2128,11 @@ async function waitForReftestSettle(page, timeoutMs) {
  *   - 'declined' — the shared top-layer pre-check says the rendered state is
  *                  unrepresentable; no browser was launched;
  *   - 'bailed'   — a scope boundary fired (see the module banner); the fixture
- *                  is left byte-identical;
+ *                  is left byte-identical, EXCEPT that a solve-class bail on a
+ *                  clean drive with a uniform non-white settled ring gains the
+ *                  body-root frame-ring stamp alone (wave-52 L1; the reason
+ *                  then ends `(frame-ring rgb(…) stamped)`, and a sampled ring
+ *                  that wrote nothing ends `(frame-ring null not stamped)`);
  *   - 'baked'    — the settled pseudo tree was delivered, fixture stamped.
  *
  * THE BOUNDED RE-DRIVE (wave-45 lane X5). Two gates in a row lost exactly one
@@ -2134,8 +2221,10 @@ export async function viewTransitionBakeFixture(fixture, testRel) {
  * body, verbatim, plus the dirty-probe channel: opens the page, settles,
  * walks, solves, plans, and on success applies the plan to `fixture` in
  * place. The fixture is mutated ONLY on the 'baked' return (the plan apply is
- * the final synchronous step), so a re-drive of any bailed or thrown drive
- * always starts from an unmutated fixture.
+ * the final synchronous step) and on the wave-52 L1 solve-class bail stamp,
+ * which is gated on an EMPTY dirty-probe list — so a re-drive (which only a
+ * dirty probe or a thrown drive triggers) always starts from an unmutated
+ * fixture.
  */
 async function driveViewTransitionBake(fixture, testRel, testAbs, trigger) {
   const browser = await getBrowser();
@@ -2301,11 +2390,63 @@ async function driveViewTransitionBake(fixture, testRel, testAbs, trigger) {
     // every wanted leaf IS consulted and an error among them always bails —
     // the retry can therefore never re-drive over an applied (mutated)
     // fixture.
-    if (bail) return { status: 'bailed', reason: bail, dirtyProbe: dirtyProbes[0] ?? null };
+    if (bail) {
+      // wave-52 L1 F-B (see the bail-path banner above applyBailFrameRingStamp):
+      // a SOLVE-class bail on a frozen, active transition still owes the
+      // `::view-transition` backdrop its one delivery channel. The ring is
+      // sampled only for that class (a non-solve bail never pays the
+      // screenshot, as before) and only on a CLEAN drive — a dirty probe
+      // means the outer loop may re-drive, and a re-drive must start from an
+      // unmutated fixture, so the honest bail rides through untouched.
+      // Named once so both returns below can say whether the ring was read.
+      const ringSampled = isSolveClassBail(bail) && dirtyProbes.length === 0;
+      const ringOnBail = ringSampled
+        ? frameRingColor(await page.screenshot({
+            type: 'png',
+            // Same settled-page sample as the baked path below: the isolation
+            // sheet is already removed, the clip is the ref-contract viewport.
+            clip: { x: 0, y: 0, width: viewport.width, height: viewport.height },
+          }))
+        : null;
+      const stampedOnBail = applyBailFrameRingStamp(fixture, fixtureStem(testRel), walk, bail, ringOnBail);
+      if (stampedOnBail) {
+        // The reason keeps its leading token (the CLI taxonomy key) and
+        // grows a parenthesised provenance so extract.log's
+        // `[vt-bake: bailed — …]` line names the stamp it delivered.
+        return {
+          status: 'bailed',
+          reason: `${bail} (frame-ring ${ringOnBail} stamped)`,
+          frameRing: ringOnBail, written: stampedOnBail,
+          // Gated on an empty dirtyProbes above, so no re-drive can follow
+          // this (mutated) return — stated, not implied.
+          dirtyProbe: null,
+        };
+      }
+      if (ringSampled) {
+        // Sampled, nothing delivered: the settled ring read white or
+        // non-uniform (frameRingColor → null), or the walk was not active.
+        // Said in the reason so extract.log tells "sampled, nothing owed"
+        // apart from "never sampled" (a non-solve class or a dirty drive) —
+        // the wave-52 L1 census over-claimed stamps for want of exactly this.
+        // The leading token is unchanged, so the CLI taxonomy key is too.
+        return {
+          status: 'bailed',
+          reason: `${bail} (frame-ring ${ringOnBail ?? 'null'} not stamped)`,
+          // `frameRing` names the DELIVERED ring on every return (baked and
+          // stamped alike); nothing was delivered here, the reason says why.
+          frameRing: null,
+          // ringSampled implies an empty dirtyProbes, so there is no probe to
+          // hand the re-drive loop — the same null the line below would give.
+          dirtyProbe: null,
+        };
+      }
+      return { status: 'bailed', reason: bail, dirtyProbe: dirtyProbes[0] ?? null };
+    }
     // The frame-ring sample (wave-41; see frameRingColor). Taken AFTER the
-    // plan is accepted so bailed tests never pay the screenshot, and AFTER
-    // the isolation sheet was removed above so this is the SETTLED page —
-    // the same pixels the ref pipeline's padColorFor frames the ref against.
+    // plan is accepted so bailed tests never pay the screenshot (except the
+    // solve-class stamp above), and AFTER the isolation sheet was removed
+    // above so this is the SETTLED page — the same pixels the ref pipeline's
+    // padColorFor frames the ref against.
     const ringShot = await page.screenshot({
       type: 'png',
       // The 358×568 ref-contract viewport, exactly what the ref render pads.

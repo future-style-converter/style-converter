@@ -1,0 +1,174 @@
+[
+ {
+  "id": "M1",
+  "file": "tools/titan/inject-wpt-block.mjs",
+  "pattern": "L12-A pin (1|7)",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A pin 1: isAbsenceOnly is the pre-registered predicate, nothing wider",
+   "L12-A pin 7: replaying the gate over wave51-fix stamps exactly the 19 census cells"
+  ],
+  "shaBefore": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "shaAfter": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "restored": true
+ },
+ {
+  "id": "M2",
+  "file": "tools/titan/inject-wpt-block.mjs",
+  "pattern": "L12-A pin 1",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A pin 1: isAbsenceOnly is the pre-registered predicate, nothing wider"
+  ],
+  "shaBefore": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "shaAfter": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "restored": true
+ },
+ {
+  "id": "M3",
+  "file": "tools/titan/inject-wpt-block.mjs",
+  "pattern": "L12-A pin 2",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A pin 2: applyAbsenceOnlyGate stamps per cell and never overwrites an earlier stamp"
+  ],
+  "shaBefore": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "shaAfter": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "restored": true
+ },
+ {
+  "id": "M4",
+  "file": "tools/titan/inject-wpt-block.mjs",
+  "pattern": "L12-A pin 6 \\(wiring\\)",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A pin 6 (wiring): diffWebVsRef reads uniformity on the RAW capture, before the white pad"
+  ],
+  "shaBefore": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "shaAfter": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "restored": true
+ },
+ {
+  "id": "M5",
+  "file": "tools/titan/inject-wpt-block.mjs",
+  "pattern": "L12-A pin 9",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A pin 9: an absence-only web-ref still anchors the per-test native-presence check"
+  ],
+  "shaBefore": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "shaAfter": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "restored": true
+ },
+ {
+  "id": "M6",
+  "file": "tools/titan/inject-wpt-block.mjs",
+  "pattern": "L12-A pin 6b",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A pin 6b: blankCaptureVsInkedRef = uniform capture ∧ inked ref ∧ not the ref’s own fill"
+  ],
+  "shaBefore": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "shaAfter": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "restored": true
+ },
+ {
+  "id": "M7a",
+  "file": "tools/titan/inject-wpt-block.mjs",
+  "pattern": "L12-A pin 3",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A pin 3: buildResults runs the gate AFTER the font gate, never on a wholly-excluded test"
+  ],
+  "shaBefore": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "shaAfter": "98a787261e756817dee5950d841ab3ee93c3638c80a3229b860a169cd025818b",
+  "restored": true
+ },
+ {
+  "id": "M7",
+  "file": "tools/titan/score-gate.mjs",
+  "pattern": "L12-A",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-A: a string stamp is unscored under the unchanged idiom (M7)",
+   "L12-A: stamped-now → UNMEASURED NOW; stamp-removed → NEWLY MEASURED, never LOST",
+   "L12-A replay: wave51-fix → adoption prints 19 UNMEASURED NOW and nothing else"
+  ],
+  "shaBefore": "d3be2929b15dbfa39626682d7c279c087789199a3c125f83b442df29d2814cd0",
+  "shaAfter": "d3be2929b15dbfa39626682d7c279c087789199a3c125f83b442df29d2814cd0",
+  "restored": true
+ },
+ {
+  "id": "MB1",
+  "file": "tools/titan/capture-browser-ref.mjs",
+  "pattern": "L12-B rootbg",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-B rootbg: the canvas background sits on :where(html) and on no rule that reaches body"
+  ],
+  "shaBefore": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "shaAfter": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "restored": true
+ },
+ {
+  "id": "MB2",
+  "file": "tools/titan/capture-browser-ref.mjs",
+  "pattern": "L12-B uamargin",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-B uamargin: the UA body sheet is the UA box and never leaks into the shared frame"
+  ],
+  "shaBefore": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "shaAfter": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "restored": true
+ },
+ {
+  "id": "MB3",
+  "file": "tools/titan/capture-browser-ref.mjs",
+  "pattern": "L12-B direction",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-B direction: the four css-masking pairs fire; undeclared and both-declared pairs do not"
+  ],
+  "shaBefore": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "shaAfter": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "restored": true
+ },
+ {
+  "id": "MB4",
+  "file": "tools/titan/capture-browser-ref.mjs",
+  "pattern": "L12-B selector rule",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-B selector rule: bodyDeclaresMargin reads author body margins and nothing else"
+  ],
+  "shaBefore": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "shaAfter": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "restored": true
+ },
+ {
+  "id": "MB5",
+  "file": "tools/titan/capture-browser-ref.mjs",
+  "pattern": "L12-B source",
+  "exit": 1,
+  "caught": true,
+  "failing": [
+   "L12-B source: renderRefPng adds the UA body sheet second, and only on the Fix-B switch"
+  ],
+  "shaBefore": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "shaAfter": "fe8a5dd4a5204de82ba7f988cb0c78f9f0c3e1467c6a3ba70fd91ff957a7c372",
+  "restored": true
+ }
+]

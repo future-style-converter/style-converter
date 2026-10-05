@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:09:47.664Z" hostname="mac-1.home" time="0.005">
+  <properties/>
+  <testcase name="S4 - a positioned ancestor outside the multicol still vetoes" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.004"/>
+  <testcase name="S3 - a non-container passes the stamp through unchanged" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S4 - without the spanner the wrapper still claims both probes" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S1 - the spanner declaration is recognised, the wrapper is not" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S4 - the host activates for that document" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S4 - a spanner with no multicol ancestor changes nothing" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.001"/>
+  <testcase name="S2 - a positioned ancestor OUTSIDE the multicol survives" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S2 - outside any multicol the rule is inert" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S2 - a spanner restarts the chain at its multicol container" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S4 - both green probes hoist to the initial containing block" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S3 - the multicol container stamps its own chain state" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S2 - the spanner's OWN position still counts" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S2 - a non-spanner keeps the frozen OR-accumulation" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <testcase name="S1 - a column-count box is a multicol container, a plain box is not" classname="com.styleconverter.runtime.columns.MulticolSpannerContainingBlockTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

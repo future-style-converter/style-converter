@@ -1,0 +1,469 @@
+{
+ "_lane": "wave52 L12-B same-session sheet A/B",
+ "moved": 23,
+ "rows": [
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "uaBodyMargin": true,
+   "changedPx": 3293,
+   "bbox": [
+    16,
+    35,
+    355,
+    75
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1095",
+    "rgb(0,0,0)×622",
+    "rgb(13,13,13)×53"
+   ],
+   "newColours": [
+    "rgb(255,255,255)×1095",
+    "rgb(0,0,0)×622",
+    "rgb(13,13,13)×53"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "uaBodyMargin": true,
+   "changedPx": 3293,
+   "bbox": [
+    16,
+    35,
+    355,
+    75
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1095",
+    "rgb(0,0,0)×622",
+    "rgb(13,13,13)×53"
+   ],
+   "newColours": [
+    "rgb(255,255,255)×1095",
+    "rgb(0,0,0)×622",
+    "rgb(13,13,13)×53"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-cascade/initial-background-color.html",
+   "uaBodyMargin": true,
+   "changedPx": 234000,
+   "bbox": [
+    0,
+    0,
+    389,
+    599
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×234000"
+   ],
+   "newColours": [
+    "rgb(0,128,0)×234000"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-display/display-contents-root-background.html",
+   "uaBodyMargin": false,
+   "changedPx": 233617,
+   "bbox": [
+    0,
+    0,
+    389,
+    599
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×232481",
+    "rgb(172,172,172)×36",
+    "rgb(13,13,13)×34"
+   ],
+   "newColours": [
+    "rgb(0,128,0)×232481",
+    "rgb(0,127,0)×39",
+    "rgb(0,86,0)×37"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "uaBodyMargin": false,
+   "changedPx": 9496,
+   "bbox": [
+    16,
+    259,
+    357,
+    335
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×3631",
+    "rgb(0,0,0)×1184",
+    "rgb(13,13,13)×193"
+   ],
+   "newColours": [
+    "rgb(255,255,255)×2932",
+    "rgb(0,0,0)×1328",
+    "rgb(13,13,13)×228"
+   ],
+   "size": "390x920"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "uaBodyMargin": false,
+   "changedPx": 5200,
+   "bbox": [
+    16,
+    16,
+    165,
+    165
+   ],
+   "oldColours": [
+    "rgb(223,232,238)×5200"
+   ],
+   "newColours": [
+    "rgb(19,28,238)×3000",
+    "rgb(223,28,34)×2200"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "uaBodyMargin": false,
+   "changedPx": 2340,
+   "bbox": [
+    16,
+    16,
+    373,
+    305
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×2340"
+   ],
+   "newColours": [
+    "rgb(127,127,255)×1500",
+    "rgb(255,127,127)×840"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "uaBodyMargin": false,
+   "changedPx": 3850,
+   "bbox": [
+    16,
+    16,
+    343,
+    495
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×3850"
+   ],
+   "newColours": [
+    "rgb(255,127,127)×2350",
+    "rgb(127,127,255)×1500"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "uaBodyMargin": false,
+   "changedPx": 2040,
+   "bbox": [
+    16,
+    16,
+    373,
+    305
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×2040"
+   ],
+   "newColours": [
+    "rgb(255,127,127)×1040",
+    "rgb(127,127,255)×1000"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "uaBodyMargin": false,
+   "changedPx": 2050,
+   "bbox": [
+    16,
+    16,
+    363,
+    305
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×2050"
+   ],
+   "newColours": [
+    "rgb(255,127,127)×1050",
+    "rgb(127,127,255)×1000"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "uaBodyMargin": true,
+   "changedPx": 3072,
+   "bbox": [
+    16,
+    16,
+    123,
+    123
+   ],
+   "oldColours": [
+    "rgb(0,128,0)×1536",
+    "rgb(255,255,255)×1536"
+   ],
+   "newColours": [
+    "rgb(255,255,255)×1536",
+    "rgb(0,128,0)×1536"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "uaBodyMargin": true,
+   "changedPx": 2623,
+   "bbox": [
+    16,
+    16,
+    123,
+    123
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1144",
+    "rgb(0,128,0)×1112",
+    "rgb(95,175,95)×11"
+   ],
+   "newColours": [
+    "rgb(255,255,255)×1143",
+    "rgb(0,128,0)×1112",
+    "rgb(95,175,95)×11"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "uaBodyMargin": true,
+   "changedPx": 3072,
+   "bbox": [
+    16,
+    16,
+    123,
+    123
+   ],
+   "oldColours": [
+    "rgb(0,128,0)×1536",
+    "rgb(255,255,255)×1536"
+   ],
+   "newColours": [
+    "rgb(255,255,255)×1536",
+    "rgb(0,128,0)×1536"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "uaBodyMargin": true,
+   "changedPx": 2623,
+   "bbox": [
+    16,
+    16,
+    123,
+    123
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1144",
+    "rgb(0,128,0)×1112",
+    "rgb(95,175,95)×11"
+   ],
+   "newColours": [
+    "rgb(255,255,255)×1143",
+    "rgb(0,128,0)×1112",
+    "rgb(95,175,95)×11"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "uaBodyMargin": false,
+   "changedPx": 1140,
+   "bbox": [
+    31,
+    574,
+    348,
+    578
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1140"
+   ],
+   "newColours": [
+    "rgb(0,0,0)×960",
+    "rgb(35,35,35)×15",
+    "rgb(219,219,219)×15"
+   ],
+   "size": "390x635"
+  },
+  {
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "uaBodyMargin": false,
+   "changedPx": 1140,
+   "bbox": [
+    31,
+    574,
+    348,
+    578
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1140"
+   ],
+   "newColours": [
+    "rgb(0,0,0)×960",
+    "rgb(35,35,35)×15",
+    "rgb(219,219,219)×15"
+   ],
+   "size": "390x635"
+  },
+  {
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "uaBodyMargin": false,
+   "changedPx": 1140,
+   "bbox": [
+    31,
+    539,
+    348,
+    543
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1140"
+   ],
+   "newColours": [
+    "rgb(0,0,0)×960",
+    "rgb(35,35,35)×15",
+    "rgb(219,219,219)×15"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "uaBodyMargin": false,
+   "changedPx": 1140,
+   "bbox": [
+    31,
+    539,
+    348,
+    543
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×1140"
+   ],
+   "newColours": [
+    "rgb(0,0,0)×960",
+    "rgb(35,35,35)×15",
+    "rgb(219,219,219)×15"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "uaBodyMargin": false,
+   "changedPx": 61655,
+   "bbox": [
+    16,
+    16,
+    261,
+    291
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×58131",
+    "rgb(13,13,13)×129",
+    "rgb(22,22,22)×121"
+   ],
+   "newColours": [
+    "rgb(0,255,0)×55082",
+    "rgb(0,0,0)×3066",
+    "rgb(0,13,0)×128"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "uaBodyMargin": false,
+   "changedPx": 234000,
+   "bbox": [
+    0,
+    0,
+    389,
+    599
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×234000"
+   ],
+   "newColours": [
+    "rgb(0,128,0)×234000"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "uaBodyMargin": false,
+   "changedPx": 234000,
+   "bbox": [
+    0,
+    0,
+    389,
+    599
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×234000"
+   ],
+   "newColours": [
+    "rgb(0,128,0)×234000"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "uaBodyMargin": false,
+   "changedPx": 131744,
+   "bbox": [
+    16,
+    216,
+    373,
+    583
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×131744"
+   ],
+   "newColours": [
+    "rgb(255,192,203)×131744"
+   ],
+   "size": "390x600"
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "uaBodyMargin": false,
+   "changedPx": 233950,
+   "bbox": [
+    0,
+    0,
+    389,
+    599
+   ],
+   "oldColours": [
+    "rgb(255,255,255)×233783",
+    "rgb(254,254,254)×12",
+    "rgb(34,34,34)×9"
+   ],
+   "newColours": [
+    "rgb(0,128,0)×233783",
+    "rgb(0,127,0)×13",
+    "rgb(0,48,0)×10"
+   ],
+   "size": "390x600"
+  }
+ ]
+}

@@ -18,10 +18,28 @@ import app.irmodels.IRAngle
  * - "45deg" → degrees=45, original=45deg
  * - "1.57rad" → degrees≈90, original=1.57rad
  * - "0.5turn" → degrees=180, original=0.5turn
+ * - "4.5e1deg" → degrees=45 (exponent form, wave 52)
+ * - "45DEG" → degrees=45 (units are ASCII case-insensitive, wave 52)
  */
 object AngleParser {
 
-    private val angleRegex = """^([+-]?\d*\.?\d+)(deg|rad|grad|turn)$""".toRegex()
+    // The <number> part follows css-values-4 §5.3 (a sign, digits with an
+    // optional fraction — a digit is required after the `.`, so `1.deg` stays
+    // invalid — or a bare `.5`, then an OPTIONAL e/E exponent);
+    // css-syntax-3 §4.3.13 ("Consume a number") folds that exponent into the
+    // <number-token> BEFORE §4.3.3 attaches the unit, so `4.5e1deg` is ONE
+    // <dimension-token> with the ordinary unit `deg`. The unit alternation
+    // matches case-insensitively because CSS dimension units, like every CSS
+    // keyword, are ASCII case-insensitive (css-values-4); the `when` below
+    // already lowercased the unit, but before wave 52 `45DEG` never reached
+    // it. Pre-wave-52 shape `^([+-]?\d*\.?\d+)(deg|rad|grad|turn)$` read
+    // neither, and the null it returned cost a SILENT WRONG COLOUR in
+    // `ColorParser.parseHslHue` (`hsl(1.2e2deg, …)` fell back to hue 0, red)
+    // and a Raw / Generic passthrough in every gradient, transform, rotate,
+    // filter and image-orientation consumer (BACKLOG 0(e), wave-52 lane L5 F4).
+    private val angleRegex =
+        """^([+-]?(?:\d+(?:\.\d+)?|\.\d+)(?:[eE][+-]?\d+)?)(deg|rad|grad|turn)$"""
+            .toRegex(RegexOption.IGNORE_CASE)
 
     /**
      * Parse a CSS angle value and normalize to degrees.

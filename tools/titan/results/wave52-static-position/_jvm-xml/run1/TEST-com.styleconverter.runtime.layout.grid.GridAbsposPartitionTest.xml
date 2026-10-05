@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" tests="15" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:48:57.238Z" hostname="mac-1.home" time="0.005">
+  <properties/>
+  <testcase name="K2b the self-end container ends the verbatim abspos child" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="container stretch makes no positional claim - start default" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="auto self falls back to container items values" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="overlay alignment folds to the canonical Compose alignments" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="nothing declared resolves both axes to start" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="an explicit inset stands the axis down to start" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="child align-self centers the block axis - typed wire" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="child justify-self drives the inline axis" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="relative and sticky children stay grid items" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="K3a last baseline resolves to its safe self-end fallback on both wires" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="placement childIndex aligns with the partitioned in-flow list" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="partition splits abspos out and preserves relative order" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="safe center rides the Generic wire into the block spec" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="K3b a baseline child does not inherit the container's center" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="K2a align-items self-end and self-start fold to the positional enums" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

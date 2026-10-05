@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-05T15:15:43.714Z" hostname="mac-1.home" time="0.009">
+  <properties/>
+  <testcase name="button root self-strips - text kept, border and All dropped" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.007"/>
+  <testcase name="grid wrapper splice - the grandchild becomes the direct grid item" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.001"/>
+  <testcase name="display-contents-float-001 root - float RIGHT contents unboxes and self-strips" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <testcase name="text runs survive as carriers - the details chain flattens recursively" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <testcase name="positioned contents keeps its box - floated contents unboxes" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <testcase name="only a base display-contents declaration unboxes" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <testcase name="inheritable declarations DO flow through the removed box" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.001"/>
+  <testcase name="non-inherited box declarations drop - the block-002 margin and the border set" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <testcase name="pseudo-bearing contents keeps the legacy wrapper - the before-after greens stay" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <testcase name="an empty splice normalizes children to null - the decode contract" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <testcase name="contents-free trees resolve to the SAME instance - baseline byte-stability" classname="com.styleconverter.runtime.core.renderer.ContentsUnboxingTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.262Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="inner level would fragment its 300px child into two 200px-capped bands under a bounded width" classname="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" time="0.0"/>
+  <testcase name="both fragmentsState writes live INSIDE placement blocks - intrinsics never execute them" classname="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" time="0.0"/>
+  <testcase name="measure body has NO fragmentsState reads - the remeasure-loop hazard stays dead" classname="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" time="0.001"/>
+  <testcase name="outer level of the wedge fixture fragments 200px of content into two 100px columns" classname="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" time="0.0"/>
+  <testcase name="legacy path never feeds the half-Infinity width into Constraints or layout" classname="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" time="0.0"/>
+  <testcase name="unbounded inline size yields the unrepresentable half-Infinity column width" classname="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" time="0.0"/>
+  <testcase name="fragmentation gate requires a bounded inline size and logs the bail" classname="com.styleconverter.runtime.columns.MultiColumnMeasureDrawBridgeTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

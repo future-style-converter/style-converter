@@ -1,0 +1,103 @@
+{
+ "cmd": [
+  "./gradlew",
+  ":runtime:testDebugUnitTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineRunFoldTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineSpanRingTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.GreedyLineBreakerTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.PreBreakPipelineTest",
+  "--tests",
+  "com.styleconverter.runtime.core.renderer.PlaceholderOverflowMarkerTest",
+  "--tests",
+  "com.styleconverter.runtime.core.renderer.LineClampUnderPreWave39Test",
+  "--continue"
+ ],
+ "cwd": "apps/android-harness",
+ "mutations": [
+  {
+   "id": "M1-hanging-punctuation-arm",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt",
+   "old": "            \"HangingPunctuation\" -> {\n                hangingKeywords = extractHangingKeywords(prop.data)\n            }\n",
+   "new": "",
+   "expectFail": [
+    "the LAST span folds onto the line as a plain member",
+    "hanging-punctuation is admitted as inert"
+   ]
+  },
+  {
+   "id": "M2-f5-taken-soft-hyphen-trigger",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+   "old": "val tookSoftHyphen = !dictionaryHyphenation && tookSoftHyphenBreak(text, lines)",
+   "new": "val tookSoftHyphen = false",
+   "expectFail": [
+    "firesWhenASoftHyphenBreakWasTaken",
+    "composesWithTheSoftHyphenPolicy"
+   ]
+  },
+  {
+   "id": "M3-f5-dictionary-gate",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+   "old": "val tookSoftHyphen = !dictionaryHyphenation && tookSoftHyphenBreak(text, lines)",
+   "new": "val tookSoftHyphen = tookSoftHyphenBreak(text, lines)",
+   "expectFail": [
+    "theSoftHyphenTriggerStaysOutOfDictionaryRuns"
+   ]
+  },
+  {
+   "id": "M4-f4-fit-loop",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "old": "while (last.isNotEmpty() && measure(last + clamp.marker) > maxWidth) {",
+   "new": "while (false && last.isNotEmpty() && measure(last + clamp.marker) > maxWidth) {",
+   "expectFail": [
+    "clampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone",
+    "clampDropsTrailingWordsUntilTheMarkerFits",
+    "clampMeasuresACustomMarkerAsARealGlyphRun",
+    "aFiredRunUnderADrawnMarkerClampBakesTheEllipsis"
+   ]
+  },
+  {
+   "id": "M5-f4-fired-run-trim",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+   "old": "return Result(clamped.joinToString(\"\\n\"), true)",
+   "new": "return Result(lines.joinToString(\"\\n\"), true)",
+   "expectFail": [
+    "aFiredRunUnderADrawnMarkerClampBakesTheEllipsis"
+   ]
+  },
+  {
+   "id": "M6-f3-ellipsis-arm-seam1",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+   "old": "return if (com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties) != null) TextOverflow.Ellipsis else declared",
+   "new": "return declared",
+   "expectFail": [
+    "a bare line-clamp on a soft-wrapped run answers Ellipsis",
+    "a clamped soft-wrapping run draws the UA marker",
+    "a drawn marker keeps the pre-R3 decision"
+   ]
+  },
+  {
+   "id": "M7-drawn-clamp-max-lines-guard",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/DrawnLineClamp.kt",
+   "old": "val clampOnly = properties.filter { it.type == TYPE }",
+   "new": "val clampOnly = properties",
+   "expectFail": [
+    "max-lines alone paints no marker",
+    "DrawnLineClamp names the fixed cap only when a marker is drawn"
+   ]
+  },
+  {
+   "id": "M8-alignment-clamp-tail",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt",
+   "old": "            ?: clampedAlignment(original, transformed)\n",
+   "new": "",
+   "expectFail": [
+    "the clamp-trimmed 032 paragraph still aligns",
+    "the clamp tail composes with the pre-break"
+   ]
+  }
+ ]
+}

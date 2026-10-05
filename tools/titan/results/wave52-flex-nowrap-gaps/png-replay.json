@@ -1,0 +1,497 @@
+{
+ "targets": [
+  {
+   "test": "css/css-backgrounds/background-clip-content-box-002.html",
+   "platform": "ios",
+   "recorded": "f 0.9992",
+   "oracle": "android capture",
+   "predicted": 0.9984,
+   "redPxRecorded": 8900,
+   "redPxPredicted": 0
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-008.html",
+   "platform": "android",
+   "recorded": "P 0.9646",
+   "oracle": "ios capture",
+   "predicted": 0.9996
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "ios",
+   "recorded": "f 0.903",
+   "oracle": "web +200, Fix A frame; off-canvas band x68-199 blank | from ref",
+   "predicted": 0.9723,
+   "upper": 1
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "android",
+   "recorded": "f 0.9085",
+   "oracle": "web +200, Fix A frame; off-canvas band x68-199 blank | from ref",
+   "predicted": 0.9723,
+   "upper": 1
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-045.html",
+   "platform": "ios",
+   "recorded": "P 0.9931",
+   "oracle": "native with rule pixels from web (snapped bands)",
+   "predicted": 1,
+   "replacedPx": 1372,
+   "asIs": 0.9931
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-045.html",
+   "platform": "android",
+   "recorded": "P 0.9994",
+   "oracle": "native with rule pixels from web (snapped bands)",
+   "predicted": 1,
+   "replacedPx": 574,
+   "asIs": 0.9994
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-046.html",
+   "platform": "ios",
+   "recorded": "P 0.9998",
+   "oracle": "native with rule pixels from web (snapped bands)",
+   "predicted": 0.9999,
+   "replacedPx": 414,
+   "asIs": 0.9998
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-046.html",
+   "platform": "android",
+   "recorded": "P 0.996",
+   "oracle": "native with rule pixels from web (snapped bands)",
+   "predicted": 0.9976,
+   "replacedPx": 280,
+   "asIs": 0.996
+  }
+ ],
+ "snapMovers": [
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-004.html",
+   "platform": "ios",
+   "recorded": "P 0.9989",
+   "replacedPx": 480,
+   "asIs": 0.9989,
+   "predicted": 0.9991,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-004.html",
+   "platform": "android",
+   "recorded": "P 0.9981",
+   "replacedPx": 500,
+   "asIs": 0.9981,
+   "predicted": 0.9984,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-005.html",
+   "platform": "ios",
+   "recorded": "P 0.9993",
+   "replacedPx": 420,
+   "asIs": 0.9993,
+   "predicted": 0.9993,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-005.html",
+   "platform": "android",
+   "recorded": "P 0.9987",
+   "replacedPx": 405,
+   "asIs": 0.9987,
+   "predicted": 0.9987,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-006.html",
+   "platform": "ios",
+   "recorded": "f 0.8266",
+   "replacedPx": 5400,
+   "asIs": 0.8266,
+   "predicted": 0.8417,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-006.html",
+   "platform": "android",
+   "recorded": "f 0.8223",
+   "replacedPx": 5400,
+   "asIs": 0.8223,
+   "predicted": 0.8394,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-008.html",
+   "platform": "android",
+   "recorded": "P 0.9646",
+   "replacedPx": 1500,
+   "asIs": 0.9646,
+   "predicted": 0.9824,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-011.html",
+   "platform": "ios",
+   "recorded": "P 0.9993",
+   "replacedPx": 16,
+   "asIs": 0.9993,
+   "predicted": 0.9993,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-011.html",
+   "platform": "android",
+   "recorded": "P 0.9987",
+   "replacedPx": 16,
+   "asIs": 0.9987,
+   "predicted": 0.9987,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-014.html",
+   "platform": "ios",
+   "recorded": "P 0.998",
+   "replacedPx": 96,
+   "asIs": 0.998,
+   "predicted": 0.9993,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-014.html",
+   "platform": "android",
+   "recorded": "P 0.9974",
+   "replacedPx": 96,
+   "asIs": 0.9974,
+   "predicted": 0.9987,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-017.html",
+   "platform": "ios",
+   "recorded": "P 0.9987",
+   "replacedPx": 1000,
+   "asIs": 0.9987,
+   "predicted": 0.9998,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-017.html",
+   "platform": "android",
+   "recorded": "P 0.9984",
+   "replacedPx": 1000,
+   "asIs": 0.9984,
+   "predicted": 0.9995,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-018.html",
+   "platform": "ios",
+   "recorded": "P 0.9986",
+   "replacedPx": 1000,
+   "asIs": 0.9986,
+   "predicted": 0.9998,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-018.html",
+   "platform": "android",
+   "recorded": "P 0.9984",
+   "replacedPx": 1000,
+   "asIs": 0.9984,
+   "predicted": 0.9995,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "ios",
+   "recorded": "f 0.903",
+   "replacedPx": 4000,
+   "asIs": 0.903,
+   "predicted": 0.9065,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "android",
+   "recorded": "f 0.9085",
+   "replacedPx": 2500,
+   "asIs": 0.9085,
+   "predicted": 0.9044,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-029.html",
+   "platform": "ios",
+   "recorded": "P 0.9925",
+   "replacedPx": 600,
+   "asIs": 0.9925,
+   "predicted": 0.9945,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-029.html",
+   "platform": "android",
+   "recorded": "P 0.9925",
+   "replacedPx": 600,
+   "asIs": 0.9925,
+   "predicted": 0.9946,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-030.html",
+   "platform": "ios",
+   "recorded": "P 0.9934",
+   "replacedPx": 600,
+   "asIs": 0.9934,
+   "predicted": 0.9955,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-030.html",
+   "platform": "android",
+   "recorded": "P 0.9934",
+   "replacedPx": 600,
+   "asIs": 0.9934,
+   "predicted": 0.9955,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "ios",
+   "recorded": "P 1",
+   "replacedPx": 2200,
+   "asIs": 1,
+   "predicted": 0.9692,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "android",
+   "recorded": "P 1",
+   "replacedPx": 2200,
+   "asIs": 1,
+   "predicted": 0.9692,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "ios",
+   "recorded": "f 0.9466",
+   "replacedPx": 368,
+   "asIs": 0.9466,
+   "predicted": 0.9463,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "android",
+   "recorded": "f 0.9466",
+   "replacedPx": 368,
+   "asIs": 0.9466,
+   "predicted": 0.9463,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "ios",
+   "recorded": "f 0.922",
+   "replacedPx": 956,
+   "asIs": 0.922,
+   "predicted": 0.9212,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "android",
+   "recorded": "f 0.922",
+   "replacedPx": 956,
+   "asIs": 0.922,
+   "predicted": 0.9212,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "ios",
+   "recorded": "P 0.9565",
+   "replacedPx": 420,
+   "asIs": 0.9565,
+   "predicted": 0.9561,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "android",
+   "recorded": "P 0.9565",
+   "replacedPx": 420,
+   "asIs": 0.9565,
+   "predicted": 0.9561,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "ios",
+   "recorded": "P 0.9576",
+   "replacedPx": 420,
+   "asIs": 0.9576,
+   "predicted": 0.9572,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "android",
+   "recorded": "P 0.9576",
+   "replacedPx": 420,
+   "asIs": 0.9576,
+   "predicted": 0.9572,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-040.html",
+   "platform": "ios",
+   "recorded": "P 0.9934",
+   "replacedPx": 500,
+   "asIs": 0.9934,
+   "predicted": 0.9939,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-040.html",
+   "platform": "android",
+   "recorded": "P 0.9934",
+   "replacedPx": 500,
+   "asIs": 0.9934,
+   "predicted": 0.9939,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-041.html",
+   "platform": "ios",
+   "recorded": "P 0.9934",
+   "replacedPx": 700,
+   "asIs": 0.9934,
+   "predicted": 0.9939,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-041.html",
+   "platform": "android",
+   "recorded": "P 0.9934",
+   "replacedPx": 700,
+   "asIs": 0.9934,
+   "predicted": 0.9939,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-042.html",
+   "platform": "ios",
+   "recorded": "P 0.9935",
+   "replacedPx": 500,
+   "asIs": 0.9935,
+   "predicted": 0.9939,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-042.html",
+   "platform": "android",
+   "recorded": "P 0.9935",
+   "replacedPx": 500,
+   "asIs": 0.9935,
+   "predicted": 0.9939,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-043.html",
+   "platform": "ios",
+   "recorded": "P 0.9995",
+   "replacedPx": 500,
+   "asIs": 0.9995,
+   "predicted": 1,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-043.html",
+   "platform": "android",
+   "recorded": "P 0.9995",
+   "replacedPx": 500,
+   "asIs": 0.9995,
+   "predicted": 1,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-044.html",
+   "platform": "ios",
+   "recorded": "P 0.9939",
+   "replacedPx": 100,
+   "asIs": 0.9939,
+   "predicted": 0.9939,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-044.html",
+   "platform": "android",
+   "recorded": "P 0.9939",
+   "replacedPx": 100,
+   "asIs": 0.9939,
+   "predicted": 0.9939,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-047.html",
+   "platform": "ios",
+   "recorded": "P 0.9989",
+   "replacedPx": 560,
+   "asIs": 0.9989,
+   "predicted": 1,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-047.html",
+   "platform": "android",
+   "recorded": "P 0.9989",
+   "replacedPx": 560,
+   "asIs": 0.9989,
+   "predicted": 1,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-049.html",
+   "platform": "ios",
+   "recorded": "P 0.9995",
+   "replacedPx": 568,
+   "asIs": 0.9995,
+   "predicted": 1,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-049.html",
+   "platform": "android",
+   "recorded": "P 0.9995",
+   "replacedPx": 560,
+   "asIs": 0.9995,
+   "predicted": 1,
+   "kind": "snap candidate"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-050.html",
+   "platform": "ios",
+   "recorded": "P 0.9922",
+   "replacedPx": 960,
+   "asIs": 0.9922,
+   "predicted": 0.994,
+   "kind": "structural (not a snap)"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-050.html",
+   "platform": "android",
+   "recorded": "P 0.9922",
+   "replacedPx": 954,
+   "asIs": 0.9922,
+   "predicted": 0.994,
+   "kind": "structural (not a snap)"
+  }
+ ]
+}

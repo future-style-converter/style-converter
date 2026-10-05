@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MultiColumnInheritedWritingModeTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.257Z" hostname="mac-1.home" time="0.004">
+  <properties/>
+  <testcase name="inline-size stays off the whitelist" classname="com.styleconverter.runtime.columns.MultiColumnInheritedWritingModeTest" time="0.004"/>
+  <testcase name="no writing-mode anywhere keeps the horizontal default" classname="com.styleconverter.runtime.columns.MultiColumnInheritedWritingModeTest" time="0.0"/>
+  <testcase name="inherited vertical-rl reaches the multicol config and flags the bail" classname="com.styleconverter.runtime.columns.MultiColumnInheritedWritingModeTest" time="0.0"/>
+  <testcase name="child's own horizontal-tb beats the inherited vertical mode" classname="com.styleconverter.runtime.columns.MultiColumnInheritedWritingModeTest" time="0.0"/>
+  <testcase name="writing-mode is on the inheritance whitelist" classname="com.styleconverter.runtime.columns.MultiColumnInheritedWritingModeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

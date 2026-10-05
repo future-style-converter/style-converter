@@ -1,0 +1,52 @@
+{
+ "run": "wave51-fix",
+ "docs": 1435,
+ "T1": {
+  "carriers": 208,
+  "docs": 31,
+  "movedComponents": 108,
+  "movedDocs": 29,
+  "indefinite": 10
+ },
+ "FOLD": {
+  "components": 2,
+  "docs": 2,
+  "byDisplay": {
+   "GRID": 2
+  }
+ },
+ "T2": {
+  "carriers": 172,
+  "docs": 41,
+  "movedComponents": 100,
+  "movedDocs": 9
+ },
+ "T3": {
+  "components": 130,
+  "docs": 30,
+  "inFlow": 1,
+  "byRaw": {
+   "safe anchor-center": 1,
+   "last baseline": 25,
+   "safe center": 12,
+   "safe end": 4,
+   "normal": 24,
+   "typed BASELINE": 24,
+   "left": 20,
+   "right": 20
+  },
+  "mobileMoved": 88
+ },
+ "moves": [
+  {
+   "platform": "ios",
+   "components": 132,
+   "docs": 29
+  },
+  {
+   "platform": "android",
+   "components": 114,
+   "docs": 38
+  }
+ ]
+}

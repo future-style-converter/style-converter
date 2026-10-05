@@ -5,6 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.StrokeCap
@@ -153,7 +154,8 @@ object BorderSideApplier {
 
         // Geometry: a stroked line centered on the inside of the element
         // edge, so the full stroke width sits inside the bounding box.
-        val (start, end, isHorizontal) = sideGeometry(side, width)
+        // DrawScope.size is the element's laid-out border box.
+        val (start, end, isHorizontal) = sideGeometry(side, width, size)
 
         when (s) {
             LineStyle.SOLID -> drawStrokedLine(c, start, end, width, pathEffect = null)
@@ -206,25 +208,75 @@ object BorderSideApplier {
     }
 
     /**
-     * Line center + orientation for a given side, with the stroke centered
-     * [width/2] inside the element edge so the full stroke is visible.
+     * Line center + orientation for a given side of a [box]-sized border
+     * box, with the stroke centered [width/2] inside the element edge so
+     * the full stroke is visible. The END/BOTTOM centres go through
+     * [innerEdgeStrokeCentre] so a box shorter than its own stroke still
+     * paints INSIDE its border box.
+     *
+     * A pure function of (side, width, box) — not a DrawScope extension —
+     * since wave 52's T2 fix pass (skeptic M1): the painters pass
+     * `DrawScope.size`, and BorderSideZeroTallBandTest pins the stroke
+     * line THIS function returns, so reverting the BOTTOM/END wiring here
+     * (not only the helper body) turns the JVM suite red.
      */
-    private fun DrawScope.sideGeometry(
-        side: Side, width: Float
+    internal fun sideGeometry(
+        side: Side, width: Float, box: Size
     ): Triple<Offset, Offset, Boolean> = when (side) {
-        Side.TOP -> Triple(Offset(0f, width / 2), Offset(size.width, width / 2), true)
+        // Top: horizontal line w/2 below the top edge — never clamps.
+        Side.TOP -> Triple(Offset(0f, width / 2), Offset(box.width, width / 2), true)
+        // End (right): vertical line w/2 inside the far edge, clamped.
         Side.END -> Triple(
-            Offset(size.width - width / 2, 0f),
-            Offset(size.width - width / 2, size.height),
+            Offset(innerEdgeStrokeCentre(box.width, width / 2), 0f),
+            Offset(innerEdgeStrokeCentre(box.width, width / 2), box.height),
             false
         )
+        // Bottom: horizontal line w/2 above the far edge, clamped.
         Side.BOTTOM -> Triple(
-            Offset(0f, size.height - width / 2),
-            Offset(size.width, size.height - width / 2),
+            Offset(0f, innerEdgeStrokeCentre(box.height, width / 2)),
+            Offset(box.width, innerEdgeStrokeCentre(box.height, width / 2)),
             true
         )
-        Side.START -> Triple(Offset(width / 2, 0f), Offset(width / 2, size.height), false)
+        // Start (left): vertical line w/2 right of the left edge — never clamps.
+        Side.START -> Triple(Offset(width / 2, 0f), Offset(width / 2, box.height), false)
     }
+
+    /**
+     * Stroke centre for a stroke hugging the FAR edge (bottom / end) of a
+     * box of extent [extentPx], with the stroke's centre [insetPx] inside
+     * that edge — clamped so the stroke can never leave the box.
+     *
+     * Wave 52 (lane L6, T2 — BACKLOG queue 3(b) "Compose renders the
+     * 003/balancing-003 orange band w px too high, where w is the band's
+     * OWN width"). MEASURED on wave51-fix CSS2/floats-clear/
+     * floats-clear-multicol-003 (`android P 0.9881`): the orange
+     * `border-bottom: 3px` band sits at rows 158–160 against the ref's
+     * 161–163 — exactly 3 px high; balancing-003 (`android P 0.9857`) is
+     * 5 px high with a 5 px band. Mechanism: `.clear { height: 0 }` hands
+     * its auto-height child FIXED 0 constraints (SizingApplier `height(v)`),
+     * so the child's layout height is 0 and the old
+     * `size.height − width/2` centred the stroke on y = −1.5, i.e. painted
+     * [−3, 0) — the band of a 0-tall box drawn ABOVE the box. iOS is exact
+     * because `.frame(height:)` does not shrink the child.
+     *
+     * Spec: css-backgrounds-3 §4 / css-box-4 §2 — a box's border occupies
+     * the border area BETWEEN the padding edge and the border edge, so the
+     * bottom border of a 0-content box occupies [contentBottom,
+     * contentBottom + w) = [0, w) of its own border box; a stroke outside
+     * the box is never correct. `max(inset, extent − inset)` is exactly
+     * that clamp: unchanged whenever the box is at least one stroke tall
+     * (every committed baseline — the frozen boxes are all taller than
+     * their borders), and [0, w) for the degenerate 0-tall box.
+     *
+     * Paint-only, deliberately: the broad fix (a `height(h)` that lets
+     * overflowing content keep its own layout size, css-overflow-3 §2) is a
+     * separate device A/B named in the lane note, not staffed here.
+     * Internal so the JVM suite can pin the band without a draw surface
+     * (BorderSideZeroTallBandTest pins it directly AND through
+     * [sideGeometry] / [doubleGeom]); the iOS twin needs no clamp.
+     */
+    internal fun innerEdgeStrokeCentre(extentPx: Float, insetPx: Float): Float =
+        kotlin.math.max(insetPx, extentPx - insetPx)
 
     /**
      * Stroke a single line on the border edge. Thin wrapper for the common
@@ -400,7 +452,8 @@ object BorderSideApplier {
      */
     private fun DrawScope.drawDouble(color: Color, side: Side, width: Float) {
         if (width < 3f) {
-            val (s, e, _) = sideGeometry(side, width)
+            // Too thin for two lines + a gap: one solid stroke, same line.
+            val (s, e, _) = sideGeometry(side, width, size)
             drawStrokedLine(color, s, e, width, null); return
         }
         val line = width / 3f
@@ -408,18 +461,30 @@ object BorderSideApplier {
         // width from the outer edge so the gap is centered.
         val offsets = listOf(line / 2f, width - line / 2f)
         for (o in offsets) {
-            val (s, e) = doubleGeom(side, o)
+            val (s, e) = doubleGeom(side, o, size)
             drawStrokedLine(color, s, e, line, null)
         }
     }
 
-    /** Geometry for one of the two strokes in a DOUBLE border. [inset] is
-     *  the distance of the stroke center from the outer edge of the box. */
-    private fun DrawScope.doubleGeom(side: Side, inset: Float): Pair<Offset, Offset> = when (side) {
-        Side.TOP -> Offset(0f, inset) to Offset(size.width, inset)
-        Side.BOTTOM -> Offset(0f, size.height - inset) to Offset(size.width, size.height - inset)
-        Side.START -> Offset(inset, 0f) to Offset(inset, size.height)
-        Side.END -> Offset(size.width - inset, 0f) to Offset(size.width - inset, size.height)
+    /** Geometry for one of the two strokes in a DOUBLE border (and each
+     *  half-band of groove/ridge) on a [box]-sized border box. [inset] is
+     *  the distance of the stroke center from the outer edge of the box.
+     *  BOTTOM/END take the same [innerEdgeStrokeCentre] clamp as the single
+     *  stroke (wave 52, T2): on a 0-tall box the outer line lands at
+     *  `inset` and the inner at `w − inset`, i.e. the band [0, w) with its
+     *  gap centred — the mirror image of TOP, never above the box. Pure
+     *  and internal for the same reason as [sideGeometry] (skeptic M1):
+     *  BorderSideZeroTallBandTest pins the returned lines themselves. */
+    internal fun doubleGeom(side: Side, inset: Float, box: Size): Pair<Offset, Offset> = when (side) {
+        // Top / start: measured from the near edge — no clamp needed.
+        Side.TOP -> Offset(0f, inset) to Offset(box.width, inset)
+        // Bottom: measured up from the far edge, clamped into the box.
+        Side.BOTTOM -> Offset(0f, innerEdgeStrokeCentre(box.height, inset)) to
+            Offset(box.width, innerEdgeStrokeCentre(box.height, inset))
+        Side.START -> Offset(inset, 0f) to Offset(inset, box.height)
+        // End: measured in from the far edge, clamped into the box.
+        Side.END -> Offset(innerEdgeStrokeCentre(box.width, inset), 0f) to
+            Offset(innerEdgeStrokeCentre(box.width, inset), box.height)
     }
 
     /**
@@ -434,14 +499,16 @@ object BorderSideApplier {
         color: Color, side: Side, width: Float, groove: Boolean
     ) {
         if (width < 2f) {
-            val (s, e, _) = sideGeometry(side, width)
+            // Too thin for two half-bands: one plain stroke on the side line.
+            val (s, e, _) = sideGeometry(side, width, size)
             drawStrokedLine(color, s, e, width, null); return
         }
         val half = width / 2f
         // Outer/inner band colors from the per-side Blink rule.
         val (outerShade, innerShade) = grooveRidgeBandShades(color, side, groove)
-        val (outerStart, outerEnd) = doubleGeom(side, half / 2f)
-        val (innerStart, innerEnd) = doubleGeom(side, half / 2f + half)
+        // Each half-band is centred half/2 and 3·half/2 from the outer edge.
+        val (outerStart, outerEnd) = doubleGeom(side, half / 2f, size)
+        val (innerStart, innerEnd) = doubleGeom(side, half / 2f + half, size)
         drawStrokedLine(outerShade, outerStart, outerEnd, half, null)
         drawStrokedLine(innerShade, innerStart, innerEnd, half, null)
     }

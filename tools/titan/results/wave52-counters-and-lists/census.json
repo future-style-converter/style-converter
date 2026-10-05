@@ -1,0 +1,2554 @@
+{
+ "_note": "wave 52, lane L6 counters-and-lists — own census over the wave51-fix per-test IR (see header).",
+ "docs": 1435,
+ "components": 10708,
+ "scoredCells": 4117,
+ "T1_korean_hangul_formal": {
+  "carriers": [
+   "css/css-counter-styles/counter-suffix.html counter-suffix__0__3"
+  ],
+  "cells": [
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html android",
+    "verdict": "f",
+    "ssim": 0.9051
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html ios",
+    "verdict": "f",
+    "ssim": 0.9285
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html web",
+    "verdict": "P",
+    "ssim": 0.9818
+   }
+  ]
+ },
+ "T2_zero_tall_border_band": {
+  "rows": 3,
+  "tests": [
+   "css/CSS2/floats-clear/floats-clear-multicol-003.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html",
+   "css/css-display/display-contents-dynamic-generated-content-fieldset-001.html"
+  ],
+  "rowsDetail": [
+   {
+    "test": "css/CSS2/floats-clear/floats-clear-multicol-003.html",
+    "component": "floats-clear__floats-clear-multicol-003__1__2__0",
+    "side": "BOTTOM",
+    "via": "parent Height",
+    "parentPx": 0,
+    "borderPx": 3
+   },
+   {
+    "test": "css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html",
+    "component": "floats-clear__floats-clear-multicol-balancing-003__1__2__0",
+    "side": "BOTTOM",
+    "via": "parent Height",
+    "parentPx": 0,
+    "borderPx": 5
+   },
+   {
+    "test": "css/css-display/display-contents-dynamic-generated-content-fieldset-001.html",
+    "component": "display-contents-dynamic-generated-content-fieldset-001__1__0",
+    "side": "BOTTOM",
+    "via": "parent Height",
+    "parentPx": 0,
+    "borderPx": 10
+   }
+  ],
+  "extended": {
+   "rows": 36,
+   "tests": [
+    "css/css-anchor-position/anchor-position-multicol-007.html",
+    "css/css-backgrounds/background-clip-009.html",
+    "css/css-display/display-contents-dynamic-generated-content-fieldset-001.html",
+    "css/css-images/gradient/gradient-hue-direction.html",
+    "css/css-tables/border-collapse-dynamic-col-001.html",
+    "css/css-tables/border-collapse-dynamic-section.html",
+    "css/css-ui/box-sizing-026.html",
+    "css/css-writing-modes/direction-upright-001.html",
+    "css/css-writing-modes/direction-upright-002.html",
+    "css/css-writing-modes/forms/input-range-zero-inline-size.html"
+   ],
+   "rowsDetail": [
+    {
+     "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+     "component": "anchor-position-multicol-007__1__2__1__2",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 5
+    },
+    {
+     "test": "css/css-backgrounds/background-clip-009.html",
+     "component": "wpt__css-backgrounds__background-clip-009__1",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 48
+    },
+    {
+     "test": "css/css-display/display-contents-dynamic-generated-content-fieldset-001.html",
+     "component": "wpt__css-display__display-contents-dynamic-generated-content-fieldset-001__1",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 2
+    },
+    {
+     "test": "css/css-images/gradient/gradient-hue-direction.html",
+     "component": "wpt__css-images__gradient__gradient-hue-direction__4",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-images/gradient/gradient-hue-direction.html",
+     "component": "wpt__css-images__gradient__gradient-hue-direction__7",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-images/gradient/gradient-hue-direction.html",
+     "component": "wpt__css-images__gradient__gradient-hue-direction__10",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__0",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__0",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__1",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__1",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__2",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__2",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__3",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__0__3",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__0",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__0",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__1",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__1",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__2",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__2",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__3",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__1__3",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__0",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__0",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__1",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__1",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__2",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__2",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__3",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-col-001.html",
+     "component": "border-collapse-dynamic-col-001__0__1__2__3",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-tables/border-collapse-dynamic-section.html",
+     "component": "border-collapse-dynamic-section__1__1__0__0",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 25
+    },
+    {
+     "test": "css/css-ui/box-sizing-026.html",
+     "component": "wpt__css-ui__box-sizing-026__2",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 10,
+     "borderPx": 50
+    },
+    {
+     "test": "css/css-ui/box-sizing-026.html",
+     "component": "wpt__css-ui__box-sizing-026__2",
+     "side": "END",
+     "via": "own Width",
+     "ownPx": 10,
+     "borderPx": 50
+    },
+    {
+     "test": "css/css-writing-modes/direction-upright-001.html",
+     "component": "wpt__css-writing-modes__direction-upright-001__6",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-writing-modes/direction-upright-002.html",
+     "component": "wpt__css-writing-modes__direction-upright-002__6",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    },
+    {
+     "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+     "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__4",
+     "side": "BOTTOM",
+     "via": "own Height",
+     "ownPx": 0,
+     "borderPx": 1
+    }
+   ],
+   "cells": [
+    {
+     "cell": "css-anchor-position/css/css-anchor-position/anchor-position-multicol-007.html android",
+     "verdict": "f",
+     "ssim": 0.9499
+    },
+    {
+     "cell": "css-backgrounds/css/css-backgrounds/background-clip-009.html android",
+     "verdict": "P",
+     "ssim": 0.9984
+    },
+    {
+     "cell": "css-display/css/css-display/display-contents-dynamic-generated-content-fieldset-001.html android",
+     "verdict": "P",
+     "ssim": 0.9981
+    },
+    {
+     "cell": "css-images/css/css-images/gradient/gradient-hue-direction.html android",
+     "verdict": "P",
+     "ssim": 0.9973
+    },
+    {
+     "cell": "css-tables/css/css-tables/border-collapse-dynamic-col-001.html android",
+     "verdict": "P",
+     "ssim": 0.9812
+    },
+    {
+     "cell": "css-tables/css/css-tables/border-collapse-dynamic-section.html android",
+     "verdict": "P",
+     "ssim": 0.9949
+    },
+    {
+     "cell": "css-ui/css/css-ui/box-sizing-026.html android",
+     "verdict": "P",
+     "ssim": 0.9967
+    },
+    {
+     "cell": "css-writing-modes/css/css-writing-modes/direction-upright-001.html android",
+     "verdict": "f",
+     "ssim": 0.4874
+    },
+    {
+     "cell": "css-writing-modes/css/css-writing-modes/direction-upright-002.html android",
+     "verdict": "f",
+     "ssim": 0.5935
+    },
+    {
+     "cell": "css-writing-modes/css/css-writing-modes/forms/input-range-zero-inline-size.html android",
+     "verdict": "f",
+     "ssim": 0.9743
+    }
+   ]
+  },
+  "cells": [
+   {
+    "cell": "CSS2/css/CSS2/floats-clear/floats-clear-multicol-003.html android",
+    "verdict": "P",
+    "ssim": 0.9881
+   },
+   {
+    "cell": "CSS2/css/CSS2/floats-clear/floats-clear-multicol-003.html ios",
+    "verdict": "P",
+    "ssim": 0.9981
+   },
+   {
+    "cell": "CSS2/css/CSS2/floats-clear/floats-clear-multicol-003.html web",
+    "verdict": "P",
+    "ssim": 1
+   },
+   {
+    "cell": "CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html android",
+    "verdict": "P",
+    "ssim": 0.9857
+   },
+   {
+    "cell": "CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html ios",
+    "verdict": "P",
+    "ssim": 0.9985
+   },
+   {
+    "cell": "CSS2/css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html web",
+    "verdict": "P",
+    "ssim": 1
+   },
+   {
+    "cell": "css-display/css/css-display/display-contents-dynamic-generated-content-fieldset-001.html android",
+    "verdict": "P",
+    "ssim": 0.9981
+   },
+   {
+    "cell": "css-display/css/css-display/display-contents-dynamic-generated-content-fieldset-001.html ios",
+    "verdict": "P",
+    "ssim": 0.9991
+   },
+   {
+    "cell": "css-display/css/css-display/display-contents-dynamic-generated-content-fieldset-001.html web",
+    "verdict": "P",
+    "ssim": 1
+   }
+  ]
+ },
+ "T3_web_markerText": {
+  "markerTextCarriers": {
+   "components": 194,
+   "tests": 26,
+   "webCells": [
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/arabic-indic/css3-counter-styles-101.html web",
+     "verdict": "P",
+     "ssim": 0.9932
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/arabic-indic/css3-counter-styles-102.html web",
+     "verdict": "P",
+     "ssim": 0.9791
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/arabic-indic/css3-counter-styles-103.html web",
+     "verdict": "P",
+     "ssim": 0.9986
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html web",
+     "verdict": "P",
+     "ssim": 0.995
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-007.html web",
+     "verdict": "P",
+     "ssim": 0.9829
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html web",
+     "verdict": "f",
+     "ssim": 0.9435
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html web",
+     "verdict": "P",
+     "ssim": 0.9971
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/bengali/css3-counter-styles-116.html web",
+     "verdict": "P",
+     "ssim": 0.9922
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/bengali/css3-counter-styles-117.html web",
+     "verdict": "P",
+     "ssim": 0.9675
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/bengali/css3-counter-styles-118.html web",
+     "verdict": "P",
+     "ssim": 0.9971
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cambodian/css3-counter-styles-158.html web",
+     "verdict": "P",
+     "ssim": 0.9917
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cambodian/css3-counter-styles-159.html web",
+     "verdict": "P",
+     "ssim": 0.9623
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cambodian/css3-counter-styles-160.html web",
+     "verdict": "P",
+     "ssim": 0.9989
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cjk-decimal/css3-counter-styles-001.html web",
+     "verdict": "P",
+     "ssim": 0.9933
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cjk-decimal/css3-counter-styles-004.html web",
+     "verdict": "P",
+     "ssim": 0.9879
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cjk-decimal/css3-counter-styles-005.html web",
+     "verdict": "P",
+     "ssim": 1
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html web",
+     "verdict": "P",
+     "ssim": 0.9818
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-decimal-leading-zero.html web",
+     "verdict": "P",
+     "ssim": 0.9908
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-decimal.html web",
+     "verdict": "P",
+     "ssim": 0.9909
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-lower-greek.html web",
+     "verdict": "P",
+     "ssim": 0.9989
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-lower-latin.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-lower-roman.html web",
+     "verdict": "P",
+     "ssim": 0.9989
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-upper-latin.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-upper-roman.html web",
+     "verdict": "P",
+     "ssim": 0.9989
+    }
+   ]
+  },
+  "shape1_rangeLimited": {
+   "components": 44,
+   "tests": [
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+    "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+    "css/css-counter-styles/armenian/css3-counter-styles-009.html",
+    "css/css-counter-styles/counter-suffix.html",
+    "css/css-lists/content-property/marker-text-matches-armenian.html",
+    "css/css-lists/content-property/marker-text-matches-georgian.html"
+   ],
+   "rows": [
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__0 armenian Ա.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__1 armenian Բ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__2 armenian Գ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__3 armenian Դ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__4 armenian Ե.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__5 armenian Զ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__6 armenian Է.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__7 armenian Ը.",
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html armenian__css3-counter-styles-006__1__0__8 armenian Թ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__0__0 armenian Ժ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__1__0 armenian ԺԱ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__2__0 armenian ԺԲ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__3__0 armenian ԽԳ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__4__0 armenian ՀԷ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__5__0 armenian Ձ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__6__0 armenian ՂԹ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__7__0 armenian Ճ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__8__0 armenian ՃԱ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__9__0 armenian ՄԻԲ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__10__0 armenian ՇԽ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__11__0 armenian ՋՂԹ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__12__0 armenian Ռ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__13__0 armenian ՌԵ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__14__0 armenian ՌԿ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__15__0 armenian ՌԿԵ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__16__0 armenian ՌՊ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__17__0 armenian ՌՊԿ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__18__0 armenian ՌՊԿԵ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__19__0 armenian ՐՊԿԵ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__20__0 armenian ՒԵ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__21__0 armenian ՒՊ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__22__0 armenian ՒՊԿԵ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html armenian__css3-counter-styles-007__1__23__0 armenian ՔՋՂԹ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-008.html armenian__css3-counter-styles-008__1__0__0 armenian ՔՋՂԹ.",
+    "css/css-counter-styles/armenian/css3-counter-styles-008.html armenian__css3-counter-styles-008__1__1__0 armenian 10000.",
+    "css/css-counter-styles/armenian/css3-counter-styles-008.html armenian__css3-counter-styles-008__1__2__0 armenian 10001.",
+    "css/css-counter-styles/armenian/css3-counter-styles-009.html armenian__css3-counter-styles-009__1__0__0 armenian Ա.",
+    "css/css-counter-styles/armenian/css3-counter-styles-009.html armenian__css3-counter-styles-009__1__0__1 armenian Բ.",
+    "css/css-counter-styles/counter-suffix.html counter-suffix__0__1__0 hebrew א.",
+    "css/css-counter-styles/counter-suffix.html counter-suffix__0__1__1 hebrew ב.",
+    "css/css-counter-styles/counter-suffix.html counter-suffix__0__5__0 hebrew א.",
+    "css/css-counter-styles/counter-suffix.html counter-suffix__0__5__1 hebrew ב.",
+    "css/css-lists/content-property/marker-text-matches-armenian.html content-property__marker-text-matches-armenian__0__0 armenian Ա.",
+    "css/css-lists/content-property/marker-text-matches-georgian.html content-property__marker-text-matches-georgian__0__0 georgian ა."
+   ],
+   "cells": [
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html android",
+     "verdict": "P",
+     "ssim": 0.9688
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html ios",
+     "verdict": "P",
+     "ssim": 0.9702
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html web",
+     "verdict": "P",
+     "ssim": 0.995
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-007.html web",
+     "verdict": "P",
+     "ssim": 0.9829
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html android",
+     "verdict": "f",
+     "ssim": 0.9423
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html ios",
+     "verdict": "f",
+     "ssim": 0.942
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html web",
+     "verdict": "f",
+     "ssim": 0.9435
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html android",
+     "verdict": "P",
+     "ssim": 0.9884
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html ios",
+     "verdict": "P",
+     "ssim": 0.9896
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html web",
+     "verdict": "P",
+     "ssim": 0.9971
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html android",
+     "verdict": "f",
+     "ssim": 0.9051
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html ios",
+     "verdict": "f",
+     "ssim": 0.9285
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html web",
+     "verdict": "P",
+     "ssim": 0.9818
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html android",
+     "verdict": "P",
+     "ssim": 0.9756
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html ios",
+     "verdict": "P",
+     "ssim": 0.9752
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html android",
+     "verdict": "P",
+     "ssim": 0.9974
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html ios",
+     "verdict": "P",
+     "ssim": 0.9989
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    }
+   ]
+  },
+  "shape2_authorNames_in_wave51fix_wire": {
+   "components": 0,
+   "tests": [],
+   "note": "zero by construction before T7: the bake bailed every @counter-style document, so no author-named item carried markerText in wave51-fix"
+  },
+  "shippedRule": {
+   "components": 44,
+   "inline": 39,
+   "string": 5,
+   "tests": [
+    "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+    "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+    "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+    "css/css-counter-styles/armenian/css3-counter-styles-009.html",
+    "css/css-counter-styles/counter-suffix.html",
+    "css/css-lists/content-property/marker-text-matches-armenian.html",
+    "css/css-lists/content-property/marker-text-matches-georgian.html"
+   ],
+   "webCells": [
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html web",
+     "verdict": "P",
+     "ssim": 0.995
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-007.html web",
+     "verdict": "P",
+     "ssim": 0.9829
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html web",
+     "verdict": "f",
+     "ssim": 0.9435
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html web",
+     "verdict": "P",
+     "ssim": 0.9971
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html web",
+     "verdict": "P",
+     "ssim": 0.9818
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    },
+    {
+     "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html web",
+     "verdict": "P",
+     "ssim": 0.999
+    }
+   ],
+   "rows": [
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__1",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__2",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__3",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__4",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__5",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__6",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__7",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+     "component": "armenian__css3-counter-styles-006__1__0__8",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__0__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__1__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__2__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__3__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__4__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__5__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__6__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__7__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__8__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__9__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__10__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__11__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__12__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__13__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__14__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__15__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__16__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__17__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__18__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__19__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__20__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__21__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__22__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+     "component": "armenian__css3-counter-styles-007__1__23__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+     "component": "armenian__css3-counter-styles-008__1__0__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+     "component": "armenian__css3-counter-styles-008__1__1__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+     "component": "armenian__css3-counter-styles-008__1__2__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-009.html",
+     "component": "armenian__css3-counter-styles-009__1__0__0",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/armenian/css3-counter-styles-009.html",
+     "component": "armenian__css3-counter-styles-009__1__0__1",
+     "form": "inline",
+     "listStyleType": "none"
+    },
+    {
+     "test": "css/css-counter-styles/counter-suffix.html",
+     "component": "counter-suffix__0__1__0",
+     "form": "string",
+     "listStyleType": "\"א. \""
+    },
+    {
+     "test": "css/css-counter-styles/counter-suffix.html",
+     "component": "counter-suffix__0__1__1",
+     "form": "string",
+     "listStyleType": "\"ב. \""
+    },
+    {
+     "test": "css/css-counter-styles/counter-suffix.html",
+     "component": "counter-suffix__0__5__0",
+     "form": "string",
+     "listStyleType": "\"א. \""
+    },
+    {
+     "test": "css/css-counter-styles/counter-suffix.html",
+     "component": "counter-suffix__0__5__1",
+     "form": "string",
+     "listStyleType": "\"ב. \""
+    },
+    {
+     "test": "css/css-lists/content-property/marker-text-matches-armenian.html",
+     "component": "content-property__marker-text-matches-armenian__0__0",
+     "form": "string",
+     "listStyleType": "\"Ա. \""
+    },
+    {
+     "test": "css/css-lists/content-property/marker-text-matches-georgian.html",
+     "component": "content-property__marker-text-matches-georgian__0__0",
+     "form": "inline",
+     "listStyleType": "none"
+    }
+   ]
+  }
+ },
+ "T5_outside_markers": {
+  "items": 100,
+  "tests": 19,
+  "insideItems": 374,
+  "cells": [
+   {
+    "cell": "css-cascade/css/css-cascade/scope-pseudo-element.html android",
+    "verdict": "P",
+    "ssim": 0.9746
+   },
+   {
+    "cell": "css-cascade/css/css-cascade/scope-pseudo-element.html ios",
+    "verdict": "f",
+    "ssim": 0.9643
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html android",
+    "verdict": "P",
+    "ssim": 0.9713
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html ios",
+    "verdict": "P",
+    "ssim": 0.9713
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html android",
+    "verdict": "f",
+    "ssim": 0.9051
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html ios",
+    "verdict": "f",
+    "ssim": 0.9285
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-hsl.html android",
+    "verdict": "f",
+    "ssim": 0.7166
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-hsl.html ios",
+    "verdict": "f",
+    "ssim": 0.8785
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-hwb.html android",
+    "verdict": "f",
+    "ssim": 0.7172
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-hwb.html ios",
+    "verdict": "f",
+    "ssim": 0.8798
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-lch.html android",
+    "verdict": "f",
+    "ssim": 0.6548
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-lch.html ios",
+    "verdict": "f",
+    "ssim": 0.8584
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-oklch.html android",
+    "verdict": "f",
+    "ssim": 0.6529
+   },
+   {
+    "cell": "css-images/css/css-images/gradient/gradient-powerless-hue-oklch.html ios",
+    "verdict": "f",
+    "ssim": 0.8565
+   },
+   {
+    "cell": "css-lists/css/css-lists/add-inline-child-after-marker-001.html android",
+    "verdict": "P",
+    "ssim": 0.9859
+   },
+   {
+    "cell": "css-lists/css/css-lists/add-inline-child-after-marker-001.html ios",
+    "verdict": "P",
+    "ssim": 0.9871
+   },
+   {
+    "cell": "css-lists/css/css-lists/add-inline-child-after-marker-002.html android",
+    "verdict": "P",
+    "ssim": 0.991
+   },
+   {
+    "cell": "css-lists/css/css-lists/add-inline-child-after-marker-002.html ios",
+    "verdict": "P",
+    "ssim": 0.9919
+   },
+   {
+    "cell": "css-lists/css/css-lists/change-list-style-type-001.html android",
+    "verdict": "f",
+    "ssim": 0.8558
+   },
+   {
+    "cell": "css-lists/css/css-lists/change-list-style-type-001.html ios",
+    "verdict": "f",
+    "ssim": 0.7671
+   },
+   {
+    "cell": "css-lists/css/css-lists/change-list-style-type-002.html android",
+    "verdict": "P",
+    "ssim": 0.958
+   },
+   {
+    "cell": "css-lists/css/css-lists/change-list-style-type-002.html ios",
+    "verdict": "P",
+    "ssim": 0.9547
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-list-item-2.html android",
+    "verdict": "P",
+    "ssim": 0.9811
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-list-item-2.html ios",
+    "verdict": "P",
+    "ssim": 0.9809
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-list-item-3.html android",
+    "verdict": "P",
+    "ssim": 0.9815
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-list-item-3.html ios",
+    "verdict": "P",
+    "ssim": 0.9814
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-list-item.html android",
+    "verdict": "f",
+    "ssim": 0.7064
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-list-item.html ios",
+    "verdict": "f",
+    "ssim": 0.7518
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-reset-reversed-nested.html android",
+    "verdict": "P",
+    "ssim": 0.9509
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-reset-reversed-nested.html ios",
+    "verdict": "P",
+    "ssim": 0.9551
+   },
+   {
+    "cell": "css-pseudo/css/css-pseudo/first-letter-exclude-inline-marker.html android",
+    "verdict": "f",
+    "ssim": 0.8554
+   },
+   {
+    "cell": "css-pseudo/css/css-pseudo/first-letter-exclude-inline-marker.html ios",
+    "verdict": "f",
+    "ssim": 0.8407
+   },
+   {
+    "cell": "css-pseudo/css/css-pseudo/first-letter-skip-marker.html android",
+    "verdict": "f",
+    "ssim": 0.9372
+   },
+   {
+    "cell": "css-pseudo/css/css-pseudo/first-letter-skip-marker.html ios",
+    "verdict": "f",
+    "ssim": 0.9363
+   },
+   {
+    "cell": "css-pseudo/css/css-pseudo/first-line-and-marker.html android",
+    "verdict": "f",
+    "ssim": 0.9434
+   },
+   {
+    "cell": "css-pseudo/css/css-pseudo/first-line-and-marker.html ios",
+    "verdict": "f",
+    "ssim": 0.945
+   },
+   {
+    "cell": "css-ui/css/css-ui/appearance-auto-details-list-item.html android",
+    "verdict": "P",
+    "ssim": 0.9679
+   },
+   {
+    "cell": "css-ui/css/css-ui/appearance-auto-details-list-item.html ios",
+    "verdict": "P",
+    "ssim": 0.9676
+   }
+  ],
+  "thinNativePasses": [
+   {
+    "cell": "css-cascade/css/css-cascade/scope-pseudo-element.html android",
+    "verdict": "P",
+    "ssim": 0.9746
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html android",
+    "verdict": "P",
+    "ssim": 0.9713
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html ios",
+    "verdict": "P",
+    "ssim": 0.9713
+   },
+   {
+    "cell": "css-lists/css/css-lists/change-list-style-type-002.html android",
+    "verdict": "P",
+    "ssim": 0.958
+   },
+   {
+    "cell": "css-lists/css/css-lists/change-list-style-type-002.html ios",
+    "verdict": "P",
+    "ssim": 0.9547
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-reset-reversed-nested.html android",
+    "verdict": "P",
+    "ssim": 0.9509
+   },
+   {
+    "cell": "css-lists/css/css-lists/counter-reset-reversed-nested.html ios",
+    "verdict": "P",
+    "ssim": 0.9551
+   },
+   {
+    "cell": "css-ui/css/css-ui/appearance-auto-details-list-item.html android",
+    "verdict": "P",
+    "ssim": 0.9679
+   },
+   {
+    "cell": "css-ui/css/css-ui/appearance-auto-details-list-item.html ios",
+    "verdict": "P",
+    "ssim": 0.9676
+   }
+  ],
+  "testsList": [
+   "css/css-cascade/scope-pseudo-element.html",
+   "css/css-counter-styles/counter-style-at-rule/broken-symbols.html",
+   "css/css-counter-styles/counter-suffix.html",
+   "css/css-images/gradient/gradient-powerless-hue-hsl.html",
+   "css/css-images/gradient/gradient-powerless-hue-hwb.html",
+   "css/css-images/gradient/gradient-powerless-hue-lch.html",
+   "css/css-images/gradient/gradient-powerless-hue-oklch.html",
+   "css/css-lists/add-inline-child-after-marker-001.html",
+   "css/css-lists/add-inline-child-after-marker-002.html",
+   "css/css-lists/change-list-style-type-001.html",
+   "css/css-lists/change-list-style-type-002.html",
+   "css/css-lists/counter-list-item-2.html",
+   "css/css-lists/counter-list-item-3.html",
+   "css/css-lists/counter-list-item.html",
+   "css/css-lists/counter-reset-reversed-nested.html",
+   "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "css/css-pseudo/first-letter-skip-marker.html",
+   "css/css-pseudo/first-line-and-marker.html",
+   "css/css-ui/appearance-auto-details-list-item.html"
+  ],
+  "displayListItemNonLi": 31
+ },
+ "T7_author_counter_style": {
+  "tests": 26,
+  "byStatus": {
+   "baked": 12,
+   "bailed": 11,
+   "skipped": 3,
+   "no-fixture": 0
+  },
+  "newlyStamped": [
+   "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html → A. B. C.",
+   "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html → A. B. iii.",
+   "css/css-counter-styles/cssom/cssom-name-setter-invalid.html → A. B. C. X. Y. Z.",
+   "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html → (3). (2). (1).",
+   "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html → 001. 002. 003.",
+   "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html → (A) (B) (C)",
+   "css/css-counter-styles/cssom/cssom-range-setter-invalid.html → A. B. 3.",
+   "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html → A. B. C."
+  ],
+  "scriptMutationWall": [
+   "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+   "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+   "css/css-counter-styles/cssom/cssom-name-setter.html",
+   "css/css-counter-styles/cssom/cssom-negative-setter.html",
+   "css/css-counter-styles/cssom/cssom-pad-setter.html",
+   "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+   "css/css-counter-styles/cssom/cssom-range-setter.html"
+  ],
+  "rows": [
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html",
+    "status": "skipped",
+    "reason": null,
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html android",
+      "verdict": "f",
+      "ssim": 0.9925
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html ios",
+      "verdict": "f",
+      "ssim": 0.9925
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html web",
+      "verdict": "f",
+      "ssim": 0.9925
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/broken-symbols.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 0,
+    "declined": 1,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html android",
+      "verdict": "P",
+      "ssim": 0.9713
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html ios",
+      "verdict": "P",
+      "ssim": 0.9713
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html web",
+      "verdict": "P",
+      "ssim": 1
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html",
+    "status": "bailed",
+    "reason": "dynamic counters",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html android",
+      "verdict": "P",
+      "ssim": 0.9593
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html ios",
+      "verdict": "P",
+      "ssim": 0.9596
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html web",
+      "verdict": "P",
+      "ssim": 0.9533
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/disclosure-styles.html",
+    "status": "bailed",
+    "reason": "dynamic counters",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html android",
+      "verdict": "f",
+      "ssim": 0.6242
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html ios",
+      "verdict": "f",
+      "ssim": 0.6127
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/disclosure-styles.html web",
+      "verdict": "f",
+      "ssim": 0.6454
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html",
+    "status": "skipped",
+    "reason": null,
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html android",
+      "verdict": "f",
+      "ssim": 0.8821
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html ios",
+      "verdict": "f",
+      "ssim": 0.8821
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html web",
+      "verdict": "f",
+      "ssim": 0.8821
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html",
+    "status": "bailed",
+    "reason": "dynamic counters",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html android",
+      "verdict": "f",
+      "ssim": 0.9542
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html ios",
+      "verdict": "f",
+      "ssim": 0.9535
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html web",
+      "verdict": "f",
+      "ssim": 0.9593
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/override-in-shadow-dom.html",
+    "status": "bailed",
+    "reason": "dynamic counters (<script>)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/override-in-shadow-dom.html android",
+      "verdict": "f",
+      "ssim": 0.9805
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/override-in-shadow-dom.html ios",
+      "verdict": "f",
+      "ssim": 0.9808
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/override-in-shadow-dom.html web",
+      "verdict": "f",
+      "ssim": 0.9816
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html",
+    "status": "skipped",
+    "reason": null,
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html android",
+      "verdict": "f",
+      "ssim": 0.9925
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html ios",
+      "verdict": "f",
+      "ssim": 0.9925
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/shadow-dom-part.html web",
+      "verdict": "f",
+      "ssim": 0.9925
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 3,
+    "declined": 0,
+    "markers": [
+     "A.",
+     "B.",
+     "C."
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html android",
+      "verdict": "P",
+      "ssim": 0.9884
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html ios",
+      "verdict": "P",
+      "ssim": 0.9887
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html web",
+      "verdict": "P",
+      "ssim": 0.9884
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+    "status": "bailed",
+    "reason": "requires-script-mutation (a CSSOM counter-style setter takes effect after load)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter.html android",
+      "verdict": "P",
+      "ssim": 0.9884
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter.html ios",
+      "verdict": "P",
+      "ssim": 0.9887
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter.html web",
+      "verdict": "P",
+      "ssim": 0.9884
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 3,
+    "declined": 0,
+    "markers": [
+     "A.",
+     "B.",
+     "iii."
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html android",
+      "verdict": "P",
+      "ssim": 0.9878
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html ios",
+      "verdict": "P",
+      "ssim": 0.9876
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html web",
+      "verdict": "P",
+      "ssim": 0.9879
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+    "status": "bailed",
+    "reason": "requires-script-mutation (a CSSOM counter-style setter takes effect after load)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter.html android",
+      "verdict": "P",
+      "ssim": 0.9878
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter.html ios",
+      "verdict": "P",
+      "ssim": 0.9876
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter.html web",
+      "verdict": "P",
+      "ssim": 0.9879
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 6,
+    "declined": 0,
+    "markers": [
+     "A.",
+     "B.",
+     "C.",
+     "X.",
+     "Y.",
+     "Z."
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter-invalid.html android",
+      "verdict": "P",
+      "ssim": 0.976
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter-invalid.html ios",
+      "verdict": "P",
+      "ssim": 0.9756
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter-invalid.html web",
+      "verdict": "P",
+      "ssim": 0.9755
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-name-setter.html",
+    "status": "bailed",
+    "reason": "requires-script-mutation (a CSSOM counter-style setter takes effect after load)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter.html android",
+      "verdict": "P",
+      "ssim": 0.976
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter.html ios",
+      "verdict": "P",
+      "ssim": 0.9756
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter.html web",
+      "verdict": "P",
+      "ssim": 0.9755
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 3,
+    "declined": 0,
+    "markers": [
+     "(3).",
+     "(2).",
+     "(1)."
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html android",
+      "verdict": "f",
+      "ssim": 0.9848
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html ios",
+      "verdict": "f",
+      "ssim": 0.9849
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html web",
+      "verdict": "P",
+      "ssim": 0.984
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-negative-setter.html",
+    "status": "bailed",
+    "reason": "requires-script-mutation (a CSSOM counter-style setter takes effect after load)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter.html android",
+      "verdict": "f",
+      "ssim": 0.9848
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter.html ios",
+      "verdict": "f",
+      "ssim": 0.9849
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter.html web",
+      "verdict": "P",
+      "ssim": 0.984
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 3,
+    "declined": 0,
+    "markers": [
+     "001.",
+     "002.",
+     "003."
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html android",
+      "verdict": "f",
+      "ssim": 0.982
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html ios",
+      "verdict": "f",
+      "ssim": 0.9819
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html web",
+      "verdict": "f",
+      "ssim": 0.9821
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-pad-setter.html",
+    "status": "bailed",
+    "reason": "requires-script-mutation (a CSSOM counter-style setter takes effect after load)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter.html android",
+      "verdict": "f",
+      "ssim": 0.982
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter.html ios",
+      "verdict": "f",
+      "ssim": 0.9819
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter.html web",
+      "verdict": "f",
+      "ssim": 0.9821
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 3,
+    "declined": 0,
+    "markers": [
+     "(A)",
+     "(B)",
+     "(C)"
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html android",
+      "verdict": "f",
+      "ssim": 0.9849
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html ios",
+      "verdict": "f",
+      "ssim": 0.9848
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html web",
+      "verdict": "f",
+      "ssim": 0.9844
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+    "status": "bailed",
+    "reason": "requires-script-mutation (a CSSOM counter-style setter takes effect after load)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html android",
+      "verdict": "f",
+      "ssim": 0.9849
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html ios",
+      "verdict": "f",
+      "ssim": 0.9848
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html web",
+      "verdict": "f",
+      "ssim": 0.9844
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 3,
+    "declined": 0,
+    "markers": [
+     "A.",
+     "B.",
+     "3."
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter-invalid.html android",
+      "verdict": "P",
+      "ssim": 0.988
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter-invalid.html ios",
+      "verdict": "P",
+      "ssim": 0.9878
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter-invalid.html web",
+      "verdict": "P",
+      "ssim": 0.9882
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-range-setter.html",
+    "status": "bailed",
+    "reason": "requires-script-mutation (a CSSOM counter-style setter takes effect after load)",
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter.html android",
+      "verdict": "P",
+      "ssim": 0.988
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter.html ios",
+      "verdict": "P",
+      "ssim": 0.9878
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter.html web",
+      "verdict": "P",
+      "ssim": 0.9882
+     }
+    ]
+   },
+   {
+    "test": "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 3,
+    "declined": 0,
+    "markers": [
+     "A.",
+     "B.",
+     "C."
+    ],
+    "cells": [
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html android",
+      "verdict": "P",
+      "ssim": 0.9878
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html ios",
+      "verdict": "P",
+      "ssim": 0.9876
+     },
+     {
+      "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html web",
+      "verdict": "P",
+      "ssim": 0.988
+     }
+    ]
+   },
+   {
+    "test": "css/css-lists/content-property/marker-text-matches-circle.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-circle.html android",
+      "verdict": "P",
+      "ssim": 0.9913
+     },
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-circle.html ios",
+      "verdict": "P",
+      "ssim": 0.9913
+     },
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-circle.html web",
+      "verdict": "P",
+      "ssim": 0.9901
+     }
+    ]
+   },
+   {
+    "test": "css/css-lists/content-property/marker-text-matches-disc.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-disc.html android",
+      "verdict": "P",
+      "ssim": 0.9914
+     },
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-disc.html ios",
+      "verdict": "P",
+      "ssim": 0.9914
+     },
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-disc.html web",
+      "verdict": "P",
+      "ssim": 0.9901
+     }
+    ]
+   },
+   {
+    "test": "css/css-lists/content-property/marker-text-matches-square.html",
+    "status": "baked",
+    "reason": null,
+    "stamped": 0,
+    "declined": 0,
+    "markers": [],
+    "cells": [
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-square.html android",
+      "verdict": "P",
+      "ssim": 0.9894
+     },
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-square.html ios",
+      "verdict": "P",
+      "ssim": 0.9901
+     },
+     {
+      "cell": "css-lists/css/css-lists/content-property/marker-text-matches-square.html web",
+      "verdict": "P",
+      "ssim": 0.9981
+     }
+    ]
+   }
+  ]
+ },
+ "T7_native_empty_items": {
+  "now": {
+   "items": 12,
+   "tests": [
+    "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html"
+   ]
+  },
+  "afterFE": {
+   "items": 63,
+   "tests": [
+    "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html",
+    "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+    "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+    "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+    "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+    "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+    "css/css-counter-styles/cssom/cssom-name-setter.html",
+    "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+    "css/css-counter-styles/cssom/cssom-negative-setter.html",
+    "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+    "css/css-counter-styles/cssom/cssom-pad-setter.html",
+    "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+    "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+    "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+    "css/css-counter-styles/cssom/cssom-range-setter.html",
+    "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html"
+   ],
+   "cells": [
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html android",
+     "verdict": "f",
+     "ssim": 0.9542
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html ios",
+     "verdict": "f",
+     "ssim": 0.9535
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html web",
+     "verdict": "f",
+     "ssim": 0.9593
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html android",
+     "verdict": "P",
+     "ssim": 0.9884
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html ios",
+     "verdict": "P",
+     "ssim": 0.9887
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html web",
+     "verdict": "P",
+     "ssim": 0.9884
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter.html android",
+     "verdict": "P",
+     "ssim": 0.9884
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter.html ios",
+     "verdict": "P",
+     "ssim": 0.9887
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-additive-symbols-setter.html web",
+     "verdict": "P",
+     "ssim": 0.9884
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html android",
+     "verdict": "P",
+     "ssim": 0.9878
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html ios",
+     "verdict": "P",
+     "ssim": 0.9876
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html web",
+     "verdict": "P",
+     "ssim": 0.9879
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter.html android",
+     "verdict": "P",
+     "ssim": 0.9878
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter.html ios",
+     "verdict": "P",
+     "ssim": 0.9876
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-fallback-setter.html web",
+     "verdict": "P",
+     "ssim": 0.9879
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter-invalid.html android",
+     "verdict": "P",
+     "ssim": 0.976
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter-invalid.html ios",
+     "verdict": "P",
+     "ssim": 0.9756
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter-invalid.html web",
+     "verdict": "P",
+     "ssim": 0.9755
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter.html android",
+     "verdict": "P",
+     "ssim": 0.976
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter.html ios",
+     "verdict": "P",
+     "ssim": 0.9756
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-name-setter.html web",
+     "verdict": "P",
+     "ssim": 0.9755
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html android",
+     "verdict": "f",
+     "ssim": 0.9848
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html ios",
+     "verdict": "f",
+     "ssim": 0.9849
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html web",
+     "verdict": "P",
+     "ssim": 0.984
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter.html android",
+     "verdict": "f",
+     "ssim": 0.9848
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter.html ios",
+     "verdict": "f",
+     "ssim": 0.9849
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter.html web",
+     "verdict": "P",
+     "ssim": 0.984
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html android",
+     "verdict": "f",
+     "ssim": 0.982
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html ios",
+     "verdict": "f",
+     "ssim": 0.9819
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html web",
+     "verdict": "f",
+     "ssim": 0.9821
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter.html android",
+     "verdict": "f",
+     "ssim": 0.982
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter.html ios",
+     "verdict": "f",
+     "ssim": 0.9819
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter.html web",
+     "verdict": "f",
+     "ssim": 0.9821
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html android",
+     "verdict": "f",
+     "ssim": 0.9849
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html ios",
+     "verdict": "f",
+     "ssim": 0.9848
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html web",
+     "verdict": "f",
+     "ssim": 0.9844
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html android",
+     "verdict": "f",
+     "ssim": 0.9849
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html ios",
+     "verdict": "f",
+     "ssim": 0.9848
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html web",
+     "verdict": "f",
+     "ssim": 0.9844
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter-invalid.html android",
+     "verdict": "P",
+     "ssim": 0.988
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter-invalid.html ios",
+     "verdict": "P",
+     "ssim": 0.9878
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter-invalid.html web",
+     "verdict": "P",
+     "ssim": 0.9882
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter.html android",
+     "verdict": "P",
+     "ssim": 0.988
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter.html ios",
+     "verdict": "P",
+     "ssim": 0.9878
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-range-setter.html web",
+     "verdict": "P",
+     "ssim": 0.9882
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html android",
+     "verdict": "P",
+     "ssim": 0.9878
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html ios",
+     "verdict": "P",
+     "ssim": 0.9876
+    },
+    {
+     "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html web",
+     "verdict": "P",
+     "ssim": 0.988
+    }
+   ]
+  }
+ },
+ "laneCells": {
+  "flips": [
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html android",
+    "verdict": "f",
+    "ssim": 0.9423
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html ios",
+    "verdict": "f",
+    "ssim": 0.942
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html web",
+    "verdict": "f",
+    "ssim": 0.9435
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html android",
+    "verdict": "f",
+    "ssim": 0.982
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html ios",
+    "verdict": "f",
+    "ssim": 0.9819
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html web",
+    "verdict": "f",
+    "ssim": 0.9821
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html android",
+    "verdict": "f",
+    "ssim": 0.9849
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html ios",
+    "verdict": "f",
+    "ssim": 0.9848
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html web",
+    "verdict": "f",
+    "ssim": 0.9844
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html android",
+    "verdict": "f",
+    "ssim": 0.9848
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html ios",
+    "verdict": "f",
+    "ssim": 0.9849
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html web",
+    "verdict": "P",
+    "ssim": 0.984
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html android",
+    "verdict": "f",
+    "ssim": 0.9051
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html ios",
+    "verdict": "f",
+    "ssim": 0.9285
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html web",
+    "verdict": "P",
+    "ssim": 0.9818
+   }
+  ],
+  "atRisk": [
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html android",
+    "verdict": "P",
+    "ssim": 0.9688
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html ios",
+    "verdict": "P",
+    "ssim": 0.9702
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-006.html web",
+    "verdict": "P",
+    "ssim": 0.995
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-007.html web",
+    "verdict": "P",
+    "ssim": 0.9829
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html android",
+    "verdict": "P",
+    "ssim": 0.9884
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html ios",
+    "verdict": "P",
+    "ssim": 0.9896
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-009.html web",
+    "verdict": "P",
+    "ssim": 0.9971
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html android",
+    "verdict": "P",
+    "ssim": 0.9756
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html ios",
+    "verdict": "P",
+    "ssim": 0.9752
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-armenian.html web",
+    "verdict": "P",
+    "ssim": 0.999
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html android",
+    "verdict": "P",
+    "ssim": 0.9974
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html ios",
+    "verdict": "P",
+    "ssim": 0.9989
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-georgian.html web",
+    "verdict": "P",
+    "ssim": 0.999
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html android",
+    "verdict": "P",
+    "ssim": 0.9713
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html ios",
+    "verdict": "P",
+    "ssim": 0.9713
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/broken-symbols.html web",
+    "verdict": "P",
+    "ssim": 1
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html android",
+    "verdict": "P",
+    "ssim": 0.9593
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html ios",
+    "verdict": "P",
+    "ssim": 0.9596
+   },
+   {
+    "cell": "css-counter-styles/css/css-counter-styles/counter-style-at-rule/descriptor-suffix.html web",
+    "verdict": "P",
+    "ssim": 0.9533
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-circle.html android",
+    "verdict": "P",
+    "ssim": 0.9913
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-circle.html ios",
+    "verdict": "P",
+    "ssim": 0.9913
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-circle.html web",
+    "verdict": "P",
+    "ssim": 0.9901
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-disc.html android",
+    "verdict": "P",
+    "ssim": 0.9914
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-disc.html ios",
+    "verdict": "P",
+    "ssim": 0.9914
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-disc.html web",
+    "verdict": "P",
+    "ssim": 0.9901
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-square.html android",
+    "verdict": "P",
+    "ssim": 0.9894
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-square.html ios",
+    "verdict": "P",
+    "ssim": 0.9901
+   },
+   {
+    "cell": "css-lists/css/css-lists/content-property/marker-text-matches-square.html web",
+    "verdict": "P",
+    "ssim": 0.9981
+   }
+  ]
+ }
+}

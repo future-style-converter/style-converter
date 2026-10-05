@@ -117,6 +117,31 @@ object UAWidgetsResolve {
         val special = kind == UAWidgetsGeometry.Kind.HIDDEN ||
             kind == UAWidgetsGeometry.Kind.IMAGE || kind == UAWidgetsGeometry.Kind.FILE
         if (!special && !appearanceIsNative(component.properties)) return null
+        // Wave 52 lane L8 (M-G) — the ZERO-BOX gate. css-sizing-3 §5.1 / CSS
+        // 2.1 §10.2: a used `width` or `height` of 0px is a real box of zero
+        // extent, and a replaced element's content is painted INSIDE that
+        // box — there is nothing to paint the fixed 129×21 atom into.
+        // MEASURED on wave51-fix css-writing-modes/forms/input-range-zero-
+        // inline-size (post-load wire: every `input[type=range]` carries
+        // `Width 16px × Height 0` under a vertical flex parent, `0 × 16`
+        // under the horizontal one, and the extractor dropped its
+        // `visibility: hidden`): both natives painted a 224×70 slider group
+        // where the ref shows only the parents' 1px green borders — iOS f
+        // 0.9747, Android f 0.9743. Returning null hands the component to the
+        // ordinary box path, whose modifier chain already sizes it 16×0 / 0×16.
+        // Blast radius (census.json `anyWidgetZeroBox`): ONE document.
+        if (hasZeroUsedBox(component.properties)) {
+            // No silent fallthrough: the mount hook's caller sees a plain
+            // box, so say once per process why the replica went away.
+            if (zeroBoxLogged.compareAndSet(false, true)) runCatching {
+                android.util.Log.i(
+                    "UAWidgetsResolve",
+                    "widget:zero-used-box — ${component._tag}[${component.attrs?.type}] has a " +
+                        "0px used width or height; no UA replica is painted (css-sizing-3 §5.1)",
+                )
+            }
+            return null
+        }
         val a = component.attrs
         // Value fraction for the position-taking widgets. Range: HTML
         // default min 0 / max 100 / value midpoint; value rides the wire
@@ -183,6 +208,29 @@ object UAWidgetsResolve {
             accent = accentFor(component.properties)
         )
     }
+
+    /** One-shot latch for the zero-box breadcrumb in [resolve] (process-wide). */
+    private val zeroBoxLogged = java.util.concurrent.atomic.AtomicBoolean(false)
+
+    /**
+     * Wave 52 lane L8 (M-G) — does the MERGED list give this box a used
+     * `width` or `height` of exactly 0px?
+     *
+     * Only an ABSOLUTE zero counts (`LengthValue.Exact(0.0)`): `auto`, a
+     * percentage, `calc()` or an em value may still resolve to a non-zero
+     * box at layout time, and the post-load wire the target carries is
+     * absolute px anyway (`Width {"type":"length","px":0}`). Reads the same
+     * property list [resolve] reads, so the gate and the replica can never
+     * describe different elements. Twin: Swift `UAWidgetsResolve.hasZeroUsedBox`.
+     */
+    internal fun hasZeroUsedBox(properties: List<com.styleconverter.runtime.core.ir.IRProperty>): Boolean =
+        listOf("Width", "Height").any { type ->
+            // First declaration wins — the converter emits post-cascade lists.
+            val data = properties.firstOrNull { it.type == type }?.data ?: return@any false
+            // Exact 0px only; every other shape keeps the atom (see KDoc).
+            (com.styleconverter.runtime.core.types.extractLength(data)
+                as? com.styleconverter.runtime.core.types.LengthValue.Exact)?.px == 0.0
+        }
 
     /**
      * Wave-38 lane N1 — the IR-reading half of the block-context line box

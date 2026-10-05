@@ -1,0 +1,704 @@
+{
+ "sideA": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/diff/base",
+ "sideB": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/diff/s6",
+ "fixtures": {
+  "compared": 2870,
+  "changed": 22,
+  "onlyA": [],
+  "onlyB": [],
+  "changedFiles": [
+   "css-cascade/import-conditional-001.json",
+   "css-cascade/import-conditional-002.json",
+   "css-cascade/important-prop.json",
+   "css-cascade/revert-val-002.json",
+   "css-color/color-mix-percents-02.json",
+   "css-counter-styles/counter-style-at-rule__override-in-shadow-dom.json",
+   "css-counter-styles/cssom__cssom-additive-symbols-setter-invalid.json",
+   "css-counter-styles/cssom__cssom-additive-symbols-setter.json",
+   "css-counter-styles/cssom__cssom-fallback-setter-invalid.json",
+   "css-counter-styles/cssom__cssom-fallback-setter.json",
+   "css-counter-styles/cssom__cssom-name-setter-invalid.json",
+   "css-counter-styles/cssom__cssom-name-setter.json",
+   "css-counter-styles/cssom__cssom-negative-setter-invalid.json",
+   "css-counter-styles/cssom__cssom-negative-setter.json",
+   "css-counter-styles/cssom__cssom-pad-setter-invalid.json",
+   "css-counter-styles/cssom__cssom-pad-setter.json",
+   "css-counter-styles/cssom__cssom-prefix-suffix-setter-invalid.json",
+   "css-counter-styles/cssom__cssom-prefix-suffix-setter.json",
+   "css-counter-styles/cssom__cssom-range-setter-invalid.json",
+   "css-counter-styles/cssom__cssom-range-setter.json",
+   "css-counter-styles/cssom__cssom-symbols-setter-invalid.json",
+   "css-gaps/flex__flex-gap-decorations-024.json"
+  ]
+ },
+ "perTestIr": {
+  "compared": 1435,
+  "changed": 22,
+  "onlyA": [],
+  "onlyB": [],
+  "changedDocs": [
+   "css-cascade/wpt__css-cascade__import-conditional-001.json",
+   "css-cascade/wpt__css-cascade__import-conditional-002.json",
+   "css-cascade/wpt__css-cascade__important-prop.json",
+   "css-cascade/wpt__css-cascade__revert-val-002.json",
+   "css-color/wpt__css-color__color-mix-percents-02.json",
+   "css-counter-styles/wpt__css-counter-styles__counter-style-at-rule__override-in-shadow-dom.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter-invalid.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter-invalid.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter-invalid.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter-invalid.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter.json",
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid.json",
+   "css-gaps/wpt__css-gaps__flex__flex-gap-decorations-024.json"
+  ],
+  "deltas": {
+   "css-cascade/wpt__css-cascade__import-conditional-001.json": {
+    "wpt__css-cascade__import-conditional-001__1-026": {
+     "BackgroundColor": {
+      "before": "{\"srgb\":{\"r\":1,\"g\":0,\"b\":0},\"original\":\"red\"}",
+      "after": "{\"srgb\":{\"r\":0,\"g\":0.5019607843137255,\"b\":0},\"original\":\"green\"}"
+     }
+    }
+   },
+   "css-cascade/wpt__css-cascade__import-conditional-002.json": {
+    "wpt__css-cascade__import-conditional-002__1-028": {
+     "BackgroundColor": {
+      "before": "{\"srgb\":{\"r\":1,\"g\":0,\"b\":0},\"original\":\"red\"}",
+      "after": "{\"srgb\":{\"r\":0,\"g\":0.5019607843137255,\"b\":0},\"original\":\"green\"}"
+     }
+    }
+   },
+   "css-cascade/wpt__css-cascade__important-prop.json": {
+    "wpt__css-cascade__important-prop__1-032": {
+     "Color": {
+      "before": "{\"srgb\":{\"r\":1,\"g\":0,\"b\":0},\"original\":\"red\"}",
+      "after": "{\"srgb\":{\"r\":0,\"g\":0,\"b\":1},\"original\":\"#00f\"}"
+     }
+    }
+   },
+   "css-cascade/wpt__css-cascade__revert-val-002.json": {
+    "revert-val-002__1__0-090": {
+     "Generic": {
+      "before": "{\"propertyName\":\"display\",\"rawValue\":\"revert\",\"_unmapped\":true}",
+      "after": "(absent)"
+     },
+     "Display": {
+      "before": "(absent)",
+      "after": "\"BLOCK\""
+     }
+    }
+   },
+   "css-color/wpt__css-color__color-mix-percents-02.json": {
+    "wpt__css-color__color-mix-percents-02__6-130": {
+     "BackgroundColor": {
+      "before": "{\"original\":{\"type\":\"color-mix\",\"colorSpace\":\"lch\",\"color1\":\"purple\",\"percent1\":125,\"color2\":\"plum\",\"percent2\":125}}",
+      "after": "{\"srgb\":{\"r\":0.6823529411764706,\"g\":0.3568627450980392,\"b\":0.6823529411764706},\"original\":{\"r\":174,\"g\":91,\"b\":174}}"
+     }
+    },
+    "wpt__css-color__color-mix-percents-02__7-131": {
+     "BackgroundColor": {
+      "before": "{\"original\":{\"type\":\"color-mix\",\"colorSpace\":\"lch\",\"color1\":\"purple\",\"percent1\":9999,\"color2\":\"plum\",\"percent2\":9999}}",
+      "after": "{\"srgb\":{\"r\":0.6823529411764706,\"g\":0.3568627450980392,\"b\":0.6823529411764706},\"original\":{\"r\":174,\"g\":91,\"b\":174}}"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__counter-style-at-rule__override-in-shadow-dom.json": {
+    "counter-style-at-rule__override-in-shadow-dom__0__0-569": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "counter-style-at-rule__override-in-shadow-dom__0__1-570": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "counter-style-at-rule__override-in-shadow-dom__0__2-571": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid.json": {
+    "cssom__cssom-additive-symbols-setter-invalid__0__0-595": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-additive-symbols-setter-invalid__0__1-596": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-additive-symbols-setter-invalid__0__2-597": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter.json": {
+    "cssom__cssom-additive-symbols-setter__0__0-599": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-additive-symbols-setter__0__1-600": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-additive-symbols-setter__0__2-601": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid.json": {
+    "cssom__cssom-fallback-setter-invalid__0__0-603": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-fallback-setter-invalid__0__1-604": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-fallback-setter-invalid__0__2-605": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter.json": {
+    "cssom__cssom-fallback-setter__0__0-607": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-fallback-setter__0__1-608": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-fallback-setter__0__2-609": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter-invalid.json": {
+    "cssom__cssom-name-setter-invalid__0__0-611": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter-invalid__0__1-612": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter-invalid__0__2-613": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter-invalid__1__0-615": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter-invalid__1__1-616": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter-invalid__1__2-617": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter.json": {
+    "cssom__cssom-name-setter__0__0-619": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter__0__1-620": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter__0__2-621": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter__1__0-623": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter__1__1-624": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-name-setter__1__2-625": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter-invalid.json": {
+    "cssom__cssom-negative-setter-invalid__0__0-627": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-negative-setter-invalid__0__1-628": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-negative-setter-invalid__0__2-629": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter.json": {
+    "cssom__cssom-negative-setter__0__0-631": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-negative-setter__0__1-632": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-negative-setter__0__2-633": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter-invalid.json": {
+    "cssom__cssom-pad-setter-invalid__0__0-635": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-pad-setter-invalid__0__1-636": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-pad-setter-invalid__0__2-637": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter.json": {
+    "cssom__cssom-pad-setter__0__0-639": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-pad-setter__0__1-640": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-pad-setter__0__2-641": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid.json": {
+    "cssom__cssom-prefix-suffix-setter-invalid__0__0-643": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-prefix-suffix-setter-invalid__0__1-644": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-prefix-suffix-setter-invalid__0__2-645": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter.json": {
+    "cssom__cssom-prefix-suffix-setter__0__0-647": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-prefix-suffix-setter__0__1-648": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-prefix-suffix-setter__0__2-649": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter-invalid.json": {
+    "cssom__cssom-range-setter-invalid__0__0-651": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-range-setter-invalid__0__1-652": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-range-setter-invalid__0__2-653": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter.json": {
+    "cssom__cssom-range-setter__0__0-655": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-range-setter__0__1-656": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-range-setter__0__2-657": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-counter-styles/wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid.json": {
+    "cssom__cssom-symbols-setter-invalid__0__0-659": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-symbols-setter-invalid__0__1-660": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    },
+    "cssom__cssom-symbols-setter-invalid__0__2-661": {
+     "Width": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     },
+     "Height": {
+      "before": "{\"type\":\"length\",\"px\":100}",
+      "after": "(absent)"
+     }
+    }
+   },
+   "css-gaps/wpt__css-gaps__flex__flex-gap-decorations-024.json": {
+    "wpt__css-gaps__flex__flex-gap-decorations-024__1-184": {
+     "ColumnRuleWidth": {
+      "before": "{\"type\":\"length\",\"px\":9}",
+      "after": "{\"type\":\"length\",\"px\":10}"
+     },
+     "ColumnRuleStyle": {
+      "before": "\"DOTTED\"",
+      "after": "\"SOLID\""
+     },
+     "ColumnRuleColor": {
+      "before": "{\"srgb\":{\"r\":0,\"g\":0,\"b\":1},\"original\":\"blue\"}",
+      "after": "{\"srgb\":{\"r\":1,\"g\":0.7529411764705882,\"b\":0.796078431372549},\"original\":\"pink\"}"
+     }
+    }
+   }
+  }
+ }
+}

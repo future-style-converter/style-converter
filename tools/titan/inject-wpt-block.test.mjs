@@ -2179,3 +2179,207 @@ test('pixelmatch options: inject stays pre-flip (0.25/includeAA true); compare-s
   assert.match(banner, /PRE-FLIP settings/, 'the diffWebVsRef comment must name the pre-flip choice');
   assert.doesNotMatch(banner, /same threshold as compare-screenshots/, 'the false parity claim must stay gone');
 });
+
+// ── wave-52 L12-A: the ABSENCE-ONLY per-cell exclusion + the blank-capture stamp ──
+//
+// Brief: tools/titan/results/wave52-plan/absence-only-denominator.md §4 (Decision
+// A + B) and §7 pins 1–8. Every pin below was proven able to fail by an EXECUTED
+// mutation of inject-wpt-block.mjs, restored byte-exact (sha-256 checked) — the
+// mutation ledger is tools/titan/results/wave52-instrument-and-calibration/_note.md
+// §"Mutations":
+//   M1 drop the `wptPass !== true` conjunct of isAbsenceOnly   → pins 1, 7 fail
+//   M2 `<` → `<=` against WPT_PRESENCE_REF_MIN_PCT             → pin 1 fails
+//   M3 delete applyAbsenceOnlyGate's never-overwrite guard      → pin 2 fails
+//   M4 compute captureUniform on the PADDED capture             → pin 6 fails
+//   M5 revert the assertPlatformColumns anchor                  → pin 9 fails
+//   M6 drop computeBlankCaptureVsInkedRef's same-colour clause  → pin 6b fails
+//   M7 move the call above the font gate / drop `isNa ? [] :`   → pin 3 fails
+
+import {
+  ABSENCE_ONLY_STAMP, ABSENCE_ONLY_PLATFORMS, isAbsenceOnly, applyAbsenceOnlyGate,
+  uniformColour, computeBlankCaptureVsInkedRef, summarizeInstrumentStamps,
+} from './inject-wpt-block.mjs';
+import { readFileSync as _readFileSync, existsSync as _existsSyncL12 } from 'node:fs';
+
+/** A pngjs-shaped bitmap filled with one RGBA value (in memory, no file). */
+function solidImg(w, h, rgba) {
+  const img = new PNG({ width: w, height: h });
+  for (let i = 0; i < img.data.length; i += 4) img.data.set(rgba, i);
+  return img;
+}
+
+test('L12-A pin 1: isAbsenceOnly is the pre-registered predicate, nothing wider', () => {
+  // Positive: a pass on a blank ref — the null-renderer pass.
+  assert.equal(isAbsenceOnly({ wptPass: true, semanticPresence: { bCoveragePct: 0 } }), true);
+  // Just under the floor still qualifies (the floor is the instrument's own).
+  assert.equal(isAbsenceOnly({ wptPass: true, semanticPresence: { bCoveragePct: 0.019 } }), true);
+  // Boundary: exactly the floor is INKED (strict `<`, as computePresenceFailed) — M2.
+  assert.equal(isAbsenceOnly({ wptPass: true, semanticPresence: { bCoveragePct: 0.02 } }), false);
+  // access-from-shadow-dom's ref (0.102 % ink) is a real target — never stamped.
+  assert.equal(isAbsenceOnly({ wptPass: true, semanticPresence: { bCoveragePct: 0.102 } }), false);
+  // calc-in-media-queries: a FAIL on a blank ref is information and stays scored — M1.
+  assert.equal(isAbsenceOnly({ wptPass: false, semanticPresence: { bCoveragePct: 0 } }), false);
+  // The olive full-bleed pass (bCoveragePct 100) is a positive assertion.
+  assert.equal(isAbsenceOnly({ wptPass: true, semanticPresence: { bCoveragePct: 100 } }), false);
+  // Unknown presence declines; an already-neutralised verdict (null) declines.
+  assert.equal(isAbsenceOnly({ wptPass: true, semanticPresence: null }), false);
+  assert.equal(isAbsenceOnly({ wptPass: null, semanticPresence: { bCoveragePct: 0 } }), false);
+  assert.equal(isAbsenceOnly({ error: 'x', wptPass: true, semanticPresence: { bCoveragePct: 0 } }), false);
+});
+
+test('L12-A pin 2: applyAbsenceOnlyGate stamps per cell and never overwrites an earlier stamp', () => {
+  const blankPass = () => ({ ssim: 1, wptPass: true, semanticPresence: { bCoveragePct: 0 } });
+  // A font-parity cell that (hypothetically) still reads as a blank pass must
+  // keep ITS reason — the guard, not the predicate, is under test here (M3).
+  const font = { ...blankPass(), scoreExcluded: 'native-font-parity' };
+  const wall = { ...blankPass(), scoreExcluded: true };
+  const web = blankPass();
+  const stamped = applyAbsenceOnlyGate({ 'web-ref': web, 'ios-ref': font, 'android-ref': wall });
+  assert.deepEqual(stamped, ['web-ref'], 'only the unstamped cell is stamped');
+  assert.equal(web.scoreExcluded, ABSENCE_ONLY_STAMP);
+  assert.equal(web.wptPass, null, 'the stamped cell is neither pass nor fail');
+  assert.equal(web.ssim, 1, 'raw metrics survive for investigators');
+  assert.equal(font.scoreExcluded, 'native-font-parity', 'the font reason must not be downgraded');
+  assert.equal(wall.scoreExcluded, true, 'the whole-test wall must not be downgraded');
+  // Absent platforms, error diffs and failing cells are skipped silently by contract.
+  assert.deepEqual(applyAbsenceOnlyGate({ 'web-ref': null, 'ios-ref': { error: 'e' },
+    'android-ref': { ssim: 0.5, wptPass: false, semanticPresence: { bCoveragePct: 0 } } }), []);
+  assert.deepEqual(applyAbsenceOnlyGate(undefined), []);
+});
+
+test('L12-A pin 3: buildResults runs the gate AFTER the font gate, never on a wholly-excluded test', async () => {
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  // The isNa caller contract, same idiom as the font gate's `isNa ? [] :` pin.
+  assert.match(src, /const absenceOnlyExcluded = isNa \? \[\] : applyAbsenceOnlyGate\(\{/,
+    'the per-cell gate must run ONLY when the whole-test gate did not fire');
+  // Ordering: the font stamp is written first, so the never-overwrite guard keeps it.
+  assert.ok(src.indexOf('const fontParityExcluded = isNa') < src.indexOf('const absenceOnlyExcluded = isNa'),
+    'the absence-only gate must run after the font-parity gate');
+  // The per-test record must expose which platforms left the denominator.
+  assert.match(src, /\n {6}absenceOnlyExcluded,\n/, 'results must expose absenceOnlyExcluded');
+  // scoreEligible is untouched: the test is still scored where it can fail.
+  assert.match(src, /scoreEligible: !isNa,/);
+});
+
+test('L12-A pin 6: uniformColour reads one RGBA value or null (alpha included)', () => {
+  assert.deepEqual(uniformColour(solidImg(4, 4, [255, 255, 255, 255])), [255, 255, 255, 255]);
+  // The fully transparent capture (text-decoration-inset-025 Android) is uniform too.
+  assert.deepEqual(uniformColour(solidImg(4, 4, [0, 0, 0, 0])), [0, 0, 0, 0]);
+  // One changed channel anywhere — here the LAST pixel's alpha — breaks uniformity.
+  const one = solidImg(4, 4, [255, 255, 255, 255]);
+  one.data[one.data.length - 1] = 254;
+  assert.equal(uniformColour(one), null);
+  assert.equal(uniformColour(null), null);
+  assert.equal(uniformColour({ width: 0, height: 0, data: Buffer.alloc(0) }), null);
+});
+
+test('L12-A pin 6b: blankCaptureVsInkedRef = uniform capture ∧ inked ref ∧ not the ref’s own fill', () => {
+  const white = [255, 255, 255, 255];
+  // access-from-shadow-dom: white capture, 0.102 % ref ink → the triage class.
+  assert.equal(computeBlankCaptureVsInkedRef(white, { bCoveragePct: 0.102 }), true);
+  // Blank ref → the absence-only side, not this class.
+  assert.equal(computeBlankCaptureVsInkedRef(white, { bCoveragePct: 0 }), false);
+  // Non-uniform capture → never a blank.
+  assert.equal(computeBlankCaptureVsInkedRef(null, { bCoveragePct: 5 }), false);
+  // The olive full-bleed agreement (capture == uniform ref) is NOT a blank — M6.
+  const olive = [100, 100, 0, 255];
+  assert.equal(computeBlankCaptureVsInkedRef(olive, { bCoveragePct: 100 }, olive), false);
+  // overlay-transition-backdrop: white capture vs a uniform GREEN ref stays in.
+  assert.equal(computeBlankCaptureVsInkedRef(white, { bCoveragePct: 100 }, [0, 128, 0, 255]), true);
+  // Unknown ref coverage declines.
+  assert.equal(computeBlankCaptureVsInkedRef(white, null), false);
+});
+
+test('L12-A pin 6 (wiring): diffWebVsRef reads uniformity on the RAW capture, before the white pad', async () => {
+  // A short BLACK capture against a taller inked ref: padToCanvas fills the
+  // missing rows with WHITE, so a uniformity read on the padded buffer would
+  // report null and hide the blank — M4 is exactly that mutation.
+  const dir = await tmpDir('l12uniform');
+  const cap = await writePng(dir, 'cap.png', 20, 10, [0, 0, 0, 255]);
+  const refImg = solidImg(20, 20, [255, 255, 255, 255]);
+  for (let y = 4; y < 12; y++) for (let x = 4; x < 12; x++) refImg.data.set([0, 128, 0, 255], (y * 20 + x) * 4);
+  const ref = join(dir, 'ref.png');
+  await fs.writeFile(ref, PNG.sync.write(refImg));
+  const { diffWebVsRef, diffComposedVsRef } = await import('./inject-wpt-block.mjs');
+  const d = await diffWebVsRef(cap, ref);
+  assert.deepEqual(d.captureUniform, [0, 0, 0, 255], 'uniformity must be read before padding');
+  assert.equal(d.refUniform, null, 'the ref has structure');
+  // And the stamp rides the composed path (the only path the gate uses).
+  const testKey = 'wpt__css-x__blank';
+  await fs.copyFile(cap, join(dir, `${testKey}.png`));
+  const c = await diffComposedVsRef({ platformDir: dir, testKey, refPng: ref, fuzzy: null });
+  assert.equal(c.blankCaptureVsInkedRef, true, 'the composed path must stamp the named class');
+  assert.equal(c.wptPass, false, 'scoring unchanged: the presence veto already fails it');
+});
+
+test('L12-A pin 8: the stamp is a tag-free per-cell string over all three platforms', () => {
+  assert.equal(ABSENCE_ONLY_STAMP, 'absence-only');
+  assert.deepEqual([...ABSENCE_ONLY_PLATFORMS], ['web-ref', 'ios-ref', 'android-ref']);
+  // Truthy for every `if (d.scoreExcluded)` aggregator, yet readable.
+  assert.ok(ABSENCE_ONLY_STAMP && ABSENCE_ONLY_STAMP !== true);
+});
+
+test('L12-A pin 9: an absence-only web-ref still anchors the per-test native-presence check', () => {
+  // M5: without the anchor clause, a test whose web pass was stamped would
+  // silently stop checking that its native captures were delivered at all.
+  const results = {
+    t1: { absenceOnlyExcluded: ['web-ref'], browserRef: { diffs: {
+      'web-ref': { ssim: 1, wptPass: null, scoreExcluded: 'absence-only' },
+      'ios-ref': { ssim: 1, wptPass: null, scoreExcluded: 'absence-only' } } } },   // android absent
+  };
+  const r = assertPlatformColumns(results, {});
+  assert.deepEqual(r.missingCells, { 'ios-ref': [], 'android-ref': ['t1'] });
+  // A whole-test wall (scoreExcluded: true) still does NOT anchor.
+  const wall = { t2: { browserRef: { diffs: { 'web-ref': { ssim: 1, scoreExcluded: true } } } } };
+  assert.deepEqual(assertPlatformColumns(wall, {}).missingCells, { 'ios-ref': [], 'android-ref': [] });
+});
+
+test('L12-A summary: the inject log counts and names both populations', async () => {
+  const s = summarizeInstrumentStamps({
+    a: { absenceOnlyExcluded: ['web-ref'], browserRef: { diffs: { 'web-ref': { blankCaptureVsInkedRef: false } } } },
+    b: { absenceOnlyExcluded: [], browserRef: { diffs: { 'ios-ref': { blankCaptureVsInkedRef: true }, 'android-ref': null } } },
+    c: { browserRef: null },
+  });
+  assert.deepEqual(s, { absenceOnly: ['a web-ref'], blankCaptures: ['b ios-ref'] });
+  const src = await fs.readFile(new URL('./inject-wpt-block.mjs', import.meta.url), 'utf8');
+  assert.match(src, /absence-only=\$\{stamps\.absenceOnly\.length\} blank-captures=\$\{stamps\.blankCaptures\.length\}/,
+    'plan §7 reads `absence-only=<n> blank-captures=<n>` off the gate log');
+});
+
+// Pin 7 — the committed-run replay (the S6 discipline). The run dirs are
+// gitignored, so the census script (results/wave52-instrument-and-calibration/
+// absence-only-census.mjs) committed a DIGEST of every wave51-fix cell whose ref
+// ink is under 1 % (50× the floor — every cell a widened predicate could reach).
+// Replaying the shipped gate over it must stamp EXACTLY the 19 cells the plan's
+// census lists by name, and the totals must land on the brief's §6 numbers.
+const L12_DIGEST = new URL('./results/wave52-instrument-and-calibration/absence-only-digest.wave51-fix.json', import.meta.url);
+const L12_PLAN = new URL('./results/wave52-plan/absence-only-denominator.census.json', import.meta.url);
+test('L12-A pin 7: replaying the gate over wave51-fix stamps exactly the 19 census cells', { skip: !_existsSyncL12(L12_DIGEST) }, () => {
+  const digest = JSON.parse(_readFileSync(L12_DIGEST, 'utf8'));
+  const plan = JSON.parse(_readFileSync(L12_PLAN, 'utf8'));
+  const PLAT = { 'web-ref': 'web', 'ios-ref': 'ios', 'android-ref': 'android' };
+  // Group the digest back into per-test diff maps, deep-copied (the gate mutates).
+  const byTest = new Map();
+  for (const c of digest.cells) {
+    if (!byTest.has(c.test)) byTest.set(c.test, { eligible: c.scoreEligible, diffs: {} });
+    byTest.get(c.test).diffs[c.key] = { ssim: c.ssim, wptPass: c.wptPass, semanticPresence: { bCoveragePct: c.bCov }, ...(c.scoreExcluded ? { scoreExcluded: c.scoreExcluded } : {}) };
+  }
+  const stamped = [];
+  for (const [testRel, t] of byTest) {
+    const keys = t.eligible ? applyAbsenceOnlyGate(t.diffs) : [];
+    for (const k of keys) stamped.push(`${testRel} ${PLAT[k]}`);
+  }
+  // The plan census names its rows "wave51-fix <section>/<path>.html <plat> P 1.0000".
+  const expected = plan.populations.absenceOnly.rows.map((r) => {
+    const [, secPath, plat] = r.cell.split(' ');
+    return `css/${secPath} ${plat}`;
+  });
+  assert.deepEqual(stamped.sort(), expected.sort(), 'exactly the 19 census cells, by name');
+  // Totals: every stamped cell was a scored PASS, so it leaves both columns.
+  const after = {};
+  for (const p of ['web', 'ios', 'android']) {
+    const n = stamped.filter((s) => s.endsWith(` ${p}`)).length;
+    after[p] = `${digest.totalsBefore[p].passing - n}/${digest.totalsBefore[p].measured - n}`;
+  }
+  assert.deepEqual(after, { web: '1208/1372', ios: '1083/1363', android: '1074/1363' });
+});

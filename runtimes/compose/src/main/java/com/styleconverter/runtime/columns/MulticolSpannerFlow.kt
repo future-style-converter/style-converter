@@ -156,15 +156,27 @@ object MulticolSpannerFlow {
          */
         val cloneBands: MulticolCloneGeometry.Bands? = null,
         /**
-         * Wave-47 lane Z2 — true iff the child's wire carries BOTH baked
-         * physical `Width` and `Height` entries: the post-load extractor's
-         * signature (it resolves the browser's used layout into physical
-         * longhands on every component). The vertical fragmentation pass
-         * ([VerticalMulticolMeasure]) declines such children — their baked
-         * geometry already encodes the browser's fragmentation, and the
-         * anchor-position-multicol family PASSES today on exactly that
+         * Wave-47 lane Z2 — true iff the child's wire carries the post-load
+         * extractor's signature (it resolves the browser's used layout into
+         * physical longhands on every component). The vertical fragmentation
+         * pass ([VerticalMulticolMeasure]) declines such children — their
+         * baked geometry already encodes the browser's fragmentation, and
+         * the anchor-position-multicol family PASSES today on exactly that
          * frozen render. Default false keeps every other consumer of this
          * spec byte-identical.
+         *
+         * Wave 52 (lane L3, fix F1): the signature is the SHARED
+         * [com.styleconverter.runtime.core.renderer.BakedLayoutSignature]
+         * predicate (Width ∧ Height ∧ BoxSizing ∧ (PaddingTop ∨
+         * BorderTopStyle)), no longer the two-property "Width ∧ Height"
+         * heuristic, which an authored `width:50px; height:50px` rule also
+         * satisfied. Every baked carrier in the wave51-fix corpus still
+         * reads true (census F1: 12/12 containers own-mode, 23/23 under the
+         * used writing mode, 9 docs); authored carriers read false — pinned
+         * by VerticalBlockFlowSeamGuardTest. This vertical-multicol gate's
+         * own carriers (census f1swiftUsed: sole flow child, used vertical
+         * mode): exactly one, anchor-position-multicol-017's baked child,
+         * which stays guarded — zero corpus movement here.
          */
         val bakedPhysicalSize: Boolean = false
     )
@@ -315,12 +327,16 @@ object MulticolSpannerFlow {
                 // every non-clone container's spec is byte-identical).
                 MulticolCloneDecoration.declaresClone(child),
                 MulticolCloneDecoration.bandsFor(child),
-                // Wave-47 lane Z2: the post-load-extraction signature —
-                // baked physical Width AND Height on the child's own wire
-                // (see ChildSpec.bakedPhysicalSize for why the vertical
-                // fragmentation pass must decline such children).
-                child.properties.any { it.type == "Width" } &&
-                    child.properties.any { it.type == "Height" }
+                // Wave-47 lane Z2: the post-load-extraction signature on
+                // the child's own wire (see ChildSpec.bakedPhysicalSize for
+                // why the vertical fragmentation pass must decline such
+                // children). Wave 52 (lane L3, F1): read through the ONE
+                // shared predicate the block-flow seam also reads (its
+                // Swift copy is BakedLayoutSignature.swift) instead of the
+                // two-property heuristic, which also matched authored
+                // `width`+`height` rules.
+                com.styleconverter.runtime.core.renderer.BakedLayoutSignature
+                    .bakedPhysicalBox(child.properties)
             )
         }
     }

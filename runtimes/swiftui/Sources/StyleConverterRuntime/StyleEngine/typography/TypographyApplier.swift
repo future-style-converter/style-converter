@@ -314,3 +314,28 @@ private struct LayoutDirectionMod: ViewModifier {
         if let d = direction { content.environment(\.layoutDirection, d) } else { content }
     }
 }
+
+// MARK: - Wave 52 (lane L9, F2): a glyph-less inline member's own band
+
+extension TypographyApplier {
+    /// The background band of a GLYPH-LESS fold member (InlineSpanRing's
+    /// hanging-whitespace ring admits `background-color` only there):
+    /// css-backgrounds-3 §2.1 paints an inline box's background over its
+    /// content area, which for a run of preserved spaces is exactly the
+    /// run's advance — the per-range `AttributedString.backgroundColor`
+    /// SwiftUI's `Text` draws behind those characters. Kept here (a
+    /// SwiftUI file) because InlineSpanRing is deliberately SwiftUI-free;
+    /// the label's styled-span split (ComponentRenderer.styledSpanText)
+    /// calls it per segment. Identity when the member carries no band —
+    /// every pre-wave-52 segment. Twin: InlineSpanContent.kt's
+    /// `SpanStyle(background = …)` (Compose wave 50, lane B9).
+    static func bandedRun(_ run: AttributedString, band: InlineSpanRing.Ink?) -> AttributedString {
+        // No band declared → the run exactly as built (kerns, script faces).
+        guard let band else { return run }
+        // Copy so the caller's run is never mutated in place.
+        var out = run
+        // sRGB 0…1 floats are the IR's own normalised space (schema/spec/02).
+        out.backgroundColor = Color(.sRGB, red: band.r, green: band.g, blue: band.b, opacity: band.a)
+        return out
+    }
+}

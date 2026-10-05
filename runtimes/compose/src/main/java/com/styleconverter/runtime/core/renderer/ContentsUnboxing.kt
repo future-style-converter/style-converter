@@ -40,9 +40,17 @@ object ContentsUnboxing {
     /**
      * The unboxing gate (pin C1/C3). A component unboxes only when ALL of:
      *  - its base Display computes to `contents`;
-     *  - it is NOT positioned out-of-flow and NOT floated — css-display-3
-     *    §2.7 blockifies the display of absolutely-positioned and floated
-     *    elements, so `contents` never survives on them;
+     *  - it is NOT positioned (any non-static `position` keeps the box —
+     *    see the containing-block reason inside). Wave 52 (lane L3, fix
+     *    F2): a FLOATED contents element DOES unbox — css-display-3 §2.7's
+     *    blockification sentence ends "…has no effect on display types
+     *    that generate no box at all (none, contents)", so `float` never
+     *    conjures a box for it. The wave-18 Float clause was a misread of
+     *    that section: on css-display/display-contents-float-001
+     *    (`display:contents; float:right; background:red` around "PASS")
+     *    the kept box painted a full-width RED bar behind the word —
+     *    wave51-fix ios f 0.9417 · android f 0.941 against a ref that is
+     *    the word "PASS" alone (web P 1.0000: Chrome unboxes it);
      *  - it carries NO ::before/::after payload — a contents element's
      *    pseudo-elements DO render (treated as its first/last children,
      *    css-display-3 §2.5), and our pseudo machinery hangs off the
@@ -68,10 +76,16 @@ object ContentsUnboxing {
         val position = PositionExtractor
             .extractPositionConfig(component.properties.map { it.type to it.data }).type
         if (position != PositionType.STATIC) return false
-        // Float blockifies too (§2.7); any non-none float keeps the box.
-        val floated = component.properties.lastOrNull { it.type == "Float" }
-            ?.let { ValueExtractors.extractKeyword(it.data)?.uppercase() }
-        if (floated != null && floated != "NONE") return false
+        // NO float clause (wave 52, lane L3, fix F2): css-display-3 §2.7
+        // blockifies floated elements but explicitly exempts display types
+        // that generate no box (none, contents) — a floated contents
+        // element still has no box to float, and its `Float` declaration
+        // is dropped with the box by inheritableSubset (float does not
+        // inherit). Census: exactly ONE of the 1435 wave51-fix per-test IR
+        // docs carries Display=CONTENTS with a non-none Float (the
+        // display-contents-float-001 target), so the blast radius is that
+        // single cell pair. Pinned by ContentsUnboxingTest (mutation: re-add
+        // the clause → the float row fails).
         // Pseudo payloads render through the component box — keep it.
         if (component.pseudos != null) return false
         // Dynamic buckets could flip display — conservative keep.

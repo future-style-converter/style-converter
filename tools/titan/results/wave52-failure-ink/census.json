@@ -1,0 +1,2261 @@
+{
+  "run": "wave51-fix",
+  "docs": 1435,
+  "f1": {
+    "carriers": [
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9379
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9499
+        },
+        "component": "anchor-position-multicol-007__1__2-672",
+        "containerDisplay": "BLOCK",
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-008.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9699
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9804
+        },
+        "component": "anchor-position-multicol-008__1__0-681",
+        "containerDisplay": "BLOCK",
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-013.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9762
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9807
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-013__1-706",
+        "containerDisplay": "BLOCK",
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-014.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9741
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9807
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-014__1-714",
+        "containerDisplay": "BLOCK",
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-015.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9689
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9871
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-015__1-723",
+        "containerDisplay": "BLOCK",
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-016.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9689
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9871
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-016__1-733",
+        "containerDisplay": "BLOCK",
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-017.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9511
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9823
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-017__1-743",
+        "containerDisplay": "BLOCK",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-colspan-003.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9768
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9919
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-colspan-003__1-752",
+        "containerDisplay": "BLOCK",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-lr-rtl-wrap-reverse.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9721
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9713
+        },
+        "component": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-lr-rtl-wrap-reverse__1-455",
+        "containerDisplay": "FLEX",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-rl-rtl-wrap-reverse.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9721
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9713
+        },
+        "component": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-rl-rtl-wrap-reverse__1-459",
+        "containerDisplay": "FLEX",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-gaps/flex/flex-gap-decorations-006.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8266
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8223
+        },
+        "component": "wpt__css-gaps__flex__flex-gap-decorations-006__1-044",
+        "containerDisplay": "FLEX",
+        "inflow": 6,
+        "widthHeightKids": 6,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__0__0-320",
+        "containerDisplay": null,
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__4__0-336",
+        "containerDisplay": null,
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__5__0-340",
+        "containerDisplay": null,
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.999
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.998
+        },
+        "component": "flexbox_align-items-stretch-writing-modes__1__1__1-776",
+        "containerDisplay": null,
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.999
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.998
+        },
+        "component": "flexbox_align-items-stretch-writing-modes__1__1__2-779",
+        "containerDisplay": null,
+        "inflow": 2,
+        "widthHeightKids": 2,
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__2-813",
+        "containerDisplay": "FLEX",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__3-815",
+        "containerDisplay": "FLEX",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__4-817",
+        "containerDisplay": "FLEX",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__5-819",
+        "containerDisplay": "FLEX",
+        "inflow": 1,
+        "widthHeightKids": 1,
+        "oldGuard": true,
+        "newGuard": true
+      }
+    ],
+    "oldGuardTrue": 20,
+    "newGuardTrue": 12,
+    "bakedStayGuarded": 12,
+    "bakedSlipThrough": 0,
+    "authoredUnguarded": 8,
+    "authoredStillGuarded": 0
+  },
+  "signature": {
+    "widthHeightComponents": 5353,
+    "baked": {
+      "newTrue": 1478,
+      "newFalse": 113
+    },
+    "authored": {
+      "newTrue": 39,
+      "newFalse": 3723
+    },
+    "authoredNewTrue": [
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__0-447"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__1-450"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__2-453"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__3-456"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__5-460"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__6-463"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__7-466"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-overflow-005.html",
+        "component": "wpt__css-anchor-position__anchor-center-overflow-005__8-469"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-safe-rtl.html",
+        "component": "wpt__css-anchor-position__anchor-center-safe-rtl__2-475"
+      },
+      {
+        "test": "css/css-anchor-position/anchor-center-safe-rtl.html",
+        "component": "wpt__css-anchor-position__anchor-center-safe-rtl__4-480"
+      },
+      {
+        "test": "css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html",
+        "component": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3__0-079"
+      },
+      {
+        "test": "css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html",
+        "component": "background-attachment-local__attachment-local-positioning-3__0__0__0-081"
+      },
+      {
+        "test": "css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html",
+        "component": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4__0-083"
+      },
+      {
+        "test": "css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html",
+        "component": "background-attachment-local__attachment-local-positioning-4__0__0__0-085"
+      },
+      {
+        "test": "css/css-backgrounds/background-clip-padding-box-001.html",
+        "component": "background-clip-padding-box-001__1__0-138"
+      },
+      {
+        "test": "css/css-cascade/import-conditional-001.html",
+        "component": "wpt__css-cascade__import-conditional-001__1-026"
+      },
+      {
+        "test": "css/css-cascade/import-conditional-002.html",
+        "component": "wpt__css-cascade__import-conditional-002__1-028"
+      },
+      {
+        "test": "css/css-counter-styles/counter-suffix.html",
+        "component": "counter-suffix__0__4-623"
+      },
+      {
+        "test": "css/css-counter-styles/counter-suffix.html",
+        "component": "counter-suffix__0__4__0-624"
+      },
+      {
+        "test": "css/css-counter-styles/counter-suffix.html",
+        "component": "counter-suffix__0__4__1-626"
+      },
+      {
+        "test": "css/css-counter-styles/counter-suffix.html",
+        "component": "counter-suffix__0__5-628"
+      },
+      {
+        "test": "css/css-counter-styles/counter-suffix.html",
+        "component": "counter-suffix__0__5__0-629"
+      },
+      {
+        "test": "css/css-counter-styles/counter-suffix.html",
+        "component": "counter-suffix__0__5__1-631"
+      },
+      {
+        "test": "css/css-position/position-absolute-center-003.html",
+        "component": "position-absolute-center-003__1__0-055"
+      },
+      {
+        "test": "css/css-position/position-absolute-center-004.html",
+        "component": "position-absolute-center-004__1__0-060"
+      },
+      {
+        "test": "css/css-text/bidi/bidi-lines-001.html",
+        "component": "wpt__css-text__bidi__bidi-lines-001__1-007"
+      },
+      {
+        "test": "css/css-text/bidi/bidi-lines-002.html",
+        "component": "wpt__css-text__bidi__bidi-lines-002__1-015"
+      },
+      {
+        "test": "css/css-ui/box-sizing-005.html",
+        "component": "box-sizing-005__1__0-289"
+      },
+      {
+        "test": "css/css-ui/box-sizing-026.html",
+        "component": "wpt__css-ui__box-sizing-026__2-378"
+      },
+      {
+        "test": "css/css-writing-modes/bidi-plaintext-br-001.html",
+        "component": "wpt__css-writing-modes__bidi-plaintext-br-001__0-412"
+      },
+      {
+        "test": "css/css-writing-modes/bidi-plaintext-br-001.html",
+        "component": "wpt__css-writing-modes__bidi-plaintext-br-001__1-415"
+      },
+      {
+        "test": "css/css-writing-modes/bidi-plaintext-br-001.html",
+        "component": "wpt__css-writing-modes__bidi-plaintext-br-001__2-418"
+      },
+      {
+        "test": "css/css-writing-modes/bidi-plaintext-br-001.html",
+        "component": "wpt__css-writing-modes__bidi-plaintext-br-001__3-423"
+      },
+      {
+        "test": "css/css-writing-modes/bidi-plaintext-br-001.html",
+        "component": "wpt__css-writing-modes__bidi-plaintext-br-001__4-428"
+      },
+      {
+        "test": "css/css-writing-modes/bidi-plaintext-br-001.html",
+        "component": "wpt__css-writing-modes__bidi-plaintext-br-001__5-433"
+      },
+      {
+        "test": "css/filter-effects/backdrop-filter-clip-rect-2.html",
+        "component": "backdrop-filter-clip-rect-2__2__0-059"
+      },
+      {
+        "test": "css/filter-effects/backdrop-filter-clip-rect-2.html",
+        "component": "backdrop-filter-clip-rect-2__2__1-060"
+      },
+      {
+        "test": "css/filter-effects/backdrop-filter-clip-rect-2.html",
+        "component": "backdrop-filter-clip-rect-2__2__2-061"
+      },
+      {
+        "test": "css/filter-effects/backdrop-filter-edge-mirror.html",
+        "component": "wpt__filter-effects__backdrop-filter-edge-mirror__0-119"
+      }
+    ]
+  },
+  "f2": {
+    "displayContents": 106,
+    "floated": [
+      {
+        "test": "css/css-display/display-contents-float-001.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9417
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.941
+        },
+        "component": "wpt__css-display__display-contents-float-001__1-218",
+        "float": "RIGHT",
+        "text": "PASS"
+      }
+    ]
+  },
+  "f3": {
+    "spanners": 28,
+    "spannerWithPositionedDescendant": [
+      {
+        "test": "css/css-multicol/abspos-containing-block-outside-spanner.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9553
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "component": "abspos-containing-block-outside-spanner__8__0__0-034",
+        "positionedDescendants": 2
+      }
+    ]
+  },
+  "f1swift": {
+    "verticalMulticolSoleChild": [
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-017.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9511
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9823
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-017__1-743",
+        "oldGuard": true,
+        "newGuard": true
+      }
+    ]
+  },
+  "f1swiftUsed": [
+    {
+      "test": "css/css-anchor-position/anchor-position-multicol-017.html",
+      "postLoadExtracted": true,
+      "web": {
+        "pass": true,
+        "ssim": 0.999
+      },
+      "ios": {
+        "pass": true,
+        "ssim": 0.9511
+      },
+      "android": {
+        "pass": true,
+        "ssim": 0.9823
+      },
+      "container": "wpt__css-anchor-position__anchor-position-multicol-017__1-743",
+      "child": "anchor-position-multicol-017__1__0-744",
+      "childFlow": true,
+      "oldGuard": true,
+      "newGuard": true
+    }
+  ],
+  "f1Used": {
+    "containers": [
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9379
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9499
+        },
+        "component": "anchor-position-multicol-007__1__2-672",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9379
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9499
+        },
+        "component": "anchor-position-multicol-007__1__2__1-674",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-008.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9699
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9804
+        },
+        "component": "anchor-position-multicol-008__1__0-681",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-008.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9699
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9804
+        },
+        "component": "anchor-position-multicol-008__1__0__1-683",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-008.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9699
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9804
+        },
+        "component": "anchor-position-multicol-008__1__0__1__2-686",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-008.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9699
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9804
+        },
+        "component": "anchor-position-multicol-008__1__0__2-688",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-013.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9762
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9807
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-013__1-706",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-013.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9762
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9807
+        },
+        "component": "anchor-position-multicol-013__1__1-708",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-014.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9741
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9807
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-014__1-714",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-014.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9741
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9807
+        },
+        "component": "anchor-position-multicol-014__1__1-716",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-015.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9689
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9871
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-015__1-723",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-015.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9689
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9871
+        },
+        "component": "anchor-position-multicol-015__1__1-725",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-016.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9689
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9871
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-016__1-733",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-016.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9689
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9871
+        },
+        "component": "anchor-position-multicol-016__1__1-735",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-017.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9511
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9823
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-017__1-743",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-017.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9511
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9823
+        },
+        "component": "anchor-position-multicol-017__1__0-744",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-colspan-003.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9768
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9919
+        },
+        "component": "wpt__css-anchor-position__anchor-position-multicol-colspan-003__1-752",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-colspan-003.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9768
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9919
+        },
+        "component": "anchor-position-multicol-colspan-003__1__0-753",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null,
+          null,
+          null,
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-anchor-position/anchor-position-multicol-colspan-003.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.999
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9768
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9919
+        },
+        "component": "anchor-position-multicol-colspan-003__1__0__0-754",
+        "sourceTag": null,
+        "containerDisplay": "BLOCK",
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-lr-rtl-wrap-reverse.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9721
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9713
+        },
+        "component": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-lr-rtl-wrap-reverse__1-455",
+        "sourceTag": null,
+        "containerDisplay": "FLEX",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-rl-rtl-wrap-reverse.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9721
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9713
+        },
+        "component": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-rl-rtl-wrap-reverse__1-459",
+        "sourceTag": null,
+        "containerDisplay": "FLEX",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/baseline-vertical.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8028
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.6209
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.5727
+        },
+        "component": "baseline-vertical__0__0__0-078",
+        "sourceTag": "td",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/baseline-vertical.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8028
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.6209
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.5727
+        },
+        "component": "baseline-vertical__0__0__1-080",
+        "sourceTag": "td",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-sideways-rl-rtl-overflow__0__0__0-192",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-sideways-rl-rtl-overflow__0__0__1-195",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8741
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8573
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8506
+        },
+        "component": "collapsed-border-vertical-lr-rtl-overflow__0__0__0-201",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8741
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8573
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8506
+        },
+        "component": "collapsed-border-vertical-lr-rtl-overflow__0__0__1-204",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-vertical-rtl-overflow__0__0__0-210",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-vertical-rtl-overflow__0__0__1-213",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/height-distribution/td-different-subpixel-padding-in-same-row-vertical-rl.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9638
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9609
+        },
+        "component": "height-distribution__td-different-subpixel-padding-in-same-row-vertical-rl__0__0-303",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td",
+          "td",
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__0__0-320",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__4__0-336",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__5__0-340",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.999
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.998
+        },
+        "component": "flexbox_align-items-stretch-writing-modes__1__1__1-776",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.999
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.998
+        },
+        "component": "flexbox_align-items-stretch-writing-modes__1__1__2-779",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__2-813",
+        "sourceTag": null,
+        "containerDisplay": "FLEX",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          "input"
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__3-815",
+        "sourceTag": null,
+        "containerDisplay": "FLEX",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          "input"
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__4-817",
+        "sourceTag": null,
+        "containerDisplay": "FLEX",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          "input"
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      },
+      {
+        "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+        "postLoadExtracted": true,
+        "web": {
+          "pass": true,
+          "ssim": 0.9964
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9747
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9743
+        },
+        "component": "wpt__css-writing-modes__forms__input-range-zero-inline-size__5-819",
+        "sourceTag": null,
+        "containerDisplay": "FLEX",
+        "ownWm": true,
+        "otherPath": true,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          "input"
+        ],
+        "oldGuard": true,
+        "newGuard": true
+      }
+    ],
+    "movers": [
+      {
+        "test": "css/css-tables/baseline-vertical.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8028
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.6209
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.5727
+        },
+        "component": "baseline-vertical__0__0__0-078",
+        "sourceTag": "td",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/baseline-vertical.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8028
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.6209
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.5727
+        },
+        "component": "baseline-vertical__0__0__1-080",
+        "sourceTag": "td",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__0__0-320",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__4__0-336",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/abs-pos-border-offset-003.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.9342
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.9262
+        },
+        "component": "abs-pos-border-offset-003__5__0-340",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.999
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.998
+        },
+        "component": "flexbox_align-items-stretch-writing-modes__1__1__1-776",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.999
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.998
+        },
+        "component": "flexbox_align-items-stretch-writing-modes__1__1__2-779",
+        "sourceTag": null,
+        "containerDisplay": null,
+        "ownWm": true,
+        "otherPath": false,
+        "tableInternal": false,
+        "rowConsumed": false,
+        "childTags": [
+          null,
+          null
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      }
+    ],
+    "rowConsumed": [
+      {
+        "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-sideways-rl-rtl-overflow__0__0__0-192",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-sideways-rl-rtl-overflow__0__0__1-195",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8741
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8573
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8506
+        },
+        "component": "collapsed-border-vertical-lr-rtl-overflow__0__0__0-201",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8741
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8573
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8506
+        },
+        "component": "collapsed-border-vertical-lr-rtl-overflow__0__0__1-204",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-vertical-rtl-overflow__0__0__0-210",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": false,
+          "ssim": 0.8733
+        },
+        "ios": {
+          "pass": false,
+          "ssim": 0.8582
+        },
+        "android": {
+          "pass": false,
+          "ssim": 0.8528
+        },
+        "component": "collapsed-border-vertical-rtl-overflow__0__0__1-213",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      },
+      {
+        "test": "css/css-tables/height-distribution/td-different-subpixel-padding-in-same-row-vertical-rl.html",
+        "postLoadExtracted": false,
+        "web": {
+          "pass": true,
+          "ssim": 1
+        },
+        "ios": {
+          "pass": true,
+          "ssim": 0.9638
+        },
+        "android": {
+          "pass": true,
+          "ssim": 0.9609
+        },
+        "component": "height-distribution__td-different-subpixel-padding-in-same-row-vertical-rl__0__0-303",
+        "sourceTag": "tr",
+        "containerDisplay": null,
+        "ownWm": false,
+        "otherPath": false,
+        "tableInternal": true,
+        "rowConsumed": true,
+        "childTags": [
+          "td",
+          "td",
+          "td",
+          "td",
+          "td"
+        ],
+        "oldGuard": true,
+        "newGuard": false
+      }
+    ]
+  }
+}

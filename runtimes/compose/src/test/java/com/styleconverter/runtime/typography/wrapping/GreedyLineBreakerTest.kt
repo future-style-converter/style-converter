@@ -217,4 +217,178 @@ class GreedyLineBreakerTest {
             GreedyLineBreaker.hasUnbreakableOverflowingLine(listOf("x"), 192f, measure = over)
         )
     }
+
+    // ── Wave 52 (lane L9, F4) — the drawn-marker CLAMP over the fold ────
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, mutate.py M4 —
+    // tools/titan/results/wave52-inline-run-wall/mutations-compose.result
+    // .json): with clampLines's fit loop disabled (`while (false && …)`,
+    // the marker appended unconditionally) the 025 pin, `clampDropsTrailing
+    // WordsUntilTheMarkerFits`, `clampMeasuresACustomMarkerAsARealGlyphRun`
+    // and PreBreakPipelineTest's fired-run clamp pin fail. Restored
+    // byte-exact (sha256-verified). The fix pass replaced that loop with
+    // the clampHead walk, so M4 was RE-CUT and re-executed as K5 (the
+    // fit test forced true — marker appended to the whole line N): the same
+    // four pins plus the 030 and 028 pins fail
+    // (mutations-m1-compose.result.json).
+
+    /** css-overflow/line-clamp/block-ellipsis-025's text, VERBATIM off
+     *  wave51-fix/sections/css-overflow/per-test-ir (the ONE component:
+     *  `line-clamp: 4`, `width: 32.5ch`, monospace). */
+    private val ELLIPSIS_025 = "Test passes if there are 4 lines and the last one only contains … " +
+        "supercalifragilisticexpialidocious supercalifragilisticexpialidocious Test fails: this should not be visible"
+
+    /** block-ellipsis-025, the ref's picture: line 3 is the 34ch word
+     *  overflowing the 32.5ch box (CSS 2.1 §9.5), line 4 is the marker
+     *  ALONE — the second copy of the word cannot fit beside "…" either, so
+     *  css-overflow-4 §4.2 hides the whole word at its soft wrap
+     *  opportunity and the ellipsis is all that remains. SwiftUI's tail
+     *  truncation appended "…" AFTER the full word (ios f 0.9495); Compose
+     *  clipped the word and painted no marker (android P 0.9607 — wrong). */
+    @Test
+    fun clampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone() {
+        val lines = GreedyLineBreaker.lines(
+            ELLIPSIS_025, 32.5f * CH, mono, clamp = GreedyLineBreaker.Clamp(4))
+        assertEquals(
+            listOf(
+                "Test passes if there are 4 lines",
+                "and the last one only contains …",
+                "supercalifragilisticexpialidocious",
+                "…",
+            ),
+            lines
+        )
+    }
+
+    /** The marker rides the last kept line when it fits — no word dropped. */
+    @Test
+    fun clampAppendsTheMarkerToAFittingLastLine() {
+        // "aa bb" / "cc dd" / "ee ff" at 6ch; clamp 2 → "cc dd…" is 6ch, fits.
+        assertEquals(
+            listOf("aa bb", "cc dd…"),
+            GreedyLineBreaker.lines("aa bb cc dd ee ff", 6 * CH, mono, clamp = GreedyLineBreaker.Clamp(2))
+        )
+    }
+
+    /** css-overflow-4 §4.2: content is hidden at SOFT WRAP OPPORTUNITIES
+     *  (whole words), never mid-word, until the ellipsis fits. */
+    @Test
+    fun clampDropsTrailingWordsUntilTheMarkerFits() {
+        // "aa bb" / "cc dd" / "ee" at 5ch; clamp 2 → "cc dd…" is 6ch (no
+        // fit) → drop "dd" → "cc…" fits.
+        assertEquals(
+            listOf("aa bb", "cc…"),
+            GreedyLineBreaker.lines("aa bb cc dd ee", 5 * CH, mono, clamp = GreedyLineBreaker.Clamp(2))
+        )
+    }
+
+    /** A clamp only ever REMOVES lines: a paragraph inside the cap is
+     *  returned as the SAME instance (the pipeline detects "trimmed" by
+     *  reference), and so is a non-positive cap. */
+    @Test
+    fun clampIsIdentityWhenTheParagraphFitsTheCap() {
+        val lines = listOf("aa bb", "cc")
+        assertTrue(lines === GreedyLineBreaker.clampLines(lines, GreedyLineBreaker.Clamp(2), 6 * CH, mono))
+        assertTrue(lines === GreedyLineBreaker.clampLines(lines, GreedyLineBreaker.Clamp(3), 6 * CH, mono))
+        assertTrue(lines === GreedyLineBreaker.clampLines(lines, GreedyLineBreaker.Clamp(0), 6 * CH, mono))
+        // And `lines(clamp = null)` is the wave-41 fold byte for byte.
+        assertEquals(
+            GreedyLineBreaker.lines("aa bb cc dd ee", 5 * CH, mono),
+            GreedyLineBreaker.lines("aa bb cc dd ee", 5 * CH, mono, clamp = null)
+        )
+    }
+
+    /** The marker itself is configurable (css-text-4 `hyphenate-character`
+     *  has no analogue here yet, but css-overflow-4 §4.2 lets `block-
+     *  ellipsis: <string>` name one) and is measured like any glyph. */
+    @Test
+    fun clampMeasuresACustomMarkerAsARealGlyphRun() {
+        // "cc dd" + "[more]" = 11ch > 5 → drop "dd" → "cc[more]" = 8 > 5 →
+        // drop "cc" → the marker alone.
+        assertEquals(
+            listOf("aa bb", "[more]"),
+            GreedyLineBreaker.lines("aa bb cc dd ee", 5 * CH, mono, clamp = GreedyLineBreaker.Clamp(2, "[more]"))
+        )
+    }
+
+    // ── Wave 52 fix pass (skeptic M1) — the clamp hides at EVERY modelled
+    //    soft wrap opportunity, not only U+0020 ─────────────────────────
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9 fix pass, mutate.py —
+    // tools/titan/results/wave52-inline-run-wall/mutations-m1-compose
+    // .result.json; restored byte-exact, sha256-verified, each run):
+    // K1 — isClampSeparator narrowed to U+0020: the 030 pin fails (`…`);
+    // K2 — markedLine returns the display line (soft hyphens lost): the
+    //      028 pin fails (`room…`);
+    // K3 — the ideograph/SA decline disabled: the decline pin fails;
+    // K4 — the hyphen/dash break-after arm removed: the dash pin fails.
+
+    /** IR property off the verbatim wire (the PlaceholderOverflowMarkerTest idiom). */
+    private fun prop(t: String, s: String) =
+        com.styleconverter.runtime.core.ir.IRProperty(t, kotlinx.serialization.json.Json.parseToJsonElement(s))
+
+    /** css-overflow/line-clamp/block-ellipsis-030 box 1, VERBATIM off
+     *  wave51-fix/sections/css-overflow/per-test-ir: text `123<U+1680>5 789`,
+     *  `line-clamp: 1` ({"type":"lines","count":1}), `width: 5ch`, monospace.
+     *  U+1680 OGHAM SPACE MARK is UAX #14 class BA — a soft wrap
+     *  opportunity — so css-overflow-4 §4.2 hides `5` there and the ref
+     *  (box 2) paints `123…`. A U+0020-only cut baked `…` alone. The 029
+     *  control (`123 5 789` at 5.1ch, the same ref) rides along. */
+    @Test
+    fun clampHidesAtTheOghamSpaceMarkOfBlockEllipsis030() {
+        val cap = DrawnLineClamp.cap(listOf(prop("LineClamp", """{"type":"lines","count":1}""")))
+        assertEquals(1, cap)
+        assertEquals(
+            listOf("123…"),
+            GreedyLineBreaker.lines("123\u16805 789", 5 * CH, mono, clamp = GreedyLineBreaker.Clamp(cap!!))
+        )
+        assertEquals(
+            listOf("123…"),
+            GreedyLineBreaker.lines("123 5 789", 5.1f * CH, mono, clamp = GreedyLineBreaker.Clamp(cap))
+        )
+    }
+
+    /** css-overflow/line-clamp/block-ellipsis-028, VERBATIM (`line-clamp: 2`,
+     *  `width: 63.1ch`, `hyphens: manual`). Line 2 is exactly 63ch, so the
+     *  marker needs room; both refs hide `cally` at the soft hyphen and
+     *  paint the hyphen: `…room uncharacteristi‐…` (ref-a's U+2010). A
+     *  word-only cut showed `…room…`, 17 cells short of the ref. */
+    @Test
+    fun clampHidesAtTheSoftHyphenOfBlockEllipsis028() {
+        val text = "This time, Mark, who had always been the center of attention in any social gathering, " +
+            "walked into the room uncharacteristi\u00ADcally quietly, barely speaking as he settled into a chair. " +
+            "When asked, he said that he was fine, when he wasn't really fine."
+        assertEquals(
+            listOf(
+                "This time, Mark, who had always been the center of attention in",
+                "any social gathering, walked into the room uncharacteristi\u2010…",
+            ),
+            GreedyLineBreaker.lines(text, 63.1f * CH, mono, clamp = GreedyLineBreaker.Clamp(2))
+        )
+    }
+
+    /** UAX #14 ID/SA opportunities sit BETWEEN letters and are not modelled:
+     *  a hidden tail holding one DECLINES (same instance — the wave-51 shape
+     *  stays), while an ideograph-free tail still trims at its space. */
+    @Test
+    fun clampDeclinesWhenTheHiddenTailHoldsAnIdeograph() {
+        val cjk = listOf("aa bb", "字字字字字字", "cc")
+        assertTrue(cjk === GreedyLineBreaker.clampLines(cjk, GreedyLineBreaker.Clamp(2), 5 * CH, mono))
+        // Control: the ideographs stay in the KEPT part, the tail is Latin.
+        assertEquals(
+            listOf("x", "字字 aa…"),
+            GreedyLineBreaker.clampLines(listOf("x", "字字 aa bb", "y"), GreedyLineBreaker.Clamp(2), 6 * CH, mono)
+        )
+    }
+
+    /** Break-after hyphens/dashes and ZWSP are opportunities; `1-2`
+     *  (HY × NU) and a word-initial hyphen (LB20.1) are not. */
+    @Test
+    fun clampHidesAfterAHyphenAndAtAZeroWidthSpace() {
+        val c = GreedyLineBreaker.Clamp(2)
+        assertEquals(listOf("x", "foo-…"), GreedyLineBreaker.clampLines(listOf("x", "foo-barbaz", "y"), c, 6 * CH, mono))
+        assertEquals(listOf("x", "foo…"), GreedyLineBreaker.clampLines(listOf("x", "foo\u200Bbarbaz", "y"), c, 6 * CH, mono))
+        assertEquals(listOf("x", "…"), GreedyLineBreaker.clampLines(listOf("x", "foo-1234", "y"), c, 6 * CH, mono))
+        assertEquals(listOf("x", "…"), GreedyLineBreaker.clampLines(listOf("x", "-foobarbaz", "y"), c, 6 * CH, mono))
+    }
 }

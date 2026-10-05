@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.core.renderer.SeamReachabilityTest" tests="3" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:53:13.819Z" hostname="mac-1.home" time="0.254">
+  <properties/>
+  <testcase name="every module wave 49 added to the compose runtime has a live call site" classname="com.styleconverter.runtime.core.renderer.SeamReachabilityTest" time="0.246"/>
+  <testcase name="a module named only in prose is not counted as referenced" classname="com.styleconverter.runtime.core.renderer.SeamReachabilityTest" time="0.001"/>
+  <testcase name="the four wave 49 composition seams are still spliced into the renderer" classname="com.styleconverter.runtime.core.renderer.SeamReachabilityTest" time="0.007"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

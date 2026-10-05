@@ -1,0 +1,10 @@
+{
+ "ssrOld": "<span id=\"t\" style=\"color:rgb(0, 128, 0);all:initial\">x</span>",
+ "ssrNew": "<span id=\"t\" style=\"all:initial;color:rgb(0, 128, 0)\">x</span>",
+ "ssrOldComputed": "rgb(0, 0, 0)",
+ "ssrNewComputed": "rgb(0, 128, 0)",
+ "clientOldComputed": "rgb(0, 0, 0)",
+ "clientNewComputed": "rgb(0, 128, 0)",
+ "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/151.0.0.0 Safari/537.36",
+ "premiseHolds": true
+}

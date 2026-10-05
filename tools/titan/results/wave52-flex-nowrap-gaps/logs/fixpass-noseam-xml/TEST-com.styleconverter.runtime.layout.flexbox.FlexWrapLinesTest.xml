@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" tests="26" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.070Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="an auto cross size leaves the lines hugging their items" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="space-around halves the edge share" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.001"/>
+  <testcase name="flex-gap-decorations-002 stretches to 50px lines" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="043 zero leftover keeps the packed FlowColumn geometry" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="no items means no lines" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="stretch adds to whatever the items already claim" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="space-evenly equalizes all four gaps" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="null distribution packs lines at the cross start" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="a single line absorbs the whole definite cross size" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="the remainder lands on the leading lines so the sum is exact" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="046 row-axis line stretch - the same step 8 on the block axis" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="an oversized item still gets its own line" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="line count exposes the gap multiplier" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="gap counts against the line budget" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="center and end position the block, gaps intact" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="015 exact-fit columns stretch to identity" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="045 line collection - nine 70px items in a 400px column budget" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="line-stretch routing gate - stretch keyword with definite cross only" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="a gap that overflows forces the earlier break" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="hugging or overflowing containers pack under every keyword" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="flex-gap-decorations-001 packs two 45px items per line" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="overflowing lines are never compressed" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="045 line stretch - integer split hands the remainder forward" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="space-between distributes the leftover into the line gaps" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="an unbounded container never wraps" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <testcase name="definite cross size stretches zero-height lines" classname="com.styleconverter.runtime.layout.flexbox.FlexWrapLinesTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

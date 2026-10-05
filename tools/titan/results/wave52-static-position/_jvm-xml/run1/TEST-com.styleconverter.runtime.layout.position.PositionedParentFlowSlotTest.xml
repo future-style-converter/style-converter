@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:48:57.315Z" hostname="mac-1.home" time="0.004">
+  <properties/>
+  <testcase name="composited-filters-under-opacity - both children take this slot and nothing else claims them" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.001"/>
+  <testcase name="an absolute child of an absolute, fixed or sticky parent takes the slot" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.0"/>
+  <testcase name="mount installs one layout element and reads the end anchor through anchorGate" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.002"/>
+  <testcase name="an end-anchored axis anchors at the slot's bounded extent, else keeps the start anchor" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.0"/>
+  <testcase name="the BLOCK axis end-anchors too when the Column's height is bounded" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.0"/>
+  <testcase name="the end-edge feeds anchorPlacePx like the overlay's canvas edge does" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.0"/>
+  <testcase name="a relative or static parent never takes the slot" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.0"/>
+  <testcase name="only out-of-flow children qualify" classname="com.styleconverter.runtime.layout.position.PositionedParentFlowSlotTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

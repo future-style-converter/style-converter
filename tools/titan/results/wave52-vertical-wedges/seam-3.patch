@@ -1,0 +1,49 @@
+# seam-3 (wave52 lane L8 vertical-wedges, M-E) — Compose ComponentRenderer.kt RenderTableContent: harvest the UA-only
+# <col>/<colgroup> column widths (TableBoxTree.columnWidthsPx, css-tables-3 §2.1/§3.2) under the capture gate and give
+# each cell of that column the width as a minimum (itemModifier widthIn(min)). Two hunks in RenderTableContent.
+# Cut against HEAD 7d9c22a7; independent of seam-1 (disjoint lines; either order applies). Needs the L8 TableBoxTree.kt.
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -3024,6 +3024,16 @@
+         val tableEstablishes = com.styleconverter.runtime.layout.position.CanvasRootHoist
+             .LocalHasPositionedAncestor.current ||
+             com.styleconverter.runtime.table.TableBoxTree.establishesContainingBlock(component)
++        // Wave 52 lane L8 (M-E) — css-tables-3 §2.1/§3.2: the UA-only
++        // `<col>`/`<colgroup>` boxes the splice above drops still carry
++        // their column's specified width; it becomes each cell's minimum
++        // (wave51-fix ch-units-vrl-003/-004: the green td stayed 6 px wide
++        // under a `width: 5ch` upright col, ref 120). Same capture gate as
++        // the drop; the table's inheritable set resolves the col's 5ch.
++        val columnWidthsPx = if (LocalWptCaptureMode.current)
++            com.styleconverter.runtime.table.TableBoxTree.columnWidthsPx(
++                component.children, LocalInheritedProperties.current)
++        else emptyList()
+         if (rows.isNotEmpty()) {
+             rows.forEach { rowComponent ->
+                 // Each child is a table row. A row group that was spliced
+@@ -3034,7 +3044,7 @@
+                         .establishesContainingBlock(rowComponent)
+                 TableApplier.TableRow {
+                     if (!rowComponent.children.isNullOrEmpty()) {
+-                        rowComponent.children.forEach { cellComponent ->
++                        rowComponent.children.forEachIndexed { cellIndex, cellComponent ->
+                             // Each grandchild is a table cell. The cell's
+                             // OWN RenderComponent runs below and publishes
+                             // its own flag for the cell's subtree; what this
+@@ -3045,7 +3055,15 @@
+                                     com.styleconverter.runtime.layout.position.CanvasRootHoist
+                                         .LocalHasPositionedAncestor provides rowEstablishes
+                                 ) {
+-                                    RenderComponent(cellComponent)
++                                    // M-E: the column's width as the cell's
++                                    // floor (prepended, so a cell's own
++                                    // definite width still wins); no
++                                    // harvested width → the frozen call.
++                                    RenderComponent(
++                                        cellComponent,
++                                        itemModifier = columnWidthsPx.getOrNull(cellIndex)
++                                            ?.let { Modifier.widthIn(min = it.dp) } ?: Modifier,
++                                    )
+                                 }
+                             }
+                         }

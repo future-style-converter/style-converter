@@ -1,0 +1,26 @@
+hunk-for-orchestrator-1.patch — wave 52 lane L11 FIX PASS (skeptic M1, second half): put
+fixtures/combinations/all-then-color.json on the gate set so brief pin 7 actually executes
+(fixtures/combinations/README.md: a pin fixture off tools/visual/gate-fixtures.txt is never
+run), and list it in the combinations README. Both files are owned by NO wave-52 lane, hence a
+hunk for the orchestrator. Base: HEAD 7d9c22a7 (both files unmodified in the tree).
+Land ONLY together with L11's web F1 + seam-4.patch (see the gate-fixtures comment), and LOOK
+at the first capture: the two text rows (InitialUnderRedParent, DirectionSurvives) reset
+font-family to its UA-dependent initial value, so their cross-platform pairs may need a
+ledger line if the faces split them (the `_expect` oracle asserts fill/box only).
+--- a/tools/visual/gate-fixtures.txt	2026-10-05 18:45:22
++++ b/tools/visual/gate-fixtures.txt	2026-10-05 18:45:22
+@@ -30,3 +30,4 @@
+ fixtures/combinations/transform-abspos-pivot.json   # retro F3: the A11#0 abspos-pivot pin (4 TAP_* rows, no waivers; no committed baseline yet -> gate-only + oracle until seeded)
+ fixtures/combinations/blend-isolation.json
+ fixtures/combinations/opacity-blend.json
++fixtures/combinations/all-then-color.json   # wave 52 L11: the order-aware `all` reset pin (4 ATC_* rows, no waivers; no committed baseline yet -> gate-only + oracle until seeded). Needs L11's web F1 (StyleBuilder.ts) AND seam-4.patch (web-harness calibrateStyles) in the same tree, else ATC_AllThenProps / ATC_DirectionSurvives fail the oracle on web (358 px wide).
+--- a/fixtures/combinations/README.md	2026-10-05 18:45:22
++++ b/fixtures/combinations/README.md	2026-10-05 18:45:22
+@@ -89,6 +89,7 @@
+ | `radius-overflow-transform.json` | overflow clip × border-radius × transformed content (clip applies POST-transform, in the clipper's space) |
+ | `gradient-stops-interp.json` | hard gradient stops at non-midpoint positions (css-images-3 §3.4.1) |
+ | `transform-abspos-pivot.json` | transform pivot × absolute positioning (css-transforms-1 §4: transform-origin is the element's OWN border-box centre, (left, top) included; Compose's transform node is OUTER of the abspos offset — finding A11#0). Anchor/mover twin rows so the v1 bbox oracle sees WHERE the mover landed. Listed in `tools/visual/gate-fixtures.txt` (retro F3): a pin fixture off that list is never executed. |
++| `all-then-color.json` | the `all` shorthand × declaration ORDER (css-cascade-4 §6.4 order of appearance, §3.1 the direction / unicode-bidi exemption, §7.3 the per-keyword inherited value): declarations AFTER the last `all` win, the ones before it drop. `all: initial` also resets `display` to `inline` (css-display-3 §2), under which width / height do not apply — so every row that keeps a box re-declares `display: block` AFTER `all` (the oracle was first authored without it and asserted boxes the browser never paints — wave 52 skeptic M1). The PropsThenAll child covers most of its parent so a kept-before-`all` red box out-votes the green. Listed in `tools/visual/gate-fixtures.txt` (wave 52 L11). |
+ 
+ Deliberately absent: a blur-combination fixture. Gaussian tails cannot
+ be hand-computed to a byte, so a blur `_expect` would either restate a

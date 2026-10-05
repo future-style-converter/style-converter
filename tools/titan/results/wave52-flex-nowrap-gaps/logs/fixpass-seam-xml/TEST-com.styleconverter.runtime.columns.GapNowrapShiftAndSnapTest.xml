@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.GapNowrapShiftAndSnapTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.129Z" hostname="mac-1.home" time="0.042">
+  <properties/>
+  <testcase name="snap table - Chromium PixelSnappedIntRect on 045 and 046 bands" classname="com.styleconverter.runtime.columns.GapNowrapShiftAndSnapTest" time="0.001"/>
+  <testcase name="paint shifts follow the container direction - RTL mirrors One's pull" classname="com.styleconverter.runtime.columns.GapNowrapShiftAndSnapTest" time="0.024"/>
+  <testcase name="without the shift the slot jump splits the line and the first rule is lost" classname="com.styleconverter.runtime.columns.GapNowrapShiftAndSnapTest" time="0.015"/>
+  <testcase name="046 bands use the fractional share the SwiftUI twin uses" classname="com.styleconverter.runtime.columns.GapNowrapShiftAndSnapTest" time="0.0"/>
+  <testcase name="027 rules sit in the outer-size gaps once One is shifted to its painted box" classname="com.styleconverter.runtime.columns.GapNowrapShiftAndSnapTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

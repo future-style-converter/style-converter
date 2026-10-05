@@ -1,0 +1,541 @@
+{
+ "summary": {
+  "generatedAt": "2026-10-05T16:02:10.920Z",
+  "run": "wave51-fix",
+  "driven": 18,
+  "solveClassBails": 18,
+  "sampled": 17,
+  "stamped": [
+   {
+    "rel": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+    "ring": "rgb(255, 182, 193)"
+   },
+   {
+    "rel": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+    "ring": "rgb(255, 182, 193)"
+   },
+   {
+    "rel": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+    "ring": "rgb(255, 182, 193)"
+   },
+   {
+    "rel": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+    "ring": "rgb(255, 182, 193)"
+   }
+  ],
+  "notStamped": [
+   {
+    "rel": "css/css-view-transitions/animating-new-content-subset.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/animating-new-content.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/break-inside-avoid-child.html",
+    "sampled": false,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/capture-with-visibility-mixed-descendants.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/class-specificity.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/content-with-child-with-transparent-background.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/content-with-transform-new-image.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/content-with-transform-old-image.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/element-with-overflow.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/far-away-capture.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/inline-child-with-composited-filter.html",
+    "sampled": true,
+    "ring": null
+   },
+   {
+    "rel": "css/css-view-transitions/inline-child-with-filter.html",
+    "sampled": true,
+    "ring": null
+   }
+  ],
+  "stampTouchedOther": [],
+  "nonStampMutated": []
+ },
+ "drives": [
+  {
+   "rel": "css/css-view-transitions/animating-new-content-subset.html",
+   "ms": 5861,
+   "loggedReason": "non-uniform-snapshot target/new (162 colours, 65.07% flat)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "non-uniform-snapshot target/new (162 colours, 65.07% flat) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/animating-new-content.html",
+   "ms": 1668,
+   "loggedReason": "non-uniform-snapshot target/new (117 colours, 65.21% flat)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "non-uniform-snapshot target/new (117 colours, 65.21% flat) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/break-inside-avoid-child.html",
+   "ms": 2457,
+   "loggedReason": "snapshot solve failed for target/old: snapshot overflows its 358x302 box (79800px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for target/old: snapshot overflows its 358x302 box (79800px of ink outside it)"
+   },
+   "ringSampled": false,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/capture-with-visibility-mixed-descendants.html",
+   "ms": 973,
+   "loggedReason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (100px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (100px of ink outside it) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [
+    {
+     "id": "capture-with-visibility-mixed-descendants__body",
+     "properties": {
+      "scrollbar-width": "none"
+     },
+     "_lossy": null,
+     "_lossyReasons": null
+    }
+   ],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/class-specificity.html",
+   "ms": 965,
+   "loggedReason": "snapshot solve failed for shared/old: snapshot overflows its 100x100 box (4400px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for shared/old: snapshot overflows its 100x100 box (4400px of ink outside it) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element.html",
+   "ms": 988,
+   "loggedReason": "snapshot solve failed for target/new: snapshot overflows its 100x100 box (100px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for target/new: snapshot overflows its 100x100 box (100px of ink outside it) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "ms": 822,
+   "loggedReason": "snapshot solve failed for target/old: isolation window 500x200 exceeds the 358x568 viewport",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for target/old: isolation window 500x200 exceeds the 358x568 viewport (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/content-with-child-with-transparent-background.html",
+   "ms": 1476,
+   "loggedReason": "snapshot solve failed for shared/old: snapshot overflows its 50x50 box (2500px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for shared/old: snapshot overflows its 50x50 box (2500px of ink outside it) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/content-with-transform-new-image.html",
+   "ms": 1471,
+   "loggedReason": "non-uniform-snapshot target/new (139 colours, 46.7% flat)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "non-uniform-snapshot target/new (139 colours, 46.7% flat) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/content-with-transform-old-image.html",
+   "ms": 1570,
+   "loggedReason": "non-uniform-snapshot target/old (139 colours, 46.7% flat)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "non-uniform-snapshot target/old (139 colours, 46.7% flat) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/element-with-overflow.html",
+   "ms": 1812,
+   "loggedReason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (1625px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (1625px of ink outside it) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/far-away-capture.html",
+   "ms": 2124,
+   "loggedReason": "non-uniform-snapshot one/old (53 colours, 96.08% flat)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "non-uniform-snapshot one/old (53 colours, 96.08% flat) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "ms": 1146,
+   "loggedReason": "snapshot solve failed for one/new: snapshot overflows its 101x51 box (225px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for one/new: snapshot overflows its 101x51 box (225px of ink outside it) (frame-ring rgb(255, 182, 193) stamped)",
+    "frameRing": "rgb(255, 182, 193)",
+    "written": 1
+   },
+   "ringSampled": true,
+   "ringMeasured": "rgb(255, 182, 193)",
+   "stamped": true,
+   "changed": [
+    {
+     "id": "fractional-box-with-overflow-children-new__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_role": "body-root"
+    }
+   ],
+   "bodyRoots": [
+    {
+     "id": "fractional-box-with-overflow-children-new__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_lossy": true,
+     "_lossyReasons": [
+      "baked-view-transition-tree"
+     ]
+    }
+   ],
+   "displayNoneCount": 1,
+   "vtSubtree": false,
+   "mutated": true
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "ms": 1159,
+   "loggedReason": "snapshot solve failed for one/old: snapshot overflows its 101x51 box (225px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for one/old: snapshot overflows its 101x51 box (225px of ink outside it) (frame-ring rgb(255, 182, 193) stamped)",
+    "frameRing": "rgb(255, 182, 193)",
+    "written": 1
+   },
+   "ringSampled": true,
+   "ringMeasured": "rgb(255, 182, 193)",
+   "stamped": true,
+   "changed": [
+    {
+     "id": "fractional-box-with-overflow-children-old__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_role": "body-root"
+    }
+   ],
+   "bodyRoots": [
+    {
+     "id": "fractional-box-with-overflow-children-old__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_lossy": true,
+     "_lossyReasons": [
+      "baked-view-transition-tree"
+     ]
+    }
+   ],
+   "displayNoneCount": 1,
+   "vtSubtree": false,
+   "mutated": true
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "ms": 1195,
+   "loggedReason": "snapshot solve failed for one/new: snapshot overflows its 101x51 box (624px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for one/new: snapshot overflows its 101x51 box (624px of ink outside it) (frame-ring rgb(255, 182, 193) stamped)",
+    "frameRing": "rgb(255, 182, 193)",
+    "written": 1
+   },
+   "ringSampled": true,
+   "ringMeasured": "rgb(255, 182, 193)",
+   "stamped": true,
+   "changed": [
+    {
+     "id": "fractional-box-with-shadow-new__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_role": "body-root"
+    }
+   ],
+   "bodyRoots": [
+    {
+     "id": "fractional-box-with-shadow-new__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_lossy": true,
+     "_lossyReasons": [
+      "baked-view-transition-tree"
+     ]
+    }
+   ],
+   "displayNoneCount": 1,
+   "vtSubtree": false,
+   "mutated": true
+  },
+  {
+   "rel": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "ms": 1213,
+   "loggedReason": "snapshot solve failed for one/old: snapshot overflows its 101x51 box (624px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for one/old: snapshot overflows its 101x51 box (624px of ink outside it) (frame-ring rgb(255, 182, 193) stamped)",
+    "frameRing": "rgb(255, 182, 193)",
+    "written": 1
+   },
+   "ringSampled": true,
+   "ringMeasured": "rgb(255, 182, 193)",
+   "stamped": true,
+   "changed": [
+    {
+     "id": "fractional-box-with-shadow-old__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_role": "body-root"
+    }
+   ],
+   "bodyRoots": [
+    {
+     "id": "fractional-box-with-shadow-old__body",
+     "properties": {
+      "display": "none",
+      "background-color": "rgb(255, 182, 193)"
+     },
+     "_lossy": true,
+     "_lossyReasons": [
+      "baked-view-transition-tree"
+     ]
+    }
+   ],
+   "displayNoneCount": 1,
+   "vtSubtree": false,
+   "mutated": true
+  },
+  {
+   "rel": "css/css-view-transitions/inline-child-with-composited-filter.html",
+   "ms": 1422,
+   "loggedReason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [
+    {
+     "id": "inline-child-with-composited-filter__body",
+     "properties": {
+      "margin": "0"
+     },
+     "_lossy": null,
+     "_lossyReasons": null
+    }
+   ],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  },
+  {
+   "rel": "css/css-view-transitions/inline-child-with-filter.html",
+   "ms": 1208,
+   "loggedReason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it)",
+   "outcome": {
+    "status": "bailed",
+    "reason": "snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it) (frame-ring null not stamped)",
+    "frameRing": null
+   },
+   "ringSampled": true,
+   "ringMeasured": null,
+   "stamped": false,
+   "changed": [],
+   "bodyRoots": [
+    {
+     "id": "inline-child-with-filter__body",
+     "properties": {
+      "margin": "0"
+     },
+     "_lossy": null,
+     "_lossyReasons": null
+    }
+   ],
+   "displayNoneCount": 0,
+   "vtSubtree": false,
+   "mutated": false
+  }
+ ]
+}

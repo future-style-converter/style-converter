@@ -1,0 +1,33 @@
+hunk-for-L5-1.patch — from L1 (web-tail-colour-vt) to L5 (extractor-cascade), the only lane on the
+tools/titan/extract-fixture.mjs seam this wave (PLAN §3/§5). COMMENT-ONLY, zero behaviour change.
+
+Why: L1's F-B (view-transition-bake.mjs applyBailFrameRingStamp) makes one bail class write the fixture:
+a solve-class bail on a clean drive whose measured settled ring is a uniform non-white colour gains the
+body-root frame-ring stamp. The seam comment at :11645 still says every bail leaves the fixture
+byte-identical (L1 skeptic should-fix 2). Please fold this hunk into your ordered seam patch set (any
+position — it touches only :11645, far from every L5 hunk at :905-:11028), or the orchestrator may apply
+it on its own after L5's set.
+
+Cut against: HEAD 7d9c22a7 (no prior lane patches needed). Verified 2026-10-05 under the seam lock
+(tools/titan/runs/wave52-lock/extract-fixture.mjs): sha eb9742dc…25f60 → `git apply` → `node --check`
+OK → `node --test tools/titan/view-transition-bake.test.mjs` 140/140 (its section-8c wiring pin reads
+this file's `[vt-bake: …]` print line, which the hunk does not touch) → restored with
+`git show HEAD:… >` → sha eb9742dc…25f60 again (equal), `git diff --quiet` clean → lock released.
+
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index 104ef67..3fc4c51 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -11642,7 +11642,11 @@ async function main() {
+         // applyViewTransitionBakePlan), so running it last means the passes
+         // above never operate on the synthetic pseudo-tree subtree and the
+         // synthetic subtree is never re-walked by a pass that expects real
+-        // elements. Skips/declines/bails leave the fixture byte-identical.
++        // elements. Skips/declines/bails leave the fixture byte-identical,
++        // with ONE exception (wave-52 L1 F-B): a solve-class bail on a clean
++        // drive whose MEASURED settled ring is a uniform non-white colour gains
++        // only the body-root frame-ring stamp (view-transition-bake.mjs
++        // applyBailFrameRingStamp); the reason then ends `(frame-ring … stamped)`.
+         let vtNote = '';
+         if (vtBake) {
+           // The bake THROWS on a browser fault rather than dressing one up as

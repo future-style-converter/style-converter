@@ -1,0 +1,517 @@
+{
+ "generated": "2026-10-05T15:32:11.046Z",
+ "run": "wave51-fix",
+ "tests": 14,
+ "extracted": 14,
+ "errors": 0,
+ "testsWithIntroducedColour": 12,
+ "componentsIntroduced": 26,
+ "byTest": [
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-class.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-class__0__3",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Selectively ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class__0__5",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-class-prefix.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-class-prefix__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-class-prefix__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-attr.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-attr__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-attr__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-id-prefix.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-id-prefix__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-id-prefix__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-in-is.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9976",
+    "android": "P 0.9965"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-in-is__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-in-is__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-has.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9371",
+    "android": "P 0.96"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-has__0__3",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Selectively ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-has__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not"
+    },
+    {
+     "id": "invalidation__nth-child-of-has__0__5",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Not"
+    },
+    {
+     "id": "invalidation__nth-child-of-has__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-of-ids.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9995",
+    "ios": "P 0.9976",
+    "android": "P 0.9964"
+   },
+   "introduced": 1,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-of-ids__0__3",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Selectively ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-ids__0__4",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-ids__0__5",
+     "tag": "p",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 0, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__nth-child-of-ids__0__6",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/nth-child-containing-ancestor.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9993",
+    "ios": "P 0.9992",
+    "android": "P 0.9996"
+   },
+   "introduced": 1,
+   "colour": [
+    {
+     "id": "invalidation__nth-child-containing-ancestor__0__0__0__0",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Should be green"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/negated-nth-child-when-ancestor-changes.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9981",
+    "ios": "P 0.9978",
+    "android": "P 0.9981"
+   },
+   "introduced": 4,
+   "colour": [
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__0",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    },
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__1",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__3",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-child-when-ancestor-changes__0__5",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/negated-nth-last-child-when-ancestor-changes.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9981",
+    "ios": "P 0.9978",
+    "android": "P 0.9981"
+   },
+   "introduced": 4,
+   "colour": [
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__0",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    },
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__2",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__4",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Not ignored"
+    },
+    {
+     "id": "invalidation__negated-nth-last-child-when-ancestor-changes__0__5",
+     "tag": "p",
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "Negated"
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/class-id-attr.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9987",
+    "ios": "P 0.9989",
+    "android": "P 0.9993"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "invalidation__class-id-attr__0",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "This should be green"
+    },
+    {
+     "id": "invalidation__class-id-attr__1",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": "And this too"
+    }
+   ]
+  },
+  {
+   "rel": "css/css-color/currentcolor-004.html",
+   "section": "css-color",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9913",
+    "android": "P 0.9901"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "currentcolor-004__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "currentcolor",
+     "now": "rgb(0, 0, 0)",
+     "text": ""
+    },
+    {
+     "id": "currentcolor-004__0__0",
+     "tag": "a",
+     "kind": "repaired",
+     "was": "red",
+     "now": "rgb(255, 0, 0)",
+     "text": ""
+    },
+    {
+     "id": "currentcolor-004__0__0__0",
+     "tag": null,
+     "kind": "repaired",
+     "was": "currentcolor",
+     "now": "rgb(255, 0, 0)",
+     "text": "This should be green and not red."
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/has-visited.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9854",
+    "ios": "f 0.9469",
+    "android": "P 0.9509"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "has-visited__0__0",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "has-visited__0__2",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(154, 205, 50)",
+     "text": ""
+    }
+   ]
+  },
+  {
+   "rel": "css/selectors/invalidation/any-link-attribute-removal.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9995"
+   },
+   "introduced": 0,
+   "colour": [
+    {
+     "id": "invalidation__any-link-attribute-removal__1",
+     "tag": "span",
+     "kind": "repaired",
+     "was": "green",
+     "now": "rgb(0, 128, 0)",
+     "text": "This should be green"
+    }
+   ]
+  }
+ ]
+}

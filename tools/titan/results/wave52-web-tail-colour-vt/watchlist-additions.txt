@@ -1,0 +1,21 @@
+# tools/titan/results/wave52-web-tail-colour-vt/watchlist-additions.txt — L1 additions to tools/titan/results/wave52-plan/watchlist.txt
+# (same format: one bare substring per line = all platforms).
+#
+# FIX PASS 2026-10-05 (skeptic must-fix 2). The first cut labelled the four lines below "MOVERS DOWN" from an
+# AUTHORSHIP predicate (they author a `::view-transition { background }` and bail on a solve-class reason). The real
+# drive (bake-probe.mjs over all 18 solve-class bails, run twice, 0 verdicts differing; bake-probe.json / .run1.json)
+# reads each one's settled ring as null — sampled, white or non-uniform → NOT stamped, fixture byte-identical. They are
+# NEGATIVE CONTROLS: they must NOT move under F-B. If one moves in the closing gate, the ring sample is reading
+# something other than the settled page, or another lane moved it — attribute it, never to L1's stamp.
+# wave51-fix: f 0.9215/0.9196/0.9196 · f 0.8773 ×3 · f 0.9067 ×3 · f 0.2117/0.2118/0.2118.
+css-view-transitions/capture-with-visibility-mixed-descendants
+css-view-transitions/class-specificity
+css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element
+css-view-transitions/far-away-capture
+# Negative control: a solve-class bail WITHOUT an author backdrop (its settled ring reads null → no stamp, measured).
+# Must NOT move under F-B.
+css-view-transitions/element-with-overflow
+# MEASURED, already in watchlist.txt (kept there): css-view-transitions/column-span-during-transition-doesnt-skip ×3
+# P 0.9879 is NOT stamped by F-B — its settled ring reads non-uniform (the `target` group's green snapshot reaches the
+# top edge) → null. Predicted change from L1: 0 on all three (a negative control, not an at-risk cell). The measured
+# F-B blast radius is exactly the four fractional-box targets (already in watchlist.txt), 12 cells, all toward the ref.

@@ -1,0 +1,225 @@
+[
+  {
+    "id": "T2",
+    "sec": "css-display",
+    "test": "display-contents-float-001",
+    "fix": "F2 (Float clause deleted)",
+    "ref": {
+      "w": 390,
+      "h": 600,
+      "red": 0,
+      "green": 0,
+      "redBBox": null
+    },
+    "captures": {
+      "web": {
+        "w": 390,
+        "h": 600,
+        "red": 0,
+        "green": 0,
+        "redBBox": null,
+        "vsRef": {
+          "mismatched": 0,
+          "pct": 0,
+          "bbox": null
+        }
+      },
+      "ios": {
+        "w": 390,
+        "h": 600,
+        "red": 6941,
+        "green": 0,
+        "redBBox": [
+          16,
+          88,
+          373,
+          107
+        ],
+        "vsRef": {
+          "mismatched": 8167,
+          "pct": 3.49,
+          "bbox": [
+            16,
+            36,
+            373,
+            107
+          ]
+        }
+      },
+      "android": {
+        "w": 390,
+        "h": 600,
+        "red": 6958,
+        "green": 0,
+        "redBBox": [
+          16,
+          88,
+          373,
+          107
+        ],
+        "vsRef": {
+          "mismatched": 8396,
+          "pct": 3.588,
+          "bbox": [
+            16,
+            35,
+            373,
+            107
+          ]
+        }
+      }
+    },
+    "predictedResidual_webOverRef": {
+      "mismatched": 0,
+      "pct": 0,
+      "bbox": null
+    }
+  },
+  {
+    "id": "T1",
+    "sec": "css-writing-modes",
+    "test": "flexbox_align-items-stretch-writing-modes",
+    "fix": "F1 (baked signature)",
+    "ref": {
+      "w": 390,
+      "h": 600,
+      "red": 0,
+      "green": 25000,
+      "redBBox": null
+    },
+    "captures": {
+      "web": {
+        "w": 390,
+        "h": 600,
+        "red": 0,
+        "green": 25000,
+        "redBBox": null,
+        "vsRef": {
+          "mismatched": 0,
+          "pct": 0,
+          "bbox": null
+        }
+      },
+      "ios": {
+        "w": 390,
+        "h": 600,
+        "red": 10000,
+        "green": 15000,
+        "redBBox": [
+          166,
+          88,
+          265,
+          187
+        ],
+        "vsRef": {
+          "mismatched": 11179,
+          "pct": 4.777,
+          "bbox": [
+            16,
+            35,
+            350,
+            187
+          ]
+        }
+      },
+      "android": {
+        "w": 390,
+        "h": 600,
+        "red": 10000,
+        "green": 15000,
+        "redBBox": [
+          166,
+          88,
+          265,
+          187
+        ],
+        "vsRef": {
+          "mismatched": 11476,
+          "pct": 4.904,
+          "bbox": [
+            16,
+            35,
+            350,
+            187
+          ]
+        }
+      }
+    },
+    "predictedResidual_webOverRef": {
+      "mismatched": 0,
+      "pct": 0,
+      "bbox": null
+    }
+  },
+  {
+    "id": "T3",
+    "sec": "css-multicol",
+    "test": "abspos-containing-block-outside-spanner",
+    "fix": "F3 (spanner chain → ICB hoist)",
+    "ref": {
+      "w": 390,
+      "h": 600,
+      "red": 0,
+      "green": 20000,
+      "redBBox": null
+    },
+    "captures": {
+      "web": {
+        "w": 390,
+        "h": 600,
+        "red": 0,
+        "green": 20000,
+        "redBBox": null,
+        "vsRef": {
+          "mismatched": 0,
+          "pct": 0,
+          "bbox": null
+        }
+      },
+      "ios": {
+        "w": 390,
+        "h": 600,
+        "red": 20000,
+        "green": 10000,
+        "redBBox": [
+          16,
+          16,
+          373,
+          583
+        ],
+        "vsRef": {
+          "mismatched": 30481,
+          "pct": 13.026,
+          "bbox": [
+            16,
+            16,
+            373,
+            583
+          ]
+        }
+      },
+      "android": {
+        "w": 390,
+        "h": 600,
+        "red": 0,
+        "green": 20000,
+        "redBBox": null,
+        "vsRef": {
+          "mismatched": 609,
+          "pct": 0.26,
+          "bbox": [
+            16,
+            136,
+            195,
+            147
+          ]
+        }
+      }
+    },
+    "predictedResidual_webOverRef": {
+      "mismatched": 0,
+      "pct": 0,
+      "bbox": null
+    }
+  }
+]

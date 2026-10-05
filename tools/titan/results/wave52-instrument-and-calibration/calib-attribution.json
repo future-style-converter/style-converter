@@ -1,0 +1,1603 @@
+{
+ "_lane": "wave52 L12 calibration — capture-hash check + attribution",
+ "prev": "wave52-open",
+ "cur": "wave52-calib",
+ "captures": {
+  "identical": 4305,
+  "differ": 0,
+  "onlyInOneRun": 0,
+  "differList": [],
+  "onlyOneList": []
+ },
+ "scoreGate": {
+  "prev": {
+   "web": {
+    "passing": 1215,
+    "measured": 1379
+   },
+   "ios": {
+    "passing": 1089,
+    "measured": 1369
+   },
+   "android": {
+    "passing": 1080,
+    "measured": 1369
+   }
+  },
+  "cur": {
+   "web": {
+    "passing": 1211,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1084,
+    "measured": 1363
+   },
+   "android": {
+    "passing": 1075,
+    "measured": 1363
+   }
+  },
+  "gained": [
+   {
+    "sec": "css-cascade",
+    "test": "css/css-cascade/initial-background-color.html",
+    "platform": "android",
+    "prev": 0.5414,
+    "cur": 1,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-cascade",
+    "test": "css/css-cascade/initial-background-color.html",
+    "platform": "ios",
+    "prev": 0.5414,
+    "cur": 1,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-cascade",
+    "test": "css/css-cascade/initial-background-color.html",
+    "platform": "web",
+    "prev": 0.5414,
+    "cur": 1,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+    "platform": "web",
+    "prev": 0.94,
+    "cur": 1,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+    "platform": "android",
+    "prev": 0.9466,
+    "cur": 0.9885,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+    "platform": "ios",
+    "prev": 0.9466,
+    "cur": 0.9885,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+    "platform": "web",
+    "prev": 0.9458,
+    "cur": 0.9916,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+    "platform": "android",
+    "prev": 0.922,
+    "cur": 0.987,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+    "platform": "ios",
+    "prev": 0.922,
+    "cur": 0.987,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+    "platform": "web",
+    "prev": 0.9206,
+    "cur": 0.9919,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "filter-effects",
+    "test": "css/filter-effects/backdrop-filter-root-element.html",
+    "platform": "android",
+    "prev": 0.54,
+    "cur": 0.9998,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "filter-effects",
+    "test": "css/filter-effects/backdrop-filter-root-element.html",
+    "platform": "ios",
+    "prev": 0.5401,
+    "cur": 1,
+    "prevPass": false,
+    "curPass": true
+   },
+   {
+    "sec": "filter-effects",
+    "test": "css/filter-effects/backdrop-filter-root-element.html",
+    "platform": "web",
+    "prev": 0.5402,
+    "cur": 1,
+    "prevPass": false,
+    "curPass": true
+   }
+  ],
+  "lost": [
+   {
+    "sec": "css-display",
+    "test": "css/css-display/display-contents-root-background.html",
+    "platform": "android",
+    "prev": 0.9988,
+    "cur": 0.5355,
+    "prevPass": true,
+    "curPass": false
+   },
+   {
+    "sec": "css-display",
+    "test": "css/css-display/display-contents-root-background.html",
+    "platform": "ios",
+    "prev": 0.9994,
+    "cur": 0.5346,
+    "prevPass": true,
+    "curPass": false
+   },
+   {
+    "sec": "css-display",
+    "test": "css/css-display/display-contents-root-background.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": 0.534,
+    "prevPass": true,
+    "curPass": false
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+    "platform": "android",
+    "prev": 1,
+    "cur": 0.94,
+    "prevPass": true,
+    "curPass": false
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+    "platform": "ios",
+    "prev": 1,
+    "cur": 0.94,
+    "prevPass": true,
+    "curPass": false
+   },
+   {
+    "sec": "css-view-transitions",
+    "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+    "platform": "android",
+    "prev": 0.9879,
+    "cur": 0.9332,
+    "prevPass": true,
+    "curPass": false
+   },
+   {
+    "sec": "css-view-transitions",
+    "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+    "platform": "ios",
+    "prev": 0.9879,
+    "cur": 0.9332,
+    "prevPass": true,
+    "curPass": false
+   },
+   {
+    "sec": "css-view-transitions",
+    "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+    "platform": "web",
+    "prev": 0.9879,
+    "cur": 0.9332,
+    "prevPass": true,
+    "curPass": false
+   }
+  ],
+  "newlyMeasured": [],
+  "unmeasuredNow": [
+   {
+    "sec": "css-backgrounds",
+    "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+    "platform": "android",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-backgrounds",
+    "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+    "platform": "ios",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-backgrounds",
+    "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-backgrounds",
+    "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+    "platform": "android",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-backgrounds",
+    "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+    "platform": "ios",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-backgrounds",
+    "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-cascade",
+    "test": "css/css-cascade/scope-implicit-crash-print.html",
+    "platform": "android",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-cascade",
+    "test": "css/css-cascade/scope-implicit-crash-print.html",
+    "platform": "ios",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-cascade",
+    "test": "css/css-cascade/scope-implicit-crash-print.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-flexbox",
+    "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+    "platform": "android",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-flexbox",
+    "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+    "platform": "ios",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-flexbox",
+    "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-images",
+    "test": "css/css-images/gradient-refcrash.html",
+    "platform": "android",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-images",
+    "test": "css/css-images/gradient-refcrash.html",
+    "platform": "ios",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-images",
+    "test": "css/css-images/gradient-refcrash.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-transforms",
+    "test": "css/css-transforms/backface-visibility-hidden-006.html",
+    "platform": "android",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-transforms",
+    "test": "css/css-transforms/backface-visibility-hidden-006.html",
+    "platform": "ios",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-transforms",
+    "test": "css/css-transforms/backface-visibility-hidden-006.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   },
+   {
+    "sec": "css-view-transitions",
+    "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+    "platform": "web",
+    "prev": 1,
+    "cur": null,
+    "prevPass": true,
+    "curPass": null
+   }
+  ],
+  "movers": [
+   {
+    "sec": "css-display",
+    "test": "css/css-display/display-contents-sharing-001.html",
+    "platform": "android",
+    "prev": 0.6892,
+    "cur": 0.6816,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0076
+   },
+   {
+    "sec": "css-display",
+    "test": "css/css-display/display-contents-sharing-001.html",
+    "platform": "ios",
+    "prev": 0.6891,
+    "cur": 0.6815,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0076
+   },
+   {
+    "sec": "css-display",
+    "test": "css/css-display/display-contents-sharing-001.html",
+    "platform": "web",
+    "prev": 0.6891,
+    "cur": 0.6815,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0076
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+    "platform": "android",
+    "prev": 0.9565,
+    "cur": 0.9919,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0354
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+    "platform": "ios",
+    "prev": 0.9565,
+    "cur": 0.9919,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0354
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+    "platform": "web",
+    "prev": 0.9557,
+    "cur": 0.9946,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0389
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+    "platform": "android",
+    "prev": 0.9576,
+    "cur": 0.9933,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0357
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+    "platform": "ios",
+    "prev": 0.9576,
+    "cur": 0.9933,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0357
+   },
+   {
+    "sec": "css-gaps",
+    "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+    "platform": "web",
+    "prev": 0.9568,
+    "cur": 0.996,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0392
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+    "platform": "android",
+    "prev": 0.9585,
+    "cur": 1,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0415
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+    "platform": "ios",
+    "prev": 0.9585,
+    "cur": 1,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0415
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+    "platform": "web",
+    "prev": 0.9585,
+    "cur": 1,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0415
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+    "platform": "android",
+    "prev": 0.9695,
+    "cur": 0.9997,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0302
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+    "platform": "ios",
+    "prev": 0.9695,
+    "cur": 0.9999,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0304
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+    "platform": "web",
+    "prev": 0.9696,
+    "cur": 0.9998,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0302
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+    "platform": "android",
+    "prev": 0.9585,
+    "cur": 1,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0415
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+    "platform": "ios",
+    "prev": 0.9585,
+    "cur": 1,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0415
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+    "platform": "web",
+    "prev": 0.9585,
+    "cur": 1,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0415
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+    "platform": "android",
+    "prev": 0.9696,
+    "cur": 0.9999,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0303
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+    "platform": "ios",
+    "prev": 0.9696,
+    "cur": 0.9999,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0303
+   },
+   {
+    "sec": "css-masking",
+    "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+    "platform": "web",
+    "prev": 0.9697,
+    "cur": 1,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0303
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-absolute-root-element-flex.html",
+    "platform": "android",
+    "prev": 0.7511,
+    "cur": 0.7222,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0289
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-absolute-root-element-flex.html",
+    "platform": "ios",
+    "prev": 0.7915,
+    "cur": 0.7626,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0289
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-absolute-root-element-flex.html",
+    "platform": "web",
+    "prev": 0.7907,
+    "cur": 0.7619,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0288
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-absolute-root-element-grid.html",
+    "platform": "android",
+    "prev": 0.7511,
+    "cur": 0.7222,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0289
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-absolute-root-element-grid.html",
+    "platform": "ios",
+    "prev": 0.7915,
+    "cur": 0.7626,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0289
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-absolute-root-element-grid.html",
+    "platform": "web",
+    "prev": 0.7907,
+    "cur": 0.7619,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0288
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-fixed-root-element-flex.html",
+    "platform": "android",
+    "prev": 0.7427,
+    "cur": 0.712,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0307
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-fixed-root-element-flex.html",
+    "platform": "ios",
+    "prev": 0.815,
+    "cur": 0.8467,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.0317
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-fixed-root-element-flex.html",
+    "platform": "web",
+    "prev": 0.8139,
+    "cur": 0.8456,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.0317
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-fixed-root-element-grid.html",
+    "platform": "android",
+    "prev": 0.7427,
+    "cur": 0.712,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0307
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-fixed-root-element-grid.html",
+    "platform": "ios",
+    "prev": 0.815,
+    "cur": 0.8467,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.0317
+   },
+   {
+    "sec": "css-position",
+    "test": "css/css-position/position-fixed-root-element-grid.html",
+    "platform": "web",
+    "prev": 0.8139,
+    "cur": 0.8456,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.0317
+   },
+   {
+    "sec": "css-text",
+    "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+    "platform": "android",
+    "prev": 0.6796,
+    "cur": 0.745,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.0654
+   },
+   {
+    "sec": "css-text",
+    "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+    "platform": "ios",
+    "prev": 0.744,
+    "cur": 0.7361,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0079
+   },
+   {
+    "sec": "css-text",
+    "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+    "platform": "web",
+    "prev": 0.7567,
+    "cur": 0.8415,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.0848
+   },
+   {
+    "sec": "css-values",
+    "test": "css/css-values/calc-in-media-queries-001.html",
+    "platform": "android",
+    "prev": 0.5535,
+    "cur": 0.9997,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.4462
+   },
+   {
+    "sec": "css-values",
+    "test": "css/css-values/calc-in-media-queries-001.html",
+    "platform": "ios",
+    "prev": 0.5535,
+    "cur": 0.9997,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.4462
+   },
+   {
+    "sec": "css-values",
+    "test": "css/css-values/calc-in-media-queries-001.html",
+    "platform": "web",
+    "prev": 0.5535,
+    "cur": 0.9997,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.4462
+   },
+   {
+    "sec": "css-values",
+    "test": "css/css-values/calc-in-media-queries-002.html",
+    "platform": "android",
+    "prev": 0.5535,
+    "cur": 0.9997,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.4462
+   },
+   {
+    "sec": "css-values",
+    "test": "css/css-values/calc-in-media-queries-002.html",
+    "platform": "ios",
+    "prev": 0.5535,
+    "cur": 0.9997,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.4462
+   },
+   {
+    "sec": "css-values",
+    "test": "css/css-values/calc-in-media-queries-002.html",
+    "platform": "web",
+    "prev": 0.5535,
+    "cur": 0.9997,
+    "prevPass": false,
+    "curPass": false,
+    "delta": 0.4462
+   },
+   {
+    "sec": "CSS2",
+    "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+    "platform": "android",
+    "prev": 0.9309,
+    "cur": 0.9307,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0002
+   },
+   {
+    "sec": "CSS2",
+    "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+    "platform": "ios",
+    "prev": 0.9538,
+    "cur": 0.9536,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0002
+   },
+   {
+    "sec": "CSS2",
+    "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+    "platform": "web",
+    "prev": 0.9947,
+    "cur": 0.9658,
+    "prevPass": true,
+    "curPass": true,
+    "delta": -0.0289
+   },
+   {
+    "sec": "CSS2",
+    "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+    "platform": "android",
+    "prev": 0.9332,
+    "cur": 0.9298,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0034
+   },
+   {
+    "sec": "CSS2",
+    "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+    "platform": "ios",
+    "prev": 0.9321,
+    "cur": 0.9288,
+    "prevPass": false,
+    "curPass": false,
+    "delta": -0.0033
+   },
+   {
+    "sec": "CSS2",
+    "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+    "platform": "web",
+    "prev": 0.9656,
+    "cur": 0.9923,
+    "prevPass": true,
+    "curPass": true,
+    "delta": 0.0267
+   }
+  ]
+ },
+ "cells": {
+  "unchanged": 4217,
+  "movedAttributed": 88,
+  "unattributed": 0
+ },
+ "moved": [
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "web",
+   "prev": "0.9947|true|",
+   "cur": "0.9658|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "ios",
+   "prev": "0.9538|false|",
+   "cur": "0.9536|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "android",
+   "prev": "0.9309|false|",
+   "cur": "0.9307|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "web",
+   "prev": "0.9656|true|",
+   "cur": "0.9923|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "ios",
+   "prev": "0.9321|false|",
+   "cur": "0.9288|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "android",
+   "prev": "0.9332|false|",
+   "cur": "0.9298|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "ios",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "android",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "ios",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "android",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "web",
+   "prev": "0.5414|false|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "ios",
+   "prev": "0.5414|false|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "android",
+   "prev": "0.5414|false|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "ios",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "android",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "0.534|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "ios",
+   "prev": "0.9994|true|",
+   "cur": "0.5346|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "android",
+   "prev": "0.9988|true|",
+   "cur": "0.5355|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "web",
+   "prev": "0.6891|false|",
+   "cur": "0.6815|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "ios",
+   "prev": "0.6891|false|",
+   "cur": "0.6815|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "android",
+   "prev": "0.6892|false|",
+   "cur": "0.6816|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "ios",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "android",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "web",
+   "prev": "0.94|false|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "ios",
+   "prev": "1|true|",
+   "cur": "0.94|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "android",
+   "prev": "1|true|",
+   "cur": "0.94|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "web",
+   "prev": "0.9458|false|",
+   "cur": "0.9916|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "ios",
+   "prev": "0.9466|false|",
+   "cur": "0.9885|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "android",
+   "prev": "0.9466|false|",
+   "cur": "0.9885|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "web",
+   "prev": "0.9206|false|",
+   "cur": "0.9919|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "ios",
+   "prev": "0.922|false|",
+   "cur": "0.987|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "android",
+   "prev": "0.922|false|",
+   "cur": "0.987|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "web",
+   "prev": "0.9557|true|",
+   "cur": "0.9946|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "ios",
+   "prev": "0.9565|true|",
+   "cur": "0.9919|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "android",
+   "prev": "0.9565|true|",
+   "cur": "0.9919|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "web",
+   "prev": "0.9568|true|",
+   "cur": "0.996|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "ios",
+   "prev": "0.9576|true|",
+   "cur": "0.9933|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "android",
+   "prev": "0.9576|true|",
+   "cur": "0.9933|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "ios",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "android",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "web",
+   "prev": "0.9585|true|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "ios",
+   "prev": "0.9585|true|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "android",
+   "prev": "0.9585|true|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "web",
+   "prev": "0.9696|true|",
+   "cur": "0.9998|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "ios",
+   "prev": "0.9695|true|",
+   "cur": "0.9999|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "android",
+   "prev": "0.9695|true|",
+   "cur": "0.9997|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "web",
+   "prev": "0.9585|true|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "ios",
+   "prev": "0.9585|true|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "android",
+   "prev": "0.9585|true|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "web",
+   "prev": "0.9697|true|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "ios",
+   "prev": "0.9696|true|",
+   "cur": "0.9999|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "android",
+   "prev": "0.9696|true|",
+   "cur": "0.9999|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "web",
+   "prev": "0.7907|false|",
+   "cur": "0.7619|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "ios",
+   "prev": "0.7915|false|",
+   "cur": "0.7626|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "android",
+   "prev": "0.7511|false|",
+   "cur": "0.7222|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "web",
+   "prev": "0.7907|false|",
+   "cur": "0.7619|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "ios",
+   "prev": "0.7915|false|",
+   "cur": "0.7626|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "android",
+   "prev": "0.7511|false|",
+   "cur": "0.7222|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "web",
+   "prev": "0.8139|false|",
+   "cur": "0.8456|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "ios",
+   "prev": "0.815|false|",
+   "cur": "0.8467|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "android",
+   "prev": "0.7427|false|",
+   "cur": "0.712|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "web",
+   "prev": "0.8139|false|",
+   "cur": "0.8456|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "ios",
+   "prev": "0.815|false|",
+   "cur": "0.8467|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "android",
+   "prev": "0.7427|false|",
+   "cur": "0.712|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "web",
+   "prev": "0.7567|false|",
+   "cur": "0.8415|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "ios",
+   "prev": "0.744|false|",
+   "cur": "0.7361|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "android",
+   "prev": "0.6796|false|",
+   "cur": "0.745|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "ios",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "android",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "web",
+   "prev": "0.5535|false|",
+   "cur": "0.9997|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "ios",
+   "prev": "0.5535|false|",
+   "cur": "0.9997|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "android",
+   "prev": "0.5535|false|",
+   "cur": "0.9997|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "web",
+   "prev": "0.5535|false|",
+   "cur": "0.9997|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "ios",
+   "prev": "0.5535|false|",
+   "cur": "0.9997|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "android",
+   "prev": "0.5535|false|",
+   "cur": "0.9997|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+   "platform": "web",
+   "prev": "1|true|",
+   "cur": "1|null|absence-only",
+   "why": "absence-only stamp"
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "web",
+   "prev": "0.9879|true|",
+   "cur": "0.9332|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "ios",
+   "prev": "0.9879|true|",
+   "cur": "0.9332|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "android",
+   "prev": "0.9879|true|",
+   "cur": "0.9332|false|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "web",
+   "prev": "0.5402|false|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "ios",
+   "prev": "0.5401|false|",
+   "cur": "1|true|",
+   "why": "re-frozen ref"
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "android",
+   "prev": "0.54|false|",
+   "cur": "0.9998|true|",
+   "why": "re-frozen ref"
+  }
+ ],
+ "unattributed": []
+}

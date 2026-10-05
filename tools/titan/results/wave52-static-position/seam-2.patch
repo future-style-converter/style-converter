@@ -1,0 +1,93 @@
+wave-52 lane L7 · static-position — seam-2 (iOS, T2): ComponentRenderer.swift
+positionedChildren(), the two `containerW/H` arguments of the WPT-capture
+AbsposStaticPosition.staticOffset call ONLY (PLAN §3 row `:2098-2112`).
+
+BASE: cut against HEAD 7d9c22a7 WITH lane L3's
+tools/titan/results/wave52-failure-ink/seam-2.patch applied first (PLAN §4
+"L3 before L7"; L3's hunk is at :4352-4361, far from this one, so this patch
+ALSO applies clean on bare HEAD — both checked with `git apply --check` /
+`patch --dry-run`). L2 delivered no ComponentRenderer.swift patch.
+Why: css-flexbox-1 §4.1 — the sole-flex-item alignment container is the
+CONTENT box; the padding-box extents (childCB/childCBH) stay the percent
+basis. staticOffset (AbsposStaticOffset.swift, L7-owned) adds the
+padding-start edge and the align-items fallback itself.
+Also ADDS runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticOffsetSeamWiringTests.swift
+(the source pin for this hunk; it needs the hunk, so it ships with it). When
+verifying a STACK, apply prior lanes' patches with git apply --include=<seam path>.
+
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -2104,12 +2104,22 @@
+                 : (wptCaptureMode
+                     // Full resolver: raw container wire (the resolved
+                     // declarations — same list the flex container reads)
+-                    // + the §3.1 padding-box channels already computed.
++                    // + the CONTENT-box extents. Wave 52 (lane L7, T2):
++                    // the sole-flex-item alignment container is the
++                    // content box (css-flexbox-1 §4.1), not the §3.1
++                    // padding box childCB/childCBH stay for percent bases;
++                    // staticOffset adds the padding-start edge itself. The
++                    // height keeps the wave-33 used-height fallback
++                    // (absposUsedPaddingBoxHeight minus its padding band =
++                    // the used content height, CSS 2.2 §10.6.3).
+                     ? AbsposStaticPosition.staticOffset(
+                         containerProperties: resolvedProperties,
+                         childProperties: child.properties,
+-                        containerW: childCB,
+-                        containerH: childCBH,
++                        containerW: flexContentSize(style: style, vertical: false),
++                        containerH: flexContentSize(style: style, vertical: true)
++                            ?? absposUsedPaddingBoxHeight(style: style).map {
++                                $0 - ContainingBlockBasis.paddingBand(style: style, vertical: true)
++                            },
+                         wptCaptureMode: true)
+                     // Wave-18 machinery, byte-identical for dark stage.
+                     : AbsposStaticAlignment.staticCrossOffset(
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticOffsetSeamWiringTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticOffsetSeamWiringTests.swift
+new file mode 100644
+--- /dev/null
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/AbsposStaticOffsetSeamWiringTests.swift
+@@ -0,0 +1,42 @@
++//
++//  AbsposStaticOffsetSeamWiringTests.swift
++//  Wave 52 (lane L7, static-position T2) — SOURCE pin for the one seam hunk
++//  lane L7 delivers in tools/titan/results/wave52-static-position/
++//  seam-2.patch (this file ships INSIDE that patch, so it lands with it).
++//  positionedChildren() is a private SwiftUI view builder; the math it calls
++//  is pinned in AbsposFlexStaticOffsetTests (S1–S4). This pin proves the
++//  seam hands staticOffset the CONTENT-box extents (flexContentSize), not
++//  the §3.1 padding box (childCB / childCBH, which stay the percent basis).
++//  NEGATIVE CONTROL EXECUTED: run on bare HEAD (seam not applied) → fails
++//  (tools/titan/results/wave52-static-position/_seam2-verify.log).
++//
++
++import XCTest
++
++final class AbsposStaticOffsetSeamWiringTests: XCTestCase {
++
++    /// The renderer's source text, located from this file (#filePath).
++    private func rendererSource() throws -> String {
++        let url = URL(fileURLWithPath: #filePath)
++            .deletingLastPathComponent()   // StyleConverterRuntimeTests/
++            .deletingLastPathComponent()   // Tests/
++            .deletingLastPathComponent()   // runtimes/swiftui/
++            .appendingPathComponent("Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift")
++        return try String(contentsOf: url, encoding: .utf8)
++    }
++
++    func testWptStaticOffsetCallPassesContentBoxExtents() throws {
++        let src = try rendererSource()
++        // The WPT-capture call inside positionedChildren().
++        guard let start = src.range(of: "? AbsposStaticPosition.staticOffset("),
++              let end = src.range(of: "wptCaptureMode: true)", range: start.upperBound..<src.endIndex)
++        else { return XCTFail("staticOffset call not found") }
++        let call = String(src[start.lowerBound..<end.upperBound])
++        // Content-box extents on both axes (css-flexbox-1 §4.1).
++        XCTAssertTrue(call.contains("containerW: flexContentSize(style: style, vertical: false)"))
++        XCTAssertTrue(call.contains("containerH: flexContentSize(style: style, vertical: true)"))
++        // The padding-box channels are no longer the alignment container.
++        XCTAssertFalse(call.contains("containerW: childCB,"))
++        XCTAssertFalse(call.contains("containerH: childCBH,"))
++    }
++}

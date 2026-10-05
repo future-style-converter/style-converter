@@ -1,4 +1,5 @@
 import XCTest
+import SwiftUI
 @testable import StyleConverterRuntime
 
 /// Wave 47, lane Z6 — the STYLED-SPAN RING's pure pins
@@ -170,13 +171,128 @@ final class InlineSpanRingTests: XCTestCase {
             ],
             hostProperties: [])
         XCTAssertEqual(admitted(styleless)?.1.isEmpty, true)
-        // Anything outside the ring refuses with the type named (032's
-        // pre-wrap hangs span — the hanging-whitespace ring's wall).
+        // Anything outside the ring refuses with the type named — a
+        // GLYPH-BEARING member's `white-space` is still the wall it was
+        // (the glyphless arm below is the one exception, wave 52).
         let ws = InlineSpanRing.admit(
             tag: "span",
             properties: [IRProperty(type: "WhiteSpace", data: .string("PRE_WRAP"))],
             hostProperties: [])
         XCTAssertEqual(refusal(ws), "member-prop:WhiteSpace")
+    }
+
+    // MARK: - Wave 52 (lane L9): the HANGING-WHITESPACE ring (Compose wave 50 ported)
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, Catalyst, mutate.py —
+    // tools/titan/results/wave52-inline-run-wall/mutations-swift.result
+    // .json): S2 — the WhiteSpace arm's `guard glyphless` turned into
+    // `guard false` (the arm answering as wave 51 did): the first case
+    // below, the collapsing-keyword case and InlineRunFlowTests' 032 wire
+    // fold fail; S3 — the parameter defaulted TRUE: the default-relying
+    // glyph-member pin in testBordersAreAStatedLossStylelessBordersInert…
+    // (`member-prop:WhiteSpace` asserted, an admission returned) fails;
+    // S4 — InlineRunFlow's glyphless predicate forced false: the 032 wire
+    // fold fails. Restored byte-exact (sha256-verified).
+
+    func testGlyphlessPreWrapMemberAdmitsItsPreservedSpacesAndBand() {
+        // block-ellipsis-032's `<span class=hangs>` payload, verbatim
+        // shapes: `white-space: pre-wrap` + `background-color: red` over
+        // eight U+0020. Glyph-less, so the keyword only governs how that
+        // white space is processed (css-text-3 §3 preserves it) and the
+        // band is a solid rect over the advance (css-backgrounds-3 §2.1).
+        let props = [
+            IRProperty(type: "WhiteSpace", data: .string("PRE_WRAP")),
+            IRProperty(type: "BackgroundColor", data: srgb(1, 0, 0)),
+        ]
+        guard let (style, losses) = admitted(InlineSpanRing.admit(
+            tag: "span", properties: props, hostProperties: [], glyphless: true)) else { return }
+        XCTAssertEqual(style.background, InlineSpanRing.Ink(r: 1, g: 0, b: 0, a: 1))
+        // The band member paints no glyphs, so it contributes no ink
+        // attribution beyond the background — and no stated loss.
+        XCTAssertNil(style.ink)
+        XCTAssertFalse(style.isPlain)
+        XCTAssertTrue(losses.isEmpty)
+        // Every preserving keyword rides the same way (§3: pre, pre-wrap,
+        // break-spaces PRESERVE the space run; pre-line collapses it — see
+        // the collapsing pin below).
+        for kw in ["PRE", "BREAK_SPACES", "pre-wrap"] {
+            let one = InlineSpanRing.admit(
+                tag: "span",
+                properties: [IRProperty(type: "WhiteSpace", data: .string(kw))],
+                hostProperties: [], glyphless: true)
+            XCTAssertNotNil(admitted(one), kw)
+        }
+    }
+
+    func testGlyphBearingMemberStillRefusesWhiteSpaceAndBackground() {
+        // The ring is admitted ONLY for a glyph-less member: a paragraph
+        // lays out under ONE white-space mode, and a band behind real
+        // glyphs is uncalibrated (the admit banner). Same props, glyphs
+        // present → the wave-44 refusals, type named.
+        let ws = InlineSpanRing.admit(
+            tag: "span",
+            properties: [IRProperty(type: "WhiteSpace", data: .string("PRE_WRAP"))],
+            hostProperties: [], glyphless: false)
+        XCTAssertEqual(refusal(ws), "member-prop:WhiteSpace")
+        let bg = InlineSpanRing.admit(
+            tag: "span",
+            properties: [IRProperty(type: "BackgroundColor", data: srgb(1, 0, 0))],
+            hostProperties: [], glyphless: false)
+        XCTAssertEqual(refusal(bg), "member-prop:BackgroundColor")
+    }
+
+    func testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless() {
+        // `normal` / `nowrap` / `pre-line` collapse a space run to ONE
+        // space (css-text-3 §4.1.1 — `pre-line` keeps segment breaks only);
+        // the fold appends the member's text verbatim, so admitting them
+        // would paint a run CSS collapses away. Twin of InlineRunFoldTest.kt's
+        // `a collapsing white-space keyword refuses even on a glyph-less
+        // member`. MUTATION PROOF (executed 2026-10-05, lane L9 fix pass,
+        // mutations-s3-swift.result.json): with "pre-line" put back into
+        // the preserving arm this test fails on PRE_LINE; restored
+        // byte-exact (sha256-verified).
+        for kw in ["NORMAL", "NOWRAP", "PRE_LINE"] {
+            let a = InlineSpanRing.admit(
+                tag: "span",
+                properties: [IRProperty(type: "WhiteSpace", data: .string(kw))],
+                hostProperties: [], glyphless: true)
+            XCTAssertEqual(refusal(a), "member-prop:WhiteSpace-collapsing", kw)
+        }
+    }
+
+    // MARK: - Wave 52 (lane L9): `hanging-punctuation` is an inert member prop
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, Catalyst, mutate.py S1
+    // — mutations-swift.result.json): with the `case "HangingPunctuation":`
+    // arm removed, this pin and InlineRunFlowTests' hanging-punctuation-
+    // inline-001 wire fold fail (`member-prop:HangingPunctuation` returned
+    // / the fold refused). Restored byte-exact (sha256-verified).
+
+    func testHangingPunctuationIsAdmittedInertWithItsKeywordsNamed() {
+        // hanging-punctuation-inline-001's `<span>` payload, verbatim shape
+        // (`HangingPunctuation=["LAST"]`). css-text-3 §8.3: a line-end
+        // behaviour of the glyph, unimplemented on iOS (parse-only), so the
+        // member folds PLAIN and the un-hung punctuation is a STATED loss
+        // the seam's breadcrumb names.
+        let last = InlineSpanRing.admit(
+            tag: "span",
+            properties: [IRProperty(type: "HangingPunctuation", data: .array([.string("LAST")]))],
+            hostProperties: [])
+        guard let (style, losses) = admitted(last) else { return }
+        XCTAssertTrue(style.isPlain)
+        XCTAssertEqual(losses, ["hanging-punctuation(last)"])
+        // Multi-keyword and bare-keyword wires name every keyword.
+        let both = InlineSpanRing.admit(
+            tag: "span",
+            properties: [IRProperty(type: "HangingPunctuation",
+                                    data: .array([.string("FIRST"), .string("ALLOW_END")]))],
+            hostProperties: [])
+        XCTAssertEqual(admitted(both)?.1, ["hanging-punctuation(first,allow_end)"])
+        let none = InlineSpanRing.admit(
+            tag: "span",
+            properties: [IRProperty(type: "HangingPunctuation", data: .string("none"))],
+            hostProperties: [])
+        XCTAssertEqual(admitted(none)?.1, ["hanging-punctuation(none)"])
     }
 
     // MARK: - Wave 48 (lane W4): the UA-styled tag rings
@@ -354,5 +470,62 @@ final class InlineSpanRingTests: XCTestCase {
         // A case rewrite is outside the op set — the label then renders
         // the fold un-styled (degraded style, never wrong glyphs).
         XCTAssertNil(InlineSpanRing.alignment(original: "abc", transformed: "ABC"))
+    }
+
+    // MARK: - Wave 52 (lane L9, F4/F2): the clamp's hidden tail + the band
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, Catalyst, mutate.py —
+    // mutations-swift.result.json): S5 — `?? clampedAlignment(...)` removed
+    // from `alignment`: both clamp-tail tests fail (nil returned); S6 —
+    // TypographyApplier.bandedRun's backgroundColor write removed: the band
+    // test fails (no backgroundColor on the run). Restored byte-exact,
+    // sha256-verified.
+
+    func testClampTrimmed032ParagraphStillAlignsItsMembers() {
+        // block-ellipsis-032's fold string (InlineRunFlowTests' 032 pin)
+        // against the label's display string once the drawn-marker
+        // `line-clamp: 1` bakes its marker at 29ch (GreedyLineBreaker
+        // .clampLines): the kept line plus "…". Without the hidden-tail arm
+        // the walk answered nil and the green bold member rendered
+        // un-styled (the seam's degraded fallback). Twin: InlineRunFoldTest
+        // .kt `the clamp-trimmed 032 paragraph still aligns`.
+        let original = "This text is left-aligned        Clamped"
+        let map = InlineSpanRing.alignment(original: original,
+                                           transformed: "This text is left-aligned\u{2026}")
+        XCTAssertNotNil(map)
+        // The green bold member [13, 25) keeps its exact range.
+        XCTAssertEqual(map?[13], 13)
+        XCTAssertEqual(map?[25], 25)
+        // The red pre-wrap band [25, 33) is hidden with the tail: empty.
+        XCTAssertEqual(map?[33], 25)
+        // End sentinel stops BEFORE the marker (the block's own inline).
+        XCTAssertEqual(map?[original.count], 25)
+    }
+
+    func testClampTailComposesWithThePreBreakAndRefusesUnexplainedSurgery() {
+        // A multi-line run whose last kept line lost `dd` to the fit test.
+        let map = InlineSpanRing.alignment(original: "aa bb cc dd ee",
+                                           transformed: "aa bb\ncc\u{2026}")
+        XCTAssertEqual(map?[5], 5)   // the space that became the break
+        XCTAssertEqual(map?[6], 6)   // `cc` verbatim on line 2
+        XCTAssertEqual(map?[8], 8)   // the separator before hidden `dd`
+        XCTAssertEqual(map?[11], 8)  // `dd ee` hidden onto the marker
+        XCTAssertEqual(map?[14], 8)  // end sentinel = kept prefix length
+        // A trailing "…" does not make arbitrary surgery alignable.
+        XCTAssertNil(InlineSpanRing.alignment(original: "abc", transformed: "xyz\u{2026}"))
+    }
+
+    func testGlyphlessBandRidesTheRunAsABackgroundAttribute() {
+        // css-backgrounds-3 §2.1 — the glyph-less member's own band over
+        // its advance; 032's `<span class=hangs>` red over eight spaces.
+        let spaces = AttributedString("        ")
+        let red = InlineSpanRing.Ink(r: 1, g: 0, b: 0, a: 1)
+        let banded = TypographyApplier.bandedRun(spaces, band: red)
+        XCTAssertEqual(banded.backgroundColor, Color(.sRGB, red: 1, green: 0, blue: 0, opacity: 1))
+        // The characters are untouched — only the attribute is added.
+        XCTAssertEqual(String(banded.characters), "        ")
+        // No band → the run comes back exactly as built.
+        XCTAssertEqual(TypographyApplier.bandedRun(spaces, band: nil), spaces)
+        XCTAssertNil(TypographyApplier.bandedRun(spaces, band: nil).backgroundColor)
     }
 }

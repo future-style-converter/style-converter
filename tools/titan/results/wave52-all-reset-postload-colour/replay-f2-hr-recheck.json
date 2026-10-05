@@ -1,0 +1,56 @@
+{
+ "generated": "2026-10-05T15:37:51.356Z",
+ "run": "wave51-fix",
+ "tests": 2,
+ "extracted": 2,
+ "errors": 0,
+ "testsWithIntroducedColour": 1,
+ "componentsIntroduced": 2,
+ "byTest": [
+  {
+   "rel": "css/css-pseudo/active-selection-057.html",
+   "section": "css-pseudo",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9994",
+    "android": "P 0.9986"
+   },
+   "introduced": 0,
+   "colour": []
+  },
+  {
+   "rel": "css/selectors/has-visited.html",
+   "section": "selectors",
+   "status": "extracted",
+   "reason": null,
+   "structure": false,
+   "cells": {
+    "web": "P 0.9854",
+    "ios": "f 0.9469",
+    "android": "P 0.9509"
+   },
+   "introduced": 2,
+   "colour": [
+    {
+     "id": "has-visited__0__0",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(0, 128, 0)",
+     "text": ""
+    },
+    {
+     "id": "has-visited__0__2",
+     "tag": null,
+     "kind": "introduced",
+     "was": null,
+     "now": "rgb(154, 205, 50)",
+     "text": ""
+    }
+   ]
+  }
+ ]
+}

@@ -1,0 +1,219 @@
+{
+  "family": "vertical-wedges",
+  "lane": "L8",
+  "run": "wave51-fix",
+  "docs": 1435,
+  "sections": 30,
+  "chDocs": {
+    "count": 74,
+    "noFontFamily": 18,
+    "noFontFamilyDocs": [
+      "css-text/hyphens/hyphens-auto-001 [wIA]",
+      "css-text/hyphens/hyphens-auto-last-word-001 [wia]",
+      "css-text/hyphens/hyphens-none-shy-on-2nd-line-001 [WIA]",
+      "css-text/hyphens/hyphens-out-of-flow-001 [Wia]",
+      "css-text/hyphens/hyphens-out-of-flow-002 [wIa]",
+      "css-text/hyphens/hyphens-punctuation-001 [WIa]",
+      "css-text/hyphens/hyphens-span-001 [Wia]",
+      "css-text/hyphens/hyphens-span-002 [WIA]",
+      "css-text-decor/text-decoration-inset-004 [WIA]",
+      "css-values/ch-unit-001 [Wia]",
+      "css-writing-modes/ch-units-vrl-001 [wia]",
+      "css-writing-modes/ch-units-vrl-002 [wia]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-005 [Wia]",
+      "css-writing-modes/ch-units-vrl-006 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]"
+    ]
+  },
+  "chCarriers": {
+    "total": 169,
+    "uprightVertical": 18,
+    "uprightVerticalDocs": [
+      "css-writing-modes/ch-units-vrl-001 [wia]",
+      "css-writing-modes/ch-units-vrl-002 [wia]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-005 [Wia]",
+      "css-writing-modes/ch-units-vrl-006 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]"
+    ],
+    "otherVertical": 15,
+    "horizontal": 136
+  },
+  "chRuntimeUprightVertical": {
+    "carriers": 16,
+    "docs": [
+      "css-writing-modes/ch-units-vrl-001 [wia]",
+      "css-writing-modes/ch-units-vrl-002 [wia]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-005 [Wia]",
+      "css-writing-modes/ch-units-vrl-006 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]"
+    ]
+  },
+  "chFacelessCarriers": {
+    "carriers": 79,
+    "docs": [
+      "css-text/bidi/bidi-lines-001 [WIa]",
+      "css-text/bidi/bidi-lines-002 [WIA]",
+      "css-text/hyphens/hyphens-auto-001 [wIA]",
+      "css-text/hyphens/hyphens-auto-last-word-001 [wia]",
+      "css-text/hyphens/hyphens-none-shy-on-2nd-line-001 [WIA]",
+      "css-text/hyphens/hyphens-out-of-flow-001 [Wia]",
+      "css-text/hyphens/hyphens-out-of-flow-002 [wIa]",
+      "css-text/hyphens/hyphens-punctuation-001 [WIa]",
+      "css-text/hyphens/hyphens-span-001 [Wia]",
+      "css-text/hyphens/hyphens-span-002 [WIA]",
+      "css-text-decor/text-decoration-inset-004 [WIA]",
+      "css-values/ch-unit-001 [Wia]",
+      "css-writing-modes/ch-units-vrl-001 [wia]",
+      "css-writing-modes/ch-units-vrl-002 [wia]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-005 [Wia]",
+      "css-writing-modes/ch-units-vrl-006 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]"
+    ]
+  },
+  "chFacelessSizing": {
+    "carriers": 73,
+    "docs": [
+      "css-text/hyphens/hyphens-auto-001 [wIA]",
+      "css-text/hyphens/hyphens-auto-last-word-001 [wia]",
+      "css-text/hyphens/hyphens-none-shy-on-2nd-line-001 [WIA]",
+      "css-text/hyphens/hyphens-out-of-flow-001 [Wia]",
+      "css-text/hyphens/hyphens-out-of-flow-002 [wIa]",
+      "css-text/hyphens/hyphens-punctuation-001 [WIa]",
+      "css-text/hyphens/hyphens-span-001 [Wia]",
+      "css-text/hyphens/hyphens-span-002 [WIA]",
+      "css-text-decor/text-decoration-inset-004 [WIA]",
+      "css-values/ch-unit-001 [Wia]",
+      "css-writing-modes/ch-units-vrl-001 [wia]",
+      "css-writing-modes/ch-units-vrl-002 [wia]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-005 [Wia]",
+      "css-writing-modes/ch-units-vrl-006 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]"
+    ]
+  },
+  "chFacelessSpacingOnly": {
+    "carriers": 2,
+    "docs": [
+      "css-text/bidi/bidi-lines-001 [WIa]",
+      "css-text/bidi/bidi-lines-002 [WIA]"
+    ]
+  },
+  "runtimeUprightLeaves": {
+    "count": 14,
+    "docs": [
+      "css-writing-modes/available-size-011 [Wia]",
+      "css-writing-modes/ch-units-vrl-001 [wia]",
+      "css-writing-modes/ch-units-vrl-002 [wia]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-005 [Wia]",
+      "css-writing-modes/ch-units-vrl-006 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]",
+      "css-writing-modes/direction-upright-001 [wia]",
+      "css-writing-modes/forms/checkbox-appearance-native-vertical-lr-baseline.optional [wia]",
+      "css-writing-modes/forms/checkbox-appearance-native-vertical-rl-baseline.optional [wia]",
+      "css-writing-modes/forms/radio-appearance-native-vertical-lr-baseline.optional [wia]",
+      "css-writing-modes/forms/radio-appearance-native-vertical-rl-baseline.optional [wia]"
+    ]
+  },
+  "uprightVerticalTextLeaves": {
+    "count": 10,
+    "docs": [
+      "css-writing-modes/ch-units-vrl-001 [wia]",
+      "css-writing-modes/ch-units-vrl-002 [wia]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-005 [Wia]",
+      "css-writing-modes/ch-units-vrl-006 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]",
+      "css-writing-modes/direction-upright-001 [wia]",
+      "css-writing-modes/direction-upright-002 [wia]"
+    ]
+  },
+  "mixedCjkVerticalTextLeaves": {
+    "count": 5,
+    "docs": [
+      "css-writing-modes/available-size-011 [Wia]",
+      "css-writing-modes/forms/checkbox-appearance-native-vertical-lr-baseline.optional [wia]",
+      "css-writing-modes/forms/checkbox-appearance-native-vertical-rl-baseline.optional [wia]",
+      "css-writing-modes/forms/radio-appearance-native-vertical-lr-baseline.optional [wia]",
+      "css-writing-modes/forms/radio-appearance-native-vertical-rl-baseline.optional [wia]"
+    ]
+  },
+  "asciiMixedVerticalTextLeaves": {
+    "count": 24,
+    "docs": [
+      "css-counter-styles/counter-style-at-rule/disclosure-styles [wia]",
+      "css-gaps/flex/flex-gap-decorations-006 [Wia]",
+      "css-gaps/flex/flex-gap-decorations-031 [WIA]",
+      "css-gaps/flex/flex-gap-decorations-032 [WIA]",
+      "css-multicol/column-fill-balance-orthog-block-001 [WiA]",
+      "css-text/hyphens/hyphens-vertical-001 [wia]",
+      "css-text-decor/line-through-vertical [Wia]",
+      "css-text-decor/text-decoration-inset-012 [wia]",
+      "css-writing-modes/available-size-001 [WIA]",
+      "css-writing-modes/available-size-002 [WIA]",
+      "css-writing-modes/available-size-003 [WIA]",
+      "css-writing-modes/available-size-004 [WIA]",
+      "css-writing-modes/available-size-005 [WIA]",
+      "css-writing-modes/available-size-012 [WIA]",
+      "css-writing-modes/available-size-013 [WIA]",
+      "css-writing-modes/available-size-014 [WIA]",
+      "css-writing-modes/available-size-017 [WIA]",
+      "css-writing-modes/available-size-018 [WIA]",
+      "css-writing-modes/baseline-with-orthogonal-flow-001 [WIA]",
+      "css-writing-modes/direction-upright-001 [wia]",
+      "css-writing-modes/float-vlr-014 [WIA]",
+      "css-writing-modes/forms/select-appearance-none-vertical-lr.optional [WIA]",
+      "css-writing-modes/forms/select-appearance-none-vertical-rl.optional [WIA]",
+      "css-writing-modes/inline-box-border-vlr-001 [wia]"
+    ]
+  },
+  "colWithWidth": {
+    "count": 5,
+    "docs": [
+      "css-tables/border-collapse-dynamic-col-001 [WiA]",
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]"
+    ]
+  },
+  "colWithWidthUaOnly": {
+    "count": 4,
+    "docs": [
+      "css-writing-modes/ch-units-vrl-003 [Wia]",
+      "css-writing-modes/ch-units-vrl-004 [Wia]",
+      "css-writing-modes/ch-units-vrl-007 [wia]",
+      "css-writing-modes/ch-units-vrl-008 [wia]"
+    ]
+  },
+  "rangeZeroBox": {
+    "count": 1,
+    "docs": [
+      "css-writing-modes/forms/input-range-zero-inline-size [Wia]"
+    ]
+  },
+  "anyWidgetZeroBox": {
+    "count": 1,
+    "docs": [
+      "css-writing-modes/forms/input-range-zero-inline-size [Wia]"
+    ]
+  }
+}
