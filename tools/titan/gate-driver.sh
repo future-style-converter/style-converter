@@ -61,6 +61,10 @@ set -uo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 TITAN_DIR="$PROJECT_ROOT/tools/titan"
+# Process hygiene (wave 52): the driver stops ONLY the emulators
+# provision-devices.sh recorded and the test browsers started from this
+# checkout — never every emulator / puppeteer browser on the host.
+source "$TITAN_DIR/own-processes.sh"
 # The 30 corpus sections, in corpus-v6.15's capture order — the scorer diffs
 # by section name, so order only affects when a wedge would surface.
 DEFAULT_SECTIONS="CSS2 css-anchor-position css-backgrounds css-break css-cascade css-color css-contain css-counter-styles css-display css-flexbox css-gaps css-grid css-images css-lists css-masking css-multicol css-overflow css-position css-pseudo css-sizing css-tables css-text css-text-decor css-transforms css-ui css-values css-view-transitions css-writing-modes filter-effects selectors"
@@ -121,9 +125,13 @@ stop_our_processes() {
   # Only OUR processes: the emulator fleet provision-devices launches, the
   # puppeteer browsers lane work leaves behind, and the Gradle daemons of both
   # build roots. The user's browser is theirs — the check below reports it as
-  # load/memory and refuses instead of killing it.
-  pkill -f 'qemu-system' 2>/dev/null || true
-  pkill -f 'Chrome for Testing' 2>/dev/null || true
+  # load/memory and refuses instead of killing it. Since wave 52 "ours" is
+  # CHECKED, not assumed (own-processes.sh): until then these two lines were
+  # host-wide pkills that also took down another project's emulator or
+  # Playwright/puppeteer browser. A foreign one now stays up, is named on
+  # stderr, and counts as load in the check below.
+  kill_own_emulators
+  kill_own_test_browsers
   export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null || true)}"
   (cd "$PROJECT_ROOT" && ./gradlew --stop -q >/dev/null 2>&1) || true
   (cd "$PROJECT_ROOT/apps/android-harness" && ./gradlew --stop -q >/dev/null 2>&1) || true
@@ -176,7 +184,8 @@ reprovision_android() {
   # The watchdog path: kill the emulator fleet we launched and rebuild the
   # pool. Simulators are left alone — every wedge so far was Android-side.
   log "reprovision: killing emulators + adb, rebuilding the pool"
-  pkill -f 'qemu-system' 2>/dev/null || true
+  # Ours only (emulator-pids): a wedged pool emulator is one we launched.
+  kill_own_emulators
   sleep 5
   unset ANDROID_SERIAL
   provision
@@ -279,7 +288,8 @@ if (( ! SKIP_FIXTURE_NET )); then
 fi
 
 # ── Teardown + summary ──────────────────────────────────────────────────────
-pkill -f 'qemu-system' 2>/dev/null || true
+# Stop the pool emulator this gate provisioned — and no other (own-processes.sh).
+kill_own_emulators
 {
   echo "gate-driver summary — run-id $RUN_ID — $(date -u +%Y-%m-%dT%H:%M:%SZ)"
   for sec in $SECTIONS; do printf '%-26s %s\n' "$sec" "$(cat "$DRV_DIR/$sec.status" 2>/dev/null || echo 'not run')"; done

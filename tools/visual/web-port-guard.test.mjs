@@ -42,8 +42,12 @@ function guard(call) {
 /** True when the process is still running (signal 0 probes without killing). */
 const alive = (child) => { try { process.kill(child.pid, 0); return true; } catch { return false; } };
 const settle = () => new Promise((r) => setTimeout(r, 300));       // let a SIGKILL be reaped before probing
+// The guard's only probe is lsof. The capture harness is a macOS host tool, so a
+// machine without lsof (a slim CI image) skips the behavioural pins — loudly, by
+// name — and still runs the source pin at the bottom.
+const NEEDS_LSOF = spawnSync('lsof', ['-v']).error ? { skip: 'lsof is not installed on this machine' } : {};
 
-test('a foreign listener on the port survives, and the guard reports it (exit 1)', async () => {
+test('a foreign listener on the port survives, and the guard reports it (exit 1)', NEEDS_LSOF, async () => {
   const { child, port } = await listen(tmpdir(), null);            // plain node, cwd outside the checkout
   try {
     const r = guard(`wpg_kill_our_vite_on_port ${port}`);
@@ -54,7 +58,7 @@ test('a foreign listener on the port survives, and the guard reports it (exit 1)
   } finally { child.kill('SIGKILL'); }
 });
 
-test('a vite-named listener OUTSIDE the checkout survives (name alone is not enough)', async () => {
+test('a vite-named listener OUTSIDE the checkout survives (name alone is not enough)', NEEDS_LSOF, async () => {
   const { child, port } = await listen(mkdtempSync(join(tmpdir(), 'wpg-')), 'vite'); // argv says vite, cwd is foreign
   try {
     const r = guard(`wpg_kill_our_vite_on_port ${port}`);
@@ -64,7 +68,7 @@ test('a vite-named listener OUTSIDE the checkout survives (name alone is not eno
   } finally { child.kill('SIGKILL'); }
 });
 
-test('a non-vite listener INSIDE the checkout survives (cwd alone is not enough)', async () => {
+test('a non-vite listener INSIDE the checkout survives (cwd alone is not enough)', NEEDS_LSOF, async () => {
   const { child, port } = await listen(join(REPO, 'apps', 'web-harness'), null); // our cwd, but not vite
   try {
     const r = guard(`wpg_kill_our_vite_on_port ${port}`);
@@ -74,7 +78,7 @@ test('a non-vite listener INSIDE the checkout survives (cwd alone is not enough)
   } finally { child.kill('SIGKILL'); }
 });
 
-test('our own stale vite (vite in argv, cwd inside the checkout) IS killed, and the guard returns 0', async () => {
+test('our own stale vite (vite in argv, cwd inside the checkout) IS killed, and the guard returns 0', NEEDS_LSOF, async () => {
   const { child, port } = await listen(join(REPO, 'apps', 'web-harness'), 'vite');
   try {
     const r = guard(`wpg_kill_our_vite_on_port ${port}`);
@@ -84,7 +88,7 @@ test('our own stale vite (vite in argv, cwd inside the checkout) IS killed, and 
   } finally { if (alive(child)) child.kill('SIGKILL'); }
 });
 
-test('wpg_free_port skips a busy port and fails when the whole range is taken', async () => {
+test('wpg_free_port skips a busy port and fails when the whole range is taken', NEEDS_LSOF, async () => {
   const { child, port } = await listen(tmpdir(), null);
   try {
     const next = guard(`wpg_free_port ${port} ${port + 20}`);
@@ -94,8 +98,9 @@ test('wpg_free_port skips a busy port and fails when the whole range is taken', 
   } finally { child.kill('SIGKILL'); }
 });
 
-test('the two capture scripts free their port ONLY through the guard', () => {
-  for (const rel of ['test-all.sh', join('tools', 'titan', 'section-runner.sh')]) {
+test('every capture script frees its port ONLY through the guard', () => {
+  // test-all, the section runner, and the text-metrics probe (which kept the old kill until later in the same wave).
+  for (const rel of ['test-all.sh', join('tools', 'titan', 'section-runner.sh'), join('tools', 'visual', 'probe-text-metrics.sh')]) {
     const src = readFileSync(join(REPO, rel), 'utf8');
     // The old unconditional kill, in any spelling of the port variable, is gone…
     assert.doesNotMatch(src, /lsof -ti:"\$(WEB_)?PORT"[^\n]*xargs kill/, `${rel} still kills whatever holds the port`);
