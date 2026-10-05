@@ -43,6 +43,18 @@ package com.styleconverter.runtime.borders.sides
 //   double-bottom doubleGeom BOTTOM → `box.height - inset`: the double and
 //               groove pins red.
 // Outcomes per run are the `result` lines of mutations.log.
+//
+// R1 FIX PASS (skeptic re-verify R1): the two-line paths no longer go
+// through the single-stroke clamp, which MIRRORED any line deeper than w/2
+// — this file's groove pin had asserted that mirror (outer {0,1}). It now
+// pins the band TRANSLATED into [0, w): outer half {2,3} (border edge),
+// inner {0,1}; the double pin pins each line, outer {2} / inner {0}.
+// `doubleInk` / the groove pin read the painters' own plans (`doubleLines`,
+// `grooveRidgeLines`). The R1 mutations (`double-mirror*`,
+// `band-centre-mirror`, `*-lines-width`, `double-dev-bottom` = dev's
+// `box.height - inset` on the new arm — the successor of `double-bottom`
+// above, whose substring is gone) were executed against BOTH files; the
+// counts are in BorderSideTwoLineBandTest's header and mutations.log.
 
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -73,15 +85,14 @@ class BorderSideZeroTallBandTest {
         return inkCells(a, b, w, horizontal)
     }
 
-    /** Ink of the DOUBLE path: drawDouble's two 1/3-width lines at insets
-     *  line/2 and w − line/2 (the painter's own offsets, w ≥ 3). */
-    private fun doubleInk(s: Side, w: Float, box: Size): Set<Int> {
-        val line = w / 3f
+    /** Ink of the DOUBLE path, per line (outer first): drawDouble's own
+     *  plan `doubleLines` — two 1/3-width lines, w ≥ 3. */
+    private fun doubleInk(s: Side, w: Float, box: Size): List<Set<Int>> {
+        val line = w / 3f                                  // each line's stroke width
         val horizontal = s == Side.TOP || s == Side.BOTTOM // block-axis sides
-        return listOf(line / 2f, w - line / 2f).flatMap { o ->
-            val (a, b) = BorderSideApplier.doubleGeom(s, o, box)
-            inkCells(a, b, line, horizontal)
-        }.toSet()
+        return BorderSideApplier.doubleLines(s, w, box).map { (a, b) ->
+            inkCells(a, b, line, horizontal)               // one set per line
+        }
     }
 
     // ── the defect shape: a 0-tall box, single stroke ───────────────────
@@ -149,27 +160,27 @@ class BorderSideZeroTallBandTest {
         assertEquals((0..2).toSet(), singleInk(Side.BOTTOM, 3f, Size(100f, 3f)))
     }
 
-    // ── the DOUBLE / groove / ridge paths take the same clamp ───────────
+    // ── the DOUBLE / groove / ridge paths translate the whole band ──────
 
     @Test
     fun `a double border on a 0-tall box paints rows 0 and 2 with the gap at 1`() {
         // `border-bottom: 3px double`: line = 1, insets 0.5 (outer) and
-        // 2.5 (inner) through doubleGeom — the band [0, 3) with its gap
-        // centred, never above the box.
-        assertEquals(setOf(0, 2), doubleInk(Side.BOTTOM, 3f, Size(100f, 0f)))
+        // 2.5 (inner) from the far edge of the band translated into [0, 3)
+        // — outer line at the border edge (row 2), inner at row 0, gap 1.
+        assertEquals(listOf(setOf(2), setOf(0)), doubleInk(Side.BOTTOM, 3f, Size(100f, 0f)))
         // Same picture on the inline axis for a 0-wide box.
-        assertEquals(setOf(0, 2), doubleInk(Side.END, 3f, Size(0f, 40f)))
+        assertEquals(listOf(setOf(2), setOf(0)), doubleInk(Side.END, 3f, Size(0f, 40f)))
     }
 
     @Test
-    fun `a groove border on a 0-tall box keeps both half-bands inside 0 to w`() {
-        // drawGrooveOrRidge: half = w/2, half-bands centred half/2 and
-        // 3·half/2 from the outer edge through doubleGeom — for w = 4 the
-        // outer half inks rows {0,1} and the inner {2,3}.
-        val box = Size(100f, 0f)
-        val (oa, ob) = BorderSideApplier.doubleGeom(Side.BOTTOM, 1f, box)
-        val (ia, ib) = BorderSideApplier.doubleGeom(Side.BOTTOM, 3f, box)
-        assertEquals(setOf(0, 1), inkCells(oa, ob, 2f, true))
-        assertEquals(setOf(2, 3), inkCells(ia, ib, 2f, true))
+    fun `a groove border on a 0-tall box keeps its outer half at the border edge`() {
+        // drawGrooveOrRidge's plan: half = w/2, half-bands centred half/2
+        // and 3·half/2 in from the border edge of the band translated into
+        // [0, w). For w = 4 the OUTER half (grooveRidgeBandShades' first
+        // colour) inks rows {2,3} and the inner {0,1} — the R1 fix; the
+        // per-line clamp had mirrored them ({0,1} / {2,3}, shades swapped).
+        val (outer, inner) = BorderSideApplier.grooveRidgeLines(Side.BOTTOM, 4f, Size(100f, 0f))
+        assertEquals(setOf(2, 3), inkCells(outer.first, outer.second, 2f, true))
+        assertEquals(setOf(0, 1), inkCells(inner.first, inner.second, 2f, true))
     }
 }

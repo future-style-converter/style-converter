@@ -103,7 +103,7 @@
                 },
                 {
                     "type": "All",
-                    "data": "INITIAL"
+                    "data": "REVERT"
                 }
             ],
             "slot": {
@@ -165,17 +165,6 @@
                     "data": "BLOCK"
                 },
                 {
-                    "type": "Color",
-                    "data": {
-                        "srgb": {
-                            "r": 1.0,
-                            "g": 1.0,
-                            "b": 1.0
-                        },
-                        "original": "#ffffff"
-                    }
-                },
-                {
                     "type": "Width",
                     "data": {
                         "type": "length",
@@ -199,22 +188,11 @@
                         },
                         "original": "#2ecc71"
                     }
-                },
-                {
-                    "type": "FontSize",
-                    "data": {
-                        "px": 20.0,
-                        "original": {
-                            "type": "length",
-                            "px": 20.0
-                        }
-                    }
                 }
             ],
             "slot": {
                 "parent": "atc_initialunderredparent-004"
-            },
-            "text": "Hamburg 123"
+            }
         },
         {
             "id": "atc_directionsurvives-006",

@@ -160,4 +160,42 @@ orchestrator's call. N2 (`<string>` / CSS-wide keyword guard in `bakedMarkerList
 lines: `BorderSideApplier.kt` now 565), N4 (Swift `ListMarkerOutsideHangLayout` silent `.zero` on a broken contract), N5 (own-list
 amendment — PR record), N6 (uncommented runs in counter-style-author/descriptors).
 
+## 12. Fix pass 2 — skeptic re-verify R1 (2026-10-05 19:50–20:00, no seam, no lock)
+
+**R1 (must-fix) — FIXED.** `doubleGeom` sent the double's inner line (inset 5w/6) and the groove/ridge inner half (3w/4) through the
+single-stroke clamp `max(inset, extent − inset)`, which MIRRORS any line with extent < 2·inset (dev `git show 5d9ed628:…` paints
+`size.height − inset` / `size.width − inset`, confirmed). Prescribed fix applied in `BorderSideApplier.kt` (sha256 `7bcc1fe7…`, 636 lines):
+new `farEdgeBandCentre(extent, band, inset) = max(extent, band) − inset`; `doubleGeom(side, inset, sideWidth, box)` uses it for BOTTOM/END
+(no default on `sideWidth`, so a missed call site cannot compile); the painters' plans are now pure `doubleLines(side, width, box)` /
+`grooveRidgeLines(side, width, box)` that pass the side's FULL width as the band — `drawDouble` / `drawGrooveOrRidge` stroke exactly those
+lines (stroke widths unchanged: width/3, width/2). `sideGeometry` and `innerEdgeStrokeCentre` are byte-unchanged, so every T2 single-stroke
+pin and both measured cells (multicol-003 / balancing-003 orange rows) are untouched. Doc corrected: the `innerEdgeStrokeCentre` "unchanged
+whenever the box is at least one stroke tall" sentence is now scoped to inset = w/2 and names the mirror; `doubleGeom`'s doc no longer
+claims the T2 clamp.
+
+Pins: `BorderSideZeroTallBandTest` groove pin FLIPPED to outer {2,3} / inner {0,1} (it had pinned the mirror), the 0-tall double pin is
+now per line (outer {2} / inner {0} on BOTTOM and END — the set {0,2} alone could not see the mirror). New `BorderSideTwoLineBandTest`
+(174 lines, 10 tests): the skeptic's probe rows as pins with dev's values — 100×3 3px double [{2},{0}], 100×6 6px [{4,5},{0,1}], 100×9
+6px [{7,8},{3,4}], END 3×40 3px cols [{2},{0}], 100×4 4px groove ({2,3},{0,1}), plus p7 100×2 3px double → translated band [{2},{0}];
+a float-exact sweep (w ∈ 2…14 incl. 2.5/3.75, extent w…w+24 in ¼ px, BOTTOM+END, double+groove) that the fixed lines equal dev's
+`extent − inset` for every box at least one band tall; `farEdgeBandCentre(e, w, w/2) == innerEdgeStrokeCentre(e, w/2)` for e 0…40 (the
+single stroke cannot move); a direct helper pin; TOP/START ignore the band. Independent oracle `r1-oracle.py` → `r1-oracle.txt` (dev /
+pre-R1 / fixed rows per probe) agrees with every expectation.
+
+Mutations EXECUTED (`mutate.py` new entries, driver `r1-run-mutations.py`, per-run gradle logs `mutation-r1-<name>.log`, only JUnit XML
+newer than the run start read, every restore sha256 `7bcc1fe7…` byte-exact; `--tests '*BorderSide*'` = 18 tests): **double-mirror**
+(doubleGeom BOTTOM+END back to `innerEdgeStrokeCentre(extent, inset)` = max(inset, extent − inset)) **9 red**; double-mirror-bottom 8 red;
+double-mirror-end 3 red; band-centre-mirror (helper body → the mirror) 10 red; double-lines-width (band = line) 2 red; groove-lines-width
+(band = half) 1 red; double-dev-bottom (dev `box.height − inset`) 3 red — ONLY the 0-tall / sub-band pins, the ≥ one-band probe pins and
+the sweep stay green, i.e. the fix equals dev wherever dev was right. The pre-R1 `double-bottom` entry now refuses (0 matches) — it
+targets sha `9f806563…`; `double-dev-bottom` is its successor.
+
+Durable record: `compose-tests-r1.summary.txt` (tracked; every R1 apply / result / restore line copied from the gitignored `mutations.log`).
+Runs: `compose-tests-r1.log` — `*BorderSide*` 2 classes, 18 / 0 (after the mutations); `compose-tests-r1-broad.log` — `lists.*
+borders.* *MulticolFloatStrip*` 32 classes, **293 / 0** (= §11's 283 + the 10 new; `MulticolFloatStripRefRowsTest` green). Gate
+exposure unchanged from the skeptic's census: 0 of 53 wave51-fix two-line far-edge carriers sit in the changed range. No seam patch
+touches `BorderSideApplier.kt`; seam-1..4 are not re-cut. Not verified: device pictures of a short / 0-tall double or groove/ridge box
+(JVM has no draw surface; the painter → plan step is one call per painter); N3 deepens (636 lines, was 565) — a split is a follow-up,
+not in this mandate.
+
 STATUS: COMPLETE

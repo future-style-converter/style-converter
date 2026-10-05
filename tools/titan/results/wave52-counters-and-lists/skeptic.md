@@ -559,3 +559,117 @@ for r in rows:
     if r['parentDefinite'] is not None and r['parentDefinite'] < r['thresh']: print('  ', r)
 json.dump(rows, open(sys.argv[1], 'w'), indent=1)
 ```
+
+## R1 — builder fix response (L6 fix pass 2, 2026-10-05 ≈19:57–20:00 CEST)
+
+Appended by the L6 builder for the next re-verifier; not a skeptic verdict. Full record: `_note.md` §12.
+
+- **Fix (as prescribed):** `farEdgeBandCentre(extent, band, inset) = max(extent, band) − inset`; `doubleGeom(side, inset, sideWidth, box)`
+  routes BOTTOM/END through it; `drawDouble` / `drawGrooveOrRidge` now stroke the lines of pure `doubleLines` / `grooveRidgeLines`, which pass
+  the side's full width as the band. `sideGeometry` + `innerEdgeStrokeCentre` byte-unchanged (single stroke and both measured cells untouched).
+  `innerEdgeStrokeCentre` doc sentence scoped to inset = w/2. `BorderSideApplier.kt` sha256 `7bcc1fe7…`.
+- **Probe rows now pinned** (`BorderSideTwoLineBandTest`): p1 [{2},{0}], p2 [{4,5},{0,1}], p3 [{7,8},{3,4}], p4 cols [{2},{0}], p5 ({2,3},{0,1}),
+  p7 [{2},{0}] (per line, outer first); p6 = `BorderSideZeroTallBandTest` groove pin FLIPPED to outer {2,3} / inner {0,1}; the 0-tall double pin
+  is per line (outer {2} / inner {0}), since the set {0,2} cannot see the mirror. Plus a float-exact sweep: fixed lines == dev `extent − inset`
+  for every box ≥ one band (w 2…14, ¼ px steps, BOTTOM+END, double+groove), and `farEdgeBandCentre(e,w,w/2) == innerEdgeStrokeCentre(e,w/2)`.
+- **Mutations executed** (restores sha `7bcc1fe7…` byte-exact, `*BorderSide*` 18 tests, XML freshness checked): `double-mirror` (doubleGeom back to
+  `max(inset, extent − inset)`) 9 red · `-bottom` 8 · `-end` 3 · `band-centre-mirror` 10 · `double-lines-width` 2 · `groove-lines-width` 1 ·
+  `double-dev-bottom` (dev arithmetic) 3 red, all 0-tall / sub-band — the ≥ one-band pins stay green.
+- **Runs:** `*BorderSide*` 18 / 0; `lists.* borders.* *MulticolFloatStrip*` 32 classes 293 / 0.
+- **For the re-verifier to check:** that p7 (extent 0 < e < w → translated band [0, w), overflowing a 2px box by 1px like the single stroke
+  already does) is the intended spec reading; that no device capture is claimed.
+
+## Re-verify 2
+
+Reviewer: L6 re-verify-2 skeptic, 2026-10-05 20:11–20:18 CEST. Tree: campaign/wave52 @ b35e203a plus every lane's uncommitted work.
+`BorderSideApplier.kt` sha256 `7bcc1fe7…` (the builder's §12 value) before and after this pass. Read-only except for two mutations of that
+file, each restored from an in-memory copy and sha256-verified byte-exact. My evidence is in the new `skeptic-rv2/` folder:
+`Probe.java`, `mut.py`, `run.sh`, the census copy and every output. It uses my own helpers, not the lane's `mutate.py`, `r1-oracle.py`
+or the pins' rasteriser. Every Gradle run used `--rerun`, and I read only JUnit XML newer than each run's start. No seam file was touched:
+`git status` is clean on all four. I took no lock and used no device.
+
+### What dev paints (read, not assumed)
+
+`git show 5d9ed628:…/BorderSideApplier.kt`: dev's `doubleGeom` far edges are `size.height - inset` / `size.width - inset`, with no clamp.
+`drawDouble` uses insets `line/2` and `width − line/2`, and `drawGrooveOrRidge` uses `half/2` and `half/2 + half`. The tree's
+`doubleLines` / `grooveRidgeLines` produce the same insets and pass the side's full `width` as the band. Compared with HEAD, the only code
+change is `farEdgeBandCentre` plus `doubleGeom`'s BOTTOM/END arms and the two plan functions. The bodies of `sideGeometry` and
+`innerEdgeStrokeCentre` are byte-unchanged; only their doc lines changed.
+
+### Probe rows on the FIXED bytecode (executed)
+
+`skeptic-rv2/Probe.java` loads the class Gradle had just compiled and tested (`built_in_kotlinc/…/BorderSideApplier.class`, newer than the
+source). It calls `doubleLines-…` / `grooveRidgeLines-…` by reflection with real packed `Size` values, and unpacks the returned `Offset`s.
+It then rasterises with the same model as the pins. Next to that it prints my own transcriptions of dev (`e − inset`) and of pre-R1
+(`max(inset, e − inset)`). Results are per line, OUTER first:
+
+| probe | box · border | FIXED (bytecode) | dev | pre-R1 | verdict |
+|---|---|---|---|---|---|
+| p1 | 100×3 · 3px double bottom | [{2},{0}] | [{2},{0}] | [{2},{2}] | = dev ✔ |
+| p2 | 100×6 · 6px double | [{4,5},{0,1}] | same | [{4,5},{4,5}] | = dev ✔ |
+| p3 | 100×9 · 6px double | [{7,8},{3,4}] | same | [{7,8},{4,5}] | = dev ✔ |
+| p4 | 3×40 · 3px double END (cols) | [{2},{0}] | same | [{2},{2}] | = dev ✔ |
+| p5 | 100×4 · 4px groove (outer, inner) | ({2,3},{0,1}) | same | ({2,3},{2,3}) | = dev ✔ |
+| p6 | 100×0 · 4px groove | ({2,3},{0,1}) | ({−2,−1},{−4,−3}) | ({0,1},{2,3}) | spec order ✔ |
+| p7 | 100×2 · 3px double | [{2},{0}] | [{1},{−1}] | [{1},{2}] | band translated into [0,3) ✔ |
+| c1 / c2 | 100×50 / 100×0 · 3px double | [{49},{47}] / [{2},{0}] | — | — | ✔ |
+| extra | groove END 4×40 and 0×40; double END 9×40 · 6px; groove 10px on 100×12; double 14px on 100×20; double 9px on 100×5; groove 2px on 100×1 | for every e ≥ w, = dev; for e < w, the band is translated | | | ✔ |
+
+Bytecode sweep (Probe.java). It covers w ∈ {2, 2.5, 3, 3.3, 3.75, 4, 5, 6, 7, 9, 10, 12.5, 14, 20} and e from 0 to 50 in ⅛-px steps,
+on BOTTOM and END, for double and groove: **20 852 cases, 0 invariant failures**. Each case checks four things:
+- The outer stroke ends exactly at `max(e, w)`.
+- The inner stroke starts at or after 0.
+- outer > inner, and the gap equals the inset difference, so there is no mirror.
+- Every e ≥ w is **bit-identical to dev**: 0 mismatches.
+
+Single stroke: `farEdgeBandCentre(e,w,w/2)` == `innerEdgeStrokeCentre(e,w/2)` == the `sideGeometry` BOTTOM centre in **5 614/5 614** cases.
+That leaves the T2 path and both measured multicol cells untouched.
+
+### Pins and mutations (executed)
+
+| run | what | result | restore |
+|---|---|---|---|
+| base 20:13:19 | `--tests '*BorderSide*'` | 2 classes, **18 / 0** | — |
+| **double-mirror** 20:15:18 (the named R1 mutation) | `doubleGeom` BOTTOM + END → `kotlin.math.max(inset, box.X − inset)`, written inline rather than through the helper name, so the mutation is mine and not the lane's | **9 red / 18**: p1, p2, p3, p4, p5, p7, the dev sweep, ZeroTall groove (`was [0, 1]`), ZeroTall double (`was [[0],[2]]`). This is the same 9 the builder listed. Probe on the mutated bytecode reproduces the pre-R1 rows exactly (p1 {2}/{2}, p6 {0,1}/{2,3}, p7 {1}/{2}). Sweep: 5 058 invariant failures; single stroke still 0 | `7bcc1fe7…` byte-exact |
+| groove-swap 20:15:27 (mine, extra) | `grooveRidgeLines` returns (inner, outer), so shades swap on every side | **4 red**: dev sweep, p5, near-edge pin, ZeroTall groove | `7bcc1fe7…` byte-exact |
+| final 20:15:39 | `*BorderSide*` (recompiled restored source) | **18 / 0** | — |
+| final 20:15:42 | `lists.* borders.* *MulticolFloatStrip*` | 32 classes, **293 / 0** (= builder's §12) | — |
+| probe on restored bytecode | — | output byte-identical to the pre-mutation probe | — |
+
+I cross-checked the builder's records. `mutations.log` R1 entries (19:57:59–19:58:15) show 9 / 8 / 3 / 10 / 2 / 1 / 3 red, and each
+restore is `byte_exact: true` back to `7bcc1fe7…`. The tracked `compose-tests-r1.summary.txt` copies those lines faithfully. The test
+headers state the same counts.
+
+### Gate exposure (re-derived)
+
+I re-ran `two_line_census.py`, the previous re-verify's script copied verbatim. It found 53 two-line far-edge carriers in 10 wave51-fix tests:
+- 48 have a known extent. The smallest **e/w is 7.0**, so none has e < w, which is the only region where the fix differs from dev.
+- 5 carry text, so their extent is at least one line box.
+- No parent definite size is below w.
+
+**0 gate cells move against wave51-fix.** The fix is dev-identical for every box at least one band tall, and the sweep shows that bit-for-bit.
+
+### Answers to the builder's two questions
+
+- **p7 (0 < e < w → band [0, w), overflowing a 2px box by 1px):** this is the intended reading. A squeezed box's content height cannot
+  go negative, so its bottom border area is [0, w) (css-backgrounds-3 §4). The single stroke already paints exactly that on the same
+  box: `innerEdgeStrokeCentre(2, 1.5) = 1.5`, so ink [0,3). Dev also overflowed the box, upward ({−1} row). Accepted.
+- **No device capture is claimed** in the note, the summary or the test headers. That is correct: there is no draw surface on the JVM.
+
+### Residuals (none blocking R1)
+
+- **Unpinned painter-to-plan step:** the call from `drawDouble` / `drawGrooveOrRidge` to their plan has no JVM pin. It is one call per
+  painter, which I read, and the stroke widths are `width/3` and `width/2` as in dev. This is a stated limit.
+- **Observation, not a regression:** a squeezed box with BOTH a top border and a two-line bottom border still overlaps the two bands. Dev
+  did the same, and T2's single stroke behaves the same way. This belongs with the broad `height(h)` fix the note defers.
+- **N3 grows:** `BorderSideApplier.kt` is now 636 lines (the target is 200 and the split point 300). That is a follow-up split.
+- **S1** from the first review is still open, as recorded. It is not in R1's scope.
+- **Nit:** a few lines in `BorderSideTwoLineBandTest`'s sweep body have no trailing comment (127–129, 133–137). The surrounding blocks are
+  commented. Cosmetic.
+
+### Re-verify 2 verdict
+
+**R1: CLOSED (executed).** The prescribed fix is in. The skeptic's probe rows on the real compiled bytecode now equal dev for every box at
+least one band tall, the 0-tall groove keeps the spec band order, and the sub-band box gets the translated band. The named mutation
+(`doubleGeom` back to `max(inset, extent − inset)`) turns 9 of 18 pins red and its restore is byte-exact. The pins are green again at
+18/0 and 293/0. Gate exposure is 0 cells. I found no new must-fix.

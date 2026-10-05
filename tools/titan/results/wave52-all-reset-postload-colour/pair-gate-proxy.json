@@ -1,0 +1,1090 @@
+{
+ "runs": {
+  "pre-fix-head-b35e203a": {
+   "generated": "2026-10-05T17:58:24.964Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "fixtureSha256": "87e19d8f7d713457b77f86260b3e5ae194316b961728f948f3f1d7683cb91b33",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 4,
+   "gate": {
+    "checked": 18,
+    "unexpected": [
+     "004_ATC_InitialUnderRedParent.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00",
+     "004_ATC_InitialUnderRedParent.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00",
+     "005_span.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00",
+     "005_span.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00"
+    ]
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 0
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 0.9551,
+      "pxPct": 1.396,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9404,
+      "pxPct": 1.639,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.942,
+      "pxPct": 1.525,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 0.9551,
+      "pxPct": 1.396,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9404,
+      "pxPct": 1.639,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.942,
+      "pxPct": 1.525,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 4 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 0 violation(s)",
+    "✗ 4 unexpected cross-platform divergence(s):",
+    "  · 004_ATC_InitialUnderRedParent.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00 · mixed",
+    "  · 004_ATC_InitialUnderRedParent.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00 · mixed",
+    "  · 005_span.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00 · mixed",
+    "  · 005_span.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00 · mixed"
+   ]
+  },
+  "post-fix-1-textless-initial": {
+   "generated": "2026-10-05T18:15:58.296Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "fixtureSha256": "0ee2eb5c615c010c9f48296b1a5e4b2fc5749ef3384751bc9d13761bbecd6a90",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 0,
+   "gate": {
+    "checked": 18,
+    "unexpected": []
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 0
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 0 violation(s)"
+   ]
+  },
+  "P-M1-head-text": {
+   "generated": "2026-10-05T18:25:05.201Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "model": "css",
+   "fixtureSha256": "87e19d8f7d713457b77f86260b3e5ae194316b961728f948f3f1d7683cb91b33",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 4,
+   "gate": {
+    "checked": 18,
+    "unexpected": [
+     "004_ATC_InitialUnderRedParent.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00",
+     "004_ATC_InitialUnderRedParent.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00",
+     "005_span.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00",
+     "005_span.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00"
+    ]
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 0
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 0.9551,
+      "pxPct": 1.396,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9404,
+      "pxPct": 1.639,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.942,
+      "pxPct": 1.525,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 0.9551,
+      "pxPct": 1.396,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9404,
+      "pxPct": 1.639,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.942,
+      "pxPct": 1.525,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 4 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 0 violation(s)",
+    "✗ 4 unexpected cross-platform divergence(s):",
+    "  · 004_ATC_InitialUnderRedParent.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00 · mixed",
+    "  · 004_ATC_InitialUnderRedParent.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00 · mixed",
+    "  · 005_span.png · iOS-web — SSIM 0.9404 · Δpx 1.64% · ΔE95 0.00 · mixed",
+    "  · 005_span.png · Android-web — SSIM 0.9420 · Δpx 1.52% · ΔE95 0.00 · mixed"
+   ]
+  },
+  "P-M2-display-before-all": {
+   "generated": "2026-10-05T18:25:07.194Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "model": "css",
+   "fixtureSha256": "a15e46192b6f84932fe42d5bda7d45dc1e4854a038226f7ce8a9b19eddfb3d39",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 6,
+   "gate": {
+    "checked": 18,
+    "unexpected": []
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 6
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 6 violation(s)",
+    "✗ 6 spec-oracle violation(s) — a render disagrees with the CSS spec:",
+    "  · iOS · ATC_InitialUnderRedParent · fill — expected rgb(46,204,113) ±2/channel · measured rgb(52,152,219) · Δmax 106 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · iOS · ATC_InitialUnderRedParent · box — expected 200×60 ±1px · measured 0×0 · Δ 200×60 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · Android · ATC_InitialUnderRedParent · fill — expected rgb(46,204,113) ±2/channel · measured rgb(52,152,219) · Δmax 106 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · Android · ATC_InitialUnderRedParent · box — expected 200×60 ±1px · measured 0×0 · Δ 200×60 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · web · ATC_InitialUnderRedParent · fill — expected rgb(46,204,113) ±2/channel · measured rgb(52,152,219) · Δmax 106 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · web · ATC_InitialUnderRedParent · box — expected 200×60 ±1px · measured 0×0 · Δ 200×60 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant"
+   ]
+  },
+  "P-M3-order-blind-drop": {
+   "generated": "2026-10-05T18:25:09.195Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "model": "css",
+   "fixtureSha256": "92b3989c18e942bd3668ca3d8ec49b3c484ad0fa07e9a9d1d002b4bf4fb2b4fc",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 6,
+   "gate": {
+    "checked": 18,
+    "unexpected": []
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 6
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 6 violation(s)",
+    "✗ 6 spec-oracle violation(s) — a render disagrees with the CSS spec:",
+    "  · iOS · ATC_InitialUnderRedParent · fill — expected rgb(46,204,113) ±2/channel · measured rgb(52,152,219) · Δmax 106 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · iOS · ATC_InitialUnderRedParent · box — expected 200×60 ±1px · measured 0×0 · Δ 200×60 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · Android · ATC_InitialUnderRedParent · fill — expected rgb(46,204,113) ±2/channel · measured rgb(52,152,219) · Δmax 106 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · Android · ATC_InitialUnderRedParent · box — expected 200×60 ±1px · measured 0×0 · Δ 200×60 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · web · ATC_InitialUnderRedParent · fill — expected rgb(46,204,113) ±2/channel · measured rgb(52,152,219) · Δmax 106 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant",
+    "  · web · ATC_InitialUnderRedParent · box — expected 200×60 ±1px · measured 0×0 · Δ 200×60 — all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant"
+   ]
+  },
+  "post-fix-2": {
+   "generated": "2026-10-05T18:25:00.972Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "model": "css",
+   "fixtureSha256": "ae4867a8947f63072779808290a5b9b40f79cdeffec7d796427c512a27a12e6e",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 0,
+   "gate": {
+    "checked": 18,
+    "unexpected": []
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 0
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 0 violation(s)"
+   ]
+  },
+  "post-fix-2-native-model": {
+   "generated": "2026-10-05T18:25:03.093Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "model": "native",
+   "fixtureSha256": "ae4867a8947f63072779808290a5b9b40f79cdeffec7d796427c512a27a12e6e",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 0,
+   "gate": {
+    "checked": 18,
+    "unexpected": []
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 0
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 0 violation(s)"
+   ]
+  },
+  "P-M4-reset-initial-native": {
+   "generated": "2026-10-05T18:25:11.337Z",
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "model": "native",
+   "fixtureSha256": "ff4f9d321b512c60433e917e04fa02238c79e834e14b1a8ef57ab1ed5ec4d286",
+   "captures": [
+    "001_ATC_AllThenProps",
+    "002_ATC_PropsThenAll_InGreenParent",
+    "003_reset",
+    "004_ATC_InitialUnderRedParent",
+    "005_span",
+    "006_ATC_DirectionSurvives"
+   ],
+   "exit": 4,
+   "gate": {
+    "checked": 18,
+    "unexpected": [
+     "003_reset.png · iOS-web — SSIM 0.6627 · Δpx 48.39% · ΔE95 49.71",
+     "003_reset.png · Android-web — SSIM 0.6627 · Δpx 48.39% · ΔE95 49.71"
+    ]
+   },
+   "oracle": {
+    "checked": 12,
+    "violations": 0
+   },
+   "pairs": {
+    "001_ATC_AllThenProps.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "002_ATC_PropsThenAll_InGreenParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "003_reset.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.6627,
+      "pxPct": 48.387,
+      "dE95": 49.71
+     },
+     "Android-web": {
+      "ssim": 0.6627,
+      "pxPct": 48.387,
+      "dE95": 49.71
+     }
+    },
+    "004_ATC_InitialUnderRedParent.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "005_span.png": {
+     "iOS-Android": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 1,
+      "pxPct": 0,
+      "dE95": 0
+     }
+    },
+    "006_ATC_DirectionSurvives.png": {
+     "iOS-Android": {
+      "ssim": 0.9888,
+      "pxPct": 0.278,
+      "dE95": 0
+     },
+     "iOS-web": {
+      "ssim": 0.9818,
+      "pxPct": 0.452,
+      "dE95": 0
+     },
+     "Android-web": {
+      "ssim": 0.9844,
+      "pxPct": 0.381,
+      "dE95": 0
+     }
+    }
+   },
+   "summaryLines": [
+    "· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 2 unexpected",
+    "· spec oracle: 12 platform-component check(s) · 0 violation(s)",
+    "✗ 2 unexpected cross-platform divergence(s):",
+    "  · 003_reset.png · iOS-web — SSIM 0.6627 · Δpx 48.39% · ΔE95 49.71 · no-content",
+    "  · 003_reset.png · Android-web — SSIM 0.6627 · Δpx 48.39% · ΔE95 49.71 · no-content"
+   ]
+  }
+ }
+}

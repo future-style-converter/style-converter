@@ -1,0 +1,38 @@
+== base
+start 20:13:19 sha 7bcc1fe79280d4b5
+gradle exit 0
+fresh classes 2 tests 18 failures 0 errors 0
+end 20:13:20
+== mut-double-mirror
+start 20:15:19 sha 0d3a2cd4c9911bd1
+gradle exit 1
+  RED BorderSideTwoLineBandTest | a 6px bottom double on a 6px box keeps dev rows 0-1 and 4-5 | java.lang.AssertionError: expected:<[[4, 5], [0, 1]]> but was:<[[4, 5], [4, 5]]>
+  RED BorderSideTwoLineBandTest | every box at least one band tall gets the dev far-edge lines exactly | java.lang.AssertionError: groove inner w=2.0 e=2.0 BOTTOM expected:<0.5> but was:<1.5>
+  RED BorderSideTwoLineBandTest | a 6px bottom double on a 9px box keeps dev rows 3-4 and 7-8 | java.lang.AssertionError: expected:<[[7, 8], [3, 4]]> but was:<[[7, 8], [4, 5]]>
+  RED BorderSideTwoLineBandTest | a 3px bottom double on a 3px box keeps both lines and its gap | java.lang.AssertionError: expected:<[[2], [0]]> but was:<[[2], [2]]>
+  RED BorderSideTwoLineBandTest | a 4px bottom groove on a 4px box keeps its halves apart | java.lang.AssertionError: expected:<([2, 3], [0, 1])> but was:<([2, 3], [2, 3])>
+  RED BorderSideTwoLineBandTest | a 3px bottom double on a 2px box paints the translated band | java.lang.AssertionError: expected:<[[2], [0]]> but was:<[[1], [2]]>
+  RED BorderSideTwoLineBandTest | a 3px end double on a 3px wide box keeps dev columns 0 and 2 | java.lang.AssertionError: expected:<[[2], [0]]> but was:<[[2], [2]]>
+  RED BorderSideZeroTallBandTest | a groove border on a 0-tall box keeps its outer half at the border edge | java.lang.AssertionError: expected:<[2, 3]> but was:<[0, 1]>
+  RED BorderSideZeroTallBandTest | a double border on a 0-tall box paints rows 0 and 2 with the gap at 1 | java.lang.AssertionError: expected:<[[2], [0]]> but was:<[[0], [2]]>
+fresh classes 2 tests 18 failures 9 errors 0
+end 20:15:22
+== mut-groove-swap
+start 20:15:29 sha eb578cab231d3d32
+gradle exit 1
+  RED BorderSideTwoLineBandTest | every box at least one band tall gets the dev far-edge lines exactly | java.lang.AssertionError: groove outer w=2.0 e=2.0 BOTTOM expected:<1.5> but was:<0.5>
+  RED BorderSideTwoLineBandTest | a 4px bottom groove on a 4px box keeps its halves apart | java.lang.AssertionError: expected:<([2, 3], [0, 1])> but was:<([0, 1], [2, 3])>
+  RED BorderSideTwoLineBandTest | the near-edge sides ignore the band and the box | java.lang.AssertionError: expected:<1.0> but was:<3.0>
+  RED BorderSideZeroTallBandTest | a groove border on a 0-tall box keeps its outer half at the border edge | java.lang.AssertionError: expected:<[2, 3]> but was:<[0, 1]>
+fresh classes 2 tests 18 failures 4 errors 0
+end 20:15:31
+== final-bs
+start 20:15:39 sha 7bcc1fe79280d4b5
+gradle exit 0
+fresh classes 2 tests 18 failures 0 errors 0
+end 20:15:41
+== final-broad
+start 20:15:42 sha 7bcc1fe79280d4b5
+gradle exit 0
+fresh classes 32 tests 293 failures 0 errors 0
+end 20:15:43

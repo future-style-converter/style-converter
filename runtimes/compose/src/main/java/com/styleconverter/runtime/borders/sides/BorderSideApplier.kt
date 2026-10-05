@@ -263,20 +263,48 @@ object BorderSideApplier {
      * the border area BETWEEN the padding edge and the border edge, so the
      * bottom border of a 0-content box occupies [contentBottom,
      * contentBottom + w) = [0, w) of its own border box; a stroke outside
-     * the box is never correct. `max(inset, extent − inset)` is exactly
-     * that clamp: unchanged whenever the box is at least one stroke tall
-     * (every committed baseline — the frozen boxes are all taller than
-     * their borders), and [0, w) for the degenerate 0-tall box.
+     * the box is never correct. For the SINGLE stroke (inset = w/2)
+     * `max(inset, extent − inset)` ≡ `max(extent, w) − w/2` is exactly that
+     * clamp: unchanged whenever the box is at least one stroke tall (every
+     * committed baseline — the frozen boxes are all taller than their
+     * borders), and [0, w) for the degenerate 0-tall box. It holds ONLY for
+     * inset = w/2: fed a deeper inset (the double's inner line at 5w/6, a
+     * groove/ridge inner half at 3w/4) it MIRRORS that line about `inset`
+     * whenever extent < 2·inset (wave 52 skeptic R1), so the two-line paths
+     * use [farEdgeBandCentre] — BorderSideTwoLineBandTest pins the two
+     * helpers equal for the single stroke.
      *
      * Paint-only, deliberately: the broad fix (a `height(h)` that lets
      * overflowing content keep its own layout size, css-overflow-3 §2) is a
      * separate device A/B named in the lane note, not staffed here.
      * Internal so the JVM suite can pin the band without a draw surface
      * (BorderSideZeroTallBandTest pins it directly AND through
-     * [sideGeometry] / [doubleGeom]); the iOS twin needs no clamp.
+     * [sideGeometry]); the iOS twin needs no clamp.
      */
     internal fun innerEdgeStrokeCentre(extentPx: Float, insetPx: Float): Float =
         kotlin.math.max(insetPx, extentPx - insetPx)
+
+    /**
+     * Centre of a line [insetPx] inside the FAR edge (bottom / end) of a
+     * border band [bandPx] wide on a box of extent [extentPx] — the general
+     * form of [innerEdgeStrokeCentre] the two-line paths need ([doubleGeom]:
+     * the double's two thirds, groove/ridge's two halves).
+     *
+     * Wave 52, lane L6, skeptic R1. The far edge sits at `max(extent,
+     * band)`: the laid-out extent whenever the box is at least one band
+     * tall — so `extent − inset`, the dev arithmetic every committed
+     * baseline was captured with — and `band` for a box the layout squeezed
+     * below its own border (T2's 0-tall `.bar`), i.e. the whole band
+     * TRANSLATED into [0, band) with the outer line still hugging the
+     * border edge (css-backgrounds-3 §4: the border area runs from the
+     * padding edge OUT to the border edge). Clamping each line alone
+     * (`max(inset, extent − inset)`) mirrored every line deeper than band/2
+     * about its inset: a 3px double on a 3px box lost its gap, a 0-tall
+     * groove swapped its shades. For inset = band/2 both forms give the same
+     * float (band − band/2 is exact), so the single stroke is unchanged.
+     */
+    internal fun farEdgeBandCentre(extentPx: Float, bandPx: Float, insetPx: Float): Float =
+        kotlin.math.max(extentPx, bandPx) - insetPx
 
     /**
      * Stroke a single line on the border edge. Thin wrapper for the common
@@ -456,35 +484,59 @@ object BorderSideApplier {
             val (s, e, _) = sideGeometry(side, width, size)
             drawStrokedLine(color, s, e, width, null); return
         }
+        // Each of the two lines is one third of the side's width wide.
         val line = width / 3f
-        // Two parallel strokes; the "inner" one is pushed 2/3 of the total
-        // width from the outer edge so the gap is centered.
-        val offsets = listOf(line / 2f, width - line / 2f)
-        for (o in offsets) {
-            val (s, e) = doubleGeom(side, o, size)
+        // Two parallel strokes, outer then inner (doubleLines): the inner
+        // one sits 2/3 of the total width from the outer edge so the gap
+        // is centred.
+        for ((s, e) in doubleLines(side, width, size)) {
             drawStrokedLine(color, s, e, line, null)
+        }
+    }
+
+    /**
+     * The two centre lines [drawDouble] strokes (each width/3 wide) for a
+     * `double` side of [width] ≥ 3 on a [box]-sized border box, OUTER
+     * first: insets line/2 and width − line/2 (line = width/3). Each goes
+     * through [doubleGeom] with the side's FULL width as the band (R1 —
+     * passing a line or half width there re-opens the 0-tall defect). Pure
+     * and internal so the JVM suite pins the painter's own lines, wiring
+     * included (BorderSideTwoLineBandTest).
+     */
+    internal fun doubleLines(side: Side, width: Float, box: Size): List<Pair<Offset, Offset>> {
+        // One third of the band per line; the gap is the middle third.
+        val line = width / 3f
+        // Outer line hugs the border edge, inner line the padding edge.
+        return listOf(line / 2f, width - line / 2f).map { o ->
+            // The full side width is the band the far-edge clamp translates.
+            doubleGeom(side, inset = o, sideWidth = width, box = box)
         }
     }
 
     /** Geometry for one of the two strokes in a DOUBLE border (and each
      *  half-band of groove/ridge) on a [box]-sized border box. [inset] is
-     *  the distance of the stroke center from the outer edge of the box.
-     *  BOTTOM/END take the same [innerEdgeStrokeCentre] clamp as the single
-     *  stroke (wave 52, T2): on a 0-tall box the outer line lands at
-     *  `inset` and the inner at `w − inset`, i.e. the band [0, w) with its
-     *  gap centred — the mirror image of TOP, never above the box. Pure
-     *  and internal for the same reason as [sideGeometry] (skeptic M1):
-     *  BorderSideZeroTallBandTest pins the returned lines themselves. */
-    internal fun doubleGeom(side: Side, inset: Float, box: Size): Pair<Offset, Offset> = when (side) {
-        // Top / start: measured from the near edge — no clamp needed.
+     *  the distance of the stroke center from the outer edge of the box;
+     *  [sideWidth] is the side's FULL border width, the band both lines
+     *  share. BOTTOM/END go through [farEdgeBandCentre] (wave 52 R1): the
+     *  far edge is `max(extent, sideWidth)`, so a box at least one band
+     *  tall gets exactly the dev `extent − inset` lines, and a 0-tall box
+     *  gets the band TRANSLATED into [0, w) — outer line at `w − inset`,
+     *  never above the box and never mirrored. Pure and internal for the
+     *  same reason as [sideGeometry] (skeptic M1): BorderSideZeroTallBandTest
+     *  and BorderSideTwoLineBandTest pin the returned lines themselves. */
+    internal fun doubleGeom(
+        side: Side, inset: Float, sideWidth: Float, box: Size
+    ): Pair<Offset, Offset> = when (side) {
+        // Top: measured down from the near edge — no clamp needed.
         Side.TOP -> Offset(0f, inset) to Offset(box.width, inset)
-        // Bottom: measured up from the far edge, clamped into the box.
-        Side.BOTTOM -> Offset(0f, innerEdgeStrokeCentre(box.height, inset)) to
-            Offset(box.width, innerEdgeStrokeCentre(box.height, inset))
+        // Bottom: measured up from the far edge of the (translated) band.
+        Side.BOTTOM -> Offset(0f, farEdgeBandCentre(box.height, sideWidth, inset)) to
+            Offset(box.width, farEdgeBandCentre(box.height, sideWidth, inset))
+        // Start: measured in from the near edge — no clamp needed.
         Side.START -> Offset(inset, 0f) to Offset(inset, box.height)
-        // End: measured in from the far edge, clamped into the box.
-        Side.END -> Offset(innerEdgeStrokeCentre(box.width, inset), 0f) to
-            Offset(innerEdgeStrokeCentre(box.width, inset), box.height)
+        // End: measured in from the far edge of the (translated) band.
+        Side.END -> Offset(farEdgeBandCentre(box.width, sideWidth, inset), 0f) to
+            Offset(farEdgeBandCentre(box.width, sideWidth, inset), box.height)
     }
 
     /**
@@ -503,14 +555,33 @@ object BorderSideApplier {
             val (s, e, _) = sideGeometry(side, width, size)
             drawStrokedLine(color, s, e, width, null); return
         }
+        // Each half-band is half the side's width wide.
         val half = width / 2f
         // Outer/inner band colors from the per-side Blink rule.
         val (outerShade, innerShade) = grooveRidgeBandShades(color, side, groove)
-        // Each half-band is centred half/2 and 3·half/2 from the outer edge.
-        val (outerStart, outerEnd) = doubleGeom(side, half / 2f, size)
-        val (innerStart, innerEnd) = doubleGeom(side, half / 2f + half, size)
-        drawStrokedLine(outerShade, outerStart, outerEnd, half, null)
-        drawStrokedLine(innerShade, innerStart, innerEnd, half, null)
+        // Outer half hugs the border edge, inner half the padding edge.
+        val (outer, inner) = grooveRidgeLines(side, width, size)
+        drawStrokedLine(outerShade, outer.first, outer.second, half, null)
+        drawStrokedLine(innerShade, inner.first, inner.second, half, null)
+    }
+
+    /**
+     * The (outer, inner) half-band centre lines [drawGrooveOrRidge]
+     * strokes (each width/2 wide) for a groove/ridge side of [width] ≥ 2:
+     * insets half/2 and 3·half/2 from the border edge, through [doubleGeom]
+     * with the side's FULL width as the band (R1). OUTER is the border-edge
+     * half that grooveRidgeBandShades' first colour paints, so on a 0-tall
+     * box it lands at [w/2, w), not [0, w/2) — the shades never swap.
+     * Pure and internal so the JVM suite pins the painter's own lines.
+     */
+    internal fun grooveRidgeLines(
+        side: Side, width: Float, box: Size
+    ): Pair<Pair<Offset, Offset>, Pair<Offset, Offset>> {
+        // Each half-band is half the side's width wide.
+        val half = width / 2f
+        // Outer half centred half/2 in, inner half 3·half/2 in.
+        return doubleGeom(side, inset = half / 2f, sideWidth = width, box = box) to
+            doubleGeom(side, inset = half / 2f + half, sideWidth = width, box = box)
     }
 
     /**

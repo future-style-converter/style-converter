@@ -44,6 +44,57 @@ MUTATIONS = {
                       '        Side.BOTTOM -> Offset(0f, box.height - inset) to\n'
                       '            Offset(box.width, box.height - inset)\n',
                       'T2: doubleGeom BOTTOM back to the pre-fix centre (double / groove / ridge)'),
+    # R1 fix pass (skeptic re-verify R1). The entry ABOVE targets the pre-R1
+    # file (sha256 9f806563…) and now refuses (0 matches); these target the
+    # post-R1 doubleGeom / farEdgeBandCentre / doubleLines / grooveRidgeLines.
+    'double-dev-bottom': ('runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt',
+                          '        Side.BOTTOM -> Offset(0f, farEdgeBandCentre(box.height, sideWidth, inset)) to\n'
+                          '            Offset(box.width, farEdgeBandCentre(box.height, sideWidth, inset))\n',
+                          '        Side.BOTTOM -> Offset(0f, box.height - inset) to\n'
+                          '            Offset(box.width, box.height - inset)\n',
+                          'R1: doubleGeom BOTTOM = dev 5d9ed628 (`size.height - inset`) — only 0-tall/sub-band pins may go red'),
+    'double-mirror': ('runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt',
+                      '        Side.BOTTOM -> Offset(0f, farEdgeBandCentre(box.height, sideWidth, inset)) to\n'
+                      '            Offset(box.width, farEdgeBandCentre(box.height, sideWidth, inset))\n'
+                      '        // Start: measured in from the near edge — no clamp needed.\n'
+                      '        Side.START -> Offset(inset, 0f) to Offset(inset, box.height)\n'
+                      '        // End: measured in from the far edge of the (translated) band.\n'
+                      '        Side.END -> Offset(farEdgeBandCentre(box.width, sideWidth, inset), 0f) to\n'
+                      '            Offset(farEdgeBandCentre(box.width, sideWidth, inset), box.height)\n',
+                      '        Side.BOTTOM -> Offset(0f, innerEdgeStrokeCentre(box.height, inset)) to\n'
+                      '            Offset(box.width, innerEdgeStrokeCentre(box.height, inset))\n'
+                      '        // Start: measured in from the near edge — no clamp needed.\n'
+                      '        Side.START -> Offset(inset, 0f) to Offset(inset, box.height)\n'
+                      '        // End: measured in from the far edge of the (translated) band.\n'
+                      '        Side.END -> Offset(innerEdgeStrokeCentre(box.width, inset), 0f) to\n'
+                      '            Offset(innerEdgeStrokeCentre(box.width, inset), box.height)\n',
+                      'R1: doubleGeom BOTTOM+END back to the pre-R1 max(inset, extent - inset) (the regression itself)'),
+    'double-mirror-bottom': ('runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt',
+                             '        Side.BOTTOM -> Offset(0f, farEdgeBandCentre(box.height, sideWidth, inset)) to\n'
+                             '            Offset(box.width, farEdgeBandCentre(box.height, sideWidth, inset))\n',
+                             '        Side.BOTTOM -> Offset(0f, innerEdgeStrokeCentre(box.height, inset)) to\n'
+                             '            Offset(box.width, innerEdgeStrokeCentre(box.height, inset))\n',
+                             'R1: doubleGeom BOTTOM arm alone back to the pre-R1 mirror'),
+    'double-mirror-end': ('runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt',
+                          '        Side.END -> Offset(farEdgeBandCentre(box.width, sideWidth, inset), 0f) to\n'
+                          '            Offset(farEdgeBandCentre(box.width, sideWidth, inset), box.height)\n',
+                          '        Side.END -> Offset(innerEdgeStrokeCentre(box.width, inset), 0f) to\n'
+                          '            Offset(innerEdgeStrokeCentre(box.width, inset), box.height)\n',
+                          'R1: doubleGeom END arm alone back to the pre-R1 mirror'),
+    'band-centre-mirror': ('runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt',
+                           'kotlin.math.max(extentPx, bandPx) - insetPx',
+                           'kotlin.math.max(insetPx, extentPx - insetPx)',
+                           'R1: farEdgeBandCentre body = the per-line mirror clamp'),
+    'double-lines-width': ('runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt',
+                           'doubleGeom(side, inset = o, sideWidth = width, box = box)',
+                           'doubleGeom(side, inset = o, sideWidth = line, box = box)',
+                           'R1 wiring: drawDouble\'s plan passes one line width, not the side width, as the band'),
+    'groove-lines-width': ('runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt',
+                           'return doubleGeom(side, inset = half / 2f, sideWidth = width, box = box) to\n'
+                           '            doubleGeom(side, inset = half / 2f + half, sideWidth = width, box = box)',
+                           'return doubleGeom(side, inset = half / 2f, sideWidth = half, box = box) to\n'
+                           '            doubleGeom(side, inset = half / 2f + half, sideWidth = half, box = box)',
+                           'R1 wiring: groove/ridge plan passes the half width, not the side width, as the band'),
     'hang-width-kt': ('runtimes/compose/src/main/java/com/styleconverter/runtime/lists/ListMarkerOutsideHang.kt',
                       'return Placement(markerX, markerY, itemWidth, itemHeight)',
                       'return Placement(markerX, markerY, itemWidth + markerWidth + gapPx, itemHeight)',

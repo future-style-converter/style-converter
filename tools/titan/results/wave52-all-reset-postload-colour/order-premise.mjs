@@ -14,7 +14,18 @@
 //     pin 7 — "assert none moved");
 //   - the executed MUTATION: a temp copy of the L11 fixture with the
 //     AllThenProps keys REVERSED must fail the first assertion (proving the
-//     check can fail; the temp copy lives in this directory and is removed).
+//     check can fail; the temp copy lives in this directory and is removed);
+//   - (fix pass 2, skeptic RV-M1) the ONLY text-bearing component in the IR is
+//     ATC_DirectionSurvives — the glyph-colour row ATC_InitialUnderRedParent's
+//     `span` carries no `text`, because `all: initial` resets font-family to the
+//     UA initial face and its glyphs split web (Times) from the natives (sans)
+//     below the pair-gate bar (pair-gate-proxy.json). Its executed MUTATION: the
+//     committed HEAD b35e203a fixture (span text "Hamburg 123") converted the same
+//     way must FAIL that check (temp copy in this directory, removed). EXECUTED
+//     2026-10-05: 14/14 ok — the fixed fixture gives ["ATC_DirectionSurvives"],
+//     the HEAD fixture ["ATC_DirectionSurvives","span"] (the pin fails on it, as
+//     required). No tree file is mutated by this script (temp copies only), so
+//     there is nothing to restore.
 // Usage: node order-premise.mjs   (JDK 21; writes only under ./convert-out/)
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, readFileSync, writeFileSync, rmSync } from 'node:fs';
@@ -36,6 +47,10 @@ function convert(fixture, tag) {
   // v2 flat list: index every component by its `name` (the fixture key).
   return new Map(doc.components.map((c) => [c.name, (c.properties ?? []).map((p) => p.type)]));
 }
+
+/** Names of the components that carry non-empty `text` in a converted tag's IR (sorted). */
+const textBearing = (tag) => JSON.parse(readFileSync(join(HERE, 'convert-out', tag, 'tmpOutput.json'), 'utf8'))
+  .components.filter((c) => typeof c.text === 'string' && c.text.length > 0).map((c) => c.name).sort();   // v2 `text` field
 
 /** Find a component whose name ends with `suffix` (child names carry their parent's). */
 const pick = (m, suffix) => [...m].find(([n]) => n === suffix || n.endsWith(`__${suffix}`) || n.endsWith(suffix))?.[1];
@@ -59,6 +74,9 @@ check('ATC_AllThenProps: Display right after All', displayAfterAll(allThen), all
 const span = atc.get('span');   // ATC_InitialUnderRedParent's child, bare fixture key
 check('InitialUnderRedParent child: All then Display', span?.[0] === 'All' && displayAfterAll(span), span);
 check('ATC_DirectionSurvives: Display right after All', displayAfterAll(dir), dir);
+// Skeptic RV-M1: the glyph-colour row is glyph-free; the direction row is the one text row.
+const texts = textBearing('all-then-color');
+check('text-bearing components = [ATC_DirectionSurvives] only (span is glyph-free)', JSON.stringify(texts) === '["ATC_DirectionSurvives"]', texts);
 
 // 2. The longtail fixture: `all` LAST everywhere ⇒ the reset leaves them identical.
 const lt = convert(join(ROOT, 'fixtures/properties/global/longtail.json'), 'longtail');
@@ -75,6 +93,15 @@ writeFileSync(tmp, JSON.stringify(src));
 const mut = pick(convert(tmp, 'mutated'), 'ATC_AllThenProps');
 rmSync(tmp);
 check('MUTATION reversed keys: All no longer FIRST (the check CAN fail)', mut?.[0] !== 'All', mut);
+
+// 4. Executed mutation (fix pass 2): the committed HEAD b35e203a fixture, with the
+// span's 'Hamburg 123', must FAIL the text-bearing check above.
+const headTmp = join(HERE, 'convert-out', 'head-b35e203a-all-then-color.json');
+writeFileSync(headTmp, execFileSync('git', ['-C', ROOT, 'show', 'b35e203a:fixtures/combinations/all-then-color.json']));   // read-only git
+convert(headTmp, 'head-b35e203a');                                // real converter, same flags
+rmSync(headTmp);                                                  // the temp copy never stays
+const headTexts = textBearing('head-b35e203a');
+check('MUTATION HEAD b35e203a fixture: span text present (the text check CAN fail)', JSON.stringify(headTexts) !== '["ATC_DirectionSurvives"]', headTexts);
 
 for (const r of results) console.log(`${r.ok ? 'ok  ' : 'FAIL'} ${r.label}  ${JSON.stringify(r.detail)}`);
 writeFileSync(join(HERE, 'order-premise.json'), JSON.stringify({ generated: new Date().toISOString(), results }, null, 1) + '\n');

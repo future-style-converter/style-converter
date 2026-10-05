@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-05T16:39:47.100Z",
+ "generated": "2026-10-05T18:23:17.450Z",
  "results": [
   {
    "label": "ATC_AllThenProps: All FIRST",
@@ -53,11 +53,9 @@
    "detail": [
     "All",
     "Display",
-    "Color",
     "Width",
     "Height",
-    "BackgroundColor",
-    "FontSize"
+    "BackgroundColor"
    ]
   },
   {
@@ -72,6 +70,13 @@
     "BackgroundColor",
     "Color",
     "FontSize"
+   ]
+  },
+  {
+   "label": "text-bearing components = [ATC_DirectionSurvives] only (span is glyph-free)",
+   "ok": true,
+   "detail": [
+    "ATC_DirectionSurvives"
    ]
   },
   {
@@ -133,6 +138,14 @@
     "Width",
     "Display",
     "All"
+   ]
+  },
+  {
+   "label": "MUTATION HEAD b35e203a fixture: span text present (the text check CAN fail)",
+   "ok": true,
+   "detail": [
+    "ATC_DirectionSurvives",
+    "span"
    ]
   }
  ]

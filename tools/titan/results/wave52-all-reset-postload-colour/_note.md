@@ -63,7 +63,7 @@ to L11's `post-load-extract.test.mjs`) so no tree state is red. **seam-3 must la
 | seam-2 (iOS) under the lock: AllResetTests + ContentsUnboxingTests (18), then the wider 7-class set (+ InheritanceWave9, IOSTextLane, Phase10, UAWidgets, FidelityWave1 — 78 tests) | green both times, seam sha IDENTICAL after each restore | `seam-verification.log` |
 | hunk-for-L3-1 + seam-2 in an ISOLATED package copy (scratch; L3's file in the tree never touched) | AllResetTests 7 + ContentsUnboxingTests 11 green; 0 callers of the legacy fn left; the hunk (1-line context) applies on BOTH HEAD's and L3's in-flight test file, and its output is byte-identical to the verified copy | `seam-verification.log` |
 | seam-3 under the lock: post-load suite 101 pass + extract-fixture ua-link pins 5/5; mutation S1 (guard removed) caught | green, both files IDENTICAL | `seam-verification.log`, `mutations.log`, `verify-seam-3.sh` |
-| pin 4 — converter order premise (real `:converter`): `all` FIRST / LAST / after `Direction` exactly as the fixture's source order, and (fix pass) `Display` RIGHT AFTER `All` in the three box rows; `longtail.json` All_* all LAST (⇒ F1 leaves them byte-identical, brief pin 7); mutation (reversed keys) fails the check | 12/12 (re-run in the fix pass) | `order-premise.mjs`, `order-premise.json`, `order-premise.log` |
+| pin 4 — converter order premise (real `:converter`): `all` FIRST / LAST / after `Direction` exactly as the fixture's source order, and (fix pass) `Display` RIGHT AFTER `All` in the three box rows; `longtail.json` All_* all LAST (⇒ F1 leaves them byte-identical, brief pin 7); mutation (reversed keys) fails the check; (fix pass 2) the only text-bearing component is ATC_DirectionSurvives, its mutation (HEAD b35e203a fixture) fails it | 12/12 (fix pass); 14/14 (fix pass 2, §8) | `order-premise.mjs`, `order-premise.json`, `order-premise.log` |
 | pin 7 — the fixture's `_expect` oracle (fix pass, skeptic M1): the REAL `spec-oracle.mjs` judging (a) the CSS truth (fixture declarations per key in source order, pinned Chromium, 390-px #1A1A2E canvas) and (b) the REAL web harness (vite `?mode=capture`, converted IR served by request interception) | CSS truth 4/4 green; harness 4/4 green WITH seam-4, 2 violations at HEAD (358-px boxes — the defect seam-4 fixes); mutations M1 pre-fix / M2 display-before-all / M3 keep-before-all / M4 order-blind each caught | `fixture-oracle-probe.mjs`, `fixture-oracle-probe.json` (css), `.harness-head.json`, `.harness-patched.json`, `mutations.log` |
 | seam-4 (web-harness `ComponentRenderer.tsx`) under the lock: patched vitest 5 files 65/65 (new pin + RendererParity golden + maxSizeFloor + swarm003 + ComponentRenderer); harness oracle probe green; MUTATION HEAD source + new pin → pin FAILS | green; mutation caught; seam sha IDENTICAL after restore, pin file removed | `verify-seam-4.sh`, `seam-verification.log`, `seam-4-*.out` |
 | web key-order premise (brief §9 unverified item) in the pinned HeadlessChrome/151: SSR string and per-key CSSOM writes | old order `color…;all` → rgb(0,0,0); new `all;color…` → rgb(0,128,0) on both paths | `web-order-probe.mjs/.json` |
@@ -104,10 +104,11 @@ six tags (= the brief), 1 with `<hr>`; none of their `a/button/input/select/text
   `harnessDefaultsUnderAll`, and a NEW pin file `apps/web-harness/tests/sdui/ComponentRenderer.allHarnessDefaults.test.tsx`
   (3 tests, ATC_AllThenProps IR verbatim). On HEAD; no other lane patches this seam (L6's conditional T3 row was not
   needed — `wave52-counters-and-lists/_note.md:83`). **NEW registry row for the orchestrator.** Must land with L11's web F1.
-- `hunk-for-orchestrator-1.patch` (FIX PASS) — `tools/visual/gate-fixtures.txt` (+1 line: `all-then-color.json`, gate-only +
-  oracle until baselines are seeded) and a `fixtures/combinations/README.md` table row. Both files are owned by no lane.
-  `git apply --check` on HEAD ✓; test-all's own `_gate_set_fixtures` parses the patched list and every path exists
-  (the `test-all-guards.test.mjs` contract). Land only together with web F1 + seam-4.
+- `hunk-for-orchestrator-1.patch` (FIX PASS, header + README row rewritten in FIX PASS 2 §8) — `tools/visual/gate-fixtures.txt`
+  (+1 line: `all-then-color.json`) and a `fixtures/combinations/README.md` table row. Both files are owned by no lane.
+  **The fixture is gate-listed WITHOUT a committed baseline: gate + oracle only** (test-all `--gate-set` drops `--baseline`
+  for it — `_gate_fixture_has_baselines` returns false, executed §8). `git apply --check` on HEAD b35e203a ✓; test-all's own
+  `_gate_set_fixtures` parses the patched list (9 fixtures, every path exists). Land only together with web F1 + seam-4.
 - `hunk-for-L3-1.patch` — `ContentsUnboxingTests.swift` :175-192 rewrite (L3's file) + deletion of the legacy
   `GlobalExtractor.applyingAllReset(to:)` (L11's file). Apply AFTER L3 merges and AFTER seam-2, in L11's commit (PLAN §9 C5).
 - **To L5 (FYI):** your extract+convert differential with `POST_LOAD_EXTRACT` SET runs over a tree that carries F2 — its
@@ -119,8 +120,10 @@ six tags (= the brief), 1 with `<hr>`; none of their `a/button/input/select/text
   (`extract-fixture.mjs` SUPPORTED_PSEUDO_ELEMENTS) — brief F3, ~15 colour-only carriers, extractor seam."
 - Fixture `fixtures/combinations/all-then-color.json` (4 components, `_expect` per the combinations README) — CORRECTED in the
   fix pass (§7): every `all: initial` row that keeps a box re-declares `display: block` after `all`; the PropsThenAll child
-  grew to 150x50 so its oracle can fail. Converts (order premise above); **baselines NOT captured** (device-free lane) —
-  capture + LOOK before committing them.
+  grew to 150x50 so its oracle can fail. FIX PASS 2 (§8): the ATC_InitialUnderRedParent row is GLYPH-FREE (its `span` lost
+  `_text` + the glyph-only `color` / `font-size`), and the PropsThenAll child ends in `all: revert` (its standalone capture
+  no longer splits the frame on the natives' S2 placeholder floor). Converts (order premise above); **baselines NOT captured** (device-free
+  lane) — capture + LOOK before committing them.
 
 ## 5. Predictions (gate cells, wave51-fix → after)
 
@@ -162,8 +165,11 @@ re-scored to EXACTLY its manifest number first):
 - The `all-then-color.json` baselines (need `UPDATE_BASELINE=1 ./test-all.sh` + a LOOK), and the fixture's NATIVE renders: the
   oracle is proven against the CSS truth and the real web harness only; Compose / SwiftUI see `[All, Display BLOCK, …]` →
   (AllReset keeps own(i,end]) `[Display BLOCK, Width, Height, …]`, which they paint as a block — unit-level reasoning, no capture.
-- Cross-platform pairs of the two TEXT rows (InitialUnderRedParent, DirectionSurvives): `all: initial` resets font-family to
-  its UA-dependent initial value, so the glyph faces may differ by platform; the first gate run may need a ledger line there.
+- ~~Cross-platform pairs of the two TEXT rows~~ — MEASURED and RESOLVED in fix pass 2 (§8): the InitialUnderRedParent text
+  failed the proxied pair gate (exit 4) and is gone; the one remaining text row, DirectionSurvives, proxies at
+  0.9818 / 0.9844 / 0.9888 (≥ 0.971 under ±2–6 px native glyph offsets). Still unmeasured: the REAL native glyph raster of
+  its "123" (device-gated) — LOOK at its first capture — and the natives' real frame for the standalone `reset` (predicted
+  390×62 from their floor code; web measured 390×62).
 - Why the ref's `all: initial` span keeps an Inter-width face (brief §9) — caps all-prop-initial-color web at ≈0.979.
 
 Device-gated by the lane rules (handed to the orchestrator's sweep/gate, not owed here): the `all-then-color.json` baselines and every PNG claim above.
@@ -200,5 +206,77 @@ Should-fix items NOT addressed in this pass (code unchanged; recorded so they ar
 - **S2** natives do not model non-inherited INITIAL values that differ from their defaults (above all `display: initial` =
   inline) nor REVERT's UA values, and do not log it. Corpus-neutral; the corrected fixture no longer depends on it.
 - **N1** no pin exercises the seam-1 / seam-2 wiring itself (the unit tests re-implement the call order); device gate only.
+
+## 8. Fix pass 2 — skeptic RV-M1 (the gate-list hunk would land a red pair) + a second red found while proxying
+
+**Defect (RV-M1).** The fix-pass fixture's ATC_InitialUnderRedParent child drew "Hamburg 123". `all: initial` resets
+`font-family` to the UA-dependent initial face (Chromium: Times) while the natives draw their system sans, and the hunk puts
+the fixture on the gate set with no baseline, so the cross-platform pair gate runs on it. **Reproduced** with my own re-build
+of the skeptic's proxy (`pair-gate-proxy.mjs`, run `pre-fix-head-b35e203a`): exit 4, 4 unexpected — 004_ATC_InitialUnderRedParent
+AND the standalone 005_span capture (the skeptic's "likely further red pair", now measured), iOS-web 0.9404 / Android-web
+0.9420 each (skeptic: 0.9415 / 0.9420).
+
+**Fix 1 — the prescribed option (a).** The `span` child lost `_text` and its glyph-only declarations (`color: #ffffff`,
+`font-size: 20px`); the row now asserts through fills/boxes only. The parent keeps `color: #e74c3c` on purpose: it gives
+the child a NON-EMPTY inherited channel (Compose / iOS hand it `[Color red]`), so the row still runs the reset's INITIAL
+branch with something to drop. The oracle probe stays meaningful — the fill the reset must NOT clear is the child's green
+(written AFTER `all`, §6.4); the fill it reveals when it wrongly clears it is the parent's blue (12000 px): P-M2 / P-M3 below.
+The red-vs-white glyph colour was never visible to the v1 oracle; it stays pinned at unit level (AllReset pins, verbatim
+all-prop-*-color IR, three runtimes) and in the WPT corpus. ATC_DirectionSurvives keeps its digits: their purpose is
+direction (for the LOOK), not glyph colour — it is the one text row, and it cannot fail on direction (RV-S1, recorded in the
+`_comment`).
+
+**Second red, found by this pass (not in the skeptic's review).** The skeptic's proxy captured the 4 roots only; the real
+legacy flatten also captures every child STANDALONE (`reset`, `span`). Measured on the REAL web harness (HEAD source,
+throwaway scratch script): the standalone `reset` (`width/height/background` then `all: initial`) is `display: inline`, 0×0,
+frame **390×32**. Compose / SwiftUI never apply CSS initial values (skeptic S2): F1 leaves them an EMPTY own list, which takes
+the harness placeholder floor (`StyleApplier.placeholderFloorMinSize` / `StyleBuilder.minFloor` + `MinBoxFloor`, 50×30 —
+read, not device-run) → frame **390×62**. A pair-gate red (iOS-web / Android-web SSIM 0.6627, Δpx 48.39 %) unrelated to
+order. **Fix 2:** the PropsThenAll child now ends in `all: revert` instead of `all: initial` — the before-`all` drop (the
+row's subject, §6.4) is identical for every keyword; `revert` rolls a `<div>` back to the UA `display: block` (§7.3.4), so it
+stays a block everywhere: real web harness standalone frame **390×62** (block 358×30 under the harness floors, ground + label
+only) = the natives' floor frame. The composed row is unchanged (an empty transparent block; green 160×60 dominates).
+To make this executable I added `--model native` to the proxy: web = CSS truth + the harness's trailing min-width/min-height
+floors read from the POST-F1 styles (RV-N1); natives = the F1 own-list reset (no CSS initial value ever applied) + the 50×30
+floor on an unsized axis. The default `--model css` stays the skeptic's recipe.
+
+**The fixture still exercises the ORDER rule** (after-`all` kept: AllThenProps, InitialUnderRedParent, DirectionSurvives's
+box; before-`all` dropped: PropsThenAll; exemption kept: DirectionSurvives) — the gate-list hunk is NOT withdrawn.
+`_comment`, the `_expect.note`s, the hunk header and its README row all say so.
+
+**Gate status, stated plainly.** Gate-listed WITHOUT a committed baseline → **gate + oracle only** (no `--baseline`; 0
+baseline PNGs name an ATC_* / span / reset component — `_gate_fixture_has_baselines` executed on the real baseline dir:
+false; control visual-test.json: true). With the hunk the gate set has **9** fixtures (the opening gate's "exit 0 ×8"
+becomes ×9). The closing gate (`BASELINE=1 ./test-all.sh --gate-set`) must print for this child: the `--gate-set: … has NO
+committed baseline … (gate + oracle only)` notice, `· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0
+unexpected`, `· spec oracle: 12 platform-component check(s) · 0 violation(s)`, and the summary line `exit 0
+fixtures/combinations/all-then-color.json   (gate-only: no committed baseline)` (18 = 6 captures × 3 pairs — the legacy
+flatten emits the 4 roots plus the standalone `reset` and `span`; 12 = 4 `_expect` rows × 3 platforms).
+
+Fixture bytes: HEAD b35e203a 87e19d8f… → textless only 0ee2eb5c… → **landed ae4867a8…** (textless + `revert`; the last edit
+was `_comment` wording only and every run below was repeated on these final bytes).
+
+| check (all executed this pass) | result | evidence |
+|---|---|---|
+| proxy (css), HEAD b35e203a fixture (with text) | **exit 4**, 18 pairs / 4 unexpected (004 + 005, iOS-web 0.9404, Android-web 0.9420), oracle 12 / 0 | `pair-gate-proxy.json` run `pre-fix-head-b35e203a` |
+| proxy (css), textless-only fixture 0ee2eb5c… | exit 0 — but the native model on the same bytes exits 4 on 003_reset (= P-M4) | runs `post-fix-1-textless-initial`, `P-M4-reset-initial-native` |
+| **proxy, landed fixture ae4867a8…, BOTH models** | **exit 0, 18 pairs / 0 unexpected, 12 oracle checks / 0 violations** (css and native); 001–005 every pair SSIM 1.0000; 006 DirectionSurvives iOS-Android 0.9888 · iOS-web 0.9818 · Android-web 0.9844 | runs `post-fix-2`, `post-fix-2-native-model` |
+| mutations IN PLACE on the fixture (`mutate-fixture-proxy.sh`): P-M1 HEAD text bytes → required 4; P-M2 span `display` before `all` → 6; P-M3 span emptied (order-blind) → 6; P-M4 reset `revert`→`initial`, `--model native` → 4 | all four CAUGHT (P-M2 / P-M3: 6 violations each — ATC_InitialUnderRedParent fill rgb(52,152,219) box 0×0 ×3; P-M4: 003_reset iOS-web / Android-web 0.6627); fixture sha256 ae4867a8… before = after **IDENTICAL** (also IDENTICAL on the two intermediate byte sets) | `mutations.log` "FIX PASS 2" (`*.log` is gitignored — the durable record is the `pair-gate-proxy.mjs` header + `pair-gate-proxy.json`) |
+| order premise, REAL `:converter` (JDK 21) + new pin "text-bearing components = [ATC_DirectionSurvives] only" | 14/14 ok; span `[All, Display, Width, Height, BackgroundColor]`; reset `[Width, Height, BackgroundColor, All REVERT]` (All LAST); MUTATION (HEAD b35e203a fixture converted) → `["ATC_DirectionSurvives","span"]`, the text pin fails as required | `order-premise.mjs/.json`, `convert-out/` |
+| lane CSS-truth oracle probe on the landed fixture | PROBE OK: 4/4 green; M1–M4 each caught (M3 still turns PropsThenAll red under `revert`) | `fixture-oracle-probe.pass2.json` (pass-1 record `fixture-oracle-probe.json` left as is) |
+| REAL web harness at HEAD (no seam-4), landed IR | glyph-free row green (fill green, box 200×60); PropsThenAll green; AllThenProps / DirectionSurvives 358 px — the known seam-4 defect, unchanged; M2 caught. Standalone frames (throwaway dims script): reset 390×62 block, span 390×92 | `fixture-oracle-probe.pass2.harness-head.json` |
+| hunk | `git apply --check` ✓ on HEAD b35e203a; patched list parsed by test-all's `_gate_set_fixtures` (9 fixtures, all exist) | this note |
+| throwaway sensitivity (scratch copy of the proxy, not committed): DirectionSurvives native text offset 2 / 4 px down, 3 / 6 px left | still exit 0; worst pair 0.9711 (dy 4) | numbers recorded here only |
+
+Proxy recipe (re-built; the skeptic's scratch scripts were purged): CSS truth in the pinned Chrome/151 headless, 390-px
+#1A1A2E canvas with 16-px pad (CaptureGallery `canvasStyle` + the harness body font), per-key `setProperty` in source order;
+web keeps the UA initial face; "iOS" re-declares `system-ui` (SF) and "Android" `Roboto, Arial` (→ Arial) AFTER `all` on
+text nodes only; the legacy flatten modelled (roots + standalone children, pre-order); the block-font label chrome stamped
+on text-less leaves (identical ×3); judged by the REAL `compare-screenshots.mjs --input fixtures/combinations/all-then-color.json`
+from `tools/visual` (gate-only, every write redirected to scratch). One correction to the recipe, MEASURED: a bare
+`-apple-system` is NOT SF in this headless Chromium — "Hamburg 123" @20px lays out at 110.19 px = Times (the fallback; my
+first run read iOS-web 1.0000), `system-ui` gives 118.48 px = SF. Neither model rasterises real native glyphs or runs a
+native renderer: the native model is the F1 rule + the floor code, read. So a PASS on DirectionSurvives is optimistic by the
+native glyph-raster delta, and the `reset` frame agreement rests on the natives' floor code — LOOK at both first captures.
 
 STATUS: COMPLETE
