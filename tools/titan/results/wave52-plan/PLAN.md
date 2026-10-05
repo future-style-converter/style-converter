@@ -687,3 +687,43 @@ BACKLOG is orchestrator-owned and is NOT edited here; the one amendment it needs
 Re-verification after the edits: `node tools/titan/results/wave52-plan/watchlist-check.mjs` → `unmatched 0`; every `wave51-fix <section>/<test> <platform> <P|f> <ssim>`
 citation in this file resolves against `tools/titan/runs/wave51-fix/sections/*/manifest.json` with the stated verdict and score (re-run of plan-skeptic-1's check over the
 corrected text — see the report accompanying this revision).
+
+## 10. Integration record and closing-gate expectations as amended (orchestrator, 2026-10-05, BEFORE the closing gate)
+
+Written before `wave52-final` runs, so everything below is a pre-registration. Sources: `ORCHESTRATOR-TODO.md` (this directory), the twelve lane
+notes and skeptic reviews, `build-v2-result.json`.
+
+**Integration.** `integrate-seams.sh` applied 35/35 seam patches and cross-lane hunks in the §4 order (dry run in a throwaway worktree first, then
+the tree; commit c565d2e3), plus L11's gate-list hunk after its must-fix RV-M1 was closed (the fixture asserts through fills only; the skeptic's
+proxy through the real comparator exits 0 under both models). `tools/visual/gate-fixtures.txt` therefore lists **9** fixtures; the closing gate's
+fixture net must print exit 0 ×9 — `all-then-color.json` is gate-only (no committed baseline). Withdrawn / not needed, nothing applied: L4's
+b′ BlockContainer gate, L2's Compose RC1 zIndex hunk (went harness-side), L3's iOS overlay partition, L6's web marker row, L8's Compose budget
+hand-off. Never committed: `vertical-wedges/ma-exclude-ios.patch`, `inline-run-wall/drop-F1.patch` (device-A/B arms).
+
+**Deferred by the orchestrator, with the reason.** L6 asked for `requires-script-mutation` not-applicable tags on seven valid
+`css-counter-styles/cssom/cssom-*-setter` tests. That tag excludes unconditionally: 21 scored cells would leave the denominator, 13 of them
+passing, in the same gate as L5/L6's cssom work — the movement would be unreadable. NOT applied this wave; queued in BACKLOG with the census.
+
+**§7 as amended — what `score-gate.mjs wave51-fix wave52-final` must print, and how to read it.**
+- Instrument-only moves are known in advance from L12's calibration (`tools/titan/runs/wave52-calib` = `wave52-open` captures re-scored against
+  the re-frozen refs; 4305/4305 capture PNGs byte-identical, 88 moved cells all attributed): **gained 13** (initial-background-color ×3,
+  flex-gap-decorations-033 web, -034 ×3, -035 ×3, backdrop-filter-root-element ×3), **lost 8** (flex-gap-decorations-033 ios/android —
+  pre-registered at plan time; `css-display/display-contents-root-background` ×3 P ≈1.0 → f 0.535 and
+  `css-view-transitions/column-span-during-transition-doesnt-skip` ×3 P 0.9879 → f 0.9332 — NOT pre-registered at plan time, declared here:
+  the old refs were erased/degenerate, the new refs show what Chrome paints and the runtimes do not), **unmeasured-now 19** (the absence-only
+  stamps, by name in L12's note). L1 measured that its F-B does NOT repay column-span ×3; no lane repays display-contents-root-background ×3 —
+  both become BACKLOG items with the calibration as their evidence.
+- So "lost" in the score of record is **≥ 8, all instrument-only and capture-identical**; a lost cell outside that list of eight is a REAL
+  regression and stops the ship. **unmeasured-now = 21** (19 + armenian/css3-counter-styles-008 ios/android via L6's adjudication hunk);
+  the inject summary prints `absence-only=19` and `blank-captures=45`.
+- Render lanes are attributed against the calibration run: `score-gate.mjs wave52-calib wave52-final` must show **lost = 0** and
+  unmeasured-now = 2; every gained cell there is PNG-checked against the re-frozen ref before it is written as a pass, and cells labelled
+  DEGENERATE in §2 are counted and named, never claimed as fixes.
+- Baseline for the totals: calibration alone puts the corpus at web 1211/1372 · iOS 1084/1363 · Android 1075/1363. The lanes' HIGH and
+  MED-HIGH predictions (per `build-v2-result.json`) add roughly +19 web / +27 iOS / +26 Android on top if all land; the watchlist
+  (300 lines, 0 unmatched) attributes each.
+- Tripwires on the final run: L2's frame-ink census → overrun-right + overrun-left = 0/0; L4's four
+  `css-sizing/abspos-auto-sizing-fit-content-percentage-001…004` Android PNGs `cmp`-identical to wave52-open; the ring-fenced
+  `filter-effects/backdrop-filter-basic-blur` reported plainly (L2's Fix A moves its frame).
+- Device A/Bs owed after the gate, each recording the installed `base.apk` sha1 / `.app` hash: L4 b″, L6 T5 (outside markers), L8 M-A (face
+  change), L9 F2/F1 (glyphless ring / hanging punctuation). The integrated tree is the include arm.
