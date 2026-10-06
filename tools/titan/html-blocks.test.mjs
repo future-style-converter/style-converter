@@ -6,6 +6,12 @@
 //      gate reads (the 30 sections' tests.list + the reference pages), when
 //      the vendored corpus is present (tools/wpt is gitignored; on a CI runner
 //      without it that pin skips BY NAME and the behaviour pins still run).
+// The three OLD_* regexes below are kept VERBATIM on purpose: they are the
+// oracle the equality pin compares against, and nothing else in the tree
+// uses them. CodeQL flags them (js/bad-tag-filter,
+// js/incomplete-multi-character-sanitization — alerts 31–34 on PR #151); they
+// are dismissed as "used in tests", which is what they are. Do not "fix" them:
+// an oracle that no longer matches the replaced code proves nothing.
 // Run via `node --test tools/titan/html-blocks.test.mjs`.
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
