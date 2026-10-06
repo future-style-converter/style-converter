@@ -13,6 +13,7 @@
 import { readFileSync, readdirSync } from 'node:fs';
 import { join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { stripBetween } from '../../html-blocks.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO = resolve(HERE, '..', '..', '..', '..');
@@ -37,7 +38,7 @@ for (const sec of readdirSync(SECTIONS)) {
 const source = (t) => { try { return readFileSync(join(WPT, t), 'utf8'); } catch { return ''; } };
 // Comment-stripped <style> text + style attributes of one source.
 const cssOf = (html) => {
-  const h = html.replace(/<!--[\s\S]*?-->/g, '').replace(/\/\*[\s\S]*?\*\//g, ' ');
+  const h = stripBetween(html, '<!--', '-->').replace(/\/\*[\s\S]*?\*\//g, ' ');   // wave 52: index-based comment strip (CodeQL multi-character-sanitization on the regex)
   const style = [...h.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]).join('\n');
   const attrs = [...h.matchAll(/\sstyle\s*=\s*("([^"]*)"|'([^']*)')/gi)].map((m) => m[2] ?? m[3]);
   return { style, attrs };

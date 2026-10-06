@@ -109,7 +109,7 @@ for (const sec of readdirSync(RUN)) {
     comps.forEach(resolve);
     const carriers = comps.filter((c) => (c.properties ?? []).some((p) => kw(p) !== null));
     if (!carriers.length) continue;
-    const id = `${sec}/${f.replace(/^wpt__[^_]+(?:-[^_]+)*__/, '').replace(/__/g, '/').replace(/\.json$/, '')}`;
+    const id = `${sec}/${f.replace(/^wpt__[^_]+__/, '').replace(/__/g, '/').replace(/\.json$/, '')}`;
     // Web: `all` used to be the LAST key; now FIRST, with the before-list filtered out.
     const webKeysBefore = carriers.map((c) => c.properties.slice(0, c.properties.findLastIndex((p) => kw(p) !== null))
       .filter((p) => !EXEMPT.has(p.type)).length);

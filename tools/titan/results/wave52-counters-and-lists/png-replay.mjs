@@ -38,6 +38,7 @@ import {
   BROWSER_LAUNCH_ARGS, canvasFrameCss, UA_BODY_CSS, uaBodyMarginFor, padPngBuffer,
   CANVAS_PAD_PX, CANVAS_BG, REF_RENDER_WIDTH, REF_RENDER_MIN_HEIGHT,
 } from '../../capture-browser-ref.mjs';
+import { stripScripts } from '../../html-blocks.mjs';   // wave 52: index-based script strip (CodeQL bad-tag-filter on the regex)
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(HERE, '..', '..', '..', '..');
@@ -80,12 +81,18 @@ function irItems(rel, bake) {
 /** Rewrite the n-th source <li> per `form(item)` → null | {listStyleType, inlineMarkerText?}. */
 function variantHtml(src, items, form) {
   let i = 0;
-  return src.replace(/<script\b[\s\S]*?<\/script>/gi, '').replace(/@counter-style\s+[^{]+\{[^}]*\}/g, '')
+  return stripScripts(src).replace(/@counter-style\s+[^{]+\{[^}]*\}/g, '')
     .replace(/<li\b([^>]*)>/gi, (m, attrs) => {
       const it = items[i++]; const f = it && form(it);
       if (!f) return m;
-      const css = `list-style-type: ${f.listStyleType.replace(/'/g, "\\'")}`;
-      const open = /style\s*=\s*"/i.test(attrs) ? `<li${attrs.replace(/style\s*=\s*"/i, `style="${css}; `)}>` : `<li${attrs} style='${css}'>`;
+      // The CSS goes into an HTML ATTRIBUTE, so the quote that would end the
+      // attribute is escaped as an HTML entity (the parser decodes it before
+      // CSS sees the text) — backslash-escaping belonged to a JS string, not
+      // here, and was CodeQL's js/incomplete-sanitization (wave 52).
+      const css = `list-style-type: ${f.listStyleType}`;
+      const open = /style\s*=\s*"/i.test(attrs)
+        ? `<li${attrs.replace(/style\s*=\s*"/i, `style="${css.replace(/"/g, '&quot;')}; `)}>`
+        : `<li${attrs} style='${css.replace(/'/g, '&#39;')}'>`;
       return f.inlineMarkerText === undefined ? open : `${open}<span style="unicode-bidi:isolate">${f.inlineMarkerText}</span>`;
     });
 }
@@ -141,7 +148,7 @@ try {
     const frozen = PNG.sync.read(fs.readFileSync(path.join(FROZEN, sec, stem + '.png')));
     const items = irItems(c.rel, c.bake);
     const planOf = (it) => bakedMarkerPlan(it.type, it.position, it.marker, it.hasChildren);
-    const stringOf = (it) => { const p = planOf(it); return p && { listStyleType: p.inlineMarkerText === undefined ? p.listStyleType : `"${p.inlineMarkerText.replace(/"/g, '\\"')}"` }; };
+    const stringOf = (it) => { const p = planOf(it); return p && { listStyleType: p.inlineMarkerText === undefined ? p.listStyleType : `"${p.inlineMarkerText.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"` }; };
     const row = { test: c.rel, items: items.map((it) => ({ ...it, plan: planOf(it) ?? null })), frozen: { bands: bands(frozen) }, renders: {} };
     const pages = [['ref', refAbs], ['native', testAbs]];
     for (const [kind, form] of [['string', stringOf], ['plan', planOf]]) {

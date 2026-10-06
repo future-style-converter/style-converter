@@ -159,3 +159,17 @@ Each arm: ONE mechanism taken out of the shipped tree, the sections that hold it
   by provision-devices.sh" — the launcher pid that provision-devices.sh records forks qemu as a child and, on SIGTERM,
   exits after waiting for it, leaving the dying qemu an orphan no recorded pid reaches. provision-devices.sh now records
   the children too, once they exist (uncommitted at the arms' time; in the ship commit).
+
+### 8. After the PR opened (2026-10-06)
+
+- **CodeQL.** All four required ci.yml contexts and the other seven jobs green on f122b50c; the bare `CodeQL` summary
+  check FAILED with "11 new alerts … 11 high" — real findings in this PR's own code, not the stuck analyzer:
+  `js/regex-injection` (cells.mjs ×2, one pre-existing), `js/redos` (the redundant `(?:-[^_]+)*`), and the regex
+  `<script>` / `<!-- -->` filters in counter-style-author.mjs, png-replay.mjs and census.mjs plus one quote escape.
+  Fixed in code (`tools/titan/html-blocks.mjs` + `html-blocks.test.mjs`: byte-equal to the regexes over every corpus
+  source; plain-term helpers; entity escaping), re-pushed for CodeQL to re-evaluate before the squash merge.
+- **The host changed under the record.** Between the gate (2026-10-05, macOS 26 / Xcode 26.6) and this check-in the
+  host moved to macOS 27.0.1 / Xcode 27.0. Re-run on the new toolchain: swiftui Catalyst 2147/2147; the ios-harness
+  XCTest scheme now RUNS (it could not before) — 17 pass, 13 fail reading repo files from inside the simulator
+  (NSCocoaErrorDomain 257 on `~/Documents/…`; BACKLOG Known-broken has the diagnosis and the fix direction). The
+  gate of record itself was captured on the old toolchain and is not re-run: nothing in the shipped tree changed.

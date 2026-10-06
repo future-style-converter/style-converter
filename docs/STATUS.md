@@ -2618,8 +2618,10 @@ inside the checkout). Two host-wide stops remain in the gate path —
 `./gradlew --stop` and the adb-timeout `pkill -9 -x adb` (BACKLOG
 Known-broken). Suites on the shipped tree: converter 551 · web
 runtime 1361 · web-harness 321 · compose 3393 · android-harness 159 ·
-swiftui 2147 · tooling 2261 · IR conformance valid; the ios-harness XCTest
-bundle compiles with 30 tests and cannot run on this host. Lessons that
+swiftui 2147 · tooling 2266 · IR conformance valid; the ios-harness XCTest
+scheme (30 tests) could not run under Xcode 26.6 and, under the Xcode 27.0
+the host moved to the next day, runs with 17 passing and 13 blocked by a
+simulator file-permission denial on `~/Documents` (BACKLOG Known-broken). Lessons that
 outlive the wave: a pre-registered lost list is what made five real cells
 visible among thirteen; a correct change that exposes an older defect is
 fixed at the older root, not reverted; a probe licenses an assembled result
@@ -2639,7 +2641,7 @@ a look — 11 of 102 gains are degenerate. Gate record and every artifact:
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 159 |
 | swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2147 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 321 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2261 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2266 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 30 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 

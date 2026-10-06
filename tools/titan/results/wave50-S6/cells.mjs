@@ -1,10 +1,14 @@
 // S6 skeptic helper: independent cell reader over a titan run dir.
-// Usage: node tools/titan/results/wave50-S6/cells.mjs <runId> <regex> [section]
+// Usage: node tools/titan/results/wave50-S6/cells.mjs <runId> <terms> [section]
+//   <terms>: `|`-separated alternatives of space-separated words that must all occur
+//   (case-insensitive substrings) — plain text, not a regex (wave 52: a RegExp built
+//   from an argument was CodeQL alert #19, js/regex-injection).
 import fs from 'node:fs';
 import path from 'node:path';
-const [runId, rx, sectionFilter] = process.argv.slice(2);
+const [runId, terms, sectionFilter] = process.argv.slice(2);
 const root = path.join('tools/titan/runs', runId, 'sections');
-const re = new RegExp(rx);
+const alternatives = String(terms ?? '').split('|').map((alt) => alt.trim().toLowerCase().split(/\s+/).filter(Boolean)).filter((w) => w.length);
+const re = { test: (key) => { const k = String(key).toLowerCase(); return alternatives.some((words) => words.every((w) => k.includes(w))); } };
 const out = [];
 for (const sec of fs.readdirSync(root)) {
   if (sectionFilter && sec !== sectionFilter) continue;

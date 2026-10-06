@@ -107,7 +107,7 @@ for (const section of fs.readdirSync(runDir)) {
   for (const file of fs.readdirSync(irDir).filter((f) => f.endsWith('.json'))) {
     out.docs++;
     const doc = JSON.parse(fs.readFileSync(path.join(irDir, file), 'utf8'));
-    const tag = `${section}/${file.replace(/^wpt__[^_]+(?:-[^_]+)*__/, '').replace(/\.json$/, '').split('__').join('/')}`;
+    const tag = `${section}/${file.replace(/^wpt__[^_]+__/, '').replace(/\.json$/, '').split('__').join('/')}`;
     const faces = doc.fontFaces || [];
     // iOS registers every face CoreText can load (woff included); Android only ttf/otf/ttc.
     const iosDoc = new Set(faces.map((f) => norm(f.family)));

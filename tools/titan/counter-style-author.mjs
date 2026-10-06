@@ -20,10 +20,13 @@ import { PREDEFINED, BULLET_STYLES } from './counter-style-table.mjs';
 import {
   DESCRIPTOR_PARSERS, IMAGE_SYMBOL, parseName, setterTakesEffect,
 } from './counter-style-descriptors.mjs';
+// Index-based `<script>` scanning (wave 52): the regex it replaced was a
+// CodeQL bad-tag-filter finding; html-blocks.test.mjs pins byte-equality.
+import { scriptBlocks, stripScripts } from './html-blocks.mjs';
 
 /** Strip `<script>…</script>` so a template-literal `<style>` inside a script
  *  (override-in-shadow-dom) is never read as a document-scope rule. */
-const withoutScripts = (html) => String(html ?? '').replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '');
+const withoutScripts = (html) => stripScripts(html);
 
 /**
  * Every `@counter-style` rule in the document's `<style>` blocks, in source
@@ -162,7 +165,8 @@ const SETTER = /^(\w+)\.(name|system|symbols|additiveSymbols|negative|prefix|suf
  * i.e. the post-load rendering differs from the static rule.
  */
 export function cssomScriptVerdict(html, rules) {
-  const bodies = [...String(html ?? '').matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/gi)];
+  // Same shape the matchAll gave: [whole, attrs, body] per block (html-blocks.mjs).
+  const bodies = scriptBlocks(html).map((b) => [null, b.attrs, b.body]);
   if (bodies.length === 0) return { kind: 'none' };
   if (bodies.some((m) => /\bsrc\s*=/i.test(m[1]))) return { kind: 'foreign' };
   const sheets = {}, ruleVars = {}, assignments = [];

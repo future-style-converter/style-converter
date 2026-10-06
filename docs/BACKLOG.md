@@ -3722,17 +3722,28 @@ platform; they are not folded into a rendering wave.
   harness target while
   other lanes' seams were transiently applied; Debug builds succeed
   (`tools/titan/results/wave52-composed-canvas/_note.md` §6).
-- **The ios-harness XCTest scheme cannot run on this host** (wave-52 sweep,
-  2026-10-05): Xcode 26.6 (17F113) reports "iOS 26.5 is not installed" — the
-  installed simulator runtimes are iOS 26.0 / 26.2 (CoreSimulator volumes
-  `iOS_23A8464`, `iOS_23C54`) — so `xcodebuild test -scheme
-  StyleConverterTestTests` exits 70. The harness app builds, and the test
-  bundle compiles by target (`-target StyleConverterTestTests -sdk
-  iphonesimulator`; 30 test functions under
-  `apps/ios-harness/StyleConverterTestTests/`, the count CLAUDE.md's table
-  carries). Remedy is a host action — install the platform in Xcode ›
-  Settings › Components — not a code change; until then those tests are
-  compile-checked only.
+- **The ios-harness XCTest scheme runs again, and 13 of its 30 tests fail on
+  a file-permission error** (2026-10-06, after the host moved to macOS 27.0.1
+  + Xcode 27.0 — under Xcode 26.6 the scheme could not run at all: "iOS 26.5
+  is not installed", exit 70). `xcodebuild test -scheme StyleConverterTestTests
+  -destination 'platform=iOS Simulator,id=<booted>'`: 17 pass; the 13
+  failures are every test that reads a repo file from inside the simulator
+  process via `#filePath` hops — `ComposedCanvasIcbClipTests` (7, the
+  `CaptureCanvas.swift` source pins), `ComposedCanvasPaddingTests` (4),
+  `ComposedRootInlineFlowTests` (2, two per-test IR JSONs) — each with
+  `NSCocoaErrorDomain Code=257 "… couldn't be opened because you don't have
+  permission to view it"` on a path under `~/Documents/Projects/…`. The
+  runtime's own Catalyst suite reads the same files the same way and passes
+  2147/2147 on the same host (an Xcode-hosted process), so this is the
+  simulator process being denied `~/Documents` (macOS privacy protection for
+  the Documents folder), not the tests' logic. Fix direction, code-side and
+  host-independent: bundle the files those tests read as resources of the
+  test target (xcodegen `project.yml`, `resources:`) and read them through
+  `Bundle(for:)` instead of the source tree — the pattern the runtime's
+  ConformanceTests will need too if the suite ever runs in a simulator. Host
+  workaround: grant the Simulator access to Documents (System Settings ›
+  Privacy & Security › Files and Folders). Until one lands the suite's
+  honest count is 17 passing / 13 environment-blocked, not 30.
 - **`tools/visual/smoke.sh` still hardcodes port 3000 in its web tiers**
   (Tier 5 interaction states, Tier 11 a11y audit): `start_vite` runs `npm run
   dev` (`apps/web-harness/vite.config.ts` `server.port: 3000`) and polls
@@ -3903,6 +3914,25 @@ platform; they are not folded into a rendering wave.
   private subdirectory (L3 collided with another lane's derived-data
   directory under a generic name — `tools/titan/results/wave52-failure-ink/_note.md`
   §8).
+- **A red CodeQL summary check on a wave PR is read, not overridden** (wave
+  52, PR #151): the four required contexts were green and the bare `CodeQL`
+  check failed in 7 s — not the stuck java-kotlin analyzer the `--admin`
+  ritual covers, but **11 new alerts in code the PR added** (`gh api
+  repos/<r>/code-scanning/alerts?state=open&ref=refs/pull/<N>/head`):
+  `js/regex-injection` (a lookup helper built a `RegExp` from its argument —
+  `tools/titan/results/wave52-gate/cells.mjs`, and the pre-existing #19 in
+  `wave50-S6/cells.mjs`), `js/redos` (`/^wpt__[^_]+(?:-[^_]+)*__/`, whose
+  second quantifier was redundant), and `js/bad-tag-filter` /
+  `js/incomplete-multi-character-sanitization` / `js/incomplete-sanitization`
+  (regex `<script>` / `<!-- -->` stripping in `tools/titan/counter-style-author.mjs`
+  and two lane scripts, plus a backslash-style quote escape inside an HTML
+  attribute). All eleven fixed in code: an index-based scanner
+  (`tools/titan/html-blocks.mjs`, pinned by `html-blocks.test.mjs` — behaviour,
+  AND byte-equality with the replaced regexes over every corpus source),
+  plain-term matching in the helpers, HTML-entity escaping for attribute
+  context. The rule: a CodeQL failure caused by alerts in the PR's own code is
+  a finding to fix before merge; `--admin` stays reserved for the wedged
+  analyzer with zero new alerts (change-control skill §4.2).
 - **The vite port guard: capture scripts never kill a foreign listener on
   their web port** (wave 52; `tools/visual/web-port-guard.sh`, sourced by
   `test-all.sh`, `tools/titan/section-runner.sh` and
