@@ -1,0 +1,12 @@
+TRIP T-L2   frame-ink overrun-right 0 · overrun-left 1 (wave 51: 208 · 84; expected 0 · 0) — clean 4019, top 45, mixed 0
+    overrun-left  android  L1 R0 T0  P 0.9981  css/filter-effects/backdrop-filter-clip-rect-2.html
+ok   T-L1   frame-ring stamped on 4 test(s), 4 of them fractional-box (expected 4 / 4)
+TRIP T-L12  absence-only=19 blank-captures=43 over 30 section logs (expected 19 / 45)
+ok   T-L4   abspos-auto-sizing-fit-content-percentage-001…004 android byte-identical to wave52-open: same same same same
+ok   T-L6   floats-clear__floats-clear-multicol-003 android orange rows 161–163 (expected to include 161–163; wave52-open: 158–160)
+ok   T-L6   floats-clear__floats-clear-multicol-balancing-003 android orange rows 171–175 (expected to include 171–175; wave52-open: 166–170)
+     REPORT backdrop-filter-basic-blur web: P 0.9943 → P 1 (ring-fenced; generic mechanisms only)
+     REPORT backdrop-filter-basic-blur ios: f 0.9469 → P 0.9526 (ring-fenced; generic mechanisms only)
+     REPORT backdrop-filter-basic-blur android: f 0.899 → f 0.904 (ring-fenced; generic mechanisms only)
+
+2 tripwire(s) tripped

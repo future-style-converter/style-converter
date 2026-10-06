@@ -1,0 +1,27 @@
+A/B  exclude=wave52-ab-ma  include=wave52-ship  sections=css-text,css-text-decor,css-writing-modes  platforms=ios,android
+compared 288 cells: 25 differ (flip, or |Δ| ≥ 0.002), 263 within threshold
+  flip f→P     ios      f 0.9032  → P 0.9991  Δ+0.0959  css/css-text/hyphens/hyphens-auto-last-word-001.html
+  flip f→P     android  f 0.938   → P 0.9981  Δ+0.0601  css/css-text/hyphens/hyphens-punctuation-001.html
+  flip f→P     android  f 0.9291  → P 0.982   Δ+0.0529  css/css-text/hyphens/hyphens-out-of-flow-002.html
+  flip f→P     android  f 0.9218  → P 0.9685  Δ+0.0467  css/css-text/hyphens/hyphens-out-of-flow-001.html
+  flip f→P     android  f 0.9166  → P 0.9532  Δ+0.0366  css/css-text/hyphens/hyphens-span-001.html
+  mover        android  f 0.8697  → f 0.945   Δ+0.0753  css/css-text/hyphens/hyphens-auto-last-word-001.html
+  mover        android  P 0.9602  → P 0.9943  Δ+0.0341  css/css-text/hyphens/hyphens-span-002.html
+  mover        ios      P 0.9786  → P 0.9971  Δ+0.0185  css/css-text/hyphens/hyphens-out-of-flow-002.html
+  mover        ios      P 0.9786  → P 0.9971  Δ+0.0185  css/css-text/hyphens/hyphens-span-002.html
+  mover        android  f 0.922   → f 0.9347  Δ+0.0127  css/css-writing-modes/ch-units-vrl-005.html
+  mover        android  f 0.922   → f 0.9347  Δ+0.0127  css/css-writing-modes/ch-units-vrl-006.html
+  mover        android  P 0.9903  → P 0.9803  Δ-0.01  css/css-text/hyphens/hyphens-manual-inline-012.html
+  mover        ios      f 0.8558  → f 0.8652  Δ+0.0094  css/css-text/hyphens/hyphens-span-001.html
+  mover        ios      f 0.8863  → f 0.8935  Δ+0.0072  css/css-text/hyphens/hyphens-out-of-flow-001.html
+  mover        ios      f 0.9054  → f 0.911   Δ+0.0056  css/css-writing-modes/ch-units-vrl-007.html
+  mover        ios      f 0.9054  → f 0.911   Δ+0.0056  css/css-writing-modes/ch-units-vrl-008.html
+  mover        ios      P 0.9556  → P 0.9588  Δ+0.0032  css/css-text/hyphens/hyphens-punctuation-001.html
+  mover        android  P 0.9536  → P 0.9507  Δ-0.0029  css/css-writing-modes/ch-units-vrl-003.html
+  mover        android  P 0.9536  → P 0.9507  Δ-0.0029  css/css-writing-modes/ch-units-vrl-004.html
+  mover        android  f 0.8608  → f 0.8581  Δ-0.0027  css/css-text/hyphens/hyphenate-limit-chars-001.html
+  mover        ios      P 0.9558  → P 0.9535  Δ-0.0023  css/css-writing-modes/ch-units-vrl-003.html
+  mover        ios      P 0.9558  → P 0.9535  Δ-0.0023  css/css-writing-modes/ch-units-vrl-004.html
+  mover        ios      f 0.945   → f 0.9428  Δ-0.0022  css/css-text/hyphens/hyphenate-character-005.html
+  mover        android  f 0.9012  → f 0.9034  Δ+0.0022  css/css-writing-modes/ch-units-vrl-007.html
+  mover        android  f 0.9012  → f 0.9034  Δ+0.0022  css/css-writing-modes/ch-units-vrl-008.html

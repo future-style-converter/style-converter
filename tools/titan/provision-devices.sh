@@ -216,6 +216,18 @@ if (( CUR < WANT_ANDROID )); then
     (( READY >= WANT_ANDROID )) && break
     sleep 5
   done
+  # Wave 52: the launcher pid recorded above forks the qemu process as a CHILD
+  # and, on SIGTERM, waits up to 20 s for it and exits — the qemu it leaves
+  # behind for a moment is then an orphan (parent 1) that no recorded pid
+  # reaches. Record the children too, once they exist, so a later
+  # kill_own_emulators (tools/titan/own-processes.sh) still knows the dying
+  # qemu is ours instead of naming it as a stranger.
+  while read -r p; do
+    [[ "$p" =~ ^[0-9]+$ ]] || continue
+    for c in $(pgrep -P "$p" 2>/dev/null); do
+      grep -qx "$c" "$EMU_PIDS_FILE" || echo "$c" >> "$EMU_PIDS_FILE"
+    done
+  done < <(cat "$EMU_PIDS_FILE")
   if (( READY < WANT_ANDROID )); then
     log "WARNING: only $READY/$WANT_ANDROID Android instance(s) booted — continuing with a smaller pool. Launch log tails:"
     for f in "$POOL_ROOT"/emulator-launch-*.log; do

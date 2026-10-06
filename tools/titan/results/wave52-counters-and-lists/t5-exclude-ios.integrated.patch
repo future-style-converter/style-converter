@@ -1,0 +1,109 @@
+# t5-exclude-ios, cut against the wave-52 tree WITH the closing-gate fixes (closing-fixes.patch): the lane's seam-2.patch no
+# longer reverses there — the li-display gate added lines inside its first hunk's context. Same content as
+# 'git apply -R seam-2.patch' for ComponentRenderer.swift (the outside-marker hang taken out; seam-4 and the li gate stay).
+# Device A/B exclude arm only (device-ab.sh t5): apply, build, record the installed .app hash, capture, restore. Never committed.
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -3790,15 +3790,14 @@
+                 // INSIDE the item's box, through an overlay that cannot
+                 // move or resize it — css-lists-3 §3.5 makes it the item's
+                 // first inline box. Everything else keeps the HStack.
+-                //
+-                // Wave 52 (lane L6, T5): an `outside` marker now HANGS in
+-                // the item's margin area (css-lists-3 §3.5) through
+-                // ListMarkerOutsideHangLayout — see markerPlacement.
+                 //
+-                // STILL DEFERRED — an `inside` marker on an item that DOES
+-                // have text still displaces that item's box, and the gap
+-                // is the fixed ListMarkerRow.gapPt rather than the UA's
+-                // per-counter-style marker padding.
++                // STILL DEFERRED — the rest of B-RC3 part 3: `outside` is
++                // painted as a leading inline box rather than hung in the
++                // item's margin area, an `inside` marker on an item that
++                // DOES have text still displaces that item's box, and the
++                // gap is the fixed ListMarkerRow.gapPt rather than the
++                // UA's per-counter-style marker padding. Those need a
++                // custom Layout — out of scope here.
+                 // (v2 rename: the tag hint lives at meta.sourceTag.)
+                 let parentTag = (component.meta?.sourceTag ?? "").lowercased()
+                 // Wave-52 closing gate: an `<li>` whose OWN authored
+@@ -3860,12 +3859,6 @@
+                 // post-F-E cssom rows onto one (probed).
+                 let markerInsideOverlay = ListMarkerEmptyItem.rendersInsideOverlay(
+                     position: markerConfig?.position, item: child)
+-                // Wave 52 (lane L6, T5) — the third placement: an `outside`
+-                // marker hangs in the margin area instead of leading the
+-                // HStack. Disjoint with the overlay by construction (that
+-                // one is `inside`-only); nil position keeps the HStack.
+-                let markerHangsOutside = ListMarkerRow.hangsOutside(
+-                    position: markerConfig?.position)
+                 // Wave 10 — the fragmentation contract (css-break-3 §4):
+                 // a multicol container's single in-flow child whose
+                 // block-size C exceeds the column block-size H breaks
+@@ -3945,7 +3938,6 @@
+                         // ListMarkerRow.
+                         markerPlacement(child: child, markerText: markerText,
+                                         insideOverlay: markerInsideOverlay,
+-                                        hangsOutside: markerHangsOutside,
+                                         exposesBaseline: markerExposesBaseline,
+                                         // Wave 30 (lane 3, fix B6) — the
+                                         // resolved counter style and the
+@@ -4521,16 +4513,9 @@
+     /// swaps the glyph's INK for the painted Chromium symbol while keeping
+     /// the box the glyph measured (see ListMarkerSymbol) — a no-op for
+     /// every other counter style.
+-    ///
+-    /// Wave 52 (lane L6, T5) — a THIRD placement, `hangsOutside`: the
+-    /// marker hangs in the item's margin area (css-lists-3 §3.5) through
+-    /// `ListMarkerOutsideHangLayout`, which reports the ITEM's size and
+-    /// places the marker at x = −(markerWidth + gap). Staged as a device
+-    /// A/B (tools/titan/results/wave52-counters-and-lists/seam-2.patch).
+     @ViewBuilder
+     private func markerPlacement(child: IRComponent, markerText: String,
+-                                 insideOverlay: Bool, hangsOutside: Bool,
+-                                 exposesBaseline: Bool,
++                                 insideOverlay: Bool, exposesBaseline: Bool,
+                                  markerType: ListMarkerType,
+                                  markerFontSizePx: CGFloat,
+                                  isCSSFlex: Bool,
+@@ -4577,37 +4562,9 @@
+                                           markerText: markerText,
+                                           fontSizePx: markerFontSizePx)
+                 }
+-        } else if hangsOutside {
+-            // Wave 52 (lane L6, T5) — `list-style-position: outside`: the
+-            // item lays out as if it had no marker (its content edge does
+-            // not move, css-lists-3 §3.5) and the marker hangs before its
+-            // start edge. The baseline decision is the HStack's own per-item
+-            // rule (B-RC6), handed to the Layout as a Bool because a Layout
+-            // reads the guides itself.
+-            ListMarkerOutsideHangLayout(
+-                gap: ListMarkerRow.gapPt,
+-                alignsByBaseline: ListMarkerRow.rowAlignment(
+-                    itemExposesTextBaseline: exposesBaseline) == .firstTextBaseline,
+-                // An EMPTY item's one line box is the marker's (seam-4's
+-                // ListMarkerEmptyItem rule, outside half).
+-                itemIsEmpty: ListMarkerEmptyItem.isEmpty(child)) {
+-                // Subview 0 — the marker, the HStack's Text byte-for-byte
+-                // (per-script runs, shrink-to-fit, painted symbol).
+-                Text(ScriptFallbackFonts.annotate(markerText,
+-                                                  enabled: wptCaptureMode,
+-                                                  size: markerFontSizePx))
+-                    .fixedSize(horizontal: true, vertical: true)
+-                    .listMarkerSymbol(type: markerType,
+-                                      markerText: markerText,
+-                                      fontSizePx: markerFontSizePx)
+-                // Subview 1 — the item, exactly as the HStack hosts it.
+-                markerItemView(child: child, isCSSFlex: isCSSFlex,
+-                               childAgg: childAgg, parentAgg: parentAgg)
+-            }
+-        } else {
+-            // An `inside` item whose in-flow text the marker must push
+-            // along the line, or an unknown position (a baked marker under
+-            // a non-list parent): the leading-inline-box row. Its
++        } else {
++            // `outside`, or an item whose in-flow text the marker must
++            // push along the line: the leading-inline-box row. Its
+             // cross-axis alignment is still chosen per item (B-RC6) —
+             // SwiftUI falls back to a baseline-less view's BOTTOM edge,
+             // which would hang the marker's ascent outside the item.

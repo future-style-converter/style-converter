@@ -14,67 +14,71 @@ this file is incomplete.
 
 Corpus history and per-wave findings live in `docs/STATUS.md` (one dated
 paragraph per wave) and `tools/titan/results/corpus-v*.json` (one snapshot
-per wave, `_note` carries the full story). Current: **corpus-v6.17**
-(wave 51 PR 1, device gate `wave51-fix` on a quiet host, 2026-09-15 — web
-1215/1379 88.1%, iOS 1089/1369 79.5%, Android 1080/1369 78.9%; per cell
-**3 gained, 0 lost, 0 movers** against wave50-final — exactly the three
-cells wave 50 lost, recovered by the PercentSizeClamp intrinsic-pass fix
-(queue 0(z)); 30/30 sections at 48/48/48 on the first attempt, fixture net
-exit 0 on all 8; `node tools/titan/score-gate.mjs wave50-final wave51-fix`).
-The wave-51 OPENING gate (`wave51-open`, the unmodified wave-50 tree) came
-first and scored **0 gained / 0 lost / 0 movers over 4117 cells** against
-wave50-final — the pipeline is deterministic run-to-run on this host. The
-previous snapshot, **corpus-v6.16** (wave 50, `wave50-final`, 2026-09-14 —
-web 1215/1379, iOS 1089/1369, Android 1077/1369; **40 gained, 3 lost, 6
-newly measured**, 4117 scored cells with exact column parity), is what
-v6.17 attributes against; its 3 lost cells were bisected on device and
-attributed to neither the retro's nor wave 50's Compose code — a
-conclusion wave 51 OVERTURNED (0(z): the bisection carried no install
-evidence); its 6 newly measured are the retro-R13 unexclusions,
-denominator changes by the rule. Before that, **corpus-v6.15** (wave 49 —
-web 1205/1379, iOS 1081/1366, Android 1058/1366; 32 gained, zero lost).
-All deltas attribute against the most recent snapshot, never across the
-PR-#126 instrument change.
-**Neither the retrospective's device gate nor wave 50's opening gate ran
-before the lanes did.** The retro's 17 attempts (2026-09-05 → 09-07) all
-failed on one cause — the host had no memory headroom (15 GB used, ≤230 MB
-free, 5–6 GB in the compressor, load 13–25 with the user's browsers open):
-adb-server wedges, `adb install` "success" with no package, feeder
-timeouts, a wedged fixture whose `am force-stop` could not finish in 210 s,
-vite dependency re-optimisation taking 20 min, and a section overrunning
-the 50-min watchdog. The one section that completed (attempt 9,
-css-position, at host load 9) was clean: 48/48/48 with the Android column
-present. **Wave 50 was therefore built with NO device gate**: every
-builder prediction below is a corpus simulation over the frozen
-`wave49-final` per-test IR, a JVM / Catalyst pin, or a PNG replay against
-the frozen refs — never a render (`tools/titan/results/wave50-gate/_note.md`).
-The retro's rendering changes (R1–R6, F1–F3) AND wave 50's eleven applied
-seam patches were both corpus-unmeasured until the wave-50 gate ran at ship
-time and measured both at once (obligation #1 carries the attribution). The
-nine harness defects the retro's attempts found are fixed, and since this
-wave the gate itself is tracked code — `tools/titan/gate-driver.sh` refuses
-a loud, reasoned exit 2 on a host that cannot hold it, instead of hanging
-silently — and it ran its first gate clean: 30 sections, every column
-complete, first attempt each.
+per wave, `_note` carries the full story). Current: **corpus-v6.18**
+(wave 52, device gate of record `wave52-ship` on a quiet host, commit
+aaf676c5, 2026-10-05 — web 1229/1372 89.6%, iOS 1119/1362 82.2%, Android
+1111/1362 81.6%; per cell against wave51-fix **102 gained, 8 lost, 0 newly
+measured, 21 unmeasured-now** (295 movers ≥ 0.005) — the 8 lost are exactly
+the eight instrument-only cells the calibration run pre-registered, the 21
+unmeasured are the 19 `absence-only` stamps (queue 0(n)) plus the two
+`armenian/css3-counter-styles-008` natives (2(c¹)); the 102 split into 13
+instrument-only and 89 render (web 18 · iOS 35 · Android 36), and against
+the calibration run `wave52-calib` (the opening captures re-scored under
+the re-frozen refs) the render lanes score **89 gained / 0 lost**; every
+flipped cell was looked at against its reference — 91 gains FAITHFUL, **11
+DEGENERATE** (obligation 0(b)), all 8 losses HONEST_FAIL
+(`tools/titan/results/wave52-gate/cell-review.json`); `node
+tools/titan/score-gate.mjs wave51-fix wave52-ship`; snapshot
+`tools/titan/results/corpus-v6-18.json`; record
+`tools/titan/results/wave52-gate/_note.md`). The wave-52 OPENING gate
+(`wave52-open`, the unmodified wave-51 tree) came first and scored **0
+gained / 0 lost / 0 movers over 4117 cells** against wave51-fix — the third
+consecutive deterministic gate. **The first closing attempt (`wave52-final`,
+commit 308d11f0) STOPPED the ship**: five lost cells outside the
+pre-registered eight (`css-lists/counter-reset-reversed-nested` ios/android,
+`css-text/hyphens/hyphens-manual-011` / `-012` / `-manual-inline-011`
+android). Both causes were older defects the lanes exposed — Android `ch`
+measured as a hinted, ceiled rasteriser number, and both natives drawing a
+marker on an `<li>` that is not a list item — fixed at the root in aaf676c5
+(1(e), 2(f)), proven by three section probes with a byte-identity control,
+then the full gate re-run (Operational recipes, "Probe, then ship"). The
+previous snapshot, **corpus-v6.17** (wave 51, `wave51-fix`, 2026-09-15 —
+web 1215/1379, iOS 1089/1369, Android 1080/1369; 3 gained / 0 lost / 0
+movers against wave50-final), is what v6.18 attributes against. All deltas
+attribute against the most recent snapshot, never across the PR-#126
+instrument change.
+**The retrospective (2026-09-04) and wave 50 ran their lanes with no device
+gate**: the retro's 17 gate attempts (2026-09-05 → 09-07) all failed on one
+cause — no memory headroom on the host (15 GB used, load 13–25 with the
+user's browsers open: adb-server wedges, installs that reported success with
+no package, feeder timeouts, 20-min vite re-optimisation) — so wave 50's
+predictions were corpus simulations, JVM / Catalyst pins and PNG replays,
+never renders, until `wave50-final` measured the retro's and wave 50's
+changes at once (obligation #1). That is why the gate is tracked code:
+`tools/titan/gate-driver.sh` refuses a host that cannot hold it with a
+reasoned exit 2 ("Gate on a quiet host" below; the retro's nine harness
+defects are fixed there), and waves 51 and 52 both opened AND closed on a
+device gate.
 
-This revision is the **wave-50 refill** (12 builder lanes B1–B12, eleven
-applied seam patches, seven executed-repro skeptics S1–S7 and six fix
-lanes F1–F6; every artifact under `tools/titan/results/wave50-*/`). It
-replaces the 2026-09-04 retrospective refill (12 audit lanes A1–A12 over
-waves 1–49, 195 executed-evidence findings; fix lanes R1–R13 + sweeps
-P2a–P2e), whose conclusions survive in every entry that still says "retro
-Rn". Skeptic S6's 18 verified corrections
-(`tools/titan/results/wave50-S6/backlog-corrections.json`) are folded in
-VERBATIM where it supplied a `correctedText`; S6 re-derived each from the
-frozen evidence, never from a lane's prose. Every "landed" / "not landed" /
-"delivered" sentence below was re-checked against the FINAL tree at ship
-time by grepping the symbol and opening the file, and every `path:LINE`
-pointer was re-resolved against the live line or replaced by a symbol —
-wave 50 moved `ComponentRenderer.kt`, `StyleApplier.kt`,
-`ComponentRenderer.tsx`, `PseudoBucketExtractor.kt` and
-`extract-fixture.mjs`, so nine of the retro's line pointers had drifted.
-"Pending the device gate" means the code is in the tree and its predicted
-cell flips await the wave-50 gate.
+This revision is the **wave-52 refill** (twelve builder lanes L1–L12 from
+`tools/titan/results/wave52-plan/PLAN.md`, 35 seam patches applied in one
+ordered pass by `tools/titan/results/wave52-plan/integrate-seams.sh`, an
+executed-repro skeptic per lane, and the two closing-gate fixes of aaf676c5;
+every artifact under `tools/titan/results/wave52-*/`). Every prediction a
+lane wrote is resolved below against `wave52-ship` in the gate-cell form:
+held (closed or shrunk), MISSED (written "predicted …; measured …", kept
+open) or DEGENERATE (a pass whose picture does not earn it — never written
+as a fix, kept open with what the picture shows); a sentence that waits on
+one of the three device A/Bs run after the gate (L6 T5, L8 M-A, L9 F1) is
+marked as owed, naming its arm. Every "landed" / "fixed" / "pinned by"
+sentence was re-checked against the final tree by grepping the symbol, and
+`path:LINE` pointers are cited by symbol where the line drifts. Older
+labels: "S6-NN" are wave-50 skeptic S6's verified corrections
+(`tools/titan/results/wave50-S6/backlog-corrections.json`, folded in
+verbatim); "retro Rn" / "A<n>#<m>" are the 2026-09-04 retrospective's fix
+lanes and audit findings (`tools/titan/results/retro-2026-09-04/`); an entry
+that still says "pending the gate" dates from waves 50–51 and its gate has
+run (`wave50-final`, obligation #1).
 
 ---
 
@@ -218,33 +222,108 @@ cell flips await the wave-50 gate.
   baseline can be wrong; the ledger's `observed` block must come from a
   capture the gate made (`observedFrom` names the run), and a "now passing"
   verdict that did not come from a live gate is not a deletion warrant.
+- **Capture and gate scripts must never stop a process this checkout did
+  not start** (wave 52) — a rule, not yet a fact: a port is freed only of a
+  vite dev server whose working directory is inside this checkout
+  (`tools/visual/web-port-guard.sh`, commit 308d11f0); emulators only by the
+  pids `provision-devices.sh` recorded and test browsers only when their
+  working directory is inside this checkout (`tools/titan/own-processes.sh`,
+  commit 20acb531). A foreign process is named on stderr and left running;
+  it counts toward the quiet-host load / memory check, which refuses the
+  gate when either crosses its threshold; it is never cleared by a
+  host-wide kill. (Two host-wide stops still violate it in the gate path —
+  `./gradlew --stop` and the adb-timeout `pkill -9 -x adb`; Known-broken —
+  and `provision-devices.sh --restart-fleet`, operator-requested only, still
+  pkills every qemu-system.)
+- **Nothing a running gate executes or builds from is edited** — no runtime,
+  harness, extractor or tool file, no `tools/titan/runs/` content — while a
+  gate (or a device A/B) runs on this host. A fix found mid-gate is prepared
+  as a patch file and applied when the device is idle (wave 52; Operational
+  recipes).
+- **A lost cell outside the list pre-registered before the closing gate
+  stops the ship** until its cause is found in the picture AND the wire
+  document — never ledgered, never excused by a re-run. Wave 52's five
+  (`tools/titan/results/wave52-gate/adjudication.txt`) were two older
+  defects, fixed at the root in aaf676c5 (queue 1(e), 2(f)).
 
-## Next-wave obligations (wave 52 opens with these)
+## Next-wave obligations (wave 53 opens with these)
 
-0. **Wave 51 shipped as three PRs, each measured on device before merge**
-   (2026-09-15 → 22): PR 1 the lost cells (queue 0(z): retro R2's percent
-   clamp dropped the min floor in Compose's intrinsic pass — fixed, +3
-   Android, `corpus-v6.17`, run `wave51-fix`), PR 2 the 9(g) one-liner
-   (`align-items` no longer moves a non-flex block's content on Android —
-   two layout.combos pairs to 1.0000), PR 3 the harness label as
-   capture-frame chrome on all three platforms (decided-PR (A) below: 390
-   baselines refreshed after a 390-sheet review, two ledger lines deleted,
-   gate set exit 0 ×8, tripwire 136/136, 14 spill rows to ≥ 0.997).
-   Three device gates ran this wave: `wave51-open` (the unmodified wave-50
-   tree — 0/0/0/0 against wave50-final, run-to-run determinism proven),
-   `wave51-fix` (corpus-v6.17), and PR 3's fixture-net measure/refresh
-   runs; wave 52 therefore opens, as always, with the FULL gate on a quiet
-   host (`tools/titan/gate-driver.sh wave52-open`, scored against
-   `wave51-fix` with the wave-50 watchlist) — expected: zero per-cell
-   change (PR 3 cannot reach the corpus by construction; PR 2's carriers are
-   off-corpus), fixture net exit 0 ×8, and the two iOS blend carriers
-   (obligation #1 below) still 1.0000. The first divergence from that
-   expectation is the first item of wave 52. Standing constraints added
-   this wave: a device A/B records the installed APK's sha1 (0(z)); and —
-   learned the hard way when a six-day gap purged the session scratchpad —
-   design documents, lane reports and review verdicts are committed under
-   `tools/titan/results/<wave>-<lane>/` the moment they exist
-   (`wave51-A/` is the template).
+0. **Wave 52 shipped as one wave** (twelve lanes, 35 seam patches, the
+   closing-gate fixes aaf676c5 and the harness-hygiene commits 308d11f0 /
+   20acb531), measured by the gate of record `wave52-ship` → corpus-v6.18
+   (header). Its own opening obligation is DISCHARGED: `wave52-open` scored
+   0 gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured over 4117
+   cells against wave51-fix, fixture net exit 0 ×8
+   (`tools/titan/results/wave52-gate/_note.md`). **Wave 53 opens, as always,
+   with the FULL gate on a quiet host** — `tools/titan/gate-driver.sh
+   wave53-open`, scored `node tools/titan/score-gate.mjs wave52-ship
+   wave53-open --watch tools/titan/results/wave52-plan/watchlist.txt` — and
+   it must print **0 gained / 0 lost / 0 movers / 0 newly measured / 0
+   unmeasured-now** against wave52-ship (pipeline determinism, as
+   `wave52-open` did against wave51-fix) and fixture net exit 0 on all 9
+   gate fixtures. The first divergence is the first item of wave 53. Then,
+   in this order:
+   (a) **The three device A/B read-outs — RUN (2026-10-05 23:28 → 23:58 UTC),
+   each exclude arm built, hashed (`build-hashes.txt`: installed `base.apk`
+   sha1 / `.app` digest MATCH the built one, all three) and restored**
+   (`tools/titan/results/wave52-gate/device-ab.sh <arm>`; include arm
+   `wave52-ship`; read-outs `tools/titan/results/wave52-gate/ab-t5.txt`,
+   `ab-ma.txt`, `ab-f1.txt`). What wave 53 inherits from them:
+   `t5` (L6 T5, the outside-marker hang; 254 ios/android cells of
+   css-lists / css-counter-styles / css-pseudo): the hang is what flipped
+   `counter-suffix` ios f 0.9285 → P 0.9802 and android f 0.9030 → P 0.9547
+   (both DEGENERATE — the RTL lists still have no marker, 2(c⁴)); 20 more
+   cells moved, 18 up (`change-list-style-type-001` ios +0.084 / android
+   +0.075, `first-line-and-marker` ±0.029, `counter-list-item` ×2, …) and 2
+   down (`first-letter-exclude-inline-marker` ios −0.006 / android −0.009,
+   both already failing); P → f 0. Compose seam-1 now has device proof.
+   `ma` (L8 M-A, the Inter measuring face; 288 cells of css-text /
+   css-text-decor / css-writing-modes): M-A is what flipped
+   `hyphens-auto-last-word-001` ios f 0.9032 → P 0.9991 and, with the
+   closing `ch` fix in both arms, `hyphens-punctuation-001` android f 0.938 →
+   P 0.9981, `hyphens-out-of-flow-001` / `-002` android f 0.9218 / 0.9291 →
+   P 0.9685 / 0.982 and `hyphens-span-001` android f 0.9166 → P 0.9532 (the
+   last three DEGENERATE, 4(g)); it costs `hyphens-manual-inline-012`
+   android −0.010 (P 0.9903 → 0.9803) and `ch-units-vrl-003` / `-004`
+   −0.003 on both natives (P either way; the `ch-units-vrl` flips come from
+   M-B, present in both arms); `text-decoration-inset-004` and
+   `bidi-lines-001` / `-002` did not move at |Δ| ≥ 0.002; P → f 0.
+   `f1` (L9 F1, the hanging-punctuation fold; 96 css-text cells): F1 is
+   confined to its one carrier — 94 cells identical at |Δ| < 0.002 — and
+   is what moved `hanging-punctuation-inline-001` ios P 0.9756 → P 0.9555
+   and android f 0.9495 → f 0.9452; no flip either way. DECISION
+   (orchestrator, deviating from the lane's "apply drop-F1 if the arm
+   confirms the drop"): F1 is KEPT — it is the CSS-correct fold (kinsoku
+   wrap, inherited colour) and the cell passes on iOS with it; a score drop
+   with no flip does not outrank picture-correctness in this campaign.
+   `drop-F1.patch` stays in the lane dir as the reversible arm; the iOS cell
+   is now a THIN pass (0.9555) on the wave-53 watch list, and the real fix
+   is hanging punctuation itself (css-text-3 §8.3), queue 4(f). Still owed
+   and NOT among the three: L9 F2's A/B (queue 4(c)) — no exclude arm exists.
+   (b) **Ten DEGENERATE gains and one wrong picture that passes —
+   first-lane material.** Each passes in `wave52-ship` and its picture does
+   not earn it (`tools/titan/results/wave52-gate/cell-review.json` — every
+   DEGENERATE label had a second, adversarial reader or, for
+   `s-11-1-1b-006` android, the measured geometry of its overturned iOS
+   twin): `anchor-position-multicol-007` android,
+   `contain-inline-size-bfc-floats-001` ios + android, `s-11-1-1b-006` ios +
+   android (queue 0(l″)); `counter-suffix` ios + android (2(c⁴));
+   `hyphens-out-of-flow-001` / `-002`, `hyphens-span-001` android (4(g)).
+   (The eleventh DEGENERATE gain, `filter-effects/backdrop-filter-basic-blur`
+   ios, is RING-FENCED — reported only, in 0(l′); never a target.) Plus
+   `css-lists/counter-reset-reversed-nested` ×3, passing at 0.9506–0.9509 with a wrong list (2(f)). None of these is
+   counted as a fix in any sentence of this file.
+   (c) **The eight instrument-only honest fails** — the eight lost cells of
+   v6.18, every one HONEST_FAIL against the re-rendered reference (no suspect
+   ref): `css-display/display-contents-root-background` ×3 (0(ac)),
+   `css-view-transitions/column-span-during-transition-doesnt-skip` ×3
+   (0(ad)), `css-gaps/flex/flex-gap-decorations-033` ios + android (7(e¹)).
+   (d) **Decide L6's deferred `requires-script-mutation` tags** for the
+   seven valid cssom setter tests ("Instrument decisions pending") — apply
+   as its own instrument change with a full extract + capture run, or Park.
+   (e) Seed `fixtures/combinations/all-then-color.json`'s baselines (gate-only
+   since wave 52) with `UPDATE_BASELINE=1` only after LOOKING at its
+   captures (queue 0(m)).
 1. **The wave-50 gate RAN (run `wave50-final`, 2026-09-14 21:14 → 22:44 UTC,
    quiet host, `tools/titan/gate-driver.sh`): 30/30 sections, every column
    48/48/48 on the first attempt; `score-gate.mjs` wave49-final →
@@ -778,26 +857,50 @@ platform; they are not folded into a rendering wave.
    validity. A value that is syntactically well-formed but wrong for its
    property is invisible to it, by design — "prove it or say nothing" — and
    widening it is a new decision with its own differential, not a tweak.
-   (a′) **The IMPORTANCE half of the same collapse is still open, and S2
-   sharpened it**: `div { color: red !important; color: green }` ends on
-   `green` **and keeps `important: {color: true}`** — the surviving
-   non-important declaration is PROMOTED to important, where css-cascade-5
-   §6.4.4 says the important one wins. Zero corpus carriers; the 40-row
-   census above is the population (e.g. `css-cascade/important-prop`,
-   selector `from, to`, `border-color: ["green", "red !important"]`).
-   (a″) **A splitter defect UPSTREAM of the oracle, pre-existing on both
-   sides** (B1 §4, S2 defect 6): `url(data:image/svg+xml;base64,…)` is torn
-   at the `;` by the declaration splitter, so the value becomes
-   `url(data:image/svg+xml` and can silently delete a valid earlier
-   `background-image`. The validity oracle cannot catch it — it is not a
-   unit question. Zero corpus carriers.
-   (a‴) **The LAYERED cascade path keeps the unguarded sort.**
-   `resolveLayeredCascade` orders candidates by css-cascade-5 §6.4.4 and
-   resolves `revert-layer` recursively, so the refusal would have to become
-   a candidate filter inside that sort. All four provably-invalid corpus
-   declarations sit in one UNLAYERED block, so a layered filter would move
-   nothing today and could only risk the css-cascade cells. Stated in the
-   code, not left as a silent gap.
+   (a′) **CLOSED in wave 52 (lane L5 F1).** In-block: importance is compared
+   before order and the flag follows the write taken (`collapseDeclaration`
+   in `tools/titan/extract-fixture.mjs`). Cross-rule: the `propsForElement`
+   gate routes importance carriers through the layered resolver. The "zero
+   corpus carriers" claim was the in-block twin only — the cross-rule half
+   had TWO static carriers: `css-gaps/flex/flex-gap-decorations-024` (blue
+   dotted rule → solid pink) and `css-cascade/revert-val-002` (`display:
+   block !important` over a later `display: revert`).
+   (a″) **CLOSED in wave 52 (lane L5 F2)**: one css-syntax-3 splitter
+   (`splitDeclarations`) at rule bodies, `style=""`, @keyframes and
+   @font-face. Zero corpus bytes moved (the css-pseudo first-letter pair's
+   bag is dropped before emission).
+   (a‴) **CLOSED in wave 52 (lane L5 F3)**: the candidate filter inside
+   `resolveOne`; zero corpus movement.
+   (a⁗) **What else lane L5 landed (wave 52), and what it left open**
+   (`tools/titan/results/wave52-extractor-cascade/_note.md`, its `skeptic.md`
+   beside it). F-D: Selectors-4 specificity orders the per-element cascade
+   (`selectorSpecificity` / `compareSpecificity`; IR property order
+   unchanged). F-C: a `color-mix()` operand percentage outside [0,100] is
+   provably invalid (oracle rule R2). F-E: `<li>` / `<summary>` are exempt
+   from the 100×100 empty-node placeholder (`LIST_ITEM_TAGS`) — landed in
+   the SAME tree as L6's empty-item seams (2(e)), without which it must never
+   ship: a replay through the gate's own scorer puts F-E alone at 18 native
+   cssom cells P → f on the coverage-ratio veto
+   (`tools/titan/results/wave52-extractor-cascade/fe-native-replay.json`).
+   Extract+convert differential over all 1435 documents: 22 change, static
+   and post-load alike. **Measured — every prediction held**:
+   `wave52-ship css-cascade/import-conditional-001` web P 0.999 / ios P
+   0.9974 / android P 0.9967 and `-002` the same (+6, all f at wave51-fix;
+   FAITHFUL — a solid green square, no red); `wave52-ship
+   css-color/color-mix-percents-02 web P 1.0000` / ios P 0.9988 / android P
+   0.9981 (+3, FAITHFUL); `flex-gap-decorations-024` ×3 P 0.99 → P 1.0000;
+   the 18 native cssom setter cells stay P (0.9916–0.9999); at-risk
+   `css-cascade/important-prop` ×3 stays P (0.9966 / 0.995 / 0.9946, −0.002
+   each). `revert-val-002` web is unmoved at P 0.999 — its "degenerate →
+   honest" is a picture claim no gate review looked at. **Open (skeptic should-fix /
+   nits, no corpus carrier):** D2 `selectorSpecificity` throws on a selector
+   ending in a lone backslash (`.foo\ { … }` — `readIdent` reads `m[0]` of a
+   null match; fix `i += m ? m[0].length : 1` plus a pin); D4 surviving
+   mutants need pins — SK1 (R2 with only the SECOND operand out of range),
+   SK8 (the splitter's bad-string newline), SK4 (a `:not(#id)` specificity);
+   N1 `keepAll` in `resolveLayeredCascade` is dead logic whose comment says
+   it is needed; the Android one-band geometry behind the F-E coupling is
+   code reading, not a raster. D3 is at (e).
    (b) **Compose percentage insets resolve against the wrong containing
    block LEVEL — FIXED in tree (wave 50, lane B2 + its applied seam),
    pending the gate.** The wave-49 diagnosis in this entry AND in
@@ -829,23 +932,39 @@ platform; they are not folded into a rendering wave.
    so the confirmation is the f→P, not the arithmetic.
    (b′) **The CSS 2.1 §10.1 republish for NON-BLOCK-CONTAINER ancestors is a
    real and SEPARATE gap**, still open, in
-   `DynamicValueResolver.childContainingBlock`. It is not what blocked −006
-   and it moves nothing on this corpus: its only two carriers, −002's
-   `<span>` parent and −008's `<tbody>` parent, resolve to the same used
-   inset with or without it (pinned as `PercentInsetResolveTest`'s L4/L5).
-   (b″) **The SAME level defect exists in `spacing/MarginApplier.kt` and
-   `spacing/PaddingApplier.kt`** and was NOT fixed (skeptic S3,
+   `DynamicValueResolver.childContainingBlock` — it is not what blocked
+   −006, and **it is NOT
+   zero-movement** (wave 52 lane L4, which therefore did not land it): the
+   inset-only scan that called it inert (−002's `<span>`, −008's `<tbody>`,
+   pinned as `PercentInsetResolveTest`'s L4/L5) is right for insets, but
+   `tools/titan/results/wave52-small-fixes/census.json` (`b1`) also counts
+   percentage SIZES and finds 8 percentage consumers in 6 tests whose base
+   changes, 7 of them `Width: 100%` children of a `<span>` in
+   `css-break/block-in-inline-000…004` (wave51-fix android P 0.9966 ×4 +
+   P 0.9967, ios f 0.9459 ×3). Needs its own brief with a size-aware census
+   before any lane picks it up.
+   (b″) ~~The SAME level defect in `spacing/MarginApplier.kt` and
+   `spacing/PaddingApplier.kt`~~ **PORTED in wave 52 (lane L4), correctness
+   only** (`tools/titan/results/wave52-small-fixes/_note.md` § b″): both
+   appliers now read `ElementContainingBlock.containingBlockFor(element =
+   LocalElementContainingBlock.current, ambient = LocalContainingBlock.current,
+   breadcrumb = SPACING_UNPUBLISHED_BREADCRUMB)`; pinned by
+   `PercentSpacingContainingBlockLevelTest`. Carriers (skeptic S3,
    `tools/titan/results/wave50-S3/probe-output/percent-spacing-levels.txt`):
-   both read `LocalContainingBlock.current` from inside their own composed
-   chain, i.e. the child level. Four carriers, all of them currently
-   PASSING, so this is correctness rather than score:
-   `wave49-final css-sizing/abspos-auto-sizing-fit-content-percentage-001`
-   (MarginLeft −50%), `-002` (MarginRight −50%), `-003` (PaddingLeft 50%),
-   `-004` (PaddingRight 50%) — each web P 1.0000 · iOS P 0.9992 · Android
-   P 0.9984, and the element-level width is `null` on all four where the
-   child level is 100. Port them onto
-   `ElementContainingBlock.containingBlockFor` with an A/B, or state the
-   divergence.
+   `css-sizing/abspos-auto-sizing-fit-content-percentage-001…004` (margin /
+   padding ±50%, all PASSING); the used value moves −50 / +50 px → 0 px on
+   boxes that paint nothing and have no children. **Device A/B DONE at the
+   closing gate — zero pixel movement, as predicted**: the gate is the
+   include arm (installed `base.apk` sha1 recorded against the build,
+   `tools/titan/results/wave52-gate/build-hashes.txt`), `wave52-open` the
+   exclude (the exclude arm predates the hash record — its side is a score;
+   the byte-identity of the four PNGs is what carries the result); the four
+   Android PNGs are byte-identical to `wave52-open`
+   (tripwire T-L4, measured on the gate of record:
+   `tools/titan/results/wave52-gate/tripwires-ship.txt`), `wave52-ship
+   css-sizing/abspos-auto-sizing-fit-content-percentage-001…004 android P
+   0.9984` ×4 and `css-position/position-relative-002 / -008 android P 0.9967 /
+   P 0.9984`, all unchanged.
    (c) **`css-transforms/css-transform-3d-transform-style` (android) passes
    at 0.9577 against iOS's 0.9574 and is FRAGILE.** `OrthographicFlatten`
    still does not read `transform-style`; retro R1 narrowed it (it now
@@ -857,6 +976,32 @@ platform; they are not folded into a rendering wave.
    perspective`, `-nested-3d-transform-perspective`). Real preserve-3d
    compositing on Compose is the actual fix; treat the cell as a candidate
    to lose.
+   (c′) **Transforms small fixes (wave 52 lane L4;
+   `tools/titan/results/wave52-small-fixes/_note.md`).** T5:
+   `backface-visibility: hidden` under `transform-style: preserve-3d` culls
+   the element's OWN face, not its subtree (css-transforms-2 §10 / §4.1.2) —
+   Compose `transforms/BackfaceCull.kt` (`decide` → `NONE | HIDE_SUBTREE |
+   CULL_OWN_FACE`, `stripOwnFace`), iOS `BackfaceCulling.decide`; one corpus
+   carrier. T7: Compose `transform: inherit` through
+   `transforms/TransformInheritance.kt` (`LocalInheritedTransform`, provided
+   at every `RenderComponent`; an unprovided channel leaves the keyword in
+   place so the extractor's `Transform` breadcrumb fires); one corpus
+   carrier. **Measured — every prediction held**: `wave52-ship
+   css-transforms/composited-under-rotateY-180deg-preserve-3d ios P 1.0000` /
+   `android P 1.0000` (f 0.9565 at wave51-fix — both natives' captures were
+   blank; FAITHFUL); `wave52-ship css-transforms/css-transform-inherit-scale
+   android P 0.9967` (f 0.9965; FAITHFUL); unmoved:
+   `backface-visibility-hidden-animated-001/002` ios P 0.9646 and the 0(c)
+   HOLD cells (`css-transform-3d-transform-style` android P 0.9577,
+   `backdrop-filter-3d-transform-perspective` android P 0.9868,
+   `-nested-3d-transform-perspective` android P 0.9749). **Open:** iOS keeps a culled preserve-3d element's own
+   background / border (its decoration is inner of `TransformsApplier`;
+   breadcrumbed `BackfaceVisibility[preserve-3d-own-face-approximated]`, 0
+   carriers); the element's own text under `CULL_OWN_FACE` is neither culled
+   nor breadcrumbed on either native; the wiring pin
+   (`BackfaceCullChainTest` W1) reads `GraphicsLayerElement` only, so the
+   block form `graphicsLayer { alpha = 0f }` survives it (skeptic K4 — count
+   `BlockGraphicsLayerElement`s too).
    (d) **`clip-path-contentBox-1d/1e` on Android is a WIDTH defect, not a
    clip defect — FIXED in tree (wave 50, lane B2 + its applied seam),
    pending the gate.** wave49-final android f 0.8775 / 0.8875 cF cvF; 1d
@@ -905,12 +1050,14 @@ platform; they are not folded into a rendering wave.
    `AtomicInlineShrinkToFit.suppressesBlockAutoWidth` to `false`, re-run;
    restore it and stub `PseudoTextFold.resolve` to the identity, re-run.
    Both stubs switch off the MECHANISM — never narrow by test name.
-   (e) Scientific-notation angles (`1e2deg`) survive as a Raw
-   passthrough because `AngleParser.angleRegex` has no exponent branch.
-   Zero corpus carriers today (grep over `tools/wpt/css/` finds none),
-   so it is documented as a modelling limitation rather than treated as
-   invalidity. Widening AngleParser touches transforms, colour hue
-   channels, conic prefixes and gradient stops — wider than one lane.
+   (e) **CLOSED in wave 52 (lane L5 F4)**: `AngleParser` reads the exponent
+   and case-insensitive units; `hsl(1.2e2deg, …)` is green, not red; zero
+   corpus carriers (census: 0 sources, 0 wire docs; a converter differential
+   over all 1435 per-test IR documents changed 0). Residual (skeptic D3,
+   open, no carrier): a non-finite angle is now reachable —
+   `rotate(1e999deg)` yields a `_serializationError` (Infinity);
+   `AngleParser` should return null when the number or the converted
+   degrees are not finite, with a pin and its mutation.
    <!-- spec-cite-ignore-begin: this item QUOTES the wrong section numbers it records; tools/visual/spec-cite-validate.mjs --include-docs skips the block -->
    (f) **Spec-citation sweep — what the retro did and what is left.**
    The wave-49 list of "pre-existing wrong citations" was re-checked
@@ -1080,6 +1227,39 @@ platform; they are not folded into a rendering wave.
    right colour, in the wrong place. That is the single largest thing the
    scorer cannot see, and (obligation #4) the class a displacement-aware
    instrument is structurally WORST at.
+   (j′) **Static position (wave 52 lane L7;
+   `tools/titan/results/wave52-static-position/_note.md`).** Compose's
+   css-grid-1 §9.2 grid overlay owns its children's static position (the RC1
+   zero-flow mount stands down by identity, `LocalStaticPositionOwner`),
+   `align-items: self-start|self-end` fold to start/end
+   (`GridRenderer.foldAlignItems`), the iOS flex overlay aligns in the
+   CONTENT box from the padding-start edge and falls back to `align-items`
+   (`AbsposStaticOffset.swift` + the renderer's content-box arguments), and
+   `align-self: normal | [first|last] baseline` are typed (web emits `last
+   baseline`; mobile uses the css-align-3 §4.2 safe self-start/self-end
+   fallback, `baselineFallback`; `left|right` are dropped as invalid).
+   **Measured — every prediction held**: `wave52-ship
+   css-flexbox/abspos/position-absolute-containing-block-002 ios P 1.0000`
+   (f 0.9373; FAITHFUL); the 16 Android
+   `css-grid/abspos/grid-abspos-staticpos-align-{self,items}-{center,end,flex-end,self-end}(-large-border-padding)`
+   cells → P 1.0000 and the 10 web non-img `*-last-baseline-*` → P
+   0.9998–1.0000; the drops stayed P (`…-align-self-vertWM-003/-004` android
+   P 0.9667 / 0.9682, `…-vertWM-last-baseline-003/-004` ios P 0.9950); no
+   L7 cell lost.
+   **Open:** T4 (grid area as alignment container, RTL / vertical-rl axes —
+   the last-baseline marks overshoot on mobile until then); abspos
+   `normal`/`stretch` still defer to `align-items` on mobile, and
+   `GridAbsposPartitionTest` K3b pins that known-wrong `normal` (a fix must
+   flip it); justify-self baseline fallback (iOS-only would split the
+   natives). Skeptic findings: the `AbsposStaticOffset.swift` change REQUIRES
+   L7's seam-2 content-box arguments — both are in the tree; never revert one
+   without the other (containing-block-002, margin-002/-003 and
+   fallback-justify-content-001 over-shift otherwise); the fold also moves the
+   dark-stage fixture `fixtures/properties/layout/flex-align-items.json`
+   `AI_SelfEnd` (CSS-correct direction; no baseline, off the gate set);
+   `fixtures/properties/layout/flex-align-self.json` / `grid-align-self.json`
+   do not exercise `normal`, `first baseline` or `last baseline`
+   (done-definition #1 gap).
    (k) **The test's own failure-indicator ink reaches the canvas — 7
    cells.** The element the test expects covered, clipped or sized away is
    painted, so the capture displays the very mark that means "fail": 031
@@ -1087,6 +1267,36 @@ platform; they are not folded into a rendering wave.
    mechanism rather than by platform — orthogonal-flow / available-size
    sizing (012, 031, 068), fragmentation (046, 091), anchor-position (038),
    float/clear (098). Worth a lane.
+   **Wave 52 (lane L3, `tools/titan/results/wave52-failure-ink/_note.md`):
+   F1/F2/F3 shipped; the seven sampled 0(k) cells all PASS and are
+   correctness work — F4 (§7.2 sequential fill, 046), F5 (table-box clip,
+   098), F6 (§7.3.1 orthogonal available size, 031/068) remain queued with
+   the carrier counts in `tools/titan/results/wave52-plan/failure-ink.md`
+   §5.** F1: the baked-layout guard reads the post-load extractor's real
+   signature (`BakedLayoutSignature.bakedPhysicalBox` = Width ∧ Height ∧
+   BoxSizing ∧ (PaddingTop ∨ BorderTopStyle), both natives, plus the Swift
+   `VerticalMulticolPlan` twin); F2: a floated `display: contents` unboxes
+   (css-display-3 §2.7 — the wave-18 Float clause is deleted on both
+   natives); F3: iOS `MulticolSpannerContainingBlock.swift` restarts the
+   abspos containing-block chain at a `column-span: all` box and hoists to the
+   ICB (Compose has had its twin since wave 49). **Measured — every
+   prediction held**: `wave52-ship css-display/display-contents-float-001 ios
+   P 0.9988` / `android P 0.9979` (f 0.9417 / 0.941; FAITHFUL); `wave52-ship
+   css-multicol/abspos-containing-block-outside-spanner ios P 0.9994` (f
+   0.9553) — and its PNG shows ZERO red (both green squares cover the red
+   ones; `cell-review.json`), so it is the fix; `wave52-ship
+   css-writing-modes/flexbox_align-items-stretch-writing-modes ios P 0.9991`
+   (f 0.999; FAITHFUL). Movers: `abs-pos-border-offset-003` rose and stays f
+   (ios 0.9342 → 0.9361, android 0.9262 → 0.9276); `css-tables/baseline-vertical`
+   did not move (f 0.5727 / 0.6209 / 0.8028). **Open
+   (skeptic nits):** the bake-gate comment and `VerticalMulticolBakeGateTests`
+   justify protecting `anchor-position-multicol-017` by its P verdicts, which
+   are DEGENERATE (ios 7 800 / android 8 000 red px at P 0.9511 / 0.9823) —
+   say so or drop the "PASSES" wording; no RASTER pin covers an authored
+   Width+Height sole child that now takes the wave-47 vertical plan (zero
+   corpus carriers); 39 authored `box-sizing`-carrying Width+Height
+   components (17 docs) are the guard's residual false-positive potential
+   should one ever sit under a vertical container.
    (l) **The 16 px page-padding overrun — 3 cells, possibly ONE root cause,
    and the cheapest three in the table.** Cells 018 (Android,
    gap-decoration), 026 (Android, line-clamp) and 083 (web, line-clamp) sit
@@ -1097,12 +1307,163 @@ platform; they are not folded into a rendering wave.
    one cause before staffing the families separately. The same table's
    clip/mask reference-box pair (099 web, 028 Android — the mark displaced
    by exactly the 8 px padding on both axes, ink mass identical) is the
-   other cheap geometric pair.
-   (m) **A computed colour never reaches the text run — 3 cells.** A colour
-   arriving via cascade, selector match or pseudo-element is dropped and the
-   text paints in the inherited class: 087 (web) · 052, 055 (Android).
-   Owner: cascade / selectors / pseudo. Distinct from the converter-side
-   colour drop closed at 9(b).
+   other cheap geometric pair. **Wave 52: ONE cause, harness-side, on all
+   three platforms** — the composed canvases clipped at the 390 px canvas,
+   not at the ICB, so ink reaching the canvas edge painted into the 16 px
+   frame (Fix A, lane L2 — (l′)); and the clip/mask pair was the REFERENCE,
+   not the runtime: the test declares a body margin its ref does not, and the
+   re-frozen refs (lane L12 UAMARGIN, "Instrument decisions pending") restore
+   the UA 8 px — `clip-path-{contentBox,paddingBox}-{1d,1e}` ×12 moved
+   0.9585 / 0.9696 → 0.9997–1.0000 in the calibration run `wave52-calib` on
+   byte-identical captures (degenerate → honest, no verdict change).
+   (l′) **Composed canvases (wave 52 lane L2;
+   `tools/titan/results/wave52-composed-canvas/_note.md`).** The ICB clips
+   the inline axis on all three platforms (Fix A); a concrete body margin is
+   owned by the canvas flow stack, not the body-root box (M1, CSS 2.1 §8.3
+   table-internal bodies excluded); the natives' root-stack fold no longer
+   joins an RC1 root's margins (T1), collapses through empty text-less
+   pseudo-less block roots (T2), paints a content-free, undeclared-z RC1 root
+   above later plain in-flow roots (T3 — a declared z-index, a
+   content-bearing root or later step-8 content keeps the wave-51 order: the
+   wave-52 skeptic caught the first cut lifting `z-index: -1` boxes) and
+   gives hoisted UA-tag roots their UA block margin (T6). The lift rule
+   (`composedRootsPaintingAboveFlow`, Kotlin `UaBlockMargins.kt` + Swift
+   `ComposedRootStack.swift`) fires on 35 roots / 24 docs, not only the T3
+   rows; the 14 passing tests outside them are on the watchlist and
+   **did not move, as predicted** (`wave52-ship
+   css-images/gradient/gradient-single-stop-001…008`,
+   `css-sizing/aspect-ratio/abspos-0*`, `background-clip-content-box-001`,
+   `clip-path-polygon-003`, `backdrop-filter-edge-pixels-2`: every passing
+   cell at its wave51-fix score; the failing `aspect-ratio/abspos-008` /
+   `-014` android drifted f 0.653 → f 0.6409, unattributed). **Measured
+   against the other predictions — held, with one MISS and one DEGENERATE
+   flip**: `wave52-ship css-masking/clip-path/clip-path-ellipse-006/007/008`
+   ios P 0.9991 / android P 0.9982 (+6, FAITHFUL);
+   `css-text-decor/text-decoration-propagation-shadow` ios P 0.9994 / android
+   P 0.9989 (+2, FAITHFUL); `css-flexbox/align-items-007` ios P 0.9974 /
+   android P 0.9967 (+2, FAITHFUL — the positioned green box now paints over
+   the `<img>`); `css-gaps/flex/flex-gap-decorations-027 web P 1.0000` (+1,
+   FAITHFUL); Fix A: `flex-gap-decorations-040 web P 1.0000`,
+   `css-overflow/line-clamp/block-ellipsis-028 web P 1.0000`,
+   `css-position/position-absolute-semi-replaced-stretch-input web P 0.9596`
+   (f 0.9422; FAITHFUL — its second column of small boxes still sits 5 px
+   left); no L2 cell lost. `CSS2/css21-errata/s-11-1-1b-006` ios/android
+   flipped as predicted (+2, MED) but is **DEGENERATE** — 0(l″). Tripwire:
+   predicted frame-ink overrun-right + overrun-left 208 + 84 → 0 / 0;
+   **measured 0 / 1** — one left-frame pixel on
+   `filter-effects/backdrop-filter-clip-rect-2` android, whose cell is
+   unchanged at P 0.9981 (`tools/titan/results/wave52-gate/tripwires-ship.txt`,
+   method `frame-ink-census.mjs` beside it). The three scorer flips L2
+   pre-labelled DEGENERATE all flipped and all ARE degenerate —
+   `contain-inline-size-bfc-floats-001` ios/android,
+   `anchor-position-multicol-007` android (0(l″)); never fixes.
+   `flex-gap-decorations-034` ×3, whose label was disputed, is **FAITHFUL**:
+   `wave52-ship … web/ios/android P 1.0000`, pixel-identical to the
+   reference — an instrument-only gain (`wave52-calib`) whose overrun strip
+   x 374–389 Fix A then blanked (`cell-review.json`). The ring-fenced
+   `filter-effects/backdrop-filter-basic-blur`, reported plainly: ios f
+   0.9469 → P 0.9526 as predicted from Fix A's frame alone, and the
+   reviewers label it DEGENERATE (its three filter boxes sit 24 px right of
+   the reference; the score moved only in the x 374–389 strip); web P 0.9943
+   → P 1.0000, android f 0.899 → f 0.904 — no code names it, no queue item
+   targets it. **Open:**
+   nested RC1 z-order (7 tests, census `t3Nested` — needs the renderer seam)
+   and true step-8 interleaving (per-descendant z in the runtimes); ref page
+   height on body-margin docs (refs 390×720 vs captures 600); `display:
+   unset` converts to `Generic` (unset-val-002's span). Skeptic should-fix /
+   nits not addressed: `blockMarginsInFold` unpinned on both natives
+   (SK-K1/S1); Android `LocalContainingBlock.widthPx` minus the body margin
+   unpinned (SK-K2 — moves % geometry on the 8 M1 docs); the negative
+   `margin-top` offset unpinned (SK-K3); `isSelfCollapsingRoot` lacks CSS 2.1
+   §8.3.1's "does not establish a new BFC" clause and treats `AspectRatio`
+   boxes, `<input>` widgets and `<br>` roots as empty (39 roots / 21 tests
+   marked transparent, 0 move today); the positive-declared-z exclusion has
+   no pin (N1, 2 unscored carriers); the Swift lift rule has no `runs` clause
+   and tests `pseudos == nil` where Kotlin tests `isNullOrEmpty()` (N2, 0
+   carriers); `composed-canvas.census.mjs` / `png-replay.mjs` overwrite their
+   committed JSON on every run (N3). The Compose `clipRect` inside the
+   composed `graphicsLayer.record` and the SwiftUI band `.clipShape` under
+   `ImageRenderer`, unexecuted at lane time, ran at the closing gate
+   (overrun-right 208 → 0 above); they still have no raster pin.
+   (l″) **Three tests (five cells) the composed-canvas changes flipped pass
+   DEGENERATE in `wave52-ship` — wrong pictures the scorer lets through** (each looked at
+   against the reference by two readers; `s-11-1-1b-006` android carries its
+   overturned iOS twin's measured geometry —
+   `tools/titan/results/wave52-gate/cell-review.json`; never counted
+   as fixes; obligation 0(b)):
+   - `wave52-ship CSS2/css21-errata/s-11-1-1b-006 ios P 0.9953` / `android P
+     0.9944` (f 0.9321 / 0.9332): the black 20×20 square is 5 px too high on
+     both (ink rows 51–70 against the reference's 56–75, touching the text).
+     Mechanism guess (reviewer, untraced): a `display: table` body is laid
+     out as a block stack, so the `display: table-cell` child's
+     `margin-top: -15px` is honoured and nets with the preceding block's
+     `margin-bottom: 10px` to −5. CSS 2.1 §17.5
+     ignores margins on table cells, and the block sibling belongs in an
+     anonymous cell (§17.2.1; 11(h) T10 is the fixup). Sibling
+     `s-11-1-1b-005` web passes at 0.9658 with no black square at all (5(g)).
+   - `wave52-ship css-contain/contain-inline-size-bfc-floats-001 ios P
+     0.9531` / `android P 0.9519` (f 0.9406 / 0.9394): the orange 200×20 bar
+     sits at y 388–407, wholly below the third float, where the reference
+     puts it at y 288–307 beside and over that float — the test's
+     assertion; only the float's right edge moved (Fix A). Mechanism guess:
+     the flow-root BFC is placed by its 200 px content width instead of the
+     zero inline size `contain: inline-size` gives it, so it clears every
+     float.
+   - `wave52-ship css-anchor-position/anchor-position-multicol-007 android P
+     0.9519` (f 0.9499): the red anchor box the test forbids is still drawn
+     (800 red px at x 52–121 / y 88–107, unchanged) beside a stray hollow
+     green rectangle at x ≈163–231; only the outer green bar at x 7–15 went
+     (Fix A). Mechanism guess: Compose's anchor() / position-area ignores
+     vertical-rl multicol fragmentation (siblings: 0(k)'s
+     `anchor-position-multicol-017`, also a red-ink pass).
+   (m) **A computed colour never reaches the text run** — three
+   mechanisms, two fixed in wave 52 (lane L11,
+   `tools/titan/results/wave52-all-reset-postload-colour/_note.md`): (052)
+   the runtimes' order-blind `all` reset (all three; now order-aware —
+   css-cascade-4 §6.4/§3.1/§7.3: Compose `global/AllReset.kt`, iOS
+   `GlobalExtractor.applyingAllReset(own:inherited:)`, web `applyAllReset`
+   with `all` emitted as the FIRST style key), (055) the post-load overlay
+   could not INTRODUCE `color` (now: introduce when the computed colour
+   differs from the parent's, UA-coloured tags skipped —
+   `introducesOverParent` / `UA_COLOURED_TAGS` in
+   `tools/titan/post-load-extract.mjs`; 13 tests / 27 components gain a
+   colour in the executed 277-test replay). Still open: (087)
+   `::first-letter` dropped at parse time (`extract-fixture.mjs`
+   `SUPPORTED_PSEUDO_ELEMENTS`) — brief F3, ~15 colour-only carriers,
+   extractor seam. Distinct from the converter-side colour drop closed at
+   9(b). The gate-set pin is `fixtures/combinations/all-then-color.json`,
+   gate + oracle only — NO committed baseline: seed it with
+   `UPDATE_BASELINE=1` only after LOOKING at its first captures, above all
+   `ATC_DirectionSurvives`' digits and the standalone `reset` frame (both
+   predicted from code, not rendered on a native). **Measured — every
+   prediction held**: `wave52-ship selectors/has-visited ios P 0.9571` (f
+   0.9469; the skeptic-corrected replay said 0.9573) — FAITHFUL on the parent
+   colours the test checks (green / black / yellowgreen, from the post-load
+   colour bake), over a picture the inline-run wall still breaks (each link on
+   its own line, black where the UA paints purple / blue — 4(a));
+   the colour cells stay P (`all-prop-{inherit,initial,revert,unset}-color`
+   ×3 at 0.9787–1.0000); at-risk cells unmoved — `css-cascade/all-prop-001`
+   ×3 P 0.9689 / 0.9641 / 0.9642 (±0.0001; its PNG was not in the gate
+   review, which looked at flipped cells only), `all-prop-initial-visited`
+   ×3 P 0.9839 / 0.999 / 0.9995, `display-contents-{button,details,fieldset}`
+   web P (±0.0008). **Open (skeptic, not fixed; all corpus-neutral):** S1 the "IR
+   order IS cascade order" premise has two known exceptions — the
+   extractor's in-place re-assignment keeps a key in its FIRST declaration's
+   slot (`.a{all:initial}.b{color:red}.c{all:initial}` → `[All, Color red]`,
+   painted red where CSS gives black) and UA bakes are appended after `all`
+   (the link bake is now guarded; the table-cell padding bake has the same
+   shape) — the general fix (delete + re-insert on re-assignment; UA bakes
+   before the author bag) is extractor-seam work, and `AllReset.kt`'s KDoc
+   overclaims it; S2 the natives model neither non-inherited INITIAL values
+   that differ from their defaults (above all `display: initial` = inline)
+   nor REVERT's UA values, and do not log it; N1 no pin exercises the
+   seam-1 / seam-2 wiring (the unit tests re-implement the call order); N2
+   Compose `ol { all: initial }` now gets the UA `decimal` (iOS parity; CSS:
+   `disc` and `display: inline`); RV-S1 `ATC_DirectionSurvives` cannot fail
+   on direction — never count it as direction evidence; RV-N1 web F1 filters
+   the before-`all` width/height out of `styles`, so `calibrateStyles`'
+   trailing min-size floors read nothing for `all`-LAST rows (longtail
+   `All_*`, not gate-listed).
    (n) **The absence-only class — a DENOMINATOR problem, ~67 cells, needing
    a decision rather than a fix.** 2 of the 100 sampled passing cells cannot
    fail: 053 is blank-on-blank (the reference paints nothing, the capture
@@ -1120,7 +1481,25 @@ platform; they are not folded into a rendering wave.
    honestly — or stay counted with the caveat documented. **Do not decide it
    silently by shipping a guard**: the blank-capture guard under "Instrument
    decisions pending" addresses the 42 (a capture FAILURE), not these 21 (a
-   test that cannot discriminate).
+   test that cannot discriminate). (Superseded wave 52: Decision B declined
+   the capture-failure form — the guard is a triage stamp, 39 rows on
+   wave51-fix / 45 re-frozen; see "Instrument decisions pending".)
+   **DECIDED AND EXECUTED (wave 52, lane L12-A — Decision A): exclude per
+   cell with a named reason.** `inject-wpt-block.mjs` stamps `scoreExcluded
+   = 'absence-only'` (`isAbsenceOnly`: `wptPass === true ∧
+   semanticPresence.bCoveragePct < WPT_PRESENCE_REF_MIN_PCT` — the pass a
+   capture with no ink would also receive) and never overwrites an existing
+   stamp; fails on blank refs stay scored, and the three olive
+   `background-color-animation-in-body` cells (a positive assertion, in S6's
+   21) stay counted. Measured on the unmodified wave-52 captures
+   (calibration run `wave52-calib`): **19 cells / 7 tests leave the pass
+   column — web 7 / iOS 6 / Android 6**, printed under `score-gate.mjs`'s
+   existing UNMEASURED NOW heading (no scorer change; the standing
+   NEWLY-MEASURED rule holds). Names:
+   `tools/titan/results/wave52-instrument-and-calibration/_note.md` § Census
+   (the v6.18 snapshot's `_note` carries them after the closing gate).
+   Ratchet cost, stated: a repaired blank-ref FAIL moves to `absence-only`,
+   never to P.
    (z) ~~**RANKED FIRST — the wave-50 gate's only losses: 3 Android cells,
    one test family, cause NOT in any runtime code.**~~ **FOUND AND FIXED
    (wave 51, commit 962effa5, measured on device with a VERIFIED install) —
@@ -1207,6 +1586,40 @@ platform; they are not folded into a rendering wave.
    product runtimes (the iOS chrome view too, for Catalyst testability).
    Nothing blocks moving it (the harnesses already import the runtimes);
    the checksum pins and `HarnessLabelChrome*` tests move with it.
+   (ac) **`css-display/display-contents-root-background` ×3 — an honest
+   failure the wave-52 reference re-freeze exposed (a new defect, not a
+   regression).** `wave52-open … P 1.0000 / 0.9994 / 0.9988` (web / ios /
+   android) → `wave52-calib css-display/display-contents-root-background web
+   f 0.5340` (ios f 0.5346, android f 0.5355) on byte-identical captures —
+   only the ref changed. The old pass was degenerate: the erasing body
+   background whitened the old ref. The re-frozen ref shows Chrome's green
+   root canvas (the test's `:root { display: contents; background-image:
+   url(1x1-green.png) }`, blockified per css-display-3 §2.7 and propagated to
+   the canvas) and all three runtimes paint white. No lane repays it.
+   Evidence: `tools/titan/results/wave52-instrument-and-calibration/_note.md`
+   § Calibration gate (LOST). Next (no runtime traced yet): find, per
+   runtime, where a `display: contents` root's `background-image` is dropped
+   on the way to the canvas (root-to-canvas background propagation in the
+   three renderers and the harness canvases), and census the corpus's other
+   root-`background` carriers before staffing a lane. Closing gate:
+   `wave52-ship … web f 0.534` (ios f 0.5346, android f 0.5355), one of v6.18's
+   eight lost cells, HONEST_FAIL on all three (`cell-review.json` — the
+   reference is right; the captures have no green at all).
+   (ad) **`css-view-transitions/column-span-during-transition-doesnt-skip` ×3
+   — the second honest failure the re-freeze exposed.** `wave52-open … P
+   0.9879` → `wave52-calib … f 0.9332` on all three, capture bytes identical:
+   the re-frozen ref shows the pink `::view-transition` region, the captures
+   do not. Lane L1 MEASURED that its frame-ring stamp (F-B, 5(j)) does not
+   apply: the vt-bake bails `isolation window 500x200 exceeds the 358x568
+   viewport` and the settled ring is NON-UNIFORM (the `target` group's green
+   snapshot reaches the top edge — three ring points read (1,129,1), five
+   read (255,192,203)) → null → nothing stamped
+   (`tools/titan/results/wave52-web-tail-colour-vt/_note.md` § Real drive).
+   Remedy candidates, both outside wave 52's budget: an isolation window that
+   fits the 500×200 spanner, or a group-tolerant ring rule shared with
+   `capture-browser-ref.mjs`. Closing gate: `wave52-ship … f 0.9453` on all
+   three (Fix A blanked the x 374–389 strip, so the captures are no longer
+   byte-identical; still no pink), HONEST_FAIL (`cell-review.json`).
 
 1. **Vertical-wedge residuals** (the wave-47 wedges are FIXED as
    mechanisms — W1 wave 48): (a) `css-break/background-image-006` **scores
@@ -1293,6 +1706,104 @@ platform; they are not folded into a rendering wave.
    1230, and the Android/web height ratio of 12.63× is an outlier (next
    worst in the corpus is 4.67×). **The guard this test motivates is keyed
    on UNIFORM COLOUR, not on alpha** — see "Instrument decisions pending".
+   (d) **Vertical wedges (wave 52 lane L8;
+   `tools/titan/results/wave52-vertical-wedges/_note.md`).** Landed on both
+   natives (pins on verbatim per-test IR, every mutation executed): M-A `ch`
+   measures the face the label paints (css-values-4 §6.1.1) — Compose
+   `ChUnitMetrics.paintsInter` routes only face-less and Inter families
+   through the Inter loader the renderer installs (`bindInterFace`), every
+   other family keeps `Typeface.DEFAULT` (the skeptic's must-fix: the first
+   cut sent `FontFamily.Default` labels to Inter); iOS measures Inter for the
+   design-default family; M-B `ch` along the inline axis under upright text
+   (`VerticalInlineAxis.{kt,swift}`); M-C an upright run's
+   css-writing-modes-4 §7.3.1 budget (definite ancestor block size, else the
+   ICB), WPT-capture-only on both (`uprightFallbackBudgetPx`); M-E UA `<col
+   width>` harvested into a per-cell min width (`TableBoxTree.columnChains` /
+   `columnWidthsPx`, Swift twin); M-G a widget whose used width or height is
+   0 paints no UA atom (`UAWidgetsResolve.hasZeroUsedBox`). M-F (the baked
+   guard) is 0(k)'s F1. **Measured — six predicted flips held, four
+   MISSED**: `wave52-ship css-writing-modes/forms/input-range-zero-inline-size
+   ios P 0.9993` / `android P 0.9989` (f 0.9747 / 0.9743; FAITHFUL — the
+   slider widgets are gone, the green L-mark matches);
+   `css-writing-modes/ch-units-vrl-003` / `-004` ios P 0.9535 / android P
+   0.9507 (+4, f 0.8396 / 0.8404; FAITHFUL — the green table-column square
+   is the reference's 120×120; residuals: the blue control is 120×125–126,
+   so the orange square sits 5–6 px low, and `<strong>` is not bold). The
+   Android pair already passed at 0.9504 in the first attempt; it holds
+   0.0007 over the bar, and the closing-gate `ch` fix nearly cost it (a
+   "strictly above" snap took it to f 0.9440 on a probe — 1(e)). **`ch-units-vrl-005` / `-006`: predicted f → P on iOS
+   (MED-LOW) and Android (LOW); measured `wave52-ship
+   css-writing-modes/ch-units-vrl-005 ios f 0.942` / `android f 0.9347`
+   (from f 0.9159 / 0.9103), the same for `-006` — still failing, open.**
+   `-001` / `-002` landed where predicted (ios f 0.8771, android f 0.8744);
+   `-007` / `-008` fell (ios f 0.911, android f 0.9034, from 0.9159 / 0.9103 —
+   unfixable as scored, below). The M-A at-risk cells all stay P
+   (`hyphens-auto-001`, `hyphens-none-shy-on-2nd-line-001`, `hyphens-span-002`,
+   `text-decoration-inset-004` unchanged or rising; `hyphens-out-of-flow-002`
+   / `hyphens-punctuation-001` ios rose to P 0.9971 / 0.9588); `bidi-lines-001
+   / -002` ios unchanged at P 0.9926 / 0.989; `hyphenate-character-005` ios f
+   0.945 → f 0.9428. One cell on L8's M-A mover list flipped, unpredicted
+   as a flip (whether M-A moved it is arm `ma`'s question, below):
+   `wave52-ship css-text/hyphens/hyphens-auto-last-word-001 ios P 0.9991`
+   (f 0.9032 at wave51-fix; already `wave52-final` P 0.9991, before
+   aaf676c5; FAITHFUL — the first box reads
+   `Test example` on one line where it broke `Test exam-` / `ple`, all six
+   boxes match the reference; android f 0.8697 → f 0.945, still failing; L8
+   listed it in `tools/titan/results/wave52-vertical-wedges/watchlist-additions.txt`
+   as a mover that "can move, cannot be lost"). MEASURED by arm `ma` (`tools/titan/results/wave52-gate/ab-ma.txt`; exclude = Compose `git apply -R` of L8 seam-1 + iOS `ma-exclude-ios.integrated.patch`, hashes in `build-hashes.txt`): M-A is what flipped `hyphens-auto-last-word-001` ios (f 0.9032 without it → P 0.9991 with it) and, together with the closing `ch` fix present in both arms, the four Android hyphens cells of 4(g); it costs `hyphens-manual-inline-012` android −0.010 (P 0.9903 → P 0.9803) and `ch-units-vrl-003` / `-004` −0.003 on both natives (P in both arms — those flips are M-B's); `text-decoration-inset-004` and `bidi-lines-001` / `-002` did not move at |Δ| ≥ 0.002; P → f 0.
+   **Open:** M-G's second clause (size the atom to a declared px box) is not
+   built — every post-load widget wire carries px Width/Height, so it would
+   move every passing widget cell, unpriced; `text-orientation` is inherited
+   on neither native (twin-identical), so a `td` under an upright `tr`
+   (`ch-units-vrl-001/-002`) measures the x-advance — making it inherit is a
+   seam change with an unmeasured radius; `ch-units-vrl-007/-008` are
+   unfixable as scored (the td's own upright `height: 5ch` is 120 per spec
+   and Chromium; the ref expects 63); `colspan` / `<col span>` are absent
+   from the IR v2 wire (0 corpus components carry them — a v3-gated wire
+   change, not a runtime one); `ChUnitMetrics.cacheName` reads the volatile
+   loader outside the memo lock (a racing install could memoise one stale
+   advance; installs happen once per process). Never executed:
+   `bindInterFace`'s real `Resources.getFont` load, the Compose M-E cell
+   width and the upright glyph line box (24 / 24.2 / 25 px).
+   (e) **Android `ch` is the font's advance — FIXED at the root by the
+   closing gate (commit aaf676c5); one residual.** `ChUnitMetrics` measured
+   '0' with a plain `Paint()` (advance hinted to a whole pixel) through
+   `Paint.measureText` (`Math.ceil` of the run): 19 for 32 px monospace
+   (font: 19.2), 13 for 20 px Inter (12.6). A `10ch` box therefore held nine
+   glyphs, and L9's F5 soft-hyphen pre-break, correct for that box, took the
+   earlier opportunity — `wave52-final css-text/hyphens/hyphens-manual-011
+   android f 0.8925`, `-012` f 0.8983, `-manual-inline-011` f 0.8842, three
+   of the first closing attempt's five lost cells; every `5ch` box of
+   `ch-units-vrl-005…008` was 65 px against the reference's 63. Fix:
+   `ChUnitMetrics.ADVANCE_PAINT_FLAGS` (linear + sub-pixel) and
+   `Paint.getRunAdvance`; `ChUnitMetrics.fitSafePx` rounds a `ch`-derived
+   length UP to a whole device pixel and leaves one already on a pixel
+   alone (both `SpacingResolve` `ch` arms go through it); pinned in
+   `ChUnitMetricsTest`, seven of the nine mutations in
+   `tools/titan/results/wave52-gate/closing-fixes-mutations.log` (C1–C3,
+   F1–F4; G1 / G2 are the marker gate's). Why
+   round-up-only (`tools/titan/results/wave52-gate/_note.md` §3): with no
+   snap, `css-overflow/line-clamp/block-ellipsis-023` / `-024` android lost
+   a line (`32ch` = 655.2 device px rounded to 655); with a "strictly above"
+   snap, `ch-units-vrl-003` / `-004` android lost their pass (an exact
+   315-px tie became 316). Measured: `wave52-ship
+   css-text/hyphens/hyphens-auto-010 android P 0.9915` (f 0.8636) and
+   `hyphens-punctuation-001 android P 0.9981` (f 0.938), both FAITHFUL
+   (`tools/titan/results/wave52-gate/cell-review.json`);
+   `hyphens-manual-011 android P 0.9952` (`-012` P 0.9952,
+   `-manual-inline-011` P 0.9927) — back above their wave51-fix 0.9811 /
+   0.9811 / 0.9739, but P → P against wave51-fix, so their post-fix
+   pictures were not in the gate review (the gate note §2 geometry — the
+   194-px `10ch` box — measures `wave52-final`, not the fixed build).
+   `hyphens-span-001` android also flipped with aaf676c5 (`wave52-final` f
+   0.945 → `wave52-ship` P 0.9532) and is DEGENERATE (4(g));
+   `hyphens-out-of-flow-001` / `-002` android, DEGENERATE too, had already
+   flipped in the first attempt, before aaf676c5 (4(g)). **RESIDUAL** (the
+   `fitSafePx` KDoc's KNOWN GAP): an exact tie (N × advance × density a whole number) has no headroom
+   and holds only while Minikin's summed advances do not exceed it by float
+   noise — `ch-units-vrl-003` / `-004` android pass at P 0.9507 with nothing
+   to spare; `ch-units-vrl-005` / `-006` android still fail (f 0.9347) and
+   `-007` / `-008` too (f 0.9034, unfixable as scored — 1(d)).
 2. **Counter/marker follow-ups from the Rule-43 unexclusion** (W2 wave 48
    unexcluded 15 of 28; the refusal list in `tools/titan/inject-wpt-block.mjs`
    `NATIVE_FONT_PARITY_REFUSED_TESTS` carries per-key measured scores):
@@ -1375,7 +1886,18 @@ platform; they are not folded into a rendering wave.
    plausibly face-bound). **Queued from it, as wave 50 re-measured each:**
    (c¹) **natives — armenian fallback-row line breaking** (unchanged: both
    natives print "10000. 10000" on ONE line where the ref wraps the §7.1.4
-   fallback row; armenian 0.9420/0.9423).
+   fallback row; armenian 0.9420/0.9423). **Wave 52 (lane L6, adjudication
+   A): `armenian/css3-counter-styles-008` is BACK on
+   `NATIVE_FONT_PARITY_REFUSED_TESTS`** (`inject-wpt-block.mjs`) — its two
+   native cells left the denominator at the closing gate as predicted
+   (`wave51-fix … ios f 0.942` / `android f 0.9423` → unscored in
+   `wave52-ship`; two of v6.18's 21 unmeasured-now); the line-breaking
+   defect itself is unchanged and no longer scored. Web: T3 bakes the marker
+   as the ref's own inline `<bdi>`-shaped span for an inside, childless item
+   (`bakedMarkerPlan`; the `<string>` form wraps row 3 — measured). Held:
+   `wave52-ship css-counter-styles/armenian/css3-counter-styles-008 web P
+   0.9981` (f 0.9435; FAITHFUL — decimal `10000.` / `10001.` fallbacks,
+   rows broken as the reference breaks them).
    (c²) ~~shared — counter-suffix doubled item text~~ **FIXED in tree (wave
    50, lane B4's autoclose patch, APPLIED).** `tools/titan/extract-fixture.mjs`'s
    `scanOwnText` never mirrored `walkChildren`'s `AUTO_CLOSE_TRIGGERS` rule
@@ -1431,7 +1953,13 @@ platform; they are not folded into a rendering wave.
    `lists/ListStyleApplier.kt`'s `getMarker` `when`, one arm beside
    `KATAKANA_IROHA`. Until then the two natives answer differently for this
    keyword (iOS `일,`, Compose `1.`), which the Swift file's TWIN DIVERGENCE
-   banner states rather than leaving silent.
+   banner states rather than leaving silent. **The korean half is CLOSED in
+   wave 52 (lane L6 T1)**: Compose `lists/KoreanHangulFormal.kt` (byte-parallel
+   with the Swift twin; in-range negatives stated as unmodelled in its banner,
+   the (c⁶) shape) plus the three arms above (`KOREAN_HANGUL_FORMAL`,
+   `"korean_hangul_formal"`, the `getMarker` arm). Left over: the Swift
+   `KoreanHangulFormal.swift` TWIN DIVERGENCE banner still says Compose
+   answers `1.` — re-true it. The missing RTL markers stay (c⁴).
    (c⁴) **RTL markers are BLOCKED UPSTREAM — do not fix them in the
    runtime.** Executed repro (Catalyst): for the verbatim
    `counter-suffix__0__4__0` `<li>`, `ComponentRenderer.isOutOfFlow(li)` is
@@ -1451,7 +1979,20 @@ platform; they are not folded into a rendering wave.
    geometry, so it should do the same for the item's marker, or preserve a
    marker-side signal. Census: exactly **4** components in the whole corpus
    carry `meta.markerText` together with `position: absolute|fixed`, all
-   four in `counter-suffix`.
+   four in `counter-suffix`. **Now a DEGENERATE PASS on both natives (wave-52
+   closing gate):** `wave52-ship css-counter-styles/counter-suffix ios P
+   0.9802` / `android P 0.9547` (f 0.9285 / 0.9051) while the two `dir=rtl`
+   lists still draw NO marker — a third of what the test asserts; the
+   reviewers read the LTR markers now hanging in the padding (2(d)) and, on
+   Android, Compose's korean arm (2(c³)) in the picture. MEASURED by arm `t5` (`tools/titan/results/wave52-gate/ab-t5.txt`): the hang is what moved both cells — without it
+   ios f 0.9285 / android f 0.9030, with it P 0.9802 / P 0.9547 (obligation 0(a)). The
+   reviewers also measured: Android places the RTL
+   item text 48 px (one 3em padding) right of the reference; iOS's LTR Hebrew
+   markers read `.א` / `.ב` with the period on the left (their guess: the
+   marker string takes a first-strong RTL base direction instead of the
+   list's) and `一、` carries a trailing space
+   (`tools/titan/results/wave52-gate/cell-review.json`). Never count these
+   two cells as fixed; obligation 0(b).
    (c⁵) **`name-case-sensitivity` is TWO DIFFERENT DEFECTS, and the old
    "missing marker content on all three" erases web's real one** (S6-06,
    PARTIALLY-CONFIRMED). wave49-final web f 0.9593 / iOS f 0.9535 / Android
@@ -1475,6 +2016,91 @@ platform; they are not folded into a rendering wave.
    `KoreanHangulFormalTests.testExpandCoversTheAdditiveTable` pins
    `expand(-1) == "-1"` as if correct. Model the negative, or say plainly
    that negatives are unmodelled and pin the refusal.
+   (d) **Outside markers hang (wave 52 lane L6 T5).** `lists/ListMarkerOutsideHang.{kt,swift}`
+   (pure geometry + Layout) and `ListMarkerRow.hangsOutside`, wired by L6's
+   seam-1 / seam-2 (`tools/titan/results/wave52-counters-and-lists/_note.md`):
+   an outside marker is painted outside the item's border box (css-lists-3
+   §3.5) instead of taking inline space as a Row / HStack sibling, which
+   displaced every item by marker width + gap (100 outside `<li>` in 19
+   tests). **Measured: the predicted flip happened and is DEGENERATE** —
+   `wave52-ship css-counter-styles/counter-suffix ios P 0.9802` (f 0.9285;
+   MED) and, unpredicted, `android P 0.9547` (f 0.9051), both passing while
+   the `dir=rtl` rows draw no marker (c⁴): not a fix. The at-risk thin
+   native list passes all held and rose — `css-lists/counter-list-item-2` /
+   `-3` ios P 0.9939 / 0.9965, android P 0.9923 / 0.9947 (from ≈0.981),
+   `add-inline-child-after-marker-001` / `-002` natives P 0.9873–0.9962;
+   `css-pseudo/first-line-and-marker` natives stay f (0.9434 / 0.945 →
+   0.9725 / 0.9739). The other cells on the arm's list moved and all stay
+   f: `wave52-ship css-pseudo/first-letter-exclude-inline-marker android f
+   0.8466` / `ios f 0.8346` FELL (from f 0.8554 / 0.8407);
+   `css-lists/change-list-style-type-001` android f 0.9303 / ios f 0.851
+   (from 0.8558 / 0.7671) and `css-lists/counter-list-item` android f
+   0.7307 / ios f 0.7864 (from 0.7064 / 0.7518) rose. MEASURED by arm `t5` (`tools/titan/results/wave52-gate/ab-t5.txt`; exclude = Compose `git apply -R` of L6 seam-1 + iOS `tools/titan/results/wave52-counters-and-lists/t5-exclude-ios.integrated.patch` — seam-2 reversed, re-cut because the closing-gate `<li>`-display fix sits inside seam-2's context; seam-3/4 stay; installed `base.apk` sha1 / `.app` digest MATCH in `build-hashes.txt`): over the 254 ios/android cells of css-lists / css-counter-styles / css-pseudo the hang flips `counter-suffix` ios + android (both DEGENERATE), moves 18 more cells UP (`change-list-style-type-001` ios +0.084 / android +0.075, `first-line-and-marker` +0.029 both, `counter-list-item` ×2, `counter-list-item-2` / `-3` ×4, `broken-symbols` ×2, `change-list-style-type-002` ×2, `first-letter-skip-marker` ×2, `add-inline-child-after-marker-002` ×2) and 2 DOWN (`first-letter-exclude-inline-marker` ios −0.006 / android −0.009, both failing before and after); P → f 0.
+   (e) **Author `@counter-style` resolved by the bake (wave 52 lane L6 T7).**
+   `tools/titan/counter-style-bake.mjs` lifts `@counter-style` out of the
+   dynamic-signal bail and parses the css-counter-styles-3 descriptors into
+   the predefined shape (`counter-style-author.mjs`,
+   `counter-style-descriptors.mjs`); a `<script>` is judged by a CSSOM
+   recogniser (setters that take effect → bail `requires-script-mutation`;
+   all-invalid setters → inert). Native half: an EMPTY inside `<li>` takes
+   the Row/HStack instead of the zero-size overlay
+   (`lists/ListMarkerEmptyItem.{kt,swift}` + L6 seam-3/seam-4), landed with
+   L5's F-E (0(a⁗)) — never one without the other. Web: a baked
+   `meta.markerText` for range-limited additive and author styles, rendered by
+   `NodeRenderer.ts`. **Measured — every prediction held, the MED-LOW tier
+   included**: `wave52-ship
+   css-counter-styles/cssom/cssom-pad-setter-invalid web P 1.0000` and
+   `cssom-prefix-suffix-setter-invalid web P 1.0000` (f 0.9821 / 0.9844);
+   natives `pad` / `prefix-suffix` / `negative` `-invalid` ×6 all P
+   0.9994–0.9998 (f 0.9819–0.9849) — all eight FAITHFUL, markers `001.` /
+   `(A)` / `(3).` on the reference's 20-px rows; `armenian/css3-counter-styles-006`
+   / `-007` web P 1.0000, `-009` web P 0.9985,
+   `css-lists/content-property/marker-text-matches-georgian` web P 1.0000. The
+   seven VALID cssom setter tests stay scored (`pad` / `prefix-suffix` /
+   `negative` valid natives still f 0.989–0.992) — their not-applicable
+   tags were deferred ("Instrument decisions pending"). The named seam-3/4
+   mover fell on both natives: `wave52-ship
+   css-counter-styles/counter-style-at-rule/name-case-sensitivity ios f
+   0.9354` / `android f 0.9364` (from f 0.9535 / 0.9542, −0.018; web
+   unmoved at f 0.9593) — still failing; its two defects are 2(c⁵)'s.
+   **Open (skeptic, not fixed):** Compose seam-1 (hang) and seam-3 (empty
+   item) have no source-level pin — the device A/B is their only proof (S1);
+   the `<string>` / CSS-wide-keyword guard in `bakedMarkerListStyleType` (N2,
+   0 carriers); Swift `ListMarkerOutsideHangLayout` returns a silent `.zero`
+   on a broken contract (N4); uncommented runs in `counter-style-author.mjs` /
+   `counter-style-descriptors.mjs` (N6); file sizes in 9(m).
+   (f) **`css-lists/counter-reset-reversed-nested` ×3 passes with a WRONG
+   picture on all three platforms** (`wave52-ship … web P 0.9506` / ios P
+   0.9508 / android P 0.9509; obligation 0(b)). The test (`li { display:
+   block }`, `li::before` counters, `ol { counter-reset: reversed(foo) }`)
+   nests a three-item `<ol>` inside the second `<li>`; the per-test IR the
+   gate extracted (vendored byte-verbatim at
+   `tools/titan/results/wave52-gate/per-test-ir/css-lists/`; sha-256
+   identical in the `wave52-final` and `wave52-ship` runs)
+   slots the nested list's three `<li>` (Eleven / Nine / Eight) under the
+   ROOT `<ol>`, leaves the nested `<ol>` empty, and DROPS the last `<li>`
+   ("One") — so the list is flat and its counter values are wrong, where
+   the reference reads 3 / 2 / 11 / 9 / 8 / 1 (the painted values were not
+   read out). Extractor defect, not
+   traced (the HTML optional-end-tag rule `AUTO_CLOSE_TRIGGERS` in
+   `tools/titan/extract-fixture.mjs` closes an `<li>` at the next `<li>`
+   opener — a first suspect only if it ignores the nesting). Its SECOND
+   defect is FIXED: both natives also painted a native `1.`…`5.` marker in
+   front of the authored counters — css-lists-3 §3.1 attaches the marker to
+   the list-item BOX — and L6's outside hang moved that stray marker, which
+   is the whole of the first closing attempt's loss here (`wave52-final …
+   ios f 0.9424` / `android f 0.9425`). aaf676c5 gates both natives'
+   parent-loop marker paths on `ListItemMarkerGate.displayTakesMarkerAway`
+   (an authored `Display` that is not list-item; a baked `meta.markerText`
+   still wins; pinned by `ListItemMarkerGateTest` / `ListItemMarkerGateTests`).
+   The same gate touched `css-images/gradient/gradient-powerless-hue-*`
+   (`li { display: flex }`) — still failing, 5(e).
+   (g) **`ListOrdinal` still counts an `<li>` whose display is not
+   `list-item`** — the KNOWN GAP in `ListItemMarkerGate.displayTakesMarkerAway`'s
+   KDoc (both twins): css-lists-3 §4.6 increments `list-item` only on
+   list-item boxes. No corpus list mixes the two kinds, so no ordinal is
+   observably wrong today; a fixture mixing `display: block` and list-item
+   `<li>` siblings is the pin to write first.
 3. **Multicol float residuals** (W3 wave 48 closed seam 2 — the iOS
    slice-replay renders ref-exact rows):
    (a) **the converter/inline bake drops `<br clear="all">` — and it is an
@@ -1544,7 +2170,22 @@ platform; they are not folded into a rendering wave.
    fixes the paint position but leaves the box 3–5 px short. **Do NOT shift
    `MulticolFloatStripPlan`'s offsets** — `MulticolFloatStripRefRowsTest`
    pins them at the ref's own rows, and skeptic S3 re-scanned both frozen
-   refs at x=237 to confirm those pins.
+   refs at x=237 to confirm those pins. **Wave 52 (lane L6 T2): the narrow
+   option is LANDED — paint-clamped in `borders/sides/BorderSideApplier.kt`**:
+   a far-edge band of a box shorter than its stroke paints inside [0, w)
+   (`innerEdgeStrokeCentre` for single strokes; `farEdgeBandCentre` for the
+   double / groove / ridge lines, which the first cut MIRRORED — skeptic R1,
+   fixed and pinned by `BorderSideTwoLineBandTest`, 0 of 53 wave51-fix
+   two-line far-edge carriers in the changed range); the box itself stays
+   3–5 px short, and the broad `height(h)` overflow fix stays a device A/B.
+   **Tripwire held, no flip, as predicted**: the Android orange now sits at
+   rows 161–163 (multicol-003) and 171–175 (balancing-003) — the reference's
+   own rows (158–160 / 166–170 at `wave52-open`; T-L6 in
+   `tools/titan/results/wave52-gate/tripwires-ship.txt`); `wave52-ship
+   CSS2/floats-clear/floats-clear-multicol-003 android P 0.9968` (P 0.9881)
+   and `floats-clear-multicol-balancing-003 android P 0.997` (P 0.9857). The
+   paint position is fixed; what stays open here is the 3–5 px short box
+   (the broad fix, device-gated).
 4. **Inline-run wall, corrected map** (wave-48 W4 measured the briefed
    rings as no-ops: the br ring shipped in wave 47; the 75 tagless
    members are correctly-stacked BLOCK boxes. The UA-styled ring —
@@ -1650,7 +2291,24 @@ platform; they are not folded into a rendering wave.
    moving a fold decision on a passing host; the Swift twin
    (`InlineSpanRing.swift` + `InlineRunFlow.swift` plus
    `AttributedString.backgroundColor` at the segment seam) is queued, not
-   shipped, and skeptic S4 confirmed nothing slipped into SwiftUI this wave;
+   shipped, and skeptic S4 confirmed nothing slipped into SwiftUI this wave.
+   **The Swift twin SHIPPED in wave 52 (lane L9 F2)**: `InlineSpanRing.swift`
+   `glyphless:` with the `WhiteSpace` (preserving only) / `BackgroundColor`
+   arms, the `InlineRunFlow.swift` predicate, and
+   `TypographyApplier.bandedRun` at the segment seam. **Measured: iOS held,
+   Android MISSED again.** iOS: predicted P 0.9577 → ≈0.98 (MED); measured
+   `wave52-ship css-overflow/line-clamp/block-ellipsis-032.tentative ios P
+   0.9899`. Android: **predicted a thin P (MED-LOW); measured `wave52-ship
+   css-overflow/line-clamp/block-ellipsis-032.tentative android f 0.9457`**
+   (f 0.9397 at wave51-fix) — still failing, the second wave in a row this
+   cell's flip was predicted and did not come (obligation #1 records wave
+   50's miss); open. F2 is a device A/B still owed — NOT among the three arms
+   `tools/titan/results/wave52-gate/device-ab.sh` runs (no drop patch exists — arm A is
+   the integrated tree minus F2 — the Swift ring's `glyphless:` arm, the
+   `InlineRunFlow.swift` predicate, `TypographyApplier.bandedRun` and L9
+   seam-2's band hunk, reverted for the run and never committed — built and
+   installed with its `.app` hash recorded per run (no wave51-fix `.app` hash
+   was ever committed, so the wave51-fix capture is a score, not an arm));
    (d) **Compose line-clamp-006/007 — the cross-block line-box census
    LANDED and its renderer seam is APPLIED (wave 50, lane B9); CLOSABLE at
    the gate.** `typography/inline/LineBoxCensus.kt` + `LineBoxCensusRuns.kt`
@@ -1692,7 +2350,80 @@ platform; they are not folded into a rendering wave.
    checked either way; (e) Compose
    baseline-shift is face-ascent-dependent (hard-coded Inter 0.96875) while
    iOS is exact points — watch sup/sub cells on device for the ~2px class
-   (named limitation in `InlineSpanContent.kt`).
+   (named limitation in `InlineSpanContent.kt`); (f) **Inline-run wall
+   (wave 52 lane L9; `tools/titan/results/wave52-inline-run-wall/_note.md`).**
+   Refuted half of the brief: "Compose never paints a block-ellipsis marker on
+   any clamp in the corpus" — `placeholderOverflow` handed a bare
+   `line-clamp` back `declared` = Clip. L9 F3 draws it on soft-wrapped runs
+   (`DrawnLineClamp.cap`), and F4 bakes it into pre-broken runs on both twins
+   (`GreedyLineBreaker.clampLines` / `clampHead` — css-overflow-4 §4.2
+   word-level placement at space separators, ZWSP, soft hyphens and dashes;
+   UAX #14 ID/SA opportunities DECLINE, logged once); F5: a taken soft hyphen
+   fires the Compose pre-break (`PreBreakPipeline.tookSoftHyphenBreak`).
+   `css-text/hanging-punctuation/hanging-punctuation-inline-001`: the fold
+   (F1) is CSS-correct for a non-hanging UA but the replay predicted a SCORE
+   LOSS on both natives (the ref hangs the bracket; android 0.9495 → 0.9454,
+   ios 0.9756 → 0.9685). **Measured: the cell fell — Android to 0.9452
+   (predicted 0.9454), iOS 2.8× the predicted drop**:
+   `wave52-ship … android f 0.9452`; **predicted
+   ios 0.9685, measured `wave52-ship … ios P 0.9555`** — still passing, 0.0055
+   over the bar. Real
+   progress there needs `hanging-punctuation: last` implemented (measure the
+   paragraph without the trailing closing bracket; Compose would need a wider
+   Text constraint, iOS a fixed-size label), not a fold admission.
+   MEASURED by arm `f1` (`tools/titan/results/wave52-gate/ab-f1.txt`, exclude = `drop-F1.patch` applied, hashes in `build-hashes.txt`): F1 is what moved the cell — ios P 0.9756 → P 0.9555, android f 0.9495 → f 0.9452 — and nothing else: the other 94 css-text native cells are identical at |Δ| < 0.002. DECISION (orchestrator, deviating from the lane's rule above): F1 is KEPT — the fold is CSS-correct and the cell still passes on iOS; a score drop with no flip does not outrank picture-correctness here. `tools/titan/results/wave52-inline-run-wall/drop-F1.patch` stays as the reversible arm; `hanging-punctuation-inline-001` ios is a THIN pass (0.9555) on the wave-53 watch list.
+   **Measured — the other predictions held**: `wave52-ship
+   css-overflow/line-clamp/block-ellipsis-025 ios P 0.9709` (f 0.9495;
+   FAITHFUL — four lines, the fourth holding only the ellipsis);
+   `wave52-ship css-text/hyphens/hyphens-manual-inline-012 android P 0.9803`
+   (f 0.9419; FAITHFUL — `Deoxy-` / `ribonu-` broken at the soft hyphens);
+   every Android line-clamp host stays P (the "…" itself was not in the
+   gate review, which looked at flipped cells only);
+   `block-ellipsis-023` / `-024` android P 0.972 → P 0.9736, the named P → P
+   movers (the first closing-gate probe lost them to an unsnapped `ch` —
+   1(e)). **Open (skeptic, not fixed; 0 corpus
+   reach each):** R1 `PreBreakPipeline.preBreak`'s `source = text` argument
+   is unpinned (mutation SKK1 survives — add a rule-B-fired soft-hyphen clamp
+   pin); R2 `markedLine`'s first-spelling token map is per display string,
+   not per occurrence; R3 two em-dash cases (B2 × B2 treated as an
+   opportunity; the break BEFORE an em dash not modelled); seam-1's call-site
+   argument and seam-2's wiring (the four `blockEllipsisClamp:` arguments,
+   `clamp:` into the pre-break, the `styledSpanText` band rebuild) have no
+   unit pin; note-only fallthroughs with no breadcrumb (an author
+   `block-ellipsis: "<string>"` is drawn as `…`; `max-lines` +
+   `block-ellipsis: auto` answer "no marker"; a fired F5 run bakes U+2010
+   even when `HyphenateCharacter` is on the wire); the `GreedyLineBreaker`
+   split is in 9(m).
+   (g) **A soft hyphen in a run with NO space is never taken on Android —
+   three DEGENERATE passes** (obligation 0(b);
+   `tools/titan/results/wave52-gate/cell-review.json`). F5's pre-break
+   declines a run without a space (`PreBreakPipeline.preBreak`: `if
+   (text.indexOf(' ') < 0) return identity`, leaving that case to the
+   wave-21 whole-run gate), and Compose maps `hyphens: manual` to
+   `Hyphens.None` (`TextWrapApplier`), under which Minikin ignores U+00AD —
+   so a `high&shy;way` box in a `6ch` column breaks at a character with no
+   hyphen. The scores rose with the box width, and not in one step.
+   `hyphens-span-001` android flipped with the closing-gate `ch` fix (1(e),
+   aaf676c5): `wave52-final css-text/hyphens/hyphens-span-001 android f
+   0.945` → `wave52-ship … P 0.9532` (f 0.9166 at wave51-fix; all nine
+   boxes read `highwa` / `y` where the reference reads `high-` / `way`).
+   `hyphens-out-of-flow-001` / `-002` android had already flipped in the
+   first attempt, before aaf676c5 (`wave52-final … P 0.9619` / `P 0.975`;
+   `wave52-ship` P 0.9685 / P 0.982, from f 0.9218 / f 0.9291): in `-001`
+   none of the seven boxes shows a hyphen (they break `highwa/y`,
+   `h/ighway` or `high/way`); `-002` is `hyphens: auto`, and only boxes 1, 2
+   and 7 read `high-/way`. Mechanism guess (reviewer, untraced): an abspos
+   span inside the word splits it at the span's position, so the
+   dictionary never sees the whole word. MEASURED by arm `ma`
+   (`tools/titan/results/wave52-gate/ab-ma.txt`): M-A, with the closing `ch` fix present in both arms, is what moved the out-of-flow pair
+   (`-001` android f 0.9218 → P 0.9685, `-002` f 0.9291 → P 0.982) and `hyphens-span-001` (f 0.9166 → P 0.9532) — obligation 0(a); `-001` is an M-A mover in
+   `tools/titan/results/wave52-vertical-wedges/watchlist-additions.txt`,
+   `-002` an M-A sizing-`ch` carrier on L8's at-risk list
+   (`tools/titan/results/wave52-vertical-wedges/_note.md`). Fix directions:
+   let a taken soft hyphen fire for a space-less run (or honour U+00AD under `manual` without turning on automatic
+   hyphenation), and shape / hyphenate a word with its out-of-flow children
+   removed. iOS fails `hyphens-span-001` / `hyphens-out-of-flow-001` (f
+   0.8652 / f 0.8935) — check whether it shares the cause before staffing.
 5. **Web tail residuals** (W5 wave 48 measured +14 web: contain-body ×8,
    lch/oklch %, degenerate calc, image(), contain-intrinsic bridge):
    (a) ~~`tools/titan/extract-fixture.mjs` stamps 100×100 on `<hr>`~~
@@ -1745,7 +2476,14 @@ platform; they are not folded into a rendering wave.
    tests share one solid-green ref whose prose is 001's — WPT authoring
    artifact; exclusion-lane decision, never a code carve-out; web honest
    loss 0.9144→0.9038 recorded); (e) native powerless-hue/lch gradients
-   (0.65–0.86) need polar interpolation with alpha-carrying stops; (f)
+   (0.65–0.86) need polar interpolation with alpha-carrying stops — and
+   (wave-52 closing gate) `css-images/gradient/gradient-powerless-hue-{hsl,hwb,lch,oklch}`
+   are `li { display: flex }` documents: the
+   closing-gate marker fix (aaf676c5, 2(f)) took their stray native marker
+   away (+0.009…+0.012 on both natives) and they still fail — `wave52-ship
+   … ios f 0.9334–0.9445`, `android f 0.6991–0.755` (scores only; their
+   pictures were not in the gate review — open them before naming a second
+   defect); (f)
    color-mix in lch needs a static mixer (srgb→lch in ColorConversion);
    (g) **contain-content-004 / contain-html-overflow-002 — both mechanisms
    FOUND and both fixes APPLIED in tree (wave 50, lane B7), pending the
@@ -1809,7 +2547,11 @@ platform; they are not folded into a rendering wave.
    complementary predicate ("the parent's text IS its children's text", which
    B4's end-tag pairing does not express) is kept as defence in depth at
    `tools/titan/results/wave50-B7/table-duplicate-text.patch` — **it adds
-   ZERO cells of its own** and must never be counted alongside B4's; (h) ~~native image() carries only the FIRST src~~ **DONE (wave 49,
+   ZERO cells of its own** and must never be counted alongside B4's.
+   **Wave 52 residual (lane L5 F-D):** Selectors-4 specificity now orders the
+   per-ELEMENT cascade; `propsForBodyRoot`'s html/body/`*` root-scope merge
+   still uses document order inside each scope — not measured, no known
+   carrier; (h) ~~native image() carries only the FIRST src~~ **DONE (wave 49,
    `ImageCandidateChain` on both natives; fallbacks-and-annotations
    002/003/004 P on all three — web 1.0000 / iOS 0.9990 / Android 0.9982).
    Re-verified and PNG-checked at wave 50 (S6-01, CONFIRMED)**: every capture
@@ -1822,7 +2564,53 @@ platform; they are not folded into a rendering wave.
    (wave-48 F1/S6 probes): `MaskImageValue.ColorStop` drops
    `positionLength` (every px-positioned mask gradient stop), and
    ImageNotation is absent from `mapToMask` so `mask-image: image(...)`
-   drops the whole property.
+   drops the whole property; (j) **Wave 52 lane L1
+   (`tools/titan/results/wave52-web-tail-colour-vt/_note.md`): F-A and F-B
+   shipped.** F-A: `color(display-p3-linear | a98-rgb-linear |
+   rec2020-linear …)` resolve to sRGB (`ColorConversion.displayP3LinearToSrgb`
+   and twins — the parent space's matrix without the transfer decode — via
+   three `ColorParser.kt` arms; 6 tests / 18 cells). F-B: on a solve-class
+   view-transition bail with a clean drive, the MEASURED settled frame ring is
+   stamped as the body-root canvas colour (`isSolveClassBail` /
+   `applyBailFrameRingStamp` in `tools/titan/view-transition-bake.mjs`; the
+   bail reason ends `(frame-ring … stamped)` or `(frame-ring null not
+   stamped)`); a real headless drive of all 18 solve-class bails, run twice,
+   stamps exactly the four `fractional-box-with-{shadow,overflow-children}-{new,old}`
+   tests (12 cells). **Measured — every prediction held**: `wave52-ship
+   css-color/display-p3-linear-001 / -002 / -003` web P 1.0000, ios P
+   0.9989–0.999, android P 0.9981–0.9984 (+9, f 0.7959–0.9484; FAITHFUL);
+   `css-view-transitions/fractional-box-with-{shadow,overflow-children}-{new,old}`
+   web ×4 P 1.0000 and natives ×8 P 0.9975–1.0000 (+12, f 0.9739–0.9763;
+   FAITHFUL); `display-p3-linear-004 / -005 / -006` ×3 P 0.9973–1.0000 (from
+   0.9522–0.9568); tripwire T-L1 — the frame ring stamped on exactly the four
+   fractional-box tests (`tools/titan/results/wave52-gate/tripwires-ship.txt`).
+   **Open:** the
+   `prophoto-rgb(-linear)` arm (no ProPhoto matrix; 0 corpus docs); a
+   shadow-aware overflow window (css-backgrounds-3 §7.1) so the fractional-box
+   groups BAKE instead of bailing; the 5 backdrop authors whose settled ring
+   reads null (white or non-uniform — `column-span-during-transition-doesnt-skip`
+   measured non-uniform, 0(ad)). Nits: the bail-path body-root mint is still
+   tagged `baked-view-transition-tree` (component-level only, never reaches
+   inject's `lossyReasons`); the converter rounds `rgb(100% 100% 100%)` to
+   254 and `rgb(44.8436% 53.537% 28.8112%)` one step below the ref
+   (pre-existing, harmless on these tests). The rest of the web tail
+   (`tools/titan/results/wave52-plan/web-tail.md` §2) not taken by L1/L5 is
+   wave-53 singletons, each its own mechanism (web-tail.md §9, PNG-clustered,
+   not root-caused per cell): `css-view-transitions/html-becomes-fixed` (the
+   post-load serializer `inPageSerializer` returns only `headInner` /
+   `bodyOuter` and `buildSyntheticHtml` writes a bare `<html>`, so the
+   script's `<html class>` is lost; 3 cells, S–M);
+   `css-cascade/scope-implicit-006-print` (`extractInlineStyle` in
+   `extract-fixture.mjs` collects a `<template shadowrootmode>` `<style>` as a
+   document sheet; 13 corpus carriers, 7 passing web cells at risk — needs
+   shadow-scoped rules, M); `css-tables/colspan-004` web f 0.999 (natives
+   pass — web-runtime table attributes); caret-shape (§9 counts ×2,
+   `web-tail.failing-cells.json` lists `css-ui/caret-shape-block-color-001`;
+   no caret paints in a capture); `css-color/at-color-profile-001` (ICC
+   profile — unpassable, an exclusion candidate). §9's other ≥0.93 web
+   failures (shadow-DOM presence → the absence-only lane; hyphenation /
+   text-decoration-inset / table / flex-gap singletons at 0.93–0.95) are
+   clustered only.
 6. **Open runtime bugs from the harness overhaul:** (a) ~~Compose
    transform-list~~ FIXED wave 48 (`TransformListComposer`, ordered §11
    product; exit-5 deletions done). Residuals after retro R1: pure-2D
@@ -1880,7 +2668,14 @@ platform; they are not folded into a rendering wave.
    mechanisms that do widen an Android shadow's painted extent were repaired
    after that probe and are corpus-UNMEASURED: retro R6's border-box knockout
    + opacity attenuation (6(c′)) and retro round-2 F1's margin-box stripping
-   (`ShadowGeometry.borderBoxRect` / `outsetShadowRect`). (c′) **FIXED
+   (`ShadowGeometry.borderBoxRect` / `outsetShadowRect`). **Wave 52 (lane
+   L10): the probe is RE-AUTHORED and committed** —
+   `fixtures/properties/effects/box-shadow-reach.json` (4 × 100×40 boxes,
+   `box-shadow: 0 10px 10px {−8,0,+8,−1}px`; its v1 `_expect` pins fill + box,
+   and the spec-derived bottom-most shadow rows 56/64/72/63 sit in each
+   `_expect.note` because the v1 oracle cannot assert a row position). Never
+   rendered, no baselines, not on the gate set: the reach still needs a device
+   read, and a v2 position oracle to become a test. (c′) **FIXED
    retro R6, pending the device gate** — the two css-backgrounds-3 §6.1 /
    css-color-4 §3.3 defects PR #95 deferred and never ledgered (A11#2 /
    A10#5): the outset shadow painted UNDER the border box and ESCAPED the
@@ -1951,7 +2746,8 @@ platform; they are not folded into a rendering wave.
    `FixedHoist.split` deliberately diverges from Compose
    `CanvasRootHoist.shouldHoistToCanvasRoot`** on the nested
    inset-anchored ABSOLUTE clause (wave 34 "parity item", wave 35 B1;
-   `FixedHoist.swift:137-160`, pinned EXPECTED-DIVERGENT in
+   the "PARITY NOTE — A/B PENDING" block of `FixedHoist.split`'s doc
+   comment in `FixedHoist.swift`, pinned EXPECTED-DIVERGENT in
    `FixedHoistTests`). **Its stated blocker is FALSE on the current wire**
    (A10#4, A4#0): the comment says the extractor drops `body > div
    {position: relative}` for css-writing-modes available-size-00x, but the
@@ -2057,9 +2853,11 @@ platform; they are not folded into a rendering wave.
    geometry**, which is exactly the Android-only second-band offset above.
    Each side matches its OWN layout, which is the property that matters, but
    the divergence is UNMEASURED on device: a gate lane should diff the two
-   natives' 045/046 bands after the wave-50 gate; (b) `background-clip-content-box-002` iOS 0.9992 cF F: a
+   natives' 045/046 bands after the wave-50 gate. **CLOSED in tree (wave 52
+   lane L10, 7(g))**: the Kotlin share is now the Swift twin's fractional
+   `leftover / n` and both natives pixel-snap every rule rect; (b) `background-clip-content-box-002` iOS 0.9992 cF F: a
    decoded `.percent` flex-basis no nowrap path reads — likely free fix
-   when CSSFlexLayout honours percent; (c) iOS column-wrap stretch
+   when CSSFlexLayout honours percent — **LANDED (wave 52 lane L10, 7(g))**; (c) iOS column-wrap stretch
    injection (no corpus carrier yet); (d) wrap-reverse ordering both
    natives (pre-existing TODO, now load-bearing for the routing gates);
    (e) **css-gaps distribution defects — SPLIT into three different
@@ -2087,7 +2885,16 @@ platform; they are not folded into a rendering wave.
    defects at all** — all three platforms agree with each other at ≥ 0.995
    and fail the blank ref together (034 f 0.9458/0.9466/0.9466, 035 f
    0.9206/0.9220/0.9220). The instrument fix is a verified patch, deferred as
-   a CALIBRATION — see "Instrument decisions pending".
+   a CALIBRATION — see "Instrument decisions pending". **RE-FROZEN (wave 52
+   lane L12)**: on byte-identical captures (`wave52-calib`) 034 ×3 and 035 ×3
+   go f → P (0.987–0.992) and 033 web f → P, instrument-only; 033 natives
+   P → f as pre-registered; 036/037 rise to 0.991–0.996. At the closing gate
+   (`wave52-ship`) 034–037 ×3 all reach P 1.0000 (Fix A's frame on top);
+   `css-gaps/flex/flex-gap-decorations-033 ios f 0.94` / `android f 0.94` are
+   HONEST_FAIL — the re-frozen ref paints the red / blue gap rules, the
+   captures paint none (`tools/titan/results/wave52-gate/cell-review.json`) —
+   the natives' missing zero-width-gap decorations are now this item's
+   runtime work (obligation 0(c)).
    **(e²) 006 is a writing-mode flex-axis defect, PRICED and declined.**
    `flex-gap-decorations-006` (natives f 0.8266 / f 0.8223, web P) has a
    `writing-mode: vertical-lr` container, so css-flexbox-1 §4 makes the flex
@@ -2111,13 +2918,56 @@ platform; they are not folded into a rendering wave.
    `css-writing-modes/forms/input-range-zero-inline-size` web P · iOS f
    0.9747 · Android f 0.9743). That trade is not worth taking blind: it
    belongs to a wave that OPENS with a gate.
-   **(e³) 027 stays open and unexplained**: all-three f 0.9012/0.9030/0.9085,
-   untracked until the retro (A10#10), not touched by the band rebuild (its
-   cross size is auto) and not an erased-ref victim; (f) **Compose
+   **(e³) ~~027 stays open and unexplained~~ CLOSED in wave 52 — the
+   mechanism is confirmed on device**: all-three f 0.9012 / 0.9030 / 0.9085
+   at wave51-fix → `wave52-ship css-gaps/flex/flex-gap-decorations-027 web P
+   1.0000` / ios P 0.9997 / android P 0.9991, FAITHFUL on all three (items
+   from x 68, the five column rules at x 118 / 178 / 238 / 298 / 358 as in
+   the reference). Two causes, both fixed: the canvases dropped the declared
+   body `margin-left` (lane L2 M1, 0(l′)) and both natives advanced past
+   negative main-axis margins by inner size (lane L10 M2/M3, 7(g) — the
+   Compose `FlexNowrapLine.Line`, unexecuted at lane time, ran here and on
+   008); (f) **Compose
    bare-number `FlexBasis` wire read as PERCENT — PORTED retro R2 (A7#0)**:
    the Swift rule (`FlexboxExtractor.swift:238-240`, bare `.double/.int` →
    percent) now has its Compose twin in `ItemPlacementExtractor` +
-   `FlexPercentBasisTest`; pending the gate.
+   `FlexPercentBasisTest`; pending the gate; (g) **css-gaps residuals
+   (wave 52 lane L10; `tools/titan/results/wave52-flex-nowrap-gaps/_note.md`):**
+   7(b) the iOS nowrap path resolves a percent flex-basis (content-box,
+   outer-size §9.7 — `CSSFlexMath.percentBasis` + L10's SwiftUI renderer
+   seam) — background-clip-content-box-002; M2 both natives advance by OUTER
+   size for negative main-axis margins (iOS `CSSFlexLayout` ungated; Compose
+   via the GATED `layout/flexbox/FlexNowrapLine.kt`, 2 carriers: 008 / 027)
+   and the gap anchors follow the painted box; M3 Compose overflowing
+   shrink-0 lines no longer squeeze (same gate, which refuses an RTL line);
+   7(a′) rule rects are pixel-snapped on both natives and the Kotlin band
+   share is fractional (045/046). 6(c): `fixtures/properties/effects/box-shadow-reach.json`
+   committed — the reach rows still need a device read. Open: 006
+   (declined), 6(e), 6(x²), the legacy Compose `FLEX_ROW` route (unpatched;
+   no gate carrier reaches it — inferred from the engine decision, not
+   traced). **Measured — the flips held; two of the mover predictions
+   MISSED**: `wave52-ship css-backgrounds/background-clip-content-box-002 ios
+   P 0.9992` (f 0.9992, the colour veto had failed it on 8 900 red px; now a
+   solid green square, ZERO red — FAITHFUL); `flex-gap-decorations-027` ios P
+   0.9997 / android P 0.9991 (f 0.903 / 0.9085; FAITHFUL — 7(e³));
+   `flex-gap-decorations-008 android P 0.999` (P 0.9646, predicted ≈0.9996);
+   `-045 ios` P 0.9931 → P 0.9996; no L10 cell lost. **Predicted `-046
+   android` to rise; measured P 0.996 → P 0.9947** (still P). **Predicted the
+   snap to move 024/029/030/034–037/050 by ≤ 0.0014; measured rises of
+   +0.0037 (029/030 natives) to +0.013 (035 natives, 0.987 → 1.0000 against
+   `wave52-calib`), 024 ×3 to 1.0000 and 050 ×3 to 0.9997–1.0000** — all
+   upward, and not separable here from L2's Fix A, which blanked the x
+   374–389 overrun strip on the same tests (034's review).
+   **Open (skeptic, not fixed; 0 corpus carriers each):** the RTL refusal's
+   wiring has no pin — the seam's and the hook's `LocalLayoutDirection` reads
+   can be replaced by `false` with every test green (V6/V7; the pure
+   `engages(…, rtl)` refusal IS pinned); iOS reads a bare-number percent
+   margin/padding as px (#2); the composable `Line`'s measure body is
+   unpinned (#3); only the `shrink` and `trigger` gate clauses are pinned
+   individually (#5); the gate's fit test ignores `box-sizing` (#6); non-px
+   main-axis margins contribute 0 to the iOS `outer` and to both paint shifts
+   with no breadcrumb while `MarginApplier` still paints them (#7); iOS M2
+   (ungated) was not examined for RTL; file sizes in 9(m).
 8. Vertical mechanism completion: multi-child balancing, clone-under-
    vertical, §8.3.1 horizontal collapse (wave-47 Z2 logged bails). ~~the
    upright intrinsic Int-overflow at ~2.1e9px summed advances~~ **DONE (wave
@@ -2356,7 +3206,27 @@ platform; they are not folded into a rendering wave.
    `tools/titan/results/retro-2026-09-04/excl-detail-wave49-final.out` and
    the wave49-final manifests; (m) file-size cleanups
    (`BackgroundImagePropertyParser.kt` 420 lines, `BackgroundImageExtractor.ts`
-   593, `TransformApplier.kt` 1008 after R1 — split lane).
+   593, `TransformApplier.kt` 1008 after R1 — split lane). **Wave 52 adds
+   (`wc -l` on the integrated tree, against CLAUDE.md's split-past-~300
+   rule):** Compose `borders/sides/BorderSideApplier.kt` **636** after L6's
+   T2 + R1 fix — split by value family (single strokes vs the double /
+   groove / ridge line plans); L2 `apps/android-harness/…/screenshot/UaBlockMargins.kt`
+   669 and Swift `spacing/ComposedRootStack.swift` 674; L3 Swift
+   `Renderer/FixedHoist.swift` 538; L9 `GreedyLineBreaker.swift` 566 / `.kt`
+   463 (move `Clamp` / `clampLines` / `clampHead` / `markedLine` /
+   `drawnClamp` into a `BlockEllipsisClamp` beside the breaker); L8
+   `table/TableBoxTree.kt` 533 / `.swift` 318; L10 `CSSFlexLayout.swift` 429
+   and `GapDecorationsPainter.swift` 303; L6 web `runtimes/web/src/renderer/NodeRenderer.ts`
+   432 and `tools/titan/counter-style-bake.mjs` 447; Compose
+   `spacing/ChUnitMetrics.kt` **350** after L8 (270) plus the closing-gate
+   fix aaf676c5 — split the horizontal advance probe and `fitSafePx` from the
+   vertical-metrics half. Past the ≤ 200 target, under 300: L3
+   `ContentsUnboxing.kt` 214 / `.swift` 206 and their tests 228 / 233; L7
+   `AbsposStaticAlignment.swift` 279 / `.kt` 209; L8
+   `VerticalTextFlowLayout.kt` 236; L10 `GapDecorationHook.kt` 222,
+   `GapDecorationBands.kt` 224; L2 `ComposedCanvasMarginTest.kt` 205; the
+   closing gate took `lists/ListItemMarkerGate.kt` / `.swift` to 214 / 216
+   (from 170 / 176) and `ChUnitMetricsTest.kt` to 264.
 10. **Corpus expansion — recommendation DECIDED, execution open** (wave-48
     W8 arithmetic): Option B — add css-shadow (A-pool 106), css-align
     (54), compositing (48) at depth-48 = +144 slots, +10% gate time,
@@ -2377,7 +3247,9 @@ platform; they are not folded into a rendering wave.
     picture. After the ref is re-frozen the three platforms disagree with
     EACH OTHER, which makes it a real render defect and actionable for the
     first time rather than an exclusion candidate. See queue 7(e¹) and
-    "Instrument decisions pending".
+    "Instrument decisions pending". **The calibration landed (wave 52 lane
+    L12)**: its ref is re-frozen; the cell stays f and is now actionable (the
+    web and Android captures wrap the 。).
 11. **Untracked native/web fails with named mechanisms** (A10#10 — named
     as deferred in corpus notes or commit bodies, never queued; all
     wave49-final, flat since wave47-final unless noted):
@@ -2388,9 +3260,11 @@ platform; they are not folded into a rendering wave.
     flip**: the 33 `" N"` runs come back and the canvas should collapse
     1990 → ≈959, while iOS keeps failing the same cell on the bold `<h2>` —
     which is 0(g)'s `UAElementFontRule` with no Compose twin. Watch it as a
-    mover, not as a flip; (b) `css-flexbox/align-items-007` natives f
-    0.9974/0.9966 cF (web P 0.9990) — the wave-44 honest loss with a real
-    colour divergence the flip's skeptic flagged; (c)
+    mover, not as a flip; (b) ~~`css-flexbox/align-items-007` natives f
+    0.9974/0.9966 cF — the red `<img>` painted over the abspos green~~
+    **DONE (wave 52 lane L2 T3, 0(l′))**: `wave52-ship
+    css-flexbox/align-items-007 ios P 0.9974` / `android P 0.9967`, FAITHFUL
+    (the positioned green box paints above the `<img>`, zero red); (c)
     `counter-style-at-rule/broken-symbols` now fails on BOTH natives (iOS
     0.9486, Android 0.9490; wave 41 recorded only the Android −1). **Both
     are predicted to FLIP by lane B4's autoclose (2(c²)) — an unclaimed +2
@@ -2409,7 +3283,56 @@ platform; they are not folded into a rendering wave.
     `runtimes/compose/src/test/.../core/variables/FontSizePercentageEmBasisTest.kt`
     (4 tests), verified 2026-09-05 — 96×96 → 192×192 box, predicted Android
     flip pending the gate; iOS 0.9990 P / web 1.0000 P must not move; 6
-    carriers, the other 4 score-excluded**); (g) the css-gaps cells in 7(e).
+    carriers, the other 4 score-excluded**); (g) the css-gaps cells in 7(e);
+    (h) **Wave-52 plan findings not staffed (PLAN §6), each with its brief —
+    census before staffing** (wave51-fix numbers). From
+    `tools/titan/results/wave52-plan/native-near-misses.md` §3.8 (predictions
+    §5, all speculative): **T8** inline-tag components boxed block-level —
+    `css-values/attr-style-sharing-1` ios/android f 0.9445/0.9447, `-3` f
+    0.9515/0.9513 (a text-bearing `<span>` with `BackgroundColor` and no
+    `Display` paints a full-width bar; 9 passing carriers in its census, and
+    the ref's same-line join stays unreproduced in a Column of roots);
+    **T9** LCH hue interpolation —
+    `css-images/gradient/gradient-{decreasing,increasing}-hue-lch` ios/android
+    (4 cells, f ≈0.958; Compose has no interpolation module, iOS has
+    `GradientInterpolation.swift` yet paints byte-close to Android —
+    mechanism unverified on iOS); **T10** anonymous table fixup, CSS 2.1
+    §17.2.1 — `css-tables/fixup-dynamic-anonymous-inline-table-001/-002`
+    ios/android + `fixup-dynamic-anonymous-table-001` ios (5 cells;
+    `TableBoxTree.{kt,swift}` classify only table → row-group → row → cell,
+    and the iOS 4-px gap is a whitespace run the same fixup must drop);
+    **T11** abspos `display: table` with `top: 0; bottom: 0; margin: auto`,
+    CSS 2.1 §10.6.4 — `css-position/position-absolute-center-007`
+    ios/android f 0.9451/0.9445 (natives stretch to 200;
+    `layout/position/AbsposInsetStretch.kt` owns the stretch); **T2-children**
+    a self-collapsing `height: 0` CHILD (CSS 2.1 §8.3.1) — Compose
+    `ComponentRenderer.kt` `SELF_COLLAPSE_HEIGHT_TYPES` treats a declared 0
+    as a floor and bails the plan, twin `MarginCollapseChildGates.swift` +
+    `MarginCollapsePlanner.swift`; 0 predicted flips
+    (`change-list-style-type-002` / `anonymous-table-cell-margin-collapsing`
+    thin) and it rewrites the S1–S12 pin table on both natives. PLAN §6 names
+    T10 / T11 wave-53 lanes. From
+    `tools/titan/results/wave52-plan/counters-and-multicol.md` §3/§4: **B**
+    `css-lists/counter-reset-reversed-list-item(-start)` web f 0.9369/0.9377
+    (natives P 0.999) — Chrome paints the UA disc on `<span
+    style="display: list-item">` because `::marker { content: none }` did not
+    reach the wave51-fix wire (no `pseudos.marker` bag; 10 gate tests carry a
+    `::marker` rule). Re-read at the wave-52 closing gate: the per-test IR
+    the gate extracted (vendored at
+    `tools/titan/results/wave52-gate/per-test-ir/css-lists/`, identical in
+    `wave52-final` and `wave52-ship`)
+    carries `pseudos.marker {content: none}` on 9 of 9 components of both
+    tests and web still fails (`wave52-ship
+    css-lists/counter-reset-reversed-list-item web f 0.938`, `-start` f
+    0.938) — the bag arrives, so the defect is its web consumer.
+    A second web defect there (two 20 px anonymous line boxes) has no
+    identified mechanism. **C**
+    `css-counter-styles/counter-style-at-rule/{override-in-shadow-dom,access-from-shadow-dom,shadow-dom-part}`
+    ×3 each (f 0.98 / 0.9925 / 0.9925): no `shadowRoot` / `attachShadow` in
+    `extract-fixture.mjs` or `post-load-extract.mjs` (grep) — the post-load
+    pass sizes the hosts but never walks their shadow trees; the fix walks
+    them with tree-scoped `@counter-style` names on top of L6 T7's author-rule
+    bake (2(e)).
 12. **Feature briefs that exist only in corpus notes** (A10#10): css-logical
     "residual is orthogonal-flow" + the "direction half" of orthogonal flow
     (corpus-v6-1/v6-2, W6 "deferred"); css-ruby / css-inline "briefs on
@@ -2461,67 +3384,174 @@ platform; they are not folded into a rendering wave.
   threshold — the per-cell cost tracks that count almost exactly (6.8 ms
   average over the 144 `css-tables` cells, 35 ms worst there, 985 ms on the
   390×9470 `text-decoration-inset-025` Android capture).
-- **The blank-capture guard — DECIDE IT, and key it on UNIFORM COLOUR, not
-  on alpha.** There is no blank-capture guard anywhere in `tools/` today: a
-  composed capture of a WHITE-canvas document with no ink in it is scored
-  like any other render, and the only place the shape is even mentioned is
-  `inject-wpt-block.mjs`'s `computeColorComposite` comment, which EXCUSES it
-  ("labDeltaE is null for degenerate pairs"). The check that can be made to
-  fail, and the population that proves it: **42 wave49-final captures are a
-  single uniform colour against a reference that CARRIES INK and are all
-  still scored**, with scores from 0.0001 to **0.9959**
-  (`tools/titan/results/wave50-S6/blank-capture-vs-inked-ref.json` —
-  notable single-platform rows: `counter-cjk-decimal` Android 0.9407,
-  `attr-style-sharing-4` Android 0.9959, `attr-notype-fallback` Android
-  0.9584, `clip-path-inset-round-rendering` iOS 0.7483,
-  `broken-column-rule-1` iOS 0.9752,
-  `composited-under-rotateY-180deg-preserve-3d` iOS+Android 0.9565). **The
-  alpha-only predicate finds exactly ONE** — `text-decoration-inset-025`
-  Android, the only fully transparent capture among all 4305
-  (`tools/titan/results/wave50-B5/blank-captures.json`, queue 1(c)) — while
-  the uniform-colour predicate finds forty-two. Ship it as a CAPTURE FAILURE
-  in the exit-7 family, not as a score, and mutation-prove it against those
-  42 rows. **It does NOT address the 21 blank-vs-blank PASS cells** — those
-  are a test that cannot discriminate, queue 0(n) — and conflating the two
-  would decide 0(n) silently.
-- **The erased-reference body background — a CALIBRATION, not a render
-  change** (wave 50, lane B10; the erasure verified from the frozen bytes by
-  S6-09 / S6-10). `capture-browser-ref.mjs`'s `canvasFrameCss()` injects
-  `:where(html, body) { …; background: #FFFFFF }`; canvas propagation already
-  paints the page white from the ROOT's background, so the BODY half
-  additionally paints an opaque box in the body's own layer and CSS 2.1
-  Appendix E buries every `z-index: -1` body child under it. The fix —
-  `tools/titan/results/wave50-B10/capture-browser-ref-body-background.patch`,
-  `git apply --check` verified, applied/exercised/reverted in-lane — moves
-  `background` off the body half and keeps it on `:where(html)`, where canvas
-  propagation reads it, and replaces the now-wrong "background legitimately
-  stays on both" note with the measured account. **Scope, S6-verified**: 42
-  of the 8088 `*-ref.html` files in `tools/wpt/css` declare a negative
-  z-index; **8** are the match target of a scored wave49-final test (24
-  cells, 10 failing) and **6 of those 8 are erased** (the other two are
-  css-view-transitions pairs whose negative z-index sits inside a
-  `::view-transition` stacking context). Carry B10's own blind spot forward:
-  `zneg-census.json`'s `unresolvedMatchLink` is **33** — 33 scored tests have
-  a `rel=match` link the census could not resolve — **so 42 is a LOWER
-  BOUND**; and B10's "28 of the 42 rasterise differently under the fix" is a
-  live-browser measurement S6 could not re-run and calls UNVERIFIABLE.
-  Because this is an instrument change the standing rule applies in full:
-  **bump `CANVAS_REV`, re-freeze the affected refs, and adjudicate the
-  resulting moves with the Calibration-gate recipe** (sha1 every capture PNG
-  against the previous gate; identical bytes = instrument-only, different
-  bytes = a render change). Expected moves, stated up front so they cannot be
-  re-narrated afterwards: 034 and 035 **f → P on all three (+6)**; 036 and
-  037 keep their verdicts while their scores rise; **033 web f → P (+1) and
-  both natives P → f (−2)**, which is the honest direction — they paint
-  nothing where Chromium paints 10 px rules in 0 px gaps, and suppressing it
-  would mean keeping a degenerate pass; `hanging-punctuation-block-bound-001`
-  stays `f` and becomes ACTIONABLE for the first time, because its three
-  platforms disagree with EACH OTHER at 0.70–0.84 (queue 10). Net on the 18
-  cells: **+5 verdicts, −2 verdicts, and one previously unreachable defect
-  made visible.** Regenerate the scope with
-  `node tools/titan/results/wave50-B10/census.mjs`; re-measure the erasure
-  with `zneg-ab-probe.mjs` and the patch's byte-level blast radius with
-  `canvas-css-ab.mjs`.
+- ~~**The blank-capture guard — DECIDE IT, and key it on UNIFORM COLOUR, not
+  on alpha.**~~ **DECIDED AND EXECUTED (wave 52, lane L12-A): a TRIAGE STAMP
+  plus a loud listing; scoring UNCHANGED; the exit-7 capture-failure form
+  DECLINED, reason recorded.** The predicate is keyed on UNIFORM COLOUR as
+  this item required: `inject-wpt-block.mjs` stamps `captureUniform:
+  [r,g,b,a] | null` on every `<platform>-ref` diff, computed on the raw
+  decoded capture BEFORE `padToCanvas` (so the one fully transparent
+  capture, `text-decoration-inset-025` Android, and a solid-white or
+  solid-green one are the same class), plus `blankCaptureVsInkedRef`
+  (`computeBlankCaptureVsInkedRef`: uniform capture ∧ ref `bCoveragePct ≥
+  WPT_PRESENCE_REF_MIN_PCT`), listed in the inject summary as
+  `blank-captures=<n>` and mutation-proved against the wave51-fix
+  population (`tools/titan/results/wave52-instrument-and-calibration/absence-only-census.wave51-fix.json`
+  `blankCaptureVsInkedRef`): 39 rows / 16 tests on the wave51-fix refs — 33
+  scored (all already failing via `presenceFailed`), 6 already excluded; a
+  uniform capture equal to a uniform full-bleed ref (olive / green
+  agreement) is excluded from the class by a third clause, a uniform capture
+  of a different colour (overlay-transition-backdrop: white vs green) is
+  kept; 45 under the re-frozen refs (+6 calc-in-media-queries red fallback
+  vs green) — and 43 at the closing gate, pre-registered as 45: L4's T5
+  un-blanked the two `composited-under-rotateY-180deg-preserve-3d` natives
+  (now P 1.0000; tripwire T-L12, `tools/titan/results/wave52-gate/tripwires-ship.txt`). (The plan's census,
+  `tools/titan/results/wave52-plan/absence-only-denominator.census.json`
+  `populations.blankCaptureVsInkedRef`, read 36 rows / 15 tests through an
+  unstated "ref not uniform" rule; the scored 33 are the same.)
+  `inject-wpt-block.mjs` also stamps `refUniform`. **Why not a CAPTURE
+  FAILURE in the exit-7 family:** (1) the sentence "there is no
+  blank-capture guard anywhere in `tools/` today" was wrong in substance —
+  there is none by that NAME, but every one of the 33 scored
+  blank-capture-vs-inked-ref cells ALREADY FAILS via `presenceFailed`
+  (`computePresenceFailed` in `inject-wpt-block.mjs`), so scoring is already
+  correct on this class; (2) these captures are MEASUREMENTS of runtime
+  defects, not pipeline failures — `composited-under-rotateY-180deg-preserve-3d`
+  iOS+Android (queue 0(c′), wave-52 lane L4 T5), `counter-cjk-decimal`
+  Android (a Compose paint bug fixed in wave 50 and counted as a GAIN) — and
+  an exit-7 guard would move them out of the denominator, so a fix prints as
+  NEWLY MEASURED instead of GAINED and the gate is permanently red on 33
+  known cells in 14 tests, partly undiagnosed (queue 1(c)'s 9470-px blow-up
+  among them): the pre-excused shape in reverse. Decision rule going
+  forward: uniform-capture cells stay SCORED and FAILING; the stamp is for
+  triage and feeds the standing "excluded tests whose platforms disagree"
+  report. It does NOT address the blank-vs-blank PASS cells — those are
+  0(n), decided separately as the per-cell `absence-only` exclusion
+  (Decision A: `wptPass === true ∧ bCoveragePct < WPT_PRESENCE_REF_MIN_PCT`
+  → `scoreExcluded = 'absence-only'`; 19 cells / 7 tests in wave51-fix, web
+  7 / iOS 6 / Android 6, listed by name in
+  `tools/titan/results/wave52-instrument-and-calibration/_note.md` § Census
+  and, after the closing gate, in the v6.18 snapshot's `_note`). Evidence:
+  `tools/titan/results/wave52-plan/absence-only-denominator.md` §4 and the
+  census JSON beside it. **Open (skeptic,
+  `tools/titan/results/wave52-instrument-and-calibration/skeptic.md` §9):**
+  D1 nothing pins the `refUniform` → `computeBlankCaptureVsInkedRef` wiring
+  on either diff path (a regression would print `blank-captures=54` and put
+  the flag on three scored PASS cells — triage only); D7 the
+  `inject-wpt-block.test.mjs` banner calls the font-gate-order mutation "M7"
+  where the lane's `mutations.json` names it M7a.
+- ~~**The erased-reference body background — a CALIBRATION, not a render
+  change**~~ **EXECUTED (wave 52, lane L12-B;
+  `tools/titan/results/wave52-instrument-and-calibration/_note.md`).** The
+  mechanism (wave 50 B10, S6-09 / S6-10): `canvasFrameCss()` injected
+  `background: #FFFFFF` on `:where(html, body)`, and the BODY half painted an
+  opaque box that CSS 2.1 Appendix E puts over every `z-index: -1` body child
+  and over an author root canvas. One `CANVAS_REV` bump, to
+  `white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin`
+  (`capture-browser-ref.mjs`; `inject-wpt-block.mjs` `LIVE_CANVAS_REV`, the
+  old rev appended to `KNOWN_STALE_CANVAS_REVS`): ROOTBG — B10's patch, the
+  canvas `background` on `:where(html)` only; UAMARGIN — page-padding Fix B,
+  `UA_BODY_CSS` (`margin: 8px; display: block; min-height: auto`) as a
+  separate style tag when the TEST declares a body margin and its REF does
+  not (`bodyDeclaresMargin`; 10 pairs fire). No runtime change. **Re-freeze:**
+  a byte-exact re-render of the frozen corpus is impossible on this host (994
+  of 1435 refs differ by 1–45 glyph-AA pixels under an UNCHANGED contract), so
+  the contract effect was measured by a same-session A/B — **23 refs move**:
+  B10's 6 erased refs and the 3 all-green refs as predicted, 7 of Fix B's 10
+  pairs (`initial-background-color` is in both the all-green and the Fix-B
+  sets), `css-tags-paint-order(-with-entry)` not at all, and **8 that the
+  plan's list did not name**, same mechanism, re-frozen too —
+  `css-display/display-contents-root-background`,
+  `css-display/display-contents-sharing-001`,
+  `css-position/position-{absolute,fixed}-root-element-{flex,grid}` (4),
+  `filter-effects/backdrop-filter-root-element`,
+  `css-view-transitions/column-span-during-transition-doesnt-skip` (revert
+  recipe in the note). The other 1412 refs were CLONED byte-identical into the
+  new slot (set digest `8c55b96b…` old = new; the old tree `617cb0b6…`
+  untouched; `tools/titan/results/wave52-instrument-and-calibration/refreeze-apply.post.json`);
+  the new tree is gitignored and holds
+  only the 30 gate sections' refs. B10's "28 of the 42 rasterise
+  differently", which S6 could not re-run, is reproduced
+  (`tools/titan/results/wave52-instrument-and-calibration/b10-rerasterise.mjs`).
+  **Calibration gate** (`wave52-calib` = the
+  `wave52-open` captures re-scored, inject only): 4305/4305 capture PNGs
+  byte-identical, 4217 cells unchanged, all 88 moved cells attributed (19
+  absence-only stamps + 69 re-frozen refs, 0 unattributed); `score-gate.mjs
+  wave52-open wave52-calib` = **13 gained / 8 lost / 0 newly measured / 19
+  unmeasured-now**, totals web 1211/1372, iOS 1084/1363, Android 1075/1363
+  (`tools/titan/results/wave52-instrument-and-calibration/score-gate.wave52-open.wave52-calib.txt`).
+  Gained, each PNG-checked:
+  `css-cascade/initial-background-color` ×3, 033 web, 034 ×3 and 035 ×3
+  (instrument-only — not L2's or L10's flips), `backdrop-filter-root-element`
+  ×3 (not predicted). Lost, all honest: 033 ios/android (pre-registered here),
+  `display-contents-root-background` ×3 (0(ac)) and
+  `column-span-during-transition-doesnt-skip` ×3 (0(ad)) — neither
+  pre-registered. Movers holding their verdict: masking
+  `{contentBox,paddingBox}-{1d,1e}` ×12 → 0.9997–1.0000 (degenerate →
+  honest); `s-11-1-1b-005` web P 0.9947 → 0.9658 (still P with NO black
+  square — a degenerate pass); `s-11-1-1b-006` web 0.9656 → 0.9923; 036/037
+  rise to 0.991–0.996; `hanging-punctuation-block-bound-001` stays f, now
+  actionable (queue 10). **Any future `CANVAS_REV` bump must clone the
+  unmoved refs as this one did**, or it attributes host glyph drift to the
+  contract. **Open (skeptic §9, note § Findings):**
+  `display-contents-sharing-001`'s ref renders this pipeline's injected
+  stylesheet TEXT (base64 fonts included — `* { display: contents }` un-hides
+  `<style>`) under both contracts, so its 3 cells (f ≈0.68) are measured
+  against a polluted ref — the fix (an id on the injected tag + `display:
+  none !important`) is a new instrument change with its own calibration; D2
+  the `capture-browser-ref.mjs` comment ("the two TEST-page bake paths …
+  snapshot GEOMETRY") omits `view-transition-bake.mjs`, which samples pixels
+  (exposure 0 by the skeptic's census); D5 `pageDeclaresBodyMargin` leaves
+  root-relative links unpinned and skips scheme hrefs (remote, `data:`)
+  silently although its doc comment says they are reported (exposure 0); D6
+  about ten bare statements in `pageDeclaresBodyMargin` /
+  `bodyDeclaresMargin` miss the every-line-comment rule; D8 the run's
+  `calib-logs/_status` lists 29 sections (css-masking ran separately a
+  minute earlier), so "30/30 rc 0" cannot be read off it.
+- **L6's `requires-script-mutation` tags for the seven VALID cssom setter
+  tests — DEFERRED by the orchestrator, not applied (wave 52); decide, then
+  execute or Park.** L6 (`tools/titan/results/wave52-counters-and-lists/_note.md`
+  §8; `tools/titan/results/wave52-counters-and-lists/census.json`
+  `T7_author_counter_style.scriptMutationWall`) asked to
+  tag `css/css-counter-styles/cssom/cssom-{additive-symbols,fallback,name,negative,pad,prefix-suffix,range}-setter.html`
+  in `tools/titan/wpt-not-applicable.mjs` (no owner; L6 named no mechanism,
+  and today's `RX.scriptDomMutation` does not match them). The tag is in
+  `inject-wpt-block.mjs` `EXTRACTION_WALL_TAGS`, which excludes a tagged
+  test only when post-load or structure extraction did NOT deliver it
+  (`applyNaScoreGate`: `return !delivered`). The tag also turns post-load
+  extraction ON for the seven: `post-load-extract.mjs`
+  `shouldPostLoadExtract` route 1 is `hasWallTag`, read from
+  `wpt-buckets.json`. wave51-fix's `postLoadExtracted=false` was measured
+  without the tag. So "21 scored cells leave, 13 of them passing" (additive
+  ×3, fallback ×3, name ×3, range ×3, negative web; 8 of L5's 18 watched
+  native cssom cells) holds only if that post-load pass fails to deliver. If
+  it delivers, the cells stay scored on re-extracted fixtures — which may
+  still carry the pre-script `@counter-style`: `inPageSerializer` ships the
+  cloned `head.innerHTML`, and a CSSOM descriptor setter does not rewrite a
+  `<style>` element's text (the counters brief already says the valid tests
+  "need post-load CSSOM serialisation"). Either way cells move in the same
+  gate as L5/L6's cssom work, so the movement would be unreadable
+  (`tools/titan/results/wave52-plan/PLAN.md` §10, "Deferred by the
+  orchestrator" — its "excludes unconditionally" is the error corrected
+  here; `tools/titan/results/wave52-plan/ORCHESTRATOR-TODO.md` §1d).
+  Decide: apply it after the wave-52 gate as its own instrument change, with
+  a full extract + capture run of the seven tests (NOT an inject-only
+  calibration — the fixtures can change), naming every cell that leaves the
+  denominator or moves (open each PNG first — a pass on the pre-script
+  document may be honest), or Park it: the bake already names the wall in
+  `lossyReasons`.
+- **Coverage ratio on dark ink — a decision, not a fix** (wave-52 brief
+  `tools/titan/results/wave52-plan/native-near-misses.md` §3.9; not staffed,
+  PLAN §6). Where native and reference line boxes coincide to the pixel, the
+  natives carry 5–10 % less ink at threshold 8 (Android glyphs have almost no
+  grey AA fringe), and the coverage-ratio veto's 2.0 bar then DECIDES 9
+  verdicts where web PASSES the same render (e.g.
+  `anchor-position-multicol-nested-001` web P at ratio 1.98 vs natives f at
+  2.03 / 2.08; `nth-child-of-attr-largedom` android ratio 2.04 at threshold 8,
+  1.17 at threshold 64). Proposal: compute the ratio on ink > 64/channel, or
+  dilate both masks by 1 px; either moves those 9 without touching a runtime.
+  Obligation #4 applies: pre-register the rule and measure it on the
+  committed sample before arming it.
 - **Threshold study C4 is half-flipped** (A10#6). `docs/STATUS.md`'s
   heading **"PROPOSAL (not flipped here — every recorded number moves)"**
   (cited by name, not line: STATUS grows every wave) derived SSIM ≥0.95
@@ -2586,7 +3616,7 @@ platform; they are not folded into a rendering wave.
   natives 2026-09-05** (P2a Compose, P2b Swift, coordinated): TableBoxTree
   only ever mentioned it in doc comments, the css-tables border-conflict
   cells pass by another path, and its 110 Kotlin + Swift test references
-  pinned dead weight. `TableBoxTree.kt:128` / `TableBoxTree.swift:114` and
+  pinned dead weight. `TableBoxTree.kt:128` / `TableBoxTree.swift:117` and
   `TableUaDisplayTest.kt:80` / `TableUaDisplayTests.swift:63` record the
   deletion; the table trees are now 6 Compose · 4 SwiftUI · 16 web source
   files (`tools/titan/wpt-not-applicable.mjs` `requires-table-layout`
@@ -2680,13 +3710,71 @@ platform; they are not folded into a rendering wave.
   RE-VERIFIED 2026-09-04, exit 65). Repro: `xcodebuild -target
   StyleConverterTest -sdk iphonesimulator -arch arm64` (Release, `-O
   -enable-default-cmo`, Swift 6.3.3) → "While silgen emitFunction for
-  'styledContent(now:)'" (`Renderer/ComponentRenderer.swift:869` today;
-  STATUS quotes :835, only the line drifted) — the deep nested
+  'styledContent(now:)'" (`Renderer/ComponentRenderer.swift`
+  `styledContent(now:)` — cite by symbol; the line drifts every wave, and
+  STATUS still quotes :835) — the deep nested
   `struct_type` chain of Applier types tips the optimizer over.
   Workaround, already what `test-all.sh` passes: `-configuration Debug`
   (`-Onone -disable-cmo`, ~20 s). A CI Release build or a ship would hit
   it cold. Fix direction (STATUS "Known-broken: iOS harness cold build"):
-  break the Applier modifier-chain type nesting.
+  break the Applier modifier-chain type nesting. Wave 52: lane L2 hit the
+  same SILGen crash in `styledContent(now:)` on a Release build of the
+  harness target while
+  other lanes' seams were transiently applied; Debug builds succeed
+  (`tools/titan/results/wave52-composed-canvas/_note.md` §6).
+- **The ios-harness XCTest scheme cannot run on this host** (wave-52 sweep,
+  2026-10-05): Xcode 26.6 (17F113) reports "iOS 26.5 is not installed" — the
+  installed simulator runtimes are iOS 26.0 / 26.2 (CoreSimulator volumes
+  `iOS_23A8464`, `iOS_23C54`) — so `xcodebuild test -scheme
+  StyleConverterTestTests` exits 70. The harness app builds, and the test
+  bundle compiles by target (`-target StyleConverterTestTests -sdk
+  iphonesimulator`; 30 test functions under
+  `apps/ios-harness/StyleConverterTestTests/`, the count CLAUDE.md's table
+  carries). Remedy is a host action — install the platform in Xcode ›
+  Settings › Components — not a code change; until then those tests are
+  compile-checked only.
+- **`tools/visual/smoke.sh` still hardcodes port 3000 in its web tiers**
+  (Tier 5 interaction states, Tier 11 a11y audit): `start_vite` runs `npm run
+  dev` (`apps/web-harness/vite.config.ts` `server.port: 3000`) and polls
+  `http://localhost:3000/`, and `tools/visual/interaction-states.mjs` /
+  `a11y-audit.mjs` default `WEB_PORT` to `'3000'`; smoke neither sources
+  `tools/visual/web-port-guard.sh` nor exports `WEB_PORT`. On 2026-10-05 a
+  developer's unrelated server on :3000 made Tier 5/11 fail with that
+  server's 404s. A false red, not destructive: smoke kills only its own
+  process group, and the capture scripts never kill a foreign listener
+  (Operational recipes, port guard). Fix: thread the chosen port through the
+  smoke tiers — pick a free one (`wpg_free_port`, or honour `WEB_PORT`),
+  start vite on it, poll it, export `WEB_PORT` to both tiers.
+- **Two host-wide stops remain in the gate path.** The emulator and
+  test-browser half is FIXED (commit 20acb531): `tools/titan/gate-driver.sh`'s
+  `stop_our_processes`, `reprovision_android` and teardown go through
+  `tools/titan/own-processes.sh` (`kill_own_emulators` — only the pids
+  `provision-devices.sh` recorded in `emulator-pids`, and only while their
+  command line is still an emulator; `kill_own_test_browsers` — only
+  Chrome-for-Testing whose working directory is inside this checkout),
+  pinned by `tools/titan/own-processes.test.mjs` with real throwaway
+  processes, and exercised on device by `wave52-probe` / `-probe2` /
+  `-probe3` (provisioning, 17 sections, teardown) and the gate of record
+  `wave52-ship`. RESIDUAL: (1) `stop_our_processes` still runs `./gradlew
+  --stop` in both build roots, which stops every Gradle daemon of that
+  Gradle version for the user — another checkout's build included; (2) on
+  an `adb devices` timeout `section-runner.sh` (`_android_candidates`, inside
+  the gate) and `provision-devices.sh` (`_adb_devices`) run `kill-server`
+  then `pkill -9 -x adb` — every adb process on the host, other sessions'
+  clients included, not just the wedged shared server (fix direction,
+  untested: kill only the server's listener on tcp:5037 when `kill-server`
+  times out; for Gradle, stop only daemons whose working directory is this
+  checkout, or none and let the quiet-host check report them).
+- **`BackgroundImageURLTests.testPercentEncodedDataURIDecodes` is
+  load-sensitive** (`runtimes/swiftui/Tests/StyleConverterRuntimeTests/BackgroundImageURLTests.swift`):
+  it asserts cache IDENTITY (`BackgroundURLImageResolver.image(for: uri) ===
+  img`), and the resolver's cache is an `NSCache`
+  (`StyleEngine/background/BackgroundURLImage.swift`), which may evict under
+  memory pressure. It failed 1 of 2 full Catalyst runs on 2026-10-05 with
+  the host loaded and passed on the immediate re-run (2147 / 2147). Not a
+  render defect; a red sweep on a busy host. Fix: assert equality of the
+  decoded pixels / size instead of identity, or pin the cache behaviour
+  separately with an eviction-free cache in the test.
 
 ## Operational recipes (hard-won; read before gating)
 
@@ -2725,9 +3813,17 @@ platform; they are not folded into a rendering wave.
   `gained` / `lost` / `movers` / **NEWLY MEASURED** / `unmeasured-now` as
   five disjoint lists. **Validated on history: `wave48-final` →
   `wave49-final` reproduces corpus-v6.15's +32 / 0 exactly.**
-  **The preconditions are still yours, not the driver's**: stop our
-  processes first (`pkill -f qemu-system; pkill -f "Chrome for Testing";
-  ./gradlew --stop`), close the browsers, and prune disk (the APFS
+  **The preconditions are still yours, not the driver's**: of emulators and
+  test browsers, the driver stops only those this checkout started
+  (`stop_our_processes` → `tools/titan/own-processes.sh`: the recorded pool
+  emulators, test browsers whose working directory is inside this checkout)
+  and names any other, which stays up and counts toward the quiet-host
+  load / memory check (that check refuses the gate only when either crosses
+  its threshold); it
+  still runs `./gradlew --stop` in both build roots, which is host-wide for
+  that Gradle version (Known-broken). Close another session's emulator or
+  browser through its owner, never by a host-wide pkill (standing
+  constraint); close the browsers, and prune disk (the APFS
   `tmutil thinlocalsnapshots` step, and `xcrun simctl delete unavailable` +
   deleting every Shutdown sim except the seed) — see "Gate on a quiet host"
   below, which is the 17-attempt lesson the driver enforces but cannot
@@ -2735,7 +3831,9 @@ platform; they are not folded into a rendering wave.
   What `--gate-set` buys (retro A12#3): one child run per line of
   `tools/visual/gate-fixtures.txt` — visual-test, composition-test,
   filter-sepia-amounts, nested-transforms, radius-overflow-transform,
-  blend-isolation, opacity-blend — so every fixture-scoped ledger line and
+  transform-abspos-pivot, blend-isolation, opacity-blend, all-then-color
+  (nine since wave 52 added `all-then-color`; `transform-abspos-pivot` is
+  the retro's) — so every fixture-scoped ledger line and
   every `_expect.waive` is actually exercised and CAN go stale; a fixture
   with no committed baselines runs gate-only until `UPDATE_BASELINE=1
   ./test-all.sh <fixture>` seeds it; the first non-zero child exit is
@@ -2774,6 +3872,98 @@ platform; they are not folded into a rendering wave.
     PASSING cells; post-load bailed 49× and declined 9× in that same run, so
     bail-to-static is live and an IR census is never a safe proxy for a
     static-path change.
+- **Seam integration is one ordered, scripted pass** (wave 52). Lanes
+  verify a seam patch under a per-file lock directory (`mkdir
+  tools/titan/runs/<wave>-lock/<basename>` → sha256 → apply → focused suites
+  → `git show HEAD:<path> >` → sha256 equal → `rmdir`; arm the release only
+  after your own `mkdir` succeeded — a bare trailing `rmdir` once removed
+  another lane's live lock, `tools/titan/results/wave52-failure-ink/_note.md`
+  §8). The orchestrator then applies every patch with
+  `tools/titan/results/wave52-plan/integrate-seams.sh` (35 patches in the
+  plan's landing order; `git apply --check`, then `git apply`, the first
+  failure stops the run). `--dry-run` replays in a throwaway worktree and
+  proves APPLY, not compile — untracked new files are absent there — so
+  build and sweep the integrated tree afterwards.
+- **Wide lane fan-outs are FILE-DRIVEN, RESUMABLE and run on opus** (wave
+  52; this supersedes the "overrides only to dead lanes" clause of
+  "Limit-killed workflow lanes" below). Three fan-outs died on the session
+  usage limit mid-run. Each lane writes
+  `tools/titan/results/<wave>-<lane>/_note.md` ending in a `STATUS:` line
+  (`COMPLETE`, or `PARTIAL — <what is missing>`), and a relaunch skips every
+  lane whose note says COMPLETE; a resumed lane still opens with `git status`
+  / `git diff` on its owned paths. (`.claude/skills/wave/SKILL.md` "Phase 2 —
+  builder lanes" states the same rule since the wave-52 ship.)
+- **The session scratchpad (under /private/tmp) is purged after about three
+  days** — every durable artifact (notes, censuses, replay scripts, seam
+  patches, verification logs) goes under `tools/titan/results/<wave>-<lane>/`
+  in the repo the moment it exists. Wave 52's L5 lost its whole extractor
+  implementation to a purge and rebuilt it from its surviving pins
+  (`tools/titan/results/wave52-extractor-cascade/_note.md` § Resume record).
+  The scratchpad is also SHARED by every lane of a session: give each lane a
+  private subdirectory (L3 collided with another lane's derived-data
+  directory under a generic name — `tools/titan/results/wave52-failure-ink/_note.md`
+  §8).
+- **The vite port guard: capture scripts never kill a foreign listener on
+  their web port** (wave 52; `tools/visual/web-port-guard.sh`, sourced by
+  `test-all.sh`, `tools/titan/section-runner.sh` and
+  `tools/visual/probe-text-metrics.sh`; pinned by
+  `web-port-guard.test.mjs` with real throwaway listeners): only a vite dev
+  server whose working directory is inside THIS checkout is killed on a
+  port; a foreign holder is named and left alone, and `test-all.sh` moves to
+  a free port in 3300–3399 (exit 2 when `WEB_PORT` was set explicitly).
+  `smoke.sh` is not port-aware yet — Known-broken. **The gate follows the
+  same rule since commit 20acb531**: `tools/titan/gate-driver.sh`
+  (`stop_our_processes`, `reprovision_android`, teardown) stops emulators and
+  test browsers only through `tools/titan/own-processes.sh` (standing
+  constraint); its residual host-wide stops — `./gradlew --stop` and the
+  adb-timeout `pkill -9 -x adb` — are Known-broken.
+- **A gate launched from a background task needs an explicit 2-hour limit
+  and goes in TWO launches** (wave 52): the first `wave52-final` launch
+  inherited the background task's default limit and was cut ten minutes in,
+  two sections done; `tools/titan/gate-driver.sh <run-id> --resume` ran the
+  other 28 on the same installed builds
+  (`tools/titan/results/wave52-gate/build-hashes.txt`). The corpus alone
+  fills ~90 min on a quiet host, so launch `gate-driver.sh <run-id>
+  --skip-fixture-net` (limit 7200000 ms), then `rm -f
+  /tmp/titan-device-pool/provisioned-*` and `gate-driver.sh <run-id>
+  --skip-corpus` for the fixture net.
+- **Nothing a running gate executes or builds from is edited** (standing
+  constraint): a fix found while a gate or a device A/B is running is
+  written as a patch file (under `tools/titan/results/<wave>-gate/`) and
+  applied only when the device is idle — every section re-runs the
+  extractor, the converter (`./gradlew :converter:run`, rebuilt from the
+  working tree; `tools/titan/section-runner.sh`) and the vite web harness
+  from source, so an edit mid-gate silently splits one gate across two
+  trees.
+- **Probe, then ship** (wave 52's closing gate, `tools/titan/results/wave52-gate/_note.md`
+  §3–§4): when a closing gate forces a fix, do NOT spend the full gate on
+  it first. Run only the sections that hold the fix's carriers
+  (`gate-driver.sh <probe-run> --sections a,b,… --skip-fixture-net`), prove
+  with `tools/titan/results/wave52-gate/control-check.mjs <pre-fix> <probe>`
+  that every capture outside the fix's carrier set is BYTE-IDENTICAL (it
+  knows each fix's reachable wire shape; it reports 0 changed on two
+  identical runs and 747 leaks across the lanes' own changes — it can
+  fail), read the cells with `ab-diff.mjs <pre-fix> <probe>`, and only then
+  run the full gate. Wave 52 needed three probes: the first fix lost
+  `block-ellipsis-023` / `-024` android, the second lost `ch-units-vrl-003`
+  / `-004` android — two thin passes each probe caught in about 15 minutes
+  (1(e)). A symlink assembly of the probes over the pre-fix sections
+  (`wave52-preview`) is the gate's expected content; the gate of record is
+  then verified against it cell by cell.
+- **The closing gate is adjudicated by rules written before it ran, in
+  code, and every flipped cell is LOOKED AT before a sentence about it is
+  written** (wave 52): `tools/titan/results/wave52-gate/adjudicate.mjs`
+  reads three `score-gate.mjs` JSONs (record, calibration, render) and
+  checks R1 lost ⊆ the pre-registered instrument-only list, R2 render lost
+  = 0, R3 / R4 every departure from the denominator named, R5 no missing
+  section or short column — exit 1 names the broken rule and every cell
+  (`adjudication.txt` is the failing first attempt). Then
+  `review-sheets.mjs` writes ref | before | after contact sheets for every
+  gained and lost cell, a reader labels each FAITHFUL / DEGENERATE /
+  HONEST_FAIL and every non-plain label plus every sixth plain one goes to a
+  second, adversarial reader (wave 52: 26 cells, two verdicts overturned —
+  `cell-review.json`), and only a FAITHFUL gain may be written as a fix. `tripwires.mjs` reads the lanes' mechanism checks;
+  `cells.mjs '<regex>' <run> …` looks any cell up across runs.
 - **Twin-picture flip claims have a measured noise floor** (wave-50 skeptic
   S7, over the 1366 wave49-final cells scored on all three platforms). Raw
   SSIM agreement between rasterisers: |iOS − Android| p50 0.0008 / p75
@@ -2891,7 +4081,11 @@ platform; they are not folded into a rendering wave.
   gate itself adds ~10 load (emulator ~4–5 cores of software GPU, vite,
   puppeteer, gradle) and ~4 GB RAM; on a 16 GB Mac with browsers open it
   swaps, and then EVERYTHING times out. Preconditions: our processes off
-  (`pkill -f qemu-system; pkill -f "Chrome for Testing"; ./gradlew --stop`),
+  (the driver's `stop_our_processes` stops the emulators and test browsers
+  this checkout started — `tools/titan/own-processes.sh`; any other is
+  named, left running and counted toward the load / memory check, which
+  refuses the gate when either crosses its threshold — never a kill; its
+  `./gradlew --stop` is still host-wide — Known-broken),
   idle 1-min load < 6, `vm_stat` free+inactive > 2 GB, ONE emulator
   (`--android 1 --ios 1`). Under swap the 50-min section watchdog is too
   tight (vite's per-section dependency re-optimisation alone took 20 min).
@@ -2904,7 +4098,9 @@ platform; they are not folded into a rendering wave.
   retried 30→60→120 s; a failed app restart marks the fixture instead of
   FATAL; `WANT_ANDROID`/`WANT_IOS` overridable; a boot poll bounded to 15 s.
   A leftover puppeteer "Chrome for Testing" fleet (19 processes, from lane
-  work) can hold GBs — kill it before any gate.
+  work) can hold GBs — the driver stops the ones whose working directory is
+  inside this checkout; a fleet left by another checkout is closed from
+  that checkout, never by a host-wide pkill.
   **All three `provision-devices.sh` budget loops are WALL-CLOCK now** (wave
   50; skeptic S1 found the orchestrator had converted one of three and left
   the other two counting sleeps): the emulator boot poll, the `pm path`
@@ -2916,7 +4112,9 @@ platform; they are not folded into a rendering wave.
   per-fixture commands, never `set -- $pair` loops.
 - **Limit-killed workflow lanes**: resume with
   `Workflow({scriptPath, resumeFromRunId})` — completed lanes replay from
-  cache; add per-lane `model:'opus'` overrides only to dead lanes. A
+  cache; add per-lane `model:'opus'` overrides only to dead lanes
+  (superseded wave 52: every wide fan-out runs on opus — see "Wide lane
+  fan-outs are FILE-DRIVEN …" above). A
   resumed lane's first act is `git status`/`git diff` on its OWNED paths:
   the killed attempt may have left partial edits or an un-restored
   mutation (retro R5 found one).
@@ -2933,12 +4131,16 @@ platform; they are not folded into a rendering wave.
   (`node --test`, whose count includes skipped tests), IR conformance —
   `doc-staleness-check.sh` derives the two harness counts since the retro
   (A8#4), so the README/CLAUDE/STATUS tables must carry their rows. The
-  ios-harness XCTest target (`StyleConverterTestTests`, project.yml) is
-  still run by nothing documented — `doc-staleness-check.sh:194-200` now
-  WARNS with its declared-test count rather than letting it pass silently,
-  and the retro added a file to it, so the count is growing untested. Wire
-  it into the tables (it needs a simulator) or delete the target at the P2
-  sweep; a warn is a placeholder, not a decision.
+  ios-harness XCTest target (`StyleConverterTestTests`, project.yml) has a
+  row in README/CLAUDE/STATUS since wave 52 (30 tests, needs a simulator;
+  the bundle compiles, but running it is blocked on this host —
+  Known-broken). `doc-staleness-check.sh:194-200` still only WARNS, with a
+  now-false "no documented sweep row runs it" message, and never compares
+  the count with the tables, so the "30" can drift silently. Next: replace
+  the warn with `check_suite_count "ios-harness" "$IOS_HARNESS_DECLS"
+  README.md CLAUDE.md docs/STATUS.md` (the count is grep-derived and needs
+  no simulator; the row's first cell carries the keyword, so
+  `doc_quotes_suite_count` matches it).
 - iOS capture knobs travel as `SIMCTL_CHILD_*`; `FORCE_STATE` has **no**
   `CAPTURE_` prefix.
 - Fixture authoring: `_expect` with shown arithmetic; solid colours

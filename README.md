@@ -209,11 +209,11 @@ the point.
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 551 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1361 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3384 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3393 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 159 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2143 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2147 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 321 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2256 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2261 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 30 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 

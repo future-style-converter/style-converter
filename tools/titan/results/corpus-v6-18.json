@@ -1,0 +1,703 @@
+{
+  "_snapshot": "corpus-v6.18",
+  "_note": "Wave 52 (2026-09-25 → 2026-10-06) — twelve builder lanes, one instrument re-freeze, and a closing gate that stopped the ship once: corpus-v6.18.\n\nHEADLINE. Run wave52-ship (tools/titan/gate-driver.sh, quiet host, commit aaf676c5, 2026-10-05 21:54 → 23:09 UTC for the 30 sections, then the fixture net): 30/30 sections, every column 48/48/48 (css-cascade 43/43/43) on the first attempt; fixture net exit 0 on all 9 gate fixtures. Per cell against wave51-fix (corpus-v6.17): web 1215/1379 → 1229/1372, iOS 1089/1369 → 1119/1362, Android 1080/1369 → 1111/1362 — 102 gained, 8 lost, 0 newly measured, 21 unmeasured-now, 295 movers at |Δ| ≥ 0.005 (`node tools/titan/score-gate.mjs wave51-fix wave52-ship --watch tools/titan/results/wave52-plan/watchlist.txt`). The run is byte-identical, capture for capture (4305/4305), to the preview assembled from the three probe runs and the first closing attempt, and identical cell for cell to it (4096/4096 at |Δ| < 0.0001).\n\nTHE INSTRUMENT MOVED FIRST, AND WAS CALIBRATED ON IDENTICAL CAPTURES (lane L12). CANVAS_REV white-black-ink-font-lh-imgpad-htmlpins → …-rootbg-uamargin: the canvas background sits on :where(html) only, and the UA body margin applies when the test declares a body margin and the reference does not; 1412 references cloned byte-identical, 23 re-rendered. The absence-only stamp (Decision A) takes a PASS against a reference with ink under the presence floor out of the denominator — it cannot discriminate — while a FAIL there stays a measurement. wave52-calib (the wave-51 captures re-scored, 4305/4305 capture hashes identical): 13 gained, 8 lost, 0 newly measured, 19 unmeasured-now — all pre-registered in PLAN.md §10 before the closing gate ran. The 13 instrument-only gains: css-cascade/initial-background-color ×3 (the reference was the artefact: the capture is one solid green), css-gaps/flex/flex-gap-decorations-033 web, -034 ×3, -035 ×3, filter-effects/backdrop-filter-root-element ×3. The 8 instrument-only losses are honest fails against the corrected references (every one looked at — cell-review.json): css-display/display-contents-root-background ×3 (P ≈1.0 → f 0.534–0.5355: a degenerate pass became an honest fail; the natives and web paint white where the reference is green), css-gaps/flex/flex-gap-decorations-033 ios + android (1.0 → 0.94), css-view-transitions/column-span-during-transition-doesnt-skip ×3 (0.9879 → 0.9453). The 19 absence-only cells (7 tests): background-color-transparent-animation-in-body ×3, background-color-animation-with-zero-alpha ×3, scope-implicit-crash-print ×3, flexbox_inline-abspos ×3, gradient-refcrash ×3, backface-visibility-hidden-006 ×3, animation-name-ua-prefix web; plus L6's adjudication A takes css3-counter-styles-008 ios + android out (native font parity) — 21 in all.\n\nWHAT THE RENDER LANES DID (wave52-calib → wave52-ship, instrument held fixed): 89 gained (web 18 · iOS 35 · Android 36), 0 lost, 0 newly measured. 91 of the 102 gains are FAITHFUL to the reference and 11 are DEGENERATE — they pass and the picture does not earn it; they are recorded under perCellDiff.degenerateGains and queued in docs/BACKLOG.md, never claimed as fixes: anchor-position-multicol-007 android, contain-inline-size-bfc-floats-001 ios + android, counter-suffix ios + android, hyphens-out-of-flow-001 / -002 and hyphens-span-001 android, CSS2/css21-errata/s-11-1-1b-006 ios + android, and backdrop-filter-basic-blur ios (ring-fenced; reported plainly: it rose through L2's generic frame clip, and its filter boxes sit 24 px right of the reference).\n\nTHE CLOSING GATE STOPPED THE SHIP ONCE. The first attempt (wave52-final, commit 308d11f0) lost 13 cells: the eight pre-registered ones and FIVE outside the list — css-lists/counter-reset-reversed-nested ios + android, css-text/hyphens/hyphens-manual-011 / -012 / -manual-inline-011 android (adjudication.txt: rules R1 and R2 failed). Both causes were older than the wave. (1) Android measured the `ch` unit with a plain Paint (advances hinted to whole pixels) through Paint.measureText (Math.ceil of the run): 19 for a 19.2-px '0' at 32 px monospace, so a `10ch` box was 190 px around the reference's 192 and held nine glyphs — L9's soft-hyphen pre-break, correct for that box, broke one opportunity early; 13 for Inter's 12.6-px '0' at 20 px, so every `5ch` box of ch-units-vrl-005..008 was 65 px against 63. Fixed at the root (ChUnitMetrics: linear sub-pixel flags + getRunAdvance; fitSafePx rounds a ch length UP to a whole device pixel because Compose's round-to-nearest put a `32ch` box at 655 device px under a 655.2-px line — and leaves a length already on a pixel alone, because adding one there cost ch-units-vrl-003/-004 their pass on the second probe). (2) Both natives painted a native marker on an <li> whose authored display is `block`; L6's outside-marker hang only moved that stray `1.`…`5.`. Fixed at the root (ListItemMarkerGate.displayTakesMarkerAway on both natives). Three probe runs of the affected sections, each with a byte-identity control (control-check.mjs: web 0 captures changed, iOS only the five <li> documents, Android only the `ch` carriers), then the full gate of record. Against the first attempt the fixed build gains hyphens-manual-011 / -012 / -manual-inline-011, hyphens-auto-010, hyphens-punctuation-001, hyphens-span-001 android and counter-reset-reversed-nested ios + android, and loses nothing; counter-reset-reversed-nested is still a wrong picture (the extractor flattens the nested list) and hyphens-span-001 is degenerate (no hyphen glyph).\n\nPREDICTION RECORD. Lanes predicted roughly +19 web / +27 iOS / +26 Android (HIGH / MED-HIGH); measured +18 / +35 / +36 render gains. The watchlist read-out is in tools/titan/results/wave52-gate/score-ship.txt; the misses and the degenerate gains are itemised in docs/BACKLOG.md and docs/STATUS.md. The lanes' mechanism tripwires (tripwires-ship.txt): frame-ink overrun-right 208 → 0 and overrun-left 84 → 1 (one pixel, backdrop-filter-clip-rect-2 android, cell unchanged at P 0.9981); the frame ring stamped on exactly the four fractional-box tests; absence-only 19, blank-captures 45 → 43 (L4 un-blanked the two composited-under-rotateY-180deg natives); L4 b″ moved nothing (four Android captures byte-identical to the opening gate); L6's orange rows at 161–163 / 171–175.\n\nDEVICE A/Bs (each run records the installed base.apk sha1 / .app digest against the build it tested — build-hashes.txt; read-outs ab-t5.txt, ab-ma.txt, ab-f1.txt in tools/titan/results/wave52-gate/, exclude arm vs the gate of record): t5 — L6's outside-marker hang is what flipped counter-suffix ios f 0.9285 → P 0.9802 and android f 0.9030 → P 0.9547 (both degenerate: the RTL lists still have no marker), moved 18 more list cells up and 2 failing ones down, no flip across the bar. ma — L8's Inter measuring face is what flipped hyphens-auto-last-word-001 ios f 0.9032 → P 0.9991 and, with the closing ch fix present in both arms, hyphens-punctuation-001 / -out-of-flow-001 / -002 / -span-001 android; it costs hyphens-manual-inline-012 android −0.010 and ch-units-vrl-003/-004 −0.003 on both natives (passing in both arms). f1 — L9's hanging-punctuation fold is confined to its one carrier (94 of 96 css-text native cells identical) and moved hanging-punctuation-inline-001 ios P 0.9756 → P 0.9555, android f 0.9495 → f 0.9452; KEPT as the CSS-correct fold (no flip either way), deviating from the lane's drop rule — docs/BACKLOG.md 4(f).\n\nHARNESS. The capture scripts no longer kill a process this checkout did not start: test-all.sh, section-runner.sh and probe-text-metrics.sh free their web port only of this checkout's own vite (web-port-guard.sh; a foreign listener is named and the run moves to 3300–3399), and gate-driver.sh stops only the emulators provision-devices.sh recorded and the test browsers started from this checkout (own-processes.sh). Found because a developer's own server was listening on :3000 while the wave was being verified. Still host-wide, queued: `./gradlew --stop` and `pkill -9 -x adb`.\n\nSUITES on the shipped tree: converter 551 · web runtime 1361 · web-harness 321 · compose 3393 · android-harness 159 · swiftui 2147 · tooling 2261 · IR conformance valid on all four codebases. Full record: tools/titan/results/wave52-gate/_note.md (opening gate, the three probes, the review of every flipped cell); lanes under tools/titan/results/wave52-*/; plan and seam registry under tools/titan/results/wave52-plan/.",
+  "artifact": "tools/titan/runs/wave52-ship (gitignored)",
+  "wptRef": "9b5435e55e0b54a6cd09c1c563861eb3c999cef1",
+  "devSha": "5d9ed628+wave52",
+  "date": "2026-10-05",
+  "bucket": "A",
+  "passThreshold": 0.95,
+  "criterion": "ssim>=0.95 OR wptFuzzyMatch, VETOED by semanticPresence + coverage-RATIO (max/min>2) + colorDivergent-with-dE>=2.3 + extraction-wall exclusion + post-load/structure re-admission (corpus-v5.0 gate) + ref-unachievable exclusion (v5.4) + per-platform native-font-parity exclusion (v5.5) + harness-overhaul gate contract (exits 3/4/5/6; pixelmatch 0.02+AA; fuzzy in WPT-native units) + per-cell absence-only exclusion (v6.18, wave 52 L12 Decision A: a PASS against a reference with ink under the presence floor is undiscriminating and leaves the denominator — inject-wpt-block.mjs isAbsenceOnly / applyAbsenceOnlyGate; a FAIL there is still a measurement and stays)",
+  "sampling": "30 sections x 48 bucket-A tests (depth-48)",
+  "canvasBoundary": "white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin (v6.18, wave 52 L12: the canvas background sits on :where(html) only, and the UA body margin is applied when the test declares a body margin and the reference does not; 23 references re-rendered, 1412 cloned byte-identical)",
+  "totals": {
+    "web": {
+      "passing": 1229,
+      "measured": 1372
+    },
+    "ios": {
+      "passing": 1119,
+      "measured": 1362
+    },
+    "android": {
+      "passing": 1111,
+      "measured": 1362
+    }
+  },
+  "sections": {
+    "CSS2": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 47
+      },
+      "android": {
+        "passing": 41,
+        "measured": 47
+      }
+    },
+    "css-anchor-position": {
+      "web": {
+        "passing": 30,
+        "measured": 32
+      },
+      "ios": {
+        "passing": 24,
+        "measured": 32
+      },
+      "android": {
+        "passing": 27,
+        "measured": 32
+      }
+    },
+    "css-backgrounds": {
+      "web": {
+        "passing": 24,
+        "measured": 29
+      },
+      "ios": {
+        "passing": 24,
+        "measured": 29
+      },
+      "android": {
+        "passing": 24,
+        "measured": 29
+      }
+    },
+    "css-break": {
+      "web": {
+        "passing": 37,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 29,
+        "measured": 48
+      },
+      "android": {
+        "passing": 31,
+        "measured": 48
+      }
+    },
+    "css-cascade": {
+      "web": {
+        "passing": 36,
+        "measured": 41
+      },
+      "ios": {
+        "passing": 35,
+        "measured": 41
+      },
+      "android": {
+        "passing": 36,
+        "measured": 41
+      }
+    },
+    "css-color": {
+      "web": {
+        "passing": 43,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 43,
+        "measured": 48
+      },
+      "android": {
+        "passing": 44,
+        "measured": 48
+      }
+    },
+    "css-contain": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 48
+      },
+      "android": {
+        "passing": 38,
+        "measured": 48
+      }
+    },
+    "css-counter-styles": {
+      "web": {
+        "passing": 40,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 28,
+        "measured": 37
+      },
+      "android": {
+        "passing": 28,
+        "measured": 37
+      }
+    },
+    "css-display": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 47
+      },
+      "android": {
+        "passing": 40,
+        "measured": 47
+      }
+    },
+    "css-flexbox": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 45,
+        "measured": 47
+      },
+      "android": {
+        "passing": 45,
+        "measured": 47
+      }
+    },
+    "css-gaps": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 46,
+        "measured": 48
+      },
+      "android": {
+        "passing": 46,
+        "measured": 48
+      }
+    },
+    "css-grid": {
+      "web": {
+        "passing": 48,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 48
+      },
+      "android": {
+        "passing": 47,
+        "measured": 48
+      }
+    },
+    "css-images": {
+      "web": {
+        "passing": 43,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 35,
+        "measured": 47
+      },
+      "android": {
+        "passing": 35,
+        "measured": 47
+      }
+    },
+    "css-lists": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-masking": {
+      "web": {
+        "passing": 41,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 47
+      },
+      "android": {
+        "passing": 40,
+        "measured": 47
+      }
+    },
+    "css-multicol": {
+      "web": {
+        "passing": 45,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 43,
+        "measured": 48
+      }
+    },
+    "css-overflow": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 47,
+        "measured": 47
+      },
+      "android": {
+        "passing": 46,
+        "measured": 47
+      }
+    },
+    "css-position": {
+      "web": {
+        "passing": 36,
+        "measured": 41
+      },
+      "ios": {
+        "passing": 33,
+        "measured": 41
+      },
+      "android": {
+        "passing": 33,
+        "measured": 41
+      }
+    },
+    "css-pseudo": {
+      "web": {
+        "passing": 33,
+        "measured": 42
+      },
+      "ios": {
+        "passing": 32,
+        "measured": 42
+      },
+      "android": {
+        "passing": 31,
+        "measured": 42
+      }
+    },
+    "css-sizing": {
+      "web": {
+        "passing": 47,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 44,
+        "measured": 48
+      },
+      "android": {
+        "passing": 45,
+        "measured": 48
+      }
+    },
+    "css-tables": {
+      "web": {
+        "passing": 44,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 47
+      },
+      "android": {
+        "passing": 37,
+        "measured": 47
+      }
+    },
+    "css-text": {
+      "web": {
+        "passing": 35,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 34,
+        "measured": 48
+      },
+      "android": {
+        "passing": 34,
+        "measured": 48
+      }
+    },
+    "css-text-decor": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 31,
+        "measured": 48
+      },
+      "android": {
+        "passing": 29,
+        "measured": 48
+      }
+    },
+    "css-transforms": {
+      "web": {
+        "passing": 46,
+        "measured": 47
+      },
+      "ios": {
+        "passing": 46,
+        "measured": 47
+      },
+      "android": {
+        "passing": 43,
+        "measured": 47
+      }
+    },
+    "css-ui": {
+      "web": {
+        "passing": 42,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 42,
+        "measured": 48
+      },
+      "android": {
+        "passing": 41,
+        "measured": 48
+      }
+    },
+    "css-values": {
+      "web": {
+        "passing": 44,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 40,
+        "measured": 48
+      },
+      "android": {
+        "passing": 40,
+        "measured": 48
+      }
+    },
+    "css-view-transitions": {
+      "web": {
+        "passing": 32,
+        "measured": 45
+      },
+      "ios": {
+        "passing": 27,
+        "measured": 46
+      },
+      "android": {
+        "passing": 29,
+        "measured": 46
+      }
+    },
+    "css-writing-modes": {
+      "web": {
+        "passing": 36,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 30,
+        "measured": 48
+      },
+      "android": {
+        "passing": 27,
+        "measured": 48
+      }
+    },
+    "filter-effects": {
+      "web": {
+        "passing": 41,
+        "measured": 46
+      },
+      "ios": {
+        "passing": 36,
+        "measured": 46
+      },
+      "android": {
+        "passing": 32,
+        "measured": 46
+      }
+    },
+    "selectors": {
+      "web": {
+        "passing": 46,
+        "measured": 48
+      },
+      "ios": {
+        "passing": 41,
+        "measured": 48
+      },
+      "android": {
+        "passing": 38,
+        "measured": 48
+      }
+    }
+  },
+  "perCellDiff": {
+    "against": "wave51-fix (corpus-v6.17)",
+    "scorer": "node tools/titan/score-gate.mjs wave51-fix wave52-ship --watch tools/titan/results/wave52-plan/watchlist.txt --movers 0.005",
+    "gained": 102,
+    "lost": 8,
+    "newlyMeasured": 0,
+    "unmeasuredNow": 21,
+    "movers": 295,
+    "gainedCells": [
+      "css-anchor-position/css/css-anchor-position/anchor-position-multicol-007.html android 0.9499 -> 0.9519",
+      "css-backgrounds/css/css-backgrounds/background-clip-content-box-002.html ios 0.9992 -> 0.9992",
+      "css-cascade/css/css-cascade/import-conditional-001.html android 0.9966 -> 0.9967",
+      "css-cascade/css/css-cascade/import-conditional-001.html ios 0.9974 -> 0.9974",
+      "css-cascade/css/css-cascade/import-conditional-001.html web 0.999 -> 0.999",
+      "css-cascade/css/css-cascade/import-conditional-002.html android 0.9966 -> 0.9967",
+      "css-cascade/css/css-cascade/import-conditional-002.html ios 0.9974 -> 0.9974",
+      "css-cascade/css/css-cascade/import-conditional-002.html web 0.999 -> 0.999",
+      "css-cascade/css/css-cascade/initial-background-color.html android 0.5414 -> 1",
+      "css-cascade/css/css-cascade/initial-background-color.html ios 0.5414 -> 1",
+      "css-cascade/css/css-cascade/initial-background-color.html web 0.5414 -> 1",
+      "css-color/css/css-color/color-mix-percents-02.html android 0.9496 -> 0.9981",
+      "css-color/css/css-color/color-mix-percents-02.html ios 0.9503 -> 0.9988",
+      "css-color/css/css-color/color-mix-percents-02.html web 0.9514 -> 1",
+      "css-color/css/css-color/display-p3-linear-001.html android 0.8756 -> 0.9982",
+      "css-color/css/css-color/display-p3-linear-001.html ios 0.8764 -> 0.999",
+      "css-color/css/css-color/display-p3-linear-001.html web 0.8775 -> 1",
+      "css-color/css/css-color/display-p3-linear-002.html android 0.7959 -> 0.9981",
+      "css-color/css/css-color/display-p3-linear-002.html ios 0.7966 -> 0.9989",
+      "css-color/css/css-color/display-p3-linear-002.html web 0.7977 -> 1",
+      "css-color/css/css-color/display-p3-linear-003.html android 0.9468 -> 0.9984",
+      "css-color/css/css-color/display-p3-linear-003.html ios 0.9474 -> 0.999",
+      "css-color/css/css-color/display-p3-linear-003.html web 0.9484 -> 1",
+      "css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html android 0.9394 -> 0.9519",
+      "css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html ios 0.9406 -> 0.9531",
+      "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html web 0.9435 -> 0.9981",
+      "css-counter-styles/css/css-counter-styles/counter-suffix.html android 0.9051 -> 0.9547",
+      "css-counter-styles/css/css-counter-styles/counter-suffix.html ios 0.9285 -> 0.9802",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html android 0.9848 -> 0.9996",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-negative-setter-invalid.html ios 0.9849 -> 0.9998",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html android 0.982 -> 0.9994",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html ios 0.9819 -> 0.9998",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-pad-setter-invalid.html web 0.9821 -> 1",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html android 0.9849 -> 0.9996",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html ios 0.9848 -> 0.9998",
+      "css-counter-styles/css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html web 0.9844 -> 1",
+      "css-display/css/css-display/display-contents-float-001.html android 0.941 -> 0.9979",
+      "css-display/css/css-display/display-contents-float-001.html ios 0.9417 -> 0.9988",
+      "css-flexbox/css/css-flexbox/abspos/position-absolute-containing-block-002.html ios 0.9373 -> 1",
+      "css-flexbox/css/css-flexbox/align-items-007.html android 0.9966 -> 0.9967",
+      "css-flexbox/css/css-flexbox/align-items-007.html ios 0.9974 -> 0.9974",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-027.html android 0.9085 -> 0.9991",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-027.html ios 0.903 -> 0.9997",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-027.html web 0.9012 -> 1",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html web 0.94 -> 1",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html android 0.9466 -> 1",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html ios 0.9466 -> 1",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html web 0.9458 -> 1",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html android 0.922 -> 1",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html ios 0.922 -> 1",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html web 0.9206 -> 1",
+      "css-images/css/css-images/cross-fade-target-alpha.html android 0.9662 -> 0.9957",
+      "css-masking/css/css-masking/clip-path/clip-path-ellipse-006.html android 0.948 -> 0.9982",
+      "css-masking/css/css-masking/clip-path/clip-path-ellipse-006.html ios 0.9488 -> 0.9991",
+      "css-masking/css/css-masking/clip-path/clip-path-ellipse-007.html android 0.948 -> 0.9982",
+      "css-masking/css/css-masking/clip-path/clip-path-ellipse-007.html ios 0.9488 -> 0.9991",
+      "css-masking/css/css-masking/clip-path/clip-path-ellipse-008.html android 0.948 -> 0.9982",
+      "css-masking/css/css-masking/clip-path/clip-path-ellipse-008.html ios 0.9488 -> 0.9991",
+      "css-multicol/css/css-multicol/abspos-containing-block-outside-spanner.html ios 0.9553 -> 0.9994",
+      "css-overflow/css/css-overflow/line-clamp/block-ellipsis-025.html ios 0.9495 -> 0.9709",
+      "css-position/css/css-position/position-absolute-semi-replaced-stretch-input.html web 0.9422 -> 0.9596",
+      "css-tables/css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html web 0.8733 -> 1",
+      "css-tables/css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html web 0.8741 -> 1",
+      "css-tables/css/css-tables/collapsed-border-vertical-rtl-overflow.html web 0.8733 -> 1",
+      "css-text-decor/css/css-text-decor/text-decoration-propagation-shadow.html android 0.9486 -> 0.9989",
+      "css-text-decor/css/css-text-decor/text-decoration-propagation-shadow.html ios 0.9484 -> 0.9994",
+      "css-text/css/css-text/hyphens/hyphens-auto-010.html android 0.8636 -> 0.9915",
+      "css-text/css/css-text/hyphens/hyphens-auto-last-word-001.html ios 0.9032 -> 0.9991",
+      "css-text/css/css-text/hyphens/hyphens-manual-inline-012.html android 0.9419 -> 0.9803",
+      "css-text/css/css-text/hyphens/hyphens-out-of-flow-001.html android 0.9218 -> 0.9685",
+      "css-text/css/css-text/hyphens/hyphens-out-of-flow-002.html android 0.9291 -> 0.982",
+      "css-text/css/css-text/hyphens/hyphens-punctuation-001.html android 0.938 -> 0.9981",
+      "css-text/css/css-text/hyphens/hyphens-span-001.html android 0.9166 -> 0.9532",
+      "css-transforms/css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html android 0.9565 -> 1",
+      "css-transforms/css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html ios 0.9565 -> 1",
+      "css-transforms/css/css-transforms/css-transform-inherit-scale.html android 0.9965 -> 0.9967",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-overflow-children-new.html android 0.9753 -> 0.9996",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-overflow-children-new.html ios 0.9757 -> 1",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-overflow-children-new.html web 0.9757 -> 1",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-overflow-children-old.html android 0.9753 -> 0.9996",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-overflow-children-old.html ios 0.9757 -> 1",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-overflow-children-old.html web 0.9757 -> 1",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-new.html android 0.9739 -> 0.9975",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-new.html ios 0.9749 -> 0.9984",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-new.html web 0.9763 -> 1",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-old.html android 0.9739 -> 0.9975",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-old.html ios 0.9749 -> 0.9984",
+      "css-view-transitions/css/css-view-transitions/fractional-box-with-shadow-old.html web 0.9763 -> 1",
+      "css-writing-modes/css/css-writing-modes/ch-units-vrl-003.html android 0.8404 -> 0.9507",
+      "css-writing-modes/css/css-writing-modes/ch-units-vrl-003.html ios 0.8396 -> 0.9535",
+      "css-writing-modes/css/css-writing-modes/ch-units-vrl-004.html android 0.8404 -> 0.9507",
+      "css-writing-modes/css/css-writing-modes/ch-units-vrl-004.html ios 0.8396 -> 0.9535",
+      "css-writing-modes/css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html ios 0.999 -> 0.9991",
+      "css-writing-modes/css/css-writing-modes/forms/input-range-zero-inline-size.html android 0.9743 -> 0.9989",
+      "css-writing-modes/css/css-writing-modes/forms/input-range-zero-inline-size.html ios 0.9747 -> 0.9993",
+      "CSS2/css/CSS2/css21-errata/s-11-1-1b-006.html android 0.9332 -> 0.9944",
+      "CSS2/css/CSS2/css21-errata/s-11-1-1b-006.html ios 0.9321 -> 0.9953",
+      "filter-effects/css/filter-effects/backdrop-filter-basic-blur.html ios 0.9469 -> 0.9526",
+      "filter-effects/css/filter-effects/backdrop-filter-root-element.html android 0.54 -> 0.9998",
+      "filter-effects/css/filter-effects/backdrop-filter-root-element.html ios 0.5401 -> 1",
+      "filter-effects/css/filter-effects/backdrop-filter-root-element.html web 0.5402 -> 1",
+      "selectors/css/selectors/has-visited.html ios 0.9469 -> 0.9571"
+    ],
+    "lostCells": [
+      "css-display/css/css-display/display-contents-root-background.html android 0.9988 -> 0.5355",
+      "css-display/css/css-display/display-contents-root-background.html ios 0.9994 -> 0.5346",
+      "css-display/css/css-display/display-contents-root-background.html web 1 -> 0.534",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html android 1 -> 0.94",
+      "css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html ios 1 -> 0.94",
+      "css-view-transitions/css/css-view-transitions/column-span-during-transition-doesnt-skip.html android 0.9879 -> 0.9453",
+      "css-view-transitions/css/css-view-transitions/column-span-during-transition-doesnt-skip.html ios 0.9879 -> 0.9453",
+      "css-view-transitions/css/css-view-transitions/column-span-during-transition-doesnt-skip.html web 0.9879 -> 0.9453"
+    ],
+    "newlyMeasuredCells": [],
+    "unmeasuredNowCells": [
+      "css-backgrounds/css/css-backgrounds/animations/background-color-transparent-animation-in-body.html android 1 -> unscored",
+      "css-backgrounds/css/css-backgrounds/animations/background-color-transparent-animation-in-body.html ios 1 -> unscored",
+      "css-backgrounds/css/css-backgrounds/animations/background-color-transparent-animation-in-body.html web 1 -> unscored",
+      "css-backgrounds/css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html android 1 -> unscored",
+      "css-backgrounds/css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html ios 1 -> unscored",
+      "css-backgrounds/css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html web 1 -> unscored",
+      "css-cascade/css/css-cascade/scope-implicit-crash-print.html android 1 -> unscored",
+      "css-cascade/css/css-cascade/scope-implicit-crash-print.html ios 1 -> unscored",
+      "css-cascade/css/css-cascade/scope-implicit-crash-print.html web 1 -> unscored",
+      "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html android 0.9423 -> unscored",
+      "css-counter-styles/css/css-counter-styles/armenian/css3-counter-styles-008.html ios 0.942 -> unscored",
+      "css-flexbox/css/css-flexbox/abspos/flexbox_inline-abspos.html android 1 -> unscored",
+      "css-flexbox/css/css-flexbox/abspos/flexbox_inline-abspos.html ios 1 -> unscored",
+      "css-flexbox/css/css-flexbox/abspos/flexbox_inline-abspos.html web 1 -> unscored",
+      "css-images/css/css-images/gradient-refcrash.html android 1 -> unscored",
+      "css-images/css/css-images/gradient-refcrash.html ios 1 -> unscored",
+      "css-images/css/css-images/gradient-refcrash.html web 1 -> unscored",
+      "css-transforms/css/css-transforms/backface-visibility-hidden-006.html android 1 -> unscored",
+      "css-transforms/css/css-transforms/backface-visibility-hidden-006.html ios 1 -> unscored",
+      "css-transforms/css/css-transforms/backface-visibility-hidden-006.html web 1 -> unscored",
+      "css-view-transitions/css/css-view-transitions/animation-name-ua-prefix.html web 1 -> unscored"
+    ],
+    "instrumentOnly": {
+      "calibration": "node tools/titan/score-gate.mjs wave51-fix wave52-calib  (the wave-51 captures re-scored against the re-frozen references; capture-hash check 4305/4305 identical)",
+      "gainedCells": [
+        "css-cascade/css/css-cascade/initial-background-color.html android 0.5414 -> 1",
+        "css-cascade/css/css-cascade/initial-background-color.html ios 0.5414 -> 1",
+        "css-cascade/css/css-cascade/initial-background-color.html web 0.5414 -> 1",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html web 0.94 -> 1",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html android 0.9466 -> 1",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html ios 0.9466 -> 1",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-034.html web 0.9458 -> 1",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html android 0.922 -> 1",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html ios 0.922 -> 1",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-035.html web 0.9206 -> 1",
+        "filter-effects/css/filter-effects/backdrop-filter-root-element.html android 0.54 -> 0.9998",
+        "filter-effects/css/filter-effects/backdrop-filter-root-element.html ios 0.5401 -> 1",
+        "filter-effects/css/filter-effects/backdrop-filter-root-element.html web 0.5402 -> 1"
+      ],
+      "lostCells": [
+        "css-display/css/css-display/display-contents-root-background.html android 0.9988 -> 0.5355",
+        "css-display/css/css-display/display-contents-root-background.html ios 0.9994 -> 0.5346",
+        "css-display/css/css-display/display-contents-root-background.html web 1 -> 0.534",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html android 1 -> 0.94",
+        "css-gaps/css/css-gaps/flex/flex-gap-decorations-033.html ios 1 -> 0.94",
+        "css-view-transitions/css/css-view-transitions/column-span-during-transition-doesnt-skip.html android 0.9879 -> 0.9453",
+        "css-view-transitions/css/css-view-transitions/column-span-during-transition-doesnt-skip.html ios 0.9879 -> 0.9453",
+        "css-view-transitions/css/css-view-transitions/column-span-during-transition-doesnt-skip.html web 0.9879 -> 0.9453"
+      ],
+      "unmeasuredNowCells": [
+        "css-backgrounds/css/css-backgrounds/animations/background-color-transparent-animation-in-body.html android 1 -> unscored",
+        "css-backgrounds/css/css-backgrounds/animations/background-color-transparent-animation-in-body.html ios 1 -> unscored",
+        "css-backgrounds/css/css-backgrounds/animations/background-color-transparent-animation-in-body.html web 1 -> unscored",
+        "css-backgrounds/css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html android 1 -> unscored",
+        "css-backgrounds/css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html ios 1 -> unscored",
+        "css-backgrounds/css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html web 1 -> unscored",
+        "css-cascade/css/css-cascade/scope-implicit-crash-print.html android 1 -> unscored",
+        "css-cascade/css/css-cascade/scope-implicit-crash-print.html ios 1 -> unscored",
+        "css-cascade/css/css-cascade/scope-implicit-crash-print.html web 1 -> unscored",
+        "css-flexbox/css/css-flexbox/abspos/flexbox_inline-abspos.html android 1 -> unscored",
+        "css-flexbox/css/css-flexbox/abspos/flexbox_inline-abspos.html ios 1 -> unscored",
+        "css-flexbox/css/css-flexbox/abspos/flexbox_inline-abspos.html web 1 -> unscored",
+        "css-images/css/css-images/gradient-refcrash.html android 1 -> unscored",
+        "css-images/css/css-images/gradient-refcrash.html ios 1 -> unscored",
+        "css-images/css/css-images/gradient-refcrash.html web 1 -> unscored",
+        "css-transforms/css/css-transforms/backface-visibility-hidden-006.html android 1 -> unscored",
+        "css-transforms/css/css-transforms/backface-visibility-hidden-006.html ios 1 -> unscored",
+        "css-transforms/css/css-transforms/backface-visibility-hidden-006.html web 1 -> unscored",
+        "css-view-transitions/css/css-view-transitions/animation-name-ua-prefix.html web 1 -> unscored"
+      ]
+    },
+    "renderGained": 89,
+    "renderLost": 0,
+    "degenerateGains": [
+      {
+        "cell": "css-anchor-position/css/css-anchor-position/anchor-position-multicol-007.html android 0.9499 -> 0.9519",
+        "why": "the red anchor box the test forbids is still drawn, beside a jumble of green pieces"
+      },
+      {
+        "cell": "css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html android 0.9394 -> 0.9519",
+        "why": "the orange bar is not beside the third float (the flow-root is sized from its content, not from the contained inline size)"
+      },
+      {
+        "cell": "css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html ios 0.9406 -> 0.9531",
+        "why": "the orange bar is not beside the third float (the flow-root is sized from its content, not from the contained inline size)"
+      },
+      {
+        "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html android 0.9051 -> 0.9547",
+        "why": "the eight LTR lines match, but the two dir=rtl lists draw no marker at all"
+      },
+      {
+        "cell": "css-counter-styles/css/css-counter-styles/counter-suffix.html ios 0.9285 -> 0.9802",
+        "why": "the eight LTR lines match, but the two dir=rtl lists draw no marker at all"
+      },
+      {
+        "cell": "css-text/css/css-text/hyphens/hyphens-out-of-flow-001.html android 0.9218 -> 0.9685",
+        "why": "no hyphen glyph and the word breaks at a character (highwa / y); only the box width — the ch fix — matches"
+      },
+      {
+        "cell": "css-text/css/css-text/hyphens/hyphens-out-of-flow-002.html android 0.9291 -> 0.982",
+        "why": "only three of seven boxes read high- / way; the out-of-flow span splits the word in the others"
+      },
+      {
+        "cell": "css-text/css/css-text/hyphens/hyphens-span-001.html android 0.9166 -> 0.9532",
+        "why": "all nine boxes read highwa / y with no hyphen; only the box width — the ch fix — matches"
+      },
+      {
+        "cell": "CSS2/css/CSS2/css21-errata/s-11-1-1b-006.html android 0.9332 -> 0.9944",
+        "why": "the black square sits 5 px too high (ink band y 36-70 against the reference text 36-50 + square 56-75): a display:table body laid out as blocks"
+      },
+      {
+        "cell": "CSS2/css/CSS2/css21-errata/s-11-1-1b-006.html ios 0.9321 -> 0.9953",
+        "why": "the black square sits 5 px too high (ink band y 36-70 against the reference text 36-50 + square 56-75): a display:table body laid out as blocks"
+      },
+      {
+        "cell": "filter-effects/css/filter-effects/backdrop-filter-basic-blur.html ios 0.9469 -> 0.9526",
+        "why": "RING-FENCED (an external session owns this test), reported plainly: passes through the generic frame clip; its filter boxes sit 24 px right of the reference"
+      }
+    ],
+    "faithfulGains": 91
+  },
+  "installedBuilds": [
+    {
+      "launch": "wave52-ship (the gate of record: commit aaf676c5, 30 sections) — 2026-10-05T21:57:05Z — HEAD aaf676c5 (+ three README test-count restamps, documentation only — the script printed them as 'uncommitted runtime/app changes' before its dirty check learnt to exclude *.md; the git diff --stat below is theirs)",
+      "android": "android serial=emulator-5554 built app-debug.apk sha1=5ef49abcded96334015404507cd6794bd0d4994f installed base.apk sha1=5ef49abcded96334015404507cd6794bd0d4994f",
+      "ios": "ios udid=0BB986A6-1EAD-4916-9276-079235324DA1 built .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5 installed .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5",
+      "match": true
+    }
+  ],
+  "reproduce": "tools/titan/gate-driver.sh wave52-ship --skip-fixture-net, then rm -f /tmp/titan-device-pool/provisioned-* and tools/titan/gate-driver.sh wave52-ship --skip-corpus  (quiet host: idle load < 6, free+inactive > 2 GB, ONE emulator + ONE simulator; the driver refuses otherwise; per section it runs POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1 section-runner.sh <section> --all-platforms --max-tests 48 --run-id wave52-ship --foreground; the net is BASELINE=1 ./test-all.sh --gate-set). Score: node tools/titan/score-gate.mjs wave51-fix wave52-ship --watch tools/titan/results/wave52-plan/watchlist.txt ; adjudicate: node tools/titan/results/wave52-gate/adjudicate.mjs <record.json> score-calib.json <render.json>"
+}

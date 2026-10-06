@@ -127,9 +127,13 @@ deferred}`. The COMMON preamble every lane gets:
 - Fixture authoring rules (BACKLOG "Operational recipes" tail) whenever
   a lane adds fixtures — `_expect` with shown arithmetic preferred.
 
-If lanes die on a usage limit: resume the same Workflow
-(`resumeFromRunId`) — completed lanes replay from cache; add per-lane
-`model:'opus'` overrides only to the dead lanes.
+Wide fan-outs are FILE-DRIVEN and run every lane on `model: 'opus'` from
+the start (wave 52: three fan-outs died on the session usage limit
+mid-run and left partial edits): each lane ends its
+`tools/titan/results/<wave>-<lane>/_note.md` with a `STATUS: COMPLETE` /
+`STATUS: PARTIAL — …` line, and a relaunch skips the COMPLETE ones. If
+lanes still die on a limit: resume the same Workflow (`resumeFromRunId`)
+— completed lanes replay from cache.
 
 ## Phase 3 — skeptics (executed repros, non-negotiable)
 
@@ -180,9 +184,21 @@ own since the retro; reprovision with pm clear; 30 sections ×48;
 watchdog+reprovision; the 327-net as **`BASELINE=1 ./test-all.sh
 --gate-set`** — every fixture in `tools/visual/gate-fixtures.txt`, not
 visual-test alone; set `ANDROID_SERIAL` when more than one device is
-attached or the run refuses with exit 2). Run it in background
-(`run_in_background: true` — not a shell `&`), heartbeat every ~30 min
-checking **capture counts per completed section**, never liveness.
+attached or the run refuses with exit 2). The gate is tracked code:
+`tools/titan/gate-driver.sh <run-id>`. Run it in background
+(`run_in_background: true` — not a shell `&`) with an EXPLICIT
+`timeout: 7200000` and as TWO launches — `--skip-fixture-net` for the
+corpus (~80 min), then `rm -f /tmp/titan-device-pool/provisioned-*` and
+`--skip-corpus` for the net — so neither half is near the 2-hour limit
+(wave 52: a launch with a short limit was stopped 10 minutes in;
+`--resume` skips the sections already OK). Then WAIT for the task
+notification — no heartbeat, no polling loop — and verify **capture
+counts per completed section** from the driver's summary, never
+liveness. While a gate runs, edit NOTHING it executes or builds from
+(the driver and runner scripts, runtime / harness / converter sources):
+bash reads a script as it runs, and provisioning builds from the tree.
+Prepare such changes as a patch file and apply it when the device is
+idle.
 
 Scoring: full per-section deltas vs the previous snapshot; capture
 columns verified against tests.list; every skeptic watchlist cell

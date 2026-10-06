@@ -1,0 +1,28 @@
+record  wave51-fix → wave52-final
+  prev  web 1215/1379  ios 1089/1369  android 1080/1369
+  cur   web 1229/1372  ios 1118/1362  android 1104/1362
+  gained 99  lost 13  newly-measured 0  unmeasured-now 21
+render  wave52-calib → wave52-final
+  gained 86  lost 5  newly-measured 0  unmeasured-now 2
+
+FAIL R1  record lost 13: 8 instrument-only (pre-registered), 5 outside the list
+    css/css-lists/counter-reset-reversed-nested.html [android]  0.9509 → 0.9425
+    css/css-lists/counter-reset-reversed-nested.html [ios]  0.9551 → 0.9424
+    css/css-text/hyphens/hyphens-manual-011.html [android]  0.9811 → 0.8925
+    css/css-text/hyphens/hyphens-manual-012.html [android]  0.9811 → 0.8983
+    css/css-text/hyphens/hyphens-manual-inline-011.html [android]  0.9739 → 0.8842
+FAIL R2  render lost 5
+    css/css-lists/counter-reset-reversed-nested.html [android]  0.9509 → 0.9425
+    css/css-lists/counter-reset-reversed-nested.html [ios]  0.9551 → 0.9424
+    css/css-text/hyphens/hyphens-manual-011.html [android]  0.9811 → 0.8925
+    css/css-text/hyphens/hyphens-manual-012.html [android]  0.9811 → 0.8983
+    css/css-text/hyphens/hyphens-manual-inline-011.html [android]  0.9739 → 0.8842
+ok   R3  record unmeasured-now 21: expected 19 absence-only + 2 (L6); unexpected 0, expected-but-still-measured 0
+ok   R4  render unmeasured-now 2 (expected the 2 L6 cells; other: 0)
+ok   R5  missing sections 0, short columns 0
+
+gained 99 = 13 instrument-only + 86 render
+  render gains by platform: web 18  ios 35  android 33
+  render newly measured: 0
+
+ADJUDICATION: 2 rule(s) broken — do not ship

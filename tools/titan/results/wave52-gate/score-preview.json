@@ -1,0 +1,5076 @@
+{
+ "prev": "wave51-fix",
+ "cur": "wave52-preview",
+ "totals": {
+  "prev": {
+   "web": {
+    "passing": 1215,
+    "measured": 1379
+   },
+   "ios": {
+    "passing": 1089,
+    "measured": 1369
+   },
+   "android": {
+    "passing": 1080,
+    "measured": 1369
+   }
+  },
+  "cur": {
+   "web": {
+    "passing": 1229,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1119,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1111,
+    "measured": 1362
+   }
+  }
+ },
+ "sections": {
+  "CSS2": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-anchor-position": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 26,
+     "measured": 32
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   }
+  },
+  "css-backgrounds": {
+   "prev": {
+    "web": {
+     "passing": 26,
+     "measured": 31
+    },
+    "ios": {
+     "passing": 25,
+     "measured": 31
+    },
+    "android": {
+     "passing": 26,
+     "measured": 31
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 24,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 29
+    },
+    "android": {
+     "passing": 24,
+     "measured": 29
+    }
+   }
+  },
+  "css-break": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 31,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 31,
+     "measured": 48
+    }
+   }
+  },
+  "css-cascade": {
+   "prev": {
+    "web": {
+     "passing": 34,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 42
+    },
+    "android": {
+     "passing": 34,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   }
+  },
+  "css-color": {
+   "prev": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   }
+  },
+  "css-contain": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 37,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  },
+  "css-counter-styles": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 38
+    },
+    "android": {
+     "passing": 24,
+     "measured": 38
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   }
+  },
+  "css-display": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   }
+  },
+  "css-flexbox": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   }
+  },
+  "css-gaps": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 48
+    },
+    "android": {
+     "passing": 46,
+     "measured": 48
+    }
+   }
+  },
+  "css-grid": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-images": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 48
+    },
+    "android": {
+     "passing": 35,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   }
+  },
+  "css-lists": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-masking": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 38,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   }
+  },
+  "css-multicol": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   }
+  },
+  "css-overflow": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   }
+  },
+  "css-position": {
+   "prev": {
+    "web": {
+     "passing": 35,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   }
+  },
+  "css-pseudo": {
+   "prev": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   }
+  },
+  "css-sizing": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   }
+  },
+  "css-tables": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   }
+  },
+  "css-text": {
+   "prev": {
+    "web": {
+     "passing": 35,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 48
+    },
+    "android": {
+     "passing": 28,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 35,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 34,
+     "measured": 48
+    },
+    "android": {
+     "passing": 34,
+     "measured": 48
+    }
+   }
+  },
+  "css-text-decor": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 28,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   }
+  },
+  "css-transforms": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 48
+    },
+    "android": {
+     "passing": 42,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   }
+  },
+  "css-ui": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-values": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   }
+  },
+  "css-view-transitions": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 46
+    },
+    "android": {
+     "passing": 26,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   }
+  },
+  "css-writing-modes": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 48
+    },
+    "android": {
+     "passing": 24,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   }
+  },
+  "filter-effects": {
+   "prev": {
+    "web": {
+     "passing": 40,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 34,
+     "measured": 46
+    },
+    "android": {
+     "passing": 31,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 46
+    },
+    "android": {
+     "passing": 32,
+     "measured": 46
+    }
+   }
+  },
+  "selectors": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  }
+ },
+ "gained": [
+  {
+   "sec": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+   "platform": "android",
+   "prev": 0.9499,
+   "cur": 0.9519,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-clip-content-box-002.html",
+   "platform": "ios",
+   "prev": 0.9992,
+   "cur": 0.9992,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "android",
+   "prev": 0.9966,
+   "cur": 0.9967,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": 0.9974,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": 0.999,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "android",
+   "prev": 0.9966,
+   "cur": 0.9967,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": 0.9974,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "web",
+   "prev": 0.999,
+   "cur": 0.999,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "android",
+   "prev": 0.5414,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "ios",
+   "prev": 0.5414,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "web",
+   "prev": 0.5414,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "android",
+   "prev": 0.9496,
+   "cur": 0.9981,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "ios",
+   "prev": 0.9503,
+   "cur": 0.9988,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "web",
+   "prev": 0.9514,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "android",
+   "prev": 0.8756,
+   "cur": 0.9982,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "ios",
+   "prev": 0.8764,
+   "cur": 0.999,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "web",
+   "prev": 0.8775,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "android",
+   "prev": 0.7959,
+   "cur": 0.9981,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "ios",
+   "prev": 0.7966,
+   "cur": 0.9989,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "web",
+   "prev": 0.7977,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "android",
+   "prev": 0.9468,
+   "cur": 0.9984,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "ios",
+   "prev": 0.9474,
+   "cur": 0.999,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "web",
+   "prev": 0.9484,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "platform": "android",
+   "prev": 0.9394,
+   "cur": 0.9519,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "platform": "ios",
+   "prev": 0.9406,
+   "cur": 0.9531,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+   "platform": "web",
+   "prev": 0.9435,
+   "cur": 0.9981,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "platform": "android",
+   "prev": 0.9051,
+   "cur": 0.9547,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "platform": "ios",
+   "prev": 0.9285,
+   "cur": 0.9802,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.9848,
+   "cur": 0.9996,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9849,
+   "cur": 0.9998,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.982,
+   "cur": 0.9994,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9819,
+   "cur": 0.9998,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.9821,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.9849,
+   "cur": 0.9996,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9848,
+   "cur": 0.9998,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.9844,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-float-001.html",
+   "platform": "android",
+   "prev": 0.941,
+   "cur": 0.9979,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-float-001.html",
+   "platform": "ios",
+   "prev": 0.9417,
+   "cur": 0.9988,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/position-absolute-containing-block-002.html",
+   "platform": "ios",
+   "prev": 0.9373,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "android",
+   "prev": 0.9966,
+   "cur": 0.9967,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "ios",
+   "prev": 0.9974,
+   "cur": 0.9974,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "android",
+   "prev": 0.9085,
+   "cur": 0.9991,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "ios",
+   "prev": 0.903,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "web",
+   "prev": 0.9012,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "web",
+   "prev": 0.94,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "android",
+   "prev": 0.9466,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "ios",
+   "prev": 0.9466,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "web",
+   "prev": 0.9458,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "android",
+   "prev": 0.922,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "ios",
+   "prev": 0.922,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "web",
+   "prev": 0.9206,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/cross-fade-target-alpha.html",
+   "platform": "android",
+   "prev": 0.9662,
+   "cur": 0.9957,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-006.html",
+   "platform": "android",
+   "prev": 0.948,
+   "cur": 0.9982,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-006.html",
+   "platform": "ios",
+   "prev": 0.9488,
+   "cur": 0.9991,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-007.html",
+   "platform": "android",
+   "prev": 0.948,
+   "cur": 0.9982,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-007.html",
+   "platform": "ios",
+   "prev": 0.9488,
+   "cur": 0.9991,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-008.html",
+   "platform": "android",
+   "prev": 0.948,
+   "cur": 0.9982,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-008.html",
+   "platform": "ios",
+   "prev": 0.9488,
+   "cur": 0.9991,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-multicol",
+   "test": "css/css-multicol/abspos-containing-block-outside-spanner.html",
+   "platform": "ios",
+   "prev": 0.9553,
+   "cur": 0.9994,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "ios",
+   "prev": 0.9495,
+   "cur": 0.9709,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-input.html",
+   "platform": "web",
+   "prev": 0.9422,
+   "cur": 0.9596,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+   "platform": "web",
+   "prev": 0.8733,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+   "platform": "web",
+   "prev": 0.8741,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+   "platform": "web",
+   "prev": 0.8733,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "platform": "android",
+   "prev": 0.9486,
+   "cur": 0.9989,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "platform": "ios",
+   "prev": 0.9484,
+   "cur": 0.9994,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-auto-010.html",
+   "platform": "android",
+   "prev": 0.8636,
+   "cur": 0.9915,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-auto-last-word-001.html",
+   "platform": "ios",
+   "prev": 0.9032,
+   "cur": 0.9991,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-manual-inline-012.html",
+   "platform": "android",
+   "prev": 0.9419,
+   "cur": 0.9803,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "platform": "android",
+   "prev": 0.9218,
+   "cur": 0.9685,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "platform": "android",
+   "prev": 0.9291,
+   "cur": 0.982,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-punctuation-001.html",
+   "platform": "android",
+   "prev": 0.938,
+   "cur": 0.9981,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-span-001.html",
+   "platform": "android",
+   "prev": 0.9166,
+   "cur": 0.9532,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+   "platform": "android",
+   "prev": 0.9565,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+   "platform": "ios",
+   "prev": 0.9565,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/css-transform-inherit-scale.html",
+   "platform": "android",
+   "prev": 0.9965,
+   "cur": 0.9967,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "platform": "android",
+   "prev": 0.9753,
+   "cur": 0.9996,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "platform": "ios",
+   "prev": 0.9757,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "platform": "web",
+   "prev": 0.9757,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "platform": "android",
+   "prev": 0.9753,
+   "cur": 0.9996,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "platform": "ios",
+   "prev": 0.9757,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "platform": "web",
+   "prev": 0.9757,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "platform": "android",
+   "prev": 0.9739,
+   "cur": 0.9975,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "platform": "ios",
+   "prev": 0.9749,
+   "cur": 0.9984,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "platform": "web",
+   "prev": 0.9763,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "platform": "android",
+   "prev": 0.9739,
+   "cur": 0.9975,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "platform": "ios",
+   "prev": 0.9749,
+   "cur": 0.9984,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "platform": "web",
+   "prev": 0.9763,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-003.html",
+   "platform": "android",
+   "prev": 0.8404,
+   "cur": 0.9507,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-003.html",
+   "platform": "ios",
+   "prev": 0.8396,
+   "cur": 0.9535,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-004.html",
+   "platform": "android",
+   "prev": 0.8404,
+   "cur": 0.9507,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-004.html",
+   "platform": "ios",
+   "prev": 0.8396,
+   "cur": 0.9535,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+   "platform": "ios",
+   "prev": 0.999,
+   "cur": 0.9991,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+   "platform": "android",
+   "prev": 0.9743,
+   "cur": 0.9989,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+   "platform": "ios",
+   "prev": 0.9747,
+   "cur": 0.9993,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "android",
+   "prev": 0.9332,
+   "cur": 0.9944,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "ios",
+   "prev": 0.9321,
+   "cur": 0.9953,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-basic-blur.html",
+   "platform": "ios",
+   "prev": 0.9469,
+   "cur": 0.9526,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "android",
+   "prev": 0.54,
+   "cur": 0.9998,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "ios",
+   "prev": 0.5401,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "web",
+   "prev": 0.5402,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "selectors",
+   "test": "css/selectors/has-visited.html",
+   "platform": "ios",
+   "prev": 0.9469,
+   "cur": 0.9571,
+   "prevPass": false,
+   "curPass": true
+  }
+ ],
+ "lost": [
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "android",
+   "prev": 0.9988,
+   "cur": 0.5355,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": 0.5346,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": 0.534,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": 0.94,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": 0.94,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "android",
+   "prev": 0.9879,
+   "cur": 0.9453,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "ios",
+   "prev": 0.9879,
+   "cur": 0.9453,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "web",
+   "prev": 0.9879,
+   "cur": 0.9453,
+   "prevPass": true,
+   "curPass": false
+  }
+ ],
+ "movers": [
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-001.html",
+   "platform": "ios",
+   "prev": 0.5031,
+   "cur": 0.4509,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0522
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-002.html",
+   "platform": "ios",
+   "prev": 0.3653,
+   "cur": 0.3391,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0262
+  },
+  {
+   "sec": "css-break",
+   "test": "css/css-break/background-image-000.html",
+   "platform": "android",
+   "prev": 0.9912,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0088
+  },
+  {
+   "sec": "css-break",
+   "test": "css/css-break/background-image-000.html",
+   "platform": "ios",
+   "prev": 0.9912,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0088
+  },
+  {
+   "sec": "css-break",
+   "test": "css/css-break/background-image-000.html",
+   "platform": "web",
+   "prev": 0.9912,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0088
+  },
+  {
+   "sec": "css-break",
+   "test": "css/css-break/background-image-001.html",
+   "platform": "android",
+   "prev": 0.9924,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0076
+  },
+  {
+   "sec": "css-break",
+   "test": "css/css-break/background-image-001.html",
+   "platform": "web",
+   "prev": 0.9924,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0076
+  },
+  {
+   "sec": "css-break",
+   "test": "css/css-break/background-image-002.html",
+   "platform": "android",
+   "prev": 0.989,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.011
+  },
+  {
+   "sec": "css-break",
+   "test": "css/css-break/background-image-002.html",
+   "platform": "web",
+   "prev": 0.989,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.011
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-003.html",
+   "platform": "android",
+   "prev": 0.7655,
+   "cur": 0.7794,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0139
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-003.html",
+   "platform": "ios",
+   "prev": 0.7604,
+   "cur": 0.7707,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0103
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/currentcolor-003.html",
+   "platform": "web",
+   "prev": 0.9862,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0138
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-004.html",
+   "platform": "android",
+   "prev": 0.9522,
+   "cur": 0.9973,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0451
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-004.html",
+   "platform": "ios",
+   "prev": 0.9532,
+   "cur": 0.9984,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0452
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-004.html",
+   "platform": "web",
+   "prev": 0.9548,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0452
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-005.html",
+   "platform": "android",
+   "prev": 0.9531,
+   "cur": 0.9984,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0453
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-005.html",
+   "platform": "ios",
+   "prev": 0.9538,
+   "cur": 0.999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0452
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-005.html",
+   "platform": "web",
+   "prev": 0.9547,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0453
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-006.html",
+   "platform": "android",
+   "prev": 0.9548,
+   "cur": 0.998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0432
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-006.html",
+   "platform": "ios",
+   "prev": 0.9556,
+   "cur": 0.9988,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0432
+  },
+  {
+   "sec": "css-color",
+   "test": "css/css-color/display-p3-linear-006.html",
+   "platform": "web",
+   "prev": 0.9568,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0432
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "platform": "web",
+   "prev": 0.9876,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0124
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-002.html",
+   "platform": "android",
+   "prev": 0.9186,
+   "cur": 0.9311,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0125
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-002.html",
+   "platform": "ios",
+   "prev": 0.9198,
+   "cur": 0.9322,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0124
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-002.html",
+   "platform": "web",
+   "prev": 0.9876,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0124
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-grid-indefinite-height-min-height-flex-row.html",
+   "platform": "web",
+   "prev": 0.9729,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0271
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-legend.html",
+   "platform": "android",
+   "prev": 0.8479,
+   "cur": 0.8427,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0052
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/armenian/css3-counter-styles-006.html",
+   "platform": "web",
+   "prev": 0.995,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.005
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/armenian/css3-counter-styles-007.html",
+   "platform": "web",
+   "prev": 0.9829,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0171
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/broken-symbols.html",
+   "platform": "android",
+   "prev": 0.9713,
+   "cur": 0.9972,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0259
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/broken-symbols.html",
+   "platform": "ios",
+   "prev": 0.9713,
+   "cur": 0.9976,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0263
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html",
+   "platform": "android",
+   "prev": 0.9542,
+   "cur": 0.9364,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0178
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html",
+   "platform": "ios",
+   "prev": 0.9535,
+   "cur": 0.9354,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0181
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.9884,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0113
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9887,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0112
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.9884,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0116
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+   "platform": "android",
+   "prev": 0.9884,
+   "cur": 0.9948,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0064
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+   "platform": "ios",
+   "prev": 0.9887,
+   "cur": 0.9948,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0061
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+   "platform": "web",
+   "prev": 0.9884,
+   "cur": 0.9958,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0074
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.9878,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0119
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9876,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0123
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.9879,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0121
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+   "platform": "android",
+   "prev": 0.9878,
+   "cur": 0.9948,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+   "platform": "ios",
+   "prev": 0.9876,
+   "cur": 0.9949,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0073
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+   "platform": "web",
+   "prev": 0.9879,
+   "cur": 0.9957,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0078
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.976,
+   "cur": 0.9993,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0233
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9756,
+   "cur": 0.9998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0242
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.9755,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0245
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-name-setter.html",
+   "platform": "android",
+   "prev": 0.976,
+   "cur": 0.9916,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0156
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-name-setter.html",
+   "platform": "ios",
+   "prev": 0.9756,
+   "cur": 0.9919,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0163
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-name-setter.html",
+   "platform": "web",
+   "prev": 0.9755,
+   "cur": 0.9928,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0173
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.984,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.016
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter.html",
+   "platform": "android",
+   "prev": 0.9848,
+   "cur": 0.9913,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0065
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter.html",
+   "platform": "ios",
+   "prev": 0.9849,
+   "cur": 0.9918,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0069
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter.html",
+   "platform": "web",
+   "prev": 0.984,
+   "cur": 0.992,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.008
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter.html",
+   "platform": "android",
+   "prev": 0.982,
+   "cur": 0.9892,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0072
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter.html",
+   "platform": "ios",
+   "prev": 0.9819,
+   "cur": 0.9894,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0075
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter.html",
+   "platform": "web",
+   "prev": 0.9821,
+   "cur": 0.9898,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0077
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+   "platform": "android",
+   "prev": 0.9849,
+   "cur": 0.9919,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+   "platform": "ios",
+   "prev": 0.9848,
+   "cur": 0.992,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0072
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+   "platform": "web",
+   "prev": 0.9844,
+   "cur": 0.9919,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0075
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.988,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0117
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9878,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0121
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.9882,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0118
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-range-setter.html",
+   "platform": "android",
+   "prev": 0.988,
+   "cur": 0.997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.009
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-range-setter.html",
+   "platform": "ios",
+   "prev": 0.9878,
+   "cur": 0.9971,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0093
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-range-setter.html",
+   "platform": "web",
+   "prev": 0.9882,
+   "cur": 0.9977,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0095
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html",
+   "platform": "android",
+   "prev": 0.9878,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0119
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html",
+   "platform": "ios",
+   "prev": 0.9876,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0123
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html",
+   "platform": "web",
+   "prev": 0.988,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.012
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "android",
+   "prev": 0.6892,
+   "cur": 0.6816,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0076
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "ios",
+   "prev": 0.6891,
+   "cur": 0.6815,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0076
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "web",
+   "prev": 0.6891,
+   "cur": 0.6815,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0076
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-flow-root-002.html",
+   "platform": "android",
+   "prev": 0.9655,
+   "cur": 0.9734,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0079
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-flow-root-002.html",
+   "platform": "ios",
+   "prev": 0.9655,
+   "cur": 0.9734,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0079
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-flow-root-002.html",
+   "platform": "web",
+   "prev": 0.9938,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0062
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/abspos-autopos-htb-rtl.html",
+   "platform": "ios",
+   "prev": 0.9904,
+   "cur": 0.9974,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/abspos-autopos-vlr-rtl.html",
+   "platform": "ios",
+   "prev": 0.9904,
+   "cur": 0.9974,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/abspos-autopos-vrl-rtl.html",
+   "platform": "ios",
+   "prev": 0.9904,
+   "cur": 0.9974,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html",
+   "platform": "ios",
+   "prev": 0.9921,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0079
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-margin-001.html",
+   "platform": "ios",
+   "prev": 0.9909,
+   "cur": 0.9971,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0062
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-margin-002.html",
+   "platform": "ios",
+   "prev": 0.991,
+   "cur": 0.9969,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0059
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-margin-003.html",
+   "platform": "ios",
+   "prev": 0.9857,
+   "cur": 0.9972,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0115
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/position-absolute-containing-block-001.html",
+   "platform": "ios",
+   "prev": 0.9505,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0495
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-008.html",
+   "platform": "android",
+   "prev": 0.9646,
+   "cur": 0.999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0344
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-024.html",
+   "platform": "android",
+   "prev": 0.99,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.01
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-024.html",
+   "platform": "ios",
+   "prev": 0.99,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.01
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-024.html",
+   "platform": "web",
+   "prev": 0.9901,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0099
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "android",
+   "prev": 0.9565,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0435
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "ios",
+   "prev": 0.9565,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0435
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "web",
+   "prev": 0.9557,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0443
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "android",
+   "prev": 0.9576,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0424
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "ios",
+   "prev": 0.9576,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0424
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "web",
+   "prev": 0.9568,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0432
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-040.html",
+   "platform": "android",
+   "prev": 0.9934,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0063
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-040.html",
+   "platform": "ios",
+   "prev": 0.9934,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0063
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-040.html",
+   "platform": "web",
+   "prev": 0.9939,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0061
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-041.html",
+   "platform": "android",
+   "prev": 0.9934,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0066
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-041.html",
+   "platform": "ios",
+   "prev": 0.9934,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0066
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-041.html",
+   "platform": "web",
+   "prev": 0.9939,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0061
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-042.html",
+   "platform": "android",
+   "prev": 0.9935,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0064
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-042.html",
+   "platform": "ios",
+   "prev": 0.9935,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0064
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-042.html",
+   "platform": "web",
+   "prev": 0.9939,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0061
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-044.html",
+   "platform": "android",
+   "prev": 0.9939,
+   "cur": 0.9998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0059
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-044.html",
+   "platform": "ios",
+   "prev": 0.9939,
+   "cur": 0.9998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0059
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-044.html",
+   "platform": "web",
+   "prev": 0.9939,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0061
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-045.html",
+   "platform": "ios",
+   "prev": 0.9931,
+   "cur": 0.9996,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0065
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-050.html",
+   "platform": "android",
+   "prev": 0.9922,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0075
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-050.html",
+   "platform": "ios",
+   "prev": 0.9922,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0075
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-050.html",
+   "platform": "web",
+   "prev": 0.994,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.006
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-center-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9856,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0144
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-center.html",
+   "platform": "android",
+   "prev": 0.9808,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0192
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-end-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9726,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0274
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-end.html",
+   "platform": "android",
+   "prev": 0.9704,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0296
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-flex-end-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9726,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0274
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-flex-end.html",
+   "platform": "android",
+   "prev": 0.9704,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0296
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-self-end-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9698,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0302
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-self-end.html",
+   "platform": "android",
+   "prev": 0.9715,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0285
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html",
+   "platform": "android",
+   "prev": 0.9737,
+   "cur": 0.9791,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0054
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-center-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9856,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0144
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-center.html",
+   "platform": "android",
+   "prev": 0.9808,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0192
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-end-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9726,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0274
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-end.html",
+   "platform": "android",
+   "prev": 0.9704,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0296
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-flex-end-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9726,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0274
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-flex-end.html",
+   "platform": "android",
+   "prev": 0.9704,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0296
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html",
+   "platform": "android",
+   "prev": 0.9747,
+   "cur": 0.9998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0251
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html",
+   "platform": "android",
+   "prev": 0.9588,
+   "cur": 0.9778,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.019
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html",
+   "platform": "android",
+   "prev": 0.9588,
+   "cur": 0.9778,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.019
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-self-end-large-border-padding.html",
+   "platform": "android",
+   "prev": 0.9726,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0274
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-self-end.html",
+   "platform": "android",
+   "prev": 0.9704,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0296
+  },
+  {
+   "sec": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-justify-self-002.html",
+   "platform": "android",
+   "prev": 0.974,
+   "cur": 0.9823,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0083
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/cross-fade-target-alpha.html",
+   "platform": "ios",
+   "prev": 0.9665,
+   "cur": 0.996,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0295
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/cross-fade-target-alpha.html",
+   "platform": "web",
+   "prev": 0.9686,
+   "cur": 0.9981,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0295
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-button.html",
+   "platform": "android",
+   "prev": 0.9919,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0078
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-button.html",
+   "platform": "ios",
+   "prev": 0.9919,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0078
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-button.html",
+   "platform": "web",
+   "prev": 0.9922,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0078
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-move-stops.html",
+   "platform": "android",
+   "prev": 0.9817,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0182
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-move-stops.html",
+   "platform": "ios",
+   "prev": 0.9811,
+   "cur": 0.9993,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0182
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-move-stops.html",
+   "platform": "web",
+   "prev": 0.9817,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0183
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-hsl.html",
+   "platform": "android",
+   "prev": 0.7166,
+   "cur": 0.7542,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0376
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-hsl.html",
+   "platform": "ios",
+   "prev": 0.8785,
+   "cur": 0.943,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0645
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-hwb.html",
+   "platform": "android",
+   "prev": 0.7172,
+   "cur": 0.755,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0378
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-hwb.html",
+   "platform": "ios",
+   "prev": 0.8798,
+   "cur": 0.9445,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0647
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-lch.html",
+   "platform": "android",
+   "prev": 0.6548,
+   "cur": 0.7013,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0465
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-lch.html",
+   "platform": "ios",
+   "prev": 0.8584,
+   "cur": 0.935,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0766
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-oklch.html",
+   "platform": "android",
+   "prev": 0.6529,
+   "cur": 0.6991,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0462
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient/gradient-powerless-hue-oklch.html",
+   "platform": "ios",
+   "prev": 0.8565,
+   "cur": 0.9334,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0769
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/change-list-style-type-001.html",
+   "platform": "android",
+   "prev": 0.8558,
+   "cur": 0.9303,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0745
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/change-list-style-type-001.html",
+   "platform": "ios",
+   "prev": 0.7671,
+   "cur": 0.851,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0839
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/change-list-style-type-002.html",
+   "platform": "android",
+   "prev": 0.958,
+   "cur": 0.975,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.017
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/change-list-style-type-002.html",
+   "platform": "ios",
+   "prev": 0.9547,
+   "cur": 0.9874,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0327
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-list-item-2.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": 0.9923,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0112
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-list-item-2.html",
+   "platform": "ios",
+   "prev": 0.9809,
+   "cur": 0.9939,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.013
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-list-item-3.html",
+   "platform": "android",
+   "prev": 0.9815,
+   "cur": 0.9947,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0132
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-list-item-3.html",
+   "platform": "ios",
+   "prev": 0.9814,
+   "cur": 0.9965,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0151
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-list-item.html",
+   "platform": "android",
+   "prev": 0.7064,
+   "cur": 0.7307,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0243
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-list-item.html",
+   "platform": "ios",
+   "prev": 0.7518,
+   "cur": 0.7864,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0346
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-circle-closest-corner.html",
+   "platform": "android",
+   "prev": 0.7263,
+   "cur": 0.7429,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0166
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-circle-closest-corner.html",
+   "platform": "ios",
+   "prev": 0.74,
+   "cur": 0.7609,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0209
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-circle-closest-corner.html",
+   "platform": "web",
+   "prev": 0.7278,
+   "cur": 0.7445,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0167
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "android",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "ios",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "web",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "android",
+   "prev": 0.9695,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0302
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "ios",
+   "prev": 0.9695,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0304
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "web",
+   "prev": 0.9696,
+   "cur": 0.9998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0302
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-closest-farthest-corner.html",
+   "platform": "android",
+   "prev": 0.8436,
+   "cur": 0.8543,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0107
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-closest-farthest-corner.html",
+   "platform": "ios",
+   "prev": 0.8596,
+   "cur": 0.8709,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0113
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-closest-farthest-corner.html",
+   "platform": "web",
+   "prev": 0.8453,
+   "cur": 0.856,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0107
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-inset-round-rendering.html",
+   "platform": "web",
+   "prev": 0.9237,
+   "cur": 0.9447,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.021
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "android",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "ios",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "web",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "android",
+   "prev": 0.9696,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0303
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "ios",
+   "prev": 0.9696,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0303
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "web",
+   "prev": 0.9697,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0303
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-016.html",
+   "platform": "ios",
+   "prev": 0.9883,
+   "cur": 0.9972,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0089
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "android",
+   "prev": 0.9607,
+   "cur": 0.9812,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0205
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "platform": "android",
+   "prev": 0.9397,
+   "cur": 0.9457,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.006
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "platform": "ios",
+   "prev": 0.9577,
+   "cur": 0.9899,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0322
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/discard/discard-multicol-001.html",
+   "platform": "android",
+   "prev": 0.9577,
+   "cur": 0.965,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0073
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/discard/discard-multicol-002.html",
+   "platform": "android",
+   "prev": 0.9578,
+   "cur": 0.9652,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0074
+  },
+  {
+   "sec": "css-overflow",
+   "test": "css/css-overflow/line-clamp/discard/discard-multicol-004.html",
+   "platform": "android",
+   "prev": 0.9577,
+   "cur": 0.9653,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0076
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/containing-block-change-button.html",
+   "platform": "android",
+   "prev": 0.9621,
+   "cur": 0.9869,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0248
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/containing-block-change-button.html",
+   "platform": "ios",
+   "prev": 0.9713,
+   "cur": 0.9962,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0249
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/containing-block-change-button.html",
+   "platform": "web",
+   "prev": 0.9752,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0248
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-center-006.html",
+   "platform": "android",
+   "prev": 0.9622,
+   "cur": 0.9692,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-center-006.html",
+   "platform": "ios",
+   "prev": 0.9629,
+   "cur": 0.9699,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "android",
+   "prev": 0.7511,
+   "cur": 0.7222,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "ios",
+   "prev": 0.7915,
+   "cur": 0.7626,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "web",
+   "prev": 0.7907,
+   "cur": 0.7619,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0288
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "android",
+   "prev": 0.7511,
+   "cur": 0.7222,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "ios",
+   "prev": 0.7915,
+   "cur": 0.7626,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "web",
+   "prev": 0.7907,
+   "cur": 0.7619,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0288
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-other.html",
+   "platform": "web",
+   "prev": 0.9264,
+   "cur": 0.941,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0146
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "android",
+   "prev": 0.7427,
+   "cur": 0.712,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0307
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "ios",
+   "prev": 0.815,
+   "cur": 0.8467,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "web",
+   "prev": 0.8139,
+   "cur": 0.8456,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "android",
+   "prev": 0.7427,
+   "cur": 0.712,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0307
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "ios",
+   "prev": 0.815,
+   "cur": 0.8467,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "web",
+   "prev": 0.8139,
+   "cur": 0.8456,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "platform": "android",
+   "prev": 0.8554,
+   "cur": 0.8466,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0088
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "platform": "ios",
+   "prev": 0.8407,
+   "cur": 0.8346,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0061
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "platform": "android",
+   "prev": 0.9372,
+   "cur": 0.9664,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0292
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "platform": "ios",
+   "prev": 0.9363,
+   "cur": 0.9664,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0301
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "platform": "web",
+   "prev": 0.9324,
+   "cur": 0.9638,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0314
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-marker.html",
+   "platform": "android",
+   "prev": 0.9434,
+   "cur": 0.9725,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0291
+  },
+  {
+   "sec": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-marker.html",
+   "platform": "ios",
+   "prev": 0.945,
+   "cur": 0.9739,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0289
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-008.html",
+   "platform": "android",
+   "prev": 0.653,
+   "cur": 0.6409,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0121
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/abspos-014.html",
+   "platform": "android",
+   "prev": 0.653,
+   "cur": 0.6409,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0121
+  },
+  {
+   "sec": "css-sizing",
+   "test": "css/css-sizing/aspect-ratio/auto-margins-001.html",
+   "platform": "android",
+   "prev": 0.9622,
+   "cur": 0.9692,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/absolute-tables-011.tentative.html",
+   "platform": "android",
+   "prev": 0.9869,
+   "cur": 0.9939,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+   "platform": "ios",
+   "prev": 0.8582,
+   "cur": 0.8732,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.015
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+   "platform": "android",
+   "prev": 0.8506,
+   "cur": 0.8578,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0072
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+   "platform": "ios",
+   "prev": 0.8573,
+   "cur": 0.8675,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0102
+  },
+  {
+   "sec": "css-tables",
+   "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+   "platform": "ios",
+   "prev": 0.8582,
+   "cur": 0.8732,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.015
+  },
+  {
+   "sec": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-dotted-001.html",
+   "platform": "web",
+   "prev": 0.8957,
+   "cur": 0.9027,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.007
+  },
+  {
+   "sec": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-dotted-002.html",
+   "platform": "web",
+   "prev": 0.9937,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0063
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "android",
+   "prev": 0.6796,
+   "cur": 0.745,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0654
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "ios",
+   "prev": 0.744,
+   "cur": 0.7361,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0079
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "web",
+   "prev": 0.7567,
+   "cur": 0.8415,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0848
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "platform": "ios",
+   "prev": 0.9756,
+   "cur": 0.9555,
+   "prevPass": true,
+   "curPass": true,
+   "delta": -0.0201
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-003.html",
+   "platform": "android",
+   "prev": 0.9089,
+   "cur": 0.9168,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0079
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-auto-control.html",
+   "platform": "android",
+   "prev": 0.9623,
+   "cur": 0.9732,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0109
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-auto-inline-010.html",
+   "platform": "android",
+   "prev": 0.9776,
+   "cur": 0.995,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0174
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-auto-last-word-001.html",
+   "platform": "android",
+   "prev": 0.8697,
+   "cur": 0.945,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0753
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-manual-010.html",
+   "platform": "android",
+   "prev": 0.9717,
+   "cur": 0.9869,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0152
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-manual-011.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": 0.9952,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0141
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-manual-012.html",
+   "platform": "android",
+   "prev": 0.9811,
+   "cur": 0.9952,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0141
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-manual-013.html",
+   "platform": "android",
+   "prev": 0.9822,
+   "cur": 0.9945,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0123
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-manual-inline-010.html",
+   "platform": "android",
+   "prev": 0.9574,
+   "cur": 0.9819,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0245
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-manual-inline-011.html",
+   "platform": "android",
+   "prev": 0.9739,
+   "cur": 0.9927,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0188
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-none-011.html",
+   "platform": "android",
+   "prev": 0.9717,
+   "cur": 0.9869,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0152
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "platform": "ios",
+   "prev": 0.8862,
+   "cur": 0.8935,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0073
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "platform": "ios",
+   "prev": 0.9786,
+   "cur": 0.9971,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0185
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-span-001.html",
+   "platform": "ios",
+   "prev": 0.8558,
+   "cur": 0.8652,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0094
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-span-002.html",
+   "platform": "android",
+   "prev": 0.9602,
+   "cur": 0.9943,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0341
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-span-002.html",
+   "platform": "ios",
+   "prev": 0.9786,
+   "cur": 0.9971,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0185
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-animated-001.html",
+   "platform": "android",
+   "prev": 0.989,
+   "cur": 0.9985,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0095
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-animated-001.html",
+   "platform": "web",
+   "prev": 0.9905,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0095
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-animated-002.html",
+   "platform": "android",
+   "prev": 0.989,
+   "cur": 0.9985,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0095
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-animated-002.html",
+   "platform": "web",
+   "prev": 0.9904,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0095
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/css-scale-of-clip-path.html",
+   "platform": "android",
+   "prev": 0.9414,
+   "cur": 0.935,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0064
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/css-scale-of-clip-path.html",
+   "platform": "ios",
+   "prev": 0.9721,
+   "cur": 0.9793,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0072
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/css-scale-of-clip-path.html",
+   "platform": "web",
+   "prev": 0.9923,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0076
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "android",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "ios",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "web",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "android",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "ios",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "web",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/ch-unit-001.html",
+   "platform": "android",
+   "prev": 0.8362,
+   "cur": 0.8229,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0133
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/ch-unit-001.html",
+   "platform": "ios",
+   "prev": 0.8294,
+   "cur": 0.8235,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0059
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/content-with-transform-new-image.html",
+   "platform": "android",
+   "prev": 0.9743,
+   "cur": 0.9882,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0139
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/content-with-transform-new-image.html",
+   "platform": "web",
+   "prev": 0.9746,
+   "cur": 0.9885,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0139
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/content-with-transform-old-image.html",
+   "platform": "android",
+   "prev": 0.8605,
+   "cur": 0.8722,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0117
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/content-with-transform-old-image.html",
+   "platform": "ios",
+   "prev": 0.8604,
+   "cur": 0.8721,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0117
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/content-with-transform-old-image.html",
+   "platform": "web",
+   "prev": 0.8597,
+   "cur": 0.8714,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0117
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/available-size-011.html",
+   "platform": "ios",
+   "prev": 0.9427,
+   "cur": 0.9317,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.011
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-001.html",
+   "platform": "android",
+   "prev": 0.8404,
+   "cur": 0.8744,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.034
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-001.html",
+   "platform": "ios",
+   "prev": 0.8396,
+   "cur": 0.8771,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0375
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-002.html",
+   "platform": "android",
+   "prev": 0.8404,
+   "cur": 0.8744,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.034
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-002.html",
+   "platform": "ios",
+   "prev": 0.8396,
+   "cur": 0.8771,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0375
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-005.html",
+   "platform": "android",
+   "prev": 0.9103,
+   "cur": 0.9347,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0244
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-005.html",
+   "platform": "ios",
+   "prev": 0.9159,
+   "cur": 0.942,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0261
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-006.html",
+   "platform": "android",
+   "prev": 0.9103,
+   "cur": 0.9347,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0244
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-006.html",
+   "platform": "ios",
+   "prev": 0.9159,
+   "cur": 0.942,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0261
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-007.html",
+   "platform": "android",
+   "prev": 0.9103,
+   "cur": 0.9034,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0069
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/ch-units-vrl-008.html",
+   "platform": "android",
+   "prev": 0.9103,
+   "cur": 0.9034,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0069
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/direction-upright-002.html",
+   "platform": "ios",
+   "prev": 0.602,
+   "cur": 0.6092,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0072
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/checkbox-appearance-native-vertical-lr-baseline.optional.html",
+   "platform": "android",
+   "prev": 0.8546,
+   "cur": 0.8231,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0315
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/checkbox-appearance-native-vertical-lr-baseline.optional.html",
+   "platform": "ios",
+   "prev": 0.8306,
+   "cur": 0.8453,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0147
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/checkbox-appearance-native-vertical-rl-baseline.optional.html",
+   "platform": "android",
+   "prev": 0.8678,
+   "cur": 0.8333,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0345
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/checkbox-appearance-native-vertical-rl-baseline.optional.html",
+   "platform": "ios",
+   "prev": 0.8306,
+   "cur": 0.8453,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0147
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/radio-appearance-native-vertical-lr-baseline.optional.html",
+   "platform": "android",
+   "prev": 0.8576,
+   "cur": 0.8167,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0409
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/radio-appearance-native-vertical-lr-baseline.optional.html",
+   "platform": "ios",
+   "prev": 0.8317,
+   "cur": 0.8385,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0068
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/radio-appearance-native-vertical-rl-baseline.optional.html",
+   "platform": "android",
+   "prev": 0.8695,
+   "cur": 0.8254,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0441
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/forms/radio-appearance-native-vertical-rl-baseline.optional.html",
+   "platform": "ios",
+   "prev": 0.8317,
+   "cur": 0.8385,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0068
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/inline-box-orthogonal-child-with-margins.html",
+   "platform": "android",
+   "prev": 0.9709,
+   "cur": 0.9792,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0083
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/inline-box-orthogonal-child-with-margins.html",
+   "platform": "ios",
+   "prev": 0.9597,
+   "cur": 0.9686,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0089
+  },
+  {
+   "sec": "css-writing-modes",
+   "test": "css/css-writing-modes/inline-box-orthogonal-child-with-margins.html",
+   "platform": "web",
+   "prev": 0.9911,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0089
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "web",
+   "prev": 0.9947,
+   "cur": 0.9658,
+   "prevPass": true,
+   "curPass": true,
+   "delta": -0.0289
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "web",
+   "prev": 0.9656,
+   "cur": 0.9941,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0285
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/floats-clear/floats-clear-multicol-003.html",
+   "platform": "android",
+   "prev": 0.9881,
+   "cur": 0.9968,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0087
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html",
+   "platform": "android",
+   "prev": 0.9857,
+   "cur": 0.997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0113
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-basic-blur.html",
+   "platform": "android",
+   "prev": 0.899,
+   "cur": 0.904,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.005
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-basic-blur.html",
+   "platform": "web",
+   "prev": 0.9943,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0057
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-containing-block.html",
+   "platform": "android",
+   "prev": 0.7448,
+   "cur": 0.7506,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0058
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-containing-block.html",
+   "platform": "ios",
+   "prev": 0.7837,
+   "cur": 0.7955,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0118
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-containing-block.html",
+   "platform": "web",
+   "prev": 0.9879,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0121
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-scale-transform.html",
+   "platform": "android",
+   "prev": 0.9688,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0155
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-scale-transform.html",
+   "platform": "ios",
+   "prev": 0.9688,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0155
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-scale-transform.html",
+   "platform": "web",
+   "prev": 0.9688,
+   "cur": 0.9843,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0155
+  },
+  {
+   "sec": "selectors",
+   "test": "css/selectors/has-visited.html",
+   "platform": "android",
+   "prev": 0.9509,
+   "cur": 0.9579,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.007
+  },
+  {
+   "sec": "selectors",
+   "test": "css/selectors/has-visited.html",
+   "platform": "web",
+   "prev": 0.9854,
+   "cur": 0.997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0116
+  }
+ ],
+ "newlyMeasured": [],
+ "unmeasuredNow": [
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+   "platform": "android",
+   "prev": 0.9423,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-counter-styles",
+   "test": "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+   "platform": "ios",
+   "prev": 0.942,
+   "cur": null,
+   "prevPass": false,
+   "curPass": null
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  }
+ ],
+ "missingSections": [],
+ "columnShorts": []
+}

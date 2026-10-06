@@ -122,14 +122,16 @@ fi
 host_load1() { sysctl -n vm.loadavg | awk '{print $2}'; }
 host_free_mb() { vm_stat | awk '/Pages free/{f=$3} /Pages inactive/{i=$3} END{gsub(/\./,"",f); gsub(/\./,"",i); printf "%d", (f+i)*16384/1048576}'; }
 stop_our_processes() {
-  # Only OUR processes: the emulator fleet provision-devices launches, the
-  # puppeteer browsers lane work leaves behind, and the Gradle daemons of both
-  # build roots. The user's browser is theirs — the check below reports it as
-  # load/memory and refuses instead of killing it. Since wave 52 "ours" is
-  # CHECKED, not assumed (own-processes.sh): until then these two lines were
-  # host-wide pkills that also took down another project's emulator or
-  # Playwright/puppeteer browser. A foreign one now stays up, is named on
-  # stderr, and counts as load in the check below.
+  # Only OUR processes: the emulator fleet provision-devices launches and the
+  # puppeteer browsers lane work leaves behind. The user's browser is theirs —
+  # the check below reports it as load/memory and refuses instead of killing
+  # it. Since wave 52 "ours" is CHECKED, not assumed (own-processes.sh): until
+  # then these two lines were host-wide pkills that also took down another
+  # project's emulator or Playwright/puppeteer browser. A foreign one now
+  # stays up, is named on stderr, and counts as load in the check below.
+  # STILL HOST-WIDE (queued in BACKLOG): `gradlew --stop` below stops every
+  # Gradle daemon of this Gradle version on the machine, not only those of
+  # the two build roots it is run from.
   kill_own_emulators
   kill_own_test_browsers
   export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null || true)}"

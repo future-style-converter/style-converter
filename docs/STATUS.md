@@ -2444,6 +2444,190 @@ the flags that suppress the chrome). Design, reviews, lane reports,
 skeptic verdicts and the refresh record are in
 `tools/titan/results/wave51-A/`.
 
+**Wave 52 (2026-09-25 → 10-06) — twelve lanes, and a ship that stopped
+itself.** corpus-v6.18 (`tools/titan/results/corpus-v6-18.json`): web
+1229/1372 89.6%, iOS 1119/1362 82.2%, Android 1111/1362 81.6% (corpus-v6.17:
+1215/1379 · 1089/1369 · 1080/1369); **102 cells gained, 8 lost, 0 newly
+measured, 21 unmeasured-now** against wave51-fix over 4096 scored cells
+(`wave52-ship`, commit aaf676c5). The wave opened with the full gate on the
+unmodified wave-51 tree (`wave52-open`, quiet host, 30/30 at 48/48/48 first
+attempt, fixture net exit 0 ×8): **0 gained / 0 lost / 0 movers over 4117
+cells**, the third deterministic gate in a row. Twelve builder lanes (PLAN:
+`tools/titan/results/wave52-plan/PLAN.md` §1–§2), each followed by an
+executed-repro skeptic and a fix pass, ran on the opus model as file-driven,
+resumable workflows after three fan-outs died on the usage limit — and the
+resumed starts found real defects in the killed starts' uncommitted code (L2
+had applied the body margin twice). The two must-fix findings still open at
+compile time were closed first (L6's two-line border band mirrored the inner
+line; L11's gate-list hunk would have landed a red pair), then 35 seam
+patches and cross-lane hunks went in in one ordered pass
+(`integrate-seams.sh`, c565d2e3). By lane: **L1** the converter resolves
+`display-p3-linear` / `a98-rgb-linear` / `rec2020-linear` (no transfer
+decode, css-color-4 §10.2) and the view-transition bake stamps a frame ring
+on fractional boxes; **L2** composed canvases — inline-axis overflow cropped
+at the viewport instead of painting into the 16 px frame (Fix A), one owner
+for the body margin, the root-stack fold, the UA margin of hoisted roots;
+**L3** failure-indicator ink — `display: contents` unboxes floats, the
+baked-layout guard reads the real signature instead of any authored width +
+height, a spanner's abspos descendant finds its containing block on iOS;
+**L4** backface culling under `preserve-3d`, Compose `transform: inherit`,
+the containing-block-level port of percent margin/padding (its four
+`abspos-auto-sizing-fit-content-percentage` Android captures byte-identical
+to the opening gate, as required); **L5** the extractor's cascade —
+importance, the declaration splitter, the layered path, Selectors-4
+specificity in the merge, invalid values no longer shadowing valid ones,
+scientific-notation angles; **L6** the Compose korean counter-style twin,
+the Compose far-edge border band of a too-short multicol float box painted
+inside the box (paint-clamped; the box stays 3–5 px short), author
+`@counter-style` resolved by the bake, the outside-marker hang,
+armenian-008's natives back on the
+font-parity refusal list; **L7** static position (Android grid §9.2
+alignment — 16 cells to 1.0000 as predicted — iOS flex, last-baseline);
+**L8** `ch` in the face the label paints and along the upright inline axis,
+the upright run's §7.3.1 budget, `<col width>` harvested, a zero used box
+paints no UA widget; **L9** the hanging-punctuation fold (F1, CSS-correct
+for a non-hanging UA, not hanging punctuation itself; its one carrier
+fell, below), the Swift glyphless ring, a
+drawn ellipsis on soft-wrapped clamps, clamp-aware line breaking, the
+soft-hyphen pre-break; **L10** iOS percent `flex-basis` on the nowrap path,
+negative main-axis margins in the flex line's outer sizes, fractional
+gap-decoration band shares snapped as Chromium snaps them; **L11** `all`
+keeps the declarations written after it, on all three runtimes, and
+post-load extraction can introduce `color`; **L12** the instrument. L6's
+request to tag seven valid cssom tests not-applicable was deferred — up to
+21 scored cells (13 passing) could have left the denominator, or moved on
+re-extracted fixtures, in the same gate as the cssom work (BACKLOG,
+Instrument decisions pending). **The instrument change was calibrated
+before any render change was scored**: an absence-only stamp (a pass that an inkless capture
+would also receive, because the reference is nearly blank, leaves the
+denominator — 19 cells, 7 tests) and a CANVAS_REV re-freeze (canvas
+background on `:where(html)` only; the UA body margin when the test declares
+one and the reference does not — 1412 references cloned byte-identical, 23
+re-rendered, 8 of them off the plan's list), scored on IDENTICAL captures
+(`wave52-calib` = the opening gate's 4305 PNGs re-scored, 88 moved cells all
+attributed): 13 gained, 8 lost, 19 unmeasured. All of it was pre-registered
+in PLAN §10 before the closing gate, including the six losses PLAN §1 had
+not foreseen (its "lost must be exactly 2" named only the two
+`flex-gap-decorations-033` natives, and did not survive the calibration):
+`display-contents-root-background` ×3 (P ≈1.0 → f 0.534–0.5355) and
+`column-span-during-transition-doesnt-skip` ×3 (P 0.9879 → f) — the old references were erased or degenerate, the new ones
+show what Chrome paints and the runtimes do not (BACKLOG 0(ac), 0(ad)).
+**The first closing attempt stopped the ship.** `wave52-final` (308d11f0;
+30/30, every column full, fixture net exit 0 ×9) scored 99 gained / 13 lost
+— five outside the pre-registered eight (`counter-reset-reversed-nested`
+ios/android, `hyphens-manual-011` / `-012` / `-manual-inline-011` android
+0.9811 / 0.9811 / 0.9739 → 0.8925 / 0.8983 / 0.8842), so the adjudication
+failed and nothing shipped. Both causes were older defects the lanes had exposed, fixed at the root (aaf676c5;
+`wave52-gate/_note.md` §2): Android measured `ch` as a rasteriser's number —
+a hinted `Paint()` through `measureText`, which ceils the run, so 19 instead
+of 19.2 at 32 px monospace; the `10ch` box held nine glyphs and L9's
+soft-hyphen pre-break, correct for the box it was given, broke one
+opportunity early; `ch` is now the font's advance (`getRunAdvance`, linear
+sub-pixel metrics) — and both natives drew a list marker on an `<li>` the
+author made `display: block` (css-lists-3 §3.1: the marker follows the box)
+— L6's hang had only moved that stray marker from ink columns 57–65 to
+38–49. Three section probes, each under a byte-identity control that reports
+0 changed on identical captures and 747 leaks across the lanes' own changes
+(web 0 of 336 captures changed, iOS only the five `<li>`-display documents,
+Android only carriers), settled how the now-exact `ch` box meets the pixel
+grid: the first caught Compose's round-to-nearest putting `32ch` = 655.2
+device px at 655 and wrapping `block-ellipsis-023/-024` android early; the
+second caught the over-correction — a strictly-above snap grew an exact 315
+px to 316 and cost `ch-units-vrl-003/-004` android their pass; the shipped
+rule rounds a `ch`-derived length up only when it is off the grid (third
+probe against `wave52-final`: f → P 6, P → f 0). Nine mutations, each killed
+by exactly its named pins (`wave52-gate/closing-fixes-mutations.log`). **The
+gate of record**, `wave52-ship` (installed APK and `.app` hashes equal to
+the third probe's): gained 102 = 13 instrument-only + 89 render (web 18 ·
+iOS 35 · Android 36, against PLAN §10's HIGH + MED-HIGH estimate of roughly
++19 / +27 / +26); lost 8, exactly the pre-registered eight; unmeasured-now
+21 = the 19 stamps + armenian-008's two natives; scored against the
+calibration run, the render lanes lose 0. **Every flipped cell was looked
+at** against its reference (six reviewers, 26 cells to a second adversarial
+reader, two verdicts overturned, one in each direction;
+`wave52-gate/cell-review.json`): **91 faithful gains, 11 degenerate, 8
+honest fails** (no suspect reference). The 11 pass on a wrong picture and
+are recorded, never claimed: `anchor-position-multicol-007` android (the
+forbidden red anchor still drawn) and `contain-inline-size-bfc-floats-001`
+×2 (the bar below the third float), both pre-labelled by L2;
+`counter-suffix` ×2 (the `dir=rtl` lists have no markers);
+`hyphens-out-of-flow-001/-002` and `hyphens-span-001` android (hyphens
+missing and the word broken at a character — only `-002`'s boxes 1, 2 and 7
+hyphenate — while the box width now matches the reference; `-001` / `-002`
+already passed in the first attempt, `hyphens-span-001` flipped with
+aaf676c5);
+`s-11-1-1b-006` ×2 (the square 5 px high — reviewers' guess: a
+`display: table` body laid out as blocks); and the ring-fenced `filter-effects/backdrop-filter-basic-blur`
+ios, f 0.9469 → P 0.9526 through L2's generic frame crop while its filter
+boxes sit 24 px right of the reference (web P 0.9943 → 1, Android f 0.899 →
+0.904) — reported as measured. `counter-reset-reversed-nested` ×3 still
+passes at 0.9506–0.9509 on a flat list with wrong counter values. Tripwires
+(first attempt and gate of record alike): frame-ink overrun-right 208 → 0
+and overrun-left 84 → 1 (one pixel, cell unchanged at P 0.9981), the frame
+ring on exactly the four fractional-box tests, blank captures 45 → 43 (L4
+un-blanked the two `composited-under-rotateY-180deg-preserve-3d` natives).
+Prediction misses,
+read from the gate's watchlist block against
+`wave52-plan/ORCHESTRATOR-TODO.md` §5: `block-ellipsis-032` android (L9,
+MED-LOW) rose 0.9397 → 0.9457 and stayed f — the cell wave 50 also missed;
+`ch-units-vrl-005/-006` (L8, iOS MED-LOW, Android LOW) rose to 0.942 /
+0.9347 and stayed f; `hanging-punctuation-inline-001` ios, where L9's F1
+replay predicted a dip to 0.9685 with no flip, fell 0.9756 → 0.9555 — nearly
+three times the predicted drop, 0.0055 above the line (Android landed on its
+prediction, 0.9452 for 0.9454); L10's `flex-gap-decorations-046` android,
+predicted to rise, fell P 0.996 → P 0.9947; L10's snap movers
+(`flex-gap-decorations-024/029/030/034–037/050`), predicted ≤ 0.0014, moved
++0.0037 … +0.013 (all upward, not separable from L2's Fix A on the same
+tests); L2's frame-ink tripwire, predicted 0 / 0, measured 0 / 1 (above);
+L2's DEGENERATE pre-label on
+`flex-gap-decorations-034` ×3 was wrong in the honest direction
+(pixel-identical to the reference); `s-11-1-1b-006` ×2 (L2, MED) and
+`counter-suffix` ios (L6, MED, with an unpredicted Android twin) flipped as
+predicted and landed degenerate. Unpredicted faithful gains:
+`collapsed-border-{sideways-rl,vertical-lr,vertical}-rtl-overflow` web ×3
+0.8733 / 0.8741 / 0.8733 → 1.0 (L2; the table had sat 60 px left),
+`cross-fade-target-alpha`
+android (Fix A's crop), `hyphens-auto-last-word-001` ios (f 0.9032 → P
+0.9991, on L8's M-A mover list), and
+`hyphens-auto-010` / `hyphens-punctuation-001` android from the closing `ch`
+fix. Three device A/B exclude arms ran after the gate (23:28 → 23:58 UTC,
+each built, its installed `base.apk` sha1 / `.app` digest matched against
+the build, the tree restored; `tools/titan/results/wave52-gate/ab-{t5,ma,f1}.txt`)
+and decided what the include arm could not: L6 T5's outside-marker hang
+is what flipped `counter-suffix` on both natives (degenerate — the RTL
+lists still have no marker) and moved 18 more list cells up, 2 down, none
+across the bar; L8 M-A's measuring face is what flipped
+`hyphens-auto-last-word-001` ios (f 0.9032 → P 0.9991) and, with the
+closing `ch` fix in both arms, the four Android hyphens cells, at the price
+of −0.010 on `hyphens-manual-inline-012` android and −0.003 on
+`ch-units-vrl-003` / `-004` (still P); L9 F1's fold is confined to its one
+carrier and is what moved `hanging-punctuation-inline-001` (ios P 0.9756 →
+P 0.9555, android f 0.9495 → f 0.9452) — kept, as the CSS-correct fold with
+no flip either way, against the lane's own "drop it if the arm confirms
+the drop" (docs/BACKLOG.md 4(f) records the decision and the thin iOS
+pass). Harness: the capture and gate scripts no
+longer kill emulators, test browsers or web-port listeners they did not
+start — a developer's own server was
+listening on the default web port :3000, which `test-all.sh` and
+`section-runner.sh` freed with `kill -9` and a gate would have killed
+(308d11f0, `web-port-guard.sh`: a foreign holder is named and left alone,
+the default port moves to 3300–3399, an explicit one exits 2), and
+`gate-driver.sh` had stopped every emulator and test browser on the host
+(20acb531, `own-processes.sh`: only recorded pids and browsers whose cwd is
+inside the checkout). Two host-wide stops remain in the gate path —
+`./gradlew --stop` and the adb-timeout `pkill -9 -x adb` (BACKLOG
+Known-broken). Suites on the shipped tree: converter 551 · web
+runtime 1361 · web-harness 321 · compose 3393 · android-harness 159 ·
+swiftui 2147 · tooling 2261 · IR conformance valid; the ios-harness XCTest
+bundle compiles with 30 tests and cannot run on this host. Lessons that
+outlive the wave: a pre-registered lost list is what made five real cells
+visible among thirteen; a correct change that exposes an older defect is
+fixed at the older root, not reverted; a probe licenses an assembled result
+only under a control that has been seen to fail; a pixel snap is a choice
+between two failures, and the probes measured both; and a score is still not
+a look — 11 of 102 gains are degenerate. Gate record and every artifact:
+`tools/titan/results/wave52-gate/`; open items: `docs/BACKLOG.md`.
+
 
 ## Test suites
 
@@ -2451,11 +2635,11 @@ skeptic verdicts and the refresh record are in
 |---|---|---:|
 | converter (Kotlin) | `./gradlew :converter:test` | 551 |
 | web runtime (vitest) | `npm -w runtimes/web run test` | 1361 |
-| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3384 |
+| compose runtime (JUnit) | `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest)` | 3393 |
 | android-harness app (JUnit) | `(cd apps/android-harness && ./gradlew :app:testDebugUnitTest)` | 159 |
-| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2143 |
+| swiftui runtime (XCTest) | `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64'` | 2147 |
 | web-harness (vitest) | `npm -w apps/web-harness run test` | 321 |
-| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2256 |
+| tooling (node --test) | `node --test tools/visual/*.test.mjs tools/titan/*.test.mjs` | 2261 |
 | ios-harness app (XCTest — needs a simulator, so it is outside the device-less sweep) | `(cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>')` | 30 |
 | IR conformance | `node schema/conformance/run.mjs --emit` | 39 goldens (12 v1 + 27 v2) × 4 codebases |
 
