@@ -1,0 +1,30 @@
+{
+ "cmd": [
+  "xcodebuild",
+  "test",
+  "-scheme",
+  "StyleConverterRuntime",
+  "-destination",
+  "platform=macOS,variant=Mac Catalyst,arch=arm64",
+  "-derivedDataPath",
+  "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/dd",
+  "-only-testing:StyleConverterRuntimeTests/InlineSpanRingTests"
+ ],
+ "results": [
+  {
+   "id": "W6-pre-line-readmitted",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "exit": 65,
+   "sha256Before": "88343a1931e1dbd361649813e198a05eb4fc5494fc3e6c9ebe643cae3c1f59b6",
+   "sha256After": "88343a1931e1dbd361649813e198a05eb4fc5494fc3e6c9ebe643cae3c1f59b6",
+   "expectFail": {
+    "testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless": true
+   },
+   "failLines": [
+    "/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift:259: error: -[StyleConverterRuntimeTests.InlineSpanRingTests testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless] : XCTAssertEqual failed: (\"nil\") is not equal to (\"Optional(\"member-prop:WhiteSpace-collapsing\")\") - PRE_LINE",
+    "Test Case '-[StyleConverterRuntimeTests.InlineSpanRingTests testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless]' failed (0.934 seconds)."
+   ],
+   "proven": true
+  }
+ ]
+}

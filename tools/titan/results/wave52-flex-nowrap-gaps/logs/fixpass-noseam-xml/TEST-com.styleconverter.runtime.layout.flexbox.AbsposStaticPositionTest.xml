@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.053Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="definiteExtentPx - logical bare-px wire with writing-mode mapping" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="justify-content sole-item folds" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.001"/>
+  <testcase name="axis map - horizontal-tb column family" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="axisOffset - reversed axes mirror inside the free space" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="axis map - horizontal-tb row family" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="safe-002 - reverse directions with margins" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="auto insets keep the static position - non-auto insets replace it" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.001"/>
+  <testcase name="definiteExtentPx reads only the typed exact-length wire" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="safe-003 - safe end fits so END is honored" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="axis map - vertical-rl swaps axes and reverses the block axis" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="explicit insets null the claim on their physical axis only" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <testcase name="safe-001 - four sub-containers" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticPositionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,288 @@
+Wave 52 · lane L3 (failure-ink) · hunk-for-orchestrator-1 — FIX-PASS RE-CUT (2026-10-05), replaces the first-pass text.
+Base: HEAD 7d9c22a7 (blobs: VerticalMulticolPlan.swift b6935082, VerticalFragmentGeometryTests.swift 8472f39,
+Wave12BoxSizingBasisTests.swift 7ee56f1; VerticalMulticolBakeGateTests.swift is NEW). All four paths have no
+owner in PLAN.md §2, so this is a hunk for the orchestrator, never a lane edit. No ordering dependency on any
+other patch: verified alone AND with seam-2.patch applied (either order). Apply with `git apply` from the repo root.
+
+WHAT: the Swift vertical-multicol plan builder's post-load bake gate (ColumnsApplier.verticalFragmentPlan) reads
+the shared BakedLayoutSignature predicate (Width ∧ Height ∧ BoxSizing ∧ (PaddingTop ∨ BorderTopStyle)) like its
+Compose twin ChildSpec.bakedPhysicalSize (already in-tree, MulticolSpannerFlow.kt) — the fourth F1 site.
+WHY THE TESTS RIDE ALONG (skeptic must-fix, executed): the first-pass hunk turned two existing Catalyst pins red
+because their fixtures were wave-47-"baked" only by the old heuristic (bare Width + Height, no BoxSizing):
+  - VerticalFragmentGeometryTests.testVerticalPlanDeclinesBakedLayout (the skeptic's find) → its row now
+    carries the real signature (+BoxSizing CONTENT_BOX, +PaddingTop 0);
+  - Wave12BoxSizingBasisTests.testInheritedVerticalModeRendersUnfragmented (found in this pass, :394/:397 red
+    with the source hunk alone — log H3) → its TallChild carries the same two longhands, zero geometric effect,
+    so the pin stays on the bail path it was written for;
+  - NEW VerticalMulticolBakeGateTests (3 tests): the VERBATIM wave51-fix anchor-position-multicol-017 sole child
+    (30 longhands) on its own container geometry → nil; authored Width+Height → a 5-fragment plan; authored
+    Width+Height+BoxSizing (no band) → a plan.
+VERIFIED (results/wave52-failure-ink/_swift-hunk1-*.log; Mac Catalyst, private copy of Package.swift +
+runtimes/swiftui with the HEAD-bytes ComponentRenderer.swift — the shared tree was never edited):
+  A  hunk alone, 16 suites: 166 tests, 0 failures (_swift-hunk1-runA.log)
+  D  hunk + seam-2.patch:   166 tests, 0 failures (_swift-hunk1-runD-with-seam2.log)
+  H1 gate → wave-47 heuristic (HEAD bytes): both authored rows FAIL; restored sha-equal
+  H2 gate → `if false`: -017 row + testVerticalPlanDeclinesBakedLayout + the Wave12 raster row FAIL; restored
+  H3 Wave12 file at HEAD with the source hunk: :394/:397 FAIL (why the fixture edit ships here)
+CENSUS (census.mjs → census.json f1swiftUsed, the call site's own gates: used writing mode, flow-sibling count,
+every non-spanner child): 1 old-guarded child in 1435 docs (anchor-position-multicol-017__1__0-744, baked),
+new guard true → ZERO corpus movement; the change is native parity, not a flip.
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/VerticalMulticolPlan.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/VerticalMulticolPlan.swift
+index b693508..4207e9d 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/VerticalMulticolPlan.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/VerticalMulticolPlan.swift
+@@ -27,11 +27,13 @@ extension ColumnsApplier {
+     /// differ from the generic bail log their own record):
+     ///  - exactly ONE in-flow child (multi-child vertical balancing is not
+     ///    built — the generic bail covers it);
+-    ///  - NOT a post-load-extracted wire: a child carrying baked physical
+-    ///    Width AND Height already encodes the browser's used layout —
+-    ///    including its fragmentation — so re-fragmenting would double-apply
+-    ///    (the anchor-position-multicol family PASSES today on that frozen
+-    ///    render; Compose twin: ChildSpec.bakedPhysicalSize);
++    ///  - NOT a post-load-extracted wire: a child carrying the extractor's
++    ///    signature (BakedLayoutSignature: baked physical Width AND Height
++    ///    plus the BoxSizing + decoration band always written with them)
++    ///    already encodes the browser's used layout — including its
++    ///    fragmentation — so re-fragmenting would double-apply (the
++    ///    anchor-position-multicol family PASSES today on that frozen
++    ///    render; Compose twin: ChildSpec.bakedPhysicalSize, same predicate);
+     ///  - definite content WIDTH (W) and HEIGHT (U, the inline extent);
+     ///  - used count ≥ 2 (§8.2: one column overflows, never clips);
+     ///  - a statically-resolvable child block extent C — the child's
+@@ -48,10 +50,12 @@ extension ColumnsApplier {
+         // Sole-child contract (the caller's generic bail logs the rest).
+         guard siblingCount == 1 else { return nil }
+         // The post-load bake gate (doc above) — its own log, because this
+-        // decline is a PROTECTION, not a missing feature.
+-        let hasBakedWidth = childProperties.contains { $0.type == "Width" }
+-        let hasBakedHeight = childProperties.contains { $0.type == "Height" }
+-        if hasBakedWidth && hasBakedHeight {
++        // decline is a PROTECTION, not a missing feature. Wave 52 (lane L3,
++        // F1): read through the ONE shared BakedLayoutSignature predicate,
++        // the twin of Compose ChildSpec.bakedPhysicalSize — the two-property
++        // "Width ∧ Height" heuristic it replaces also matched an AUTHORED
++        // `width`+`height` rule and silently kept such a child unfragmented.
++        if BakedLayoutSignature.bakedPhysicalBox(childProperties) {
+             PropertyTracker.logOnce(
+                 key: "multicol-vertical-baked-layout",
+                 message: "vertical multicol: post-load-extracted baked "
+@@ -82,7 +86,10 @@ extension ColumnsApplier {
+         // declines (`allowPercent: false`): its basis is the fragmented
+         // flow itself.
+         let childSize = SizeExtractor.extract(from: childProperties)
+-        let blockSlot = hasBakedWidth ? childSize.width : childSize.height
++        // A declared physical `width` (authored, now that baked ones
++        // declined above) is the block extent; otherwise `block-size`.
++        let hasPhysicalWidth = childProperties.contains { $0.type == "Width" }
++        let blockSlot = hasPhysicalWidth ? childSize.width : childSize.height
+         guard let c = SizeApplierResolve.exact(blockSlot, ctx: ctx,
+                                                parent: 0,
+                                                allowPercent: false) else { return nil }
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalFragmentGeometryTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalFragmentGeometryTests.swift
+index 8472f39..89aada0 100644
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalFragmentGeometryTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalFragmentGeometryTests.swift
+@@ -142,14 +142,19 @@ final class VerticalFragmentGeometryTests: XCTestCase {
+             "no capture → the pre-wave-47 bail, byte-identical")
+     }
+ 
+-    /// A post-load-extracted child (baked physical Width AND Height) keeps
+-    /// the frozen path — its baked geometry already encodes the browser's
+-    /// fragmentation (the anchor-position-multicol protection).
++    /// A post-load-extracted child keeps the frozen path — its baked
++    /// geometry already encodes the browser's fragmentation (the
++    /// anchor-position-multicol protection). Wave 52 (lane L3): the shape is
++    /// the BakedLayoutSignature (Width + Height + BoxSizing + a padding
++    /// band), not bare Width + Height — VerticalMulticolBakeGateTests pins
++    /// the verbatim -017 child and the authored Width + Height rows.
+     func testVerticalPlanDeclinesBakedLayout() throws {
+         let baked = try props(#"""
+             [{"type":"BlockSize","data":{"px":350.0}},
+              {"type":"Width","data":{"type":"length","px":450.0}},
+-             {"type":"Height","data":{"type":"length","px":20.0}}]
++             {"type":"Height","data":{"type":"length","px":20.0}},
++             {"type":"BoxSizing","data":"CONTENT_BOX"},
++             {"type":"PaddingTop","data":{"px":0}}]
+             """#)
+         XCTAssertNil(ColumnsApplier.verticalFragmentPlan(
+             columns: threeColumns(), siblingCount: 1,
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalMulticolBakeGateTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalMulticolBakeGateTests.swift
+new file mode 100644
+index 0000000..3efa07f
+--- /dev/null
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/VerticalMulticolBakeGateTests.swift
+@@ -0,0 +1,146 @@
++//
++//  VerticalMulticolBakeGateTests.swift
++//  StyleConverterRuntimeTests
++//
++//  Wave 52 (lane L3 · failure-ink, fix F1 — the fourth site): the vertical
++//  multicol plan builder's post-load BAKE GATE
++//  (ColumnsApplier.verticalFragmentPlan, VerticalMulticolPlan.swift) reads
++//  the shared BakedLayoutSignature predicate — Width ∧ Height ∧ BoxSizing ∧
++//  (PaddingTop ∨ BorderTopStyle) — like its Compose twin
++//  ChildSpec.bakedPhysicalSize, instead of the wave-47 "Width ∧ Height"
++//  heuristic that an AUTHORED `width`+`height` rule also satisfied.
++//
++//  The geometry is the real carrier's: anchor-position-multicol-017's
++//  container (wave51-fix per-test IR `…-017__1-743`: vertical-rl,
++//  column-count 5, column-gap 0, a baked 100×100 content box) and its sole
++//  flow child `anchor-position-multicol-017__1__0-744`, whose 30 longhands
++//  are copied VERBATIM below. Census (results/wave52-failure-ink/census.mjs,
++//  f1swiftUsed — the call site's own gates: used writing mode, flow-sibling
++//  count, every non-spanner child): that child is the ONLY old-guarded child
++//  in the 1435-doc corpus, and the new predicate still guards it — zero
++//  corpus movement; the authored rows below are the behaviour change.
++//
++//  Mutations EXECUTED against these pins (PLAN §0; each restored, sha-checked;
++//  log: results/wave52-failure-ink/_swift-hunk1-mutations.log):
++//   - H1, gate reverted to the wave-47 heuristic (the HEAD bytes of
++//     VerticalMulticolPlan.swift): both authored rows FAIL (nil plan); the
++//     -017 row, VerticalFragmentGeometryTests and Wave12BoxSizingBasisTests
++//     stay green (both rules read their payloads as baked);
++//   - H2, gate disabled (`if false`): the verbatim -017 row FAILS (a
++//     5-fragment plan), and so do VerticalFragmentGeometryTests'
++//     testVerticalPlanDeclinesBakedLayout and Wave12BoxSizingBasisTests'
++//     testInheritedVerticalModeRendersUnfragmented.
++//
++
++import XCTest
++import CoreGraphics
++@testable import StyleConverterRuntime
++
++final class VerticalMulticolBakeGateTests: XCTestCase {
++
++    /// Wire-shaped property decode (the VerticalFragmentGeometryTests helper).
++    private func props(_ json: String) throws -> [IRProperty] {
++        try JSONDecoder().decode([IRProperty].self, from: Data(json.utf8))
++    }
++
++    /// The -017 container's columns: `column-count: 5` (gap 0 is passed
++    /// separately as `gapPx`, as the renderer's multicolFillGap does).
++    private func fiveColumns() -> ColumnsConfig {
++        var cols = ColumnsConfig()
++        cols.count = 5
++        return cols
++    }
++
++    /// The plan builder over the -017 container geometry: content box
++    /// 100×100 (W = 100 block extent, U = 100 inline extent), gap 0, rl.
++    private func plan017(_ child: [IRProperty]) -> ColumnsApplier.FragmentPlan? {
++        ColumnsApplier.verticalFragmentPlan(
++            columns: fiveColumns(), siblingCount: 1,
++            contentWidthPx: 100, contentHeightPx: 100, gapPx: 0,
++            childProperties: child, ctx: SpacingContext(), blockRtl: true)
++    }
++
++    /// VERBATIM wave51-fix IR of `anchor-position-multicol-017__1__0-744`.
++    private func verbatim017Child() throws -> [IRProperty] {
++        try props(#"""
++             [{"type":"Position","data":"RELATIVE"},
++              {"type":"Top","data":{"px":0}},
++              {"type":"Left","data":{"px":0}},
++              {"type":"Width","data":{"type":"length","px":450}},
++              {"type":"Height","data":{"type":"length","px":20}},
++              {"type":"BoxSizing","data":"CONTENT_BOX"},
++              {"type":"MarginTop","data":{"px":0}},
++              {"type":"MarginRight","data":{"px":0}},
++              {"type":"MarginBottom","data":{"px":0}},
++              {"type":"MarginLeft","data":{"px":0}},
++              {"type":"PaddingTop","data":{"px":0}},
++              {"type":"PaddingRight","data":{"px":0}},
++              {"type":"PaddingBottom","data":{"px":0}},
++              {"type":"PaddingLeft","data":{"px":0}},
++              {"type":"BorderTopWidth","data":{"px":0}},
++              {"type":"BorderRightWidth","data":{"px":0}},
++              {"type":"BorderBottomWidth","data":{"px":0}},
++              {"type":"BorderLeftWidth","data":{"px":0}},
++              {"type":"BorderTopStyle","data":"NONE"},
++              {"type":"BorderRightStyle","data":"NONE"},
++              {"type":"BorderBottomStyle","data":"NONE"},
++              {"type":"BorderLeftStyle","data":"NONE"},
++              {"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},
++              {"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},
++              {"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},
++              {"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},
++              {"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},
++              {"type":"Display","data":"BLOCK"},
++              {"type":"OverflowX","data":"VISIBLE"},
++              {"type":"OverflowY","data":"VISIBLE"}]
++            """#)
++    }
++
++    /// The baked carrier keeps the frozen path: its wire already holds the
++    /// browser's fragmented layout (ios P 0.9511 / android P 0.9823 today).
++    func testVerbatim017SoleChildKeepsTheFrozenPath() throws {
++        let child = try verbatim017Child()
++        // Precondition: the payload IS the extractor's signature.
++        XCTAssertTrue(BakedLayoutSignature.bakedPhysicalBox(child),
++            "the verbatim -017 child carries the post-load signature")
++        XCTAssertNil(plan017(child),
++            "baked used layout: fragmenting again would double-apply")
++    }
++
++    /// The SAME geometry with only the author's `width:450px; height:20px`
++    /// (no BoxSizing, no band) is not baked: the plan builds, C = the
++    /// physical width 450 (the block extent under vertical-rl), F = 5
++    /// bands of W = 100 walking leftward (tx = W − C + i·W, the V-table).
++    func testAuthoredWidthHeightChildEngagesThePlan() throws {
++        let authored = try props(#"""
++            [{"type":"Width","data":{"type":"length","px":450}},
++             {"type":"Height","data":{"type":"length","px":20}}]
++            """#)
++        let plan = try XCTUnwrap(plan017(authored),
++            "authored Width + Height is not the bake signature")
++        XCTAssertTrue(plan.vertical, "the plan must mark itself vertical")
++        XCTAssertEqual(plan.fragments.map { $0.translate.width },
++                       [-350, -250, -150, -50, 50],
++                       "C = 450 sliced into five W = 100 bands, rl")
++        XCTAssertEqual(plan.columnWidthPx, 100, "slot width = W")
++        XCTAssertEqual(plan.columnBlockSizePx, 20, accuracy: 0.001,
++                       "slot height = colH = 100 / 5")
++    }
++
++    /// An author's `box-sizing` alone does not re-trip the gate: the
++    /// decoration-band conjunct (PaddingTop ∨ BorderTopStyle) separates it
++    /// from the extractor, which always writes the band.
++    func testAuthoredBoxSizingWithoutBandStillEngages() throws {
++        let authored = try props(#"""
++            [{"type":"Width","data":{"type":"length","px":450}},
++             {"type":"Height","data":{"type":"length","px":20}},
++             {"type":"BoxSizing","data":"BORDER_BOX"}]
++            """#)
++        XCTAssertFalse(BakedLayoutSignature.bakedPhysicalBox(authored),
++            "BoxSizing without a band is an author rule")
++        let plan = try XCTUnwrap(plan017(authored),
++            "BoxSizing alone keeps the child authored: the plan builds")
++        XCTAssertEqual(plan.fragments.count, 5,
++            "F = ceil(450 / 100) = 5 ≤ N = 5")
++    }
++}
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave12BoxSizingBasisTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave12BoxSizingBasisTests.swift
+index 7ee56f1..4f068ae 100644
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave12BoxSizingBasisTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/Wave12BoxSizingBasisTests.swift
+@@ -355,7 +355,12 @@ final class Wave12BoxSizingBasisTests: XCTestCase {
+         // Fresh dedupe set: the render itself must emit the breadcrumb.
+         PropertyTracker._resetForTests()
+         // Wrapper declares the vertical mode; the 470×120 count-3
+-        // multicol container holds one 150×350 red child.
++        // multicol container holds one 150×350 red child. Wave 52 (lane
++        // L3): the child carries the post-load BakedLayoutSignature
++        // (BoxSizing content-box + a 0px PaddingTop — no geometric effect)
++        // so the wave-47 vertical plan declines it and this pin stays on the
++        // bail path it was written for; with bare Width + Height it read as
++        // AUTHORED and the plan engaged (VerticalMulticolBakeGateTests).
+         let comp = try JSONDecoder().decode(IRComponent.self, from: Data("""
+         {"id":"w","name":"VerticalAncestor",
+          "properties":[
+@@ -374,6 +379,8 @@ final class Wave12BoxSizingBasisTests: XCTestCase {
+                "properties":[
+                  {"type":"Width","data":{"type":"length","px":150.0}},
+                  {"type":"Height","data":{"type":"length","px":350.0}},
++                 {"type":"BoxSizing","data":"CONTENT_BOX"},
++                 {"type":"PaddingTop","data":{"px":0}},
+                  {"type":"BackgroundColor","data":{"srgb":{"r":1.0,"g":0.0,"b":0.0},"original":"#ff0000"}}
+                ]}
+             ]}

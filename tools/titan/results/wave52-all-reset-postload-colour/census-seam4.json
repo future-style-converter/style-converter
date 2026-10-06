@@ -1,0 +1,12 @@
+{
+ "generated": "2026-10-05T16:44:59.496Z",
+ "docs": 1435,
+ "allComponents": 28,
+ "perElementReach": [],
+ "composedReach": 0,
+ "legacyFixtureReach": [
+  "fixtures/combinations/all-then-color.json ATC_AllThenProps",
+  "fixtures/combinations/all-then-color.json ATC_InitialUnderRedParent/span",
+  "fixtures/combinations/all-then-color.json ATC_DirectionSurvives"
+ ]
+}

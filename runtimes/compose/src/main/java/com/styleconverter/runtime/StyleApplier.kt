@@ -529,33 +529,33 @@ object StyleApplier {
         //     (backface-visibility-hidden-001's `rotateY(180deg)` red child,
         //     composited-under-rotateY-180deg-perspective's red block), where
         //     cos θ < 0 ⇔ θ ∈ (90°, 270°) mod 360 is exact.
-        if (config.interactions.backfaceVisibility ==
-                com.styleconverter.runtime.interactions.BackfaceVisibilityMode.HIDDEN) {
-            val ry = (config.transforms.rotateY ?: 0f) +
-                config.transforms.functions.sumOf {
-                    when (it) {
-                        is com.styleconverter.runtime.transforms.TransformFunction.RotateY -> it.degrees.toDouble()
-                        else -> 0.0
-                    }
-                }.toFloat()
-            val rx = (config.transforms.rotateX ?: 0f) +
-                config.transforms.functions.sumOf {
-                    when (it) {
-                        is com.styleconverter.runtime.transforms.TransformFunction.RotateX -> it.degrees.toDouble()
-                        else -> 0.0
-                    }
-                }.toFloat()
-            // Normalise to [-180, 180] then check if absolute angle > 90.
-            fun normalised(deg: Float): Float {
-                var d = deg % 360f
-                if (d > 180f) d -= 360f
-                if (d < -180f) d += 360f
-                return d
-            }
-            val flipped = kotlin.math.abs(normalised(ry)) > 90f ||
-                          kotlin.math.abs(normalised(rx)) > 90f
-            if (flipped) result = result.alpha(0f)
+        //
+        //     Wave 52 (lane L4, T5) — the degree rule now lives in
+        //     transforms/BackfaceCull.isBackFacing (verbatim), and the
+        //     DECISION is split by `transform-style` (css-transforms-2
+        //     §4.1.2): under FLAT the subtree is flattened into this plane,
+        //     so `alpha(0f)` on the whole chain is the back face; under
+        //     PRESERVE_3D the children are their own planes with their own
+        //     `backface-visibility`, so only this element's OWN box (its
+        //     background + borders) is culled and the children keep
+        //     painting. Measured on css-transforms/composited-under-
+        //     rotateY-180deg-preserve-3d (ios/android f 0.9565): the parent
+        //     `rotateY(180deg); backface-visibility: hidden; preserve-3d`
+        //     alpha'd its green 100×100 child and painted a BLANK canvas
+        //     where the frozen ref paints the square at (16,16).
+        val backface = com.styleconverter.runtime.transforms.BackfaceCull.decide(config)
+        if (backface == com.styleconverter.runtime.transforms.BackfaceCull.Decision.HIDE_SUBTREE) {
+            result = result.alpha(0f)
         }
+        // The config the decoration steps (5./6. below) paint: the culled
+        // own face has its background and borders removed; every other lane
+        // (layout, effects, overflow, padding, opacity) keeps reading
+        // `config` unchanged, so a NONE / HIDE_SUBTREE element is byte-
+        // identical to the pre-wave-52 chain (`paint === config`).
+        val paint =
+            if (backface == com.styleconverter.runtime.transforms.BackfaceCull.Decision.CULL_OWN_FACE)
+                com.styleconverter.runtime.transforms.BackfaceCull.stripOwnFace(config)
+            else config
 
         // 2. Transforms — rotate/scale/skew the entire element including bg.
         //    retro R1 (A11#0): this node is OUTER of step 4's absoluteOffset,
@@ -712,34 +712,37 @@ object StyleApplier {
         //    (uniform/no border, plain color background — the pure gate in
         //    BorderRadiusApplier.selfPaintsWithoutClip), the radius shapes
         //    the background fill + border band directly and clips NOTHING.
+        //    Both routes read `paint` (step 1.5): the element's own
+        //    decoration, minus the culled back face under preserve-3d;
+        //    `paint === config` everywhere else.
         if (com.styleconverter.runtime.borders.radius.BorderRadiusApplier.selfPaintsWithoutClip(
-                radius = config.borders.radius,
-                sides = config.borders.sides,
+                radius = paint.borders.radius,
+                sides = paint.borders.sides,
                 // css-overflow-3 §3 used values: any clipping axis keeps the
                 // legacy children-clipping mode (that clip IS the spec then).
                 overflowClips = config.overflow.shouldClip,
                 // Rectangular layer paints (gradients/url layers, clip
                 // insets) would lose their rounding without the clip.
-                hasBackgroundLayers = config.colors.backgroundImages.isNotEmpty(),
-                hasClipInsets = config.colors.backgroundClipInsets != null,
+                hasBackgroundLayers = paint.colors.backgroundImages.isNotEmpty(),
+                hasClipInsets = paint.colors.backgroundClipInsets != null,
                 // opacity < 1: the fill must stay INSIDE ColorApplier's
                 // alpha layer (its step 1 wraps its step 2); self-paint
                 // would hoist it outside and un-attenuate it.
-                hasPartialOpacity = (config.colors.opacity ?: 1f) < 1f,
+                hasPartialOpacity = (paint.colors.opacity ?: 1f) < 1f,
             )
         ) {
             // Rounded fill + band, no clip — children paint unclipped.
             result = com.styleconverter.runtime.borders.radius.BorderRadiusApplier.applySelfPaint(
-                result, config.borders.radius, config.borders.sides,
-                config.colors.backgroundColor,
+                result, paint.borders.radius, paint.borders.sides,
+                paint.colors.backgroundColor,
             )
             // Outline unchanged — it draws OUTSIDE the box and never rode
             // the radius clip (BordersFacade applies it after the sides).
             result = com.styleconverter.runtime.borders.outline.OutlineApplier
-                .applyOutline(result, config.borders.outline)
+                .applyOutline(result, paint.borders.outline)
             // Colors with the solid fill suppressed (applySelfPaint is its
             // single owner in this mode); opacity/layers logic unchanged.
-            result = ColorApplier.applyColors(result, config.colors.copy(backgroundColor = null))
+            result = ColorApplier.applyColors(result, paint.colors.copy(backgroundColor = null))
         } else {
             // Legacy route (no radius, or a combination self-paint cannot
             // express yet): radius clip sits between the outer sizing frame
@@ -747,8 +750,8 @@ object StyleApplier {
             // border-box including the padding band; background then paints
             // the full sized box, INCLUDING the padding region (padding is
             // applied in step 8 below, INSIDE bg in chain order).
-            result = BordersFacade.apply(result, config.borders)
-            result = ColorApplier.applyColors(result, config.colors)
+            result = BordersFacade.apply(result, paint.borders)
+            result = ColorApplier.applyColors(result, paint.colors)
         }
 
         // 7. Overflow (clipping and scrolling)
@@ -823,8 +826,18 @@ object StyleApplier {
         return com.styleconverter.runtime.spacing.SpacingContext(
             fontSizePx = fontSizePx,
             chAdvancePx = if (needsCh) {
-                com.styleconverter.runtime.spacing.ChUnitMetrics
-                    .measure(config.typography.fontFamily, fontSizePx)
+                com.styleconverter.runtime.spacing.ChUnitMetrics.measure(
+                    config.typography.fontFamily, fontSizePx,
+                    // Wave 52 lane L8 (M-B) — css-values-4 §6.1.1: `ch` is the
+                    // '0' advance "in the inline axis of the element"; under
+                    // `vertical-*` + `text-orientation: upright` that is the
+                    // VERTICAL advance (24 px at 20 px Inter, so the
+                    // ch-units-vrl orange `width: 5ch` box is the ref's 120).
+                    // `config` is extracted from the MERGED list, so an
+                    // inherited writing-mode reaches the decision.
+                    inlineAxisUpright = com.styleconverter.runtime.typography.text.VerticalInlineAxis
+                        .chAdvanceIsVertical(config.writingMode.writingMode, config.writingMode.textOrientation),
+                )
             } else null,
             // The lh basis: declared line-height (Sp-typed — every shape
             // the typography extractor emits) wins; declared-`normal` and

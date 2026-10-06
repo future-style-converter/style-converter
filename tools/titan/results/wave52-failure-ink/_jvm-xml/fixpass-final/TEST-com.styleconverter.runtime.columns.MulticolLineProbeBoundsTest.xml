@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolLineProbeBoundsTest" tests="5" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:09:47.658Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="the clamp maps any width into the legal range" classname="com.styleconverter.runtime.columns.MulticolLineProbeBoundsTest" time="0.0"/>
+  <testcase name="the representable boundary is 262142 and the constant names it" classname="com.styleconverter.runtime.columns.MulticolLineProbeBoundsTest" time="0.0"/>
+  <testcase name="the applier probes through the clamp, not the bare constant" classname="com.styleconverter.runtime.columns.MulticolLineProbeBoundsTest" time="0.0"/>
+  <testcase name="IntrinsicChannel still does not guard the Constraints packing throw" classname="com.styleconverter.runtime.columns.MulticolLineProbeBoundsTest" time="0.001"/>
+  <testcase name="the line probe width is representable in Compose Constraints" classname="com.styleconverter.runtime.columns.MulticolLineProbeBoundsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

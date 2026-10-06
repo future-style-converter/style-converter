@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" tests="35" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.670Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="flex-grow parsed as float from wrapped value" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.001"/>
+  <testcase name="display flex maps to DisplayKind Flex" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="unrelated properties are ignored" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-self end" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="order negative parsed" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="display flex + row + space-between extracts all three" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-items flex-start" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="justify-content space-between" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-content space-around" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-wrap wrap-reverse" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-direction column" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-direction row-reverse" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="display block maps to Block" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="empty property list returns Empty config" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="justify-content center" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="display inline-flex maps to InlineFlex" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="display none maps to None" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="explicit flex-direction wins over box-orient" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-shrink parsed as float" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-wrap nowrap" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-direction row" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="order parsed as int" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="justify-content flex-start" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-items flex-end" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="box-orient vertical implies column direction when flex-direction absent" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-self anchor-center collapses to center" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-items stretch" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-items center" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-direction column-reverse" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="justify-content space-around" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="align-items baseline" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-wrap wrap" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="justify-content space-evenly" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="justify-content flex-end" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <testcase name="flex-basis fills Default placeholder when present" classname="com.styleconverter.runtime.layout.flexbox.FlexboxExtractorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

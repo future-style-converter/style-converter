@@ -1,0 +1,129 @@
+Wave 52 · lane L9 (inline-run-wall) · seam-2 — iOS ComponentRenderer.swift
+Applies on: HEAD 7d9c22a7 (campaign/wave52) — NO prior lane patch needed; touches none of the
+other lanes' registered iOS hunks (L11 :330-345, L3 :765/~:2050/:4354-4361, L7 :2098-2112,
+L6 :4405-4480, L8 :4969-4987).
+What: F4 — PlaceholderLabel gains `blockEllipsisClamp` (default nil = byte-identical), set at the
+four label call sites from GreedyLineBreaker.drawnClamp(limit:properties:), and passed as `clamp:`
+to the greedy pre-break (:4769), so a drawn-marker `line-clamp` bakes its "…" at a soft wrap
+opportunity (css-overflow-4 §4.2) instead of SwiftUI's tail truncation after an overlong word
+(block-ellipsis-025 ios f 0.9495). F2 paint — styledSpanText attaches a glyph-less member's band
+through TypographyApplier.bandedRun (AttributedString.backgroundColor). `.lineLimit` (:5071) and
+TypographyApplier's TruncationMod are unchanged on purpose (see _note.md).
+Depends on (non-seam, lane-owned, already in the tree): GreedyLineBreaker.swift (Clamp, clampLines,
+drawnClamp), TypographyApplier.swift (bandedRun), InlineSpanRing.swift (clamp hidden-tail alignment).
+Verification: see tools/titan/results/wave52-inline-run-wall/_note.md "Seam verification".
+
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+index 97993624..59482d8d 100644
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -3132,6 +3132,10 @@ public struct ComponentRenderer: View {
+             // language (`meta.lang`), the input the `hyphens: auto`
+             // dictionary gate needs. nil for every CSS-envelope fixture.
+             lang: component.meta?.lang,
++            // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
++            // bakes; nil for no clamp / a suppressed marker / bare max-lines.
++            blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
++                limit: style.text.lineClampLimit, properties: component.properties),
+         )
+     }
+ 
+@@ -3414,7 +3418,11 @@ public struct ComponentRenderer: View {
+                     // string surgery, so the split happens in there).
+                     // nil for every span-less fold keeps the label
+                     // byte-identical to wave 45.
+-                    inlineSpans: flow.spans.isEmpty ? nil : flow.spans
++                    inlineSpans: flow.spans.isEmpty ? nil : flow.spans,
++                    // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
++                    // bakes; nil for no clamp / a suppressed marker / bare max-lines.
++                    blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
++                        limit: style.text.lineClampLimit, properties: component.properties)
+                 )
+             }
+             if let t = component.text, !t.isEmpty, runPlan == nil,
+@@ -3466,7 +3474,11 @@ public struct ComponentRenderer: View {
+                     // sibling of the leaf site below. Nil for every
+                     // non-collapsed component.
+                     decorations: DecorationWire.decorationLines(
+-                        from: component.meta?.decorations)
++                        from: component.meta?.decorations),
++                    // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
++                    // bakes; nil for no clamp / a suppressed marker / bare max-lines.
++                    blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
++                        limit: style.text.lineClampLimit, properties: component.properties)
+                 )
+             }
+             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
+@@ -4161,6 +4173,10 @@ public struct ComponentRenderer: View {
+                 // per-line overlay from here.
+                 decorations: DecorationWire.decorationLines(
+                     from: component.meta?.decorations),
++                // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
++                // bakes; nil for no clamp / a suppressed marker / bare max-lines.
++                blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
++                    limit: style.text.lineClampLimit, properties: component.properties),
+                 // Wave 35 (lane B5) — the upright-vertical gate. Reads the
+                 // MERGED list because `writing-mode` / `text-orientation` are
+                 // inherited and normally sit on an ancestor. nil for every run
+@@ -4646,6 +4662,18 @@ private struct PlaceholderLabel: View {
+     // label byte-identical to wave 45.
+     var inlineSpans: [InlineRunFlow.Span]? = nil
+ 
++    // Wave 52 (lane L9, F4) — the drawn-marker `line-clamp` this label's
++    // greedy pre-break bakes (css-overflow-4 §5.1 `line-clamp: <n>` ⇒
++    // `block-ellipsis: auto`; §4.2 places the UA ellipsis so it FITS the
++    // last line, hiding content at soft wrap opportunities). Decided ONCE
++    // at the call site by GreedyLineBreaker.drawnClamp (nil for no clamp,
++    // a suppressed marker, or the bare `max-lines` longhand). nil — the
++    // default, every caller that does not pass it — keeps the pre-break
++    // byte-identical to wave 51, where SwiftUI's `.lineLimit` tail
++    // truncation appended "…" AFTER an overlong word that had to be
++    // displaced (css-overflow/line-clamp/block-ellipsis-025 ios f 0.9495).
++    var blockEllipsisClamp: GreedyLineBreaker.Clamp? = nil
++
+     // Wave 35 (lane B5) — non-nil ⇒ this run is an UPRIGHT vertical run
+     // (css-writing-modes-4 §5.1) and the value is the side line 1 stacks on.
+     // Decided ONCE at the call site by `VerticalUprightGate.stack`, which
+@@ -4784,7 +4812,16 @@ private struct PlaceholderLabel: View {
+                 // contribution (the keyword never reaches TextConfig), so
+                 // routing it is a separate, wire-side change — deliberately
+                 // NOT smuggled in here.
+-                hyphenChar: AutoHyphenation.defaultHyphenCharacter)
++                hyphenChar: AutoHyphenation.defaultHyphenCharacter,
++                // Wave 52 (lane L9, F4) — the drawn-marker clamp: keep
++                // lines 1…N, the marker baked onto line N after hiding
++                // trailing words until it fits (alone if nothing does).
++                // With exactly N hard lines left, the `.lineLimit(N)`
++                // below is inert, so TextKit never adds a second "…"
++                // (SwiftUI's default truncation mode is `.tail` anyway,
++                // so TypographyApplier's TruncationMod needs no change).
++                // nil = every pre-wave-52 run, byte-identical.
++                clamp: blockEllipsisClamp)
+             // Hard newlines force TextKit to OUR break positions — its
+             // push-out strategy only relocates SOFT breaks, and every
+             // pre-broken line fits `avail` by construction EXCEPT the
+@@ -5514,6 +5551,24 @@ private struct PlaceholderLabel: View {
+             let piece = String(chars[range])
+             var t = wordSpacedText(piece)
+             if let style {
++                // Wave 52 (lane L9, F2) — a GLYPH-LESS member's own band
++                // (css-backgrounds-3 §2.1: the inline box's background over
++                // its content area — for preserved spaces, their advance).
++                // Only the hanging-whitespace ring admits one, so the
++                // piece is white space: rebuilt through the SAME kern
++                // builder wordSpacedText used (script faces are moot for
++                // spaces) with the band as a per-range attribute, which
++                // keeps the `Text + Text` concatenation one paragraph. On
++                // block-ellipsis-032 the range collapses into the
++                // pre-break's line break and the clamp's hidden tail, so
++                // nothing paints there (no red, as the ref).
++                if style.background != nil {
++                    let run = WordSpacingApplier.kernedRun(
++                        text: piece,
++                        letterSpacingPx: textConfig.letterSpacing,
++                        wordSpacingPx: textConfig.wordSpacingPx) ?? AttributedString(piece)
++                    t = Text(TypographyApplier.bandedRun(run, band: style.background))
++                }
+                 // The member's own ink (css-color-4 §3.2) — inner
+                 // foregroundColor wins over the label's outer one.
+                 if let ink = style.ink {

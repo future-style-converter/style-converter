@@ -82,6 +82,24 @@ class ColorParserHslHueTest {
     }
 
     @Test
+    fun `scientific notation hue WITH a unit is the same green, not red`() {
+        // wave-52 lane L5 F4, cascade-and-splitter brief §7 pin 10. HUE (this
+        // file's subject regex) admits `1.2e2deg`, so the colour parses — but
+        // parseHslHue hands the hue to AngleParser first, which before F4 had
+        // no exponent branch and returned null; the bare-number fallback then
+        // failed on the unit and returned hue 0: `hsl(1.2e2deg, 75%, 50%)`
+        // painted RED instead of green, a silent wrong colour. Mutations F4-a
+        // / F4-b (AngleParserTest header) turn these rows red again.
+        assertSrgb(ColorParser.parse("hsl(1.2e2deg, 75%, 50%)")?.srgb, greenR, greenG, greenB)
+        assertSrgb(ColorParser.parse("hsl(1.2E2DEG 75% 50%)")?.srgb, greenR, greenG, greenB)
+        assertSrgb(ColorParser.parse("hsl(1.3333333333e2grad, 75%, 50%)")?.srgb, greenR, greenG, greenB)
+        // Hue 0 would be red {0.875, 0.125, 0.125}: the defect's own colour,
+        // asserted absent so a regression names itself.
+        val c = ColorParser.parse("hsl(1.2e2deg, 75%, 50%)")?.srgb
+        assertTrue(c != null && c.r < 0.5, "hsl(1.2e2deg) must not resolve to hue 0 (red), got $c")
+    }
+
+    @Test
     fun `all hue-120 spellings agree exactly`() {
         // Cross-check every spelling collapses to the identical rgb triple.
         val forms = listOf(

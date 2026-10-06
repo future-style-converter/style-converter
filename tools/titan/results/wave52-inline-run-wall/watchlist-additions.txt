@@ -1,0 +1,6 @@
+# L9 inline-run-wall — cells the lane's census found that tools/titan/results/wave52-plan/watchlist.txt does not already match.
+# F5 (taken-soft-hyphen trigger, PreBreakPipeline): `hyphens: manual` U+00AD carriers whose Android cell can MOVE when the
+# fold takes a soft hyphen at the box width (all f today, so movers only — none can be LOST).
+css-text/hyphens/hyphenate-character-00 android
+css-text/hyphens/hyphens-out-of-flow-001 android
+css-text/hyphens/hyphens-span-001 android

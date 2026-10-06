@@ -1,0 +1,180 @@
+{
+ "mode": "post",
+ "oldRev": "white-black-ink-font-lh-imgpad-htmlpins",
+ "newRev": "white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin",
+ "tests": 1435,
+ "moved": 23,
+ "others": 1412,
+ "oldTree": {
+  "files": 21327,
+  "digest": "617cb0b649d686bcc89d4d90fc522e2dd15c7d96"
+ },
+ "oldTreeUntouched": true,
+ "othersDigestOld": "8c55b96b567d80a2c3f5d7f2aec3f9da1ba506da",
+ "othersDigestNew": "8c55b96b567d80a2c3f5d7f2aec3f9da1ba506da",
+ "othersIdentical": true,
+ "othersMismatch": [],
+ "refrozen": [
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "oldSha1": "d55ea761d804c7b72f02327d68f60342d0fb7fd3",
+   "newSha1": "3b63133f718448d0c02b93e003a28924914c457a",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "oldSha1": "d55ea761d804c7b72f02327d68f60342d0fb7fd3",
+   "newSha1": "3b63133f718448d0c02b93e003a28924914c457a",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-cascade/initial-background-color.html",
+   "oldSha1": "4dae09789c01a203b520b91498afa8a7db9f428e",
+   "newSha1": "178c369300e28c701971c500b622cf67d51e3d89",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-display/display-contents-root-background.html",
+   "oldSha1": "f300767afa2666d582c2fb761503b4abbae6a978",
+   "newSha1": "c1114e8a54a019682c78ea5c057d2b59a7a66ea9",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "oldSha1": "c37cad8d86adfaac66d129c813bf429ddb2d55f3",
+   "newSha1": "34c782e8e66e3a34aca0c6b8314a81e118b2c3ae",
+   "size": "390x920",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "oldSha1": "9338239a46ff8760b40f9a32bd7de89e34004db3",
+   "newSha1": "9b5585d8777b48b42ebfbd338bddfe0f86113947",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "oldSha1": "d281ce0aa8dcd72c8823f3bcbd9042daafa5a2a1",
+   "newSha1": "a35a5af6bdcd3e0ab6c9408823b4c42078a6dbe6",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "oldSha1": "a2f9b215112276ac319280606dea4b83b9d158e0",
+   "newSha1": "0e28e4f9ff6cb5d1d6a36ef16ce87047ad078d33",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "oldSha1": "18d730f9f2e4f7d79f94f952fee1ed17328ad50e",
+   "newSha1": "03197f784407d93a763981ebd396d8c4ca44d40d",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "oldSha1": "8b649a6afdb16cbfa811828394462e17f30f29c9",
+   "newSha1": "9419089140400d66fdec73c814ff3a8973179e44",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "oldSha1": "3ea51a44a21cf7faaa6543be36714373c9b215af",
+   "newSha1": "0d3f72de178d357a39d84714a723d83956448951",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "oldSha1": "62bfa991f2e157336a998ec415c37da6a77b4a07",
+   "newSha1": "995555239ad8498e8a7384d8ac0a2ffa7c354606",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "oldSha1": "3ea51a44a21cf7faaa6543be36714373c9b215af",
+   "newSha1": "0d3f72de178d357a39d84714a723d83956448951",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "oldSha1": "62bfa991f2e157336a998ec415c37da6a77b4a07",
+   "newSha1": "995555239ad8498e8a7384d8ac0a2ffa7c354606",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "oldSha1": "938c0a567318da5ade7c7237fc3c4ad1fb0bdd5d",
+   "newSha1": "a2f12dc004c277274107ebcfaee1921f0869a9ac",
+   "size": "390x635",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "oldSha1": "938c0a567318da5ade7c7237fc3c4ad1fb0bdd5d",
+   "newSha1": "a2f12dc004c277274107ebcfaee1921f0869a9ac",
+   "size": "390x635",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "oldSha1": "b27d638c19a1b97b3495c9c707672636283577b8",
+   "newSha1": "6c231d18792966b07179782f37a5020864217ba4",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "oldSha1": "b27d638c19a1b97b3495c9c707672636283577b8",
+   "newSha1": "6c231d18792966b07179782f37a5020864217ba4",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "oldSha1": "eec1b663dab50d59ca1d2ffc9fa2264ea628a6bf",
+   "newSha1": "99354e331baae76bcdd0b8d95aa575da2bd6aa0a",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "oldSha1": "4dae09789c01a203b520b91498afa8a7db9f428e",
+   "newSha1": "178c369300e28c701971c500b622cf67d51e3d89",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "oldSha1": "4dae09789c01a203b520b91498afa8a7db9f428e",
+   "newSha1": "178c369300e28c701971c500b622cf67d51e3d89",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "oldSha1": "3a6efe9cd7bbf28cf2774aa7a7916bedc8ea8c0a",
+   "newSha1": "80162a43ec3ff82fa316260b8edd4b84446e695d",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "oldSha1": "dfdabfe4f9c2bbc9961509d3805c468fab79fad7",
+   "newSha1": "62977b89e89683f1f9b9d5ea5a3ae4451ee30b76",
+   "size": "390x600",
+   "matchesAbNewArm": true
+  }
+ ]
+}

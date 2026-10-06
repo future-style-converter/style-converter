@@ -1,0 +1,97 @@
+{
+  "_comment": "box-shadow REACH (BACKLOG queue 6(c), wave 52 lane L10). The 2026-08-28 probe that measured an Android bottom-most shadow row of 123/131/131/120 against web's 93/101/109/90 (box rows 30-70, blur 10, offset-y 10, spread -8/0/+8/-1 px) was never committed, so the reach could be neither re-run nor refuted; this is that probe RE-AUTHORED as a committed fixture (geometry re-derived, not copied: the original's per-component blur on its fourth box is unknown, so its numbers are quoted as history, not as this fixture's expectation). Four 100x40 #e74c3c boxes, each `box-shadow: 0 10px 10px <spread> #3498db`, 40px apart vertically (margin-bottom 40). SPEC ARITHMETIC (css-backgrounds-3 §6.1.1: the shadow rect is the border box offset by (0,10) and grown by the spread on every side; the blur is a Gaussian with σ = blur/2 = 5px; the shadow is clipped OUT of the border box): the shadow rect's bottom edge sits at box-bottom + 10 + spread = +2 / +10 / +18 / +9 px below the box for spread -8 / 0 / +8 / -1, and an 8-bit render keeps ink while 1 - Φ(d/σ) >= 0.5/255, i.e. d <= 2.88σ = 14.4px past that edge -> the BOTTOM-MOST SHADOW ROW is box-bottom + 16 / 24 / 32 / 23 (±1 AA). That row is the reach assertion: read it per platform from the capture (component-relative, box bottom = row 40 of the component) at the next device gate and compare to 56 / 64 / 72 / 63. The v1 `_expect` schema (tools/visual/spec-oracle.mjs: fill + bbox SIZE) cannot express a row position, so each component's `_expect` pins what v1 can see - the box itself, opaque and un-eaten by the knockout (fill (231,76,60), box 100x40) - and carries its reach row in `note`, recorded for the v2 bbox-position oracle exactly as combinations/nested-transforms.json records its translate case.",
+  "components": {
+    "BSR_SpreadMinus8": {
+      "properties": {
+        "width": "100px",
+        "height": "40px",
+        "margin-bottom": "40px",
+        "background-color": "#e74c3c",
+        "box-shadow": "0 10px 10px -8px #3498db"
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          100,
+          40
+        ],
+        "boxTolerance": 1,
+        "note": "css-backgrounds-3 §6.1.1: knockout keeps the 100x40 box opaque (fill + box asserted). REACH (v2, recorded): shadow rect bottom = box bottom + 10 + (-8) = +2px; σ = 5px; last 8-bit-inked row = +2+14 = box-bottom + 16px -> component row 56 (±1)"
+      }
+    },
+    "BSR_Spread0": {
+      "properties": {
+        "width": "100px",
+        "height": "40px",
+        "margin-bottom": "40px",
+        "background-color": "#e74c3c",
+        "box-shadow": "0 10px 10px 0px #3498db"
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          100,
+          40
+        ],
+        "boxTolerance": 1,
+        "note": "css-backgrounds-3 §6.1.1: knockout keeps the 100x40 box opaque (fill + box asserted). REACH (v2, recorded): shadow rect bottom = box bottom + 10 + (0) = +10px; σ = 5px; last 8-bit-inked row = +10+14 = box-bottom + 24px -> component row 64 (±1)"
+      }
+    },
+    "BSR_SpreadPlus8": {
+      "properties": {
+        "width": "100px",
+        "height": "40px",
+        "margin-bottom": "40px",
+        "background-color": "#e74c3c",
+        "box-shadow": "0 10px 10px 8px #3498db"
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          100,
+          40
+        ],
+        "boxTolerance": 1,
+        "note": "css-backgrounds-3 §6.1.1: knockout keeps the 100x40 box opaque (fill + box asserted). REACH (v2, recorded): shadow rect bottom = box bottom + 10 + (8) = +18px; σ = 5px; last 8-bit-inked row = +18+14 = box-bottom + 32px -> component row 72 (±1)"
+      }
+    },
+    "BSR_SpreadMinus1": {
+      "properties": {
+        "width": "100px",
+        "height": "40px",
+        "margin-bottom": "40px",
+        "background-color": "#e74c3c",
+        "box-shadow": "0 10px 10px -1px #3498db"
+      },
+      "_expect": {
+        "fill": [
+          231,
+          76,
+          60
+        ],
+        "fillTolerance": 2,
+        "box": [
+          100,
+          40
+        ],
+        "boxTolerance": 1,
+        "note": "css-backgrounds-3 §6.1.1: knockout keeps the 100x40 box opaque (fill + box asserted). REACH (v2, recorded): shadow rect bottom = box bottom + 10 + (-1) = +9px; σ = 5px; last 8-bit-inked row = +9+14 = box-bottom + 23px -> component row 63 (±1)"
+      }
+    }
+  }
+}

@@ -21,6 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+// wave-52 L2 Fix A: DrawScope.clipRect for the composed canvas's ICB band.
+import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.geometry.Offset
 // wave-51 PR A — the harness label chrome paints 1x1-px rects (Size(1f, 1f)).
 import androidx.compose.ui.geometry.Size
@@ -42,6 +44,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+// wave-52 L2 (T3): Appendix E step-8 draw order for the RC1 static-position slot.
+import androidx.compose.ui.zIndex
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.typography.font.DocumentFontRegistry
@@ -61,6 +65,11 @@ import com.styleconverter.runtime.core.renderer.WPT_CANVAS_BACKGROUND
 // runtime so all three platforms read ONE number for the ref's image frame.
 import com.styleconverter.runtime.core.renderer.WPT_CANVAS_FRAME_DP
 import com.styleconverter.runtime.core.renderer.composedIcbExtentDp
+// wave-52 lane L2 (Fix A): the composed canvas's inline-axis clip band —
+// the ICB's padding edges, derived from the FRAME alone (never the resolved
+// body pad), and the finite vertical slack that keeps the block axis open.
+import com.styleconverter.runtime.core.renderer.composedIcbClipBandPx
+import com.styleconverter.runtime.core.renderer.COMPOSED_ICB_CLIP_VERTICAL_SLACK_PX
 // Wave 15 — the pure composed-canvas alpha-compositing rule (body background
 // blended source-over onto the white WPT canvas; see resolveComposedCanvasBackground).
 import com.styleconverter.runtime.core.renderer.composedCanvasBackground
@@ -1221,6 +1230,40 @@ internal data class CanvasPadding(
         )
     }
 }
+/**
+ * wave-52 lane L2 (M1) — the composed canvas's resolved BODY MARGIN per
+ * physical side (see [resolveComposedCanvasMargin]). Split into the two
+ * halves the Column can express: positive sides become extra inset beside
+ * the resolved padding, negative top/left become an offset.
+ */
+internal data class CanvasMargin(
+    val top: Dp, val right: Dp, val bottom: Dp, val left: Dp,
+) {
+    /** The positive part of a side — spent as Column inset (0 for a negative side). */
+    private fun pos(d: Dp): Dp = if (d.value > 0f) d else 0.dp
+    /** The negative part of a side — spent as an offset (0 for a positive side). */
+    private fun neg(d: Dp): Dp = if (d.value < 0f) d else 0.dp
+    val insetTop: Dp get() = pos(top)
+    val insetRight: Dp get() = pos(right)
+    val insetBottom: Dp get() = pos(bottom)
+    val insetLeft: Dp get() = pos(left)
+    /** Negative top/left pull the flow stack up/left without shrinking it
+     *  (no corpus body carries one after the CSS 2.1 §8.3 guard:
+     *  s-11-1-1b-005's −15 top sits on a table-cell body). A
+     *  negative right/bottom would WIDEN the body in CSS; no corpus body
+     *  declares one, and it is deliberately not emulated (kept 0). */
+    val offsetX: Dp get() = neg(left)
+    val offsetY: Dp get() = neg(top)
+    /** The horizontal inset the body's content box loses to its margin —
+     *  feeds the containing-block width beside the padding's `horizontal`. */
+    val insetHorizontal: Dp get() = insetLeft + insetRight
+
+    companion object {
+        /** No body-root, or one declaring no concrete margin — every
+         *  pre-wave-52 capture: byte-identical (all four sides 0). */
+        val ZERO = CanvasMargin(0.dp, 0.dp, 0.dp, 0.dp)
+    }
+}
 private val CaptureCanvasBg      = Color(0xFF1A1A2E)
 // Composed-canvas minimum height. Mirrors capture-browser-ref.mjs, whose
 // injected `:where(body){min-height:100vh}` at a 600px viewport floors the ref
@@ -1360,6 +1403,125 @@ internal fun resolveComposedCanvasPadding(roots: List<IRComponent>): CanvasPaddi
         bottom = side("PaddingBottom"),
         left   = side("PaddingLeft"),
     )
+}
+
+/**
+ * wave-52 lane L2 (M1) — the composed canvas's resolved BODY MARGIN, in
+ * CSS px per PHYSICAL side (zero default), the twin of
+ * [resolveComposedCanvasPadding] for the margin half of the body's box.
+ *
+ * WHY: the extractor emits html+body as ONE synthetic `body-root` whose
+ * element children are SIBLINGS (extract-fixture.mjs: "a non-inherited root
+ * declaration (background, margin, …) changes nothing for the children"),
+ * and the three composed canvases read that root for background and PADDING
+ * only — a DECLARED `body { margin-left: 200px }` never reached the flow
+ * stack on any platform. The ref keeps it: capture-browser-ref.mjs injects
+ * `:where(html, body) { margin: 0 }` at specificity 0, so the author's
+ * `body { margin: 0 0 0 200px }` (0,0,1) wins there. css-gaps/flex/
+ * flex-gap-decorations-027's whole web page sat exactly 200 px left of the
+ * ref (wave51-fix web f 0.9012; natives f 0.9030/0.9085 with two more
+ * defects on top). Census over the 1435 per-test IRs
+ * (tools/titan/results/wave52-composed-canvas/composed-canvas.census.mjs):
+ * 9 tests carry a non-zero concrete body-root margin, 8 after the §8.3
+ * table-internal guard below (24 cells); `auto` / `em` leaves (11 tests)
+ * stay 0.
+ *
+ * WHERE IT IS SPENT: on the IN-FLOW root stack only (the composed Column),
+ * never on canvas-hoisted abspos/fixed roots — CSS 2.1 §10.1: a static body
+ * is no containing block, those anchor at the ICB, so the margin moves only
+ * in-flow content (the same lesson as CAL-RC1's padding). Positive sides add
+ * to the Column's inset next to the resolved padding (margin lies outside
+ * padding, but both are additive offsets on one axis, so the sum places
+ * content exactly where Chrome does); a NEGATIVE top/left rides an offset
+ * (padding cannot pull content UP). Vertical: the ref's body is a
+ * `display: flow-root` BFC, so the declared margin REPLACES today's
+ * collapse of the body-root box's own margins into the root-stack fold —
+ * which is why [withCanvasOwnedBodyMargin] strips the sides the canvas owns
+ * from that box (one owner, never applied twice). CSS 2.1 §8.3: a
+ * table-internal body (`display: table-cell`, s-11-1-1b-005) has no used
+ * margin at all → ZERO. Only CONCRETE px are honoured — `auto`, `em`, `%`,
+ * `calc()` have no absolute value here and keep 0 (documented contract, not
+ * a silent fallthrough). Twins: web `resolveCanvasMargin`, iOS
+ * `ComposedCaptureCanvas.resolvedMargin`; JVM pins in ComposedCanvasMarginTest.
+ */
+internal fun resolveComposedCanvasMargin(roots: List<IRComponent>): CanvasMargin {
+    // Same lookup rule as the background/padding resolvers — one body per doc.
+    val bodyRoot = roots.firstOrNull { it.role == "body-root" }
+        ?: return CanvasMargin.ZERO
+    // CSS 2.1 §8.3 "Applies to: all elements except elements with table
+    // display types other than table-caption, table and inline-table".
+    if (bodyMarginDoesNotApply(bodyRoot)) return CanvasMargin.ZERO
+    // One reader for all four sides (see bodyMarginLeafPx); absent or
+    // runtime-dependent ⇒ 0 for that side.
+    fun side(type: String): Dp = bodyMarginLeafPx(bodyRoot, type)?.dp ?: 0.dp
+    return CanvasMargin(
+        top    = side("MarginTop"),
+        right  = side("MarginRight"),
+        bottom = side("MarginBottom"),
+        left   = side("MarginLeft"),
+    )
+}
+
+/** The four physical body-margin longhands the composed canvas owns. */
+private val CANVAS_MARGIN_TYPES = listOf("MarginTop", "MarginRight", "MarginBottom", "MarginLeft")
+
+/** css-display-3 table-internal boxes — CSS 2.1 §8.3: margins do not apply. */
+private val TABLE_INTERNAL_DISPLAYS = setOf(
+    "TABLE_CELL", "TABLE_ROW", "TABLE_ROW_GROUP", "TABLE_HEADER_GROUP",
+    "TABLE_FOOTER_GROUP", "TABLE_COLUMN", "TABLE_COLUMN_GROUP",
+)
+
+/** True when the body-root's `Display` enum leaf is table-internal (§8.3). */
+private fun bodyMarginDoesNotApply(bodyRoot: IRComponent): Boolean =
+    (bodyRoot.properties.firstOrNull { it.type == "Display" }?.data as? JsonPrimitive)
+        ?.contentOrNull?.uppercase() in TABLE_INTERNAL_DISPLAYS
+
+/**
+ * The raw ABSOLUTE-px leaf of one body-root margin longhand: the two shapes
+ * the wire carries — top-level `{"px": N}` and the typed-wrapper
+ * `{"original": {"px": N}}` — read directly, the way the iOS twin reads
+ * them. Deliberately NOT ValueExtractors.extractDp: that reader resolves
+ * `em` at a fixed 16 px/em, which would make Android alone move the four
+ * em-margin bodies (first-letter-exclude-*, inline-box-border-vlr) that web
+ * and iOS keep at 0 — the three resolvers must agree. Null for anything
+ * else (`auto`, `em`, `%`, `calc`). Negative values are kept: CSS allows
+ * negative margins; §8.4 forbids only negative padding.
+ */
+private fun bodyMarginLeafPx(bodyRoot: IRComponent, type: String): Double? {
+    // The first declaration of that longhand, as a JSON object leaf.
+    val d = bodyRoot.properties.firstOrNull { it.type == type }?.data
+        as? kotlinx.serialization.json.JsonObject ?: return null
+    // `{px:N}` first, then the wrapped `{original:{px:N}}`.
+    return (d["px"] as? JsonPrimitive)?.doubleOrNull
+        ?: ((d["original"] as? kotlinx.serialization.json.JsonObject)?.get("px") as? JsonPrimitive)
+            ?.doubleOrNull
+}
+
+/**
+ * wave-52 lane L2 (M1) — ONE OWNER for the body margin. The body-root
+ * component ALSO renders as the first composed root, and its declared block
+ * margins fed the root-stack fold (stripped from the box, emitted as gap
+ * Spacers) — so once the Column carries the margin, leaving them on that
+ * root would apply it TWICE (collapsed-border-*-rtl-overflow: the fold's
+ * 60 + 60 already put the table at 136 where the ref has 76; the Column's
+ * 60 on top would make it 196). Returns [roots] with exactly the sides
+ * [resolveComposedCanvasMargin] resolved (concrete px leaves) removed from
+ * the body-root; `auto`/`em` sides stay on the box (never the canvas's).
+ * Identity — the SAME list instance — when the canvas owns no margin, so
+ * every other document composes the exact objects it always did.
+ */
+internal fun withCanvasOwnedBodyMargin(roots: List<IRComponent>, margin: CanvasMargin): List<IRComponent> {
+    // No margin owned ⇒ untouched list (byte-identical captures).
+    if (margin == CanvasMargin.ZERO) return roots
+    return roots.map { root ->
+        // Only the synthetic html+body bag is rewritten.
+        if (root.role != "body-root") return@map root
+        // The longhands the resolver read (a concrete px leaf on that side).
+        val owned = CANVAS_MARGIN_TYPES.filter { bodyMarginLeafPx(root, it) != null }.toSet()
+        // A data-class copy minus those declarations; id/meta ride verbatim,
+        // so every id-keyed channel (hoist band suppression …) is unchanged.
+        root.copy(properties = root.properties.filterNot { it.type in owned })
+    }
 }
 
 /**
@@ -1520,6 +1682,29 @@ private fun ComposedCaptureCanvas(
     val canvasPadding = androidx.compose.runtime.remember(roots) {
         resolveComposedCanvasPadding(roots)
     }
+    // wave-52 lane L2 (M1) — the body-root's DECLARED margin, the twin of the
+    // padding above for the margin half of the body box (see
+    // resolveComposedCanvasMargin). ZERO for every document without a
+    // concrete body margin (1427 of 1435), so those captures are byte-identical.
+    val canvasMargin = androidx.compose.runtime.remember(roots) {
+        resolveComposedCanvasMargin(roots)
+    }
+    // wave-52 lane L2 (M1) — ONE OWNER for the body margin: from here on the
+    // canvas composes the roots with the body-root's owned margin sides
+    // stripped (see withCanvasOwnedBodyMargin), so the fold, the hoist host,
+    // the inline-row planner and the render all see the box WITHOUT the
+    // margin the Column now carries. Shadowing the parameter (rather than a
+    // second name) is deliberate: no consumer below can reach the unstripped
+    // list by accident. The SAME list instance whenever the margin is ZERO,
+    // so every other document composes exactly what it always did.
+    // wave-52 lane L2 (T6) rides the SAME rewrite: a canvas-hoisted root with
+    // a UA-margin tag and no declared block margin gets its UA margin as two
+    // declared longhands (withUaBlockMarginOnHoistedRoot — CSS 2.1 §9.3.2,
+    // `top` offsets the margin edge); identity for every other root.
+    @Suppress("NAME_SHADOWING")
+    val roots = androidx.compose.runtime.remember(roots, canvasMargin) {
+        withCanvasOwnedBodyMargin(roots, canvasMargin).map(::withUaBlockMarginOnHoistedRoot)
+    }
     // FIX 1 (UA default margins) — TITAN Round 4b — per-root effective UA
     // block margins, still the source of the HORIZONTAL blockquote/figure
     // insets below (IR-declared sides zeroed — the runtime's margin applier
@@ -1555,106 +1740,37 @@ private fun ComposedCaptureCanvas(
     // neighbors' margins THROUGH them into ONE gap (see
     // collapsedRootStackGapsPx); only flow-sized out-of-flow roots still
     // bail.
+    // wave-52 lane L2: the per-root plan is now the PURE
+    // `composedRootStackPlan` in UaBlockMargins.kt (JVM-pinned on the
+    // verbatim per-test IR, UaBlockMarginsTest U1–U6; Swift twin
+    // UABlockMargin.composedRootStackPlan) — the wave-17…46 lambda that used
+    // to live here, verbatim, plus two §8.3.1 corrections: T1 — an RC1
+    // static-position root contributes (0,0) and KEEPS its declared margins
+    // on the box (they were max()-joined into the collapse set and stripped:
+    // clip-path-ellipse-006's `margin: 50px` abspos landed 16 px high); T2 —
+    // an EMPTY in-flow root whose block margins are all in the fold collapses
+    // THROUGH (text-decoration-propagation-shadow's `height: 0` `<p>`s emitted
+    // 16 + 16 for Chrome's one 16). Whether the CanvasRootHoist.Host below
+    // will ACTIVATE is decided once here through the SAME function the Host
+    // runs (wave 21 A-RC7: any out-of-flow box), so margin transparency, the
+    // z-order wrap and the renderer's footprint stay in lockstep.
+    val hostActive = androidx.compose.runtime.remember(roots) {
+        com.styleconverter.runtime.layout.position.CanvasRootHoist.hostActivates(roots)
+    }
     val rootPlans = androidx.compose.runtime.remember(roots) {
-        // Wave-19 follow-up: whether the CanvasRootHoist.Host below will
-        // actually ACTIVATE — the RC1 static-position zero-flow anchor is
-        // host-gated in ComponentRenderer. Wave 21 (A-RC7): activation now
-        // fires for ANY out-of-flow box (hoisted OR static-position), so a
-        // document whose only out-of-flow boxes are no-inset absolutes
-        // (conic-gradient-line-height-relative-units-001/002) zero-flows
-        // them too — this fold sees the SAME broadened decision through the
-        // SAME function the Host runs (one decision, two consumers), so
-        // margin transparency and the renderer's footprint stay in lockstep.
-        val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist
-            .hostActivates(roots)
-        roots.map { root ->
-            // Hoisted roots occupy no flow space (pin S5) — and (wave-19
-            // follow-up) they are margin-TRANSPARENT: a browser collapses
-            // the neighbors' block margins THROUGH an out-of-flow box as if
-            // it were absent (CSS 2.1 §8.3.1 in-flow precondition, §9.3.1),
-            // so the fold keeps ONE adjoining set open across this slot.
-            // Contribution stays (0,0): §8.3.1 "margins of absolutely
-            // positioned boxes do not collapse" — its own declared margins
-            // render in the overlay and never push flow content.
-            if (com.styleconverter.runtime.layout.position.CanvasRootHoist
-                    .shouldHoistToCanvasRoot(root.properties, hasPositionedAncestor = false)
-            ) {
-                RootStackMargin(0f, 0f, stripDeclared = false, marginTransparent = true)
-            } else {
-                // Which block sides the IR declares (any Margin* covering them).
-                val declared = declaredMarginSides(root.properties.map { it.type })
-                // Wave-18 RC1 static-position root under an ACTIVE host: it
-                // mounts in its Column slot at 0×0 (zeroFlowAnchor), so it is
-                // margin-transparent too (wave-19 follow-up). Same renderer
-                // decision function — never re-derived here.
-                val staticPos = hostActive &&
-                    com.styleconverter.runtime.layout.position.CanvasRootHoist
-                        .rendersInFlowAsStaticPosition(root.properties, hasPositionedAncestor = false)
-                // Static declared (top, bottom) px via the runtime's §8.3.1
-                // classifier; null bails (out-of-scope value flavors).
-                // Out-of-flow roots that KEEP their flow size (host inactive
-                // — the RC1 anchor never engages) bail too: they render their
-                // own margins in the flow, exactly the pre-fix behavior.
-                // A zero-flow static-position root does NOT bail: its own
-                // declared margins join the collapse-through set (§8.3.1's
-                // empty-box model — the hypothetical static box's margins
-                // are adjoining) and strip from its render like any other
-                // folded root, so its slot anchor stays the §8.3.1
-                // hypothetical position and nothing double-renders.
-                // Wave 22 (B-RC2): the classifier now also resolves `em`
-                // against the root's OWN declared FontSize (css-values-4
-                // §6.1.1 — the base rides the same property list), because
-                // dotted-001's three `margin: .5em; font-size: 92px` divs
-                // bailed on the relative flavor and painted 46+46 = 92px of
-                // inter-div space where the ref collapses to ONE 46px gap.
-                // Wave 45 (H0): a root with an em margin but NO declared
-                // FontSize no longer bails either — ownFontSizePx resolves
-                // the UA-default ladder (MonospaceUAFontSize's 13px quirk,
-                // else 16px), because the pre-fix E4 bail sent such roots
-                // down R4/R5 where the fold emitted the UA gap AND
-                // MarginApplier rendered the full declared margin — a
-                // measured +16px double-space on floats-clear-multicol-002
-                // and discard-multicol-001. Declared var()/calc()/relative
-                // sizes still bail (E4 kept, narrowed).
-                // StaticEmMargin.verticalEdges is a strict SUPERSET of
-                // BlockMarginCollapse.blockMarginsOrNull on non-em wires
-                // (pin E8), so every wave-19 R/S/T value is unchanged; the
-                // runtime's own §8.3.1 plan still uses the narrow
-                // classifier, keeping the dark-stage baseline byte-stable.
-                val staticEdges = if (isOutOfFlowRoot(root) && !staticPos) null else
-                    StaticEmMargin.verticalEdges(root.properties)
-                // wave-46 lane Y8: the root's UA default resolves its em
-                // against the root's OWN computed font-size (css-values-4
-                // §6.1.1) — null for every root without a font signal, so
-                // only a font-sized `<p>`/`<ul>`/… root moves (measured:
-                // inherit-computed-001's `font-size: larger` p, 16 → 19px).
-                // The tag rides in as well: it gates the monospace
-                // fixed-default rung (B1), which Blink applies only to
-                // KEYWORD-sized elements — an em-sized heading keeps the
-                // ref-calibrated table rather than a wrong 13px em base.
-                val uaBasisPx = com.styleconverter.runtime.spacing.UaBlockMarginFontBasis
-                    .ownFontSizePx(root.properties, sourceTag = root._tag)
-                rootStackMargin(root._tag, "top" in declared, "bottom" in declared, staticEdges,
-                    ownFontSizePx = uaBasisPx)
-                    // Transparency rides the SAME plan entry so the fold and
-                    // the render agree on this root's (zero) flow footprint.
-                    .copy(marginTransparent = staticPos)
-                    // wave-26 (lane RES residual 3a): fold in the HOIST BAND
-                    // the root's own §8.3.1 plan would otherwise emit as
-                    // padding OUTSIDE its border box. Both are outer spacing
-                    // in the same adjoining region, so leaving each owner to
-                    // emit its own ADDED where the browser takes ONE max()
-                    // (worked example in withHoistBand's kdoc). The band is
-                    // read through the runtime's own plan builder, so the
-                    // number folded here is exactly the number suppressed at
-                    // the render below — one decision, two consumers.
-                    .let { plan ->
-                        val band = com.styleconverter.runtime.core.renderer.ComponentRenderer
-                            .composedRootHoistBand(root, uaBlockMargins = true)
-                        withHoistBand(plan, band.topPx to band.bottomPx)
-                    }
-            }
-        }
+        roots.map { root -> composedRootStackPlan(root, hostActive) }
+    }
+    // wave-52 lane L2 (T3): which roots the Column lifts above the flow —
+    // CSS 2.1 Appendix E step 8 paints positioned descendants with
+    // `z-index: auto` AFTER (above) in-flow content, but the RC1 slot mounted
+    // in Column order and a LATER in-flow root painted over it
+    // (css-flexbox/align-items-007's red `<img>` covered the abspos green:
+    // wave51-fix android f 0.9966 colour-vetoed). Only an RC1 root with NO
+    // declared z-index, no content and no later step-8 root is lifted (see
+    // composedRootsPaintingAboveFlow: a `z-index: -1` box stays BELOW the
+    // flow). Same host activation as the fold. Consumed by renderRootAt.
+    val rootAboveFlow = androidx.compose.runtime.remember(roots) {
+        composedRootsPaintingAboveFlow(roots, hostActive)
     }
     val rootGaps = androidx.compose.runtime.remember(rootPlans) {
         // Wave-19 follow-up: the transparency-aware fold — collapses the
@@ -1724,6 +1840,47 @@ private fun ComposedCaptureCanvas(
                     }
                     ?: Modifier.background(canvasBackground)
             )
+            // wave-52 lane L2 (Fix A) — THE HORIZONTAL VIEWPORT CROP. The
+            // browser-ref is RENDERED in a 358-px viewport and padded in
+            // image space (capture-browser-ref.mjs REF_RENDER_WIDTH /
+            // padPngBuffer): ink past content x=358 is scrollable overflow
+            // the PNG never contains, so frame columns 0..15 / 374..389 are
+            // always the pad colour. This canvas had NO clip on that box —
+            // the Column and the CanvasRootHoist.Host overlay both painted
+            // into the frame (css-gaps/flex/flex-gap-decorations-040's
+            // 400-px row ran to x=389: its whole 1664-px mismatch; 208
+            // overrun-right + 84 overrun-left scored wave51-fix cells).
+            // CSS 2.1 §9.1.1: the ICB has the viewport's dimensions, and the
+            // ref's viewport IS the content canvas — so content is clipped
+            // to the ICB's padding edges on the INLINE axis. Placed AFTER
+            // the `.background(canvasBackground)` chain above, because an
+            // earlier draw modifier wraps the later ones: the background
+            // stays outside this clip and the frame keeps the propagated
+            // body colour, while `drawContent()` here is the Column + the
+            // hoist overlay only. The band is the pure runtime helper
+            // (composedIcbClipBandPx — JVM-pinned in ComposedIcbClipTest),
+            // fed the FRAME converted to px, never the resolved body pad:
+            // an author `body { padding }` insets content inside the
+            // viewport but moves neither the viewport nor its crop. The
+            // block axis stays open by a finite slack on both sides: the
+            // ref's second viewport is max(scrollHeight, 568), so it never
+            // crops the bottom, and a vertical clip would hide abspos content
+            // the ref shows. ComposedCanvasIcbClipSourceTest pins the
+            // placement and the frame argument.
+            .drawWithContent {
+                // Left/right padding edges of the ICB in this DrawScope's px.
+                val band = composedIcbClipBandPx(size.width, CaptureCanvasFrame.toPx())
+                // Clip x to the band; y open (slack) on both sides.
+                clipRect(
+                    left = band.leftPx,
+                    top = -COMPOSED_ICB_CLIP_VERTICAL_SLACK_PX,
+                    right = band.rightPx,
+                    bottom = size.height + COMPOSED_ICB_CLIP_VERTICAL_SLACK_PX,
+                ) {
+                    // The composed root Column and the hoist overlay.
+                    this@drawWithContent.drawContent()
+                }
+            }
             .testTag("composed-capture-canvas")
             .onGloballyPositioned { coords ->
                 val pos = coords.positionInWindow()
@@ -1771,7 +1928,11 @@ private fun ComposedCaptureCanvas(
                     // the resolved pad, not the constant, so a ref that zeroes
                     // its body padding hands % widths the full 390dp — the
                     // same number Chromium gives that ref's body content box.
-                    widthPx = (canvasWidth - canvasPadding.horizontal).value
+                    // wave-52 L2 (M1): minus the body's positive horizontal
+                    // margin as well — the ref's body content box is
+                    // 358 − margins (027: 158), which is what its children's
+                    // percentages resolve against.
+                    widthPx = (canvasWidth - canvasPadding.horizontal - canvasMargin.insetHorizontal).value
                 ),
             // wave-26 (lane RES residual 2): the runtime-v1 media width basis
             // is the ref's RENDER viewport (358 at the 390 default), not the
@@ -1864,12 +2025,23 @@ private fun ComposedCaptureCanvas(
                 // (16dp each unless the body-root declares its own), applied
                 // as PHYSICAL start/end here because the WPT composed canvas
                 // is always LTR-framed — see CanvasPadding's doc.
+                // wave-52 lane L2 (M1): the body-root's DECLARED margin rides
+                // THIS Column too — the in-flow stack only, never the Host's
+                // hoisted overlay (CSS 2.1 §10.1: a static body is no
+                // containing block; those anchor at the ICB). Positive sides
+                // add to the resolved pad (margin + padding are additive
+                // offsets on one axis, so the sum lands content where Chrome
+                // does and the Column's width shrinks like the body's content
+                // box); a negative top/left is an OFFSET, which is what
+                // a negative body `margin-top` needs (padding cannot
+                // pull content up). CanvasMargin.ZERO ⇒ this chain is the
+                // wave-24 padding alone, byte-identical.
                 Column(modifier = Modifier.fillMaxWidth().padding(
-                    start  = canvasPadding.left,
-                    top    = canvasPadding.top,
-                    end    = canvasPadding.right,
-                    bottom = canvasPadding.bottom,
-                )) {
+                    start  = canvasPadding.left + canvasMargin.insetLeft,
+                    top    = canvasPadding.top + canvasMargin.insetTop,
+                    end    = canvasPadding.right + canvasMargin.insetRight,
+                    bottom = canvasPadding.bottom + canvasMargin.insetBottom,
+                ).offset(x = canvasMargin.offsetX, y = canvasMargin.offsetY)) {
                     // wave-34 lane H (H1) — the per-root inline-block boxes and
                     // the ROOT segment plan. `rootSegments` is null for every
                     // document with no ≥2 run of declared inline-block roots,
@@ -1953,14 +2125,38 @@ private fun ComposedCaptureCanvas(
                             ) { ComponentHost.Render(root) }
                         }
                         val m = rootMargins[i]
-                        if (m.left > 0 || m.right > 0) {
-                            // Horizontal UA inset (blockquote/figure) — pad the root
-                            // box left/right; the runtime renders inside it.
-                            Box(modifier = Modifier.padding(start = m.left.dp, end = m.right.dp)) {
+                        // The in-flow node: a horizontal UA inset
+                        // (blockquote/figure) pads the root box left/right and
+                        // the runtime renders inside it; otherwise the host alone.
+                        val inFlow: @androidx.compose.runtime.Composable () -> Unit = {
+                            if (m.left > 0 || m.right > 0) {
+                                Box(modifier = Modifier.padding(start = m.left.dp, end = m.right.dp)) {
+                                    hosted()
+                                }
+                            } else {
                                 hosted()
                             }
+                        }
+                        if (rootAboveFlow[i]) {
+                            // wave-52 lane L2 (T3) — CSS 2.1 Appendix E step 8:
+                            // the RC1 static-position root is a positioned box
+                            // with `z-index: auto`, painted AFTER all in-flow
+                            // roots of this stack (a declared z-index, a
+                            // content-bearing root, or a later step-8 root
+                            // keeps the wave-51 order — the else branch).
+                            // `Modifier.zIndex` reorders
+                            // the DRAW of this Column child above its siblings
+                            // without moving anything: the Box wraps the 0×0
+                            // zeroFlowAnchor report, so the Spacer arithmetic
+                            // and every slot origin are byte-identical. Hoisted
+                            // overlays (the Host's own Box, outside this Column)
+                            // still paint above it, as step 8's later-in-order
+                            // positioned boxes should. Both renderers already do
+                            // this for children of positioned containers; the
+                            // root stack was the one path left out.
+                            Box(modifier = Modifier.zIndex(1f)) { inFlow() }
                         } else {
-                            hosted()
+                            inFlow()
                         }
                     }
                     if (rootSegments == null) {

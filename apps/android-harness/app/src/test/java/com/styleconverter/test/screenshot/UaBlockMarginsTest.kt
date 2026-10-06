@@ -412,4 +412,293 @@ class UaBlockMarginsTest {
         // Inline insets are untouched by the block-axis basis.
         assertEquals(UaMargins(19, 19, 40, 40), uaBlockMargins("blockquote", 19.2f))
     }
+
+    // ── wave-52 lane L2 — the composed-stack PLAN on the VERBATIM per-test IR ──
+    //
+    // U1–U6 pin `composedRootStackPlan` / `isComposedStaticPositionRoot` /
+    // `isSelfCollapsingRoot` on documents copied byte-for-byte out of
+    // tools/titan/runs/wave51-fix/sections/<section>/per-test-ir/, decoded and
+    // slot-composed through the SAME path ComposedCaptureCanvas runs
+    // (IRDocumentDecoder → SlotComposer). Byte-parallel with the Swift twin
+    // (ComposedRootStackTests U1–U6).
+    //
+    // EXECUTED MUTATIONS (applied to UaBlockMargins.kt, this class run alone,
+    // source restored byte-exact — sha256 checked; record in
+    // tools/titan/results/wave52-composed-canvas/_note.md):
+    //   M1 shape 2 restored to the wave-19 join (`rootStackMargin(...)
+    //      .copy(marginTransparent = true)` for the RC1 root)  → u1 red (50, strip).
+    //   M2 `isSelfCollapsingRoot` forced false                  → u2 red (32 px).
+    //   M3 the `display != "BLOCK"` guard dropped                → u8 red
+    //      (u5 does NOT catch it: its table row is also the body-root —
+    //      executed GREEN, which is why u8 exists).
+    //   M4 the generated-content (`pseudos`) guard dropped       → u7 red.
+    //   M5 withUaBlockMarginOnHoistedRoot returns `root` first    → u9 red (T6).
+
+    /** Decode + slot-compose a v2 document exactly as the harness does. */
+    private fun rootsOf(componentsJson: String): List<IRComponent> =
+        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
+                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
+
+    /** css-masking/clip-path/clip-path-ellipse-006 — roots 0 and 1, verbatim. */
+    private val ellipse006 = """
+        {"id":"wpt__css-masking__clip-path__clip-path-ellipse-006__0-059","name":"wpt__css-masking__clip-path__clip-path-ellipse-006__0","properties":[],"text":"The test passes if there is a full green ellipse.","meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css-masking__clip-path__clip-path-ellipse-006__1-060","name":"wpt__css-masking__clip-path__clip-path-ellipse-006__1","properties":[{"type":"Width","data":{"type":"length","px":150}},{"type":"Height","data":{"type":"length","px":100}},{"type":"Position","data":"ABSOLUTE"},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"ClipPath","data":{"type":"ellipse"}}]}
+    """.trimIndent()
+
+    /** css-text-decor/text-decoration-propagation-shadow — all three roots, verbatim (post-load wire). */
+    private val propagationShadow = """
+        {"id":"wpt__css-text-decor__text-decoration-propagation-shadow__0-230","name":"wpt__css-text-decor__text-decoration-propagation-shadow__0","properties":[{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":0}},{"type":"Position","data":"STATIC"},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":16}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":16}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},{"type":"Display","data":"BLOCK"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"meta":{"sourceTag":"p"}},
+        {"id":"wpt__css-text-decor__text-decoration-propagation-shadow__1-231","name":"wpt__css-text-decor__text-decoration-propagation-shadow__1","properties":[{"type":"TextDecorationLine","data":["UNDERLINE"]},{"type":"Position","data":"STATIC"},{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":20}},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},{"type":"Display","data":"BLOCK"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"text":"This text should be underlined.","meta":{"role":"ws-after"}},
+        {"id":"wpt__css-text-decor__text-decoration-propagation-shadow__2-232","name":"wpt__css-text-decor__text-decoration-propagation-shadow__2","properties":[{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":0}},{"type":"Position","data":"STATIC"},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":16}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":16}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},{"type":"Display","data":"BLOCK"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"meta":{"sourceTag":"p"}}
+    """.trimIndent()
+
+    /** css-flexbox/align-items-007 — all four components, verbatim (root 1 = the RC1 green). */
+    private val alignItems007 = """
+        {"id":"wpt__css-flexbox__align-items-007__0-361","name":"wpt__css-flexbox__align-items-007__0","properties":[],"text":"Test passes if there is a filled green square and no red.","meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css-flexbox__align-items-007__1-362","name":"wpt__css-flexbox__align-items-007__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}],"meta":{"role":"ws-after"}},
+        {"id":"wpt__css-flexbox__align-items-007__2-363","name":"wpt__css-flexbox__align-items-007__2","properties":[{"type":"Display","data":"FLEX"},{"type":"FlexDirection","data":"COLUMN"},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"LineHeight","data":{"original":{"type":"length","px":20}}},{"type":"AlignItems","data":"CENTER"}]},
+        {"id":"align-items-007__2__0-364","name":"align-items-007__2__0","properties":[{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}}],"slot":{"parent":"wpt__css-flexbox__align-items-007__2-363"},"meta":{"sourceTag":"img","attrs":{"src":"css/support/red-rect.svg"}}}
+    """.trimIndent()
+
+    /** css-images/gradient/gradient-hue-direction — root 4, the baked `<hr>`, verbatim. */
+    private val hueDirectionHr = """
+        {"id":"wpt__css-images__gradient__gradient-hue-direction__4-070","name":"wpt__css-images__gradient__gradient-hue-direction__4","properties":[{"type":"Display","data":"BLOCK"},{"type":"Height","data":{"type":"length","px":0}},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"BorderTopWidth","data":{"px":1}},{"type":"BorderRightWidth","data":{"px":1}},{"type":"BorderBottomWidth","data":{"px":1}},{"type":"BorderLeftWidth","data":{"px":1}},{"type":"BorderTopStyle","data":"INSET"},{"type":"BorderRightStyle","data":"INSET"},{"type":"BorderBottomStyle","data":"INSET"},{"type":"BorderLeftStyle","data":"INSET"},{"type":"BorderTopColor","data":{"srgb":{"r":0.9333333333333333,"g":0.9333333333333333,"b":0.9333333333333333},"original":"#eeeeee"}},{"type":"BorderRightColor","data":{"srgb":{"r":0.9333333333333333,"g":0.9333333333333333,"b":0.9333333333333333},"original":"#eeeeee"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0.9333333333333333,"g":0.9333333333333333,"b":0.9333333333333333},"original":"#eeeeee"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0.9333333333333333,"g":0.9333333333333333,"b":0.9333333333333333},"original":"#eeeeee"}},{"type":"MarginTop","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"}],"meta":{"sourceTag":"hr","role":"ws-after","lang":"en"}}
+    """.trimIndent()
+
+    /** selectors/has-style-sharing-002 — root 0 (em padding + em margins), verbatim. */
+    private val hasStyleSharing002Root0 = """
+        {"id":"wpt__selectors__has-style-sharing-002__0-162","name":"wpt__selectors__has-style-sharing-002__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}},{"type":"PaddingTop","data":{"original":{"v":1,"u":"EM"}}},{"type":"PaddingRight","data":{"original":{"v":1,"u":"EM"}}},{"type":"PaddingBottom","data":{"original":{"v":1,"u":"EM"}}},{"type":"PaddingLeft","data":{"original":{"v":1,"u":"EM"}}},{"type":"MarginTop","data":{"original":{"v":1,"u":"EM"}}},{"type":"MarginRight","data":{"original":{"v":1,"u":"EM"}}},{"type":"MarginBottom","data":{"original":{"v":1,"u":"EM"}}},{"type":"MarginLeft","data":{"original":{"v":1,"u":"EM"}}}],"meta":{"role":"ws-after"}}
+    """.trimIndent()
+
+    /** CSS2/css21-errata/s-11-1-1b-006 — root 0, the `display: table` body-root, verbatim. */
+    private val s006BodyRoot = """
+        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__0-141","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"MarginTop","data":{"px":40}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}}],"meta":{"role":"body-root"}}
+    """.trimIndent()
+
+    @Test
+    fun u1_ellipse006_rc1RootContributesZero_andKeepsItsDeclaredMargins() {
+        // U1 (T1). Chrome: <p> bottom margin 16 resolves in full ABOVE the abspos
+        // slot, then the box's own margin-top 50 offsets its ink → ellipse top
+        // at line box + 66 (ref y 118). wave 19–51 joined the 50 into the set:
+        // max(16, 50) = 50, stripped → y 102, 16 px high on both natives.
+        val roots = rootsOf(ellipse006)
+        val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist.hostActivates(roots)
+        assertEquals("the no-inset abspos root activates the host", true, hostActive)
+        val plans = roots.map { composedRootStackPlan(it, hostActive) }
+        // The <p>: UA 16/16, opaque, never stripped (R1).
+        assertEquals(RootStackMargin(16f, 16f, stripDeclared = false), plans[0])
+        // The RC1 root: (0,0), transparent, and NOT stripped — its 50 renders on the box.
+        assertEquals(RootStackMargin(0f, 0f, stripDeclared = false, marginTransparent = true), plans[1])
+        // Gap above the slot is the <p>'s full 16 (nothing else in the set);
+        // slot + the box's own 50 = 66 below the <p>'s border box.
+        assertEquals(listOf(16f, 16f, 0f), collapsedRootStackGapsPx(plans))
+        assertEquals(66f, collapsedRootStackGapsPx(plans)[1] + 50f, 0f)
+    }
+
+    @Test
+    fun u2_propagationShadow_emptyRootsCollapseThrough() {
+        // U2 (T2-roots). Three roots: EMPTY <p> (h0, 16/16), the text block
+        // (0/0), EMPTY <p> (h0, 16/16). §8.3.1 collapses the empty box's
+        // margins through it → ONE 16-px gap above the text (ref y 35 = 16
+        // frame + 16 + 3 line-box). The opaque fold emitted 16 + 16 → y 51.
+        val roots = rootsOf(propagationShadow)
+        val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist.hostActivates(roots)
+        assertEquals("no out-of-flow box — host inactive", false, hostActive)
+        val plans = roots.map { composedRootStackPlan(it, hostActive) }
+        assertEquals(RootStackMargin(16f, 16f, stripDeclared = true, marginTransparent = true), plans[0])
+        assertEquals(RootStackMargin(0f, 0f, stripDeclared = true, marginTransparent = false), plans[1])
+        assertEquals(RootStackMargin(16f, 16f, stripDeclared = true, marginTransparent = true), plans[2])
+        // [above p0, above text, above p2, trailing]: the text block sits 16
+        // below the padded top (16 emitted above the collapse-through p0, 0
+        // more above the text), the trailing 16 is emitted above p2's slot.
+        assertEquals(listOf(16f, 0f, 16f, 0f), collapsedRootStackGapsPx(plans))
+        // Mutation M2 (predicate forced false) gives [16, 16, 16, 16] — 32 px.
+    }
+
+    @Test
+    fun u3_alignItems007_rc1RootIsTheStaticPositionSlot_underAnActiveHost() {
+        // U3 (T3 consumer). Root 1 (abspos, no inset) is the RC1 slot when the
+        // host activates — and, with no declared z, no content and a plain
+        // later root, the one the Column wraps in zIndex(1f) (u10 pins the lift).
+        // Root 2 (the flex box) and root 0 (the <p>) are not.
+        val roots = rootsOf(alignItems007)
+        val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist.hostActivates(roots)
+        assertEquals(listOf(false, true, false), roots.map { isComposedStaticPositionRoot(it, hostActive) })
+        // Host inactive (dark stage / hostless paths) → never the RC1 slot.
+        assertEquals(listOf(false, false, false), roots.map { isComposedStaticPositionRoot(it, false) })
+        // And its plan is shape 2: zero contribution, margins kept.
+        assertEquals(RootStackMargin(0f, 0f, stripDeclared = false, marginTransparent = true),
+            composedRootStackPlan(roots[1], hostActive))
+    }
+
+    @Test
+    fun u4_emptyPredicate_acceptsThePostLoadHeightZeroParagraph() {
+        // U4. The propagation-shadow <p>: no text/children, Display BLOCK,
+        // Height 0, all block paddings/borders 0, Position STATIC → self-collapsing.
+        val roots = rootsOf(propagationShadow)
+        assertEquals(true, isSelfCollapsingRoot(roots[0]))
+        // The text block has text → not empty.
+        assertEquals(false, isSelfCollapsingRoot(roots[1]))
+    }
+
+    @Test
+    fun u5_emptyPredicate_refusesBorderedTableAndPaddedRoots() {
+        // U5 — the census's at-risk rows stay OPAQUE:
+        //  gradient-hue-direction's <hr>: Height 0 but a 1-px inset border.
+        assertEquals(false, isSelfCollapsingRoot(rootsOf(hueDirectionHr)[0]))
+        //  has-style-sharing-002 root 0: `padding: 1em` (non-zero, unresolvable) → not empty.
+        assertEquals(false, isSelfCollapsingRoot(rootsOf(hasStyleSharing002Root0)[0]))
+        //  s-11-1-1b-006's body-root: `display: table` AND the body-root role (M1's domain).
+        assertEquals(false, isSelfCollapsingRoot(rootsOf(s006BodyRoot)[0]))
+        //  The RC1 abspos root of ellipse-006: out of flow → its own rule, not this one.
+        assertEquals(false, isSelfCollapsingRoot(rootsOf(ellipse006)[1]))
+    }
+
+    @Test
+    fun u6_planBuilder_matchesTheLegacyLambda_onTheR1Paragraph() {
+        // U6 — byte-compat: an ordinary prose <p> root (the corpus's most
+        // common root) is R1 exactly as before — UA 16/16, opaque, no strip,
+        // band 0 — so every prose-only capture is unmoved.
+        val p = rootsOf(ellipse006)[0]
+        assertEquals(RootStackMargin(16f, 16f, stripDeclared = false), composedRootStackPlan(p, hostActive = true))
+        assertEquals(RootStackMargin(16f, 16f, stripDeclared = false), composedRootStackPlan(p, hostActive = false))
+    }
+    /** css-counter-styles/counter-name-case-sensitive — root 1, verbatim (a `::before`-only div). */
+    private val counterNameRoot1 = """
+        {"id":"wpt__css-counter-styles__counter-name-case-sensitive__1-514","name":"wpt__css-counter-styles__counter-name-case-sensitive__1","properties":[{"type":"CounterIncrement","data":[{"name":"foo"}]}],"pseudos":{"before":{"properties":{"content":"\"1\" \"-\" \"5\""},"_text":"1-5","_lossy":true,"_lossyReasons":["generated-content-baked"]}},"meta":{"role":"ws-after","lang":"en-US"}}
+    """.trimIndent()
+
+    /** selectors/invalidation/any-link-attribute-removal — root 0, verbatim (an empty inline `<a>`). */
+    private val anyLinkRoot0 = """
+        {"id":"wpt__selectors__invalidation__any-link-attribute-removal__0-220","name":"wpt__selectors__invalidation__any-link-attribute-removal__0","properties":[{"type":"TextDecorationLine","data":["UNDERLINE"]},{"type":"Position","data":"STATIC"},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},{"type":"Display","data":"INLINE"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"meta":{"sourceTag":"a"}}
+    """.trimIndent()
+
+    @Test
+    fun u7_emptyPredicate_refusesGeneratedContent() {
+        // U7 — the corpus census found 35 roots matching every other clause
+        // that carry a `::before`/`::after` (this one paints "1-5"): line
+        // boxes ⇒ NOT self-collapsing (§8.3.1). Mutation M4 red.
+        assertEquals(false, isSelfCollapsingRoot(rootsOf(counterNameRoot1)[0]))
+    }
+
+    @Test
+    fun u8_emptyPredicate_refusesANonBlockDisplay() {
+        // U8 — an empty `display: inline` <a>: not a §8.3.1 block box; only
+        // the Display guard keeps it opaque. Mutation M3 red.
+        assertEquals(false, isSelfCollapsingRoot(rootsOf(anyLinkRoot0)[0]))
+    }
+    /** CSS2/css21-errata/s-11-1-1b-006 — root 3, verbatim: the inset abspos `<p>` (top 0, left 8). */
+    private val s006InsetP = """
+        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__3-144","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__3","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":8}}],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
+    """.trimIndent()
+
+    @Test
+    fun u9_t6_insetAbsposP_getsItsUaBlockMargin() {
+        // U9 (T6). CSS 2.1 §9.3.2: `top: 0` offsets the MARGIN edge, so the
+        // <p>'s border box sits 16 below the ICB edge (ref prose y 35). The
+        // overlay never sees the fold's UA margins, so the harness hands it
+        // the UA 16/16 as declared longhands. Mutation M5 red.
+        val p = rootsOf(s006InsetP)[0]
+        val out = withUaBlockMarginOnHoistedRoot(p)
+        assertEquals(listOf("Position", "Top", "Left", "MarginTop", "MarginBottom"), out.properties.map { it.type })
+        assertEquals(16f, com.styleconverter.runtime.core.types.ValueExtractors.extractDp(out.properties[3].data)?.value)
+        assertEquals(16f, com.styleconverter.runtime.core.types.ValueExtractors.extractDp(out.properties[4].data)?.value)
+        // The RC1 root (no inset) is the fold's, never this rule's: same instance.
+        val rc1 = rootsOf(ellipse006)[1]
+        assertEquals(true, rc1 === withUaBlockMarginOnHoistedRoot(rc1))
+        // An in-flow <p> root: same instance.
+        val prose = rootsOf(ellipse006)[0]
+        assertEquals(true, prose === withUaBlockMarginOnHoistedRoot(prose))
+        // An author block margin wins (css-cascade-4 §6.1): same instance.
+        val declared = p.copy(properties = p.properties + com.styleconverter.runtime.core.ir.IRProperty(
+            "MarginTop", kotlinx.serialization.json.Json.parseToJsonElement("""{"px":0}""")))
+        assertEquals(true, declared === withUaBlockMarginOnHoistedRoot(declared))
+    }
+
+    // ── wave-52 lane L2 — T3 skeptic fix: WHICH roots the Column lifts ──
+    //
+    // `composedRootsPaintingAboveFlow` on four more verbatim wave51-fix docs.
+    // The first cut lifted every RC1 root; these pin the four rules.
+    //
+    // EXECUTED MUTATIONS (UaBlockMargins.kt, this class run alone, restored
+    // byte-exact — sha256 checked; mutations.log carries the mutated text
+    // and the failing assertion):
+    //   M6 rule 2 dropped (`ItemPlacementExtractor.zIndex(…) == null` → `true`) → u10 red.
+    //   M7 rule 4 dropped (`paintsAsLayer(roots[j])` → `false`)                 → u11 red.
+    //   M8 rule 3 dropped (`root.children.isNullOrEmpty()` → `true`)            → u12 red.
+
+    /** css-tables/height-distribution/extra-height-given-to-all-row-groups-001 — all 7 components, verbatim. */
+    private val extraHeight001 = """
+        {"id":"wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__0-254","name":"wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__0","properties":[],"text":"Test passes if there is a filled green square and no red.","meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__1-255","name":"wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__1","properties":[{"type":"Height","data":{"type":"length","px":100}},{"type":"Width","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Position","data":"ABSOLUTE"},{"type":"ZIndex","data":{"value":-1,"original":{"type":"integer","value":-1}}}],"meta":{"role":"ws-after"}},
+        {"id":"wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__2-256","name":"wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"BorderCollapse","data":"COLLAPSE"},{"type":"Height","data":{"type":"length","px":100}}],"meta":{"sourceTag":"table"}},
+        {"id":"height-distribution__extra-height-given-to-all-row-groups-001__2__0-257","name":"height-distribution__extra-height-given-to-all-row-groups-001__2__0","properties":[],"slot":{"parent":"wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__2-256"},"meta":{"sourceTag":"thead"}},
+        {"id":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0-258","name":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0","properties":[],"slot":{"parent":"height-distribution__extra-height-given-to-all-row-groups-001__2__0-257"},"meta":{"sourceTag":"tr"}},
+        {"id":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0__0-259","name":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0__0","properties":[{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}}],"slot":{"parent":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0-258"},"meta":{"sourceTag":"td"}},
+        {"id":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0__0__0-260","name":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0__0__0","properties":[{"type":"Display","data":"INLINE_BLOCK"},{"type":"Width","data":{"type":"length","px":100}}],"slot":{"parent":"height-distribution__extra-height-given-to-all-row-groups-001__2__0__0__0-259"}}
+    """.trimIndent()
+
+    /** CSS2/abspos/static-inside-inline-001 — all 5 components, verbatim (root 2 nests an abspos green). */
+    private val staticInsideInline001 = """
+        {"id":"wpt__css2__abspos__static-inside-inline-001__0-019","name":"wpt__CSS2__abspos__static-inside-inline-001__0","properties":[],"text":"Test passes if there is a filled green square and no red.","meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css2__abspos__static-inside-inline-001__1-020","name":"wpt__CSS2__abspos__static-inside-inline-001__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}}],"meta":{"role":"ws-after"}},
+        {"id":"wpt__css2__abspos__static-inside-inline-001__2-021","name":"wpt__CSS2__abspos__static-inside-inline-001__2","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}}]},
+        {"id":"abspos__static-inside-inline-001__2__0-022","name":"abspos__static-inside-inline-001__2__0","properties":[{"type":"LineHeight","data":{"original":{"type":"length","px":100}}},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css2__abspos__static-inside-inline-001__2-021"},"text":"X","meta":{"sourceTag":"span","runs":[{"child":"abspos__static-inside-inline-001__2__0__0"},{"text":" X"}]}},
+        {"id":"abspos__static-inside-inline-001__2__0__0-023","name":"abspos__static-inside-inline-001__2__0__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}}],"slot":{"parent":"abspos__static-inside-inline-001__2__0-022"}}
+    """.trimIndent()
+
+    /** css-cascade/unset-val-002 — all 4 components, verbatim (root 1 holds a `display: unset` span). */
+    private val unsetVal002 = """
+        {"id":"wpt__css-cascade__unset-val-002__0-150","name":"wpt__css-cascade__unset-val-002__0","properties":[],"text":"Test passes if there is a filled green square and no red.","meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css-cascade__unset-val-002__1-151","name":"wpt__css-cascade__unset-val-002__1","properties":[{"type":"Position","data":"ABSOLUTE"}],"meta":{"role":"ws-after"}},
+        {"id":"unset-val-002__1__0-152","name":"unset-val-002__1__0","properties":[{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Generic","data":{"propertyName":"display","rawValue":"unset","_unmapped":true}}],"slot":{"parent":"wpt__css-cascade__unset-val-002__1-151"},"meta":{"sourceTag":"span"}},
+        {"id":"wpt__css-cascade__unset-val-002__2-153","name":"wpt__css-cascade__unset-val-002__2","properties":[{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}]}
+    """.trimIndent()
+
+    /** css-masking/clip-path/clip-path-path-with-zoom — both roots, verbatim (the green is a clip-path layer). */
+    private val clipPathWithZoom = """
+        {"id":"wpt__css-masking__clip-path__clip-path-path-with-zoom__0-099","name":"wpt__css-masking__clip-path__clip-path-path-with-zoom__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}}],"meta":{"role":"ws-after"}},
+        {"id":"wpt__css-masking__clip-path__clip-path-path-with-zoom__1-100","name":"wpt__css-masking__clip-path__clip-path-path-with-zoom__1","properties":[{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"ClipPath","data":{"type":"path","d":"M0,0 L100,0  L0,100  L0,0","rule":"nonzero"}},{"type":"Zoom","data":{"type":"number","value":2}}]}
+    """.trimIndent()
+
+    /** The lift verdicts for one verbatim doc, under the doc's own host activation. */
+    private fun liftsOf(json: String): List<Boolean> {
+        // Decode + compose exactly as the harness does, then the Host's own gate.
+        val roots = rootsOf(json)
+        val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist.hostActivates(roots)
+        return composedRootsPaintingAboveFlow(roots, hostActive)
+    }
+
+    @Test
+    fun u10_extraHeight001_negativeZRc1RootIsNotLifted() {
+        // U10 (rule 2). Root 1: red `position: absolute; z-index: -1`, the
+        // RC1 slot (its margins still fold as shape 2), followed by the
+        // green table. Appendix E step 3 paints it BELOW in-flow blocks;
+        // the first cut lifted it (red over green, 22 passing cells).
+        val roots = rootsOf(extraHeight001)
+        val hostActive = com.styleconverter.runtime.layout.position.CanvasRootHoist.hostActivates(roots)
+        assertEquals("still the RC1 slot for the fold", listOf(false, true, false),
+            roots.map { isComposedStaticPositionRoot(it, hostActive) })
+        assertEquals("never lifted", listOf(false, false, false), liftsOf(extraHeight001))
+        // The positive control: align-items-007's undeclared-z green IS lifted.
+        assertEquals(listOf(false, true, false), liftsOf(alignItems007))
+    }
+
+    @Test
+    fun u11_staticInsideInline001_laterNestedAbsposKeepsTheRedBelow() {
+        // U11 (rule 4). Root 1: red z-auto RC1 box; root 2 nests an abspos
+        // green that follows it in TREE order at step 8, so the green wins.
+        // A Column zIndex on root 1 would lift it past root 2's whole subtree.
+        assertEquals(listOf(false, false, false), liftsOf(staticInsideInline001))
+        // clip-path-path-with-zoom: the later green is a clip-path layer (step 8, z 0).
+        assertEquals(listOf(false, false), liftsOf(clipPathWithZoom))
+    }
+
+    @Test
+    fun u12_unsetVal002_contentBearingRc1RootIsNotLifted() {
+        // U12 (rule 3). Root 1 is an RC1 box whose only paint is a child span;
+        // rule 3 keeps the wave-51 order for any content-bearing root.
+        assertEquals(listOf(false, false, false), liftsOf(unsetVal002))
+    }
 }

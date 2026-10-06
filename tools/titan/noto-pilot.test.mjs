@@ -63,8 +63,9 @@ test('flag off: no files listed to push', () => {
 
 test('flag off: the live CANVAS_REV and canvas frame carry no pilot trace', async () => {
   // This test file runs WITHOUT the env flag, so the imported constants are
-  // the default pipeline's — pin them.
-  assert.equal(CANVAS_REV, 'white-black-ink-font-lh-imgpad-htmlpins');
+  // the default pipeline's — pin them. (wave-52 L12-B bumped the rev to
+  // '-rootbg-uamargin': canvas background on the root only + the UA body box.)
+  assert.equal(CANVAS_REV, 'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin');
   const css = await canvasFrameCss();
   assert.ok(!css.includes('Noto Pilot'), 'default canvas frame must not mention pilot faces');
   assert.ok(css.includes(REF_FONT_STACK), 'default canvas frame keeps the pinned stack verbatim');
@@ -139,6 +140,6 @@ test('subprocess: TITAN_NOTO_PILOT=1 suffixes CANVAS_REV; unset does not', () =>
   const probe = (env) => execFileSync(process.execPath,
     ['-e', `import(${JSON.stringify(join(__dirname, 'capture-browser-ref.mjs'))}).then(m => console.log(m.CANVAS_REV))`],
     { encoding: 'utf8', env: { ...process.env, TITAN_NOTO_PILOT: '', ...env } }).trim();
-  assert.equal(probe({}), 'white-black-ink-font-lh-imgpad-htmlpins');
-  assert.equal(probe({ TITAN_NOTO_PILOT: '1' }), 'white-black-ink-font-lh-imgpad-htmlpins-notopilot');
+  assert.equal(probe({}), 'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin');
+  assert.equal(probe({ TITAN_NOTO_PILOT: '1' }), 'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin-notopilot');
 });

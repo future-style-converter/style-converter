@@ -1,0 +1,24 @@
+# ma-exclude-ios, recut against the INTEGRATED wave-52 tree (the lane's ma-exclude-ios.patch no longer applies:
+# the L8 fix pass reworded the comment its second hunk used as context). Same two changes — the iOS default design
+# measures SF again (pre-wave-52) while M-B/M-C stay. Device A/B exclude arm only: apply, build, record the installed
+# .app hash, capture, REVERSE. Never committed (ChUnitInlineAxisTests' Inter pins go red under it by design).
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/ChUnitMetrics.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/spacing/ChUnitMetrics.swift
+@@ -116,7 +116,7 @@
+     /// system font, the pre-wave-52 measurement). Internal so the Catalyst
+     /// pin can observe which face the default design measures.
+     internal static func defaultMeasuringFaceKey(sizePx: Double) -> String {
+-        interFont(size: CGFloat(sizePx)) == nil ? "default" : "inter"
++        "default"
+     }
+ 
+     /// M-A: the registered Inter face by name — the same lookup the label
+@@ -210,7 +210,7 @@
+         // design-default family that paints the platform face, so the
+         // Compose fix-pass `paintsInter` split has no twin to mirror here.)
+         default:
+-            return interFont(size: size) ?? (UIFont.systemFont(ofSize: size) as CTFont)
++            return UIFont.systemFont(ofSize: size) as CTFont
+         }
+         #else
+         // Non-UIKit fallback (defensive — every supported platform has

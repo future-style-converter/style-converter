@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.position.CanvasHostActivationTest" tests="6" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:48:57.278Z" hostname="mac-1.home" time="0.003">
+  <properties/>
+  <testcase name="A6 anyOutOfFlowBox is exactly hoisted-or-static-position - no third class" classname="com.styleconverter.runtime.layout.position.CanvasHostActivationTest" time="0.003"/>
+  <testcase name="A3 an out-of-flow-free document does NOT activate - identity fast path pinned" classname="com.styleconverter.runtime.layout.position.CanvasHostActivationTest" time="0.0"/>
+  <testcase name="A5 a static-position box at depth under STATIC ancestors activates" classname="com.styleconverter.runtime.layout.position.CanvasHostActivationTest" time="0.0"/>
+  <testcase name="A1 a document of ONLY no-inset absolute roots activates the host" classname="com.styleconverter.runtime.layout.position.CanvasHostActivationTest" time="0.0"/>
+  <testcase name="A2 any hoist-eligible box still activates - the wave-19 behavior is kept" classname="com.styleconverter.runtime.layout.position.CanvasHostActivationTest" time="0.0"/>
+  <testcase name="A4 a no-inset absolute UNDER a positioned ancestor does not activate on its own" classname="com.styleconverter.runtime.layout.position.CanvasHostActivationTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

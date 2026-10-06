@@ -110,6 +110,38 @@ enum BackfaceCulling {
                                  inherited: inherited)) < 0
     }
 
+    /// Wave 52 (lane L4, native-near-misses T5) — WHAT a culled element
+    /// hides, split by `transform-style` (css-transforms-2 §4.1.2).
+    enum Decision: Equatable {
+        /// Front-facing, or `backface-visibility: visible` — paint normally.
+        case none
+        /// Culled + FLAT: the subtree is flattened INTO this plane, so the
+        /// whole flattened picture is the back face → `opacity(0)`.
+        case hideSubtree
+        /// Culled + PRESERVE_3D: the descendants are their own planes in the
+        /// 3D rendering context this element extends, each with its OWN
+        /// `backface-visibility` (initial `visible`) — only this element's
+        /// own box is the back face, and the children keep painting.
+        case cullOwnFace
+    }
+
+    /// [isCulled] refined by the flattening mode. MEASURED on wave51-fix
+    /// css-transforms/composited-under-rotateY-180deg-preserve-3d (ios f
+    /// 0.9565): the parent `rotateY(180deg); backface-visibility: hidden;
+    /// transform-style: preserve-3d; width: 100` holds a 100×100 GREEN
+    /// child; Chromium's frozen ref paints the square at (16,16) and the
+    /// old `opacity(0)`-the-content rule painted a BLANK canvas — the child
+    /// never asked to be culled, the parent's flat-mode rule reached it
+    /// through a flattening §4.1.2 says does not happen.
+    static func decide(agg: TransformsAggregate,
+                       inherited: CATransform3D) -> Decision {
+        // Not culled at all (visible flag, or a front-facing accumulated
+        // normal): nothing to hide — the common path, unchanged.
+        guard isCulled(agg: agg, inherited: inherited) else { return .none }
+        // preserve-3d keeps the descendants as their own planes.
+        return agg.preserve3D ? .cullOwnFace : .hideSubtree
+    }
+
     /// True when the element ESTABLISHES or EXTENDS a 3D rendering context
     /// for its children (css-transforms-2 §4.1): a used `perspective` other
     /// than none establishes one; `preserve-3d` extends the parent's. Such

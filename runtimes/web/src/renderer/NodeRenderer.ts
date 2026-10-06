@@ -43,6 +43,11 @@ import { rootPseudoPlacementStyle, rootWritingModeSuppression } from './RootPseu
 // wave-32 lane R: the wire `meta.runs` → an ordered render plan over the
 // composed children (the inline anonymous-run box) — see InlineRuns.ts.
 import { resolveRuns } from './InlineRuns';
+// wave-52 lane L6 (T3): the wire `meta.markerText` → a `<string>`
+// list-style-type (or, inside + childless, a leading inline box) for the
+// two shapes Chrome's own ::marker gets wrong — see the rule and its
+// measurements in engine/lists/ListStyleTypeApplier.ts.
+import { bakedMarkerPlan } from '../engine/lists/ListStyleTypeApplier';
 
 /** Props for one composed node render. */
 export interface NodeRendererProps {
@@ -52,6 +57,20 @@ export interface NodeRendererProps {
   depth?: number;
   /** Calibration hooks (see RendererOptions). Omit for pure CSS semantics. */
   options?: RendererOptions;
+  /**
+   * wave-52 lane L6 (T3): the `list-style-type` keyword in force from the
+   * nearest ancestor that declared one — css-lists-3 §3.1 makes the
+   * property inherited, and the flat wire has no parent edge, so the
+   * renderer threads the computed value down the recursion for the ONE
+   * decision that needs it (bakedMarkerListStyleType). Never reaches the
+   * DOM: the browser still inherits the real property natively.
+   */
+  inheritedListStyleType?: string;
+  /** wave-52 lane L6 (T3): the inherited `list-style-position`, threaded
+   *  exactly like the type (same §3.1 inheritance, same flat-wire reason) —
+   *  it picks the baked marker's form (bakedMarkerPlan). Never reaches the
+   *  DOM. */
+  inheritedListStylePosition?: string;
 }
 
 /**
@@ -59,7 +78,9 @@ export interface NodeRendererProps {
  * exactly once; children recurse with the SAME options so a skin applies
  * uniformly at every composition depth.
  */
-export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): ReactElement | null {
+export function NodeRenderer(
+  { node, depth = 0, options, inheritedListStyleType, inheritedListStylePosition }: NodeRendererProps,
+): ReactElement | null {
   // The component under render — the only wire input besides children.
   const component = node.component;
   // Engine styles are pure per-properties — memoise on identity. Hooks
@@ -97,14 +118,31 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
   // the wave48-cal measurements. Null for every other component, so their
   // style objects stay byte-identical.
   const rootWmOverride = rootWritingModeSuppression(component);
+  // wave-52 lane L6 (T3): the item's COMPUTED list-style-type and
+  // -position — its own emitted value, else the ancestor's (css-lists-3
+  // §3.1 inheritance, threaded as props because the flat wire has no parent
+  // edge). Only bakedMarkerPlan reads them, and only a component carrying a
+  // baked `meta.markerText` under one of the two measured shapes gets an
+  // override; every other component's style object stays byte-identical
+  // (the plan is undefined, the spread below is empty, no extra node).
+  const ownListStyleType = typeof styles.listStyleType === 'string' ? styles.listStyleType : undefined;
+  const effectiveListStyleType = ownListStyleType ?? inheritedListStyleType;
+  const ownListStylePosition = typeof styles.listStylePosition === 'string' ? styles.listStylePosition : undefined;
+  const effectiveListStylePosition = ownListStylePosition ?? inheritedListStylePosition;
+  const bakedPlan = bakedMarkerPlan(effectiveListStyleType, effectiveListStylePosition,
+    component.meta?.markerText, hasChildren);
+  const bakedMarkerOverride = bakedPlan === undefined ? null : { listStyleType: bakedPlan.listStyleType };
   // Variables merge LAST — `--name` keys are disjoint from every regular
   // CSS key, so this can never clobber a declaration. The decoration host
   // override rides with them: it only ever sets `text-decoration-line`,
   // which the wrappers are about to re-declare per entry. The root
   // writing-mode override merges after the engine styles ON PURPOSE — its
-  // whole job is to beat the emitted `writing-mode: vertical-rl`.
+  // whole job is to beat the emitted `writing-mode: vertical-rl`, and the
+  // baked-marker override merges after them for the same reason: its whole
+  // job is to replace the emitted keyword on the two shapes it names.
   const styleProp = {
     ...decorated, ...variableStyles, ...hostDecoration, ...(rootWmOverride ?? {}),
+    ...(bakedMarkerOverride ?? {}),
   } as CSSProperties;
 
   // Element choice: lowercase the trusted wire tag, then let the skin
@@ -221,7 +259,16 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
   const rootPlacement = rootPseudoPlacementStyle(component);
   // CSS orders ::marker before ::before, both before the inline content;
   // ::after trails everything (including real children).
-  const markerNode = pseudo?.marker ? renderPseudoNode(pseudo.marker, 'marker', rootPlacement) : null;
+  // wave-52 lane L6 (T3): the inline form of a baked marker — a leading
+  // isolated text box (the ref's own `<bdi>10000. </bdi>` markup; css-lists-3
+  // §3.5 makes an inside marker the item's first inline box) standing in for
+  // the `::marker` that `list-style-type: none` just suppressed. Only when
+  // the extractor sent no ::marker bag of its own (that one wins, as before).
+  const markerNode = pseudo?.marker ? renderPseudoNode(pseudo.marker, 'marker', rootPlacement)
+    : bakedPlan?.inlineMarkerText !== undefined
+      ? createElement('span', { key: 'baked-marker', 'data-baked-marker': '', style: { unicodeBidi: 'isolate' } },
+        bakedPlan.inlineMarkerText)
+      : null;
   const beforeNode = pseudo?.before ? renderPseudoNode(pseudo.before, 'before', rootPlacement) : null;
   const afterNode = pseudo?.after ? renderPseudoNode(pseudo.after, 'after', rootPlacement) : null;
 
@@ -248,6 +295,11 @@ export function NodeRenderer({ node, depth = 0, options }: NodeRendererProps): R
         node: child,
         depth: depth + 1,
         options,
+        // wave-52 lane L6 (T3): the computed keyword and position flow to
+        // the children exactly as CSS inheritance carries them (own beats
+        // inherited).
+        inheritedListStyleType: effectiveListStyleType,
+        inheritedListStylePosition: effectiveListStylePosition,
       });
     };
     // ── wave-32 lane R: the inline anonymous-run box ────────────────────

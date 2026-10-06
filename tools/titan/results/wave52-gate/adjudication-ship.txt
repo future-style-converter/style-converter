@@ -1,0 +1,18 @@
+record  wave51-fix → wave52-ship
+  prev  web 1215/1379  ios 1089/1369  android 1080/1369
+  cur   web 1229/1372  ios 1119/1362  android 1111/1362
+  gained 102  lost 8  newly-measured 0  unmeasured-now 21
+render  wave52-calib → wave52-ship
+  gained 89  lost 0  newly-measured 0  unmeasured-now 2
+
+ok   R1  record lost 8: 8 instrument-only (pre-registered), 0 outside the list
+ok   R2  render lost 0
+ok   R3  record unmeasured-now 21: expected 19 absence-only + 2 (L6); unexpected 0, expected-but-still-measured 0
+ok   R4  render unmeasured-now 2 (expected the 2 L6 cells; other: 0)
+ok   R5  missing sections 0, short columns 0
+
+gained 102 = 13 instrument-only + 89 render
+  render gains by platform: web 18  ios 35  android 36
+  render newly measured: 0
+
+ADJUDICATION: all five rules hold

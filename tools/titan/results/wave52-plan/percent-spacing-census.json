@@ -1,0 +1,248 @@
+{
+ "run": "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave51-fix",
+ "rootCb": [
+  358,
+  null
+ ],
+ "summary": {
+  "docs": 1435,
+  "carriers": 4,
+  "tests": 4,
+  "cbDiffer": 4,
+  "usedDiffer": 4
+ },
+ "shapes": {
+  "MarginTop:px": 3077,
+  "PaddingLeft:px": 2778,
+  "MarginRight:px": 3551,
+  "MarginBottom:px": 3568,
+  "MarginLeft:px": 2999,
+  "PaddingTop:px": 2767,
+  "PaddingRight:px": 2750,
+  "PaddingBottom:px": 2771,
+  "PaddingTop:original": 11,
+  "PaddingRight:original": 26,
+  "PaddingBottom:original": 17,
+  "PaddingLeft:original": 194,
+  "MarginTop:original": 61,
+  "MarginRight:original": 62,
+  "MarginBottom:original": 103,
+  "MarginLeft:original": 66,
+  "MarginBlockEnd:px": 12,
+  "MarginRight:string": 28,
+  "MarginTop:string": 18,
+  "MarginBottom:string": 17,
+  "MarginLeft:string": 24,
+  "PaddingInlineStart:px": 1,
+  "MarginLeft:bare-number": 1,
+  "MarginRight:bare-number": 1,
+  "PaddingLeft:bare-number": 1,
+  "PaddingRight:bare-number": 1,
+  "PaddingTop:string": 1,
+  "PaddingRight:string": 1,
+  "PaddingBottom:string": 1,
+  "PaddingLeft:string": 1,
+  "MarginTop:expr": 1,
+  "MarginRight:expr": 1,
+  "MarginBottom:expr": 1,
+  "MarginLeft:expr": 1
+ },
+ "rows": [
+  {
+   "sec": "css-sizing",
+   "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-001",
+   "id": "abspos-auto-sizing-fit-content-percentage-001__1__0__0-004",
+   "elementCb": [
+    null,
+    null
+   ],
+   "childCb": [
+    100,
+    100
+   ],
+   "cbDiffer": true,
+   "sides": [
+    {
+     "type": "MarginLeft",
+     "pct": -50,
+     "elementPx": 0,
+     "childPx": -50,
+     "moves": true
+    }
+   ],
+   "moves": true,
+   "paints": false,
+   "hasChildren": false,
+   "verdicts": {
+    "web": {
+     "ssim": 1,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "android": {
+     "ssim": 0.9984,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    }
+   }
+  },
+  {
+   "sec": "css-sizing",
+   "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-002",
+   "id": "abspos-auto-sizing-fit-content-percentage-002__1__0__0-008",
+   "elementCb": [
+    null,
+    null
+   ],
+   "childCb": [
+    100,
+    100
+   ],
+   "cbDiffer": true,
+   "sides": [
+    {
+     "type": "MarginRight",
+     "pct": -50,
+     "elementPx": 0,
+     "childPx": -50,
+     "moves": true
+    }
+   ],
+   "moves": true,
+   "paints": false,
+   "hasChildren": false,
+   "verdicts": {
+    "web": {
+     "ssim": 1,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "android": {
+     "ssim": 0.9984,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    }
+   }
+  },
+  {
+   "sec": "css-sizing",
+   "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-003",
+   "id": "abspos-auto-sizing-fit-content-percentage-003__1__0__0-012",
+   "elementCb": [
+    null,
+    null
+   ],
+   "childCb": [
+    100,
+    100
+   ],
+   "cbDiffer": true,
+   "sides": [
+    {
+     "type": "PaddingLeft",
+     "pct": 50,
+     "elementPx": 0,
+     "childPx": 50,
+     "moves": true
+    }
+   ],
+   "moves": true,
+   "paints": false,
+   "hasChildren": false,
+   "verdicts": {
+    "web": {
+     "ssim": 1,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "android": {
+     "ssim": 0.9984,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    }
+   }
+  },
+  {
+   "sec": "css-sizing",
+   "test": "wpt__css-sizing__abspos-auto-sizing-fit-content-percentage-004",
+   "id": "abspos-auto-sizing-fit-content-percentage-004__1__0__0-016",
+   "elementCb": [
+    null,
+    null
+   ],
+   "childCb": [
+    100,
+    100
+   ],
+   "cbDiffer": true,
+   "sides": [
+    {
+     "type": "PaddingRight",
+     "pct": 50,
+     "elementPx": 0,
+     "childPx": 50,
+     "moves": true
+    }
+   ],
+   "moves": true,
+   "paints": false,
+   "hasChildren": false,
+   "verdicts": {
+    "web": {
+     "ssim": 1,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    },
+    "android": {
+     "ssim": 0.9984,
+     "pass": true,
+     "cF": false,
+     "nF": false,
+     "ex": false
+    }
+   }
+  }
+ ]
+}

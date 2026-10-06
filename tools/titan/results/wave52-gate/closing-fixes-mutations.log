@@ -1,0 +1,12 @@
+baseline: 25 tests, 0 failing []
+G1 displayTakesMarkerAway: != LIST_ITEM_KEYWORD -> ==: RED as expected — 3/25 failing: ['an explicit list-item display keeps the marker in both spellings', 'an li the author made display block or flex has no marker', 'the last Display entry decides whether the marker is taken away']; restored byte-exact: True
+G2 displayTakesMarkerAway: any Display entry strips the marker: RED as expected — 2/25 failing: ['an explicit list-item display keeps the marker in both spellings', 'the last Display entry decides whether the marker is taken away']; restored byte-exact: True
+C1 horizontalAdvance: Paint(ADVANCE_PAINT_FLAGS) -> Paint(): RED as expected — 1/25 failing: ['the production probe measures the font advance - no hinting, no ceil']; restored byte-exact: True
+C2 horizontalAdvance: getRunAdvance -> measureText: RED as expected — 1/25 failing: ['the production probe measures the font advance - no hinting, no ceil']; restored byte-exact: True
+C3 ADVANCE_PAINT_FLAGS: LINEAR_TEXT_FLAG dropped: RED as expected — 1/25 failing: ['the advance probe asks for linear sub-pixel metrics']; restored byte-exact: True
+F1 fitSafePx: the snap replaced by the identity: RED as expected — 2/25 failing: ['a ch length is rounded up to a whole device pixel and an exact one stays', 'both ch resolution paths go through the snap']; restored byte-exact: True
+F2 SpacingResolve: the bare ch arm loses the snap: RED as expected — 1/25 failing: ['both ch resolution paths go through the snap']; restored byte-exact: True
+F3 SpacingResolve: the calc ch arm loses the snap: RED as expected — 1/25 failing: ['both ch resolution paths go through the snap']; restored byte-exact: True
+F4 fitSafePx: strictly-above instead of ceil (an exact tie grows a pixel — the wave52-probe2 regression): RED as expected — 1/25 failing: ['a ch length is rounded up to a whole device pixel and an exact one stays']; restored byte-exact: True
+after restore: 25 tests, 0 failing
+RESULT: every mutation killed by exactly its named pins

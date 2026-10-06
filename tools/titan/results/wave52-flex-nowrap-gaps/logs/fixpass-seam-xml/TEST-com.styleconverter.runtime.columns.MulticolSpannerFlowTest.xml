@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.292Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="F replay gate - sole flow with only inkless spanners" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="BRK6 break-after children engage the plan" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="BRK1 discard drops the overflow chunk and everything after - live IR discard-multicol-003" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="X boundary crossing - straddling children are detected" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP7 empty container plans nothing and N floors at 1" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP3 auto-height sole-flow balance - live IR as-column-flex-item" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="FBK2 firstFlowIndex finds a forced-break sole flow child" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="R rolesFor - span all is SPANNER, abspos is STATIC, out-of-flow beats span" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="DSC1 discard latches across the following spanner and segment" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP8 trailing static clamps to column N-1" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="E engagement - spanner always, sole-flow balance only when it shortens" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="FLT1 specsFor marks children whose subtree declares a float" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP6 static anchor mid-segment - live IR abspos-after-spanner-static-pos" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="FBK1 specsFor marks forced column breaks hidden below the child" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="BRK2 three break-after chunks fill three columns one line tall" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="BRK3 overflow chunk keeps flowing into overflow columns when not discarding" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP2 abspos static position after spanner - live IR abspos-after-spanner" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP4 three 30px children in two columns fill sequentially at H 45" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="BRK4 chunk columns match the greedy distribution for at-most-N single-child chunks" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP1 balance before spanner - live IR always-balancing-before-column-span" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="BRK7 rolesFor reads BreakAfter COLUMN and flowCount includes it" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="SP5 mid-list 20px spanner - segments balance independently" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <testcase name="BRK5 multi-child chunk stacks before the forced break" classname="com.styleconverter.runtime.columns.MulticolSpannerFlowTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

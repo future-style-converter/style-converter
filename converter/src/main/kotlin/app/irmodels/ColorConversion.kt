@@ -543,6 +543,38 @@ object ColorConversion {
         return if (mag < b * 4.5) sign * (mag / 4.5) else sign * ((mag + a - 1) / a).pow(1.0 / 0.45)
     }
 
+    // ---- Linear-light twins (wave-52 L1 F-A; css-color-4 §10.2) ----
+    //
+    // css-color-4 §10.2 defines `display-p3-linear`, `a98-rgb-linear` and
+    // `rec2020-linear` as "the linear-light version of" their gamma-encoded
+    // parents: SAME primaries, SAME white point, NO transfer function. So each
+    // twin is its parent's matrix path with the decode step removed — the
+    // values are already linear light. Measured before this arm existed: the
+    // parser's `when` had no `-linear` case for these three, so `srgb` stayed
+    // null and every runtime painted nothing (wave51-fix css-color/
+    // display-p3-linear-001..003 f 0.8775 / 0.7977 / 0.9484 on all three).
+
+    /** color(display-p3-linear r g b): linear P3 → XYZ(D65) → sRGB, no decode. */
+    fun displayP3LinearToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB {
+        // No srgbGammaToLinear here — that is the ONLY difference from displayP3ToSrgb.
+        val (x, y, z) = mul3(P3_TO_XYZ, r, g, b)
+        return xyzToSrgb(x, y, z, alpha)
+    }
+
+    /** color(a98-rgb-linear r g b): linear Adobe RGB → XYZ(D65) → sRGB, no decode. */
+    fun a98RgbLinearToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB {
+        // No a98Linear (the 563/256 power) — the values are already linear light.
+        val (x, y, z) = mul3(A98_TO_XYZ, r, g, b)
+        return xyzToSrgb(x, y, z, alpha)
+    }
+
+    /** color(rec2020-linear r g b): linear BT.2020 → XYZ(D65) → sRGB, no decode. */
+    fun rec2020LinearToSrgb(r: Double, g: Double, b: Double, alpha: Double = 1.0): SRGB {
+        // No rec2020Linear (the BT.2020 curve) — the values are already linear light.
+        val (x, y, z) = mul3(REC2020_TO_XYZ, r, g, b)
+        return xyzToSrgb(x, y, z, alpha)
+    }
+
     /** color(xyz r g b) / color(xyz-d65 …) — components already XYZ(D65). */
     fun xyzD65ToSrgb(x: Double, y: Double, z: Double, alpha: Double = 1.0): SRGB =
         xyzToSrgb(x, y, z, alpha)

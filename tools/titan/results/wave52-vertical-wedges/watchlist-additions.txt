@@ -1,0 +1,18 @@
+# L8 vertical-wedges — cells the lane's census found beyond the plan's L8 block (watchlist.txt:137-149).
+# M-A at risk, iOS ONLY: a face-less `padding: 0.5ch` (StyleBuilder measures ch for padding/margin;
+# Compose's buildSpacingContext measures it for sizing slots only) — SF → Inter moves each side ≈ +0.15 px.
+css-text/bidi/bidi-lines-001 ios
+css-text/bidi/bidi-lines-002 ios
+# M-A movers (face-less sizing ch carriers, failing on the natives today — can move, cannot be lost).
+css-text/hyphens/hyphens-auto-last-word-001
+css-text/hyphens/hyphens-out-of-flow-001
+css-text/hyphens/hyphens-span-001
+# M-C movers: the gate-admitted upright (all-CJK `mixed`) leaves whose decline the §7.3.1 budget
+# replaces — failing on both natives today.
+css-writing-modes/forms/checkbox-appearance-native-vertical
+css-writing-modes/forms/radio-appearance-native-vertical
+# FIX PASS (skeptic should-fix 2): iOS M-A's gate is design `default` (no monospace / serif / rounded
+# entry, no document face), not "face-less": a declared `font-family: sans-serif` is design default too,
+# so its `margin-left: 10ch` @32px measures Inter 20.19 px per ch instead of SF 19.2 (≈ +9.9 px).
+# census-family.mjs: iOS movers 21 docs / 76 carriers; this is the only one with a declared family.
+css-text/hyphens/hyphenate-character-005 ios

@@ -162,4 +162,54 @@ class ListItemMarkerGateTest {
             "div", listOf(pair("Display", "\"BLOCK\""),
                           pair("ListStylePosition", "\"INSIDE\""))))
     }
+
+    // ── displayTakesMarkerAway: the mirror of §3.1 for a tagged <li> ─────
+    // Wave-52 closing gate. MUTATIONS EXECUTED (2026-10-05, each restored):
+    //  • `!= LIST_ITEM_KEYWORD` → `== LIST_ITEM_KEYWORD`: the first, third
+    //    and fourth tests below fail.
+    //  • the loop body replaced by `takenAway = true` (any Display entry
+    //    strips the marker): the third and fourth fail.
+
+    @Test
+    fun `an li the author made display block or flex has no marker`() {
+        // The EXACT payload of every <li> in the live
+        // wpt__css-lists__counter-reset-reversed-nested document
+        // (`li { display: block }`), where both natives painted a stray
+        // `1.`…`5.` in front of the authored ::before counters…
+        assertTrue(ListItemMarkerGate.displayTakesMarkerAway(
+            listOf(pair("Display", "\"BLOCK\""))))
+        // …and of the gradient-powerless-hue-* documents (`display: flex`).
+        for (keyword in listOf("FLEX", "INLINE", "INLINE_BLOCK", "GRID", "NONE")) {
+            assertTrue(keyword, ListItemMarkerGate.displayTakesMarkerAway(
+                listOf(pair("Display", "\"$keyword\""))))
+        }
+    }
+
+    @Test
+    fun `an li with no Display entry keeps the UA default marker`() {
+        // HTML §15.3.7's `li { display: list-item }` is not on the wire —
+        // the shape of every other <li> in the corpus. Must stay marked.
+        assertFalse(ListItemMarkerGate.displayTakesMarkerAway(emptyList()))
+        assertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            listOf(pair("ListStyleType", "\"square\""))))
+    }
+
+    @Test
+    fun `an explicit list-item display keeps the marker in both spellings`() {
+        // change-list-style-type-002, add-inline-child-after-marker-001/002
+        // and change-list-style-position-001 carry it on the <li> itself.
+        assertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            listOf(pair("Display", "\"LIST_ITEM\""))))
+        assertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            listOf(pair("Display", "\"list-item\""))))
+    }
+
+    @Test
+    fun `the last Display entry decides whether the marker is taken away`() {
+        // Last-wins, the same fold as isListItemDisplay.
+        assertFalse(ListItemMarkerGate.displayTakesMarkerAway(
+            listOf(pair("Display", "\"BLOCK\""), pair("Display", "\"LIST_ITEM\""))))
+        assertTrue(ListItemMarkerGate.displayTakesMarkerAway(
+            listOf(pair("Display", "\"LIST_ITEM\""), pair("Display", "\"BLOCK\""))))
+    }
 }

@@ -1,0 +1,1201 @@
+{
+ "generatedAt": "2026-10-05T16:02:59.206Z",
+ "run": "wave51-fix",
+ "irDocs": 1435,
+ "fa": {
+  "colorSpaces": {
+   "--foo": {
+    "decls": 1,
+    "withSrgb": 0,
+    "tests": [
+     "css/css-color/at-color-profile-001.html"
+    ],
+    "status": "still null (runtime-dependent)"
+   },
+   "a98-rgb": {
+    "decls": 4,
+    "withSrgb": 4,
+    "tests": [
+     "css/css-color/a98rgb-001.html",
+     "css/css-color/a98rgb-002.html",
+     "css/css-color/a98rgb-003.html",
+     "css/css-color/a98rgb-004.html"
+    ],
+    "status": "already resolved"
+   },
+   "display-p3": {
+    "decls": 6,
+    "withSrgb": 6,
+    "tests": [
+     "css/css-color/display-p3-001.html",
+     "css/css-color/display-p3-002.html",
+     "css/css-color/display-p3-003.html",
+     "css/css-color/display-p3-004.html",
+     "css/css-color/display-p3-005.html",
+     "css/css-color/display-p3-006.html"
+    ],
+    "status": "already resolved"
+   },
+   "display-p3-linear": {
+    "decls": 6,
+    "withSrgb": 0,
+    "tests": [
+     "css/css-color/display-p3-linear-001.html",
+     "css/css-color/display-p3-linear-002.html",
+     "css/css-color/display-p3-linear-003.html",
+     "css/css-color/display-p3-linear-004.html",
+     "css/css-color/display-p3-linear-005.html",
+     "css/css-color/display-p3-linear-006.html"
+    ],
+    "status": "RESOLVED BY F-A"
+   },
+   "srgb": {
+    "decls": 40,
+    "withSrgb": 40,
+    "tests": [
+     "css/css-color/color-mix-basic-001.html",
+     "css/css-color/color-mix-currentcolor-nested-for-color-property.html",
+     "css/css-color/color-mix-currentcolor-visited.html",
+     "css/css-color/display-p3-006.html",
+     "css/css-color/display-p3-linear-006.html",
+     "css/css-images/cross-fade-premultiplied-alpha.html",
+     "css/css-images/gradient/css-color-4-colors-default-to-oklab-gradient.html",
+     "css/css-images/gradient/gradient-none-interpolation.html",
+     "css/css-images/gradient/gradient-powerless-hue-hsl.html",
+     "css/css-images/gradient/gradient-powerless-hue-hwb.html",
+     "css/css-images/gradient/gradient-powerless-hue-lch.html",
+     "css/css-images/gradient/gradient-powerless-hue-oklch.html"
+    ],
+    "status": "already resolved"
+   },
+   "xyz-d65": {
+    "decls": 3,
+    "withSrgb": 3,
+    "tests": [
+     "css/css-color/color-mix-non-srgb-001.html"
+    ],
+    "status": "already resolved"
+   }
+  },
+  "linearSpaceTests": [
+   {
+    "test": "css/css-color/display-p3-linear-001.html",
+    "cells": {
+     "web": "f 0.8775",
+     "ios": "f 0.8764",
+     "android": "f 0.8756"
+    }
+   },
+   {
+    "test": "css/css-color/display-p3-linear-002.html",
+    "cells": {
+     "web": "f 0.7977",
+     "ios": "f 0.7966",
+     "android": "f 0.7959"
+    }
+   },
+   {
+    "test": "css/css-color/display-p3-linear-003.html",
+    "cells": {
+     "web": "f 0.9484",
+     "ios": "f 0.9474",
+     "android": "f 0.9468"
+    }
+   },
+   {
+    "test": "css/css-color/display-p3-linear-004.html",
+    "cells": {
+     "web": "P 0.9548",
+     "ios": "P 0.9532",
+     "android": "P 0.9522"
+    }
+   },
+   {
+    "test": "css/css-color/display-p3-linear-005.html",
+    "cells": {
+     "web": "P 0.9547",
+     "ios": "P 0.9538",
+     "android": "P 0.9531"
+    }
+   },
+   {
+    "test": "css/css-color/display-p3-linear-006.html",
+    "cells": {
+     "web": "P 0.9568",
+     "ios": "P 0.9556",
+     "android": "P 0.9548"
+    }
+   }
+  ]
+ },
+ "fb": {
+  "sources": 48,
+  "authors": 29,
+  "solveClassBails": 18,
+  "stampCandidates": 9,
+  "stampsMeasured": 4,
+  "unmeasured": 0,
+  "stampCells": 12,
+  "probe": {
+   "generatedAt": "2026-10-05T16:02:53.345Z",
+   "run": "wave51-fix",
+   "driven": 18,
+   "solveClassBails": 18,
+   "sampled": 17,
+   "stamped": [
+    {
+     "rel": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+     "ring": "rgb(255, 182, 193)"
+    },
+    {
+     "rel": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+     "ring": "rgb(255, 182, 193)"
+    },
+    {
+     "rel": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+     "ring": "rgb(255, 182, 193)"
+    },
+    {
+     "rel": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+     "ring": "rgb(255, 182, 193)"
+    }
+   ],
+   "notStamped": [
+    {
+     "rel": "css/css-view-transitions/animating-new-content-subset.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/animating-new-content.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/break-inside-avoid-child.html",
+     "sampled": false,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/capture-with-visibility-mixed-descendants.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/class-specificity.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/content-with-child-with-transparent-background.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/content-with-transform-new-image.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/content-with-transform-old-image.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/element-with-overflow.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/far-away-capture.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/inline-child-with-composited-filter.html",
+     "sampled": true,
+     "ring": null
+    },
+    {
+     "rel": "css/css-view-transitions/inline-child-with-filter.html",
+     "sampled": true,
+     "ring": null
+    }
+   ],
+   "stampTouchedOther": [],
+   "nonStampMutated": []
+  },
+  "tests": [
+   {
+    "test": "css/css-view-transitions/3d-transform-incoming.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(255, 192, 203)",
+    "refCorner": "rgb(255, 192, 203)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "f 0.9328",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/3d-transform-outgoing.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(255, 192, 203)",
+    "refCorner": "rgb(255, 192, 203)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "f 0.9488",
+     "android": "P 0.9504"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/animating-new-content-subset.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — non-uniform-snapshot target/new (162 colours, 65.07% flat)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9957",
+     "ios": "P 0.9954",
+     "android": "P 0.9849"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/animating-new-content.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — non-uniform-snapshot target/new (117 colours, 65.21% flat)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9715",
+     "ios": "P 0.9714",
+     "android": "P 0.9643"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": null,
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "f 0.957",
+     "android": "f 0.957"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/auto-name-from-id-shadow.html",
+    "backdrop": "rebeccapurple",
+    "backdropRgb": "rgb(102, 51, 153)",
+    "bake": "bailed — transition-not-frozen (active: true → false)",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(102, 51, 153)",
+    "refCorner": "rgb(102, 51, 153)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.5621",
+     "ios": "f 0.5621",
+     "android": "f 0.5621"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/auto-name-from-id.html",
+    "backdrop": "rebeccapurple",
+    "backdropRgb": "rgb(102, 51, 153)",
+    "bake": "bailed — transition-not-frozen (active: true → false)",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(102, 51, 153)",
+    "refCorner": "rgb(102, 51, 153)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.555",
+     "ios": "f 0.555",
+     "android": "f 0.555"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/auto-name.html",
+    "backdrop": "rebeccapurple",
+    "backdropRgb": "rgb(102, 51, 153)",
+    "bake": "bailed — transition-not-frozen (active: true → false)",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(102, 51, 153)",
+    "refCorner": "rgb(102, 51, 153)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.555",
+     "ios": "f 0.555",
+     "android": "f 0.555"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/break-inside-avoid-child.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — snapshot solve failed for target/old: snapshot overflows its 358x302 box (79800px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": false,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9872",
+     "ios": "P 0.9735",
+     "android": "P 0.9735"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/capture-with-offscreen-child-translated.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.986",
+     "ios": "P 0.986",
+     "android": "P 0.986"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/capture-with-offscreen-child.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/capture-with-opacity-zero-child.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/capture-with-visibility-hidden-child.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/capture-with-visibility-mixed-descendants.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "bailed — snapshot solve failed for target/old: snapshot overflows its 100x100 box (100px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": true,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none — candidate, ring measured null (negative control)",
+    "cells": {
+     "web": "f 0.9215",
+     "ios": "f 0.9196",
+     "android": "f 0.9196"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/class-specificity.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "bailed — snapshot solve failed for shared/old: snapshot overflows its 100x100 box (4400px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": true,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none — candidate, ring measured null (negative control)",
+    "cells": {
+     "web": "f 0.8773",
+     "ios": "f 0.8773",
+     "android": "f 0.8773"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "bailed — snapshot solve failed for target/new: snapshot overflows its 100x100 box (100px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": true,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none — candidate, ring measured null (negative control)",
+    "cells": {
+     "web": "f 0.9067",
+     "ios": "f 0.9067",
+     "android": "f 0.9067"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "bailed — snapshot solve failed for target/old: isolation window 500x200 exceeds the 358x568 viewport",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": true,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none — candidate, ring measured null (negative control)",
+    "cells": {
+     "web": "P 0.9879",
+     "ios": "P 0.9879",
+     "android": "P 0.9879"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/content-smaller-than-box-size.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "baked — 2 groups, 2 leaves, 1 invariant cross-fade",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/content-visibility-auto-shared-element.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 2 groups, 10 leaves, two-colour nested",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/content-with-child-with-transparent-background.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — snapshot solve failed for shared/old: snapshot overflows its 50x50 box (2500px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9977",
+     "ios": "P 0.9977",
+     "android": "P 0.9977"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/content-with-transform-new-image.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — non-uniform-snapshot target/new (139 colours, 46.7% flat)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9746",
+     "ios": "f 0.7892",
+     "android": "P 0.9743"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/content-with-transform-old-image.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — non-uniform-snapshot target/old (139 colours, 46.7% flat)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.8597",
+     "ios": "f 0.8604",
+     "android": "f 0.8605"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/content-with-transparent-background.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "baked — 2 groups, 3 leaves, 1 invariant cross-fade, two-colour band-v",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/css-tags-paint-order-with-entry.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "baked — 4 groups, 4 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9791",
+     "ios": "P 0.9791",
+     "android": "P 0.9791"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/css-tags-paint-order.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "baked — 3 groups, 3 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9791",
+     "ios": "P 0.9791",
+     "android": "P 0.9791"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/css-tags-shared-element.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "baked — 2 groups, 2 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/dialog-in-top-layer-during-transition-new.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "declined — top-layer-undeliverable",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "-",
+     "ios": "-",
+     "android": "-"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/dialog-in-top-layer-during-transition-old.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "declined — top-layer-undeliverable",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "-",
+     "ios": "-",
+     "android": "-"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/element-is-grouping-during-animation.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/element-stops-grouping-after-animation.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "bailed — no-active-transition",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9639",
+     "ios": "P 0.9639",
+     "android": "P 0.9639"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/element-with-overflow.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — snapshot solve failed for target/old: snapshot overflows its 100x100 box (1625px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.8497",
+     "ios": "f 0.8497",
+     "android": "f 0.8483"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/empty-render-target-capture.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — root-not-captured (page content paints in place)",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "f 0.9565"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/escaped-name.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — root-not-captured (page content paints in place)",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/far-away-capture.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "bailed — non-uniform-snapshot one/old (53 colours, 96.08% flat)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": true,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none — candidate, ring measured null (negative control)",
+    "cells": {
+     "web": "f 0.2117",
+     "ios": "f 0.2118",
+     "android": "f 0.2118"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fractional-box-new.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "baked — 2 groups, 2 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "f 0.9206",
+     "android": "f 0.8658"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fractional-box-old.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "baked — 2 groups, 2 leaves",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "f 0.9206",
+     "android": "f 0.8658"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "bailed — snapshot solve failed for one/new: snapshot overflows its 101x51 box (225px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": true,
+    "stampMeasured": true,
+    "ringSampled": true,
+    "ringMeasured": "rgb(255, 182, 193)",
+    "direction": "TOWARD ref (ref ring == measured ring)",
+    "cells": {
+     "web": "f 0.9757",
+     "ios": "f 0.9757",
+     "android": "f 0.9753"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "bailed — snapshot solve failed for one/old: snapshot overflows its 101x51 box (225px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": true,
+    "stampMeasured": true,
+    "ringSampled": true,
+    "ringMeasured": "rgb(255, 182, 193)",
+    "direction": "TOWARD ref (ref ring == measured ring)",
+    "cells": {
+     "web": "f 0.9757",
+     "ios": "f 0.9757",
+     "android": "f 0.9753"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "bailed — snapshot solve failed for one/new: snapshot overflows its 101x51 box (624px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": true,
+    "stampMeasured": true,
+    "ringSampled": true,
+    "ringMeasured": "rgb(255, 182, 193)",
+    "direction": "TOWARD ref (ref ring == measured ring)",
+    "cells": {
+     "web": "f 0.9763",
+     "ios": "f 0.9749",
+     "android": "f 0.9739"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+    "backdrop": "lightpink",
+    "backdropRgb": "rgb(255, 182, 193)",
+    "bake": "bailed — snapshot solve failed for one/old: snapshot overflows its 101x51 box (624px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 0,
+    "refRing": "rgb(255, 182, 193)",
+    "refCorner": "rgb(255, 182, 193)",
+    "stampCandidate": true,
+    "stampMeasured": true,
+    "ringSampled": true,
+    "ringMeasured": "rgb(255, 182, 193)",
+    "direction": "TOWARD ref (ref ring == measured ring)",
+    "cells": {
+     "web": "f 0.9763",
+     "ios": "f 0.9749",
+     "android": "f 0.9739"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fragmented-at-start-ignored.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "baked — 1 groups, 1 leaves, 1 invariant cross-fade",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9684",
+     "ios": "P 0.9684",
+     "android": "P 0.9684"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/fragmented-during-transition-skips.html",
+    "backdrop": "pink",
+    "backdropRgb": "rgb(255, 192, 203)",
+    "bake": "bailed — no-active-transition",
+    "solveClassBail": false,
+    "bodyRoots": 0,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.9196",
+     "ios": "f 0.9196",
+     "android": "f 0.9246"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/hit-test-unpainted-element.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — reftest-wait never cleared",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9656",
+     "ios": "P 0.9656",
+     "android": "P 0.9656"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/hit-test-unrelated-element.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — reftest-wait never cleared",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 1",
+     "ios": "P 1",
+     "android": "P 1"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/html-becomes-fixed.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — no-active-transition",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(238, 238, 238)",
+    "refCorner": "rgb(238, 238, 238)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.9969",
+     "ios": "f 0.9969",
+     "android": "f 0.9968"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/inline-child-with-composited-filter.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9956",
+     "ios": "P 0.9931",
+     "android": "P 0.9941"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/inline-child-with-filter.html",
+    "backdrop": null,
+    "backdropRgb": null,
+    "bake": "bailed — snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it)",
+    "solveClassBail": true,
+    "bodyRoots": 1,
+    "refRing": null,
+    "refCorner": "rgb(255, 255, 255)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": true,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "P 0.9956",
+     "ios": "P 0.9931",
+     "android": "P 0.9941"
+    }
+   },
+   {
+    "test": "css/css-view-transitions/inline-child-with-overflow-shadow.html",
+    "backdrop": "rebeccapurple",
+    "backdropRgb": "rgb(102, 51, 153)",
+    "bake": "bailed — root-not-captured (page content paints in place)",
+    "solveClassBail": false,
+    "bodyRoots": 1,
+    "refRing": "rgb(102, 51, 153)",
+    "refCorner": "rgb(102, 51, 153)",
+    "stampCandidate": false,
+    "stampMeasured": false,
+    "ringSampled": null,
+    "ringMeasured": null,
+    "direction": "none",
+    "cells": {
+     "web": "f 0.5653",
+     "ios": "f 0.5627",
+     "android": "f 0.5557"
+    }
+   }
+  ]
+ }
+}

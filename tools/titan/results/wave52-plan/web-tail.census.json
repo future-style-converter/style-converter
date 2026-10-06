@@ -1,0 +1,2046 @@
+{
+ "stamp100": [
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-002.html",
+   "section": "css-anchor-position",
+   "tags": [
+    null,
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9242
+    ],
+    "ios": [
+     "f",
+     0.909
+    ],
+    "android": [
+     "f",
+     0.909
+    ]
+   }
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-003.html",
+   "section": "css-anchor-position",
+   "tags": [
+    null,
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9125
+    ],
+    "ios": [
+     "f",
+     0.9184
+    ],
+    "android": [
+     "f",
+     0.9184
+    ]
+   }
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-004.html",
+   "section": "css-anchor-position",
+   "tags": [
+    null,
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.923
+    ],
+    "ios": [
+     "f",
+     0.9165
+    ],
+    "android": [
+     "f",
+     0.9165
+    ]
+   }
+  },
+  {
+   "test": "css/css-cascade/scope-implicit-006-print.html",
+   "section": "css-cascade",
+   "tags": [
+    "template"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     1
+    ],
+    "ios": [
+     "f",
+     0.9065
+    ],
+    "android": [
+     "f",
+     0.9076
+    ]
+   }
+  },
+  {
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "section": "css-cascade",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-flex.html",
+   "section": "css-contain",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.999
+    ],
+    "ios": [
+     "P",
+     0.9535
+    ],
+    "android": [
+     "P",
+     0.9528
+    ]
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-grid.html",
+   "section": "css-contain",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.999
+    ],
+    "ios": [
+     "P",
+     0.9535
+    ],
+    "android": [
+     "P",
+     0.9528
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9884
+    ],
+    "ios": [
+     "P",
+     0.9887
+    ],
+    "android": [
+     "P",
+     0.9884
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9884
+    ],
+    "ios": [
+     "P",
+     0.9887
+    ],
+    "android": [
+     "P",
+     0.9884
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9879
+    ],
+    "ios": [
+     "P",
+     0.9876
+    ],
+    "android": [
+     "P",
+     0.9878
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9879
+    ],
+    "ios": [
+     "P",
+     0.9876
+    ],
+    "android": [
+     "P",
+     0.9878
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li",
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9755
+    ],
+    "ios": [
+     "P",
+     0.9756
+    ],
+    "android": [
+     "P",
+     0.976
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-name-setter.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li",
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9755
+    ],
+    "ios": [
+     "P",
+     0.9756
+    ],
+    "android": [
+     "P",
+     0.976
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.984
+    ],
+    "ios": [
+     "f",
+     0.9849
+    ],
+    "android": [
+     "f",
+     0.9848
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.984
+    ],
+    "ios": [
+     "f",
+     0.9849
+    ],
+    "android": [
+     "f",
+     0.9848
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9821
+    ],
+    "ios": [
+     "f",
+     0.9819
+    ],
+    "android": [
+     "f",
+     0.982
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9821
+    ],
+    "ios": [
+     "f",
+     0.9819
+    ],
+    "android": [
+     "f",
+     0.982
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9844
+    ],
+    "ios": [
+     "f",
+     0.9848
+    ],
+    "android": [
+     "f",
+     0.9849
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9844
+    ],
+    "ios": [
+     "f",
+     0.9848
+    ],
+    "android": [
+     "f",
+     0.9849
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9882
+    ],
+    "ios": [
+     "P",
+     0.9878
+    ],
+    "android": [
+     "P",
+     0.988
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-range-setter.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9882
+    ],
+    "ios": [
+     "P",
+     0.9878
+    ],
+    "android": [
+     "P",
+     0.988
+    ]
+   }
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html",
+   "section": "css-counter-styles",
+   "tags": [
+    "li",
+    "li",
+    "li"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.988
+    ],
+    "ios": [
+     "P",
+     0.9876
+    ],
+    "android": [
+     "P",
+     0.9878
+    ]
+   }
+  },
+  {
+   "test": "css/css-flexbox/abspos/position-absolute-005.html",
+   "section": "css-flexbox",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9991
+    ],
+    "android": [
+     "P",
+     0.9983
+    ]
+   }
+  },
+  {
+   "test": "css/css-flexbox/align-items-007.html",
+   "section": "css-flexbox",
+   "tags": [
+    "img"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.999
+    ],
+    "ios": [
+     "f",
+     0.9974
+    ],
+    "android": [
+     "f",
+     0.9966
+    ]
+   }
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-circle-farthest-corner.html",
+   "section": "css-masking",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.6544
+    ],
+    "ios": [
+     "f",
+     0.6843
+    ],
+    "android": [
+     "f",
+     0.6527
+    ]
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-015.tentative.html",
+   "section": "css-overflow",
+   "tags": [
+    "wbr"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.979
+    ],
+    "ios": [
+     "P",
+     0.9787
+    ],
+    "android": [
+     "P",
+     0.973
+    ]
+   }
+  },
+  {
+   "test": "css/css-position/overlay/overlay-transition-backdrop-entry.html",
+   "section": "css-position",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     1
+    ],
+    "ios": [
+     "f",
+     1
+    ],
+    "android": [
+     "f",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-position/overlay/overlay-transition-backdrop.html",
+   "section": "css-position",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.5414
+    ],
+    "ios": [
+     "f",
+     0.5414
+    ],
+    "android": [
+     "f",
+     0.5414
+    ]
+   }
+  },
+  {
+   "test": "css/css-position/position-absolute-center-006.html",
+   "section": "css-position",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.999
+    ],
+    "ios": [
+     "P",
+     0.9629
+    ],
+    "android": [
+     "P",
+     0.9622
+    ]
+   }
+  },
+  {
+   "test": "css/css-position/position-absolute-center-007.html",
+   "section": "css-position",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.999
+    ],
+    "ios": [
+     "f",
+     0.9451
+    ],
+    "android": [
+     "f",
+     0.9445
+    ]
+   }
+  },
+  {
+   "test": "css/css-pseudo/first-letter-of-html-root-refcrash.html",
+   "section": "css-pseudo",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9936
+    ],
+    "ios": [
+     "f",
+     0.9936
+    ],
+    "android": [
+     "f",
+     0.9936
+    ]
+   }
+  },
+  {
+   "test": "css/css-sizing/abspos-auto-sizing-fit-content-percentage-006.html",
+   "section": "css-sizing",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "P",
+     0.9984
+    ]
+   }
+  },
+  {
+   "test": "css/css-transforms/3d-rendering-context-and-abspos.html",
+   "section": "css-transforms",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "P",
+     0.9988
+    ]
+   }
+  },
+  {
+   "test": "css/css-transforms/3d-rendering-context-and-fixpos.html",
+   "section": "css-transforms",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "P",
+     0.9988
+    ]
+   }
+  },
+  {
+   "test": "css/css-transforms/css-transforms-3d-on-anonymous-block-001.html",
+   "section": "css-transforms",
+   "tags": [
+    "p"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9805
+    ],
+    "ios": [
+     "P",
+     0.9837
+    ],
+    "android": [
+     "P",
+     0.9833
+    ]
+   }
+  },
+  {
+   "test": "css/css-values/attr-in-slotted.html",
+   "section": "css-values",
+   "tags": [
+    "slot"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9732
+    ],
+    "ios": [
+     "P",
+     0.9735
+    ],
+    "android": [
+     "P",
+     0.9739
+    ]
+   }
+  },
+  {
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "section": "css-values",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.5535
+    ],
+    "ios": [
+     "f",
+     0.5535
+    ],
+    "android": [
+     "f",
+     0.5535
+    ]
+   }
+  },
+  {
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "section": "css-values",
+   "tags": [
+    null
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.5535
+    ],
+    "ios": [
+     "f",
+     0.5535
+    ],
+    "android": [
+     "f",
+     0.5535
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/content-with-transform-old-image.html",
+   "section": "css-view-transitions",
+   "tags": [
+    "html"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.8597
+    ],
+    "ios": [
+     "f",
+     0.8604
+    ],
+    "android": [
+     "f",
+     0.8605
+    ]
+   }
+  },
+  {
+   "test": "css/selectors/featureless-001.html",
+   "section": "selectors",
+   "tags": [
+    "slot",
+    "section"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "P",
+     0.9713
+    ]
+   }
+  },
+  {
+   "test": "css/selectors/featureless-002.html",
+   "section": "selectors",
+   "tags": [
+    "slot",
+    "section"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "f",
+     0.9631
+    ]
+   }
+  },
+  {
+   "test": "css/selectors/featureless-003.html",
+   "section": "selectors",
+   "tags": [
+    "slot",
+    "section"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "f",
+     0.9631
+    ]
+   }
+  },
+  {
+   "test": "css/selectors/featureless-004.html",
+   "section": "selectors",
+   "tags": [
+    "slot",
+    "section"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "f",
+     0.9597
+    ]
+   }
+  },
+  {
+   "test": "css/selectors/featureless-005.html",
+   "section": "selectors",
+   "tags": [
+    "slot",
+    "section"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     0.9992
+    ],
+    "android": [
+     "P",
+     0.9713
+    ]
+   }
+  }
+ ],
+ "vt": [
+  {
+   "test": "css/css-view-transitions/3d-transform-incoming.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "f",
+     0.9328
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/3d-transform-outgoing.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "f",
+     0.9488
+    ],
+    "android": [
+     "P",
+     0.9504
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/animating-new-content-subset.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 non-uniform-snapshot target/new (162 colours, 65.07% flat)",
+   "cells": {
+    "web": [
+     "P",
+     0.9957
+    ],
+    "ios": [
+     "P",
+     0.9954
+    ],
+    "android": [
+     "P",
+     0.9849
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/animating-new-content.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 non-uniform-snapshot target/new (117 colours, 65.21% flat)",
+   "cells": {
+    "web": [
+     "P",
+     0.9715
+    ],
+    "ios": [
+     "P",
+     0.9714
+    ],
+    "android": [
+     "P",
+     0.9643
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+   "vtBackground": null,
+   "bake": null,
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "f",
+     0.957
+    ],
+    "android": [
+     "f",
+     0.957
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/auto-name-from-id-shadow.html",
+   "vtBackground": "rebeccapurple",
+   "bake": "bailed \u2014 transition-not-frozen (active: true \u2192 false)",
+   "cells": {
+    "web": [
+     "f",
+     0.5621
+    ],
+    "ios": [
+     "f",
+     0.5621
+    ],
+    "android": [
+     "f",
+     0.5621
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/auto-name-from-id.html",
+   "vtBackground": "rebeccapurple",
+   "bake": "bailed \u2014 transition-not-frozen (active: true \u2192 false)",
+   "cells": {
+    "web": [
+     "f",
+     0.555
+    ],
+    "ios": [
+     "f",
+     0.555
+    ],
+    "android": [
+     "f",
+     0.555
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/auto-name.html",
+   "vtBackground": "rebeccapurple",
+   "bake": "bailed \u2014 transition-not-frozen (active: true \u2192 false)",
+   "cells": {
+    "web": [
+     "f",
+     0.555
+    ],
+    "ios": [
+     "f",
+     0.555
+    ],
+    "android": [
+     "f",
+     0.555
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/break-inside-avoid-child.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 snapshot solve failed for target/old: snapshot overflows its 358x302 box (79800px of ink outside it)",
+   "cells": {
+    "web": [
+     "P",
+     0.9872
+    ],
+    "ios": [
+     "P",
+     0.9735
+    ],
+    "android": [
+     "P",
+     0.9735
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/capture-with-offscreen-child-translated.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves",
+   "cells": {
+    "web": [
+     "P",
+     0.986
+    ],
+    "ios": [
+     "P",
+     0.986
+    ],
+    "android": [
+     "P",
+     0.986
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/capture-with-offscreen-child.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/capture-with-opacity-zero-child.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/capture-with-visibility-hidden-child.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/capture-with-visibility-mixed-descendants.html",
+   "vtBackground": "pink",
+   "bake": "bailed \u2014 snapshot solve failed for target/old: snapshot overflows its 100x100 box (100px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.9215
+    ],
+    "ios": [
+     "f",
+     0.9196
+    ],
+    "android": [
+     "f",
+     0.9196
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/class-specificity.html",
+   "vtBackground": "pink",
+   "bake": "bailed \u2014 snapshot solve failed for shared/old: snapshot overflows its 100x100 box (4400px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.8773
+    ],
+    "ios": [
+     "f",
+     0.8773
+    ],
+    "android": [
+     "f",
+     0.8773
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element.html",
+   "vtBackground": "lightpink",
+   "bake": "bailed \u2014 snapshot solve failed for target/new: snapshot overflows its 100x100 box (100px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.9067
+    ],
+    "ios": [
+     "f",
+     0.9067
+    ],
+    "android": [
+     "f",
+     0.9067
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "vtBackground": "pink",
+   "bake": "bailed \u2014 snapshot solve failed for target/old: isolation window 500x200 exceeds the 358x568 viewport",
+   "cells": {
+    "web": [
+     "P",
+     0.9879
+    ],
+    "ios": [
+     "P",
+     0.9879
+    ],
+    "android": [
+     "P",
+     0.9879
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/content-smaller-than-box-size.html",
+   "vtBackground": null,
+   "bake": "baked \u2014 2 groups, 2 leaves, 1 invariant cross-fade",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/content-visibility-auto-shared-element.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 2 groups, 10 leaves, two-colour nested",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/content-with-child-with-transparent-background.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 snapshot solve failed for shared/old: snapshot overflows its 50x50 box (2500px of ink outside it)",
+   "cells": {
+    "web": [
+     "P",
+     0.9977
+    ],
+    "ios": [
+     "P",
+     0.9977
+    ],
+    "android": [
+     "P",
+     0.9977
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/content-with-transform-new-image.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 non-uniform-snapshot target/new (139 colours, 46.7% flat)",
+   "cells": {
+    "web": [
+     "P",
+     0.9746
+    ],
+    "ios": [
+     "f",
+     0.7892
+    ],
+    "android": [
+     "P",
+     0.9743
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/content-with-transform-old-image.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 non-uniform-snapshot target/old (139 colours, 46.7% flat)",
+   "cells": {
+    "web": [
+     "f",
+     0.8597
+    ],
+    "ios": [
+     "f",
+     0.8604
+    ],
+    "android": [
+     "f",
+     0.8605
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/content-with-transparent-background.html",
+   "vtBackground": null,
+   "bake": "baked \u2014 2 groups, 3 leaves, 1 invariant cross-fade, two-colour band-v",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/css-tags-paint-order-with-entry.html",
+   "vtBackground": "lightpink",
+   "bake": "baked \u2014 4 groups, 4 leaves",
+   "cells": {
+    "web": [
+     "P",
+     0.9791
+    ],
+    "ios": [
+     "P",
+     0.9791
+    ],
+    "android": [
+     "P",
+     0.9791
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/css-tags-paint-order.html",
+   "vtBackground": "lightpink",
+   "bake": "baked \u2014 3 groups, 3 leaves",
+   "cells": {
+    "web": [
+     "P",
+     0.9791
+    ],
+    "ios": [
+     "P",
+     0.9791
+    ],
+    "android": [
+     "P",
+     0.9791
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/css-tags-shared-element.html",
+   "vtBackground": "lightpink",
+   "bake": "baked \u2014 2 groups, 2 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/dialog-in-top-layer-during-transition-new.html",
+   "vtBackground": null,
+   "bake": "declined \u2014 top-layer-undeliverable",
+   "cells": {
+    "web": [
+     "f",
+     0.9645
+    ],
+    "ios": [
+     "f",
+     0.9645
+    ],
+    "android": [
+     "f",
+     0.9645
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/dialog-in-top-layer-during-transition-old.html",
+   "vtBackground": null,
+   "bake": "declined \u2014 top-layer-undeliverable",
+   "cells": {
+    "web": [
+     "f",
+     0.9647
+    ],
+    "ios": [
+     "f",
+     0.9647
+    ],
+    "android": [
+     "f",
+     0.9647
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/element-is-grouping-during-animation.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/element-stops-grouping-after-animation.html",
+   "vtBackground": "pink",
+   "bake": "bailed \u2014 no-active-transition",
+   "cells": {
+    "web": [
+     "P",
+     0.9639
+    ],
+    "ios": [
+     "P",
+     0.9639
+    ],
+    "android": [
+     "P",
+     0.9639
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/element-with-overflow.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 snapshot solve failed for target/old: snapshot overflows its 100x100 box (1625px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.8497
+    ],
+    "ios": [
+     "f",
+     0.8497
+    ],
+    "android": [
+     "f",
+     0.8483
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/empty-render-target-capture.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 root-not-captured (page content paints in place)",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "f",
+     0.9565
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/escaped-name.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 root-not-captured (page content paints in place)",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/far-away-capture.html",
+   "vtBackground": "pink",
+   "bake": "bailed \u2014 non-uniform-snapshot one/old (53 colours, 96.08% flat)",
+   "cells": {
+    "web": [
+     "f",
+     0.2117
+    ],
+    "ios": [
+     "f",
+     0.2118
+    ],
+    "android": [
+     "f",
+     0.2118
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-new.html",
+   "vtBackground": "lightpink",
+   "bake": "baked \u2014 2 groups, 2 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "f",
+     0.9206
+    ],
+    "android": [
+     "f",
+     0.8658
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-old.html",
+   "vtBackground": "lightpink",
+   "bake": "baked \u2014 2 groups, 2 leaves",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "f",
+     0.9206
+    ],
+    "android": [
+     "f",
+     0.8658
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "vtBackground": "lightpink",
+   "bake": "bailed \u2014 snapshot solve failed for one/new: snapshot overflows its 101x51 box (225px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.9757
+    ],
+    "ios": [
+     "f",
+     0.9757
+    ],
+    "android": [
+     "f",
+     0.9753
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "vtBackground": "lightpink",
+   "bake": "bailed \u2014 snapshot solve failed for one/old: snapshot overflows its 101x51 box (225px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.9757
+    ],
+    "ios": [
+     "f",
+     0.9757
+    ],
+    "android": [
+     "f",
+     0.9753
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "vtBackground": "lightpink",
+   "bake": "bailed \u2014 snapshot solve failed for one/new: snapshot overflows its 101x51 box (624px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.9763
+    ],
+    "ios": [
+     "f",
+     0.9749
+    ],
+    "android": [
+     "f",
+     0.9739
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "vtBackground": "lightpink",
+   "bake": "bailed \u2014 snapshot solve failed for one/old: snapshot overflows its 101x51 box (624px of ink outside it)",
+   "cells": {
+    "web": [
+     "f",
+     0.9763
+    ],
+    "ios": [
+     "f",
+     0.9749
+    ],
+    "android": [
+     "f",
+     0.9739
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fragmented-at-start-ignored.html",
+   "vtBackground": "pink",
+   "bake": "baked \u2014 1 groups, 1 leaves, 1 invariant cross-fade",
+   "cells": {
+    "web": [
+     "P",
+     0.9684
+    ],
+    "ios": [
+     "P",
+     0.9684
+    ],
+    "android": [
+     "P",
+     0.9684
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/fragmented-during-transition-skips.html",
+   "vtBackground": "pink",
+   "bake": "bailed \u2014 no-active-transition",
+   "cells": {
+    "web": [
+     "f",
+     0.9196
+    ],
+    "ios": [
+     "f",
+     0.9196
+    ],
+    "android": [
+     "f",
+     0.9246
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/hit-test-unpainted-element.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 reftest-wait never cleared",
+   "cells": {
+    "web": [
+     "P",
+     0.9656
+    ],
+    "ios": [
+     "P",
+     0.9656
+    ],
+    "android": [
+     "P",
+     0.9656
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/hit-test-unrelated-element.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 reftest-wait never cleared",
+   "cells": {
+    "web": [
+     "P",
+     1
+    ],
+    "ios": [
+     "P",
+     1
+    ],
+    "android": [
+     "P",
+     1
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/html-becomes-fixed.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 no-active-transition",
+   "cells": {
+    "web": [
+     "f",
+     0.9969
+    ],
+    "ios": [
+     "f",
+     0.9969
+    ],
+    "android": [
+     "f",
+     0.9968
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/inline-child-with-composited-filter.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it)",
+   "cells": {
+    "web": [
+     "P",
+     0.9956
+    ],
+    "ios": [
+     "P",
+     0.9931
+    ],
+    "android": [
+     "P",
+     0.9941
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/inline-child-with-filter.html",
+   "vtBackground": null,
+   "bake": "bailed \u2014 snapshot solve failed for target/old: snapshot overflows its 100x100 box (6341px of ink outside it)",
+   "cells": {
+    "web": [
+     "P",
+     0.9956
+    ],
+    "ios": [
+     "P",
+     0.9931
+    ],
+    "android": [
+     "P",
+     0.9941
+    ]
+   }
+  },
+  {
+   "test": "css/css-view-transitions/inline-child-with-overflow-shadow.html",
+   "vtBackground": "rebeccapurple",
+   "bake": "bailed \u2014 root-not-captured (page content paints in place)",
+   "cells": {
+    "web": [
+     "f",
+     0.5653
+    ],
+    "ios": [
+     "f",
+     0.5627
+    ],
+    "android": [
+     "f",
+     0.5557
+    ]
+   }
+  }
+ ],
+ "colorMixOutOfRange": [
+  {
+   "test": "css/css-color/color-mix-percents-02.html",
+   "expr": "color-mix(in lch, purple 125%, plum 125%)",
+   "cells": {
+    "web": [
+     "f",
+     0.9514
+    ],
+    "ios": [
+     "f",
+     0.9503
+    ],
+    "android": [
+     "f",
+     0.9496
+    ]
+   }
+  },
+  {
+   "test": "css/css-color/color-mix-percents-02.html",
+   "expr": "color-mix(in lch, purple 9999%, plum 9999%)",
+   "cells": {
+    "web": [
+     "f",
+     0.9514
+    ],
+    "ios": [
+     "f",
+     0.9503
+    ],
+    "android": [
+     "f",
+     0.9496
+    ]
+   }
+  }
+ ],
+ "linearSpaces": [
+  {
+   "test": "css/css-color/display-p3-linear-001.html",
+   "spaces": [
+    "display-p3-linear"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.8775
+    ],
+    "ios": [
+     "f",
+     0.8764
+    ],
+    "android": [
+     "f",
+     0.8756
+    ]
+   }
+  },
+  {
+   "test": "css/css-color/display-p3-linear-002.html",
+   "spaces": [
+    "display-p3-linear"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.7977
+    ],
+    "ios": [
+     "f",
+     0.7966
+    ],
+    "android": [
+     "f",
+     0.7959
+    ]
+   }
+  },
+  {
+   "test": "css/css-color/display-p3-linear-003.html",
+   "spaces": [
+    "display-p3-linear"
+   ],
+   "cells": {
+    "web": [
+     "f",
+     0.9484
+    ],
+    "ios": [
+     "f",
+     0.9474
+    ],
+    "android": [
+     "f",
+     0.9468
+    ]
+   }
+  },
+  {
+   "test": "css/css-color/display-p3-linear-004.html",
+   "spaces": [
+    "display-p3-linear"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9548
+    ],
+    "ios": [
+     "P",
+     0.9532
+    ],
+    "android": [
+     "P",
+     0.9522
+    ]
+   }
+  },
+  {
+   "test": "css/css-color/display-p3-linear-005.html",
+   "spaces": [
+    "display-p3-linear"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9547
+    ],
+    "ios": [
+     "P",
+     0.9538
+    ],
+    "android": [
+     "P",
+     0.9531
+    ]
+   }
+  },
+  {
+   "test": "css/css-color/display-p3-linear-006.html",
+   "spaces": [
+    "display-p3-linear"
+   ],
+   "cells": {
+    "web": [
+     "P",
+     0.9568
+    ],
+    "ios": [
+     "P",
+     0.9556
+    ],
+    "android": [
+     "P",
+     0.9548
+    ]
+   }
+  }
+ ]
+}

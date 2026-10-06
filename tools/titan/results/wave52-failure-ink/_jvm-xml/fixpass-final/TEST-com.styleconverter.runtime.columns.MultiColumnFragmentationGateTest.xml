@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:09:47.587Z" hostname="mac-1.home" time="0.018">
+  <properties/>
+  <testcase name="threaded boundary signal engages the gate under loosened constraints" classname="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" time="0.011"/>
+  <testcase name="MultiColumnLayout reads definiteness at the BoxWithConstraints boundary" classname="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" time="0.001"/>
+  <testcase name="direct tight constraints still engage without the thread" classname="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" time="0.0"/>
+  <testcase name="auto and unbounded block-sizes never produce a fragmentainer" classname="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" time="0.0"/>
+  <testcase name="without the thread the gate stays dead - the wave-10 gap pinned" classname="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" time="0.0"/>
+  <testcase name="the signal is threaded through every hop to the gate" classname="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" time="0.006"/>
+  <testcase name="loosened inner constraints no longer read as fixed-height" classname="com.styleconverter.runtime.columns.MultiColumnFragmentationGateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

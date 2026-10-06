@@ -22,6 +22,10 @@ package com.styleconverter.runtime.layout.flexbox
 //   align-self: safe end      → Generic, rawValue "safe end"
 // (AlignSelfPropertyParser recognises only bare keywords, so every
 // overflow-modifier value ships through the Generic escape hatch.)
+// Wave 52 (lane L7, T3): the converter now also types `normal` → NORMAL,
+// `first baseline` → BASELINE and `last baseline` → LAST_BASELINE, and drops
+// the invalid `left`/`right`; the <baseline-position> values resolve to
+// their css-align-3 §4.2 FALLBACK alignment here (see [baselineFallback]).
 //
 // The math half (crossOffset) is deliberately platform-free Double
 // arithmetic: the SwiftUI runtime carries the byte-equivalent
@@ -51,8 +55,9 @@ object AbsposStaticAlignment {
      * (plain values) and the Generic escape hatch (safe/unsafe values —
      * see the pinned shapes in the header). Returns null when the child
      * declares no align-self, or a value with no static-position mapping
-     * (auto/stretch/baseline keep the caller's legacy behaviour:
-     * css-flexbox-1 §4.1 treats them as flex-start for abspos children).
+     * (auto/normal/stretch keep the caller's legacy behaviour:
+     * css-flexbox-1 §4.1 treats them as flex-start for abspos children;
+     * since wave 52 the baseline positions claim their §4.2 fallback).
      */
     fun resolveCross(properties: List<IRProperty>): Spec? {
         // Channel 1 — typed wire: bare keyword primitive ("CENTER").
@@ -60,10 +65,13 @@ object AbsposStaticAlignment {
             // extractKeyword tolerates primitive/object carriers, same
             // reader ItemPlacementExtractor.alignSelf uses.
             val kw = ValueExtractors.extractKeyword(prop.data)
+            // Wave 52 (T3): BASELINE / LAST_BASELINE claim their §4.2
+            // fallback alignment (safe self-start / safe self-end).
+            baselineFallback(kw)?.let { return it }
             // A typed keyword never carries an overflow modifier (the
             // parser rejects two-token values), so safe is false.
             baseOf(kw)?.let { return Spec(it, safe = false) }
-            // Typed but unmappable (STRETCH/BASELINE/AUTO) → no claim;
+            // Typed but unmappable (STRETCH/NORMAL/AUTO) → no claim;
             // the converter emits either typed OR Generic, never both,
             // so falling through to channel 2 can't double-read.
         }
@@ -76,6 +84,14 @@ object AbsposStaticAlignment {
             if (name != "align-self") return@forEach
             // The raw declaration value, verbatim from the stylesheet.
             val raw = (obj["rawValue"] as? JsonPrimitive)?.contentOrNull ?: return@forEach
+            // Wave 52 (T3): a <baseline-position> on the raw wire (pre-wave-52
+            // IR carries `last baseline` as Generic) → its §4.2 fallback.
+            // Here, not in parseRaw: parseRaw also reads justify-content,
+            // whose grammar has no baseline.
+            val tokens = raw.trim().lowercase().split(Regex("\\s+"))
+            if ("baseline" in tokens) {
+                return baselineFallback(if ("last" in tokens) "LAST_BASELINE" else "BASELINE")
+            }
             return parseRaw(raw)
         }
         // No align-self claim on either channel.
@@ -99,6 +115,28 @@ object AbsposStaticAlignment {
     }
 
     /**
+     * Wave 52 (lane L7, T3) — css-align-3 §4.2: "If a box does not
+     * participate in baseline alignment, it uses its fallback alignment" —
+     * `safe self-start` for `first baseline` (≡ `baseline`), `safe self-end`
+     * for `last baseline`. An absolutely-positioned box shares no baseline
+     * alignment context, so the fallback IS its static-position alignment
+     * (the refs: grid-abspos-staticpos-align-self-rtl-last-baseline-002 puts
+     * the mark at the grid-area block END; vertWM-003's `baseline` at START).
+     * self-start/self-end fold to start/end in the runtime's LTR
+     * horizontal-tb normalization (same fold as [baseOf]). Null for every
+     * other keyword. Twin: AbsposStaticAlignment.swift `baselineFallback`.
+     */
+    internal fun baselineFallback(kw: String?): Spec? =
+        when (kw?.uppercase()?.replace('-', '_')) {
+            // `baseline` / `first baseline` → safe self-start.
+            "BASELINE", "FIRST_BASELINE" -> Spec(Base.START, safe = true)
+            // `last baseline` → safe self-end.
+            "LAST_BASELINE" -> Spec(Base.END, safe = true)
+            // Not a <baseline-position>.
+            else -> null
+        }
+
+    /**
      * Keyword → Base. Accepts both the converter's UPPER_SNAKE typed
      * spelling and raw CSS hyphenated spelling so both wires share one
      * table. self-start/self-end fold to start/end — no writing-mode
@@ -118,7 +156,8 @@ object AbsposStaticAlignment {
         // end-family keywords (+ the LTR `right` fold, see above).
         "FLEX-END", "FLEX_END", "END", "SELF-END", "SELF_END",
         "RIGHT" -> Base.END
-        // auto/stretch/baseline/unknown → no static-position claim.
+        // auto/normal/stretch/unknown → no static-position claim (the
+        // baseline positions are claimed earlier by [baselineFallback]).
         else -> null
     }
 

@@ -1,0 +1,18 @@
+# L4 small-fixes — watchlist additions (score-gate.mjs --watch format: "<sec>/<test> [platform]", substring rule).
+# Every cell this lane predicts to move or names as at-risk is ALREADY on tools/titan/results/wave52-plan/watchlist.txt
+# (lines 85-93: composited-under-rotateY-180deg-preserve-3d; css-transform-inherit-scale android; the css-transforms/
+# backface-visibility family; css-sizing/abspos-auto-sizing-fit-content-percentage-00 android; css-position/position-
+# relative-002/-008 android; the three 0(c) HOLD tripwires). The lane's own census (census.mjs → census.json) found NO
+# further carrier for the shipped changes: T5 = 1 preserve-3d culled element (17 flat `hidden` elements keep today's rule),
+# T7 = 1 `transform: inherit` element, b″ = 4 percent-spacing carriers. No new lines are needed for the closing gate.
+#
+# NOT SHIPPED — recorded for the wave that lands queue 0(b′) (the CSS 2.1 §10.1 republish for non-block-container
+# ancestors): the lane's size-consumer probe (census.json `b1`) shows the republish would change the percentage BASE on
+# 8 components in 6 tests, seven of them `Width: 100%` children of a `<span>` in css-break, which the planning brief's
+# inset+spacing-only scan did not count. If b′ is ever landed these are its watch lines (kept commented out here so the
+# wave-52 gate is not asked to attribute movement no lane produced):
+#css-break/block-in-inline-000
+#css-break/block-in-inline-001
+#css-break/block-in-inline-002
+#css-break/block-in-inline-003
+#css-break/block-in-inline-004

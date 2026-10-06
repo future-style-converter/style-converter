@@ -1,0 +1,16 @@
+[gate-driver 23:41:10] run-id=wave52-ab-ma sections=3 max-tests=48 android=1 ios=1 timeout=50min resume=0
+[own-processes] emulator pid 44532 was not launched by provision-devices.sh — not touching it
+[gate-driver 23:41:16] host after stopping our processes: load1=4.62 free+inactive=3672MB (ceiling load 6, floor 2048MB)
+[gate-driver 23:44:34] provision rc=0 android=[emulator-5554 ] ios=[0BB986A6-1EAD-4916-9276-079235324DA1 ] ANDROID_SERIAL=emulator-5554
+[gate-driver 23:44:34] css-text: attempt 1 starting
+[gate-driver 23:47:04] css-text: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 23:47:04] css-text-decor: attempt 1 starting
+[gate-driver 23:49:35] css-text-decor: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 23:49:35] css-writing-modes: attempt 1 starting
+[gate-driver 23:52:05] css-writing-modes: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[own-processes] emulator pid 44532 was not launched by provision-devices.sh — not touching it
+gate-driver summary — run-id wave52-ab-ma — 2026-10-05T23:52:05Z
+css-text                   OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-text-decor             OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-writing-modes          OK attempt=1 web=48/48 android=48/48 ios=48/48 
+score: node tools/titan/score-gate.mjs <previous-run-id> wave52-ab-ma

@@ -355,7 +355,12 @@ final class Wave12BoxSizingBasisTests: XCTestCase {
         // Fresh dedupe set: the render itself must emit the breadcrumb.
         PropertyTracker._resetForTests()
         // Wrapper declares the vertical mode; the 470×120 count-3
-        // multicol container holds one 150×350 red child.
+        // multicol container holds one 150×350 red child. Wave 52 (lane
+        // L3): the child carries the post-load BakedLayoutSignature
+        // (BoxSizing content-box + a 0px PaddingTop — no geometric effect)
+        // so the wave-47 vertical plan declines it and this pin stays on the
+        // bail path it was written for; with bare Width + Height it read as
+        // AUTHORED and the plan engaged (VerticalMulticolBakeGateTests).
         let comp = try JSONDecoder().decode(IRComponent.self, from: Data("""
         {"id":"w","name":"VerticalAncestor",
          "properties":[
@@ -374,6 +379,8 @@ final class Wave12BoxSizingBasisTests: XCTestCase {
                "properties":[
                  {"type":"Width","data":{"type":"length","px":150.0}},
                  {"type":"Height","data":{"type":"length","px":350.0}},
+                 {"type":"BoxSizing","data":"CONTENT_BOX"},
+                 {"type":"PaddingTop","data":{"px":0}},
                  {"type":"BackgroundColor","data":{"srgb":{"r":1.0,"g":0.0,"b":0.0},"original":"#ff0000"}}
                ]}
             ]}

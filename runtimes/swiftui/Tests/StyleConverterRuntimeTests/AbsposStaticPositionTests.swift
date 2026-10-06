@@ -28,6 +28,15 @@
 //    safe-003 |  2  | row            | vertical-rl  | safe end     |   0 |   0
 //    safe-003 |  3  | column         | vertical-rl  | safe end     |  21 |  21
 //
+//  Wave 52 (lane L7, T2) — RE-DERIVED, not deleted: the iOS overlay now
+//  aligns inside the CONTENT box and adds the padding-start edge
+//  (AbsposFlexStaticOffsetTests). The safe-00x containers carry a border
+//  and NO padding (verbatim wave51-fix IR; census
+//  tools/titan/results/wave52-static-position/static-position.census.json
+//  T2: 0 movers in all three docs), so their padding box IS their content
+//  box and every row above is unchanged: 50 is both extents, the padding
+//  start is 0.
+//
 
 import XCTest
 // @testable: AbsposStaticPosition + the IR model inits are internal.

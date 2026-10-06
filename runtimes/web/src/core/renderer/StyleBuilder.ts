@@ -109,7 +109,7 @@ import { applyContainerPhase10 } from '../../engine/container/_dispatch';
 import { applyMathPhase10 } from '../../engine/math/_dispatch';
 import { applyExperimentalPhase10 } from '../../engine/experimental/_dispatch';
 import { applyContentPhase10 } from '../../engine/content/_dispatch';
-import { applyGlobalPhase10 } from '../../engine/global/_dispatch';
+import { applyGlobalPhase10, applyAllReset } from '../../engine/global/_dispatch';
 
 export interface CSSStyles {
   [key: string]: string | number | undefined;
@@ -129,7 +129,17 @@ export function buildStyles(properties: IRProperty[]): CSSStyles {
     console.warn('[StyleBuilder] buildStyles: non-array properties payload skipped:', typeof properties);
     return {};
   }
-  const styles: CSSStyles = {};
+  // Wave 52 (lane L11) — the ORDER-AWARE `all` reset. The style object is
+  // consumed in key order (React's style writer, CssText's Object.entries),
+  // so `all` must be the FIRST key: every later key then re-sets what the
+  // shorthand cleared, exactly as the source's `all: initial; color: green`
+  // reads (css-cascade-4 §6.4). Emitted from the LAST keyword `All` before the
+  // list is filtered; applyAllReset then leaves only the declarations that
+  // FOLLOW it (plus `direction` / `unicode-bidi`, §3.1). Both are identity /
+  // `{}` for an All-free list, so every other component's object is unchanged.
+  const globalStyles = applyGlobalPhase10(properties);
+  properties = applyAllReset(properties);
+  const styles: CSSStyles = { ...globalStyles } as CSSStyles;
 
   // Phase-2 engine path — spacing properties are bucketed once and
   // handled by dedicated Config/Applier triplets.  The legacy switch
@@ -219,7 +229,7 @@ export function buildStyles(properties: IRProperty[]): CSSStyles {
   Object.assign(styles, applyMathPhase10(properties));
   Object.assign(styles, applyExperimentalPhase10(properties));
   Object.assign(styles, applyContentPhase10(properties));
-  Object.assign(styles, applyGlobalPhase10(properties));
+  // (Phase-10 global — `all` — is emitted FIRST, at the top: see wave 52.)
 
   for (const prop of properties) {
     // Wave-6: Generic is the parser's degradation envelope for declarations

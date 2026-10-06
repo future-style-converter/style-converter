@@ -1,0 +1,27 @@
+# wave-52 lane L5 (extractor-cascade) — watchlist additions (one "<section>/<test> <platform>" per line).
+# F-E: the static differential changes this document's three <li> (100x100 placeholder → empty bag); no brief predicted it.
+css-counter-styles/counter-style-at-rule/override-in-shadow-dom web
+css-counter-styles/counter-style-at-rule/override-in-shadow-dom ios
+css-counter-styles/counter-style-at-rule/override-in-shadow-dom android
+# FIX PASS (skeptic D1): the 18 native cssom cells that PASS in wave51-fix. AT RISK P → f if seam-6-FE-li lands without
+# lane L6's seam-3/seam-4 (zero-size overlay stacks each empty list's markers on one band → coverage-ratio veto, ink ratio
+# 2.22–2.87 > 2; fe-native-replay.json). Predicted P (SSIM up, 0.986–0.994) when they land together. Exact-name patterns (.html)
+# so a setter line never also matches its -invalid twin.
+css-counter-styles/cssom/cssom-additive-symbols-setter.html ios
+css-counter-styles/cssom/cssom-additive-symbols-setter.html android
+css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html ios
+css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html android
+css-counter-styles/cssom/cssom-fallback-setter.html ios
+css-counter-styles/cssom/cssom-fallback-setter.html android
+css-counter-styles/cssom/cssom-fallback-setter-invalid.html ios
+css-counter-styles/cssom/cssom-fallback-setter-invalid.html android
+css-counter-styles/cssom/cssom-name-setter.html ios
+css-counter-styles/cssom/cssom-name-setter.html android
+css-counter-styles/cssom/cssom-name-setter-invalid.html ios
+css-counter-styles/cssom/cssom-name-setter-invalid.html android
+css-counter-styles/cssom/cssom-range-setter.html ios
+css-counter-styles/cssom/cssom-range-setter.html android
+css-counter-styles/cssom/cssom-range-setter-invalid.html ios
+css-counter-styles/cssom/cssom-range-setter-invalid.html android
+css-counter-styles/cssom/cssom-symbols-setter-invalid.html ios
+css-counter-styles/cssom/cssom-symbols-setter-invalid.html android

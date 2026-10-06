@@ -1,0 +1,1375 @@
+{
+ "_what": "wave-52 closing gate: every gained and lost cell LOOKED AT against its reference (first reviewer), every non-plain verdict and every 6th plain one challenged by a second adversarial reader; \"final\" is the second verdict where there is one. Sheets: review-sheets.mjs over score-preview.json (ref | wave51-fix | wave52-preview).",
+ "cells": [
+  {
+   "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+   "platform": "android",
+   "sheet": "gained-01",
+   "row": 1,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "The reference shows one filled 100x100 green square. The capture shows an overlapping jumble instead: a green block with stray border bars at x16-110, a red-bordered 70x20 anchor box at x52-121/y88-107 (800 red px, same as before), and an extra hollow green rectangle at x163-231. The red that the test forbids is still drawn and the structure is wrong; the scorer let it pass at 0.9519."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I couldn't overturn it. The test asserts \"a filled green square and no red\". The full-size reference has exactly one solid 100x100 green square at x16-115, y88-187, and no red at all. The now-capture still draws 800 pure-red px from the anchor at x52-121, y88-107, which is the same box and count as wave51-fix. It also still has a stray hollow green rectangle at about x163-231, y88-107, and the green mass is a jagged block with border bars at y85 and y182 rather than one square. The only change from before is that the outer green bar at x7-15 is gone. That moves the green bbox from x7-231 to x16-231 and nudges SSIM from 0.9499 to 0.9519, but the feature under test (green covers the anchor, no red shows) is still visibly broken.",
+    "mechanismGuess": "Most likely an Android runtime gap: anchor() / position-area does not account for vertical-rl multicol fragmentation. The four test boxes resolve against the wrong anchor rect (the 70x20 anchor is drawn as one horizontal strip and never covered), so the red stays visible and a second green box lands in another column. The scorer also has a hole: its novel-colour/ink veto let about 800 px of pure red through when the reference has none."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-backgrounds/background-clip-content-box-002.html",
+   "platform": "ios",
+   "sheet": "gained-01",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the square was red (8900 red px) with only a thin green sliver at the left, which the colour veto caught. Now it is a solid 100x100 green square at x16-115/y68-167 with zero red pixels, pixel-identical in extent to the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "android",
+   "sheet": "gained-01",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, a red 100x100 square showed a green 'FAIL' text smudge. Now the media-query @import applies `.test{background:green;color:green}`, giving a solid 100x100 green square (exactly 10000 green px, no red) at the reference's x16-115/y88-187. Only the sentence's bold 'no red' weight differs."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "ios",
+   "sheet": "gained-01",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The red square with the green FAIL glyphs is gone. A solid 100x100 green square (10000 green px, 0 red) sits at the reference position x16-115/y88-187, so the conditional @import of test-green.css now wins."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/import-conditional-001.html",
+   "platform": "web",
+   "sheet": "gained-01",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the square was red with green 'FAIL' text. Now it is a solid 100x100 green square (10000 green px, no red) exactly where the reference has it (x16-115/y88-187)."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "android",
+   "sheet": "gained-01",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The square was solid red before, because the supports()-conditioned @import was ignored. Now it is a solid 100x100 green square with no red, at the same x16-115/y88-187 as the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "ios",
+   "sheet": "gained-02",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The square goes from solid red (10000 red px) to solid green (10000 green px, 0 red) at the reference's x16-115/y88-187, so the supports(display:block) @import now applies."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I agree with FAITHFUL; I found nothing to overturn it. The test checks that only the supports(display: block) @import applies. The full-size iOS capture now has a solid green square of exactly 10000 px of rgb(0,128,0) at x16-115/y88-187 and 0 red px, which matches the reference pixel-for-pixel. The wave51 capture had a red square at the same place, and the two captures have different hashes, so this is a real capture change and not an instrument-only flip. The one visible difference is that the instruction text's <strong>no red</strong> is regular weight in the capture but bold in the reference. That difference was already in the before capture and lies outside the conditional-import feature this test checks.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/import-conditional-002.html",
+   "platform": "web",
+   "sheet": "gained-02",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The square was solid red before and is now a solid 100x100 green square with no red, matching the reference's position and size exactly."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "android",
+   "sheet": "gained-02",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Instrument-only: the capture is byte-identical before and now. It is a single colour, rgb(0,128,0), over all 390x600 px, and the re-rendered all-green reference is the same single colour. The `background-color: initial` div is transparent and the html green shows through, which is what the test asserts."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "ios",
+   "sheet": "gained-02",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Instrument-only: the capture is byte-identical before and now and is entirely rgb(0,128,0) with no red. It matches the re-rendered all-green reference pixel for pixel."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "web",
+   "sheet": "gained-02",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Instrument-only: the capture is byte-identical before and now and is a solid rgb(0,128,0) page. The re-rendered all-green reference is identical, so the old 0.54 score was a reference artefact."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "android",
+   "sheet": "gained-02",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the two over-100% color-mix rows (t6, t7) were missing, so the purple block was only 224x160. Now all seven 2em rows render as a 224x224 square at x16-239/y88-311, the same as the reference. The bands alternate between (175,92,174) and (174,91,174), a 1/255 difference that cannot be seen, and there is no red."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "ios",
+   "sheet": "gained-03",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The previously missing t6/t7 rows (color-mix percentages summing over 100%) now render. The purple square is 224x224 at x16-239/y88-311, matching the reference extent, with only 1/255 band differences and no red."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I agree with FAITHFUL. I checked the full-size images pixel by pixel. The reference shows one solid purple square at x16-239, y88-311, colour (175,92,174). The new iOS capture fills exactly the same box. Bands t2-t5 (y120-247) are (175,92,174), and bands t1, t6 and t7 (y88-119 and y248-311) are (174,91,174), a 1/255 rounding difference. The text line is the same and there is no red. Before, the square stopped at y247, leaving a white 224x64 gap where t6 and t7 belong. In the reference, the old capture and the new capture, the text and the purple area appear in the same places. One small correction to the first reviewer's reason: it is not the sum over 100% that matters for t6/t7. Their individual percentages (125% and 9999%) are outside the allowed 0-100% range, so the whole color-mix declaration is invalid. The new IR now drops it, and the box falls back to .negative-test's literal rgb(174,91,174). That fallback is exactly what the test's negative-test class is for. The old IR passed color-mix 125/9999 through, and the runtime drew nothing. So the gain is earned, not luck.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/color-mix-percents-02.html",
+   "platform": "web",
+   "sheet": "gained-03",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The block was 224x160 before, with the last two rows absent. Now it is the full 224x224 purple square, identical in extent to the reference, with the t1/t6/t7 bands 1 unit off (174,91,174 vs 175,92,174), which is not visible, and no red."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "android",
+   "sheet": "gained-03",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the page was blank below the text because color(display-p3-linear ...) was dropped. Now a 192x192 square of exactly #008000 sits at x16-207/y88-279, pixel-identical to the reference's green square."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "ios",
+   "sheet": "gained-03",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The square went from absent to a 192x192 exact #008000 square at the reference's position (x16-207/y88-279), with no red."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-001.html",
+   "platform": "web",
+   "sheet": "gained-03",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the page was blank. Now a 192x192 square of exactly rgb(0,128,0) at x16-207/y88-279 matches the reference's colour count and extent exactly."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "android",
+   "sheet": "gained-03",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, no square was drawn. Now a 192x192 pure #000000 square sits at x16-207/y88-279, identical to the black-square reference, with no red."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "ios",
+   "sheet": "gained-04",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, no square was drawn at all. Now there is a pure black (0,0,0) 192x192 square at (16,88)-(207,279), the same box as the reference, with no red anywhere."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I could not overturn it. The test checks that color(display-p3-linear 0 0 0) replaces the red fallback and paints a black 12em square. In the full-size pictures, the current iOS capture has a pure (0,0,0) block whose bounding box is exactly (16,88)-(207,279). That is the same box as the reference, and both have white just outside it at (15,88), (16,87) and (208,280). Neither picture contains a single red pixel. The before capture had no square at all, only the text. The only differences are greyscale anti-aliasing on the instruction text. The black comes from a real conversion, not a stand-in colour: the new \"display-p3-linear\" branch in ColorParser.kt calls ColorConversion.displayP3LinearToSrgb, and linear (0,0,0) maps to sRGB (0,0,0).",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-002.html",
+   "platform": "web",
+   "sheet": "gained-04",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the square was missing. Now a pure black 192x192 square sits at (16,88)-(207,279), matching the reference exactly, with no red pixels."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "android",
+   "sheet": "gained-04",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, only the top .ref half (192x96) was white and the color(display-p3-linear 1 1 1) half was missing. Now the full 192x192 white square at (16,88)-(207,279) is drawn on the grey (128) page; the test half is 254 against 255, which cannot be seen, and there is no red."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "ios",
+   "sheet": "gained-04",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The lower display-p3-linear half that was missing before is now painted. The full 192x192 white square matches the reference box on the grey 128 page; the test half is 254 against 255 (invisible), with no red."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-color/display-p3-linear-003.html",
+   "platform": "web",
+   "sheet": "gained-04",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The test half that was missing before is now painted. The full white 192x192 square sits at (16,88)-(207,279) on grey 128, the same as the reference; the test half is 254 against 255, with no red."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "platform": "android",
+   "sheet": "gained-04",
+   "row": 6,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "The orange 200x20 bar is drawn at y=388-408, below the third float. The reference has it at y=288-308, level with the third float's top and overlapping it, and that overlap is the test's assertion. The only change since before is that float3's right edge moved from 390 to 374 px."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I tried to overturn this and could not. I measured the full-size images. In the reference, the orange 200x20 box sits at x16-215, y288-307: level with the top of float3 (y288-387) and painted over float3's left 100 px, so float3 shows blue only from x216 at y300. In the capture now, the orange box sits at x16-215, y388-407, entirely below float3, which is fully visible from x116. That matches the before capture exactly. The test's own text and its geometry ask for the orange box beside float3 and overlapping it: with contain:inline-size the fit-content flow-root has zero width, fits in the 100 px gap left of float3 at float3's top, and the inline-block overflows into the float. So the difference is the feature under test, not something incidental. The only change since before is that float3's right edge moved from x389 to x373 to match the reference, and that lifted SSIM from 0.9394 to 0.9519 while the asserted placement is still wrong.",
+    "mechanismGuess": "Android places the flow-root BFC using its content width (200 px from the orange inline-block) instead of the zero inline size contain:inline-size gives it, or it clears every float instead of fitting the BFC into the gap beside one. Either way the box drops below all the floats instead of sitting in the 100 px gap left of float3."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "platform": "ios",
+   "sheet": "gained-05",
+   "row": 1,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "Same as Android: the orange bar sits at y=388-408, below the third float, about 100 px lower than the reference's y=288-308 position where it overlaps that float. Only the right float's edge was fixed (it now ends at 374)."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I could not overturn it. I measured the full-size PNGs pixel by pixel. In the reference the 200x20 orange bar sits at x16-215, y288-307, on top of the third float (which spans x116-373, y288-387). That is exactly what the test asserts: \"to the left of the third float, overlapping the float\". In the wave52-preview iOS capture the bar is at x16-215, y388-407. That is 100 px lower, entirely below the third float, and it overlaps no float at all. The only change from wave51-fix is that the floats' right edge now clips at x373 instead of x389. That is a viewport/clip fix that has nothing to do with the feature under test, so the SSIM moved from 0.9406 to 0.9531 for a reason the test is not about.",
+    "mechanismGuess": "Placing a flow-root next to floats ignores inline-size containment. The contain:inline-size + width:fit-content box should size from 0 and fit into the 100 px gap beside float3 at y=200. Instead it is sized from its 200 px orange content, or simply clears every float, so it drops below the last float (y=300)."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-counter-styles/armenian/css3-counter-styles-008.html",
+   "platform": "web",
+   "sheet": "gained-05",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the 10000 and 10001 markers were tofu boxes plus Armenian glyphs. Now they fall back to decimal '10000.' and '10001.', and the lines break exactly as in the reference ('10000.' / '10000' / '10001. 10001'); the 9999 line 'ՔՋՂԹ. ՔՋՂԹ' is unchanged and matches."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "platform": "android",
+   "sheet": "gained-05",
+   "row": 3,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "The eight LTR lines match, but the two dir=rtl lists draw only bare 'foo/bar/foo/bar' at x≈151-176 with no markers. The reference shows 'foo .1', 'bar .2', 'foo .א', 'bar .ב' with the text at x≈103. The gain comes from dropping the wrongly-placed LTR '1. foo / 2. bar' markers that were there before."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I opened the full-size pictures. The eight LTR lines now match the reference, but the two dir=rtl lists, which are a third of what this counter-suffix test checks, draw only bare \"foo/bar/foo/bar\" with no \".1 / .2 / .א / .ב\" suffixed markers, and that text sits at x≈151-176 instead of the reference's x≈103-127, which is 48 px (one 3em padding) too far right. I disagree with one detail of the first reviewer's mechanism. The RTL lists already had no markers in the wave51 capture. The gain actually comes from the LTR markers moving from inside the text (text at x≈64-100) to hanging in the padding, and from korean-hangul-formal drawing 일/이 instead of falling back to \"1./2.\". The RTL failure is unchanged and the scorer tolerated it.",
+    "mechanismGuess": "The Android list-item renderer is not mirrored for direction: rtl. It drops the outside ::marker for dir=rtl lists instead of placing it on the inline-end (right) side, and it right-aligns the li text to the padding edge rather than the content edge (a 48 px offset)."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-counter-styles/counter-suffix.html",
+   "platform": "ios",
+   "sheet": "gained-05",
+   "row": 4,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "The four dir=rtl items still have no markers: the reference's '.1', '.2', '.א' and '.ב' after foo/bar are missing. The Hebrew LTR markers also read '.א' / '.ב' with the period on the left, where the reference reads 'א.' / 'ב.'. Only the LTR markers moving outside to the right-aligned gutter improved."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I could not overturn it. I compared the full-size 390x600 pictures with a 4x crop side by side. Rows 9-12 (the two dir=rtl lists) in the capture show only 'foo' / 'bar' at x≈103-128, which is the right position, but there is no marker at all. The reference draws '.1', '.2', '.א' and '.ב' in the right-hand padding. The test includes those rows specifically to check suffix placement under RTL, so a third of the markers the test asserts are absent. That is the feature under test, not anti-aliasing. The rest of the first reviewer's reasoning also holds. The LTR Hebrew markers render as '.א' / '.ב' with the period to the left of the letter, where the reference has 'א.' / 'ב.'. The cjk-decimal markers '一、' / '二、' sit about 4 px further left with an extra gap before 'foo', so the suffix wrongly carries a trailing space. The genuine improvement is real but partial: the LTR markers now hang outside in the right-aligned 3em gutter (x≈46-58) instead of pushing the item text to x≈80. The iOS runtime admits the RTL gap in its own header (ListMarkerOutsideHang.swift lines 33-41: 'The corpus's RTL rows still lack markers... no meta.markerText reaches them').",
+    "mechanismGuess": "Upstream marker-text gap: dir=rtl list items get no meta.markerText, so no marker is drawn. The LTR marker string is laid out with first-strong (Hebrew → RTL) base direction instead of the list's direction, which puts the '.' on the wrong side. A fixed space is also appended after every suffix, including cjk-decimal's '、'."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+   "platform": "android",
+   "sheet": "gained-05",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the markers read '-3.', '-2.', '-1.' and were spread ~40 px apart. Now they read '(3).', '(2).', '(1).' on three 20-px lines at x=58, y=35-89, matching the reference's glyphs and positions to within 1 px."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+   "platform": "ios",
+   "sheet": "gained-05",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The '(3).', '(2).', '(1).' markers now sit on rows y=34-49, 54-69 and 74-89 at x=57, the same as the reference. Before, they were '-3.', '-2.', '-1.' with large gaps."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+   "platform": "android",
+   "sheet": "gained-06",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the markers were unpadded '1.', '2.', '3.' spread ~40 px apart. Now they read '001.', '002.', '003.' on rows y=36-47, 56-67 and 76-87 at x=57, the same glyphs and positions as the reference."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I measured the full-size PNGs. The new capture has black, achromatic ink rows at y=36-47, 56-67 and 76-87, starting at x=57 and ending at x=85, 88 and 88. The reference's rows sit at the same y values, also start at x=57, and end at x=85, 89 and 88. Both read '001.', '002.', '003.', which is what the test expects: the invalid pad setters are ignored, so pad stays 3 '0'. One correction to the first reviewer's reason: the previous capture had unpadded '1.', '2.', '3.' about 100 px apart (y=35, 135, 235), not about 40 px. Also, the pass comes from the runtime now honouring the static `pad: 3 '0'` rule. The runtime never runs the CSSOM script, so this test's setter path is not really exercised. Even so, the picture matches the reference in the feature drawn.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+   "platform": "ios",
+   "sheet": "gained-06",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The zero-padded '001.', '002.', '003.' markers now match the reference rows (y=36-87, x=57). Before, they were unpadded and widely spaced."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+   "platform": "web",
+   "sheet": "gained-06",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "'001.', '002.', '003.' are drawn with the same ink bbox (57,36)-(89,87) and row bands as the reference. Before, the markers were plain '1.', '2.', '3.' spaced ~40 px apart."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "platform": "android",
+   "sheet": "gained-06",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the markers were decimal '1.', '2.', '3.'. Now they are the cyclic '(A)', '(B)', '(C)' with prefix and suffix, on rows y=35-89 at x=58, matching the reference to within 1 px."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "platform": "ios",
+   "sheet": "gained-06",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "'(A)', '(B)', '(C)' are drawn on rows y=34-49, 54-69 and 74-89 at x=57, identical in position to the reference. Before, they were spaced-out decimal '1.', '2.', '3.'."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "platform": "web",
+   "sheet": "gained-06",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The ink bbox (57,34)-(77,89) and the three row bands are identical to the reference's '(A)', '(B)', '(C)'. Before, the markers were decimal '1.', '2.', '3.' with large gaps."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-display/display-contents-float-001.html",
+   "platform": "android",
+   "sheet": "gained-07",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The capture shows the word \"PASS\" at (16,98) under the prompt, matching the reference, with zero red pixels. The before capture had a red bar behind PASS (display:contents was not dropping the box background). The only pixel differences from the reference are in the text glyphs."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I couldn't overturn it. The test says a floated display:contents div makes no box, so there should be no red background and no right float. It should show only \"PASS\" at the left margin under the prompt. In the full-size Android capture, the four PASS glyphs span x 17–55 at y 92–103, which matches the reference (17–55). There are 0 red pixels (the wave51-fix capture had 6978, a full-width red bar), and nothing is drawn below y=110. The capture has about 72% of the reference's ink on both the prompt line and the PASS line. That is the same font-weight difference across the page, not a missing glyph. The capture comes from a real fix that follows the spec: ContentsUnboxing.kt no longer keeps the box for a floated contents element, because css-display-3 §2.7 blockification does not apply to `contents`. The float half of the test is weak on Android, though. Even before the fix the red box sat at the left and was never floated right, so the part of the test this capture actually checks is the missing red box.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-display/display-contents-float-001.html",
+   "platform": "ios",
+   "sheet": "gained-07",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Like Android, plain \"PASS\" sits in the reference's position, the red background bar from the before capture is gone and the page has zero red pixels. The remaining differences are in text anti-aliasing only."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-flexbox/abspos/position-absolute-containing-block-002.html",
+   "platform": "ios",
+   "sheet": "gained-07",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The 100×100 green square is now centred in the flex content box, at (76,76)–(176,176) inside the 200×200 yellow box, and the capture is pixel-identical to the reference (0 differing pixels). Before, the square sat at the top of the yellow box, about 60 px too high."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "android",
+   "sheet": "gained-07",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "A 100×100 green square at (16,88) with zero red pixels, matching the reference. Before, the red 2:1 SVG was painted over the abspos green box, which the colour veto caught. The wave52 T3 paint-order lift puts the positioned green box on top, as CSS z-order requires. The only other difference is that \"no red\" is not bold, which is text styling and not what the test checks."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "ios",
+   "sheet": "gained-07",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Same as Android: a green 100×100 square at the reference's position and no red ink anywhere. The before capture's red square, drawn by painting the img above the abspos box, is gone. Other differences are text glyphs and bold weight only."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "android",
+   "sheet": "gained-07",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Items One through Six start at x=68 (the -150px margin is honoured) and the five red 10 px column rules sit at x≈118/178/238/298/358, matching the reference, with the bordered flexbox outline at 216. Before, item One was off to the left and the rules were misplaced. All differences larger than 40 are inside the label glyph rows (y 21–33)."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "ios",
+   "sheet": "gained-08",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The item strip and the five red column rules on the overflowing negative-margin items are at the reference's x positions (rules at 118/178/238/298/358, item One at 68). The before capture's shifted strip and the gap in the strip are fixed. The remaining differences are text anti-aliasing only (y 22–33)."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I agree with the first reviewer. I compared the full-size 390×600 reference and the current iOS capture pixel by pixel. Outside the text band (y 22–34) they are identical. The item strip runs from x=68 to 373, the five red 10 px rules sit at x=118, 178, 238, 298 and 358 and span y=18–67, and the container border is at x=216–217 and y=16–17/68–69, in both images. Inside the text band, every word's ink lands within about 1 px of the reference's, so the 781 differing pixels are glyph anti-aliasing only. That is exactly what the test checks: column rules painted in the gaps between overflowing items with a -150 px margin. The previous capture lost the 200 px body offset and the negative margin, and that is fixed now.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "web",
+   "sheet": "gained-08",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Nearly pixel-identical to the reference: at most 8 levels of difference and no pixel off by more than 40. Items and the five red rules are at the reference positions. Before, the strip was shifted, with item One missing at the left and the rules misplaced."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "web",
+   "sheet": "gained-08",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The capture is byte-identical before and now (an instrument-only flip) and pixel-identical to the new reference: two blue row rules at y 61–71 and 111–121, red column rules at x 61–71 in rows 1 and 3 only and at x 111–121 in all rows, with blue drawn over red at the crossings. The capture is correct and the old reference was the problem."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "android",
+   "sheet": "gained-08",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The disputed cell is an honest gain. The capture is pixel-identical to the reference: column rules at x 119–123 and 289–293 in row 1 and at 299–303 in row 2, and the red row rule broken at the intersections into 16–76, 166–246 and 346–374. Note that the PNG is not byte-identical to wave51-fix: the earlier capture also had half-pixel anti-aliased rule edges and content painted past x=374, both of which are now gone."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "ios",
+   "sheet": "gained-08",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference, with the same rule geometry as Android: four column-rule segments, and the row rule split at the non-uniform cross-gap overlaps into 16–76, 166–246 and 346–374. The before PNG differed only in half-pixel rule anti-aliasing (128 vs 127) and content painted past x=374, so the rules were already right and this is not a degenerate scorer flip."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "web",
+   "sheet": "gained-08",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference, with the same broken row-rule segments and column-rule positions. Inside x<374 the before capture is also identical to now; the only change is that the overrun strip x 374–389 is now blank, as in the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "android",
+   "sheet": "gained-09",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference. Column rules sit at x≈309, 339 and 279 in rows 1, 2 and 3, and the red row rules run from 16–266 and 16–236 then break at the overlapping cross gaps. The before PNG differed in half-pixel rule anti-aliasing and in content painted past x=374, such as the stray red dash at x 386."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "The full-size wave52 Android capture is pixel-identical to the re-frozen reference: 0 of 390×600 pixels differ, and the same holds for web and iOS. The picture matches the test's geometry. The column rules are at x 309–313 (y 16–115), 339–343 (y 206–305) and 279–283 (y 396–495). Row rule 1 covers y 159–163 and runs x 16–265, ending at min(250, 280)+16. Row rule 2 runs x 16–235, ending at min(280, 220)+16. Each row rule therefore stops at the start of the union of the overlapping cross gaps, which is what the test is about. I could not overturn the verdict, but three points need correcting. (1) This was not an instrument-only flip, and the score gain is mostly the reference's doing. The old frozen reference (the htmlpins variant) drew no rules at all, because its z-index:-1 rule divs were hidden; that is the main source of the 0.922. The captures also changed: wave52's Chromium-style rule snap removed the half-pixel edges (column 308/313 at 191,191,255), and Fix A crops the inline axis at x 374. (2) The red dash at x 386 in the old capture was not stray. It is the correct start of each row rule's second segment, at max(340, 370)+16 and max(370, 310)+16. (3) Fix A's crop removes that segment start from both the reference and the capture, so only the segment-end half of the break assertion is visible to the scorer. Nothing visible differs from the reference, though.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "ios",
+   "sheet": "gained-09",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference: three column-rule segments at the per-row gap centres, and the two row rules ending at x=266 and x=236 where the cross gaps begin. The earlier overrun past x=374 and the soft rule edges are gone."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "web",
+   "sheet": "gained-09",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference, with the same rules and items as the native captures. Inside x<374 the before capture was already identical; it only differed in the strip past x=374, which is now blank as in the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-images/cross-fade-target-alpha.html",
+   "platform": "android",
+   "sheet": "gained-09",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The inner cross-fade layer over the red-to-green outer gradient has the reference's 60% tint: mean difference 3.6 and at most 9 per channel in the inner box. It does show faint alternating 1-px horizontal striping of about ±6 levels that the smooth reference lacks, which is within the test's own 0–8 fuzz. The only change from before is that the overflow strip past x=374 is now clipped as in the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-006.html",
+   "platform": "android",
+   "sheet": "gained-09",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "A full green 150×100 ellipse at (66,118)–(216,218), matching the reference position and shape. Before, the ellipse sat about 10 px higher. Differences are limited to the prose glyphs and the ellipse's edge anti-aliasing."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-006.html",
+   "platform": "ios",
+   "sheet": "gained-09",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The full green ellipse now sits at the reference's (66,118)–(216,218), where before it was about 10 px too high. Only text and ellipse-edge anti-aliasing differ."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-007.html",
+   "platform": "android",
+   "sheet": "gained-10",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The ellipse is now a full green 150x100 shape at x 66-215, y 118-217, the same box as the reference. In the previous snapshot it sat 16 px too high (y 102-201). The caption text matches."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "The test checks that `clip-path: ellipse(farthest-side closest-side)` clips the 150x100 box to the inscribed ellipse (radii 75 and 50, centred). I measured the full-size PNGs. In the capture now, the green (0,128,0) ellipse spans x 66-215 and y 118-217, which is exactly the reference's box. The two green masks differ by only 11 pixels at the edge, and only 2 pixels below the caption differ by more than 60. In the previous capture the same ellipse sat 16 px higher (y 102-201), so this is a real fix of the box's vertical position, not a scorer artefact. The only other difference is the caption's font, which sits in the same box (x 17-355, y 36-50) and is not what the test is about.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-007.html",
+   "platform": "ios",
+   "sheet": "gained-10",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The full green ellipse now fills x 66-215, y 118-217, exactly like the reference. Before it was 16 px higher, and the shape is unclipped."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-008.html",
+   "platform": "android",
+   "sheet": "gained-10",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The ellipse(50% 50%) renders as a full green 150x100 ellipse at the reference position (x 66-215, y 118-217). The previous snapshot had it 16 px too high."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-ellipse-008.html",
+   "platform": "ios",
+   "sheet": "gained-10",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The full green ellipse now sits at the reference bounding box (x 66-215, y 118-217) instead of 16 px higher. Its shape and colour match the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-multicol/abspos-containing-block-outside-spanner.html",
+   "platform": "ios",
+   "sheet": "gained-10",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The two green 100x100 squares now sit at the top-left (16,16) and bottom-right (ending at 373,583) and fully cover the red ones, as in the reference, with zero red pixels. Before, both red squares showed and one green square sat at y 168 under the text."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "ios",
+   "sheet": "gained-10",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "There are four lines and the fourth holds only the ellipsis at x 16-22, like the reference. Before, line 4 showed 'supercalifragilisticexpialidocious…'. Line positions are within 1-2 px of the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-input.html",
+   "platform": "web",
+   "sheet": "gained-11",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Every input stretches to its containing block minus the 3px insets, and the lime outlines line up with the reference in all nine boxes. What flipped: the wide boxes' right border at x 374-376 is now cut off, as it is in the reference. One leftover difference outside the feature under test: the second column of small boxes sits 5 px left of the reference (x 187 vs 192), because the whitespace gap between the inline-blocks is missing."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I measured the full-size pictures and could not overturn the first reviewer. Rows 245-844 (all five wide boxes: text, password, date, file and range) are pixel-identical to the reference, with no pixel off by more than 40. The first column of small boxes (input-btn and Reset) is identical too. In every box the lime outline sits 4-5 px inside the 3 px black border on all four sides, so each input stretches to its containing block minus the insets, which is what the test asserts. The second column (Submit and the colour input) is drawn as a whole 5 px further left (box border at x 187 instead of 192) because the whitespace gap between the inline-blocks is missing; shifted back by 5 px it matches except for about 200 anti-aliased pixels in the \"Submit\" text. The colour swatch keeps the same 12 px inset on each side as the reference. That shift comes from inline layout, not from stretching. The flip itself happened because the capture is now cut off at x 373, exactly as the reference is: neither has any ink past x 373. Before, the capture drew the wide boxes' right border at x 374-376. That is a viewport/instrument property, not a change to the feature, but the picture now shows what the reference shows in the feature under test.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+   "platform": "web",
+   "sheet": "gained-11",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The capture is pixel-identical to the reference in the top 600 rows: the orange thick border is fully painted at x 76-205 and the blue thin cells at x 206-257. Before, the whole table was 60 px too far left (x 16-145)."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+   "platform": "web",
+   "sheet": "gained-11",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The capture is pixel-identical to the reference: the blue cells are at x 76-127 and the unclipped orange thick border at x 128-257. Before, it was shifted 60 px left."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+   "platform": "web",
+   "sheet": "gained-11",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The capture is pixel-identical to the reference: the orange collapsed border is fully painted at x 76-205 and the blue cells at x 206-257. Before, the table sat 60 px too far left."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "platform": "android",
+   "sheet": "gained-11",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The text sits at y 36-49 with the underline on row 49 spanning x 16-249, the same as the reference. Before, the line was 16 px lower (y 52-65); the underline propagation was right both times."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "platform": "ios",
+   "sheet": "gained-11",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The underlined sentence now sits at y 36-49 with the underline at row 49 spanning x 16-249, matching the reference. Before, it was 16 px lower."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-auto-010.html",
+   "platform": "android",
+   "sheet": "gained-12",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The breaks match the reference exactly (regu- / lation / imple- / menta- / tion / now) inside a box of the same size. The hyphen glyph is a shorter U+002D where the reference has a wider dash, which the test explicitly allows (M and H refs). Before, it broke as regu-la-tion im-ple-men-ta-tion over 9 lines."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I checked this at full size and it holds. The capture breaks the text the way the reference does: regu- / lation / imple- / menta- / tion / now. The border box covers exactly the same pixels in both (x 16–135, y 16–259). The six text lines start within 1 px of the reference, and every letter sits at the same horizontal position, about 19.3 px apart. The only difference is the hyphen glyph: about 8 px wide in the capture (x 101–108 on line 1) against about 17 px in the reference (x 96–112). The test allows that, because it links two match references, one with U+002D and one with U+2010, and passing either one is a pass. Neither image has any colour or extra ink. Before this change the box was 2 px narrower (right edge at 133), so \"lation\" did not fit and the text broke into 9 lines (regu- la- tion im- ple- men- ta- tion now). That is consistent with this wave's fix making Android's ch unit equal the font's character advance.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-auto-last-word-001.html",
+   "platform": "ios",
+   "sheet": "gained-12",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The first box now reads 'Test example' on one line without hyphenating the last word, and all six boxes match the reference's breaks and hyphens. Before, the first box broke into 'Test exam-/ple'."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-inline-012.html",
+   "platform": "android",
+   "sheet": "gained-12",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "It renders DNA / means / Deoxy- / ribonu- / cleic / acid. with soft hyphens after 'Deoxy' and 'ribonu', as in the reference. The glyph is a shorter hyphen-minus, which the M/H refs allow. Before, there were no hyphens ('Deoxyri/bonucle/ic')."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "platform": "android",
+   "sheet": "gained-12",
+   "row": 4,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "None of the seven orange boxes shows a hyphen, and the breaks differ from box to box: 'highwa/y' in boxes 1, 2, 6 and 7, 'h/ighway' in box 3, 'high/way' in boxes 4 and 5. The reference shows 'high-/way' in all seven. Only the box width now matches the reference, which raised SSIM."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I opened both full-size pictures and could not overturn the first verdict. The test asserts that an absolutely positioned span has no effect on manual hyphenation: every box must look the same, including whether a hyphen appears and where. The reference shows 'high-/way' in all seven boxes. The wave52-preview Android capture draws no hyphen in any box and breaks the word differently from box to box: 'highwa/y' in boxes 1, 2, 6 and 7, 'h/ighway' in box 3, and 'high/way' (no hyphen) in boxes 4 and 5. Compared with wave51-fix, the only real change is that the boxes are now the reference's 6ch width (before they were narrower, and box 6 broke into three lines). That width match is what lifted SSIM from 0.92 to 0.97, but the hyphenation, which is the feature under test, is still wrong in every box.",
+    "mechanismGuess": "Android text layout ignores the soft hyphen (&shy; under hyphens: manual): no break opportunity and no hyphen glyph. Compose then force-breaks the overflowing word at a character instead of letting it overflow ('highwa/y'). The absolutely positioned span still splits the inline text and adds a break at its edge ('h/ighway' in box 3, 'high/way' in boxes 4–5). Only the wave52 change to how ch is measured (the font's advance) fixed the box width."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "platform": "android",
+   "sheet": "gained-12",
+   "row": 5,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "Only boxes 1, 2 and 7 show 'high-/way'. Box 3 is 'h/ighway', boxes 4 and 5 are 'high/way' with no hyphen, and box 6 is 'highwa/y', whereas all seven reference boxes are identical 'high-/way'. Out-of-flow spans still change the hyphenation, which is exactly what the test asserts against."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "The test asserts that an absolutely positioned span has no effect on automatic hyphenation, so all seven boxes must read 'high-/way' like the reference. In the full-size Android capture, only boxes 1, 2 and 7 (the span sits at the start or end of the word) read 'high-/way'. Box 3 breaks as 'h/ighway', boxes 4 and 5 as 'high/way' with no hyphen glyph, and box 6 as 'highwa/y'. That is the exact failure the test is written to catch, not a side difference. The score rose from 0.9291 to 0.982 only because the boxes now have the reference width: the 'ch is the font's advance' fix narrowed them, and box 6 dropped from three lines ('highw/a/y') to two. The hyphenation the test is about is still wrong, so I cannot overturn the first reviewer.",
+    "mechanismGuess": "Android text layout treats the out-of-flow span as a split in the inline text: the word is laid out as separate pieces at the span's position ('h'+'ighway', 'high'+'way', 'highwa'+'y'). The span becomes a line-break point with no hyphen, and the hyphenation dictionary never sees the whole word. Removing out-of-flow children before shaping and hyphenating the text would fix it."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-punctuation-001.html",
+   "platform": "android",
+   "sheet": "gained-12",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "All three boxes match the reference: 00000 / exam- / ple / 00000, then 00000 / exam- / ple. / 00000, then 00000 / (ex- / ample / 00000. The right border is about 1 px wider. Before, there were no hyphens and text overflowed the box."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-span-001.html",
+   "platform": "android",
+   "sheet": "gained-13",
+   "row": 1,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "In the reference, every orange box reads 'high-' / 'way', with a hyphen at the soft-hyphen break. In the capture, all nine boxes read 'highwa' / 'y': there is no hyphen glyph and the break comes after 'wa', which is exactly the 'presence and position of a hyphen' the test checks. The SSIM rise (0.917 to 0.953) only reflects wider boxes from the ch fix (before, the boxes read 'highw' / 'ay')."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I looked at the full-size pictures and could not overturn this. In the reference, all nine orange boxes read 'high-' over 'way', with a hyphen glyph at the soft-hyphen break. In the wave52 Android capture, all nine read 'highwa' over 'y': there is no hyphen and the line breaks between 'a' and 'y', a forced mid-word overflow break. The test itself says the presence and position of the hyphen is what it checks, so the difference is the feature under test, not something outside it. The capture's nine boxes do match each other, which is the unstyled-span part of the assertion, but this is a reftest and the reference pins 'high-/way'. The only change since wave51, where the boxes read 'highw' over 'ay', is that the boxes got wider from the ch fix, and that alone moved SSIM from 0.917 to 0.953.",
+    "mechanismGuess": "Compose TextWrapApplier maps HyphensMode.MANUAL to Hyphens.None (Minikin hyphenationFrequency NONE), so Minikin ignores the U+00AD soft hyphen as a break opportunity. The text then falls back to a forced character break with no hyphen glyph. Fix lane: manual hyphenation needs soft hyphens honored, for example the SoftHyphenPolicy / Hyphens.Auto path in typography/wrapping, without turning on automatic hyphenation."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+   "platform": "android",
+   "sheet": "gained-13",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the page was blank. Now it shows the 100x100 green square at (16,16)-(115,115), pixel-identical to the reference: same 10000 green pixels and zero differing pixels. The composited child stays visible under the flipped backface-hidden parent."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-transforms/composited-under-rotateY-180deg-preserve-3d.html",
+   "platform": "ios",
+   "sheet": "gained-13",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Same as Android: blank before, and now a green 100x100 square at (16,16)-(115,115) that is pixel-identical to the reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-transforms/css-transform-inherit-scale.html",
+   "platform": "android",
+   "sheet": "gained-13",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, a 100px green square sat inside a red 200px square, which failed on the colour veto. Now the child's inherited scale(2) covers the box: a solid green 200x200 at (16,88)-(215,287), the same box as the reference, with no red pixels. The only difference is that the heading's 'no red' is not bold."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "platform": "android",
+   "sheet": "gained-13",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Before, the canvas was white. Now it is lightpink, and the two green boxes with their dark-green overflowing children match the reference's geometry. Only 26 pixels differ: a single 1px column at x=131 on the 0.4px-shifted box's green edge, which is subpixel rounding."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "platform": "ios",
+   "sheet": "gained-13",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference (0 differing pixels): lightpink canvas, both fractional boxes with the -2px and -3px overflowing dark-green children in place. Before, the canvas was white."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-new.html",
+   "platform": "web",
+   "sheet": "gained-14",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference (0 differing pixels). The only change from before is the white canvas becoming lightpink; the boxes and overflowing children are unchanged and correct."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I agree with the first reviewer. At full size, the reference and the wave52-preview web capture are both 390x600 and pixel-identical: 0 of 234,000 pixels differ. Each has 222,874 lightpink (255,182,193), 8,500 darkgreen and 2,626 green pixels. Both boxes are drawn the same way in both images. The darkgreen child1 sticks out 2px to the left and about 8px past the right edge, child2 rises 3px above the top and is not clipped, and the second box carries its 0.4px antialiasing shift. Those boxes, their overflow and their sub-pixel placement are what the test checks. The wave51-fix capture had the same box pixels on a white canvas (222,874 pixels differed, all of them background), so the canvas colour is the only thing that changed. The extract.log shows where the change came from. The view-transition bake gave up on this test (\"snapshot overflows its 101x51 box (225px of ink outside it)\"), and the wave52 L1 change then filled the canvas with the lightpink it measured from the frozen page. So the boxes are the page's ordinary elements drawn in place, not snapshots from a real view transition. Here they land exactly where the transition's snapshots would, because the root group is at opacity 0 and the new images at opacity 1. The picture earns the pass. The credit belongs to the harness's capture step, not to view-transition support in the web runtime.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "platform": "android",
+   "sheet": "gained-14",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Same capture as the '-new' variant: lightpink canvas, both boxes and their overflow children at the reference's positions. 26 pixels differ, all in one 1px subpixel column at x=131 on the shifted box."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "platform": "ios",
+   "sheet": "gained-14",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference (0 differing pixels): lightpink canvas, both boxes with overflow children correct. Before, the canvas was white."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-overflow-children-old.html",
+   "platform": "web",
+   "sheet": "gained-14",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference (0 differing pixels). The white canvas is now lightpink, as the view-transition backdrop in the test specifies."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "platform": "android",
+   "sheet": "gained-14",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The lightpink canvas, both green boxes and the dark-green spread shadow (offset -2/-3, spread 7, extent (22,21)-(135,151)) match the reference. 303 pixels differ: the shadow's corners are rounded about 3px where the reference's are square, and there is a 1px blended seam on the shifted box's right edge. These are the same box-shadow and anti-aliasing quirks as before, not the snapshot being clipped or misplaced."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "platform": "ios",
+   "sheet": "gained-14",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Lightpink canvas, with both boxes and their full spread shadow at exactly the reference's extent (22,21)-(136,151). 152 pixels differ, all at the shadow's four outer corners, which are anti-aliased round (about 3px) instead of square. Nothing is clipped or shifted."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-new.html",
+   "platform": "web",
+   "sheet": "gained-15",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference (0 differing pixels): lightpink canvas, both fractional boxes with square-cornered dark-green shadows. Before, the canvas was white."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I agree with the first reviewer. I compared the full-size images pixel by pixel: the 390×600 reference and the capture have 0 differing pixels. Both use exactly three colours: lightpink 219,115 px, green 10,251 px and darkgreen 4,634 px. Box 1's green fill spans x 31–131, y 31–82, with a dark-green shadow ring from x 22 to 136 and y 21 to 86. Box 2's green runs to x 132, which shows its 0.4px shift, and its ring ends at x 137. A 1px pink gap sits at y 86. All of this matches the expected geometry for a -2px -3px offset and a 7px spread. The test expects the ::view-transition-new snapshots over the lightpink ::view-transition backdrop, with the root group at opacity 0, and that is exactly what is drawn. The capture did change: the earlier one, byte-different, had a white canvas. extract.log explains the change. The snapshot solve still bails ('snapshot overflows its 101x51 box (624px of ink outside it)'). The boxes are therefore the runtime's own static boxes, painted in place, while wave52 L1's new bail-path frame-ring stamp delivers the measured rgb(255,182,193) backdrop. One limit on what this pass shows: the runtime painted the fractional box-shadow geometry and the stamped backdrop. Snapshot compositing was never exercised. The picture is still what the reference shows.",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "platform": "android",
+   "sheet": "gained-15",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Same capture as the '-new' variant: lightpink canvas, with the boxes and the spread shadow at the reference's extents. The only differences are about 3px rounded shadow corners (square in the reference) and a 1px blended seam on the 0.4px-shifted box, 303 pixels in all."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "platform": "ios",
+   "sheet": "gained-15",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Lightpink canvas, with both boxes and the spread shadow matching the reference's extent. 152 pixels differ, all from the shadow's outer corners being anti-aliased round instead of square."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-view-transitions/fractional-box-with-shadow-old.html",
+   "platform": "web",
+   "sheet": "gained-15",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Pixel-identical to the reference (0 differing pixels). The white canvas became lightpink and the boxes and shadows are unchanged and correct."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-writing-modes/ch-units-vrl-003.html",
+   "platform": "android",
+   "sheet": "gained-15",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The table-column green, which is what the test is about, went from a 6px sliver to a 120x120 square at (16,184)-(135,303), pixel-for-pixel the reference's green. Smaller residuals remain: the blue control is 120x125 instead of 120x120, so the orange square (64px) sits 5px lower; there is a 1px grey column at x=136 beside the green; and the heading's strong text is not bold."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-writing-modes/ch-units-vrl-003.html",
+   "platform": "ios",
+   "sheet": "gained-15",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The green table-column square is now 120x120 at (16,184)-(135,303), exactly the reference's; before, it was a 6px sliver. Smaller residuals remain: the blue control is 120x126 instead of square, so the orange square (64x63) sits 6px lower, and the heading's strong text is not bold."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-writing-modes/ch-units-vrl-004.html",
+   "platform": "android",
+   "sheet": "gained-16",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The green square, which is the thing under test (ch on a vertical-upright td/colgroup), is now 120x120 at (16,184), exactly where and as big as the reference's. Before, it was a 6 px sliver. One caveat on a control element: the blue div comes out 120x125 against the reference's 120x120, so the orange square sits 5 px lower. The <strong> text is also not bold."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I measured the full-size PNGs pixel by pixel. The capture's green square is 120x120 at (16,184), the same size and position as the reference's. Before, it was a 6x55 sliver. The IR gives the colgroup `width: 5ch` with vertical-rl/upright, and TableBoxTree.kt resolves a colgroup width against its own upright ch (24 px), so the green really comes from the feature under test and not from some other sizing path. The first reviewer's caveats are accurate and outside the feature. The blue control div is 120x125 against the reference's 120x120: its width uses ch = 24, but five upright '0' glyphs stack at about 25 px each. That pushes the orange square from y 424 to 429, and the orange is 64x64 against 63x63. The paragraph text is not bold. Taken literally, the test's own wording (\"every shape a square, green the same size as blue\") would fail on the 5 px of blue, but that error is in upright glyph stacking in an ordinary div, not in ch on colgroups. The same 120x125 blue appears in ch-units-vrl-001, -002 and -003 on Android, and iOS shows 120x126.",
+    "mechanismGuess": "Not degenerate. Separate known gap on the control element: on Android, vertical-upright text stacks each '0' at about 25 px, while ChUnitMetrics.verticalAdvance makes the upright ch round(ascent)+round(descent) = 24, so a div sized by its upright text comes out 125 px tall where 5ch is 120."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-writing-modes/ch-units-vrl-004.html",
+   "platform": "ios",
+   "sheet": "gained-16",
+   "row": 2,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The green square is now 120x120 at (16,184), pixel-identical in position and size to the reference's. Before, it was a 6 px sliver. Caveat on a control element: the blue div is 120x126 instead of 120x120, which pushes the orange square 6 px lower, and the bold text is missing."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-writing-modes/flexbox_align-items-stretch-writing-modes.html",
+   "platform": "ios",
+   "sheet": "gained-16",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The green rectangle is now 250x100 at (16,88), identical to the reference, and no red shows. Before, the vertical-rl and vertical-lr items did not stretch, which left a 100x100 red block on the right; that was the veto fail."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+   "platform": "android",
+   "sheet": "gained-16",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The two visible blue range sliders from before are gone (visibility:hidden is now honoured). What remains is the green L-mark of 1px inline-start borders, with the same bbox and pixel count as the reference (16,68)-(31,87) and no red. The only remaining differences are text antialiasing."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+   "platform": "ios",
+   "sheet": "gained-16",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The two drawn slider widgets from before have disappeared. The green L-mark matches the reference exactly (same bbox and same 80 px), with no red. The only differences left are in the antialiasing of the caption text."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "android",
+   "sheet": "gained-16",
+   "row": 6,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The black 20x20 square is fully visible and unclipped, which is what the test asserts about overflow propagating to the viewport. It now sits at x=24 like the reference (before: x=16, with the text shifted up). One residual: the square is 5 px higher than the reference (y 51-70 vs 56-75), so it nearly touches the text. That is consistent with the table-cell's margin-top:-15px plus the 10px margin wrongly being applied."
+   },
+   "final": "DEGENERATE",
+   "orchestrator": {
+    "verdict": "DEGENERATE",
+    "reason": "Same geometry as the iOS cell the second reader overturned, measured on the full-size captures: text + square form one ink band y 36-70 on BOTH natives (square at y 51-70) against the reference's text 36-50 and square 56-75 — the square is 5 px too high on both. One label for one geometry."
+   }
+  },
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "ios",
+   "sheet": "gained-17",
+   "row": 1,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Same as on Android: a complete, unclipped 20x20 black square at x=24 under correctly placed text, which satisfies the 'black square below' assertion. It sits 5 px higher than the reference's (y 51-70 vs 56-75), which looks like the cell margin being applied wrongly. That offset is a side issue, not the overflow feature."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": false,
+    "reason": "I measured the full-size images. The text matches the reference (ink rows 36-50 in both). The 20x20 black square at x=24 sits at rows 51-70 instead of the reference's 56-75: it is 5 px too high and touches the text's bottom ink row, where the reference leaves a 5 px gap. The test has two parts. The overflow part holds, because the square is unclipped. The 5 px is not cell-margin noise, though: it is exactly the test's deliberate trap failing. The test puts margin-top:-15px on a table cell, and CSS 2.1 §17.5 says margins do not apply to table cells; the -15px nets with the caption div's margin-bottom:10px to the -5 px I measured. The reference (table at top:40) encodes that the margin must be ignored. The other half of what this test checks, that body is laid out as a table, is visibly wrong. The 0.995 SSIM passes a 5 px displacement of the test's only object, the same kind of position error the rubric names as degenerate.",
+    "mechanismGuess": "iOS (and Android, same 51-70 geometry) lays out a display:table body as a block stack instead of a table. Margins on the display:table-cell child are honoured and collapse with the preceding sibling's margin-bottom (+10, -15, net -5). CSS 2.1 §17.5 says to ignore cell margins and wrap the block sibling in an anonymous table cell."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-basic-blur.html",
+   "platform": "ios",
+   "sheet": "gained-17",
+   "row": 2,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "All three blurred filter boxes sit 24 px to the right of the reference's (box1/box2 left edges at x=290 vs 266, box3 at x=90 vs 66), as if margin:0 auto were centring an abspos box that has right:auto. Each box therefore blurs a different slice of the red square. The capture is otherwise unchanged: the only before→now difference is that the right 16 px strip (x 374-390) is now white like the reference's frame, and that, not any change in the blur, is what lifted the score over 0.95."
+   },
+   "second": {
+    "verdict": "DEGENERATE",
+    "agreesWithFirstReviewer": true,
+    "reason": "I could not overturn it. On the full-size PNGs, all three blue-bordered filter boxes sit 24 px right of where the reference draws them: box1 and box2 have their left border at x=290 against 266, and box3 at x=90 against 66 (the right border is at 241 against 217). That is the boxes under test in the wrong place, not anti-aliasing. The test's own fuzzy budget (maxDifference 40) would fail it, since about 4,900 pixels differ from the reference by more than 120 summed across channels. The one argument for a pass doesn't hold up: the blur itself is drawn correctly. Profiles across the red edge match the reference to within 1-3/255 in box1, box2 and box3 (box3 has opacity 0.6). But the score did not rise because of the blur. Between before and now, every changed pixel lies in the strip x=374-389 (rows 116-417): box1 and box2 used to run past x=374 and are now cut off there, leaving that strip white like the reference. Nothing at x<374 changed, so the 24 px offset is still there in the passing capture.",
+    "mechanismGuess": "iOS absolute-position auto-margin bug. The offset is exactly (200 − 152)/2 = 24 px: the 152 px wide box is centred in the 200 px containing block and then `left` is added on top. With `right:auto`, CSS 2.1 §10.3.7 says the auto margins are 0. AbsposAutoMargin.swift returns nil for this box (its M2 rule, end inset auto) and its comment assumes the auto margin then has no effect. But the margins are left as `auto`, so MarginApplier's HAutoFrameModifier, which stretches the box to fill the frame and centres it, still runs."
+   },
+   "final": "DEGENERATE"
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "android",
+   "sheet": "gained-17",
+   "row": 3,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "The capture is identical before and now (instrument-only flip): the full page is green edge to edge with 'Test' at the top-left, and backdrop-filter:invert has no effect on the root. That matches the re-rendered reference; the only difference is glyph rasterisation of 'Test'."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "ios",
+   "sheet": "gained-17",
+   "row": 4,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Instrument-only flip with a byte-identical capture: an all-green canvas with 'Test' at the top-left and no inversion. It matches the re-rendered reference's green page."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "web",
+   "sheet": "gained-17",
+   "row": 5,
+   "first": {
+    "verdict": "FAITHFUL",
+    "reason": "Instrument-only flip with a byte-identical capture: a full green canvas with 'Test' at the top-left, same green pixel count (233852) and same text bbox as the re-rendered reference."
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/selectors/has-visited.html",
+   "platform": "ios",
+   "sheet": "gained-17",
+   "row": 6,
+   "first": {
+    "verdict": "DEGENERATE",
+    "reason": "The parent colours the :has() selector is meant to drive are now right (green / black / yellowgreen; before, all were black). But the picture does not match: each link is pushed out of its sentence onto its own line, and 'visited link' is drawn on top of line 2's 'parent color should be black with', so the text is illegible there. The links are black instead of the reference's purple (visited) and blue (unvisited), and the trailing '.' lands on separate lines."
+   },
+   "second": {
+    "verdict": "FAITHFUL",
+    "agreesWithFirstReviewer": false,
+    "reason": "The test only checks the parent colours, and those now match the reference at full size. In a browser the test and the reference draw the same links, so the only thing that differs between them is the colour the three :has() rules give each parent. Line 1, 'parent color should be green with', is pure (0,128,0) from x=17 to 268. Line 2, 'parent color should be black with', is black. Line 4, 'parent color should be yellowgreen with', is (154,205,50). Parent1's trailing '.' is a green dot at about (17,70), and parent3's '.' is yellowgreen. In wave51-fix all of this text was black. Everything the first reviewer listed is outside what the test checks. First, each <a> and its '.' sit on their own lines, and the per-test IR fixes the boxes at Chromium's single-line heights (20/40/40 px). That is why 'visited link' is drawn black-on-black over 'parent colo' on line 2. This is the known inline-run wall, and it is pixel-identical to the failing wave51-fix capture. Second, the links are black instead of the UA purple/blue. The IR gives the <a> components no Color on purpose, because :visited and UA link ink are not modelled. Neither defect changes which parent colour is drawn. The SSIM rise from 0.9469 to 0.9571 comes entirely from the parent text changing from black to the correct green and yellowgreen. Caveat for the record: the picture is still structurally broken by the inline-run wall. The parent colours come from the post-load bake of Chromium's computed colour, not from the iOS runtime matching :has().",
+    "mechanismGuess": ""
+   },
+   "final": "FAITHFUL"
+  },
+  {
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "android",
+   "sheet": "lost-01",
+   "row": 1,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The re-rendered reference correctly shows the whole canvas green, matching its source (<html style=background:green>) and the test's 1x1-green root background-image. The byte-identical capture is a white page with the text, so the background is really missing."
+   },
+   "second": {
+    "agreesWithFirstReviewer": true,
+    "verdict": "HONEST_FAIL",
+    "reason": "The test sets display:contents and a background-image of css/support/1x1-green.png on :root. A display:contents root is blockified, so its background should spread to the canvas and tile green over the whole viewport, with \"Pass if the background is green.\" on top. The full-size re-rendered reference (rootbg-uamargin) shows exactly that: solid green canvas, black text at about (16, 42). The Android capture is byte-identical between wave51-fix and wave52-preview (md5 59ce4beb…). It is a plain white page with the same text in the same place and no green anywhere. The earlier pass was an instrument artifact: the old htmlpins reference was also all white because it dropped the ref's html background:green. The new reference is correct and the capture really is missing the thing under test, so the first reviewer's HONEST_FAIL stands.",
+    "mechanismGuess": ""
+   },
+   "final": "HONEST_FAIL"
+  },
+  {
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "ios",
+   "sheet": "lost-01",
+   "row": 2,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The reference correctly shows a full green canvas. The byte-identical capture has no green pixels at all (white page, text only), so 'Pass if the background is green' is visibly not met."
+   },
+   "final": "HONEST_FAIL"
+  },
+  {
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "web",
+   "sheet": "lost-01",
+   "row": 3,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The reference is a full green canvas, which is right for a root background-image on a blockified display:contents root. The byte-identical web capture is white with no green pixels, so the root background is not rendered."
+   },
+   "final": "HONEST_FAIL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "android",
+   "sheet": "lost-01",
+   "row": 4,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The new reference shows exactly what its source draws: red 10 px column rules at x 45-55 (rows 1 and 3) and x 95-105 (full height), and blue row rules at y 45-55 and 95-105. The old reference's opaque body box had hidden these z-index:-1 rules. The byte-identical capture is a bare tinted 150x150 grid with no gap decorations."
+   },
+   "final": "HONEST_FAIL"
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "ios",
+   "sheet": "lost-02",
+   "row": 1,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The reference correctly paints the red column rules and blue row rules in the zero-width gaps, as the test asserts. The byte-identical iOS capture shows only the pale item grid with no red or blue pixels."
+   },
+   "final": "HONEST_FAIL"
+  },
+  {
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "android",
+   "sheet": "lost-02",
+   "row": 2,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The reference (html background:pink) shows the green 200 px band with pink below it. That pink is what the test's ::view-transition pseudo paints, so the reference is right. The capture shows the green band over white, with no pink. Note that the capture is not byte-identical: since before, the green stops at x=373 instead of running to x=389 (the new right-edge frame)."
+   },
+   "final": "HONEST_FAIL"
+  },
+  {
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "ios",
+   "sheet": "lost-02",
+   "row": 3,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The reference's pink below the green target is correct for the ::view-transition{background:pink} the test asserts. The capture has the green band but a white area below it, with no pink. Only the right 16 px strip changed since before."
+   },
+   "second": {
+    "verdict": "HONEST_FAIL",
+    "agreesWithFirstReviewer": true,
+    "reason": "I agree with HONEST_FAIL. I opened the full-size pictures and compared them pixel by pixel.\n\n- **New reference:** a green band at x16–373, y16–215. Below it, pink (255,192,203) fills x16–373, y216–583, which is 131,744 px. This is correct. In the test, `::view-transition-group(root)` is hidden and `::view-transition { background: pink }` is the backdrop, so a running transition shows pink everywhere except the captured green target. The ref page reproduces that with `html { background: pink }`.\n- **Old reference:** the same green on white. The old body-white contract erased the pink, so the earlier P 0.9879 was a pass against an erased reference.\n- **Capture now:** the green band is pixel-identical to the reference at x16–373, y16–215. Everything below it is white, with no pink anywhere. That is exactly what the page looks like when no transition is running, which is the picture this test exists to tell apart from a running transition. So the cell fails on the feature under test.\n\nOne correction to the brief: this cell is not instrument-only. The captures changed on all three platforms, and iOS, Android and web are byte-identical to each other. The change is 3,200 px: before, the green ran past the frame to x389; now it stops at x373, as the reference does. That is why the score moved from 0.9332 against the re-frozen ref to 0.9453. All of the remaining loss is the missing pink region.",
+    "mechanismGuess": "Honest fail, not a defect in the reference. The author's `::view-transition` pink backdrop never reaches the composed canvas. This is the L1 F-B stamp (view-transition-bake body-root background stamp), which the plan expected to pay these 3 cells back after the re-freeze. It did not appear in the wave52-preview captures."
+   },
+   "final": "HONEST_FAIL"
+  },
+  {
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "web",
+   "sheet": "lost-02",
+   "row": 4,
+   "first": {
+    "verdict": "HONEST_FAIL",
+    "reason": "The reference correctly shows pink under the green column-span band. The web capture shows green over white with zero pink pixels, because no view-transition pseudo is rendered. The capture differs from before only in the right 16 px strip, which is now white."
+   },
+   "final": "HONEST_FAIL"
+  }
+ ]
+}

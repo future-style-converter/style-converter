@@ -367,7 +367,18 @@ struct ComposedCaptureCanvas: View {
     /// with no out-of-flow boxes split to (all, []) — their VStack is
     /// built from an identical root list, byte-unchanged.
     private var splitRoots: (flow: [IRComponent], hoisted: [IRComponent]) {
-        FixedHoist.split(roots: document.components)
+        // wave-52 lane L2 (M1) — ONE OWNER for the body margin: the roots are
+        // split with the body-root's owned margin sides stripped
+        // (UABlockMargin.withCanvasOwnedBodyMargin), because the padded flow
+        // stack below now carries that margin and the fold must not ALSO
+        // emit it as gaps. The SAME array whenever the margin is zero.
+        // wave-52 lane L2 (T6) rides the same rewrite: a hoisted root with a
+        // UA-margin tag and no declared block margin gets that UA margin as
+        // declared longhands (CSS 2.1 §9.3.2 — `top` offsets the margin edge);
+        // identity for every other root.
+        FixedHoist.split(roots: UABlockMargin.withCanvasOwnedBodyMargin(
+            document.components, UABlockMargin.canvasBodyMargin(document.components))
+            .map(UABlockMargin.withUaBlockMarginOnHoistedRoot))
     }
 
     /// TITAN Round 4 GAP 1 + RC-A4 (wave 19) — the per-root stack plan.
@@ -384,78 +395,19 @@ struct ComposedCaptureCanvas: View {
     /// occupy no flow space, so they contribute no stack margins (and the
     /// per-index arrays must match the flow ForEach exactly).
     private func rootPlans(for flowRoots: [IRComponent]) -> [UABlockMargin.RootStackMargin] {
-        flowRoots.map { root in
-            // wave-46 lane H1 (Y8's iOS twin): the root's UA default
-            // resolves its em against the root's OWN computed font-size
-            // (css-values-4 §6.1.1) — nil for every root without a font
-            // signal, so only a font-sized `<p>`/`<ul>`/… root moves
-            // (measured: inherit-computed-001's `font-size: larger` p,
-            // 16 → 19px; iOS 0.8863 → 0.9767 on a 3px translate). A
-            // composed root is a body-level child, so the basis's default
-            // 16px inherited base is exact. Resolved ONCE here and threaded
-            // into BOTH in-flow branches below, the way the Kotlin twin's
-            // single rootStackMargin call covers both (ScreenshotCaptureScreen
-            // rootPlans — `uaBasisPx`).
-            // The tag rides in as well: it gates the monospace
-            // fixed-default rung (B1), which Blink applies only to
-            // KEYWORD-sized elements — an em-sized heading (h1/h2/h3/h5/h6)
-            // keeps the ref-calibrated table rather than a wrong 13px em base.
-            let uaBasisPx = UABlockMarginFontBasis.ownFontSizePx(
-                root.properties, sourceTag: root.meta?.sourceTag)
-            // Wave-19 follow-up: the RC1 static-position family (the ONLY
-            // out-of-flow roots FixedHoist.split leaves in the flow list —
-            // absolute, no positioned ancestor, no inset) mounts at 0×0
-            // behind StaticPositionAnchor below, so it is margin-
-            // TRANSPARENT: CSS 2.1 §8.3.1 collapses the neighbors' block
-            // margins THROUGH a zero-flow-footprint box into ONE max() gap
-            // (hoisted roots already collapse through by ABSENCE — they
-            // never reach this list). Same classifier the mount uses — one
-            // decision, two consumers, never re-derived.
-            if FixedHoist.rendersInFlowAsStaticPosition(root) {
-                // Its OWN declared margins join the collapse-through set
-                // (§8.3.1's empty-box model — the hypothetical static box's
-                // margins are adjoining) via the SAME resolution as any
-                // other root, then get stripped from its render, so the
-                // slot anchor stays the §8.3.1 hypothetical position and
-                // nothing double-renders. Unresolvable flavors bail inside
-                // rootStackMargin (R4/R5) exactly like opaque roots.
-                let base = UABlockMargin.rootStackMargin(
-                    tag: root.meta?.sourceTag,
-                    declaresTop: UABlockMargin.declaresBlockMarginTop(root.properties),
-                    declaresBottom: UABlockMargin.declaresBlockMarginBottom(root.properties),
-                    staticDeclaredEdges: UABlockMargin.staticDeclaredEdges(root.properties),
-                    // H1: same basis as the opaque branch — the Kotlin
-                    // twin's one call serves both shapes.
-                    ownFontSizePx: uaBasisPx)
-                // Same contribution + strip, flagged transparent so the fold
-                // keeps the adjoining set open across this root's slot.
-                return UABlockMargin.RootStackMargin(
-                    top: base.top, bottom: base.bottom,
-                    stripDeclared: base.stripDeclared, marginTransparent: true)
-            }
-            let base = UABlockMargin.rootStackMargin(
-                tag: root.meta?.sourceTag,
-                declaresTop: UABlockMargin.declaresBlockMarginTop(root.properties),
-                declaresBottom: UABlockMargin.declaresBlockMarginBottom(root.properties),
-                // The runtime's §8.3.1 classifier (same values MarginApplier
-                // paints); nil for any other out-of-flow root (defensive —
-                // split hoists them all, so none should reach here).
-                staticDeclaredEdges: ComponentRenderer.isOutOfFlow(root)
-                    ? nil : UABlockMargin.staticDeclaredEdges(root.properties),
-                // H1: the root's own font basis (nil = the 16px table).
-                ownFontSizePx: uaBasisPx)
-            // wave-26 (lane RES residual 3a): fold in the HOIST BAND the
-            // root's own §8.3.1 plan would otherwise paint as padding OUTSIDE
-            // its styled box. Both are outer spacing in the same adjoining
-            // region, so leaving each owner to emit its own ADDED where the
-            // browser takes ONE max() (worked example in withHoistBand's
-            // doc). The band comes from the runtime's own planner, so the
-            // number folded here is exactly the number suppressed on the
-            // root's render below — one decision, two consumers.
-            return UABlockMargin.withHoistBand(
-                base,
-                band: UABlockMargin.composedRootHoistBand(root, uaBlockMargins: true))
-        }
+        // wave-52 lane L2: the per-root plan is the runtime's PURE
+        // `UABlockMargin.composedRootStackPlan` (Catalyst-pinned on the
+        // verbatim per-test IR, ComposedRootStackTests U1–U6; Kotlin twin
+        // `composedRootStackPlan` in the Android harness) — the wave-17…46
+        // closure that used to live here, verbatim, plus two §8.3.1
+        // corrections: T1 — the RC1 static-position root contributes (0,0)
+        // and KEEPS its declared margins on the box (they were max()-joined
+        // into the collapse set and stripped: clip-path-ellipse-006's
+        // `margin: 50px` abspos landed 16 px high); T2 — an EMPTY in-flow
+        // root whose block margins are all in the fold collapses THROUGH
+        // (text-decoration-propagation-shadow's `height: 0` `<p>`s emitted
+        // 16 + 16 for Chrome's one 16).
+        flowRoots.map { UABlockMargin.composedRootStackPlan($0) }
     }
 
     /// TITAN Round 4 GAP 2 — the canvas background. The browser-ref frames
@@ -596,6 +548,64 @@ struct ComposedCaptureCanvas: View {
         )
     }
 
+    /// wave-52 lane L2 (M1) — the composed canvas's resolved BODY MARGIN,
+    /// in CSS px per physical side (ZERO default): the twin of
+    /// `resolvedPadding` for the margin half of the body's box, and of the
+    /// web `resolveCanvasMargin` / Compose `resolveComposedCanvasMargin`.
+    ///
+    /// WHY: the extractor emits html+body as ONE synthetic `body-root` whose
+    /// element children are SIBLINGS, and the three composed canvases read
+    /// that root for background and PADDING only — a DECLARED
+    /// `body { margin-left: 200px }` never reached the flow stack. The ref
+    /// keeps it (its `:where(html, body) { margin: 0 }` injection has
+    /// specificity 0 and loses to the author's `body {}`): css-gaps/flex/
+    /// flex-gap-decorations-027's whole page sat exactly 200 px left of the
+    /// ref on every platform (wave51-fix ios f 0.9030). Census over the 1435
+    /// per-test IRs (tools/titan/results/wave52-composed-canvas/
+    /// composed-canvas.census.mjs): 9 tests carry a non-zero concrete
+    /// body-root margin, 8 after the CSS 2.1 §8.3 table-internal guard.
+    ///
+    /// WHERE IT IS SPENT: on the IN-FLOW root stack only (the padded VStack
+    /// below), never on the hoisted overlays — CSS 2.1 §10.1: a static body
+    /// is no containing block, those anchor at the ICB. Positive sides add
+    /// to the resolved pad (margin lies outside padding, but both are
+    /// additive offsets on one axis, so the sum places content where Chrome
+    /// does and the stack's width shrinks like the body's content box); a
+    /// NEGATIVE top/leading rides an `.offset` (a negative `margin-top` must
+    /// pull content UP, which padding cannot; no corpus body carries one once
+    /// §8.3 drops s-11-1-1b-005's table-cell body). Only
+    /// the two ABSOLUTE-px leaf shapes are honoured (`{"px": N}` and the
+    /// wrapped `{"original": {"px": N}}`, exactly as `resolvedPadding`
+    /// reads them); `auto` / `em` / `%` keep 0 — the documented contract,
+    /// not a silent fallthrough. Negatives are kept (CSS allows negative
+    /// margins; §8.4 forbids only negative padding).
+    var resolvedMargin: EdgeInsets {
+        // The runtime's pure resolver (Catalyst-pinned in
+        // ComposedRootStackTests U9–U11): concrete px per physical side,
+        // zero for a table-internal body (CSS 2.1 §8.3) or no body-root.
+        let m = UABlockMargin.canvasBodyMargin(document.components)
+        // Physical → the frame chain's leading/trailing (the WPT canvas is
+        // always LTR-framed, like resolvedPadding).
+        return EdgeInsets(top: m.top, leading: m.left, bottom: m.bottom, trailing: m.right)
+    }
+
+    /// The POSITIVE part of `resolvedMargin` — spent as extra inset beside
+    /// the pad (a negative side contributes 0 here and rides `marginOffset`).
+    static func marginInset(_ m: EdgeInsets) -> EdgeInsets {
+        EdgeInsets(top: max(0, m.top), leading: max(0, m.leading),
+                   bottom: max(0, m.bottom), trailing: max(0, m.trailing))
+    }
+
+    /// The NEGATIVE top/leading of `resolvedMargin` — spent as an `.offset`
+    /// that pulls the flow stack up/left without shrinking it (no corpus
+    /// body carries one after the §8.3 guard; s-11-1-1b-005's −15 top
+    /// is on a table-cell body and has no used value). A
+    /// negative trailing/bottom would WIDEN the body in CSS; no corpus body
+    /// declares one and it is deliberately not emulated (0).
+    static func marginOffset(_ m: EdgeInsets) -> CGSize {
+        CGSize(width: min(0, m.leading), height: min(0, m.top))
+    }
+
     /// One composed ROOT's rendered node, WITHOUT the block gaps around it —
     /// extracted VERBATIM from the frozen root ForEach (wave-34 lane H) so
     /// both walks in `body` emit the identical view for a given root and only
@@ -604,7 +614,8 @@ struct ComposedCaptureCanvas: View {
     /// spacing is the §9.4.2 packer's, not §8.3.1's.
     @ViewBuilder
     private func rootBody(_ idx: Int, _ root: IRComponent,
-                          plans: [UABlockMargin.RootStackMargin]) -> some View {
+                          plans: [UABlockMargin.RootStackMargin],
+                          aboveFlow: [Bool]) -> some View {
         // Identical host shim the per-component canvas and the engine's own
         // child loop use — placement parent-data attached (inert under this
         // VStack), full ComponentRenderer engine underneath. Zero per-node
@@ -620,8 +631,33 @@ struct ComposedCaptureCanvas: View {
             // Same classifier `split` used: one decision, two
             // consumers, never disagreeing.
             if FixedHoist.rendersInFlowAsStaticPosition(root) {
-                ComponentHost(component: root)
-                    .modifier(StaticPositionAnchor())
+                if aboveFlow[idx] {
+                    ComponentHost(component: root)
+                        .modifier(StaticPositionAnchor())
+                        // wave-52 lane L2 (T3) — CSS 2.1 Appendix E step 8: a
+                        // positioned box with `z-index: auto` paints AFTER all
+                        // in-flow content of its stacking context, but this
+                        // slot mounted in VStack order and a LATER in-flow root
+                        // painted over it (css-flexbox/align-items-007's red
+                        // `<img>` covered the abspos green: wave51-fix ios
+                        // f 0.9974, colour-vetoed). `.zIndex` reorders the DRAW
+                        // among this VStack's children without moving anything
+                        // (the 0×0 anchor report and every pad are unchanged);
+                        // the hoisted overlays attach outside the VStack and
+                        // still paint above it. Both renderers already do this
+                        // for children of positioned containers; the root
+                        // stack was the one path left out.
+                        .zIndex(1)
+                } else {
+                    // wave-52 lane L2 (T3 skeptic fix) — NOT lifted: a
+                    // declared z-index (a `z-index: -1` box paints BELOW the
+                    // flow, Appendix E step 3 — 11 corpus tests hide a red
+                    // one behind a later green box), a content-bearing root,
+                    // or a later step-8 root keeps the wave-51 VStack order
+                    // (UABlockMargin.composedRootsPaintingAboveFlow's rules).
+                    ComponentHost(component: root)
+                        .modifier(StaticPositionAnchor())
+                }
             } else {
                 ComponentHost(component: root)
             }
@@ -658,11 +694,28 @@ struct ComposedCaptureCanvas: View {
         // adjacent collapse (no collapse at the padded top/bottom edges).
         // Wave 17: over the FLOW roots only (hoisted boxes take no space).
         let plans = rootPlans(for: split.flow)
+        // wave-52 lane L2 (T3) — which flow roots the VStack lifts above the
+        // flow with `.zIndex(1)` (Appendix E step 8): only an RC1 root with no
+        // declared z-index, no content and no later step-8 root. Index-aligned
+        // with `split.flow` like `plans`; computed once per body eval.
+        let aboveFlow = UABlockMargin.composedRootsPaintingAboveFlow(split.flow)
         // wave-24 B-RC5 — the canvas pad, resolved ONCE per body eval (pure
         // over `document`): 16px per side unless this document's body-root
         // declares its own, exactly as an author `body { padding }` beats the
         // ref's zero-specificity `:where(body)` injection. See resolvedPadding.
         let pad = resolvedPadding
+        // wave-52 lane L2 (M1) — the body-root's DECLARED margin, resolved
+        // ONCE per body eval like the pad; all-zero for every document
+        // without a concrete body margin (1427 of 1435), so those captures
+        // are byte-identical. Split into the inset (positive) and offset
+        // (negative) halves the frame chain below can express.
+        let margin = resolvedMargin
+        let marginInset = Self.marginInset(margin)
+        let marginOffset = Self.marginOffset(margin)
+        // The body's content-box width: 358 minus its own horizontal margin
+        // (027: 158) — what its children block-fill to and resolve % against.
+        let flowWidth = Self.width - pad.leading - pad.trailing
+            - marginInset.leading - marginInset.trailing
         // Wave-19 follow-up: the transparency-aware fold — a margin-
         // transparent (zero-flow) root keeps the §8.3.1 adjoining set open,
         // so {prev bottom, transparent margins, next top} emit ONE max() gap
@@ -724,7 +777,7 @@ struct ComposedCaptureCanvas: View {
                         // rows) instead of centering the overflow.
                         ComposedRootInlineRow(
                             boxes: memberBoxes,
-                            fallbackAvailableWidthPx: Double(Self.width - pad.leading - pad.trailing)
+                            fallbackAvailableWidthPx: Double(flowWidth)
                         ) {
                             ForEach(seg.indices, id: \.self) { i in
                                 // wave-44 U3a — run members render with their
@@ -732,7 +785,7 @@ struct ComposedCaptureCanvas: View {
                                 // (the facade's shared rule, so Compose
                                 // strips the identical type set).
                                 rootBody(i, InlineBlockAtom.packedMarginStripped(split.flow[i]),
-                                         plans: plans)
+                                         plans: plans, aboveFlow: aboveFlow)
                             }
                         }
                         .padding(.top, flowSpacing.leading[seg.indices[0]])
@@ -744,7 +797,7 @@ struct ComposedCaptureCanvas: View {
                         // members like the frozen ForEach rather than place
                         // them against a short plan.
                         ForEach(seg.indices, id: \.self) { i in
-                            rootBody(i, split.flow[i], plans: plans)
+                            rootBody(i, split.flow[i], plans: plans, aboveFlow: aboveFlow)
                                 .padding(.top, flowSpacing.leading[i])
                                 .padding(.bottom, i == lastIndex ? flowSpacing.trailing : 0)
                         }
@@ -755,7 +808,7 @@ struct ComposedCaptureCanvas: View {
                 // reordered — a stable positional key is correct and avoids
                 // relying on component.id uniqueness across a malformed doc.
                 ForEach(Array(split.flow.enumerated()), id: \.offset) { idx, root in
-                    rootBody(idx, root, plans: plans)
+                    rootBody(idx, root, plans: plans, aboveFlow: aboveFlow)
                         // GAP 1 — the block margin ABOVE this root: its full
                         // top margin for the first root (the canvas's 16px
                         // padding blocks parent↔child collapse there), or the
@@ -777,12 +830,24 @@ struct ComposedCaptureCanvas: View {
         // component. wave-24 B-RC5: derived from the RESOLVED pad, so a ref
         // that zeroes its body padding gets the full 390px content box, the
         // same number Chromium gives that ref's body.
-        .frame(maxWidth: Self.width - pad.leading - pad.trailing, alignment: .topLeading)
+        // wave-52 L2 (M1): minus the body's positive horizontal margin too.
+        .frame(maxWidth: flowWidth, alignment: .topLeading)
         // The ref's body padding — the exact offset the stitched path
         // dropped (web composedCanvasStyle carries it too). wave-24 B-RC5:
         // 16px per side by default, overridden per side by a body-root that
-        // declares its own (see resolvedPadding).
-        .padding(pad)
+        // declares its own (see resolvedPadding). wave-52 L2 (M1): plus the
+        // body's DECLARED margin's positive part per side — margin + padding
+        // are additive offsets on one axis, so the sum lands the flow stack
+        // where Chrome's body content box starts; the hoisted overlays are
+        // attached OUTSIDE this padding and never see it (§10.1).
+        .padding(EdgeInsets(top: pad.top + marginInset.top,
+                            leading: pad.leading + marginInset.leading,
+                            bottom: pad.bottom + marginInset.bottom,
+                            trailing: pad.trailing + marginInset.trailing))
+        // wave-52 L2 (M1): a NEGATIVE body margin-top/-left pulls the padded
+        // flow stack up/left (CSS allows negative margins) — identity (0,0) for
+        // every other document.
+        .offset(x: marginOffset.width, y: marginOffset.height)
         // Frame to the full 390px width (min==max pins it) and floor the
         // height at the ref's 600px min; fixedSize(vertical) below lets the
         // surface adopt its natural height above that floor. Uses the
@@ -812,6 +877,66 @@ struct ComposedCaptureCanvas: View {
                                   canvasFrame: Self.padding)
             }
         }
+        // Wave 17 (F1/F2) — the canvas-root out-of-flow overlay: attached
+        // after the full-width frame chain and OUTSIDE the `.padding`
+        // above, so it sees the WHOLE capture surface and applies its own
+        // `canvasFrame` inset to reach the initial containing block. One
+        // owner for that corner (the overlay), instead of two modifiers
+        // that could drift.
+        //
+        // Wave 17 pinned the corner at the UNPADDED canvas origin (0,0)
+        // from measured web behavior — an absolute root's `left:100` landed
+        // at canvas x=100, not 116 — which was right while the ref framed
+        // its pages with a CSS body pad that moves in-flow content only.
+        // Wave 25 CAL-RC1 moved that frame into IMAGE space, so ref abspos
+        // content now translates with its prose and the corner is (16,16);
+        // hence the `canvasFrame: Self.padding` argument.
+        //
+        // As an overlay it paints ABOVE all in-flow content (CSS 2.1
+        // Appendix E step 8); order/z-index resolve inside
+        // FixedHoistOverlay's ZStack. Wave 19 (RC-A5b): only the
+        // NON-negative-z half mounts here — the negative-z half rides the
+        // step-3 background above. Empty half → no overlay content, view
+        // tree otherwise identical.
+        //
+        // wave-52 lane L2 (Fix A): attached HERE — BEFORE the inline-axis
+        // clip and the canvas background below — instead of after the root
+        // clip, so the overlay is INSIDE the ICB band clip like the flow
+        // stack: a hoisted `right: 0` box or a wide fixed root paints into
+        // the frame exactly like an in-flow overflow does, and the ref crops
+        // both at its viewport edge. Paint order is unchanged (canvas
+        // background < behind half < flow content < this half): a later
+        // `.background` still paints further behind.
+        .overlay(alignment: .topLeading) {
+            if !paint.above.isEmpty {
+                FixedHoistOverlay(components: paint.above,
+                                  canvasFrame: Self.padding)
+            }
+        }
+        // wave-52 lane L2 (Fix A) — THE HORIZONTAL VIEWPORT CROP. The
+        // browser-ref is RENDERED in a 358-px viewport and padded in image
+        // space (capture-browser-ref.mjs REF_RENDER_WIDTH / padPngBuffer):
+        // ink past content x=358 is scrollable overflow the PNG never
+        // contains, so frame columns 0..15 / 374..389 are always the pad
+        // colour. This canvas had NO clip on that box (only the
+        // per-component canvas has `.clipped()`), so a `width: 400px` row
+        // (css-gaps/flex/flex-gap-decorations-040) painted to x=389 — its
+        // whole 1664-px mismatch; 208 overrun-right + 84 overrun-left scored
+        // wave51-fix cells. CSS 2.1 §9.1.1: the ICB has the viewport's
+        // dimensions and the ref's viewport IS the content canvas, so the
+        // group holding the flow VStack AND both FixedHoistOverlay halves
+        // is clipped to the ICB's padding edges on the INLINE axis only
+        // (the Shape extends far past both y-edges: the ref's second
+        // viewport is max(scrollHeight, 568) and never crops the bottom).
+        // Attached BEFORE the canvas-background modifier below so the background
+        // stays outside the clip and the frame keeps the propagated body
+        // colour. The band is the runtime's pure WPTCanvas.icbClipBand
+        // (Catalyst-pinned in ComposedIcbClipTests), fed the FRAME —
+        // `Self.padding` — never `resolvedPadding`: an author
+        // `body { padding }` insets content inside the viewport but moves
+        // neither the viewport nor its crop. Twins: web `overflow-x: clip`
+        // on the ICB div; Compose `clipRect` around the content draw.
+        .clipShape(WPTCanvas.IcbClipBand(frame: Self.padding))
         // GAP 2 — the ref canvas background: corpus-v4 WHITE by default, or
         // the document body-root's own background COMPOSITED over that white
         // when it declares one (opaque grey for a98rgb-003; translucent
@@ -834,40 +959,16 @@ struct ComposedCaptureCanvas: View {
         // which is 1433 of the corpus's 1435. Components are read UNSPLIT for
         // the same reason canvasBackground reads them unsplit.
         //
-        // KNOWN LIMIT, named rather than hidden: the out-of-flow overlay
-        // below is attached OUTSIDE this clip, so a hoisted box under a
-        // clipping ROOT would escape it. No corpus document combines the two
-        // (the census over all 1435 per-test IRs found the only root clips on
-        // clip-path-document-element[-will-change], neither of which has an
-        // out-of-flow box).
+        // wave-52 lane L2 (Fix A): the out-of-flow overlay used to be
+        // attached OUTSIDE this clip (the "KNOWN LIMIT" the wave-49 lane
+        // named — a hoisted box under a clipping ROOT would have escaped
+        // it). It now mounts BEFORE the ICB band clip above, i.e. inside
+        // this root clip as well, which is what css-masking-1 §5 asks of a
+        // root clip ("the element and its descendants"). No corpus
+        // document combines a root clip with an out-of-flow box (the
+        // wave-49 census over all 1435 per-test IRs), so this is a
+        // correctness note, not a mover.
         .rootCanvasClip(document.components, frame: Self.padding)
-        // Wave 17 (F1/F2) — the canvas-root out-of-flow overlay: attached
-        // HERE, after the full-width frame chain and OUTSIDE the `.padding`
-        // above, so it sees the WHOLE capture surface and applies its own
-        // `canvasFrame` inset to reach the initial containing block. One
-        // owner for that corner (the overlay), instead of two modifiers that
-        // could drift.
-        //
-        // Wave 17 pinned the corner at the UNPADDED canvas origin (0,0) from
-        // measured web behavior — an absolute root's `left:100` landed at
-        // canvas x=100, not 116 — which was right while the ref framed its
-        // pages with a CSS body pad that moves in-flow content only. Wave 25
-        // CAL-RC1 moved that frame into IMAGE space, so ref abspos content
-        // now translates with its prose and the corner is (16,16); hence the
-        // `canvasFrame: Self.padding` argument.
-        //
-        // As an overlay it paints ABOVE all in-flow content (CSS 2.1
-        // Appendix E step 8); order/z-index resolve inside
-        // FixedHoistOverlay's ZStack. Wave 19 (RC-A5b): only the
-        // NON-negative-z half mounts here — the negative-z half rides the
-        // step-3 background above. Empty half → no overlay content, view
-        // tree otherwise identical.
-        .overlay(alignment: .topLeading) {
-            if !paint.above.isEmpty {
-                FixedHoistOverlay(components: paint.above,
-                                  canvasFrame: Self.padding)
-            }
-        }
         // Publish the capture geometry so the runtime resolves vw/vh/% and
         // containing blocks against the CAPTURE surface, not the device
         // screen. wave-24 B-RC5: the root containing block tracks the
@@ -897,7 +998,8 @@ struct ComposedCaptureCanvas: View {
             // re-layout (and making a `100vh` document terminate).
             height: Double(WPTCanvas.icbExtent(
                 canvasExtent: max(measuredCanvasHeight, Self.minHeight))),
-            rootContainingBlock: Double(Self.width - pad.leading - pad.trailing)
+            // wave-52 L2 (M1): the body's content box loses its own margin too.
+            rootContainingBlock: Double(flowWidth)
         ))
         // wave-26 (lane RES residual 2) — measure the canvas's laid-out OUTER
         // height and freeze it. A transparent background GeometryReader is the
@@ -948,7 +1050,8 @@ struct ComposedCaptureCanvas: View {
         // wave-24 B-RC5: the fill width is the RESOLVED content box, so a
         // ref that zeroes its body padding block-fills to the full 390px —
         // matching what Chromium gives that ref's unpadded body.
-        .environment(\.wptBlockFlowFillWidth, Self.width - pad.leading - pad.trailing)
+        // wave-52 L2 (M1): roots block-fill the body's content box, margin included.
+        .environment(\.wptBlockFlowFillWidth, flowWidth)
         // Same dynamic-capture hooks the per-component canvas carries
         // (pinned light scheme, empty forced set, live clock) so the
         // composed capture is a deterministic base render.

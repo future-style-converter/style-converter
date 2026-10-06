@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" tests="23" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.670Z" hostname="mac-1.home" time="0.0">
+  <properties/>
+  <testcase name="row-reverse flags reverse true" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="integration flex row space-between center alignItems" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="justify center maps to Arrangement Center" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="justify flex-end maps to Arrangement End" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="align-items stretch vertical approximated to CenterVertically" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="flex + column + wrap picks FlowColumn" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="flex + wrap picks FlowRow" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="inline-flex also picks Row" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="align-items center horizontal maps to CenterHorizontally" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="align-items flex-end vertical maps to Bottom" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="non-flex display returns null so legacy path handles it" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="align-items flex-start vertical maps to Top" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="justify space-around" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="justify space-evenly" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="wrap-reverse still uses FlowRow" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="align-items center vertical maps to CenterVertically" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="null display returns null" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="flex + column picks Column" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="justify space-between" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="display none returns None-kind decision" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="justify vertical center maps to Arrangement Center" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="display flex default row nowrap picks Row kind" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <testcase name="justify flex-start maps to Arrangement Start" classname="com.styleconverter.runtime.layout.flexbox.FlexboxApplierTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

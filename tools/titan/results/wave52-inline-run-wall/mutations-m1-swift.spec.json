@@ -1,0 +1,66 @@
+{
+ "_why": "Wave 52 L9 fix pass (skeptic M1): the Swift twin of mutations-m1-compose; run on the isolated Catalyst copy (HEAD + lane files + seam-2.patch).",
+ "cmd": [
+  "xcodebuild",
+  "test",
+  "-scheme",
+  "StyleConverterRuntime",
+  "-destination",
+  "platform=macOS,variant=Mac Catalyst,arch=arm64",
+  "-derivedDataPath",
+  "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/dd",
+  "-only-testing:StyleConverterRuntimeTests/GreedyLineBreakerTests"
+ ],
+ "cwd": ".",
+ "mutations": [
+  {
+   "id": "W1-separators-narrowed-to-U+0020",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "        c == 0x20 || c == 0x09 || c == 0x1680 || (0x2000...0x2006).contains(c)\n            || (0x2008...0x200A).contains(c) || c == 0x205F || c == 0x3000\n",
+   "new": "        c == 0x20\n",
+   "expectFail": [
+    "testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030"
+   ]
+  },
+  {
+   "id": "W2-soft-hyphens-not-restored",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "guard let source, source.unicodeScalars.contains(\"\\u{AD}\") else { return line }",
+   "new": "guard let source, false else { return line }",
+   "expectFail": [
+    "testClampHidesAtTheSoftHyphenOfBlockEllipsis028"
+   ]
+  },
+  {
+   "id": "W3-ideograph-decline-off",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "    private static func unmodelledOpportunity(_ c: UInt32) -> Bool {\n        ((0x2E80",
+   "new": "    private static func unmodelledOpportunity(_ c: UInt32) -> Bool {\n        false && ((0x2E80",
+   "expectFail": [
+    "testClampDeclinesWhenTheHiddenTailHoldsAnIdeograph"
+   ]
+  },
+  {
+   "id": "W4-dash-break-after-off",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "} else if [0x2D, 0x2010, 0x2013, 0x2014].contains(before), p >= 2,",
+   "new": "} else if false, [0x2D, 0x2010, 0x2013, 0x2014].contains(before), p >= 2,",
+   "expectFail": [
+    "testClampHidesAfterAHyphenAndAtAZeroWidthSpace"
+   ]
+  },
+  {
+   "id": "W5-fit-test-off (S8 re-cut on the new clampLines)",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/GreedyLineBreaker.swift",
+   "old": "        if measure(last + clamp.marker) <= maxWidth {\n",
+   "new": "        if true {\n",
+   "expectFail": [
+    "testClampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone",
+    "testClampDropsTrailingWordsUntilTheMarkerFits",
+    "testClampMeasuresACustomMarkerAsARealGlyphRun",
+    "testClampHidesAtTheOghamSpaceMarkOfBlockEllipsis030",
+    "testClampHidesAtTheSoftHyphenOfBlockEllipsis028"
+   ]
+  }
+ ]
+}

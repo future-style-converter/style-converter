@@ -1,0 +1,87 @@
+# seam-1.patch — wave 52 lane L10 (flex-nowrap-gaps), iOS ComponentRenderer.swift
+# Cut against HEAD 7d9c22a7 with L2's seam patches applied first (L2 delivered NONE — see
+# tools/titan/results/wave52-composed-canvas/_note.md §8 — so the base tree IS HEAD).
+# Hunks: flexMainPlan percent-basis arm + outer extent (7(b)/M2); child-loop gap anchor paintShift (M2).
+# Needs the L10 runtime files (CSSFlexLayout.swift, ItemPlacement.swift, GapDecorationsPainter.swift) in the tree.
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -2458,6 +2458,10 @@
+         let g = GapApplier.resolve(style.spacing.gap, context: ctx)
+         let gap = column ? g.row : g.column
+         var items: [CSSFlexMath.ItemInput] = []
++        // Wave 52 (lane L10, 7(b)): per item, the border + padding band
++        // the injected (border-box FRAME) width adds to a percent arm's
++        // content-box size; 0 for every pre-wave-52 arm.
++        var frameBand: [CGFloat] = []
+         for child in children {
+             // Flex factors from the child's aggregate.
+             var a = LayoutAggregate()
+@@ -2466,6 +2470,12 @@
+                 if case .px(let p)? = a.flexBasis { return p }
+                 return nil
+             }()
++            // Wave 52 (lane L10, 7(b)): the child's flex claim — a percent
++            // basis resolves against this definite content main size
++            // (css-flexbox-1 §9.2 step 3.A); nil keeps the old bail below.
++            let claim = ItemPlacementExtractor.extract(from: child.properties).flex
++            let pct = basisPx == nil
++                ? CSSFlexMath.percentBasis(claim, available: available) : nil
+             // Explicit main size fallback (css-flexbox-1 §9.2 step 3.A —
+             // basis auto defers to the main-size property).
+             let cs = SizeExtractor.extract(from: child.properties)
+@@ -2482,18 +2492,33 @@
+                                            parent: ctx.containingBlockWidth)
+             // Content-derived basis (text measurement) is not statically
+             // knowable — bail to the dynamic path.
+-            guard let basis = basisPx ?? explicit else { return nil }
++            guard let basis = basisPx ?? pct ?? explicit else { return nil }
+             // The web harness's 50×30 min floor applies per axis when
+             // the child declares nothing there (StyleBuilder.minFloor)
+             // — it clamps flexed sizes in the browser too (a browser
+             // min-width beats flex shrink/grow, §9.7 min violation).
+             let floor = StyleBuilder.minFloor(for: cs)
+-            let minMain = (column ? floor.height : floor.width) ?? 0
++            // Wave 52 (lane L10): the percent arm is new, so it takes the
++            // paint chain's own rule — no harness floor in WPT capture
++            // (StyleBuilder drops it there); the px / explicit arms keep
++            // their pre-wave-52 floor byte-identically.
++            let minMain = (pct != nil && wptCaptureMode) ? 0
++                : ((column ? floor.height : floor.width) ?? 0)
+             items.append(.init(basis: basis, min: minMain,
+                                grow: CGFloat(a.flexGrow ?? 0),
+-                               shrink: CGFloat(a.flexShrink ?? 1)))
++                               shrink: CGFloat(a.flexShrink ?? 1),
++                               // Outer extent: negative margins (M2) and,
++                               // for the percent arm, the content-box
++                               // extras — the same value the Layout uses.
++                               outer: CSSFlexMath.outer(claim, horizontal: !column,
++                                                        percentResolved: pct != nil)))
++            frameBand.append(pct == nil ? 0
++                : CSSFlexMath.frameExtra(claim, horizontal: !column, borderBoxOnly: true))
+         }
+-        return CSSFlexMath.mainSizes(items: items, available: available, gap: gap)
++        // The flexed CONTENT sizes → the border-box frames the paint
++        // chain's fold expects (identity unless a percent arm resolved).
++        return zip(CSSFlexMath.mainSizes(items: items, available: available, gap: gap),
++                   frameBand).map { $0 + $1 }
+     }
+ 
+     // MARK: - Wrap-flex cross stretch (wave 25, lane ISTRETCH — CAL-RC5)
+@@ -4003,7 +4028,16 @@
+                 // (anchorPreference changes neither layout nor paint),
+                 // and only attached at all when the container declares
+                 // gap decorations — see gapDecorationItemFrame.
+-                .gapDecorationItemFrame(index: index, active: gapDecorActive)
++                // Wave 52 (lane L10, M2): the anchor follows the item's
++                // PAINTED box — a negative-margin child is drawn shifted
++                // (MarginApplier's offset), and its gap starts there. A
++                // zero shift (every other child) is the wave-24 modifier.
++                .gapDecorationItemFrame(
++                    index: index, active: gapDecorActive,
++                    paintShift: gapDecorActive
++                        ? GapDecorationsPainter.paintShift(
++                            ItemPlacementExtractor.extract(from: child.properties).flex)
++                        : .zero)
+             }
+             // Wave-32 lane R: runs after the LAST referenced child. Empty for
+             // every plan that ends on a child (and for every container that

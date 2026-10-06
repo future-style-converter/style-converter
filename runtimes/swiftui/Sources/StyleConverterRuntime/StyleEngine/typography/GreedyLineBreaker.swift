@@ -33,6 +33,217 @@ import UIKit
 
 enum GreedyLineBreaker {
 
+    // MARK: - Wave 52 (lane L9, F4): the drawn-marker clamp over the fold
+
+    /// css-overflow-4 §4.2 — the UA `block-ellipsis: auto` string. U+2026
+    /// HORIZONTAL ELLIPSIS is what Chromium paints, hence what every
+    /// frozen line-clamp ref carries (block-ellipsis-025's fourth line is
+    /// this one glyph alone). Twin: GreedyLineBreaker.kt
+    /// BLOCK_ELLIPSIS_MARKER.
+    static let blockEllipsisMarker = "\u{2026}"
+
+    /// A fixed-count `line-clamp` whose marker is DRAWN (css-overflow-4
+    /// §5.1: `line-clamp: <n>` expands to `max-lines: <n>` +
+    /// `block-ellipsis: auto`; §4.2: `auto` = the UA ellipsis). The
+    /// renderer passes nil for a marker-suppressed clamp — `no-ellipsis` /
+    /// `""`, which LineClampCap.leafLineLimit already nils out of
+    /// `textConfig.lineClampLimit` — so the seam forwards that limit as-is.
+    struct Clamp {
+        /// The cap N — lines past it are hidden.
+        let lines: Int
+        /// The string placed at the end of line N; a REAL character in the
+        /// returned string, measured and rendered like any other glyph —
+        /// the fit test is honest only because of that.
+        var marker: String = blockEllipsisMarker
+    }
+
+    /// Apply a drawn-marker `clamp` to greedy `lines`: keep lines 1…N and,
+    /// on line N, hide content back to the LATEST soft wrap opportunity at
+    /// which `kept + marker` fits `maxWidth` (`clampHead`); when none fits
+    /// the line is the marker alone. This is css-overflow-4 §4.2's placement rule
+    /// as Chromium performs it — content at the end of the last line is
+    /// hidden at soft wrap opportunities until the ellipsis FITS, never a
+    /// character-level truncation: block-ellipsis-025's ref shows the
+    /// whole 34ch `supercalifragilisticexpialidocious` displaced off line
+    /// 4 (it overflows the 32.5ch box, so even "word + …" cannot fit)
+    /// leaving `…` alone, where SwiftUI's `.lineLimit` + `.truncationMode
+    /// (.tail)` appended `…` AFTER the full word — the label's width is
+    /// its widest line under `.fixedSize(horizontal:)`, so the intrinsic
+    /// width had room (ios f 0.9495).
+    ///
+    /// Identity — the SAME array (value-equal, no marker) — when the
+    /// paragraph fits the cap (a clamp only ever REMOVES lines) or the cap
+    /// is non-positive. With the marker baked, `.lineLimit(N)` on the
+    /// label becomes inert (exactly N lines), so TextKit has nothing left
+    /// to truncate. ALSO identity when line N's hidden tail would cross an
+    /// opportunity this walk does not model (`clampHead` → nil): the label
+    /// then keeps wave 51's `.lineLimit` tail truncation. Twin:
+    /// GreedyLineBreaker.kt `clampLines`.
+    /// - Parameters:
+    ///   - source: wave 52 fix pass (skeptic M1) — the run's text as the
+    ///     fold received it, so line N's whole words get back the U+00AD
+    ///     soft hyphens the display string dropped (`markedLine`):
+    ///     block-ellipsis-028's ref hides `cally` at `uncharacteristi<U+00AD>cally`'s
+    ///     soft hyphen and paints `uncharacteristi‐…`. nil = no soft hyphens.
+    ///   - hyphenChar: the glyph a soft-hyphen cut paints (§5.3) — the
+    ///     same one the fold paints at a taken soft hyphen.
+    static func clampLines(_ lines: [String],
+                           clamp: Clamp,
+                           maxWidth: CGFloat,
+                           measure: (String) -> CGFloat,
+                           source: String? = nil,
+                           hyphenChar: String = AutoHyphenation.defaultHyphenCharacter) -> [String] {
+        // Nothing hidden → nothing to mark (a 4-line clamp on a 3-line
+        // paragraph paints no ellipsis, css-overflow-4 §4.2 "if content
+        // overflows").
+        guard clamp.lines > 0, lines.count > clamp.lines else { return lines }
+        var kept = Array(lines[0..<clamp.lines])
+        let last = kept[clamp.lines - 1]
+        // The whole of line N plus the marker fits: nothing to hide.
+        if measure(last + clamp.marker) <= maxWidth {
+            kept[clamp.lines - 1] = last + clamp.marker
+            return kept
+        }
+        // Hide back to the latest opportunity that leaves room, or decline.
+        guard let head = clampHead(markedLine(last, source: source),
+                                   marker: clamp.marker, maxWidth: maxWidth,
+                                   measure: measure, hyphenChar: hyphenChar) else {
+            // No silent fallthrough: the wave-51 truncation stays, named once.
+            PropertyTracker.logOnce(
+                key: "line-clamp:block-ellipsis:unmodelled-opportunity",
+                message: "line-clamp: the hidden tail crosses an ideographic / "
+                    + "SA-script break opportunity the clamp walk does not model; "
+                    + "the marker is left to .lineLimit tail truncation")
+            return lines
+        }
+        kept[clamp.lines - 1] = head + clamp.marker
+        return kept
+    }
+
+    /// Wave 52 fix pass (skeptic M1) — the longest prefix of `marked` (line
+    /// N, untaken soft hyphens restored) that ends at a soft wrap
+    /// opportunity and fits beside `marker`; "" when none does; nil =
+    /// DECLINE. css-overflow-4 §4.2 hides content "at soft wrap
+    /// opportunities", and the fold's U+0020-only word split is coarser
+    /// than UAX #14: block-ellipsis-030 is `123<U+1680>5 789` at 5ch,
+    /// whose OGHAM SPACE MARK (class BA) the ref breaks at (`123…`), where
+    /// a U+0020-only cut found nothing and baked `…` alone. The walk goes
+    /// from the END, boundary by boundary, so the first fit is the latest.
+    /// It declines the moment the hidden tail holds an ideograph or an
+    /// SA-script letter (UAX #14 ID / SA: opportunities between letters,
+    /// which only a class table or a dictionary can place) — a later
+    /// opportunity might exist there. Twin: GreedyLineBreaker.kt `clampHead`.
+    static func clampHead(_ marked: String, marker: String, maxWidth: CGFloat,
+                          measure: (String) -> CGFloat, hyphenChar: String) -> String? {
+        // Code points, not Characters, so both twins index identically.
+        let s = marked.unicodeScalars.map(\.value)
+        var p = s.count - 1
+        // Boundary p sits between s[p-1] and s[p]; s[p...] is hidden.
+        while p >= 1 {
+            // The hidden tail just grew by s[p] — an unmodelled class ends it.
+            if unmodelledOpportunity(s[p]) { return nil }
+            if let head = cutHead(s, at: p, hyphenChar: hyphenChar),
+               measure(head + marker) <= maxWidth { return head }
+            p -= 1
+        }
+        // Nothing fits: the whole line is hidden (025's 34ch word), unless
+        // its first code point is itself an unmodelled opportunity.
+        if let first = s.first, unmodelledOpportunity(first) { return nil }
+        return ""
+    }
+
+    /// The kept DISPLAY text when line N breaks at boundary `p`, or nil when
+    /// UAX #14 (as approximated here) gives no opportunity there.
+    private static func cutHead(_ s: [UInt32], at p: Int, hyphenChar: String) -> String? {
+        let before = s[p - 1], after = s[p]
+        // §5.3: a soft-hyphen break paints the hyphenate character.
+        var suffix = ""
+        if isClampSeparator(after) && !isClampSeparator(before) {
+            // Before a space run (SP / BA spaces): it hangs and is hidden
+            // with the tail (css-text-3 §4.1.3) — 030's U+1680, 029's U+0020.
+        } else if after == 0x200B {
+            // ZERO WIDTH SPACE (ZW): breaks after it; inkless, so cutting
+            // before it paints the same picture.
+        } else if after == 0xAD, !isClampSeparator(before) {
+            // An untaken soft hyphen (manual): taken here, so it paints —
+            // unless a literal hyphen already ends the head (`analyze`'s rule).
+            suffix = (before == 0x2D || before == 0x2010) ? "" : hyphenChar
+        } else if [0x2D, 0x2010, 0x2013, 0x2014].contains(before), p >= 2,
+                  !isClampSeparator(after), !isClampSeparator(s[p - 2]),
+                  !((before == 0x2D || before == 0x2010) && (0x30...0x39).contains(after)) {
+            // Break AFTER a hyphen or dash (HY/BA/B2) — not word-initial
+            // (UAX #14 LB20.1) and not HY × NU (`1-2`), as `analyze` rules.
+        } else {
+            return nil
+        }
+        // Remaining soft hyphens have no advance; trailing spaces/ZWSP hang.
+        var head = s[0..<p].filter { $0 != 0xAD }
+        while let l = head.last, isClampSeparator(l) || l == 0x200B { head.removeLast() }
+        return String(String.UnicodeScalarView(head.compactMap(Unicode.Scalar.init))) + suffix
+    }
+
+    /// UAX #14 space separators that are break opportunities (SP and the
+    /// BA-class Zs), i.e. Zs minus the no-break U+00A0 / U+2007 / U+202F.
+    private static func isClampSeparator(_ c: UInt32) -> Bool {
+        c == 0x20 || c == 0x09 || c == 0x1680 || (0x2000...0x2006).contains(c)
+            || (0x2008...0x200A).contains(c) || c == 0x205F || c == 0x3000
+    }
+
+    /// Code points whose opportunities sit BETWEEN letters (ID ideographs,
+    /// Hangul, fullwidth forms; SA Thai/Lao/Myanmar/Khmer/Tai) — the
+    /// classes the walk cannot place, so a hidden tail holding one declines.
+    private static func unmodelledOpportunity(_ c: UInt32) -> Bool {
+        ((0x2E80...0x9FFF).contains(c) && c != 0x3000) || (0xAC00...0xD7AF).contains(c)
+            || (0xF900...0xFAFF).contains(c) || (0xFF00...0xFFEF).contains(c)
+            || (0x20000...0x3FFFF).contains(c) || (0x0E00...0x0EFF).contains(c)
+            || (0x1000...0x109F).contains(c) || (0x1780...0x17FF).contains(c)
+            || (0x1950...0x19DF).contains(c) || (0x1A20...0x1AAF).contains(c)
+            || (0xAA60...0xAADF).contains(c)
+    }
+
+    /// Line N with each WHOLE word's untaken soft hyphens restored from
+    /// `source` (the display word → its raw spelling). A word split across
+    /// lines N-1/N matches nothing and keeps its display text — its soft
+    /// hyphens are a stated loss (the clamp then hides it whole).
+    static func markedLine(_ line: String, source: String?) -> String {
+        // No soft hyphen anywhere → the display line IS the marked line.
+        guard let source, source.unicodeScalars.contains("\u{AD}") else { return line }
+        var raw: [String: String] = [:]
+        // The fold's own word split (U+0020, paragraphs at "\n").
+        for word in source.split(whereSeparator: { $0 == " " || $0 == "\n" })
+        where word.unicodeScalars.contains("\u{AD}") {
+            // First spelling wins; analyze() is the fold's display mapping.
+            let display = WordBreakOpportunities.analyze(String(word)).text
+            if raw[display] == nil { raw[display] = String(word) }
+        }
+        // Token-wise: the fold joins every line's words with ONE U+0020.
+        return line.split(separator: " ", omittingEmptySubsequences: false)
+            .map { raw[String($0)] ?? String($0) }.joined(separator: " ")
+    }
+
+    /// The drawn-marker clamp a label's pre-break should apply, or nil.
+    /// `limit` is the label's `TextConfig.lineClampLimit` — already nil for
+    /// a marker-suppressed clamp (LineClampCap.leafLineLimit, WPT
+    /// block-ellipsis-023/-024) — but it is ALSO set by the bare
+    /// `max-lines` longhand (TypographyAggregate.lineLimit folds both),
+    /// whose block-ellipsis is the initial `none` (css-overflow-4 §5.1:
+    /// only the `line-clamp` shorthand sets `auto`). So a marker is baked
+    /// only when the component itself declares a fixed-count `line-clamp`
+    /// that does not suppress it (css-overflow/line-clamp/discard/
+    /// discard-multicol-004 carries `max-lines: 5` alone and must keep
+    /// its marker-less discard). `line-clamp` is not inherited
+    /// (css-overflow-4 §5.1), so the component's OWN list is the right
+    /// one. Twin: DrawnLineClamp.kt `cap` (Compose).
+    static func drawnClamp(limit: Int?, properties: [IRProperty]) -> Clamp? {
+        // No cap reached the label (no clamp, `none`, or suppressed marker).
+        guard let n = limit, n >= 1 else { return nil }
+        // The `line-clamp` declaration itself: fixed count, marker drawn.
+        guard let cfg = LineClampExtractor.extract(from: properties),
+              cfg.lines != nil, !cfg.markerSuppressed else { return nil }
+        // The label's effective cap (the tighter of max-lines / line-clamp).
+        return Clamp(lines: n)
+    }
+
     // MARK: - Algorithm core (pure, measurer-injected)
 
     /// Break `text` into greedy lines at `maxWidth`: words accumulate
@@ -75,11 +286,33 @@ enum GreedyLineBreaker {
     ///     measured and rendered exactly like any other glyph — which is
     ///     what keeps the fit test honest (a line that ends in a hyphen
     ///     must fit WITH the hyphen).
+    ///   - clamp: wave 52 (lane L9) — a drawn-marker `line-clamp`, or nil
+    ///     (every pre-wave-52 caller): the greedy lines are trimmed to the
+    ///     cap with the marker placed by `clampLines` (at the latest soft
+    ///     wrap opportunity that fits — `clampHead`). Both twins take it
+    ///     in the same position with the same default.
     static func lines(text: String,
                       maxWidth: CGFloat,
                       measure: (String) -> CGFloat,
                       hyphenate: ((String) -> [Int])? = nil,
-                      hyphenChar: String = AutoHyphenation.defaultHyphenCharacter) -> [String] {
+                      hyphenChar: String = AutoHyphenation.defaultHyphenCharacter,
+                      clamp: Clamp? = nil) -> [String] {
+        // The fold proper (below), then the wave-52 clamp trim over it —
+        // identity when no clamp rides, byte-for-byte the wave-41 result.
+        let folded = fold(text: text, maxWidth: maxWidth, measure: measure,
+                          hyphenate: hyphenate, hyphenChar: hyphenChar)
+        guard let clamp else { return folded }
+        // `text` rides along so the clamp sees line N's soft hyphens.
+        return clampLines(folded, clamp: clamp, maxWidth: maxWidth, measure: measure,
+                          source: text, hyphenChar: hyphenChar)
+    }
+
+    /// The greedy fold itself — see `lines` for the contract.
+    private static func fold(text: String,
+                             maxWidth: CGFloat,
+                             measure: (String) -> CGFloat,
+                             hyphenate: ((String) -> [Int])?,
+                             hyphenChar: String) -> [String] {
         var out: [String] = []
         // Hard breaks split paragraphs; each wraps independently.
         for para in text.components(separatedBy: "\n") {

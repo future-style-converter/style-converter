@@ -1,0 +1,719 @@
+{
+ "_lane": "wave52 L12 instrument-and-calibration / Part A census",
+ "_run": "wave51-fix",
+ "_method": "manifest diffs → inject-wpt-block.mjs applyAbsenceOnlyGate on a deep copy (skipping scoreEligible:false tests, the isNa caller contract); composed captures + manifest-recorded refs decoded with pngjs → uniformColour / computeBlankCaptureVsInkedRef (the shipped functions); totals via score-gate.mjs isScored/isPass",
+ "tests": 1435,
+ "diffsSeen": 4305,
+ "composedDiffs": 4305,
+ "missingCaptures": 0,
+ "uniformRefs": [
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-backgrounds/animations__background-color-animation-in-body.png",
+   "rgba": [
+    100,
+    100,
+    0,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-backgrounds/animations__background-color-transparent-animation-in-body.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-backgrounds/animations__invalidation__background-color-animation-with-zero-alpha.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-cascade/initial-background-color.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-cascade/scope-implicit-crash-print.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-flexbox/abspos__flexbox_inline-abspos.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-images/gradient-refcrash.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-position/overlay__overlay-transition-backdrop-entry.png",
+   "rgba": [
+    0,
+    128,
+    0,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-position/overlay__overlay-transition-backdrop.png",
+   "rgba": [
+    0,
+    128,
+    0,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-transforms/backface-visibility-hidden-006.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-values/calc-in-media-queries-001.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-values/calc-in-media-queries-002.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  },
+  {
+   "ref": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-view-transitions/animation-name-ua-prefix.png",
+   "rgba": [
+    255,
+    255,
+    255,
+    255
+   ]
+  }
+ ],
+ "absenceOnly": {
+  "cells": 19,
+  "perPlatform": {
+   "web": 7,
+   "ios": 6,
+   "android": 6
+  },
+  "tests": 7,
+  "rows": [
+   "wave51-fix css-backgrounds/animations/background-color-transparent-animation-in-body.html web P 1.0000",
+   "wave51-fix css-backgrounds/animations/background-color-transparent-animation-in-body.html ios P 1.0000",
+   "wave51-fix css-backgrounds/animations/background-color-transparent-animation-in-body.html android P 1.0000",
+   "wave51-fix css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html web P 1.0000",
+   "wave51-fix css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html ios P 1.0000",
+   "wave51-fix css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html android P 1.0000",
+   "wave51-fix css-cascade/scope-implicit-crash-print.html web P 1.0000",
+   "wave51-fix css-cascade/scope-implicit-crash-print.html ios P 1.0000",
+   "wave51-fix css-cascade/scope-implicit-crash-print.html android P 1.0000",
+   "wave51-fix css-flexbox/abspos/flexbox_inline-abspos.html web P 1.0000",
+   "wave51-fix css-flexbox/abspos/flexbox_inline-abspos.html ios P 1.0000",
+   "wave51-fix css-flexbox/abspos/flexbox_inline-abspos.html android P 1.0000",
+   "wave51-fix css-images/gradient-refcrash.html web P 1.0000",
+   "wave51-fix css-images/gradient-refcrash.html ios P 1.0000",
+   "wave51-fix css-images/gradient-refcrash.html android P 1.0000",
+   "wave51-fix css-transforms/backface-visibility-hidden-006.html web P 1.0000",
+   "wave51-fix css-transforms/backface-visibility-hidden-006.html ios P 1.0000",
+   "wave51-fix css-transforms/backface-visibility-hidden-006.html android P 1.0000",
+   "wave51-fix css-view-transitions/animation-name-ua-prefix.html web P 1.0000"
+  ]
+ },
+ "uniformCaptures": {
+  "cells": 73,
+  "rows": [
+   "css-backgrounds/animations/background-color-animation-in-body.html web rgba(100,100,0,255)",
+   "css-backgrounds/animations/background-color-animation-in-body.html ios rgba(100,100,0,255)",
+   "css-backgrounds/animations/background-color-animation-in-body.html android rgba(100,100,0,255)",
+   "css-backgrounds/animations/background-color-transparent-animation-in-body.html web rgba(255,255,255,255)",
+   "css-backgrounds/animations/background-color-transparent-animation-in-body.html ios rgba(255,255,255,255)",
+   "css-backgrounds/animations/background-color-transparent-animation-in-body.html android rgba(255,255,255,255)",
+   "css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html web rgba(255,255,255,255)",
+   "css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html ios rgba(255,255,255,255)",
+   "css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html android rgba(255,255,255,255)",
+   "css-cascade/initial-background-color.html web rgba(0,128,0,255)",
+   "css-cascade/initial-background-color.html ios rgba(0,128,0,255)",
+   "css-cascade/initial-background-color.html android rgba(0,128,0,255)",
+   "css-cascade/scope-implicit-crash-print.html web rgba(255,255,255,255)",
+   "css-cascade/scope-implicit-crash-print.html ios rgba(255,255,255,255)",
+   "css-cascade/scope-implicit-crash-print.html android rgba(255,255,255,255)",
+   "css-cascade/scope-visited.html web rgba(255,255,255,255)",
+   "css-cascade/scope-visited.html ios rgba(255,255,255,255)",
+   "css-cascade/scope-visited.html android rgba(255,255,255,255)",
+   "css-color/color-layers-no-blend-mode.html web rgba(255,255,255,255)",
+   "css-color/color-layers-no-blend-mode.html ios rgba(255,255,255,255)",
+   "css-color/color-layers-no-blend-mode.html android rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html web rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html ios rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html android rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html web rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html ios rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html android rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/shadow-dom-part.html web rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/shadow-dom-part.html ios rgba(255,255,255,255)",
+   "css-counter-styles/counter-style-at-rule/shadow-dom-part.html android rgba(255,255,255,255)",
+   "css-flexbox/abspos/flexbox_inline-abspos.html web rgba(255,255,255,255)",
+   "css-flexbox/abspos/flexbox_inline-abspos.html ios rgba(255,255,255,255)",
+   "css-flexbox/abspos/flexbox_inline-abspos.html android rgba(255,255,255,255)",
+   "css-images/gradient-refcrash.html web rgba(255,255,255,255)",
+   "css-images/gradient-refcrash.html ios rgba(255,255,255,255)",
+   "css-images/gradient-refcrash.html android rgba(255,255,255,255)",
+   "css-images/gradient/gradient-eval-predefined-color-spaces.html web rgba(255,255,255,255)",
+   "css-images/gradient/gradient-eval-predefined-color-spaces.html ios rgba(255,255,255,255)",
+   "css-images/gradient/gradient-eval-predefined-color-spaces.html android rgba(255,255,255,255)",
+   "css-masking/clip-path/clip-path-inset-round-rendering.html ios rgba(255,255,255,255)",
+   "css-multicol/broken-column-rule-1.html ios rgba(255,255,255,255)",
+   "css-position/overlay/overlay-transition-backdrop-entry.html web rgba(0,128,0,255)",
+   "css-position/overlay/overlay-transition-backdrop-entry.html ios rgba(0,128,0,255)",
+   "css-position/overlay/overlay-transition-backdrop-entry.html android rgba(0,128,0,255)",
+   "css-position/overlay/overlay-transition-backdrop.html web rgba(255,255,255,255)",
+   "css-position/overlay/overlay-transition-backdrop.html ios rgba(255,255,255,255)",
+   "css-position/overlay/overlay-transition-backdrop.html android rgba(255,255,255,255)",
+   "css-pseudo/first-letter-of-html-root-refcrash.html web rgba(255,255,255,255)",
+   "css-pseudo/first-letter-of-html-root-refcrash.html ios rgba(255,255,255,255)",
+   "css-pseudo/first-letter-of-html-root-refcrash.html android rgba(255,255,255,255)",
+   "css-text-decor/text-decoration-inset-025.html android rgba(0,0,0,0)",
+   "css-transforms/backface-visibility-hidden-006.html web rgba(255,255,255,255)",
+   "css-transforms/backface-visibility-hidden-006.html ios rgba(255,255,255,255)",
+   "css-transforms/backface-visibility-hidden-006.html android rgba(255,255,255,255)",
+   "css-transforms/composited-under-rotateY-180deg-preserve-3d.html ios rgba(255,255,255,255)",
+   "css-transforms/composited-under-rotateY-180deg-preserve-3d.html android rgba(255,255,255,255)",
+   "css-values/calc-in-media-queries-001.html web rgba(255,0,0,255)",
+   "css-values/calc-in-media-queries-001.html ios rgba(255,0,0,255)",
+   "css-values/calc-in-media-queries-001.html android rgba(255,0,0,255)",
+   "css-values/calc-in-media-queries-002.html web rgba(255,0,0,255)",
+   "css-values/calc-in-media-queries-002.html ios rgba(255,0,0,255)",
+   "css-values/calc-in-media-queries-002.html android rgba(255,0,0,255)",
+   "css-view-transitions/animation-name-ua-prefix.html web rgba(255,255,255,255)",
+   "css-view-transitions/empty-render-target-capture.html android rgba(255,255,255,255)",
+   "css-writing-modes/direction-propagation-body-contain-root.html web rgba(255,255,255,255)",
+   "css-writing-modes/direction-propagation-body-contain-root.html ios rgba(255,255,255,255)",
+   "css-writing-modes/direction-propagation-body-contain-root.html android rgba(255,255,255,255)",
+   "selectors/invalidation/nth-child-in-shadow-root.html web rgba(255,255,255,255)",
+   "selectors/invalidation/nth-child-in-shadow-root.html ios rgba(255,255,255,255)",
+   "selectors/invalidation/nth-child-in-shadow-root.html android rgba(255,255,255,255)",
+   "selectors/invalidation/nth-child-of-in-shadow-root.html web rgba(255,255,255,255)",
+   "selectors/invalidation/nth-child-of-in-shadow-root.html ios rgba(255,255,255,255)",
+   "selectors/invalidation/nth-child-of-in-shadow-root.html android rgba(255,255,255,255)"
+  ]
+ },
+ "blankCaptureVsInkedRef": {
+  "cells": 39,
+  "scored": 33,
+  "excluded": 6,
+  "tests": 16,
+  "rows": [
+   {
+    "cell": "wave51-fix css-cascade/scope-visited.html web f 0.8760",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 5.396,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-cascade/scope-visited.html ios f 0.8760",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 5.396,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-cascade/scope-visited.html android f 0.8760",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 5.396,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-color/color-layers-no-blend-mode.html web f 0.5189",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 72.587,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-color/color-layers-no-blend-mode.html ios f 0.5189",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 62.638,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-color/color-layers-no-blend-mode.html android f 0.5189",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 62.638,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html web f 0.9925",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.102,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html ios f 0.9925",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.102,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/access-from-shadow-dom.html android f 0.9925",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.102,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html web f 0.8821",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 2.444,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html ios f 0.8821",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 2.444,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/fallbacks-in-shadow-dom.html android f 0.8821",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 2.444,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/shadow-dom-part.html web f 0.9925",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.102,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/shadow-dom-part.html ios f 0.9925",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.102,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-counter-styles/counter-style-at-rule/shadow-dom-part.html android f 0.9925",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.102,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-images/gradient/gradient-eval-predefined-color-spaces.html web f 0.9247",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 12.821,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-images/gradient/gradient-eval-predefined-color-spaces.html ios f 0.9247",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 12.821,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-images/gradient/gradient-eval-predefined-color-spaces.html android f 0.9247",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 12.821,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-masking/clip-path/clip-path-inset-round-rendering.html ios f 0.7483",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 37.823,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-multicol/broken-column-rule-1.html ios f 0.9752",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.214,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop.html web EXCL(true) 0.5414",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 100,
+    "scored": false
+   },
+   {
+    "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop.html ios EXCL(true) 0.5414",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 100,
+    "scored": false
+   },
+   {
+    "cell": "wave51-fix css-position/overlay/overlay-transition-backdrop.html android EXCL(true) 0.5414",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 100,
+    "scored": false
+   },
+   {
+    "cell": "wave51-fix css-pseudo/first-letter-of-html-root-refcrash.html web EXCL(true) 0.9936",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.121,
+    "scored": false
+   },
+   {
+    "cell": "wave51-fix css-pseudo/first-letter-of-html-root-refcrash.html ios EXCL(true) 0.9936",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.121,
+    "scored": false
+   },
+   {
+    "cell": "wave51-fix css-pseudo/first-letter-of-html-root-refcrash.html android EXCL(true) 0.9936",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.121,
+    "scored": false
+   },
+   {
+    "cell": "wave51-fix css-text-decor/text-decoration-inset-025.html android f 0.0000",
+    "rgba": [
+     0,
+     0,
+     0,
+     0
+    ],
+    "bCov": 1.652,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-transforms/composited-under-rotateY-180deg-preserve-3d.html ios f 0.9565",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 4.274,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-transforms/composited-under-rotateY-180deg-preserve-3d.html android f 0.9565",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 4.274,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-view-transitions/empty-render-target-capture.html android f 0.9565",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 4.274,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-writing-modes/direction-propagation-body-contain-root.html web f 0.9710",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.595,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-writing-modes/direction-propagation-body-contain-root.html ios f 0.9710",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.595,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix css-writing-modes/direction-propagation-body-contain-root.html android f 0.9710",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.595,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix selectors/invalidation/nth-child-in-shadow-root.html web f 0.9749",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.604,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix selectors/invalidation/nth-child-in-shadow-root.html ios f 0.9749",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.604,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix selectors/invalidation/nth-child-in-shadow-root.html android f 0.9749",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.604,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix selectors/invalidation/nth-child-of-in-shadow-root.html web f 0.9700",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.689,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix selectors/invalidation/nth-child-of-in-shadow-root.html ios f 0.9700",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.689,
+    "scored": true
+   },
+   {
+    "cell": "wave51-fix selectors/invalidation/nth-child-of-in-shadow-root.html android f 0.9700",
+    "rgba": [
+     255,
+     255,
+     255,
+     255
+    ],
+    "bCov": 0.689,
+    "scored": true
+   }
+  ]
+ },
+ "totals": {
+  "before": {
+   "web": {
+    "passing": 1215,
+    "measured": 1379,
+    "pct": 88.11
+   },
+   "ios": {
+    "passing": 1089,
+    "measured": 1369,
+    "pct": 79.55
+   },
+   "android": {
+    "passing": 1080,
+    "measured": 1369,
+    "pct": 78.89
+   }
+  },
+  "after": {
+   "web": {
+    "passing": 1208,
+    "measured": 1372,
+    "pct": 88.05
+   },
+   "ios": {
+    "passing": 1083,
+    "measured": 1363,
+    "pct": 79.46
+   },
+   "android": {
+    "passing": 1074,
+    "measured": 1363,
+    "pct": 78.8
+   }
+  }
+ },
+ "vsPlanCensus": {
+  "absenceOnlyOnlyInPlan": [],
+  "absenceOnlyOnlyHere": [],
+  "blankOnlyInPlan": [],
+  "blankOnlyHere": [
+   "wave51-fix css-position/overlay/overlay-transition-backdrop web EXCL(true) 0.5414",
+   "wave51-fix css-position/overlay/overlay-transition-backdrop ios EXCL(true) 0.5414",
+   "wave51-fix css-position/overlay/overlay-transition-backdrop android EXCL(true) 0.5414"
+  ]
+ }
+}

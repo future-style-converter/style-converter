@@ -113,6 +113,62 @@ class ColorConversionTest {
         assertSrgb(ColorConversion.rec2020ToSrgb(1.0, 1.0, 1.0).clamped(), 1.0, 1.0, 1.0)
     }
 
+    // ---- Linear-light twins (wave-52 L1 F-A; css-color-4 §10.2) ----
+    //
+    // MUTATION RECORD (executed 2026-09-25, restored byte-exact, sha-verified
+    // 82856d07…f833a): making `displayP3LinearToSrgb` gamma-decode its inputs
+    // (`mul3(P3_TO_XYZ, srgbGammaToLinear(r), …)`) failed
+    // `display-p3-linear green is CSS green` with g = 0.21289504620248018
+    // (expected ~0.50196 — the decode reads 0.2087 as an ENCODED value, so the
+    // light drops to ~0.036) and failed `linear twins differ …` with
+    // linear == encoded == 0.20870253472238282. The parser-side mutations are
+    // recorded in ColorParserLinearSpaceTest. Both pins are able to fail.
+
+    @Test
+    fun `display-p3-linear extremes map to sRGB black and white`() {
+        // color(display-p3-linear 0 0 0) / (1 1 1): P3 and sRGB share the D65
+        // white, so the linear path lands on exact black and white. WPT
+        // display-p3-linear-002 (black square) and -003 (white `.test` == `.ref`).
+        assertSrgb(ColorConversion.displayP3LinearToSrgb(0.0, 0.0, 0.0).clamped(), 0.0, 0.0, 0.0)
+        assertSrgb(ColorConversion.displayP3LinearToSrgb(1.0, 1.0, 1.0).clamped(), 1.0, 1.0, 1.0)
+    }
+
+    @Test
+    fun `display-p3-linear green is CSS green`() {
+        // color(display-p3-linear 0.0383 0.2087 0.0156) is the WPT
+        // display-p3-linear-001 spelling of CSS `green` (#008000 = sRGB
+        // 0, 0.50196, 0). The gamma-decoding sibling gives g = 0.2129 (the
+        // mutation record above measured it), far outside the tolerance.
+        // Tolerance: the brief's ±1/255 — one 8-bit step, tighter than `tol`.
+        val c = ColorConversion.displayP3LinearToSrgb(0.0383, 0.2087, 0.0156).clamped()
+        assertTrue(kotlin.math.abs(c.r - 0.0) <= 1.0 / 255, "r: ${c.r}")
+        assertTrue(kotlin.math.abs(c.g - 128.0 / 255.0) <= 1.0 / 255, "g: ${c.g} (expected ~0.50196)")
+        assertTrue(kotlin.math.abs(c.b - 0.0) <= 1.0 / 255, "b: ${c.b}")
+    }
+
+    @Test
+    fun `a98-rgb-linear and rec2020-linear extremes map to sRGB black and white`() {
+        // The same "no decode" shape for the other two §10.2 twins; both share
+        // the D65 white so the extremes are exact (no corpus test spells them
+        // today — the census beside this lane's note counts 0 — pinned so the
+        // arms cannot regress unnoticed when one appears).
+        assertSrgb(ColorConversion.a98RgbLinearToSrgb(0.0, 0.0, 0.0).clamped(), 0.0, 0.0, 0.0)
+        assertSrgb(ColorConversion.a98RgbLinearToSrgb(1.0, 1.0, 1.0).clamped(), 1.0, 1.0, 1.0)
+        assertSrgb(ColorConversion.rec2020LinearToSrgb(0.0, 0.0, 0.0).clamped(), 0.0, 0.0, 0.0)
+        assertSrgb(ColorConversion.rec2020LinearToSrgb(1.0, 1.0, 1.0).clamped(), 1.0, 1.0, 1.0)
+    }
+
+    @Test
+    fun `linear twins differ from their gamma-encoded parents on a mid value`() {
+        // The one property that makes the twin a twin: for 0 < v < 1 the
+        // gamma-encoded parent DECODES v (darkening it) and the linear twin
+        // does not, so the two must disagree on a mid-grey. Pinned so a lazy
+        // `"display-p3-linear" -> displayP3ToSrgb` alias can never pass.
+        val lin = ColorConversion.displayP3LinearToSrgb(0.2087, 0.2087, 0.2087).clamped()
+        val enc = ColorConversion.displayP3ToSrgb(0.2087, 0.2087, 0.2087).clamped()
+        assertTrue(lin.g - enc.g > 0.2, "linear ${lin.g} must sit well above encoded ${enc.g}")
+    }
+
     @Test
     fun `xyz-d65 white point resolves to sRGB white`() {
         // The CIE XYZ of the D65 white is (0.95046, 1.0, 1.08906) → sRGB white.

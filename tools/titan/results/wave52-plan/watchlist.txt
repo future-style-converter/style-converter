@@ -1,0 +1,342 @@
+# tools/titan/results/wave52-plan/watchlist.txt — the wave-52 gate watchlist (every predicted flip + every at-risk cell from PLAN.md).
+# Consumed by: node tools/titan/score-gate.mjs wave51-fix <run> --watch tools/titan/results/wave52-plan/watchlist.txt
+# One watch per line: "<substring of sec/test> <platform>" or a bare substring (all platforms). Bare substrings cover a family in one line.
+# Matching is score-gate.mjs:138-145: the pattern is a substring of "<section>/<manifest key>", key shape css/<section>/<path>.html — so a
+# pattern must carry the FULL sub-path (css-flexbox/abspos/…, css-overflow/line-clamp/discard/…, css-grid/abspos/…). Every line must match
+# at least one scored wave51-fix cell: node tools/titan/results/wave52-plan/watchlist-check.mjs must print "unmatched 0" (plan-skeptic-1 C7
+# found 11 dead lines on 2026-09-25; all repaired). The ring-fenced filter-effects/backdrop-filter-basic-blur line is a REPORT-only watch.
+# L1 web-tail-colour-vt — flips (p3 x3 platforms; fractional-box x4 tests) and at-risk
+css-color/display-p3-linear-001
+css-color/display-p3-linear-002
+css-color/display-p3-linear-003
+css-view-transitions/fractional-box-with-shadow-new
+css-view-transitions/fractional-box-with-shadow-old
+css-view-transitions/fractional-box-with-overflow-children-new
+css-view-transitions/fractional-box-with-overflow-children-old
+css-color/display-p3-linear-004
+css-color/display-p3-linear-005
+css-color/display-p3-linear-006
+css-view-transitions/column-span-during-transition-doesnt-skip
+css-view-transitions/element-stops-grouping-after-animation
+# L2 composed-canvas — flips (fold T1/T2-roots/T3/T6, M1, Fix A)
+css-masking/clip-path/clip-path-ellipse-006 ios
+css-masking/clip-path/clip-path-ellipse-006 android
+css-masking/clip-path/clip-path-ellipse-007 ios
+css-masking/clip-path/clip-path-ellipse-007 android
+css-masking/clip-path/clip-path-ellipse-008 ios
+css-masking/clip-path/clip-path-ellipse-008 android
+css-text-decor/text-decoration-propagation-shadow ios
+css-text-decor/text-decoration-propagation-shadow android
+css-flexbox/align-items-007 ios
+css-flexbox/align-items-007 android
+CSS2/css21-errata/s-11-1-1b-006
+CSS2/css21-errata/s-11-1-1b-005
+css-gaps/flex/flex-gap-decorations-027
+css-gaps/flex/flex-gap-decorations-040
+css-position/position-absolute-semi-replaced-stretch-input web
+# L2 Fix A scorer flips that are DEGENERATE until L12-B re-freezes — label, never claim
+css-gaps/flex/flex-gap-decorations-034
+css-contain/contain-inline-size-bfc-floats-001
+css-anchor-position/anchor-position-multicol-007 android
+# ring-fenced: moves incidentally under Fix A — REPORT plainly, never a target
+filter-effects/backdrop-filter-basic-blur
+# L2 at risk (Fix A straddle windows; M1 body-margin carriers; fold T2-roots; fold T3 — the 19 passing RC1-root docs)
+css-break/borders-002
+selectors/has-style-sharing-002
+css-anchor-position/anchor-center-safe android
+css-lists/counter-list-item-slot-order
+css-text-decor/text-decoration-skip-spaces-001 web
+css-text-decor/text-decoration-inset-009 ios
+css-text-decor/text-decoration-line-recalc ios
+css-overflow/line-clamp/discard/discard-multicol-003 android
+css-gaps/flex/flex-gap-decorations-036
+css-gaps/flex/flex-gap-decorations-037
+css-pseudo/first-letter-skip-marker
+css-tables/collapsed-border-sideways-rl-rtl-overflow
+css-tables/collapsed-border-vertical-lr-rtl-overflow
+css-tables/collapsed-border-vertical-rtl-overflow
+css-images/gradient/gradient-hue-direction
+css-text-decor/text-decoration-propagation-04 android
+CSS2/abspos/static-inside-inline-00
+CSS2/abspos/table-caption-is-containing-block-001
+CSS2/abspos/table-caption-passes-abspos-up-001
+css-cascade/unset-val-002
+css-position/position-absolute-in-inline-margin-top
+css-sizing/aspect-ratio/abspos-011
+css-tables/height-distribution/extra-height-given-to-all-row-groups-00
+css-tables/height-distribution/percentage-sizing-of-table-cell-children-00
+css-transforms/css-scale-nested-001
+css-ui/box-sizing-026
+css-masking/clip-path/clip-path-path-with-zoom
+# L3 failure-ink — flips, movers, at risk (baked-guard carriers must stay guarded; abspos contents clause kept)
+css-display/display-contents-float-001
+css-writing-modes/flexbox_align-items-stretch-writing-modes
+css-multicol/abspos-containing-block-outside-spanner
+css-writing-modes/abs-pos-border-offset-003
+css-anchor-position/anchor-position-multicol-0
+css-anchor-position/anchor-position-multicol-colspan-003
+css-display/display-contents-oof-00
+css-tables/height-distribution/td-different-subpixel-padding-in-same-row-vertical-rl
+css-flexbox/alignment/flex-align-baseline-column-vert-lr-rtl-wrap-reverse ios
+css-flexbox/alignment/flex-align-baseline-column-vert-rl-rtl-wrap-reverse ios
+css-writing-modes/float-vlr-014 ios
+# L4 small-fixes — flips; b'' tripwires (must NOT move; the -percentage-00 pattern also watches -005..-008, same P 0.9984, harmless); 0(c) HOLD tripwires;
+# backface-visibility-hidden-003/004 android are f today (0.9845 / 0.9980 cF nI) → MOVERS, not at-risk (covered by the css-transforms/backface-visibility family line)
+css-transforms/composited-under-rotateY-180deg-preserve-3d
+css-transforms/css-transform-inherit-scale android
+css-transforms/backface-visibility
+css-sizing/abspos-auto-sizing-fit-content-percentage-00 android
+css-position/position-relative-002 android
+css-position/position-relative-008 android
+css-transforms/css-transform-3d-transform-style android
+filter-effects/backdrop-filter-3d-transform-perspective android
+filter-effects/backdrop-filter-nested-3d-transform-perspective android
+# L5 extractor-cascade — flips, movers, regression anchors, at risk (layered css-cascade statics; F-E moves every cssom test)
+css-cascade/import-conditional-001
+css-cascade/import-conditional-002
+css-color/color-mix-percents-02
+css-gaps/flex/flex-gap-decorations-024
+css-values/angle-units-001
+css-cascade/revert-layer-0
+css-cascade/layer-media-toggle
+css-cascade/important-prop
+css-cascade/revert-val-002
+css-text-decor/text-decoration-line
+css-pseudo/first-letter-background-image
+selectors/has-style-sharing-003
+css-counter-styles/cssom/
+# L6 counters-and-lists — flips (armenian-008 web; cssom -invalid via L5 F-E + T7; counter-suffix ios), T2 movers, at risk;
+# armenian-008 ios/android → UNMEASURED NOW (adjudication A re-exclusion ships with L6 — expected, not diagnosed; closing gate unmeasured-now = 21)
+css-counter-styles/armenian/css3-counter-styles-00
+css-counter-styles/counter-suffix
+CSS2/floats-clear/floats-clear-multicol-003 android
+CSS2/floats-clear/floats-clear-multicol-balancing-003 android
+css-display/display-contents-dynamic-generated-content-fieldset-001 android
+css-lists/content-property/marker-text-matches-
+css-lists/counter-reset-reversed-nested
+css-lists/change-list-style-type-002
+css-ui/appearance-auto-details-list-item
+css-cascade/scope-pseudo-element android
+css-counter-styles/counter-style-at-rule/broken-symbols
+css-counter-styles/counter-style-at-rule/descriptor-suffix
+# L7 static-position — flip (containing-block-002 ios); 16 android grid + 12 web last-baseline -> 1.0; iOS T2 carriers at risk; mobile last-baseline movers
+css-flexbox/abspos/position-absolute-containing-block-002 ios
+css-flexbox/abspos/position-absolute-containing-block-001 ios
+css-flexbox/abspos/flex-abspos-staticpos-justify-self-001 ios
+css-flexbox/abspos/flex-abspos-staticpos-margin-00 ios
+css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001 ios
+css-grid/abspos/grid-abspos-staticpos-align-self android
+css-grid/abspos/grid-abspos-staticpos-align-items android
+last-baseline
+css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-00 ios
+css-flexbox/abspos/abspos-autopos ios
+css-flexbox/abspos/position-absolute-0 ios
+css-position/position-absolute-center-003 ios
+css-position/position-absolute-center-004 ios
+css-grid/abspos/grid-abspos-staticpos-align-self-safe-001
+# L8 vertical-wedges — flips (input-range x2; ch-units 005-008 x2; 003/004 x2), movers, at risk (M-A moves every undeclared-family ch carrier; M-E col width)
+css-writing-modes/forms/input-range-zero-inline-size
+css-writing-modes/ch-units-vrl-00
+css-values/ch-unit-001
+css-text/hyphens/hyphens-auto-001
+css-text/hyphens/hyphens-none-shy-on-2nd-line-001
+css-text/hyphens/hyphens-out-of-flow-002 ios
+css-text/hyphens/hyphens-punctuation-001 ios
+css-text/hyphens/hyphens-span-002
+css-text-decor/text-decoration-inset-004
+css-tables/border-collapse-dynamic-col-001
+css-writing-modes/direction-upright-00
+css-writing-modes/available-size-011 ios
+# L9 inline-run-wall — flips, movers, at risk (every Android clamp host under F3; every iOS line-clamp host under F4; soft-hyphen carriers under F5)
+css-text/hanging-punctuation/hanging-punctuation-inline-001
+css-overflow/line-clamp/block-ellipsis-032
+css-overflow/line-clamp/block-ellipsis-025
+css-text/hyphens/hyphens-manual-inline-012 android
+css-overflow/line-clamp/block-ellipsis android
+css-overflow/line-clamp ios
+css-text/hyphens/hyphens-manual-01 android
+css-text/hyphens/hyphens-manual-inline-011 android
+# L10 flex-nowrap-gaps — flip (bg-clip-002 ios), 027 natives (with L2 M1), movers, at risk (wrap-path percent basis must stay untouched)
+css-backgrounds/background-clip-content-box-002 ios
+css-gaps/flex/flex-gap-decorations-008 android
+css-gaps/flex/flex-gap-decorations-045
+css-gaps/flex/flex-gap-decorations-046
+css-flexbox/abspos/flexbox-abspos-child-002
+css-position/position-absolute-dynamic-relayout-003
+css-gaps/flex/flex-gap-decorations-025
+css-values/calc-size/calc-size-flex-007
+# L11 all-reset-postload-colour — correctness movers and at risk (all-prop-001 x3 is the P->f risk; UA-tag post-load tests if the F2 skip is omitted)
+css-cascade/all-prop
+css-display/display-contents-button
+css-display/display-contents-details
+css-display/display-contents-fieldset
+css-ui/appearance-revert-001
+selectors/invalidation/nth-child-of
+selectors/invalidation/negated-nth-
+selectors/invalidation/nth-child-containing-ancestor
+selectors/invalidation/class-id-attr
+css-color/currentcolor-004
+selectors/has-visited
+selectors/invalidation/any-link-attribute-removal
+# L12-A absence-only — the 19 cells that leave the pass column: expected under the EXISTING "UNMEASURED NOW" heading, never LOST;
+# a cell whose stamp is REMOVED prints NEWLY MEASURED (score-gate.mjs:122, unchanged — plan-skeptic-1 C2: no scorer change this wave)
+css-backgrounds/animations/background-color-transparent-animation-in-body
+css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha
+css-cascade/scope-implicit-crash-print
+css-flexbox/abspos/flexbox_inline-abspos
+css-images/gradient-refcrash
+css-transforms/backface-visibility-hidden-006
+css-view-transitions/animation-name-ua-prefix
+css-backgrounds/animations/background-color-animation-in-body
+# L12-B calibration (B10 body-background patch + Fix B test-aware body margin; CANVAS_REV bump) — refs move; adjudicate with the Calibration-gate capture-hash recipe;
+# PRE-REGISTERED (BACKLOG "erased-reference body background" + plan-skeptic-1 C1): gaps-033 ios/android P 1.0000 → f (−2, honest) and 033 web f 0.9400 → P (+1)
+css-cascade/initial-background-color
+css-values/calc-in-media-queries-00
+css-gaps/flex/flex-gap-decorations-033
+css-gaps/flex/flex-gap-decorations-035
+css-text/hanging-punctuation/hanging-punctuation-block-bound-001
+css-view-transitions/css-tags-paint-order
+css-masking/clip-path/clip-path-paddingBox-1
+css-masking/clip-path/clip-path-contentBox-1
+css-anchor-position/anchor-position-circular
+css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height
+css-position/hypothetical-dynamic-change-003
+
+# ── additions merged at integration (2026-10-05): the lanes' watchlist-additions.txt + the five roots L2's skeptic asked for ──
+# from wave52-all-reset-postload-colour/watchlist-additions.txt
+css-pseudo/first-letter-block-to-inline
+# from wave52-composed-canvas/watchlist-additions.txt
+css-backgrounds/background-attachment-margin-root-001
+css-backgrounds/background-attachment-margin-root-002
+css-text-decor/text-decoration-color-recalc ios
+# from wave52-counters-and-lists/watchlist-additions.txt
+css-lists/counter-list-item-2.html android
+css-lists/counter-list-item-2.html ios
+css-lists/counter-list-item-3.html android
+css-lists/counter-list-item-3.html ios
+css-lists/add-inline-child-after-marker-001.html android
+css-lists/add-inline-child-after-marker-001.html ios
+css-lists/add-inline-child-after-marker-002.html android
+css-lists/add-inline-child-after-marker-002.html ios
+css-pseudo/first-line-and-marker.html android
+css-pseudo/first-line-and-marker.html ios
+css-pseudo/first-letter-exclude-inline-marker.html android
+css-pseudo/first-letter-exclude-inline-marker.html ios
+css-lists/counter-list-item.html android
+css-lists/counter-list-item.html ios
+css-lists/change-list-style-type-001.html android
+css-lists/change-list-style-type-001.html ios
+css-cascade/scope-pseudo-element.html ios
+css-images/gradient/gradient-powerless-hue-hsl.html android
+css-images/gradient/gradient-powerless-hue-hsl.html ios
+css-images/gradient/gradient-powerless-hue-hwb.html android
+css-images/gradient/gradient-powerless-hue-hwb.html ios
+css-images/gradient/gradient-powerless-hue-lch.html android
+css-images/gradient/gradient-powerless-hue-lch.html ios
+css-images/gradient/gradient-powerless-hue-oklch.html android
+css-images/gradient/gradient-powerless-hue-oklch.html ios
+css-backgrounds/background-clip-009.html android
+css-tables/border-collapse-dynamic-section.html android
+css-tables/border-collapse-dynamic-col-001.html android
+css-images/gradient/gradient-hue-direction.html android
+css-ui/box-sizing-026.html android
+css-anchor-position/anchor-position-multicol-007.html android
+css-writing-modes/direction-upright-001.html android
+css-writing-modes/direction-upright-002.html android
+css-counter-styles/counter-style-at-rule/name-case-sensitivity.html
+# from wave52-extractor-cascade/watchlist-additions.txt
+css-counter-styles/counter-style-at-rule/override-in-shadow-dom web
+css-counter-styles/counter-style-at-rule/override-in-shadow-dom ios
+css-counter-styles/counter-style-at-rule/override-in-shadow-dom android
+css-counter-styles/cssom/cssom-additive-symbols-setter.html ios
+css-counter-styles/cssom/cssom-additive-symbols-setter.html android
+css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html ios
+css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html android
+css-counter-styles/cssom/cssom-fallback-setter.html ios
+css-counter-styles/cssom/cssom-fallback-setter.html android
+css-counter-styles/cssom/cssom-fallback-setter-invalid.html ios
+css-counter-styles/cssom/cssom-fallback-setter-invalid.html android
+css-counter-styles/cssom/cssom-name-setter.html ios
+css-counter-styles/cssom/cssom-name-setter.html android
+css-counter-styles/cssom/cssom-name-setter-invalid.html ios
+css-counter-styles/cssom/cssom-name-setter-invalid.html android
+css-counter-styles/cssom/cssom-range-setter.html ios
+css-counter-styles/cssom/cssom-range-setter.html android
+css-counter-styles/cssom/cssom-range-setter-invalid.html ios
+css-counter-styles/cssom/cssom-range-setter-invalid.html android
+css-counter-styles/cssom/cssom-symbols-setter-invalid.html ios
+css-counter-styles/cssom/cssom-symbols-setter-invalid.html android
+# from wave52-failure-ink/watchlist-additions.txt
+css-gaps/flex/flex-gap-decorations-006
+css-anchor-position/anchor-position-multicol-017 ios
+css-anchor-position/anchor-position-multicol-017 android
+css-tables/baseline-vertical ios
+css-tables/baseline-vertical android
+# from wave52-flex-nowrap-gaps/watchlist-additions.txt
+css-gaps/flex/flex-gap-decorations-014 ios
+css-gaps/flex/flex-gap-decorations-014 android
+css-gaps/flex/flex-gap-decorations-029 ios
+css-gaps/flex/flex-gap-decorations-029 android
+css-gaps/flex/flex-gap-decorations-030 ios
+css-gaps/flex/flex-gap-decorations-030 android
+css-gaps/flex/flex-gap-decorations-043 ios
+css-gaps/flex/flex-gap-decorations-043 android
+css-gaps/flex/flex-gap-decorations-047 ios
+css-gaps/flex/flex-gap-decorations-047 android
+css-gaps/flex/flex-gap-decorations-049 ios
+css-gaps/flex/flex-gap-decorations-049 android
+css-gaps/flex/flex-gap-decorations-050 ios
+css-gaps/flex/flex-gap-decorations-050 android
+# from wave52-inline-run-wall/watchlist-additions.txt
+css-text/hyphens/hyphenate-character-00 android
+css-text/hyphens/hyphens-out-of-flow-001 android
+css-text/hyphens/hyphens-span-001 android
+# from wave52-instrument-and-calibration/watchlist-additions.txt
+css-display/display-contents-root-background web
+css-display/display-contents-root-background ios
+css-display/display-contents-root-background android
+css-display/display-contents-sharing-001 web
+css-display/display-contents-sharing-001 ios
+css-display/display-contents-sharing-001 android
+css-position/position-absolute-root-element-flex web
+css-position/position-absolute-root-element-flex ios
+css-position/position-absolute-root-element-flex android
+css-position/position-absolute-root-element-grid web
+css-position/position-absolute-root-element-grid ios
+css-position/position-absolute-root-element-grid android
+css-position/position-fixed-root-element-flex web
+css-position/position-fixed-root-element-flex ios
+css-position/position-fixed-root-element-flex android
+css-position/position-fixed-root-element-grid web
+css-position/position-fixed-root-element-grid ios
+css-position/position-fixed-root-element-grid android
+filter-effects/backdrop-filter-root-element web
+filter-effects/backdrop-filter-root-element ios
+filter-effects/backdrop-filter-root-element android
+# from wave52-small-fixes/watchlist-additions.txt
+# from wave52-static-position/watchlist-additions.txt
+css-grid/abspos/grid-abspos-staticpos-justify-self-002 android
+css-grid/abspos/grid-abspos-staticpos-align-self ios
+css-grid/abspos/grid-abspos-staticpos-align-self-00 web
+css-contain/contain-inline-size-grid-indefinite-height-min-height-flex-row web
+# from wave52-vertical-wedges/watchlist-additions.txt
+css-text/bidi/bidi-lines-001 ios
+css-text/bidi/bidi-lines-002 ios
+css-text/hyphens/hyphens-auto-last-word-001
+css-text/hyphens/hyphens-out-of-flow-001
+css-text/hyphens/hyphens-span-001
+css-writing-modes/forms/checkbox-appearance-native-vertical
+css-writing-modes/forms/radio-appearance-native-vertical
+css-text/hyphens/hyphenate-character-005 ios
+# from wave52-web-tail-colour-vt/watchlist-additions.txt
+css-view-transitions/capture-with-visibility-mixed-descendants
+css-view-transitions/class-specificity
+css-view-transitions/clip-path-larger-than-border-box-on-child-of-named-element
+css-view-transitions/far-away-capture
+css-view-transitions/element-with-overflow
+# from wave52-composed-canvas/skeptic.md (lifted roots outside the T3 rows)
+css-images/gradient/gradient-single-stop-00
+css-sizing/aspect-ratio/abspos-0
+css-backgrounds/background-clip-content-box-001
+css-masking/clip-path/clip-path-polygon-003
+filter-effects/backdrop-filter-edge-pixels-2

@@ -1,0 +1,69 @@
+# seam-2.patch — wave 52 lane L10 (flex-nowrap-gaps), Compose ComponentRenderer.kt
+# Cut against HEAD 7d9c22a7 with L2's seam patches applied first (L2 delivered NONE — its
+# RC1 z-order went harness-side, tools/titan/results/wave52-composed-canvas/_note.md §1/§8 — so the
+# base tree IS HEAD). Hunks: the engine Row (~:2213) and Column branches call the GATED
+# RenderNowrapLine first (layout/flexbox/FlexNowrapLine.kt); a new private RenderNowrapLine above
+# RenderRowContent. The legacy FLEX_ROW route (~:2508) is NOT patched: no gate carrier reaches it.
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -2199,6 +2199,12 @@
+                 .FlexAxes.of(flexDecision, rowGap, columnGap)
+             when (flexDecision.kind) {
+                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Row -> {
++                    // Wave 52 (lane L10, M2/M3) — the GATED nowrap line: a
++                    // fixed-size line Row would squeeze (overflow with every
++                    // shrink factor 0) or mis-advance (negative main-axis
++                    // margin) goes through FlexNowrapLine; every other row
++                    // falls through to the Row below unchanged.
++                    if (RenderNowrapLine(component, modifier, rowAxis = true, gap = columnGap)) return
+                     // Gap + justify-content COMPOSE, they don't compete:
+                     // a distributing justify (space-between/around/evenly)
+                     // owns the free space — the old `gap > 0 → spacedBy`
+@@ -2224,6 +2230,9 @@
+                     return
+                 }
+                 com.styleconverter.runtime.layout.flexbox.FlexContainerKind.Column -> {
++                    // Wave 52 (lane L10): the Row branch's gated line, on
++                    // the block axis (row-gap is the main-axis gap here).
++                    if (RenderNowrapLine(component, modifier, rowAxis = false, gap = rowGap)) return
+                     // Same gap/justify composition as the Row branch —
+                     // hoisted for the intrinsic path too.
+                     val columnArrangement = axes.mainVertical
+@@ -5011,6 +5020,37 @@
+             }
+         }
+         return PositionType.STATIC
++    }
++
++    /**
++     * Wave 52 (lane L10, M2/M3) — render [component] through
++     * FlexNowrapLine when its gate admits the container (css-flexbox-1
++     * §9.5 by outer size, overflow visible); returns false — having
++     * emitted NOTHING — for every other container, so the caller's
++     * Row/Column path runs exactly as before.
++     */
++    @Composable
++    private fun RenderNowrapLine(component: IRComponent, modifier: Modifier,
++                                 rowAxis: Boolean, gap: androidx.compose.ui.unit.Dp): Boolean {
++        // `order` is refused by the gate, so slot order IS flex order.
++        val children = component.children.orEmpty()
++        val nowrap = com.styleconverter.runtime.layout.flexbox.FlexNowrapLine
++        if (!nowrap.engages(component.properties, children.map { it.properties },
++                rowAxis = rowAxis, hasText = !component._text.isNullOrEmpty())) return false
++        nowrap.Line(
++            modifier = modifier, rowAxis = rowAxis, gap = gap,
++            // Negative main-axis margins shorten each OUTER size (§9.2 step 3).
++            outerDeltas = children.map { nowrap.outerDeltaPx(it.properties, rowAxis).dp }
++        ) {
++            // Flex items ignore justify-self (css-align-3 §6) — the same
++            // self-alignment hand-off RenderRowContent makes.
++            CompositionLocalProvider(LocalSelfAlignmentHandled provides true) {
++                // One Box per child keeps the measurables 1:1 with the
++                // outer deltas, whatever the child renders to.
++                children.forEach { child -> Box { RenderComponent(child, Modifier) } }
++            }
++        }
++        return true
+     }
+ 
+     /**

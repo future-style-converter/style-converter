@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:11:12.096Z" hostname="mac-1.home" time="0.021">
+  <properties/>
+  <testcase name="P3b first baseline is the same value as baseline()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.001"/>
+  <testcase name="P3d left and right are invalid align-self values()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.001"/>
+  <testcase name="P3f the wire carries the bare enum name()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.017"/>
+  <testcase name="P3g PropertiesParser drops align-self left instead of passing it through()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.0"/>
+  <testcase name="P3e overflow-prefixed positions stay on the Generic wire()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.0"/>
+  <testcase name="P3c normal is typed()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.001"/>
+  <testcase name="P3a last baseline is typed in both token orders()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.0"/>
+  <system-out><![CDATA[[CSS Parser] Dropped invalid declaration 'align-self: left' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 1 properties (0 generic)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

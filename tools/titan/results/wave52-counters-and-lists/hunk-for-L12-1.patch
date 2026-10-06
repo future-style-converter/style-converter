@@ -1,0 +1,88 @@
+hunk-for-L12-1.patch — wave 52, lane L6 → L12 (owner of tools/titan/inject-wpt-block.mjs + .test.mjs).
+Adjudication A (PLAN §2 L6 "Seams", §3 non-seam row, §9 C3): re-add
+css/css-counter-styles/armenian/css3-counter-styles-008.html to NATIVE_FONT_PARITY_REFUSED_TESTS with the
+NEW measurement retro R13 asked for, and flip the two pins in inject-wpt-block.test.mjs that hold the list
+(membership deepEqual 10 → 11; the "never quietly re-enter" loop drops 008).
+LANDING (C3): ships in L6's PR AFTER L12 has merged — L6 makes this one edit in L12's files, L12 told.
+Base: HEAD 7d9c22a7 (both files untouched in the tree at cut time). If L12's merged version moved the
+anchors, re-cut against it: the change is one Set entry + its comment, one comment sentence, two test-pin edits.
+Effect on the closing gate: armenian-008 ios f 0.9420 / android f 0.9423 → UNMEASURED NOW (score-gate.mjs:185);
+0 on pass, −1 on each native denominator; unmeasured-now = 19 + 2 = 21 (PLAN §7).
+Verified: applied to an isolated copy of tools/titan (+ tools/visual, node_modules symlinked) at HEAD,
+`node --test inject-wpt-block.test.mjs` green; the pre-edit pin goes red on the module change alone
+(the mutation proof) — log: hunk-for-L12-1.verify.log.
+
+--- a/tools/titan/inject-wpt-block.mjs
++++ b/tools/titan/inject-wpt-block.mjs
+@@ -1334,6 +1334,21 @@
+   'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
+   // ios 0.6787 / android 0.6592 — §6.3 complex CJK, both bounded.
+   'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
++  // RE-ADDED wave 52 (lane L6, adjudication A — plan-skeptic-1 C3) with the
++  // NEW measurement R13 asked for, and a face-bound residual. wave51-fix
++  // ios f 0.9420 / android f 0.9423. pngjs ink bands over the run PNGs
++  // (tools/titan/results/wave52-counters-and-lists/_note.md): the natives
++  // print the §7.1.4 fallback row `10000. 10000` on ONE line, ink x 217–370
++  // (154 px) in the 158-px line (390 − 2·16 frame − 8em·25px padding), where
++  // the ref wraps it (`10000.` x 217–293, `10000` on the next line). The
++  // marker STRING is correct on both natives (the baked `10000.`), and row
++  // 3 shows why the wrap differs: `10001. 10001` is 143 px on both natives
++  // and 146 px in the ref (×1.021) — scaling row 2's 154 px by the same
++  // ratio gives ≈157.5 px, i.e. the ref's face sits on the 158-px boundary
++  // and the natives' sits under it. No runtime code decides that: the
++  // advance widths of the system face do. The WEB cell stays scored and is
++  // the measuring platform (L6 T3 replays it at SSIM 1.0000 vs this ref).
++  'css/css-counter-styles/armenian/css3-counter-styles-008.html',
+   // UNEXCLUDED 2026-09-04 (retro R13, A12#5) — three former members whose
+   // side-by-side PNGs (ref | web | iOS | Android) show NON-font defects, so
+   // the 'native-font-parity' stamp mislabelled two native layout bugs and
+@@ -1343,7 +1358,8 @@
+   //     print the §7.1.4 fallback row '10000. 10000' on ONE line where the
+   //     ref wraps it to two (line breaking); web fails the same test at
+   //     0.9435 for its own reason (black tofu boxes). ios 0.9420 / android
+-  //     0.9423.
++  //     0.9423. RE-ADDED wave 52 (see its line above): re-measured, the
++  //     wrap is the face's advance widths, not a runtime line breaker.
+   //   css-counter-styles/counter-suffix — every item's text painted twice
+   //     ('foo / foo') and the Korean + RTL marker rows missing on web, iOS
+   //     AND Android alike: a shared upstream marker/extraction defect. ios
+--- a/tools/titan/inject-wpt-block.test.mjs
++++ b/tools/titan/inject-wpt-block.test.mjs
+@@ -1458,10 +1458,14 @@
+   // 10 members since retro R13 (A12#5): the wave48-w2 table minus the three
+   // re-labelled below. Every retained line is still face-bound on its PNGs
+   // (cjk-decimal-001 and arabic-indic-102 spot-checked at the retrospective:
+-  // same glyph rows, different stroke forms).
++  // same glyph rows, different stroke forms). 11 since wave 52: armenian-008
++  // RE-ADDED by lane L6's adjudication A with the new measurement R13 asked
++  // for (row 3 `10001. 10001` 143 px natives vs 146 px ref → the row-2 wrap
++  // is the face's advance widths; the measurement is on the module line).
+   assert.deepEqual([...NATIVE_FONT_PARITY_REFUSED_TESTS].sort(), [
+     'css/css-counter-styles/arabic-indic/css3-counter-styles-102.html',
+     'css/css-counter-styles/armenian/css3-counter-styles-007.html',
++    'css/css-counter-styles/armenian/css3-counter-styles-008.html',
+     'css/css-counter-styles/bengali/css3-counter-styles-117.html',
+     'css/css-counter-styles/cambodian/css3-counter-styles-159.html',
+     'css/css-counter-styles/cjk-decimal/css3-counter-styles-001.html',
+@@ -1471,7 +1475,8 @@
+     'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-204.html',
+     'css/css-counter-styles/cjk-heavenly-stem/css3-counter-styles-205.html',
+   ]);
+-  // The 18 unexcluded tests must NEVER quietly re-enter: 15 were measured
++  // The 17 unexcluded tests (18 until wave 52's armenian-008 re-add) must
++  // NEVER quietly re-enter: 15 were measured
+   // clear of the font boundary at wave48-w2 (13 with both natives ≥0.95;
+   // name-case-sensitivity failing only the shared coverage veto web fails
+   // too; counter-cjk-decimal an Android blank-paint bug, not a face), and 3
+@@ -1497,8 +1502,9 @@
+     'css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html',
+     'css/css-lists/content-property/marker-text-matches-armenian.html',
+     'css/css-lists/content-property/marker-text-matches-georgian.html',
+-    // retro R13 (A12#5) re-labels — non-font defects, scored honestly:
+-    'css/css-counter-styles/armenian/css3-counter-styles-008.html',
++    // retro R13 (A12#5) re-labels — non-font defects, scored honestly
++    // (armenian-008 LEFT this list in wave 52: re-measured, re-added — the
++    // deepEqual above now pins it as a member):
+     'css/css-counter-styles/counter-suffix.html',
+     'css/css-lists/counter-004.html',
+   ]) {

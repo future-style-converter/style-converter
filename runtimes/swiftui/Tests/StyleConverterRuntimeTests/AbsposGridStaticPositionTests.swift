@@ -268,4 +268,22 @@ final class AbsposGridStaticPositionTests: XCTestCase {
                                                         childProperties: abspos5010)
         XCTAssertEqual(off, CGSize(width: 38, height: 74))
     }
+
+    // MARK: - 6. wave 52 (lane L7, T3): last baseline on the grid overlay
+
+    func testStaticOffsetLastBaselineEndsTheMarkAndBaselineIgnoresItems() {
+        // css-align-3 §4.2: `last baseline` → its fallback `safe self-end`,
+        // on the post-T3 typed wire (converter pin P3f) — y = 74 + 400.
+        // Twin of the Compose GridAbsposPartitionTest K3a row.
+        let s = largeBorderPaddingGrid(extra: [kw("AlignItems", "CENTER")])
+        let last = AbsposGridStaticPosition.staticOffset(
+            parentStyle: s, childProperties: abspos5010 + [kw("AlignSelf", "LAST_BASELINE")])
+        XCTAssertEqual(last, CGSize(width: 13, height: 474))
+        // `baseline` → `safe self-start`: the child's OWN claim, so the
+        // container's center must not leak in (grid-abspos-staticpos-
+        // align-self-001's shape) — y = the content-box origin 74.
+        let first = AbsposGridStaticPosition.staticOffset(
+            parentStyle: s, childProperties: abspos5010 + [kw("AlignSelf", "BASELINE")])
+        XCTAssertEqual(first, CGSize(width: 13, height: 74))
+    }
 }

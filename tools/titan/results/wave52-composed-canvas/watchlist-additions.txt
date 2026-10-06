@@ -1,0 +1,9 @@
+# wave-52 lane L2 (composed-canvas) — watch lines NOT already in tools/titan/results/wave52-plan/watchlist.txt,
+# discovered while finishing the lane (composed-canvas.census.mjs + png-replay.mjs). Format: "<section>/<test> [platform]".
+# Verified with: WATCH=tools/titan/results/wave52-composed-canvas/watchlist-additions.txt node tools/titan/results/wave52-plan/watchlist-check.mjs
+# M1 carriers the plan did not list: the body-root keeps its box geometry under the one-owner strip (predicted byte-identical
+# geometry on all three; the web DOM gains the flow wrapper) — watch, f today on every platform.
+css-backgrounds/background-attachment-margin-root-001
+css-backgrounds/background-attachment-margin-root-002
+# Fix A straddle-window drop the replay measures on a PASSING cell (0.9819 → 0.9818; the plan named the other three).
+css-text-decor/text-decoration-color-recalc ios

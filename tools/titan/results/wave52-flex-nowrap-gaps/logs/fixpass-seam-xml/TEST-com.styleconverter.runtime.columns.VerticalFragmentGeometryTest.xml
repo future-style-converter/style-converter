@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.294Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="V6 - overflow past N columns is clipped by the fragment cap" classname="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" time="0.001"/>
+  <testcase name="V1 - background-image-001 vertical-rl - right-aligned bands walking leftward" classname="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" time="0.0"/>
+  <testcase name="V7 - column inline size helper matches the §3-4 fit" classname="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" time="0.0"/>
+  <testcase name="V4 - borders-007 vertical-rl - mirrored bands, partial right-aligned" classname="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" time="0.0"/>
+  <testcase name="V2 - background-image-002 vertical-lr - left-aligned bands walking rightward" classname="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" time="0.0"/>
+  <testcase name="V5 - fits case degenerates to a single anchored fragment" classname="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" time="0.0"/>
+  <testcase name="V3 - borders-006 vertical-lr - block borders land in first and last fragments" classname="com.styleconverter.runtime.columns.VerticalFragmentGeometryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

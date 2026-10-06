@@ -25,16 +25,26 @@
 //  "ＰＡＳＳ", 0.9415 against a web 0.9898. The letters are right; only the
 //  line stacking is missing, and line stacking is exactly what this layout is.
 //
-//  ## The decline contract, and the one honest gap
+//  ## The decline contract, and the gap wave 52 closed
 //  The wrap budget is the block-axis extent available to the run, which
 //  SwiftUI only reveals as `proposal.height` at measure time. When it is
 //  unspecified — and `PlaceholderLabel`'s chain ends in
 //  `.fixedSize(horizontal: false, vertical: true)`, which proposes nil on
-//  exactly that axis — `VerticalTextFlow.uprightColumnIndices` DECLINES and
-//  this layout places the `fallback` subview instead, i.e. the frozen
-//  horizontal label, byte for byte. `budgetOverridePx` exists for the caller
-//  that can name the extent from the IR rather than the proposal; nil means
-//  "ask the proposal", which is all any caller does today.
+//  exactly that axis — the pre-wave-52 layout DECLINED and placed the
+//  `fallback` subview, i.e. the frozen horizontal label (wave51-fix
+//  ch-units-vrl-005..008: the orange upright `00000` drew 60×25 where the
+//  ref stacks five upright glyphs in one 120×120 column).
+//
+//  Wave 52 lane L8 (M-C): css-writing-modes-4 §7.3.1 gives an orthogonal
+//  flow with an indefinite available inline size a DEFINITE one — the
+//  nearest ancestor's definite block size, else the initial containing
+//  block's extent. `budgetOverridePx` is that §7.3.1 fallback: the label
+//  call site resolves it (`VerticalUprightGate.budgetPx`, from the element's
+//  own definite height, the containing-block channel and the composed
+//  capture's `StyleViewport.height` = the 568 px ICB) and passes it under
+//  `wptCaptureMode` only. A BOUNDED proposal still wins — the twin-pinned
+//  `VerticalInlineAxis.uprightBudget` makes the pick — and nil (every
+//  non-capture caller) keeps the historical decline byte for byte.
 //
 
 import SwiftUI
@@ -66,6 +76,67 @@ enum VerticalUprightGate {
             text: text)
         guard orientation == .upright else { return nil }
         return VerticalTextFlow.lineStack(mode)
+    }
+
+    /// Wave 52 lane L8 (M-C) — the css-writing-modes-4 §7.3.1 available
+    /// inline size for an orthogonal flow whose proposal is indefinite, as
+    /// `budgetOverridePx` for `VerticalUprightTextFlow`.
+    ///
+    /// - Parameters:
+    ///   - ownBlockExtentPx: the element's OWN definite extent along the
+    ///     flow's inline axis (its used `height` minus the vertical padding
+    ///     band under a horizontal parent), or nil when `auto`. A box that
+    ///     names its own inline size wraps against exactly that, so it
+    ///     outranks every ancestor reading.
+    ///   - containingBlockHeightPx: the nearest ancestor's definite block
+    ///     extent (`SpacingContext.containingBlockHeightPx`), or nil.
+    ///   - icbBlockExtentPx: the initial containing block's extent —
+    ///     `StyleViewport.height`, which the composed capture publishes as
+    ///     the ref's 568 px ICB. The caller gates on `wptCaptureMode`,
+    ///     because outside a capture that value is the 844 pt app default.
+    /// - Returns: the wrap budget in px, or nil to keep the historical
+    ///   decline. The precedence is the twin-pinned `VerticalInlineAxis
+    ///   .orthogonalBudget`, fed the own extent as the "nearest definite".
+    static func budgetPx(ownBlockExtentPx: Double?,
+                         containingBlockHeightPx: Double?,
+                         icbBlockExtentPx: Double?) -> CGFloat? {
+        // Own definite extent first; a non-positive one is "not definite".
+        let nearest = ownBlockExtentPx.flatMap { $0.isFinite && $0 > 0 ? $0 : nil }
+            ?? containingBlockHeightPx
+        return VerticalInlineAxis.orthogonalBudget(nearestDefiniteBlockSizePx: nearest,
+                                                   icbBlockExtentPx: icbBlockExtentPx)
+            .map { CGFloat($0) }
+    }
+
+    /// The label call site's one-line form (ComponentRenderer seam patch,
+    /// `tools/titan/results/wave52-vertical-wedges/seam-2.patch`): reads the
+    /// three inputs off the component's built style and the published
+    /// viewport so the seam hunk stays a single argument.
+    ///
+    /// - Parameters:
+    ///   - style: the component's `ComponentStyle` — its definite content
+    ///     HEIGHT (`ContainingBlockBasis.contentBox(vertical: true)`, the
+    ///     declared border box minus padding and painted borders) is the
+    ///     own extent; `spacing.context.containingBlockHeightPx` the
+    ///     ancestor's.
+    ///   - viewport: the host's `\.styleViewport` (the composed capture
+    ///     publishes the ICB height there), or nil.
+    ///   - wptCaptureMode: the `\.wptCaptureMode` flag. FALSE ⇒ nil, so
+    ///     every non-capture surface (the dark stage, the app) keeps the
+    ///     historical decline byte for byte — the app's 844 pt viewport is
+    ///     not the ref's ICB and must not become a wrap budget.
+    static func budgetPx(style: ComponentStyle,
+                         viewport: StyleViewport?,
+                         wptCaptureMode: Bool) -> CGFloat? {
+        // Outside a WPT capture there is no ref ICB to stand in for.
+        guard wptCaptureMode else { return nil }
+        return budgetPx(
+            // Own definite content height, when the element declares one.
+            ownBlockExtentPx: ContainingBlockBasis.contentBox(style: style, vertical: true).map(Double.init),
+            // The ancestor-published definite block size, when there is one.
+            containingBlockHeightPx: style.spacing.context.containingBlockHeightPx,
+            // The composed capture's ICB height (568 at the defaults).
+            icbBlockExtentPx: viewport?.height)
     }
 }
 
@@ -100,25 +171,32 @@ struct VerticalUprightTextFlowLayout: Layout {
         let sizes = (1..<subviews.count).map { subviews[$0].sizeThatFits(.unspecified) }
         // The advance along the vertical inline axis = one line box's height.
         let advance = Double(sizes.first?.height ?? 0)
-        let raw = budgetOverridePx ?? proposal.height
         // `.infinity` is SwiftUI's "as much as you like" and is NOT a wrap
-        // budget — map it to nil so the planner declines rather than packing
-        // the whole run into one impossibly long line.
-        let budget: Double? = raw.flatMap { $0.isFinite ? Double($0) : nil }
+        // budget — map it to nil so an unbounded proposal reads as indefinite.
+        let bounded: Double? = proposal.height.flatMap { $0.isFinite ? Double($0) : nil }
+        // Wave 52 lane L8 (M-C): a BOUNDED proposal (a definite available
+        // inline size) wins; only an indefinite one takes the §7.3.1
+        // `budgetOverridePx` fallback the call site resolved; nil declines.
+        // The pick is the twin-pinned `VerticalInlineAxis.uprightBudget` —
+        // the Compose measure policy makes the identical choice.
+        let budget = VerticalInlineAxis.uprightBudget(
+            boundedPx: bounded,
+            fallbackPx: budgetOverridePx.flatMap { $0.isFinite ? Double($0) : nil })
         guard let lines = VerticalTextFlow.uprightColumnIndices(glyphs: glyphs,
                                                                charAdvancePx: advance,
                                                                budgetPx: budget)
         else {
             // No silent fallthrough: the GATE already said this run is
             // upright, so a decline here is a real, named gap and not a
-            // routine "not our case". Logged once per process.
+            // routine "not our case". Logged once per process. With the
+            // §7.3.1 fallback in place a decline means no budget at all
+            // (non-capture caller) or a glyphless / zero-advance run.
             _ = PropertyTracker.logOnce(
                 key: "writing-mode:upright-vertical-budget",
                 message: "upright vertical run declined: no finite block-axis " +
-                    "budget (proposal.height was \(String(describing: raw))). " +
-                    "PlaceholderLabel's .fixedSize(vertical: true) erases that " +
-                    "axis, so the wrap width needs a containing-block channel " +
-                    "that publishes MAX-height bases; run kept horizontal.")
+                    "budget (proposal.height \(String(describing: proposal.height)), " +
+                    "§7.3.1 fallback \(String(describing: budgetOverridePx))) or a " +
+                    "glyphless/zero-advance run; run kept horizontal.")
             return nil
         }
         return (lines, sizes)

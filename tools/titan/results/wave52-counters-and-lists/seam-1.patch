@@ -1,0 +1,94 @@
+seam-1.patch — wave 52, lane L6 (counters-and-lists), T5: Compose `outside` marker hang.
+Seam: runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+      (RenderListItemMarker, §3 registry row ":4021ff RenderListItemMarker outside-marker layout").
+Base: HEAD 7d9c22a7 + seam-3.patch (cut against that tree; apply seam-3 FIRST). No other lane's hunk
+      touches RenderListItemMarker. `git apply --check` verified on HEAD+seam-3.
+Needs (in the tree, lane-owned): lists/ListMarkerOutsideHang.kt, lists/ListMarkerRow.kt (`hangsOutside`),
+      lists/ListMarkerEmptyItem.kt. DEVICE A/B: apply against the closing gate and record the installed
+      base.apk sha1 — never blind-lifted.
+Apply: git apply tools/titan/results/wave52-counters-and-lists/seam-3.patch \
+       && git apply tools/titan/results/wave52-counters-and-lists/seam-1.patch
+
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -4008,14 +4008,18 @@
+      * a zero-size overlay that cannot move or resize it — css-lists-3 §3.5
+      * makes it the item's first inline box. Everything else keeps the Row.
+      *
+-     * STILL DEFERRED — the rest of B-RC3 part 3. `outside` is still
+-     * painted as a leading inline box rather than hung in the item's
+-     * margin area (marker box outside the principal box, aligned on the
+-     * first line's baseline), an `inside` marker on an item that DOES have
+-     * text still displaces that item's box, and the gap is still the fixed
+-     * [ListMarkerRow.gapDp] rather than the UA's per-counter-style marker
+-     * padding. Those need a custom Layout and the item's resolved box
+-     * metrics at this call site.
++     * Wave 52 (lane L6, T5): an `outside` marker now HANGS in the item's
++     * margin area (css-lists-3 §3.5) through
++     * [com.styleconverter.runtime.lists.ListMarkerOutsideHang] — the item
++     * is laid out as if it had no marker and the marker is placed at
++     * x = −(markerWidth + gap), so the item's content edge no longer moves
++     * by `markerWidth + gap` (measured +18 px on counter-suffix /
++     * counter-list-item-2). Staged as a device A/B (seam-1.patch).
++     *
++     * STILL DEFERRED — an `inside` marker on an item that DOES have text
++     * still displaces that item's box (the Row below), and the gap is
++     * still the fixed [ListMarkerRow.gapDp] rather than the UA's
++     * per-counter-style marker padding.
+      */
+     @Composable
+     private fun RenderListItemMarker(
+@@ -4275,6 +4279,53 @@
+             }
+             return
+         }
++        // Wave 52 (lane L6, T5) — `list-style-position: outside`: the marker
++        // HANGS in the item's margin area instead of being a Row sibling
++        // (css-lists-3 §3.5: the marker box sits outside the principal box,
++        // before its start edge; the item's content edge does not move).
++        // ListMarkerOutsideHang.Hang measures the marker UNBOUNDED, lays the
++        // item out with the pair's full constraints, reports the ITEM's size
++        // and places the marker at x = −(markerWidth + gap). Gated on the
++        // resolved position alone (ListMarkerRow.hangsOutside); `inside`
++        // with text and an unknown position keep the Row below unchanged.
++        if (ListMarkerRow.hangsOutside(listConfig?.listStylePosition)) {
++            // The same per-item baseline decision the Row makes (wave 28 /
++            // wave 47 table on ListMarkerRow.alignsByBaseline): the Layout
++            // reads both FirstBaselines only when it is true.
++            val hangAligns = ListMarkerRow.alignsByBaseline(
++                exposesBaseline, markerSharesSnappedLineGrid)
++            com.styleconverter.runtime.lists.ListMarkerOutsideHang.Hang(
++                // ONE gap constant for both placements: the Row's
++                // `padding(end = gapDp)` becomes the hang's offset.
++                gapPx = with(markerSnapDensity) { ListMarkerRow.gapDp.roundToPx() },
++                alignsByBaseline = hangAligns,
++                // An EMPTY item's one line box is the marker's (seam-3's
++                // ListMarkerEmptyItem rule, outside half).
++                itemIsEmpty = com.styleconverter.runtime.lists.ListMarkerEmptyItem.isEmpty(child),
++                marker = {
++                    // The Row's marker Text, minus the two Row-only parts:
++                    // the RowScope baseline claim (the Layout aligns by
++                    // reading FirstBaseline itself) and the end padding (the
++                    // gap is the hang offset). Glyph fallback, typography,
++                    // one-line run, painted symbol, line-box snap and
++                    // half-leading layer are byte-for-byte the Row's chain.
++                    Text(
++                        text = com.styleconverter.runtime.typography.font
++                            .ScriptFallbackFonts.annotate(marker, LocalWptCaptureMode.current),
++                        style = markerStyle,
++                        softWrap = false,
++                        onTextLayout = { markerLayout.value = it },
++                        modifier = Modifier
++                            .then(markerSymbolPaint)
++                            .then(markerLineBoxSnapModifier)
++                            .then(markerHalfLeadingCompensation)
++                    )
++                },
++                // The item renders exactly as an unmarked child would.
++                item = { RenderComponent(child) }
++            )
++            return
++        }
+         Row(verticalAlignment = Alignment.Top) {
+             // Wave 28 (lane MC) — whether a baseline claim means anything
+             // for THIS item. See repair 2 below.

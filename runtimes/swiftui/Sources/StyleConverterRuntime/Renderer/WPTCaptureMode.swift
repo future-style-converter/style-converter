@@ -148,6 +148,85 @@ public enum WPTCanvas {
         max(0, canvasExtent - 2 * frame)
     }
 
+    /// wave-52 lane L2 (Fix A) — the composed canvas's INLINE-AXIS CLIP
+    /// BAND: the two x-edges between which composed content may paint, i.e.
+    /// the ICB's left and right padding edges (16 and 374 on the 390 canvas).
+    ///
+    /// ## Why the canvas needs a clip at the ICB edge
+    /// The browser-ref is RENDERED in a 358-px viewport and padded in image
+    /// space (`tools/titan/capture-browser-ref.mjs` REF_RENDER_WIDTH /
+    /// padPngBuffer), so anything laid out past content x=358 is scrollable
+    /// overflow outside the viewport and is never in the PNG — the frame
+    /// columns 0..15 / 374..389 are always the pad colour by construction.
+    /// The iOS composed canvas had no `.clipped()` at all (only the
+    /// per-component canvas has one), so a `width: 400px` container
+    /// (css-gaps/flex/flex-gap-decorations-040) painted across the right
+    /// frame to x=389 — a 16x104 band that was the cell's whole 1664-px
+    /// mismatch, identical on web/iOS/Android. wave51-fix frame-ink census:
+    /// 208 overrun-right + 84 overrun-left scored cells.
+    ///
+    /// ## Why this is the FRAME and not the resolved body pad
+    /// CSS 2.1 §9.1.1: the initial containing block has the viewport's
+    /// dimensions, and the ref's viewport IS the 358-px content canvas. An
+    /// author `body { padding: 40px }` insets the body's CONTENT inside that
+    /// viewport but moves neither the viewport nor its crop — so the band is
+    /// derived from the unconditional image-space frame (`canvasFramePx`)
+    /// alone, never from `ComposedCaptureCanvas.resolvedPadding`
+    /// (ComposedIcbClipTests pins that a 56-pt resolved pad still yields
+    /// 16/374). Clamped so a degenerate narrow canvas never inverts.
+    ///
+    /// Twin of Compose's `composedIcbClipBandPx`; the web puts
+    /// `overflow-x: clip` on the ICB div, whose padding edge IS this band.
+    public static func icbClipBand(canvasExtent: CGFloat,
+                                   frame: CGFloat = canvasFramePx)
+        -> (minX: CGFloat, maxX: CGFloat) {
+        // Left edge = the frame; right edge = the canvas minus the frame,
+        // floored at the left edge (empty band, never an inverted one).
+        (minX: frame, maxX: max(frame, canvasExtent - frame))
+    }
+
+    /// The vertical slack the inline-axis clip leaves open on BOTH sides of
+    /// the canvas box (see `IcbClipBand`). Large enough that no composed
+    /// document can reach it (the tallest wave51-fix capture is 4232 px),
+    /// finite so the mask path's rect arithmetic stays representable — the
+    /// same number as Compose's `COMPOSED_ICB_CLIP_VERTICAL_SLACK_PX`.
+    public static let icbClipVerticalSlack: CGFloat = 1_000_000
+
+    /// wave-52 lane L2 (Fix A) — the `Shape` the composed canvas applies with
+    /// `.clipShape` to the group holding the in-flow root VStack AND both
+    /// `FixedHoistOverlay` attach points: x ∈ [frame, width − frame), y open
+    /// by `icbClipVerticalSlack` on both sides.
+    ///
+    /// ## Why only the inline axis
+    /// The ref's second viewport is `max(scrollHeight, 568)`: it never crops
+    /// the bottom, and clipping at the ICB's in-flow height would hide abspos
+    /// content the ref shows. A `Shape` (rather than `.clipped()`) is the
+    /// SwiftUI way to clip one axis: the path simply extends far past the
+    /// view's bounds on the other.
+    public struct IcbClipBand: Shape {
+        /// The image-space frame per side — the harness passes its
+        /// `ComposedCaptureCanvas.padding` (= `canvasFramePx`), never the
+        /// resolved body pad.
+        public let frame: CGFloat
+
+        /// Explicit public init — the synthesized memberwise one is internal.
+        public init(frame: CGFloat = WPTCanvas.canvasFramePx) {
+            self.frame = frame
+        }
+
+        /// The band rect in the view's own coordinate space (`rect` is the
+        /// clipped view's bounds — the full framed canvas).
+        public func path(in rect: CGRect) -> Path {
+            // The pure band over THIS view's width (tracks a width override).
+            let band = WPTCanvas.icbClipBand(canvasExtent: rect.width, frame: frame)
+            // x clipped to the band; y extended by the slack on both sides.
+            return Path(CGRect(x: rect.minX + band.minX,
+                               y: rect.minY - WPTCanvas.icbClipVerticalSlack,
+                               width: band.maxX - band.minX,
+                               height: rect.height + 2 * WPTCanvas.icbClipVerticalSlack))
+        }
+    }
+
     /// Pure canvas-background decision for the iOS capture canvases — the
     /// 1:1 twin of Compose's `captureCanvasBackground` (unit-pinned in
     /// WPTCaptureModeTests so the mode split can never silently drift).

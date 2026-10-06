@@ -748,8 +748,19 @@ enum InlineRunFlow {
             // property list is the effective-ink base for the
             // TextDecorationColor equality gate (the seam passes the
             // MERGED list, where an inherited `color` arrives).
+            // Wave 52 (lane L9) — the HANGING-WHITESPACE ring (Compose
+            // wave 50 / lane B9 ported): a FLAT member whose text is white
+            // space and nothing else paints no glyphs, which is what lets
+            // its own `white-space` and `background-color` ride the fold
+            // (InlineSpanRing.admit's glyphless arms). A member with a
+            // nested subtree is never treated this way: its glyphs live in
+            // nodes this test cannot see. Twin predicate: InlineRunFold.kt
+            // `!hasNested && text.isNotEmpty() && text.isBlank()`.
+            let glyphless = !hasNested && !(text ?? "").isEmpty
+                && (text ?? "").allSatisfy { $0.isWhitespace }
             switch InlineSpanRing.admit(tag: tag, properties: member.properties,
-                                        hostProperties: containerProperties) {
+                                        hostProperties: containerProperties,
+                                        glyphless: glyphless) {
             case .refused(let reason):
                 _ = bail("member-prop", reason)
                 return .refused

@@ -1,0 +1,84 @@
+{
+ "sideA": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/diff/base",
+ "sideB": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/diff/s4",
+ "fixtures": {
+  "compared": 2870,
+  "changed": 5,
+  "onlyA": [],
+  "onlyB": [],
+  "changedFiles": [
+   "css-cascade/import-conditional-001.json",
+   "css-cascade/import-conditional-002.json",
+   "css-cascade/important-prop.json",
+   "css-cascade/revert-val-002.json",
+   "css-gaps/flex__flex-gap-decorations-024.json"
+  ]
+ },
+ "perTestIr": {
+  "compared": 1435,
+  "changed": 5,
+  "onlyA": [],
+  "onlyB": [],
+  "changedDocs": [
+   "css-cascade/wpt__css-cascade__import-conditional-001.json",
+   "css-cascade/wpt__css-cascade__import-conditional-002.json",
+   "css-cascade/wpt__css-cascade__important-prop.json",
+   "css-cascade/wpt__css-cascade__revert-val-002.json",
+   "css-gaps/wpt__css-gaps__flex__flex-gap-decorations-024.json"
+  ],
+  "deltas": {
+   "css-cascade/wpt__css-cascade__import-conditional-001.json": {
+    "wpt__css-cascade__import-conditional-001__1-026": {
+     "BackgroundColor": {
+      "before": "{\"srgb\":{\"r\":1,\"g\":0,\"b\":0},\"original\":\"red\"}",
+      "after": "{\"srgb\":{\"r\":0,\"g\":0.5019607843137255,\"b\":0},\"original\":\"green\"}"
+     }
+    }
+   },
+   "css-cascade/wpt__css-cascade__import-conditional-002.json": {
+    "wpt__css-cascade__import-conditional-002__1-028": {
+     "BackgroundColor": {
+      "before": "{\"srgb\":{\"r\":1,\"g\":0,\"b\":0},\"original\":\"red\"}",
+      "after": "{\"srgb\":{\"r\":0,\"g\":0.5019607843137255,\"b\":0},\"original\":\"green\"}"
+     }
+    }
+   },
+   "css-cascade/wpt__css-cascade__important-prop.json": {
+    "wpt__css-cascade__important-prop__1-032": {
+     "Color": {
+      "before": "{\"srgb\":{\"r\":1,\"g\":0,\"b\":0},\"original\":\"red\"}",
+      "after": "{\"srgb\":{\"r\":0,\"g\":0,\"b\":1},\"original\":\"#00f\"}"
+     }
+    }
+   },
+   "css-cascade/wpt__css-cascade__revert-val-002.json": {
+    "revert-val-002__1__0-090": {
+     "Generic": {
+      "before": "{\"propertyName\":\"display\",\"rawValue\":\"revert\",\"_unmapped\":true}",
+      "after": "(absent)"
+     },
+     "Display": {
+      "before": "(absent)",
+      "after": "\"BLOCK\""
+     }
+    }
+   },
+   "css-gaps/wpt__css-gaps__flex__flex-gap-decorations-024.json": {
+    "wpt__css-gaps__flex__flex-gap-decorations-024__1-184": {
+     "ColumnRuleWidth": {
+      "before": "{\"type\":\"length\",\"px\":9}",
+      "after": "{\"type\":\"length\",\"px\":10}"
+     },
+     "ColumnRuleStyle": {
+      "before": "\"DOTTED\"",
+      "after": "\"SOLID\""
+     },
+     "ColumnRuleColor": {
+      "before": "{\"srgb\":{\"r\":0,\"g\":0,\"b\":1},\"original\":\"blue\"}",
+      "after": "{\"srgb\":{\"r\":1,\"g\":0.7529411764705882,\"b\":0.796078431372549},\"original\":\"pink\"}"
+     }
+    }
+   }
+  }
+ }
+}

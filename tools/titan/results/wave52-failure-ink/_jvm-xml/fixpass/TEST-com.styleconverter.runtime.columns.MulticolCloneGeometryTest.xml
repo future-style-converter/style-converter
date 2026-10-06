@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:47:05.784Z" hostname="mac-1.home" time="0.0">
+  <properties/>
+  <testcase name="K6 - bands filling the fragmentainer or a non-positive H yield null" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K5 - bottom corner radius widens the short fragment's end band" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K3 - background-image-004 - 120px content inside 20px bands clones into two full fragments" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K4 - short last fragment is its top rows plus the block-end band shifted up" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K7 - the used column count caps the list exactly like the slice table" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K1 - borders-008 - 240px content with 10px borders clones into three full 100px fragments" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K2 - background-image-007 - 600px bandless child clones into four 150px fragments" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K9 - negative inputs floor to zero and the count to one" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <testcase name="K8 - zero content is one short fragment of just the bands" classname="com.styleconverter.runtime.columns.MulticolCloneGeometryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,347 @@
+Wave 52 · lane L9 — drop-F1.patch: removes F1 (hanging-punctuation inert arm + pins) only.
+Apply on the lane's files as committed (`git apply` from the repo root); see _note.md.
+
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt
+@@ -228,9 +228,6 @@
+         // side actually paints (style keyword present; §3.2 initial none).
+         var borderStyleSeen = false
+         val losses = mutableListOf<String>()
+-        // Wave 52 (lane L9) — the member's `hanging-punctuation` keywords,
+-        // kept only to NAME the stated loss below (null = not declared).
+-        var hangingKeywords: String? = null
+         for (prop in properties) when (prop.type) {
+             // Paragraph policy — the fold's adoption walk owns it.
+             "Hyphens" -> {}
+@@ -329,31 +326,6 @@
+             // css-break-4 §5 — fragments a box paint this ring does not
+             // paint; inert alongside the border stated-loss below.
+             "BoxDecorationBreak" -> {}
+-            // ── Wave 52 (lane L9) — `hanging-punctuation` is INERT ───────
+-            // css-text-3 §8.3: the property governs whether a punctuation
+-            // glyph at the START/END of a LINE hangs outside the line box —
+-            // a line-end behaviour of the member's own glyphs, not a paint
+-            // or a paragraph policy. Neither native implements it (parse-
+-            // only: TypographyExtractor's "CSS-Text-4 long tail" list on
+-            // Compose, UnsupportedRubyEmphasisExtractor on iOS), so the
+-            // STACKED block the wave-44 refusal produced — the member on
+-            // its own line, in the default ink — is less faithful than a
+-            // folded line that merely does not hang: the folded `」` keeps
+-            // its inherited ink and obeys UAX #14 LB13 (no break before a
+-            // closing bracket), exactly as web — which does not hang either
+-            // — paints it (`字字字` / `字」`, css-text/hanging-punctuation/
+-            // hanging-punctuation-inline-001 web P 0.9849). HONEST SCORE
+-            // NOTE: the ref HANGS the bracket (one line), and the lane's PNG
+-            // replay predicts the folded shape scores LOWER than the
+-            // stacked one on both natives (android 0.9495 → ≈0.945 f, ios
+-            // 0.9756 → ≈0.969 P — tools/titan/results/wave52-inline-run-
+-            // wall/replay.json): a correctness change, not a flip, gated by
+-            // the device A/B. The keyword list is kept so the un-hung
+-            // punctuation is a STATED loss in the seam's log (repo
+-            // no-silent-fallthrough), never a silent drop.
+-            "HangingPunctuation" -> {
+-                hangingKeywords = extractHangingKeywords(prop.data)
+-            }
+             // The border box — a stated loss, not a refusal (banner).
+             in BORDER_LOSS_TYPES -> {
+                 if (prop.type.endsWith("Style")) borderStyleSeen = true
+@@ -372,12 +344,7 @@
+         if (tag in UA_SHIFT_TAGS && !declaredFontSize) sizeEm = 1f / 1.2f
+         // A styleless border never paints (css-backgrounds-3 §3.2) — only
+         // report the loss when a style keyword makes the box real.
+-        val stated = buildList {
+-            if (borderStyleSeen) add("border-box-ink(${losses.joinToString(",")})")
+-            // Wave 52 (lane L9): the un-hung punctuation, named per keyword
+-            // so logcat can tell `first` from `last` (css-text-3 §8.3).
+-            hangingKeywords?.let { add("hanging-punctuation($it)") }
+-        }
++        val stated = if (borderStyleSeen) listOf("border-box-ink(${losses.joinToString(",")})") else emptyList()
+         return Admission.Admitted(
+             Style(ink, sizePx, sizeEm, weight, italic, underline, lineThrough, shift, background),
+             stated,
+@@ -567,19 +534,6 @@
+      *  keyword-object shapes), for FontStyle / TextDecorationStyle. */
+     private fun extractKeywordish(data: kotlinx.serialization.json.JsonElement): String? =
+         ValueExtractors.extractKeyword(data)?.lowercase()
+-
+-    /** Wave 52 (lane L9) — the HangingPunctuation wire: a JsonArray of
+-     *  keywords (`["LAST"]`, `["FIRST","ALLOW_END"]`, css-text-3 §8.3) or
+-     *  one bare keyword (`"none"`), lowercased and comma-joined for the
+-     *  stated-loss label. Never refuses: the wire is what the converter
+-     *  emitted for a parse-only property, and an unreadable shape simply
+-     *  names the loss without keywords (the label is diagnostic only). */
+-    private fun extractHangingKeywords(data: kotlinx.serialization.json.JsonElement): String =
+-        when (data) {
+-            is JsonArray -> data.mapNotNull { (it as? JsonPrimitive)?.contentOrNull?.lowercase() }
+-                .joinToString(",")
+-            else -> ValueExtractors.extractKeyword(data)?.lowercase() ?: ""
+-        }
+ 
+     /** TextDecorationLine wire: a JsonArray of keywords or one bare
+      *  keyword — normalized lowercase with the wire's LINE_THROUGH
+diff --git a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift
+@@ -192,9 +192,6 @@
+         // makes any side real (§3.2 initial `none` paints nothing).
+         var borderStyleSeen = false
+         var losses: [String] = []
+-        // Wave 52 (lane L9) — the member's `hanging-punctuation` keywords,
+-        // kept only to NAME the stated loss below (nil = not declared).
+-        var hangingKeywords: String? = nil
+         for prop in properties {
+             switch prop.type {
+             // Paragraph policy — the fold's adoption walk owns it.
+@@ -304,29 +301,6 @@
+                     return .refused("member-prop:BackgroundColor-unresolved")
+                 }
+                 style.background = band
+-            // ── Wave 52 (lane L9) — `hanging-punctuation` is INERT ───────
+-            // css-text-3 §8.3: the property governs whether a punctuation
+-            // glyph at the START/END of a LINE hangs outside the line box —
+-            // a line-end behaviour of the member's own glyphs, not a paint
+-            // or a paragraph policy. Neither native implements it (parse-
+-            // only: UnsupportedRubyEmphasisExtractor here, TypographyExtractor's
+-            // long-tail list on Compose), so the STACKED block the wave-44
+-            // refusal produced — the member on its own line, in the default
+-            // ink — is less faithful than a folded line that merely does not
+-            // hang: the folded `」` keeps its inherited ink and obeys UAX #14
+-            // LB13 (no break before a closing bracket), exactly as web —
+-            // which does not hang either — paints it (`字字字` / `字」`,
+-            // css-text/hanging-punctuation/hanging-punctuation-inline-001
+-            // web P 0.9849). HONEST SCORE NOTE: the ref HANGS the bracket
+-            // (one line), and the lane's PNG replay predicts the folded
+-            // shape scores LOWER than the stacked one on both natives (ios
+-            // 0.9756 → ≈0.969 P, android 0.9495 → ≈0.945 f — tools/titan/
+-            // results/wave52-inline-run-wall/replay.json): a correctness
+-            // change, not a flip, gated by the device A/B. The keyword list
+-            // is kept so the un-hung punctuation is a STATED loss in the
+-            // seam's breadcrumb, never a silent drop.
+-            case "HangingPunctuation":
+-                hangingKeywords = extractHangingKeywords(prop.data)
+             // css-break-4 §5 — fragments a box paint this ring does not
+             // paint; inert alongside the border stated-loss below.
+             case "BoxDecorationBreak":
+@@ -350,10 +324,7 @@
+         // `smaller` factor — unless the author declared a size (§6.1).
+         if uaShiftTags.contains(tag), !declaredFontSize { style.fontSizeEm = 1.0 / 1.2 }
+         // A styleless border never paints — only report a REAL box.
+-        var stated: [String] = borderStyleSeen ? ["border-box-ink(\(losses.joined(separator: ",")))"] : []
+-        // Wave 52 (lane L9): the un-hung punctuation, named per keyword so
+-        // the breadcrumb can tell `first` from `last` (css-text-3 §8.3).
+-        if let hangingKeywords { stated.append("hanging-punctuation(\(hangingKeywords))") }
++        let stated = borderStyleSeen ? ["border-box-ink(\(losses.joined(separator: ",")))"] : []
+         return .admitted(style, statedLossTypes: stated)
+     }
+ 
+@@ -535,23 +506,6 @@
+         return ValueExtractors.extractKeyword(data).map { [canon($0)] }
+     }
+ 
+-    /// Wave 52 (lane L9) — the HangingPunctuation wire: an array of
+-    /// keywords (`["LAST"]`, `["FIRST","ALLOW_END"]`, css-text-3 §8.3) or
+-    /// one bare keyword (`"none"`), lowercased and comma-joined for the
+-    /// stated-loss label. Never refuses: the wire is what the converter
+-    /// emitted for a parse-only property, and an unreadable shape simply
+-    /// names the loss without keywords (the label is diagnostic only).
+-    /// Twin: InlineSpanRing.kt `extractHangingKeywords`.
+-    private static func extractHangingKeywords(_ data: IRValue) -> String {
+-        if case .array(let items) = data {
+-            return items.compactMap { item -> String? in
+-                guard case .string(let s) = item else { return nil }
+-                return s.lowercased()
+-            }.joined(separator: ",")
+-        }
+-        return ValueExtractors.extractKeyword(data)?.lowercased() ?? ""
+-    }
+-
+     /// Map span offsets from the fold's MERGED string into the label's
+     /// final display string. Between the two, the label's only
+     /// character-level rewrites are (verified against the actual surgery
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/inline/InlineRunFoldTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/inline/InlineRunFoldTest.kt
+--- a/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/inline/InlineRunFoldTest.kt
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/typography/inline/InlineRunFoldTest.kt
+@@ -815,83 +815,6 @@
+     /** block-ellipsis-032's first clamp box, verbatim (minified). */
+     private val BLOCK_ELLIPSIS_032 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116","name":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1","properties":[{"type":"LineClamp","data":{"type":"lines","count":1}},{"type":"BorderTopWidth","data":{"px":1}},{"type":"BorderRightWidth","data":{"px":1}},{"type":"BorderBottomWidth","data":{"px":1}},{"type":"BorderLeftWidth","data":{"px":1}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"FontFamily","data":["monospace"]},{"type":"MarginBottom","data":{"original":{"v":1,"u":"EM"}}},{"type":"Width","data":{"type":"length","original":{"v":29,"u":"CH"}}}],"text":"This text is Clamped","meta":{"role":"ws-after","runs":[{"text":"This text is "},{"child":"line-clamp__block-ellipsis-032.tentative__1__0"},{"child":"line-clamp__block-ellipsis-032.tentative__1__1"},{"text":"Clamped"}]}},{"id":"line-clamp__block-ellipsis-032.tentative__1__0-117","name":"line-clamp__block-ellipsis-032.tentative__1__0","properties":[{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"FontWeight","data":{"weight":700,"original":"bold"}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116"},"text":"left-aligned","meta":{"sourceTag":"span"}},{"id":"line-clamp__block-ellipsis-032.tentative__1__1-118","name":"line-clamp__block-ellipsis-032.tentative__1__1","properties":[{"type":"WhiteSpace","data":"PRE_WRAP"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116"},"text":"        ","meta":{"sourceTag":"span"}}]}"""
+ 
+-    // ── Wave 52 (lane L9) — `hanging-punctuation` is an INERT member prop ──
+-    //
+-    // MUTATION PROOF (executed 2026-10-05, lane L9, mutate.py M1 —
+-    // tools/titan/results/wave52-inline-run-wall/mutations-compose.result
+-    // .json): with the `"HangingPunctuation" ->` arm removed from
+-    // InlineSpanRing.admit both tests below fail (the fold bails with
+-    // `member-prop:HangingPunctuation`, the ring refuses with it); the arm
+-    // restored byte-exact (sha256-verified), both pass.
+-
+-    @Test
+-    fun `hanging-punctuation-inline-001 - the LAST span folds onto the line as a plain member`() {
+-        // css-text/hanging-punctuation/hanging-punctuation-inline-001,
+-        // VERBATIM off wave51-fix/sections/css-text/per-test-ir (the whole
+-        // document — roots [0] instruction <p>, [1] the blue reference div,
+-        // [2] the orange 4em runs host + its `<span>` member). The member's
+-        // ONE property is `HangingPunctuation=["LAST"]`, which the wave-44
+-        // gate refused (`member-prop:HangingPunctuation`) — so the `」` was
+-        // rendered as its OWN stacked block in the default ink (android-ref
+-        // 0.9495 f: a separate black line under the orange `字字字字`; ios
+-        // P 0.9756 with the same wrong render). css-text-3 §8.3 makes the
+-        // property a line-end behaviour of the glyph, unimplemented on both
+-        // natives, so the folded line is strictly more faithful.
+-        val host = root(HANGING_PUNCTUATION_INLINE_001, 2)
+-        val outcome = foldOf(host)
+-        assertTrue("the hanging-punctuation member must fold: $outcome", outcome is InlineRunFold.Outcome.Folded)
+-        val folded = outcome as InlineRunFold.Outcome.Folded
+-        // ONE paragraph: the four ideographs and the closing bracket — the
+-        // exact glyphs of the blue reference div above it, which the ref
+-        // paints identically (the test's own pass condition).
+-        assertEquals("字字字字」", folded.text)
+-        // The member carries NO paint attribution (plain style) but the ring
+-        // NAMES the un-hung punctuation as a stated loss, so the seam logs
+-        // it — one span records exactly that, over the `」` alone.
+-        assertEquals(1, folded.spans.size)
+-        val span = folded.spans[0]
+-        assertTrue("the member paints nothing of its own", span.style.isPlain)
+-        assertEquals(listOf("hanging-punctuation(last)"), span.statedLossTypes)
+-        assertEquals(4, span.start)
+-        assertEquals(5, span.end)
+-        // Nothing else changed hands: no member hyphens, no dropped empties.
+-        assertEquals(0, folded.droppedEmptyMembers)
+-    }
+-
+-    @Test
+-    fun `hanging-punctuation is admitted as inert on any glyph member, keywords named`() {
+-        // The ring's own verdict, independent of the fold: the property
+-        // never refuses, paints nothing, and the loss label carries the
+-        // wire keywords lowercased (`first`/`last`/`allow-end`/`force-end`,
+-        // css-text-3 §8.3) so logcat can tell the variants apart.
+-        val last = listOf(IRProperty("HangingPunctuation", Json.parseToJsonElement("""["LAST"]""")))
+-        assertEquals(
+-            InlineSpanRing.Admission.Admitted(InlineSpanRing.PLAIN, listOf("hanging-punctuation(last)")),
+-            InlineSpanRing.admit("span", last, emptyList()),
+-        )
+-        val both = listOf(IRProperty("HangingPunctuation", Json.parseToJsonElement("""["FIRST","ALLOW_END"]""")))
+-        assertEquals(
+-            InlineSpanRing.Admission.Admitted(InlineSpanRing.PLAIN, listOf("hanging-punctuation(first,allow_end)")),
+-            InlineSpanRing.admit("span", both, emptyList()),
+-        )
+-        // A bare `none` keyword is the initial value — still inert, still named.
+-        val none = listOf(IRProperty("HangingPunctuation", JsonPrimitive("none")))
+-        assertEquals(
+-            InlineSpanRing.Admission.Admitted(InlineSpanRing.PLAIN, listOf("hanging-punctuation(none)")),
+-            InlineSpanRing.admit("span", none, emptyList()),
+-        )
+-        // The stated loss composes with the border loss (one entry each).
+-        val bordered = last + listOf(
+-            IRProperty("BorderTopStyle", JsonPrimitive("SOLID")),
+-            IRProperty("BorderTopWidth", Json.parseToJsonElement("""{"px":1}""")),
+-        )
+-        val admitted = InlineSpanRing.admit("span", bordered, emptyList()) as InlineSpanRing.Admission.Admitted
+-        assertEquals(
+-            listOf("border-box-ink(BorderTopStyle,BorderTopWidth)", "hanging-punctuation(last)"),
+-            admitted.statedLossTypes,
+-        )
+-    }
+-
+     // ── Wave 52 (lane L9, F4) — the clamp's hidden tail in the alignment ──
+     //
+     // MUTATION PROOF (executed 2026-10-05, lane L9, mutate.py M8 —
+@@ -939,7 +862,4 @@
+         assertNull(InlineSpanRing.alignment("abc", "ABC"))
+     }
+ 
+-    /** hanging-punctuation-inline-001, the whole document, verbatim (minified). */
+-    private val HANGING_PUNCTUATION_INLINE_001 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__0-164","name":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__0","properties":[],"text":"Test passes if the orange and blue pieces of text are laid out identically.","meta":{"sourceTag":"p","lang":"en"}},{"id":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__1-165","name":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__1","properties":[{"type":"FontSize","data":{"original":{"type":"length","original":{"v":2,"u":"EM"}}}},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}}],"text":"字字字字」","meta":{"role":"ws-after","lang":"en"}},{"id":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2-166","name":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2","properties":[{"type":"FontSize","data":{"original":{"type":"length","original":{"v":2,"u":"EM"}}}},{"type":"Width","data":{"type":"length","original":{"v":4,"u":"EM"}}},{"type":"Color","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}}],"text":"字字字字","meta":{"lang":"en","runs":[{"text":"字字字字"},{"child":"hanging-punctuation__hanging-punctuation-inline-001__2__0"}]}},{"id":"hanging-punctuation__hanging-punctuation-inline-001__2__0-167","name":"hanging-punctuation__hanging-punctuation-inline-001__2__0","properties":[{"type":"HangingPunctuation","data":["LAST"]}],"slot":{"parent":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2-166"},"text":"」","meta":{"sourceTag":"span","lang":"en"}}]}"""
+-
+ }
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineSpanRingTests.swift
+@@ -260,41 +260,6 @@
+         }
+     }
+ 
+-    // MARK: - Wave 52 (lane L9): `hanging-punctuation` is an inert member prop
+-    //
+-    // MUTATION PROOF (executed 2026-10-05, lane L9, Catalyst, mutate.py S1
+-    // — mutations-swift.result.json): with the `case "HangingPunctuation":`
+-    // arm removed, this pin and InlineRunFlowTests' hanging-punctuation-
+-    // inline-001 wire fold fail (`member-prop:HangingPunctuation` returned
+-    // / the fold refused). Restored byte-exact (sha256-verified).
+-
+-    func testHangingPunctuationIsAdmittedInertWithItsKeywordsNamed() {
+-        // hanging-punctuation-inline-001's `<span>` payload, verbatim shape
+-        // (`HangingPunctuation=["LAST"]`). css-text-3 §8.3: a line-end
+-        // behaviour of the glyph, unimplemented on iOS (parse-only), so the
+-        // member folds PLAIN and the un-hung punctuation is a STATED loss
+-        // the seam's breadcrumb names.
+-        let last = InlineSpanRing.admit(
+-            tag: "span",
+-            properties: [IRProperty(type: "HangingPunctuation", data: .array([.string("LAST")]))],
+-            hostProperties: [])
+-        guard let (style, losses) = admitted(last) else { return }
+-        XCTAssertTrue(style.isPlain)
+-        XCTAssertEqual(losses, ["hanging-punctuation(last)"])
+-        // Multi-keyword and bare-keyword wires name every keyword.
+-        let both = InlineSpanRing.admit(
+-            tag: "span",
+-            properties: [IRProperty(type: "HangingPunctuation",
+-                                    data: .array([.string("FIRST"), .string("ALLOW_END")]))],
+-            hostProperties: [])
+-        XCTAssertEqual(admitted(both)?.1, ["hanging-punctuation(first,allow_end)"])
+-        let none = InlineSpanRing.admit(
+-            tag: "span",
+-            properties: [IRProperty(type: "HangingPunctuation", data: .string("none"))],
+-            hostProperties: [])
+-        XCTAssertEqual(admitted(none)?.1, ["hanging-punctuation(none)"])
+-    }
+-
+     // MARK: - Wave 48 (lane W4): the UA-styled tag rings
+ 
+     func testSupAndSubSeedSmallerAndTheirVerticalShifts() {
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/InlineRunFlowTests.swift
+@@ -953,42 +953,4 @@
+         XCTAssertNil(band?.style.ink)
+         XCTAssertEqual(folded?.droppedEmptyMembers, 0)
+     }
+-
+-    func testHangingPunctuationInline001FoldsTheClosingBracketOntoTheLine() {
+-        // css-text/hanging-punctuation/hanging-punctuation-inline-001's
+-        // runs host, VERBATIM off wave51-fix/sections/css-text/per-test-ir:
+-        // runs [text "字字字字", child span], the span's ONE property
+-        // `HangingPunctuation=["LAST"]` over `」`. The wave-44 refusal
+-        // (`member-prop:HangingPunctuation`) stacked the bracket as its own
+-        // block in the default ink (ios P 0.9756 on that wrong render,
+-        // android f 0.9495); css-text-3 §8.3 makes the property a line-end
+-        // behaviour neither native implements, so the folded line — the
+-        // blue reference div's exact glyphs — is what the test asks for.
+-        let span = member("hanging-punctuation__hanging-punctuation-inline-001__2__0",
+-                          text: "」",
+-                          props: [IRProperty(type: "HangingPunctuation", data: .array([.string("LAST")]))],
+-                          lang: "en")
+-        let host: [IRProperty] = [
+-            IRProperty(type: "FontSize", data: .object(["original": .object([
+-                "type": .string("length"), "original": .object(["v": .int(2), "u": .string("EM")])])])),
+-            IRProperty(type: "Width", data: .object(["type": .string("length"),
+-                                                     "original": .object(["v": .int(4), "u": .string("EM")])])),
+-            IRProperty(type: "Color", data: .object(["srgb": .object(["r": .int(1), "g": .double(0.6470588235294118), "b": .int(0)]),
+-                                                     "original": .string("orange")])),
+-        ]
+-        let folded = InlineRunFlow.fold(
+-            runs: [IRRun(text: "字字字字"),
+-                   IRRun(child: "hanging-punctuation__hanging-punctuation-inline-001__2__0")],
+-            children: [span], totalChildCount: 1, containerProperties: host,
+-            containerLang: "en")
+-        XCTAssertEqual(folded?.text, "字字字字」")
+-        // A PLAIN member with a stated loss still records one span, so the
+-        // seam's breadcrumb can name the un-hung punctuation.
+-        XCTAssertEqual(folded?.spans.count, 1)
+-        XCTAssertEqual(folded?.spans.first?.style.isPlain, true)
+-        XCTAssertEqual(folded?.spans.first?.statedLossTypes, ["hanging-punctuation(last)"])
+-        XCTAssertEqual(folded?.spans.first?.start, 4)
+-        XCTAssertEqual(folded?.spans.first?.end, 5)
+-        XCTAssertEqual(folded?.droppedEmptyMembers, 0)
+-    }
+ }

@@ -1,0 +1,253 @@
+{
+ "tests": 1435,
+ "found": 1435,
+ "important": [
+  {
+   "t": "css/css-cascade/important-prop.html",
+   "count": 2,
+   "inAttr": false
+  },
+  {
+   "t": "css/css-cascade/layer-slotted-rule.html",
+   "count": 2,
+   "inAttr": false
+  },
+  {
+   "t": "css/css-cascade/revert-layer-005.html",
+   "count": 3,
+   "inAttr": false
+  },
+  {
+   "t": "css/css-cascade/revert-layer-012.html",
+   "count": 3,
+   "inAttr": true
+  },
+  {
+   "t": "css/css-cascade/revert-val-002.html",
+   "count": 1,
+   "inAttr": false
+  },
+  {
+   "t": "css/css-gaps/flex/flex-gap-decorations-024.html",
+   "count": 1,
+   "inAttr": false
+  },
+  {
+   "t": "css/css-position/overlay/author-overlay-top-layer-removal.html",
+   "count": 1,
+   "inAttr": false
+  },
+  {
+   "t": "css/css-position/overlay/overlay-button-appearance.html",
+   "count": 1,
+   "inAttr": false
+  },
+  {
+   "t": "css/css-text-decor/text-decoration-line.html",
+   "count": 6,
+   "inAttr": true
+  },
+  {
+   "t": "css/selectors/i18n/lang-pseudo-class-across-shadow-boundaries.html",
+   "count": 1,
+   "inAttr": false
+  }
+ ],
+ "twins": [
+  {
+   "t": "css/css-cascade/important-prop.html",
+   "prop": "border-color",
+   "order": "nI"
+  },
+  {
+   "t": "css/css-cascade/revert-layer-005.html",
+   "prop": "background-color",
+   "order": "nII"
+  },
+  {
+   "t": "css/css-cascade/revert-layer-005.html",
+   "prop": "background-color",
+   "order": "nI"
+  }
+ ],
+ "dataSemicolon": [
+  {
+   "t": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "hits": [
+    "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/"
+   ]
+  },
+  {
+   "t": "css/css-pseudo/first-letter-background-image.html",
+   "hits": [
+    "url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M/"
+   ]
+  }
+ ],
+ "parenSemi": [
+  {
+   "t": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "hits": [
+    "(';\n  suffix: ')"
+   ]
+  },
+  {
+   "t": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "hits": [
+    "('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4"
+   ]
+  },
+  {
+   "t": "css/css-pseudo/first-letter-background-image.html",
+   "hits": [
+    "('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR4"
+   ]
+  }
+ ],
+ "strSemi": [
+  {
+   "t": "css/css-anchor-position/anchor-position-multicol-002.html",
+   "hits": [
+    ": \"\";\n  background: green;\n}\n.target.inner.all::before {\n  width: 100%;\n  height"
+   ]
+  },
+  {
+   "t": "css/css-backgrounds/animations/background-color-animation-with-images.html",
+   "hits": [
+    ": url(\"../support/green.png\"), url(\"../support/red.png\");\n  background-size: 100",
+    ": url(\"../support/green.png\"), url(\"../support/red.png\");\n  animation: transpare"
+   ]
+  },
+  {
+   "t": "css/css-cascade/scope-pseudo-element.html",
+   "hits": [
+    ": \"B\";\n      width: 20px;\n      height: 20px;\n      display: inline-block;\n     "
+   ]
+  },
+  {
+   "t": "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html",
+   "hits": [
+    ": 3 '0';\n  }\n  @counter-style custom-style {\n    system: cyclic;\n    symbols: \\2",
+    ": counters(a, '', Decimal-leading-Zero); }\n  #counters-c::before { content: coun"
+   ]
+  },
+  {
+   "t": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+   "hits": [
+    ": '(';\n  suffix: '"
+   ]
+  },
+  {
+   "t": "css/css-display/display-contents-before-after-001.html",
+   "hits": [
+    ": \"kern\" off; }\n    div { display: contents }\n    .p::before { content: \""
+   ]
+  },
+  {
+   "t": "css/css-display/display-contents-before-after-002.html",
+   "hits": [
+    ": \"kern\" off; }\n    div::before {\n        display: contents;\n        border: 100"
+   ]
+  },
+  {
+   "t": "css/css-display/display-contents-before-after-003.html",
+   "hits": [
+    ": \"kern\" off; }\n    .flex { display: inline-flex; flex-direction: column }\n    ."
+   ]
+  },
+  {
+   "t": "css/css-display/display-contents-button.html",
+   "hits": [
+    ": \"kern\" off; }\n  button {\n    all: initial;\n    font-kerning: none; font-featur"
+   ]
+  },
+  {
+   "t": "css/css-display/display-contents-dynamic-pseudo-insertion-001.html",
+   "hits": [
+    ": \"A\";\n}\n.contents::after {\n  content: \""
+   ]
+  },
+  {
+   "t": "css/css-display/display-contents-fieldset-002.html",
+   "hits": [
+    ":\"legend\"; }\n.test2 legend.static, .test3 legend.static { display:block; }\n.test",
+    ":\"::after\"; }\n.before::before { content:\""
+   ]
+  },
+  {
+   "t": "css/css-lists/counter-list-item.html",
+   "hits": [
+    ": counter(list-item) \" \";\n}\nli:after {\n    content: \""
+   ]
+  },
+  {
+   "t": "css/css-lists/counter-reset-reversed-pseudo-001.html",
+   "hits": [
+    ": \"B\" counter(foo);\n}\n.item::after {\n  counter-increment: foo -2;\n  content: \""
+   ]
+  },
+  {
+   "t": "css/css-lists/counter-reset-reversed-pseudo-003.html",
+   "hits": [
+    ": \"B\" counter(foo);\n}\n.item::after {\n  counter-increment: foo -3;\n  content: \""
+   ]
+  },
+  {
+   "t": "css/css-masking/clip-path/animations/clip-path-path-interpolation-with-zoom.html",
+   "hits": [
+    ": path(nonzero, 'M20,20h60 v60 h-60z M30,30 h40 v40 h-40z');\n      }\n      to {\n"
+   ]
+  },
+  {
+   "t": "css/css-pseudo/before-as-flex-container.html",
+   "hits": [
+    ": \"A B\"; /* Two \""
+   ]
+  },
+  {
+   "t": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "hits": [
+    ": url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUl"
+   ]
+  },
+  {
+   "t": "css/css-pseudo/first-letter-background-image.html",
+   "hits": [
+    ": url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUl"
+   ]
+  },
+  {
+   "t": "css/css-pseudo/first-line-and-marker.html",
+   "hits": [
+    ": \"2. \";\n}\n.content::marker {\n  content: \""
+   ]
+  },
+  {
+   "t": "css/css-values/attr-notype-fallback.html",
+   "hits": [
+    ": attr(does-not-exist, \"Fallback value\");\n  }\n\n  #two::after {\n    content: attr",
+    ": attr(does-exist, \"Fallback value\");\n  }\n\n  #six::after {\n    content: attr(doe"
+   ]
+  }
+ ],
+ "sciAngle": [],
+ "layered": [
+  "css/css-cascade/layer-media-toggle.html",
+  "css/css-cascade/layer-slotted-rule.html",
+  "css/css-cascade/revert-layer-001.html",
+  "css/css-cascade/revert-layer-002.html",
+  "css/css-cascade/revert-layer-003.html",
+  "css/css-cascade/revert-layer-004.html",
+  "css/css-cascade/revert-layer-005.html",
+  "css/css-cascade/revert-layer-006.html",
+  "css/css-cascade/revert-layer-007.html",
+  "css/css-cascade/revert-layer-009.html",
+  "css/css-cascade/revert-layer-010.html",
+  "css/css-cascade/revert-layer-012.html",
+  "css/css-cascade/revert-layer-013.html",
+  "css/css-cascade/revert-layer-014.html",
+  "css/css-cascade/revert-layer-015.html"
+ ],
+ "layeredInvalid": [],
+ "missing": []
+}

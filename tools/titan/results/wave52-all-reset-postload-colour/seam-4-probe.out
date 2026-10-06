@@ -1,0 +1,9 @@
+harness                      ok   ATC_AllThenProps                 fill=[46,204,113] box=[160,60] expect=[160,60]
+harness                      ok   ATC_PropsThenAll_InGreenParent   fill=[46,204,113] box=[160,60] expect=[160,60]
+harness                      ok   ATC_InitialUnderRedParent        fill=[46,204,113] box=[200,60] expect=[200,60]
+harness                      ok   ATC_DirectionSurvives            fill=[46,204,113] box=[200,40] expect=[200,40]
+harness_M2_displayBeforeAll  FAIL ATC_AllThenProps                 fill=[175,175,181] box=[0,0] expect=[160,60]
+harness_M2_displayBeforeAll  ok   ATC_PropsThenAll_InGreenParent   fill=[46,204,113] box=[160,60] expect=[160,60]
+harness_M2_displayBeforeAll  FAIL ATC_InitialUnderRedParent        fill=[52,152,219] box=[0,0] expect=[200,60]
+harness_M2_displayBeforeAll  FAIL ATC_DirectionSurvives            fill=[255,255,255] box=[0,0] expect=[200,40]
+PROBE OK {"harness":{"violations":[],"green":true},"harness_M2_displayBeforeAll":{"violations":["ATC_AllThenProps","ATC_InitialUnderRedParent","ATC_DirectionSurvives"],"caught":true}}

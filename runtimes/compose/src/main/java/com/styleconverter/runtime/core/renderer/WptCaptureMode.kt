@@ -216,6 +216,68 @@ fun composedIcbExtentDp(canvasExtentDp: Float, frameDp: Float = WPT_CANVAS_FRAME
     maxOf(0f, canvasExtentDp - 2f * frameDp)
 
 /**
+ * wave-52 lane L2 (Fix A) — the composed canvas's INLINE-AXIS CLIP BAND, in
+ * the caller's px: the two x-edges between which composed content may paint,
+ * i.e. the ICB's left and right padding edges (16 and 374 on the 390 canvas).
+ *
+ * ## Why the canvas needs a clip at the ICB edge
+ * The browser-ref is RENDERED in a 358-px viewport and padded in image space
+ * (`tools/titan/capture-browser-ref.mjs` REF_RENDER_WIDTH / padPngBuffer), so
+ * anything laid out past content x=358 is scrollable overflow outside the
+ * viewport and is never in the PNG — the frame columns 0..15 / 374..389 are
+ * always the pad colour by construction. Compose's composed canvas had no
+ * clip at all on that box (only the per-root `clip-path` branch clips), so a
+ * `width: 400px` container (css-gaps/flex/flex-gap-decorations-040) painted
+ * across the right frame to x=389 — a 16x104 band that was the cell's whole
+ * 1664-px mismatch, identical on web/iOS/Android. wave51-fix frame-ink
+ * census: 208 overrun-right + 84 overrun-left scored cells.
+ *
+ * ## Why this is the FRAME and not the resolved body pad
+ * CSS 2.1 §9.1.1: the initial containing block has the viewport's
+ * dimensions, and the ref's viewport IS the 358-px content canvas. An author
+ * `body { padding: 40px }` insets the body's CONTENT inside that viewport but
+ * moves neither the viewport nor its crop — so the band is derived from the
+ * unconditional image-space frame ([WPT_CANVAS_FRAME_DP]) alone, never from
+ * the harness's `resolveComposedCanvasPadding` sum (ComposedIcbClipTest pins
+ * that a 56-px resolved pad still yields 16/374).
+ *
+ * ## Why only the inline axis
+ * The ref's second viewport is `max(scrollHeight, 568)`: it never crops the
+ * bottom, and clipping at the ICB's in-flow height would hide abspos content
+ * the ref shows. The harness therefore clips x∈[left, right) and leaves y
+ * open by [COMPOSED_ICB_CLIP_VERTICAL_SLACK_PX] on both sides (a finite
+ * number, because a ±Float.MAX_VALUE rect overflows Skia's width arithmetic).
+ *
+ * Pure so the geometry is JVM-pinnable (the Modifier itself is not — same
+ * constraint RootCanvasClipTest states); clamped so a degenerate narrow
+ * canvas can never produce an inverted band. Twin: SwiftUI
+ * `WPTCanvas.icbClipBand`; web puts `overflow-x: clip` on the ICB div, whose
+ * padding edge IS this band.
+ *
+ * @param canvasExtentPx the outer capture-canvas width in the caller's px
+ *   (390 at the default; `CAPTURE_WIDTH` can override it).
+ * @param framePx the image-space frame per side in the SAME px — the
+ *   harness passes its `CaptureCanvasFrame` converted through the density.
+ */
+data class ComposedIcbClipBand(val leftPx: Float, val rightPx: Float)
+
+/** See [ComposedIcbClipBand]: `[frame, extent − frame)`, right never below left. */
+fun composedIcbClipBandPx(canvasExtentPx: Float, framePx: Float): ComposedIcbClipBand =
+    // Left edge = the frame; right edge = the canvas minus the frame, floored
+    // at the left edge so a pathological override yields an empty band, not
+    // an inverted one.
+    ComposedIcbClipBand(leftPx = framePx, rightPx = maxOf(framePx, canvasExtentPx - framePx))
+
+/**
+ * The vertical slack the composed canvas's inline-axis clip leaves open on
+ * BOTH sides of the canvas box (see [composedIcbClipBandPx] "Why only the
+ * inline axis"). Large enough that no composed document can reach it
+ * (the tallest wave51-fix capture is 4232 px), finite so the clip rect's
+ * width/height arithmetic stays representable.
+ */
+const val COMPOSED_ICB_CLIP_VERTICAL_SLACK_PX: Float = 1_000_000f
+
+/**
  * Pure canvas-background decision for the Android capture canvases —
  * extracted (same pattern as [shouldSuppressSynthesizedName]) so the exact
  * mode split is unit-testable on the JVM without a Compose runtime.

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:53:13.737Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="the run pass bails at a single used column" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.001"/>
+  <testcase name="the vertical-rl multicol IR shape flags the bail and keeps fill auto" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.0"/>
+  <testcase name="duplicate continue declarations take the last one - auto then discard" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.0"/>
+  <testcase name="at one used column the bail also un-discards continue-discard content - documented caveat" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.0"/>
+  <testcase name="the run pass declares and honours fragmentationAllowed" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.0"/>
+  <testcase name="an inherited vertical writing mode reaches the same flag" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.001"/>
+  <testcase name="at one used column the run plan clips the tail away instead of overflowing" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.0"/>
+  <testcase name="the applier threads the flag into the run pass it calls first" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.0"/>
+  <testcase name="duplicate continue declarations take the last one - discard then auto" classname="com.styleconverter.runtime.columns.MulticolRunFragmentGateTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,120 @@
+wave-52 lane L5 (extractor-cascade) — seam-6-FE-li
+
+F-E (web-tail) = T6 (counters-and-multicol) — LIST_ITEM_TAGS {li, summary} exempt from the 100x100 empty-node placeholder (css-lists-3 §2/§3).
+
+*** LANDING COUPLING — READ FIRST (skeptic D1, fix pass 2026-10-05) ***
+Land this patch in the SAME step (same PR, same gate) as lane L6's
+  tools/titan/results/wave52-counters-and-lists/seam-3.patch (Compose) and seam-4.patch (Swift)
+together with the L6-owned files they need (lists/ListMarkerEmptyItem.kt / .swift and their tests) — or AFTER them.
+NEVER before them, never without them; if L6's pair is dropped or reverted, withhold this patch too.
+Why: after F-E the 51 cssom <li> reach the wire EMPTY; at HEAD both native runtimes paint an empty inside item's marker
+in a zero-size overlay, so a list's three markers stack on ONE band (L6 Catalyst raster: [(16, 28)] — seam-4.verify.log).
+Replayed with the gate's scorer (fe-native-replay.json): all 18 native cells that PASS in wave51-fix (additive, fallback,
+name, range ×2 each + symbols-invalid, on ios and android) go P → f on the coverage-ratio veto (ink ratio 2.22–2.87 > 2);
+with L6's seam-3/seam-4 the same 18 stay P (ratio 1.20–1.43, SSIM 0.976–0.989 → 0.986–0.994). Web is unaffected (11/11 P stay P).
+PLAN §4 puts L5 at step 3 and L6 at step 5: apply seam-1…seam-5 at step 3 (their pins are in the tree's test file and are
+green with seam-1…5 alone), and THIS patch at step 5 with L6's pair.
+
+This patch touches TWO files: the extractor exemption, and the F-E pin appended to tools/titan/extract-fixture.test.mjs
+(mutations M24/M25), so the pin is never in a tree without the exemption.
+Applies on: HEAD 7d9c22a7 (tools/titan/extract-fixture.mjs blob 104ef672) with, applied first IN ORDER: seam-1-F3-oracle-filter.patch
+seam-2-F1-importance.patch seam-3-FD-specificity.patch seam-4-F2-splitter.patch seam-5-FC-colormix.patch; and on L5's committed
+tools/titan/extract-fixture.test.mjs (blob e8b95f1, the tree's file). L1's comment-only hunk-for-L5-1.patch and L11's seam-3.patch
+may be applied before or after this one (both orders checked).
+Only L5 patches the extractor's L5 regions this wave. Verification record: tools/titan/results/wave52-extractor-cascade/_note.md.
+
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index 6e39ebf..3c14673 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -5054,6 +5054,19 @@ export const INTRINSIC_WIDGET_TAGS = new Set([
+   'input', 'select', 'textarea', 'button', 'meter', 'progress',
+ ]);
+ 
++// wave-52 lane L5 F-E (= counters-and-multicol T6) — LIST ITEMS ARE NEVER
++// CONTENT-LESS. css-lists-3 §2/§3: an element whose display is `list-item`
++// generates a ::marker box, so an empty `<li></li>` still paints its marker
++// on a line of its own; the HTML UA sheet gives `li` and `summary`
++// `display: list-item`. The 100x100 placeholder below assumed "no rules, no
++// text, no children" meant "nothing to render" — false here. MEASURED: 51
++// empty `<li>` in 15 css-counter-styles/cssom/* tests matched no rule (their
++// `<ol>` is styled inline) and became 100x100 boxes, so their markers sat at
++// a 100-px pitch against a ref whose rows are 20 px apart. Exempt by TAG,
++// the same narrow shape as INTRINSIC_WIDGET_TAGS; a rule-less empty element
++// of any other tag keeps the placeholder.
++export const LIST_ITEM_TAGS = new Set(['li', 'summary']);
++
+ // A floating-point number token (HTML §2.3.4.2 valid floating-point
+ // number, plus scientific notation) — the gate for the numeric wire lanes.
+ const WIDGET_NUMERIC_RX = /^-?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/;
+@@ -11390,6 +11403,7 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes
+     } else if (matchedRules === 0 && Object.keys(props).length === 0 && !node.ownText
+                && !(node.children && node.children.length > 0)
+                && !NON_BOX_GENERATING_TAGS.has(node.tag)
++               && !LIST_ITEM_TAGS.has(node.tag)
+                && !(INTRINSIC_WIDGET_TAGS.has(node.tag)
+                     && !(node.attrs && FOREIGN_NS_MARKER_ATTR in node.attrs))) {
+       // wave-24 B-RC2: the `!node.children` guard above keeps rule-less
+@@ -11415,7 +11429,8 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes
+       // wave-22 EX2 A-RC1 part 2: the `!INTRINSIC_WIDGET_TAGS` guard above
+       // keeps rule-less form controls OUT of this branch — see that set's
+       // banner for why a 100x100 <select> is worse than the UA chrome it
+-      // would replace.
++      // would replace. wave-52 lane L5 F-E: `!LIST_ITEM_TAGS` does the same
++      // for list items, which always have a ::marker to paint.
+       // Bug 1 honest fallback: no matching rules + no inline style + no
+       // own text — this is the genuine "human instruction" case (or
+       // scaffolding wrappers). Still emit a 100x100 placeholder so the
+diff --git a/tools/titan/extract-fixture.test.mjs b/tools/titan/extract-fixture.test.mjs
+index e8b95f1..0e94c10 100644
+--- a/tools/titan/extract-fixture.test.mjs
++++ b/tools/titan/extract-fixture.test.mjs
+@@ -7316,3 +7316,48 @@ test('wave52-L5 F-C: css-color/color-mix-percents-02 (VERBATIM) — rows t6/t7 k
+   assert.equal(invalidShadowDrops.length, 2);
+   invalidShadowDrops.length = 0;
+ });
++
++// ── F-E (web-tail) = T6 (counters-and-multicol): no 100×100 placeholder on a list item ──
++//
++// This block ships INSIDE seam-6-FE-li.patch (appended to this file), never on
++// its own: F-E lands in the same step as lane L6's seam-3/seam-4, which route an
++// EMPTY inside list item to the marker Row/HStack. Without them both native
++// runtimes stack an empty list's markers on one band (zero-size overlay) and the
++// coverage-ratio veto fails 18 passing native cssom cells (fe-native-replay.json).
++
++test('wave52-L5 F-E: a rule-less empty <li> keeps an EMPTY bag, not the 100x100 placeholder', () => {
++  // web-tail §7 F-E / counters §7 T6. css-lists-3 §2 + §3: a list item
++  // generates a ::marker box, so it is never content-less. The verbatim
++  // body of css-counter-styles/cssom/cssom-pad-setter-invalid.html (three
++  // `<li>` under an inline-styled `<ol>`, no matching rule) — 51 such items
++  // in 15 tests carried `Width 100 / Height 100` in the wave51-fix IR.
++  // Mutation M24: drop `li` from LIST_ITEM_TAGS → `{width:'100px',height:'100px'}`.
++  const { LIST_ITEM_TAGS } = EF52;
++  assert.deepEqual([...LIST_ITEM_TAGS].sort(), ['li', 'summary']);
++  const { components } = buildComponents(
++    '<body><ol style="list-style-type: foo; list-style-position: inside">\n  <li></li>\n  <li></li>\n  <li></li>\n</ol></body>', [], 'l');
++  const ol = components['l__0'];
++  assert.equal(ol._tag, 'ol');
++  const items = Object.values(ol.children);
++  assert.equal(items.length, 3);
++  for (const li of items) {
++    assert.equal(li._tag, 'li');
++    assert.deepEqual(li.properties, {}, 'a list item must not be stamped 100x100');
++  }
++  // The bare shape from the web-tail brief, and a <summary> (the HTML
++  // Rendering section's UA sheet makes it display: list-item too).
++  const bare = buildComponents('<body><ol><li></li></ol></body>', [], 'm');
++  assert.deepEqual(Object.values(bare.components['m__0'].children)[0].properties, {});
++  const det = buildComponents('<body><details><summary></summary></details></body>', [], 's');
++  assert.deepEqual(Object.values(det.components['s__0'].children)[0].properties, {});
++  // The exemption is NARROW: the existing "rule-less LEAF <div> still IS a
++  // placeholder" pin above stays green (mutation M25: add `div` to the set →
++  // it fails), and a rule-less empty <section> — the third-largest stamped tag
++  // in the web-tail census (5 stamps) — keeps the placeholder too. (Not a
++  // <span>: a rule-less empty span is inline-MERGED into its parent before
++  // this branch, so it never reaches the exemption at all.)
++  const section = buildComponents('<body><div><section></section></div></body>', [], 'p');
++  const sec = Object.values(section.components['p__0'].children)[0];
++  assert.equal(sec._tag, 'section');
++  assert.deepEqual(sec.properties, { width: '100px', height: '100px' });
++});

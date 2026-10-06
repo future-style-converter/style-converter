@@ -237,6 +237,9 @@ import { fixtureStem } from './safe-name.mjs';
 // Noto families after 'Inter', and the staged pilot faces ride the same
 // data-URI @font-face delivery Inter already uses.
 import { notoPilotRevSuffix, notoPilotStack, notoPilotFontFaceCss } from './noto-pilot.mjs';
+// wave-52 L12-B Fix B: the body-margin probe reads linked local stylesheets
+// synchronously next to the page it is judging (see pageDeclaresBodyMargin).
+import { readFileSync } from 'node:fs';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname  = dirname(__filename);
@@ -286,7 +289,29 @@ export const CANVAS_BG = '#FFFFFF';
 // own '…-notopilot' tree so they can never be adopted by — or leak into —
 // the frozen production scorer view; whether this leg ever becomes a REAL
 // corpus-wide rev bump is exactly the wave-46 decision the pilot measures.
-export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins${notoPilotRevSuffix()}`;
+// '-rootbg-uamargin' (wave-52 lane L12-B, the CALIBRATION the BACKLOG's
+// "Instrument decisions pending" required) marks the sixth leg, two halves
+// shipped under ONE bump: (1) ROOTBG — the canvas `background` lives on
+// `:where(html)` only (wave-50 B10's verified patch): the body half painted an
+// opaque white box at CSS 2.1 Appendix E step 3, OVER every `z-index:-1` body
+// child (step 2) and over an author `<html style="background:green">` canvas,
+// erasing ref ink no browser erases; (2) UAMARGIN — a ref whose TEST declares
+// a body margin while the REF itself relies on the UA `body { margin: 8px }`
+// keeps that UA body box (UA_BODY_CSS below), the condition the WPT pair was
+// authored under. MEASURED at the bump (tools/titan/results/wave52-instrument-
+// and-calibration/_note.md): a same-session old-sheet/new-sheet A/B over the
+// 1435 scored refs moves exactly 23 — the UA body box fires on 10 pairs and
+// moves 7 refs (the other 3 are abspos/fixed, margin-insensitive), the root-
+// only background moves 16 more (15 reveal paint the body box covered; one,
+// display-contents-sharing-001, renders the injected sheet's own TEXT under
+// `* { display: contents }`); those 23 were re-rendered through this module
+// and the other 1412 carry their previous frozen bytes into the new tree
+// unchanged (sha1 set digest equal) — NOT re-rendered, because 994 of them come
+// back with 1–45 glyph-antialias pixels changed under the OLD sheet too
+// (host font-raster drift since the freeze), which would move ~1000 cells for
+// no contract reason. The bump retires the old tree so no ref rendered under
+// the erasing contract can reach a live diff.
+export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin${notoPilotRevSuffix()}`;
 // wave-16 POST-LOAD: exported (was module-private) so post-load-extract.mjs
 // can frame the TEST page in the identical canvas the ref capture uses —
 // computed geometry snapshotted under a different pad would bake a
@@ -459,12 +484,37 @@ export async function interFontFaceCss() {
  *  byte-identical to before: html gets the pin, body inherits it, every
  *  descendant inherits it.
  *  WHAT STAYS ON BODY: `display: flow-root`, `box-sizing`, `min-height` and
- *  the body half of `margin/padding/background`. All four are NON-inherited,
- *  so hoisting them would change nothing on body — and flow-root/min-height
- *  are specifically ABOUT the body box (BFC containment, viewport fill), so
+ *  the body half of `margin/padding`. All three are NON-inherited, so
+ *  hoisting them would change nothing on body — and flow-root/min-height are
+ *  specifically ABOUT the body box (BFC containment, viewport fill), so
  *  moving them would break the CAL-RC1 geometry contract outright.
- *  `background` legitimately stays on both (canvas propagation reads the
- *  root's, then the body's — html.css UA behaviour).
+ *
+ *  ── wave-50 B10 / wave-52 L12-B: `background` LEAVES THE BODY HALF ────────
+ *  THE DEFECT (executed, not theoretical). Canvas propagation reads the
+ *  ROOT's background first, and only falls through to the body's when the
+ *  root has none — so `background` on html alone already paints the white
+ *  canvas. Repeating it on BODY additionally paints an opaque box in the
+ *  body's own layer, and CSS 2.1 Appendix E orders the root stacking context
+ *  (1) root background, (2) NEGATIVE-z-index descendants, (3) in-flow block
+ *  backgrounds. The body background is step 3; every `z-index: -1` body child
+ *  is step 2. The recipe therefore ERASED the decoration boxes of every
+ *  reference document that draws them at a negative z-index — and, by the
+ *  same step-3 box, the author canvas of `<html style="background: green">`
+ *  (css-cascade/reference/all-green.html: frozen WHITE, captures green).
+ *  MEASURED by B10 with the live recipe vs the same sheet minus the body half
+ *  (puppeteer, BROWSER_LAUNCH_ARGS, 390×600):
+ *    css-gaps/flex/flex-gap-decorations-033-ref  0 vs 5200 chromatic px
+ *    …-034-ref 0 vs 2500 · …-035-ref 0 vs 4050 · …-036/037-ref 0 vs 2050
+ *    css-text/…/hanging-punctuation-block-bound-001-ref 0 vs 58184
+ *  THE FIX: keep the canvas white where canvas propagation reads it (the
+ *  root) and stop painting a second opaque box over the negative-z-index
+ *  layer. A ref that declares its own `body { background: … }` still wins on
+ *  specificity, so the wave-30 full-bleed cases are untouched.
+ *  COST: an INSTRUMENT change — CANVAS_REV was bumped ('-rootbg-uamargin')
+ *  and the affected refs re-frozen; the resulting cell moves are adjudicated
+ *  as a calibration (capture bytes identical ⇒ instrument-only), never as a
+ *  render delta. The two TEST-page bake paths inject this same sheet; they
+ *  snapshot GEOMETRY, which a background never moves.
  *
  *  async because the embedded @font-face payloads are read from disk once
  *  per process (interFontFaceCss memoises them). */
@@ -487,10 +537,150 @@ export async function canvasFrameCss() {
       :where(html) { color: #000;
                      font-family: ${notoPilotStack(REF_FONT_STACK)};
                      line-height: ${REF_LINE_HEIGHT}; }
-      :where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }
+      :where(html) { background: ${CANVAS_BG}; }
+      :where(html, body) { margin: 0; padding: 0; }
       :where(body) { display: flow-root; box-sizing: border-box;
                      min-height: 100vh; }
     `;
+}
+
+// ── wave-52 L12-B Fix B: the UA body box, for the pairs authored under it ───
+//
+// THE DEFECT (page-padding-overrun brief §3-B, PNG-measured). The frame above
+// zeroes the body margin on EVERY ref. `clip-path-paddingBox-1d.html` declares
+// `body { margin: 0 }` and draws its green box at (8,8) through an 8-px border;
+// its match `reference/green-100x100.html` is a bare 100×100 div that lands at
+// (8,8) ONLY through the UA sheet's `body { margin: 8px }` (HTML §15.3.3, the
+// rendering section's body rule). Under the injection the ref's green sat at
+// (0,0) → image (16,16) while Chrome-on-the-test and all three runtimes put it
+// at (8,8) → image (24,24): the CSS-correct picture scored 0.9585 against a ref
+// displaced by the very 8 px the injection removed. Same for paddingBox-1e and
+// contentBox-1d/-1e.
+// THE FIX: when the TEST author declares a body margin and the REF author does
+// not (body-margin-census.json's "test-declares-ref-relies-on-UA" direction),
+// the ref gets the UA body box back, injected AFTER canvasFrameCss() at the
+// same zero specificity so it wins by order (CSS Cascade 5 §6.4) and any author
+// rule in the ref still wins over it. All three declarations restore UA html.css
+// values the frame overrode: `margin: 8px` (the UA body margin), `display:
+// block` (UA — so a first child's margin collapses through the body exactly as
+// in an unframed Chrome render; the frame's flow-root would stack 8 + the
+// child's margin), and `min-height: auto` (the initial value — with the UA
+// margin, the frame's `min-height: 100vh` would make the document 16 px taller
+// than the viewport and the PNG 616 tall; with `auto` a short ref stays at the
+// 568 viewport floor → 600 after the image pad).
+// Every other ref never sees this sheet, so its bytes cannot move (pinned:
+// the sheet is a SEPARATE constant, never interpolated into canvasFrameCss).
+export const UA_BODY_MARGIN_PX = 8;
+export const UA_BODY_CSS =
+  `:where(body) { margin: ${UA_BODY_MARGIN_PX}px; display: block; min-height: auto; }`;
+
+/** The margin-family property names a body rule may set (CSS Box 4 §3 +
+ *  CSS Logical 1 §4.3). `scroll-margin*` is deliberately NOT matched: the
+ *  boundary class keeps the `-` before `margin` from qualifying. */
+const MARGIN_DECL_RX = /(?:^|[;{\s"'])margin(?:-(?:top|right|bottom|left|block|inline|block-start|block-end|inline-start|inline-end))?\s*:/i;
+
+/** Does one selector (no commas) match the BODY element? Static judgement
+ *  over the selector text, the census's own rule widened to combinators:
+ *  the LAST compound must be a `body` type selector (any class/id/attribute/
+ *  pseudo-class qualifiers allowed — a pseudo-ELEMENT is not the body), or a
+ *  bare `*` whose ancestor compounds can only be html / :root (`*`, `html *`,
+ *  `:root > *`) — `div *` cannot reach body, whose only ancestor is html. */
+function selectorHitsBody(sel) {
+  // Split into compounds on the descendant/child/sibling combinators.
+  const parts = sel.trim().split(/\s*[>+~]\s*|\s+/).filter(Boolean);
+  // An empty selector (a stray comma) matches nothing.
+  if (!parts.length) return false;
+  // The subject compound is the last one.
+  const last = parts[parts.length - 1];
+  // `body::before` styles a generated box, not the body's own margins.
+  if (last.includes('::')) return false;
+  // `body`, `body.x`, `body:not(.y)`, `body[dir]` — type selector first.
+  if (/^body(?![\w-])/i.test(last)) return true;
+  // The universal subject reaches body only through html/:root ancestors.
+  if (/^\*(?![\w-])/.test(last)) return parts.slice(0, -1).every((p) => /^(html|:root)$/i.test(p));
+  // Anything else (classes alone, other types) is not provably the body.
+  return false;
+}
+
+/** Walk one stylesheet's rules (comments stripped, braces balanced) and
+ *  report whether any rule whose selector list hits body declares a margin.
+ *  Grouping at-rules are recursed (`@media` minus print-only, `@supports`,
+ *  `@layer`, `@container`); descriptor blocks (`@font-face`, `@keyframes`,
+ *  `@page`, …) are skipped — none of them styles the body box. */
+function cssDeclaresBodyMargin(css) {
+  // Comments can hide braces and selectors; drop them first.
+  const s = String(css).replace(/\/\*[\s\S]*?\*\//g, '');
+  // i walks the text; each iteration consumes one statement or one block.
+  let i = 0;
+  while (i < s.length) {
+    // The next block opener; a `;` first means a block-less at-statement.
+    const open = s.indexOf('{', i);
+    if (open < 0) return false;
+    const semi = s.indexOf(';', i);
+    if (semi >= 0 && semi < open && s.slice(i, semi).trim().startsWith('@')) { i = semi + 1; continue; }
+    // Find the matching close brace (depth-balanced for nested blocks).
+    let depth = 1, j = open + 1;
+    while (j < s.length && depth > 0) { if (s[j] === '{') depth++; else if (s[j] === '}') depth--; j++; }
+    const prelude = s.slice(i, open).trim(), block = s.slice(open + 1, j - 1);
+    i = j;
+    if (prelude.startsWith('@')) {
+      // print-only media never applies to the screen-medium ref render.
+      const printOnly = /^@media\b/i.test(prelude) && /\bprint\b/i.test(prelude) && !/\b(screen|all)\b/i.test(prelude);
+      // Grouping rules carry style rules inside; recurse into them.
+      if (!printOnly && /^@(media|supports|layer|container)\b/i.test(prelude) && cssDeclaresBodyMargin(block)) return true;
+      continue;
+    }
+    // A style rule: some selector hits body AND the block sets a margin.
+    if (prelude.split(',').some(selectorHitsBody) && MARGIN_DECL_RX.test(block)) return true;
+  }
+  return false;
+}
+
+/** wave-52 L12-B (pure + exported): does this HTML page's AUTHOR CSS set a
+ *  margin on <body>? Reads the inline `<body style>` attribute, every inline
+ *  `<style>` block, and any `linkedCss` strings the caller resolved from
+ *  `<link rel=stylesheet>` (pageDeclaresBodyMargin does that from disk).
+ *  Static by design: it judges the source the WPT pair was authored as, with
+ *  no page load (a test page's scripts never run in this pipeline's ref path). */
+export function bodyDeclaresMargin(html, linkedCss = []) {
+  const src = String(html ?? '');
+  // The inline attribute is the highest-precedence author declaration.
+  const bodyTag = /<body\b([^>]*)>/i.exec(src);
+  const style = bodyTag && /\bstyle\s*=\s*(?:"([^"]*)"|'([^']*)')/i.exec(bodyTag[1]);
+  if (style && MARGIN_DECL_RX.test(` ${style[1] ?? style[2]}`)) return true;
+  // Every inline sheet, then every linked one, under the same rule walk.
+  const sheets = [...src.matchAll(/<style\b[^>]*>([\s\S]*?)<\/style>/gi)].map((m) => m[1]);
+  return [...sheets, ...linkedCss].some(cssDeclaresBodyMargin);
+}
+
+/** Read a page from disk plus its linked LOCAL stylesheets and apply
+ *  bodyDeclaresMargin. Root-relative hrefs resolve against WPT_DIR (the
+ *  corpus root, as the WPT server would), relative ones against the page's
+ *  directory; remote or missing sheets are skipped and reported on stderr —
+ *  never silently counted as "no margin". */
+export function pageDeclaresBodyMargin(absPath, wptDir = WPT_DIR) {
+  const html = readFileSync(absPath, 'utf8');
+  const linked = [];
+  for (const m of html.matchAll(/<link\b[^>]*>/gi)) {
+    // Only stylesheet links carry author CSS.
+    if (!/\brel\s*=\s*["']?stylesheet\b/i.test(m[0])) continue;
+    const href = /\bhref\s*=\s*(?:"([^"]*)"|'([^']*)'|([^\s>]+))/i.exec(m[0]);
+    const h = href && (href[1] ?? href[2] ?? href[3]);
+    if (!h || /^[a-z]+:/i.test(h)) continue;   // remote: not readable here
+    const p = h.startsWith('/') ? join(wptDir, h.slice(1)) : resolve(dirname(absPath), h);
+    try { linked.push(readFileSync(p, 'utf8')); } catch {
+      process.stderr.write(`[capture-browser-ref] body-margin probe: cannot read ${h} linked from ${absPath}\n`);
+    }
+  }
+  return bodyDeclaresMargin(html, linked);
+}
+
+/** The Fix-B switch for one test (exported for the census and the pins):
+ *  true iff the TEST declares a body margin and its REF does not — the only
+ *  direction in which the frame's zero margin displaces the ref (the reverse
+ *  pairs keep today's sheet: their test side is undeclared). */
+export function uaBodyMarginFor(testAbs, refAbs, wptDir = WPT_DIR) {
+  return pageDeclaresBodyMargin(testAbs, wptDir) && !pageDeclaresBodyMargin(refAbs, wptDir);
 }
 
 // ── wave-25 CAL-RC1: the image-space frame ───────────────────────────────────
@@ -786,7 +976,9 @@ async function mirrorToLegacy(versioned, legacy) {
  *  `adoptable` is resolved ONCE per run by captureRefs (one claim read for
  *  N tests) and passed in, so step 2 costs a single existsSync per test. */
 async function renderOne(page, wptRef, testRel, browserRev, adoptable) {
-  const refAbs = await resolveRefPath(testRel);
+  // Resolved up front (as before the wave-52 split) so a test with no
+  // rel=match link fails/skips here even when a stale cache entry exists.
+  await resolveRefPath(testRel);
   const dest   = cachePathFor(wptRef, testRel, browserRev);
   const legacy = cachePathFor(wptRef, testRel);           // scorer view
   if (existsSync(dest)) {
@@ -803,6 +995,29 @@ async function renderOne(page, wptRef, testRel, browserRev, adoptable) {
   }
 
   await fs.mkdir(dirname(dest), { recursive: true });
+  // wave-52 L12-B: the render itself lives in renderRefPng (exported, so the
+  // re-freeze A/B renders through the PRODUCTION path, never a copy of it).
+  const { png, uaBodyMargin } = await renderRefPng(page, testRel);
+  await fs.writeFile(dest, png);
+  // wave-24 A-RC1: the versioned PNG is authoritative; the version-less
+  // tree is the "latest capture wins" scorer view inject-wpt-block.mjs
+  // reads through the shell scripts' hardcoded --refs-root (header
+  // MIGRATION POLICY). Mirroring AFTER the write — never before — keeps
+  // the O_TRUNC hazard documented on linkOrCopy impossible.
+  await mirrorToLegacy(dest, legacy);
+  return { dest, cached: false, uaBodyMargin };
+}
+
+/** Render ONE test's ref page to a framed PNG buffer under the live canvas
+ *  contract — canvasFrameCss() for every ref, plus UA_BODY_CSS for the
+ *  test-declares/ref-relies-on-UA pairs (uaBodyMarginFor). No cache logic:
+ *  renderOne owns the cache; the wave-52 re-freeze A/B calls this directly
+ *  so its "new contract" arm IS the shipped path.
+ *  @returns {{ png: Buffer, refAbs: string, uaBodyMargin: boolean }} */
+export async function renderRefPng(page, testRel) {
+  const refAbs = await resolveRefPath(testRel);
+  // Fix B decision, from the two SOURCES (static, no extra page load).
+  const uaBodyMargin = uaBodyMarginFor(join(WPT_DIR, testRel), refAbs);
 
   // Render via file:// so the test's relative resource paths resolve.
   // Puppeteer requires the file:// URL to be absolute and properly encoded
@@ -904,6 +1119,10 @@ async function renderOne(page, wptRef, testRel, browserRev, adoptable) {
   await page.addStyleTag({
     content: await canvasFrameCss(),
   });
+  // wave-52 L12-B Fix B: the UA body box, SECOND and only for the pairs that
+  // need it — same zero specificity, later in order, so it overrides the
+  // frame's body margin/display/min-height and nothing else (UA_BODY_CSS).
+  if (uaBodyMargin) await page.addStyleTag({ content: UA_BODY_CSS });
 
   // wave-25 CAL-RC1: render at the CONTENT width (358) — exactly what the
   // old CSS-padded body's content box measured, so wrap points and line
@@ -947,14 +1166,7 @@ async function renderOne(page, wptRef, testRel, browserRev, adoptable) {
   // is exactly the kind of silent scoring corruption the cache keys exist to
   // prevent.
   const rawPng = await page.screenshot({ type: 'png' });
-  await fs.writeFile(dest, padPngBuffer(rawPng, CANVAS_PAD_PX, CANVAS_BG));
-  // wave-24 A-RC1: the versioned PNG is authoritative; the version-less
-  // tree is the "latest capture wins" scorer view inject-wpt-block.mjs
-  // reads through the shell scripts' hardcoded --refs-root (header
-  // MIGRATION POLICY). Mirroring AFTER the screenshot — never before —
-  // keeps the O_TRUNC hazard documented on linkOrCopy impossible.
-  await mirrorToLegacy(dest, legacy);
-  return { dest, cached: false };
+  return { png: padPngBuffer(rawPng, CANVAS_PAD_PX, CANVAS_BG), refAbs, uaBodyMargin };
 }
 
 // wave-16 POST-LOAD: the launch flag set, factored to an exported const so
@@ -1032,15 +1244,18 @@ export async function captureRefs(testRels, opts = {}) {
     for (const rel of testRels) {
       i++;
       try {
-        const { dest, cached, adopted } = await renderOne(page, wptRef, rel, browserRev, adoptable);
-        results.push({ test: rel, dest, cached, adopted: !!adopted, ok: true });
+        const { dest, cached, adopted, uaBodyMargin } = await renderOne(page, wptRef, rel, browserRev, adoptable);
+        results.push({ test: rel, dest, cached, adopted: !!adopted, uaBodyMargin: !!uaBodyMargin, ok: true });
         if (!opts.quiet) {
           // An adoption IS a cache hit (no render happened), so the line
           // must keep the literal `cache ` prefix section-runner.sh counts
           // with `grep -c 'cache '` — the adoption note rides as a suffix
           // instead of replacing the verb, or an all-adopt migration run
           // would report `rendered=0 cached=0` and read as total failure.
-          const note = adopted ? ' (adopted from the version-less tree)' : '';
+          // wave-52 L12-B: a ref rendered with the UA body box says so, so
+          // the Fix-B population is readable off every browser-ref.log.
+          const note = adopted ? ' (adopted from the version-less tree)'
+            : (uaBodyMargin ? ' (ua body margin: test declares, ref relies on UA)' : '');
           process.stderr.write(
             `  [${i}/${testRels.length}] ${cached ? 'cache' : 'rendered'} ${rel}${note}\n`);
         }

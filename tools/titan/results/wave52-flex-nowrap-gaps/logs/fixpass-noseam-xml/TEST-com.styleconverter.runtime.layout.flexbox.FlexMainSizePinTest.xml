@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.063Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="a partially exhausted row is not allowed to shave the item" classname="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" time="0.0"/>
+  <testcase name="an exhausted row still measures the item at its resolved width" classname="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" time="0.0"/>
+  <testcase name="a fitting line pins exactly what Modifier width would have" classname="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" time="0.0"/>
+  <testcase name="a negative rounding artefact floors at zero" classname="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" time="0.0"/>
+  <testcase name="row pin passes the incoming block band through untouched" classname="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" time="0.0"/>
+  <testcase name="the column twin pins the block axis" classname="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" time="0.001"/>
+  <testcase name="column pin passes the incoming inline band through untouched" classname="com.styleconverter.runtime.layout.flexbox.FlexMainSizePinTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

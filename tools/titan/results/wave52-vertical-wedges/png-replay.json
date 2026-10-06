@@ -1,0 +1,1454 @@
+{
+  "run": "wave51-fix",
+  "refs": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins/css-writing-modes",
+  "model": "see header",
+  "cells": [
+    {
+      "test": "ch-units-vrl-001",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 120,
+          "h": 120
+        },
+        "blue": {
+          "x": 16,
+          "y": 304,
+          "w": 120,
+          "h": 120
+        },
+        "orange": {
+          "x": 16,
+          "y": 424,
+          "w": 63,
+          "h": 63
+        }
+      },
+      "web": {
+        "manifest": 0.9254,
+        "rescored": 0.9254,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 120
+          },
+          "blue": {
+            "x": 16,
+            "y": 304,
+            "w": 120,
+            "h": 120
+          },
+          "orange": {
+            "x": 16,
+            "y": 424,
+            "w": 63,
+            "h": 63
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.8396,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8396,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 60,
+            "h": 25
+          },
+          "orange": {
+            "x": 16,
+            "y": 269,
+            "w": 64,
+            "h": 60
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8752,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.8754,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.8767,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.8404,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8404,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 55,
+            "h": 72
+          },
+          "orange": {
+            "x": 16,
+            "y": 311,
+            "w": 64,
+            "h": 55
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8728,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.873,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.8743,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "test": "ch-units-vrl-002",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 120,
+          "h": 120
+        },
+        "blue": {
+          "x": 16,
+          "y": 304,
+          "w": 120,
+          "h": 120
+        },
+        "orange": {
+          "x": 16,
+          "y": 424,
+          "w": 63,
+          "h": 63
+        }
+      },
+      "web": {
+        "manifest": 0.9254,
+        "rescored": 0.9254,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 120
+          },
+          "blue": {
+            "x": 16,
+            "y": 304,
+            "w": 120,
+            "h": 120
+          },
+          "orange": {
+            "x": 16,
+            "y": 424,
+            "w": 63,
+            "h": 63
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.8396,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8396,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 60,
+            "h": 25
+          },
+          "orange": {
+            "x": 16,
+            "y": 269,
+            "w": 64,
+            "h": 60
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8752,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.8754,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.8767,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.8404,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8404,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 55,
+            "h": 72
+          },
+          "orange": {
+            "x": 16,
+            "y": 311,
+            "w": 64,
+            "h": 55
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8728,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.873,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.8743,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "test": "ch-units-vrl-003",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 120,
+          "h": 120
+        },
+        "blue": {
+          "x": 16,
+          "y": 304,
+          "w": 120,
+          "h": 120
+        },
+        "orange": {
+          "x": 16,
+          "y": 424,
+          "w": 63,
+          "h": 63
+        }
+      },
+      "web": {
+        "manifest": 0.9761,
+        "rescored": 0.9761,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 120,
+            "h": 120
+          },
+          "blue": {
+            "x": 16,
+            "y": 304,
+            "w": 120,
+            "h": 120
+          },
+          "orange": {
+            "x": 16,
+            "y": 424,
+            "w": 63,
+            "h": 63
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.8396,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8396,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 60,
+            "h": 25
+          },
+          "orange": {
+            "x": 16,
+            "y": 269,
+            "w": 64,
+            "h": 60
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9205,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9712,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9176,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9683,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB25": {
+            "ssim": 0.905,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9557,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.8404,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8404,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 55,
+            "h": 72
+          },
+          "orange": {
+            "x": 16,
+            "y": 311,
+            "w": 64,
+            "h": 55
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9181,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9687,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9152,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9659,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB25": {
+            "ssim": 0.9026,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9532,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          }
+        }
+      }
+    },
+    {
+      "test": "ch-units-vrl-004",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 120,
+          "h": 120
+        },
+        "blue": {
+          "x": 16,
+          "y": 304,
+          "w": 120,
+          "h": 120
+        },
+        "orange": {
+          "x": 16,
+          "y": 424,
+          "w": 63,
+          "h": 63
+        }
+      },
+      "web": {
+        "manifest": 0.9761,
+        "rescored": 0.9761,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 120,
+            "h": 120
+          },
+          "blue": {
+            "x": 16,
+            "y": 304,
+            "w": 120,
+            "h": 120
+          },
+          "orange": {
+            "x": 16,
+            "y": 424,
+            "w": 63,
+            "h": 63
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.8396,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8396,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 60,
+            "h": 25
+          },
+          "orange": {
+            "x": 16,
+            "y": 269,
+            "w": 64,
+            "h": 60
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9205,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9712,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9176,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9683,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB25": {
+            "ssim": 0.905,
+            "colorFailed": true,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9557,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.8404,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.8404,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 55,
+            "h": 72
+          },
+          "orange": {
+            "x": 16,
+            "y": 311,
+            "w": 64,
+            "h": 55
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9181,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9687,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9152,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9659,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB25": {
+            "ssim": 0.9026,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9532,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          }
+        }
+      }
+    },
+    {
+      "test": "ch-units-vrl-005",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 63,
+          "h": 63
+        },
+        "blue": {
+          "x": 16,
+          "y": 247,
+          "w": 63,
+          "h": 63
+        },
+        "orange": {
+          "x": 16,
+          "y": 310,
+          "w": 120,
+          "h": 120
+        }
+      },
+      "web": {
+        "manifest": 0.9578,
+        "rescored": 0.9578,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 63
+          },
+          "blue": {
+            "x": 16,
+            "y": 247,
+            "w": 63,
+            "h": 63
+          },
+          "orange": {
+            "x": 16,
+            "y": 310,
+            "w": 120,
+            "h": 120
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.9159,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.9159,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 64,
+            "h": 60
+          },
+          "orange": {
+            "x": 16,
+            "y": 304,
+            "w": 60,
+            "h": 25
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9529,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9513,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB25": {
+            "ssim": 0.9438,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.9103,
+          "wptPass": false,
+          "colorFailed": false,
+          "coverageRatioFailed": false
+        },
+        "rescored": {
+          "ssim": 0.9103,
+          "colorFailed": false,
+          "coverageRatioFailed": false,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 64,
+            "h": 55
+          },
+          "orange": {
+            "x": 16,
+            "y": 294,
+            "w": 55,
+            "h": 72
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9505,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9489,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.9414,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "test": "ch-units-vrl-006",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 63,
+          "h": 63
+        },
+        "blue": {
+          "x": 16,
+          "y": 247,
+          "w": 63,
+          "h": 63
+        },
+        "orange": {
+          "x": 16,
+          "y": 310,
+          "w": 120,
+          "h": 120
+        }
+      },
+      "web": {
+        "manifest": 0.9578,
+        "rescored": 0.9578,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 63
+          },
+          "blue": {
+            "x": 16,
+            "y": 247,
+            "w": 63,
+            "h": 63
+          },
+          "orange": {
+            "x": 16,
+            "y": 310,
+            "w": 120,
+            "h": 120
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.9159,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.9159,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 64,
+            "h": 60
+          },
+          "orange": {
+            "x": 16,
+            "y": 304,
+            "w": 60,
+            "h": 25
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9529,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9513,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB25": {
+            "ssim": 0.9438,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.9103,
+          "wptPass": false,
+          "colorFailed": false,
+          "coverageRatioFailed": false
+        },
+        "rescored": {
+          "ssim": 0.9103,
+          "colorFailed": false,
+          "coverageRatioFailed": false,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 64,
+            "h": 55
+          },
+          "orange": {
+            "x": 16,
+            "y": 294,
+            "w": 55,
+            "h": 72
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.9505,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": true
+          },
+          "LB24.2": {
+            "ssim": 0.9489,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.9414,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "test": "ch-units-vrl-007",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 63,
+          "h": 63
+        },
+        "blue": {
+          "x": 16,
+          "y": 247,
+          "w": 63,
+          "h": 63
+        },
+        "orange": {
+          "x": 16,
+          "y": 310,
+          "w": 120,
+          "h": 120
+        }
+      },
+      "web": {
+        "manifest": 0.917,
+        "rescored": 0.917,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 63,
+            "h": 120
+          },
+          "blue": {
+            "x": 16,
+            "y": 304,
+            "w": 63,
+            "h": 63
+          },
+          "orange": {
+            "x": 16,
+            "y": 367,
+            "w": 120,
+            "h": 120
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.9159,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.9159,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 64,
+            "h": 60
+          },
+          "orange": {
+            "x": 16,
+            "y": 304,
+            "w": 60,
+            "h": 25
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8859,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9121,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.886,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9121,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.8854,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9115,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.9103,
+          "wptPass": false,
+          "colorFailed": false,
+          "coverageRatioFailed": false
+        },
+        "rescored": {
+          "ssim": 0.9103,
+          "colorFailed": false,
+          "coverageRatioFailed": false,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 64,
+            "h": 55
+          },
+          "orange": {
+            "x": 16,
+            "y": 294,
+            "w": 55,
+            "h": 72
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8835,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9096,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.8836,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9097,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.883,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9091,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "test": "ch-units-vrl-008",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 184,
+          "w": 63,
+          "h": 63
+        },
+        "blue": {
+          "x": 16,
+          "y": 247,
+          "w": 63,
+          "h": 63
+        },
+        "orange": {
+          "x": 16,
+          "y": 310,
+          "w": 120,
+          "h": 120
+        }
+      },
+      "web": {
+        "manifest": 0.917,
+        "rescored": 0.917,
+        "boxes": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 63,
+            "h": 120
+          },
+          "blue": {
+            "x": 16,
+            "y": 304,
+            "w": 63,
+            "h": 63
+          },
+          "orange": {
+            "x": 16,
+            "y": 367,
+            "w": 120,
+            "h": 120
+          }
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.9159,
+          "wptPass": false,
+          "colorFailed": true,
+          "coverageRatioFailed": true
+        },
+        "rescored": {
+          "ssim": 0.9159,
+          "colorFailed": true,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 60
+          },
+          "blue": {
+            "x": 16,
+            "y": 244,
+            "w": 64,
+            "h": 60
+          },
+          "orange": {
+            "x": 16,
+            "y": 304,
+            "w": 60,
+            "h": 25
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8859,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9121,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.886,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9121,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.8854,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9115,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.9103,
+          "wptPass": false,
+          "colorFailed": false,
+          "coverageRatioFailed": false
+        },
+        "rescored": {
+          "ssim": 0.9103,
+          "colorFailed": false,
+          "coverageRatioFailed": false,
+          "pass": false
+        },
+        "now": {
+          "green": {
+            "x": 16,
+            "y": 184,
+            "w": 6,
+            "h": 55
+          },
+          "blue": {
+            "x": 16,
+            "y": 239,
+            "w": 64,
+            "h": 55
+          },
+          "orange": {
+            "x": 16,
+            "y": 294,
+            "w": 55,
+            "h": 72
+          }
+        },
+        "predicted": {
+          "LB24": {
+            "ssim": 0.8835,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24": {
+            "ssim": 0.9096,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB24.2": {
+            "ssim": 0.8836,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB24.2": {
+            "ssim": 0.9097,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "LB25": {
+            "ssim": 0.883,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          },
+          "withME_LB25": {
+            "ssim": 0.9091,
+            "colorFailed": false,
+            "coverageRatioFailed": false,
+            "pass": false
+          }
+        }
+      }
+    },
+    {
+      "test": "forms/input-range-zero-inline-size",
+      "ref": {
+        "green": {
+          "x": 16,
+          "y": 68,
+          "w": 16,
+          "h": 20
+        }
+      },
+      "ios": {
+        "manifest": {
+          "ssim": 0.9747,
+          "wptPass": false,
+          "colorFailed": false
+        },
+        "rescored": {
+          "ssim": 0.9747,
+          "colorFailed": false,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "erasedPx": 2599,
+        "predicted": {
+          "ssim": 0.9993,
+          "colorFailed": false,
+          "coverageRatioFailed": false,
+          "pass": true
+        },
+        "green": {
+          "x": 16,
+          "y": 68,
+          "w": 16,
+          "h": 20
+        }
+      },
+      "android": {
+        "manifest": {
+          "ssim": 0.9743,
+          "wptPass": false,
+          "colorFailed": false
+        },
+        "rescored": {
+          "ssim": 0.9743,
+          "colorFailed": false,
+          "coverageRatioFailed": true,
+          "pass": false
+        },
+        "erasedPx": 2589,
+        "predicted": {
+          "ssim": 0.9989,
+          "colorFailed": false,
+          "coverageRatioFailed": false,
+          "pass": true
+        },
+        "green": {
+          "x": 16,
+          "y": 68,
+          "w": 16,
+          "h": 20
+        }
+      }
+    }
+  ]
+}

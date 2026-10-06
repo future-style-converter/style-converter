@@ -1,0 +1,26 @@
+css-images           web      changed  0  carriers  0  outside-carriers 0
+css-images           ios      changed  4  carriers  4  outside-carriers 0
+css-images           android  changed  4  carriers  4  outside-carriers 0
+css-lists            web      changed  0  carriers  0  outside-carriers 0
+css-lists            ios      changed  1  carriers  1  outside-carriers 0
+css-lists            android  changed  1  carriers  1  outside-carriers 0
+css-overflow         web      changed  0  carriers  0  outside-carriers 0
+css-overflow         ios      changed  0  carriers  0  outside-carriers 0
+css-overflow         android  changed 13  carriers 23  outside-carriers 0
+css-text             web      changed  0  carriers  0  outside-carriers 0
+css-text             ios      changed  0  carriers  0  outside-carriers 0
+css-text             android  changed 19  carriers 30  outside-carriers 0
+css-text-decor       web      changed  0  carriers  0  outside-carriers 0
+css-text-decor       ios      changed  0  carriers  0  outside-carriers 0
+css-text-decor       android  changed  0  carriers  2  outside-carriers 0
+css-values           web      changed  0  carriers  0  outside-carriers 0
+css-values           ios      changed  0  carriers  0  outside-carriers 0
+css-values           android  changed  1  carriers  1  outside-carriers 0
+css-writing-modes    web      changed  0  carriers  0  outside-carriers 0
+css-writing-modes    ios      changed  0  carriers  0  outside-carriers 0
+css-writing-modes    android  changed  8  carriers 18  outside-carriers 0
+total web: 0 of 336 captures changed
+total ios: 5 of 336 captures changed
+total android: 46 of 336 captures changed
+
+CONTROL HOLDS: every changed capture is a carrier of the fix that may change it

@@ -1,0 +1,3 @@
+# L11 all-reset-postload-colour — cells found by the lane's executed censuses that PLAN.md's watchlist does not already cover.
+# F2: the 277-test post-load replay (replay-f2-all.json) — the script's `inner.style.color = "green"` is introduced on the inner span (P->P rise, all three).
+css-pseudo/first-letter-block-to-inline

@@ -796,10 +796,14 @@ class InlineRunFoldTest {
 
     @Test
     fun `a collapsing white-space keyword refuses even on a glyph-less member`() {
-        // `normal` / `nowrap` collapse a space run to ONE space
-        // (css-text-3 §4.1.1); the fold appends the member's text verbatim,
+        // `normal` / `nowrap` / `pre-line` collapse a space run to ONE
+        // space (css-text-3 §4.1.1 — `pre-line` keeps segment breaks only;
+        // wave 52 skeptic S3); the fold appends the member's text verbatim,
         // so admitting them would paint a run CSS collapses away.
-        for (kw in listOf("NORMAL", "NOWRAP")) {
+        // MUTATION PROOF (executed 2026-10-05, lane L9 fix pass,
+        // mutations-s3-compose.result.json): with "pre-line" put back into
+        // the preserving arm this test fails; restored byte-exact.
+        for (kw in listOf("NORMAL", "NOWRAP", "PRE_LINE")) {
             val p = listOf(IRProperty("WhiteSpace", JsonPrimitive(kw)))
             assertEquals(
                 InlineSpanRing.Admission.Refused("member-prop:WhiteSpace-collapsing"),
@@ -810,5 +814,132 @@ class InlineRunFoldTest {
 
     /** block-ellipsis-032's first clamp box, verbatim (minified). */
     private val BLOCK_ELLIPSIS_032 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116","name":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1","properties":[{"type":"LineClamp","data":{"type":"lines","count":1}},{"type":"BorderTopWidth","data":{"px":1}},{"type":"BorderRightWidth","data":{"px":1}},{"type":"BorderBottomWidth","data":{"px":1}},{"type":"BorderLeftWidth","data":{"px":1}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"FontFamily","data":["monospace"]},{"type":"MarginBottom","data":{"original":{"v":1,"u":"EM"}}},{"type":"Width","data":{"type":"length","original":{"v":29,"u":"CH"}}}],"text":"This text is Clamped","meta":{"role":"ws-after","runs":[{"text":"This text is "},{"child":"line-clamp__block-ellipsis-032.tentative__1__0"},{"child":"line-clamp__block-ellipsis-032.tentative__1__1"},{"text":"Clamped"}]}},{"id":"line-clamp__block-ellipsis-032.tentative__1__0-117","name":"line-clamp__block-ellipsis-032.tentative__1__0","properties":[{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"FontWeight","data":{"weight":700,"original":"bold"}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116"},"text":"left-aligned","meta":{"sourceTag":"span"}},{"id":"line-clamp__block-ellipsis-032.tentative__1__1-118","name":"line-clamp__block-ellipsis-032.tentative__1__1","properties":[{"type":"WhiteSpace","data":"PRE_WRAP"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}}],"slot":{"parent":"wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1-116"},"text":"        ","meta":{"sourceTag":"span"}}]}"""
+
+    // ── Wave 52 (lane L9) — `hanging-punctuation` is an INERT member prop ──
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, mutate.py M1 —
+    // tools/titan/results/wave52-inline-run-wall/mutations-compose.result
+    // .json): with the `"HangingPunctuation" ->` arm removed from
+    // InlineSpanRing.admit both tests below fail (the fold bails with
+    // `member-prop:HangingPunctuation`, the ring refuses with it); the arm
+    // restored byte-exact (sha256-verified), both pass.
+
+    @Test
+    fun `hanging-punctuation-inline-001 - the LAST span folds onto the line as a plain member`() {
+        // css-text/hanging-punctuation/hanging-punctuation-inline-001,
+        // VERBATIM off wave51-fix/sections/css-text/per-test-ir (the whole
+        // document — roots [0] instruction <p>, [1] the blue reference div,
+        // [2] the orange 4em runs host + its `<span>` member). The member's
+        // ONE property is `HangingPunctuation=["LAST"]`, which the wave-44
+        // gate refused (`member-prop:HangingPunctuation`) — so the `」` was
+        // rendered as its OWN stacked block in the default ink (android-ref
+        // 0.9495 f: a separate black line under the orange `字字字字`; ios
+        // P 0.9756 with the same wrong render). css-text-3 §8.3 makes the
+        // property a line-end behaviour of the glyph, unimplemented on both
+        // natives, so the folded line is strictly more faithful.
+        val host = root(HANGING_PUNCTUATION_INLINE_001, 2)
+        val outcome = foldOf(host)
+        assertTrue("the hanging-punctuation member must fold: $outcome", outcome is InlineRunFold.Outcome.Folded)
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        // ONE paragraph: the four ideographs and the closing bracket — the
+        // exact glyphs of the blue reference div above it, which the ref
+        // paints identically (the test's own pass condition).
+        assertEquals("字字字字」", folded.text)
+        // The member carries NO paint attribution (plain style) but the ring
+        // NAMES the un-hung punctuation as a stated loss, so the seam logs
+        // it — one span records exactly that, over the `」` alone.
+        assertEquals(1, folded.spans.size)
+        val span = folded.spans[0]
+        assertTrue("the member paints nothing of its own", span.style.isPlain)
+        assertEquals(listOf("hanging-punctuation(last)"), span.statedLossTypes)
+        assertEquals(4, span.start)
+        assertEquals(5, span.end)
+        // Nothing else changed hands: no member hyphens, no dropped empties.
+        assertEquals(0, folded.droppedEmptyMembers)
+    }
+
+    @Test
+    fun `hanging-punctuation is admitted as inert on any glyph member, keywords named`() {
+        // The ring's own verdict, independent of the fold: the property
+        // never refuses, paints nothing, and the loss label carries the
+        // wire keywords lowercased (`first`/`last`/`allow-end`/`force-end`,
+        // css-text-3 §8.3) so logcat can tell the variants apart.
+        val last = listOf(IRProperty("HangingPunctuation", Json.parseToJsonElement("""["LAST"]""")))
+        assertEquals(
+            InlineSpanRing.Admission.Admitted(InlineSpanRing.PLAIN, listOf("hanging-punctuation(last)")),
+            InlineSpanRing.admit("span", last, emptyList()),
+        )
+        val both = listOf(IRProperty("HangingPunctuation", Json.parseToJsonElement("""["FIRST","ALLOW_END"]""")))
+        assertEquals(
+            InlineSpanRing.Admission.Admitted(InlineSpanRing.PLAIN, listOf("hanging-punctuation(first,allow_end)")),
+            InlineSpanRing.admit("span", both, emptyList()),
+        )
+        // A bare `none` keyword is the initial value — still inert, still named.
+        val none = listOf(IRProperty("HangingPunctuation", JsonPrimitive("none")))
+        assertEquals(
+            InlineSpanRing.Admission.Admitted(InlineSpanRing.PLAIN, listOf("hanging-punctuation(none)")),
+            InlineSpanRing.admit("span", none, emptyList()),
+        )
+        // The stated loss composes with the border loss (one entry each).
+        val bordered = last + listOf(
+            IRProperty("BorderTopStyle", JsonPrimitive("SOLID")),
+            IRProperty("BorderTopWidth", Json.parseToJsonElement("""{"px":1}""")),
+        )
+        val admitted = InlineSpanRing.admit("span", bordered, emptyList()) as InlineSpanRing.Admission.Admitted
+        assertEquals(
+            listOf("border-box-ink(BorderTopStyle,BorderTopWidth)", "hanging-punctuation(last)"),
+            admitted.statedLossTypes,
+        )
+    }
+
+    // ── Wave 52 (lane L9, F4) — the clamp's hidden tail in the alignment ──
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, mutate.py M8 —
+    // mutations-compose.result.json): with `?: clampedAlignment(...)`
+    // removed from InlineSpanRing.alignment both tests below fail (null
+    // returned). Restored byte-exact, sha256-verified.
+
+    @Test
+    fun `the clamp-trimmed 032 paragraph still aligns - the members keep their ranges`() {
+        // block-ellipsis-032's fold string (InlineRunFold's merged text,
+        // pinned above) against the display string a drawn-marker
+        // `line-clamp: 1` produces at 29ch once the run is pre-broken and
+        // trimmed (GreedyLineBreaker.clampLines): the kept line plus the
+        // UA ellipsis. Before wave 52 nothing appended "…", so the walk had
+        // no such shape to explain; with F4 it must, or the green bold
+        // member would lose its style under the seam's un-styled fallback.
+        val original = "This text is left-aligned        Clamped"
+        val map = InlineSpanRing.alignment(original, "This text is left-aligned…")
+        assertNotNull("the clamp's hidden tail must align", map)
+        map!!
+        // The green bold member [13, 25) keeps its exact range.
+        assertEquals(13, map[13])
+        assertEquals(25, map[25])
+        // The red pre-wrap band [25, 33) is hidden with the tail: an empty
+        // range, so InlineSpanContent skips it — no red can paint.
+        assertEquals(25, map[33])
+        // `Clamped` is hidden too; the end sentinel stops BEFORE the marker
+        // (the marker is the block container's, css-overflow-4 §4.2).
+        assertEquals(25, map[original.length])
+    }
+
+    @Test
+    fun `the clamp tail composes with the pre-break and refuses unexplained surgery`() {
+        // A multi-line fired run: the last kept line lost a word to the fit
+        // test ("cc dd…" overflowed, so `dd` was hidden).
+        val map = InlineSpanRing.alignment("aa bb cc dd ee", "aa bb\ncc…")!!
+        assertEquals(5, map[5])   // the space that became the line break
+        assertEquals(6, map[6])   // `cc` verbatim on line 2
+        assertEquals(8, map[8])   // the separator before the hidden `dd`
+        assertEquals(8, map[11])  // `dd ee` hidden onto the marker's offset
+        assertEquals(8, map[14])  // end sentinel = the kept prefix's length
+        // A trailing "…" does not make arbitrary surgery alignable.
+        assertNull(InlineSpanRing.alignment("abc", "xyz…"))
+        // And a non-clamped rewrite is still refused exactly as before.
+        assertNull(InlineSpanRing.alignment("abc", "ABC"))
+    }
+
+    /** hanging-punctuation-inline-001, the whole document, verbatim (minified). */
+    private val HANGING_PUNCTUATION_INLINE_001 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__0-164","name":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__0","properties":[],"text":"Test passes if the orange and blue pieces of text are laid out identically.","meta":{"sourceTag":"p","lang":"en"}},{"id":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__1-165","name":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__1","properties":[{"type":"FontSize","data":{"original":{"type":"length","original":{"v":2,"u":"EM"}}}},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}}],"text":"字字字字」","meta":{"role":"ws-after","lang":"en"}},{"id":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2-166","name":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2","properties":[{"type":"FontSize","data":{"original":{"type":"length","original":{"v":2,"u":"EM"}}}},{"type":"Width","data":{"type":"length","original":{"v":4,"u":"EM"}}},{"type":"Color","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}}],"text":"字字字字","meta":{"lang":"en","runs":[{"text":"字字字字"},{"child":"hanging-punctuation__hanging-punctuation-inline-001__2__0"}]}},{"id":"hanging-punctuation__hanging-punctuation-inline-001__2__0-167","name":"hanging-punctuation__hanging-punctuation-inline-001__2__0","properties":[{"type":"HangingPunctuation","data":["LAST"]}],"slot":{"parent":"wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2-166"},"text":"」","meta":{"sourceTag":"span","lang":"en"}}]}"""
 
 }

@@ -1,0 +1,435 @@
+{
+ "source": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/l5fix/chain/tools/titan/extract-fixture.mjs",
+ "startSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+ "baselineFailures": [],
+ "mutations": [
+  {
+   "id": "M1",
+   "what": "F3: no candidate filter",
+   "find": "const pool = valid.length > 0 ? valid : win;",
+   "replace": "const pool = win;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F3: a provably invalid declaration in a LATER layer does not outrank a valid earlier one",
+    "wave52-L5 F3: revert-layer recursion runs through the filter and logs a candidate once"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F3: a provably invalid declaration in a LATER layer",
+    "F3: revert-layer recursion"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M2",
+   "what": "F3: always the filtered pool (no all-invalid clause)",
+   "find": "const pool = valid.length > 0 ? valid : win;",
+   "replace": "const pool = valid;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F3: an ALL-invalid window still ends on the sort's own winner (byte parity)"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F3: an ALL-invalid window"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M3",
+   "what": "F3: filter only at depth 0",
+   "find": "const pool = valid.length > 0 ? valid : win;",
+   "replace": "const pool = valid.length > 0 && depth === 0 ? valid : win;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F3: revert-layer recursion runs through the filter and logs a candidate once"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F3: revert-layer recursion"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M4",
+   "what": "B1 anchor: assignDeclaration writes unconditionally",
+   "find": "if (reason !== null && provablyInvalidDeclaration(key, prev) === null) {",
+   "replace": "if (false && reason !== null && provablyInvalidDeclaration(key, prev) === null) {",
+   "anchorHits": 1,
+   "failed": [
+    "wave50-B1: assignDeclaration refuses ONLY an invalid shadow",
+    "wave50-B1: parseCss on the VERBATIM angle-units-001 block keeps the green",
+    "wave50-B1: a refused declaration leaves no !important behind",
+    "wave52-L5 F3 anchor: css-values/angle-units-001 still refuses exactly four declarations (VERBATIM)",
+    "wave52-L5 F-C: an out-of-range color-mix() percentage is provably invalid and cannot shadow a valid value",
+    "wave52-L5 F-C: css-color/color-mix-percents-02 (VERBATIM) — rows t6/t7 keep the purple rgb(), t1–t5 unchanged"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F3 anchor: css-values/angle-units-001"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M5",
+   "what": "F1: no importance refusal in collapseDeclaration",
+   "find": "  if (important[k] && !bang && provablyInvalidDeclaration(k, props[k]) === null) return;\n",
+   "replace": "",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F1: an important declaration is not displaced by a later normal one in the same block",
+    "wave52-L5 F1: the importance flag follows the write that was taken (no promotion)",
+    "wave52-L5 F1: the style attribute obeys the same rule, and an important RULE beats a normal inline declaration"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F1: an important declaration is not displaced",
+    "F1: the style attribute obeys the same rule"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M6",
+   "what": "F1: the old flag probe (nothing clears a stale flag)",
+   "find": "  if (bang) important[k] = true;\n  else delete important[k];",
+   "replace": "  if (bang && props[k] === v) important[k] = true;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F1: the importance flag follows the write that was taken (no promotion)"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F1: the importance flag follows the write that was taken"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M7",
+   "what": "F1: gate not widened to importance carriers",
+   "find": "    || matchedRules.some((r) => r.important !== undefined)\n    || Object.keys(inlineImportant).length > 0;",
+   "replace": ";",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F1: an important declaration in an EARLIER rule beats a later normal one on the same element",
+    "wave52-L5 F1: css-gaps/flex/flex-gap-decorations-024 (VERBATIM) hands the solid pink rule to the wire, key order unchanged",
+    "wave52-L5 F1: css-cascade/revert-val-002 (VERBATIM) — `display: block !important` beats a later `display: revert`",
+    "wave52-L5 F1: the style attribute obeys the same rule, and an important RULE beats a normal inline declaration",
+    "wave52-L5 F1: a non-revert-layer `all` survives the widened gate (the layered resolver keeps it)"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F1: an important declaration in an EARLIER rule",
+    "F1: css-gaps/flex/flex-gap-decorations-024",
+    "F1: css-cascade/revert-val-002",
+    "F1: the style attribute obeys the same rule",
+    "F1: a non-revert-layer `all`"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M8",
+   "what": "F1: layered resolver drops every `all`",
+   "find": "    if (name === 'all' && !keepAll) continue;",
+   "replace": "    if (name === 'all') continue;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F1: a non-revert-layer `all` survives the widened gate (the layered resolver keeps it)"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F1: a non-revert-layer `all`"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M9",
+   "what": "F1: an INVALID important value still refuses a later normal one",
+   "find": "  if (important[k] && !bang && provablyInvalidDeclaration(k, props[k]) === null) return;",
+   "replace": "  if (important[k] && !bang) return;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F1: the importance flag follows the write that was taken (no promotion)"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F1: the importance flag follows the write that was taken"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M10",
+   "what": "F-D: a pseudo-element counted under (b)",
+   "find": "        sp[2]++;                                                   // (c) pseudo-element",
+   "replace": "        sp[1]++;                                                   // (c) pseudo-element",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-D: selectorSpecificity follows Selectors-4 §17"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-D: selectorSpecificity follows Selectors-4"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M11",
+   "what": "F-D: unlayered host bucket merged unsorted",
+   "find": "    for (const r of bySpecificity(buckets[''])) assignDeclarations(merged, r.props);",
+   "replace": "    for (const r of buckets['']) assignDeclarations(merged, r.props);",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-D: a more specific EARLIER rule beats a less specific later one",
+    "wave52-L5 F-D: css-cascade/import-conditional-002 (VERBATIM, imports resolved) hands green to the wire"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-D: a more specific EARLIER rule",
+    "F-D: css-cascade/import-conditional-002"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M12",
+   "what": "F-D: pseudo buckets merged unsorted",
+   "find": "      for (const r of bySpecificity(rs)) assignDeclarations(mergedPe, r.props);",
+   "replace": "      for (const r of rs) assignDeclarations(mergedPe, r.props);",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-D: pseudo-element buckets and the layered path take the same specificity tie-break"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-D: pseudo-element buckets and the layered path"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M13",
+   "what": "F-D: no specificity step in the layered `better`",
+   "find": "    if (bySpec !== 0) return bySpec > 0;\n",
+   "replace": "",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-D: pseudo-element buckets and the layered path take the same specificity tie-break"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-D: pseudo-element buckets and the layered path"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M14",
+   "what": "F-D: @scope rule stamped with the rewritten chain",
+   "find": "specificity: selectorSpecificity(s) };",
+   "replace": "specificity: selectorSpecificity(scoped) };",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-D: an @scope rule's specificity is its own selector's, not the rewritten chain's"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-D: an @scope rule's specificity"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M15",
+   "what": "F-D: bag keys in merge order, not document order",
+   "find": "    copyInDocumentOrder(props, merged, [...buckets[''].map((r) => r.props), inlineProps]);",
+   "replace": "    Object.assign(props, merged);",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-D: css-cascade/import-conditional-002 (VERBATIM, imports resolved) hands green to the wire"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-D: css-cascade/import-conditional-002"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M16",
+   "what": "F2: parseCss back on split",
+   "find": "      for (const decl of splitDeclarations(body)) {",
+   "replace": "      for (const decl of body.split(';')) {",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F2: a `;` inside an unquoted url() no longer tears the declaration"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F2: a `;` inside an unquoted url()"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M17",
+   "what": "F2: no string tracking in the splitter",
+   "find": "    if (ch === '\"' || ch === \"'\") { quote = ch; continue; }\n    // §4.3.6:",
+   "replace": "    // §4.3.6:",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F2: strings, escapes and the QUOTED url form each survive their own `;`"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F2: strings, escapes and the QUOTED url form"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M18",
+   "what": "F2: no escape branch in the splitter",
+   "find": "    if (ch === '\\\\') { i++; continue; }\n    if (quote) {\n      // §4.3.5",
+   "replace": "    if (quote) {\n      // §4.3.5",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F2: strings, escapes and the QUOTED url form each survive their own `;`"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F2: strings, escapes and the QUOTED url form"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M19",
+   "what": "F2: no url-token branch in the splitter",
+   "find": "    if ((ch === 'u' || ch === 'U') && /^url\\(/i.test(s.slice(i, i + 4))",
+   "replace": "    if (false && (ch === 'u' || ch === 'U') && /^url\\(/i.test(s.slice(i, i + 4))",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F2: strings, escapes and the QUOTED url form each survive their own `;`"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F2: strings, escapes and the QUOTED url form"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M20",
+   "what": "F2: @keyframes frames back on split",
+   "find": "    for (const decl of splitDeclarations(decls)) {",
+   "replace": "    for (const decl of decls.split(';')) {",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F2: the style attribute and @keyframes frames go through the same splitter"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F2: the style attribute and @keyframes frames"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M21",
+   "what": "F2: style attribute back on split",
+   "find": "    for (const decl of splitDeclarations(attrs.style)) {",
+   "replace": "    for (const decl of attrs.style.split(';')) {",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F2: the style attribute and @keyframes frames go through the same splitter"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F2: the style attribute and @keyframes frames"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M22",
+   "what": "F-C: 100 % treated as out of range",
+   "find": "      if (n < 0 || n > 100) return `${m[2]}%`;",
+   "replace": "      if (n < 0 || n >= 100) return `${m[2]}%`;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-C: an out-of-range color-mix() percentage is provably invalid and cannot shadow a valid value"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-C: an out-of-range color-mix() percentage"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M23",
+   "what": "F-C: no R2",
+   "find": "  const pct = colorMixPercentOutOfRange(value);",
+   "replace": "  const pct = null;",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-C: an out-of-range color-mix() percentage is provably invalid and cannot shadow a valid value",
+    "wave52-L5 F-C: css-color/color-mix-percents-02 (VERBATIM) — rows t6/t7 keep the purple rgb(), t1–t5 unchanged"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-C: an out-of-range color-mix() percentage",
+    "F-C: css-color/color-mix-percents-02"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M24",
+   "what": "F-E: `li` not exempt",
+   "find": "export const LIST_ITEM_TAGS = new Set(['li', 'summary']);",
+   "replace": "export const LIST_ITEM_TAGS = new Set(['summary']);",
+   "anchorHits": 1,
+   "failed": [
+    "wave52-L5 F-E: a rule-less empty <li> keeps an EMPTY bag, not the 100x100 placeholder"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "F-E: a rule-less empty <li>"
+   ],
+   "expectedAllRed": true
+  },
+  {
+   "id": "M25",
+   "what": "F-E: exemption widened to `div`",
+   "find": "export const LIST_ITEM_TAGS = new Set(['li', 'summary']);",
+   "replace": "export const LIST_ITEM_TAGS = new Set(['li', 'summary', 'div']);",
+   "anchorHits": 1,
+   "failed": [
+    "A-RC1 part 2: a rule-less LEAF <div> still IS a placeholder",
+    "B-RC2: a container whose children were all DROPPED keeps the placeholder",
+    "wave30 A4: a NON-inherited-only root bag stays byte-for-byte legacy",
+    "wave30 A4: the bake runs AFTER the empty-node placeholder decision",
+    "wave52-L5 F-E: a rule-less empty <li> keeps an EMPTY bag, not the 100x100 placeholder"
+   ],
+   "restoredSha": "027808403f13f76af7d924566c4957a9bf2ec624f1ed3ec89cc5b8690b33e307",
+   "restoreOk": true,
+   "expected": [
+    "A-RC1 part 2: a rule-less LEAF <div> still IS a placeholder",
+    "F-E: a rule-less empty <li>"
+   ],
+   "expectedAllRed": true
+  }
+ ],
+ "allProven": true
+}

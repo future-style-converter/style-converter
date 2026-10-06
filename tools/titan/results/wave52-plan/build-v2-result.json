@@ -1,0 +1,195 @@
+[
+ {
+  "id": "L1",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "PASS: both must-fix defects are confirmed closed by executed checks, with no regression and no new must-fix. The measured F-B blast radius is 4 tests / 12 cells, reproduced by two fresh real drives on the fix-pass code. The watchlist relabel holds (\"unmatched 0\"). Pins are green, five mutations bite, the seam hunk applies clean on HEAD and after L5's set, and ownership is clean. L1 may proceed to ",
+  "flips": [
+   "css-color/display-p3-linear-001 web/ios/android f → P (HIGH)",
+   "css-color/display-p3-linear-002 web/ios/android f → P (HIGH)",
+   "css-color/display-p3-linear-003 web/ios/android f → P (HIGH)",
+   "css-view-transitions/fractional-box-with-shadow-new web f → P (HIGH), ios/android f → P (MED-HIGH)",
+   "css-view-transitions/fractional-box-with-shadow-old web f → P (HIGH), ios/android f → P (MED-HIGH)",
+   "css-view-transitions/fractional-box-with-overflow-children-new web f → P (HIGH), ios/android f → P (MED-HIGH)",
+   "css-view-transitions/fractional-box-with-overflow-children-old web f → P (HIGH), ios/android f → P (MED-HIGH)",
+   "movers up (P → P): css-color/display-p3-linear-004/-005/-006 ×3",
+   "negative controls, 0 change from L1 (measured): capture-with-visibility-mixed-descendants, class-specificity, clip-path-larger-than-border-box-on-child-of-named-element, far-away-capture, element-with-overflow, column-span-during-transition-doesnt-skip ×3",
+   "Sum: +7 web / +14 native. F-B's measured blast radius is 4 tests / 12 cells, all toward the ref."
+  ]
+ },
+ {
+  "id": "L2",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "The must-fix is fixed and confirmed by executed checks, and I found no regression. Ready for the gate. The 11 `z-index: -1` carriers (22 passing native cells) are no longer lifted. The rule that controls the lift is pinned on both natives on the verbatim extra-height-001 IR, and three independent mutations of it went red with assertion evidence. One should-fix and three nits remain; none of them c",
+  "flips": [
+   "css-flexbox/align-items-007 ios f->P (HIGH; still lifted by the fix-pass rule; falsifier: any red pixel remains)",
+   "css-flexbox/align-items-007 android f->P (HIGH)",
+   "T3 P->f predicted 0 (restated). The first cut would have cost ~30 cells: 11 declared-z tests x2 (CSS2/abspos/table-caption-is-containing-block-001, table-caption-passes-abspos-up-001, css-position/position-absolute-in-inline-margin-top, css-tables/height-distribution/extra-height-given-to-all-row-groups-001/002/005, percentage-sizing-of-table-cell-children-003/004/005/006, css-ui/box-sizing-026) plus CSS2/abspos/static-inside-inline-001/002/003 x2 and css-masking/clip-path/clip-path-path-with-zoom x2. All now stay in wave-51 order; identity replays equal the recorded SSIM.",
+   "css-sizing/aspect-ratio/abspos-011 ios/android: lifted but no pixel moves (stays P)",
+   "Unchanged from the first pass: +6 HIGH clip-path-ellipse-006/007/008 ios/android, +2 HIGH text-decoration-propagation-shadow ios/android, +1 HIGH flex-gap-decorations-027 web, +2 MED s-11-1-1b-006 ios/android (replay now 0.9636 / 0.9644), and the Fix A rows as in _note.md §5"
+  ]
+ },
+ {
+  "id": "L3",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "Must-fix CLOSED. The re-cut hunk applies and is verified with its pins: 258/0 alone and 281/0 with seam-2. Each of the four executed mutations fails the rows it should, and the original defect reproduces only when its row rewrite is withheld. The census matches independently (0 movers). The fix pass caused no regressions: Compose is 93/0, and 96/0 with seam-1. Only three nits remain. mustFixBefore",
+  "flips": [
+   "css/css-display/display-contents-float-001 ios f 0.9417 → P (HIGH)",
+   "css/css-display/display-contents-float-001 android f 0.941 → P (HIGH)",
+   "css/css-multicol/abspos-containing-block-outside-spanner ios f 0.9553 → P (MED-HIGH). Only counts after a PNG check shows zero red: the scorer passes a falsified picture at P 0.9712.",
+   "css/css-writing-modes/flexbox_align-items-stretch-writing-modes ios f 0.999 → P (MED in the note; the skeptic's executed iOS render of the verbatim IR with seam-2 painted 0 red and the ref's 250×100 green, which supports HIGH)",
+   "hunk-for-orchestrator-1: no flip (f1swiftUsed census: 0 movers)"
+  ]
+ },
+ {
+  "id": "L4",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "PASS: must-fix 1 is resolved. The exact defect mutation (M4) now turns 4 tests red where it used to survive 414/0, every independent sub-mutation of the pinned lines is killed, and the regression sweep (1131/0) and seam runs (386/0) are clean. One new nit (the block-form graphicsLayer alpha mutant survives). Nothing blocks the gate.",
+  "flips": [
+   "css-transforms/composited-under-rotateY-180deg-preserve-3d ios f 0.9565 → P ≈ 1.0000 — HIGH (unchanged; iOS files not touched this pass)",
+   "css-transforms/composited-under-rotateY-180deg-preserve-3d android f 0.9565 → P ≈ 1.0000 — HIGH (the applier wiring that produces it is now pinned by BackfaceCullChainTest)",
+   "css-transforms/css-transform-inherit-scale android f 0.9965 → P ≈ 0.997 — MED-HIGH, requires seam-1 v2 to be applied (the sentinel and the gated read change no pixel on the sole carrier)",
+   "b″ abspos-auto-sizing-fit-content-percentage-001..004 android: no movement (the four PNGs must `cmp` identical); no new watchlist lines"
+  ]
+ },
+ {
+  "id": "L5",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "D1 FIXED, confirmed by executed checks; no regression found. No must-fix remains. The open should-fixes D2–D4 and nit N1 are carried unchanged as the lane's declared \"Open\" list, and none has a corpus carrier. Ready for the gate, on one condition: the orchestrator applies seam-1…5 at step 3 and seam-6-FE-li at step 5, in the same step as L6's seam-3/seam-4 (or after them).",
+  "flips": [
+   "F-E landed WITH L6 seam-3/seam-4 (the only sanctioned landing): 0 flips from F-E; the 18 native passing cssom cells stay P with SSIM up (0.976–0.989 → 0.986–0.994); MED-HIGH (pixel replay; Android pitch not measured)",
+   "F-E ALONE (forbidden): 18 P → f, 9 on ios and 9 on android (additive-symbols-setter(±invalid), fallback-setter(±invalid), name-setter(±invalid), range-setter(±invalid), symbols-setter-invalid), on the coverage-ratio veto at ratio 2.22–2.87; HIGH",
+   "F-E web: 0 flips; 11 passing web cssom cells stay P with SSIM 0.976–0.988 → 0.992–0.998; MED-HIGH",
+   "Unchanged from the first pass: import-conditional-001/-002 web f→P ×2 HIGH, ios/android f→P ×4 HIGH; color-mix-percents-02 web f→P HIGH, ios/android f→P MED; flex-gap-decorations-024 ×3 P→P ≈1.0 MED; revert-val-002 web P→P (degenerate → honest) HIGH"
+  ]
+ },
+ {
+  "id": "L6",
+  "stage": "must-fix-remains",
+  "buildStatus": "COMPLETE",
+  "remaining": [
+   {
+    "severity": "must-fix",
+    "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/borders/sides/BorderSideApplier.kt",
+    "claim": "R1 (new in this re-verify): doubleGeom sends DOUBLE and GROOVE/RIDGE far-edge lines through innerEdgeStrokeCentre = max(inset, extent - inset). That clamp is only correct for inset <= extent/2. For the double's inner line (inset 5w/6) and the groove/ridge inner half-band (inset 3w/4), any box with extent < 2·inset gets the line mirrored instead of left at HEAD's `extent - inset`. Boxes one stroke tall or more therefore change: a 3px bottom double on a 3px-tall box paints one line. On a 0-tall box the groove/ridge outer and inner shades are inverted, and BorderSideZeroTallBandTest's groove pin asserts the inverted order. The innerEdgeStrokeCentre doc claim 'unchanged whenever the box is at least one stroke tall' is false for the two-line paths. Gate exposure measured: 0 cells. Product: wrong render for a short or empty element with a one-sided double/groove/ridge bottom or end border (composed-WPT mode has no 30dp floor), and inverted shades for any 0-tall groove/ridge box.",
+    "evidence": "Executed probe (temporary ZzL6SkepticProbeTest.kt, since removed): 9 run, 7 failed. Bottom double: 100x3 3px gives {2} (HEAD {0,2}); 100x6 6px gives {4,5} (HEAD {0,1,4,5}); 100x9 6px gives {4,5,7,8} (HEAD {3,4,7,8}). End double: 3x40 3px gives cols {2} (HEAD {0,2}). Groove 4px on 100x4: inner half gives {2,3} (HEAD {0,1}). 0-tall groove: outer half gives {0,1} (spec {2,3}). Controls 100x50 and 100x0 double are green. Own census: 0 of 53 wave51-fix two-line carriers and 0 of 44 fixture carriers are in the mirrored range. Fix: far-edge centre = max(extent, bandWidth) - inset, passing the side's full width into doubleGeom from drawDouble and drawGrooveOrRidge. This is identical to today for the single stroke, so the T2 pins and both measured cells are unchanged. Then flip the groove pin to outer {2,3} / inner {0,1}, pin p1/p3/p4/p5, and confirm a mutation back to max(inset, extent - inset) in doubleGeom goes red."
+   }
+  ],
+  "verdict": "M1 is fixed. I re-ran mutation 5: sideGeometry BOTTOM put back to `box.height - width / 2`, helper untouched. BorderSideZeroTallBandTest now goes 3 red; before the fix pass it stayed green.\n\nThe regression hunt found one new must-fix, R1. The T2 clamp `max(inset, extent - inset)` is also applied in doubleGeom, where the insets reach 5w/6 (double) and 3w/4 (groove/ridge). There it mirrors the inner",
+  "flips": [
+   "armenian-008 web f 0.9435 -> P (HIGH, replay 1.0000)",
+   "armenian-008 ios/android -> unmeasured-now via adjudication A (hunk-for-L12-1)",
+   "cssom pad / prefix-suffix -invalid web f -> P (MED-HIGH, needs L5 F-E)",
+   "cssom pad / prefix-suffix / negative -invalid natives x6 f -> P (MED-LOW, needs F-E + seam-3/4)",
+   "counter-suffix ios f 0.9285 -> P (MED, needs seam-2 device A/B)",
+   "cssom additive-symbols / fallback / name / range / symbols -invalid web: passing, picture-correctness rise to ~1.0 (MED-HIGH, newly named per skeptic S2; already watched)",
+   "T2: no verdict flip; Android multicol-003 orange band should sit at rows 161-163 and balancing-003 at 171-175"
+  ]
+ },
+ {
+  "id": "L7",
+  "stage": "clean",
+  "buildStatus": "COMPLETE",
+  "verdict": "PASS. No must-fix. Two should-fix items: (1) seam-2's semantic coupling with AbsposStaticOffset.swift is not stated and no test outside the seam pins it; (2) the FOLD's \"moves nothing else\" claim covers only the WPT corpus and misses the fixture flex carrier flex-align-items AI_SelfEnd. Six nits. The predicted flip (containing-block-002 ios f→P) is highly plausible: my replay reaches 1.0000.",
+  "shouldFix": 8,
+  "flips": [
+   "+1 ios, MED-HIGH: css-flexbox/abspos/position-absolute-containing-block-002 goes f → P. Replay: 0.9373 → 0.9967. Falsifier: green not at (76,76)-(175,175).",
+   "Picture-correctness, no flip, HIGH: the 16 android css-grid/abspos/grid-abspos-staticpos-align-{self,items}-* cells go to 1.0000. Replay: 1.0000 for center and self-end; 0.9992 / 0.9942 for the end variants, where the gap is green hidden under the border in the capture.",
+   "Picture-correctness, HIGH: 10 non-img web *-last-baseline-* cells go to 1.0000; their only difference from the ref is mark ink. The 2 img-last-baseline-* web cells are MED.",
+   "Picture-correctness: css-flexbox/abspos/position-absolute-containing-block-001 ios 0.9505 → 1.0000 (HIGH). justify-self-001 ios 0.9921 → 0.9996, margin-001 ios → 0.9968, margin-003 ios → 0.9951, fallback-justify-content-001 ios → 0.9882 (MED-HIGH).",
+   "Picture-correctness, MED-HIGH: css-contain/contain-inline-size-grid-indefinite-height-min-height-flex-row web 0.9729 → ~1.0. 5002 px differ from the ref; only 2 are outside the green.",
+   "Watched drops, no flip predicted: grid-abspos-staticpos-align-self-vertWM-003/004 android ~0.970 → ~0.967 (iOS proxy only, not a direct replay). vertWM-last-baseline-003/004 ios 0.9964 → 0.9950 (the brief's predicted overshoot until T4 lands). Predicted P→f: 0."
+  ]
+ },
+ {
+  "id": "L8",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "Must-fix 1 (Compose M-A routing FontFamily.Default to the Inter loader) is FIXED and pinned: the original repro passes and every mutation of the new split fails on an assertion. No regression found and no must-fix remains; one residual nit (a pre-existing race on the loader read) is not a defect of the fix.",
+  "flips": [
+   "css-writing-modes/forms/input-range-zero-inline-size ios +1 (HIGH)",
+   "css-writing-modes/forms/input-range-zero-inline-size android +1 (MED-HIGH, lowered from HIGH this pass: no Compose raster)",
+   "css-writing-modes/ch-units-vrl-003 ios +1 / ch-units-vrl-004 ios +1 (MED-HIGH)",
+   "css-writing-modes/ch-units-vrl-003 android +1 / ch-units-vrl-004 android +1 (MED)",
+   "css-writing-modes/ch-units-vrl-005 ios +1 / ch-units-vrl-006 ios +1 (MED-LOW, 0.9513 at the measured 24.2 line box)",
+   "css-writing-modes/ch-units-vrl-005 android +1 / ch-units-vrl-006 android +1 (LOW)",
+   "This fix pass itself moves no corpus cell: the FontFamily.Default ch population is 0 (census-family.json), and the M-C capture gate leaves both capture paths unchanged"
+  ]
+ },
+ {
+  "id": "L9",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "M1 is fixed on both twins (re-verified by executed checks), no regression was found, and nothing is must-fix. One new should-fix (R1): a mutation at the `PreBreakPipeline` call site survives, so `source = text` has no pin. Corpus reach is 0 because 028 does not fire on Android. Two nits (R2, R3), both with 0 corpus reach. The working is appended as \"## Re-verify\" to /Users/dranak/Documents/Project",
+  "flips": [
+   "css-overflow/line-clamp/block-ellipsis-030 ios: P 0.9983 → P ≈0.9989. Box 1 becomes `123…` as in the ref, against today's `12…`; the pre-fix F4 would have painted `…` alone (0.9974). MED-HIGH (PNG replay plus the real-font probe on three monospace faces).",
+   "css-overflow/line-clamp/block-ellipsis-028 ios: unchanged at P 0.9906. The fixed line 2 `…uncharacteristi‐…` runs past the 390px canvas; the pre-fix F4 `…room…` would have scored 0.9895. HIGH.",
+   "From the first pass, unchanged by this one: block-ellipsis-025 ios f 0.9495 → P ≈0.97 (MED-HIGH); 025 android P → ≈0.98; hyphens-manual-inline-012 android f → P (MED); block-ellipsis-032 android f 0.9397 → thin P (MED-LOW); 032 ios P 0.9577 → ≈0.98 (MED); hanging-punctuation-inline-001: no flip, ≈−0.004 android / −0.007 ios.",
+   "Named P→P movers (S1): block-ellipsis-023/024 android P 0.972, where the overlong word now paints full width as in the ref (seam-1's `!ruleBSoftWrap` call-site argument)."
+  ]
+ },
+ {
+  "id": "L10",
+  "stage": "fixed",
+  "buildStatus": "COMPLETE",
+  "remaining": [],
+  "verdict": "The must-fix is fixed and confirmed by execution. Under Rtl the gate refuses, so every RTL row or column stays on Row/Column exactly as at HEAD. That refusal is pinned and goes RED under mutation (KT-D1, KT-H2). seam-2 applies on HEAD and compiles, and with it applied 418 tests pass with 0 failures, all under the lock with a sha-verified restore. My independent census matches the lane: 14 RTL cont",
+  "flips": [
+   "No change from the lane's earlier predictions; the fix pass is gate-neutral by census. G stays {008, 027}, G_rtlRefused = 0, S_rtl = 0.",
+   "+1 HIGH css-backgrounds/background-clip-content-box-002 ios f 0.9992 -> P (needs seam-1)",
+   "+1 MED-HIGH css-gaps/flex/flex-gap-decorations-027 ios f 0.9030 -> P (needs L2 M1 + seam-1)",
+   "+1 MED css-gaps/flex/flex-gap-decorations-027 android f 0.9085 -> P (needs L2 M1 + the re-cut seam-2 + the hook shift)",
+   "No flip: 008 android P 0.9646 -> ~0.9996; 045/046 small rises. Predicted P -> f: 0. The 7 RTL tests (14 containers) are refused by the gate both before and after the fix, so they are unchanged."
+  ]
+ },
+ {
+  "id": "L11",
+  "stage": "must-fix-remains",
+  "buildStatus": "COMPLETE",
+  "remaining": [
+   {
+    "severity": "must-fix",
+    "file": "tools/titan/results/wave52-all-reset-postload-colour/hunk-for-orchestrator-1.patch",
+    "claim": "The fix pass's gate-list hunk puts fixtures/combinations/all-then-color.json on tools/visual/gate-fixtures.txt with no baseline. That makes it gate-only, so the cross-platform pair gate still runs. Its ATC_InitialUnderRedParent text row (and the standalone `span` child capture) is predicted to fail that gate, because `all: initial` resets font-family to the UA initial serif on web while the natives draw a system sans. As handed off, the closing gate's fixture net (`BASELINE=1 ./test-all.sh --gate-set`, exit 0 x8) would re-raise exit 4. The note and the hunk header only say 'may need a ledger line', which is an unmeasured blast radius.",
+    "evidence": "The real web harness computed style shows span-005 and atc_directionsurvives-006 with font-family Times, against `Inter, -apple-system, …` for every other component. Proxy captures (web Times, iOS -apple-system/SF, Android Roboto/Arial, face re-declared after `all` on text nodes only) through the REAL tools/visual/compare-screenshots.mjs give exit 4 with 2 unexpected divergences: 003_ATC_InitialUnderRedParent iOS-web SSIM 0.9415 (dpx 1.59%) and Android-web 0.9420 (dpx 1.52%); iOS-Android 0.9971; DirectionSurvives 0.984 passes; spec oracle 0/12 violations. Fix, any one of: (a) drop `_text` from ATC_InitialUnderRedParent (the v1 oracle cannot see glyph colour, and the README says no text unless the interaction needs it); (b) re-declare the harness font-family AFTER `all` on both text nodes; (c) ship a ledger line with reason, owner and expiry inside the hunk. Then re-run the proxy."
+   }
+  ],
+  "verdict": "M1 FIXED and confirmed by executed checks: CSS truth by two mechanisms, the real harness with seam-4, mutations on both, and the converter order premise. Seam-4 is sound and lock-verified, with no runtime regression. One NEW must-fix in the fix pass: the gate-list hunk lands a fixture whose text row is predicted to fail the cross-platform pair gate (exit 4). It needs a fixture change (drop the tex",
+  "flips": [
+   "selectors/has-visited ios f 0.9469 -> P (MED). Unchanged from the first pass; the skeptic's corrected simulation gives 0.9573, +0.0073 above the bar.",
+   "Fix pass: none. seam-4 reaches 0 corpus cells (composed and per-element WPT); it changes only 3 legacy rows of all-then-color.json."
+  ]
+ },
+ {
+  "id": "L12",
+  "stage": "clean",
+  "buildStatus": "COMPLETE",
+  "verdict": "PASS with should-fix items. Every headline number in the lane note reproduces exactly with my own scripts, the captures are byte-identical, every move is attributed, every predicted flip shows the claimed picture, and no foreign file was edited. There are no must-fix defects.\n\nBefore or with L12's PR:\n- D1: add a pin for the refUniform wiring on the composed and stitch paths.\n- D4: commit absence-",
+  "shouldFix": 8,
+  "flips": [
+   "Calibration evidence (wave52-open captures, byte-identical, so instrument-only): gained 13, lost 8, newly measured 0, unmeasured-now 19 — HIGH",
+   "GAINED css-cascade/initial-background-color web/ios/android f 0.5414 → P 1.0000 (green on green, PNG-checked) — HIGH (plan said MED)",
+   "GAINED css-gaps/flex/flex-gap-decorations-033 web f 0.94 → P 1.0000 — HIGH (pre-registered)",
+   "GAINED css-gaps/flex/flex-gap-decorations-034 ×3 and -035 ×3 f 0.92–0.947 → P 0.987–0.992 — HIGH, honest per PNG. These are instrument-only, NOT L2/L10 flips as the plan assumed",
+   "GAINED filter-effects/backdrop-filter-root-element ×3 f 0.54 → P 1.0/0.9998 — HIGH, not in the plan; green canvas on every side",
+   "LOST css-gaps/flex/flex-gap-decorations-033 ios/android P 1.0000 → f 0.9400 — HIGH, pre-registered (C1), honest",
+   "LOST css-display/display-contents-root-background ×3 P ~1.0 → f 0.535 — HIGH, NOT pre-registered, honest: the ref now shows Chrome's green root canvas and all three runtimes paint white",
+   "LOST css-view-transitions/column-span-during-transition-doesnt-skip ×3 P 0.9879 → f 0.9332 — HIGH under the new ref alone; the plan noted these stay P only with L1's F-B",
+   "UNMEASURED NOW: the 19 absence-only cells (web 7 / iOS 6 / Android 6); 21 at the closing gate with L6's adjudication",
+   "Degenerate → honest, no verdict change: clip-path-paddingBox/contentBox-1d/1e ×12 from 0.9585/0.9696 to 0.9997–1.0000",
+   "s-11-1-1b-005 web stays P but drops 0.9947 → 0.9658 on a picture missing the black square (degenerate pass); -006 web 0.9656 → 0.9923",
+   "Plan §7's 'lost = exactly 2' is falsified: L12 alone loses 8, or 5 if L1 F-B restores column-span. The gate summary will read absence-only=19 blank-captures=45, not 36"
+  ]
+ }
+]

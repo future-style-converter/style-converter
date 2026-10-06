@@ -1,0 +1,16 @@
+Swift focused run 2026-10-05 17:10 (no seam; full xcodebuild log trimmed to its summary lines):
+Test Suite 'KoreanHangulFormalTests' passed at 2026-10-05 17:10:37.313.
+	 Executed 4 tests, with 0 failures (0 unexpected) in 0.003 (0.031) seconds
+Test Suite 'ListMarkerAbsposItemRasterTests' passed at 2026-10-05 17:10:39.694.
+	 Executed 7 tests, with 0 failures (0 unexpected) in 2.380 (2.382) seconds
+Test Suite 'ListMarkerInFlowItemRasterTests' passed at 2026-10-05 17:10:39.844.
+	 Executed 2 tests, with 0 failures (0 unexpected) in 0.149 (0.150) seconds
+Test Suite 'ListMarkerOutsideHangTests' passed at 2026-10-05 17:10:39.970.
+	 Executed 6 tests, with 0 failures (0 unexpected) in 0.003 (0.125) seconds
+Test Suite 'ListMarkerTests' passed at 2026-10-05 17:10:40.444.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 0.334 (0.474) seconds
+Test Suite 'StyleConverterRuntimeTests.xctest' passed at 2026-10-05 17:10:40.444.
+	 Executed 43 tests, with 0 failures (0 unexpected) in 2.870 (3.163) seconds
+Test Suite 'Selected tests' passed at 2026-10-05 17:10:40.445.
+	 Executed 43 tests, with 0 failures (0 unexpected) in 2.870 (3.164) seconds
+** TEST SUCCEEDED **

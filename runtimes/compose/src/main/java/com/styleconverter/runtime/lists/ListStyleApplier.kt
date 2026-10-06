@@ -44,6 +44,15 @@ object ListStyleApplier {
             ListStyleType.KATAKANA -> "${toKatakana(index)}."
             ListStyleType.HIRAGANA_IROHA -> "${toHiraganaIroha(index)}."
             ListStyleType.KATAKANA_IROHA -> "${toKatakanaIroha(index)}."
+            // Wave 52 (lane L6, T1) — css-counter-styles-3 §7.1
+            // korean-hangul-formal: the 1-based counter value expanded by
+            // the additive table, plus the style's OWN suffix ("," — the
+            // descriptor's `", "` minus the gap ListMarkerRow supplies; the
+            // measured argument is on KoreanHangulFormal.SUFFIX), not the
+            // "." every other arm here appends. Byte-parallel with iOS
+            // ListMarkerText.marker's `.koreanHangulFormal` case.
+            ListStyleType.KOREAN_HANGUL_FORMAL ->
+                KoreanHangulFormal.expand(index + 1) + KoreanHangulFormal.SUFFIX
 
             ListStyleType.CUSTOM -> "${index + 1}."
         }

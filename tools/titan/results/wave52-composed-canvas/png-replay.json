@@ -1,0 +1,477 @@
+{
+ "method": "ssim.js fast on RGBA, same-size pairs; see header",
+ "fixA": {
+  "rows": 274,
+  "asIsMismatch": 0,
+  "predMismatchVsBrief": 0,
+  "passingRise": 172,
+  "passingDrop": 4,
+  "passingDropCells": [
+   "css/css-break/borders-002.html web 0.9646→0.9633",
+   "css/css-break/borders-002.html android 0.9594→0.9581",
+   "css/css-text-decor/text-decoration-color-recalc.html ios 0.9819→0.9818",
+   "css/selectors/has-style-sharing-002.html ios 0.9633→0.9624"
+  ],
+  "passingBelow095": [],
+  "scorerFlipCandidates": [
+   "css/css-anchor-position/anchor-position-multicol-007.html android 0.9499→0.9519",
+   "css/css-contain/contain-inline-size-bfc-floats-001.html ios 0.9406→0.9531",
+   "css/css-contain/contain-inline-size-bfc-floats-001.html android 0.9394→0.9519",
+   "css/css-gaps/flex/flex-gap-decorations-034.html web 0.9458→0.9539",
+   "css/css-gaps/flex/flex-gap-decorations-034.html ios 0.9466→0.9548",
+   "css/css-gaps/flex/flex-gap-decorations-034.html android 0.9466→0.9548",
+   "css/css-position/position-absolute-semi-replaced-stretch-input.html web 0.9422→0.9596",
+   "css/filter-effects/backdrop-filter-basic-blur.html ios 0.9469→0.9526"
+  ]
+ },
+ "cells": [
+  {
+   "mech": "M1",
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "web",
+   "recorded": 0.9012,
+   "pass": false,
+   "replay": 0.9723
+  },
+  {
+   "mech": "M1",
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "ios",
+   "recorded": 0.903,
+   "pass": false,
+   "replay": 0.9378
+  },
+  {
+   "mech": "M1",
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "platform": "android",
+   "recorded": 0.9085,
+   "pass": false,
+   "replay": 0.9379
+  },
+  {
+   "mech": "M1",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "web",
+   "recorded": 0.9656,
+   "pass": true,
+   "replay": 0.9635
+  },
+  {
+   "mech": "M1",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "ios",
+   "recorded": 0.9321,
+   "pass": false,
+   "replay": 0.9286
+  },
+  {
+   "mech": "M1",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "android",
+   "recorded": 0.9332,
+   "pass": false,
+   "replay": 0.9297
+  },
+  {
+   "mech": "T6+M1",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "ios",
+   "recorded": 0.9321,
+   "pass": false,
+   "replay": 0.9636
+  },
+  {
+   "mech": "T6+M1",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "android",
+   "recorded": 0.9332,
+   "pass": false,
+   "replay": 0.9644
+  },
+  {
+   "mech": "T1",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-006.html",
+   "platform": "ios",
+   "recorded": 0.9488,
+   "pass": false,
+   "replay": 0.9921
+  },
+  {
+   "mech": "T1",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-006.html",
+   "platform": "android",
+   "recorded": 0.948,
+   "pass": false,
+   "replay": 0.9901
+  },
+  {
+   "mech": "T1",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-007.html",
+   "platform": "ios",
+   "recorded": 0.9488,
+   "pass": false,
+   "replay": 0.9921
+  },
+  {
+   "mech": "T1",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-007.html",
+   "platform": "android",
+   "recorded": 0.948,
+   "pass": false,
+   "replay": 0.9901
+  },
+  {
+   "mech": "T1",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-008.html",
+   "platform": "ios",
+   "recorded": 0.9488,
+   "pass": false,
+   "replay": 0.9921
+  },
+  {
+   "mech": "T1",
+   "test": "css/css-masking/clip-path/clip-path-ellipse-008.html",
+   "platform": "android",
+   "recorded": 0.948,
+   "pass": false,
+   "replay": 0.9901
+  },
+  {
+   "mech": "T2",
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "platform": "ios",
+   "recorded": 0.9484,
+   "pass": false,
+   "replay": 0.9994
+  },
+  {
+   "mech": "T2",
+   "test": "css/css-text-decor/text-decoration-propagation-shadow.html",
+   "platform": "android",
+   "recorded": 0.9486,
+   "pass": false,
+   "replay": 0.9989
+  },
+  {
+   "mech": "T3",
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": false,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3",
+   "test": "css/css-flexbox/align-items-007.html",
+   "platform": "android",
+   "recorded": 0.9966,
+   "pass": false,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/CSS2/abspos/static-inside-inline-001.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/CSS2/abspos/static-inside-inline-001.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/CSS2/abspos/static-inside-inline-002.html",
+   "platform": "ios",
+   "recorded": 0.9622,
+   "pass": true,
+   "replay": 0.9622
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/CSS2/abspos/static-inside-inline-002.html",
+   "platform": "android",
+   "recorded": 0.9617,
+   "pass": true,
+   "replay": 0.9617
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/CSS2/abspos/static-inside-inline-003.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/CSS2/abspos/static-inside-inline-003.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/CSS2/abspos/table-caption-is-containing-block-001.html",
+   "platform": "ios",
+   "recorded": 0.9903,
+   "pass": true,
+   "replay": 0.9903
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/CSS2/abspos/table-caption-is-containing-block-001.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/CSS2/abspos/table-caption-passes-abspos-up-001.html",
+   "platform": "ios",
+   "recorded": 0.9903,
+   "pass": true,
+   "replay": 0.9903
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/CSS2/abspos/table-caption-passes-abspos-up-001.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-content-bearing",
+   "test": "css/css-cascade/unset-val-002.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-content-bearing",
+   "test": "css/css-cascade/unset-val-002.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/css-masking/clip-path/clip-path-path-with-zoom.html",
+   "platform": "ios",
+   "recorded": 1,
+   "pass": true,
+   "replay": 1
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/css-masking/clip-path/clip-path-path-with-zoom.html",
+   "platform": "android",
+   "recorded": 1,
+   "pass": true,
+   "replay": 1
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-position/position-absolute-in-inline-margin-top.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-position/position-absolute-in-inline-margin-top.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-lifted",
+   "test": "css/css-sizing/aspect-ratio/abspos-011.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-lifted",
+   "test": "css/css-sizing/aspect-ratio/abspos-011.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-001.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-001.html",
+   "platform": "android",
+   "recorded": 0.9952,
+   "pass": true,
+   "replay": 0.9952
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-002.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-002.html",
+   "platform": "android",
+   "recorded": 0.9952,
+   "pass": true,
+   "replay": 0.9952
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-005.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/extra-height-given-to-all-row-groups-005.html",
+   "platform": "android",
+   "recorded": 0.9952,
+   "pass": true,
+   "replay": 0.9952
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-003.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-003.html",
+   "platform": "android",
+   "recorded": 0.9954,
+   "pass": true,
+   "replay": 0.9954
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-004.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-004.html",
+   "platform": "android",
+   "recorded": 0.9954,
+   "pass": true,
+   "replay": 0.9954
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-005.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-005.html",
+   "platform": "android",
+   "recorded": 0.9954,
+   "pass": true,
+   "replay": 0.9954
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-006.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-tables/height-distribution/percentage-sizing-of-table-cell-children-006.html",
+   "platform": "android",
+   "recorded": 0.9954,
+   "pass": true,
+   "replay": 0.9954
+  },
+  {
+   "mech": "T3-content-bearing",
+   "test": "css/css-transforms/css-scale-nested-001.html",
+   "platform": "ios",
+   "recorded": 0.999,
+   "pass": true,
+   "replay": 0.999
+  },
+  {
+   "mech": "T3-content-bearing",
+   "test": "css/css-transforms/css-scale-nested-001.html",
+   "platform": "android",
+   "recorded": 0.9981,
+   "pass": true,
+   "replay": 0.9981
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/css-transforms/css-scale-nested-001.html",
+   "platform": "ios",
+   "recorded": 0.999,
+   "pass": true,
+   "replay": 0.999
+  },
+  {
+   "mech": "T3-later-step8-root",
+   "test": "css/css-transforms/css-scale-nested-001.html",
+   "platform": "android",
+   "recorded": 0.9981,
+   "pass": true,
+   "replay": 0.9981
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-ui/box-sizing-026.html",
+   "platform": "ios",
+   "recorded": 0.9974,
+   "pass": true,
+   "replay": 0.9974
+  },
+  {
+   "mech": "T3-declared-z",
+   "test": "css/css-ui/box-sizing-026.html",
+   "platform": "android",
+   "recorded": 0.9967,
+   "pass": true,
+   "replay": 0.9967
+  }
+ ]
+}

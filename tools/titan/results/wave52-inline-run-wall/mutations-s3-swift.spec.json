@@ -1,0 +1,26 @@
+{
+ "_why": "Wave 52 L9 fix pass (skeptic S3): `pre-line` collapses spaces (css-text-3 \u00a74.1.1); putting it back into the glyph-less preserving arm must fail the collapsing pin.",
+ "cmd": [
+  "xcodebuild",
+  "test",
+  "-scheme",
+  "StyleConverterRuntime",
+  "-destination",
+  "platform=macOS,variant=Mac Catalyst,arch=arm64",
+  "-derivedDataPath",
+  "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/isw/dd",
+  "-only-testing:StyleConverterRuntimeTests/InlineSpanRingTests"
+ ],
+ "cwd": ".",
+ "mutations": [
+  {
+   "id": "W6-pre-line-readmitted",
+   "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/inline/InlineSpanRing.swift",
+   "old": "                case \"pre\", \"pre-wrap\", \"break-spaces\": break",
+   "new": "                case \"pre\", \"pre-wrap\", \"pre-line\", \"break-spaces\": break",
+   "expectFail": [
+    "testCollapsingWhiteSpaceKeywordRefusesEvenWhenGlyphless"
+   ]
+  }
+ ]
+}

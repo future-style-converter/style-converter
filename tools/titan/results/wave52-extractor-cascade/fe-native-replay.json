@@ -1,0 +1,2239 @@
+{
+ "scorer": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/l5fix/tools/titan/inject-wpt-block.mjs",
+ "scratch": "/var/folders/34/h7173byn5kb_lddtbn4hqt9w0000gn/T/l5-fe-replay-n52m0k",
+ "summary": {
+  "apparatusReproduces": true,
+  "nativePassingCells": 18,
+  "feAloneLost": [
+   "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid android",
+   "css-counter-styles/cssom/cssom-additive-symbols-setter ios",
+   "css-counter-styles/cssom/cssom-additive-symbols-setter android",
+   "css-counter-styles/cssom/cssom-fallback-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-fallback-setter-invalid android",
+   "css-counter-styles/cssom/cssom-fallback-setter ios",
+   "css-counter-styles/cssom/cssom-fallback-setter android",
+   "css-counter-styles/cssom/cssom-name-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-name-setter-invalid android",
+   "css-counter-styles/cssom/cssom-name-setter ios",
+   "css-counter-styles/cssom/cssom-name-setter android",
+   "css-counter-styles/cssom/cssom-range-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-range-setter-invalid android",
+   "css-counter-styles/cssom/cssom-range-setter ios",
+   "css-counter-styles/cssom/cssom-range-setter android",
+   "css-counter-styles/cssom/cssom-symbols-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-symbols-setter-invalid android"
+  ],
+  "feAloneGap32Lost": [
+   "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid android",
+   "css-counter-styles/cssom/cssom-additive-symbols-setter ios",
+   "css-counter-styles/cssom/cssom-additive-symbols-setter android",
+   "css-counter-styles/cssom/cssom-fallback-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-fallback-setter-invalid android",
+   "css-counter-styles/cssom/cssom-fallback-setter ios",
+   "css-counter-styles/cssom/cssom-fallback-setter android",
+   "css-counter-styles/cssom/cssom-name-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-name-setter-invalid android",
+   "css-counter-styles/cssom/cssom-name-setter ios",
+   "css-counter-styles/cssom/cssom-name-setter android",
+   "css-counter-styles/cssom/cssom-range-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-range-setter-invalid android",
+   "css-counter-styles/cssom/cssom-range-setter ios",
+   "css-counter-styles/cssom/cssom-range-setter android",
+   "css-counter-styles/cssom/cssom-symbols-setter-invalid ios",
+   "css-counter-styles/cssom/cssom-symbols-setter-invalid android"
+  ],
+  "feSeam34Lost": [],
+  "webLost": []
+ },
+ "replays": [
+  {
+   "cell": "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid web",
+   "wave51fix": "P 0.9884",
+   "today": {
+    "ssim": 0.9884,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9958,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid ios",
+   "wave51fix": "P 0.9887",
+   "today": {
+    "ssim": 0.9887,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.08,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.046,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.046,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9938,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.08,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-additive-symbols-setter-invalid android",
+   "wave51fix": "P 0.9884",
+   "today": {
+    "ssim": 0.9884,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.044,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.044,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9935,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-additive-symbols-setter web",
+   "wave51fix": "P 0.9884",
+   "today": {
+    "ssim": 0.9884,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9958,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-additive-symbols-setter ios",
+   "wave51fix": "P 0.9887",
+   "today": {
+    "ssim": 0.9887,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.08,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.046,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.046,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9938,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.08,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-additive-symbols-setter android",
+   "wave51fix": "P 0.9884",
+   "today": {
+    "ssim": 0.9884,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.044,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.044,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9935,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-fallback-setter-invalid web",
+   "wave51fix": "P 0.9879",
+   "today": {
+    "ssim": 0.9879,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.109
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9957,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-fallback-setter-invalid ios",
+   "wave51fix": "P 0.9876",
+   "today": {
+    "ssim": 0.9876,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.109
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9936,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9936,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.993,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-fallback-setter-invalid android",
+   "wave51fix": "P 0.9878",
+   "today": {
+    "ssim": 0.9878,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.109
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.109,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.109,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9932,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.109,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-fallback-setter web",
+   "wave51fix": "P 0.9879",
+   "today": {
+    "ssim": 0.9879,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.109
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9957,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-fallback-setter ios",
+   "wave51fix": "P 0.9876",
+   "today": {
+    "ssim": 0.9876,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.109
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9936,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9936,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.993,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.109,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-fallback-setter android",
+   "wave51fix": "P 0.9878",
+   "today": {
+    "ssim": 0.9878,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.109
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.109,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9935,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.109,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9932,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.109,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-name-setter-invalid web",
+   "wave51fix": "P 0.9755",
+   "today": {
+    "ssim": 0.9755,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.157,
+    "refInkPct": 0.168
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9928,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.157,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      56,
+      76,
+      112,
+      132,
+      152
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-name-setter-invalid ios",
+   "wave51fix": "P 0.9756",
+   "today": {
+    "ssim": 0.9756,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.14,
+    "refInkPct": 0.168
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9869,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.072,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      36,
+      36,
+      52,
+      52,
+      52
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9868,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.072,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      36,
+      36,
+      68,
+      68,
+      68
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9863,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.14,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      52,
+      68,
+      100,
+      116,
+      132
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-name-setter-invalid android",
+   "wave51fix": "P 0.976",
+   "today": {
+    "ssim": 0.976,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.133,
+    "refInkPct": 0.168
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9868,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.068,
+     "refInkPct": 0.168,
+     "bandTops": [
+      35,
+      35,
+      35,
+      51,
+      51,
+      51
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9867,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.068,
+     "refInkPct": 0.168,
+     "bandTops": [
+      35,
+      35,
+      35,
+      67,
+      67,
+      67
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9862,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.133,
+     "refInkPct": 0.168,
+     "bandTops": [
+      35,
+      51,
+      67,
+      99,
+      115,
+      131
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-name-setter web",
+   "wave51fix": "P 0.9755",
+   "today": {
+    "ssim": 0.9755,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.157,
+    "refInkPct": 0.168
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9928,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.157,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      56,
+      76,
+      112,
+      132,
+      152
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-name-setter ios",
+   "wave51fix": "P 0.9756",
+   "today": {
+    "ssim": 0.9756,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.14,
+    "refInkPct": 0.168
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9869,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.072,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      36,
+      36,
+      52,
+      52,
+      52
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9868,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.072,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      36,
+      36,
+      68,
+      68,
+      68
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9863,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.14,
+     "refInkPct": 0.168,
+     "bandTops": [
+      36,
+      52,
+      68,
+      100,
+      116,
+      132
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-name-setter android",
+   "wave51fix": "P 0.976",
+   "today": {
+    "ssim": 0.976,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.133,
+    "refInkPct": 0.168
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9868,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.068,
+     "refInkPct": 0.168,
+     "bandTops": [
+      35,
+      35,
+      35,
+      51,
+      51,
+      51
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9867,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.068,
+     "refInkPct": 0.168,
+     "bandTops": [
+      35,
+      35,
+      35,
+      67,
+      67,
+      67
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9862,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.133,
+     "refInkPct": 0.168,
+     "bandTops": [
+      35,
+      51,
+      67,
+      99,
+      115,
+      131
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-negative-setter-invalid web",
+   "wave51fix": "P 0.984",
+   "today": {
+    "ssim": 0.984,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.102,
+    "refInkPct": 0.19
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.992,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.102,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-negative-setter-invalid ios",
+   "wave51fix": "f 0.9849",
+   "today": {
+    "ssim": 0.9849,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.088,
+    "refInkPct": 0.19
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9906,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9906,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9906,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.088,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-negative-setter-invalid android",
+   "wave51fix": "f 0.9848",
+   "today": {
+    "ssim": 0.9848,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.19
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9905,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9905,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9903,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.19,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-negative-setter web",
+   "wave51fix": "P 0.984",
+   "today": {
+    "ssim": 0.984,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.102,
+    "refInkPct": 0.19
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.992,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.102,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-negative-setter ios",
+   "wave51fix": "f 0.9849",
+   "today": {
+    "ssim": 0.9849,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.088,
+    "refInkPct": 0.19
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9906,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9906,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9906,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.088,
+     "refInkPct": 0.19,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-negative-setter android",
+   "wave51fix": "f 0.9848",
+   "today": {
+    "ssim": 0.9848,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.19
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9905,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9905,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.045,
+     "refInkPct": 0.19,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9903,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.19,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-pad-setter-invalid web",
+   "wave51fix": "f 0.9821",
+   "today": {
+    "ssim": 0.9821,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.274
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9898,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-pad-setter-invalid ios",
+   "wave51fix": "f 0.9819",
+   "today": {
+    "ssim": 0.9819,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.274
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9876,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-pad-setter-invalid android",
+   "wave51fix": "f 0.982",
+   "today": {
+    "ssim": 0.982,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.274
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.274,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.274,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9876,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.274,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-pad-setter web",
+   "wave51fix": "f 0.9821",
+   "today": {
+    "ssim": 0.9821,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.274
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9898,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-pad-setter ios",
+   "wave51fix": "f 0.9819",
+   "today": {
+    "ssim": 0.9819,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.274
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9876,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.274,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-pad-setter android",
+   "wave51fix": "f 0.982",
+   "today": {
+    "ssim": 0.982,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.274
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.274,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9879,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.274,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9876,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.274,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid web",
+   "wave51fix": "f 0.9844",
+   "today": {
+    "ssim": 0.9844,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.205
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9919,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid ios",
+   "wave51fix": "f 0.9848",
+   "today": {
+    "ssim": 0.9848,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.205
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9903,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid android",
+   "wave51fix": "f 0.9849",
+   "today": {
+    "ssim": 0.9849,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.205
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.205,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.205,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9904,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.205,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-prefix-suffix-setter web",
+   "wave51fix": "f 0.9844",
+   "today": {
+    "ssim": 0.9844,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.205
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9919,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-prefix-suffix-setter ios",
+   "wave51fix": "f 0.9848",
+   "today": {
+    "ssim": 0.9848,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.205
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9903,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.205,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-prefix-suffix-setter android",
+   "wave51fix": "f 0.9849",
+   "today": {
+    "ssim": 0.9849,
+    "pass": false,
+    "colorFailed": false,
+    "coverageRatioFailed": true,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.205
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.205,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9901,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.205,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9904,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.205,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-range-setter-invalid web",
+   "wave51fix": "P 0.9882",
+   "today": {
+    "ssim": 0.9882,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.103
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9977,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-range-setter-invalid ios",
+   "wave51fix": "P 0.9878",
+   "today": {
+    "ssim": 0.9878,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.103
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9939,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9939,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9936,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-range-setter-invalid android",
+   "wave51fix": "P 0.988",
+   "today": {
+    "ssim": 0.988,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.103
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.103,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.103,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9937,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.103,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-range-setter web",
+   "wave51fix": "P 0.9882",
+   "today": {
+    "ssim": 0.9882,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.103
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9977,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-range-setter ios",
+   "wave51fix": "P 0.9878",
+   "today": {
+    "ssim": 0.9878,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.103
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9939,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9939,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9936,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.103,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-range-setter android",
+   "wave51fix": "P 0.988",
+   "today": {
+    "ssim": 0.988,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.103
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.103,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9938,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.103,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9937,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.103,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-symbols-setter-invalid web",
+   "wave51fix": "P 0.988",
+   "today": {
+    "ssim": 0.988,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.089,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feWeb": {
+     "ssim": 0.9962,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.089,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      56,
+      76
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-symbols-setter-invalid ios",
+   "wave51fix": "P 0.9876",
+   "today": {
+    "ssim": 0.9876,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.079,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9937,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9937,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.041,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      36,
+      36
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9934,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.079,
+     "refInkPct": 0.102,
+     "bandTops": [
+      36,
+      52,
+      68
+     ]
+    }
+   }
+  },
+  {
+   "cell": "css-counter-styles/cssom/cssom-symbols-setter-invalid android",
+   "wave51fix": "P 0.9878",
+   "today": {
+    "ssim": 0.9878,
+    "pass": true,
+    "colorFailed": false,
+    "coverageRatioFailed": false,
+    "presenceFailed": false,
+    "capInkPct": 0.076,
+    "refInkPct": 0.102
+   },
+   "predicted": {
+    "feAlone": {
+     "ssim": 0.9936,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feAloneGap32": {
+     "ssim": 0.9936,
+     "pass": false,
+     "colorFailed": false,
+     "coverageRatioFailed": true,
+     "presenceFailed": false,
+     "capInkPct": 0.038,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      35,
+      35
+     ]
+    },
+    "feSeam34": {
+     "ssim": 0.9935,
+     "pass": true,
+     "colorFailed": false,
+     "coverageRatioFailed": false,
+     "presenceFailed": false,
+     "capInkPct": 0.076,
+     "refInkPct": 0.102,
+     "bandTops": [
+      35,
+      51,
+      67
+     ]
+    }
+   }
+  }
+ ]
+}

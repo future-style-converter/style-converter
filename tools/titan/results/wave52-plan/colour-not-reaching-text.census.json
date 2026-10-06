@@ -1,0 +1,5663 @@
+{
+ "allCarriers": [
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-001.json",
+   "component": "wpt__css-cascade__all-prop-001__1-002",
+   "text": "321",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [
+    "Direction",
+    "UnicodeBidi",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "Color",
+    "TextDecorationLine",
+    "FontWeight",
+    "FontStyle",
+    "FontVariantCaps",
+    "FontSize",
+    "FontFamily",
+    "LineHeight",
+    "OutlineStyle",
+    "OutlineColor",
+    "Float",
+    "LetterSpacing",
+    "Display",
+    "TextAlign",
+    "Width",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "after": [],
+   "test": "css/css-cascade/all-prop-001.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9689,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.964,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9641,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-001.json",
+   "component": "all-prop-001__1__0-003",
+   "text": "987 654",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "Color",
+    "TextDecorationLine",
+    "FontWeight",
+    "FontStyle",
+    "FontVariantCaps",
+    "FontSize",
+    "FontFamily",
+    "LineHeight",
+    "OutlineStyle",
+    "OutlineColor",
+    "Float",
+    "LetterSpacing",
+    "Display",
+    "TextAlign",
+    "Width",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "after": [
+    "Direction"
+   ],
+   "test": "css/css-cascade/all-prop-001.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9689,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.964,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9641,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-002.json",
+   "component": "all-prop-002__1__1__0-008",
+   "text": null,
+   "allKeyword": [
+    "INHERIT"
+   ],
+   "before": [],
+   "after": [],
+   "test": "css/css-cascade/all-prop-002.html",
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9709,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "android": {
+     "ssim": 0.9702,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-002.json",
+   "component": "all-prop-002__1__1__1-010",
+   "text": null,
+   "allKeyword": [
+    "INHERIT"
+   ],
+   "before": [],
+   "after": [],
+   "test": "css/css-cascade/all-prop-002.html",
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9709,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "android": {
+     "ssim": 0.9702,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-inherit-color.json",
+   "component": "all-prop-inherit-color__0__0-013",
+   "text": "Test passes if this text is green.",
+   "allKeyword": [
+    "INHERIT"
+   ],
+   "before": [],
+   "after": [
+    "Color"
+   ],
+   "test": "css/css-cascade/all-prop-inherit-color.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "ios": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "android": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-initial-color.json",
+   "component": "all-prop-initial-color__0__0-015",
+   "text": "Test passes if this text is green.",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [],
+   "after": [
+    "Color"
+   ],
+   "test": "css/css-cascade/all-prop-initial-color.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9783,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "ios": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "android": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-initial-visited.json",
+   "component": "wpt__css-cascade__all-prop-initial-visited__0-016",
+   "text": "This text must be green.",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [],
+   "after": [
+    "TextDecorationLine",
+    "Position",
+    "BoxSizing",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "PaddingTop",
+    "PaddingRight",
+    "PaddingBottom",
+    "PaddingLeft",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "Display",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "test": "css/css-cascade/all-prop-initial-visited.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9839,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "ios": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "android": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    }
+   },
+   "postLoadExtracted": true
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-revert-color.json",
+   "component": "all-prop-revert-color__0__0-018",
+   "text": "Test passes if this text is green.",
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [],
+   "after": [
+    "Color"
+   ],
+   "test": "css/css-cascade/all-prop-revert-color.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "ios": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "android": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-cascade",
+   "ir": "wpt__css-cascade__all-prop-unset-color.json",
+   "component": "all-prop-unset-color__0__0-022",
+   "text": "Test passes if this text is green.",
+   "allKeyword": [
+    "UNSET"
+   ],
+   "before": [],
+   "after": [
+    "Color"
+   ],
+   "test": "css/css-cascade/all-prop-unset-color.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "ios": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    },
+    "android": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true,
+     "degenerateFailed": true
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-display",
+   "ir": "wpt__css-display__display-contents-button.json",
+   "component": "wpt__css-display__display-contents-button__2-036",
+   "text": "PASS",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [],
+   "after": [
+    "FontKerning",
+    "FontFeatureSettings",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "Display"
+   ],
+   "test": "css/css-display/display-contents-button.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9765,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9692,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9705,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-display",
+   "ir": "wpt__css-display__display-contents-details.json",
+   "component": "wpt__css-display__display-contents-details__3-043",
+   "text": "S",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [],
+   "after": [
+    "Display",
+    "Position",
+    "BoxSizing",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "PaddingTop",
+    "PaddingRight",
+    "PaddingBottom",
+    "PaddingLeft",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "test": "css/css-display/display-contents-details.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9724,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.968,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9693,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": true
+  },
+  {
+   "section": "css-display",
+   "ir": "wpt__css-display__display-contents-details.json",
+   "component": "display-contents-details__1__0-044",
+   "text": "A",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [],
+   "after": [
+    "Display",
+    "Position",
+    "BoxSizing",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "PaddingTop",
+    "PaddingRight",
+    "PaddingBottom",
+    "PaddingLeft",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "test": "css/css-display/display-contents-details.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9724,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.968,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9693,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": true
+  },
+  {
+   "section": "css-display",
+   "ir": "wpt__css-display__display-contents-fieldset.json",
+   "component": "wpt__css-display__display-contents-fieldset__3-193",
+   "text": "AS",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [],
+   "after": [
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "Display"
+   ],
+   "test": "css/css-display/display-contents-fieldset.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9716,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.968,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9693,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-display",
+   "ir": "wpt__css-display__display-contents-fieldset.json",
+   "component": "display-contents-fieldset__1__0-194",
+   "text": "S",
+   "allKeyword": [
+    "INITIAL"
+   ],
+   "before": [],
+   "after": [
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "Display"
+   ],
+   "test": "css/css-display/display-contents-fieldset.html",
+   "cells": {
+    "web": {
+     "ssim": 0.9716,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.968,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9693,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__0__0-194",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__1__0-196",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__2__0-198",
+   "text": "textarea",
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__3__0-200",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__4__0-202",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__5__0-204",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__6__0-206",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__7__0-208",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__8__0-210",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__9__0-212",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__10__0-214",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__11__0-217",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__12__0-220",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  },
+  {
+   "section": "css-ui",
+   "ir": "wpt__css-ui__appearance-revert-001.tentative.json",
+   "component": "appearance-revert-001.tentative__13__0-222",
+   "text": null,
+   "allKeyword": [
+    "REVERT"
+   ],
+   "before": [
+    "BackgroundColor",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor"
+   ],
+   "after": [],
+   "test": "css/css-ui/appearance-revert-001.tentative.html",
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "ios": {
+     "ssim": 0.9897,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    },
+    "android": {
+     "ssim": 0.9895,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false,
+     "degenerateFailed": false
+    }
+   },
+   "postLoadExtracted": false
+  }
+ ],
+ "firstLetterCarriers": [
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-dynamic-before-after-first-letter-001.html",
+   "rules": [
+    [
+     "isplay-contents-pass-green-no-red-ref.html\">\n<style>\n    div",
+     "color: blue;"
+    ],
+    [
+     "div::first-letter",
+     "color: red;"
+    ],
+    [
+     ".active div::before,\n    .active div::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9965,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-first-letter-001.html",
+   "rules": [
+    [
+     "-contents-pass-green-no-red-ref.html\">\n<style>\n    #contents",
+     "display: contents"
+    ],
+    [
+     "#contents::first-letter",
+     "background-color: red"
+    ],
+    [
+     "#container::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9907,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9937,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-first-letter-002.html",
+   "rules": [
+    [
+     "\"display-contents-pass-green-no-red-ref.html\">\n<style>\n  div",
+     "color: red"
+    ],
+    [
+     "div::first-letter",
+     "background: transparent /* To trigger first-letter pseudo element */"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9977,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-first-line-002.html",
+   "rules": [
+    [
+     "#victim::first-letter",
+     "float:right;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9975,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9959,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9945,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-001.html",
+   "rules": [
+    [
+     "lows the usual formating rules for floats.\">\n  <style>\n  div",
+     "font-size: 50px;\n    position: absolute;\n    left: 30px;\n    top: 50px;\n    back"
+    ],
+    [
+     "div::first-letter",
+     "color: green;\n    background: green;\n    float: left;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9806,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9726,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9717,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-002.html",
+   "rules": [
+    [
+     " non-pseudo element with the same content.\">\n  <style>\n  div",
+     "font-size: 50px;\n    position: absolute;\n    left: 30px;\n    top: 50px;"
+    ],
+    [
+     "#d2::first-letter",
+     "color: green;\n    background: green;\n    float: left;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9821,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9807,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9799,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-003.html",
+   "rules": [
+    [
+     " non-pseudo element with the same content.\">\n  <style>\n  div",
+     "font-size: 50px;\n    position: absolute;\n    left: 30px;\n    top: 50px;"
+    ],
+    [
+     "#d1::first-letter",
+     "color: red;\n    background: red;\n    float: left;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9849,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9835,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9826,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-004.html",
+   "rules": [
+    [
+     "ave proper ::first-letter styling.\">\n    <style>\n        div",
+     "font-size: 36px;"
+    ],
+    [
+     "div::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9985,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9794,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9617,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-005.html",
+   "rules": [
+    [
+     "ave proper ::first-letter styling.\">\n    <style>\n        div",
+     "font-size: 36px;"
+    ],
+    [
+     "div::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9247,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9054,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9224,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-sibling-display-change.html",
+   "rules": [
+    [
+     ".csswg.org/css-pseudo-4/#first-letter-pseudo\">\n<style>\n  div",
+     "color: green"
+    ],
+    [
+     "div::first-letter",
+     "color: red"
+    ],
+    [
+     ".green::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-whitespace.html",
+   "rules": [
+    [
+     "floated ::first-letter changes\">\n<style>\n  div::first-letter",
+     "color: black;"
+    ],
+    [
+     ".floatLetter::first-letter",
+     "float: left;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9966,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9952,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "rules": [
+    [
+     "tter-background-image-ref.html\">\n<style>\n  div::first-letter",
+     "color: lime;"
+    ],
+    [
+     "div.image::first-letter",
+     "/* Lime background */\n    background-image: url('data:image/png;base64,iVBORw0KG"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9977,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image.html",
+   "rules": [
+    [
+     "tter-background-image-ref.html\">\n<style>\n  div::first-letter",
+     "color: lime;\n    /* Lime background */\n    background-image: url('data:image/png"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9977,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-block-to-inline.html",
+   "rules": [
+    [
+     "/#first-letter-pseudo\">\n<style>\n  #outer.block::first-letter",
+     "color: red"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-capitalize-supplementary-char.html",
+   "rules": [
+    [
+     "s character for word boundary detection.\">\n  <style>\n  .test",
+     "font-size: 36px;\n    text-transform: capitalize;"
+    ],
+    [
+     ".test::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9996,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9925,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9747,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-digraph.html",
+   "rules": [
+    [
+     "st-letter respects the Dutch 'ij' digraph.\">\n  <style>\n  div",
+     "font-size: 32px;"
+    ],
+    [
+     "div p::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9778,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.932,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9679,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "rules": [
+    [
+     "st-letter-exclude-block-child-marker-ref.html\">\n<style>\nbody",
+     "margin-left: 5em; font-size: 12px;"
+    ],
+    [
+     "li::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.8489,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.86,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8525,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+   "rules": [
+    [
+     "t-letter-exclude-inline-child-marker-ref.html\">\n<style>\nbody",
+     "margin-left: 5em;"
+    ],
+    [
+     "li::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.7361,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.7363,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.7551,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "rules": [
+    [
+     "=\"first-letter-exclude-inline-marker-ref.html\">\n<style>\nbody",
+     "margin-left: 5em;"
+    ],
+    [
+     "ibi::first-letter, ibo::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.8311,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8407,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8554,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-insert-text-node-dynamic.html",
+   "rules": [
+    [
+     "-insert-text-node-dynamic-ref.html\">\n<style>\np::first-letter",
+     "text-decoration: underline; color: #CB000F;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9031,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9024,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9018,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "rules": [
+    [
+     "rel=\"help\" href=\"https://crbug.com/977044\">\n<style>\n  #outer",
+     "display: list-item;\n    overflow: auto; /* Triggers a crash in Blink see link to"
+    ],
+    [
+     "#outer::first-letter",
+     "float: left;\n    color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-of-html-root-refcrash.html",
+   "rules": [
+    [
+     "oot-crash-ref.html\">\n<style id=\"sheet\">\n  html::first-letter",
+     "font-size: initial"
+    ]
+   ],
+   "postLoadExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9936,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9936,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9936,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-001.html",
+   "rules": [
+    [
+     "eudo-4/#first-letter-styling\">\n  <style>\n    p::first-letter",
+     "opacity: 0;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9982,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9982,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9983,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-opacity-float-001.html",
+   "rules": [
+    [
+     "rrectly with dynamic changes.\">\n<style>\n  #one::first-letter",
+     "float: left; opacity: 0.5"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9975,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-and-space.html",
+   "rules": [
+    [
+     "ave proper ::first-letter styling.\">\n    <style>\n        div",
+     "font-size: 36px;"
+    ],
+    [
+     "div::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9986,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9834,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9931,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-dynamic.html",
+   "rules": [
+    [
+     "nctuation-dynamic-ref.html\">\n<style>\n  #target::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9957,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9947,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9944,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span-nested.html",
+   "rules": [
+    [
+     "kip-empty-span-nested-ref.html\">\n<style>\n  div::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span.html",
+   "rules": [
+    [
+     "etter-skip-empty-span-ref.html\">\n<style>\n  div::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "rules": [
+    [
+     "atch\" href=\"first-letter-skip-marker-ref.html\">\n<style>\nbody",
+     "margin-left:100px;"
+    ],
+    [
+     "li::first-letter",
+     "color: green"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9324,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9363,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9372,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-text-and-display-change.html",
+   "rules": [
+    [
+     "f_letter_uppercase.html\">\n<style>\n  #container::first-letter",
+     "text-transform: uppercase"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9882,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9822,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width-2.html",
+   "rules": [
+    [
+     "#test::first-letter",
+     "text-transform: uppercase;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9994,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-width.html",
+   "rules": [
+    [
+     "#test::first-letter",
+     "text-transform: uppercase;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9994,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-before-after.html",
+   "rules": [
+    [
+     "st-letter-with-before-after-ref.html\">\n<style>\n  #t1::before",
+     "content: \"F\""
+    ],
+    [
+     "div::first-letter",
+     "color: green;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9907,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9988,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-preceding-new-line.html",
+   "rules": [
+    [
+     "ng new line character is allowed or not\">\n  <style>\n    body",
+     "font-size: 30px;"
+    ],
+    [
+     "#sample::first-letter",
+     "color: green;\n      border: solid 1px blue;"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9834,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.998,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-quote.html",
+   "rules": [
+    [
+     "first-letter-with-quote-ref.html\">\n<style>\n  p::first-letter",
+     "color: red"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9948,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9948,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-span.html",
+   "rules": [
+    [
+     "\"first-letter-with-span-ref.html\">\n<style>\n  p::first-letter",
+     "color: red"
+    ]
+   ],
+   "postLoadExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9998,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "postLoadColourCandidates": [
+  {
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-center-safe.html",
+   "selectorsWithColor": [
+    "rafts.csswg.org/css-anchor-position-1/#anchor-center\">\n<style>\n.anchor",
+    ".infobox",
+    ".anchor2",
+    ".infobox2"
+   ],
+   "irColorCount": 4,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0.5450980392156862}",
+    "{\"r\": 1, \"g\": 1, \"b\": 1}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9522,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-multicol-011.html",
+   "selectorsWithColor": [
+    "\" href=\"../reference/ref-filled-green-100px-square.xht\">\n<style>\n  #mc"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9967,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/all-prop-initial-visited.html",
+   "selectorsWithColor": [
+    "a:visited"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9839,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/all-prop-revert-visited.html",
+   "selectorsWithColor": [
+    "k rel=\"match\" href=\"all-prop-revert-visited-ref.html\">\n<style>\n  :root",
+    "a:visited"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0.9333333333333333}",
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9988,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/all-prop-unset-visited.html",
+   "selectorsWithColor": [
+    "nk rel=\"match\" href=\"all-prop-unset-visited-ref.html\">\n<style>\n  :root",
+    "a:visited"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0.9333333333333333}",
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/scope-visited.html",
+   "selectorsWithColor": [
+    "@scope(.with_class_inner)",
+    "/* Should match */\n      @scope(.with_class_outer)"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.876,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.876,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.876,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/color-mix-basic-001.html",
+   "selectorsWithColor": [
+    "=\"fuzzy\" content=\"maxDifference=0-1; totalPixels=0-25088\">\n<style>\ndiv"
+   ],
+   "irColorCount": 26,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/color-mix-currentcolor-visited.html",
+   "selectorsWithColor": [
+    "itle=\"Matthieu Dubet\" href=\"https://github.com/mdubet\">\n<style>\na:link",
+    "a:visited"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9975,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9904,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9929,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/color-mix-non-srgb-001.html",
+   "selectorsWithColor": [
+    "link rel=\"match\" href=\"./color-mix-non-srgb-001-ref.html\">\n<style>\ndiv"
+   ],
+   "irColorCount": 9,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/currentcolor-003.html",
+   "selectorsWithColor": [
+    "in https://github.com/w3c/csswg-drafts/issues/1510\">\n  <style>\n    div",
+    "div::first-line"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9862,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": true,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.7604,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": true,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.7655,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": true,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-color",
+   "test": "css/css-color/currentcolor-004.html",
+   "selectorsWithColor": [
+    "or\" title=\"Matthieu Dubet\" href=\"https://github.com/mdubet\">\n<style>\na",
+    "a:visited"
+   ],
+   "irColorCount": 3,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}",
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9913,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9901,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-dynamic-before-after-001.html",
+   "selectorsWithColor": [
+    "h\" href=\"display-contents-pass-green-no-red-ref.html\">\n<style>\n    div",
+    "div::before",
+    ".active div::before"
+   ],
+   "irColorCount": 7,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9898,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9888,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9879,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-dynamic-before-after-first-letter-001.html",
+   "selectorsWithColor": [
+    "h\" href=\"display-contents-pass-green-no-red-ref.html\">\n<style>\n    div",
+    "div::first-letter",
+    ".active div::before,\n    .active div::first-letter"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 1}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9965,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-dynamic-generated-content-fieldset-001.html",
+   "selectorsWithColor": [
+    "ynamic-generated-content-fieldset-001-ref.html\">\n<style>\n.after::after"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9991,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-first-letter-001.html",
+   "selectorsWithColor": [
+    "#container::first-letter"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9907,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9937,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-first-letter-002.html",
+   "selectorsWithColor": [
+    "tch\" href=\"display-contents-pass-green-no-red-ref.html\">\n<style>\n  div"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}",
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9977,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-first-line-001.html",
+   "selectorsWithColor": [
+    "#container::first-line"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9997,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9986,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-first-line-002.html",
+   "selectorsWithColor": [
+    "ch\" href=\"display-contents-pass-green-no-red-ref.html\">\n<style>\n  span",
+    "#container::first-line"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9907,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9936,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-state-change-001.html",
+   "selectorsWithColor": [
+    "y-contents-state-change-001-ref.html\">\n<style>\n:focus-within .contents",
+    ".contents"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9985,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9985,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-inline-dynamic-001.html",
+   "selectorsWithColor": [
+    "ch\" href=\"display-inline-dynamic-001-ref.html\">\n<style>div::first-line"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9901,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9944,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-007.html",
+   "selectorsWithColor": [
+    "first-line pseudoelement of the line-clamp container.\">\n<style>\n.clamp",
+    ".clamp::first-line"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0.5019607843137255}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9841,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9843,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9844,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-008.html",
+   "selectorsWithColor": [
+    "seudoelement of a parent of the line-clamp container.\">\n<style>\n.clamp",
+    ".container::first-line"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0.5019607843137255}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9841,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9843,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9844,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-overflow",
+   "test": "css/css-overflow/line-clamp/block-ellipsis-009.html",
+   "selectorsWithColor": [
+    "pseudoelement of a child of the line-clamp container.\">\n<style>\n.clamp",
+    ".inner::first-line"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0.5019607843137255}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.984,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9839,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9795,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-051.html",
+   "selectorsWithColor": [
+    "the OS-default highlight colors for div::selection.\">\n\n  <style>\n  div"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0, \"a\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9086,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9073,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.906,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-053.html",
+   "selectorsWithColor": [
+    "the OS-default highlight colors for div::selection.\">\n\n  <style>\n  div",
+    "div::selection"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0, \"a\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9086,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9073,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.906,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-054.html",
+   "selectorsWithColor": [
+    "the OS-default highlight colors for div::selection.\">\n\n  <style>\n  div"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0, \"a\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9086,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9073,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.906,
+     "wptPass": null,
+     "scoreExcluded": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-056.html",
+   "selectorsWithColor": [
+    "div::selection"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9994,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9986,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/active-selection-057.html",
+   "selectorsWithColor": [
+    "div#subtest1::selection , hr#subtest2::selection"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9994,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9986,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-001.html",
+   "selectorsWithColor": [
+    "div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9806,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9726,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9717,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-002.html",
+   "selectorsWithColor": [
+    "#d1 span",
+    "#d2::first-letter"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9821,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9807,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9799,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-003.html",
+   "selectorsWithColor": [
+    "#d1::first-letter",
+    "#d2 span"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9849,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9835,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9826,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-004.html",
+   "selectorsWithColor": [
+    "div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9985,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9794,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9617,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-005.html",
+   "selectorsWithColor": [
+    "div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9247,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9054,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9224,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-sibling-display-change.html",
+   "selectorsWithColor": [
+    "s://drafts.csswg.org/css-pseudo-4/#first-letter-pseudo\">\n<style>\n  div",
+    "div::first-letter",
+    ".green::first-letter"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-and-whitespace.html",
+   "selectorsWithColor": [
+    "dered for floated ::first-letter changes\">\n<style>\n  div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9966,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9952,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image-dynamic.html",
+   "selectorsWithColor": [
+    "=\"first-letter-background-image-ref.html\">\n<style>\n  div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9977,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-background-image.html",
+   "selectorsWithColor": [
+    "=\"first-letter-background-image-ref.html\">\n<style>\n  div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9977,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-block-to-inline.html",
+   "selectorsWithColor": [
+    "s-pseudo-4/#first-letter-pseudo\">\n<style>\n  #outer.block::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-capitalize-supplementary-char.html",
+   "selectorsWithColor": [
+    ".test::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9996,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9925,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9747,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-digraph.html",
+   "selectorsWithColor": [
+    "div p::first-letter"
+   ],
+   "irColorCount": 9,
+   "irColors": [
+    "{\"r\": 0.8274509803921568, \"g\": 0.8274509803921568, \"b\": 0.8274509803921568}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9778,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.932,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9679,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "selectorsWithColor": [
+    "li::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.8489,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.86,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8525,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+   "selectorsWithColor": [
+    "li::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.7361,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.7363,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.7551,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "selectorsWithColor": [
+    "ibi::first-letter, ibo::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.8311,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8407,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8554,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-insert-text-node-dynamic.html",
+   "selectorsWithColor": [
+    "rst-letter-insert-text-node-dynamic-ref.html\">\n<style>\np::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9031,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9024,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9018,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "selectorsWithColor": [
+    "#outer::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-and-space.html",
+   "selectorsWithColor": [
+    "div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9986,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9834,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9931,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-punctuation-dynamic.html",
+   "selectorsWithColor": [
+    "-letter-punctuation-dynamic-ref.html\">\n<style>\n  #target::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9957,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9947,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9944,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span-nested.html",
+   "selectorsWithColor": [
+    "t-letter-skip-empty-span-nested-ref.html\">\n<style>\n  div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-empty-span.html",
+   "selectorsWithColor": [
+    "f=\"first-letter-skip-empty-span-ref.html\">\n<style>\n  div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "selectorsWithColor": [
+    "li::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9324,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9363,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9372,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-before-after.html",
+   "selectorsWithColor": [
+    "div::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9907,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9988,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-preceding-new-line.html",
+   "selectorsWithColor": [
+    "#sample::first-line",
+    "#sample::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9834,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.998,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-quote.html",
+   "selectorsWithColor": [
+    "ch\" href=\"first-letter-with-quote-ref.html\">\n<style>\n  p::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9948,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9948,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-with-span.html",
+   "selectorsWithColor": [
+    "tch\" href=\"first-letter-with-span-ref.html\">\n<style>\n  p::first-letter"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9998,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-line-and-placeholder.html",
+   "selectorsWithColor": [
+    "input::placeholder"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9834,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9743,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9743,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-line-inherited-with-transition.html",
+   "selectorsWithColor": [
+    "irst-line-inherited-with-transition-ref.html\">\n<style>\n  p::first-line"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9853,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9504,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9299,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-line-insert-text-node-dynamic.html",
+   "selectorsWithColor": [
+    "p::first-line"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.8983,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8967,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8973,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-scrollable-001.html",
+   "selectorsWithColor": [
+    "eir block container are treated as scrollable overflow. \">\n<style>\ndiv"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9914,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9912,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9742,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "test": "css/css-text-decor/text-decoration-color-selection-pseudo-01.html",
+   "selectorsWithColor": [
+    "p::selection"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9896,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9892,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.99,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-ui",
+   "test": "css/css-ui/caret-color-bar-shape-text-color.html",
+   "selectorsWithColor": [
+    "er is overlapped, so the text color is not overridden.\">\n<style>\n  div"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9907,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.998,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-002.html",
+   "selectorsWithColor": [
+    "is painted with its normal text color, not overridden.\">\n<style>\n  div"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 1, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9674,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.962,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9666,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-ui",
+   "test": "css/css-ui/caret-color-block-shape-text-color-004.html",
+   "selectorsWithColor": [
+    "ter under the block caret as it is when specified.\">\n<style>\n  #target"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 1}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9635,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9583,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9626,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-ui",
+   "test": "css/css-ui/caret-color-underscore-shape-text-color.html",
+   "selectorsWithColor": [
+    "er is overlapped, so the text color is not overridden.\">\n<style>\n  div"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9907,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.998,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "test": "css/css-view-transitions/inline-child-with-composited-filter.html",
+   "selectorsWithColor": [
+    "#child"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0.5647058823529412, \"g\": 0.9333333333333333, \"b\": 0.5647058823529412}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9956,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9931,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9941,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "test": "css/css-view-transitions/inline-child-with-filter.html",
+   "selectorsWithColor": [
+    "#child"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0.5647058823529412, \"g\": 0.9333333333333333, \"b\": 0.5647058823529412}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9956,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9931,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9941,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/dir-style-01a.html",
+   "selectorsWithColor": [
+    ":dir(ltr)",
+    ":dir(rtl)",
+    ":dir(foopy)"
+   ],
+   "irColorCount": 20,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 1}",
+    "{\"r\": 0, \"g\": 1, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9564,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8479,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8172,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/dir-style-02a.html",
+   "selectorsWithColor": [
+    ":dir(ltr)",
+    ":dir(rtl)",
+    ":dir(foopy)"
+   ],
+   "irColorCount": 29,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 1}",
+    "{\"r\": 0, \"g\": 1, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9455,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9423,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/has-visited.html",
+   "selectorsWithColor": [
+    "rel=\"match\" href=\"has-visited-ref.html\">\n<style>\n  #parent1:has(:link)",
+    "#parent2:has(:visited)",
+    "#parent3:has(:any-link)"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9854,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9469,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9509,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/any-link-attribute-removal.html",
+   "selectorsWithColor": [
+    "s://drafts.csswg.org/selectors-4/#the-any-link-pseudo\">\n<style>\n  span",
+    ":any-link + span"
+   ],
+   "irColorCount": 1,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/class-id-attr.html",
+   "selectorsWithColor": [
+    "<link rel=\"match\" href=\"class-id-attr-ref.html\">\n<style>\n[class=\"foo\"]"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9987,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9989,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/negated-nth-child-when-ancestor-changes.html",
+   "selectorsWithColor": [
+    "ectors-4/#child-index\">\n<style>\n.ancestor :not(:nth-child(even of .c))"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/negated-nth-last-child-when-ancestor-changes.html",
+   "selectorsWithColor": [
+    "s-4/#child-index\">\n<style>\n.ancestor :not(:nth-last-child(even of .c))"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9978,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-containing-ancestor.html",
+   "selectorsWithColor": [
+    "g.org/selectors-4/#child-index\">\n<style>\n  div:nth-child(odd of .a .b)"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9993,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9996,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-in-shadow-root.html",
+   "selectorsWithColor": [
+    "irstChild\">Should be red</div>\n        <style>\n        :nth-child(odd)",
+    ":nth-child(even)"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.9749,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9749,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9749,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-attr.html",
+   "selectorsWithColor": [
+    "selectors-4/#child-index\">\n<style>\n  p:nth-child(even of [attr=\"yes\"])"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9965,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-class-prefix.html",
+   "selectorsWithColor": [
+    "g/selectors-4/#child-index\">\n<style>\n  p:nth-child(even of [class^=t])"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9965,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-class.html",
+   "selectorsWithColor": [
+    "csswg.org/selectors-4/#child-index\">\n<style>\n  p:nth-child(even of .c)"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9965,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-has.html",
+   "selectorsWithColor": [
+    "org/selectors-4/#child-index\">\n<style>\n  p:nth-child(even of :has(.c))"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9371,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.96,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-id-prefix.html",
+   "selectorsWithColor": [
+    ".org/selectors-4/#child-index\">\n<style>\n  p:nth-child(even of [id^=t])"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9965,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-ids.html",
+   "selectorsWithColor": [
+    "/#child-index\">\n<style>\n  p:nth-child(even of #t1, #t2, #t3, #t4, #t5)"
+   ],
+   "irColorCount": 3,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0, \"b\": 0}",
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.9995,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9964,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-in-ancestor.html",
+   "selectorsWithColor": [
+    "g.org/selectors-4/#child-index\">\n<style>\n  p:nth-child(odd of .c) span"
+   ],
+   "irColorCount": 2,
+   "irColors": [
+    "{\"r\": 0, \"g\": 0.5019607843137255, \"b\": 0}"
+   ],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9387,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9606,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-in-is.html",
+   "selectorsWithColor": [
+    ".org/selectors-4/#child-index\">\n<style>\n  p:is(:nth-child(even of .c))"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": false,
+   "cells": {
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9976,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9965,
+     "wptPass": true,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "selectors",
+   "test": "css/selectors/invalidation/nth-child-of-in-shadow-root.html",
+   "selectorsWithColor": [
+    "e shadowrootmode=\"open\">\n    <style>\n      div:nth-child(even of .foo)"
+   ],
+   "irColorCount": 0,
+   "irColors": [],
+   "structureExtracted": true,
+   "cells": {
+    "web": {
+     "ssim": 0.97,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.97,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.97,
+     "wptPass": false,
+     "scoreExcluded": null,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "counts": {
+  "perTestIrDocs": 1435,
+  "allCarriers": 28,
+  "firstLetterCarriers": 36,
+  "postLoadColourCandidates": 83,
+  "postLoadExtractedTests": 277,
+  "postLoadTestsWithUaColouredTags": 17
+ },
+ "postLoadTestsWithUaColouredTags": [
+  "css/css-cascade/all-prop-initial-visited.html",
+  "css/css-cascade/all-prop-revert-visited.html",
+  "css/css-cascade/all-prop-unset-visited.html",
+  "css/css-cascade/revert-layer-015.html",
+  "css/css-cascade/scope-visited.html",
+  "css/css-color/color-mix-currentcolor-visited.html",
+  "css/css-color/currentcolor-004.html",
+  "css/css-display/display-contents-state-change-001.html",
+  "css/css-display/display-contents-suppression-dynamic-001.html",
+  "css/css-gaps/flex/flex-gap-decorations-023.html",
+  "css/css-position/containing-block-change-button.html",
+  "css/css-pseudo/first-line-and-placeholder.html",
+  "css/css-ui/accent-color-visited.html",
+  "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+  "css/selectors/caret-color-visited-inheritance.html",
+  "css/selectors/has-visited.html",
+  "css/selectors/invalidation/any-link-attribute-removal.html"
+ ],
+ "_note": "wave52-plan family colour-not-reaching-text. Source run: tools/titan/runs/wave51-fix (1435 per-test IR docs, 30 sections). allCarriers: every component whose properties carry {\"type\":\"All\"}, with the property types BEFORE and AFTER the All entry (IR order = extractor bag order = source declaration order) and the gate cells of its test. firstLetterCarriers: tests in the run whose source matches /::?first-letter\\b/ with their ::first-letter rule bodies and gate cells. postLoadColourCandidates: postLoadExtracted tests whose source declares color: inside a rule whose selector carries a class/id/pseudo, with the count and distinct values of Color properties the IR carries. postLoadTestsWithUaColouredTags: postLoadExtracted tests containing a[href]/button/input/select/textarea/mark (blast radius of an introduce-when-differs-from-parent colour rule). inkMeasurement: pngjs bounding boxes of css-cascade/all-prop-initial-color ref vs captures (r,g,b<240 = ink; green = r<60,g>100,b<60; black = all<60).",
+ "inkMeasurement": {
+  "test": "css/css-cascade/all-prop-initial-color.html",
+  "ref": {
+   "bbox": [
+    16,
+    35,
+    253,
+    51
+   ],
+   "inkPx": 1364,
+   "classes": {
+    "antialias": 718,
+    "green": 646
+   }
+  },
+  "web": {
+   "bbox": [
+    16,
+    36,
+    213,
+    51
+   ],
+   "inkPx": 1069,
+   "classes": {
+    "antialias": 713,
+    "black": 356
+   },
+   "note": "narrower face: all:initial also reset font-family in the harness browser"
+  },
+  "ios": {
+   "bbox": [
+    16,
+    35,
+    252,
+    51
+   ],
+   "inkPx": 1261,
+   "classes": {
+    "antialias": 758,
+    "black": 503
+   }
+  },
+  "android": {
+   "bbox": [
+    16,
+    35,
+    252,
+    51
+   ],
+   "inkPx": 1217,
+   "classes": {
+    "antialias": 875,
+    "black": 342
+   }
+  }
+ },
+ "handverdictCells": {
+  "052": {
+   "test": "css/css-cascade/all-prop-initial-color.html",
+   "platform": "android",
+   "wave49-final": 0.9993,
+   "wave51-fix": 0.9993
+  },
+  "055": {
+   "test": "css/selectors/invalidation/nth-child-of-class.html",
+   "platform": "android",
+   "wave49-final": 0.9965,
+   "wave51-fix": 0.9965
+  },
+  "087": {
+   "test": "css/css-pseudo/first-letter-skip-empty-span.html",
+   "platform": "web",
+   "wave49-final": 0.9999,
+   "wave51-fix": 0.9999
+  }
+ }
+}

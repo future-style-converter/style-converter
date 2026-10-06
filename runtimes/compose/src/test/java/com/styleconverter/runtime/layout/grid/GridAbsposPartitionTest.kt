@@ -17,6 +17,13 @@ package com.styleconverter.runtime.layout.grid
 //   2. absposStaticSpecs — the §9.2 sole-item alignment resolution
 //      (self → container items → start, insets standing the axis down);
 //   3. staticOverlayAlignment — the Base×Base → Compose Alignment fold.
+//   4. (wave 52, lane L7) the align-items fold's self-start/self-end arms
+//      and the css-align-3 §4.2 baseline FALLBACK on the block axis, on
+//      VERBATIM wave51-fix per-test IR. MUTATIONS EXECUTED
+//      (tools/titan/results/wave52-static-position/mutations.log):
+//      M-K2 drop the SELF_END arm of foldAlignItems → K2a/K2b fail;
+//      M-K3 drop the LAST_BASELINE arm of baselineFallback → K3a fails;
+//      M-K4 drop the overlay's LocalStaticPositionOwner provider → K4 fails.
 
 import androidx.compose.ui.Alignment
 import com.styleconverter.runtime.core.ir.IRComponent
@@ -24,6 +31,7 @@ import com.styleconverter.runtime.core.ir.IRProperty
 import com.styleconverter.runtime.core.renderer.ComponentRenderer
 import com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment
 import com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignment.Base
+import java.io.File
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -201,5 +209,95 @@ class GridAbsposPartitionTest {
         // `justify-items: center` WPT shape).
         assertEquals(Alignment.TopCenter,
             GridRenderer.staticOverlayAlignment(Base.CENTER, Base.START))
+    }
+
+    // ── 4. wave 52 (lane L7): self-end fold + baseline fallback ─────────────
+
+    // Verbatim properties of css-grid/abspos/grid-abspos-staticpos-align-
+    // items-self-end (wave51-fix per-test IR, component __0-129 / __0__0-130).
+    private val selfEndContainerAlignItems = "SELF_END"
+    private val selfEndChild = listOf(
+        prop("Position", "\"ABSOLUTE\""),
+        prop("Width", """{"type":"length","px":50}"""),
+        prop("Height", """{"type":"length","px":50}"""),
+        prop("BackgroundColor", """{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}"""),
+    )
+
+    @Test
+    fun `K2a align-items self-end and self-start fold to the positional enums`() {
+        // css-align-3 §6.1: positional keywords (LTR horizontal-tb fold).
+        assertEquals(ComponentRenderer.AlignItems.FLEX_END, GridRenderer.foldAlignItems("SELF_END"))
+        assertEquals(ComponentRenderer.AlignItems.FLEX_START, GridRenderer.foldAlignItems("SELF_START"))
+        // Hyphenated CSS spelling and lower case are the same keyword.
+        assertEquals(ComponentRenderer.AlignItems.FLEX_END, GridRenderer.foldAlignItems("self-end"))
+        // The pre-wave-52 table is unchanged (incl. the STRETCH default).
+        assertEquals(ComponentRenderer.AlignItems.CENTER, GridRenderer.foldAlignItems("CENTER"))
+        assertEquals(ComponentRenderer.AlignItems.BASELINE, GridRenderer.foldAlignItems("BASELINE"))
+        assertEquals(ComponentRenderer.AlignItems.STRETCH, GridRenderer.foldAlignItems("NORMAL"))
+        assertEquals(ComponentRenderer.AlignItems.STRETCH, GridRenderer.foldAlignItems(null))
+    }
+
+    @Test
+    fun `K2b the self-end container ends the verbatim abspos child`() {
+        // Container align-items SELF_END → fold → alignItemsBase END; the
+        // child declares no align-self, so §6.1 auto takes the container's.
+        val folded = GridRenderer.foldAlignItems(selfEndContainerAlignItems)
+        assertEquals(Base.END, GridRenderer.alignItemsBase(folded))
+        val (inline, block) = GridRenderer.absposStaticSpecs(selfEndChild, null, folded)
+        // Ref: green y 67..116 in a 100-px content box = END (pre-fix START).
+        assertEquals(AbsposStaticAlignment.Spec(Base.END, safe = false), block)
+        assertEquals(Base.START, inline.base)
+    }
+
+    @Test
+    fun `K3a last baseline resolves to its safe self-end fallback on both wires`() {
+        // Pre-wave-52 wire (verbatim rawValue of rtl-last-baseline-002) …
+        val (_, generic) = specs(
+            abspos(),
+            prop("Generic", """{"propertyName":"align-self","rawValue":"last baseline","_unmapped":true}""")
+        )
+        assertEquals(AbsposStaticAlignment.Spec(Base.END, safe = true), generic)
+        // … and the post-T3 typed wire (converter pin P3f).
+        val (_, typed) = specs(abspos(), prop("AlignSelf", "\"LAST_BASELINE\""))
+        assertEquals(AbsposStaticAlignment.Spec(Base.END, safe = true), typed)
+    }
+
+    @Test
+    fun `K3b a baseline child does not inherit the container's center`() {
+        // grid-abspos-staticpos-align-self-001's shape: container
+        // align-items CENTER, child align-self BASELINE. §4.2: an abspos box
+        // has no baseline-sharing group → fallback `safe self-start` — the
+        // child's OWN claim, so the container's center must not leak in.
+        val (_, block) = specs(
+            abspos(), prop("AlignSelf", "\"BASELINE\""),
+            alignItems = ComponentRenderer.AlignItems.CENTER,
+        )
+        assertEquals(AbsposStaticAlignment.Spec(Base.START, safe = true), block)
+        // NORMAL stays claim-less — the pre-wave-52 behaviour, kept on
+        // purpose (T3 only adds the baseline arms): §6.1 says an abspos
+        // `normal` behaves as start, so the container's center leaking in
+        // here is a DOCUMENTED GAP (lane note), not the desired answer.
+        val (_, normal) = specs(
+            abspos(), prop("AlignSelf", "\"NORMAL\""),
+            alignItems = ComponentRenderer.AlignItems.CENTER,
+        )
+        assertEquals(Base.CENTER, normal.base)
+    }
+
+    @Test
+    fun `K4 the section-9-2 overlay provides itself as the static-position owner`() {
+        // Source pin (no Robolectric here): the overlay's provider block must
+        // hand CanvasRootHoist.LocalStaticPositionOwner the CHILD instance —
+        // the identity the RC1 seam compares (StaticPositionSeamWiringTest SW1).
+        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/grid/GridRenderer.kt"
+        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
+        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
+        val src = File(requireNotNull(dir) { "repo root not found" }, anchor).readText()
+        // The overlay loop: from `outOfFlowChildren.forEach` to its RenderComponent.
+        val start = src.indexOf("outOfFlowChildren.forEach { child ->")
+        val end = src.indexOf("ComponentRenderer.RenderComponent(", start)
+        assertTrue("overlay loop not found", start in 0 until end)
+        val overlay = src.substring(start, end)
+        assertTrue(overlay.contains("LocalStaticPositionOwner provides child"))
     }
 }

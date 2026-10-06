@@ -1,0 +1,65 @@
+{
+ "_why": "Wave 52 L9 fix pass (skeptic M1): each mutation removes ONE opportunity class (or the decline) from the clamp walk; the named pin must fail. Run in the shared tree (the file is this lane's own), restored byte-exact by mutate.py.",
+ "cmd": [
+  "./gradlew",
+  ":runtime:testDebugUnitTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.GreedyLineBreakerTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.PreBreakPipelineTest",
+  "--continue"
+ ],
+ "cwd": "apps/android-harness",
+ "mutations": [
+  {
+   "id": "K1-separators-narrowed-to-U+0020",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "old": "        c == 0x20 || c == 0x09 || c == 0x1680 || c in 0x2000..0x2006 ||\n            c in 0x2008..0x200A || c == 0x205F || c == 0x3000\n",
+   "new": "        c == 0x20\n",
+   "expectFail": [
+    "clampHidesAtTheOghamSpaceMarkOfBlockEllipsis030"
+   ]
+  },
+  {
+   "id": "K2-soft-hyphens-not-restored",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "old": "if (source == null || source.indexOf('\\u00AD') < 0) return line",
+   "new": "if (source == null || source.indexOf('\\u00AD') < Int.MAX_VALUE) return line",
+   "expectFail": [
+    "clampHidesAtTheSoftHyphenOfBlockEllipsis028"
+   ]
+  },
+  {
+   "id": "K3-ideograph-decline-off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "old": "    private fun unmodelledOpportunity(c: Int): Boolean =\n        (c in 0x2E80",
+   "new": "    private fun unmodelledOpportunity(c: Int): Boolean = false &&\n        (c in 0x2E80",
+   "expectFail": [
+    "clampDeclinesWhenTheHiddenTailHoldsAnIdeograph"
+   ]
+  },
+  {
+   "id": "K4-dash-break-after-off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "old": "            before in CLAMP_DASHES && p >= 2 && !isClampSeparator(after) &&",
+   "new": "            false && before in CLAMP_DASHES && p >= 2 && !isClampSeparator(after) &&",
+   "expectFail": [
+    "clampHidesAfterAHyphenAndAtAZeroWidthSpace"
+   ]
+  },
+  {
+   "id": "K5-fit-test-off (M4 re-cut on the new clampLines)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "old": "        if (measure(last + clamp.marker) <= maxWidth) {\n",
+   "new": "        if (true) {\n",
+   "expectFail": [
+    "clampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone",
+    "clampDropsTrailingWordsUntilTheMarkerFits",
+    "clampMeasuresACustomMarkerAsARealGlyphRun",
+    "clampHidesAtTheOghamSpaceMarkOfBlockEllipsis030",
+    "clampHidesAtTheSoftHyphenOfBlockEllipsis028",
+    "aFiredRunUnderADrawnMarkerClampBakesTheEllipsis"
+   ]
+  }
+ ]
+}

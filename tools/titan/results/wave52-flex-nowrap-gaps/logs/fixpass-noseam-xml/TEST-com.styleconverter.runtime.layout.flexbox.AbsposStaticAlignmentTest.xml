@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.051Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="overflow - safe center falls back to start" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.001"/>
+  <testcase name="generic safe end resolves - the safe-003 fixture value" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="overflow - end and safe end" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="overflow - unsafe center keeps center" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="typed CENTER resolves to unsafe center" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="no claim for absent auto stretch or unrelated generics" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="generic unsafe center resolves without the safe flag" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="overflow - plain center keeps center - negative offset" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="fits - safe and unsafe agree - the safe-003 numbers" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="explicit cross inset disables the static position" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <testcase name="generic safe center resolves with the safe flag" classname="com.styleconverter.runtime.layout.flexbox.AbsposStaticAlignmentTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.663Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="the gate admits 027 - a negative margin-left that makes the line fit exactly" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.001"/>
+  <testcase name="the gate admits 008 - six shrink-0 items overflowing a 200px row" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.0"/>
+  <testcase name="a shrinkable overflow is refused - that line is 9_7's job" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.0"/>
+  <testcase name="008 places six items overflowing the container instead of squeezing" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.0"/>
+  <testcase name="an RTL line is refused - Row mirrors it to main-start at the right edge" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.0"/>
+  <testcase name="a fitting line without negative margin is refused - Row keeps it" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.0"/>
+  <testcase name="the other M2 carrier is refused - order and an abspos child" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.001"/>
+  <testcase name="the paint shift mirrors under RTL like the Dp Modifier offset" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.0"/>
+  <testcase name="027 advances by outer size - Two starts 90px before the content edge" classname="com.styleconverter.runtime.layout.flexbox.FlexNowrapLineTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

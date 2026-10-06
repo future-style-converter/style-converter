@@ -34,6 +34,62 @@ class UAWidgetsResolveTest {
         children = children, _text = text, _tag = tag, attrs = attrs
     )
 
+    // ── wave 52 lane L8 (M-G): the zero-used-box gate ───────────────────
+    // MUTATION EXECUTED (2026-10-05, restored byte-exact, sha-256 verified):
+    // UAWidgetsResolve.resolve's `if (hasZeroUsedBox(…)) { … return null }`
+    // gate removed → `zeroBox_paintsNoAtom` fails (a RANGE spec ≠ null).
+
+    /** The VERBATIM post-load property list of an `input[type=range]` in
+     *  tools/titan/runs/wave51-fix/sections/css-writing-modes/per-test-ir/
+     *  wpt__css-writing-modes__forms__input-range-zero-inline-size.json —
+     *  every one of the 28 properties, only Width/Height differing between
+     *  the horizontal `…__1__0__0-812` (0 × 16) and the vertical
+     *  `…__2__0-814` … `…__5__0-820` (16 × 0). */
+    private fun rangeWire(widthPx: Int, heightPx: Int): List<IRProperty> {
+        // The border colour the UA sheet gives a range (#101010), verbatim.
+        val ink = """{"srgb":{"r":0.06274509803921569,"g":0.06274509803921569,"b":0.06274509803921569},"original":{"r":16,"g":16,"b":16}}"""
+        return listOf(
+            prop("Position", "\"STATIC\""),
+            prop("Width", """{"type":"length","px":$widthPx}"""),
+            prop("Height", """{"type":"length","px":$heightPx}"""),
+            prop("BoxSizing", "\"CONTENT_BOX\""),
+        ) + listOf("MarginTop", "MarginRight", "MarginBottom", "MarginLeft",
+            "PaddingTop", "PaddingRight", "PaddingBottom", "PaddingLeft",
+            "BorderTopWidth", "BorderRightWidth", "BorderBottomWidth", "BorderLeftWidth",
+        ).map { prop(it, """{"px":0}""") } +
+            listOf("BorderTopStyle", "BorderRightStyle", "BorderBottomStyle", "BorderLeftStyle").map { prop(it, "\"NONE\"") } +
+            listOf("BorderTopColor", "BorderRightColor", "BorderBottomColor", "BorderLeftColor").map { prop(it, ink) } +
+            listOf(
+                prop("BackgroundColor", """{"srgb":{"r":1,"g":1,"b":1},"original":{"r":255,"g":255,"b":255}}"""),
+                prop("Display", "\"BLOCK\""),
+                prop("OverflowX", "\"VISIBLE\""),
+                prop("OverflowY", "\"VISIBLE\""),
+            )
+    }
+
+    @Test
+    fun zeroBox_paintsNoAtom() {
+        // The exact post-load wires of wave51-fix css-writing-modes/forms/
+        // input-range-zero-inline-size: the four vertical parents' ranges
+        // carry Width 16 × Height 0, the horizontal one's Width 0 × Height 16.
+        val vertical = rangeWire(16, 0)
+        val horizontal = rangeWire(0, 16)
+        // Sanity: the helper really is the 28-property verbatim list.
+        assertEquals(28, vertical.size)
+        assertNull(UAWidgetsResolve.resolve(comp("input", IRAttrs(type = "range"), vertical)))
+        assertNull(UAWidgetsResolve.resolve(comp("input", IRAttrs(type = "range"), horizontal)))
+        // The gate is about the BOX, not the kind: a zero-height button goes too.
+        assertNull(UAWidgetsResolve.resolve(comp("button", properties = horizontal, text = "b")))
+        // Falsifiers: an unsized range keeps its atom, and a NON-ZERO declared
+        // box (the UA 129×21) keeps it too — the gate reads exact zero only.
+        assertEquals(Kind.RANGE, UAWidgetsResolve.resolve(comp("input", IRAttrs(type = "range")))?.kind)
+        val ua = listOf(prop("Width", """{"type":"length","px":129}"""), prop("Height", """{"type":"length","px":21}"""))
+        assertEquals(Kind.RANGE, UAWidgetsResolve.resolve(comp("input", IRAttrs(type = "range"), ua))?.kind)
+        // A relative or keyword size is not a zero box (it resolves at layout).
+        assertTrue(!UAWidgetsResolve.hasZeroUsedBox(listOf(prop("Width", """{"type":"length","original":{"v":0,"u":"PERCENT"}}"""))))
+        assertTrue(!UAWidgetsResolve.hasZeroUsedBox(listOf(prop("Width", "\"auto\""))))
+    }
+
     // ── identity table (html.css UA widget mapping) ─────────────────────
 
     @Test

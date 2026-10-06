@@ -1,0 +1,66 @@
+hunk-for-orchestrator-1.patch — wave 52 lane L11 FIX PASS (skeptic M1, second half) + FIX PASS 2
+(skeptic RV-M1): put fixtures/combinations/all-then-color.json on the gate set so brief pin 7
+actually executes (fixtures/combinations/README.md: a pin fixture off tools/visual/gate-fixtures.txt
+is never run), and list it in the combinations README. Both files are owned by NO wave-52 lane,
+hence a hunk for the orchestrator. Base: HEAD b35e203a (both files unmodified in the tree;
+`git apply --check` clean). Fixture this hunk lists: sha256 ae4867a8… (the tree's file).
+
+GATE-LISTED WITHOUT A BASELINE — GATE + ORACLE ONLY. No tools/visual/baseline/*.png names any
+component of this fixture (0 matches for ATC_* / span / reset; test-all's own
+`_gate_fixture_has_baselines` returns false — control visual-test.json returns true), so
+`./test-all.sh --gate-set` downgrades its child to gate-only: no --baseline; the cross-platform
+pair gate (SSIM < 0.95 | Δpx > 2 % | ΔE95 > 5 → exit 4) and the spec oracle (`_expect` → exit 6)
+still run. With this hunk the gate set has 9 fixtures (the opening gate's "exit 0 ×8" becomes ×9).
+What the closing gate (BASELINE=1 ./test-all.sh --gate-set) MUST print for this child:
+  [test-all] --gate-set: fixtures/combinations/all-then-color.json has NO committed baseline
+    under tools/visual/baseline/ — running it WITHOUT --baseline (gate + oracle only); seed with: …
+  · cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected
+  · spec oracle: 12 platform-component check(s) · 0 violation(s)
+  summary line:  exit 0  fixtures/combinations/all-then-color.json   (gate-only: no committed baseline)
+(18 = 6 captures × 3 pairs: the legacy flatten emits the 4 roots + the standalone `reset` and
+`span` children; 12 = 4 `_expect` rows × 3 platforms.)
+
+Two predicted reds resolved before landing, both in the fixture, both measured through the REAL
+compare-screenshots.mjs on device-free proxy captures (tools/titan/results/
+wave52-all-reset-postload-colour/pair-gate-proxy.mjs → pair-gate-proxy.json):
+ 1. RV-M1 — ATC_InitialUnderRedParent drew "Hamburg 123"; `all: initial` draws it in the UA initial
+    face (Chromium: Times) while the natives draw their system sans → that row AND the standalone
+    `span` capture at iOS-web 0.9404 / Android-web 0.9420, exit 4. The row is now GLYPH-FREE
+    (option (a); the v1 oracle cannot see glyph colour — it asserts the child's after-`all` green
+    covering the blue parent).
+ 2. Found while proxying the STANDALONE child captures (the skeptic's proxy had only the 4 roots):
+    the PropsThenAll child (`… ; all: initial` LAST) is captured standalone too, where the web
+    collapses it INLINE (frame 390x32, measured on the real harness) but Compose / SwiftUI — which
+    never apply CSS initial values (skeptic S2) — keep the 50x30 placeholder floor (frame 390x62):
+    003_reset iOS-web / Android-web SSIM 0.6627, exit 4 (`--model native`). The child now ends in
+    `all: revert` (same before-`all` drop; a <div> reverts to the UA `display: block`, so every
+    platform frames it 390x62 — real web harness measured, natives by their floor code).
+Landed fixture: exit 0 under BOTH proxy models (CSS truth + native model), 18 pairs / 0 unexpected,
+12 oracle checks / 0 violations. Executed in-place mutations (fixture restored sha256-IDENTICAL):
+HEAD text → 4, display-before-all → 6, order-blind drop → 6, reset `revert`→`initial` (native) → 4.
+The proxies model the face split and the S2 floor ONLY: real native glyph raster is unmeasured, so the
+ONE remaining text row, ATC_DirectionSurvives (proxy 0.9818 / 0.9844 / 0.9888; ≥ 0.971 under ±2–6 px
+native glyph offsets), is optimistic by that delta — LOOK at its first capture; it cannot fail on
+direction (skeptic RV-S1). No ledger line is shipped: none is predicted to be needed.
+
+Land ONLY together with L11's web F1 (StyleBuilder.ts) AND seam-4.patch (web-harness
+calibrateStyles): without seam-4 the REAL web harness paints ATC_AllThenProps / ATC_DirectionSurvives
+(and the standalone `span`) 358 px wide → 2 oracle violations (exit 6) — re-measured on the landed
+fixture at HEAD (fixture-oracle-probe.pass2.harness-head.json; the glyph-free row is green there).
+--- a/tools/visual/gate-fixtures.txt	2026-10-05 18:45:22
++++ b/tools/visual/gate-fixtures.txt	2026-10-05 18:45:22
+@@ -30,3 +30,4 @@
+ fixtures/combinations/transform-abspos-pivot.json   # retro F3: the A11#0 abspos-pivot pin (4 TAP_* rows, no waivers; no committed baseline yet -> gate-only + oracle until seeded)
+ fixtures/combinations/blend-isolation.json
+ fixtures/combinations/opacity-blend.json
++fixtures/combinations/all-then-color.json   # wave 52 L11: the order-aware `all` reset pin (4 ATC_* rows, no waivers; NO committed baseline -> gate-only + oracle until seeded: expect 18 pairs / 0 unexpected, 12 oracle checks / 0 violations, exit 0). Needs L11's web F1 (StyleBuilder.ts) AND seam-4.patch (web-harness calibrateStyles) in the same tree, else ATC_AllThenProps / ATC_DirectionSurvives fail the oracle on web (358 px wide).
+--- a/fixtures/combinations/README.md	2026-10-05 18:45:22
++++ b/fixtures/combinations/README.md	2026-10-05 18:45:22
+@@ -89,6 +89,7 @@
+ | `radius-overflow-transform.json` | overflow clip × border-radius × transformed content (clip applies POST-transform, in the clipper's space) |
+ | `gradient-stops-interp.json` | hard gradient stops at non-midpoint positions (css-images-3 §3.4.1) |
+ | `transform-abspos-pivot.json` | transform pivot × absolute positioning (css-transforms-1 §4: transform-origin is the element's OWN border-box centre, (left, top) included; Compose's transform node is OUTER of the abspos offset — finding A11#0). Anchor/mover twin rows so the v1 bbox oracle sees WHERE the mover landed. Listed in `tools/visual/gate-fixtures.txt` (retro F3): a pin fixture off that list is never executed. |
++| `all-then-color.json` | the `all` shorthand × declaration ORDER (css-cascade-4 §6.4 order of appearance, §3.1 the direction / unicode-bidi exemption, §7.3 the per-keyword inherited value): declarations AFTER the last `all` win, the ones before it drop. `all: initial` also resets `display` to `inline` (css-display-3 §2), under which width / height do not apply — so every row that keeps a box re-declares `display: block` AFTER `all` (the oracle was first authored without it and asserted boxes the browser never paints — wave 52 skeptic M1). The PropsThenAll child covers most of its parent so a kept-before-`all` red box out-votes the green, and ends in `all: revert` (a `<div>` reverts to `display: block`), not `initial`: the natives never apply CSS initial values, so an `initial`-emptied child keeps their 50x30 placeholder floor while web collapses it inline — its STANDALONE capture would split the frame (390x62 vs 390x32) and fail the pair gate on a gap that is not about order. The InitialUnderRedParent row is GLYPH-FREE: `all: initial` resets `font-family` to the UA initial face (web Times vs native sans — a text row there failed the pair gate, wave 52 skeptic RV-M1) and the v1 oracle cannot see glyph colour, so it asserts the child's after-`all` green covering the blue parent; the one text row (DirectionSurvives) is for the LOOK only. Listed in `tools/visual/gate-fixtures.txt` (wave 52 L11) WITHOUT a committed baseline: gate + oracle only until seeded. |
+
+ Deliberately absent: a blur-combination fixture. Gaussian tails cannot
+ be hand-computed to a byte, so a blur `_expect` would either restate a

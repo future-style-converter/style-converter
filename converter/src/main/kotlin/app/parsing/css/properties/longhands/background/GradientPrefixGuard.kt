@@ -117,9 +117,13 @@ internal object GradientPrefixGuard {
      *
      * This is the positive test the wave-49 repair is built on: `0.25turns`
      * answers yes because `turns` is absent from the css-values-4 §7.1 table,
-     * while `4.5e1deg` answers NO because its unit really is `deg` — the
-     * converter merely cannot read the exponent yet (AngleParser's regex),
-     * which is a modelling gap, not an author error.
+     * while `4.5e1deg` answers NO because its unit really is `deg`. (Until
+     * wave 52 AngleParser could not read that exponent and the gradient fell
+     * through to a Raw passthrough — a modelling gap, never an author error,
+     * which is why this guard had to answer NO. wave-52 lane L5 F4 taught
+     * AngleParser the exponent and case-insensitive units, so the same token
+     * now also parses as a typed 45-degree angle downstream; this guard's
+     * answer is unchanged.)
      */
     private fun isNonAngleDimension(token: String?): Boolean {
         val unit = token?.let { dimensionUnit(it) } ?: return false

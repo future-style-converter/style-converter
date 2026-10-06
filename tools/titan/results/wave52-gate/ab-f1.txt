@@ -1,0 +1,4 @@
+A/B  exclude=wave52-ab-f1  include=wave52-ship  sections=css-text  platforms=ios,android
+compared 96 cells: 2 differ (flip, or |Δ| ≥ 0.002), 94 within threshold
+  mover        ios      P 0.9756  → P 0.9555  Δ-0.0201  css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html
+  mover        android  f 0.9495  → f 0.9452  Δ-0.0043  css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html

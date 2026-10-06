@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.066Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="px basis wins over percent and percent wins over the main-size property" classname="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" time="0.001"/>
+  <testcase name="025 shape - each percent basis resolves to the full 300px main" classname="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" time="0.001"/>
+  <testcase name="abspos-child-002 shape - a lone abspos child does not engage the line" classname="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" time="0.0"/>
+  <testcase name="column axis resolves percent against the inner HEIGHT" classname="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" time="0.0"/>
+  <testcase name="abspos sibling keeps its slot but takes no main space" classname="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" time="0.0"/>
+  <testcase name="percent basis resolves against the CONTENT main - padding and border come off" classname="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" time="0.0"/>
+  <testcase name="percent basis is clamped to the main - the iOS twin rule" classname="com.styleconverter.runtime.layout.flexbox.FlexPercentBasisTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

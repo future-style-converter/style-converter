@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" tests="7" skipped="0" failures="2" errors="0" timestamp="2026-10-05T16:56:33.262Z" hostname="mac-1.home" time="0.111">
+  <properties/>
+  <testcase name="P3b first baseline is the same value as baseline()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.024"/>
+  <testcase name="P3d left and right are invalid align-self values()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.002"/>
+  <testcase name="P3f the wire carries the bare enum name()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.007">
+    <failure message="java.lang.NullPointerException: null cannot be cast to non-null type app.irmodels.IRProperty" type="java.lang.NullPointerException">java.lang.NullPointerException: null cannot be cast to non-null type app.irmodels.IRProperty
+	at app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest.P3f the wire carries the bare enum name(AlignSelfPropertyParserTest.kt:98)
+</failure>
+  </testcase>
+  <testcase name="P3g PropertiesParser drops align-self left instead of passing it through()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.067"/>
+  <testcase name="P3e overflow-prefixed positions stay on the Generic wire()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.0"/>
+  <testcase name="P3c normal is typed()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.0"/>
+  <testcase name="P3a last baseline is typed in both token orders()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.004">
+    <failure message="org.opentest4j.AssertionFailedError: Expected value to be of type &lt;app.irmodels.properties.layout.flexbox.AlignSelfProperty (Kotlin reflection is not available)&gt;, actual &lt;null&gt;." type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: Expected value to be of type &lt;app.irmodels.properties.layout.flexbox.AlignSelfProperty (Kotlin reflection is not available)&gt;, actual &lt;null&gt;.
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:142)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter.assertTrue(Assertions.kt:767)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertIsOfType(Assertions.kt:123)
+	at kotlin.test.AssertionsKt.assertIsOfType(Unknown Source)
+	at app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest.typed(AlignSelfPropertyParserTest.kt:47)
+	at app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest.P3a last baseline is typed in both token orders(AlignSelfPropertyParserTest.kt:52)
+</failure>
+  </testcase>
+  <system-out><![CDATA[[CSS Parser] Dropped invalid declaration 'align-self: left' (css-syntax-3 §2.2)
+[CSS Parser] Parsed 1 properties (0 generic)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

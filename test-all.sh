@@ -290,7 +290,15 @@ TOOLS_VISUAL_DIR="$PROJECT_ROOT/tools/visual"
 IOS_BUNDLE="com.styleconverter.test"
 ANDROID_PACKAGE="com.styleconverter.test"
 ANDROID_ACTIVITY="$ANDROID_PACKAGE.MainActivity"
+# Did the CALLER choose the web port? (wave 52: a foreign program on the
+# DEFAULT port makes this run move to a free one; on a caller-chosen port it
+# stops and says so — see the vite start below and tools/visual/web-port-guard.sh.)
+WEB_PORT_EXPLICIT=0; [[ -n "${WEB_PORT:-}" ]] && WEB_PORT_EXPLICIT=1
 WEB_PORT="${WEB_PORT:-3000}"
+# The only code allowed to kill a process on that port: it kills a vite dev
+# server of THIS checkout and nothing else.
+# shellcheck source=tools/visual/web-port-guard.sh
+source "$TOOLS_VISUAL_DIR/web-port-guard.sh"
 
 # ── Background-mode flag ─────────────────────────────────────────────────────
 # When the orchestrator (TITAN-PREP-B's output) drives long unattended
@@ -1151,8 +1159,21 @@ else
         ( cd "$PROJECT_ROOT" && npm install --silent )
     fi
 
-    # Kill anything squatting on the port
-    lsof -ti:"$WEB_PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
+    # Free the port — but ONLY from a stale vite of THIS checkout (wave 52).
+    # The old `lsof | xargs kill -9` killed whatever was listening, e.g. a
+    # developer's unrelated server on :3000. A foreign holder is never
+    # touched: on the default port this run moves to a free port in the
+    # 3300..3399 range (clear of section-runner's 3100..3299), on a
+    # caller-chosen port it stops with the usage/precondition code.
+    if ! wpg_kill_our_vite_on_port "$WEB_PORT"; then
+        if [[ "$WEB_PORT_EXPLICIT" == "1" ]]; then
+            err "WEB_PORT=$WEB_PORT is in use by another program (named above) — choose a free port"
+            exit 2
+        fi
+        _wpg_new_port="$(wpg_free_port 3300 3399)" || { err "web port $WEB_PORT is in use by another program and no port is free in 3300..3399"; exit 2; }
+        warn "web port $WEB_PORT is in use by another program — using $_wpg_new_port for this run"
+        WEB_PORT="$_wpg_new_port"
+    fi
 
     # Start vite. `set +m` silences bash's job-control "Terminated" message
     # when we kill the background process below.
@@ -1164,14 +1185,15 @@ else
     VITE_PID=$!
     # Defensive cleanup on EXIT, SIGINT, SIGTERM, SIGHUP so Ctrl-C or any
     # abnormal termination doesn't leave vite squatting on the port.
-    # `lsof | xargs kill -9` is belt-and-suspenders in case the process tree
-    # fragmented across PGIDs.
+    # The guard call is belt-and-suspenders in case the process tree
+    # fragmented across PGIDs — and, like the start above, it only ever kills
+    # a vite of this checkout (wave 52), never another program on the port.
     _cleanup_vite() {
         if [[ -n "${VITE_PID:-}" ]]; then
             kill -TERM "-$VITE_PID" 2>/dev/null || kill -TERM "$VITE_PID" 2>/dev/null || true
             wait "$VITE_PID" 2>/dev/null || true
         fi
-        lsof -ti:"$WEB_PORT" 2>/dev/null | xargs kill -9 2>/dev/null || true
+        wpg_kill_our_vite_on_port "$WEB_PORT" >/dev/null 2>&1 || true
     }
     # Chain: vite cleanup + the base cleanup handler (emulator teardown +
     # lock release) installed at script start, so we don't leave a stale

@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.styleconverter.runtime.core.renderer.LocalWptCaptureMode
 import com.styleconverter.runtime.core.variables.LocalContainingBlock
+// Wave 52 (b″): the element-level containing-block channel + its breadcrumb.
+import com.styleconverter.runtime.layout.position.ElementContainingBlock
 
 /**
  * The four physical margin bands this applier turns into `absolutePadding`,
@@ -76,12 +78,33 @@ object MarginApplier {
         // margins (CSS 2.1 §8.3: margin-% on every side resolves against
         // the containing block's inline size) need the renderer's channels,
         // which only composition can read. Same tri-state as PaddingApplier:
-        // WPT capture uses the LocalContainingBlock width when definite and
-        // 0 when indefinite (css-position-3 §5.1 abspos auto-size — this is
-        // what makes `margin-left: -50%` inside a fit-content abspos box
-        // collapse to 0 like the browser ref); non-WPT keeps the legacy
-        // viewport fallback byte-identical. Percent-free configs (the whole
-        // committed baseline corpus) never enter the composed lane.
+        // WPT capture uses the containing block's width when definite and
+        // 0 when indefinite (css-sizing-3 §5.2.1: a cyclic percentage
+        // against an indefinite block contributes 0); non-WPT keeps the
+        // legacy viewport fallback byte-identical. Percent-free configs (the
+        // whole committed baseline corpus) never enter the composed lane.
+        //
+        // Wave 52 (lane L4, queue 0(b″)) — WHICH containing block. The
+        // wave-18 comment here claimed this lane is "what makes
+        // `margin-left: -50%` inside a fit-content abspos box collapse to 0
+        // like the browser ref"; it never did. A `composed` factory runs at
+        // MATERIALISATION time — inside this element's own
+        // `CompositionLocalProvider` (ComponentRenderer.inheritanceWrappedContent)
+        // — so `LocalContainingBlock.current` here is the block this element
+        // publishes for its CHILDREN, one level too deep (the wave-50 B2
+        // defect, ElementContainingBlock's header). On the fit-content
+        // carriers (css-sizing/abspos-auto-sizing-fit-content-percentage-
+        // 001/002, android P 0.9984) the `.child` is Width 100 × Height 100
+        // with `margin-left: -50%` / `margin-right: -50%`, so the child-level
+        // read resolved −50 % of its OWN 100 px = −50 px, while the block it
+        // is laid out in — the fit-content `.abs` — publishes (null, null)
+        // and CSS 2.1 §8.3 + css-sizing-3 §5.2.1 make the used value 0. The
+        // picture never showed it: the child paints nothing and has no
+        // children, and the −50 px rode `Modifier.offset`, which moves an
+        // unpainted box. The element-level channel is read below; the
+        // WPT/non-WPT gate and the tri-state are untouched, so outside WPT
+        // capture nothing changes and every committed baseline is
+        // byte-identical by construction.
         if (usesContainingBlockPercent(
                 lengthOf(r.top), lengthOf(r.right), lengthOf(r.bottom), lengthOf(r.left))
         ) {
@@ -90,7 +113,15 @@ object MarginApplier {
                 // only: definite channel base (P10) / indefinite → 0 (P11);
                 // outside WPT the unmodified ctx keeps the legacy viewport
                 // fallback (P12) — pixel-identical to the old static path.
-                val cb = LocalContainingBlock.current
+                // The ELEMENT-level block (CSS 2.1 §10.1 — the block this
+                // margin's box is laid out in), with the child-level ambient
+                // read kept only as the breadcrumbed fallback for paths the
+                // renderer's provider never wraps (ElementContainingBlock).
+                val cb = ElementContainingBlock.containingBlockFor(
+                    element = ElementContainingBlock.LocalElementContainingBlock.current,
+                    ambient = LocalContainingBlock.current,
+                    breadcrumb = ElementContainingBlock.SPACING_UNPUBLISHED_BREADCRUMB,
+                )
                 val wpt = LocalWptCaptureMode.current
                 val pctCtx = if (wpt) {
                     ctx.copy(parentWidthPx = cb.widthPx, percentIndefiniteAsZero = true)

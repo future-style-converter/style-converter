@@ -1,7 +1,7 @@
 //
 //  ContentsUnboxingTests.swift
 //  Wave 18 (RC6, lane 1) — `display: contents` unboxing pins
-//  (css-display-3 §2.5/§2.7), plus the ported `all:<global>` reset drop.
+//  (css-display-3 §2.5/§2.7), plus the order-aware `all` reset (wave 52).
 //
 //  Twin of Compose's ContentsUnboxingTest.kt — the gate and splice rules
 //  are the shared cross-native contract. Property shapes are copied from
@@ -31,15 +31,15 @@ final class ContentsUnboxingTests: XCTestCase {
         XCTAssertFalse(ContentsUnboxing.isUnboxable(block))
     }
 
-    /// css-display-3 §2.7: absolute positioning and float blockify
-    /// `display: contents` — the wrapper box must stay.
-    func testPositionedOrFloatedContentsKeepsItsBox() throws {
+    /// css-display-3 §2.7: absolute positioning blockifies `display: contents`
+    /// (box kept); a FLOAT does NOT — §2.7 exempts box-less types (wave 52 F2).
+    func testPositionedContentsKeepsItsBoxButFloatedContentsUnboxes() throws {
         let abs = try component(
             #"{"id":"a","name":"a","properties":[{"type":"Display","data":"CONTENTS"},{"type":"Position","data":"ABSOLUTE"}]}"#)
         XCTAssertFalse(ContentsUnboxing.isUnboxable(abs))
         let floated = try component(
             #"{"id":"f","name":"f","properties":[{"type":"Display","data":"CONTENTS"},{"type":"Float","data":"LEFT"}]}"#)
-        XCTAssertFalse(ContentsUnboxing.isUnboxable(floated))
+        XCTAssertTrue(ContentsUnboxing.isUnboxable(floated), "wave 52 F2: float never blockifies a box-less contents element (mutation: re-add the Float clause → fails)")
         // ANY non-static position keeps the box (wider than §2.7 on
         // purpose — see the gate's comment; twin of the Compose pin).
         let rel = try component(
@@ -167,19 +167,26 @@ final class ContentsUnboxingTests: XCTestCase {
         XCTAssertNil(ContentsUnboxing.resolve(parent).children)
     }
 
-    // MARK: - The ported all-reset (RC6 companion — Compose parity)
+    // MARK: - The `all` reset (RC6 companion — Compose parity)
 
-    /// `all: <global>` present → EVERY other declaration drops (the
-    /// Compose allReset semantics, css-cascade-4 §3.2 observable
-    /// behaviour the audit fixtures pinned).
-    func testAllResetDropsEveryOtherDeclaration() throws {
+    /// Wave 52 (lane L11, rewritten from the wave-18 "drops every other
+    /// declaration" pin) — the reset is ORDER-AWARE (css-cascade-4 §6.4):
+    /// declarations BEFORE the last `all` drop, declarations AFTER it are
+    /// kept — here the 40px width precedes `all: initial` and goes, the
+    /// 160px width and the blue background follow it and stay. The full
+    /// verbatim-IR pin set is AllResetTests.swift.
+    func testAllResetDropsDeclarationsBeforeAllOnly() throws {
         let comp = try component(#"""
         {"id":"a","name":"a","properties":[
+           {"type":"Width","data":{"type":"length","px":40}},
            {"type":"All","data":"INITIAL"},
            {"type":"Width","data":{"type":"length","px":160}},
            {"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":1}}}]}
         """#)
-        XCTAssertTrue(GlobalExtractor.applyingAllReset(to: comp.properties).isEmpty)
+        let r = GlobalExtractor.applyingAllReset(own: comp.properties, inherited: [])
+        XCTAssertEqual(r.own.map(\.type), ["Width", "BackgroundColor"])
+        // The surviving width is the one AFTER `all`.
+        XCTAssertEqual(r.own.first?.data["px"]?.doubleValue, 160)
     }
 
     /// All-free lists flow through verbatim — the whole existing corpus
@@ -187,7 +194,40 @@ final class ContentsUnboxingTests: XCTestCase {
     func testAllFreeListIsUntouched() throws {
         let comp = try component(
             #"{"id":"b","name":"b","properties":[{"type":"Width","data":{"type":"length","px":10}}]}"#)
-        XCTAssertEqual(GlobalExtractor.applyingAllReset(to: comp.properties).map(\.type),
+        XCTAssertEqual(GlobalExtractor.applyingAllReset(own: comp.properties, inherited: []).own.map(\.type),
                        ["Width"])
+    }
+
+    // MARK: - Wave 52 (lane L3, fix F2) — the display-contents-float-001 root
+
+    /// VERBATIM wave51-fix IR: tools/titan/runs/wave51-fix/sections/css-display/
+    /// per-test-ir/wpt__css-display__display-contents-float-001.json, component
+    /// `…__1-218` (`display:contents; float:right; background:red`, text "PASS").
+    /// With the Float clause the box was kept and its red background painted a
+    /// full-width 358×20 bar behind the word — ios f 0.9417 · android f 0.941
+    /// against a ref that is the word alone (web P 1.0000). The root now
+    /// self-strips: nothing box-generating survives, the text stays.
+    /// MUTATION RECORD (executed 2026-09-25): Float clause re-added → this row
+    /// and the float row above FAIL; restored byte-exact (sha256 verified).
+    func testDisplayContentsFloat001RootUnboxesAndSelfStrips() throws {
+        let root = try component(#"""
+        {"id":"wpt__css-display__display-contents-float-001__1-218","name":"div",
+         "properties":[{"type":"Display","data":"CONTENTS"},{"type":"Float","data":"RIGHT"},
+           {"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}}],
+         "text":"PASS"}
+        """#)
+        XCTAssertTrue(ContentsUnboxing.isUnboxable(root))
+        let resolved = ContentsUnboxing.resolve(root)
+        // Display, Float and BackgroundColor are all non-inherited — gone.
+        XCTAssertFalse(resolved.properties.contains {
+            $0.type == "Display" || $0.type == "Float" || $0.type == "BackgroundColor"
+        })
+        // The text node the browser keeps is the whole remaining render.
+        XCTAssertEqual(resolved.text, "PASS")
+        XCTAssertNil(resolved.children)
+        // `float: none` is the initial value: also unboxable (the keyword never mattered).
+        let none = try component(
+            #"{"id":"fn","name":"fn","properties":[{"type":"Display","data":"CONTENTS"},{"type":"Float","data":"NONE"}]}"#)
+        XCTAssertTrue(ContentsUnboxing.isUnboxable(none))
     }
 }

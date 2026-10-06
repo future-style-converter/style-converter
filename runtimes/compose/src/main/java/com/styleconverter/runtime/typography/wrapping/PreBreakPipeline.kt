@@ -121,6 +121,20 @@ object PreBreakPipeline {
      *   circuited here, because a line with no LETTERS still has nowhere
      *   to break and still needs rule B (css-text/hyphens-punctuation-001's
      *   `00000` runs — see [AutoHyphenation.hasDictionaryOpportunity]).
+     * @param clampLines wave 52 (lane L9, F4) — the cap of a fixed-count
+     *   `line-clamp` whose marker is DRAWN, or null (a marker-suppressed
+     *   clamp, the bare `max-lines` longhand, no clamp — every pre-wave-52
+     *   call). Consulted ONLY when this pipeline fires for one of the two
+     *   reasons below: the fired string is then trimmed to the cap with the
+     *   UA ellipsis baked in by [GreedyLineBreaker.clampLines], because a
+     *   fired run renders with `softWrap = false`, where
+     *   TextOverflow.Ellipsis is the wave-39 finalMaxLines landmine and
+     *   Clip paints no marker (block-ellipsis-025 android: overlong lines
+     *   CLIPPED at the box edge, no "…"). A run that does NOT fire keeps
+     *   Minikin's own wrapping and gets its marker from the placeholder's
+     *   overflow decision instead (ComponentRenderer.placeholderOverflow,
+     *   wave 52 F3) — one owner per case, and the 19 passing soft-wrapped
+     *   Android clamp hosts keep the wrap positions their captures froze.
      * @param measure single-line advance of a candidate string, in the
      *   SAME px space as [wrapWidthPx], built over the SAME resolved
      *   style the run renders with.
@@ -134,6 +148,7 @@ object PreBreakPipeline {
         allowMidWordBreak: Boolean,
         preservesSpaces: Boolean,
         dictionaryHyphenation: Boolean = false,
+        clampLines: Int? = null,
         measure: (String) -> Float
     ): Result {
         // Every decline returns the SAME instance — see Result.text.
@@ -153,15 +168,57 @@ object PreBreakPipeline {
         // Reproduce the CSS line breaking, then ask whether any committed
         // line is an unbreakable overflow (the rule-B trigger).
         val lines = GreedyLineBreaker.lines(text, wrapWidthPx, measure)
-        if (!GreedyLineBreaker.hasUnbreakableOverflowingLine(
-                lines, wrapWidthPx,
-                dictionaryHyphenation = dictionaryHyphenation, measure = measure)) {
+        val unbreakableOverflow = GreedyLineBreaker.hasUnbreakableOverflowingLine(
+            lines, wrapWidthPx,
+            dictionaryHyphenation = dictionaryHyphenation, measure = measure)
+        // Wave 52 (lane L9, F5) — the SECOND trigger: a soft-hyphen break
+        // was TAKEN. css-text-3 §5.3 `hyphens: manual`: U+00AD IS a break
+        // opportunity and the UA paints the hyphenate character when it
+        // breaks there. Minikin under Compose's default `Hyphens.None`
+        // ignores U+00AD outright (SoftHyphenPolicy's banner), so it
+        // desperate-breaks the word at the constraint edge with no hyphen
+        // glyph — css-text/hyphens/hyphens-manual-inline-012's 16-glyph
+        // word broken every 7 glyphs (android f 0.9419; the ref and iOS,
+        // which pre-breaks every run, paint `Deoxy-` / `ribonu-` / `cleic`).
+        // The fold above already SPENT the opportunity (a materialised
+        // hyphenChar at a line end), so firing hands Minikin exactly the
+        // measured string. `hyphens: auto` runs stay out: their
+        // opportunities belong to Minikin's dictionary (AutoHyphenation).
+        val tookSoftHyphen = !dictionaryHyphenation && tookSoftHyphenBreak(text, lines)
+        if (!unbreakableOverflow && !tookSoftHyphen) {
             // The platform's own greedy breaking already agrees with CSS
             // here — leave the frozen behaviour alone.
             return identity
         }
+        // Wave 52 (lane L9, F4) — a fired run under a drawn-marker clamp
+        // carries its own ellipsis: trimmed to the cap, marker baked (see
+        // the parameter's banner). Identity when the paragraph fits the cap.
+        // `text` rides along so the clamp can hide at line N's soft hyphens
+        // (block-ellipsis-028 — the fold's display lines dropped them).
+        val clamped = clampLines?.let {
+            GreedyLineBreaker.clampLines(lines, GreedyLineBreaker.Clamp(it), wrapWidthPx, measure, source = text)
+        } ?: lines
         // Fires. Hard newlines carry OUR break positions; the caller pairs
         // this with softWrap = false.
-        return Result(lines.joinToString("\n"), true)
+        return Result(clamped.joinToString("\n"), true)
+    }
+
+    /**
+     * Wave 52 (lane L9, F5) — did the fold take a soft-hyphen break? A
+     * taken U+00AD materialises one [hyphenChar] at a line end
+     * (WordBreakOpportunities.split via [GreedyLineBreaker.lines]); a taken
+     * literal `-`/U+2010 break-after adds nothing. So the fold took a soft
+     * hyphen exactly when the display lines carry MORE hyphenChars than
+     * the input had, and the input carried a U+00AD to spend. Pure string
+     * arithmetic — no re-fold, no measurer.
+     */
+    private fun tookSoftHyphenBreak(
+        text: String,
+        lines: List<String>,
+        hyphenChar: String = WordBreakOpportunities.DEFAULT_HYPHEN_CHARACTER
+    ): Boolean {
+        if (text.indexOf('\u00AD') < 0) return false
+        fun count(s: String): Int = if (hyphenChar.isEmpty()) 0 else s.windowed(hyphenChar.length, 1).count { it == hyphenChar }
+        return lines.sumOf { count(it) } > count(text)
     }
 }

@@ -1,0 +1,39 @@
+{
+ "mode": "pre",
+ "oldRev": "white-black-ink-font-lh-imgpad-htmlpins",
+ "newRev": "white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin",
+ "tests": 1435,
+ "moved": 23,
+ "others": 1412,
+ "oldTree": {
+  "files": 21327,
+  "digest": "617cb0b649d686bcc89d4d90fc522e2dd15c7d96"
+ },
+ "othersDigestOld": "8c55b96b567d80a2c3f5d7f2aec3f9da1ba506da",
+ "cloned": 1412,
+ "movedTests": [
+  "css/CSS2/css21-errata/s-11-1-1b-005.html",
+  "css/CSS2/css21-errata/s-11-1-1b-006.html",
+  "css/css-cascade/initial-background-color.html",
+  "css/css-display/display-contents-root-background.html",
+  "css/css-display/display-contents-sharing-001.html",
+  "css/css-gaps/flex/flex-gap-decorations-033.html",
+  "css/css-gaps/flex/flex-gap-decorations-034.html",
+  "css/css-gaps/flex/flex-gap-decorations-035.html",
+  "css/css-gaps/flex/flex-gap-decorations-036.html",
+  "css/css-gaps/flex/flex-gap-decorations-037.html",
+  "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+  "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+  "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+  "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+  "css/css-position/position-absolute-root-element-flex.html",
+  "css/css-position/position-absolute-root-element-grid.html",
+  "css/css-position/position-fixed-root-element-flex.html",
+  "css/css-position/position-fixed-root-element-grid.html",
+  "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+  "css/css-values/calc-in-media-queries-001.html",
+  "css/css-values/calc-in-media-queries-002.html",
+  "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+  "css/filter-effects/backdrop-filter-root-element.html"
+ ]
+}

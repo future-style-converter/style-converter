@@ -1,0 +1,1725 @@
+{
+ "run": "wave51-fix",
+ "generatedBy": "wave52-plan/runtime-bugs-and-gaps (read-only census over 1435 per-test IR docs)",
+ "docs": 1435,
+ "bodyRootMargin": [
+  {
+   "section": "CSS2",
+   "doc": "wpt__CSS2__css21-errata__s-11-1-1b-005",
+   "margins": {
+    "MarginTop": {
+     "px": -15
+    },
+    "MarginRight": {
+     "px": 8
+    },
+    "MarginBottom": {
+     "px": 8
+    },
+    "MarginLeft": {
+     "px": 8
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+    "web": {
+     "ssim": 0.9947,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9538,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9309,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "CSS2",
+   "doc": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "margins": {
+    "MarginTop": {
+     "px": 40
+    },
+    "MarginRight": {
+     "px": 8
+    },
+    "MarginBottom": {
+     "px": 8
+    },
+    "MarginLeft": {
+     "px": 8
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+    "web": {
+     "ssim": 0.9656,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9321,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9332,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-backgrounds",
+   "doc": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "margins": {
+    "MarginTop": {
+     "px": 50
+    },
+    "MarginRight": {
+     "px": 50
+    },
+    "MarginBottom": {
+     "px": 50
+    },
+    "MarginLeft": {
+     "px": 50
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/css-backgrounds/background-attachment-margin-root-001.html",
+    "web": {
+     "ssim": 0.4511,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.5031,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.451,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-backgrounds",
+   "doc": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "margins": {
+    "MarginTop": {
+     "px": 50
+    },
+    "MarginRight": {
+     "px": 50
+    },
+    "MarginBottom": {
+     "px": 50
+    },
+    "MarginLeft": {
+     "px": 50
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/css-backgrounds/background-attachment-margin-root-002.html",
+    "web": {
+     "ssim": 0.339,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.3653,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.3389,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-body-dir-001",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-body-dir-001.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-body-dir-002",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-body-dir-002.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-body-dir-003",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-body-dir-003.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-body-dir-004",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-body-dir-004.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-html-dir-001",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-html-dir-001.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-html-dir-002",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-html-dir-002.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-html-dir-003",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-html-dir-003.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-contain",
+   "doc": "wpt__css-contain__contain-html-dir-004",
+   "margins": {
+    "MarginRight": "auto"
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-contain/contain-html-dir-004.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9667,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "doc": "wpt__css-gaps__flex__flex-gap-decorations-027",
+   "margins": {
+    "MarginLeft": {
+     "px": 200
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+    "web": {
+     "ssim": 0.9012,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.903,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9085,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "doc": "wpt__css-pseudo__first-letter-exclude-block-child-marker",
+   "margins": {
+    "MarginLeft": {
+     "original": {
+      "v": 5,
+      "u": "EM"
+     }
+    }
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+    "web": {
+     "ssim": 0.8489,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.86,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8525,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "doc": "wpt__css-pseudo__first-letter-exclude-inline-child-marker",
+   "margins": {
+    "MarginLeft": {
+     "original": {
+      "v": 5,
+      "u": "EM"
+     }
+    }
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+    "web": {
+     "ssim": 0.7361,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.7363,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.7551,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "doc": "wpt__css-pseudo__first-letter-exclude-inline-marker",
+   "margins": {
+    "MarginLeft": {
+     "original": {
+      "v": 5,
+      "u": "EM"
+     }
+    }
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+    "web": {
+     "ssim": 0.8311,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8407,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8554,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-pseudo",
+   "doc": "wpt__css-pseudo__first-letter-skip-marker",
+   "margins": {
+    "MarginLeft": {
+     "px": 100
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/css-pseudo/first-letter-skip-marker.html",
+    "web": {
+     "ssim": 0.9324,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9363,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9372,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-tables",
+   "doc": "wpt__css-tables__collapsed-border-sideways-rl-rtl-overflow",
+   "margins": {
+    "MarginTop": {
+     "px": 60
+    },
+    "MarginRight": {
+     "px": 60
+    },
+    "MarginBottom": {
+     "px": 60
+    },
+    "MarginLeft": {
+     "px": 60
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+    "web": {
+     "ssim": 0.8733,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8582,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8528,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-tables",
+   "doc": "wpt__css-tables__collapsed-border-vertical-lr-rtl-overflow",
+   "margins": {
+    "MarginTop": {
+     "px": 60
+    },
+    "MarginRight": {
+     "px": 60
+    },
+    "MarginBottom": {
+     "px": 60
+    },
+    "MarginLeft": {
+     "px": 60
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+    "web": {
+     "ssim": 0.8741,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8573,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8506,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-tables",
+   "doc": "wpt__css-tables__collapsed-border-vertical-rtl-overflow",
+   "margins": {
+    "MarginTop": {
+     "px": 60
+    },
+    "MarginRight": {
+     "px": 60
+    },
+    "MarginBottom": {
+     "px": 60
+    },
+    "MarginLeft": {
+     "px": 60
+    }
+   },
+   "concretePx": true,
+   "scores": {
+    "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+    "web": {
+     "ssim": 0.8733,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8582,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8528,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-writing-modes",
+   "doc": "wpt__css-writing-modes__inline-box-border-vlr-001",
+   "margins": {
+    "MarginTop": {
+     "original": {
+      "v": 1,
+      "u": "EM"
+     }
+    },
+    "MarginRight": {
+     "original": {
+      "v": 1,
+      "u": "EM"
+     }
+    },
+    "MarginBottom": {
+     "original": {
+      "v": 1,
+      "u": "EM"
+     }
+    },
+    "MarginLeft": {
+     "original": {
+      "v": 1,
+      "u": "EM"
+     }
+    }
+   },
+   "concretePx": false,
+   "scores": {
+    "test": "css/css-writing-modes/inline-box-border-vlr-001.html",
+    "web": {
+     "ssim": 0.8919,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8904,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8474,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "negativeMainMargin": [
+  {
+   "section": "css-gaps",
+   "doc": "wpt__css-gaps__flex__flex-gap-decorations-027",
+   "container": "wpt__css-gaps__flex__flex-gap-decorations-027__1",
+   "items": [
+    {
+     "item": "flex__flex-gap-decorations-027__0__0",
+     "start": {
+      "px": -150
+     },
+     "position": "static"
+    }
+   ],
+   "scores": {
+    "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+    "web": {
+     "ssim": 0.9012,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.903,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9085,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-position",
+   "doc": "wpt__css-position__position-absolute-dynamic-relayout-003",
+   "container": "wpt__css-position__position-absolute-dynamic-relayout-003__1",
+   "items": [
+    {
+     "item": "position-absolute-dynamic-relayout-003__1__0",
+     "start": {
+      "px": -100
+     },
+     "end": {
+      "px": 0
+     },
+     "position": "STATIC"
+    }
+   ],
+   "scores": {
+    "test": "css/css-position/position-absolute-dynamic-relayout-003.html",
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9967,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "nowrapOverflowShrink0": [
+  {
+   "section": "css-gaps",
+   "doc": "wpt__css-gaps__flex__flex-gap-decorations-008",
+   "container": "wpt__css-gaps__flex__flex-gap-decorations-008__1",
+   "sumOuter": 350,
+   "containerMain": 200,
+   "scores": {
+    "test": "css/css-gaps/flex/flex-gap-decorations-008.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9996,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9646,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "bareNumberFlexBasis": [
+  {
+   "section": "css-backgrounds",
+   "doc": "wpt__css-backgrounds__background-clip-content-box-002",
+   "item": "background-clip-content-box-002__1__0",
+   "percent": 50,
+   "wrap": "NOWRAP",
+   "mainSize": {
+    "type": "length",
+    "px": 100
+   },
+   "itemPosition": "static",
+   "scores": {
+    "test": "css/css-backgrounds/background-clip-content-box-002.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9984,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-backgrounds",
+   "doc": "wpt__css-backgrounds__background-clip-content-box-002",
+   "item": "background-clip-content-box-002__1__1",
+   "percent": 50,
+   "wrap": "NOWRAP",
+   "mainSize": {
+    "type": "length",
+    "px": 100
+   },
+   "itemPosition": "static",
+   "scores": {
+    "test": "css/css-backgrounds/background-clip-content-box-002.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9992,
+     "wptPass": false,
+     "colorFailed": true,
+     "novelInkFailed": true
+    },
+    "android": {
+     "ssim": 0.9984,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__flexbox-abspos-child-002",
+   "item": "abspos__flexbox-abspos-child-002__2__0",
+   "percent": 80,
+   "wrap": "NOWRAP",
+   "mainSize": {
+    "type": "length",
+    "px": 10
+   },
+   "itemPosition": "ABSOLUTE",
+   "scores": {
+    "test": "css/css-flexbox/abspos/flexbox-abspos-child-002.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9847,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__flexbox-abspos-child-002",
+   "item": "abspos__flexbox-abspos-child-002__6__0",
+   "percent": 80,
+   "wrap": "NOWRAP",
+   "mainSize": {
+    "type": "length",
+    "px": 10
+   },
+   "itemPosition": "ABSOLUTE",
+   "scores": {
+    "test": "css/css-flexbox/abspos/flexbox-abspos-child-002.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9847,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__flexbox-abspos-child-002",
+   "item": "abspos__flexbox-abspos-child-002__10__0",
+   "percent": 80,
+   "wrap": "NOWRAP",
+   "mainSize": {
+    "type": "length",
+    "px": 10
+   },
+   "itemPosition": "ABSOLUTE",
+   "scores": {
+    "test": "css/css-flexbox/abspos/flexbox-abspos-child-002.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9847,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "doc": "wpt__css-gaps__flex__flex-gap-decorations-025",
+   "item": "flex__flex-gap-decorations-025__0__0",
+   "percent": 100,
+   "wrap": "WRAP",
+   "mainSize": "auto",
+   "itemPosition": "static",
+   "scores": {
+    "test": "css/css-gaps/flex/flex-gap-decorations-025.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "doc": "wpt__css-gaps__flex__flex-gap-decorations-025",
+   "item": "flex__flex-gap-decorations-025__0__1",
+   "percent": 100,
+   "wrap": "WRAP",
+   "mainSize": "auto",
+   "itemPosition": "static",
+   "scores": {
+    "test": "css/css-gaps/flex/flex-gap-decorations-025.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-values",
+   "doc": "wpt__css-values__calc-size__calc-size-flex-007",
+   "item": "calc-size__calc-size-flex-007__1__0",
+   "percent": 0,
+   "wrap": "WRAP_REVERSE",
+   "mainSize": {
+    "type": "length",
+    "px": 100
+   },
+   "itemPosition": "static",
+   "scores": {
+    "test": "css/css-values/calc-size/calc-size-flex-007.html",
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9967,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "verticalWritingModeFlex": [
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr",
+   "writingMode": "VERTICAL_LR",
+   "scores": {
+    "test": "css/css-flexbox/abspos/abspos-autopos-vlr-ltr.html",
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9966,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl",
+   "writingMode": "VERTICAL_LR",
+   "scores": {
+    "test": "css/css-flexbox/abspos/abspos-autopos-vlr-rtl.html",
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9904,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9966,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr",
+   "writingMode": "VERTICAL_RL",
+   "scores": {
+    "test": "css/css-flexbox/abspos/abspos-autopos-vrl-ltr.html",
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9966,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl",
+   "writingMode": "VERTICAL_LR",
+   "scores": {
+    "test": "css/css-flexbox/abspos/abspos-autopos-vrl-rtl.html",
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9904,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9966,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-001",
+   "writingMode": "VERTICAL_RL",
+   "scores": {
+    "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-001.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9937,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9619,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-002",
+   "writingMode": "VERTICAL_RL",
+   "scores": {
+    "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-002.html",
+    "web": {
+     "ssim": 0.9975,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9914,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9622,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__abspos__flex-abspos-staticpos-align-self-safe-003",
+   "writingMode": "VERTICAL_RL",
+   "scores": {
+    "test": "css/css-flexbox/abspos/flex-abspos-staticpos-align-self-safe-003.html",
+    "web": {
+     "ssim": 0.9818,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9981,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9983,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-lr-rtl-wrap-reverse",
+   "writingMode": "VERTICAL_LR",
+   "scores": {
+    "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-lr-rtl-wrap-reverse.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9721,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9713,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-rl-rtl-wrap-reverse",
+   "writingMode": "VERTICAL_RL",
+   "scores": {
+    "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-rl-rtl-wrap-reverse.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9721,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9713,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-gaps",
+   "doc": "wpt__css-gaps__flex__flex-gap-decorations-006",
+   "writingMode": "VERTICAL_LR",
+   "scores": {
+    "test": "css/css-gaps/flex/flex-gap-decorations-006.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.8266,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.8223,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-writing-modes",
+   "doc": "wpt__css-writing-modes__forms__input-range-zero-inline-size",
+   "writingMode": "VERTICAL_LR",
+   "scores": {
+    "test": "css/css-writing-modes/forms/input-range-zero-inline-size.html",
+    "web": {
+     "ssim": 0.9964,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": true
+    },
+    "ios": {
+     "ssim": 0.9747,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9743,
+     "wptPass": false,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "wrapReverse": [
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-lr-rtl-wrap-reverse",
+   "scores": {
+    "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-lr-rtl-wrap-reverse.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9721,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9713,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-flexbox",
+   "doc": "wpt__css-flexbox__alignment__flex-align-baseline-column-vert-rl-rtl-wrap-reverse",
+   "scores": {
+    "test": "css/css-flexbox/alignment/flex-align-baseline-column-vert-rl-rtl-wrap-reverse.html",
+    "web": {
+     "ssim": 1,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9721,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9713,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  },
+  {
+   "section": "css-values",
+   "doc": "wpt__css-values__calc-size__calc-size-flex-007",
+   "scores": {
+    "test": "css/css-values/calc-size/calc-size-flex-007.html",
+    "web": {
+     "ssim": 0.999,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "ios": {
+     "ssim": 0.9974,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    },
+    "android": {
+     "ssim": 0.9967,
+     "wptPass": true,
+     "colorFailed": false,
+     "novelInkFailed": false
+    }
+   }
+  }
+ ],
+ "targets": [
+  {
+   "test": "css/css-backgrounds/background-clip-content-box-002.html",
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9992,
+    "wptPass": false,
+    "colorFailed": true,
+    "novelInkFailed": true
+   },
+   "android": {
+    "ssim": 0.9984,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "web": {
+    "ssim": 0.9012,
+    "wptPass": false,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.903,
+    "wptPass": false,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9085,
+    "wptPass": false,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-008.html",
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9996,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9646,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-045.html",
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9931,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9994,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-046.html",
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9998,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.996,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-006.html",
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.8266,
+    "wptPass": false,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.8223,
+    "wptPass": false,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-backgrounds/background-attachment-fixed-inside-transform-1.html",
+   "web": {
+    "ssim": 0.9961,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9964,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9629,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-transforms/css-transform-3d-rotateY-positive.html",
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9988,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9975,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-box-shadow.html",
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9855,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9954,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-writing-modes/available-size-001.html",
+   "web": {
+    "ssim": 0.9881,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9771,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9791,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  },
+  {
+   "test": "css/css-writing-modes/available-size-012.html",
+   "web": {
+    "ssim": 0.9881,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "ios": {
+    "ssim": 0.9771,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   },
+   "android": {
+    "ssim": 0.9791,
+    "wptPass": true,
+    "colorFailed": false,
+    "novelInkFailed": false
+   }
+  }
+ ],
+ "pixelRuns": {
+  "027": {
+   "ref_y45": "One 68-117 · rules 118-127/178-187/238-247/298-307/358-367 · left border 216-217",
+   "web_y45": "left border 16-17 · rules 38-47/98-107/158-167 · Six ends 217 (ref − 200 px, otherwise exact)",
+   "ios_y45": "border 16-17 · white 18-67 · rules 68-77/128-137/188-197/248-257/308-317 · Six 318-367 (150 px past the right border 218-219)",
+   "android_y45": "border 16-17 · white 18-67 · rules 68-77/128-137 · tints 138-182(1) 183-187(2) 188-192(1) 193-217(3) 220-232(3) 233-242(2) → Four 183-232, Five 193-242, Six 193-242"
+  },
+  "008": {
+   "android_y45": "Three 138-187 · Four 183-232 · Five/Six 193-242 · rules only 68-77/128-137",
+   "ref_y45": "six items at 60-px pitch to 367, five rules to 308-317"
+  },
+  "045": {
+   "ref": "red x76-80; gold y106-110/216-220/326-330",
+   "ios": "red 75(255,128,128) 76-79 80(255,128,128); gold 105(255,235,128) 106-109 110(255,235,128)",
+   "android": "red 76-80 exact; gold 105 half 106-109 110 half"
+  },
+  "046": {
+   "ref": "gold y73-77, 134-138",
+   "ios": "72(255,245,189) 73-76 77(255,225,66); 134(255,225,66) 135-138 139(66,147,189)",
+   "android": "73-77 exact; 135-139 (+1)"
+  },
+  "background-attachment-fixed-inside-transform-1": {
+   "sizes": "ref 390x4032 · web/ios/android 390x4232",
+   "inkRows": "ref 346-919 · web 330-918 · ios 330-919 · android 501-1068",
+   "inkCols": "ref 16-373 · web 13-389 · ios 12-389 · android 33-389"
+  }
+ }
+}

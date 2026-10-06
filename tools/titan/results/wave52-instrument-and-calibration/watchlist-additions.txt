@@ -1,0 +1,23 @@
+# wave-52 L12 watchlist additions — refs the '-rootbg-uamargin' contract MOVES that the plan's list did not name
+# (same-session sheet A/B, refreeze-detail.json; all body-background reveals, B10's mechanism). Re-frozen with the 23.
+css-display/display-contents-root-background web
+css-display/display-contents-root-background ios
+css-display/display-contents-root-background android
+css-display/display-contents-sharing-001 web
+css-display/display-contents-sharing-001 ios
+css-display/display-contents-sharing-001 android
+css-position/position-absolute-root-element-flex web
+css-position/position-absolute-root-element-flex ios
+css-position/position-absolute-root-element-flex android
+css-position/position-absolute-root-element-grid web
+css-position/position-absolute-root-element-grid ios
+css-position/position-absolute-root-element-grid android
+css-position/position-fixed-root-element-flex web
+css-position/position-fixed-root-element-flex ios
+css-position/position-fixed-root-element-flex android
+css-position/position-fixed-root-element-grid web
+css-position/position-fixed-root-element-grid ios
+css-position/position-fixed-root-element-grid android
+filter-effects/backdrop-filter-root-element web
+filter-effects/backdrop-filter-root-element ios
+filter-effects/backdrop-filter-root-element android

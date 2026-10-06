@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.667Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="inflexible item with base above max freezes at max" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="FC_GrowBasis - column axis growth" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="FR_GrowBasis - grow distributes free space over bases, min floor clamps a" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="max violation freezes at max and redistributes to siblings" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="FR_ShrinkBasis - scaled shrink with min violation redistribution" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="oversized content bases shrink scaled by base" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="min beats max when the declared band is inverted" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="measured base above declared max clamps to max" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="auto bases fill from measured max-content then grow from them" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.001"/>
+  <testcase name="no free space and no flexible items keeps bases" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="measured base clamps to the placeholder floor min" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="content-sized basis makes the line unresolvable" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <testcase name="density scales declared dp fields but not measured px" classname="com.styleconverter.runtime.layout.flexbox.FlexSizeResolverTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,16 @@
+[gate-driver 23:28:37] run-id=wave52-ab-t5 sections=3 max-tests=48 android=1 ios=1 timeout=50min resume=0
+[own-processes] emulator pid 38886 was not launched by provision-devices.sh — not touching it
+[gate-driver 23:28:43] host after stopping our processes: load1=3.36 free+inactive=3931MB (ceiling load 6, floor 2048MB)
+[gate-driver 23:32:09] provision rc=0 android=[emulator-5554 ] ios=[0BB986A6-1EAD-4916-9276-079235324DA1 ] ANDROID_SERIAL=emulator-5554
+[gate-driver 23:32:09] css-lists: attempt 1 starting
+[gate-driver 23:35:09] css-lists: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 23:35:09] css-counter-styles: attempt 1 starting
+[gate-driver 23:38:09] css-counter-styles: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[gate-driver 23:38:09] css-pseudo: attempt 1 starting
+[gate-driver 23:41:09] css-pseudo: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[own-processes] emulator pid 38886 was not launched by provision-devices.sh — not touching it
+gate-driver summary — run-id wave52-ab-t5 — 2026-10-05T23:41:09Z
+css-lists                  OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-counter-styles         OK attempt=1 web=48/48 android=48/48 ios=48/48 
+css-pseudo                 OK attempt=1 web=48/48 android=48/48 ios=48/48 
+score: node tools/titan/score-gate.mjs <previous-run-id> wave52-ab-t5

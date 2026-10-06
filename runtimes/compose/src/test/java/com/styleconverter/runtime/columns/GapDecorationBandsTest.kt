@@ -82,12 +82,14 @@ class GapDecorationBandsTest {
         val bands = GapDecorationBands.resolve(
             lines, box045, mainHorizontal = false, crossGapPx = 5f, alignContentStretches = true
         ).map { it.cross }
-        // §9.4 step 8: leftover = 120 − 50 − 50 − 5 = 15, split 8/7 (the
-        // remainder goes to the leading line, FlexWrapLines.stretchLines),
-        // then §9.6 packs them from the cross-start edge with the gap
-        // between. Chromium's own boxes, read off the ref, are [0,58] and
-        // [63,120] — the gold rules run image-x 18→76 and 81→138.
-        assertEquals(listOf(iv(0f, 58f), iv(63f, 120f)), bands)
+        // §9.4 step 8: leftover = 120 − 50 − 50 − 5 = 15, split EQUALLY
+        // (7.5 each — wave 52 lane L10 moved this from the Int 8/7 split to
+        // the SwiftUI twin's fractional share), then §9.6 packs them from
+        // the cross-start edge with the gap between. The painter snaps the
+        // rule rects (GapDecorationPainter.snapped), which turns [0,57.5]
+        // and [62.5,120] into Chromium's own boxes, read off the ref:
+        // [0,58] and [63,120] — the gold rules run image-x 18→76 and 81→138.
+        assertEquals(listOf(iv(0f, 57.5f), iv(62.5f, 120f)), bands)
     }
 
     @Test
@@ -96,10 +98,16 @@ class GapDecorationBandsTest {
             config045(), items045, box045, mainHorizontal = false
         )
         // One between-line rule, spanning the content box along the main
-        // (vertical) axis. Ref ink: image x [76,81] → content [58,63].
+        // (vertical) axis, centred in the fractional gap [57.5,62.5]; the
+        // painter's snap lands it on the ref ink: image x [76,81] →
+        // content [58,63].
+        assertEquals(
+            listOf(r(57.5f, 0f, 62.5f, 400f)),
+            segs.filter { it.axis == GapAxis.COLUMN }.map { it.rect }
+        )
         assertEquals(
             listOf(r(58f, 0f, 63f, 400f)),
-            segs.filter { it.axis == GapAxis.COLUMN }.map { it.rect }
+            segs.filter { it.axis == GapAxis.COLUMN }.map { GapDecorationPainter.snapped(it.rect) }
         )
         // The defect this replaces: with the item-union extent the same
         // rule centred in [50,63] → content [54,59] → image [72,77], which
@@ -120,18 +128,20 @@ class GapDecorationBandsTest {
             config045(), items045, box045, mainHorizontal = false
         )
         // Four gaps on line 1, three on line 2 → seven within-line rules,
-        // each running the full LINE width. Ref ink: image x [18,76] for
+        // each running the full LINE width — fractional [0,57.5] and
+        // [62.5,120] before the paint snap. Ref ink: image x [18,76] for
         // line 1 and [81,138] for line 2 → content [0,58] and [63,120].
         assertEquals(
-            listOf(iv(0f, 58f), iv(0f, 58f), iv(0f, 58f), iv(0f, 58f),
-                   iv(63f, 120f), iv(63f, 120f), iv(63f, 120f)),
+            listOf(iv(0f, 57.5f), iv(0f, 57.5f), iv(0f, 57.5f), iv(0f, 57.5f),
+                   iv(62.5f, 120f), iv(62.5f, 120f), iv(62.5f, 120f)),
             crossOf(segs, GapAxis.ROW, horizontal = true)
         )
         // The first gap is [70,83]; a 5px rule centred there is [74,79] →
-        // image y [92,97], which is the first gold run in the ref.
+        // image y [92,97], which is the first gold run in the ref — and the
+        // snapped run is the ref's [0,58] wide.
         assertEquals(
             r(0f, 74f, 58f, 79f),
-            segs.first { it.axis == GapAxis.ROW }.rect
+            GapDecorationPainter.snapped(segs.first { it.axis == GapAxis.ROW }.rect)
         )
     }
 
@@ -157,22 +167,21 @@ class GapDecorationBandsTest {
         val segs = GapDecorationSegments.build(
             config046(), items046, box046, mainHorizontal = true
         )
-        // leftover = 180 − 150 − 10 = 20 → sizes 7/7/6 added to 50 each →
-        // [57,57,56], packed to bands [0,57] [62,119] [124,180]. The two
-        // line gaps are therefore [57,62] and [119,124].
+        // leftover = 180 − 150 − 10 = 20 → 20/3 added to 50 each (wave 52
+        // lane L10: the SwiftUI twin's fractional share, Chromium's split)
+        // → bands [0,56.67] [61.67,118.33] [123.33,180]; the two line gaps
+        // are [56.67,61.67] and [118.33,123.33].
+        val rects = segs.map { it.rect }
+        assertEquals(2, rects.size)
+        assertEquals(170f / 3f, rects[0].top, 0.001f)
+        assertEquals(355f / 3f, rects[1].top, 0.001f)
+        // The paint snap puts them on Chromium's whole rows: content
+        // [57,62) and [118,123) → image y 73–77 and 134–138, the ref. The
+        // wave-50 Int split painted the second at 135–139 (one row low).
         assertEquals(
-            listOf(r(0f, 57f, 140f, 62f), r(0f, 119f, 140f, 124f)),
-            segs.map { it.rect }
+            listOf(r(0f, 57f, 140f, 62f), r(0f, 118f, 140f, 123f)),
+            rects.map { GapDecorationPainter.snapped(it) }
         )
-        // Chromium splits the same leftover in fractions (56.667 per line),
-        // so its bands are [0,56.67] [61.67,118.33] [123.33,180] and its
-        // gold ink lands on image y [73,78] and [134,139]. Ours lands on
-        // [73,78] and [135,140]: the first is exact, the second carries the
-        // 1px the Compose layout ALREADY has (its third item row is
-        // captured at image y 140 where Chromium's is 139 — the integral
-        // §9.4 split, FlexWrapLines.stretchLines, not this painter).
-        // Painting against the layout's own bands is the correct choice:
-        // the rule must sit between the items that were actually placed.
     }
 
     @Test
@@ -248,7 +257,7 @@ class GapDecorationBandsTest {
         // A container whose lines are packed at the cross-START edge of a
         // definite 180px box with no stretch — the legacy FlowRow shape a
         // `wrap-reverse` container still takes. The reconstruction would
-        // claim [0,57] [62,119] [124,180]; the third line's items sit at
+        // claim [0,56.67] [61.67,118.33] [123.33,180]; the third line's items sit at
         // [110,160], outside the band claimed for it, so the union model
         // is kept and a PropertyTracker breadcrumb is left.
         val items = listOf(

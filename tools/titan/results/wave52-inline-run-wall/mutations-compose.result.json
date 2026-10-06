@@ -1,0 +1,159 @@
+{
+ "cmd": [
+  "./gradlew",
+  ":runtime:testDebugUnitTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineRunFoldTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineSpanRingTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.GreedyLineBreakerTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.wrapping.PreBreakPipelineTest",
+  "--tests",
+  "com.styleconverter.runtime.core.renderer.PlaceholderOverflowMarkerTest",
+  "--tests",
+  "com.styleconverter.runtime.core.renderer.LineClampUnderPreWave39Test",
+  "--continue"
+ ],
+ "results": [
+  {
+   "id": "M1-hanging-punctuation-arm",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt",
+   "exit": 1,
+   "sha256Before": "c8786423debe49f14d5dcd429654301f1aea0f7899de8002fd0053e9f45d7521",
+   "sha256After": "c8786423debe49f14d5dcd429654301f1aea0f7899de8002fd0053e9f45d7521",
+   "expectFail": {
+    "the LAST span folds onto the line as a plain member": true,
+    "hanging-punctuation is admitted as inert": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "InlineRunFoldTest > hanging-punctuation is admitted as inert on any glyph member, keywords named FAILED",
+    "InlineRunFoldTest > hanging-punctuation-inline-001 - the LAST span folds onto the line as a plain member FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "M2-f5-taken-soft-hyphen-trigger",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+   "exit": 1,
+   "sha256Before": "86aada79dc9b6e5708eefeeb7b58fabab77ebb56b692698e2774f590e1b40fe1",
+   "sha256After": "86aada79dc9b6e5708eefeeb7b58fabab77ebb56b692698e2774f590e1b40fe1",
+   "expectFail": {
+    "firesWhenASoftHyphenBreakWasTaken": true,
+    "composesWithTheSoftHyphenPolicy": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "PreBreakPipelineTest > firesWhenASoftHyphenBreakWasTaken FAILED",
+    "PreBreakPipelineTest > composesWithTheSoftHyphenPolicy FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "M3-f5-dictionary-gate",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+   "exit": 1,
+   "sha256Before": "86aada79dc9b6e5708eefeeb7b58fabab77ebb56b692698e2774f590e1b40fe1",
+   "sha256After": "86aada79dc9b6e5708eefeeb7b58fabab77ebb56b692698e2774f590e1b40fe1",
+   "expectFail": {
+    "theSoftHyphenTriggerStaysOutOfDictionaryRuns": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "PreBreakPipelineTest > theSoftHyphenTriggerStaysOutOfDictionaryRuns FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "M4-f4-fit-loop",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/GreedyLineBreaker.kt",
+   "exit": 1,
+   "sha256Before": "a2bbfa76311cbbcf15c4899c902bb166abc82b1591a9a6cadac1fad3a9687287",
+   "sha256After": "a2bbfa76311cbbcf15c4899c902bb166abc82b1591a9a6cadac1fad3a9687287",
+   "expectFail": {
+    "clampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone": true,
+    "clampDropsTrailingWordsUntilTheMarkerFits": true,
+    "clampMeasuresACustomMarkerAsARealGlyphRun": true,
+    "aFiredRunUnderADrawnMarkerClampBakesTheEllipsis": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "PreBreakPipelineTest > aFiredRunUnderADrawnMarkerClampBakesTheEllipsis FAILED",
+    "GreedyLineBreakerTest > clampDropsTrailingWordsUntilTheMarkerFits FAILED",
+    "GreedyLineBreakerTest > clampMeasuresACustomMarkerAsARealGlyphRun FAILED",
+    "GreedyLineBreakerTest > clampTrimsBlockEllipsis025ToFourLinesWithTheMarkerAlone FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "M5-f4-fired-run-trim",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+   "exit": 1,
+   "sha256Before": "86aada79dc9b6e5708eefeeb7b58fabab77ebb56b692698e2774f590e1b40fe1",
+   "sha256After": "86aada79dc9b6e5708eefeeb7b58fabab77ebb56b692698e2774f590e1b40fe1",
+   "expectFail": {
+    "aFiredRunUnderADrawnMarkerClampBakesTheEllipsis": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "PreBreakPipelineTest > aFiredRunUnderADrawnMarkerClampBakesTheEllipsis FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "M6-f3-ellipsis-arm-seam1",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+   "exit": 1,
+   "sha256Before": "c2822e442dbdaf39f22da87aff048dab0ecf19f1bc2c266bf5208cdfaf51eaa3",
+   "sha256After": "c2822e442dbdaf39f22da87aff048dab0ecf19f1bc2c266bf5208cdfaf51eaa3",
+   "expectFail": {
+    "a bare line-clamp on a soft-wrapped run answers Ellipsis": true,
+    "a clamped soft-wrapping run draws the UA marker": true,
+    "a drawn marker keeps the pre-R3 decision": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "LineClampUnderPreWave39Test > a clamped soft-wrapping run draws the UA marker FAILED",
+    "PlaceholderOverflowMarkerTest > a drawn marker keeps the pre-R3 decision byte-identically FAILED",
+    "PlaceholderOverflowMarkerTest > a bare line-clamp on a soft-wrapped run answers Ellipsis FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "M7-drawn-clamp-max-lines-guard",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/DrawnLineClamp.kt",
+   "exit": 1,
+   "sha256Before": "d3b8e42f7dd434c0feb6f2e1455017ea49fde4538eeb0951b2e6a9d141be70af",
+   "sha256After": "d3b8e42f7dd434c0feb6f2e1455017ea49fde4538eeb0951b2e6a9d141be70af",
+   "expectFail": {
+    "max-lines alone paints no marker": true,
+    "DrawnLineClamp names the fixed cap only when a marker is drawn": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "PlaceholderOverflowMarkerTest > DrawnLineClamp names the fixed cap only when a marker is drawn FAILED",
+    "PlaceholderOverflowMarkerTest > max-lines alone paints no marker FAILED"
+   ],
+   "proven": true
+  },
+  {
+   "id": "M8-alignment-clamp-tail",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt",
+   "exit": 1,
+   "sha256Before": "c8786423debe49f14d5dcd429654301f1aea0f7899de8002fd0053e9f45d7521",
+   "sha256After": "c8786423debe49f14d5dcd429654301f1aea0f7899de8002fd0053e9f45d7521",
+   "expectFail": {
+    "the clamp-trimmed 032 paragraph still aligns": true,
+    "the clamp tail composes with the pre-break": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "InlineRunFoldTest > the clamp tail composes with the pre-break and refuses unexplained surgery FAILED",
+    "InlineRunFoldTest > the clamp-trimmed 032 paragraph still aligns - the members keep their ranges FAILED"
+   ],
+   "proven": true
+  }
+ ]
+}

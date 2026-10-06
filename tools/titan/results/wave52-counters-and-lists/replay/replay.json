@@ -1,0 +1,3173 @@
+{
+ "browser": "Chrome/151.0.7922.47",
+ "frozenRefDir": "tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins",
+ "cases": [
+  {
+   "test": "css-counter-styles/armenian/css3-counter-styles-008",
+   "items": [
+    {
+     "marker": "ՔՋՂԹ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՔՋՂԹ. "
+     }
+    },
+    {
+     "marker": "10000.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "10000. "
+     }
+    },
+    {
+     "marker": "10001.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "10001. "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      36,
+      50,
+      17,
+      354
+     ],
+     [
+      56,
+      67,
+      17,
+      172
+     ],
+     [
+      94,
+      111,
+      216,
+      371
+     ],
+     [
+      124,
+      142,
+      217,
+      293
+     ],
+     [
+      156,
+      174,
+      217,
+      287
+     ],
+     [
+      187,
+      205,
+      217,
+      362
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       216,
+       371
+      ],
+      [
+       124,
+       142,
+       217,
+       293
+      ],
+      [
+       156,
+       174,
+       217,
+       287
+      ],
+      [
+       187,
+       205,
+       217,
+       362
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       216,
+       370
+      ],
+      [
+       120,
+       147,
+       220,
+       317
+      ],
+      [
+       152,
+       179,
+       220,
+       331
+      ]
+     ],
+     "ssimVsFrozen": 0.9387
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       216,
+       370
+      ],
+      [
+       124,
+       142,
+       219,
+       301
+      ],
+      [
+       156,
+       174,
+       217,
+       287
+      ],
+      [
+       187,
+       205,
+       219,
+       301
+      ],
+      [
+       218,
+       236,
+       217,
+       281
+      ]
+     ],
+     "ssimVsFrozen": 0.947
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       216,
+       371
+      ],
+      [
+       124,
+       142,
+       217,
+       293
+      ],
+      [
+       156,
+       174,
+       217,
+       287
+      ],
+      [
+       187,
+       205,
+       217,
+       362
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  },
+  {
+   "test": "css-counter-styles/armenian/css3-counter-styles-006",
+   "items": [
+    {
+     "marker": "Ա.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ա. "
+     }
+    },
+    {
+     "marker": "Բ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Բ. "
+     }
+    },
+    {
+     "marker": "Գ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Գ. "
+     }
+    },
+    {
+     "marker": "Դ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Դ. "
+     }
+    },
+    {
+     "marker": "Ե.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ե. "
+     }
+    },
+    {
+     "marker": "Զ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Զ. "
+     }
+    },
+    {
+     "marker": "Է.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Է. "
+     }
+    },
+    {
+     "marker": "Ը.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ը. "
+     }
+    },
+    {
+     "marker": "Թ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Թ. "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      36,
+      50,
+      17,
+      354
+     ],
+     [
+      56,
+      67,
+      17,
+      172
+     ],
+     [
+      94,
+      111,
+      218,
+      270
+     ],
+     [
+      125,
+      142,
+      218,
+      263
+     ],
+     [
+      157,
+      174,
+      218,
+      267
+     ],
+     [
+      188,
+      205,
+      217,
+      267
+     ],
+     [
+      219,
+      236,
+      218,
+      263
+     ],
+     [
+      250,
+      267,
+      218,
+      262
+     ],
+     [
+      282,
+      303,
+      218,
+      259
+     ],
+     [
+      313,
+      330,
+      218,
+      263
+     ],
+     [
+      344,
+      361,
+      218,
+      270
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       270
+      ],
+      [
+       125,
+       142,
+       218,
+       263
+      ],
+      [
+       157,
+       174,
+       218,
+       267
+      ],
+      [
+       188,
+       205,
+       217,
+       267
+      ],
+      [
+       219,
+       236,
+       218,
+       263
+      ],
+      [
+       250,
+       267,
+       218,
+       262
+      ],
+      [
+       282,
+       303,
+       218,
+       259
+      ],
+      [
+       313,
+       330,
+       218,
+       263
+      ],
+      [
+       344,
+       361,
+       218,
+       270
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       270
+      ],
+      [
+       125,
+       142,
+       218,
+       262
+      ],
+      [
+       157,
+       174,
+       218,
+       266
+      ],
+      [
+       188,
+       205,
+       217,
+       266
+      ],
+      [
+       219,
+       236,
+       218,
+       262
+      ],
+      [
+       250,
+       267,
+       218,
+       261
+      ],
+      [
+       282,
+       303,
+       218,
+       258
+      ],
+      [
+       313,
+       330,
+       218,
+       262
+      ],
+      [
+       344,
+       361,
+       218,
+       269
+      ]
+     ],
+     "ssimVsFrozen": 0.9945
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       270
+      ],
+      [
+       125,
+       142,
+       218,
+       262
+      ],
+      [
+       157,
+       174,
+       218,
+       266
+      ],
+      [
+       188,
+       205,
+       217,
+       266
+      ],
+      [
+       219,
+       236,
+       218,
+       262
+      ],
+      [
+       250,
+       267,
+       218,
+       261
+      ],
+      [
+       282,
+       303,
+       218,
+       258
+      ],
+      [
+       313,
+       330,
+       218,
+       262
+      ],
+      [
+       344,
+       361,
+       218,
+       269
+      ]
+     ],
+     "ssimVsFrozen": 0.9945
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       270
+      ],
+      [
+       125,
+       142,
+       218,
+       263
+      ],
+      [
+       157,
+       174,
+       218,
+       267
+      ],
+      [
+       188,
+       205,
+       217,
+       267
+      ],
+      [
+       219,
+       236,
+       218,
+       263
+      ],
+      [
+       250,
+       267,
+       218,
+       262
+      ],
+      [
+       282,
+       303,
+       218,
+       259
+      ],
+      [
+       313,
+       330,
+       218,
+       263
+      ],
+      [
+       344,
+       361,
+       218,
+       270
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  },
+  {
+   "test": "css-counter-styles/armenian/css3-counter-styles-007",
+   "items": [
+    {
+     "marker": "Ժ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ժ. "
+     }
+    },
+    {
+     "marker": "ԺԱ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ԺԱ. "
+     }
+    },
+    {
+     "marker": "ԺԲ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ԺԲ. "
+     }
+    },
+    {
+     "marker": "ԽԳ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ԽԳ. "
+     }
+    },
+    {
+     "marker": "ՀԷ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՀԷ. "
+     }
+    },
+    {
+     "marker": "Ձ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ձ. "
+     }
+    },
+    {
+     "marker": "ՂԹ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՂԹ. "
+     }
+    },
+    {
+     "marker": "Ճ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ճ. "
+     }
+    },
+    {
+     "marker": "ՃԱ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՃԱ. "
+     }
+    },
+    {
+     "marker": "ՄԻԲ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՄԻԲ. "
+     }
+    },
+    {
+     "marker": "ՇԽ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՇԽ. "
+     }
+    },
+    {
+     "marker": "ՋՂԹ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՋՂԹ. "
+     }
+    },
+    {
+     "marker": "Ռ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ռ. "
+     }
+    },
+    {
+     "marker": "ՌԵ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՌԵ. "
+     }
+    },
+    {
+     "marker": "ՌԿ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՌԿ. "
+     }
+    },
+    {
+     "marker": "ՌԿԵ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՌԿԵ. "
+     }
+    },
+    {
+     "marker": "ՌՊ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՌՊ. "
+     }
+    },
+    {
+     "marker": "ՌՊԿ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՌՊԿ. "
+     }
+    },
+    {
+     "marker": "ՌՊԿԵ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՌՊԿԵ. "
+     }
+    },
+    {
+     "marker": "ՐՊԿԵ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՐՊԿԵ. "
+     }
+    },
+    {
+     "marker": "ՒԵ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՒԵ. "
+     }
+    },
+    {
+     "marker": "ՒՊ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՒՊ. "
+     }
+    },
+    {
+     "marker": "ՒՊԿԵ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՒՊԿԵ. "
+     }
+    },
+    {
+     "marker": "ՔՋՂԹ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ՔՋՂԹ. "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      36,
+      50,
+      17,
+      354
+     ],
+     [
+      56,
+      67,
+      17,
+      172
+     ],
+     [
+      94,
+      111,
+      218,
+      267
+     ],
+     [
+      125,
+      142,
+      218,
+      309
+     ],
+     [
+      157,
+      174,
+      218,
+      301
+     ],
+     [
+      188,
+      205,
+      218,
+      308
+     ],
+     [
+      219,
+      240,
+      217,
+      288
+     ],
+     [
+      250,
+      267,
+      217,
+      261
+     ],
+     [
+      282,
+      299,
+      217,
+      308
+     ],
+     [
+      313,
+      330,
+      217,
+      262
+     ],
+     [
+      344,
+      361,
+      217,
+      305
+     ],
+     [
+      375,
+      392,
+      218,
+      338
+     ],
+     [
+      407,
+      424,
+      218,
+      302
+     ],
+     [
+      438,
+      455,
+      218,
+      340
+     ],
+     [
+      469,
+      486,
+      218,
+      269
+     ],
+     [
+      500,
+      517,
+      218,
+      303
+     ],
+     [
+      532,
+      549,
+      218,
+      302
+     ],
+     [
+      563,
+      580,
+      218,
+      337
+     ],
+     [
+      594,
+      611,
+      218,
+      307
+     ],
+     [
+      625,
+      642,
+      218,
+      342
+     ],
+     [
+      657,
+      674,
+      218,
+      295
+     ],
+     [
+      688,
+      705,
+      218,
+      289
+     ],
+     [
+      719,
+      736,
+      218,
+      371
+     ],
+     [
+      750,
+      767,
+      218,
+      292
+     ],
+     [
+      782,
+      799,
+      218,
+      297
+     ],
+     [
+      813,
+      830,
+      218,
+      368
+     ],
+     [
+      844,
+      861,
+      216,
+      371
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      885
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       267
+      ],
+      [
+       125,
+       142,
+       218,
+       309
+      ],
+      [
+       157,
+       174,
+       218,
+       301
+      ],
+      [
+       188,
+       205,
+       218,
+       308
+      ],
+      [
+       219,
+       240,
+       217,
+       288
+      ],
+      [
+       250,
+       267,
+       217,
+       261
+      ],
+      [
+       282,
+       299,
+       217,
+       308
+      ],
+      [
+       313,
+       330,
+       217,
+       262
+      ],
+      [
+       344,
+       361,
+       217,
+       305
+      ],
+      [
+       375,
+       392,
+       218,
+       338
+      ],
+      [
+       407,
+       424,
+       218,
+       302
+      ],
+      [
+       438,
+       455,
+       218,
+       340
+      ],
+      [
+       469,
+       486,
+       218,
+       269
+      ],
+      [
+       500,
+       517,
+       218,
+       303
+      ],
+      [
+       532,
+       549,
+       218,
+       302
+      ],
+      [
+       563,
+       580,
+       218,
+       337
+      ],
+      [
+       594,
+       611,
+       218,
+       307
+      ],
+      [
+       625,
+       642,
+       218,
+       342
+      ],
+      [
+       657,
+       674,
+       218,
+       295
+      ],
+      [
+       688,
+       705,
+       218,
+       289
+      ],
+      [
+       719,
+       736,
+       218,
+       371
+      ],
+      [
+       750,
+       767,
+       218,
+       292
+      ],
+      [
+       782,
+       799,
+       218,
+       297
+      ],
+      [
+       813,
+       830,
+       218,
+       368
+      ],
+      [
+       844,
+       861,
+       216,
+       371
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      885
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       266
+      ],
+      [
+       125,
+       142,
+       218,
+       308
+      ],
+      [
+       157,
+       174,
+       218,
+       300
+      ],
+      [
+       188,
+       205,
+       218,
+       307
+      ],
+      [
+       219,
+       240,
+       217,
+       287
+      ],
+      [
+       250,
+       267,
+       217,
+       260
+      ],
+      [
+       282,
+       299,
+       217,
+       307
+      ],
+      [
+       313,
+       330,
+       217,
+       261
+      ],
+      [
+       344,
+       361,
+       217,
+       304
+      ],
+      [
+       375,
+       392,
+       218,
+       337
+      ],
+      [
+       407,
+       424,
+       218,
+       301
+      ],
+      [
+       438,
+       455,
+       218,
+       339
+      ],
+      [
+       469,
+       486,
+       218,
+       268
+      ],
+      [
+       500,
+       517,
+       218,
+       302
+      ],
+      [
+       532,
+       549,
+       218,
+       301
+      ],
+      [
+       563,
+       580,
+       218,
+       336
+      ],
+      [
+       594,
+       611,
+       218,
+       306
+      ],
+      [
+       625,
+       642,
+       218,
+       342
+      ],
+      [
+       657,
+       674,
+       218,
+       295
+      ],
+      [
+       688,
+       705,
+       218,
+       289
+      ],
+      [
+       719,
+       736,
+       218,
+       370
+      ],
+      [
+       750,
+       767,
+       218,
+       292
+      ],
+      [
+       782,
+       799,
+       218,
+       296
+      ],
+      [
+       813,
+       830,
+       218,
+       367
+      ],
+      [
+       844,
+       861,
+       216,
+       370
+      ]
+     ],
+     "ssimVsFrozen": 0.9819
+    },
+    "string": {
+     "size": [
+      390,
+      885
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       266
+      ],
+      [
+       125,
+       142,
+       218,
+       308
+      ],
+      [
+       157,
+       174,
+       218,
+       300
+      ],
+      [
+       188,
+       205,
+       218,
+       307
+      ],
+      [
+       219,
+       240,
+       217,
+       287
+      ],
+      [
+       250,
+       267,
+       217,
+       260
+      ],
+      [
+       282,
+       299,
+       217,
+       307
+      ],
+      [
+       313,
+       330,
+       217,
+       261
+      ],
+      [
+       344,
+       361,
+       217,
+       304
+      ],
+      [
+       375,
+       392,
+       218,
+       337
+      ],
+      [
+       407,
+       424,
+       218,
+       301
+      ],
+      [
+       438,
+       455,
+       218,
+       339
+      ],
+      [
+       469,
+       486,
+       218,
+       268
+      ],
+      [
+       500,
+       517,
+       218,
+       302
+      ],
+      [
+       532,
+       549,
+       218,
+       301
+      ],
+      [
+       563,
+       580,
+       218,
+       336
+      ],
+      [
+       594,
+       611,
+       218,
+       306
+      ],
+      [
+       625,
+       642,
+       218,
+       342
+      ],
+      [
+       657,
+       674,
+       218,
+       295
+      ],
+      [
+       688,
+       705,
+       218,
+       289
+      ],
+      [
+       719,
+       736,
+       218,
+       370
+      ],
+      [
+       750,
+       767,
+       218,
+       292
+      ],
+      [
+       782,
+       799,
+       218,
+       296
+      ],
+      [
+       813,
+       830,
+       218,
+       367
+      ],
+      [
+       844,
+       861,
+       216,
+       370
+      ]
+     ],
+     "ssimVsFrozen": 0.9819
+    },
+    "plan": {
+     "size": [
+      390,
+      885
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       354
+      ],
+      [
+       56,
+       67,
+       17,
+       172
+      ],
+      [
+       94,
+       111,
+       218,
+       267
+      ],
+      [
+       125,
+       142,
+       218,
+       309
+      ],
+      [
+       157,
+       174,
+       218,
+       301
+      ],
+      [
+       188,
+       205,
+       218,
+       308
+      ],
+      [
+       219,
+       240,
+       217,
+       288
+      ],
+      [
+       250,
+       267,
+       217,
+       261
+      ],
+      [
+       282,
+       299,
+       217,
+       308
+      ],
+      [
+       313,
+       330,
+       217,
+       262
+      ],
+      [
+       344,
+       361,
+       217,
+       305
+      ],
+      [
+       375,
+       392,
+       218,
+       338
+      ],
+      [
+       407,
+       424,
+       218,
+       302
+      ],
+      [
+       438,
+       455,
+       218,
+       340
+      ],
+      [
+       469,
+       486,
+       218,
+       269
+      ],
+      [
+       500,
+       517,
+       218,
+       303
+      ],
+      [
+       532,
+       549,
+       218,
+       302
+      ],
+      [
+       563,
+       580,
+       218,
+       337
+      ],
+      [
+       594,
+       611,
+       218,
+       307
+      ],
+      [
+       625,
+       642,
+       218,
+       342
+      ],
+      [
+       657,
+       674,
+       218,
+       295
+      ],
+      [
+       688,
+       705,
+       218,
+       289
+      ],
+      [
+       719,
+       736,
+       218,
+       371
+      ],
+      [
+       750,
+       767,
+       218,
+       292
+      ],
+      [
+       782,
+       799,
+       218,
+       297
+      ],
+      [
+       813,
+       830,
+       218,
+       368
+      ],
+      [
+       844,
+       861,
+       216,
+       371
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  },
+  {
+   "test": "css-counter-styles/armenian/css3-counter-styles-009",
+   "items": [
+    {
+     "marker": "Ա.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Ա. "
+     }
+    },
+    {
+     "marker": "Բ.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "Բ. "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      36,
+      50,
+      17,
+      350
+     ],
+     [
+      56,
+      67,
+      17,
+      295
+     ],
+     [
+      94,
+      111,
+      218,
+      276
+     ],
+     [
+      125,
+      142,
+      218,
+      269
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       350
+      ],
+      [
+       56,
+       67,
+       17,
+       295
+      ],
+      [
+       94,
+       111,
+       218,
+       276
+      ],
+      [
+       125,
+       142,
+       218,
+       269
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       350
+      ],
+      [
+       56,
+       67,
+       17,
+       295
+      ],
+      [
+       94,
+       111,
+       218,
+       275
+      ],
+      [
+       125,
+       142,
+       218,
+       269
+      ]
+     ],
+     "ssimVsFrozen": 0.9983
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       350
+      ],
+      [
+       56,
+       67,
+       17,
+       295
+      ],
+      [
+       94,
+       111,
+       218,
+       275
+      ],
+      [
+       125,
+       142,
+       218,
+       269
+      ]
+     ],
+     "ssimVsFrozen": 0.9983
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       50,
+       17,
+       350
+      ],
+      [
+       56,
+       67,
+       17,
+       295
+      ],
+      [
+       94,
+       111,
+       218,
+       276
+      ],
+      [
+       125,
+       142,
+       218,
+       269
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  },
+  {
+   "test": "css-counter-styles/counter-suffix",
+   "items": [
+    {
+     "marker": "1.",
+     "type": "decimal",
+     "hasChildren": false,
+     "plan": null
+    },
+    {
+     "marker": "2.",
+     "type": "decimal",
+     "hasChildren": false,
+     "plan": null
+    },
+    {
+     "marker": "א.",
+     "type": "hebrew",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "\"א. \""
+     }
+    },
+    {
+     "marker": "ב.",
+     "type": "hebrew",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "\"ב. \""
+     }
+    },
+    {
+     "marker": "一、",
+     "type": "cjk-decimal",
+     "hasChildren": false,
+     "plan": null
+    },
+    {
+     "marker": "二、",
+     "type": "cjk-decimal",
+     "hasChildren": false,
+     "plan": null
+    },
+    {
+     "type": "korean-hangul-formal",
+     "hasChildren": false,
+     "plan": null
+    },
+    {
+     "type": "korean-hangul-formal",
+     "hasChildren": false,
+     "plan": null
+    },
+    {
+     "marker": "1.",
+     "type": "decimal",
+     "hasChildren": true,
+     "plan": null
+    },
+    {
+     "marker": "2.",
+     "type": "decimal",
+     "hasChildren": true,
+     "plan": null
+    },
+    {
+     "marker": "א.",
+     "type": "hebrew",
+     "hasChildren": true,
+     "plan": {
+      "listStyleType": "\"א. \""
+     }
+    },
+    {
+     "marker": "ב.",
+     "type": "hebrew",
+     "hasChildren": true,
+     "plan": {
+      "listStyleType": "\"ב. \""
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      22,
+      33,
+      47,
+      87
+     ],
+     [
+      46,
+      57,
+      46,
+      88
+     ],
+     [
+      70,
+      81,
+      46,
+      87
+     ],
+     [
+      94,
+      105,
+      47,
+      88
+     ],
+     [
+      118,
+      130,
+      33,
+      87
+     ],
+     [
+      142,
+      154,
+      33,
+      88
+     ],
+     [
+      165,
+      180,
+      42,
+      87
+     ],
+     [
+      189,
+      204,
+      43,
+      88
+     ],
+     [
+      214,
+      225,
+      103,
+      145
+     ],
+     [
+      238,
+      249,
+      104,
+      144
+     ],
+     [
+      262,
+      273,
+      103,
+      145
+     ],
+     [
+      286,
+      297,
+      104,
+      144
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       22,
+       33,
+       47,
+       87
+      ],
+      [
+       46,
+       57,
+       46,
+       88
+      ],
+      [
+       70,
+       81,
+       46,
+       87
+      ],
+      [
+       94,
+       105,
+       47,
+       88
+      ],
+      [
+       118,
+       130,
+       32,
+       87
+      ],
+      [
+       142,
+       154,
+       32,
+       88
+      ],
+      [
+       165,
+       180,
+       42,
+       87
+      ],
+      [
+       189,
+       204,
+       43,
+       88
+      ],
+      [
+       214,
+       225,
+       103,
+       145
+      ],
+      [
+       238,
+       249,
+       104,
+       144
+      ],
+      [
+       262,
+       273,
+       103,
+       145
+      ],
+      [
+       286,
+       297,
+       104,
+       144
+      ]
+     ],
+     "ssimVsFrozen": 0.9982
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       22,
+       33,
+       47,
+       87
+      ],
+      [
+       46,
+       57,
+       46,
+       88
+      ],
+      [
+       70,
+       81,
+       46,
+       87
+      ],
+      [
+       94,
+       105,
+       47,
+       88
+      ],
+      [
+       118,
+       130,
+       32,
+       87
+      ],
+      [
+       142,
+       154,
+       32,
+       88
+      ],
+      [
+       165,
+       180,
+       42,
+       87
+      ],
+      [
+       189,
+       204,
+       43,
+       88
+      ],
+      [
+       214,
+       225,
+       103,
+       145
+      ],
+      [
+       238,
+       249,
+       104,
+       144
+      ],
+      [
+       262,
+       273,
+       103,
+       145
+      ],
+      [
+       286,
+       297,
+       104,
+       144
+      ]
+     ],
+     "ssimVsFrozen": 0.9982
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       22,
+       33,
+       47,
+       87
+      ],
+      [
+       46,
+       57,
+       46,
+       88
+      ],
+      [
+       70,
+       81,
+       46,
+       87
+      ],
+      [
+       94,
+       105,
+       47,
+       88
+      ],
+      [
+       118,
+       130,
+       32,
+       87
+      ],
+      [
+       142,
+       154,
+       32,
+       88
+      ],
+      [
+       165,
+       180,
+       42,
+       87
+      ],
+      [
+       189,
+       204,
+       43,
+       88
+      ],
+      [
+       214,
+       225,
+       103,
+       145
+      ],
+      [
+       238,
+       249,
+       104,
+       144
+      ],
+      [
+       262,
+       273,
+       103,
+       145
+      ],
+      [
+       286,
+       297,
+       104,
+       144
+      ]
+     ],
+     "ssimVsFrozen": 0.9982
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       22,
+       33,
+       47,
+       87
+      ],
+      [
+       46,
+       57,
+       46,
+       88
+      ],
+      [
+       70,
+       81,
+       46,
+       87
+      ],
+      [
+       94,
+       105,
+       47,
+       88
+      ],
+      [
+       118,
+       130,
+       32,
+       87
+      ],
+      [
+       142,
+       154,
+       32,
+       88
+      ],
+      [
+       165,
+       180,
+       42,
+       87
+      ],
+      [
+       189,
+       204,
+       43,
+       88
+      ],
+      [
+       214,
+       225,
+       103,
+       145
+      ],
+      [
+       238,
+       249,
+       104,
+       144
+      ],
+      [
+       262,
+       273,
+       103,
+       145
+      ],
+      [
+       286,
+       297,
+       104,
+       144
+      ]
+     ],
+     "ssimVsFrozen": 0.9982
+    }
+   }
+  },
+  {
+   "test": "css-lists/content-property/marker-text-matches-armenian",
+   "items": [
+    {
+     "marker": "Ա.",
+     "type": "armenian",
+     "position": "INSIDE",
+     "hasChildren": true,
+     "plan": {
+      "listStyleType": "\"Ա. \""
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      54,
+      65,
+      17,
+      110
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       54,
+       65,
+       17,
+       110
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       54,
+       65,
+       17,
+       110
+      ]
+     ],
+     "ssimVsFrozen": 0.9989
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       54,
+       65,
+       17,
+       110
+      ]
+     ],
+     "ssimVsFrozen": 0.9989
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       54,
+       65,
+       17,
+       110
+      ]
+     ],
+     "ssimVsFrozen": 0.9989
+    }
+   }
+  },
+  {
+   "test": "css-lists/content-property/marker-text-matches-georgian",
+   "items": [
+    {
+     "marker": "ა.",
+     "type": "georgian",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "ა. "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      20,
+      31,
+      17,
+      105
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       20,
+       31,
+       17,
+       105
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       20,
+       31,
+       17,
+       105
+      ]
+     ],
+     "ssimVsFrozen": 0.9989
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       20,
+       31,
+       17,
+       105
+      ]
+     ],
+     "ssimVsFrozen": 0.9989
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       20,
+       31,
+       17,
+       105
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  },
+  {
+   "test": "css-counter-styles/cssom/cssom-pad-setter-invalid",
+   "items": [
+    {
+     "marker": "001.",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "001. "
+     }
+    },
+    {
+     "marker": "002.",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "002. "
+     }
+    },
+    {
+     "marker": "003.",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "003. "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      36,
+      47,
+      57,
+      85
+     ],
+     [
+      56,
+      67,
+      57,
+      88
+     ],
+     [
+      76,
+      87,
+      57,
+      88
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       47,
+       57,
+       85
+      ],
+      [
+       56,
+       67,
+       57,
+       88
+      ],
+      [
+       76,
+       87,
+       57,
+       88
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       47,
+       57,
+       89
+      ],
+      [
+       56,
+       67,
+       57,
+       89
+      ],
+      [
+       76,
+       87,
+       57,
+       89
+      ]
+     ],
+     "ssimVsFrozen": 0.9968
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       47,
+       57,
+       89
+      ],
+      [
+       56,
+       67,
+       57,
+       89
+      ],
+      [
+       76,
+       87,
+       57,
+       89
+      ]
+     ],
+     "ssimVsFrozen": 0.9968
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       36,
+       47,
+       57,
+       85
+      ],
+      [
+       56,
+       67,
+       57,
+       88
+      ],
+      [
+       76,
+       87,
+       57,
+       88
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  },
+  {
+   "test": "css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid",
+   "items": [
+    {
+     "marker": "(A)",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "(A) "
+     }
+    },
+    {
+     "marker": "(B)",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "(B) "
+     }
+    },
+    {
+     "marker": "(C)",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "(C) "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      35,
+      48,
+      58,
+      76
+     ],
+     [
+      55,
+      68,
+      58,
+      75
+     ],
+     [
+      75,
+      88,
+      58,
+      77
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       76
+      ],
+      [
+       55,
+       68,
+       58,
+       75
+      ],
+      [
+       75,
+       88,
+       58,
+       77
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       77
+      ],
+      [
+       55,
+       68,
+       58,
+       76
+      ],
+      [
+       75,
+       88,
+       58,
+       77
+      ]
+     ],
+     "ssimVsFrozen": 0.9988
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       77
+      ],
+      [
+       55,
+       68,
+       58,
+       76
+      ],
+      [
+       75,
+       88,
+       58,
+       77
+      ]
+     ],
+     "ssimVsFrozen": 0.9988
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       76
+      ],
+      [
+       55,
+       68,
+       58,
+       75
+      ],
+      [
+       75,
+       88,
+       58,
+       77
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  },
+  {
+   "test": "css-counter-styles/cssom/cssom-negative-setter-invalid",
+   "items": [
+    {
+     "marker": "(3).",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "(3). "
+     }
+    },
+    {
+     "marker": "(2).",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "(2). "
+     }
+    },
+    {
+     "marker": "(1).",
+     "type": "foo",
+     "position": "INSIDE",
+     "hasChildren": false,
+     "plan": {
+      "listStyleType": "none",
+      "inlineMarkerText": "(1). "
+     }
+    }
+   ],
+   "frozen": {
+    "bands": [
+     [
+      35,
+      48,
+      58,
+      80
+     ],
+     [
+      55,
+      68,
+      58,
+      80
+     ],
+     [
+      75,
+      88,
+      58,
+      76
+     ]
+    ]
+   },
+   "renders": {
+    "ref": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       80
+      ],
+      [
+       55,
+       68,
+       58,
+       80
+      ],
+      [
+       75,
+       88,
+       58,
+       76
+      ]
+     ],
+     "ssimVsFrozen": 1
+    },
+    "native": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       81
+      ],
+      [
+       55,
+       68,
+       58,
+       81
+      ],
+      [
+       75,
+       88,
+       58,
+       81
+      ]
+     ],
+     "ssimVsFrozen": 0.9942
+    },
+    "string": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       81
+      ],
+      [
+       55,
+       68,
+       58,
+       81
+      ],
+      [
+       75,
+       88,
+       58,
+       81
+      ]
+     ],
+     "ssimVsFrozen": 0.9942
+    },
+    "plan": {
+     "size": [
+      390,
+      600
+     ],
+     "bands": [
+      [
+       35,
+       48,
+       58,
+       80
+      ],
+      [
+       55,
+       68,
+       58,
+       80
+      ],
+      [
+       75,
+       88,
+       58,
+       76
+      ]
+     ],
+     "ssimVsFrozen": 1
+    }
+   }
+  }
+ ]
+}

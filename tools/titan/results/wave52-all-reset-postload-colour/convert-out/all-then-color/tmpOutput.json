@@ -1,0 +1,263 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "atc_allthenprops-001",
+            "name": "ATC_AllThenProps",
+            "properties": [
+                {
+                    "type": "All",
+                    "data": "INITIAL"
+                },
+                {
+                    "type": "Display",
+                    "data": "BLOCK"
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "atc_propsthenall_ingreenparent-002",
+            "name": "ATC_PropsThenAll_InGreenParent",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "reset-003",
+            "name": "reset",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 150.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 50.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "All",
+                    "data": "REVERT"
+                }
+            ],
+            "slot": {
+                "parent": "atc_propsthenall_ingreenparent-002"
+            }
+        },
+        {
+            "id": "atc_initialunderredparent-004",
+            "name": "ATC_InitialUnderRedParent",
+            "properties": [
+                {
+                    "type": "Color",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 200.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                }
+            ]
+        },
+        {
+            "id": "span-005",
+            "name": "span",
+            "properties": [
+                {
+                    "type": "All",
+                    "data": "INITIAL"
+                },
+                {
+                    "type": "Display",
+                    "data": "BLOCK"
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 200.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                }
+            ],
+            "slot": {
+                "parent": "atc_initialunderredparent-004"
+            }
+        },
+        {
+            "id": "atc_directionsurvives-006",
+            "name": "ATC_DirectionSurvives",
+            "properties": [
+                {
+                    "type": "Direction",
+                    "data": "RTL"
+                },
+                {
+                    "type": "All",
+                    "data": "INITIAL"
+                },
+                {
+                    "type": "Display",
+                    "data": "BLOCK"
+                },
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 200.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 40.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "Color",
+                    "data": {
+                        "srgb": {
+                            "r": 1.0,
+                            "g": 1.0,
+                            "b": 1.0
+                        },
+                        "original": "#ffffff"
+                    }
+                },
+                {
+                    "type": "FontSize",
+                    "data": {
+                        "px": 20.0,
+                        "original": {
+                            "type": "length",
+                            "px": 20.0
+                        }
+                    }
+                }
+            ],
+            "text": "123"
+        }
+    ]
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.GapDecorationBandsTest" tests="11" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:58.963Z" hostname="mac-1.home" time="0.006">
+  <properties/>
+  <testcase name="046 union model reproduces the wave49-final native ink exactly" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.002"/>
+  <testcase name="045 line boxes tile the content box, not the items" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.001"/>
+  <testcase name="a single line is never rebuilt" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.0"/>
+  <testcase name="046 gold row rules move onto the line-box gaps" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.0"/>
+  <testcase name="045 gold row rules span the stretched line, not the 50px items" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.0"/>
+  <testcase name="an unresolved cross gap refuses the reconstruction" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.0"/>
+  <testcase name="bands that disagree with the placed items are rejected" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.001"/>
+  <testcase name="a positioning align-content keyword refuses the reconstruction" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.0"/>
+  <testcase name="045 red column rule lands on the ref band instead of 4px left" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.0"/>
+  <testcase name="the extractor reads the container gaps and align-content" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.002"/>
+  <testcase name="lines that already tile the container are returned untouched" classname="com.styleconverter.runtime.columns.GapDecorationBandsTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

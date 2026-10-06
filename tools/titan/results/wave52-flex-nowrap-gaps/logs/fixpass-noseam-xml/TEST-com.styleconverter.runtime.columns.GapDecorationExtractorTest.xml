@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.GapDecorationExtractorTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:58.970Z" hostname="mac-1.home" time="0.005">
+  <properties/>
+  <testcase name="none and hidden keep the family inert" classname="com.styleconverter.runtime.columns.GapDecorationExtractorTest" time="0.001"/>
+  <testcase name="accepts the hyphenated CSS spellings too" classname="com.styleconverter.runtime.columns.GapDecorationExtractorTest" time="0.0"/>
+  <testcase name="decodes the full row and column families" classname="com.styleconverter.runtime.columns.GapDecorationExtractorTest" time="0.004"/>
+  <testcase name="claims the eight new IR names for the columns category" classname="com.styleconverter.runtime.columns.GapDecorationExtractorTest" time="0.0"/>
+  <testcase name="unresolvable inset degrades to zero rather than guessing" classname="com.styleconverter.runtime.columns.GapDecorationExtractorTest" time="0.0"/>
+  <testcase name="CSS initial values apply when properties are absent" classname="com.styleconverter.runtime.columns.GapDecorationExtractorTest" time="0.0"/>
+  <testcase name="line-width keywords resolve like the multicol rule" classname="com.styleconverter.runtime.columns.GapDecorationExtractorTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

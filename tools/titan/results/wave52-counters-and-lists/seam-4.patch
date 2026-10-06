@@ -1,0 +1,133 @@
+seam-4.patch — wave 52, lane L6 (counters-and-lists), T7 native half: the EMPTY list item on SwiftUI.
+Seam: runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+      (the marker branch's inside-overlay decision, one expression; §3 registry row ":4405-4480").
+      Also ADDS runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerEmptyItemRasterTests.swift —
+      the raster pin that is red without this seam, so it travels with it.
+Base: HEAD 7d9c22a7 — applies with NO prior lane patch; `git apply --check` verified on HEAD.
+Needs (in the tree, lane-owned): StyleEngine/lists/ListMarkerEmptyItem.swift (+ ListMarkerEmptyItemTests).
+Why: see seam-3.patch (the Compose twin). Apply WITH (or after) L5's seam-6-FE-li.patch.
+ORDER: seam-4 BEFORE seam-2 (seam-2 is cut against HEAD+seam-4).
+Apply: git apply tools/titan/results/wave52-counters-and-lists/seam-4.patch
+
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -3773,9 +3773,14 @@
+                 // in the row placement, the cross-axis alignment.
+                 let markerExposesBaseline =
+                     ListMarkerRow.itemExposesTextBaseline(child)
+-                let markerInsideOverlay = ListMarkerRow.rendersInsideOverlay(
+-                    position: markerConfig?.position,
+-                    itemExposesTextBaseline: markerExposesBaseline)
++                // Wave 52 (lane L6, T7 native half): an EMPTY item (no text,
++                // children, generated content or declared block size —
++                // ListMarkerEmptyItem.isEmpty) takes the HStack, where its
++                // inside marker sizes the item's one line box (css-lists-3
++                // §3.5, CSS 2.1 §10.6.3); the zero-size overlay collapsed the
++                // post-F-E cssom rows onto one (probed).
++                let markerInsideOverlay = ListMarkerEmptyItem.rendersInsideOverlay(
++                    position: markerConfig?.position, item: child)
+                 // Wave 10 — the fragmentation contract (css-break-3 §4):
+                 // a multicol container's single in-flow child whose
+                 // block-size C exceeds the column block-size H breaks
+--- /dev/null
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/ListMarkerEmptyItemRasterTests.swift
+@@ -0,0 +1,99 @@
++//
++//  ListMarkerEmptyItemRasterTests.swift
++//  Wave 52, lane L6 (T7's native half) — the RASTER pin for the empty-item
++//  rule. SHIPS INSIDE seam-4.patch (tools/titan/results/wave52-counters-
++//  and-lists/), never on its own: it renders through ComponentRenderer's
++//  marker branch, so it is red on a tree without the seam by design.
++//
++//  ## What it renders
++//  The VERBATIM wave51-fix cssom-pad-setter-invalid `<ol>` (per-test IR
++//  component `…cssom-pad-setter-invalid__0`: ListStyleType "foo",
++//  ListStylePosition INSIDE) and its three `<li>` as they reach the wire
++//  AFTER lane L5's F-E (the 100×100 placeholder pair gone — an empty bag)
++//  carrying the markers lane L6's T7 bake now stamps ("001." "002." "003.").
++//  The ref paints three rows at a 20 px pitch (y 36–47, 56–67, 76–87).
++//
++//  MUTATION PROOF (EXECUTED 2026-10-05 while verifying seam-4.patch, lane
++//  L6; log seam-4.verify.log): with ComponentRenderer.swift at HEAD (the
++//  zero-size overlay for every inside item without text) the three markers
++//  collapsed onto ONE ink band [(16, 28)] and this test went red; with the
++//  seam, three bands [(16, 27), (32, 43), (48, 59)] (before the 16px root
++//  pin; re-measured with it in seam-4.verify.log).
++//
++
++import XCTest
++import SwiftUI
++@testable import StyleConverterRuntime
++
++final class ListMarkerEmptyItemRasterTests: XCTestCase {
++
++    /// The post-F-E + T7 wire, nested in the decoder's children form, under
++    /// a root that only pins the browser-default 16px font (the cssom page
++    /// declares none) so the marker line is the one a capture paints.
++    private func cssomPadSetterInvalid() throws -> IRComponent {
++        let lis = ["001.", "002.", "003."].enumerated().map { (i, m) -> String in
++            "{\"id\":\"cssom__cssom-pad-setter-invalid__0__\(i)\",\"name\":\"li\(i)\",\"properties\":[],"
++                + "\"meta\":{\"sourceTag\":\"li\",\"markerText\":\"\(m)\"}}"
++        }
++        return try JSONDecoder().decode(IRComponent.self, from: Data("""
++        {"id":"root","name":"root",
++         "properties":[{"type":"FontSize","data":{"px":16.0,"original":{"type":"length","px":16.0}}}],
++         "children":[
++          {"id":"wpt__css-counter-styles__cssom__cssom-pad-setter-invalid__0-673",
++           "name":"wpt__css-counter-styles__cssom__cssom-pad-setter-invalid__0",
++           "properties":[{"type":"ListStyleType","data":"foo"},{"type":"ListStylePosition","data":"INSIDE"}],
++           "meta":{"sourceTag":"ol"},"children":[\(lis.joined(separator: ","))]}]}
++        """.utf8))
++    }
++
++    /// Ink bands (rows with a pixel darker than 128 on every channel) of the
++    /// composed capture geometry (ListMarkerInFlowItemRasterTests' plumbing).
++    @MainActor
++    private func bands(_ comp: IRComponent) throws -> [(top: Int, bottom: Int)] {
++        let view = VStack(alignment: .leading, spacing: 0) { ComponentHost(component: comp) }
++            .frame(width: 358, alignment: .topLeading)
++            .padding(16)
++            .frame(width: 390, height: 200, alignment: .topLeading)
++            .background(Color.white)
++            .environment(\.wptCaptureMode, true)
++            .environment(\.styleViewport, StyleViewport(width: 390, height: 844, rootContainingBlock: 358))
++        let renderer = ImageRenderer(content: view)
++        renderer.scale = 1
++        let cg = try XCTUnwrap(renderer.cgImage, "ImageRenderer produced no image")
++        var buf = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
++        let ctx = try XCTUnwrap(CGContext(
++            data: &buf, width: cg.width, height: cg.height, bitsPerComponent: 8,
++            bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
++            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
++        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
++        var out: [(top: Int, bottom: Int)] = [], top: Int? = nil
++        for y in 0..<cg.height {
++            // A row is inked when any pixel is dark on all three channels.
++            let inked = (0..<cg.width).contains { x in
++                let i = (y * cg.width + x) * 4
++                return buf[i] < 128 && buf[i + 1] < 128 && buf[i + 2] < 128
++            }
++            if inked { if top == nil { top = y } } else if let t = top { out.append((t, y - 1)); top = nil }
++        }
++        if let t = top { out.append((t, cg.height - 1)) }
++        return out
++    }
++
++    /// Each empty item is one marker line tall: three rows, none overlapping.
++    @MainActor
++    func testEmptyInsideItemsStackOneMarkerLineEach() throws {
++        let b = try bands(try cssomPadSetterInvalid())
++        // Logged so the lane note can cite the measured rows verbatim.
++        print("ListMarkerEmptyItemRasterTests bands: \(b)")
++        XCTAssertEqual(b.count, 3, "expected one marker row per empty item, got \(b)")
++        guard b.count == 3 else { return }
++        // The fix is "one line box per item", so the pin is NON-OVERLAP: each
++        // row starts below the previous row's ink. The pitch itself is the
++        // marker's own line box (measured 16 px here against the ref's 20 —
++        // the residual is stated in the lane note, not pinned as correct).
++        for (a, c) in zip(b, b.dropFirst()) {
++            XCTAssertGreaterThan(c.top, a.bottom, "rows overlap — bands \(b)")
++            XCTAssertGreaterThanOrEqual(c.top - a.top, 12, "row pitch \(c.top - a.top) — bands \(b)")
++        }
++    }
++}

@@ -181,7 +181,10 @@ test('a list-style-image marker is skipped without a decline', () => {
 });
 
 test('dynamic counters bail the WHOLE fixture, stamping nothing', () => {
-  for (const html of ['<style>li{counter-increment:x}</style>', '<style>@counter-style c{}</style>',
+  // Wave 52 (lane L6 T7): `<style>@counter-style c{}</style>` LEFT this list
+  // — author rules are resolved now (see the T7 block below); a `<script>`
+  // the CSSOM recogniser cannot read still bails, as the third entry pins.
+  for (const html of ['<style>li{counter-increment:x}</style>', '<style>li{counter-set:x 3}</style>',
     '<p>x<script>go()</script>', '<style>li::before{content:counters(x,".")}</style>']) {
     const fx = listFixture(1, 'decimal', 2);
     const out = bakeCounterStyles(fx, html);
@@ -318,4 +321,162 @@ test('a <ul> without any declaration keeps its UA disc — nothing baked', () =>
   const out = bakeCounterStyles(fx, '');
   assert.equal(out.stamped, 0);
   assert.equal(out.declined, 0);
+});
+
+// ── WAVE 52, LANE L6 (T7): AUTHOR `@counter-style` RULES ────────────────────
+// Every marker string below is the one the WPT reference paints (the
+// `cssom-*-ref.html` sources list them as `<div>001.</div>` …), so a
+// descriptor-semantics divergence from Blink fails loudly here first.
+//
+// MUTATION PROOF (EXECUTED 2026-09-25 at authoring, RE-EXECUTED 2026-10-05
+// by tools/titan/results/wave52-counters-and-lists/mutate.py, entry
+// `bake-inrange` in mutations.log, same four): making
+// `inRange` answer true unconditionally turned FOUR tests red — the
+// armenian §4 pin above (10000 → "ՔՌ." instead of "10000."), the §7.1.1
+// negative pin (upper-roman -3 → "-III." instead of the decimal "-3."),
+// the `fixed / range / additive … fall back` pin below and the corpus
+// integration — and left everything else green; restored byte-exact
+// (cmp-verified against the pre-mutation snapshot).
+
+import fs from 'node:fs';
+import { SCRIPT_MUTATION_REASON } from './counter-style-bake.mjs';
+
+/** The three-item `<ol style="list-style-type: foo …">` shape every cssom
+ *  test uses, as an extractor fixture; `start` optional. */
+function authorListFixture(start) {
+  const root = { _tag: 'ol', properties: { 'list-style-type': 'foo', 'list-style-position': 'inside' },
+    children: { a: { _tag: 'li', properties: {} }, b: { _tag: 'li', properties: {} }, c: { _tag: 'li', properties: {} } } };
+  if (start !== undefined) root._attrs = { start: String(start) };
+  return { _wpt: { lossy: false, lossyReasons: [] }, components: { root } };
+}
+const markersOf = (fx) => Object.values(fx.components.root.children).map((c) => c._markerText);
+
+test('T7: `extends decimal; pad: 3 "0"` stamps 001. 002. 003. (cssom-pad-setter-ref)', () => {
+  const fx = authorListFixture();
+  const out = bakeCounterStyles(fx, `<style id="sheet">@counter-style foo { system: extends decimal; pad: 3 '0'; }</style>`);
+  assert.equal(out.status, 'baked');
+  assert.deepEqual(markersOf(fx), ['001.', '002.', '003.']);
+  // Resolved, not approximated: nothing lossy, the baked stamp is set.
+  assert.equal(fx._wpt.lossy, false);
+  assert.equal(fx._wpt.counterStyleBaked, true);
+});
+
+test('T7: `cyclic; symbols: A B C; prefix "("; suffix ")"` stamps (A) (B) (C)', () => {
+  const fx = authorListFixture();
+  bakeCounterStyles(fx, `<style>@counter-style foo { system: cyclic; symbols: A B C; prefix: '('; suffix: ')'; }</style>`);
+  assert.deepEqual(markersOf(fx), ['(A)', '(B)', '(C)']);
+});
+
+test('T7: `negative "(" ")"` on extends decimal with start=-3 stamps (3). (2). (1).', () => {
+  // §3.1.4: the negative PREFIX and SUFFIX wrap the representation; the
+  // style's own `.` suffix (inherited from decimal) follows.
+  const fx = authorListFixture(-3);
+  bakeCounterStyles(fx, `<style>@counter-style foo { system: extends decimal; negative: '(' ')'; }</style>`);
+  assert.deepEqual(markersOf(fx), ['(3).', '(2).', '(1).']);
+});
+
+test('T7: fixed / range / additive author systems fall back exactly like the refs', () => {
+  // cssom-fallback-setter-ref: fixed A B, third item falls back to lower-roman.
+  const fb = authorListFixture();
+  bakeCounterStyles(fb, `<style>@counter-style foo { system: fixed; symbols: A B; fallback: lower-roman; }</style>`);
+  assert.deepEqual(markersOf(fb), ['A.', 'B.', 'iii.']);
+  // cssom-range-setter-ref: cyclic A B C with `range: 1 2` → 3 is decimal.
+  const rg = authorListFixture();
+  bakeCounterStyles(rg, `<style>@counter-style foo { system: cyclic; symbols: A B C; range: 1 2; }</style>`);
+  assert.deepEqual(markersOf(rg), ['A.', 'B.', '3.']);
+  // cssom-additive-symbols-setter-ref: `2 C, 1 B, 0 A` from start=0.
+  const ad = authorListFixture(0);
+  bakeCounterStyles(ad, `<style>@counter-style foo { system: additive; additive-symbols: 2 C, 1 B, 0 A; }</style>`);
+  assert.deepEqual(markersOf(ad), ['A.', 'B.', 'C.']);
+  // cssom-symbols-setter-ref: alphabetic A B C.
+  const al = authorListFixture();
+  bakeCounterStyles(al, `<style>@counter-style foo { system: alphabetic; symbols: A B C; }</style>`);
+  assert.deepEqual(markersOf(al), ['A.', 'B.', 'C.']);
+});
+
+test('T7: a script of INVALID CSSOM setters is inert; a setter that takes effect bails', () => {
+  // cssom-pad-setter-invalid's script, verbatim: every value the §7.1
+  // grammar rejects — the static rule IS the rendering.
+  const inert = `<style id="sheet">@counter-style foo { system: extends decimal; pad: 3 '0'; }</style>
+<script>
+document.body.offsetWidth;
+const sheet = document.getElementById('sheet');
+const foo_rule = sheet.sheet.rules[0];
+foo_rule.pad = '-1 "0"';
+foo_rule.pad = '3';
+foo_rule.pad = '3 "X" "Y"';
+</script>`;
+  const fx = authorListFixture();
+  assert.equal(bakeCounterStyles(fx, inert).status, 'baked');
+  assert.deepEqual(markersOf(fx), ['001.', '002.', '003.']);
+  // cssom-pad-setter (the VALID twin): `pad = '3 "0"'` on a rule without pad
+  // changes the rendering after load → the extraction wall, named as such.
+  const live = `<style id="sheet">@counter-style foo { system: extends decimal; }</style>
+<script>
+document.body.offsetWidth;
+const sheet = document.getElementById('sheet');
+const foo_rule = sheet.sheet.rules[0];
+foo_rule.pad = '3 "0"';
+</script>`;
+  const fy = authorListFixture();
+  const out = bakeCounterStyles(fy, live);
+  assert.equal(out.status, 'bailed');
+  assert.match(out.reason, /^requires-script-mutation/);
+  assert.deepEqual(fy._wpt.lossyReasons, [COUNTER_STYLE_LOSSY_REASON, SCRIPT_MUTATION_REASON]);
+  assert.equal(fy.components.root.children.a._markerText, undefined);
+});
+
+test('T7: an author rule extending a bullet is out of scope like the bullet', () => {
+  // css-lists/content-property/marker-text-matches-disc: `my-disc { system:
+  // extends disc }` + `ol { list-style: my-disc inside }` — no stamp, no
+  // decline, not lossy (the natives keep their own disc).
+  const fx = { _wpt: { lossy: false, lossyReasons: [] }, components: { root: {
+    _tag: 'ol', properties: { 'list-style': 'my-disc inside' }, children: { a: { _tag: 'li', properties: {} } } } } };
+  const out = bakeCounterStyles(fx, `<style>@counter-style my-disc { system: extends disc; }</style>`);
+  assert.deepEqual([out.status, out.stamped, out.declined, fx._wpt.lossy], ['baked', 0, 0, false]);
+});
+
+test('T7: an INVALID author rule defines nothing — the name declines, never guesses', () => {
+  // counter-style-at-rule/broken-symbols: `symbols: ⓐ inherit` — `inherit`
+  // is a CSS-wide keyword, not a <custom-ident>, so the rule is invalid and
+  // Blink paints "1." (the UA decimal for an undefined name). The bake
+  // DECLINES (null) so the natives fall to their own UA default, exactly
+  // the pre-T7 picture.
+  const fx = authorListFixture();
+  const out = bakeCounterStyles(fx, `<style>@counter-style foo { system: alphabetic; symbols: ⓐ inherit; }</style>`);
+  assert.equal(out.declined, 3);
+  assert.equal(fx.components.root.children.a._markerText, undefined);
+});
+
+test('T7: author names are case-sensitive, predefined keywords are not (§3)', () => {
+  const author = { 'Custom-Style': { system: 'cyclic', symbols: ['‣'], ranges: null, fallback: 'decimal', prefix: '', suffix: '.' } };
+  assert.equal(resolvedListStyleType({ 'list-style-type': 'Custom-Style' }, 'decimal', author), 'Custom-Style');
+  // The lowercase spelling is a DIFFERENT (undefined) name → lowercased path
+  // → not predefined → the bake declines it downstream.
+  assert.equal(resolvedListStyleType({ 'list-style-type': 'custom-style' }, 'decimal', author), 'custom-style');
+  assert.equal(markerStringFor('custom-style', 1, author), null);
+  assert.equal(markerStringFor('Custom-Style', 1, author), '‣.');
+});
+
+test('T7 integration: every gate cssom -invalid fixture bakes the marker its ref paints', (t) => {
+  // Reads the real extractor fixtures and authored sources when the
+  // gitignored corpora are present (they are on the gate host); skips
+  // honestly otherwise so CI without tools/wpt is not a false green.
+  const expected = {
+    'additive-symbols': ['A.', 'B.', 'C.'], fallback: ['A.', 'B.', 'iii.'],
+    name: ['A.', 'B.', 'C.', 'X.', 'Y.', 'Z.'], negative: ['(3).', '(2).', '(1).'],
+    pad: ['001.', '002.', '003.'], 'prefix-suffix': ['(A)', '(B)', '(C)'],
+    range: ['A.', 'B.', '3.'], symbols: ['A.', 'B.', 'C.'],
+  };
+  const fxDir = 'fixtures/wpt/css-counter-styles', srcDir = 'tools/wpt/css/css-counter-styles/cssom';
+  if (!fs.existsSync(fxDir) || !fs.existsSync(srcDir)) { t.skip('corpus not present'); return; }
+  for (const [stem, want] of Object.entries(expected)) {
+    const fx = JSON.parse(fs.readFileSync(`${fxDir}/cssom__cssom-${stem}-setter-invalid.json`, 'utf8'));
+    const src = fs.readFileSync(`${srcDir}/cssom-${stem}-setter-invalid.html`, 'utf8');
+    assert.equal(bakeCounterStyles(fx, src).status, 'baked', stem);
+    const got = [];
+    const walk = (n) => { if (n._markerText) got.push(n._markerText); for (const c of Object.values(n.children ?? {})) walk(c); };
+    for (const r of Object.values(fx.components)) walk(r);
+    assert.deepEqual(got, want, stem);
+  }
 });

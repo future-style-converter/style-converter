@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" tests="7" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:14:39.056Z" hostname="mac-1.home" time="0.003">
+  <properties/>
+  <testcase name="an unclipped parent still hoists its abspos child - the frozen wave-17 path" classname="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" time="0.0"/>
+  <testcase name="the pure walk drops the clipped subtree from the overlay list" classname="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" time="0.002"/>
+  <testcase name="a FIXED box is vetoed too - an unescapable clip does not grade by position" classname="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" time="0.0"/>
+  <testcase name="the abspos child hoists without the clip flag and is vetoed with it" classname="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" time="0.0"/>
+  <testcase name="the vetoed box renders in its flow slot with a zero flow footprint" classname="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" time="0.0"/>
+  <testcase name="the clip flag accumulates down the walk like the other two ancestries" classname="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" time="0.001"/>
+  <testcase name="a box that was never a hoist candidate keeps its wave-48 mount under a clip" classname="com.styleconverter.runtime.layout.position.ClipAncestorHoistVetoTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

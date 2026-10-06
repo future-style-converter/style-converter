@@ -129,3 +129,69 @@ test('watch cells resolve by substring and optional platform', () => {
   assert.equal(rows.filter(r => r.watch === 'angle-units').length, 2);
   assert.equal(rows[0].prev, 'f 0.999'); assert.equal(rows[0].cur, 'P 0.999');
 });
+
+// ── wave-52 L12-A: the absence-only stamp under the UNCHANGED scorer ─────────
+//
+// plan-skeptic-1 C2: score-gate.mjs is NOT edited for the absence-only family.
+// The standing constraint holds as written — a cell stamped NOW prints under the
+// existing "UNMEASURED NOW" heading, and a cell whose stamp is REMOVED prints as
+// NEWLY MEASURED, never LOST (a ref re-freeze can un-stamp a cell whose capture
+// bytes are identical; calling that LOST is the mis-report the rule prevents).
+// These pins assert the CURRENT rule on the string stamp, so a future wave that
+// wants LOST semantics has to change a pinned rule in the open. Mutation ledger
+// (executed, restored byte-exact): tools/titan/results/wave52-instrument-and-
+// calibration/_note.md — M7 `isScored` testing `x.scoreExcluded !== true` (the
+// "=== true" idiom) counts the string stamp and fails the first pin.
+
+// One section run dir from explicit diff objects (string stamps allowed).
+function makeRunDiffs(root, name, byTest) {
+  const sdir = path.join(root, name, 'sections', 'css-x');
+  fs.mkdirSync(sdir, { recursive: true });
+  const results = {};
+  for (const [test, diffs] of Object.entries(byTest)) results[test] = { browserRef: { diffs } };
+  fs.writeFileSync(path.join(sdir, 'manifest.json'), JSON.stringify({ wpt: { results } }));
+  return path.join(root, name);
+}
+
+test('L12-A: a string stamp is unscored under the unchanged idiom (M7)', () => {
+  assert.equal(isScored({ ssim: 1, scoreExcluded: 'absence-only' }), false);
+  assert.equal(isScored({ ssim: 1, scoreExcluded: 'native-font-parity' }), false);
+  assert.equal(isPass({ ssim: 1, wptPass: null, scoreExcluded: 'absence-only' }), false);
+});
+
+test('L12-A: stamped-now → UNMEASURED NOW; stamp-removed → NEWLY MEASURED, never LOST', () => {
+  const pass = { ssim: 1, wptPass: true };
+  const stamped = { ssim: 1, wptPass: null, scoreExcluded: 'absence-only' };
+  const regressed = { ssim: 0.71, wptPass: false };
+  // Adoption run: a scored P becomes stamped.
+  const d1 = diffRuns(loadRun(makeRunDiffs(tmp, 'l12p1', { 'css/css-x/a.html': { 'web-ref': pass } })),
+                      loadRun(makeRunDiffs(tmp, 'l12c1', { 'css/css-x/a.html': { 'web-ref': stamped } })));
+  assert.deepEqual(d1.unmeasuredNow.map(r => `${r.test}|${r.platform}|${r.prevPass}`), ['css/css-x/a.html|web|true']);
+  assert.equal(d1.lost.length + d1.gained.length + d1.newlyMeasured.length, 0);
+  // Stamp removed (e.g. the ref re-froze with ink) and the cell now fails:
+  // the standing rule prints NEWLY MEASURED, not LOST.
+  const d2 = diffRuns(loadRun(makeRunDiffs(tmp, 'l12p2', { 'css/css-x/a.html': { 'web-ref': stamped } })),
+                      loadRun(makeRunDiffs(tmp, 'l12c2', { 'css/css-x/a.html': { 'web-ref': regressed } })));
+  assert.deepEqual(d2.newlyMeasured.map(r => `${r.platform}|${r.curPass}`), ['web|false']);
+  assert.equal(d2.lost.length, 0, 'a removed stamp is never LOST (score-gate.mjs:122, unchanged)');
+});
+
+// The committed-run replay: the wave51-fix digest the L12 census committed
+// (every cell with ref ink under 1 %), scored before and after the shipped gate.
+const L12_DIGEST = new URL('./results/wave52-instrument-and-calibration/absence-only-digest.wave51-fix.json', import.meta.url);
+test('L12-A replay: wave51-fix → adoption prints 19 UNMEASURED NOW and nothing else', { skip: !fs.existsSync(L12_DIGEST) }, async () => {
+  const { applyAbsenceOnlyGate } = await import('./inject-wpt-block.mjs');
+  const digest = JSON.parse(fs.readFileSync(L12_DIGEST, 'utf8'));
+  const prev = {}, cur = {};
+  for (const c of digest.cells) {
+    const d = { ssim: c.ssim, wptPass: c.wptPass, semanticPresence: { bCoveragePct: c.bCov }, ...(c.scoreExcluded ? { scoreExcluded: c.scoreExcluded } : {}) };
+    (prev[c.test] ??= {})[c.key] = d;
+    (cur[c.test] ??= { _eligible: c.scoreEligible })[c.key] = JSON.parse(JSON.stringify(d));
+  }
+  for (const t of Object.values(cur)) { const e = t._eligible; delete t._eligible; if (e) applyAbsenceOnlyGate(t); }
+  const d = diffRuns(loadRun(makeRunDiffs(tmp, 'l12rp', prev)), loadRun(makeRunDiffs(tmp, 'l12rc', cur)));
+  assert.equal(d.unmeasuredNow.length, 19);
+  assert.deepEqual(['web', 'ios', 'android'].map(p => d.unmeasuredNow.filter(r => r.platform === p).length), [7, 6, 6]);
+  assert.ok(d.unmeasuredNow.every(r => r.prevPass === true), 'all 19 were scored passes');
+  assert.equal(d.gained.length + d.lost.length + d.newlyMeasured.length + d.movers.length, 0);
+});

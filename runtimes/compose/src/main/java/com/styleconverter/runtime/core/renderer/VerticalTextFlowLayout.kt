@@ -31,10 +31,24 @@ package com.styleconverter.runtime.core.renderer
 // ## The decline contract
 // [VerticalUprightTextFlow] does its planning at MEASURE time, because the
 // wrap budget is the incoming height constraint and composition cannot see
-// it. When `VerticalTextFlow.uprightColumnIndices` declines — an unbounded
-// height budget, a degenerate advance, a >64-line plan — this composable
-// places the `rotatedRun` slot instead and the frame is exactly what the
-// frozen renderer drew. Nothing is guessed.
+// it. When `VerticalTextFlow.uprightColumnIndices` declines — no budget at
+// all, a degenerate advance, a >64-line plan — this composable places the
+// `rotatedRun` slot instead and the frame is exactly what the frozen
+// renderer drew. Nothing is guessed.
+//
+// Wave 52 lane L8 (M-C): an UNBOUNDED height constraint is no longer "no
+// budget". css-writing-modes-4 §7.3.1 gives an orthogonal flow with an
+// indefinite available inline size a definite one — the nearest ancestor's
+// definite block size, else the initial containing block — and the composed
+// capture publishes both (`LocalContainingBlock`, `LocalComposedViewport`).
+// The fallback is WPT-capture-only ([uprightFallbackBudgetPx], gated on
+// `LocalWptCaptureMode` exactly as the Swift twin gates on
+// `\.wptCaptureMode`): the containing-block channel is published on EVERY
+// surface, so outside capture the gate — not the channel's absence — keeps
+// the historical decline byte for byte. Measured before the change: wave51-fix
+// ch-units-vrl-005..008's orange upright `00000` drew as the ROTATED run
+// (55×72 with its 4dp padding) where the ref stacks five upright glyphs in
+// one 120×120 column; direction-upright-001/002's cells the same way.
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -141,6 +155,25 @@ internal fun VerticalUprightTextFlow(
     // indices address. Memoised on the string so recomposition of an
     // unchanged run does not rebuild the list.
     val glyphs = remember(text) { VerticalTextFlow.codePointsOf(text) }
+    // Wave 52 lane L8 (M-C) — css-writing-modes-4 §7.3.1: when the measure's
+    // height constraint is UNBOUNDED (the block axis of this orthogonal flow
+    // is `height: auto` all the way up — wave51-fix ch-units-vrl-005..008's
+    // orange `width: 5ch` div, direction-upright-001/002's cells), the
+    // available inline size is the nearest ancestor's DEFINITE block size,
+    // else the initial containing block's extent. Both are already
+    // published to this subtree: the containing-block channel
+    // (`LocalContainingBlock.heightPx`, null when the ancestor is `auto` —
+    // published on EVERY surface, product included) and the composed
+    // capture's viewport (`LocalComposedViewport.heightPx` = the ref's
+    // 568 px ICB, null on every non-composed path). Both are read
+    // unconditionally (stable composition) and gated by
+    // [uprightFallbackBudgetPx] on `LocalWptCaptureMode`, the Swift twin's
+    // gate, so the app and the dark stage keep the historical decline.
+    val containingBlockHeightPx = com.styleconverter.runtime.core.variables
+        .LocalContainingBlock.current.heightPx?.toDouble()
+    val icbBlockExtentPx = LocalComposedViewport.current?.heightPx?.toDouble()
+    val fallbackBudgetPx = uprightFallbackBudgetPx(
+        LocalWptCaptureMode.current, containingBlockHeightPx, icbBlockExtentPx)
     // Wave 48 (lane W1): the measure moved VERBATIM into
     // uprightFlowMeasurePolicy so the policy carries EXPLICIT glyph-based
     // intrinsics — the default lambda-replay intrinsics were poisoned by
@@ -156,21 +189,48 @@ internal fun VerticalUprightTextFlow(
             rotatedRun()                          // slot 0 — decline fallback
             glyphs.forEach { uprightGlyph(it) }   // slots 1 … n
         },
-        measurePolicy = remember(glyphs, stack) {
+        // The policy is keyed on the fallback too: a viewport or containing
+        // block that changes between compositions must re-plan, not replay.
+        measurePolicy = remember(glyphs, stack, fallbackBudgetPx) {
             uprightFlowMeasurePolicy(glyphs, stack, onDecline = {
                 // No silent fallthrough: the GATE already said this run is
                 // upright, so a decline is a real, named gap and not a
                 // routine "not our case". Logged once per process — the
                 // Swift twin logs the same key via PropertyTracker.logOnce.
+                // Wave 52 L8: with the §7.3.1 fallback in place a decline
+                // means no budget at all (outside WPT capture, or a glyphless
+                // / zero-advance run), so the breadcrumb names both.
                 if (uprightDeclineLogged.compareAndSet(false, true)) {
                     android.util.Log.i(
                         "ComponentRenderer",
                         "writing-mode:upright-vertical-budget — upright vertical run " +
-                            "declined: no finite block-axis budget; " +
-                            "run kept on the rotated path",
+                            "declined: no finite block-axis budget (constraint unbounded and " +
+                            "§7.3.1 fallback ${fallbackBudgetPx ?: "absent — not a WPT capture, or no " +
+                                "definite containing block / composed viewport"}) " +
+                            "or a glyphless/zero-advance run; run kept on the rotated path",
                     )
                 }
-            })
+            }, fallbackBudgetPx = fallbackBudgetPx)
         },
     )
 }
+
+/**
+ * Wave 52 lane L8 (M-C) — the css-writing-modes-4 §7.3.1 fallback budget an
+ * upright run plans against when its height constraint is unbounded, or null
+ * (keep the decline). Twin of the Swift `VerticalUprightGate.budgetPx(style:
+ * viewport:wptCaptureMode:)`: FALSE capture mode answers null, because the
+ * app's viewport is not the ref's ICB and must not become a wrap budget, and
+ * because `LocalContainingBlock` is published on every surface (so the
+ * channel's presence cannot be the gate). Pure + internal for the JVM pin.
+ */
+internal fun uprightFallbackBudgetPx(
+    wptCaptureMode: Boolean,
+    containingBlockHeightPx: Double?,
+    icbBlockExtentPx: Double?,
+): Double? =
+    // Outside WPT capture: no fallback — the pre-wave-52 decline, byte for byte.
+    if (!wptCaptureMode) null
+    // Capture: the nearest definite ancestor block size, else the ICB.
+    else com.styleconverter.runtime.typography.text.VerticalInlineAxis
+        .orthogonalBudget(containingBlockHeightPx, icbBlockExtentPx)

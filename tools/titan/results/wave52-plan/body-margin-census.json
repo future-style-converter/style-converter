@@ -1,0 +1,2457 @@
+{
+ "run": "wave51-fix",
+ "generatedBy": "wave52-plan/page-padding-overrun body-margin-census.mjs (read-only)",
+ "method": "For every wave51-fix test: parse the TEST html and its rel=match REFERENCE html (inline <style> rules whose selector list hits body / html body / * / body.class, plus an inline <body style>) for any margin* declaration. A pair whose two sides differ in WHETHER they declare a body margin relies on the UA 8px body margin to match; capture-browser-ref.mjs canvasFrameCss injects :where(html, body){ margin: 0 } into the ref side only, so those refs are displaced relative to the test the runtime renders.",
+ "totals": {
+  "tests": 1435,
+  "testDeclares": 150,
+  "refDeclares": 149,
+  "mismatchPairs": 19,
+  "byDirection": {
+   "test-declares-ref-relies-on-UA": 10,
+   "ref-declares-test-relies-on-UA": 9
+  },
+  "mismatchCellsByState": {
+   "P": 44,
+   "f": 10,
+   "na": 3
+  }
+ },
+ "mismatchPairs": [
+  {
+   "section": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9947,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9538,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9309,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin-top:-15px"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/CSS2/css21-errata/s-11-1-1b-005-ref.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9656,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9321,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9332,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:40px 8px 8px"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/CSS2/css21-errata/s-11-1-1b-005-ref.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-anchor-position",
+   "test": "css/css-anchor-position/anchor-position-circular.html",
+   "lossy": false,
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/css-anchor-position/reference/anchor-position-circular-ref.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "lossy": true,
+   "web": {
+    "ssim": 0.5414,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.5414,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.5414,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0px"
+    ],
+    "how": [
+     "rule \"html, body\""
+    ]
+   },
+   "ref": "css/css-cascade/reference/all-green.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-display",
+   "test": "css/css-display/display-contents-text-only-001.html",
+   "lossy": false,
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.999,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9979,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-display/display-contents-text-only-001-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"html, body\""
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9585,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9585,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9585,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/css-masking/clip-path/reference/green-100x100.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9696,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9695,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9695,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/css-masking/clip-path/reference/green-circle-100x100.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9585,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9585,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9585,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/css-masking/clip-path/reference/green-100x100.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9697,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9696,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9696,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/css-masking/clip-path/reference/green-circle-100x100.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-position",
+   "test": "css/css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html",
+   "lossy": false,
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0px"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height-ref.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-position",
+   "test": "css/css-position/hypothetical-dynamic-change-003.html",
+   "lossy": false,
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "ref": "css/css-position/hypothetical-dynamic-change-001-ref.html",
+   "refBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "test-declares-ref-relies-on-UA"
+  },
+  {
+   "section": "css-pseudo",
+   "test": "css/css-pseudo/first-letter-of-html-root-refcrash.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9936,
+    "wptPass": null,
+    "scoreExcluded": true
+   },
+   "ios": {
+    "ssim": 0.9936,
+    "wptPass": null,
+    "scoreExcluded": true
+   },
+   "android": {
+    "ssim": 0.9936,
+    "wptPass": null,
+    "scoreExcluded": true
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-pseudo/first-letter-of-html-root-crash-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "inline:margin:0"
+    ],
+    "how": [
+     "inline body style"
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/direction-propagation-body-contain-root.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.971,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.971,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.971,
+    "wptPass": false,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-writing-modes/direction-propagation-body-contain-root-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "inline:margin:0"
+    ],
+    "how": [
+     "inline body style"
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/dynamic-offset-rtl-001.html",
+   "lossy": true,
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9955,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9952,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/dynamic-offset-rtl-002.html",
+   "lossy": true,
+   "web": {
+    "ssim": 0.9956,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9966,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9953,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/dynamic-offset-vrl-001.html",
+   "lossy": false,
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/dynamic-offset-vrl-002.html",
+   "lossy": false,
+   "web": {
+    "ssim": 0.9956,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9956,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9956,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/dynamic-offset-vrl-rtl-001.html",
+   "lossy": true,
+   "web": {
+    "ssim": 1,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9955,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9952,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  },
+  {
+   "section": "css-writing-modes",
+   "test": "css/css-writing-modes/dynamic-offset-vrl-rtl-002.html",
+   "lossy": true,
+   "web": {
+    "ssim": 0.9955,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "ios": {
+    "ssim": 0.9955,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "android": {
+    "ssim": 0.9952,
+    "wptPass": true,
+    "scoreExcluded": false
+   },
+   "testBodyMargin": {
+    "declares": false,
+    "values": [],
+    "how": []
+   },
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "refBodyMargin": {
+    "declares": true,
+    "values": [
+     "margin:0"
+    ],
+    "how": [
+     "rule \"body\""
+    ]
+   },
+   "status": "ok",
+   "mismatch": true,
+   "direction": "ref-declares-test-relies-on-UA"
+  }
+ ],
+ "declaringTests": [
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "ref": "css/CSS2/css21-errata/s-11-1-1b-005-ref.html",
+   "testValues": [
+    "margin-top:-15px"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "ref": "css/CSS2/css21-errata/s-11-1-1b-005-ref.html",
+   "testValues": [
+    "margin:40px 8px 8px"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-anchor-position/anchor-center-scroll-001.html",
+   "ref": "css/css-anchor-position/anchor-center-scroll-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "inline:margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-anchor-position/anchor-position-circular.html",
+   "ref": "css/css-anchor-position/reference/anchor-position-circular-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-001.html",
+   "ref": "css/css-anchor-position/reference/anchor-scroll-chained-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-002.html",
+   "ref": "css/css-anchor-position/reference/anchor-scroll-chained-002-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-003.html",
+   "ref": "css/css-anchor-position/reference/anchor-scroll-chained-003-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-004.html",
+   "ref": "css/css-anchor-position/reference/anchor-scroll-chained-004-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-anchor-position/anchor-scroll-chained-fallback.html",
+   "ref": "css/css-anchor-position/reference/anchor-scroll-chained-fallback-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-backgrounds/background-attachment-fixed-inside-transform-1.html",
+   "ref": "css/css-backgrounds/background-attachment-fixed-inside-transform-1-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-in-inline-015-print.html",
+   "ref": "css/css-break/block-in-inline-015-print-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-max-height-001.html",
+   "ref": "css/css-break/block-max-height-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-max-height-001b.html",
+   "ref": "css/css-break/block-max-height-001b-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-max-height-002.html",
+   "ref": "css/css-break/block-max-height-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-max-height-002b.html",
+   "ref": "css/css-break/block-max-height-001b-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-max-height-003.html",
+   "ref": "css/css-break/block-max-height-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-max-height-003b.html",
+   "ref": "css/css-break/block-max-height-001b-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-min-height-001.html",
+   "ref": "css/css-break/block-min-height-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-break/block-min-height-001b.html",
+   "ref": "css/css-break/block-min-height-001b-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-cascade/initial-background-color.html",
+   "ref": "css/css-cascade/reference/all-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-contain/contain-body-bg-001.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-bg-002.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-bg-003.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-bg-004.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-dir-001.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-dir-002.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-dir-003.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-dir-004.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-overflow-001.html",
+   "ref": "css/css-contain/reference/contain-body-overflow-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-overflow-003.html",
+   "ref": "css/css-contain/reference/contain-body-overflow-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-overflow-004.html",
+   "ref": "css/css-contain/reference/contain-body-overflow-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-w-m-001.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-w-m-002.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-w-m-003.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-body-w-m-004.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-bg-001.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-bg-002.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-bg-003.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-bg-004.html",
+   "ref": "css/css-contain/reference/contain-body-bg-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-dir-001.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-dir-002.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-dir-003.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-dir-004.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0 auto 0 0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-overflow-001.html",
+   "ref": "css/css-contain/reference/contain-body-overflow-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-overflow-002.html",
+   "ref": "css/css-contain/reference/contain-body-overflow-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-overflow-003.html",
+   "ref": "css/css-contain/reference/contain-body-overflow-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-overflow-004.html",
+   "ref": "css/css-contain/reference/contain-body-overflow-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-w-m-001.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-w-m-002.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-w-m-003.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-contain/contain-html-w-m-004.html",
+   "ref": "css/css-contain/reference/contain-body-w-m-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-display/display-contents-text-only-001.html",
+   "ref": "css/css-display/display-contents-text-only-001-ref.html",
+   "testValues": [],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-display/display-flow-root-001.html",
+   "ref": "css/css-display/display-flow-root-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-display/display-flow-root-list-item-001.html",
+   "ref": "css/css-display/display-flow-root-list-item-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-flexbox/abspos/flexbox_absolute-atomic.html",
+   "ref": "css/css-flexbox/abspos/flexbox_absolute-atomic-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-002.html",
+   "ref": "css/css-gaps/agnostic/gap-decorations-001-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-003.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-003-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-004.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-004-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-005.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-005-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-006.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-006-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-007.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-007-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-008.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-008-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-009.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-009-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-010.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-010-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-011.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-011-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-012.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-012-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-013.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-013-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-014.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-014-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-015.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-015-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-016.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-016-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-017.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-017-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-018.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-018-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-020.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-020-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-021.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-021-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-022.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-022-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-023.html",
+   "ref": "css/css-gaps/agnostic/gap-decorations-006-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-024.html",
+   "ref": "css/css-gaps/agnostic/gap-decorations-001-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-025.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-025-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-027.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-027-ref.html",
+   "testValues": [
+    "margin:0 0 0 200px"
+   ],
+   "refValues": [
+    "margin:0 0 0 200px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-028.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-028-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-029.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-029-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-030.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-030-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-031.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-031-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-032.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-032-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-033-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-034-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-035-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-036-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-037-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-039.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-039-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-040.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-040-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-041.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-041-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-042.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-042-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-043.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-043-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-044.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-044-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-045.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-045-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-046.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-046-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-047.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-047-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-048.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-048-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-049.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-049-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-gaps/flex/flex-gap-decorations-050.html",
+   "ref": "css/css-gaps/flex/flex-gap-decorations-050-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-armenian.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-armenian-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-circle.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-circle-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-decimal-leading-zero.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-decimal-leading-zero-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-decimal.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-decimal-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-disc.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-disc-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-georgian.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-georgian-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-lower-greek.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-lower-greek-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-lower-latin.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-lower-latin-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-lower-roman.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-lower-roman-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-square.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-square-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-upper-latin.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-upper-latin-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-lists/content-property/marker-text-matches-upper-roman.html",
+   "ref": "css/css-lists/content-property/marker-text-matches-upper-roman-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-circle-007.html",
+   "ref": "css/css-masking/clip-path/reference/clip-path-circle-2-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-circle-008.html",
+   "ref": "css/css-masking/clip-path/reference/clip-path-circle-3-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-circle-closest-corner.html",
+   "ref": "css/css-masking/clip-path/reference/clip-path-circle-4-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-circle-farthest-corner.html",
+   "ref": "css/css-masking/clip-path/reference/clip-path-circle-4-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-columns-shape-001.html",
+   "ref": "css/css-masking/clip-path/reference/clip-path-columns-shape-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "inline:margin: 0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "ref": "css/css-masking/clip-path/reference/green-100x100.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "ref": "css/css-masking/clip-path/reference/green-circle-100x100.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-inset-round-percent.html",
+   "ref": "css/css-masking/clip-path/clip-path-inset-round-percent-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-inset-round-rendering.html",
+   "ref": "css/css-masking/clip-path/clip-path-inset-round-rendering-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "ref": "css/css-masking/clip-path/reference/green-100x100.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "ref": "css/css-masking/clip-path/reference/green-circle-100x100.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height.html",
+   "ref": "css/css-position/absolute-pos-box-inside-fixed-pos-box-with-changing-height-ref.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-position/hypothetical-dynamic-change-003.html",
+   "ref": "css/css-position/hypothetical-dynamic-change-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-position/position-fixed-dynamic-transformed-sibling.html",
+   "ref": "css/css-position/position-fixed-dynamic-transformed-sibling-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-pseudo/first-letter-exclude-block-child-marker.html",
+   "ref": "css/css-pseudo/first-letter-exclude-block-child-marker-ref.html",
+   "testValues": [
+    "margin-left:5em"
+   ],
+   "refValues": [
+    "margin-left:5em"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-pseudo/first-letter-exclude-inline-child-marker.html",
+   "ref": "css/css-pseudo/first-letter-exclude-inline-child-marker-ref.html",
+   "testValues": [
+    "margin-left:5em"
+   ],
+   "refValues": [
+    "margin-left:5em"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-pseudo/first-letter-exclude-inline-marker.html",
+   "ref": "css/css-pseudo/first-letter-exclude-inline-marker-ref.html",
+   "testValues": [
+    "margin-left:5em"
+   ],
+   "refValues": [
+    "margin-left:5em"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-pseudo/first-letter-of-html-root-refcrash.html",
+   "ref": "css/css-pseudo/first-letter-of-html-root-crash-ref.html",
+   "testValues": [],
+   "refValues": [
+    "inline:margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-pseudo/first-letter-skip-marker.html",
+   "ref": "css/css-pseudo/first-letter-skip-marker-ref.html",
+   "testValues": [
+    "margin-left:100px"
+   ],
+   "refValues": [
+    "margin-left:100px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow.html",
+   "ref": "css/css-tables/collapsed-border-sideways-rl-rtl-overflow-ref.html",
+   "testValues": [
+    "margin:60px"
+   ],
+   "refValues": [
+    "margin:60px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow.html",
+   "ref": "css/css-tables/collapsed-border-vertical-lr-rtl-overflow-ref.html",
+   "testValues": [
+    "margin:60px"
+   ],
+   "refValues": [
+    "margin:60px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-tables/collapsed-border-vertical-rtl-overflow.html",
+   "ref": "css/css-tables/collapsed-border-vertical-rtl-overflow-ref.html",
+   "testValues": [
+    "margin:60px"
+   ],
+   "refValues": [
+    "margin:60px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/attr-color-invalid-cast.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/attr-color-valid.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/attr-in-max.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/attr-length-invalid-cast.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/attr-length-valid-zero-nofallback.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/attr-length-valid-zero.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/attr-length-valid.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-values/calc-invalid-range-clamping.html",
+   "ref": "css/css-values/reference/200-200-green.html",
+   "testValues": [
+    "margin:0px"
+   ],
+   "refValues": [
+    "margin:0px"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-view-transitions/inline-child-with-composited-filter.html",
+   "ref": "css/css-view-transitions/inline-child-with-filter-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-view-transitions/inline-child-with-filter.html",
+   "ref": "css/css-view-transitions/inline-child-with-filter-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-view-transitions/inline-child-with-overflow-shadow.html",
+   "ref": "css/css-view-transitions/inline-child-with-overflow-shadow-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-writing-modes/abs-pos-border-offset-001.html",
+   "ref": "css/css-writing-modes/abs-pos-border-offset-001-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-writing-modes/abs-pos-border-offset-002.html",
+   "ref": "css/css-writing-modes/abs-pos-border-offset-002-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-writing-modes/direction-propagation-body-contain-root.html",
+   "ref": "css/css-writing-modes/direction-propagation-body-contain-root-ref.html",
+   "testValues": [],
+   "refValues": [
+    "inline:margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-writing-modes/dynamic-offset-rtl-001.html",
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "testValues": [],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-writing-modes/dynamic-offset-rtl-002.html",
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "testValues": [],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-writing-modes/dynamic-offset-vrl-001.html",
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "testValues": [],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-writing-modes/dynamic-offset-vrl-002.html",
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "testValues": [],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-writing-modes/dynamic-offset-vrl-rtl-001.html",
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "testValues": [],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-writing-modes/dynamic-offset-vrl-rtl-002.html",
+   "ref": "css/css-writing-modes/dynamic-offset-rtl-001-ref.html",
+   "testValues": [],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": true
+  },
+  {
+   "test": "css/css-writing-modes/img-intrinsic-size-contribution-001.html",
+   "ref": "css/css-writing-modes/img-intrinsic-size-contribution-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-writing-modes/img-intrinsic-size-contribution-002.html",
+   "ref": "css/css-writing-modes/img-intrinsic-size-contribution-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/css-writing-modes/inline-box-border-vlr-001.html",
+   "ref": "css/css-writing-modes/reference/inline-box-border-vlr-001.html",
+   "testValues": [
+    "margin:1em"
+   ],
+   "refValues": [
+    "margin:1em"
+   ],
+   "mismatch": false
+  },
+  {
+   "test": "css/filter-effects/backdrop-filter-edge-pixels-2.html",
+   "ref": "css/filter-effects/reference/backdrop-filter-edge-pixels-2-ref.html",
+   "testValues": [
+    "margin:0"
+   ],
+   "refValues": [
+    "margin:0"
+   ],
+   "mismatch": false
+  }
+ ]
+}

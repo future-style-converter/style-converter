@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" tests="13" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:07:55.077Z" hostname="mac-1.home" time="0.069">
+  <properties/>
+  <testcase name="unbounded incoming max passes the measured size through" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.054"/>
+  <testcase name="K1a the owned grid child is not mounted through the zero-flow anchor" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.004"/>
+  <testcase name="px and unrelated properties pass through as the same instance" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.003"/>
+  <testcase name="logical sizes resolve against their mapped cb axis" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.001"/>
+  <testcase name="minimum constraints still bind the report" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.0"/>
+  <testcase name="unknown cb axis keeps the percentage wire" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.001"/>
+  <testcase name="percent abspos sizes resolve to cb-fraction px" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.0"/>
+  <testcase name="K1c ownership also releases the clip-veto clause, and nothing else" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.0"/>
+  <testcase name="oversized child reports the constraint max - the fixture numbers" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.0"/>
+  <testcase name="absolute and fixed are out of flow" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.0"/>
+  <testcase name="relative sticky static and undeclared stay in flow" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.0"/>
+  <testcase name="child smaller than the envelope reports its own size" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.0"/>
+  <testcase name="K1b the pure twin - a 0x0 placeable lands factor x content, the real box factor x free" classname="com.styleconverter.runtime.core.renderer.AbsposOverflowMeasureTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

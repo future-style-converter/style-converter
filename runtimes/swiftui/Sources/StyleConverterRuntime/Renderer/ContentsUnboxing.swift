@@ -40,9 +40,17 @@ enum ContentsUnboxing {
     /// The unboxing gate (pin C1/C3 — mirror of the Compose table).
     /// A component unboxes only when ALL of:
     ///  - its base Display computes to `contents`;
-    ///  - it is NOT positioned out-of-flow and NOT floated —
-    ///    css-display-3 §2.7 blockifies absolutely-positioned and floated
-    ///    elements, so `contents` never survives on them;
+    ///  - it is NOT positioned (any non-static `position` keeps the box —
+    ///    see the containing-block reason inside). Wave 52 (lane L3, fix
+    ///    F2): a FLOATED contents element DOES unbox — css-display-3 §2.7's
+    ///    blockification sentence ends "…has no effect on display types
+    ///    that generate no box at all (none, contents)", so `float` never
+    ///    conjures a box for it. The wave-18 Float clause misread that
+    ///    section: on css-display/display-contents-float-001
+    ///    (`display:contents; float:right; background:red` around "PASS")
+    ///    the kept box painted a full-width RED bar behind the word —
+    ///    wave51-fix ios f 0.9417 · android f 0.941 against a ref that is
+    ///    the word "PASS" alone (web P 1.0000: Chrome unboxes it);
     ///  - it carries NO ::before/::after payload — a contents element's
     ///    pseudo-elements DO render (treated as its first/last children,
     ///    §2.5) and the pseudo machinery hangs off the component box;
@@ -62,8 +70,17 @@ enum ContentsUnboxing {
         // safe, honest approximation, mirrored in the Compose gate).
         let agg = LayoutExtractor.extract(from: component.properties)
         if let pos = agg?.position, pos != .staticPos { return false }
-        // Float blockifies too (§2.7); any non-none float keeps the box.
-        if let f = agg?.float, f != FloatKeyword.none { return false }
+        // NO float clause (wave 52, lane L3, fix F2): css-display-3 §2.7
+        // blockifies floated elements but explicitly exempts display types
+        // that generate no box (none, contents) — a floated contents
+        // element still has no box to float, and its `Float` declaration
+        // drops with the box in inheritableSubset (float does not inherit).
+        // Census: exactly ONE of the 1435 wave51-fix per-test IR docs
+        // carries Display=CONTENTS with a non-none Float (the
+        // display-contents-float-001 target) — that single cell pair is
+        // the whole blast radius. Pinned by ContentsUnboxingTests
+        // (mutation: re-add the clause → the float row fails). Mirrors the
+        // Compose gate byte-for-byte.
         // Pseudo payloads render through the component box — keep it.
         if component.pseudos != nil { return false }
         // Dynamic buckets could flip display — conservative keep.

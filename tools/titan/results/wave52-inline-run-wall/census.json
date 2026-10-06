@@ -1,0 +1,2067 @@
+{
+ "run": "wave51-fix",
+ "summary": {
+  "docs": 1435,
+  "F1_hangingPunctuationMembers": 1,
+  "F2_glyphlessMembers": 4,
+  "F2_admittedByTheGlyphlessArmsAlone": 3,
+  "F3F4_clampTests": 35,
+  "F3F4_byHostClass": {
+   "markerDrawnSoftWrapped": {
+    "tests": 20,
+    "android": {
+     "scored": 20,
+     "passing": 19
+    },
+    "ios": {
+     "scored": 20,
+     "passing": 19
+    },
+    "testsList": [
+     "css/css-overflow/line-clamp/block-ellipsis-001.html",
+     "css/css-overflow/line-clamp/block-ellipsis-002.html",
+     "css/css-overflow/line-clamp/block-ellipsis-003.html",
+     "css/css-overflow/line-clamp/block-ellipsis-004.html",
+     "css/css-overflow/line-clamp/block-ellipsis-005.html",
+     "css/css-overflow/line-clamp/block-ellipsis-006.html",
+     "css/css-overflow/line-clamp/block-ellipsis-007.html",
+     "css/css-overflow/line-clamp/block-ellipsis-008.html",
+     "css/css-overflow/line-clamp/block-ellipsis-009.html",
+     "css/css-overflow/line-clamp/block-ellipsis-011.html",
+     "css/css-overflow/line-clamp/block-ellipsis-012.html",
+     "css/css-overflow/line-clamp/block-ellipsis-016.html",
+     "css/css-overflow/line-clamp/block-ellipsis-022.html",
+     "css/css-overflow/line-clamp/block-ellipsis-025.html",
+     "css/css-overflow/line-clamp/block-ellipsis-027.html",
+     "css/css-overflow/line-clamp/block-ellipsis-028.html",
+     "css/css-overflow/line-clamp/block-ellipsis-029.html",
+     "css/css-overflow/line-clamp/block-ellipsis-030.html",
+     "css/css-overflow/line-clamp/block-ellipsis-031.html",
+     "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html"
+    ]
+   },
+   "markerSuppressed": {
+    "tests": 2,
+    "android": {
+     "scored": 2,
+     "passing": 2
+    },
+    "ios": {
+     "scored": 2,
+     "passing": 2
+    },
+    "testsList": [
+     "css/css-overflow/line-clamp/block-ellipsis-023.html",
+     "css/css-overflow/line-clamp/block-ellipsis-024.html"
+    ]
+   },
+   "maxLinesOnly-noMarker": {
+    "tests": 1,
+    "android": {
+     "scored": 1,
+     "passing": 1
+    },
+    "ios": {
+     "scored": 1,
+     "passing": 1
+    },
+    "testsList": [
+     "css/css-overflow/line-clamp/discard/discard-multicol-004.html"
+    ]
+   },
+   "preOrNowrap": {
+    "tests": 12,
+    "android": {
+     "scored": 12,
+     "passing": 12
+    },
+    "ios": {
+     "scored": 12,
+     "passing": 12
+    },
+    "testsList": [
+     "css/css-overflow/line-clamp/block-ellipsis-013.html",
+     "css/css-overflow/line-clamp/block-ellipsis-014.html",
+     "css/css-overflow/line-clamp/block-ellipsis-015.tentative.html",
+     "css/css-overflow/line-clamp/block-ellipsis-017.html",
+     "css/css-overflow/line-clamp/block-ellipsis-026.html",
+     "css/css-overflow/line-clamp/line-clamp-001.html",
+     "css/css-overflow/line-clamp/line-clamp-002.html",
+     "css/css-overflow/line-clamp/line-clamp-003.html",
+     "css/css-overflow/line-clamp/line-clamp-004.html",
+     "css/css-overflow/line-clamp/line-clamp-005.html",
+     "css/css-overflow/line-clamp/line-clamp-006.html",
+     "css/css-overflow/line-clamp/line-clamp-007.html"
+    ]
+   }
+  },
+  "F4_foldHostsUnderADrawnClamp": [
+   "css/css-overflow/line-clamp/block-ellipsis-002.html",
+   "css/css-overflow/line-clamp/block-ellipsis-003.html",
+   "css/css-overflow/line-clamp/block-ellipsis-004.html",
+   "css/css-overflow/line-clamp/block-ellipsis-005.html",
+   "css/css-overflow/line-clamp/block-ellipsis-006.html",
+   "css/css-overflow/line-clamp/block-ellipsis-007.html",
+   "css/css-overflow/line-clamp/block-ellipsis-008.html",
+   "css/css-overflow/line-clamp/block-ellipsis-009.html",
+   "css/css-overflow/line-clamp/block-ellipsis-022.html",
+   "css/css-overflow/line-clamp/block-ellipsis-027.html",
+   "css/css-overflow/line-clamp/block-ellipsis-031.html",
+   "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html"
+  ],
+  "M1_drawnClampHostsWithNonSpaceOpportunities": [
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+    "host": "0",
+    "classes": [
+     "softHyphen"
+    ],
+    "cells": {
+     "web": [
+      true,
+      0.9992
+     ],
+     "ios": [
+      true,
+      0.9906
+     ],
+     "android": [
+      true,
+      0.9847
+     ]
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+    "host": "1",
+    "classes": [
+     "spaceSeparator"
+    ],
+    "cells": {
+     "web": [
+      true,
+      0.9996
+     ],
+     "ios": [
+      true,
+      0.9983
+     ],
+     "android": [
+      true,
+      0.9942
+     ]
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+    "host": "1",
+    "classes": [
+     "dash"
+    ],
+    "cells": {
+     "web": [
+      true,
+      0.9834
+     ],
+     "ios": [
+      true,
+      0.9577
+     ],
+     "android": [
+      false,
+      0.9397
+     ]
+    }
+   },
+   {
+    "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+    "host": "2",
+    "classes": [
+     "dash"
+    ],
+    "cells": {
+     "web": [
+      true,
+      0.9834
+     ],
+     "ios": [
+      true,
+      0.9577
+     ],
+     "android": [
+      false,
+      0.9397
+     ]
+    }
+   }
+  ],
+  "M1_drawnClampHostsDeclined": [],
+  "F5_softHyphenTests": 17,
+  "F5_android": {
+   "scored": 17,
+   "passing": 9
+  },
+  "F5_byMode": {
+   "AUTO": [
+    "css/css-text/hyphens/hyphens-auto-control.html"
+   ],
+   "MANUAL": [
+    "css/css-overflow/line-clamp/block-ellipsis-028.html",
+    "css/css-text/hyphens/hyphenate-character-001.html",
+    "css/css-text/hyphens/hyphenate-character-003.html",
+    "css/css-text/hyphens/hyphenate-character-004.html",
+    "css/css-text/hyphens/hyphens-manual-011.html",
+    "css/css-text/hyphens/hyphens-manual-012.html",
+    "css/css-text/hyphens/hyphens-manual-013.html",
+    "css/css-text/hyphens/hyphens-manual-inline-011.html",
+    "css/css-text/hyphens/hyphens-manual-inline-012.html",
+    "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+    "css/css-text/hyphens/hyphens-span-001.html",
+    "css/css-text/hyphens/hyphens-vertical-001.html"
+   ],
+   "MANUAL(initial)": [
+    "css/css-overflow/line-clamp/block-ellipsis-014.html",
+    "css/css-text/hyphens/hyphenate-character-005.html"
+   ],
+   "NONE": [
+    "css/css-text/hyphens/hyphens-none-011.html",
+    "css/css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html"
+   ]
+  }
+ },
+ "F1": [
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "host": "wpt__css-text__hanging-punctuation__hanging-punctuation-inline-001__2",
+   "member": "hanging-punctuation__hanging-punctuation-inline-001__2__0",
+   "text": "」",
+   "props": [
+    "HangingPunctuation"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9849
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9756
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9495
+    }
+   }
+  }
+ ],
+ "F2": [
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1",
+   "member": "line-clamp__block-ellipsis-032.tentative__1__1",
+   "props": [
+    "WhiteSpace",
+    "BackgroundColor"
+   ],
+   "whiteSpace": "PRE_WRAP",
+   "textLength": 8,
+   "admittedByTheGlyphlessArmsAlone": true,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9834
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9577
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9397
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__2",
+   "member": "line-clamp__block-ellipsis-032.tentative__2__1",
+   "props": [
+    "WhiteSpace",
+    "BackgroundColor"
+   ],
+   "whiteSpace": "PRE_WRAP",
+   "textLength": 8,
+   "admittedByTheGlyphlessArmsAlone": true,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9834
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9577
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9397
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__3",
+   "member": "line-clamp__block-ellipsis-032.tentative__3__1",
+   "props": [
+    "WhiteSpace",
+    "BackgroundColor"
+   ],
+   "whiteSpace": "PRE_WRAP",
+   "textLength": 8,
+   "admittedByTheGlyphlessArmsAlone": true,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9834
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9577
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9397
+    }
+   }
+  },
+  {
+   "test": "css/css-pseudo/first-letter-001.html",
+   "host": "wpt__css-pseudo__first-letter-001__1",
+   "member": "first-letter-001__1__0",
+   "props": [
+    "Position",
+    "BoxSizing",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "PaddingTop",
+    "PaddingRight",
+    "PaddingBottom",
+    "PaddingLeft",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "Display",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "whiteSpace": null,
+   "textLength": 1,
+   "admittedByTheGlyphlessArmsAlone": false,
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9806
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9726
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9717
+    }
+   }
+  }
+ ],
+ "F3F4": [
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-001.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-001__0",
+     "count": 2,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9975
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9894
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9836
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-002.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-002__0",
+     "count": 3,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9868
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9813
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9884
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-003.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-003__0",
+     "count": 3,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9999
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9918
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9861
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-004.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-004__0",
+     "count": 3,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9737
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9704
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.98
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-005.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-005__0",
+     "count": 3,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9735
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.97
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9789
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-006.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-006__0",
+     "count": 3,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9735
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.97
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9789
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-007.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-007__0",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": {
+      "type": "length",
+      "px": 358
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9841
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9843
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9844
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-008.html",
+   "hosts": [
+    {
+     "host": "line-clamp__block-ellipsis-008__0__0",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": {
+      "type": "length",
+      "px": 358
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9841
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9843
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9844
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-009.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-009__0",
+     "count": 3,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": null,
+     "width": {
+      "type": "length",
+      "px": 358
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.984
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9839
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9795
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-011.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-011__0",
+     "count": 2,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 31.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.994
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9863
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-012.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-012__0",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 38.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9982
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9975
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9911
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-013.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-013__0",
+     "count": 2,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.979
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9787
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.973
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-014.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-014__0",
+     "count": 2,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": true,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": [
+      "softHyphen"
+     ]
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.979
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9787
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.973
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-015.tentative.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-015.tentative__0",
+     "count": 2,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.979
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9787
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.973
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-016.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-016__0",
+     "count": 3,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 20.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9901
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9883
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.981
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-017.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-017__0",
+     "count": 2,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.979
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9787
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.973
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-022.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-022__0",
+     "count": 2,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 29.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9939
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9863
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-023.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-023__0",
+     "count": 4,
+     "class": "markerSuppressed",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 32,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9965
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9931
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.972
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-024.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-024__0",
+     "count": 4,
+     "class": "markerSuppressed",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 32,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9965
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9931
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.972
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-025__0",
+     "count": 4,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 32.5,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9765
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.9495
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9607
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-026.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-026__1",
+     "count": 2,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9992
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9907
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9818
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-027.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-027__1",
+     "count": 2,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9914
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9905
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9818
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-028__0",
+     "count": 2,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": true,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": [
+      "softHyphen"
+     ]
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9992
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9906
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9847
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-029.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-029__1",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 5.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    },
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-029__2",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 5.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9994
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9991
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9906
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-030__1",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 5,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": [
+      "spaceSeparator"
+     ]
+    },
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-030__2",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 5,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9996
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9983
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9942
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-031.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-031__0",
+     "count": 2,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 63.1,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9993
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9843
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9779
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__1",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 29,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": [
+      "dash"
+     ]
+    },
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__2",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 29,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": [
+      "dash"
+     ]
+    },
+    {
+     "host": "wpt__css-overflow__line-clamp__block-ellipsis-032.tentative__3",
+     "count": 1,
+     "class": "markerDrawnSoftWrapped",
+     "whiteSpace": null,
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 29,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9834
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9577
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9397
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/discard/discard-multicol-004.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__discard__discard-multicol-004__1",
+     "count": null,
+     "class": "maxLinesOnly-noMarker",
+     "whiteSpace": null,
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "monospace"
+     ],
+     "width": {
+      "type": "length",
+      "original": {
+       "v": 27,
+       "u": "CH"
+      }
+     },
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9613
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9577
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/line-clamp-001.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__line-clamp-001__0",
+     "count": 4,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "serif"
+     ],
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9905
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9809
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/line-clamp-002.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__line-clamp-002__0",
+     "count": 6,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "serif"
+     ],
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9881
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9766
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/line-clamp-003.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__line-clamp-003__0",
+     "count": 5,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "serif"
+     ],
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9881
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9766
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/line-clamp-004.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__line-clamp-004__0",
+     "count": 4,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": false,
+     "softHyphen": false,
+     "fontFamily": [
+      "serif"
+     ],
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9902
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9802
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/line-clamp-005.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__line-clamp-005__0",
+     "count": 3,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "serif"
+     ],
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9891
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.982
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/line-clamp-006.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__line-clamp-006__0",
+     "count": 5,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "serif"
+     ],
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9822
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9701
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/line-clamp-007.html",
+   "hosts": [
+    {
+     "host": "wpt__css-overflow__line-clamp__line-clamp-007__0",
+     "count": 3,
+     "class": "preOrNowrap",
+     "whiteSpace": "PRE",
+     "foldHost": true,
+     "softHyphen": false,
+     "fontFamily": [
+      "serif"
+     ],
+     "width": null,
+     "nonSpaceOpportunities": []
+    }
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9822
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9701
+    }
+   }
+  }
+ ],
+ "F5": [
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-014.html",
+   "softHyphens": 1,
+   "hyphensModes": [
+    "MANUAL(initial)"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.979
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9787
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.973
+    }
+   }
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+   "softHyphens": 1,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9992
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9906
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9847
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-001.html",
+   "softHyphens": 12,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.935
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.9287
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9128
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-003.html",
+   "softHyphens": 12,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.8812
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.9337
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9089
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-004.html",
+   "softHyphens": 12,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.9249
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.9134
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9059
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphenate-character-005.html",
+   "softHyphens": 1,
+   "hyphensModes": [
+    "MANUAL(initial)"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.974
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.945
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9474
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-auto-control.html",
+   "softHyphens": 3,
+   "hyphensModes": [
+    "AUTO"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9731
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9623
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-011.html",
+   "softHyphens": 2,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9998
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9951
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9811
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-012.html",
+   "softHyphens": 4,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9998
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9951
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9811
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-013.html",
+   "softHyphens": 1,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9992
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.994
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9822
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-inline-011.html",
+   "softHyphens": 2,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9998
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.993
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9739
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-manual-inline-012.html",
+   "softHyphens": 4,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 0.9984
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9905
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9419
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-none-011.html",
+   "softHyphens": 2,
+   "hyphensModes": [
+    "NONE"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9874
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.9717
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html",
+   "softHyphens": 4,
+   "hyphensModes": [
+    "NONE"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": true,
+     "ssim": 0.9988
+    },
+    "android": {
+     "pass": true,
+     "ssim": 0.998
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "softHyphens": 7,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.8862
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9218
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-span-001.html",
+   "softHyphens": 9,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": true,
+     "ssim": 1
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.8558
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.9166
+    }
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-vertical-001.html",
+   "softHyphens": 1,
+   "hyphensModes": [
+    "MANUAL"
+   ],
+   "cells": {
+    "web": {
+     "pass": false,
+     "ssim": 0.8909
+    },
+    "ios": {
+     "pass": false,
+     "ssim": 0.8801
+    },
+    "android": {
+     "pass": false,
+     "ssim": 0.8795
+    }
+   }
+  }
+ ]
+}

@@ -1,0 +1,97 @@
+wave-52 lane L5 (extractor-cascade) — seam-1-F3-oracle-filter
+
+F3 (BACKLOG 0(a‴)) — the css-syntax-3 §2.2 candidate filter inside resolveLayeredCascade's resolveOne; set-asides that changed a winner are logged on invalidShadowDrops.
+
+Applies on: HEAD 7d9c22a7 (tools/titan/extract-fixture.mjs blob 104ef672).
+Ordered patch set (PLAN.md §2 L5 / §3): seam-1 → seam-2 → seam-3 → seam-4 → seam-5 → seam-6; each is cut against the tree the previous ones leave.
+Only L5 patches this seam file this wave. Verification record: tools/titan/results/wave52-extractor-cascade/_note.md.
+
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index 104ef67..0867169 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -980,14 +980,16 @@ export function assignDeclaration(target, key, value) {
+  * same element — css-syntax-3 §2.2 ignores an invalid declaration wherever it
+  * appears in the cascade, not only inside one block.
+  *
+- * NOT applied on the LAYERED path (`resolveLayeredCascade`): that path sorts
+- * candidates by the css-cascade-5 §6.4.4 order and resolves `revert-layer`
+- * recursively, so the refusal would have to become a candidate filter inside
+- * the sort. Measured reason to leave it alone: across the 1435-test corpus
+- * the oracle proves exactly four declarations invalid and all four sit in ONE
+- * unlayered rule block (css-values/angle-units-001), so a layered-path filter
+- * would move nothing and could only risk the css-cascade cells. Stated here
+- * rather than left as a silent gap.
++ * The LAYERED path (`resolveLayeredCascade`) sorts candidates by the
++ * css-cascade-5 §6.4.4 order and resolves `revert-layer` recursively, so
++ * there the refusal is a CANDIDATE FILTER inside the sort (wave-52 lane L5
++ * F3, BACKLOG 0(a‴)) with the same two clauses as the guarded write: a
++ * provably invalid candidate is set aside only when some other candidate in
++ * its window survives the oracle, and every set-aside that changed the
++ * winner is logged on `invalidShadowDrops`. Measured: across the 1435-test
++ * corpus the oracle proves exactly four declarations invalid and all four
++ * sit in ONE unlayered rule block (css-values/angle-units-001), so the
++ * filter moves no corpus document (extract+convert differential, lane note).
+  *
+  * @param {Record<string,string>} target bag being built
+  * @param {Record<string,string>} source bag being merged in
+@@ -1284,23 +1286,55 @@ export function resolveLayeredCascade(groups, layerCount) {
+     if (a.rank !== b.rank) return a.important ? a.rank < b.rank : a.rank > b.rank;
+     return a.order > b.order;
+   };
++  // wave-52 lane L5 F3 (BACKLOG 0(a‴)) — THE CANDIDATE FILTER. css-syntax-3
++  // §2.2: a provably invalid declaration is ignored, so it never enters the
++  // cascade at all and cannot outrank anything. The oracle's verdict is
++  // memoised per candidate (`c.invalid`: string reason | null) because a
++  // revert-layer chain re-runs the selection over the same candidates.
++  const invalidReason = (c) => {
++    if (c.invalid === undefined) c.invalid = provablyInvalidDeclaration(c.name, c.value);
++    return c.invalid;
++  };
++  // Candidates the filter set aside AND that would otherwise have won their
++  // pass — the only skips that changed an outcome, the same "log what the
++  // refusal cost" rule assignDeclaration follows. A Set, because a
++  // revert-layer chain can meet the same important candidate in two passes
++  // and one refusal must be logged once.
++  const skipped = new Set();
+   const resolveOne = (name, maxRank, depth) => {
+     // A pathological revert-layer cycle cannot happen (maxRank strictly
+     // decreases) but the guard keeps a malformed sheet from spinning.
+     if (depth > 32) return undefined;
++    // The window: every declaration of this property below `maxRank`.
++    const win = cands.filter((c) => c.name === name && c.rank < maxRank);
++    if (win.length === 0) return undefined;
++    // Filter ONLY when at least one candidate survives it — the exact
++    // assignDeclaration semantics: an all-invalid window keeps the sort's own
++    // winner, so the converter receives the byte-identical input it always
++    // did (and decides for itself what an invalid value means).
++    const valid = win.filter((c) => invalidReason(c) === null);
++    const pool = valid.length > 0 ? valid : win;
+     let best = null;
+-    for (const c of cands) {
+-      if (c.name !== name || c.rank >= maxRank) continue;
+-      if (best === null || better(c, best)) best = c;
++    for (const c of pool) if (best === null || better(c, best)) best = c;
++    // Every set-aside candidate that `better` would have preferred is a
++    // refusal that changed this pass's result — recorded for the log below.
++    if (pool !== win) {
++      for (const c of win) if (invalidReason(c) !== null && better(c, best)) skipped.add(c);
+     }
+-    if (best === null) return undefined;
+     if (best.value === REVERT_LAYER) return resolveOne(name, best.rank, depth + 1);
+     return best.value;
+   };
+   const out = {};
+   for (const name of names) {
++    skipped.clear();
+     const v = resolveOne(name, layerCount + 2, 0);
+     if (v !== undefined) out[name] = v;
++    // NO SILENT FALLTHROUGH: every refusal lands on the same
++    // `invalidShadowDrops` log the unlayered collapse feeds (printed per test
++    // as `[validity: …]`), naming the value that finally stayed in force.
++    for (const c of skipped) {
++      invalidShadowDrops.push({ prop: name, kept: v, dropped: c.value, reason: c.invalid });
++    }
+   }
+   return out;
+ }

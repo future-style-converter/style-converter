@@ -150,9 +150,16 @@ class PreBreakPipelineTest {
      *  `Deoxy&shy;ribo&shy;nucleic` arrives as the bare word and fires
      *  exactly like hyphens-manual-010's. Left in place — i.e. under
      *  `manual` — the soft hyphens are opportunities the wave-41 fold
-     *  SPENDS itself (`Deoxyribo‐`/`nucleic`/`acid`, every line
-     *  fitting), so the probe stays false and the pipeline still
-     *  declines: hyphens-manual-011's committed capture cannot move. */
+     *  SPENDS itself (`Deoxyribo‐`/`nucleic`/`acid`, every line fitting).
+     *  Until wave 52 that meant "no rule-B claim, decline" — and Minikin,
+     *  which ignores U+00AD under Hyphens.None, then desperate-broke the
+     *  word with NO hyphen glyph (hyphens-manual-011 android P 0.9811
+     *  paints `Deoxyribo` / `nucleic`, hyphen-less; the ref paints the
+     *  hyphen). Wave 52 (lane L9, F5) makes the TAKEN soft hyphen a second
+     *  trigger (css-text-3 §5.3), so the `manual` half now FIRES with the
+     *  measured lines — hyphens-manual-011's capture is expected to move
+     *  ref-ward (its hyphen appears); the flip is pre-registered in
+     *  tools/titan/results/wave52-plan/watchlist.txt. */
     @Test
     fun composesWithTheSoftHyphenPolicy() {
         val authored = "Deoxy­ribo­nucleic acid"
@@ -162,9 +169,117 @@ class PreBreakPipelineTest {
         assertTrue(none.fired)
         assertEquals("Deoxyribonucleic\nacid", none.text)
         // hyphens: manual → the conditional characters survive; the fold
-        // takes the greedy one and every line fits, so no rule-B claim
-        // and the run stays the platform's.
+        // takes the greedy one (after `ribo`, 10ch with the hyphen) and
+        // every line fits — no rule-B claim, but a soft hyphen was TAKEN,
+        // so the wave-52 trigger fires with the hyphen materialised.
         val manual = fire(text = SoftHyphenPolicy.displayString(authored, "manual"))
-        assertFalse(manual.fired)
+        assertTrue(manual.fired)
+        assertEquals("Deoxyribo‐\nnucleic\nacid", manual.text)
+    }
+
+    // ── Wave 52 (lane L9, F5) — the TAKEN-SOFT-HYPHEN trigger ────────
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, mutate.py M2/M3 —
+    // tools/titan/results/wave52-inline-run-wall/mutations-compose.result
+    // .json): M2 `val tookSoftHyphen = false` → the -012 pin below and the
+    // `manual` half of composesWithTheSoftHyphenPolicy fail (identity
+    // returned where `fired` is asserted); M3 the `!dictionaryHyphenation`
+    // gate removed → the dictionary pin fails (fired where identity is
+    // asserted). Restored byte-exact (sha256-verified) after each run.
+
+    /** css-text/hyphens/hyphens-manual-inline-012's paragraph, VERBATIM
+     *  off wave51-fix/sections/css-text/per-test-ir: the host's runs
+     *  `DNA ` + span(`means Deo&shy;xy&shy;ribo&shy;nu&shy;cleic acid`,
+     *  hyphens: manual) + `.`, folded by InlineRunFold into one string,
+     *  in an 8ch monospace-32px box. */
+    private val MANUAL_INLINE_012 = "DNA means Deo­xy­ribo­nu­cleic acid."
+
+    /** The measured defect: Minikin broke the 16-glyph word every 7 glyphs
+     *  with no hyphen (`Deoxyri` / `bonucle` / `ic`, android f 0.9419); the
+     *  ref — and iOS, which pre-breaks every run — paint
+     *  `Deoxy-` / `ribonu-` / `cleic`. Nothing overflows here (every line
+     *  fits 8ch), so rule B alone never fired; the taken soft hyphens do. */
+    @Test
+    fun firesWhenASoftHyphenBreakWasTaken() {
+        val r = fire(text = MANUAL_INLINE_012, wrapWidthPx = 8 * CH)
+        assertTrue(r.fired)
+        assertEquals("DNA\nmeans\nDeoxy‐\nribonu‐\ncleic\nacid.", r.text)
+    }
+
+    /** `hyphens: auto` with a language tag hands the opportunities to
+     *  Minikin's dictionary (AutoHyphenation) — the soft-hyphen trigger
+     *  stays out of such runs even when the fold took one, or firing would
+     *  hard-newline the run with softWrap OFF and suppress the
+     *  hyphenation that was just switched on. */
+    @Test
+    fun theSoftHyphenTriggerStaysOutOfDictionaryRuns() {
+        val r = PreBreakPipeline.preBreak(
+            text = MANUAL_INLINE_012, wrapWidthPx = 8 * CH, enabled = true,
+            softWrapAllowed = true, allowMidWordBreak = false, preservesSpaces = false,
+            dictionaryHyphenation = true, measure = mono)
+        assertFalse(r.fired)
+        assertSame(MANUAL_INLINE_012, r.text)
+        // hyphens-auto-010's wire (`regulation implementation now`, 6ch,
+        // `hyphens: auto`, lang en): the overlong words are dictionary
+        // opportunities, so neither trigger claims the run — identity.
+        val auto010 = "regulation implementation now"
+        val a = PreBreakPipeline.preBreak(
+            text = auto010, wrapWidthPx = 6 * CH, enabled = true,
+            softWrapAllowed = true, allowMidWordBreak = false, preservesSpaces = false,
+            dictionaryHyphenation = true, measure = mono)
+        assertSame(auto010, a.text)
+    }
+
+    /** A soft hyphen the fold did NOT take (the word fits) changes nothing
+     *  — identity, so a wide box keeps its frozen capture. */
+    @Test
+    fun anUntakenSoftHyphenDoesNotFire() {
+        val r = fire(text = MANUAL_INLINE_012, wrapWidthPx = 40 * CH)
+        assertFalse(r.fired)
+        assertSame(MANUAL_INLINE_012, r.text)
+    }
+
+    // ── Wave 52 (lane L9, F4) — the drawn-marker CLAMP on a fired run ──
+    //
+    // MUTATION PROOF (executed 2026-10-05, lane L9, mutate.py M5 —
+    // mutations-compose.result.json): with the fired result built from the
+    // untrimmed `lines` instead of `clamped`, the 025 pin below fails (the
+    // untrimmed paragraph where 4 lines + "…" are asserted). Restored
+    // byte-exact (sha256-verified).
+
+    /** block-ellipsis-025, the Compose arm F3 cannot reach: the 34ch word
+     *  fires rule B (an unbreakable overflow), the run renders with
+     *  softWrap = false, and there TextOverflow.Ellipsis is the wave-39
+     *  landmine — so the marker is BAKED into the fired string instead:
+     *  four lines, the fourth the UA ellipsis alone (the ref's picture). */
+    @Test
+    fun aFiredRunUnderADrawnMarkerClampBakesTheEllipsis() {
+        val text = "Test passes if there are 4 lines and the last one only contains … " +
+            "supercalifragilisticexpialidocious supercalifragilisticexpialidocious Test fails: this should not be visible"
+        val r = PreBreakPipeline.preBreak(
+            text = text, wrapWidthPx = 32.5f * CH, enabled = true,
+            softWrapAllowed = true, allowMidWordBreak = false, preservesSpaces = false,
+            clampLines = 4, measure = mono)
+        assertTrue(r.fired)
+        assertEquals(
+            "Test passes if there are 4 lines\nand the last one only contains …\n" +
+                "supercalifragilisticexpialidocious\n…",
+            r.text
+        )
+    }
+
+    /** The clamp is consulted ONLY on a fired run: an ordinary wrapping
+     *  paragraph under `line-clamp: 1` stays Minikin's (identity) and gets
+     *  its marker from the placeholder's overflow decision instead — one
+     *  owner per case, the frozen wrap positions untouched. */
+    @Test
+    fun theClampAloneNeverFires() {
+        val text = "This text is left-aligned        Clamped"
+        val r = PreBreakPipeline.preBreak(
+            text = text, wrapWidthPx = 29 * CH, enabled = true,
+            softWrapAllowed = true, allowMidWordBreak = false, preservesSpaces = false,
+            clampLines = 1, measure = mono)
+        assertFalse(r.fired)
+        assertSame(text, r.text)
     }
 }

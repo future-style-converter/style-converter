@@ -64,6 +64,30 @@ package com.styleconverter.runtime.layout.position
 // falls back to the ambient (wrong-level) read, which is the behaviour every
 // committed capture was frozen against — no silent change, and the fallback
 // leaves a PropertyTracker breadcrumb rather than passing quietly.
+//
+// ## Readers (wave 52, lane L4 — queue 0(b″))
+// The channel now has THREE readers, each resolving a containing-block
+// percentage at the element's own level:
+//   1. `PercentInsetPositioned` (wave 50, B2) — percentage insets;
+//   2. `spacing/MarginApplier` — percentage margins (CSS 2.1 §8.3);
+//   3. `spacing/PaddingApplier` — percentage padding (CSS 2.1 §8.4).
+// The two spacing appliers read `LocalContainingBlock.current` inside their
+// `Modifier.composed { }` percent lane, i.e. the SAME materialisation point
+// as the inset lane and therefore the same one-level-too-deep defect. On the
+// wave51-fix corpus the two levels disagree on exactly four carriers
+// (css-sizing/abspos-auto-sizing-fit-content-percentage-001…004, all
+// `android P 0.9984`): the `.child` (Width 100, Height 100, a bare-number
+// −50 % margin or 50 % padding) sits in a fit-content abspos `.abs` that
+// publishes (null, null), while the child's OWN published block is
+// (100, 100) — so the applier resolved −50 % / 50 % of 100 = −50 / +50 px
+// where CSS 2.1 §8.3/§8.4 + css-sizing-3 §5.2.1 (cyclic percentage against
+// an indefinite block → 0 for the intrinsic contribution) say 0 px, which is
+// what SizingExtractor's frame-inflation lane (P13) already used for the
+// same box. The picture was right by accident — the box paints nothing and
+// has no children — so the port predicts ZERO pixel movement (the b″ A/B at
+// the gate `cmp`s the four Android PNGs); it is a correctness repair. Each
+// reader names its own fallback breadcrumb so the coverage report separates
+// an unpublished inset read from an unpublished spacing read.
 
 // The channel type: the renderer's content-box record, px == dp in this runtime.
 import com.styleconverter.runtime.core.variables.ContainingBlock
@@ -110,7 +134,17 @@ object ElementContainingBlock {
     const val UNPUBLISHED_BREADCRUMB = "Inset[containing-block-level-unpublished]"
 
     /**
-     * Pick the containing block a percentage inset must resolve against.
+     * Wave 52 (lane L4, b″) — the breadcrumb the two SPACING readers record
+     * on the fallback leg, so a percentage margin/padding that resolved at
+     * the wrong level (list markers, widget shims — paths that never pass the
+     * renderer's provider) is filed under its own lane, not under `Inset[…]`.
+     */
+    const val SPACING_UNPUBLISHED_BREADCRUMB = "Spacing[containing-block-level-unpublished]"
+
+    /**
+     * Pick the containing block a containing-block percentage must resolve
+     * against (an inset, a margin or a padding — CSS 2.1 §9.4.3 / §8.3 / §8.4
+     * all name "the containing block", the block the element is laid out in).
      *
      * @param element the [LocalElementContainingBlock] read — this element's
      *   OWN containing block, or null when the channel is unpublished.
@@ -118,17 +152,23 @@ object ElementContainingBlock {
      *   inside a component's own modifier chain is the block it publishes for
      *   its CHILDREN (the level defect in the file header). Used only as the
      *   frozen-behaviour fallback.
+     * @param breadcrumb the PropertyTracker key the fallback leg records —
+     *   [UNPUBLISHED_BREADCRUMB] for the inset lane (the default, so the
+     *   wave-50 call site and its pins are byte-identical),
+     *   [SPACING_UNPUBLISHED_BREADCRUMB] for the two spacing appliers.
      */
     fun containingBlockFor(
         element: ContainingBlock?,
         ambient: ContainingBlock,
+        breadcrumb: String = UNPUBLISHED_BREADCRUMB,
     ): ContainingBlock {
         // Published channel: the spec-correct level, used verbatim.
         if (element != null) return element
         // Unpublished: keep the pre-wave-50 reading so no committed capture
-        // moves, and record that this element's percentage inset resolved
-        // against the wrong level (CLAUDE.md's no-silent-fallthrough rule).
-        PropertyTracker.markUnhandled(UNPUBLISHED_BREADCRUMB)
+        // moves, and record that this element's percentage resolved against
+        // the wrong level (CLAUDE.md's no-silent-fallthrough rule), under
+        // the calling lane's own key.
+        PropertyTracker.markUnhandled(breadcrumb)
         return ambient
     }
 }

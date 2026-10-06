@@ -539,6 +539,149 @@ export function resolveCanvasPadding(doc: IRDocument): CanvasPadding {
   return pad;
 }
 
+/** Per-side body MARGIN in CSS px (zero default; negatives kept). */
+export interface CanvasMargin {
+  top: number; right: number; bottom: number; left: number;
+}
+
+/**
+ * wave-52 lane L2 (M1) — BODY MARGIN PROPAGATION, the twin of
+ * resolveCanvasPadding above for the margin half of the body's box.
+ *
+ * WHY: the extractor emits html+body as ONE synthetic `body-root` whose
+ * element children are SIBLINGS, not descendants (extract-fixture.mjs: "a
+ * non-inherited root declaration (background, margin, contain, …) changes
+ * nothing for the children"), and this canvas read that root for background
+ * and PADDING only — so a DECLARED `body { margin-left: 200px }` never moved
+ * the root forest. The ref keeps it: capture-browser-ref.mjs injects
+ * `:where(html, body) { margin: 0 }` at specificity 0, and the author's
+ * `body { margin: 0 0 0 200px }` (0,0,1) wins there. MEASURED on wave51-fix:
+ * css-gaps/flex/flex-gap-decorations-027's WHOLE page sat exactly 200 px
+ * left of the ref — container border at x 16–17 vs 216–217, every rule and
+ * glyph run 200 px off, relative geometry pixel-exact (web f 0.9012, the
+ * web cell's only defect). Census over the 1435 per-test IRs
+ * (tools/titan/results/wave52-composed-canvas/composed-canvas.census.mjs):
+ * 9 tests carry a non-zero concrete body-root margin, 8 after the §8.3
+ * table-internal guard below (24 cells); 11 more carry only `auto` / `em`
+ * leaves and stay at 0 by this resolver's contract.
+ *
+ * WHERE IT IS SPENT: on a `display: flow-root` wrapper INSIDE the ICB div
+ * that holds the root forest (see ComposedTestCanvas) — the web analogue of
+ * the ref's body box, which its injection also makes a `flow-root` BFC. The
+ * ICB div stays the containing block (`position: relative`), so an abspos
+ * root's INSETS still anchor at the viewport corner (CSS 2.1 §10.1: a static
+ * body is no containing block) while its STATIC position follows the
+ * wrapper — exactly Chrome's behaviour for body children. Vertical: a BFC
+ * wrapper means the declared margin REPLACES today's accidental
+ * collapse-through of the empty body-root box (the vertical half "leaked
+ * through by accident" — runtime-bugs-and-gaps §3-M1), which is why the
+ * body-root node itself renders WITHOUT the sides the wrapper owns
+ * (withCanvasOwnedBodyMargin — one owner). A negative `margin-top` is a
+ * real margin on that wrapper, never a padding.
+ *
+ * Only CONCRETE px are honoured, read from the RAW leaf exactly as the two
+ * native twins read theirs (`{px:N}` or the wrapped `{original:{px:N}}`) —
+ * not through buildStyles, whose MarginApplier re-emits the author's unit
+ * for wrapped leaves and `auto` for auto sides. A runtime-dependent length
+ * (`auto`, `1em`, `%`, `calc()`) has no absolute answer here and keeps 0:
+ * the documented contract, not a silent fallthrough. No body-root, or one
+ * declaring no margin (or a table-internal body, §8.3) ⇒ all four sides 0
+ * and NO wrapper is emitted, so those captures (1427 of 1435) are
+ * byte-identical.
+ */
+export function resolveCanvasMargin(doc: IRDocument): CanvasMargin {
+  const margin: CanvasMargin = { top: 0, right: 0, bottom: 0, left: 0 };
+  // Same lookup rule as the background/padding resolvers — a document has one body.
+  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
+  if (!bodyRoot) return margin;
+  // CSS 2.1 §8.3 "Applies to: all elements except elements with table
+  // display types other than table-caption, table and inline-table": a
+  // `display: table-cell` body (CSS2/css21-errata/s-11-1-1b-005) has NO used
+  // margin in Chrome, so there is nothing to propagate — keep all four 0 and
+  // emit no wrapper (that capture stays byte-identical; web P 0.9947).
+  if (bodyMarginDoesNotApply(bodyRoot)) return margin;
+  // Per side (the cascade is per-longhand); negatives are kept — CSS allows
+  // negative margins (§8.4 forbids only negative padding).
+  for (const [side, type] of CANVAS_MARGIN_SIDES) {
+    const px = bodyMarginLeafPx(bodyRoot, type);
+    if (px !== null) margin[side] = px;
+  }
+  return margin;
+}
+
+/** The four physical body-margin longhands the canvas owns, by side. */
+const CANVAS_MARGIN_SIDES: ReadonlyArray<readonly [keyof CanvasMargin, string]> = [
+  ['top', 'MarginTop'], ['right', 'MarginRight'],
+  ['bottom', 'MarginBottom'], ['left', 'MarginLeft'],
+];
+
+/** css-display-3 table-internal boxes — CSS 2.1 §8.3: margins do not apply. */
+const TABLE_INTERNAL_DISPLAYS = new Set([
+  'TABLE_CELL', 'TABLE_ROW', 'TABLE_ROW_GROUP', 'TABLE_HEADER_GROUP',
+  'TABLE_FOOTER_GROUP', 'TABLE_COLUMN', 'TABLE_COLUMN_GROUP',
+]);
+
+/** True when the body-root's `Display` is a table-internal type (§8.3). */
+function bodyMarginDoesNotApply(bodyRoot: IRComponent): boolean {
+  // The enum leaf the converter emits for `display` (e.g. "TABLE_CELL").
+  const d = (bodyRoot.properties as Array<{ type: string; data?: unknown }>)
+    .find((pr) => pr.type === 'Display')?.data;
+  return typeof d === 'string' && TABLE_INTERNAL_DISPLAYS.has(d.toUpperCase());
+}
+
+/**
+ * The raw ABSOLUTE-px leaf of one body-root margin longhand — `{px:N}` or
+ * the wrapped `{original:{px:N}}`, exactly as resolveCanvasPadding's
+ * native-parity path reads it — or null when absent or runtime-dependent
+ * (`auto`, `em`, `%`, `calc()`), which the resolver's contract keeps at 0.
+ */
+function bodyMarginLeafPx(bodyRoot: IRComponent, type: string): number | null {
+  // First declaration of that longhand (the bag carries one per type).
+  const prop = (bodyRoot.properties as Array<{ type: string; data?: unknown }>)
+    .find((pr) => pr.type === type);
+  const d = prop?.data as { px?: unknown; original?: { px?: unknown } } | undefined;
+  if (typeof d?.px === 'number') return d.px;
+  if (typeof d?.original?.px === 'number') return d.original.px;
+  return null;                                       // absent or unresolved (auto/em/%/calc)
+}
+
+/**
+ * wave-52 lane L2 (M1) — ONE OWNER for the body margin. The body-root
+ * component ALSO renders as the first root of the forest, carrying its own
+ * Margin* longhands — so once the flow wrapper takes the margin, leaving
+ * them on that box would apply it TWICE (collapsed-border-*-rtl-overflow's
+ * 60 px would land at 120; background-attachment-margin-root-001's 258-wide
+ * 300-tall body box would move from (66,66) to (116,116)). This returns the
+ * forest with exactly the sides `resolveCanvasMargin` resolved (concrete px
+ * leaves) removed from the body-root node; `auto`/`em` sides stay on the box
+ * (they were never the canvas's). Identity — the SAME array — when the
+ * canvas owns no margin, so every other document renders the exact nodes it
+ * always did.
+ */
+export function withCanvasOwnedBodyMargin<N extends { component: IRComponent }>(
+  roots: N[], margin: CanvasMargin,
+): N[] {
+  // No wrapper ⇒ the canvas owns nothing ⇒ untouched forest (byte-identical).
+  if (!margin.top && !margin.right && !margin.bottom && !margin.left) return roots;
+  return roots.map((node) => {
+    // Only the synthetic html+body bag is rewritten.
+    if (node.component.meta?.role !== 'body-root') return node;
+    // The longhands the resolver read (a concrete px leaf on that side).
+    const owned = new Set(CANVAS_MARGIN_SIDES
+      .filter(([, type]) => bodyMarginLeafPx(node.component, type) !== null)
+      .map(([, type]) => type));
+    // A shallow copy with those declarations filtered out; children, meta,
+    // id (and so every id-keyed channel) ride through verbatim.
+    return {
+      ...node,
+      component: {
+        ...node.component,
+        properties: node.component.properties.filter((p) => !owned.has(p.type)),
+      },
+    };
+  });
+}
+
 interface ComposedCaptureGalleryProps {
   /** The decoded COMBINED IR document (every WPT test's components, flat). */
   document: IRDocument;
@@ -679,6 +822,16 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // matched instead of diffed at a (+16,+16) offset — clip-path-circle-007's
   // whole divergence. Pure per document, memoised like the background.
   const canvasPadding = React.useMemo(() => resolveCanvasPadding(doc), [doc]);
+  // wave-52 L2 (M1): the body-root's DECLARED margin — the twin of the pad
+  // above for the margin half of the body box. All-zero for every document
+  // without a concrete body margin, and then NO wrapper is emitted below, so
+  // those captures are byte-identical. Pure per document, memoised alike.
+  const canvasMargin = React.useMemo(() => resolveCanvasMargin(doc), [doc]);
+  // The forest the wrapper below renders: the body-root node minus the
+  // margin sides the wrapper now owns (one owner, never applied twice).
+  // The SAME array as `roots` whenever the margin is all-zero.
+  const flowRoots = React.useMemo(
+    () => withCanvasOwnedBodyMargin(roots, canvasMargin), [roots, canvasMargin]);
   // wave-37 W6: the PRINCIPAL WRITING MODE (css-writing-modes-4 §8). Pure per
   // document like the two resolvers above — memoised on the same identity.
   // `undefined` for every horizontal document, which is what keeps the rest of
@@ -799,11 +952,45 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
             : {}),
         }}
       >
-        {roots.map((root, i) => (
-          <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
-            <ComponentRenderer node={root} />
-          </RootErrorBoundary>
-        ))}
+        {/* wave-52 lane L2 (M1) — the BODY BOX's margin. When the body-root
+            declares a concrete margin, the root forest is wrapped in a
+            `display: flow-root` div carrying it: the web analogue of the
+            ref's body (its injection makes body a flow-root BFC too), whose
+            margin offsets the in-flow content INSIDE the viewport. The ICB
+            div above stays the containing block, so an abspos root's insets
+            keep anchoring at the viewport corner while its static position
+            follows this wrapper — Chrome's behaviour for body children
+            (CSS 2.1 §10.1). Negative sides are real margins here (a
+            `margin-top: -15px` pulls the forest up), never paddings. Zero
+            margin ⇒ no wrapper: the markup is byte-identical to wave 51.
+            The body-root node inside renders WITHOUT the sides the wrapper
+            owns (`flowRoots`, see withCanvasOwnedBodyMargin) — one owner.
+            See resolveCanvasMargin for the census and the contract. */}
+        {canvasMargin.top !== 0 || canvasMargin.right !== 0
+          || canvasMargin.bottom !== 0 || canvasMargin.left !== 0 ? (
+          <div
+            data-capture-flow
+            style={{
+              display: 'flow-root',
+              marginTop: `${canvasMargin.top}px`,
+              marginRight: `${canvasMargin.right}px`,
+              marginBottom: `${canvasMargin.bottom}px`,
+              marginLeft: `${canvasMargin.left}px`,
+            }}
+          >
+            {flowRoots.map((root, i) => (
+              <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
+                <ComponentRenderer node={root} />
+              </RootErrorBoundary>
+            ))}
+          </div>
+        ) : (
+          roots.map((root, i) => (
+            <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
+              <ComponentRenderer node={root} />
+            </RootErrorBoundary>
+          ))
+        )}
       </div>
     </div>
   );
@@ -938,6 +1125,37 @@ const composedCanvasStyle: React.CSSProperties = {
  * `flow-root` — not `overflow:hidden`, not a 1px padding — because it is
  * EXACTLY what the ref declares: same BFC, same float containment, same
  * margin-escape block, and it adds no clip and no geometry of its own.
+ *
+ * ── wave-52 lane L2 (Fix A): THE HORIZONTAL VIEWPORT CROP ──
+ *
+ * THE DEFECT. The ref is RENDERED in a 358-px viewport and padded in image
+ * space (capture-browser-ref.mjs REF_RENDER_WIDTH, padPngBuffer): anything
+ * laid out past content x=358 is scrollable overflow outside the viewport
+ * and is never in the PNG — the ref's right edge of ink is image x=373 by
+ * construction and columns 374..389 are always the frame colour. This
+ * canvas clipped at the 390-px OUTER div (`overflow: hidden` above) and
+ * left this ICB div un-clipped, so a `width: 400px` flex row
+ * (css-gaps/flex/flex-gap-decorations-040) painted across the frame to
+ * image x=389 — a 16x104 band that was that cell's ENTIRE 1664-px
+ * mismatch, identical on web/iOS/Android. wave51-fix census
+ * (tools/titan/results/wave52-plan/frame-ink-census.json): 208
+ * overrun-right + 84 overrun-left scored cells carry frame ink the ref
+ * cannot have.
+ *
+ * THE FIX: `overflow-x: clip` HERE, on the ICB, because the ICB IS the
+ * viewport (CSS 2.1 §9.1.1 — the initial containing block has the
+ * dimensions of the viewport; capture-browser-ref.mjs: "the viewport IS the
+ * content canvas"). css-overflow-3 §3.1: `clip` clips at the overflow clip
+ * edge (padding edge + `overflow-clip-margin: 0px`, i.e. exactly the 358-px
+ * ICB) WITHOUT making the box a scroll container and without changing its
+ * formatting context — so `flow-root` above keeps meaning what it means.
+ * `overflow-y` stays `visible` ON PURPOSE (css-overflow-3 §3.2: the pair
+ * `clip` + `visible` is preserved as specified — the visible→auto coercion
+ * applies only when the other axis is neither visible nor clip): the ref's
+ * second viewport is max(scrollHeight, 568), so the ref never crops the
+ * bottom, and cropping at the ICB's in-flow height would hide abspos
+ * content the ref shows. Never `overflow: clip` (both axes) for that reason
+ * — ComposedCanvasIcbClip.test.tsx pins the axis split.
  */
 const composedIcbStyle: React.CSSProperties = {
   width: '100%',
@@ -949,6 +1167,10 @@ const composedIcbStyle: React.CSSProperties = {
   display: 'flow-root',
   position: 'relative',
   transform: 'translateZ(0)',
+  // wave-52 L2 Fix A — the ref's viewport crop on the inline axis only
+  // (banner above). css-overflow-3 §3.1 `clip`: no scroll container, no
+  // new formatting context, clips at the ICB's padding edge = image x 374.
+  overflowX: 'clip',
 };
 
 export default ComposedCaptureGallery;

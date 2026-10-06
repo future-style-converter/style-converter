@@ -1,0 +1,56 @@
+# seam-1.patch — lane L11 (all-reset-postload-colour), Compose ComponentRenderer.kt :1107-1137
+# Applies on: HEAD 7d9c22a7 (no prior lane patch needed). Registry row: §3 ':1134-1137 AllReset before mergeInherited'.
+# Effect: the order-aware AllReset (global/AllReset.kt) runs on own + inherited BEFORE mergeInherited; the post-merge drop is removed.
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -1105,6 +1105,20 @@
+         // Uses the DYNAMIC-RESOLVED list so bucket overrides and resolved
+         // light-dark colors participate in inheritance like any other value.
+         val inheritedProperties = LocalInheritedProperties.current
++        // Wave 52 (lane L11) — the ORDER-AWARE `all` reset runs FIRST, on the
++        // element's OWN list and the inherited channel kept apart: css-cascade-4
++        // §6.4 makes declarations AFTER `all` win over it (`all: initial;
++        // color: green` computes green — all-prop-initial-color painted black
++        // under the old post-merge drop-everything), §3.1 exempts `direction` /
++        // `unicode-bidi`, and §7.3 decides the channel per keyword (`initial`
++        // drops it, `inherit` / `unset` / `revert*` keep it) — a decision the
++        // old post-merge position could not make. Same list instances for
++        // every All-free element, so the identity fast paths below hold. See
++        // global/AllReset.kt (twin of iOS GlobalExtractor.applyingAllReset).
++        val allReset = com.styleconverter.runtime.global.AllReset.apply(
++            schemeResolvedProperties,
++            inheritedProperties
++        )
+         // Wave 25 (lane LF follow-up) — the UA `list-style-type` rule runs
+         // HERE, the last point that still holds the element's OWN list and
+         // the inherited channel separately. On a list container with no own
+@@ -1117,24 +1131,12 @@
+         // argument and the nested-list KNOWN GAP.
+         val rawProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
+             component._tag,
+-            schemeResolvedProperties,
+-            mergeInherited(schemeResolvedProperties, inheritedProperties)
++            allReset.own,
++            mergeInherited(allReset.own, allReset.inherited)
+         )
+-
+-        // CSS `all: initial|inherit|unset|revert|revert-layer` resets every
+-        // other property to its respective global value. We can't synthesize
+-        // a per-property reset on Compose at runtime, but for the common
+-        // case where `all` is the SOLE override on an isolated element, the
+-        // simplest faithful behaviour is to drop every other declaration so
+-        // the element collapses to its untouched defaults — which on web is
+-        // exactly what these audit fixtures expect (no width / height / bg).
+-        // We only apply this when no parent-cascade context is wired in
+-        // (true today on Android), so `inherit` falls back to "no styling"
+-        // — same observable result as the audit's `All_Inherit` web render.
+-        val allReset = rawProperties.firstOrNull { it.type == "All" }?.let { p ->
+-            (p.data as? JsonPrimitive)?.contentOrNull?.uppercase()
+-        }
+-        val unresolvedProperties = if (allReset != null) emptyList() else rawProperties
++        // The `all` reset already ran above (AllReset, before the merge); the
++        // post-merge drop-everything it replaced is gone.
++        val unresolvedProperties = rawProperties
+ 
+         // ── Wave-6 dynamic-value resolution ────────────────────────────
+         // Merge this component's custom-property definitions (the decoded

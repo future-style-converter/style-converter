@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" tests="19" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:07:55.708Z" hostname="mac-1.home" time="0.003">
+  <properties/>
+  <testcase name="dark stage - auto stretches exactly like composed capture" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="absent align-items is stretch" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="explicit column stretch fills in composed capture" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="calc-size-flex column shape - auto item stretches on the width axis" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="dark stage - explicit row stretch keeps its historical fill" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="ordinary and absent display values generate a box" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.001"/>
+  <testcase name="calc-size-flex row shape - auto item under default align-items stretches" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="positional align-items keywords are not stretch" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="contents and none generate no box" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="boxless display-contents children are excluded from the new arm" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="auto container cross size stands the new arm down" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="definite child cross size degrades stretch to flex-start" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="dark stage - explicit column stretch fills the line cross size" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="positional align-self values never stretch" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="non-stretch align-items keeps auto items positional" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="normal and stretch keywords fold to stretch like the display fold" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.001"/>
+  <testcase name="N3_ColumnOfRows and AI_Stretch verbatim IR - auto items stretch on both axes" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="out-of-flow children are not flex items" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <testcase name="FC_AlignSelf verbatim IR - only d stretches, a b c are positional" classname="com.styleconverter.runtime.layout.flexbox.FlexCrossStretchTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

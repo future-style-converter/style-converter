@@ -61,6 +61,8 @@ import {
   VT_TWO_COLOUR_MIN_AREA_PX, VT_TWO_COLOUR_EDGE_SLACK_PX,
   twoColourKind, rectComplement, snapshotBoxes, frameRingColor,
   VT_DIRTY_PROBE_COMPLEMENT_FRACTION, VT_MAX_REDRIVES, isDirtyOverflowProbe,
+  // wave-52 L1 F-B: the bail-path frame-ring stamp (section 8c below).
+  applyFrameRingStamp, isSolveClassBail, applyBailFrameRingStamp,
 } from './view-transition-bake.mjs';
 import {
   viewTransitionBakeTrigger,
@@ -1295,6 +1297,171 @@ test('VT apply: NO frameRing argument keeps the fixture byte-identical to the wa
   const { plan } = planOneRoot();
   applyViewTransitionBakePlan(fx, 't', plan);
   assert.equal('t__body' in fx.components, false);
+});
+
+// ── 8c. The BAIL-PATH frame-ring stamp (wave-52 L1 F-B) ─────────────────────
+//
+// The measured defect: wave51-fix css-view-transitions/fractional-box-with-
+// {shadow,overflow-children}-{new,old} web f 0.9763/0.9763/0.9757/0.9757,
+// each diff 100 % canvas (219 115 / 222 874 px white vs the ref's lightpink),
+// 0 box pixels — the snapshot solve bailed on ink overflow and the bail
+// returned before the ring sample, so the author `::view-transition
+// { background: lightpink }` never reached the body-root channel.
+//
+// MUTATION RECORD (executed 2026-09-25, restored byte-exact, sha-verified
+// 5bde8f73…ca88c): (M1) deleting the `walk?.active !== true` gate in
+// applyBailFrameRingStamp failed exactly one pin, `an inactive walk writes
+// nothing` (139 pass / 1 fail); (M2) making applyBailFrameRingStamp call the
+// full applyViewTransitionBakePlan (with an empty plan) instead of
+// applyFrameRingStamp failed three — `an active solve bail stamps ONLY the
+// ring` (display:none written, `t__vt` minted), `an EXISTING body-root is
+// overridden …` (display retired) and `a WHITE (null) ring writes nothing`
+// (the wrapper is written even with a null ring) — 137 pass / 3 fail. The
+// pins are therefore able to fail; the baseline re-run is 140 / 0.
+//
+// FIX-PASS MUTATION RECORD (executed 2026-10-05 after the skeptic's nit 7 —
+// the sampled-null reason suffix — restored byte-exact, sha-verified
+// acf8f897…0897c9): (M3) deleting the `if (ringSampled) { … not stamped … }`
+// return failed exactly the wiring pin (139 / 1); (V3) gating the sample on
+// `isSolveClassBail(bail)` alone (dropping `&& dirtyProbes.length === 0`)
+// failed the wiring pin (139 / 1); (M1, re-run on the new bytes) deleting
+// the `walk?.active !== true` gate failed `an inactive walk writes nothing`
+// (139 / 1). Baseline re-run 140 / 0.
+
+// The VERBATIM extract.log reasons of the four target tests, the at-risk
+// column-span cell, and one raster refusal (wave51-fix css-view-transitions).
+const BAIL_SHADOW_NEW = 'snapshot solve failed for one/new: snapshot overflows its 101x51 box (624px of ink outside it)';
+const BAIL_OVERFLOW_OLD = 'snapshot solve failed for one/old: snapshot overflows its 101x51 box (225px of ink outside it)';
+const BAIL_COLUMN_SPAN = 'snapshot solve failed for target/old: isolation window 500x200 exceeds the 358x568 viewport';
+const BAIL_RASTER = 'non-uniform-snapshot target/new (162 colours, 65.07% flat)';
+const LIGHTPINK = 'rgb(255, 182, 193)';
+
+test('VT bail-stamp: isSolveClassBail accepts the solve classes VERBATIM and refuses the state bails', () => {
+  for (const r of [BAIL_SHADOW_NEW, BAIL_OVERFLOW_OLD, BAIL_COLUMN_SPAN, BAIL_RASTER,
+                   'missing snapshot solve for root/old']) {
+    assert.equal(isSolveClassBail(r), true, r);
+  }
+  // Every bail that says the page is NOT in a frozen active state — the
+  // backdrop is not on screen, so no stamp may follow.
+  for (const r of ['no-active-transition', 'transition-not-frozen (active: true → false)',
+                   'root-not-captured (page content paints in place)', 'no-view-transition-groups',
+                   'generated-names (view-transition-name: auto mints unaddressable groups)',
+                   "nested-group-tree ('x' has ::view-transition-group-children)",
+                   'group budget exceeded (41 > 40)', "cross-fade-not-invariant 'root' (…)",
+                   "mix-blend-mode 'plus-lighter' with both leaves painted on 'root'",
+                   "ambiguous paint order: 'a' has no document position and overlaps 'b'",
+                   'no painted view-transition content', 'reftest-wait never cleared', '', null, undefined]) {
+    assert.equal(isSolveClassBail(r), false, String(r));
+  }
+});
+
+test('VT bail-stamp: an active solve bail stamps ONLY the ring — no display:none, no pseudo tree, no bake stamp', () => {
+  // The fractional-box shape: two live boxes, NO body-root minted (the four
+  // per-test IR docs carry 2 / 6 components and 0 body-root each).
+  const fx = fixtureWith(2);
+  const walk = walkOf([grp({ name: 'one' })], { rootCaptureName: 'root' });
+  const written = applyBailFrameRingStamp(fx, 't', walk, BAIL_SHADOW_NEW, LIGHTPINK);
+  assert.equal(written, 1, 'exactly the stamp is written');
+  const br = fx.components.t__body;
+  assert.ok(br, 'the body-root is minted at <stem>__body');
+  assert.equal(br._role, 'body-root');
+  assert.equal(br.properties['background-color'], LIGHTPINK);
+  assert.equal(br.properties.display, 'none', 'the MINT paints nothing itself (wave-41 shape)');
+  assert.deepEqual(br._lossyReasons, [VT_BAKE_LOSSY_REASON]);
+  // The live document is NOT retired: the page paints in place as every
+  // bail did before; only the canvas colour is added.
+  for (const id of ['t__0', 't__1']) {
+    assert.equal(fx.components[id].properties.display, undefined, `${id} keeps painting`);
+    assert.deepEqual(fx.components[id].properties, { color: 'red' }, `${id} untouched`);
+  }
+  // No pseudo-tree wrapper and no "baked" provenance — this is a BAIL.
+  assert.equal('t__vt' in fx.components, false);
+  assert.equal(fx._wpt.viewTransitionBaked, undefined);
+  assert.equal(fx._wpt.lossy, false, 'the fixture-level roll-up is not touched by a bail');
+});
+
+test('VT bail-stamp: an EXISTING body-root is overridden, its other properties and display kept', () => {
+  const fx = fixtureWith(1);
+  fx.components.t__body = { properties: { 'font-size': '20px', 'background-color': 'rgb(1, 2, 3)' }, _role: 'body-root' };
+  const walk = walkOf([grp()]);
+  assert.equal(applyBailFrameRingStamp(fx, 't', walk, BAIL_OVERFLOW_OLD, LIGHTPINK), 1);
+  const br = fx.components.t__body;
+  assert.equal(br.properties['background-color'], LIGHTPINK, 'override, never merge');
+  assert.equal(br.properties['font-size'], '20px');
+  assert.equal(br.properties.display, undefined, 'an existing body-root keeps painting on the bail path');
+  assert.equal(Object.values(fx.components).filter((c) => c._role === 'body-root').length, 1);
+});
+
+test('VT bail-stamp: an inactive walk writes nothing', () => {
+  const fx = fixtureWith(2);
+  const before = JSON.stringify(fx);
+  const walk = walkOf([grp()], { active: false });
+  assert.equal(applyBailFrameRingStamp(fx, 't', walk, BAIL_SHADOW_NEW, LIGHTPINK), 0);
+  assert.equal(JSON.stringify(fx), before, 'byte-identical fixture');
+  // A missing walk is the same answer, never a throw.
+  assert.equal(applyBailFrameRingStamp(fx, 't', undefined, BAIL_SHADOW_NEW, LIGHTPINK), 0);
+});
+
+test('VT bail-stamp: a WHITE (null) ring writes nothing — the pipeline default already matches', () => {
+  const fx = fixtureWith(2);
+  const before = JSON.stringify(fx);
+  const walk = walkOf([grp()]);
+  // frameRingColor answers null for a white ring (pinned in 8b); the stamp
+  // must treat that null as "nothing to deliver", not as a colour.
+  assert.equal(frameRingColor(solidPng(20, 20, [255, 255, 255])), null);
+  assert.equal(applyBailFrameRingStamp(fx, 't', walk, BAIL_SHADOW_NEW, null), 0);
+  assert.equal(applyFrameRingStamp(fx, 't', null), 0);
+  assert.equal(JSON.stringify(fx), before);
+});
+
+test('VT bail-stamp: a NON-solve bail writes nothing even with an active walk and a pink ring', () => {
+  const walk = walkOf([grp()]);
+  for (const r of ['no-active-transition', 'transition-not-frozen (active: true → false)',
+                   'root-not-captured (page content paints in place)']) {
+    const fx = fixtureWith(1);
+    const before = JSON.stringify(fx);
+    assert.equal(applyBailFrameRingStamp(fx, 't', walk, r, LIGHTPINK), 0, r);
+    assert.equal(JSON.stringify(fx), before, r);
+  }
+});
+
+test('VT bail-stamp: applyFrameRingStamp is step 2c verbatim — the baked path is byte-identical to wave-41', () => {
+  // Two fixtures, one through the (refactored) full apply, one through the
+  // factored stamp after the same plan minus the ring: same body-root bytes.
+  const a = fixtureWith(2), b = fixtureWith(2);
+  const { plan } = planOneRoot();
+  const wa = applyViewTransitionBakePlan(a, 't', plan, LIGHTPINK);
+  const wb = applyViewTransitionBakePlan(b, 't', plan) + applyFrameRingStamp(b, 't', LIGHTPINK);
+  assert.equal(wa, wb, 'the written count includes the stamp exactly once');
+  assert.deepEqual(a.components.t__body, b.components.t__body);
+  assert.deepEqual(a, b);
+});
+
+// The extractor's source for the log-shape pin below (section 10 reads its
+// own copy later in the file; this one is declared before its first use).
+const EXTRACT_SRC_FOR_8C = readFileSync(join(__dirname, 'extract-fixture.mjs'), 'utf8');
+
+test('VT bail-stamp wiring: the drive samples the ring only for a solve-class bail on a CLEAN drive, and says so in the reason', () => {
+  const src = readFileSync(join(__dirname, 'view-transition-bake.mjs'), 'utf8');
+  // The gate: solve class AND no dirty probe — a re-drive must start unmutated.
+  assert.match(src, /const ringSampled = isSolveClassBail\(bail\) && dirtyProbes\.length === 0;/);
+  // The screenshot is paid only under that gate.
+  assert.match(src, /const ringOnBail = ringSampled\s*\n\s*\? frameRingColor\(await page\.screenshot\(/);
+  // The stamp goes through the PURE function the pins above exercise.
+  assert.match(src, /applyBailFrameRingStamp\(fixture, fixtureStem\(testRel\), walk, bail, ringOnBail\)/);
+  // The reason keeps its leading token (CLI taxonomy) and names the stamp.
+  assert.match(src, /reason: `\$\{bail\} \(frame-ring \$\{ringOnBail\} stamped\)`/);
+  // The stamped return carries no dirty probe (it cannot: the gate above).
+  assert.match(src, /frameRing: ringOnBail, written: stampedOnBail,\s*\n(\s*\/\/[^\n]*\n)*\s*dirtyProbe: null,/);
+  // A SAMPLED ring that wrote nothing says so (skeptic nit 7): extract.log
+  // must tell "sampled → white/non-uniform" from "never sampled", or a census
+  // cannot measure the stamp population from the gate's own log.
+  assert.match(src, /if \(ringSampled\) \{[\s\S]{0,700}?reason: `\$\{bail\} \(frame-ring \$\{ringOnBail \?\? 'null'\} not stamped\)`/);
+  // The un-stamped bail return is the wave-45 line, verbatim (section 11 pins it too).
+  assert.match(src, /return \{ status: 'bailed', reason: bail, dirtyProbe: dirtyProbes\[0\] \?\? null \};/);
+  // extract-fixture.mjs prints `[vt-bake: bailed — ${reason}]`, so the suffix
+  // lands in extract.log with no seam change.
+  assert.match(EXTRACT_SRC_FOR_8C, /: ` — \$\{outcome\.reason\}`\) \+ '\]'/);
 });
 
 // ── 9. String shapes ────────────────────────────────────────────────────────

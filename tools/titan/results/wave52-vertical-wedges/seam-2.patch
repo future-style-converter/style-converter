@@ -1,0 +1,184 @@
+# seam-2 (wave52 lane L8 vertical-wedges, M-C) — SwiftUI ComponentRenderer.swift: pass the css-writing-modes-4 §7.3.1
+# fallback budget (VerticalUprightGate.budgetPx(style:viewport:wptCaptureMode:)) through PlaceholderLabel to
+# VerticalUprightTextFlow(budgetOverridePx:), and veto the WPT N x L line-box pin for a run that will plan upright.
+# Four hunks: label call site, PlaceholderLabel property, the pin's lineCountIsExact veto, the flow call; plus the
+# end-to-end raster pin UprightChOrangeRasterTests.swift (red without the seam, 120x25, so it ships here).
+# Cut against HEAD 7d9c22a7 (no prior lane's patch required; no line inside another lane's §3 hunk). Needs the L8
+# VerticalTextFlowLayout.swift, ChUnitMetrics.swift and StyleBuilder.swift ch block in the tree.
+--- a/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
++++ b/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift
+@@ -4168,7 +4168,15 @@
+                 // `vertical-*` mode, i.e. for every other component in the
+                 // frozen corpus, which therefore renders byte-identically.
+                 verticalUprightStack: VerticalUprightGate.stack(
+-                    properties: resolvedProperties, text: component.text)
++                    properties: resolvedProperties, text: component.text),
++                // Wave 52 lane L8 (M-C) — css-writing-modes-4 §7.3.1: the
++                // upright run's wrap budget when the label's proposal is
++                // indefinite (its `.fixedSize(vertical: true)` erases it):
++                // own definite height → ancestor's → the capture's ICB.
++                // nil outside WPT capture (byte-identical decline there).
++                verticalUprightBudgetPx: VerticalUprightGate.budgetPx(
++                    style: style, viewport: styleViewport,
++                    wptCaptureMode: wptCaptureMode)
+             )
+         }
+     }
+@@ -4652,6 +4660,13 @@
+     // reads the MERGED property list; nil (the default, and every call site
+     // that does not pass it) keeps the frozen horizontal chain byte for byte.
+     var verticalUprightStack: LineStack? = nil
++
++    // Wave 52 lane L8 (M-C) — the css-writing-modes-4 §7.3.1 wrap budget for
++    // that upright run when this label's proposal is indefinite, resolved at
++    // the call site by `VerticalUprightGate.budgetPx(style:viewport:
++    // wptCaptureMode:)`. nil (the default, and every non-capture caller)
++    // keeps the pre-wave-52 decline to the horizontal label.
++    var verticalUprightBudgetPx: CGFloat? = nil
+ 
+     var body: some View {
+         // Resolve the visible string: rawText wins when present (the IR
+@@ -4905,8 +4920,14 @@
+         // Anything else (unknown wrap width, preserved-whitespace modes)
+         // stays UNPINNED — an under-counted pin would ride the next sibling
+         // up, which is worse than the drift it would remove.
+-        let lineCountIsExact = singleLineText || textConfig.noWrap
+-            || wptUnbreakableRun || broken.preBroken
++        // Wave 52 lane L8 (M-C): an upright vertical run that will PLAN
++        // (a §7.3.1 budget rides in) stacks its glyphs DOWN the box, so the
++        // horizontal line count says nothing about its block extent — the
++        // N × L pin would clamp five 24 px upright line boxes to one 25 px
++        // row (measured: ch-units-vrl-005's orange div 120×25, ref 120×120).
++        let uprightPlans = verticalUprightStack != nil && verticalUprightBudgetPx != nil
++        let lineCountIsExact = (singleLineText || textConfig.noWrap
++            || wptUnbreakableRun || broken.preBroken) && !uprightPlans
+         let pinnedBoxHeight = LineBoxMetrics.pinnedBoxHeight(
+             lineHeightPx: effectiveLineHeight,
+             // `line-clamp` truncates the block to N line boxes (css-overflow-4
+@@ -4967,7 +4988,10 @@
+             // frozen branches below, verbatim — whenever it declines, so a
+             // run this gate admits can never render WORSE than before.
+             if let stack = verticalUprightStack {
+-                VerticalUprightTextFlow(text: displayText, stack: stack) {
++                // Wave 52 L8 (M-C): the §7.3.1 fallback budget rides in as
++                // the layout's override; a bounded proposal still wins.
++                VerticalUprightTextFlow(text: displayText, stack: stack,
++                                        budgetOverridePx: verticalUprightBudgetPx) {
+                     if let g = clipTextGradient {
+                         textView.foregroundStyle(g)
+                     } else {
+--- /dev/null
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UprightChOrangeRasterTests.swift
+@@ -0,0 +1,112 @@
++//
++//  UprightChOrangeRasterTests.swift
++//  Wave 52 lane L8 (vertical-wedges) — END-TO-END Catalyst raster pin for the
++//  iOS ch-units-vrl fix: M-A (Inter face) + M-B (upright inline axis) through
++//  StyleBuilder, and M-C (the §7.3.1 budget) through the ComponentRenderer
++//  seam hunk. Ships INSIDE seam-2.patch (tools/titan/results/
++//  wave52-vertical-wedges/) because its height half is red without the
++//  seam by construction — the two must land in one commit.
++//
++//  Verbatim IR: tools/titan/runs/wave51-fix/sections/css-writing-modes/
++//  per-test-ir/wpt__css-writing-modes__ch-units-vrl-005.json — component
++//  `wpt__css-writing-modes__ch-units-vrl-005__4-479`, copied byte for byte.
++//  Ref (frozen, Chromium + Inter): one 120×120 orange square. wave51-fix
++//  iOS drew 60×25 (5ch at SF's 12 px, the run declined to a horizontal
++//  label). Measured with this file (seam applied): 120×121.
++//
++//  MUTATIONS EXECUTED (2026-10-05, restored byte-exact, sha-256 verified):
++//   • seam-2 not applied (the label keeps its nil `verticalUprightBudgetPx`
++//     default — byte-equivalent to removing the argument) →
++//     `testOrangeUprightDivIsTheRefsSquare` fails on height (25 ≠ 121 ± 1).
++//   • seam-2's line-box-pin veto (`&& !uprightPlans`) disabled alone → the
++//     same failure: the N × L pin clamps the planned column back to 25.
++//
++
++import CoreText
++import SwiftUI
++import UIKit
++import XCTest
++@testable import StyleConverterRuntime
++
++final class UprightChOrangeRasterTests: XCTestCase {
++
++    /// The harness's Inter Regular (the face the capture paints).
++    private var interURL: URL {
++        URL(fileURLWithPath: #filePath)
++            .deletingLastPathComponent().deletingLastPathComponent()
++            .deletingLastPathComponent().deletingLastPathComponent()
++            .deletingLastPathComponent()
++            .appendingPathComponent("apps/ios-harness/StyleConverterTest/Resources/Inter-Regular.otf")
++    }
++
++    override func setUpWithError() throws {
++        // Process-scope registration, exactly what the harness bundle does.
++        var error: Unmanaged<CFError>?
++        if !CTFontManagerRegisterFontsForURL(interURL as CFURL, .process, &error),
++           UIFont(name: "Inter", size: 20) == nil {
++            XCTFail("could not register \(interURL.path)")
++        }
++    }
++
++    override func tearDown() {
++        // Leave the process without Inter, as the suite found it.
++        var error: Unmanaged<CFError>?
++        _ = CTFontManagerUnregisterFontsForURL(interURL as CFURL, .process, &error)
++        super.tearDown()
++    }
++
++    /// `…ch-units-vrl-005__4-479`, verbatim from the per-test IR.
++    private func orange() throws -> IRComponent {
++        try JSONDecoder().decode(IRComponent.self, from: Data(#"""
++        {"id":"wpt__css-writing-modes__ch-units-vrl-005__4-479","name":"wpt__css-writing-modes__ch-units-vrl-005__4","properties":[{"type":"FontSize","data":{"px":20,"original":{"type":"length","px":20}}},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"WritingMode","data":"VERTICAL_RL"},{"type":"TextOrientation","data":"UPRIGHT"},{"type":"Width","data":{"type":"length","original":{"v":5,"u":"CH"}}}],"text":"00000"}
++        """#.utf8))
++    }
++
++    /// The orange ink's bounding box on a white 240×240 stage, rendered in
++    /// the composed-WPT environment (capture flag + the 358×568 ICB).
++    @MainActor
++    private func orangeBox() throws -> CGRect {
++        let view = ComponentRenderer(component: try orange())
++            .frame(width: 240, height: 240, alignment: .topLeading)
++            .background(Color.white)
++            .environment(\.wptCaptureMode, true)
++            .environment(\.styleViewport, StyleViewport(width: 358, height: 568))
++        let renderer = ImageRenderer(content: view)
++        renderer.scale = 1
++        let cg = try XCTUnwrap(renderer.cgImage, "ImageRenderer produced no image")
++        // Redraw into RGBA8 for format-stable reads.
++        let w = cg.width, h = cg.height
++        var buf = [UInt8](repeating: 0, count: w * h * 4)
++        let ctx = try XCTUnwrap(CGContext(
++            data: &buf, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
++            space: CGColorSpaceCreateDeviceRGB(),
++            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
++        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
++        // Orange = (255, 165, 0) ± 24 per channel.
++        var minX = w, minY = h, maxX = -1, maxY = -1
++        for y in 0..<h {
++            for x in 0..<w {
++                let i = (y * w + x) * 4
++                if buf[i] > 231, abs(Int(buf[i + 1]) - 165) < 24, buf[i + 2] < 24 {
++                    minX = min(minX, x); maxX = max(maxX, x)
++                    minY = min(minY, y); maxY = max(maxY, y)
++                }
++            }
++        }
++        guard maxX >= 0 else { return .zero }
++        return CGRect(x: minX, y: minY, width: maxX - minX + 1, height: maxY - minY + 1)
++    }
++
++    @MainActor
++    func testOrangeUprightDivIsTheRefsSquare() throws {
++        let box = try orangeBox()
++        // Width: `5ch` with the upright inline axis = 5 × 24 (M-A + M-B).
++        XCTAssertEqual(box.width, 120, accuracy: 1, "orange width \(box.width)")
++        // Height: five upright line boxes, one per '0' (M-C through the
++        // seam). Each is one Inter-20 Text line box — the brief's open
++        // question (24 vs 25) answered on Catalyst: 24.2 (ascent + descent
++        // unrounded), so 5 × 24.2 = 121 against the ref's 120.
++        XCTAssertEqual(box.height, 121, accuracy: 1, "orange height \(box.height)")
++        print("[L8] orange box \(box)")
++    }
++}

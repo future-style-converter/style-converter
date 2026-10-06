@@ -1,0 +1,181 @@
+{
+    "irVersion": 2,
+    "minReaderVersion": 2,
+    "components": [
+        {
+            "id": "all_initial-001",
+            "name": "All_Initial",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.20392156862745098,
+                            "g": 0.596078431372549,
+                            "b": 0.8588235294117647
+                        },
+                        "original": "#3498db"
+                    }
+                },
+                {
+                    "type": "All",
+                    "data": "INITIAL"
+                }
+            ]
+        },
+        {
+            "id": "all_inherit-002",
+            "name": "All_Inherit",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9058823529411765,
+                            "g": 0.2980392156862745,
+                            "b": 0.23529411764705882
+                        },
+                        "original": "#e74c3c"
+                    }
+                },
+                {
+                    "type": "All",
+                    "data": "INHERIT"
+                }
+            ]
+        },
+        {
+            "id": "all_unset-003",
+            "name": "All_Unset",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.1803921568627451,
+                            "g": 0.8,
+                            "b": 0.44313725490196076
+                        },
+                        "original": "#2ecc71"
+                    }
+                },
+                {
+                    "type": "All",
+                    "data": "UNSET"
+                }
+            ]
+        },
+        {
+            "id": "all_revert-004",
+            "name": "All_Revert",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.6078431372549019,
+                            "g": 0.34901960784313724,
+                            "b": 0.7137254901960784
+                        },
+                        "original": "#9b59b6"
+                    }
+                },
+                {
+                    "type": "All",
+                    "data": "REVERT"
+                }
+            ]
+        },
+        {
+            "id": "all_revertlayer-005",
+            "name": "All_RevertLayer",
+            "properties": [
+                {
+                    "type": "Width",
+                    "data": {
+                        "type": "length",
+                        "px": 160.0
+                    }
+                },
+                {
+                    "type": "Height",
+                    "data": {
+                        "type": "length",
+                        "px": 60.0
+                    }
+                },
+                {
+                    "type": "BackgroundColor",
+                    "data": {
+                        "srgb": {
+                            "r": 0.9529411764705882,
+                            "g": 0.611764705882353,
+                            "b": 0.07058823529411765
+                        },
+                        "original": "#f39c12"
+                    }
+                },
+                {
+                    "type": "All",
+                    "data": "REVERT_LAYER"
+                }
+            ]
+        }
+    ]
+}

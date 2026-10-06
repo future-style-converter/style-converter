@@ -189,7 +189,13 @@ internal fun rotatedRunMeasurePolicy(rotationDegrees: Float): MeasurePolicy =
  *    intrinsic and measure part ways ON PURPOSE, because the measure
  *    declines an unbounded block axis to the fallback rather than
  *    invent a wrap width, while a max-content query wants the flow's
- *    own unwrapped extent.
+ *    own unwrapped extent. Wave 52 L8 (M-C) qualifies the first half:
+ *    with a `fallbackBudgetPx` the measure PLANS on an unbounded axis
+ *    (css-writing-modes-4 §7.3.1), and the two agree whenever the run
+ *    fits that budget in one column — true of every corpus upright run
+ *    (≤ 12 glyphs against a 568 px ICB); a longer run would wrap in the
+ *    measure while max-content still answers one column, which is the
+ *    spec's own fit-content-vs-max-content distinction, not a defect.
  *  - min HEIGHT = the tallest single glyph (a column may break after
  *    every glyph, so no line box needs more than one glyph's advance).
  *  - max HEIGHT = the sum of every glyph's advance — the single
@@ -208,10 +214,20 @@ internal fun rotatedRunMeasurePolicy(rotationDegrees: Float): MeasurePolicy =
  * @param glyphs the SAME per-code-point list the composable's slots
  *   1…n were built from — index parity with the measurables is the
  *   contract that lets the plan address them.
+ * @param fallbackBudgetPx wave 52 lane L8 (M-C) — the css-writing-modes-4
+ *   §7.3.1 available inline size for an orthogonal flow whose height
+ *   constraint is UNBOUNDED (`VerticalInlineAxis.orthogonalBudget`: the
+ *   nearest definite ancestor block size, else the ICB extent). Null — the
+ *   default, and every pre-wave-52 caller — keeps the historical decline
+ *   on an unbounded budget, so the dark stage is byte-identical. It sits
+ *   BEFORE [onDecline] so every trailing-lambda caller
+ *   (`uprightFlowMeasurePolicy(glyphs, stack) { … }`) still binds the
+ *   lambda to the decline hook, unchanged.
  */
 internal fun uprightFlowMeasurePolicy(
     glyphs: List<String>,
     stack: LineStack,
+    fallbackBudgetPx: Double? = null,
     onDecline: () -> Unit,
 ): MeasurePolicy = object : MeasurePolicy {
     override fun MeasureScope.measure(
@@ -229,9 +245,18 @@ internal fun uprightFlowMeasurePolicy(
         val glyphPlaceables = measurables.drop(1).map { it.measure(free) }
         // The advance along the vertical inline axis = one line box's height.
         val advance = glyphPlaceables.firstOrNull()?.height?.toDouble() ?: 0.0
-        // The wrap budget IS the incoming height constraint — null when the
-        // block axis is unbounded, which the planner declines on.
-        val budget = if (constraints.hasBoundedHeight) constraints.maxHeight.toDouble() else null
+        // The wrap budget IS the incoming height constraint when it is
+        // bounded. Wave 52 lane L8 (M-C): when the block axis is UNBOUNDED
+        // (`height: auto` up the chain — wave51-fix ch-units-vrl-005..008's
+        // orange `width: 5ch` div), css-writing-modes-4 §7.3.1 says the
+        // orthogonal flow wraps against the nearest definite ancestor block
+        // size, else the initial containing block — the caller resolves that
+        // into [fallbackBudgetPx]; null keeps the historical decline. The
+        // pick itself is the twin-pinned `VerticalInlineAxis.uprightBudget`.
+        val budget = com.styleconverter.runtime.typography.text.VerticalInlineAxis.uprightBudget(
+            boundedPx = if (constraints.hasBoundedHeight) constraints.maxHeight.toDouble() else null,
+            fallbackPx = fallbackBudgetPx,
+        )
         val plan = VerticalTextFlow.uprightColumnIndices(glyphs, advance, budget)
 
         if (plan == null) {

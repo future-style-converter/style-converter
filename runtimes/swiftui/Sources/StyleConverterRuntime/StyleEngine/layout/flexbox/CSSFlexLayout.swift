@@ -39,6 +39,12 @@ enum CSSFlexMath {
         var grow: CGFloat
         /// flex-shrink factor.
         var shrink: CGFloat
+        /// Wave 52 (lane L10) — main-axis extent OUTSIDE the flexed size:
+        /// the box around a content-unit basis plus the NEGATIVE margins
+        /// (css-flexbox-1 §9.2 step 3 "outer hypothetical main size").
+        /// 0 — the default every pre-wave-52 caller gets — keeps the
+        /// arithmetic below byte-identical.
+        var outer: CGFloat = 0
     }
 
     /// §9.7 resolve flexible lengths, min-clamped (no max clamp — the
@@ -60,8 +66,9 @@ enum CSSFlexMath {
         // Space taken by the fixed inter-item gaps (§7 gutters).
         let gapTotal = gap * CGFloat(items.count - 1)
         let inner = available - gapTotal
-        // Sum of hypothetical sizes decides grow vs shrink (§9.7 step 1).
-        let hypSum = hypothetical.reduce(0, +)
+        // Sum of OUTER hypothetical sizes decides grow vs shrink (§9.7
+        // step 1) — `outer` adds the box/negative-margin extent (wave 52).
+        let hypSum = zip(hypothetical, items).reduce(0) { $0 + $1.0 + $1.1.outer }
         if hypSum == inner { return hypothetical }
         let growing = hypSum < inner
 
@@ -77,10 +84,13 @@ enum CSSFlexMath {
             let unfrozenIdx = items.indices.filter { !frozen[$0] }
             if unfrozenIdx.isEmpty { break }
             // Free space relative to the UNfrozen items' flex base sizes
-            // plus the frozen items' final sizes (§9.7 step 4a).
+            // plus the frozen items' final sizes (§9.7 step 4a) — both as
+            // OUTER sizes ("sum of the outer … sizes"), hence `+ outer`.
             let frozenSum = items.indices.filter { frozen[$0] }
-                .reduce(CGFloat(0)) { $0 + sizes[$1] }
-            let unfrozenBase = unfrozenIdx.reduce(CGFloat(0)) { $0 + items[$1].basis }
+                .reduce(CGFloat(0)) { $0 + sizes[$1] + items[$1].outer }
+            let unfrozenBase = unfrozenIdx.reduce(CGFloat(0)) {
+                $0 + items[$1].basis + items[$1].outer
+            }
             let free = inner - frozenSum - unfrozenBase
             var violation: CGFloat = 0
             var minViolated: [Int] = []
@@ -122,13 +132,19 @@ enum CSSFlexMath {
 
     /// §8.2 justify-content — returns each item's main-axis offset from
     /// the content-box origin. `available` nil/infinite → packed start.
+    /// Wave 52 (lane L10, M2): `outers[i]` is item i's `ItemInput.outer`
+    /// (empty = all zero, every pre-wave-52 caller) — §9.5 places by OUTER
+    /// size, so a −150 margin-left item advances the cursor by s − 150.
     static func mainOffsets(sizes: [CGFloat],
                             available: CGFloat?,
                             gap: CGFloat,
-                            justify: AlignmentKeyword?) -> [CGFloat] {
+                            justify: AlignmentKeyword?,
+                            outers: [CGFloat] = []) -> [CGFloat] {
         guard !sizes.isEmpty else { return [] }
+        // Outer extent per item; a short/empty list pads with zeros.
+        let outer: (Int) -> CGFloat = { $0 < outers.count ? outers[$0] : 0 }
         let gapTotal = gap * CGFloat(sizes.count - 1)
-        let content = sizes.reduce(0, +) + gapTotal
+        let content = sizes.indices.reduce(CGFloat(0)) { $0 + sizes[$1] + outer($1) } + gapTotal
         // Leftover free space AFTER flexing — only non-zero when no item
         // grew (grow factors all 0) inside a definite container.
         let free = max(0, (available.flatMap { $0.isFinite ? $0 : nil } ?? content) - content)
@@ -146,11 +162,54 @@ enum CSSFlexMath {
         }
         var offsets: [CGFloat] = []
         var cursor = lead
-        for s in sizes {
+        for (i, s) in sizes.enumerated() {
             offsets.append(cursor)
-            cursor += s + gap + between
+            // The OUTER size advances the cursor (§9.5), never the frame.
+            cursor += s + outer(i) + gap + between
         }
         return offsets
+    }
+
+    /// Wave 52 (lane L10, 7(b)) — css-flexbox-1 §9.2 step 3.A / §7.2.3:
+    /// a percentage flex basis resolves against the container's DEFINITE
+    /// inner main size; an indefinite container (nil) makes it `content`,
+    /// i.e. nil here → the caller's intrinsic fallback.
+    static func percentBasis(_ claim: ItemPlacement.FlexClaim,
+                             available: CGFloat?) -> CGFloat? {
+        // No percent claim, or nothing definite to resolve it against.
+        guard let pct = claim.basisPercent,
+              let a = available, a.isFinite else { return nil }
+        return a * pct / 100
+    }
+
+    /// Wave 52 (lane L10) — the extent between a resolved percent basis
+    /// (a CONTENT-box size) and the subview frame the Layout places: the
+    /// border + padding band plus the positive margins MarginApplier pads
+    /// outside the border box. `borderBoxOnly` drops the margins — the
+    /// renderer's static plan injects a border-box width.
+    static func frameExtra(_ claim: ItemPlacement.FlexClaim,
+                           horizontal: Bool, borderBoxOnly: Bool = false) -> CGFloat {
+        // Border + padding on this axis (0 under box-sizing: border-box).
+        let band = horizontal ? claim.boxExtraWidth : claim.boxExtraHeight
+        if borderBoxOnly { return band }
+        // Positive main-axis margins (each ≥ 0).
+        let m = claim.margins
+        return band + (horizontal ? max(0, m.left) + max(0, m.right)
+                                  : max(0, m.top) + max(0, m.bottom))
+    }
+
+    /// Wave 52 (lane L10) — the `ItemInput.outer` of one claim on one
+    /// axis: the frame extra when the basis is a resolved percent, plus
+    /// the negative start + end margins (§9.2 step 3, outer hypothetical).
+    static func outer(_ claim: ItemPlacement.FlexClaim,
+                      horizontal: Bool, percentResolved: Bool) -> CGFloat {
+        // Negative margins on the two main-axis sides (each ≤ 0).
+        let m = claim.negativeMargins
+        let neg = horizontal ? m.left + m.right : m.top + m.bottom
+        // Box extras only for the percent arm — the px and intrinsic arms
+        // keep their pre-wave-52 frame-unit treatment (no carrier moves).
+        guard percentResolved else { return neg }
+        return neg + frameExtra(claim, horizontal: horizontal)
     }
 
     /// §8.3/§8.4 cross-axis position for one item inside the line.
@@ -240,6 +299,9 @@ struct CSSFlexLayout: Layout {
 
         // Per-item inputs: intrinsic ideal, minimum, spec.
         var inputs: [CSSFlexMath.ItemInput] = []
+        // Wave 52 (lane L10): the frame extent beyond the flexed size —
+        // non-zero only for a resolved percent basis (its box extras).
+        var frameExtra: [CGFloat] = []
         var aligns: [AlignmentKeyword] = []
         var stretchable: [Bool] = []
         for sub in subviews {
@@ -259,9 +321,25 @@ struct CSSFlexLayout: Layout {
                 ? ProposedViewSize(width: 0, height: nil)
                 : ProposedViewSize(width: nil, height: 0)
             let minMain = mc(sub.sizeThatFits(zeroProbe)).main
-            inputs.append(.init(basis: claim.basisPx ?? ideal.main,
-                                min: minMain,
-                                grow: claim.grow, shrink: claim.shrink))
+            // Wave 52 (lane L10, 7(b)): a percent basis resolves against
+            // the definite content main size (§9.2 step 3.A) — this arm
+            // used to fall through to the intrinsic size (0 for an empty
+            // box: background-clip-content-box-002's two 50% items).
+            let pct = claim.basisPx == nil
+                ? CSSFlexMath.percentBasis(claim, available: available) : nil
+            // The percent basis sizes the CONTENT box; the frame adds the
+            // box extras (border/padding/positive margins) around it.
+            let extra = pct == nil ? 0
+                : CSSFlexMath.frameExtra(claim, horizontal: axis == .horizontal)
+            frameExtra.append(extra)
+            inputs.append(.init(basis: claim.basisPx ?? pct ?? ideal.main,
+                                // The min probe answers in frame units;
+                                // a content-unit basis compares net of it.
+                                min: max(0, minMain - extra),
+                                grow: claim.grow, shrink: claim.shrink,
+                                // Box extras + negative margins (M2).
+                                outer: CSSFlexMath.outer(claim, horizontal: axis == .horizontal,
+                                                         percentResolved: pct != nil)))
             let a = CSSFlexMath.resolvedAlign(self: claim.alignSelf, items: alignItems)
             aligns.append(a)
             // §8.3: stretch only stretches items with an auto cross size.
@@ -276,11 +354,19 @@ struct CSSFlexLayout: Layout {
         }
 
         // Main-axis resolution (§9.7) + justify offsets (§8.2).
-        let sizes = CSSFlexMath.mainSizes(items: inputs, available: available, gap: gap)
-        let offsets = CSSFlexMath.mainOffsets(sizes: sizes, available: available,
-                                              gap: gap, justify: justify)
+        let flexed = CSSFlexMath.mainSizes(items: inputs, available: available, gap: gap)
+        // Wave 52: the frame each subview is proposed/placed at = flexed
+        // size + its box extras (identity when no percent basis resolved).
+        let sizes = zip(flexed, frameExtra).map { $0 + $1 }
+        // Offsets advance by flexed + outer (box extras + negative margins).
+        let outers = inputs.map(\.outer)
+        let offsets = CSSFlexMath.mainOffsets(sizes: flexed, available: available,
+                                              gap: gap, justify: justify, outers: outers)
+        // Hug size of an indefinite container: the OUTER sizes + gaps,
+        // floored at 0 (a large negative margin cannot make it negative).
         let totalMain = available
-            ?? (sizes.reduce(0, +) + gap * CGFloat(max(0, sizes.count - 1)))
+            ?? max(0, zip(flexed, outers).reduce(0) { $0 + $1.0 + $1.1 }
+                       + gap * CGFloat(max(0, flexed.count - 1)))
 
         // Cross-axis: measure each item at its flexed main size so text
         // re-wraps (shrunken items grow taller, like CSS).

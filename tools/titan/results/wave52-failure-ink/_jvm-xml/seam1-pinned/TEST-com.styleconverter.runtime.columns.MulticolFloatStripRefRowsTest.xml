@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolFloatStripRefRowsTest" tests="4" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:53:13.726Z" hostname="mac-1.home" time="0.004">
+  <properties/>
+  <testcase name="a Clear wire on a br child is IGNORED today - queue 3a, recorded not endorsed" classname="com.styleconverter.runtime.columns.MulticolFloatStripRefRowsTest" time="0.002"/>
+  <testcase name="the Android shift is NOT reachable from any strip offset" classname="com.styleconverter.runtime.columns.MulticolFloatStripRefRowsTest" time="0.001"/>
+  <testcase name="003 fill - the plan puts the 3px band on the ref's rows 161-163" classname="com.styleconverter.runtime.columns.MulticolFloatStripRefRowsTest" time="0.0"/>
+  <testcase name="balancing-003 - the plan puts the 5px band on the ref's rows 171-175" classname="com.styleconverter.runtime.columns.MulticolFloatStripRefRowsTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

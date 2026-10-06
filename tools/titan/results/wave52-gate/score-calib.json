@@ -1,0 +1,1747 @@
+{
+ "prev": "wave51-fix",
+ "cur": "wave52-calib",
+ "totals": {
+  "prev": {
+   "web": {
+    "passing": 1215,
+    "measured": 1379
+   },
+   "ios": {
+    "passing": 1089,
+    "measured": 1369
+   },
+   "android": {
+    "passing": 1080,
+    "measured": 1369
+   }
+  },
+  "cur": {
+   "web": {
+    "passing": 1211,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1084,
+    "measured": 1363
+   },
+   "android": {
+    "passing": 1075,
+    "measured": 1363
+   }
+  }
+ },
+ "sections": {
+  "CSS2": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   }
+  },
+  "css-anchor-position": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 26,
+     "measured": 32
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 26,
+     "measured": 32
+    }
+   }
+  },
+  "css-backgrounds": {
+   "prev": {
+    "web": {
+     "passing": 26,
+     "measured": 31
+    },
+    "ios": {
+     "passing": 25,
+     "measured": 31
+    },
+    "android": {
+     "passing": 26,
+     "measured": 31
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 24,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 23,
+     "measured": 29
+    },
+    "android": {
+     "passing": 24,
+     "measured": 29
+    }
+   }
+  },
+  "css-break": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 31,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 31,
+     "measured": 48
+    }
+   }
+  },
+  "css-cascade": {
+   "prev": {
+    "web": {
+     "passing": 34,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 42
+    },
+    "android": {
+     "passing": 34,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 34,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 34,
+     "measured": 41
+    }
+   }
+  },
+  "css-color": {
+   "prev": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 39,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   }
+  },
+  "css-contain": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 37,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 48
+    },
+    "android": {
+     "passing": 37,
+     "measured": 48
+    }
+   }
+  },
+  "css-counter-styles": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 38
+    },
+    "android": {
+     "passing": 24,
+     "measured": 38
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 38
+    },
+    "android": {
+     "passing": 24,
+     "measured": 38
+    }
+   }
+  },
+  "css-display": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 39,
+     "measured": 47
+    },
+    "android": {
+     "passing": 39,
+     "measured": 47
+    }
+   }
+  },
+  "css-flexbox": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 47
+    },
+    "android": {
+     "passing": 44,
+     "measured": 47
+    }
+   }
+  },
+  "css-gaps": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   }
+  },
+  "css-grid": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-images": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 48
+    },
+    "android": {
+     "passing": 35,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 34,
+     "measured": 47
+    }
+   }
+  },
+  "css-lists": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-masking": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 38,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 38,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   }
+  },
+  "css-multicol": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   }
+  },
+  "css-overflow": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   }
+  },
+  "css-position": {
+   "prev": {
+    "web": {
+     "passing": 35,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 35,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   }
+  },
+  "css-pseudo": {
+   "prev": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   }
+  },
+  "css-sizing": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   }
+  },
+  "css-tables": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   }
+  },
+  "css-text": {
+   "prev": {
+    "web": {
+     "passing": 35,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 48
+    },
+    "android": {
+     "passing": 28,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 35,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 48
+    },
+    "android": {
+     "passing": 28,
+     "measured": 48
+    }
+   }
+  },
+  "css-text-decor": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 28,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 28,
+     "measured": 48
+    }
+   }
+  },
+  "css-transforms": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 48
+    },
+    "android": {
+     "passing": 42,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-ui": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-values": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   }
+  },
+  "css-view-transitions": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 46
+    },
+    "android": {
+     "passing": 26,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 28,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 23,
+     "measured": 46
+    },
+    "android": {
+     "passing": 25,
+     "measured": 46
+    }
+   }
+  },
+  "css-writing-modes": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 48
+    },
+    "android": {
+     "passing": 24,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 48
+    },
+    "android": {
+     "passing": 24,
+     "measured": 48
+    }
+   }
+  },
+  "filter-effects": {
+   "prev": {
+    "web": {
+     "passing": 40,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 34,
+     "measured": 46
+    },
+    "android": {
+     "passing": 31,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 46
+    },
+    "android": {
+     "passing": 32,
+     "measured": 46
+    }
+   }
+  },
+  "selectors": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  }
+ },
+ "gained": [
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "android",
+   "prev": 0.5414,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "ios",
+   "prev": 0.5414,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/initial-background-color.html",
+   "platform": "web",
+   "prev": 0.5414,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "web",
+   "prev": 0.94,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "android",
+   "prev": 0.9466,
+   "cur": 0.9885,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "ios",
+   "prev": 0.9466,
+   "cur": 0.9885,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-034.html",
+   "platform": "web",
+   "prev": 0.9458,
+   "cur": 0.9916,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "android",
+   "prev": 0.922,
+   "cur": 0.987,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "ios",
+   "prev": 0.922,
+   "cur": 0.987,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-035.html",
+   "platform": "web",
+   "prev": 0.9206,
+   "cur": 0.9919,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "android",
+   "prev": 0.54,
+   "cur": 0.9998,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "ios",
+   "prev": 0.5401,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "filter-effects",
+   "test": "css/filter-effects/backdrop-filter-root-element.html",
+   "platform": "web",
+   "prev": 0.5402,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  }
+ ],
+ "lost": [
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "android",
+   "prev": 0.9988,
+   "cur": 0.5355,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "ios",
+   "prev": 0.9994,
+   "cur": 0.5346,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": 0.534,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": 0.94,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-033.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": 0.94,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "android",
+   "prev": 0.9879,
+   "cur": 0.9332,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "ios",
+   "prev": 0.9879,
+   "cur": 0.9332,
+   "prevPass": true,
+   "curPass": false
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/column-span-during-transition-doesnt-skip.html",
+   "platform": "web",
+   "prev": 0.9879,
+   "cur": 0.9332,
+   "prevPass": true,
+   "curPass": false
+  }
+ ],
+ "movers": [
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "android",
+   "prev": 0.6892,
+   "cur": 0.6816,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0076
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "ios",
+   "prev": 0.6891,
+   "cur": 0.6815,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0076
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-sharing-001.html",
+   "platform": "web",
+   "prev": 0.6891,
+   "cur": 0.6815,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0076
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "android",
+   "prev": 0.9565,
+   "cur": 0.9919,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0354
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "ios",
+   "prev": 0.9565,
+   "cur": 0.9919,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0354
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-036.html",
+   "platform": "web",
+   "prev": 0.9557,
+   "cur": 0.9946,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0389
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "android",
+   "prev": 0.9576,
+   "cur": 0.9933,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0357
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "ios",
+   "prev": 0.9576,
+   "cur": 0.9933,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0357
+  },
+  {
+   "sec": "css-gaps",
+   "test": "css/css-gaps/flex/flex-gap-decorations-037.html",
+   "platform": "web",
+   "prev": 0.9568,
+   "cur": 0.996,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0392
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "android",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "ios",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1d.html",
+   "platform": "web",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "android",
+   "prev": 0.9695,
+   "cur": 0.9997,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0302
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "ios",
+   "prev": 0.9695,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0304
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-contentBox-1e.html",
+   "platform": "web",
+   "prev": 0.9696,
+   "cur": 0.9998,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0302
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "android",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "ios",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1d.html",
+   "platform": "web",
+   "prev": 0.9585,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0415
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "android",
+   "prev": 0.9696,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0303
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "ios",
+   "prev": 0.9696,
+   "cur": 0.9999,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0303
+  },
+  {
+   "sec": "css-masking",
+   "test": "css/css-masking/clip-path/clip-path-paddingBox-1e.html",
+   "platform": "web",
+   "prev": 0.9697,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0303
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "android",
+   "prev": 0.7511,
+   "cur": 0.7222,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "ios",
+   "prev": 0.7915,
+   "cur": 0.7626,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-flex.html",
+   "platform": "web",
+   "prev": 0.7907,
+   "cur": 0.7619,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0288
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "android",
+   "prev": 0.7511,
+   "cur": 0.7222,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "ios",
+   "prev": 0.7915,
+   "cur": 0.7626,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0289
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-absolute-root-element-grid.html",
+   "platform": "web",
+   "prev": 0.7907,
+   "cur": 0.7619,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0288
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "android",
+   "prev": 0.7427,
+   "cur": 0.712,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0307
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "ios",
+   "prev": 0.815,
+   "cur": 0.8467,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-flex.html",
+   "platform": "web",
+   "prev": 0.8139,
+   "cur": 0.8456,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "android",
+   "prev": 0.7427,
+   "cur": 0.712,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0307
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "ios",
+   "prev": 0.815,
+   "cur": 0.8467,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-position",
+   "test": "css/css-position/position-fixed-root-element-grid.html",
+   "platform": "web",
+   "prev": 0.8139,
+   "cur": 0.8456,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0317
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "android",
+   "prev": 0.6796,
+   "cur": 0.745,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0654
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "ios",
+   "prev": 0.744,
+   "cur": 0.7361,
+   "prevPass": false,
+   "curPass": false,
+   "delta": -0.0079
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "platform": "web",
+   "prev": 0.7567,
+   "cur": 0.8415,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0848
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "android",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "ios",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-001.html",
+   "platform": "web",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "android",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "ios",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "css-values",
+   "test": "css/css-values/calc-in-media-queries-002.html",
+   "platform": "web",
+   "prev": 0.5535,
+   "cur": 0.9997,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.4462
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-005.html",
+   "platform": "web",
+   "prev": 0.9947,
+   "cur": 0.9658,
+   "prevPass": true,
+   "curPass": true,
+   "delta": -0.0289
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "web",
+   "prev": 0.9656,
+   "cur": 0.9923,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0267
+  }
+ ],
+ "newlyMeasured": [],
+ "unmeasuredNow": [
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/background-color-transparent-animation-in-body.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/animations/invalidation/background-color-animation-with-zero-alpha.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-cascade",
+   "test": "css/css-cascade/scope-implicit-crash-print.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flexbox_inline-abspos.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-images",
+   "test": "css/css-images/gradient-refcrash.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "android",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "ios",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-transforms",
+   "test": "css/css-transforms/backface-visibility-hidden-006.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  },
+  {
+   "sec": "css-view-transitions",
+   "test": "css/css-view-transitions/animation-name-ua-prefix.html",
+   "platform": "web",
+   "prev": 1,
+   "cur": null,
+   "prevPass": true,
+   "curPass": null
+  }
+ ],
+ "missingSections": [],
+ "columnShorts": []
+}

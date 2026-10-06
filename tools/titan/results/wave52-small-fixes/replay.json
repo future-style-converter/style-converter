@@ -1,0 +1,140 @@
+[
+ {
+  "cell": "css-transforms/composited-under-rotateY-180deg-preserve-3d",
+  "label": "T5 (+2 ios/android predicted)",
+  "ref": "size=390x600  green 10000px [16,16→115,115]",
+  "platforms": {
+   "web": {
+    "ssim": 1,
+    "pixelMismatchedPct": 0,
+    "ink": "size=390x600  green 10000px [16,16→115,115]"
+   },
+   "ios": {
+    "ssim": 0.9565,
+    "pixelMismatchedPct": 4.274,
+    "ink": "size=390x600"
+   },
+   "android": {
+    "ssim": 0.9565,
+    "pixelMismatchedPct": 4.274,
+    "ink": "size=390x600"
+   }
+  },
+  "androidEqualsIos": false
+ },
+ {
+  "cell": "css-transforms/css-transform-inherit-scale",
+  "label": "T7 (+1 android predicted; ios already P)",
+  "ref": "size=390x600  grey 1007px [16,35→369,68]  dark 1471px [17,36→371,67]  green 40000px [16,88→215,287]",
+  "platforms": {
+   "web": {
+    "ssim": 0.999,
+    "pixelMismatchedPct": 0.066,
+    "ink": "size=390x600  grey 1001px [16,35→369,68]  dark 1405px [17,36→371,67]  green 40000px [16,88→215,287]"
+   },
+   "ios": {
+    "ssim": 0.9974,
+    "pixelMismatchedPct": 0.17,
+    "ink": "size=390x600  grey 1045px [16,35→371,68]  dark 1258px [17,36→370,67]  green 40000px [16,88→215,287]"
+   },
+   "android": {
+    "ssim": 0.9965,
+    "pixelMismatchedPct": 13.031,
+    "ink": "size=390x600  grey 1212px [16,35→371,68]  dark 1075px [17,36→370,67]  red 30000px [16,88→215,287]  green 10000px [66,138→165,237]"
+   }
+  },
+  "androidEqualsIos": false
+ },
+ {
+  "cell": "css-sizing/abspos-auto-sizing-fit-content-percentage-001",
+  "label": "b″ control (must not move)",
+  "ref": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]",
+  "platforms": {
+   "web": {
+    "ssim": 1,
+    "pixelMismatchedPct": 0,
+    "ink": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "ios": {
+    "ssim": 0.9992,
+    "pixelMismatchedPct": 0.078,
+    "ink": "size=390x600  grey 871px [16,35→343,51]  dark 1002px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "android": {
+    "ssim": 0.9984,
+    "pixelMismatchedPct": 0.115,
+    "ink": "size=390x600  grey 979px [16,35→343,51]  dark 864px [17,36→342,50]  green 10000px [16,68→115,167]"
+   }
+  },
+  "androidEqualsIos": false
+ },
+ {
+  "cell": "css-sizing/abspos-auto-sizing-fit-content-percentage-002",
+  "label": "b″ control (must not move)",
+  "ref": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]",
+  "platforms": {
+   "web": {
+    "ssim": 1,
+    "pixelMismatchedPct": 0,
+    "ink": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "ios": {
+    "ssim": 0.9992,
+    "pixelMismatchedPct": 0.078,
+    "ink": "size=390x600  grey 871px [16,35→343,51]  dark 1002px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "android": {
+    "ssim": 0.9984,
+    "pixelMismatchedPct": 0.115,
+    "ink": "size=390x600  grey 979px [16,35→343,51]  dark 864px [17,36→342,50]  green 10000px [16,68→115,167]"
+   }
+  },
+  "androidEqualsIos": false
+ },
+ {
+  "cell": "css-sizing/abspos-auto-sizing-fit-content-percentage-003",
+  "label": "b″ control (must not move)",
+  "ref": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]",
+  "platforms": {
+   "web": {
+    "ssim": 1,
+    "pixelMismatchedPct": 0,
+    "ink": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "ios": {
+    "ssim": 0.9992,
+    "pixelMismatchedPct": 0.078,
+    "ink": "size=390x600  grey 871px [16,35→343,51]  dark 1002px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "android": {
+    "ssim": 0.9984,
+    "pixelMismatchedPct": 0.115,
+    "ink": "size=390x600  grey 979px [16,35→343,51]  dark 864px [17,36→342,50]  green 10000px [16,68→115,167]"
+   }
+  },
+  "androidEqualsIos": false
+ },
+ {
+  "cell": "css-sizing/abspos-auto-sizing-fit-content-percentage-004",
+  "label": "b″ control (must not move)",
+  "ref": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]",
+  "platforms": {
+   "web": {
+    "ssim": 1,
+    "pixelMismatchedPct": 0,
+    "ink": "size=390x600  grey 820px [16,35→343,51]  dark 1131px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "ios": {
+    "ssim": 0.9992,
+    "pixelMismatchedPct": 0.078,
+    "ink": "size=390x600  grey 871px [16,35→343,51]  dark 1002px [17,36→342,50]  green 10000px [16,68→115,167]"
+   },
+   "android": {
+    "ssim": 0.9984,
+    "pixelMismatchedPct": 0.115,
+    "ink": "size=390x600  grey 979px [16,35→343,51]  dark 864px [17,36→342,50]  green 10000px [16,68→115,167]"
+   }
+  },
+  "androidEqualsIos": false
+ }
+]

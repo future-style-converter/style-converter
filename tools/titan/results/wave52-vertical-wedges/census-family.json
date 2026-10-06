@@ -1,0 +1,86 @@
+{
+  "lane": "L8",
+  "run": "wave51-fix",
+  "docs": 1435,
+  "chCarriers": 169,
+  "composeByFamily": {
+    "monospace": 77,
+    "null": 73
+  },
+  "composeMovers": {
+    "carriers": 73,
+    "docs": [
+      "css-text/hyphens/hyphens-auto-001",
+      "css-text/hyphens/hyphens-auto-last-word-001",
+      "css-text/hyphens/hyphens-none-shy-on-2nd-line-001",
+      "css-text/hyphens/hyphens-out-of-flow-001",
+      "css-text/hyphens/hyphens-out-of-flow-002",
+      "css-text/hyphens/hyphens-punctuation-001",
+      "css-text/hyphens/hyphens-span-001",
+      "css-text/hyphens/hyphens-span-002",
+      "css-text-decor/text-decoration-inset-004",
+      "css-values/ch-unit-001",
+      "css-writing-modes/ch-units-vrl-001",
+      "css-writing-modes/ch-units-vrl-002",
+      "css-writing-modes/ch-units-vrl-003",
+      "css-writing-modes/ch-units-vrl-004",
+      "css-writing-modes/ch-units-vrl-005",
+      "css-writing-modes/ch-units-vrl-006",
+      "css-writing-modes/ch-units-vrl-007",
+      "css-writing-modes/ch-units-vrl-008"
+    ]
+  },
+  "composeDefectPopulation": {
+    "carriers": 0,
+    "docs": []
+  },
+  "iosByDesign": {
+    "monospaced": 83,
+    "default": 76
+  },
+  "iosMovers": {
+    "carriers": 76,
+    "docs": [
+      "css-text/bidi/bidi-lines-001",
+      "css-text/bidi/bidi-lines-002",
+      "css-text/hyphens/hyphenate-character-005",
+      "css-text/hyphens/hyphens-auto-001",
+      "css-text/hyphens/hyphens-auto-last-word-001",
+      "css-text/hyphens/hyphens-none-shy-on-2nd-line-001",
+      "css-text/hyphens/hyphens-out-of-flow-001",
+      "css-text/hyphens/hyphens-out-of-flow-002",
+      "css-text/hyphens/hyphens-punctuation-001",
+      "css-text/hyphens/hyphens-span-001",
+      "css-text/hyphens/hyphens-span-002",
+      "css-text-decor/text-decoration-inset-004",
+      "css-values/ch-unit-001",
+      "css-writing-modes/ch-units-vrl-001",
+      "css-writing-modes/ch-units-vrl-002",
+      "css-writing-modes/ch-units-vrl-003",
+      "css-writing-modes/ch-units-vrl-004",
+      "css-writing-modes/ch-units-vrl-005",
+      "css-writing-modes/ch-units-vrl-006",
+      "css-writing-modes/ch-units-vrl-007",
+      "css-writing-modes/ch-units-vrl-008"
+    ]
+  },
+  "iosMoversDeclaredFamily": {
+    "carriers": 1,
+    "docs": [
+      "css-text/hyphens/hyphenate-character-005 [\"sans-serif\"]"
+    ]
+  },
+  "corpusDefaultFamilyDocs": [
+    "css-counter-styles/counter-style-at-rule/disclosure-styles",
+    "css-text/boundary-shaping/boundary-shaping-001",
+    "css-text/boundary-shaping/boundary-shaping-002",
+    "css-text/boundary-shaping/boundary-shaping-003",
+    "css-text/boundary-shaping/boundary-shaping-004",
+    "css-text/boundary-shaping/boundary-shaping-005",
+    "css-text/boundary-shaping/boundary-shaping-006",
+    "css-text/boundary-shaping/boundary-shaping-007",
+    "css-text/boundary-shaping/boundary-shaping-008",
+    "css-text-decor/line-through-vertical",
+    "css-writing-modes/bidi-plaintext-br-001"
+  ]
+}

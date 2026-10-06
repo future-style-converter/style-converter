@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MulticolLineSnapTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.037Z" hostname="mac-1.home" time="0.001">
+  <properties/>
+  <testcase name="LS8 band height is the whole-line extent not the column height" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS6 non-line-grid child height declines" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS9 one-pixel-per-line rounding still snaps" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS3 line probe taller than the column declines" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS2 line-multiple column height makes snap and raw slice agree" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS5 single-line child declines" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS4 null line probe declines" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS1 seven 17px lines in 29px columns snap to one whole line per column" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.0"/>
+  <testcase name="LS7 fragment count caps at the used column count" classname="com.styleconverter.runtime.columns.MulticolLineSnapTest" time="0.001"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

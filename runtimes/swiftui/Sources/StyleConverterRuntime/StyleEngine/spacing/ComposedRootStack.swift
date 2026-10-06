@@ -326,3 +326,349 @@ public extension View {
         environment(\.hoistBandSuppressedFor, id)
     }
 }
+
+// ─────────────────────────────────────────────────────────────────────────
+// wave-52 lane L2 — the per-root COMPOSED-STACK PLAN, extracted from
+// CaptureCanvas.swift's `rootPlans(for:)` closure so it is Catalyst-pinnable
+// on the verbatim per-test IR (ComposedRootStackTests U1–U6), byte-parallel
+// with the Kotlin twin (apps/android-harness UaBlockMargins.kt
+// `composedRootStackPlan`).
+// ─────────────────────────────────────────────────────────────────────────
+public extension UABlockMargin {
+
+    /// A px leaf that is ABSENT, or present and exactly 0 (`{px:0}` /
+    /// `{original:{px:0}}`). A present-but-unresolvable leaf (`auto`, `em`,
+    /// `%`) is NOT zero — the predicate below stays conservative on it.
+    private static func zeroOrAbsent(_ properties: [IRProperty], _ type: String) -> Bool {
+        // Absent ⇒ the initial value (0 for the sizing/edge properties asked).
+        guard let data = properties.first(where: { $0.type == type })?.data else { return true }
+        // Present: it must resolve to a concrete 0 px.
+        let px = data["px"]?.doubleValue ?? data["original"]?["px"]?.doubleValue
+        return px == 0
+    }
+
+    /// The block-axis edges that must be zero for a box to self-collapse
+    /// (CSS 2.1 §8.3.1: "no top or bottom border, no top or bottom
+    /// padding") — physical AND the horizontal-tb logical spellings.
+    private static let selfCollapseZeroEdges = [
+        "PaddingTop", "PaddingBottom", "PaddingBlockStart", "PaddingBlockEnd",
+        "BorderTopWidth", "BorderBottomWidth", "BorderBlockStartWidth", "BorderBlockEndWidth",
+    ]
+
+    /// wave-52 lane L2 (T2-roots) — CSS 2.1 §8.3.1: "If the top and bottom
+    /// margins of a box are adjoining, then its margins collapse through it"
+    /// — zero (or auto) height, no in-flow children, no line boxes, no block
+    /// border or padding. The composed stack marked only RC1/hoisted roots
+    /// margin-transparent, so an EMPTY in-flow root (css-text-decor/
+    /// text-decoration-propagation-shadow's post-load `<p>` with `height: 0;
+    /// margin: 16px 0`) CLOSED the adjoining set and iOS emitted 16 + 16
+    /// where Chrome emits ONE 16-px gap (the underline sat 16 px too low;
+    /// wave51-fix ios f 0.9484, web P 1.0000).
+    ///
+    /// Deliberately NARROW (the blast radius is the whole composed corpus):
+    /// not out-of-flow (their transparency is the hoist / static-position
+    /// rule), not the `body-root` (its margins are `resolvedMargin`'s — M1),
+    /// no text / children / generated content, `Display` absent or BLOCK (a table / flex /
+    /// inline box is not a §8.3.1 self-collapsing block), `Height` and
+    /// `MinHeight` absent or exactly 0 px, every block padding and border
+    /// width absent or exactly 0 px (gradient-hue-direction's baked `<hr>`
+    /// has a 1-px inset border; has-style-sharing-002's root has
+    /// `padding: 1em` — both stay opaque).
+    static func isSelfCollapsingRoot(_ root: IRComponent) -> Bool {
+        // Out-of-flow boxes never take part in §8.3.1 here.
+        if ComponentRenderer.isOutOfFlow(root) { return false }
+        // The synthetic html+body bag is not a stacked block box.
+        if root.meta?.role == "body-root" { return false }
+        // Any content ⇒ line boxes / in-flow children ⇒ not self-collapsing.
+        if let t = root.text, !t.isEmpty { return false }
+        if let kids = root.children, !kids.isEmpty { return false }
+        // Generated content (`::before` / `::after`) puts line boxes in the
+        // box — 35 corpus roots match every other clause and carry a pseudo
+        // (counter-name-case-sensitive's `content: "1-5"` divs). Conservative:
+        // ANY pseudo payload keeps the root opaque (the wave-51 behaviour).
+        if root.pseudos != nil { return false }
+        // Only a block box (absent Display = a block-level root in the stack).
+        if let d = root.properties.first(where: { $0.type == "Display" })?.data.stringValue,
+           d.uppercased() != "BLOCK" { return false }
+        // Zero (or absent) height floor and used height.
+        guard zeroOrAbsent(root.properties, "Height"),
+              zeroOrAbsent(root.properties, "MinHeight") else { return false }
+        // No block border, no block padding.
+        return selfCollapseZeroEdges.allSatisfy { zeroOrAbsent(root.properties, $0) }
+    }
+
+    /// wave-52 lane L2 — one composed FLOW root's stack plan, the pure body of
+    /// what `rootPlans(for:)` in CaptureCanvas.swift used to inline (waves
+    /// 17 → 46 in its history). Hoisted roots never reach this list
+    /// (FixedHoist.split removes them), so two shapes remain:
+    ///
+    ///  1. RC1 STATIC-POSITION root (absolute, NO inset — the only
+    ///     out-of-flow root `split` leaves in the flow) — wave-52 L2 T1:
+    ///     (0, 0), transparent, and NOT stripped. Through wave 51 its own
+    ///     declared margins were joined into the collapse set and stripped
+    ///     from the box ("§8.3.1's empty-box model"), so css-masking/
+    ///     clip-path/clip-path-ellipse-006's `margin: 50px` abspos root
+    ///     landed at max(UA 16, 50) = 50 below the `<p>` where Chrome puts
+    ///     it at 16 + 50 = 66 (16 px too high; wave51-fix ios f 0.9488).
+    ///     §8.3.1: an abspos box's margins do not collapse — not even with
+    ///     the preceding sibling's bottom margin — and §10.6.4's static
+    ///     position is where the box's top MARGIN edge would be, so the
+    ///     preceding margin resolves in full ABOVE the slot and the box's
+    ///     own margin then offsets its ink. The slot anchor takes the
+    ///     neighbours' collapsed gap alone; the box keeps rendering its
+    ///     declared margins through MarginApplier (no strip).
+    ///  2. IN-FLOW root: the wave-19/22/45/46 plan verbatim (UA + static
+    ///     declared edges through the SAME classifier the renderer paints
+    ///     with, em basis, hoist band folded in) — plus wave-52 L2 T2-roots:
+    ///     a self-collapsing empty root whose block margins are all in the
+    ///     fold (stripped, or none declared) is margin-TRANSPARENT, so the
+    ///     set stays open across it and its neighbours share ONE max() gap
+    ///     (§8.3.1 collapse-through). A root that must render its own
+    ///     margins (R4/R5 bail) stays opaque.
+    static func composedRootStackPlan(_ root: IRComponent) -> RootStackMargin {
+        // Shape 1 — the RC1 static-position slot (wave-52 L2 T1).
+        if FixedHoist.rendersInFlowAsStaticPosition(root) {
+            return RootStackMargin(top: 0, bottom: 0, stripDeclared: false, marginTransparent: true)
+        }
+        // wave-46 H1: the UA default's em basis is the root's OWN computed
+        // font-size; the tag gates the monospace fixed-default rung.
+        let uaBasisPx = UABlockMarginFontBasis.ownFontSizePx(
+            root.properties, sourceTag: root.meta?.sourceTag)
+        // Which block sides the IR declares.
+        let declaresTop = declaresBlockMarginTop(root.properties)
+        let declaresBottom = declaresBlockMarginBottom(root.properties)
+        // The R1–R5 plan (author > UA per edge, css-cascade-4 §6.1); a
+        // flow-sized out-of-flow root (defensive — split hoists them all)
+        // bails to R4/R5 exactly as before.
+        let base = rootStackMargin(
+            tag: root.meta?.sourceTag,
+            declaresTop: declaresTop,
+            declaresBottom: declaresBottom,
+            staticDeclaredEdges: ComponentRenderer.isOutOfFlow(root)
+                ? nil : staticDeclaredEdges(root.properties),
+            ownFontSizePx: uaBasisPx)
+        // wave-52 L2 T2-roots: collapse THROUGH an empty root whose block
+        // margins all live in the fold — stripped (R2/R3) or never declared (R1).
+        let blockMarginsInFold = base.stripDeclared || (!declaresTop && !declaresBottom)
+        let plan = RootStackMargin(
+            top: base.top, bottom: base.bottom, stripDeclared: base.stripDeclared,
+            marginTransparent: isSelfCollapsingRoot(root) && blockMarginsInFold)
+        // wave-26 (lane RES residual 3a): fold in the HOIST BAND the root's
+        // own §8.3.1 plan would otherwise paint outside its styled box —
+        // from the runtime's own planner, so the number folded here is the
+        // number suppressed on the render. Transparent roots return unchanged.
+        return withHoistBand(plan, band: composedRootHoistBand(root, uaBlockMargins: true))
+    }
+
+    /// IR property types whose mere PRESENCE makes a box paint as its own
+    /// layer at CSS 2.1 Appendix E step 8 or later — a z-ordered box or a
+    /// stacking context (css-transforms-1 §6, css-masking-1 §1, filter-
+    /// effects-1 §2, compositing-1 §3/§4, css-contain-2 §3, css-will-change-1
+    /// §2, css-view-transitions-1). Presence alone counts (`opacity: 1` still
+    /// blocks): a missed lift keeps the wave-51 VStack order, a wrong lift
+    /// paints the wrong box on top. Twin of the Kotlin PAINT_LAYER_TYPES.
+    private static let paintLayerTypes: Set<String> = [
+        "ZIndex", "Opacity", "Transform", "Translate", "Rotate", "Scale", "Perspective",
+        "TransformStyle", "Filter", "BackdropFilter", "ClipPath", "MaskImage", "MixBlendMode",
+        "Isolation", "WillChange", "Contain", "ContainerType", "ViewTransitionName",
+    ]
+
+    /// True when `c` or any composed descendant paints at Appendix E step
+    /// 8+: a positioned box (`position` other than static, css-position-3
+    /// §2) or a `paintLayerTypes` layer. Such content follows an earlier RC1
+    /// root in TREE order at step 8, so it must stay ABOVE it — which a
+    /// VStack-level `.zIndex` on the RC1 root cannot express (it lifts past
+    /// the whole later subtree: CSS2/abspos/static-inside-inline-001's
+    /// nested abspos green).
+    private static func paintsAsLayer(_ c: IRComponent) -> Bool {
+        // The root-level Position leaf — the wire is the bare enum string.
+        if let p = c.properties.first(where: { $0.type == "Position" })?.data.stringValue?.uppercased(),
+           p != "STATIC" { return true }
+        // A layer-creating property anywhere on this box.
+        if c.properties.contains(where: { paintLayerTypes.contains($0.type) }) { return true }
+        // Recurse through the composed subtree.
+        return (c.children ?? []).contains(where: paintsAsLayer)
+    }
+
+    /// wave-52 lane L2 (T3, skeptic must-fix) — per FLOW root (the
+    /// `FixedHoist.split` flow half, the list the composed VStack walks),
+    /// whether CaptureCanvas lifts its DRAW above the in-flow roots with
+    /// `.zIndex(1)`. CSS 2.1 Appendix E step 8 paints a positioned box with
+    /// `z-index: auto` AFTER in-flow, non-positioned content, so css-flexbox/
+    /// align-items-007's abspos green must cover the later red `<img>`
+    /// (wave51-fix ios f 0.9974, colour-vetoed). Lifted only when:
+    ///  1. the root is the RC1 static-position slot
+    ///     (`FixedHoist.rendersInFlowAsStaticPosition`);
+    ///  2. it declares NO z-index (the reader ComponentRenderer partitions
+    ///     positioned children with) — a declared value is its own stacking
+    ///     level (step 3 BELOW in-flow blocks when negative, step 9
+    ///     otherwise) and an outer `.zIndex` would shadow the box's own. The
+    ///     first cut lifted every RC1 root, so 11 corpus tests' red
+    ///     `z-index: -1` box (css-tables/height-distribution/extra-height-
+    ///     given-to-all-row-groups-001 …) rose above the green it hides behind;
+    ///  3. it is a single painted box — no children, text or generated
+    ///     content (deliberately NARROW: the one target is such a box; a
+    ///     content-bearing root brings its descendants' own paint-order and
+    ///     display questions — css-cascade/unset-val-002's `display: unset` span);
+    ///  4. no LATER flow root carries step-8+ content (`paintsAsLayer`)
+    ///     unless it is itself lifted (equal `.zIndex` keeps tree order) —
+    ///     hence the back-to-front walk.
+    /// Every unlifted root keeps the wave-51 VStack order, byte-identical.
+    /// Twin of the Kotlin harness `composedRootsPaintingAboveFlow`.
+    static func composedRootsPaintingAboveFlow(_ flow: [IRComponent]) -> [Bool] {
+        // Filled back to front: rule 4 reads the verdicts of LATER roots.
+        var lifted = [Bool](repeating: false, count: flow.count)
+        for i in flow.indices.reversed() {
+            let root = flow[i]
+            // Rules 1–3: the RC1 slot, no declared z, a single painted box.
+            let candidate = FixedHoist.rendersInFlowAsStaticPosition(root)
+                && ItemPlacementExtractor.extract(from: root.properties).paint.zIndex == nil
+                && (root.children ?? []).isEmpty && (root.text ?? "").isEmpty
+                && root.pseudos == nil
+            // Rule 4: every later flow root is lifted too, or plain flow.
+            lifted[i] = candidate && !flow.indices.filter { $0 > i }.contains { j in
+                !lifted[j] && paintsAsLayer(flow[j])
+            }
+        }
+        // Index-aligned with `flow`, exactly as the VStack walks it.
+        return lifted
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────
+// wave-52 lane L2 (M1) — the composed canvas's BODY MARGIN, as pure runtime
+// helpers so the iOS twin of the web `resolveCanvasMargin` / Compose
+// `resolveComposedCanvasMargin` is Catalyst-pinnable (the harness target
+// needs a simulator), and so the one-owner strip can rebuild an IRComponent
+// (its memberwise init is internal to this module).
+// ─────────────────────────────────────────────────────────────────────────
+public extension UABlockMargin {
+
+    /// The body-root's resolved margin per PHYSICAL side, in CSS px.
+    struct CanvasBodyMargin: Equatable {
+        public let top: CGFloat
+        public let right: CGFloat
+        public let bottom: CGFloat
+        public let left: CGFloat
+        /// Explicit public init — the synthesized memberwise one is internal.
+        public init(top: CGFloat, right: CGFloat, bottom: CGFloat, left: CGFloat) {
+            self.top = top; self.right = right; self.bottom = bottom; self.left = left
+        }
+        /// No body-root, no concrete margin, or a table-internal body.
+        public static let zero = CanvasBodyMargin(top: 0, right: 0, bottom: 0, left: 0)
+    }
+
+    /// The four physical body-margin longhands the canvas owns.
+    private static let canvasMarginTypes = ["MarginTop", "MarginRight", "MarginBottom", "MarginLeft"]
+
+    /// css-display-3 table-internal boxes — CSS 2.1 §8.3: margins do not apply.
+    private static let tableInternalDisplays: Set<String> = [
+        "TABLE_CELL", "TABLE_ROW", "TABLE_ROW_GROUP", "TABLE_HEADER_GROUP",
+        "TABLE_FOOTER_GROUP", "TABLE_COLUMN", "TABLE_COLUMN_GROUP",
+    ]
+
+    /// The raw ABSOLUTE-px leaf of one margin longhand (`{px:N}` or the
+    /// wrapped `{original:{px:N}}`, the two shapes `resolvedPadding` reads),
+    /// or nil when absent or runtime-dependent (`auto`, `em`, `%`, `calc`).
+    private static func bodyMarginLeafPx(_ body: IRComponent, _ type: String) -> CGFloat? {
+        // The first declaration of that longhand.
+        guard let data = body.properties.first(where: { $0.type == type })?.data else { return nil }
+        // `{px:N}` first, then the typed wrapper; anything else is not concrete.
+        guard let px = data["px"]?.doubleValue ?? data["original"]?["px"]?.doubleValue else { return nil }
+        return CGFloat(px)
+    }
+
+    /// wave-52 L2 (M1) — the body-root's DECLARED margin. The extractor
+    /// emits html+body as ONE synthetic `body-root` whose element children
+    /// are SIBLINGS, and the canvas read it for background and PADDING only,
+    /// so `body { margin-left: 200px }` never moved the flow stack
+    /// (css-gaps/flex/flex-gap-decorations-027: 200 px left on every
+    /// platform; wave51-fix ios f 0.9030) while the ref keeps it (its
+    /// zero-specificity `:where(html, body) { margin: 0 }` loses to the
+    /// author's rule). Concrete px only, per side, negatives kept (CSS allows
+    /// negative margins); `auto`/`em` → 0. CSS 2.1 §8.3: a table-internal
+    /// body (s-11-1-1b-005's `display: table-cell`) has no used margin → zero.
+    static func canvasBodyMargin(_ components: [IRComponent]) -> CanvasBodyMargin {
+        // Same lookup rule as the background/padding resolvers.
+        guard let body = components.first(where: { $0.meta?.role == "body-root" }) else { return .zero }
+        // §8.3 applicability: no used margin on a table-internal box.
+        if let d = body.properties.first(where: { $0.type == "Display" })?.data.stringValue,
+           tableInternalDisplays.contains(d.uppercased()) { return .zero }
+        // Per side; absent / unresolvable ⇒ 0.
+        return CanvasBodyMargin(top: bodyMarginLeafPx(body, "MarginTop") ?? 0,
+                                right: bodyMarginLeafPx(body, "MarginRight") ?? 0,
+                                bottom: bodyMarginLeafPx(body, "MarginBottom") ?? 0,
+                                left: bodyMarginLeafPx(body, "MarginLeft") ?? 0)
+    }
+
+    /// wave-52 L2 (M1) — ONE OWNER for the body margin. The body-root also
+    /// stacks as the first composed root, and its declared block margins fed
+    /// the root-stack fold — so once the canvas pads the flow stack by the
+    /// margin, leaving them on that root applies it TWICE (collapsed-border-
+    /// *-rtl-overflow: the fold's 60 + 60 put the table at 136 where the ref
+    /// has 76). Returns `roots` with exactly the sides `canvasBodyMargin`
+    /// resolved removed from the body-root; `auto`/`em` sides stay on the
+    /// box. Identity (the same array) when the canvas owns no margin.
+    static func withCanvasOwnedBodyMargin(_ roots: [IRComponent],
+                                          _ margin: CanvasBodyMargin) -> [IRComponent] {
+        // Nothing owned ⇒ untouched roots (byte-identical captures).
+        guard margin != .zero else { return roots }
+        return roots.map { root in
+            // Only the synthetic html+body bag is rewritten.
+            guard root.meta?.role == "body-root" else { return root }
+            // The longhands the resolver read (a concrete px leaf on that side).
+            let owned = Set(canvasMarginTypes.filter { bodyMarginLeafPx(root, $0) != nil })
+            // Rebuild minus those declarations; id/meta/children ride verbatim.
+            return IRComponent(
+                id: root.id, name: root.name,
+                properties: root.properties.filter { !owned.contains($0.type) },
+                selectors: root.selectors, media: root.media,
+                children: root.children, slot: root.slot,
+                text: root.text, pseudos: root.pseudos,
+                meta: root.meta, variables: root.variables)
+        }
+    }
+}
+
+// wave-52 lane L2 (T6) — the UA block margin of a CANVAS-HOISTED root.
+public extension UABlockMargin {
+
+    /// A hoisted root (fixed, or absolute with an inset — the roots
+    /// `FixedHoist.split` moves to the overlay) keeps its tag's UA block
+    /// margin. CSS 2.1 §9.3.2 / §10.6.4: `top` offsets the box's MARGIN edge,
+    /// so an abspos `<p style="top:0">` paints its border box 1em below the
+    /// containing block's edge. The composed canvas emits UA block margins
+    /// ONLY through the root-stack fold, which hoisted roots never enter, so
+    /// such a root rendered with NO margin: CSS2/css21-errata/s-11-1-1b-006's
+    /// prose sat 16 px high (wave51-fix ios f 0.9321; web P — the browser
+    /// applies the UA sheet). The overlay gets the UA margin as two ordinary
+    /// declared longhands, which it already renders like any author margin.
+    /// Identity unless the root hoists AND its tag has a UA block margin AND
+    /// it declares no block margin (author > UA, css-cascade-4 §6.1). Census
+    /// over the 1435 wave51-fix docs: ONE carrier (006 root 3). Kotlin twin:
+    /// apps/android-harness UaBlockMargins.kt `withUaBlockMarginOnHoistedRoot`.
+    static func withUaBlockMarginOnHoistedRoot(_ root: IRComponent) -> IRComponent {
+        // Only the overlay's roots: out of flow and NOT the RC1 static slot.
+        guard ComponentRenderer.isOutOfFlow(root),
+              !FixedHoist.rendersInFlowAsStaticPosition(root) else { return root }
+        // Any author block margin wins over the UA sheet.
+        guard !declaresBlockMarginTop(root.properties),
+              !declaresBlockMarginBottom(root.properties) else { return root }
+        // The tag's UA block margin at the root's own em basis (wave 46 H1).
+        let tag = root.meta?.sourceTag
+        let ua = vertical(forTag: tag, ownFontSizePx: UABlockMarginFontBasis.ownFontSizePx(
+            root.properties, sourceTag: tag))
+        // A tag with no UA block margin (div, span, …) is untouched.
+        guard ua.top != 0 || ua.bottom != 0 else { return root }
+        // Two absolute-px longhands in the wire's own leaf shape (`{"px": N}`).
+        let added = [IRProperty(type: "MarginTop", data: .object(["px": .double(Double(ua.top))])),
+                     IRProperty(type: "MarginBottom", data: .object(["px": .double(Double(ua.bottom))]))]
+        // Rebuild with the two longhands appended; every other field verbatim.
+        return IRComponent(
+            id: root.id, name: root.name, properties: root.properties + added,
+            selectors: root.selectors, media: root.media,
+            children: root.children, slot: root.slot,
+            text: root.text, pseudos: root.pseudos,
+            meta: root.meta, variables: root.variables)
+    }
+}

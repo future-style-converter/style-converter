@@ -40,9 +40,10 @@ package com.styleconverter.runtime.columns
 //   SECOND bands differ by one row — Android's starts at 132, iOS's at 131.
 //
 //   THAT ONE-ROW SPLIT IS ARITHMETIC, NOT A DIFFERENT MODEL (wave-50 skeptic
-//   S6, third finding). The two runtimes run the same §9.4 step-8
+//   S6, third finding; the wave-50 state — superseded by the WAVE 52 note
+//   below). The two runtimes run the same §9.4 step-8
 //   distribution in different NUMERIC DOMAINS. Compose measures in whole
-//   pixels, so this file rounds the per-line base cross sizes, the gap and
+//   pixels, so this file rounded the per-line base cross sizes, the gap and
 //   the container cross size to `Int` before calling
 //   [FlexWrapLines.stretchLines], which splits the leftover as an INTEGER
 //   share and hands the remainder to the LEADING lines — the lines then sum
@@ -72,9 +73,18 @@ package com.styleconverter.runtime.columns
 // post-placement channel from a child Layout to it — the item rectangles
 // only reach the painter because every child reports them through
 // GapDecorationHook's sink. Rather than add a second reporting channel
-// through ComponentRenderer, this object calls THE SAME pure function the
-// layout calls, on the same inputs, so the two cannot drift: a disagreement
-// would be a bug in one shared implementation, not in two.
+// through ComponentRenderer, this object re-derived the bands from the
+// same inputs the layout sees.
+//
+// WAVE 52 (lane L10, queue 7(a′)) — NO LONGER THE LAYOUT'S INT SPLIT. It
+// used to call FlexWrapLines.stretchLines itself so the rule sat between
+// the integer-placed items; that reproduced the layout's +1 row instead
+// of the ref (046's second band one row low) and kept the natives apart.
+// The share is now the SwiftUI twin's fractional `leftover / n` and the
+// painter snaps the rule rect (GapDecorationPainter.snapped) — the
+// Chromium order: fractional layout, one pixel snap at paint. The
+// agreement gate below still checks the placed items against the bands
+// (an Int-placed item sits ≤ 1 px inside a fractional band).
 //
 // NO SILENT FALLTHROUGH. The reconstruction is admissible only when the
 // observed geometry CONFIRMS it (every line's item union must fall inside
@@ -85,8 +95,6 @@ package com.styleconverter.runtime.columns
 // visible in the coverage report instead of silently wrong.
 
 import com.styleconverter.runtime.PropertyTracker
-import com.styleconverter.runtime.layout.flexbox.FlexWrapLines
-import kotlin.math.roundToInt
 
 /**
  * Promotes item-union line extents to real §9.4-step-8 line boxes.
@@ -163,31 +171,34 @@ object GapDecorationBands {
         val cross = GapDecorationLines.crossOf(contentBox, mainHorizontal)
         if (cross.isEmpty) return lines
 
-        // The layout measures in whole pixels (Compose Constraints are
-        // Int), so the reconstruction rounds to Int before calling the
-        // SAME helper the layout calls. Rounding here rather than after
-        // is what makes the two results identical rather than merely close.
-        val base = IntArray(lines.size) { lines[it].cross.size.roundToInt() }
-        val gapPx = gap.roundToInt()
-        val containerCross = cross.size.roundToInt()
-        // §9.4 step 8 — equal share of the leftover, remainder to the
-        // leading lines (FlexWrapLines.stretchLines owns that rule; see
-        // its doc for why the split is integral).
-        val sizes = FlexWrapLines.stretchLines(base, containerCross, gapPx)
-        // No leftover ⇒ the lines already hug their items ⇒ the union IS
-        // the band. Returning the input keeps every already-correct
-        // fixture byte-identical.
-        if (sizes.contentEquals(base)) return lines
+        // Wave 52 (lane L10, queue 7(a′)) — the share is FRACTIONAL now,
+        // the SwiftUI twin's `leftover / n` (FlexWrapPlan.stretchLines),
+        // not the Int split FlexWrapLines.stretchLines hands the layout.
+        // Chromium splits the leftover in LayoutUnits and snaps only at
+        // paint, so 046's bands are [0,56.67] [61.67,118.33] [123.33,180]
+        // in the ref; the Int split (57/57/56) put the second rule one
+        // row low (image y 135–139 against the ref's 134–138) and made
+        // the natives disagree. GapDecorationPainter snaps the RULE rect
+        // to whole pixels afterwards — exactly once, at paint, as Blink
+        // does — so 045's 7.5-px share still lands on [58,63).
+        val base = FloatArray(lines.size) { lines[it].cross.size }
+        // §9.4 step 8 — the free cross space after the lines and gaps.
+        val leftover = cross.size - base.sum() - gap * (lines.size - 1)
+        // No leftover (within rounding dust) ⇒ the lines already hug their
+        // items ⇒ the union IS the band. Returning the input keeps every
+        // already-correct fixture byte-identical.
+        if (leftover < CONTAINMENT_EPS) return lines
+        // Equal share per line (css-flexbox-1 §9.4 step 8 "distribute
+        // equally"), no remainder bookkeeping in a fractional domain.
+        val share = leftover / lines.size
 
         // §9.6 with no distribution keyword: the lines pack from the
-        // cross-start edge, separated by the used cross gap. This is the
-        // `lineCrossOffsets(..., distribution = null)` accumulation, which
-        // for an integral gap and integral sizes is exact.
+        // cross-start edge, separated by the used cross gap.
         val bands = ArrayList<GapInterval>(lines.size)
         var cursor = cross.start
-        for (size in sizes) {
-            bands.add(GapInterval(cursor, cursor + size))
-            cursor += size + gapPx
+        for (size in base) {
+            bands.add(GapInterval(cursor, cursor + size + share))
+            cursor += size + share + gap
         }
 
         // AGREEMENT GATE. The reconstruction is a claim about where the

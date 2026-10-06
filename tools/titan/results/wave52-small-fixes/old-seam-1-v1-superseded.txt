@@ -1,0 +1,54 @@
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index c25311b..92780b0 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -1238,7 +1238,7 @@ object ComponentRenderer {
+         // pre-wave-18 list byte-identical (AbsposInsetStretch.inject is
+         // additionally identity whenever nothing stretches).
+         val wptCaptureModeForStretch = LocalWptCaptureMode.current
+-        val effectiveProperties =
++        val effectivePropertiesBeforeTransformInherit =
+             if (isOutOfFlowChild(animatedProperties)) {
+                 // Wave-33 lane C — the ABSPOS view of the containing block.
+                 // css-position-3 §3.1 makes an out-of-flow box's containing
+@@ -1281,6 +1281,22 @@ object ComponentRenderer {
+                         .inject(stretched, absposCb)
+                 } else pctResolved
+             } else animatedProperties
++        // Wave 52 (lane L4, native-near-misses T7) — `transform: inherit`
++        // (css-cascade-4 §7.3.2: the child's computed value IS the parent's
++        // computed value). The extractor is a pure function of one list and
++        // cannot see the parent, so the keyword is substituted HERE, before
++        // any extractor runs, from the channel the parent's RenderComponent
++        // provided below — the same substitution idiom mergeInherited uses
++        // for `color: currentColor`. Identity (same instance) for every
++        // list without the keyword: 1434 of the 1435 wave51-fix documents.
++        // Sole carrier: css-transforms/css-transform-inherit-scale (android
++        // f 0.9965 — the child's own scale(2) was dropped, 100×100 green
++        // centred on the 200×200 red instead of covering it).
++        val effectiveProperties = com.styleconverter.runtime.transforms.TransformInheritance
++            .resolve(
++                effectivePropertiesBeforeTransformInherit,
++                com.styleconverter.runtime.transforms.TransformInheritance.LocalInheritedTransform.current,
++            )
+ 
+         // Extract property pairs for extractors
+         val propertyPairs = effectiveProperties.map { it.type to it.data }
+@@ -2020,6 +2036,17 @@ object ComponentRenderer {
+                 // through the wave-49 repair.
+                 com.styleconverter.runtime.layout.position.ElementContainingBlock
+                     .LocalElementContainingBlock provides containingBlock,
++                // Wave 52 (lane L4, T7) — THIS element's COMPUTED `Transform`
++                // wire (resolved above, so a chain of `inherit` carries the
++                // same value down — css-cascade-4 §7.3.2 per element), or
++                // null when it declares none (computed `none`, css-transforms-1
++                // §3). Provided at EVERY RenderComponent, so a child's
++                // `transform: inherit` under an untransformed parent reads
++                // `none` rather than the nearest transformed ancestor. Read
++                // only through TransformInheritance.resolve.
++                com.styleconverter.runtime.transforms.TransformInheritance
++                    .LocalInheritedTransform provides
++                    com.styleconverter.runtime.transforms.TransformInheritance.published(effectiveProperties),
+                 // §8.3.1 collapse channels are strictly one-level: THIS
+                 // component consumed its own override above, and any plan it
+                 // publishes for its children is provided deeper (inside its

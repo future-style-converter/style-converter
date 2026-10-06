@@ -1,0 +1,22 @@
+# tools/titan/results/wave52-failure-ink/watchlist-additions.txt — L3 failure-ink additions to tools/titan/results/wave52-plan/watchlist.txt
+# Same format as the plan watchlist: "<substring of sec/test> <platform>" or a bare substring (all platforms). Every line below matches
+# a scored wave51-fix cell (checked against the manifests by census.mjs on 2026-09-25, and on 2026-10-05 with
+# `WATCH=<this file> node tools/titan/results/wave52-plan/watchlist-check.mjs` → 5 lines, 7 distinct cells, unmatched 0).
+# L3 census F1 (census.json → f1.carriers) found a 14th carrier DOCUMENT the brief's 13 did not list: a vertical-writing-mode FLEX
+# container whose Width+Height child is authored. The block-flow seam never reaches a flex container (it lives in the display
+# `else ->` branch), so the cell is expected NOT to move — watched as an at-risk cell, both natives f today (ios 0.8266 · android 0.8223).
+css-gaps/flex/flex-gap-decorations-006
+# L3 F1' (the Swift VerticalMulticolPlan sole-child gate — delivered as hunk-for-orchestrator-1.patch, unowned file): its ONE corpus
+# carrier is baked (postLoadExtracted, 9-longhand signature) and stays guarded under the new predicate; watched so the hunk's
+# zero-movement claim is attributable if the orchestrator applies it (already covered by the plan's `anchor-position-multicol-0` line;
+# repeated here with the platform split because this lane's claim is per-native).
+css-anchor-position/anchor-position-multicol-017 ios
+css-anchor-position/anchor-position-multicol-017 android
+# L3 resume pass (2026-10-05) — census.json → f1Used: the brief's recipe read the container's OWN WritingMode; both real seams read
+# the USED (inherited) one. The used-mode pass finds ONE more mover document the plan watchlist does not carry: two `<td>` cells
+# (inherited vertical mode; one authored 50×100 Width+Height child each) are table CELLS — rendered through RenderComponent on Compose
+# and role .cell → no track on iOS — so the block seam now engages on them. Both natives f today (ios 0.6209 · android 0.5727): a mover,
+# direction unknown, cannot be LOST. (The seven `<tr>` old-guarded containers — td-different-subpixel…, collapsed-border-*-overflow — are
+# consumed by the table path on both natives and are already on the plan watchlist.)
+css-tables/baseline-vertical ios
+css-tables/baseline-vertical android

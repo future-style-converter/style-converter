@@ -27,11 +27,13 @@ extension ColumnsApplier {
     /// differ from the generic bail log their own record):
     ///  - exactly ONE in-flow child (multi-child vertical balancing is not
     ///    built — the generic bail covers it);
-    ///  - NOT a post-load-extracted wire: a child carrying baked physical
-    ///    Width AND Height already encodes the browser's used layout —
-    ///    including its fragmentation — so re-fragmenting would double-apply
-    ///    (the anchor-position-multicol family PASSES today on that frozen
-    ///    render; Compose twin: ChildSpec.bakedPhysicalSize);
+    ///  - NOT a post-load-extracted wire: a child carrying the extractor's
+    ///    signature (BakedLayoutSignature: baked physical Width AND Height
+    ///    plus the BoxSizing + decoration band always written with them)
+    ///    already encodes the browser's used layout — including its
+    ///    fragmentation — so re-fragmenting would double-apply (the
+    ///    anchor-position-multicol family PASSES today on that frozen
+    ///    render; Compose twin: ChildSpec.bakedPhysicalSize, same predicate);
     ///  - definite content WIDTH (W) and HEIGHT (U, the inline extent);
     ///  - used count ≥ 2 (§8.2: one column overflows, never clips);
     ///  - a statically-resolvable child block extent C — the child's
@@ -48,10 +50,12 @@ extension ColumnsApplier {
         // Sole-child contract (the caller's generic bail logs the rest).
         guard siblingCount == 1 else { return nil }
         // The post-load bake gate (doc above) — its own log, because this
-        // decline is a PROTECTION, not a missing feature.
-        let hasBakedWidth = childProperties.contains { $0.type == "Width" }
-        let hasBakedHeight = childProperties.contains { $0.type == "Height" }
-        if hasBakedWidth && hasBakedHeight {
+        // decline is a PROTECTION, not a missing feature. Wave 52 (lane L3,
+        // F1): read through the ONE shared BakedLayoutSignature predicate,
+        // the twin of Compose ChildSpec.bakedPhysicalSize — the two-property
+        // "Width ∧ Height" heuristic it replaces also matched an AUTHORED
+        // `width`+`height` rule and silently kept such a child unfragmented.
+        if BakedLayoutSignature.bakedPhysicalBox(childProperties) {
             PropertyTracker.logOnce(
                 key: "multicol-vertical-baked-layout",
                 message: "vertical multicol: post-load-extracted baked "
@@ -82,7 +86,10 @@ extension ColumnsApplier {
         // declines (`allowPercent: false`): its basis is the fragmented
         // flow itself.
         let childSize = SizeExtractor.extract(from: childProperties)
-        let blockSlot = hasBakedWidth ? childSize.width : childSize.height
+        // A declared physical `width` (authored, now that baked ones
+        // declined above) is the block extent; otherwise `block-size`.
+        let hasPhysicalWidth = childProperties.contains { $0.type == "Width" }
+        let blockSlot = hasPhysicalWidth ? childSize.width : childSize.height
         guard let c = SizeApplierResolve.exact(blockSlot, ctx: ctx,
                                                parent: 0,
                                                allowPercent: false) else { return nil }

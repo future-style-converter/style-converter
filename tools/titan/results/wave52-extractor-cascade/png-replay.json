@@ -1,0 +1,272 @@
+{
+ "scorer": "/private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/l5/tools/titan/inject-wpt-block.mjs",
+ "replays": [
+  {
+   "cell": "css-cascade/import-conditional-001 web",
+   "sim": "recolourRedToGreen",
+   "geometry": null,
+   "ssimBefore": 0.999,
+   "ssimPredicted": 0.999,
+   "residualBefore": {
+    "captionBandPx": 229,
+    "testAreaPx": 9921
+   },
+   "residualPredicted": {
+    "captionBandPx": 229,
+    "testAreaPx": 99
+   }
+  },
+  {
+   "cell": "css-cascade/import-conditional-001 ios",
+   "sim": "recolourRedToGreen",
+   "geometry": null,
+   "ssimBefore": 0.9974,
+   "ssimPredicted": 0.9974,
+   "residualBefore": {
+    "captionBandPx": 1022,
+    "testAreaPx": 9931
+   },
+   "residualPredicted": {
+    "captionBandPx": 1022,
+    "testAreaPx": 95
+   }
+  },
+  {
+   "cell": "css-cascade/import-conditional-001 android",
+   "sim": "recolourRedToGreen",
+   "geometry": null,
+   "ssimBefore": 0.9966,
+   "ssimPredicted": 0.9967,
+   "residualBefore": {
+    "captionBandPx": 1351,
+    "testAreaPx": 9940
+   },
+   "residualPredicted": {
+    "captionBandPx": 1351,
+    "testAreaPx": 100
+   }
+  },
+  {
+   "cell": "css-cascade/import-conditional-002 web",
+   "sim": "recolourRedToGreen",
+   "geometry": null,
+   "ssimBefore": 0.999,
+   "ssimPredicted": 0.999,
+   "residualBefore": {
+    "captionBandPx": 229,
+    "testAreaPx": 10000
+   },
+   "residualPredicted": {
+    "captionBandPx": 229,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-cascade/import-conditional-002 ios",
+   "sim": "recolourRedToGreen",
+   "geometry": null,
+   "ssimBefore": 0.9974,
+   "ssimPredicted": 0.9974,
+   "residualBefore": {
+    "captionBandPx": 1022,
+    "testAreaPx": 10000
+   },
+   "residualPredicted": {
+    "captionBandPx": 1022,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-cascade/import-conditional-002 android",
+   "sim": "recolourRedToGreen",
+   "geometry": null,
+   "ssimBefore": 0.9966,
+   "ssimPredicted": 0.9967,
+   "residualBefore": {
+    "captionBandPx": 1351,
+    "testAreaPx": 10000
+   },
+   "residualPredicted": {
+    "captionBandPx": 1351,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-color/color-mix-percents-02 web",
+   "sim": "twoMorePurpleRows",
+   "geometry": null,
+   "ssimBefore": 0.9514,
+   "ssimPredicted": 1,
+   "residualBefore": {
+    "captionBandPx": 0,
+    "testAreaPx": 14336
+   },
+   "residualPredicted": {
+    "captionBandPx": 0,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-color/color-mix-percents-02 ios",
+   "sim": "twoMorePurpleRows",
+   "geometry": null,
+   "ssimBefore": 0.9503,
+   "ssimPredicted": 0.9988,
+   "residualBefore": {
+    "captionBandPx": 806,
+    "testAreaPx": 14336
+   },
+   "residualPredicted": {
+    "captionBandPx": 806,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-color/color-mix-percents-02 android",
+   "sim": "twoMorePurpleRows",
+   "geometry": null,
+   "ssimBefore": 0.9496,
+   "ssimPredicted": 0.9981,
+   "residualBefore": {
+    "captionBandPx": 1134,
+    "testAreaPx": 14336
+   },
+   "residualPredicted": {
+    "captionBandPx": 1134,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-gaps/flex/flex-gap-decorations-024 web",
+   "sim": "pinkColumnGap",
+   "geometry": {
+    "gap": [
+     66,
+     75
+    ],
+    "grid": {
+     "x0": 16,
+     "y0": 16,
+     "x1": 125,
+     "y1": 125
+    }
+   },
+   "ssimBefore": 0.9901,
+   "ssimPredicted": 1,
+   "residualBefore": {
+    "captionBandPx": 540,
+    "testAreaPx": 460
+   },
+   "residualPredicted": {
+    "captionBandPx": 0,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-gaps/flex/flex-gap-decorations-024 ios",
+   "sim": "pinkColumnGap",
+   "geometry": {
+    "gap": [
+     66,
+     75
+    ],
+    "grid": {
+     "x0": 16,
+     "y0": 16,
+     "x1": 125,
+     "y1": 125
+    }
+   },
+   "ssimBefore": 0.99,
+   "ssimPredicted": 1,
+   "residualBefore": {
+    "captionBandPx": 540,
+    "testAreaPx": 460
+   },
+   "residualPredicted": {
+    "captionBandPx": 0,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-gaps/flex/flex-gap-decorations-024 android",
+   "sim": "pinkColumnGap",
+   "geometry": {
+    "gap": [
+     66,
+     75
+    ],
+    "grid": {
+     "x0": 16,
+     "y0": 16,
+     "x1": 125,
+     "y1": 125
+    }
+   },
+   "ssimBefore": 0.99,
+   "ssimPredicted": 1,
+   "residualBefore": {
+    "captionBandPx": 540,
+    "testAreaPx": 460
+   },
+   "residualPredicted": {
+    "captionBandPx": 0,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-cascade/revert-val-002 web",
+   "sim": "fillOuterGreen",
+   "geometry": {
+    "x0": 16,
+    "y0": 88,
+    "x1": 115,
+    "y1": 187
+   },
+   "ssimBefore": 0.999,
+   "ssimPredicted": 0.999,
+   "residualBefore": {
+    "captionBandPx": 229,
+    "testAreaPx": 8460
+   },
+   "residualPredicted": {
+    "captionBandPx": 229,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-cascade/revert-val-002 ios",
+   "sim": "fillOuterGreen",
+   "geometry": {
+    "unchanged": "no red pixels — the span already paints the whole box"
+   },
+   "ssimBefore": 0.9974,
+   "ssimPredicted": 0.9974,
+   "residualBefore": {
+    "captionBandPx": 1022,
+    "testAreaPx": 0
+   },
+   "residualPredicted": {
+    "captionBandPx": 1022,
+    "testAreaPx": 0
+   }
+  },
+  {
+   "cell": "css-cascade/revert-val-002 android",
+   "sim": "fillOuterGreen",
+   "geometry": {
+    "unchanged": "no red pixels — the span already paints the whole box"
+   },
+   "ssimBefore": 0.9967,
+   "ssimPredicted": 0.9967,
+   "residualBefore": {
+    "captionBandPx": 1351,
+    "testAreaPx": 0
+   },
+   "residualPredicted": {
+    "captionBandPx": 1351,
+    "testAreaPx": 0
+   }
+  }
+ ]
+}

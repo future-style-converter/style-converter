@@ -1,0 +1,152 @@
+{
+ "generated": "2026-10-05T18:23:17.450Z",
+ "results": [
+  {
+   "label": "ATC_AllThenProps: All FIRST",
+   "ok": true,
+   "detail": [
+    "All",
+    "Display",
+    "Width",
+    "Height",
+    "BackgroundColor"
+   ]
+  },
+  {
+   "label": "PropsThenAll child: All LAST",
+   "ok": true,
+   "detail": [
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "All"
+   ]
+  },
+  {
+   "label": "ATC_DirectionSurvives: Direction then All",
+   "ok": true,
+   "detail": [
+    "Direction",
+    "All",
+    "Display",
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "Color",
+    "FontSize"
+   ]
+  },
+  {
+   "label": "ATC_AllThenProps: Display right after All",
+   "ok": true,
+   "detail": [
+    "All",
+    "Display",
+    "Width",
+    "Height",
+    "BackgroundColor"
+   ]
+  },
+  {
+   "label": "InitialUnderRedParent child: All then Display",
+   "ok": true,
+   "detail": [
+    "All",
+    "Display",
+    "Width",
+    "Height",
+    "BackgroundColor"
+   ]
+  },
+  {
+   "label": "ATC_DirectionSurvives: Display right after All",
+   "ok": true,
+   "detail": [
+    "Direction",
+    "All",
+    "Display",
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "Color",
+    "FontSize"
+   ]
+  },
+  {
+   "label": "text-bearing components = [ATC_DirectionSurvives] only (span is glyph-free)",
+   "ok": true,
+   "detail": [
+    "ATC_DirectionSurvives"
+   ]
+  },
+  {
+   "label": "longtail All_Initial: All LAST",
+   "ok": true,
+   "detail": [
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "All"
+   ]
+  },
+  {
+   "label": "longtail All_Inherit: All LAST",
+   "ok": true,
+   "detail": [
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "All"
+   ]
+  },
+  {
+   "label": "longtail All_Unset: All LAST",
+   "ok": true,
+   "detail": [
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "All"
+   ]
+  },
+  {
+   "label": "longtail All_Revert: All LAST",
+   "ok": true,
+   "detail": [
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "All"
+   ]
+  },
+  {
+   "label": "longtail All_RevertLayer: All LAST",
+   "ok": true,
+   "detail": [
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "All"
+   ]
+  },
+  {
+   "label": "MUTATION reversed keys: All no longer FIRST (the check CAN fail)",
+   "ok": true,
+   "detail": [
+    "BackgroundColor",
+    "Height",
+    "Width",
+    "Display",
+    "All"
+   ]
+  },
+  {
+   "label": "MUTATION HEAD b35e203a fixture: span text present (the text check CAN fail)",
+   "ok": true,
+   "detail": [
+    "ATC_DirectionSurvives",
+    "span"
+   ]
+  }
+ ]
+}

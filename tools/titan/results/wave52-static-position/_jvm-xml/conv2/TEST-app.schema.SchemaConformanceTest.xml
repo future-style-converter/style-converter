@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.schema.SchemaConformanceTest" tests="17" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:11:12.129Z" hostname="mac-1.home" time="0.041">
+  <properties/>
+  <testcase name="text and meta are emitted under the v2 names and omitted when absent()" classname="app.schema.SchemaConformanceTest" time="0.008"/>
+  <testcase name="circle length radius deep-flattens — px inlined, r key gone()" classname="app.schema.SchemaConformanceTest" time="0.002"/>
+  <testcase name="font-weight keyword keeps dual storage while numeric flattens to a primitive()" classname="app.schema.SchemaConformanceTest" time="0.001"/>
+  <testcase name="ellipse two-axis keywords keep rx and ry — no flattening with two fields()" classname="app.schema.SchemaConformanceTest" time="0.0"/>
+  <testcase name="px length emits px-only object()" classname="app.schema.SchemaConformanceTest" time="0.001"/>
+  <testcase name="document carries the v2 version pair and nothing else at top level()" classname="app.schema.SchemaConformanceTest" time="0.001"/>
+  <testcase name="GenericProperty serializes with the _unmapped marker under type Generic()" classname="app.schema.SchemaConformanceTest" time="0.0"/>
+  <testcase name="selectors and media are omitted when empty and strict when present()" classname="app.schema.SchemaConformanceTest" time="0.003"/>
+  <testcase name="em length emits original-only — no px key for relative units()" classname="app.schema.SchemaConformanceTest" time="0.0"/>
+  <testcase name="v1 golden fixtures satisfy the legacy structural envelope contract()" classname="app.schema.SchemaConformanceTest" time="0.005"/>
+  <testcase name="pt length emits dual storage with original v-u()" classname="app.schema.SchemaConformanceTest" time="0.0"/>
+  <testcase name="auto margin emits a raw string primitive()" classname="app.schema.SchemaConformanceTest" time="0.001"/>
+  <testcase name="nested children input flattens to slot refs — no children key anywhere()" classname="app.schema.SchemaConformanceTest" time="0.002"/>
+  <testcase name="every emitted property is exactly a type-data envelope()" classname="app.schema.SchemaConformanceTest" time="0.001"/>
+  <testcase name="circle keyword radius stays a string under r()" classname="app.schema.SchemaConformanceTest" time="0.0"/>
+  <testcase name="percent padding emits a raw number primitive()" classname="app.schema.SchemaConformanceTest" time="0.001"/>
+  <testcase name="v2 golden fixtures satisfy the flat structural envelope contract()" classname="app.schema.SchemaConformanceTest" time="0.01"/>
+  <system-out><![CDATA[[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 5 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+[CSS Parser] Parsed 1 properties (0 generic)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:11:12.124Z" hostname="mac-1.home" time="0.003">
+  <properties/>
+  <testcase name="pre-existing orderings and line-styles are unchanged()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.001"/>
+  <testcase name="fractional and signed lengths are recognised as widths()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.0"/>
+  <testcase name="rgba commas are not mistaken for a rule-list separator()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.0"/>
+  <testcase name="CSS Color 4-5 functions reach the colour longhand()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.0"/>
+  <testcase name="a gap-rule-list stays unexpanded so it records as unmapped()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.0"/>
+  <testcase name="the two axes classify every probe token identically()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.001"/>
+  <testcase name="keyword width survives alongside style and colour()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.0"/>
+  <testcase name="line-width keywords land on the width longhand, not colour()" classname="app.parsing.css.properties.shorthands.RuleShorthandExpansionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

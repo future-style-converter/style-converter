@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:11:12.127Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="an explicit length thickness still works and keeps its colour()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.001"/>
+  <testcase name="from-font lands on thickness instead of vanishing()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.0"/>
+  <testcase name="the corpus declarations expand exactly as they did before wave 50()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.0"/>
+  <testcase name="thickness keywords are matched case-insensitively()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.0"/>
+  <testcase name="an uppercase colour function is still a colour()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.0"/>
+  <testcase name="a CSS-wide keyword shorthand is RECORDED, not endorsed()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.001"/>
+  <testcase name="colour functions reach the colour longhand()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.0"/>
+  <testcase name="auto lands on thickness and leaves the declared colour alone()" classname="app.parsing.css.properties.shorthands.TextDecorationShorthandExpansionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" tests="12" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.074Z" hostname="mac-1.home" time="0.0">
+  <properties/>
+  <testcase name="pin survives a large main size against a bounded cross band" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="an exactly-filled container leaves the lines alone" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="flex-gap-decorations-001 breaks two-per-line and stretches to 45px" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="pin survives a large main size against an infinite cross band" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="a zero-width container still puts one item per line" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="the 008 shape freezes at six 50px items and overflows by 154px" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="a gap wider than the leftover forces a break even for tiny items" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="step 8 needs both a definite cross size and a stretching align-content" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="gaps alone can consume the whole cross size without shrinking lines" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="zero-gap fold is the identity of the pre-fold mapper for all keywords" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="a leftover smaller than the line count still sums exactly" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <testcase name="space-between still hands FlowRow a zero spacing despite the gap" classname="com.styleconverter.runtime.layout.flexbox.ZZSkepticFlexProbeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

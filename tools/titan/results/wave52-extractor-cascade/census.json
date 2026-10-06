@@ -1,0 +1,492 @@
+{
+ "run": "wave51-fix",
+ "perTestIrDocs": 1435,
+ "sources": 1435,
+ "F-E placeholder stamps by sourceTag": {
+  "(untagged)": 21,
+  "template": 1,
+  "li": 51,
+  "img": 1,
+  "wbr": 1,
+  "p": 1,
+  "slot": 6,
+  "html": 1,
+  "section": 5
+ },
+ "F-E docs with a li/summary stamp": [
+  "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid.json",
+  "wpt__css-counter-styles__cssom__cssom-additive-symbols-setter.json",
+  "wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid.json",
+  "wpt__css-counter-styles__cssom__cssom-fallback-setter.json",
+  "wpt__css-counter-styles__cssom__cssom-name-setter-invalid.json",
+  "wpt__css-counter-styles__cssom__cssom-name-setter.json",
+  "wpt__css-counter-styles__cssom__cssom-negative-setter-invalid.json",
+  "wpt__css-counter-styles__cssom__cssom-negative-setter.json",
+  "wpt__css-counter-styles__cssom__cssom-pad-setter-invalid.json",
+  "wpt__css-counter-styles__cssom__cssom-pad-setter.json",
+  "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid.json",
+  "wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter.json",
+  "wpt__css-counter-styles__cssom__cssom-range-setter-invalid.json",
+  "wpt__css-counter-styles__cssom__cssom-range-setter.json",
+  "wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid.json"
+ ],
+ "F-C wire color-mix percent outside [0,100]": [
+  {
+   "file": "wpt__css-color__color-mix-percents-02.json",
+   "component": "wpt__css-color__color-mix-percents-02__6",
+   "property": "BackgroundColor",
+   "percents": [
+    125,
+    125
+   ]
+  },
+  {
+   "file": "wpt__css-color__color-mix-percents-02.json",
+   "component": "wpt__css-color__color-mix-percents-02__7",
+   "property": "BackgroundColor",
+   "percents": [
+    9999,
+    9999
+   ]
+  }
+ ],
+ "F-C sources with an out-of-range color-mix percentage": [
+  "css/css-color/color-mix-percents-02.html"
+ ],
+ "F4 sources with an exponent angle": [],
+ "F4 wire docs with an exponent angle": [],
+ "F4 sources with an upper-case angle unit in <style>": [],
+ "F1 sources with !important": [
+  "css/css-cascade/important-prop.html",
+  "css/css-cascade/layer-slotted-rule.html",
+  "css/css-cascade/revert-layer-005.html",
+  "css/css-cascade/revert-layer-012.html",
+  "css/css-cascade/revert-val-002.html",
+  "css/css-gaps/flex/flex-gap-decorations-024.html",
+  "css/css-position/overlay/author-overlay-top-layer-removal.html",
+  "css/css-position/overlay/overlay-button-appearance.html",
+  "css/css-text-decor/text-decoration-line.html",
+  "css/selectors/i18n/lang-pseudo-class-across-shadow-boundaries.html"
+ ],
+ "F2 sources with a ; inside url(": [
+  "css/css-pseudo/first-letter-background-image-dynamic.html",
+  "css/css-pseudo/first-letter-background-image.html"
+ ],
+ "F3 sources with @layer / revert-layer": [
+  "css/css-cascade/layer-media-toggle.html",
+  "css/css-cascade/layer-slotted-rule.html",
+  "css/css-cascade/revert-layer-001.html",
+  "css/css-cascade/revert-layer-002.html",
+  "css/css-cascade/revert-layer-003.html",
+  "css/css-cascade/revert-layer-004.html",
+  "css/css-cascade/revert-layer-005.html",
+  "css/css-cascade/revert-layer-006.html",
+  "css/css-cascade/revert-layer-007.html",
+  "css/css-cascade/revert-layer-010.html",
+  "css/css-cascade/revert-layer-013.html",
+  "css/css-cascade/revert-layer-014.html",
+  "css/css-cascade/revert-layer-015.html"
+ ],
+ "differential": {
+  "differential-static-stage-6-FE.json": [
+   {
+    "doc": "css-cascade/wpt__css-cascade__import-conditional-001.json",
+    "cells": {
+     "web": "f 0.999",
+     "test": "css/css-cascade/import-conditional-001.html",
+     "ios": "f 0.9974",
+     "android": "f 0.9966"
+    }
+   },
+   {
+    "doc": "css-cascade/wpt__css-cascade__import-conditional-002.json",
+    "cells": {
+     "web": "f 0.999",
+     "test": "css/css-cascade/import-conditional-002.html",
+     "ios": "f 0.9974",
+     "android": "f 0.9966"
+    }
+   },
+   {
+    "doc": "css-cascade/wpt__css-cascade__important-prop.json",
+    "cells": {
+     "web": "P 0.999",
+     "test": "css/css-cascade/important-prop.html",
+     "ios": "P 0.9973",
+     "android": "P 0.9966"
+    }
+   },
+   {
+    "doc": "css-cascade/wpt__css-cascade__revert-val-002.json",
+    "cells": {
+     "web": "P 0.999",
+     "test": "css/css-cascade/revert-val-002.html",
+     "ios": "P 0.9974",
+     "android": "P 0.9967"
+    }
+   },
+   {
+    "doc": "css-color/wpt__css-color__color-mix-percents-02.json",
+    "cells": {
+     "web": "f 0.9514",
+     "test": "css/css-color/color-mix-percents-02.html",
+     "ios": "f 0.9503",
+     "android": "f 0.9496"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__counter-style-at-rule__override-in-shadow-dom.json",
+    "cells": {
+     "web": "f 0.9816",
+     "test": "css/css-counter-styles/counter-style-at-rule/override-in-shadow-dom.html",
+     "ios": "f 0.9808",
+     "android": "f 0.9805"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9884",
+     "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+     "ios": "P 0.9887",
+     "android": "P 0.9884"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter.json",
+    "cells": {
+     "web": "P 0.9884",
+     "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+     "ios": "P 0.9887",
+     "android": "P 0.9884"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9879",
+     "test": "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+     "ios": "P 0.9876",
+     "android": "P 0.9878"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter.json",
+    "cells": {
+     "web": "P 0.9879",
+     "test": "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+     "ios": "P 0.9876",
+     "android": "P 0.9878"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9755",
+     "test": "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+     "ios": "P 0.9756",
+     "android": "P 0.976"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter.json",
+    "cells": {
+     "web": "P 0.9755",
+     "test": "css/css-counter-styles/cssom/cssom-name-setter.html",
+     "ios": "P 0.9756",
+     "android": "P 0.976"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter-invalid.json",
+    "cells": {
+     "web": "P 0.984",
+     "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+     "ios": "f 0.9849",
+     "android": "f 0.9848"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter.json",
+    "cells": {
+     "web": "P 0.984",
+     "test": "css/css-counter-styles/cssom/cssom-negative-setter.html",
+     "ios": "f 0.9849",
+     "android": "f 0.9848"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter-invalid.json",
+    "cells": {
+     "web": "f 0.9821",
+     "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+     "ios": "f 0.9819",
+     "android": "f 0.982"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter.json",
+    "cells": {
+     "web": "f 0.9821",
+     "test": "css/css-counter-styles/cssom/cssom-pad-setter.html",
+     "ios": "f 0.9819",
+     "android": "f 0.982"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid.json",
+    "cells": {
+     "web": "f 0.9844",
+     "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+     "ios": "f 0.9848",
+     "android": "f 0.9849"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter.json",
+    "cells": {
+     "web": "f 0.9844",
+     "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+     "ios": "f 0.9848",
+     "android": "f 0.9849"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9882",
+     "test": "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+     "ios": "P 0.9878",
+     "android": "P 0.988"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter.json",
+    "cells": {
+     "web": "P 0.9882",
+     "test": "css/css-counter-styles/cssom/cssom-range-setter.html",
+     "ios": "P 0.9878",
+     "android": "P 0.988"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid.json",
+    "cells": {
+     "web": "P 0.988",
+     "test": "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html",
+     "ios": "P 0.9876",
+     "android": "P 0.9878"
+    }
+   },
+   {
+    "doc": "css-gaps/wpt__css-gaps__flex__flex-gap-decorations-024.json",
+    "cells": {
+     "web": "P 0.9901",
+     "test": "css/css-gaps/flex/flex-gap-decorations-024.html",
+     "ios": "P 0.99",
+     "android": "P 0.99"
+    }
+   }
+  ],
+  "differential-postload-base-vs-s6.json": [
+   {
+    "doc": "css-cascade/wpt__css-cascade__import-conditional-001.json",
+    "cells": {
+     "web": "f 0.999",
+     "test": "css/css-cascade/import-conditional-001.html",
+     "ios": "f 0.9974",
+     "android": "f 0.9966"
+    }
+   },
+   {
+    "doc": "css-cascade/wpt__css-cascade__import-conditional-002.json",
+    "cells": {
+     "web": "f 0.999",
+     "test": "css/css-cascade/import-conditional-002.html",
+     "ios": "f 0.9974",
+     "android": "f 0.9966"
+    }
+   },
+   {
+    "doc": "css-cascade/wpt__css-cascade__important-prop.json",
+    "cells": {
+     "web": "P 0.999",
+     "test": "css/css-cascade/important-prop.html",
+     "ios": "P 0.9973",
+     "android": "P 0.9966"
+    }
+   },
+   {
+    "doc": "css-cascade/wpt__css-cascade__revert-val-002.json",
+    "cells": {
+     "web": "P 0.999",
+     "test": "css/css-cascade/revert-val-002.html",
+     "ios": "P 0.9974",
+     "android": "P 0.9967"
+    }
+   },
+   {
+    "doc": "css-color/wpt__css-color__color-mix-percents-02.json",
+    "cells": {
+     "web": "f 0.9514",
+     "test": "css/css-color/color-mix-percents-02.html",
+     "ios": "f 0.9503",
+     "android": "f 0.9496"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__counter-style-at-rule__override-in-shadow-dom.json",
+    "cells": {
+     "web": "f 0.9816",
+     "test": "css/css-counter-styles/counter-style-at-rule/override-in-shadow-dom.html",
+     "ios": "f 0.9808",
+     "android": "f 0.9805"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9884",
+     "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter-invalid.html",
+     "ios": "P 0.9887",
+     "android": "P 0.9884"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-additive-symbols-setter.json",
+    "cells": {
+     "web": "P 0.9884",
+     "test": "css/css-counter-styles/cssom/cssom-additive-symbols-setter.html",
+     "ios": "P 0.9887",
+     "android": "P 0.9884"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9879",
+     "test": "css/css-counter-styles/cssom/cssom-fallback-setter-invalid.html",
+     "ios": "P 0.9876",
+     "android": "P 0.9878"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-fallback-setter.json",
+    "cells": {
+     "web": "P 0.9879",
+     "test": "css/css-counter-styles/cssom/cssom-fallback-setter.html",
+     "ios": "P 0.9876",
+     "android": "P 0.9878"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9755",
+     "test": "css/css-counter-styles/cssom/cssom-name-setter-invalid.html",
+     "ios": "P 0.9756",
+     "android": "P 0.976"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-name-setter.json",
+    "cells": {
+     "web": "P 0.9755",
+     "test": "css/css-counter-styles/cssom/cssom-name-setter.html",
+     "ios": "P 0.9756",
+     "android": "P 0.976"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter-invalid.json",
+    "cells": {
+     "web": "P 0.984",
+     "test": "css/css-counter-styles/cssom/cssom-negative-setter-invalid.html",
+     "ios": "f 0.9849",
+     "android": "f 0.9848"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-negative-setter.json",
+    "cells": {
+     "web": "P 0.984",
+     "test": "css/css-counter-styles/cssom/cssom-negative-setter.html",
+     "ios": "f 0.9849",
+     "android": "f 0.9848"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter-invalid.json",
+    "cells": {
+     "web": "f 0.9821",
+     "test": "css/css-counter-styles/cssom/cssom-pad-setter-invalid.html",
+     "ios": "f 0.9819",
+     "android": "f 0.982"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-pad-setter.json",
+    "cells": {
+     "web": "f 0.9821",
+     "test": "css/css-counter-styles/cssom/cssom-pad-setter.html",
+     "ios": "f 0.9819",
+     "android": "f 0.982"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter-invalid.json",
+    "cells": {
+     "web": "f 0.9844",
+     "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter-invalid.html",
+     "ios": "f 0.9848",
+     "android": "f 0.9849"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-prefix-suffix-setter.json",
+    "cells": {
+     "web": "f 0.9844",
+     "test": "css/css-counter-styles/cssom/cssom-prefix-suffix-setter.html",
+     "ios": "f 0.9848",
+     "android": "f 0.9849"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter-invalid.json",
+    "cells": {
+     "web": "P 0.9882",
+     "test": "css/css-counter-styles/cssom/cssom-range-setter-invalid.html",
+     "ios": "P 0.9878",
+     "android": "P 0.988"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-range-setter.json",
+    "cells": {
+     "web": "P 0.9882",
+     "test": "css/css-counter-styles/cssom/cssom-range-setter.html",
+     "ios": "P 0.9878",
+     "android": "P 0.988"
+    }
+   },
+   {
+    "doc": "css-counter-styles/wpt__css-counter-styles__cssom__cssom-symbols-setter-invalid.json",
+    "cells": {
+     "web": "P 0.988",
+     "test": "css/css-counter-styles/cssom/cssom-symbols-setter-invalid.html",
+     "ios": "P 0.9876",
+     "android": "P 0.9878"
+    }
+   },
+   {
+    "doc": "css-gaps/wpt__css-gaps__flex__flex-gap-decorations-024.json",
+    "cells": {
+     "web": "P 0.9901",
+     "test": "css/css-gaps/flex/flex-gap-decorations-024.html",
+     "ios": "P 0.99",
+     "android": "P 0.99"
+    }
+   }
+  ]
+ }
+}

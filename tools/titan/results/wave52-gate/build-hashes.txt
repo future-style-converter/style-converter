@@ -1,0 +1,99 @@
+== wave52-final — 2026-10-05T19:09:35Z — HEAD 308d11f0
+android  serial=emulator-5554  built app-debug.apk sha1=547c9fcff10c15313183f83424cfbacfecf3d919  installed base.apk sha1=547c9fcff10c15313183f83424cfbacfecf3d919
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=2036ce506e9d987a417714707a73982aa15d8d26  installed .app digest=2036ce506e9d987a417714707a73982aa15d8d26
+ios      MATCH
+
+== wave52-final (resumed after the task stop; sections 3-30) — 2026-10-05T19:14:47Z — HEAD 308d11f0
+android  serial=emulator-5554  built app-debug.apk sha1=547c9fcff10c15313183f83424cfbacfecf3d919  installed base.apk sha1=547c9fcff10c15313183f83424cfbacfecf3d919
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=2036ce506e9d987a417714707a73982aa15d8d26  installed .app digest=2036ce506e9d987a417714707a73982aa15d8d26
+ios      MATCH
+
+== wave52-probe (integrated tree + closing-fixes.patch; 7 sections) — 2026-10-05T20:50:30Z — HEAD 308d11f0 + uncommitted runtime/app changes
+    .../runtime/core/renderer/ComponentRenderer.kt     | 20 ++++++++-
+    .../runtime/lists/ListItemMarkerGate.kt            | 44 +++++++++++++++++++
+    .../runtime/spacing/ChUnitMetrics.kt               | 32 +++++++++++---
+    .../runtime/lists/ListItemMarkerGateTest.kt        | 50 ++++++++++++++++++++++
+    .../runtime/spacing/ChUnitMetricsTest.kt           | 38 ++++++++++++++++
+    .../Renderer/ComponentRenderer.swift               |  6 +++
+    .../StyleEngine/lists/ListItemMarkerGate.swift     | 40 +++++++++++++++++
+    .../ListItemMarkerGateTests.swift                  | 42 ++++++++++++++++++
+    8 files changed, 265 insertions(+), 7 deletions(-)
+android  serial=emulator-5554  built app-debug.apk sha1=80d549558f73882cee7363bc17f2c23c80555950  installed base.apk sha1=80d549558f73882cee7363bc17f2c23c80555950
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5  installed .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5
+ios      MATCH
+
+== wave52-probe2 (closing fixes + the ch device-pixel snap; 5 ch sections) — 2026-10-05T21:16:07Z — HEAD 308d11f0 + uncommitted runtime/app changes
+    .../runtime/core/renderer/ComponentRenderer.kt     |  20 +++-
+    .../runtime/lists/ListItemMarkerGate.kt            |  44 +++++++++
+    .../runtime/spacing/ChUnitMetrics.kt               |  80 +++++++++++++++-
+    .../runtime/spacing/SpacingResolve.kt              |   7 +-
+    .../runtime/lists/ListItemMarkerGateTest.kt        |  50 ++++++++++
+    .../runtime/spacing/ChUnitMetricsTest.kt           | 101 +++++++++++++++++++++
+    .../Renderer/ComponentRenderer.swift               |   6 ++
+    .../StyleEngine/lists/ListItemMarkerGate.swift     |  40 ++++++++
+    .../ListItemMarkerGateTests.swift                  |  42 +++++++++
+    9 files changed, 381 insertions(+), 9 deletions(-)
+android  serial=emulator-5554  built app-debug.apk sha1=04aebc329be1cc49f05b6c975f3ca4442d0e36a5  installed base.apk sha1=04aebc329be1cc49f05b6c975f3ca4442d0e36a5
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5  installed .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5
+ios      MATCH
+
+== wave52-probe3 (closing fixes + round-up-only ch snap; 5 ch sections) — 2026-10-05T21:33:39Z — HEAD 308d11f0 + uncommitted runtime/app changes
+    .../runtime/core/renderer/ComponentRenderer.kt     |  20 +++-
+    .../runtime/lists/ListItemMarkerGate.kt            |  44 +++++++++
+    .../runtime/spacing/ChUnitMetrics.kt               |  90 +++++++++++++++++-
+    .../runtime/spacing/SpacingResolve.kt              |   7 +-
+    .../runtime/lists/ListItemMarkerGateTest.kt        |  50 ++++++++++
+    .../runtime/spacing/ChUnitMetricsTest.kt           | 104 +++++++++++++++++++++
+    .../Renderer/ComponentRenderer.swift               |   6 ++
+    .../StyleEngine/lists/ListItemMarkerGate.swift     |  40 ++++++++
+    .../ListItemMarkerGateTests.swift                  |  42 +++++++++
+    9 files changed, 394 insertions(+), 9 deletions(-)
+android  serial=emulator-5554  built app-debug.apk sha1=5ef49abcded96334015404507cd6794bd0d4994f  installed base.apk sha1=5ef49abcded96334015404507cd6794bd0d4994f
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5  installed .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5
+ios      MATCH
+
+== wave52-ship (the gate of record: commit aaf676c5, 30 sections) — 2026-10-05T21:57:05Z — HEAD aaf676c5 (+ three README test-count restamps, documentation only — the script printed them as 'uncommitted runtime/app changes' before its dirty check learnt to exclude *.md; the git diff --stat below is theirs)
+    apps/android-harness/README.md | 2 +-
+    runtimes/compose/README.md     | 2 +-
+    runtimes/swiftui/README.md     | 2 +-
+    3 files changed, 3 insertions(+), 3 deletions(-)
+android  serial=emulator-5554  built app-debug.apk sha1=5ef49abcded96334015404507cd6794bd0d4994f  installed base.apk sha1=5ef49abcded96334015404507cd6794bd0d4994f
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5  installed .app digest=8d0e9f2590f0927a9b8a147a17ed72987693a0c5
+ios      MATCH
+
+== wave52-ab-t5 (t5 exclude arm) — 2026-10-05T23:32:13Z — HEAD aaf676c5 + uncommitted runtime/app code changes
+    .../runtime/core/renderer/ComponentRenderer.kt     | 67 +++-------------------
+    .../Renderer/ComponentRenderer.swift               | 63 ++++----------------
+    2 files changed, 18 insertions(+), 112 deletions(-)
+android  serial=emulator-5554  built app-debug.apk sha1=57283f896abea2955ef1cd95083237de5e532b22  installed base.apk sha1=57283f896abea2955ef1cd95083237de5e532b22
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=272b15a5c451c77c7184492cc231cc6c3e279a9b  installed .app digest=272b15a5c451c77c7184492cc231cc6c3e279a9b
+ios      MATCH
+
+== wave52-ab-ma (ma exclude arm) — 2026-10-05T23:44:35Z — HEAD aaf676c5 + uncommitted runtime/app code changes
+    .../com/styleconverter/runtime/core/renderer/ComponentRenderer.kt | 8 --------
+    .../StyleConverterRuntime/StyleEngine/spacing/ChUnitMetrics.swift | 4 ++--
+    2 files changed, 2 insertions(+), 10 deletions(-)
+android  serial=emulator-5554  built app-debug.apk sha1=7ff505a542ce92ccb48bf292e9fa5db4b5bd6e29  installed base.apk sha1=7ff505a542ce92ccb48bf292e9fa5db4b5bd6e29
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=e8953eed9abfb180bf158ea7fac7dbada78b6df3  installed .app digest=e8953eed9abfb180bf158ea7fac7dbada78b6df3
+ios      MATCH
+
+== wave52-ab-f1 (f1 exclude arm) — 2026-10-05T23:55:21Z — HEAD aaf676c5 + uncommitted runtime/app code changes
+    .../runtime/typography/inline/InlineSpanRing.kt    | 48 +------------
+    .../runtime/typography/inline/InlineRunFoldTest.kt | 80 ----------------------
+    .../typography/inline/InlineSpanRing.swift         | 48 +------------
+    .../InlineRunFlowTests.swift                       | 38 ----------
+    .../InlineSpanRingTests.swift                      | 35 ----------
+    5 files changed, 2 insertions(+), 247 deletions(-)
+android  serial=emulator-5554  built app-debug.apk sha1=fcf50122afc464f56b545f398a244bb0f486c13a  installed base.apk sha1=fcf50122afc464f56b545f398a244bb0f486c13a
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=4cb574406289aed8deaf5aab5d8394a9332c18e3  installed .app digest=4cb574406289aed8deaf5aab5d8394a9332c18e3
+ios      MATCH
+

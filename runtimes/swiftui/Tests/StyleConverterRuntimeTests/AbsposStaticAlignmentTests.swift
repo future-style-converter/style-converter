@@ -14,6 +14,14 @@
 //  → 44px padding box; the abspos child is 65px (frame extent). The
 //  non-overflow rows use a 25px child (the safe-003 fixture's size).
 //
+//  Wave 52 (lane L7, static-position T3) — section 4: the css-align-3
+//  §4.2 baseline FALLBACK (`last baseline` → safe self-end, `baseline` →
+//  safe self-start) on both wires, align-self only. Twin of the Compose
+//  GridAbsposPartitionTest K3a/K3b rows. MUTATION EXECUTED
+//  (tools/titan/results/wave52-static-position/mutations.log): M-S3 drop
+//  the LAST_BASELINE arm of baselineFallback → B1 fails (and the grid
+//  twin row in AbsposGridStaticPositionTests).
+//
 
 import XCTest
 // @testable: AbsposStaticAlignment + the IR model inits are internal.
@@ -189,5 +197,29 @@ final class AbsposStaticAlignmentTests: XCTestCase {
         XCTAssertEqual(AbsposStaticAlignment.staticCrossOffset(
             flexDirection: .row, childProperties: insetChild, containerW: 44, containerH: 44),
             .zero)
+    }
+
+    // MARK: - 4. wave 52 (T3): <baseline-position> fallback alignment
+
+    func testB1LastBaselineTypedAndGenericResolveToSafeEnd() {
+        // Post-T3 typed wire (converter pin P3f) …
+        XCTAssertEqual(AbsposStaticAlignment.resolveCross(from: typed("LAST_BASELINE")), safeEnd)
+        // … and the verbatim pre-wave-52 Generic of rtl-last-baseline-002.
+        XCTAssertEqual(AbsposStaticAlignment.resolveCross(from: generic("last baseline")), safeEnd)
+    }
+
+    func testB2BaselineResolvesToSafeStartAndNormalStaysClaimless() {
+        // `baseline` ≡ `first baseline` → safe self-start (§4.2).
+        let safeStart = AbsposStaticAlignment.Spec(base: .start, safe: true)
+        XCTAssertEqual(AbsposStaticAlignment.resolveCross(from: typed("BASELINE")), safeStart)
+        XCTAssertEqual(AbsposStaticAlignment.resolveCross(from: generic("first baseline")), safeStart)
+        // NORMAL keeps the pre-wave-52 "no claim" (documented gap — §6.1
+        // says abspos `normal` is start; not staffed this wave).
+        XCTAssertNil(AbsposStaticAlignment.resolveCross(from: typed("NORMAL")))
+        // The baseline fallback is align-self-only: the justify-self wire
+        // (grid reader) keeps its pre-wave-52 answer so the natives agree.
+        XCTAssertNil(AbsposStaticAlignment.resolveSelf(
+            from: [IRProperty(type: "JustifySelf", data: .string("BASELINE"))],
+            typedType: "JustifySelf", cssName: "justify-self"))
     }
 }

@@ -1,0 +1,67 @@
+{
+  "_comment": "The `all` shorthand x declaration ORDER (css-cascade-4 §6.4 order of appearance; §3.1 the direction/unicode-bidi exemption; §7.3 the per-keyword inherited value) — wave 52 lane L11, brief colour-not-reaching-text F1. Before wave 52 every runtime was order-blind: Compose/iOS dropped EVERY declaration (own and inherited) when any `all` keyword appeared, and web emitted `all` as the LAST style key so the browser reset everything written before it. The rule now: declarations BEFORE the last `all` drop (except direction / unicode-bidi), declarations AFTER it are kept; `initial` drops the inherited channel, inherit/unset/revert keep it. Property ORDER in each `properties` object below IS the source order the converter preserves (pinned by tools/titan/results/wave52-all-reset-postload-colour/order-premise.mjs). HAND DERIVATION — `all: initial` resets every property except direction / unicode-bidi to its INITIAL value (§3.1), and that includes `display`, whose initial value is `inline` (css-display-3 §2 property table); width / height do not apply to a non-replaced inline box (CSS 2.1 §10.3.1 / §10.6.1), so an `all: initial` element paints NO box unless something AFTER `all` makes it a block again. Every component below that must keep its box therefore re-declares `display: block` immediately AFTER `all` — itself the §6.4 ordering under test (a `display: block` written BEFORE `all` is reset back to inline and the box vanishes: mutation M2 of tools/titan/results/wave52-all-reset-postload-colour/fixture-oracle-probe.mjs). ATC_AllThenProps: `all: initial; display: block` then 160x60 #2ecc71 — a block, width 160 and height 60 apply, so the dominant fill is green over a 160x60 bbox (old order-blind rule: nothing painted). ATC_PropsThenAll_InGreenParent: a #2ecc71 160x60 parent (9600 px) holds a 150x50 #e74c3c child (7500 px) whose `all: revert` comes LAST — every declaration before it drops (§6.4; the before-`all` drop is the same for every keyword), and `revert` rolls each property back to the UA origin (§7.3.4): for the child <div> that is `display: block` (html.css) with width / height auto and no background — an empty block of height 0 that paints nothing; only the parent's green 160x60 paints. `revert`, not `initial`, on purpose (wave 52 L11 fix pass 2): under `initial` the web child collapses INLINE (display's initial value) while Compose / SwiftUI, which never apply CSS initial values (skeptic S2), keep a block under the harness's 50x30 placeholder floor — invisible inside the parent, but the legacy flatten ALSO captures `reset` standalone, and there the frame split 390x32 (web — measured on the real harness) vs 390x62 (natives' floor) is a pair-gate red (exit 4: pair-gate-proxy.json run P-M4-reset-initial-native, `--model native`) that says nothing about ORDER; under `revert` a <div> is a block on every platform, so the standalone frames agree (390x62, ground + label only — measured on the real web harness). The child is sized to cover MOST of the parent on purpose: a runtime that wrongly keeps the declarations before `all` paints 7500 red px against 2100 green, so the dominant fill turns red and the oracle fires (mutation M3 of the probe) — a 120x40 child (4800 vs 4800, a tie the oracle breaks to green) could never fail. ATC_InitialUnderRedParent: the all-prop-initial-color SHAPE with its glyphs taken out (wave 52 skeptic RV-M1) — a #3498db 200x60 parent whose `color: #e74c3c` hands the child a NON-EMPTY inherited channel (Compose / iOS pass it [Color red]), so the child runs the reset's INITIAL branch with something to drop (§7.3.1); the child's `all: initial; display: block` then #2ecc71 200x60 is a block of width 200 / height 60 inside a 200-px-wide parent and covers the blue exactly, so the dominant fill is green over 200x60. The fill the reset must NOT clear is the child's green (written AFTER `all`); the fill it reveals when it wrongly clears it is the parent's blue — a runtime that drops the child's after-`all` list (the pre-wave-52 order-blind rule) or lets `display: block` lose to `all` collapses the child to an empty inline box, the 12000 blue px win, and the oracle fires (mutations P-M2 / P-M3 of tools/titan/results/wave52-all-reset-postload-colour/pair-gate-proxy.mjs; M1 / M2 / M4 of fixture-oracle-probe.mjs). NO text, on purpose (README: no `_text` unless the interaction needs it): the v1 `_expect` cannot see glyph colour — the red-vs-white glyph question stays pinned at unit level (the three runtimes' AllReset pins on the verbatim all-prop-{initial,inherit,unset,revert}-color IR) and in the WPT corpus — and `all: initial` also resets font-family to its UA-dependent initial face (Chromium: Times) while the natives draw their system sans, so the first cut's 'Hamburg 123' split the faces: proxied through the real tools/visual/compare-screenshots.mjs it scored iOS-web 0.9404 / Android-web 0.9420 on this row AND on the standalone `span` capture, exit 4 (pair-gate-proxy.json run pre-fix-head-b35e203a). ATC_DirectionSurvives, the ONE text row: `direction: rtl` BEFORE `all: initial` survives (§3.1) — the white digits sit at the RIGHT edge (inline-start in rtl) of the green 200x40 block. The digits are for the human LOOK only: v1 `_expect` cannot see position and the pair gate cannot either (skeptic RV-S1: proxy natives that DROP direction still pass at 0.954), so the row pins fill / box (the `display: block` after `all`) and is NOT direction evidence — the exemption is pinned at unit level. Its face split (web Times vs native sans) is measured in the same proxy at iOS-web 0.9818 / Android-web 0.9844 / iOS-Android 0.9888, above the 0.95 bar (optimistic by the native glyph-raster delta — LOOK at its first capture). Gate: listed on tools/visual/gate-fixtures.txt WITHOUT a committed baseline, so `./test-all.sh --gate-set` runs it gate + oracle only (no --baseline); expected closing-gate lines for this child (predicted exit 0 by pair-gate-proxy.mjs under BOTH its CSS-truth and native models): `· cross-platform gate: 18 pair(s) · 0 known divergence(s) · 0 unexpected`, `· spec oracle: 12 platform-component check(s) · 0 violation(s)`, summary `exit 0  fixtures/combinations/all-then-color.json   (gate-only: no committed baseline)`. Baselines: NOT captured by lane L11 (the build lanes ran device-free); capture + LOOK before committing baselines.",
+  "components": {
+    "ATC_AllThenProps": {
+      "properties": {
+        "all": "initial",
+        "display": "block",
+        "width": "160px",
+        "height": "60px",
+        "background-color": "#2ecc71"
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [160, 60], "boxTolerance": 1, "note": "css-cascade-4 §6.4: the longhands FOLLOW `all: initial` and win — `display: block` undoes the initial `inline` (css-display-3 §2), so the 160x60 green block paints" }
+    },
+    "ATC_PropsThenAll_InGreenParent": {
+      "properties": {
+        "width": "160px",
+        "height": "60px",
+        "background-color": "#2ecc71"
+      },
+      "children": {
+        "reset": {
+          "properties": {
+            "width": "150px",
+            "height": "50px",
+            "background-color": "#e74c3c",
+            "all": "revert"
+          }
+        }
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [160, 60], "boxTolerance": 1, "note": "css-cascade-4 §6.4: `all: revert` FOLLOWS the child's red box and drops it (§7.3.4: the <div> rolls back to the UA display: block, auto size, no background — an empty block paints nothing) — only the parent's green 160x60 paints" }
+    },
+    "ATC_InitialUnderRedParent": {
+      "properties": {
+        "color": "#e74c3c",
+        "width": "200px",
+        "height": "60px",
+        "background-color": "#3498db"
+      },
+      "children": {
+        "span": {
+          "properties": {
+            "all": "initial",
+            "display": "block",
+            "width": "200px",
+            "height": "60px",
+            "background-color": "#2ecc71"
+          }
+        }
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [200, 60], "boxTolerance": 1, "note": "all-prop-initial-color shape, glyph-free: under `all: initial` the child with a non-empty inherited channel (§7.3.1) keeps what FOLLOWS `all` (§6.4) — `display: block` + green 200x60 cover the blue parent; a wrongly-cleared after-`all` list leaves the parent's blue dominant" }
+    },
+    "ATC_DirectionSurvives": {
+      "_text": "123",
+      "properties": {
+        "direction": "rtl",
+        "all": "initial",
+        "display": "block",
+        "width": "200px",
+        "height": "40px",
+        "background-color": "#2ecc71",
+        "color": "#ffffff",
+        "font-size": "20px"
+      },
+      "_expect": { "fill": [46, 204, 113], "fillTolerance": 2, "box": [200, 40], "boxTolerance": 1, "note": "css-cascade-4 §3.1: `all` never resets direction — the digits sit at the block's RIGHT (inline-start in rtl); `display: block` after `all` keeps the 200x40 box; fill/box only (position is v2)" }
+    }
+  }
+}

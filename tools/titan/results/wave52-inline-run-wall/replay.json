@@ -1,0 +1,162 @@
+{
+ "recipeCheck": [
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "platform": "web",
+   "manifest": 0.9849,
+   "rescored": 0.9849,
+   "exact": true
+  },
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "platform": "ios",
+   "manifest": 0.9756,
+   "rescored": 0.9756,
+   "exact": true
+  },
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "platform": "android",
+   "manifest": 0.9495,
+   "rescored": 0.9495,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "web",
+   "manifest": 0.9765,
+   "rescored": 0.9765,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "ios",
+   "manifest": 0.9495,
+   "rescored": 0.9495,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "android",
+   "manifest": 0.9607,
+   "rescored": 0.9607,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "platform": "web",
+   "manifest": 0.9834,
+   "rescored": 0.9834,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "platform": "ios",
+   "manifest": 0.9577,
+   "rescored": 0.9577,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-032.tentative.html",
+   "platform": "android",
+   "manifest": 0.9397,
+   "rescored": 0.9397,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+   "platform": "web",
+   "manifest": 0.9996,
+   "rescored": 0.9996,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+   "platform": "ios",
+   "manifest": 0.9983,
+   "rescored": 0.9983,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+   "platform": "android",
+   "manifest": 0.9942,
+   "rescored": 0.9942,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+   "platform": "web",
+   "manifest": 0.9992,
+   "rescored": 0.9992,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+   "platform": "ios",
+   "manifest": 0.9906,
+   "rescored": 0.9906,
+   "exact": true
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+   "platform": "android",
+   "manifest": 0.9847,
+   "rescored": 0.9847,
+   "exact": true
+  }
+ ],
+ "predictions": [
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "platform": "ios",
+   "today": 0.9756,
+   "predicted": 0.9685,
+   "file": "tools/titan/results/wave52-inline-run-wall/replay/hanging-punctuation-inline-001.ios.predicted.png"
+  },
+  {
+   "test": "css/css-text/hanging-punctuation/hanging-punctuation-inline-001.html",
+   "platform": "android",
+   "today": 0.9495,
+   "predicted": 0.9454,
+   "file": "tools/titan/results/wave52-inline-run-wall/replay/hanging-punctuation-inline-001.android.predicted.png"
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "ios",
+   "today": 0.9495,
+   "predicted": 0.9708,
+   "file": "tools/titan/results/wave52-inline-run-wall/replay/block-ellipsis-025.ios.predicted.png"
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-025.html",
+   "platform": "android",
+   "today": 0.9607,
+   "predicted": 0.9806,
+   "file": "tools/titan/results/wave52-inline-run-wall/replay/block-ellipsis-025.android.predicted.png"
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+   "platform": "ios",
+   "today": 0.9983,
+   "predicted": 0.9989,
+   "file": "tools/titan/results/wave52-inline-run-wall/replay/block-ellipsis-030.ios.predicted.png"
+  }
+ ],
+ "counterfactuals": [
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-030.html",
+   "platform": "ios",
+   "today": 0.9983,
+   "scored": 0.9974,
+   "file": "tools/titan/results/wave52-inline-run-wall/replay/block-ellipsis-030.ios.counterfactual-preFixF4.png"
+  },
+  {
+   "test": "css/css-overflow/line-clamp/block-ellipsis-028.html",
+   "platform": "ios",
+   "today": 0.9906,
+   "scored": 0.9895,
+   "file": "tools/titan/results/wave52-inline-run-wall/replay/block-ellipsis-028.ios.counterfactual-preFixF4.png"
+  }
+ ]
+}

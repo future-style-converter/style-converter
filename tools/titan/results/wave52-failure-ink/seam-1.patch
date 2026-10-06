@@ -1,0 +1,139 @@
+Wave 52 · lane L3 (failure-ink) · seam-1 — FIX-PASS RE-CUT (2026-10-05). Base: HEAD 7d9c22a7 (ComponentRenderer.kt blob c25311b4); no
+prior lane's patch needed. Changes vs the first-pass text (sha 848bccea…): (1) the carrier-count comment now quotes the USED-writing-mode
+census this seam actually reads (23 baked containers, 9 docs; was the own-mode 12); (2) NEW VerticalBlockFlowSeamWiringTest.kt — the
+source pin the skeptic asked for (should-fix 2): the seam's anyBakedChild guard must call BakedLayoutSignature.bakedPhysicalBox, the
+wave-47 Width∧Height heuristic must be gone, and the engage condition must still read !anyBakedChild. Verification + negative controls:
+_seam1-verify.log (lock wave52-lock/ComponentRenderer.kt).
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+index c25311b..7fa528a 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt
+@@ -2772,15 +2772,24 @@ object ComponentRenderer {
+                         child.properties.any { it.type == "WritingMode" }
+                     }
+                     // BAKED-LAYOUT guard: post-load-extracted wires carry
+-                    // the browser's used physical Width+Height on every
+-                    // box — that layout already encodes vertical flow AND
++                    // the browser's used physical layout on every box —
++                    // that layout already encodes vertical flow AND
+                     // fragmentation, and the frozen Column render of it
+                     // passes today (the anchor-position-multicol family);
+                     // re-stacking would break passing cells (the same
+                     // protection as ChildSpec.bakedPhysicalSize).
++                    // Wave 52 (lane L3, F1): read through the ONE shared
++                    // BakedLayoutSignature predicate (Width ∧ Height ∧
++                    // BoxSizing ∧ (PaddingTop ∨ BorderTopStyle)) — the
++                    // two-property "Width ∧ Height" heuristic it replaces
++                    // also matched an authored `.square{width:50px;
++                    // height:50px}` and froze the Column on
++                    // flexbox_align-items-stretch-writing-modes (the flex
++                    // items' squares stacked vertically, ios f 0.999).
++                    // Census F1 (this seam reads the USED writing mode):
++                    // all 23 baked containers (9 docs) read true.
+                     val anyBakedChild = seamInFlowChildren.any { child ->
+-                        child.properties.any { it.type == "Width" } &&
+-                            child.properties.any { it.type == "Height" }
++                        BakedLayoutSignature.bakedPhysicalBox(child.properties)
+                     }
+                     // TEXT-ONLY-LEAVES guard (wave-47 skeptic S3 D1): a
+                     // container whose EVERY in-flow child is a text-only
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/VerticalBlockFlowSeamWiringTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/VerticalBlockFlowSeamWiringTest.kt
+new file mode 100644
+index 0000000..ee6ba7d
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/core/renderer/VerticalBlockFlowSeamWiringTest.kt
+@@ -0,0 +1,94 @@
++package com.styleconverter.runtime.core.renderer
++
++// Wave 52 (lane L3 · failure-ink, fix F1) — the SEAM WIRING pin, shipped
++// inside seam-1.patch together with the seam it pins.
++//
++// WHY THIS EXISTS (wave-52 skeptic, should-fix 2): VerticalBlockFlowSeamGuardTest
++// pins the PREDICATE (BakedLayoutSignature.bakedPhysicalBox) but nothing pinned
++// that the vertical block-flow seam in ComponentRenderer.kt CALLS it. With
++// seam-1 dropped or mis-merged (many lanes deliver hunks into that one file)
++// every predicate pin stays green and
++// css-writing-modes/flexbox_align-items-stretch-writing-modes silently keeps
++// its frozen Column. A @Composable seam cannot execute in this module's plain
++// JVM JUnit4 tests, so this is a SOURCE-level pin — the module's idiom
++// (SeamReachabilityTest, columns/FragmentGeometryTest read source the same way).
++//
++// NEGATIVE CONTROLS, EXECUTED (fix pass 2026-10-05, log
++// results/wave52-failure-ink/_seam1-verify.log):
++//  - ComponentRenderer.kt at HEAD 7d9c22a7 bytes (seam-1 NOT applied): the two
++//    guard tests FAIL; the consumer test stays green (HEAD consumes the guard);
++//  - seam-1 applied but the `!anyBakedChild &&` engage conjunct deleted: the
++//    consumer test FAILS.
++
++import java.io.File
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++class VerticalBlockFlowSeamWiringTest {
++
++    /**
++     * ComponentRenderer.kt, found by walking up from the JVM's working
++     * directory to the repo root (this module's Gradle rootDir is
++     * apps/android-harness, the out-of-tree include) — SeamReachabilityTest's
++     * walk-up, so both pins resolve the same file.
++     */
++    private val renderer: File by lazy {
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/" +
++            "core/renderer/ComponentRenderer.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, anchor)
++    }
++
++    /** The seam's source text, read once per test (the file is ~500 KB). */
++    private fun source(): String = renderer.readText()
++
++    /**
++     * The BAKED-LAYOUT guard block: from `val anyBakedChild` to the next
++     * guard's declaration (`val allTextOnlyLeaves`, the TEXT-ONLY-LEAVES
++     * guard that follows it in the seam since wave 47).
++     */
++    private fun guardBlock(text: String): String {
++        // The guard's declaration — its name is the seam's own contract.
++        val start = text.indexOf("val anyBakedChild = seamInFlowChildren.any")
++        assertTrue("the vertical seam's anyBakedChild guard is missing", start >= 0)
++        // The following guard bounds the block (never the end of file).
++        val end = text.indexOf("val allTextOnlyLeaves", start)
++        assertTrue("the TEXT-ONLY-LEAVES guard no longer follows anyBakedChild", end > start)
++        return text.substring(start, end)
++    }
++
++    /** The guard reads the ONE shared post-load signature predicate. */
++    @Test
++    fun `the vertical seam's baked guard reads BakedLayoutSignature`() {
++        assertTrue(
++            "anyBakedChild must call BakedLayoutSignature.bakedPhysicalBox (seam-1)",
++            guardBlock(source()).contains(
++                "BakedLayoutSignature.bakedPhysicalBox(child.properties)"
++            )
++        )
++    }
++
++    /** The wave-47 two-property heuristic (authored squares trip it) is gone. */
++    @Test
++    fun `the wave-47 Width-and-Height heuristic is gone from the guard`() {
++        assertFalse(
++            "anyBakedChild still reads the bare Width ∧ Height heuristic",
++            guardBlock(source()).contains("it.type == \"Width\"")
++        )
++    }
++
++    /** The guard still gates the seam's engage condition (not dead code). */
++    @Test
++    fun `the seam's engage condition still consumes the guard`() {
++        val text = source()
++        // The consumer sits after the declaration, in the `if (…)` that
++        // engages VerticalBlockFlowLayout.
++        val declared = text.indexOf("val anyBakedChild")
++        assertTrue(
++            "the engage condition no longer reads !anyBakedChild",
++            declared >= 0 && text.indexOf("!anyBakedChild &&", declared) > declared
++        )
++    }
++}

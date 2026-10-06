@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.MultiColumnDistributionTest" tests="8" skipped="0" failures="0" errors="0" timestamp="2026-10-05T16:53:13.688Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="D5 two children in three columns leave the third column empty" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.001"/>
+  <testcase name="D3 all-equal children alternate columns via the first-index tie-break" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.0"/>
+  <testcase name="D2 mixed heights in three columns - fourth child lands on the shortest column" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.0"/>
+  <testcase name="D1 three equal children in two columns - third child ties back to column 0" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.0"/>
+  <testcase name="empty child list yields no slots and zero container height" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.001"/>
+  <testcase name="D6 a single child lands in column 0 and sets the container height" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.0"/>
+  <testcase name="D7 a sub-1 column count is coerced to a single flush stack" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.0"/>
+  <testcase name="D4 greedy heuristic accepts a 70-tall result where true balancing gives 60" classname="com.styleconverter.runtime.columns.MultiColumnDistributionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

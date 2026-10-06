@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" tests="7" skipped="0" failures="2" errors="0" timestamp="2026-10-05T16:56:35.644Z" hostname="mac-1.home" time="0.13">
+  <properties/>
+  <testcase name="P3b first baseline is the same value as baseline()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.02"/>
+  <testcase name="P3d left and right are invalid align-self values()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.005">
+    <failure message="org.opentest4j.AssertionFailedError: expected: &lt;app.parsing.css.properties.InvalidDeclaration@758f4f03&gt; but was: &lt;null&gt;" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: expected: &lt;app.parsing.css.properties.InvalidDeclaration@758f4f03&gt; but was: &lt;null&gt;
+	at org.junit.jupiter.api.Assertions.assertSame(Assertions.java:2975)
+	at kotlin.test.junit5.JUnit5Asserter.assertSame(JUnitSupport.kt:40)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertSame(Assertions.kt:97)
+	at kotlin.test.AssertionsKt.assertSame(Unknown Source)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertSame$default(Assertions.kt:96)
+	at kotlin.test.AssertionsKt.assertSame$default(Unknown Source)
+	at app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest.P3d left and right are invalid align-self values(AlignSelfPropertyParserTest.kt:76)
+</failure>
+  </testcase>
+  <testcase name="P3f the wire carries the bare enum name()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.024"/>
+  <testcase name="P3g PropertiesParser drops align-self left instead of passing it through()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.073">
+    <failure message="org.opentest4j.AssertionFailedError: got [GenericProperty(name=align-self, rawValue=left), WidthProperty(width=LengthValue(length=IRLength(pixels=8.0, originalValue=8.0, originalUnit=PX)))]" type="org.opentest4j.AssertionFailedError">org.opentest4j.AssertionFailedError: got [GenericProperty(name=align-self, rawValue=left), WidthProperty(width=LengthValue(length=IRLength(pixels=8.0, originalValue=8.0, originalUnit=PX)))]
+	at org.junit.jupiter.api.Assertions.fail(Assertions.java:142)
+	at kotlin.test.junit5.JUnit5Asserter.fail(JUnitSupport.kt:56)
+	at kotlin.test.Asserter.assertTrue(Assertions.kt:767)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.Asserter.assertTrue(Assertions.kt:777)
+	at kotlin.test.junit5.JUnit5Asserter.assertTrue(JUnitSupport.kt:30)
+	at kotlin.test.AssertionsKt__AssertionsKt.assertTrue(Assertions.kt:44)
+	at kotlin.test.AssertionsKt.assertTrue(Unknown Source)
+	at app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest.P3g PropertiesParser drops align-self left instead of passing it through(AlignSelfPropertyParserTest.kt:112)
+</failure>
+  </testcase>
+  <testcase name="P3e overflow-prefixed positions stay on the Generic wire()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.001"/>
+  <testcase name="P3c normal is typed()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.0"/>
+  <testcase name="P3a last baseline is typed in both token orders()" classname="app.parsing.css.properties.longhands.layout.flexbox.AlignSelfPropertyParserTest" time="0.001"/>
+  <system-out><![CDATA[[CSS Parser] No parser for 'align-self', using GenericProperty
+[CSS Parser] Parsed 2 properties (1 generic)
+]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

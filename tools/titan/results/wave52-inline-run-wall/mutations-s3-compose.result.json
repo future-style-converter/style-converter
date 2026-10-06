@@ -1,0 +1,28 @@
+{
+ "cmd": [
+  "./gradlew",
+  ":runtime:testDebugUnitTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineRunFoldTest",
+  "--tests",
+  "com.styleconverter.runtime.typography.inline.InlineSpanRingTest",
+  "--continue"
+ ],
+ "results": [
+  {
+   "id": "K6-pre-line-readmitted",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineSpanRing.kt",
+   "exit": 1,
+   "sha256Before": "aa49faebb37a4a0eb749df4b50612010c9b3b7e97a1b2b2ef467a8d87c9fa598",
+   "sha256After": "aa49faebb37a4a0eb749df4b50612010c9b3b7e97a1b2b2ef467a8d87c9fa598",
+   "expectFail": {
+    "a collapsing white-space keyword refuses even on a glyph-less member": true
+   },
+   "failLines": [
+    "> Task :runtime:testDebugUnitTest FAILED",
+    "InlineRunFoldTest > a collapsing white-space keyword refuses even on a glyph-less member FAILED"
+   ],
+   "proven": true
+  }
+ ]
+}

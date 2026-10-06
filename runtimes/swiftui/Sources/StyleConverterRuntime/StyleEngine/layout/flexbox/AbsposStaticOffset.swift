@@ -62,13 +62,31 @@ extension AbsposStaticPosition {
 
     /// View-level convenience for ComponentRenderer's positioned-child
     /// overlay: the FULL static-position shift (as a CGSize from the
-    /// overlay's top-leading padding-box anchor) for one abspos child of
-    /// a flex container. Per axis, zero when any input is unresolvable:
-    ///   • no claim (inset owns the axis per §3.5, or nothing aligns it);
-    ///   • container extent indefinite (nil channel);
-    ///   • child extent indefinite (auto-sized — cannot be safe-checked
-    ///     or end-aligned ahead of measurement; honest skip, visible
-    ///     here rather than silently absorbed).
+    /// overlay's top-leading PADDING-box anchor) for one abspos child of a
+    /// flex container.
+    ///
+    /// Wave 52 (lane L7, static-position T2) — three corrections, measured
+    /// on css-flexbox/abspos/position-absolute-containing-block-002 (iOS
+    /// green (69,21) vs ref (76,76), f 0.9373) and
+    /// flex-abspos-staticpos-justify-self-001 (every mark (−2,−1)):
+    ///   (a) the alignment container is the CONTENT box — css-flexbox-1
+    ///       §4.1 "as if it were the sole flex item in the flex container",
+    ///       css-align-3 §6.2; `containerW/H` are now content extents (the
+    ///       call site passes flexContentSize, not the §3.1 padding box);
+    ///   (b) the shift starts at the padding-box anchor, so the padding-
+    ///       START edge joins on every axis the static position owns —
+    ///       the same term the grid twin adds
+    ///       (AbsposGridStaticPosition.axisOffset);
+    ///   (c) a child with NO own align-self claim (absent or `auto`) falls
+    ///       back to the container's `align-items` (css-align-3 §6.1:
+    ///       `auto` computes to the parent's align-items) — the Compose
+    ///       flex loops already honour it through the Row/Column
+    ///       alignment, which is why Android is right on all six cells.
+    /// Per axis, zero when an explicit (non-auto) inset owns the axis
+    /// (css-position-3 §3.5 — PositionApplier offsets from the padding box,
+    /// the untouched anchor). Unresolvable extents (indefinite container,
+    /// auto-sized child) degrade to the content-box origin (padding start),
+    /// the start outcome — honest, never a guessed alignment.
     /// The caller gates on the ancestor being a flex container and on
     /// wptCaptureMode (the dark-stage corpus keeps the wave-18
     /// staticCrossOffset behavior byte-identically).
@@ -77,20 +95,84 @@ extension AbsposStaticPosition {
                              containerW: CGFloat?,
                              containerH: CGFloat?,
                              wptCaptureMode: Bool) -> CGSize {
-        // Physical claims from the shared resolver (inset-gated inside).
-        let pos = resolveStatic(containerProperties: containerProperties,
+        // Physical claims from the shared resolver (inset-gated inside) —
+        // byte-parallel with the Compose twin, so the align-items fallback
+        // is layered on top here, in the iOS-only half.
+        var pos = resolveStatic(containerProperties: containerProperties,
                                 childProperties: childProperties)
+        // The container's style through the SAME engine the renderer uses:
+        // its padding (paint-identical resolution) and align-items keyword.
+        let containerStyle = StyleBuilder.build(from: containerProperties)
+        // (c) align-items fallback on the CROSS axis when the child makes no
+        // claim of its own and no inset owns that axis.
+        pos = withAlignItemsFallback(pos, containerProperties: containerProperties,
+                                     childProperties: childProperties,
+                                     alignItems: containerStyle.layout7?.alignItems)
         // Painted margin-box extents (RC-A6 band + margin math).
         let ext = childFrameExtents(childProperties: childProperties,
                                     wptCaptureMode: wptCaptureMode)
-        // Per-axis shared math; 0 for any unresolvable input (see doc).
-        func off(_ spec: AxisSpec?, _ child: CGFloat?, _ container: CGFloat?) -> CGFloat {
-            guard let spec, let child, let container else { return 0 }
-            return CGFloat(axisOffset(childPx: Double(child),
-                                      containerPx: Double(container),
-                                      spec: spec))
+        // One axis: inset → 0; else padding start + the shared alignment math
+        // inside the content extent (start outcome when unresolvable).
+        func off(_ spec: AxisSpec?, _ child: CGFloat?, _ content: CGFloat?,
+                 vertical: Bool) -> CGFloat {
+            // §3.5: a non-auto inset replaces the static position — the
+            // overlay's padding-box anchor is already its containing block.
+            if hasNonAutoInset(childProperties, vertical: vertical) { return 0 }
+            // (b) the padding-box → content-box shift on this axis.
+            let pad = AbsposGridStaticPosition.paddingStartEdge(containerStyle, top: vertical)
+            // No claim, or an extent we cannot know ahead of measurement.
+            guard let spec, let child, let content else { return pad }
+            // (a) align inside the CONTENT extent (reversal-aware math).
+            return pad + CGFloat(axisOffset(childPx: Double(child),
+                                            containerPx: Double(content),
+                                            spec: spec))
         }
-        return CGSize(width: off(pos.x, ext.w, containerW),
-                      height: off(pos.y, ext.h, containerH))
+        return CGSize(width: off(pos.x, ext.w, containerW, vertical: false),
+                      height: off(pos.y, ext.h, containerH, vertical: true))
+    }
+
+    /// Wave 52 (lane L7, T2c) — layer the container's `align-items` onto
+    /// the CROSS axis of a resolved static position when the child has no
+    /// align-self of its own (css-align-3 §6.1: `align-self: auto` computes
+    /// to the parent's `align-items`). A child that DECLARES align-self —
+    /// typed non-auto, or any Generic `safe|unsafe <pos>` — keeps
+    /// resolveStatic's answer even when that answer is "no claim" (an
+    /// explicit `stretch`/`normal` behaves as start for an abspos box), and
+    /// an explicit inset on the cross axis keeps the axis nil (§3.5).
+    /// Non-positional items keywords (stretch/normal/baseline/absent) make
+    /// no claim (AbsposGridStaticPosition.base(ofItems:) — the ONE table).
+    static func withAlignItemsFallback(_ pos: StaticPos,
+                                       containerProperties: [IRProperty],
+                                       childProperties: [IRProperty],
+                                       alignItems: AlignmentKeyword?) -> StaticPos {
+        // Positional align-items only; nil leaves the resolver untouched.
+        guard let base = AbsposGridStaticPosition.base(ofItems: alignItems) else { return pos }
+        // The child's own align-self (typed non-auto, or Generic) wins.
+        let declares = childProperties.contains { p in
+            (p.type == "AlignSelf" &&
+                ValueExtractors.extractKeyword(p.data)?.uppercased() != "AUTO") ||
+            (p.type == "Generic" && {
+                if case .object(let o) = p.data { return o["propertyName"]?.stringValue == "align-self" }
+                return false
+            }())
+        }
+        if declares { return pos }
+        // Which physical axis is the cross axis, and its direction.
+        let map = axisMap(
+            flexDirection: containerProperties.first { $0.type == "FlexDirection" }
+                .flatMap { ValueExtractors.extractKeyword($0.data) },
+            writingMode: containerProperties.first { $0.type == "WritingMode" }
+                .flatMap { ValueExtractors.extractKeyword($0.data) },
+            direction: containerProperties.first { $0.type == "Direction" }
+                .flatMap { ValueExtractors.extractKeyword($0.data) })
+        // Cross = vertical for a horizontal main axis (css-flexbox-1 §5).
+        let crossVertical = map.mainIsHorizontal
+        // §3.5: a non-auto cross inset keeps the axis to PositionApplier.
+        if hasNonAutoInset(childProperties, vertical: crossVertical) { return pos }
+        // The fallback claim, carrying the cross axis's own reversal.
+        let spec = AxisSpec(base: base, safe: false, reversed: map.crossReversed)
+        return crossVertical
+            ? StaticPos(x: pos.x, y: pos.y ?? spec, justifyTyped: pos.justifyTyped)
+            : StaticPos(x: pos.x ?? spec, y: pos.y, justifyTyped: pos.justifyTyped)
     }
 }

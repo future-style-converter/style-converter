@@ -1,0 +1,50 @@
+wave-52 L12 (instrument-and-calibration) -> orchestrator, hunk 1 of 2.
+File: tools/titan/wpt-white-canvas.test.mjs (owned by no lane in PLAN.md §2).
+Applies on HEAD 7d9c22a7 (git apply --check verified). Lands in the SAME commit as
+L12's CANVAS_REV bump (capture-browser-ref.mjs) — without it this suite goes red
+on the three literal pins below; with it the suite is green (verified by L12 in a
+scratch tree, see _note.md "Hunks delivered").
+Why: the canvas rev is bumped to '…-rootbg-uamargin' and the frame's html/body rule
+loses `background` (wave-50 B10's verified patch, executed under L12-B).
+
+--- a/tools/titan/wpt-white-canvas.test.mjs	2026-10-05 17:25:31
++++ b/tools/titan/wpt-white-canvas.test.mjs	2026-10-05 17:25:31
+@@ -60,7 +60,11 @@
+   // pinned by noto-pilot.test.mjs, which also pins the default expanded
+   // string byte-for-byte), so the production rev is unchanged and pilot
+   // refs live in their own '…-notopilot' tree.
+-  assert.match(s, /export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins\$\{notoPilotRevSuffix\(\)\}`/, 'cache revision segment missing');
++  // wave-52 L12-B: '…-rootbg-uamargin' == the sixth leg — the canvas
++  // background on :where(html) only (the body half erased z-index:-1 ref ink
++  // and author html canvases) + the UA body box for test-declares/ref-relies-
++  // on-UA pairs (capture-browser-ref.mjs UA_BODY_CSS).
++  assert.match(s, /export const CANVAS_REV = `white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin\$\{notoPilotRevSuffix\(\)\}`/, 'cache revision segment missing');
+   assert.match(s, /join\(REFS_ROOT, wptRef, CANVAS_REV, section/, 'cachePathFor must key on CANVAS_REV');
+ });
+ 
+@@ -89,7 +93,7 @@
+     for (const seg of segs) {
+       // Either it already IS the live rev, or the normaliser knows how to
+       // upgrade it. Nothing else may ship — on EVERY occurrence.
+-      assert.ok(seg === 'white-black-ink-font-lh-imgpad-htmlpins' || stale.includes(`'${seg}'`),
++      assert.ok(seg === 'white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin' || stale.includes(`'${seg}'`),
+         `${sh}: refs-root segment '${seg}' is neither the live rev nor a KNOWN_STALE_CANVAS_REVS entry`);
+     }
+     // Every --refs-root in the file must have been captured by the pattern
+@@ -617,8 +621,15 @@
+   // The box-model rules are EXACTLY the zero-specificity html/body frame —
+   // pin both literals so any widening (extra selectors, changed values)
+   // fails here rather than silently re-boxing the ref.
+-  assert.ok(injected.includes(':where(html, body) { margin: 0; padding: 0; background: ${CANVAS_BG}; }'),
++  // wave-52 L12-B (wave-50 B10's patch): the canvas `background` sits on the
++  // ROOT only — on body it painted an opaque box (CSS 2.1 Appendix E step 3)
++  // over every z-index:-1 body child and over author html canvases.
++  assert.ok(injected.includes(':where(html) { background: ${CANVAS_BG}; }'),
++    'ref root canvas rule missing/changed');
++  assert.ok(injected.includes(':where(html, body) { margin: 0; padding: 0; }'),
+     'ref html/body frame rule missing/changed');
++  assert.doesNotMatch(injected, /:where\([^)]*body[^)]*\)\s*\{[^}]*background/,
++    'the canvas background came back on a body rule — it erases z-index:-1 ref ink');
+   // wave-25 CAL-RC1: the 16px canvas pad is GONE from CSS — it is applied to
+   // the raster (padPngBuffer) so abspos/fixed overlays translate with the
+   // in-flow content instead of staying pinned to the ICB origin. `flow-root`

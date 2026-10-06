@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" tests="9" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:36:59.055Z" hostname="mac-1.home" time="0.002">
+  <properties/>
+  <testcase name="a subtree that answers intrinsics still gets its floor" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.001"/>
+  <testcase name="a zero-width container never squeezes an item below its min-content" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.0"/>
+  <testcase name="the mechanism gate is off until a lane can make it pay" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.0"/>
+  <testcase name="an unbounded offer keeps an unbounded ceiling" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.0"/>
+  <testcase name="a subtree that refuses intrinsics yields no band at all" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.001"/>
+  <testcase name="an item that already fits is measured with the frozen band" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.0"/>
+  <testcase name="a non-refusal failure keeps propagating" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.0"/>
+  <testcase name="squeezed is exactly available-below-min-content" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.0"/>
+  <testcase name="a zero or negative intrinsic degrades to the no-op floor" classname="com.styleconverter.runtime.layout.flexbox.FlexAutoMinSizeTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

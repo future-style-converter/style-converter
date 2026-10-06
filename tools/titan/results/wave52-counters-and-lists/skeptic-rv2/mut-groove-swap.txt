@@ -1,0 +1,42 @@
+20:15:27 groove-swap: pre sha 7bcc1fe79280d4b511cb921ce32a416c30b6959cd91b27b2f8fb3898288ca7f1 expected 7bcc1fe79280d4b511cb921ce32a416c30b6959cd91b27b2f8fb3898288ca7f1 match=True
+mutated sha eb578cab231d3d32fed279642c1d499924882d24afddb5fc4cd201e8ab7b20da
+start 20:15:29 sha eb578cab231d3d32
+gradle exit 1
+  RED BorderSideTwoLineBandTest | every box at least one band tall gets the dev far-edge lines exactly | java.lang.AssertionError: groove outer w=2.0 e=2.0 BOTTOM expected:<1.5> but was:<0.5>
+  RED BorderSideTwoLineBandTest | a 4px bottom groove on a 4px box keeps its halves apart | java.lang.AssertionError: expected:<([2, 3], [0, 1])> but was:<([0, 1], [2, 3])>
+  RED BorderSideTwoLineBandTest | the near-edge sides ignore the band and the box | java.lang.AssertionError: expected:<1.0> but was:<3.0>
+  RED BorderSideZeroTallBandTest | a groove border on a 0-tall box keeps its outer half at the border edge | java.lang.AssertionError: expected:<[2, 3]> but was:<[0, 1]>
+fresh classes 2 tests 18 failures 4 errors 0
+end 20:15:31
+--- probe on MUTATED bytecode ---
+== skeptic probe rows (rows/cols per line, OUTER first) ==
+p1  double BOTTOM w=3.0  box=100.0x3.0 | FIXED(bytecode) outer,inner=[[2][0]] | dev=[[2][0]] | preR1=[[2][2]] | myFormula==bytecode true
+p2  double BOTTOM w=6.0  box=100.0x6.0 | FIXED(bytecode) outer,inner=[[4, 5][0, 1]] | dev=[[4, 5][0, 1]] | preR1=[[4, 5][4, 5]] | myFormula==bytecode true
+p3  double BOTTOM w=6.0  box=100.0x9.0 | FIXED(bytecode) outer,inner=[[7, 8][3, 4]] | dev=[[7, 8][3, 4]] | preR1=[[7, 8][4, 5]] | myFormula==bytecode true
+p4  double END    w=3.0  box=3.0x40.0 | FIXED(bytecode) outer,inner=[[2][0]] | dev=[[2][0]] | preR1=[[2][2]] | myFormula==bytecode true
+p5  groove BOTTOM w=4.0  box=100.0x4.0 | FIXED(bytecode) outer,inner=[[0, 1][2, 3]] | dev=[[2, 3][0, 1]] | preR1=[[2, 3][2, 3]] | myFormula==bytecode false
+p6  groove BOTTOM w=4.0  box=100.0x0.0 | FIXED(bytecode) outer,inner=[[0, 1][2, 3]] | dev=[[-2, -1][-4, -3]] | preR1=[[0, 1][2, 3]] | myFormula==bytecode false
+p7  double BOTTOM w=3.0  box=100.0x2.0 | FIXED(bytecode) outer,inner=[[2][0]] | dev=[[1][-1]] | preR1=[[1][2]] | myFormula==bytecode true
+c1  double BOTTOM w=3.0  box=100.0x50.0 | FIXED(bytecode) outer,inner=[[49][47]] | dev=[[49][47]] | preR1=[[49][47]] | myFormula==bytecode true
+c2  double BOTTOM w=3.0  box=100.0x0.0 | FIXED(bytecode) outer,inner=[[2][0]] | dev=[[-1][-3]] | preR1=[[0][2]] | myFormula==bytecode true
+x1  groove END    w=4.0  box=4.0x40.0 | FIXED(bytecode) outer,inner=[[0, 1][2, 3]] | dev=[[2, 3][0, 1]] | preR1=[[2, 3][2, 3]] | myFormula==bytecode false
+x2  groove END    w=4.0  box=0.0x40.0 | FIXED(bytecode) outer,inner=[[0, 1][2, 3]] | dev=[[-2, -1][-4, -3]] | preR1=[[0, 1][2, 3]] | myFormula==bytecode false
+x3  double END    w=6.0  box=9.0x40.0 | FIXED(bytecode) outer,inner=[[7, 8][3, 4]] | dev=[[7, 8][3, 4]] | preR1=[[7, 8][4, 5]] | myFormula==bytecode true
+x4  groove BOTTOM w=10.0 box=100.0x12.0 | FIXED(bytecode) outer,inner=[[2, 3, 4, 5, 6][7, 8, 9, 10, 11]] | dev=[[7, 8, 9, 10, 11][2, 3, 4, 5, 6]] | preR1=[[7, 8, 9, 10, 11][5, 6, 7, 8, 9]] | myFormula==bytecode false
+x5  double BOTTOM w=14.0 box=100.0x20.0 | FIXED(bytecode) outer,inner=[[15, 16, 17, 18, 19][6, 7, 8, 9, 10]] | dev=[[15, 16, 17, 18, 19][6, 7, 8, 9, 10]] | preR1=[[15, 16, 17, 18, 19][9, 10, 11, 12, 13]] | myFormula==bytecode true
+x6  double BOTTOM w=9.0  box=100.0x5.0 | FIXED(bytecode) outer,inner=[[6, 7, 8][0, 1, 2]] | dev=[[2, 3, 4][-4, -3, -2]] | preR1=[[2, 3, 4][6, 7, 8]] | myFormula==bytecode true
+x7  groove BOTTOM w=2.0  box=100.0x1.0 | FIXED(bytecode) outer,inner=[[0][1]] | dev=[[0][-1]] | preR1=[[0][1]] | myFormula==bytecode false
+x8  double TOP    w=6.0  box=100.0x0.0 | FIXED(bytecode) outer,inner=[[0, 1][4, 5]] | dev=[[-2, -1][-6, -5]] | preR1=[[0, 1][4, 5]] | myFormula==bytecode false
+x9  groove START  w=4.0  box=0.0x40.0 | FIXED(bytecode) outer,inner=[[2, 3][0, 1]] | dev=[[-2, -1][-4, -3]] | preR1=[[0, 1][2, 3]] | myFormula==bytecode true
+BAD groove BOTTOM w=2.0 e=0.0 [0.5, 1.5]
+BAD groove END w=2.0 e=0.0 [0.5, 1.5]
+BAD groove BOTTOM w=2.0 e=0.125 [0.5, 1.5]
+BAD groove END w=2.0 e=0.125 [0.5, 1.5]
+BAD groove BOTTOM w=2.0 e=0.25 [0.5, 1.5]
+BAD groove END w=2.0 e=0.25 [0.5, 1.5]
+BAD groove BOTTOM w=2.0 e=0.375 [0.5, 1.5]
+BAD groove END w=2.0 e=0.375 [0.5, 1.5]
+BAD groove BOTTOM w=2.0 e=0.5 [0.5, 1.5]
+== sweep: cases=20852 invariant failures=11228 dev-mismatch(e>=w)=19188
+== single stroke: cases=5614 mismatches=0
+20:15:31 restored sha 7bcc1fe79280d4b511cb921ce32a416c30b6959cd91b27b2f8fb3898288ca7f1 byte_exact=True

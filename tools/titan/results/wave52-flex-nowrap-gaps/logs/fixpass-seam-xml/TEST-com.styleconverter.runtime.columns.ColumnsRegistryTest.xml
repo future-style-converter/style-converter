@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.columns.ColumnsRegistryTest" tests="1" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:35:18.228Z" hostname="mac-1.home" time="0.0">
+  <properties/>
+  <testcase name="all 8 column properties are registered under columns owner" classname="com.styleconverter.runtime.columns.ColumnsRegistryTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" tests="16" skipped="0" failures="1" errors="0" timestamp="2026-10-05T17:07:05.948Z" hostname="mac-1.home" time="0.096">
+  <properties/>
+  <testcase name="K2b the self-end container ends the verbatim abspos child" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.031"/>
+  <testcase name="container stretch makes no positional claim - start default" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="auto self falls back to container items values" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="overlay alignment folds to the canonical Compose alignments" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="nothing declared resolves both axes to start" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="an explicit inset stands the axis down to start" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.004"/>
+  <testcase name="child align-self centers the block axis - typed wire" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="child justify-self drives the inline axis" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="relative and sticky children stay grid items" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.026"/>
+  <testcase name="K3a last baseline resolves to its safe self-end fallback on both wires" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="placement childIndex aligns with the partitioned in-flow list" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.002"/>
+  <testcase name="partition splits abspos out and preserves relative order" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.001"/>
+  <testcase name="K4 the section-9-2 overlay provides itself as the static-position owner" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.024">
+    <failure message="java.lang.AssertionError" type="java.lang.AssertionError">java.lang.AssertionError
+	at org.junit.Assert.fail(Assert.java:87)
+	at org.junit.Assert.assertTrue(Assert.java:42)
+	at org.junit.Assert.assertTrue(Assert.java:53)
+	at com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest.K4 the section-9-2 overlay provides itself as the static-position owner(GridAbsposPartitionTest.kt:301)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.junit.runners.model.FrameworkMethod$1.runReflectiveCall(FrameworkMethod.java:59)
+	at org.junit.internal.runners.model.ReflectiveCallable.run(ReflectiveCallable.java:12)
+	at org.junit.runners.model.FrameworkMethod.invokeExplosively(FrameworkMethod.java:56)
+	at org.junit.internal.runners.statements.InvokeMethod.evaluate(InvokeMethod.java:17)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.BlockJUnit4ClassRunner$1.evaluate(BlockJUnit4ClassRunner.java:100)
+	at org.junit.runners.ParentRunner.runLeaf(ParentRunner.java:366)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:103)
+	at org.junit.runners.BlockJUnit4ClassRunner.runChild(BlockJUnit4ClassRunner.java:63)
+	at org.junit.runners.ParentRunner$4.run(ParentRunner.java:331)
+	at org.junit.runners.ParentRunner$1.schedule(ParentRunner.java:79)
+	at org.junit.runners.ParentRunner.runChildren(ParentRunner.java:329)
+	at org.junit.runners.ParentRunner.access$100(ParentRunner.java:66)
+	at org.junit.runners.ParentRunner$2.evaluate(ParentRunner.java:293)
+	at org.junit.runners.ParentRunner$3.evaluate(ParentRunner.java:306)
+	at org.junit.runners.ParentRunner.run(ParentRunner.java:413)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:137)
+	at org.junit.runner.JUnitCore.run(JUnitCore.java:115)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.runRequest(JUnitTestExecutor.java:175)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:84)
+	at org.gradle.api.internal.tasks.testing.junit.JUnitTestExecutor.accept(JUnitTestExecutor.java:47)
+	at org.gradle.api.internal.tasks.testing.junit.AbstractJUnitTestDefinitionProcessor.processTestDefinition(AbstractJUnitTestDefinitionProcessor.java:65)
+	at org.gradle.api.internal.tasks.testing.SuiteTestDefinitionProcessor.processTestDefinition(SuiteTestDefinitionProcessor.java:53)
+	at java.base/jdk.internal.reflect.DirectMethodHandleAccessor.invoke(DirectMethodHandleAccessor.java:103)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:580)
+	at org.gradle.internal.dispatch.MethodInvocation.invokeOn(MethodInvocation.java:77)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:28)
+	at org.gradle.internal.dispatch.ReflectionDispatch.dispatch(ReflectionDispatch.java:19)
+	at org.gradle.internal.dispatch.ContextClassLoaderDispatch.dispatch(ContextClassLoaderDispatch.java:33)
+	at org.gradle.internal.dispatch.ProxyDispatchAdapter$DispatchingInvocationHandler.invoke(ProxyDispatchAdapter.java:88)
+	at jdk.proxy1/jdk.proxy1.$Proxy4.processTestDefinition(Unknown Source)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker$2.run(TestWorker.java:178)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.executeAndMaintainThreadName(TestWorker.java:126)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:103)
+	at org.gradle.api.internal.tasks.testing.worker.TestWorker.execute(TestWorker.java:63)
+	at org.gradle.process.internal.worker.child.ActionExecutionWorker.execute(ActionExecutionWorker.java:56)
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:122)
+	at org.gradle.process.internal.worker.child.SystemApplicationClassLoaderWorker.call(SystemApplicationClassLoaderWorker.java:72)
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.run(GradleWorkerMain.java:69)
+	at worker.org.gradle.process.internal.worker.GradleWorkerMain.main(GradleWorkerMain.java:74)
+</failure>
+  </testcase>
+  <testcase name="safe center rides the Generic wire into the block spec" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="K3b a baseline child does not inherit the container's center" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <testcase name="K2a align-items self-end and self-start fold to the positional enums" classname="com.styleconverter.runtime.layout.grid.GridAbsposPartitionTest" time="0.0"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>

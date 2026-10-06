@@ -1,0 +1,1080 @@
+{
+ "method": "ssim.js fast, RGBA, same-size; see header",
+ "natives": [
+  {
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html",
+   "platform": "ios",
+   "recorded": 0.9874,
+   "wptPass": true,
+   "now": 0.9874,
+   "moved": 8,
+   "after": 0.9882
+  },
+  {
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html",
+   "platform": "ios",
+   "recorded": 0.9921,
+   "wptPass": true,
+   "now": 0.9921,
+   "moved": 28,
+   "after": 0.9996
+  },
+  {
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-margin-001.html",
+   "platform": "ios",
+   "recorded": 0.9909,
+   "wptPass": true,
+   "now": 0.9909,
+   "moved": 20,
+   "after": 0.9968
+  },
+  {
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-margin-002.html",
+   "platform": "ios",
+   "recorded": 0.991,
+   "wptPass": true,
+   "now": 0.991,
+   "moved": 20,
+   "unmapped": "containers IR 20 vs capture 21"
+  },
+  {
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/abspos/flex-abspos-staticpos-margin-003.html",
+   "platform": "ios",
+   "recorded": 0.9857,
+   "wptPass": true,
+   "now": 0.9857,
+   "moved": 20,
+   "after": 0.9951
+  },
+  {
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/abspos/position-absolute-containing-block-001.html",
+   "platform": "ios",
+   "recorded": 0.9505,
+   "wptPass": true,
+   "now": 0.9505,
+   "moved": 1,
+   "after": 1
+  },
+  {
+   "section": "css-flexbox",
+   "test": "css/css-flexbox/abspos/position-absolute-containing-block-002.html",
+   "platform": "ios",
+   "recorded": 0.9373,
+   "wptPass": false,
+   "now": 0.9373,
+   "moved": 1,
+   "after": 0.9967
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-center-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9856,
+   "wptPass": true,
+   "now": 0.9856,
+   "moved": 1,
+   "after": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-center.html",
+   "platform": "android",
+   "recorded": 0.9808,
+   "wptPass": true,
+   "now": 0.9808,
+   "moved": 1,
+   "after": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-end-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9726,
+   "wptPass": true,
+   "now": 0.9726,
+   "moved": 1,
+   "after": 0.9942
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-end.html",
+   "platform": "android",
+   "recorded": 0.9704,
+   "wptPass": true,
+   "now": 0.9704,
+   "moved": 1,
+   "after": 0.9992
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-flex-end-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9726,
+   "wptPass": true,
+   "now": 0.9726,
+   "moved": 1,
+   "after": 0.9942
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-flex-end.html",
+   "platform": "android",
+   "recorded": 0.9704,
+   "wptPass": true,
+   "now": 0.9704,
+   "moved": 1,
+   "after": 0.9992
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-self-end-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9698,
+   "wptPass": true,
+   "now": 0.9698,
+   "moved": 1,
+   "after": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-items-self-end.html",
+   "platform": "android",
+   "recorded": 0.9715,
+   "wptPass": true,
+   "now": 0.9715,
+   "moved": 1,
+   "after": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-001.html",
+   "platform": "ios",
+   "recorded": 0.9661,
+   "wptPass": true,
+   "now": 0.9661,
+   "moved": 2,
+   "after": 0.9669
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-001.html",
+   "platform": "android",
+   "recorded": 0.9665,
+   "wptPass": true,
+   "now": 0.9665,
+   "moved": 2,
+   "unmapped": "containers IR 22 vs capture 33"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html",
+   "platform": "android",
+   "recorded": 0.9737,
+   "wptPass": true,
+   "now": 0.9737,
+   "moved": 16,
+   "unmapped": "containers IR 22 vs capture 36"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html",
+   "platform": "ios",
+   "recorded": 0.9771,
+   "wptPass": true,
+   "now": 0.9771,
+   "moved": 2,
+   "after": 0.9787
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-center-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9856,
+   "wptPass": true,
+   "now": 0.9856,
+   "moved": 1,
+   "after": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-center.html",
+   "platform": "android",
+   "recorded": 0.9808,
+   "wptPass": true,
+   "now": 0.9808,
+   "moved": 1,
+   "after": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-end-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9726,
+   "wptPass": true,
+   "now": 0.9726,
+   "moved": 1,
+   "after": 0.9942
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-end.html",
+   "platform": "android",
+   "recorded": 0.9704,
+   "wptPass": true,
+   "now": 0.9704,
+   "moved": 1,
+   "after": 0.9992
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-flex-end-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9726,
+   "wptPass": true,
+   "now": 0.9726,
+   "moved": 1,
+   "after": 0.9942
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-flex-end.html",
+   "platform": "android",
+   "recorded": 0.9704,
+   "wptPass": true,
+   "now": 0.9704,
+   "moved": 1,
+   "after": 0.9992
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html",
+   "platform": "android",
+   "recorded": 0.9747,
+   "wptPass": true,
+   "now": 0.9747,
+   "moved": 2,
+   "unmapped": "no mark colour / box for abspos__grid-abspos-staticpos-align-self-img-002__0__15__0-342"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html",
+   "platform": "ios",
+   "recorded": 0.9952,
+   "wptPass": true,
+   "now": 0.9952,
+   "moved": 2,
+   "after": 0.9948
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html",
+   "platform": "android",
+   "recorded": 0.9951,
+   "wptPass": true,
+   "now": 0.9951,
+   "moved": 2,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html",
+   "platform": "android",
+   "recorded": 0.9949,
+   "wptPass": true,
+   "now": 0.9949,
+   "moved": 2,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html",
+   "platform": "ios",
+   "recorded": 0.9951,
+   "wptPass": true,
+   "now": 0.9951,
+   "moved": 2,
+   "after": 0.9966
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html",
+   "platform": "ios",
+   "recorded": 0.9649,
+   "wptPass": true,
+   "now": 0.9649,
+   "moved": 2,
+   "after": 0.9656
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html",
+   "platform": "android",
+   "recorded": 0.9639,
+   "wptPass": true,
+   "now": 0.9639,
+   "moved": 2,
+   "unmapped": "containers IR 26 vs capture 39"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html",
+   "platform": "ios",
+   "recorded": 0.9649,
+   "wptPass": true,
+   "now": 0.9649,
+   "moved": 2,
+   "after": 0.9656
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html",
+   "platform": "android",
+   "recorded": 0.9639,
+   "wptPass": true,
+   "now": 0.9639,
+   "moved": 2,
+   "unmapped": "containers IR 26 vs capture 39"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html",
+   "platform": "android",
+   "recorded": 0.9588,
+   "wptPass": true,
+   "now": 0.9588,
+   "moved": 10,
+   "unmapped": "containers IR 26 vs capture 52"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html",
+   "platform": "ios",
+   "recorded": 0.9777,
+   "wptPass": true,
+   "now": 0.9777,
+   "moved": 2,
+   "after": 0.9789
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html",
+   "platform": "android",
+   "recorded": 0.9588,
+   "wptPass": true,
+   "now": 0.9588,
+   "moved": 10,
+   "unmapped": "containers IR 26 vs capture 52"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html",
+   "platform": "ios",
+   "recorded": 0.9777,
+   "wptPass": true,
+   "now": 0.9777,
+   "moved": 2,
+   "after": 0.9789
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html",
+   "platform": "ios",
+   "recorded": 0.9948,
+   "wptPass": true,
+   "now": 0.9948,
+   "moved": 1,
+   "after": 0.9949
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html",
+   "platform": "android",
+   "recorded": 0.9947,
+   "wptPass": true,
+   "now": 0.9947,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html",
+   "platform": "ios",
+   "recorded": 0.9948,
+   "wptPass": true,
+   "now": 0.9948,
+   "moved": 1,
+   "after": 0.9949
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html",
+   "platform": "android",
+   "recorded": 0.9947,
+   "wptPass": true,
+   "now": 0.9947,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html",
+   "platform": "android",
+   "recorded": 0.9951,
+   "wptPass": true,
+   "now": 0.9951,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 4"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html",
+   "platform": "ios",
+   "recorded": 0.995,
+   "wptPass": true,
+   "now": 0.995,
+   "moved": 1,
+   "after": 0.9966
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html",
+   "platform": "android",
+   "recorded": 0.9951,
+   "wptPass": true,
+   "now": 0.9951,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 4"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html",
+   "platform": "ios",
+   "recorded": 0.995,
+   "wptPass": true,
+   "now": 0.995,
+   "moved": 1,
+   "after": 0.9966
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-self-end-large-border-padding.html",
+   "platform": "android",
+   "recorded": 0.9726,
+   "wptPass": true,
+   "now": 0.9726,
+   "moved": 1,
+   "after": 0.9942
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-self-end.html",
+   "platform": "android",
+   "recorded": 0.9704,
+   "wptPass": true,
+   "now": 0.9704,
+   "moved": 1,
+   "after": 0.9992
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html",
+   "platform": "ios",
+   "recorded": 0.9612,
+   "wptPass": true,
+   "now": 0.9612,
+   "moved": 2,
+   "after": 0.9614
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html",
+   "platform": "android",
+   "recorded": 0.9611,
+   "wptPass": true,
+   "now": 0.9611,
+   "moved": 2,
+   "unmapped": "containers IR 26 vs capture 39"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html",
+   "platform": "ios",
+   "recorded": 0.9614,
+   "wptPass": true,
+   "now": 0.9614,
+   "moved": 2,
+   "after": 0.9616
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html",
+   "platform": "android",
+   "recorded": 0.9613,
+   "wptPass": true,
+   "now": 0.9613,
+   "moved": 2,
+   "unmapped": "containers IR 26 vs capture 39"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html",
+   "platform": "android",
+   "recorded": 0.97,
+   "wptPass": true,
+   "now": 0.97,
+   "moved": 10,
+   "unmapped": "containers IR 26 vs capture 43"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html",
+   "platform": "ios",
+   "recorded": 0.9667,
+   "wptPass": true,
+   "now": 0.9667,
+   "moved": 2,
+   "after": 0.9669
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html",
+   "platform": "android",
+   "recorded": 0.9711,
+   "wptPass": true,
+   "now": 0.9711,
+   "moved": 10,
+   "unmapped": "containers IR 26 vs capture 43"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html",
+   "platform": "ios",
+   "recorded": 0.9682,
+   "wptPass": true,
+   "now": 0.9682,
+   "moved": 2,
+   "after": 0.9684
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html",
+   "platform": "ios",
+   "recorded": 0.9947,
+   "wptPass": true,
+   "now": 0.9947,
+   "moved": 1,
+   "after": 0.9946
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html",
+   "platform": "android",
+   "recorded": 0.9946,
+   "wptPass": true,
+   "now": 0.9946,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html",
+   "platform": "ios",
+   "recorded": 0.9947,
+   "wptPass": true,
+   "now": 0.9947,
+   "moved": 1,
+   "after": 0.9946
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html",
+   "platform": "android",
+   "recorded": 0.9946,
+   "wptPass": true,
+   "now": 0.9946,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html",
+   "platform": "android",
+   "recorded": 0.9963,
+   "wptPass": true,
+   "now": 0.9963,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html",
+   "platform": "ios",
+   "recorded": 0.9964,
+   "wptPass": true,
+   "now": 0.9964,
+   "moved": 1,
+   "after": 0.995
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html",
+   "platform": "android",
+   "recorded": 0.9963,
+   "wptPass": true,
+   "now": 0.9963,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 3"
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html",
+   "platform": "ios",
+   "recorded": 0.9964,
+   "wptPass": true,
+   "now": 0.9964,
+   "moved": 1,
+   "after": 0.995
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-justify-self-002.html",
+   "platform": "android",
+   "recorded": 0.974,
+   "wptPass": true,
+   "now": 0.974,
+   "moved": 18,
+   "unmapped": "containers IR 26 vs capture 43"
+  },
+  {
+   "section": "css-position",
+   "test": "css/css-position/position-absolute-center-003.html",
+   "platform": "ios",
+   "recorded": 0.9973,
+   "wptPass": true,
+   "now": 0.9973,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 0"
+  },
+  {
+   "section": "css-position",
+   "test": "css/css-position/position-absolute-center-004.html",
+   "platform": "ios",
+   "recorded": 0.9973,
+   "wptPass": true,
+   "now": 0.9973,
+   "moved": 1,
+   "unmapped": "containers IR 2 vs capture 0"
+  }
+ ],
+ "web": [
+  {
+   "section": "css-contain",
+   "test": "css/css-contain/contain-inline-size-grid-indefinite-height-min-height-flex-row.html",
+   "recorded": 0.9729,
+   "wptPass": true,
+   "differingPx": 5002,
+   "unexplainedPx": 2,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-001.html",
+   "recorded": 0.9799,
+   "wptPass": true,
+   "differingPx": 1400,
+   "unexplainedPx": 600,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html",
+   "recorded": 0.9809,
+   "wptPass": true,
+   "differingPx": 1220,
+   "unexplainedPx": 420,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-001.html",
+   "recorded": 1,
+   "wptPass": true,
+   "differingPx": 0,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html",
+   "recorded": 1,
+   "wptPass": true,
+   "differingPx": 0,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-001.html",
+   "recorded": 0.9954,
+   "wptPass": true,
+   "differingPx": 384,
+   "unexplainedPx": 384,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-002.html",
+   "recorded": 0.9954,
+   "wptPass": true,
+   "differingPx": 396,
+   "unexplainedPx": 396,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html",
+   "recorded": 0.9981,
+   "wptPass": true,
+   "differingPx": 112,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html",
+   "recorded": 0.9983,
+   "wptPass": true,
+   "differingPx": 112,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html",
+   "recorded": 0.9782,
+   "wptPass": true,
+   "differingPx": 1640,
+   "unexplainedPx": 776,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html",
+   "recorded": 0.9782,
+   "wptPass": true,
+   "differingPx": 1640,
+   "unexplainedPx": 776,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html",
+   "recorded": 0.9789,
+   "wptPass": true,
+   "differingPx": 1412,
+   "unexplainedPx": 548,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html",
+   "recorded": 0.9789,
+   "wptPass": true,
+   "differingPx": 1412,
+   "unexplainedPx": 548,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html",
+   "recorded": 0.9979,
+   "wptPass": true,
+   "differingPx": 144,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html",
+   "recorded": 0.9979,
+   "wptPass": true,
+   "differingPx": 144,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html",
+   "recorded": 0.9983,
+   "wptPass": true,
+   "differingPx": 144,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html",
+   "recorded": 0.9983,
+   "wptPass": true,
+   "differingPx": 144,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html",
+   "recorded": 0.9858,
+   "wptPass": true,
+   "differingPx": 962,
+   "unexplainedPx": 394,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html",
+   "recorded": 0.9859,
+   "wptPass": true,
+   "differingPx": 962,
+   "unexplainedPx": 394,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html",
+   "recorded": 0.9871,
+   "wptPass": true,
+   "differingPx": 858,
+   "unexplainedPx": 290,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html",
+   "recorded": 0.9872,
+   "wptPass": true,
+   "differingPx": 858,
+   "unexplainedPx": 290,
+   "predicted": null
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html",
+   "recorded": 0.9974,
+   "wptPass": true,
+   "differingPx": 160,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html",
+   "recorded": 0.9974,
+   "wptPass": true,
+   "differingPx": 160,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html",
+   "recorded": 0.9978,
+   "wptPass": true,
+   "differingPx": 160,
+   "unexplainedPx": 0,
+   "predicted": 1
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html",
+   "recorded": 0.9978,
+   "wptPass": true,
+   "differingPx": 160,
+   "unexplainedPx": 0,
+   "predicted": 1
+  }
+ ],
+ "proxy": [
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-001.html",
+   "android": 0.9665,
+   "ios": 0.9661,
+   "differingPx": 150,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html",
+   "android": 0.9737,
+   "ios": 0.9771,
+   "differingPx": 1083,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html",
+   "android": 0.9747,
+   "ios": 0.978,
+   "differingPx": 1392,
+   "unexplainedPx": 1392
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html",
+   "android": 0.9951,
+   "ios": 0.9952,
+   "differingPx": 18,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html",
+   "android": 0.9949,
+   "ios": 0.9951,
+   "differingPx": 105,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html",
+   "android": 0.9639,
+   "ios": 0.9649,
+   "differingPx": 598,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html",
+   "android": 0.9639,
+   "ios": 0.9649,
+   "differingPx": 598,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html",
+   "android": 0.9588,
+   "ios": 0.9777,
+   "differingPx": 2291,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html",
+   "android": 0.9588,
+   "ios": 0.9777,
+   "differingPx": 2291,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html",
+   "android": 0.9947,
+   "ios": 0.9948,
+   "differingPx": 46,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html",
+   "android": 0.9947,
+   "ios": 0.9948,
+   "differingPx": 46,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html",
+   "android": 0.9951,
+   "ios": 0.995,
+   "differingPx": 180,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html",
+   "android": 0.9951,
+   "ios": 0.995,
+   "differingPx": 180,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html",
+   "android": 0.9611,
+   "ios": 0.9612,
+   "differingPx": 128,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html",
+   "android": 0.9613,
+   "ios": 0.9614,
+   "differingPx": 128,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html",
+   "android": 0.97,
+   "ios": 0.9667,
+   "differingPx": 896,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html",
+   "android": 0.9711,
+   "ios": 0.9682,
+   "differingPx": 896,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html",
+   "android": 0.9946,
+   "ios": 0.9947,
+   "differingPx": 10,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html",
+   "android": 0.9946,
+   "ios": 0.9947,
+   "differingPx": 10,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html",
+   "android": 0.9963,
+   "ios": 0.9964,
+   "differingPx": 10,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html",
+   "android": 0.9963,
+   "ios": 0.9964,
+   "differingPx": 10,
+   "unexplainedPx": 0
+  },
+  {
+   "section": "css-grid",
+   "test": "css/css-grid/abspos/grid-abspos-staticpos-justify-self-002.html",
+   "android": 0.974,
+   "ios": 0.9821,
+   "differingPx": 1269,
+   "unexplainedPx": 0
+  }
+ ]
+}

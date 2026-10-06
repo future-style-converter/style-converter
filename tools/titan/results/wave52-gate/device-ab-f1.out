@@ -1,0 +1,10 @@
+[gate-driver 23:52:05] run-id=wave52-ab-f1 sections=1 max-tests=48 android=1 ios=1 timeout=50min resume=0
+[own-processes] emulator pid 49881 was not launched by provision-devices.sh — not touching it
+[gate-driver 23:52:11] host after stopping our processes: load1=2.88 free+inactive=5323MB (ceiling load 6, floor 2048MB)
+[gate-driver 23:55:19] provision rc=0 android=[emulator-5554 ] ios=[0BB986A6-1EAD-4916-9276-079235324DA1 ] ANDROID_SERIAL=emulator-5554
+[gate-driver 23:55:19] css-text: attempt 1 starting
+[gate-driver 23:57:49] css-text: attempt 1 rc=0 columns: web=48/48 android=48/48 ios=48/48 
+[own-processes] emulator pid 49881 was not launched by provision-devices.sh — not touching it
+gate-driver summary — run-id wave52-ab-f1 — 2026-10-05T23:57:49Z
+css-text                   OK attempt=1 web=48/48 android=48/48 ios=48/48 
+score: node tools/titan/score-gate.mjs <previous-run-id> wave52-ab-f1

@@ -1,0 +1,12 @@
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - `__dirname` (vite.config.ts:146:27). Use `import.meta.dirname` instead
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v4.1.10 /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/web-harness
+
+
+ Test Files  5 passed (5)
+      Tests  65 passed (65)
+   Start at  18:43:09
+   Duration  3.09s (transform 9.13s, setup 0ms, import 5.12s, tests 8.08s, environment 1ms)
+

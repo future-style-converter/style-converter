@@ -131,7 +131,12 @@ public enum FixedHoist {
     ///     taken over (wave 35, lane B1 — css-transforms-1 §3 /
     ///     css-transforms-2 §8; see `strippingFixedDescendants`).
     /// Nested ABSOLUTE descendants are never touched — they keep the
-    /// wave-8/9 positioned-ancestor padding-box containing block.
+    /// wave-8/9 positioned-ancestor padding-box containing block — with
+    /// ONE wave-52 exception (lane L3, fix F3): an inset absolute
+    /// descendant of a `column-span: all` box whose containing-block chain,
+    /// RESTARTED at the spanner per css-multicol-1 §6.1, has no positioned
+    /// box hoists here too (CSS 2.1 §10.1 rule 4 → the initial containing
+    /// block). See `MulticolSpannerContainingBlock.hoistsToInitialContainingBlock`.
     ///
     /// ── PARITY NOTE — A/B PENDING (rewritten by retro P2b, A4#0/A10#4) ──
     /// That last clause is where this rule table still DIVERGES from its
@@ -277,8 +282,23 @@ public enum FixedHoist {
     ///
     /// Defaulted false so the parameter is additive — every pre-wave-35 call
     /// site (tests included) keeps the wave-17 always-strip behaviour.
+    ///
+    /// Wave 52 (lane L3, fix F3) — `hasPositionedAncestor`,
+    /// `positionedAtMulticol` and `underSpanner` thread the CSS 2.1 §10.1
+    /// positioned-ancestor chain through the SAME walk, restarted at a
+    /// `column-span: all` box per css-multicol-1 §6.1
+    /// (`MulticolSpannerContainingBlock` — the Compose CanvasRootHoist
+    /// walk's twin). They serve ONE consumer: an inset ABSOLUTE descendant
+    /// of a spanner whose restarted chain has no positioned box hoists to
+    /// the canvas-root overlay (the initial containing block, §10.1 rule 4)
+    /// exactly like a fixed descendant. All three default to the root
+    /// context (no ancestor, no multicol, no spanner), so every pre-wave-52
+    /// call site — split's roots included — is byte-identical.
     static func strippingFixedDescendants(_ component: IRComponent,
-                                          hasTransformedAncestor: Bool = false)
+                                          hasTransformedAncestor: Bool = false,
+                                          hasPositionedAncestor: Bool = false,
+                                          positionedAtMulticol: Bool? = nil,
+                                          underSpanner: Bool = false)
         -> (kept: IRComponent, hoisted: [IRComponent]) {
         // Leaf (nil children): nothing to strip, return verbatim.
         guard let children = component.children else { return (component, []) }
@@ -287,6 +307,26 @@ public enum FixedHoist {
         // once per level, not per child.
         let childTransformed = hasTransformedAncestor
             || TransformContainingBlock.establishes(component)
+        // Wave 52 (F3): the positioned chain the children see — §10.1
+        // OR-accumulation, restarted at a spanner from its multicol
+        // container's state (the two MulticolSpannerContainingBlock rules,
+        // byte-for-byte the Compose CanvasRootHoist walk).
+        let childPositioned = MulticolSpannerContainingBlock.childPositionedAncestor(
+            ancestorPositioned: hasPositionedAncestor,
+            positionedAtMulticol: positionedAtMulticol,
+            properties: component.properties)
+        // …the multicol stamp the children inherit (set at a container,
+        // passed through everywhere else, nil outside any multicol)…
+        let childAtMulticol = MulticolSpannerContainingBlock.childPositionedAtMulticol(
+            positionedAtMulticol: positionedAtMulticol,
+            childPositionedAncestor: childPositioned,
+            properties: component.properties)
+        // …and whether the §6.1 restart has FIRED on this path: THIS box is
+        // a spanner inside a multicol (a nil stamp means no multicol
+        // ancestor, where `column-span` computes to none — nothing restarts).
+        let childUnderSpanner = underSpanner
+            || (positionedAtMulticol != nil
+                && MulticolSpannerContainingBlock.isSpanner(component.properties))
         // Walk children in order, recursing FIRST so a fixed grandchild
         // inside a kept child hoists too (any depth).
         var keptChildren: [IRComponent] = []
@@ -296,13 +336,33 @@ public enum FixedHoist {
         // fixed-free trees reference-identical to their input.
         var changed = false
         for child in children {
+            // One recursion shape for every branch below (the pre-wave-52
+            // code recursed per branch with identical arguments), so the
+            // ancestry flags can never diverge between them.
+            let sub = strippingFixedDescendants(child,
+                                                hasTransformedAncestor: childTransformed,
+                                                hasPositionedAncestor: childPositioned,
+                                                positionedAtMulticol: childAtMulticol,
+                                                underSpanner: childUnderSpanner)
             if isFixed(child) && !childTransformed {
                 // F1: the fixed box leaves its parent entirely — no flow
                 // space, no parent-anchored inset basis. Its own subtree
                 // is stripped too (a fixed box nested in a fixed box
                 // also anchors at the viewport).
-                let sub = strippingFixedDescendants(child,
-                                                    hasTransformedAncestor: childTransformed)
+                hoisted.append(sub.kept)
+                hoisted.append(contentsOf: sub.hoisted)
+                changed = true
+            } else if MulticolSpannerContainingBlock.hoistsToInitialContainingBlock(
+                        child, underSpanner: childUnderSpanner,
+                        hasPositionedAncestor: childPositioned,
+                        hasTransformedAncestor: childTransformed) {
+                // Wave 52 (F3): the spanner's inset abspos descendant has
+                // NO containing block inside the multicol (§6.1 skipped the
+                // column item) and none outside it → the initial containing
+                // block (§10.1 rule 4). Same mount as a fixed box: the
+                // canvas-root overlay, whose ICB-sized GeometryReader gives
+                // `bottom`/`right` their basis. Pre-order kept: it follows
+                // its parent's earlier hoists and precedes later siblings'.
                 hoisted.append(sub.kept)
                 hoisted.append(contentsOf: sub.hoisted)
                 changed = true
@@ -312,8 +372,6 @@ public enum FixedHoist {
                 // whose containing block a transformed ancestor claimed
                 // (`childTransformed`), which stays in the tree and renders
                 // through its parent's out-of-flow overlay.
-                let sub = strippingFixedDescendants(child,
-                                                    hasTransformedAncestor: childTransformed)
                 keptChildren.append(sub.kept)
                 hoisted.append(contentsOf: sub.hoisted)
                 // Rebuild only if the recursion actually changed it.

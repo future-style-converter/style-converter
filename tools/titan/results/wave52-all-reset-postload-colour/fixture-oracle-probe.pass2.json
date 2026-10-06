@@ -1,0 +1,360 @@
+{
+ "generated": "2026-10-05T18:25:20.079Z",
+ "fixture": "fixtures/combinations/all-then-color.json",
+ "runs": {
+  "css": {
+   "ATC_AllThenProps": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_PropsThenAll_InGreenParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_InitialUnderRedParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     200,
+     60
+    ],
+    "expectBox": [
+     200,
+     60
+    ]
+   },
+   "ATC_DirectionSurvives": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     200,
+     40
+    ],
+    "expectBox": [
+     200,
+     40
+    ]
+   }
+  },
+  "css_M1_preFix": {
+   "ATC_AllThenProps": {
+    "ok": false,
+    "fill": null,
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_PropsThenAll_InGreenParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_InitialUnderRedParent": {
+    "ok": false,
+    "fill": [
+     52,
+     152,
+     219
+    ],
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     200,
+     60
+    ]
+   },
+   "ATC_DirectionSurvives": {
+    "ok": false,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     30,
+     23
+    ],
+    "expectBox": [
+     200,
+     40
+    ]
+   }
+  },
+  "css_M2_displayBeforeAll": {
+   "ATC_AllThenProps": {
+    "ok": false,
+    "fill": null,
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_PropsThenAll_InGreenParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_InitialUnderRedParent": {
+    "ok": false,
+    "fill": [
+     52,
+     152,
+     219
+    ],
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     200,
+     60
+    ]
+   },
+   "ATC_DirectionSurvives": {
+    "ok": false,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     30,
+     23
+    ],
+    "expectBox": [
+     200,
+     40
+    ]
+   }
+  },
+  "css_M3_keepBeforeAll": {
+   "ATC_AllThenProps": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_PropsThenAll_InGreenParent": {
+    "ok": false,
+    "fill": [
+     231,
+     76,
+     60
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_InitialUnderRedParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     200,
+     60
+    ],
+    "expectBox": [
+     200,
+     60
+    ]
+   },
+   "ATC_DirectionSurvives": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     200,
+     40
+    ],
+    "expectBox": [
+     200,
+     40
+    ]
+   }
+  },
+  "css_M4_orderBlindDrop": {
+   "ATC_AllThenProps": {
+    "ok": false,
+    "fill": null,
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_PropsThenAll_InGreenParent": {
+    "ok": true,
+    "fill": [
+     46,
+     204,
+     113
+    ],
+    "box": [
+     160,
+     60
+    ],
+    "expectBox": [
+     160,
+     60
+    ]
+   },
+   "ATC_InitialUnderRedParent": {
+    "ok": false,
+    "fill": [
+     52,
+     152,
+     219
+    ],
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     200,
+     60
+    ]
+   },
+   "ATC_DirectionSurvives": {
+    "ok": false,
+    "fill": [
+     0,
+     0,
+     0
+    ],
+    "box": [
+     0,
+     0
+    ],
+    "expectBox": [
+     200,
+     40
+    ]
+   }
+  }
+ },
+ "verdict": {
+  "css": {
+   "violations": [],
+   "green": true
+  },
+  "css_M1_preFix": {
+   "violations": [
+    "ATC_AllThenProps",
+    "ATC_InitialUnderRedParent",
+    "ATC_DirectionSurvives"
+   ],
+   "caught": true
+  },
+  "css_M2_displayBeforeAll": {
+   "violations": [
+    "ATC_AllThenProps",
+    "ATC_InitialUnderRedParent",
+    "ATC_DirectionSurvives"
+   ],
+   "caught": true
+  },
+  "css_M3_keepBeforeAll": {
+   "violations": [
+    "ATC_PropsThenAll_InGreenParent"
+   ],
+   "caught": true
+  },
+  "css_M4_orderBlindDrop": {
+   "violations": [
+    "ATC_AllThenProps",
+    "ATC_InitialUnderRedParent",
+    "ATC_DirectionSurvives"
+   ],
+   "caught": true
+  }
+ }
+}

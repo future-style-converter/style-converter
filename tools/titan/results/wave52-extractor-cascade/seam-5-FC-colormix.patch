@@ -1,0 +1,110 @@
+wave-52 lane L5 (extractor-cascade) — seam-5-FC-colormix
+
+F-C (web-tail) — oracle rule R2: a color-mix() operand percentage outside [0,100] (css-color-5 §3.1) is provably invalid.
+
+Applies on: HEAD 7d9c22a7 (tools/titan/extract-fixture.mjs blob 104ef672) with, applied first IN ORDER: seam-1-F3-oracle-filter.patch seam-2-F1-importance.patch seam-3-FD-specificity.patch seam-4-F2-splitter.patch.
+Ordered patch set (PLAN.md §2 L5 / §3): seam-1 → seam-2 → seam-3 → seam-4 → seam-5 → seam-6; each is cut against the tree the previous ones leave.
+Only L5 patches this seam file this wave. Verification record: tools/titan/results/wave52-extractor-cascade/_note.md.
+
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index b4bfed6..6e39ebf 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -687,7 +687,7 @@ export function extractRefHref(html) {
+ // WHAT THE ORACLE PROVES, AND WHAT IT DELIBERATELY DOES NOT.
+ // It is a CONSERVATIVE oracle: it returns a reason ONLY for a value that is
+ // invalid in EVERY CSS context, and null ("no proof" → treat as valid →
+-// historical behaviour) for everything else. One rule today:
++// historical behaviour) for everything else. Two rules today:
+ //
+ //   R1 — UNKNOWN DIMENSION UNIT. A <number> immediately followed by an
+ //   identifier is a <dimension-token>, and the unit tables are CLOSED
+@@ -699,10 +699,16 @@ export function extractRefHref(html) {
+ //   is invalid per css-syntax-3 §2.2 — `90degree`, `100gradian`, `1.57radian`
+ //   and `0.25turns` alike.
+ //
++//   R2 — COLOR-MIX() PERCENTAGE OUTSIDE [0,100] (wave-52 lane L5 F-C). The
++//   range is written into the css-color-5 §3.1 grammar (`<percentage
++//   [0,100]>`), so `color-mix(in lch, purple 125%, plum 125%)` parses in no
++//   context at all; colorMixPercentOutOfRange states the exact shape.
++//
+ // NOT proven (and therefore never dropped): unknown property names, unknown
+-// keywords, out-of-range numbers, wrong function arity, and attr()/var()/
+-// calc() substitutions that only become invalid at computed-value time. Each
+-// of those needs the property's own grammar; guessing at them here would
++// keywords, out-of-range numbers (save R2's one GRAMMAR-level range), wrong
++// function arity, and attr()/var()/calc() substitutions that only become
++// invalid at computed-value time. Each of those needs the property's own
++// grammar; guessing at them here would
+ // shadow a LATER valid declaration with an EARLIER one — the same class of
+ // bug in the opposite direction. `1e2deg` is deliberately VALID here: the
+ // exponent form is real CSS (css-values-4 §5.3; docs/BACKLOG.md ranked item
+@@ -787,7 +793,7 @@ export function extractRefHref(html) {
+  * included, before any of them), and an apostrophe inside a surviving
+  * `/* … *\/` would otherwise open a string — measured: 20 of the 22
+  * first-draft hits of the comment-blind census splitter were exactly that or
+- * the escaped quote below (`wave52-plan/splitter-differential.json`).
++ * the escaped quote named above (`wave52-plan/splitter-differential.json`).
+  *
+  * Replaces four private splitters: parseCss's and the style attribute's
+  * `split(';')` (quote- and url-blind — the tear documented on the oracle
+@@ -995,6 +1001,59 @@ export function provablyInvalidDeclaration(prop, value) {
+   if (unit !== null) {
+     return `unknown dimension unit '${unit}' (css-values-4 §7.1 / §6.2 unit tables are closed)`;
+   }
++  // R2 (wave-52 lane L5 F-C) — reported with the authored percentage.
++  const pct = colorMixPercentOutOfRange(value);
++  if (pct !== null) {
++    return `color-mix() percentage ${pct} outside [0,100] (css-color-5 §3.1 <percentage [0,100]>)`;
++  }
++  return null;
++}
++
++/**
++ * R2 — a `color-mix()` whose colour operand carries a percentage outside
++ * [0,100]. css-color-5 §3.1 writes the operand as `<color> && <percentage
++ * [0,100]>?`, so the range is part of the GRAMMAR, not a computed-value
++ * clamp: `purple 125%` fails to parse, the declaration is invalid
++ * (css-syntax-3 §2.2) and an earlier valid value stays in force. MEASURED
++ * carrier: css-color/color-mix-percents-02, whose `.t6`/`.t7` rows
++ * (`125%`, `9999%`) shadowed the valid `rgb(…)` of `.negative-test`, and the
++ * web capture painted two white rows (Blink refused them, the wire still
++ * carried them) where the ref is uniform purple.
++ *
++ * Conservative like R1: only a value that IS one `color-mix(…)` call, only
++ * percentages at the TOP level of an operand (a percentage inside a nested
++ * `rgb(…)`/`calc(…)` belongs to that function's grammar), and an unbalanced
++ * call proves nothing.
++ *
++ * @param   {string} value declaration value, `!important` already stripped
++ * @returns {string|null} the first out-of-range percentage as authored
++ */
++function colorMixPercentOutOfRange(value) {
++  const v = value.trim();
++  if (!/^color-mix\(/i.test(v)) return null;
++  // The call's own closing paren must end the value.
++  let depth = 0;
++  let end = -1;
++  for (let i = 'color-mix('.length; i < v.length; i++) {
++    if (v[i] === '(') depth++;
++    else if (v[i] === ')') { if (depth === 0) { end = i; break; } depth--; }
++  }
++  if (end !== v.length - 1) return null;
++  // Argument 0 is the `in <colorspace>` interpolation clause; the rest are
++  // the colour operands.
++  const operands = splitTopLevel(v.slice('color-mix('.length, end), ',').slice(1);
++  for (const op of operands) {
++    // Drop every nested function's argument list (innermost first) so only
++    // the operand's own top-level tokens remain.
++    let top = op;
++    for (let prev = null; prev !== top; ) { prev = top; top = top.replace(/\([^()]*\)/g, ''); }
++    // A <percentage-token> (css-values-4 §5.3 number spelling + `%`) that
++    // starts its own token, not the tail of an ident or hash.
++    for (const m of top.matchAll(/(^|[\s,])([+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?)%/g)) {
++      const n = Number(m[2]);
++      if (n < 0 || n > 100) return `${m[2]}%`;
++    }
++  }
+   return null;
+ }
+ 

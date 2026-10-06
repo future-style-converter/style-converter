@@ -1,0 +1,206 @@
+wave-52 lane L5 (extractor-cascade) — seam-2-F1-importance
+
+F1 (BACKLOG 0(a′)) — importance before order: collapseDeclaration in parseCss and the style attribute, assignDeclaration returns taken/refused, the propsForElement gate widened to importance carriers, a non-revert-layer `all` kept by the layered resolver.
+
+Applies on: HEAD 7d9c22a7 (tools/titan/extract-fixture.mjs blob 104ef672) with, applied first IN ORDER: seam-1-F3-oracle-filter.patch.
+Ordered patch set (PLAN.md §2 L5 / §3): seam-1 → seam-2 → seam-3 → seam-4 → seam-5 → seam-6; each is cut against the tree the previous ones leave.
+Only L5 patches this seam file this wave. Verification record: tools/titan/results/wave52-extractor-cascade/_note.md.
+
+diff --git a/tools/titan/extract-fixture.mjs b/tools/titan/extract-fixture.mjs
+index 0867169..742298b 100644
+--- a/tools/titan/extract-fixture.mjs
++++ b/tools/titan/extract-fixture.mjs
+@@ -958,6 +958,11 @@ export const invalidShadowDrops = [];
+  * @param {Record<string,string>} target declaration bag being built
+  * @param {string} key   property name
+  * @param {string} value incoming value
++ * @returns {boolean} true when the write was TAKEN, false when refused —
++ *   wave-52 lane L5 F1: the block collapse records `!important` only for a
++ *   write that was taken, so it needs the answer rather than re-probing the
++ *   bag (the old `props[k] === v` probe could not tell "taken" from "an
++ *   earlier declaration happened to carry the same text").
+  */
+ export function assignDeclaration(target, key, value) {
+   const prev = target[key];
+@@ -968,10 +973,44 @@ export function assignDeclaration(target, key, value) {
+     // historical last-wins byte shape must be preserved exactly.
+     if (reason !== null && provablyInvalidDeclaration(key, prev) === null) {
+       invalidShadowDrops.push({ prop: key, kept: prev, dropped: value, reason });
+-      return;
++      return false;
+     }
+   }
+   target[key] = value;
++  return true;
++}
++
++/**
++ * wave-52 lane L5 F1 (BACKLOG 0(a′)) — ONE declaration of a block or a
++ * `style=""` attribute, collapsed with importance compared BEFORE order of
++ * appearance (css-cascade-5 §6.1 "Cascade Sorting Order": origin and
++ * importance come first, order of appearance last).
++ *
++ * Two rules, both from that sort:
++ *   1. a NORMAL declaration never displaces an IMPORTANT one already in the
++ *      bag — unless that important value is provably invalid, in which case
++ *      css-syntax-3 §2.2 says it was never in the cascade at all;
++ *   2. the importance flag follows the write that was TAKEN: set for an
++ *      important write, CLEARED for a normal one (which can only be taken
++ *      over a normal or an invalid value). This retires the wave-50
++ *      promotion defect, where a surviving normal declaration was handed on
++ *      flagged important because nothing ever cleared the flag.
++ *
++ * @param {Record<string,string>} props     the bag being collapsed
++ * @param {Record<string,true>}   important which of its keys are important
++ * @param {string}  k    property name
++ * @param {string}  v    value, `!important` already stripped
++ * @param {boolean} bang whether the declaration carried `!important`
++ */
++function collapseDeclaration(props, important, k, v, bang) {
++  // Rule 1 — a normal declaration loses to a VALID important one, whatever
++  // the order; the earlier important value stays in force.
++  if (important[k] && !bang && provablyInvalidDeclaration(k, props[k]) === null) return;
++  // The guarded write (wave-50 B1) still decides validity; rule 2 then
++  // records importance only for the write it actually took.
++  if (!assignDeclaration(props, k, v)) return;
++  if (bang) important[k] = true;
++  else delete important[k];
+ }
+ 
+ /**
+@@ -1168,41 +1207,21 @@ export function parseCss(css) {
+         v = v.replace(/\s*!important\s*$/i, '').trim();
+         // Skip custom properties (the bucketer flagged them as B already).
+         if (k.startsWith('--')) continue;
+-        // THE SEAM (wave 50 lane B1). Was a bare `props[k] = v` — an
+-        // unconditional last-wins collapse that let a PROVABLY INVALID later
+-        // declaration delete an earlier valid one before the converter, which
+-        // implements css-syntax-3 §2.2 correctly, ever saw either. The
+-        // guarded write refuses only what the oracle can prove is not CSS;
+-        // every other declaration still wins exactly as before.
+-        assignDeclaration(props, k, v);
+-        // A REFUSED declaration is "ignored" in the full §2.2 sense — it
+-        // contributes neither its value nor its importance, so the `!important`
+-        // flag is recorded only when the write was actually taken. For every
+-        // declaration the oracle does not refuse this is byte-identical to the
+-        // historical `if (bang) important[k] = true`. Deliberately NOT a
+-        // wider importance fix: `a: x !important; a: y` still ends on `y`
+-        // here (css-cascade-5 §6.4.4 says the important one should win), an
+-        // OLDER defect of this collapse with zero corpus carriers — widening
+-        // the seam to cover it would move css-cascade bytes this lane has no
+-        // gate for.
+-        //
+-        // THE SECOND HALF OF THAT SAME DEFECT, recorded in wave 50 by fix
+-        // lane F6 (skeptic S2 on lane B1's residual). `a: x !important; a: y`
+-        // does not merely end on `y`: `important[a]` was set to true by the
+-        // declaration that was then DROPPED, and nothing clears it, so the
+-        // surviving NON-important `y` is handed on flagged `!important` and
+-        // beats every later author rule (css-cascade-5 §6.4.4 ranks important
+-        // author declarations above normal ones — the same ranking that makes
+-        // this collapse's first half wrong, now firing in the other
+-        // direction). Executed on this tree:
+-        // `parseCss('div { color: red !important; color: green }')` returns
+-        // `props {color:'green'}` together with `important {color:true}`.
+-        // Pre-existing at HEAD, and MEASURED at ZERO corpus carriers — over
+-        // the 1435 wave49-final tests no declaration block declares a property
+-        // `!important` and then re-declares it without. Still deferred, for
+-        // the same reason as the half above: the repair belongs in the
+-        // cascade resolution, not in this collapse.
+-        if (bang && props[k] === v) important[k] = true;
++        // THE SEAM (wave 50 lane B1; importance added by wave-52 lane L5 F1).
++        // Was a bare `props[k] = v` — an unconditional last-wins collapse
++        // that let a PROVABLY INVALID later declaration delete an earlier
++        // valid one, and (the wave-50 F6 / skeptic S2 residual) let a later
++        // NORMAL declaration displace an earlier IMPORTANT one and then be
++        // handed on flagged `!important` itself: `parseCss('div { color: red
++        // !important; color: green }')` returned `{color:'green'}` with
++        // `important {color:true}`. collapseDeclaration compares importance
++        // before order (css-cascade-5 §6.1) and keeps the flag on the write
++        // that was taken; a REFUSED declaration still contributes neither
++        // its value nor its importance (css-syntax-3 §2.2). Measured: zero
++        // corpus blocks re-declare an important property without the bang,
++        // so this hunk moves no document (the CROSS-RULE half below in
++        // propsForElement is the one with a carrier).
++        collapseDeclaration(props, important, k, v, bang);
+       }
+       if (Object.keys(props).length === 0) continue;
+       const hasImportant = Object.keys(important).length > 0;
+@@ -1271,7 +1290,18 @@ export function resolveLayeredCascade(groups, layerCount) {
+       });
+     }
+   }
+-  const names = new Set(cands.filter((c) => c.name !== 'all').map((c) => c.name));
++  // Every declared name in first-appearance order — the key order the
++  // unlayered last-wins merge produces, which the output below keeps.
++  const declared = [...new Set(cands.map((c) => c.name))];
++  const names = new Set(declared.filter((n) => n !== 'all'));
++  // wave-52 lane L5 F1: an `all` declaration whose value is NOT revert-layer
++  // (`all: initial`, css-cascade-5 §5) is an ordinary declaration of the
++  // `all` shorthand and must reach the bag like any other — the unlayered
++  // merge always passed it through. Before F1 widened the gate to importance
++  // carriers, only `@layer` sheets reached this resolver and none in the
++  // corpus declares a non-revert-layer `all`; after it, dropping `all` here
++  // would silently diverge from the merge it replaces.
++  const keepAll = cands.some((c) => c.name === 'all' && c.value !== REVERT_LAYER);
+   // `all: revert-layer` is a revert-layer declaration for EVERY property the
+   // element has a declaration for (revert-layer-003 reverts width, height and
+   // background-color in one line).
+@@ -1325,7 +1355,10 @@ export function resolveLayeredCascade(groups, layerCount) {
+     return best.value;
+   };
+   const out = {};
+-  for (const name of names) {
++  for (const name of declared) {
++    // `all: revert-layer` alone was expanded onto `names` above and is not
++    // itself an output key (historical shape).
++    if (name === 'all' && !keepAll) continue;
+     skipped.clear();
+     const v = resolveOne(name, layerCount + 2, 0);
+     if (v !== undefined) out[name] = v;
+@@ -6336,22 +6369,36 @@ export function propsForElement(rules, tag, attrs, ancestors = null, pos = null,
+       const raw = decl.slice(colon + 1).trim();
+       const v = raw.replace(/\s*!important\s*$/i, '').trim();
+       if (k && v && !k.startsWith('--')) {
+-        // Guarded like the parseCss seam: a style="" attribute can repeat a
+-        // property too, and css-syntax-3 §2.2 ignores the invalid one there
+-        // as well. Importance is recorded only when the write was taken, so
+-        // a refused declaration contributes nothing at all.
+-        assignDeclaration(inlineProps, k, v);
+-        if (inlineProps[k] === v && /\s*!important\s*$/i.test(raw)) inlineImportant[k] = true;
++        // Collapsed exactly like a rule block (wave-52 lane L5 F1): a
++        // style="" attribute can repeat a property too, css-syntax-3 §2.2
++        // ignores the invalid one, and css-cascade-5 §6.1 keeps an important
++        // declaration over a later normal one — importance recorded only
++        // for the write that was taken.
++        collapseDeclaration(inlineProps, inlineImportant, k, v, /\s*!important\s*$/i.test(raw));
+       }
+     }
+   }
+   // THE GATE. Unless a `@layer` rule matched, or some declaration says
+-  // `revert-layer`, nothing about this element's cascade is layered — take
+-  // the historical last-write-wins path so every non-layer fixture in the
+-  // corpus stays byte-identical.
++  // `revert-layer`, or (wave-52 lane L5 F1) some matched declaration is
++  // `!important`, nothing about this element's cascade needs more than
++  // order of appearance — take the historical last-write-wins path so every
++  // such fixture in the corpus stays byte-identical.
++  //
++  // WHY importance joins the gate (BACKLOG 0(a′), the CROSS-RULE half): the
++  // last-wins merge below never reads `rule.important`, so on
++  // css-gaps/flex/flex-gap-decorations-024 `.flex-container { column-rule:
++  // 10px solid pink !important }` lost to the LATER `#container {
++  // column-rule: 9px dotted blue }` and the wire painted blue dots where the
++  // ref has a solid pink rule. The layered resolver already ranks importance
++  // first (css-cascade-5 §6.1) and, with every unlayered rule at the one rank
++  // `layerCount`, falls back to order of appearance between normal
++  // declarations — the same answer as the merge below — so only
++  // important-vs-normal pairs change.
+   const layered = matchedRules.some((r) => typeof r.layerIdx === 'number')
+     || matchedRules.some((r) => hasRevertLayer(r.props))
+-    || hasRevertLayer(inlineProps);
++    || hasRevertLayer(inlineProps)
++    || matchedRules.some((r) => r.important !== undefined)
++    || Object.keys(inlineImportant).length > 0;
+   if (!layered) {
+     // Guarded merges (wave 50 lane B1): a later RULE's declaration shadows an
+     // earlier rule's by the same last-wins rule the block collapse used, so

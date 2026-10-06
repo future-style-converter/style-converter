@@ -145,4 +145,121 @@ class TransformExtractorTest {
         // marker so the applier can log a TODO instead of silently flattening.
         assertEquals(TransformStyleValue.PRESERVE_3D, cfg.transformStyle)
     }
+
+    // ── Wave 52 (lane L4, native-near-misses T7) — `transform: inherit` ──
+    //
+    // VERBATIM wave51-fix per-test IR: tools/titan/runs/wave51-fix/sections/
+    // css-transforms/per-test-ir/wpt__css-transforms__css-transform-inherit-
+    // scale.json — `.parent` = css-transform-inherit-scale__1__1-155,
+    // `.child` = css-transform-inherit-scale__1__1__0-156.
+    //
+    // MUTATION EXECUTED (2026-09-25, this lane): with
+    // TransformInheritance.resolve's body replaced by `return properties`
+    // (the keyword left unresolved, i.e. the pre-wave-52 empty list),
+    // `T7 - inherit under the parent's scale(2) resolves to scale 2` FAILS
+    // (expected 1 function, was 0) and `T7 - an unresolved keyword …` stays
+    // green; bytes restored, sha-verified.
+
+    /** IR property, as the renderer holds it. */
+    private fun ir(t: String, j: String) =
+        com.styleconverter.runtime.core.ir.IRProperty(t, parse(j))
+
+    /** `.parent` — 50×50, abspos at (75,75), `transform: scale(2)`. */
+    private val inheritParent = listOf(
+        ir("BackgroundColor", """{"srgb":{"r":1,"g":1,"b":0},"original":"yellow"}"""),
+        ir("Width", """{"type":"length","px":50}"""),
+        ir("Height", """{"type":"length","px":50}"""),
+        ir("Position", "\"ABSOLUTE\""),
+        ir("Top", """{"px":75}"""),
+        ir("Left", """{"px":75}"""),
+        ir("Transform", """{"type":"functions","list":[{"fn":"scale","x":2,"y":2}]}"""),
+    )
+
+    /** `.child` — 50×50 green, `transform: inherit`. */
+    private val inheritChild = listOf(
+        ir("Position", "\"ABSOLUTE\""),
+        ir("Transform", """{"type":"keyword","keyword":"inherit"}"""),
+        ir("Width", """{"type":"length","px":50}"""),
+        ir("Height", """{"type":"length","px":50}"""),
+        ir("BackgroundColor", """{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}"""),
+    )
+
+    @Test
+    fun `T7 - inherit under the parent's scale(2) resolves to scale 2`() {
+        // The renderer's two steps: the parent publishes its computed wire,
+        // the child's list is resolved against it BEFORE extraction.
+        val published = TransformInheritance.published(inheritParent)
+        val resolved = TransformInheritance.resolve(inheritChild, published)
+        val cfg = TransformExtractor.extractTransformConfig(resolved.map { it.type to it.data })
+        // css-cascade-4 §7.3.2: the child's computed transform IS scale(2) —
+        // the own factor of two the Android capture dropped (100×100 green
+        // centred on the red 200×200 instead of covering it).
+        assertEquals(listOf<TransformFunction>(TransformFunction.Scale(2f, 2f)), cfg.functions)
+        assertTrue(cfg.hasTransform)
+        // Every other property of the child is carried through untouched.
+        assertEquals(inheritChild.filter { it.type != "Transform" }, resolved.filter { it.type != "Transform" })
+    }
+
+    @Test
+    fun `T7 - a chain of inherit carries the same value down`() {
+        // The child publishes what it RESOLVED to, so a grandchild's
+        // `inherit` reads scale(2) too (§7.3.2 applied per element).
+        val resolvedChild = TransformInheritance.resolve(inheritChild, TransformInheritance.published(inheritParent))
+        val grandchild = listOf(ir("Transform", """{"type":"keyword","keyword":"inherit"}"""))
+        val resolvedGrandchild = TransformInheritance.resolve(grandchild, TransformInheritance.published(resolvedChild))
+        assertEquals(TransformInheritance.published(inheritParent), resolvedGrandchild.single().data)
+    }
+
+    @Test
+    fun `T7 - inherit under a parent with no transform computes to none`() {
+        // css-transforms-1 §3: the parent's computed value is `none` (no
+        // `Transform` entry → published NONE, never the unprovided null —
+        // TransformInheritanceSeamTest pins that difference), so the child's
+        // entry is dropped — an absent Transform renders as `none`.
+        val untransformedParent = listOf(ir("Width", """{"type":"length","px":50}"""))
+        assertEquals(TransformInheritance.NONE, TransformInheritance.published(untransformedParent))
+        val resolved = TransformInheritance.resolve(inheritChild, TransformInheritance.published(untransformedParent))
+        assertTrue(resolved.none { it.type == "Transform" })
+        assertTrue(!TransformExtractor.extractTransformConfig(resolved.map { it.type to it.data }).hasTransform)
+    }
+
+    @Test
+    fun `T7 - lists without the keyword are returned as the same instance`() {
+        // The identity fast path: 1434 of the 1435 wave51-fix documents never
+        // allocate here, and the parent's own list is untouched by its own
+        // published value.
+        assertTrue(TransformInheritance.resolve(inheritParent, null) === inheritParent)
+        assertTrue(TransformInheritance.resolve(inheritParent, TransformInheritance.published(inheritParent)) === inheritParent)
+        val plain = listOf(ir("Transform", """{"type":"functions","list":[{"fn":"rotate","a":{"deg":45}}]}"""))
+        assertTrue(TransformInheritance.resolve(plain, TransformInheritance.published(inheritParent)) === plain)
+    }
+
+    @Test
+    fun `T7 - an unresolved keyword still leaves the PropertyTracker breadcrumb`() {
+        // The pre-seam fallback (and every path that renders without
+        // RenderComponent): the extractor refuses the keyword AND records
+        // it — no silent fallthrough. Same reset/isUnhandled/reset shape as
+        // PercentInsetContainingBlockLevelTest so the global tracker is left
+        // as this test found it.
+        com.styleconverter.runtime.PropertyTracker.reset()
+        val cfg = TransformExtractor.extractTransformConfig(inheritChild.map { it.type to it.data })
+        assertTrue(cfg.functions.isEmpty())
+        assertTrue(com.styleconverter.runtime.PropertyTracker.isUnhandled("Transform"))
+        com.styleconverter.runtime.PropertyTracker.reset()
+        // Negative control: the resolved list leaves NO breadcrumb.
+        val resolved = TransformInheritance.resolve(inheritChild, TransformInheritance.published(inheritParent))
+        TransformExtractor.extractTransformConfig(resolved.map { it.type to it.data })
+        assertTrue(!com.styleconverter.runtime.PropertyTracker.isUnhandled("Transform"))
+        com.styleconverter.runtime.PropertyTracker.reset()
+    }
+
+    @Test
+    fun `T7 - only the exact keyword wire is recognised`() {
+        assertTrue(TransformInheritance.isInheritKeyword(parse("""{"type":"keyword","keyword":"inherit"}""")))
+        assertTrue(TransformInheritance.isInheritKeyword(parse("""{"type":"keyword","keyword":"INHERIT"}""")))
+        assertTrue(!TransformInheritance.isInheritKeyword(parse("""{"type":"keyword","keyword":"initial"}""")))
+        assertTrue(!TransformInheritance.isInheritKeyword(parse("""{"type":"functions","list":[]}""")))
+        assertTrue(!TransformInheritance.isInheritKeyword(parse("\"inherit\"")))
+        assertTrue(!TransformInheritance.isInheritKeyword(null))
+    }
 }

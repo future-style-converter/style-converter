@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuite name="com.styleconverter.runtime.core.renderer.StaticPositionSeamWiringTest" tests="2" skipped="0" failures="0" errors="0" timestamp="2026-10-05T17:07:55.247Z" hostname="mac-1.home" time="0.016">
+  <properties/>
+  <testcase name="SW1 the RC1 branch passes the grid overlay's ownership by identity" classname="com.styleconverter.runtime.core.renderer.StaticPositionSeamWiringTest" time="0.01"/>
+  <testcase name="SW2 the AlignItems fold delegates to the pinned pure table" classname="com.styleconverter.runtime.core.renderer.StaticPositionSeamWiringTest" time="0.005"/>
+  <system-out><![CDATA[]]></system-out>
+  <system-err><![CDATA[]]></system-err>
+</testsuite>
