@@ -1,0 +1,14 @@
+# Wave 53 single-writer full sweep — tree 4adc107b (campaign/applier-campaign), started 2026-10-07T11:46:51Z
+# suite | rc | count line (as the tool prints it) | wall
+tooling            | rc=0 | # pass 2296 # fail 0  | 22s
+conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 4s
+web-runtime        | rc=0 |       Tests  1369 passed (1369) | 5s
+web-harness        | rc=0 |       Tests  330 passed (330) | 8s
+converter          | rc=0 | testcases=551 BUILD SUCCESSFUL in 22s | 23s
+compose            | rc=0 | testcases=3432 BUILD SUCCESSFUL in 21s | 21s
+android-app        | rc=0 | testcases=168 BUILD SUCCESSFUL in 987ms | 1s
+swiftui            | rc=0 | 	 Executed 2190 tests, with 0 failures (0 unexpected) in 35.833 (58.511) seconds | 121s
+ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.053 (0.059) seconds | 71s
+# finished 2026-10-07T11:51:27Z
+android-app rerun    | rc=0 | testcases=168 failures=0 BUILD SUCCESSFUL in 13s | 13s
+# addendum: android-app re-run with --rerun-tasks because the sweep's run was UP-TO-DATE (1 s); raw logs for every suite: /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/sweep-raw/ (session scratchpad — not kept)
