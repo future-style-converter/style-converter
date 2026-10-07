@@ -71,6 +71,9 @@ import {
   rootBackgroundPlan, rootCanvasBackgroundStyle, withRootBackgroundStripped,
   type RootBackgroundPlan,
 } from '@style-converter/web/engine/background/RootBackgroundPropagation';
+// wave-53 lane L3 (item B) — a `display: table` body makes the flow wrapper
+// below a table box, so Chrome runs CSS 2.1 §17.2.1's fixup itself.
+import { resolveCanvasTableBody } from './CanvasTableBody';
 import { composeTree } from '../sdui/Composer';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 
@@ -865,6 +868,9 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // without a concrete body margin, and then NO wrapper is emitted below, so
   // those captures are byte-identical. Pure per document, memoised alike.
   const canvasMargin = React.useMemo(() => resolveCanvasMargin(doc), [doc]);
+  // wave-53 L3 (item B): the body's table-box declarations, or null for every
+  // non-table body (1434 of 1435 documents — their markup is unchanged).
+  const canvasTableBody = React.useMemo(() => resolveCanvasTableBody(doc), [doc]);
   // The forest the wrapper below renders: the body-root node minus the
   // margin sides the wrapper now owns (one owner, never applied twice).
   // The SAME array as `roots` whenever the margin is all-zero.
@@ -1041,16 +1047,24 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
             The body-root node inside renders WITHOUT the sides the wrapper
             owns (`flowRoots`, see withCanvasOwnedBodyMargin) — one owner.
             See resolveCanvasMargin for the census and the contract. */}
-        {canvasMargin.top !== 0 || canvasMargin.right !== 0
+        {/* wave-53 lane L3 (item B) — a TABLE body's wrapper is a table box
+            (`display: table` + the body's border-spacing), emitted even at
+            zero margin: the wrapper IS the body's box, so Chrome wraps the
+            non-row roots in an anonymous row + cells (CSS 2.1 §17.2.1 rule
+            2) and drops a cell root's margin (§8.3) — s-11-1-1b-006's td
+            lands at the reference's (8, 40). See CanvasTableBody.ts. */}
+        {canvasTableBody || canvasMargin.top !== 0 || canvasMargin.right !== 0
           || canvasMargin.bottom !== 0 || canvasMargin.left !== 0 ? (
           <div
             data-capture-flow
             style={{
-              display: 'flow-root',
+              display: canvasTableBody ? canvasTableBody.display : 'flow-root',
               marginTop: `${canvasMargin.top}px`,
               marginRight: `${canvasMargin.right}px`,
               marginBottom: `${canvasMargin.bottom}px`,
               marginLeft: `${canvasMargin.left}px`,
+              // Written only for a table body that declares one (key absent otherwise).
+              ...(canvasTableBody?.borderSpacing ? { borderSpacing: canvasTableBody.borderSpacing } : {}),
             }}
           >
             {flowRoots.map((root, i) => (
