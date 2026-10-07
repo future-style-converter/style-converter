@@ -1,13 +1,13 @@
-# Wave 53 single-writer full sweep — tree 568fd5be (campaign/applier-campaign), started 2026-10-07T13:36:59Z
+# Wave 53 single-writer full sweep — tree 63326995 (campaign/applier-campaign), started 2026-10-07T14:48:27Z
 # suite | rc | count line (as the tool prints it) | wall
-tooling            | rc=0 | # pass 2301 # fail 0  | 10s
-conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 2s
+tooling            | rc=0 | # pass 2287 # fail 0  | 18s
+conformance        | rc=0 | IR conformance: all documents valid (v1 goldens + v2 goldens) | 4s
 web-runtime        | rc=0 |       Tests  1369 passed (1369) | 5s
-web-harness        | rc=0 |       Tests  330 passed (330) | 7s
-converter          | rc=0 | testcases=551 BUILD SUCCESSFUL in 11s | 12s
-compose            | rc=0 | testcases=3434 BUILD SUCCESSFUL in 16s | 16s
-android-app        | rc=0 | testcases=169 BUILD SUCCESSFUL in 2s | 3s
-swiftui            | rc=0 | 	 Executed 2192 tests, with 0 failures (0 unexpected) in 35.639 (54.362) seconds | 117s
-ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.066 (0.083) seconds | 70s
-# finished 2026-10-07T13:41:01Z
-# tooling: # tests 2305 · # pass 2301 · # skipped 4 (env-gated: post-load e2e, wave49-final census, composition-test convert, converter round-trip); raw logs in the session scratchpad (not kept)
+web-harness        | rc=0 |       Tests  330 passed (330) | 8s
+converter          | rc=0 | testcases=551 BUILD SUCCESSFUL in 24s | 24s
+compose            | rc=0 | testcases=3428 BUILD SUCCESSFUL in 28s | 29s
+android-app        | rc=0 | testcases=168 BUILD SUCCESSFUL in 2s | 3s
+swiftui            | rc=0 | 	 Executed 2192 tests, with 0 failures (0 unexpected) in 39.602 (60.357) seconds | 120s
+ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.054 (0.060) seconds | 69s
+# finished 2026-10-07T14:53:07Z
+# tooling: # tests 2291 · # pass 2287 · # skipped 4 (env-gated); raw logs in the session scratchpad (not kept)
