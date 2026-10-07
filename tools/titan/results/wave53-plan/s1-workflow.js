@@ -6,13 +6,14 @@ export const meta = {
     { title: 'Fix', detail: 'must-fix items, then re-check', model: 'opus' },
   ],
 }
-// args: { tree, sweepLog }  — the orchestrator has ALREADY run the single-writer full sweep and points S1 at its log.
+// args: { tree, sweepLog, base? }  — the orchestrator has ALREADY landed the units and run the single-writer full sweep; base = the opening-gate tip (default e330e255).
 const T = args.tree
 const SWEEP = args.sweepLog
 const PLAN = `${T}/tools/titan/results/wave53-plan/PLAN.md`
 const OUT = `${T}/tools/titan/results/wave53-S1`
 
-const RULES = `HARD RULES — shared tree ${T}, branch campaign/applier-campaign; the five lanes' edits AND their seam patches are applied (integrate-seams.sh ran). You modify nothing in the tree except ${OUT}/ (your report) unless you are the fix lane. No device, Chromium, emulator, simulator; the full sweep was run by the orchestrator (log: ${SWEEP}) — you READ it, you may run FOCUSED suites to re-check a specific claim. No git commit/checkout/stash/reset. Absolute paths rooted at ${T}.`
+const BASE = args.base || 'e330e255'   // the opening-gate tip; everything after it is this wave's landed work
+const RULES = `HARD RULES — shared tree ${T}, branch campaign/applier-campaign; the five lanes' edits AND their seam patches are LANDED as unit commits (land-units.sh): \`git -C ${T} log --format='%h %s' ${BASE}..HEAD\` lists them (11 unit commits in landing order + the orchestrator's plan/sweep commits); the working tree is clean. You modify nothing in the tree except ${OUT}/ (your report) unless you are the fix lane. No device, Chromium, emulator, simulator; the full sweep was run by the orchestrator (log: ${SWEEP}) — you READ it, you may run FOCUSED suites to re-check a specific claim. No git commit/checkout/stash/reset. Absolute paths rooted at ${T}.`
 
 const REPORT = {
   type: 'object',
@@ -29,9 +30,9 @@ const REPORT = {
 phase('S1')
 const s1 = await agent(`You are S1, the COMBINED-TREE skeptic of wave 53 of the Style-Converter applier campaign (wave skill Phase 3). ${RULES}
 Read ${PLAN} §1–§4 and §6, then every lane note tools/titan/results/wave53-{lists-bakes,soft-hyphen,canvas-root,float-avoid,harness-hygiene}/_note.md (and skeptic.md). Then, BY EXECUTION:
-1. SEAM-HUNK AUDIT: \`git -C ${T} diff -- runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift apps/web-harness/src/sdui/ComponentRenderer.tsx tools/titan/extract-fixture.mjs\` — every hunk maps to exactly one §3 registry row and one lane's patch file (compare with the patch files' hunks); no hunk is unregistered, no two overlap, every hunk is commented.
+1. SEAM-HUNK AUDIT: \`git -C ${T} diff ${BASE} HEAD -- runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift apps/web-harness/src/sdui/ComponentRenderer.tsx tools/titan/extract-fixture.mjs\` (and per unit commit: \`git -C ${T} show <sha> -- <seam>\`) — every hunk maps to exactly one §3 registry row and one lane's patch file (compare with the patch files' hunks: wave53-lists-bakes/seam-1.patch, wave53-soft-hyphen/seam-1/2.patch, wave53-float-avoid/seam-1/2.patch); no hunk is unregistered, no two overlap, every hunk is commented, and each seam hunk sits in the unit commit PLAN §4 assigns it to.
 2. SWEEP: read ${SWEEP}; every suite green with its count; counts vs the committed doc tables (README.md, CLAUDE.md, docs/STATUS.md rows; tree READMEs) — list the rows that must be restamped. If any suite is red, that is a must-fix with the failing test named.
-3. GIT HYGIENE: \`git -C ${T} status --short\` — every modified/untracked path maps to one lane's ownership list (PLAN §2 own:) or to a seam patch or to a lane results dir; zero probe files in source trees; no stray build files; \`git stash list\` empty; no lock dir under tools/titan/runs/wave53-lock/.
+3. GIT HYGIENE: \`git -C ${T} status --short\` must be EMPTY; \`git -C ${T} diff --stat ${BASE} HEAD\` — every path maps to one lane's ownership list (PLAN §2 own:) or to a seam patch or to a lane / plan / gate results dir, and sits in the unit commit of ITS lane (a path in another lane's commit is a defect); zero probe files in source trees; no stray build files; \`git stash list\` empty; no lock dir under tools/titan/runs/wave53-lock/.
 4. POINTER AUDIT: every evidence pointer in the five lane notes (paths, test names, cells) resolves — paths exist, cells re-derived with \`node ${T}/tools/titan/results/wave52-gate/cells.mjs '<terms>' wave53-open\`.
 5. CENSUS REPLAY: for EACH lane, re-derive its carrier set with your own script (over tools/titan/runs/wave53-open/sections/*/per-test-ir and the WPT sources) and compare with tools/titan/results/wave53-plan/expectations.json lanes.<lane>.captureCarriers / wireCarriers; an under-reported radius is a must-fix.
 6. MUTATIONS: pick two pins per lane and replay their mutations (red → restore byte-exact → green).
