@@ -1,0 +1,168 @@
+{
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/FloatAvoidPlan.swift",
+ "sha256Before": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4",
+ "runs": [
+  {
+   "mutation": "M1",
+   "edit": [
+    "c.contains(\"INLINE_SIZE\"), ",
+    ""
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G7_FitContentWithoutContainment"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M2",
+   "edit": [
+    "$0.b > y && ($0.t < y + h || $0.t <= y)",
+    "$0.b >= y && $0.t <= y + h"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP1_001FloatsAndTheBfcBesideFloat3",
+    "testP3_FlowRoot002ZeroWidthBfcAt250x100",
+    "testP4_HalfOpenBoundaryOn001",
+    "testP6_ReportedHeightsAreTheBfcBottoms"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M3",
+   "edit": [
+    "isLeft ? l : r - fw",
+    "isLeft ? l : 0"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP1_001FloatsAndTheBfcBesideFloat3",
+    "testP3_FlowRoot002ZeroWidthBfcAt250x100",
+    "testP7_RightFloatsFromThe400pxContainerNotA358Proposal"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M4",
+   "edit": [
+    "pxWidth ?? (containedIntrinsic(bfc) ? 0 : nil)",
+    "pxWidth ?? Optional(0.0)"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G7_AutoWidth",
+    "testP5d_G7_FitContentWithoutContainment"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M5",
+   "edit": [
+    "if hasWire(container, \"Clear\") { return nil }",
+    "if false { return nil }"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G5_ClearOnTheBfc"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M7",
+   "edit": [
+    "shape.containerIsBfc ? max(bfcBottom, floatBottom) : bfcBottom",
+    "max(bfcBottom, floatBottom)"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP6_ReportedHeightsAreTheBfcBottoms"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M8",
+   "edit": [
+    "shape.containerWidthPx.map { $0 * scale } ?? incomingWidth",
+    "incomingWidth"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP7_RightFloatsFromThe400pxContainerNotA358Proposal"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M9",
+   "edit": [
+    "if pxWidth == nil && bp.contains(where: { paints($0.type) }) { return nil }",
+    "if false { return nil }"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G8_ContainSizedBfcBackground"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "M10",
+   "edit": [
+    "if container.slot?.parent != nil && !containerBfc { return nil }",
+    "if false { return nil }"
+   ],
+   "rc": 65,
+   "tests": 15,
+   "red": [
+    "testP5d_G2_NestedInANonBfcParent"
+   ],
+   "verdict": "RED",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "S2",
+   "edit": [
+    "shape.containerIsBfc ? max(bfcBottom, floatBottom) : bfcBottom",
+    "bfcBottom"
+   ],
+   "rc": 0,
+   "tests": 15,
+   "red": [],
+   "verdict": "GREEN (SURVIVOR)",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  },
+  {
+   "mutation": "S3",
+   "edit": [
+    "($0.t < y + h || $0.t <= y)",
+    "($0.t < y + h)"
+   ],
+   "rc": 0,
+   "tests": 15,
+   "red": [],
+   "verdict": "GREEN (SURVIVOR)",
+   "restoredSha256": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+  }
+ ],
+ "green": {
+  "rc": 0,
+  "tests": 15,
+  "red": [],
+  "sha256After": "e7780896a092a147359c3380c40571c3204c19bbcc7b1874a550ad13750d36c4"
+ }
+}

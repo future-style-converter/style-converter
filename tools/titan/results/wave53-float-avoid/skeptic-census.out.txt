@@ -1,0 +1,58 @@
+=== wave52-ship RAW (SlotComposer tree): 1435 documents, 10712 components walked
+T0 structural float…,last-non-float containers: 22 in 20 documents
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance-002 wpt__css2__floats-clear__adjoining-float-nested-forced-clearance-002__1-168 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance floats-clear__adjoining-float-nested-forced-clearance__2__0-197 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance floats-clear__adjoining-float-nested-forced-clearance__2__0__1-199 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-new-fc floats-clear__adjoining-float-new-fc__1__0-204 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-child-with-margins-2 wpt__css2__floats-clear__clear-on-child-with-margins-2__1-213 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-child-with-margins-2 floats-clear__clear-on-child-with-margins-2__1__1-215 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-child-with-margins wpt__css2__floats-clear__clear-on-child-with-margins__1-220 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-parent-with-margins-no-clearance wpt__css2__floats-clear__clear-on-parent-with-margins-no-clearance__1-233 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-parent-with-margins wpt__css2__floats-clear__clear-on-parent-with-margins__1-238 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-parent wpt__css2__floats-clear__clear-on-parent__1-243 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__floats-bfc-003 floats-clear__floats-bfc-003__1__0-254 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__floats-clear-multicol-001 floats-clear__floats-clear-multicol-001__1__0-269 -> last child not a plain BFC root
+   T0 CSS2/wpt__CSS2__floats-clear__floats-clear-multicol-balancing-001 floats-clear__floats-clear-multicol-balancing-001__1__0-297 -> last child not a plain BFC root
+   T0 CSS2/wpt__CSS2__floats-clear__negative-clearance-after-adjoining-float wpt__css2__floats-clear__negative-clearance-after-adjoining-float__1-317 -> Clear in subtree
+   T0 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-001 wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 -> container: ADMIT
+   T0 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-002 wpt__css-contain__contain-inline-size-bfc-floats-002__1-109 -> container: ADMIT
+   T0 css-display/wpt__css-display__display-flow-root-001 wpt__css-display__display-flow-root-001__3-284 -> last child not a plain BFC root
+   T0 css-display/wpt__css-display__display-flow-root-002 wpt__css-display__display-flow-root-002__0-291 -> container: ADMIT
+   T0 css-display/wpt__css-display__display-flow-root-list-item-001 wpt__css-display__display-flow-root-list-item-001__3-302 -> last child not a plain BFC root
+   T0 css-flexbox/wpt__css-flexbox__abspos__flex-abspos-staticpos-fallback-justify-content-001 wpt__css-flexbox__abspos__flex-abspos-staticpos-fallback-justify-content-001__1-058 -> Clear in subtree
+   T0 css-position/wpt__css-position__position-absolute-dynamic-relayout-004 wpt__css-position__position-absolute-dynamic-relayout-004__1-083 -> float not a plain childless box
+   T0 css-writing-modes/wpt__css-writing-modes__float-vlr-014 wpt__css-writing-modes__float-vlr-014__1-788 -> last child not a plain BFC root
+T1 child-proof (runtime merge cannot change): 3
+   T1 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-001 wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 container clause: pass
+   T1 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-002 wpt__css-contain__contain-inline-size-bfc-floats-002__1-109 container clause: pass
+   T1 css-display/wpt__css-display__display-flow-root-002 wpt__css-display__display-flow-root-002__0-291 container clause: pass
+T2 full gate: 3: ['wpt__css-contain__contain-inline-size-bfc-floats-001__1-101', 'wpt__css-contain__contain-inline-size-bfc-floats-002__1-109', 'wpt__css-display__display-flow-root-002__0-291']
+=== wave52-ship UNBOXED (runtime entry rewrite): 1435 documents, 10668 components walked
+T0 structural float…,last-non-float containers: 22 in 20 documents
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance-002 wpt__css2__floats-clear__adjoining-float-nested-forced-clearance-002__1-168 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance floats-clear__adjoining-float-nested-forced-clearance__2__0-197 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance floats-clear__adjoining-float-nested-forced-clearance__2__0__1-199 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__adjoining-float-new-fc floats-clear__adjoining-float-new-fc__1__0-204 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-child-with-margins-2 wpt__css2__floats-clear__clear-on-child-with-margins-2__1-213 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-child-with-margins-2 floats-clear__clear-on-child-with-margins-2__1__1-215 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-child-with-margins wpt__css2__floats-clear__clear-on-child-with-margins__1-220 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-parent-with-margins-no-clearance wpt__css2__floats-clear__clear-on-parent-with-margins-no-clearance__1-233 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-parent-with-margins wpt__css2__floats-clear__clear-on-parent-with-margins__1-238 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__clear-on-parent wpt__css2__floats-clear__clear-on-parent__1-243 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__floats-bfc-003 floats-clear__floats-bfc-003__1__0-254 -> Clear in subtree
+   T0 CSS2/wpt__CSS2__floats-clear__floats-clear-multicol-001 floats-clear__floats-clear-multicol-001__1__0-269 -> last child not a plain BFC root
+   T0 CSS2/wpt__CSS2__floats-clear__floats-clear-multicol-balancing-001 floats-clear__floats-clear-multicol-balancing-001__1__0-297 -> last child not a plain BFC root
+   T0 CSS2/wpt__CSS2__floats-clear__negative-clearance-after-adjoining-float wpt__css2__floats-clear__negative-clearance-after-adjoining-float__1-317 -> Clear in subtree
+   T0 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-001 wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 -> container: ADMIT
+   T0 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-002 wpt__css-contain__contain-inline-size-bfc-floats-002__1-109 -> container: ADMIT
+   T0 css-display/wpt__css-display__display-flow-root-001 wpt__css-display__display-flow-root-001__3-284 -> last child not a plain BFC root
+   T0 css-display/wpt__css-display__display-flow-root-002 wpt__css-display__display-flow-root-002__0-291 -> container: ADMIT
+   T0 css-display/wpt__css-display__display-flow-root-list-item-001 wpt__css-display__display-flow-root-list-item-001__3-302 -> last child not a plain BFC root
+   T0 css-flexbox/wpt__css-flexbox__abspos__flex-abspos-staticpos-fallback-justify-content-001 wpt__css-flexbox__abspos__flex-abspos-staticpos-fallback-justify-content-001__1-058 -> Clear in subtree
+   T0 css-position/wpt__css-position__position-absolute-dynamic-relayout-004 wpt__css-position__position-absolute-dynamic-relayout-004__1-083 -> float not a plain childless box
+   T0 css-writing-modes/wpt__css-writing-modes__float-vlr-014 wpt__css-writing-modes__float-vlr-014__1-788 -> last child not a plain BFC root
+T1 child-proof (runtime merge cannot change): 3
+   T1 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-001 wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 container clause: pass
+   T1 css-contain/wpt__css-contain__contain-inline-size-bfc-floats-002 wpt__css-contain__contain-inline-size-bfc-floats-002__1-109 container clause: pass
+   T1 css-display/wpt__css-display__display-flow-root-002 wpt__css-display__display-flow-root-002__0-291 container clause: pass
+T2 full gate: 3: ['wpt__css-contain__contain-inline-size-bfc-floats-001__1-101', 'wpt__css-contain__contain-inline-size-bfc-floats-002__1-109', 'wpt__css-display__display-flow-root-002__0-291']

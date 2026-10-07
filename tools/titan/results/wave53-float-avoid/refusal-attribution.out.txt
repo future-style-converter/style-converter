@@ -1,0 +1,12 @@
+wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance-002 floats-clear__adjoining-float-nested-forced-clearance-002__1__2__0__0-173 → G2 nested non-BFC container; G4 a non-float before the BFC; G6 float box-model wire; G6 non-px float size; G7 BFC box-model wire
+wpt__CSS2__floats-clear__adjoining-float-nested-forced-clearance-004 (roots) → no container: float and BFC are sibling composed roots
+wpt__CSS2__floats-clear__adjoining-float-new-fc floats-clear__adjoining-float-new-fc__1__0-204 → G2 nested non-BFC container; G5 Clear in subtree; G7 BFC box-model wire
+wpt__CSS2__floats-clear__floats-bfc-003 floats-clear__floats-bfc-003__1__0-254 → G2 nested non-BFC container; G5 Clear in subtree; G5 same-side run; G7 auto/non-px BFC width
+wpt__css-cascade__all-prop-001 (roots) → no container: float and BFC are sibling composed roots
+wpt__css-contain__contain-content-001 (roots) → no container: float and BFC are sibling composed roots
+wpt__css-contain__contain-inline-size-bfc-floats-001 wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 → ADMITTED
+wpt__css-contain__contain-inline-size-bfc-floats-002 wpt__css-contain__contain-inline-size-bfc-floats-002__1-109 → ADMITTED
+wpt__css-display__display-flow-root-001 wpt__css-display__display-flow-root-001__3-284 → G3 BFC tag span; G3 BFC own text; G7 BFC box-model wire; G7 auto/non-px BFC width
+wpt__css-display__display-flow-root-002 wpt__css-display__display-flow-root-002__0-291 → ADMITTED
+wpt__css-writing-modes__direction-upright-001 (roots) → no container: float and BFC are sibling composed roots
+wpt__css-writing-modes__direction-upright-002 (roots) → no container: float and BFC are sibling composed roots

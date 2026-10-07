@@ -1,0 +1,19 @@
+            } else if wptCaptureMode,
+                      clearanceScopePlan?.scopeIds.contains(component.id) != true,
+                      let floatAvoid = FloatAvoidPlan.shape(component, containerProperties: resolvedProperties) {
+                // Wave 53 (lane L4) — CSS 2.1 §9.5 float AVOIDANCE, tried
+                // before the float runs: k px floats then ONE in-flow BFC root
+                // (FloatAvoidPlan's gate G2–G8; G1 = wptCaptureMode). The
+                // floats place by §9.5.1 and the BFC goes beside them instead
+                // of below the stacked floats (contain-inline-size-bfc-
+                // floats-001/-002, display-flow-root-002). Mutually exclusive
+                // with blockFloatSegments() by G5; a container inside an active
+                // §9.5.2 scope keeps the frozen path (its floats are W5's).
+                FloatAvoidLayout(shape: floatAvoid, componentId: component.id) {
+                    // Same content pass as every container — the sorted in-flow
+                    // children become the layout's subviews in order.
+                    contentOrPlaceholder(style: style)
+                }
+                // Re-publish the §9.5.2 scope plan for DESCENDANT block loops,
+                // exactly like the VStack branch (id-keyed, so the identity here).
+                .environment(\.floatClearancePlan, clearanceScopePlan)

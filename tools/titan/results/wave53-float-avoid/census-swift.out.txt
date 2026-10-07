@@ -1,0 +1,4 @@
+# FloatAvoidPlanTests (Catalyst) — xcodebuild -only-testing:StyleConverterRuntimeTests/FloatAvoidPlanTests, seam not applied
+	 Executed 15 tests, with 0 failures (0 unexpected) in 3.286 (3.341) seconds
+	 Executed 15 tests, with 0 failures (0 unexpected) in 3.286 (3.458) seconds
+FloatAvoid census (swift): 1435 documents, 10712 components, 3 admitted: ["wpt__css-contain__contain-inline-size-bfc-floats-001.json#wpt__css-contain__contain-inline-size-bfc-floats-001__1-101", "wpt__css-contain__contain-inline-size-bfc-floats-002.json#wpt__css-contain__contain-inline-size-bfc-floats-002__1-109", "wpt__css-display__display-flow-root-002.json#wpt__css-display__display-flow-root-002__0-291"]

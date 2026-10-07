@@ -1,0 +1,14 @@
+	 Executed 2 tests, with 6 failures (0 unexpected) in 1.046 (1.047) seconds
+	 Executed 3 tests, with 6 failures (0 unexpected) in 1.386 (1.387) seconds
+	 Executed 3 tests, with 6 failures (0 unexpected) in 1.386 (1.467) seconds
+** TEST FAILED **
+SKEPTIC Q1 swift position:absolute floats (2 edited) admitted = true
+SKEPTIC Q4 abspos-float render: blue=(0,0)-(399,99) n=40000 orange=(0,100)-(199,119) n=4000
+SKEPTIC Q4 baseline 001 render: blue=(0,0)-(399,299) n=75000 orange=(0,300)-(199,319) n=4000
+SKEPTIC Q5 002 float2(100,150)=0,0,255 float3(300,250)=0,0,255 ink: blue=(0,0)-(399,299) n=75000 orange=(0,300)-(299,319) n=6000
+Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift:68: error: -[StyleConverterRuntimeTests.FloatAvoidLayoutRasterTests testContainInlineSizeBfcFloats001OrangeBesideFloat3] : XCTAssertTrue failed - orange missing at (50,205)
+Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift:69: error: -[StyleConverterRuntimeTests.FloatAvoidLayoutRasterTests testContainInlineSizeBfcFloats001OrangeBesideFloat3] : XCTAssertTrue failed - orange not painted over float 3 at (150,215)
+Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift:71: error: -[StyleConverterRuntimeTests.FloatAvoidLayoutRasterTests testContainInlineSizeBfcFloats001OrangeBesideFloat3] : XCTAssertTrue failed - orange still stacked below the floats at (50,310)
+Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift:79: error: -[StyleConverterRuntimeTests.FloatAvoidLayoutRasterTests testContainInlineSizeBfcFloats002OrangeBesideFloat1] : XCTAssertTrue failed - orange missing at (50,10)
+Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift:80: error: -[StyleConverterRuntimeTests.FloatAvoidLayoutRasterTests testContainInlineSizeBfcFloats002OrangeBesideFloat1] : XCTAssertTrue failed - orange not painted over float 1 at (250,10)
+Tests/StyleConverterRuntimeTests/FloatAvoidLayoutRasterTests.swift:82: error: -[StyleConverterRuntimeTests.FloatAvoidLayoutRasterTests testContainInlineSizeBfcFloats002OrangeBesideFloat1] : XCTAssertTrue failed - orange still stacked below the floats at (50,310)

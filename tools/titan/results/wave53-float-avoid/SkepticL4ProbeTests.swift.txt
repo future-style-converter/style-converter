@@ -1,0 +1,50 @@
+// THROWAWAY skeptic probe (wave 53 L4 skeptic) — copied into runtimes/swiftui/Tests/StyleConverterRuntimeTests/ for
+// ONE Catalyst run under the ComponentRenderer.swift lock with seam-2 applied, then deleted (source of record: this
+// .txt). It executes the real FloatAvoidPlan + FloatAvoidLayout through ComponentRenderer at the raster stage of
+// FloatAvoidLayoutRasterTests (420×420 white, scale 1, wptCaptureMode) on derived edits of the verbatim literals.
+//  Q1 — gate hole: is a `position: absolute` float admitted by the Swift planner?
+//  Q4 — what the admitted abspos-float shape RENDERS (drift fallback?): ink bboxes.
+//  Q5 — 002: the floats overflowing the 20-px container still paint (blue at float 2 / float 3 centres).
+import XCTest
+import SwiftUI
+@testable import StyleConverterRuntime
+
+final class SkepticL4ProbeTests: XCTestCase {
+    private func root1(_ doc: String) throws -> IRComponent {
+        try JSONDecoder().decode(IRDocument.self, from: Data(doc.utf8)).components[1]
+    }
+    @MainActor private func raster(_ c: IRComponent) throws -> (px: [UInt8], w: Int, h: Int) {
+        let view = ComponentRenderer(component: c).frame(width: 420, height: 420, alignment: .topLeading)
+            .background(Color.white).environment(\.wptCaptureMode, true).environment(\.wptBlockFlowFillWidth, 358)
+        let r = ImageRenderer(content: view); r.scale = 1
+        let cg = try XCTUnwrap(r.cgImage); let w = cg.width, h = cg.height
+        var buf = [UInt8](repeating: 0, count: w * h * 4)
+        let ctx = try XCTUnwrap(CGContext(data: &buf, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+            space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        return (buf, w, h)
+    }
+    private func bbox(_ img: (px: [UInt8], w: Int, h: Int), _ f: (Int, Int, Int) -> Bool) -> String {
+        var x0 = Int.max, y0 = Int.max, x1 = -1, y1 = -1, n = 0
+        for y in 0..<img.h { for x in 0..<img.w { let i = (y * img.w + x) * 4
+            if f(Int(img.px[i]), Int(img.px[i + 1]), Int(img.px[i + 2])) { x0 = min(x0, x); y0 = min(y0, y); x1 = max(x1, x); y1 = max(y1, y); n += 1 } } }
+        return n == 0 ? "none" : "(\(x0),\(y0))-(\(x1),\(y1)) n=\(n)"
+    }
+    private func ink(_ img: (px: [UInt8], w: Int, h: Int)) -> String {
+        "blue=\(bbox(img) { $0 < 40 && $1 < 40 && $2 > 200 }) orange=\(bbox(img) { $0 > 200 && $1 > 120 && $1 < 200 && $2 < 60 })"
+    }
+    @MainActor func testProbe() throws {
+        let f1 = #"{"type":"Float","data":"RIGHT"},"#
+        let abs = FloatAvoidPlanTests.P001.replacingOccurrences(of: f1 + #"{"type":"BackgroundColor""#,
+            with: f1 + #"{"type":"Position","data":"ABSOLUTE"},{"type":"BackgroundColor""#, options: [], range: nil)
+        // Only float 1 and float 3 carry RIGHT; both edits are acceptable for the gate question, report the count.
+        let edits = abs.components(separatedBy: #""Position","data":"ABSOLUTE""#).count - 1
+        let a = try root1(abs)
+        print("SKEPTIC Q1 swift position:absolute floats (\(edits) edited) admitted = \(FloatAvoidPlan.shape(a) != nil)")
+        print("SKEPTIC Q4 abspos-float render: \(ink(try raster(a)))")
+        print("SKEPTIC Q4 baseline 001 render: \(ink(try raster(try root1(FloatAvoidPlanTests.P001))))")
+        let img = try raster(try root1(FloatAvoidPlanTests.P002))
+        func px(_ x: Int, _ y: Int) -> String { let i = (y * img.w + x) * 4; return "\(img.px[i]),\(img.px[i + 1]),\(img.px[i + 2])" }
+        print("SKEPTIC Q5 002 float2(100,150)=\(px(100, 150)) float3(300,250)=\(px(300, 250)) ink: \(ink(img))")
+    }
+}

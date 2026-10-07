@@ -1,0 +1,32 @@
+// tools/titan/results/wave53-float-avoid/FloatAvoidOutlineProbe.swift.txt — a THROWAWAY Catalyst probe (copied into the
+// test target only for one run under the ComponentRenderer.swift lock with seam-2 applied, then deleted). It prints
+// the black-ink bbox of display-flow-root-002's container and the orange bbox of 001/002 at the raster stage, to
+// replace the MED guess about the outline's 1-px-vs-2-px column with a measurement. Output: outline-probe.out.txt.
+import XCTest
+import SwiftUI
+@testable import StyleConverterRuntime
+
+final class FloatAvoidOutlineProbe: XCTestCase {
+    @MainActor
+    func testProbe() throws {
+        for (name, doc, root) in [("flow-root-002", FloatAvoidPlanTests.PFR2, 0), ("001", FloatAvoidPlanTests.P001, 1),
+                                  ("002", FloatAvoidPlanTests.P002, 1)] {
+            let comp = try JSONDecoder().decode(IRDocument.self, from: Data(doc.utf8)).components[root]
+            let view = ComponentRenderer(component: comp).frame(width: 420, height: 480, alignment: .topLeading)
+                .background(Color.white).environment(\.wptCaptureMode, true).environment(\.wptBlockFlowFillWidth, 358)
+            let r = ImageRenderer(content: view); r.scale = 1
+            let cg = try XCTUnwrap(r.cgImage); let w = cg.width, h = cg.height
+            var buf = [UInt8](repeating: 0, count: w * h * 4)
+            let ctx = try XCTUnwrap(CGContext(data: &buf, width: w, height: h, bitsPerComponent: 8, bytesPerRow: w * 4,
+                space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+            ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+            func bbox(_ f: (Int, Int, Int) -> Bool) -> String {
+                var x0 = Int.max, y0 = Int.max, x1 = -1, y1 = -1, n = 0
+                for y in 0..<h { for x in 0..<w { let i = (y * w + x) * 4
+                    if f(Int(buf[i]), Int(buf[i + 1]), Int(buf[i + 2])) { x0 = min(x0, x); y0 = min(y0, y); x1 = max(x1, x); y1 = max(y1, y); n += 1 } } }
+                return n == 0 ? "none" : "(\(x0),\(y0))-(\(x1),\(y1)) n=\(n)"
+            }
+            print("PROBE \(name) black=\(bbox { max($0, $1, $2) < 64 }) orange=\(bbox { $0 > 200 && $1 > 120 && $1 < 200 && $2 < 60 }) blue=\(bbox { $0 < 40 && $1 < 40 && $2 > 200 })")
+        }
+    }
+}

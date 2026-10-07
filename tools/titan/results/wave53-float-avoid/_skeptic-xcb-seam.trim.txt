@@ -1,0 +1,11 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.005 (0.107) seconds
+	 Executed 15 tests, with 0 failures (0 unexpected) in 3.638 (3.703) seconds
+	 Executed 18 tests, with 0 failures (0 unexpected) in 0.012 (0.109) seconds
+	 Executed 2 tests, with 0 failures (0 unexpected) in 1.150 (1.263) seconds
+	 Executed 46 tests, with 0 failures (0 unexpected) in 5.152 (5.633) seconds
+	 Executed 46 tests, with 0 failures (0 unexpected) in 5.152 (5.695) seconds
+** TEST SUCCEEDED **
+SKEPTIC Q1 swift position:absolute floats (2 edited) admitted = true
+SKEPTIC Q4 abspos-float render: blue=(0,0)-(399,99) n=40000 orange=(0,100)-(199,119) n=4000
+SKEPTIC Q4 baseline 001 render: blue=(0,0)-(399,299) n=73000 orange=(0,200)-(199,219) n=4000
+SKEPTIC Q5 002 float2(100,150)=0,0,255 float3(300,250)=0,0,255 ink: blue=(0,0)-(399,299) n=73000 orange=(0,0)-(299,19) n=6000

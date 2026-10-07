@@ -1,0 +1,30 @@
+kt M1: rc=1 tests=50 red=1 -> RED
+     P5d G7 - fit-content without inline-size containment is the content width :: java.lang.AssertionError: admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 expected null, but was:<FloatAvoidShape(sides
+kt M2: rc=1 tests=50 red=4 -> RED
+     P1 - 001 floats at 200,0 0,100 100,200 and the BFC beside float 3 at 0,200 :: java.lang.AssertionError: expected:<[(200.0, 0.0), (0.0, 100.0), (100.0, 200.0), (0.0, 200.0)]> but was:<[(200.0, 0.0), (0.0, 100.0), (100.0
+     P4 - the half-open boundary on 001 - h 100 fits at 0,0 and h 101 drops to 0,200 :: java.lang.AssertionError: expected:<(0.0, 0.0)> but was:<(0.0, 300.0)>
+     P6 - reported heights are the BFC bottoms 370, 20, 300 - floats excluded :: java.lang.AssertionError: expected:<370.0> but was:<470.0>
+     P3 - flow-root-002 floats at 150,0 and 0,100, the zero-width BFC at 250,100 :: java.lang.AssertionError: expected:<[(150.0, 0.0), (0.0, 100.0), (250.0, 100.0)]> but was:<[(150.0, 0.0), (0.0, 100.0), (250.0, 200.0)]>
+kt M3: rc=1 tests=50 red=3 -> RED
+     P1 - 001 floats at 200,0 0,100 100,200 and the BFC beside float 3 at 0,200 :: java.lang.AssertionError: expected:<[(200.0, 0.0), (0.0, 100.0), (100.0, 200.0), (0.0, 200.0)]> but was:<[(0.0, 0.0), (0.0, 100.0), (0.0, 20
+     P3 - flow-root-002 floats at 150,0 and 0,100, the zero-width BFC at 250,100 :: java.lang.AssertionError: expected:<[(150.0, 0.0), (0.0, 100.0), (250.0, 100.0)]> but was:<[(0.0, 0.0), (0.0, 100.0), (250.0, 100.0)]>
+     P7 - right floats are placed from the 400px container, not a 358 proposal :: java.lang.AssertionError: expected:<200.0> but was:<0.0>
+kt M4: rc=1 tests=50 red=2 -> RED
+     P5d G7 - an auto width is the unprovable gap fill :: java.lang.AssertionError: admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 expected null, but was:<FloatAvoidShape(sides
+     P5d G7 - fit-content without inline-size containment is the content width :: java.lang.AssertionError: admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 expected null, but was:<FloatAvoidShape(sides
+kt M5: rc=1 tests=50 red=1 -> RED
+     P5d G5 - a Clear on the BFC makes it FloatClearance's shape :: java.lang.AssertionError: admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 expected null, but was:<FloatAvoidShape(sides
+kt M7: rc=1 tests=50 red=1 -> RED
+     P6 - reported heights are the BFC bottoms 370, 20, 300 - floats excluded :: java.lang.AssertionError: expected:<20.0> but was:<300.0>
+kt M8: rc=1 tests=50 red=1 -> RED
+     P7 - right floats are placed from the 400px container, not a 358 proposal :: java.lang.AssertionError: expected:<200.0> but was:<158.0>
+kt M9: rc=1 tests=50 red=1 -> RED
+     P5d G8 - a contain-sized BFC background would paint over the floats in wire order :: java.lang.AssertionError: admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 expected null, but was:<FloatAvoidShape(sides
+kt M10: rc=1 tests=50 red=1 -> RED
+     P5d G2 - the same container nested in a non-BFC parent can see outside floats :: java.lang.AssertionError: admitted wpt__css-contain__contain-inline-size-bfc-floats-001__1-101 expected null, but was:<FloatAvoidShape(sides
+kt S1: rc=0 tests=50 red=0 -> GREEN (SURVIVOR)
+kt S2: rc=0 tests=50 red=0 -> GREEN (SURVIVOR)
+kt S3: rc=0 tests=50 red=0 -> GREEN (SURVIVOR)
+kt S4: rc=0 tests=50 red=0 -> GREEN (SURVIVOR)
+kt S5: rc=0 tests=50 red=0 -> GREEN (SURVIVOR)
+kt GREEN after restore: rc=0 tests=50 red=0 sha256 fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7 -> fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7
