@@ -1,0 +1,14 @@
+columns: re-frozen ref | wave53-open | wave53-final
+gained-01 row 1: css/css-backgrounds/background-attachment-margin-root-001.html [android] 0.451 → 0.9996
+gained-01 row 2: css/css-backgrounds/background-attachment-margin-root-001.html [ios] 0.4509 → 0.9995
+gained-01 row 3: css/css-backgrounds/background-attachment-margin-root-001.html [web] 0.4511 → 1
+gained-01 row 4: css/css-backgrounds/background-attachment-margin-root-002.html [android] 0.3389 → 0.9996
+gained-01 row 5: css/css-backgrounds/background-attachment-margin-root-002.html [ios] 0.3391 → 0.9994
+gained-01 row 6: css/css-backgrounds/background-attachment-margin-root-002.html [web] 0.339 → 1
+gained-02 row 1: css/css-contain/contain-inline-size-bfc-floats-002.html [android] 0.9311 → 0.9974
+gained-02 row 2: css/css-contain/contain-inline-size-bfc-floats-002.html [ios] 0.9322 → 0.9985
+gained-02 row 3: css/css-display/display-contents-root-background.html [android] 0.5355 → 0.9989
+gained-02 row 4: css/css-display/display-contents-root-background.html [ios] 0.5346 → 0.9995
+gained-02 row 5: css/css-display/display-contents-root-background.html [web] 0.5341 → 1
+gained-02 row 6: css/css-text/hyphens/hyphens-out-of-flow-001.html [ios] 0.8935 → 0.9971
+gained-03 row 1: css/css-text/hyphens/hyphens-span-001.html [ios] 0.8652 → 0.9968

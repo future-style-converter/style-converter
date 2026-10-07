@@ -1,0 +1,2298 @@
+{
+ "preds": [
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-nested.html web",
+   "from": "P 0.9506",
+   "to": "P >= 0.995",
+   "kind": "picture-correctness",
+   "confidence": "HIGH",
+   "floor": 0.995,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "counter-reset-reversed-nested web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-nested.html ios",
+   "from": "P 0.9508",
+   "to": "P >= 0.99",
+   "kind": "picture-correctness",
+   "confidence": "MED-HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "counter-reset-reversed-nested ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-nested.html android",
+   "from": "P 0.9509",
+   "to": "P >= 0.99",
+   "kind": "picture-correctness",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "counter-reset-reversed-nested android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/counter-suffix.html web",
+   "from": "P 0.9818",
+   "to": "P >= 0.995",
+   "kind": "picture-correctness",
+   "confidence": "HIGH (P + geometry) / MED (magnitude)",
+   "floor": 0.95,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "counter-suffix web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/counter-suffix.html ios",
+   "from": "P 0.9802 DEGENERATE",
+   "to": "P ~0.986",
+   "kind": "RTL rows picture-correct; cell stays DEGENERATE on rows 3-6 (iOS)",
+   "confidence": "HIGH (stays P) / MED (magnitude, geometry)",
+   "floor": 0.95,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "gatingMeans": "floor 0.95 only (rule 3); geometry report-only, not in geometryProbe.geometryGating",
+   "term": "counter-suffix ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/counter-suffix.html android",
+   "from": "P 0.9547 DEGENERATE",
+   "to": "P ~0.985",
+   "kind": "RTL rows picture-correct; cell stays DEGENERATE on rows 5-6 (Android)",
+   "confidence": "MED-HIGH",
+   "floor": 0.975,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "counter-suffix android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-lines-002.html android",
+   "from": "P 0.9534",
+   "to": "P 0.975-0.98",
+   "kind": "mover (up)",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "bidi-lines-002 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-lines-001.html android",
+   "from": "f 0.8934",
+   "to": "~0.95-0.96 (f->P possible)",
+   "kind": "possible flip",
+   "confidence": "MED-LOW",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "bidi-lines-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-span-001.html android",
+   "from": "P 0.9532 DEGENERATE",
+   "to": "P ~0.994",
+   "kind": "degenerate->faithful",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "hyphens-span-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-out-of-flow-001.html android",
+   "from": "P 0.9685 DEGENERATE",
+   "to": "P ~0.994 (F1+F2; F1 alone ~0.975)",
+   "kind": "degenerate->faithful",
+   "confidence": "MED-HIGH",
+   "floor": 0.985,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "hyphens-out-of-flow-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-out-of-flow-002.html android",
+   "from": "P 0.982 DEGENERATE",
+   "to": "P ~0.994 (F2)",
+   "kind": "degenerate->faithful",
+   "confidence": "MED-HIGH",
+   "floor": 0.985,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "hyphens-out-of-flow-002 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-span-001.html ios",
+   "from": "f 0.8652",
+   "to": "P ~0.99",
+   "kind": "flip",
+   "confidence": "MED-HIGH",
+   "floor": 0.98,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "hyphens-span-001 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-out-of-flow-001.html ios",
+   "from": "f 0.8935",
+   "to": "P ~0.99",
+   "kind": "flip",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "hyphens-out-of-flow-001 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-001.html android",
+   "from": "f 0.9136",
+   "to": "up",
+   "kind": "mover; a flip is DEGENERATE by construction",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "hyphenate-character-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-003.html android",
+   "from": "f 0.9168",
+   "to": "up",
+   "kind": "mover; a flip is DEGENERATE by construction",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "hyphenate-character-003 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-004.html android",
+   "from": "f 0.9041",
+   "to": "small",
+   "kind": "mover; a flip is DEGENERATE by construction",
+   "confidence": "LOW",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "hyphenate-character-004 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-001.html ios",
+   "from": "f 0.9287",
+   "to": "small",
+   "kind": "mover; a flip is DEGENERATE by construction",
+   "confidence": "LOW",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "hyphenate-character-001 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-003.html ios",
+   "from": "f 0.9337",
+   "to": "small",
+   "kind": "mover; a flip is DEGENERATE by construction",
+   "confidence": "LOW",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "hyphenate-character-003 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-004.html ios",
+   "from": "f 0.9134",
+   "to": "small",
+   "kind": "mover; a flip is DEGENERATE by construction",
+   "confidence": "LOW",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "hyphenate-character-004 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-display/display-contents-root-background.html web",
+   "from": "f 0.534",
+   "to": "P (replay 1.0000)",
+   "kind": "flip",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "display-contents-root-background web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-display/display-contents-root-background.html ios",
+   "from": "f 0.5346",
+   "to": "P (replay 0.9995)",
+   "kind": "flip",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "display-contents-root-background ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-display/display-contents-root-background.html android",
+   "from": "f 0.5355",
+   "to": "P (replay 0.9991)",
+   "kind": "flip",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "display-contents-root-background android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-backgrounds/background-attachment-margin-root-001.html web",
+   "from": "f 0.4511",
+   "to": "P (replay 0.9996)",
+   "kind": "flip",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "background-attachment-margin-root-001 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-backgrounds/background-attachment-margin-root-001.html ios",
+   "from": "f 0.4509",
+   "to": "P (replay 0.9992)",
+   "kind": "flip",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "background-attachment-margin-root-001 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-backgrounds/background-attachment-margin-root-001.html android",
+   "from": "f 0.451",
+   "to": "P (replay 0.9997)",
+   "kind": "flip",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "background-attachment-margin-root-001 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-backgrounds/background-attachment-margin-root-002.html web",
+   "from": "f 0.339",
+   "to": "P (replay 0.9996)",
+   "kind": "flip",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "background-attachment-margin-root-002 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-backgrounds/background-attachment-margin-root-002.html ios",
+   "from": "f 0.3391",
+   "to": "P (replay 0.9992)",
+   "kind": "flip",
+   "confidence": "MED-LOW",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "background-attachment-margin-root-002 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-backgrounds/background-attachment-margin-root-002.html android",
+   "from": "f 0.3389",
+   "to": "P (replay 0.9997)",
+   "kind": "flip",
+   "confidence": "MED-LOW",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "background-attachment-margin-root-002 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-006.html web",
+   "from": "P 0.9941 (wrong: square y66-85)",
+   "to": "P >= 0.998, square y56-75",
+   "kind": "picture-correctness",
+   "confidence": "HIGH (geometry) / MED (score)",
+   "floor": 0.95,
+   "gating": true,
+   "geometry": "square rows 56-75 (20) x 24-43 | red px 0",
+   "term": "s-11-1-1b-006 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-006.html ios",
+   "from": "P 0.9953 DEGENERATE",
+   "to": "P ~0.998, square y56-75",
+   "kind": "degenerate->faithful (probe-gated)",
+   "confidence": "MED (geometry) / LOW (score)",
+   "floor": null,
+   "gating": false,
+   "geometry": "square rows 56-75 (20) x 24-43 | red px 0",
+   "term": "s-11-1-1b-006 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-006.html android",
+   "from": "P 0.9944 DEGENERATE",
+   "to": "P ~0.998, square y56-75",
+   "kind": "degenerate->faithful (probe-gated)",
+   "confidence": "MED (geometry) / LOW (score)",
+   "floor": null,
+   "gating": false,
+   "geometry": "square rows 56-75 (20) x 24-43 | red px 0",
+   "term": "s-11-1-1b-006 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-inline-size-bfc-floats-001.html ios",
+   "from": "P 0.9531 DEGENERATE",
+   "to": "P ~0.998 (sim 0.9984)",
+   "kind": "degenerate->faithful",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "contain-inline-size-bfc-floats-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-inline-size-bfc-floats-001.html android",
+   "from": "P 0.9519 DEGENERATE",
+   "to": "P ~0.997 (sim 0.9972)",
+   "kind": "degenerate->faithful",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "contain-inline-size-bfc-floats-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-inline-size-bfc-floats-002.html ios",
+   "from": "f 0.9322",
+   "to": "P ~0.998 (sim 0.9985)",
+   "kind": "flip",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "contain-inline-size-bfc-floats-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-inline-size-bfc-floats-002.html android",
+   "from": "f 0.9311",
+   "to": "P ~0.997 (sim 0.9974)",
+   "kind": "flip",
+   "confidence": "HIGH",
+   "floor": 0.99,
+   "gating": true,
+   "geometry": "GEOMETRY OK",
+   "term": "contain-inline-size-bfc-floats-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-display/display-flow-root-002.html ios",
+   "from": "P 0.9734 DEGENERATE (unreviewed)",
+   "to": "P ~1.000",
+   "kind": "degenerate->faithful",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "display-flow-root-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-display/display-flow-root-002.html android",
+   "from": "P 0.9734 DEGENERATE (unreviewed)",
+   "to": "P ~1.000",
+   "kind": "degenerate->faithful",
+   "confidence": "MED",
+   "floor": null,
+   "gating": false,
+   "geometry": "GEOMETRY OK",
+   "term": "display-flow-root-002 android"
+  },
+  {
+   "lane": "L5-harness-hygiene",
+   "cell": "ios-harness XCTest StyleConverterTestTests",
+   "from": "17/30",
+   "to": "30/30",
+   "kind": "suite",
+   "confidence": "HIGH (padding 4) / HIGH-MED (IcbClip 7) / MED (InlineFlow 2)",
+   "floor": null,
+   "gating": false,
+   "geometry": null,
+   "term": "ios-harness XCTest StyleConverterTestTests"
+  }
+ ],
+ "mnm": [
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/arabic-indic/css3-counter-styles-101.html android",
+   "term": "css3-counter-styles-101 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/arabic-indic/css3-counter-styles-101.html ios",
+   "term": "css3-counter-styles-101 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/arabic-indic/css3-counter-styles-101.html web",
+   "term": "css3-counter-styles-101 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/arabic-indic/css3-counter-styles-102.html web",
+   "term": "css3-counter-styles-102 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/arabic-indic/css3-counter-styles-103.html android",
+   "term": "css3-counter-styles-103 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/arabic-indic/css3-counter-styles-103.html ios",
+   "term": "css3-counter-styles-103 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-counter-styles/arabic-indic/css3-counter-styles-103.html web",
+   "term": "css3-counter-styles-103 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-display/display-contents-dynamic-before-after-001.html android",
+   "term": "display-contents-dynamic-before-after-001 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-display/display-contents-dynamic-before-after-001.html ios",
+   "term": "display-contents-dynamic-before-after-001 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-display/display-contents-dynamic-before-after-001.html web",
+   "term": "display-contents-dynamic-before-after-001 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-2.html android",
+   "term": "counter-list-item-2 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-2.html ios",
+   "term": "counter-list-item-2 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-2.html web",
+   "term": "counter-list-item-2 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-3.html android",
+   "term": "counter-list-item-3 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-3.html ios",
+   "term": "counter-list-item-3 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-3.html web",
+   "term": "counter-list-item-3 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-slot-order.html android",
+   "term": "counter-list-item-slot-order android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-slot-order.html ios",
+   "term": "counter-list-item-slot-order ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item-slot-order.html web",
+   "term": "counter-list-item-slot-order web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item.html android",
+   "term": "counter-list-item android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item.html ios",
+   "term": "counter-list-item ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-list-item.html web",
+   "term": "counter-list-item web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-display-none.html android",
+   "term": "counter-reset-reversed-display-none android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-display-none.html ios",
+   "term": "counter-reset-reversed-display-none ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-display-none.html web",
+   "term": "counter-reset-reversed-display-none web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-list-item-start.html android",
+   "term": "counter-reset-reversed-list-item-start android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-list-item-start.html ios",
+   "term": "counter-reset-reversed-list-item-start ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-list-item-start.html web",
+   "term": "counter-reset-reversed-list-item-start web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-list-item.html android",
+   "term": "counter-reset-reversed-list-item android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-list-item.html ios",
+   "term": "counter-reset-reversed-list-item ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-list-item.html web",
+   "term": "counter-reset-reversed-list-item web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-multiple.html android",
+   "term": "counter-reset-reversed-multiple android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-multiple.html ios",
+   "term": "counter-reset-reversed-multiple ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-multiple.html web",
+   "term": "counter-reset-reversed-multiple web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-not-list-item-start.html android",
+   "term": "counter-reset-reversed-not-list-item-start android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-not-list-item-start.html ios",
+   "term": "counter-reset-reversed-not-list-item-start ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-not-list-item-start.html web",
+   "term": "counter-reset-reversed-not-list-item-start web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-not-list-item.html android",
+   "term": "counter-reset-reversed-not-list-item android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-not-list-item.html ios",
+   "term": "counter-reset-reversed-not-list-item ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-not-list-item.html web",
+   "term": "counter-reset-reversed-not-list-item web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-001.html android",
+   "term": "counter-reset-reversed-pseudo-001 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-001.html ios",
+   "term": "counter-reset-reversed-pseudo-001 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-001.html web",
+   "term": "counter-reset-reversed-pseudo-001 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-002.html android",
+   "term": "counter-reset-reversed-pseudo-002 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-002.html ios",
+   "term": "counter-reset-reversed-pseudo-002 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-002.html web",
+   "term": "counter-reset-reversed-pseudo-002 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-003.html android",
+   "term": "counter-reset-reversed-pseudo-003 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-003.html ios",
+   "term": "counter-reset-reversed-pseudo-003 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-pseudo-003.html web",
+   "term": "counter-reset-reversed-pseudo-003 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-001a.html android",
+   "term": "counter-reset-reversed-siblings-001a android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-001a.html ios",
+   "term": "counter-reset-reversed-siblings-001a ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-001a.html web",
+   "term": "counter-reset-reversed-siblings-001a web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-001b.html android",
+   "term": "counter-reset-reversed-siblings-001b android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-001b.html ios",
+   "term": "counter-reset-reversed-siblings-001b ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-001b.html web",
+   "term": "counter-reset-reversed-siblings-001b web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-002.html android",
+   "term": "counter-reset-reversed-siblings-002 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-002.html ios",
+   "term": "counter-reset-reversed-siblings-002 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-002.html web",
+   "term": "counter-reset-reversed-siblings-002 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-003.html android",
+   "term": "counter-reset-reversed-siblings-003 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-003.html ios",
+   "term": "counter-reset-reversed-siblings-003 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-siblings-003.html web",
+   "term": "counter-reset-reversed-siblings-003 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-with-regular.html android",
+   "term": "counter-reset-reversed-with-regular android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-with-regular.html ios",
+   "term": "counter-reset-reversed-with-regular ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-lists/counter-reset-reversed-with-regular.html web",
+   "term": "counter-reset-reversed-with-regular web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-lines-001.html ios",
+   "term": "bidi-lines-001 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-lines-001.html web",
+   "term": "bidi-lines-001 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-lines-002.html ios",
+   "term": "bidi-lines-002 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-lines-002.html web",
+   "term": "bidi-lines-002 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-tab-001.html android",
+   "term": "bidi-tab-001 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-tab-001.html ios",
+   "term": "bidi-tab-001 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/bidi/bidi-tab-001.html web",
+   "term": "bidi-tab-001 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/boundary-shaping/boundary-shaping-009.html android",
+   "term": "boundary-shaping-009 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/boundary-shaping/boundary-shaping-009.html ios",
+   "term": "boundary-shaping-009 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/boundary-shaping/boundary-shaping-009.html web",
+   "term": "boundary-shaping-009 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/hyphens/hyphenate-character-005.html android",
+   "term": "hyphenate-character-005 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/hyphens/hyphenate-character-005.html ios",
+   "term": "hyphenate-character-005 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-text/hyphens/hyphenate-character-005.html web",
+   "term": "hyphenate-character-005 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-writing-modes/bidi-plaintext-br-001.html android",
+   "term": "bidi-plaintext-br-001 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-writing-modes/bidi-plaintext-br-001.html ios",
+   "term": "bidi-plaintext-br-001 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "css-writing-modes/bidi-plaintext-br-001.html web",
+   "term": "bidi-plaintext-br-001 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-selector-change-003.html android",
+   "term": "dir-selector-change-003 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-selector-change-003.html ios",
+   "term": "dir-selector-change-003 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-selector-change-003.html web",
+   "term": "dir-selector-change-003 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-selector-change-004.html android",
+   "term": "dir-selector-change-004 android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-selector-change-004.html ios",
+   "term": "dir-selector-change-004 ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-selector-change-004.html web",
+   "term": "dir-selector-change-004 web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-style-02a.html android",
+   "term": "dir-style-02a android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-style-02a.html ios",
+   "term": "dir-style-02a ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-style-02a.html web",
+   "term": "dir-style-02a web"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-style-03a.html android",
+   "term": "dir-style-03a android"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-style-03a.html ios",
+   "term": "dir-style-03a ios"
+  },
+  {
+   "lane": "L1-lists-bakes",
+   "cell": "selectors/dir-style-03a.html web",
+   "term": "dir-style-03a web"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "CSS2/abspos/between-float-and-text.html android",
+   "term": "between-float-and-text android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "CSS2/abspos/hypothetical-inline-alone-on-second-line.html android",
+   "term": "hypothetical-inline-alone-on-second-line android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "CSS2/abspos/static-inside-inline-001.html android",
+   "term": "static-inside-inline-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "CSS2/abspos/static-inside-inline-002.html android",
+   "term": "static-inside-inline-002 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "CSS2/abspos/static-inside-inline-003.html android",
+   "term": "static-inside-inline-003 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-overflow/line-clamp/block-ellipsis-014.html android",
+   "term": "block-ellipsis-014 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-overflow/line-clamp/block-ellipsis-014.html ios",
+   "term": "block-ellipsis-014 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-overflow/line-clamp/block-ellipsis-028.html android",
+   "term": "block-ellipsis-028 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-overflow/line-clamp/block-ellipsis-028.html ios",
+   "term": "block-ellipsis-028 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-position/position-absolute-semi-replaced-stretch-other.html android",
+   "term": "position-absolute-semi-replaced-stretch-other android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-pseudo/first-letter-list-item-dynamic-001.html android",
+   "term": "first-letter-list-item-dynamic-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-tables/abspos-container-change-dynamic-001.html android",
+   "term": "abspos-container-change-dynamic-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hanging-punctuation/hanging-punctuation-inline-001.html ios",
+   "term": "hanging-punctuation-inline-001 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-005.html android",
+   "term": "hyphenate-character-005 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-005.html ios",
+   "term": "hyphenate-character-005 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphenate-character-005.html web",
+   "term": "hyphenate-character-005 web"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-auto-control.html android",
+   "term": "hyphens-auto-control android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-auto-control.html ios",
+   "term": "hyphens-auto-control ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-011.html android",
+   "term": "hyphens-manual-011 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-011.html ios",
+   "term": "hyphens-manual-011 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-012.html android",
+   "term": "hyphens-manual-012 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-012.html ios",
+   "term": "hyphens-manual-012 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-013.html android",
+   "term": "hyphens-manual-013 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-013.html ios",
+   "term": "hyphens-manual-013 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-inline-011.html android",
+   "term": "hyphens-manual-inline-011 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-inline-011.html ios",
+   "term": "hyphens-manual-inline-011 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-inline-012.html android",
+   "term": "hyphens-manual-inline-012 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-manual-inline-012.html ios",
+   "term": "hyphens-manual-inline-012 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-none-011.html android",
+   "term": "hyphens-none-011 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-none-011.html ios",
+   "term": "hyphens-none-011 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html android",
+   "term": "hyphens-none-shy-on-2nd-line-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-none-shy-on-2nd-line-001.html ios",
+   "term": "hyphens-none-shy-on-2nd-line-001 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-punctuation-001.html android",
+   "term": "hyphens-punctuation-001 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-span-002.html android",
+   "term": "hyphens-span-002 android"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-span-002.html ios",
+   "term": "hyphens-span-002 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-text/hyphens/hyphens-vertical-001.html ios",
+   "term": "hyphens-vertical-001 ios"
+  },
+  {
+   "lane": "L2-soft-hyphen",
+   "cell": "css-values/ch-unit-001.html android",
+   "term": "ch-unit-001 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-001.html android",
+   "term": "s-11-1-1b-001 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-001.html ios",
+   "term": "s-11-1-1b-001 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-001.html web",
+   "term": "s-11-1-1b-001 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-002.html android",
+   "term": "s-11-1-1b-002 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-002.html ios",
+   "term": "s-11-1-1b-002 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-002.html web",
+   "term": "s-11-1-1b-002 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-003.html android",
+   "term": "s-11-1-1b-003 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-003.html ios",
+   "term": "s-11-1-1b-003 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-003.html web",
+   "term": "s-11-1-1b-003 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-004.html android",
+   "term": "s-11-1-1b-004 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-004.html ios",
+   "term": "s-11-1-1b-004 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-004.html web",
+   "term": "s-11-1-1b-004 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-005.html android",
+   "term": "s-11-1-1b-005 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-005.html ios",
+   "term": "s-11-1-1b-005 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-005.html web",
+   "term": "s-11-1-1b-005 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-007.html android",
+   "term": "s-11-1-1b-007 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-007.html ios",
+   "term": "s-11-1-1b-007 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-007.html web",
+   "term": "s-11-1-1b-007 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-008.html android",
+   "term": "s-11-1-1b-008 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-008.html ios",
+   "term": "s-11-1-1b-008 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-008.html web",
+   "term": "s-11-1-1b-008 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-009.html android",
+   "term": "s-11-1-1b-009 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-009.html ios",
+   "term": "s-11-1-1b-009 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "CSS2/css21-errata/s-11-1-1b-009.html web",
+   "term": "s-11-1-1b-009 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-cascade/initial-background-color.html android",
+   "term": "initial-background-color android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-cascade/initial-background-color.html ios",
+   "term": "initial-background-color ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-cascade/initial-background-color.html web",
+   "term": "initial-background-color web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-color/a98rgb-003.html android",
+   "term": "a98rgb-003 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-color/a98rgb-003.html ios",
+   "term": "a98rgb-003 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-color/a98rgb-003.html web",
+   "term": "a98rgb-003 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-001.html android",
+   "term": "contain-body-bg-001 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-001.html ios",
+   "term": "contain-body-bg-001 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-001.html web",
+   "term": "contain-body-bg-001 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-002.html android",
+   "term": "contain-body-bg-002 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-002.html ios",
+   "term": "contain-body-bg-002 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-002.html web",
+   "term": "contain-body-bg-002 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-003.html android",
+   "term": "contain-body-bg-003 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-003.html ios",
+   "term": "contain-body-bg-003 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-003.html web",
+   "term": "contain-body-bg-003 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-004.html android",
+   "term": "contain-body-bg-004 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-004.html ios",
+   "term": "contain-body-bg-004 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-body-bg-004.html web",
+   "term": "contain-body-bg-004 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-001.html android",
+   "term": "contain-html-bg-001 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-001.html ios",
+   "term": "contain-html-bg-001 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-001.html web",
+   "term": "contain-html-bg-001 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-002.html android",
+   "term": "contain-html-bg-002 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-002.html ios",
+   "term": "contain-html-bg-002 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-002.html web",
+   "term": "contain-html-bg-002 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-003.html android",
+   "term": "contain-html-bg-003 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-003.html ios",
+   "term": "contain-html-bg-003 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-003.html web",
+   "term": "contain-html-bg-003 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-004.html android",
+   "term": "contain-html-bg-004 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-004.html ios",
+   "term": "contain-html-bg-004 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-contain/contain-html-bg-004.html web",
+   "term": "contain-html-bg-004 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-display/display-contents-text-only-001.html android",
+   "term": "display-contents-text-only-001 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-display/display-contents-text-only-001.html ios",
+   "term": "display-contents-text-only-001 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-display/display-contents-text-only-001.html web",
+   "term": "display-contents-text-only-001 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-images/css-image-fallbacks-and-annotations002.html android",
+   "term": "css-image-fallbacks-and-annotations002 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-images/css-image-fallbacks-and-annotations002.html ios",
+   "term": "css-image-fallbacks-and-annotations002 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-images/css-image-fallbacks-and-annotations002.html web",
+   "term": "css-image-fallbacks-and-annotations002 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-images/css-image-fallbacks-and-annotations003.html android",
+   "term": "css-image-fallbacks-and-annotations003 android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-images/css-image-fallbacks-and-annotations003.html ios",
+   "term": "css-image-fallbacks-and-annotations003 ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-images/css-image-fallbacks-and-annotations003.html web",
+   "term": "css-image-fallbacks-and-annotations003 web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-masking/clip-path/clip-path-document-element-will-change.html android",
+   "term": "clip-path-document-element-will-change android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-masking/clip-path/clip-path-document-element-will-change.html ios",
+   "term": "clip-path-document-element-will-change ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-masking/clip-path/clip-path-document-element-will-change.html web",
+   "term": "clip-path-document-element-will-change web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-masking/clip-path/clip-path-document-element.html android",
+   "term": "clip-path-document-element android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-masking/clip-path/clip-path-document-element.html ios",
+   "term": "clip-path-document-element ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-masking/clip-path/clip-path-document-element.html web",
+   "term": "clip-path-document-element web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-position/position-absolute-dynamic-static-position-table-cell.html android",
+   "term": "position-absolute-dynamic-static-position-table-cell android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-position/position-absolute-dynamic-static-position-table-cell.html ios",
+   "term": "position-absolute-dynamic-static-position-table-cell ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-position/position-absolute-dynamic-static-position-table-cell.html web",
+   "term": "position-absolute-dynamic-static-position-table-cell web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-tables/baseline-vertical.html android",
+   "term": "baseline-vertical android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-tables/baseline-vertical.html ios",
+   "term": "baseline-vertical ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "css-tables/baseline-vertical.html web",
+   "term": "baseline-vertical web"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "filter-effects/backdrop-filter-root-element.html android",
+   "term": "backdrop-filter-root-element android"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "filter-effects/backdrop-filter-root-element.html ios",
+   "term": "backdrop-filter-root-element ios"
+  },
+  {
+   "lane": "L3-canvas-root",
+   "cell": "filter-effects/backdrop-filter-root-element.html web",
+   "term": "backdrop-filter-root-element web"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-before-clearance.html android",
+   "term": "adjoining-float-before-clearance android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-before-clearance.html ios",
+   "term": "adjoining-float-before-clearance ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance-002.html android",
+   "term": "adjoining-float-nested-forced-clearance-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance-002.html ios",
+   "term": "adjoining-float-nested-forced-clearance-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance-003.html android",
+   "term": "adjoining-float-nested-forced-clearance-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance-003.html ios",
+   "term": "adjoining-float-nested-forced-clearance-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance-004.html android",
+   "term": "adjoining-float-nested-forced-clearance-004 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance-004.html ios",
+   "term": "adjoining-float-nested-forced-clearance-004 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance.html android",
+   "term": "adjoining-float-nested-forced-clearance android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-nested-forced-clearance.html ios",
+   "term": "adjoining-float-nested-forced-clearance ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-new-fc.html android",
+   "term": "adjoining-float-new-fc android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/adjoining-float-new-fc.html ios",
+   "term": "adjoining-float-new-fc ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-child-with-margins-2.html android",
+   "term": "clear-on-child-with-margins-2 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-child-with-margins-2.html ios",
+   "term": "clear-on-child-with-margins-2 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-child-with-margins.html android",
+   "term": "clear-on-child-with-margins android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-child-with-margins.html ios",
+   "term": "clear-on-child-with-margins ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-parent-with-margins-no-clearance.html android",
+   "term": "clear-on-parent-with-margins-no-clearance android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-parent-with-margins-no-clearance.html ios",
+   "term": "clear-on-parent-with-margins-no-clearance ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-parent-with-margins.html android",
+   "term": "clear-on-parent-with-margins android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-parent-with-margins.html ios",
+   "term": "clear-on-parent-with-margins ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-parent.html android",
+   "term": "clear-on-parent android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-on-parent.html ios",
+   "term": "clear-on-parent ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-with-top-margin-after-cleared-empty-block.html android",
+   "term": "clear-with-top-margin-after-cleared-empty-block android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/clear-with-top-margin-after-cleared-empty-block.html ios",
+   "term": "clear-with-top-margin-after-cleared-empty-block ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-bfc-003.html android",
+   "term": "floats-bfc-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-bfc-003.html ios",
+   "term": "floats-bfc-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-000.html android",
+   "term": "floats-clear-multicol-000 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-000.html ios",
+   "term": "floats-clear-multicol-000 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-001.html android",
+   "term": "floats-clear-multicol-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-001.html ios",
+   "term": "floats-clear-multicol-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-002.html android",
+   "term": "floats-clear-multicol-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-002.html ios",
+   "term": "floats-clear-multicol-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-003.html android",
+   "term": "floats-clear-multicol-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-003.html ios",
+   "term": "floats-clear-multicol-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-000.html android",
+   "term": "floats-clear-multicol-balancing-000 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-000.html ios",
+   "term": "floats-clear-multicol-balancing-000 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-001.html android",
+   "term": "floats-clear-multicol-balancing-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-001.html ios",
+   "term": "floats-clear-multicol-balancing-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-002.html android",
+   "term": "floats-clear-multicol-balancing-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-002.html ios",
+   "term": "floats-clear-multicol-balancing-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-003.html android",
+   "term": "floats-clear-multicol-balancing-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/floats-clear-multicol-balancing-003.html ios",
+   "term": "floats-clear-multicol-balancing-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/negative-clearance-after-adjoining-float.html android",
+   "term": "negative-clearance-after-adjoining-float android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "CSS2/floats-clear/negative-clearance-after-adjoining-float.html ios",
+   "term": "negative-clearance-after-adjoining-float ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-anchor-position/anchor-position-multicol-007.html android",
+   "term": "anchor-position-multicol-007 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-break/block-in-inline-011.html android",
+   "term": "block-in-inline-011 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-cascade/all-prop-001.html android",
+   "term": "all-prop-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-cascade/all-prop-001.html ios",
+   "term": "all-prop-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-content-001.html android",
+   "term": "contain-content-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-content-001.html ios",
+   "term": "contain-content-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-inline-size-bfc-floats-001.html web",
+   "term": "contain-inline-size-bfc-floats-001 web"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-contain/contain-inline-size-bfc-floats-002.html web",
+   "term": "contain-inline-size-bfc-floats-002 web"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-display/display-contents-float-001.html android",
+   "term": "display-contents-float-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-display/display-contents-float-001.html ios",
+   "term": "display-contents-float-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-display/display-flow-root-001.html android",
+   "term": "display-flow-root-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-display/display-flow-root-001.html ios",
+   "term": "display-flow-root-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-display/display-flow-root-002.html web",
+   "term": "display-flow-root-002 web"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html android",
+   "term": "flex-abspos-staticpos-fallback-justify-content-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html ios",
+   "term": "flex-abspos-staticpos-fallback-justify-content-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html android",
+   "term": "flex-abspos-staticpos-justify-self-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html ios",
+   "term": "flex-abspos-staticpos-justify-self-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-margin-001.html android",
+   "term": "flex-abspos-staticpos-margin-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-margin-001.html ios",
+   "term": "flex-abspos-staticpos-margin-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-margin-002.html android",
+   "term": "flex-abspos-staticpos-margin-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-margin-002.html ios",
+   "term": "flex-abspos-staticpos-margin-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-margin-003.html android",
+   "term": "flex-abspos-staticpos-margin-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-flexbox/abspos/flex-abspos-staticpos-margin-003.html ios",
+   "term": "flex-abspos-staticpos-margin-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-001.html android",
+   "term": "descendant-static-position-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-001.html ios",
+   "term": "descendant-static-position-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-002.html android",
+   "term": "descendant-static-position-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-002.html ios",
+   "term": "descendant-static-position-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-003.html android",
+   "term": "descendant-static-position-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-003.html ios",
+   "term": "descendant-static-position-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-004.html android",
+   "term": "descendant-static-position-004 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/descendant-static-position-004.html ios",
+   "term": "descendant-static-position-004 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-001.html android",
+   "term": "grid-abspos-staticpos-align-self-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-002.html android",
+   "term": "grid-abspos-staticpos-align-self-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-001.html android",
+   "term": "grid-abspos-staticpos-align-self-img-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-img-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html android",
+   "term": "grid-abspos-staticpos-align-self-img-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-img-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-001.html android",
+   "term": "grid-abspos-staticpos-align-self-img-last-baseline-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-img-last-baseline-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-002.html android",
+   "term": "grid-abspos-staticpos-align-self-img-last-baseline-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-img-last-baseline-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html android",
+   "term": "grid-abspos-staticpos-align-self-last-baseline-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-last-baseline-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html android",
+   "term": "grid-abspos-staticpos-align-self-last-baseline-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-last-baseline-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-004 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-004 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html android",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-004 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html ios",
+   "term": "grid-abspos-staticpos-align-self-rtl-last-baseline-004 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-004 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-004 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html android",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-004 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html ios",
+   "term": "grid-abspos-staticpos-align-self-vertWM-last-baseline-004 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-justify-self-001.html android",
+   "term": "grid-abspos-staticpos-justify-self-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-justify-self-001.html ios",
+   "term": "grid-abspos-staticpos-justify-self-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-justify-self-002.html android",
+   "term": "grid-abspos-staticpos-justify-self-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-justify-self-002.html ios",
+   "term": "grid-abspos-staticpos-justify-self-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-justify-self-img-001.html android",
+   "term": "grid-abspos-staticpos-justify-self-img-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-grid/abspos/grid-abspos-staticpos-justify-self-img-001.html ios",
+   "term": "grid-abspos-staticpos-justify-self-img-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-masking/clip-path/clip-path-marginBox-1b.html android",
+   "term": "clip-path-marginBox-1b android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-masking/clip-path/clip-path-marginBox-1b.html ios",
+   "term": "clip-path-marginBox-1b ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-masking/clip-path/clip-path-marginBox-1c.html android",
+   "term": "clip-path-marginBox-1c android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-masking/clip-path/clip-path-marginBox-1c.html ios",
+   "term": "clip-path-marginBox-1c ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-masking/clip-path/clip-path-marginBox-1d.html android",
+   "term": "clip-path-marginBox-1d android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-masking/clip-path/clip-path-marginBox-1d.html ios",
+   "term": "clip-path-marginBox-1d ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-position/position-absolute-dynamic-relayout-004.html android",
+   "term": "position-absolute-dynamic-relayout-004 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-position/position-absolute-dynamic-relayout-004.html ios",
+   "term": "position-absolute-dynamic-relayout-004 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-pseudo/first-letter-002.html android",
+   "term": "first-letter-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-pseudo/first-letter-002.html ios",
+   "term": "first-letter-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-pseudo/first-letter-003.html android",
+   "term": "first-letter-003 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-pseudo/first-letter-003.html ios",
+   "term": "first-letter-003 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-pseudo/first-letter-list-item-dynamic-001.html android",
+   "term": "first-letter-list-item-dynamic-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-pseudo/first-letter-list-item-dynamic-001.html ios",
+   "term": "first-letter-list-item-dynamic-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/direction-upright-001.html android",
+   "term": "direction-upright-001 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/direction-upright-001.html ios",
+   "term": "direction-upright-001 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/direction-upright-002.html android",
+   "term": "direction-upright-002 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/direction-upright-002.html ios",
+   "term": "direction-upright-002 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/float-in-htb-in-vrl.html android",
+   "term": "float-in-htb-in-vrl android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/float-in-htb-in-vrl.html ios",
+   "term": "float-in-htb-in-vrl ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/float-vlr-014.html android",
+   "term": "float-vlr-014 android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/float-vlr-014.html ios",
+   "term": "float-vlr-014 ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/inline-box-orthogonal-child-with-margins.html android",
+   "term": "inline-box-orthogonal-child-with-margins android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "css-writing-modes/inline-box-orthogonal-child-with-margins.html ios",
+   "term": "inline-box-orthogonal-child-with-margins ios"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "selectors/dir-pseudo-update-document-element.html android",
+   "term": "dir-pseudo-update-document-element android"
+  },
+  {
+   "lane": "L4-float-avoid",
+   "cell": "selectors/dir-pseudo-update-document-element.html ios",
+   "term": "dir-pseudo-update-document-element ios"
+  },
+  {
+   "lane": "L5-harness-hygiene",
+   "cell": "CSS2/abspos/static-inside-inline-block.html ios",
+   "term": "static-inside-inline-block ios"
+  },
+  {
+   "lane": "L5-harness-hygiene",
+   "cell": "css-cascade/scope-pseudo-element.html ios",
+   "term": "scope-pseudo-element ios"
+  },
+  {
+   "lane": "L5-harness-hygiene",
+   "cell": "css-flexbox/align-items-007.html ios",
+   "term": "align-items-007 ios"
+  },
+  {
+   "lane": "L5-harness-hygiene",
+   "cell": "css-gaps/flex/flex-gap-decorations-027.html ios",
+   "term": "flex-gap-decorations-027 ios"
+  },
+  {
+   "lane": "L5-harness-hygiene",
+   "cell": "css-masking/clip-path/clip-path-circle-007.html ios",
+   "term": "clip-path-circle-007 ios"
+  }
+ ]
+}

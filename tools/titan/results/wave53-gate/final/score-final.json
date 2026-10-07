@@ -1,0 +1,1192 @@
+{
+ "prev": "wave53-open",
+ "cur": "wave53-final",
+ "totals": {
+  "prev": {
+   "web": {
+    "passing": 1229,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1119,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1111,
+    "measured": 1362
+   }
+  },
+  "cur": {
+   "web": {
+    "passing": 1232,
+    "measured": 1372
+   },
+   "ios": {
+    "passing": 1125,
+    "measured": 1362
+   },
+   "android": {
+    "passing": 1115,
+    "measured": 1362
+   }
+  }
+ },
+ "sections": {
+  "CSS2": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-anchor-position": {
+   "prev": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 30,
+     "measured": 32
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 32
+    },
+    "android": {
+     "passing": 27,
+     "measured": 32
+    }
+   }
+  },
+  "css-backgrounds": {
+   "prev": {
+    "web": {
+     "passing": 24,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 24,
+     "measured": 29
+    },
+    "android": {
+     "passing": 24,
+     "measured": 29
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 26,
+     "measured": 29
+    },
+    "ios": {
+     "passing": 26,
+     "measured": 29
+    },
+    "android": {
+     "passing": 26,
+     "measured": 29
+    }
+   }
+  },
+  "css-break": {
+   "prev": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 31,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 37,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 29,
+     "measured": 48
+    },
+    "android": {
+     "passing": 31,
+     "measured": 48
+    }
+   }
+  },
+  "css-cascade": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 41
+    },
+    "android": {
+     "passing": 36,
+     "measured": 41
+    }
+   }
+  },
+  "css-color": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 43,
+     "measured": 48
+    },
+    "android": {
+     "passing": 44,
+     "measured": 48
+    }
+   }
+  },
+  "css-contain": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 39,
+     "measured": 48
+    }
+   }
+  },
+  "css-counter-styles": {
+   "prev": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 40,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 28,
+     "measured": 37
+    },
+    "android": {
+     "passing": 28,
+     "measured": 37
+    }
+   }
+  },
+  "css-display": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 41,
+     "measured": 47
+    }
+   }
+  },
+  "css-flexbox": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 45,
+     "measured": 47
+    },
+    "android": {
+     "passing": 45,
+     "measured": 47
+    }
+   }
+  },
+  "css-gaps": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 48
+    },
+    "android": {
+     "passing": 46,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 48
+    },
+    "android": {
+     "passing": 46,
+     "measured": 48
+    }
+   }
+  },
+  "css-grid": {
+   "prev": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 48,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 48
+    },
+    "android": {
+     "passing": 47,
+     "measured": 48
+    }
+   }
+  },
+  "css-images": {
+   "prev": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 43,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 35,
+     "measured": 47
+    },
+    "android": {
+     "passing": 35,
+     "measured": 47
+    }
+   }
+  },
+  "css-lists": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-masking": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 47
+    },
+    "android": {
+     "passing": 40,
+     "measured": 47
+    }
+   }
+  },
+  "css-multicol": {
+   "prev": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 45,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 43,
+     "measured": 48
+    }
+   }
+  },
+  "css-overflow": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 47,
+     "measured": 47
+    },
+    "android": {
+     "passing": 46,
+     "measured": 47
+    }
+   }
+  },
+  "css-position": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 41
+    },
+    "ios": {
+     "passing": 33,
+     "measured": 41
+    },
+    "android": {
+     "passing": 33,
+     "measured": 41
+    }
+   }
+  },
+  "css-pseudo": {
+   "prev": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 33,
+     "measured": 42
+    },
+    "ios": {
+     "passing": 32,
+     "measured": 42
+    },
+    "android": {
+     "passing": 31,
+     "measured": 42
+    }
+   }
+  },
+  "css-sizing": {
+   "prev": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 47,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 44,
+     "measured": 48
+    },
+    "android": {
+     "passing": 45,
+     "measured": 48
+    }
+   }
+  },
+  "css-tables": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 47
+    },
+    "android": {
+     "passing": 37,
+     "measured": 47
+    }
+   }
+  },
+  "css-text": {
+   "prev": {
+    "web": {
+     "passing": 35,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 34,
+     "measured": 48
+    },
+    "android": {
+     "passing": 34,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 35,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 48
+    },
+    "android": {
+     "passing": 34,
+     "measured": 48
+    }
+   }
+  },
+  "css-text-decor": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 31,
+     "measured": 48
+    },
+    "android": {
+     "passing": 29,
+     "measured": 48
+    }
+   }
+  },
+  "css-transforms": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 47
+    },
+    "ios": {
+     "passing": 46,
+     "measured": 47
+    },
+    "android": {
+     "passing": 43,
+     "measured": 47
+    }
+   }
+  },
+  "css-ui": {
+   "prev": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 42,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 42,
+     "measured": 48
+    },
+    "android": {
+     "passing": 41,
+     "measured": 48
+    }
+   }
+  },
+  "css-values": {
+   "prev": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 44,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 40,
+     "measured": 48
+    },
+    "android": {
+     "passing": 40,
+     "measured": 48
+    }
+   }
+  },
+  "css-view-transitions": {
+   "prev": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 32,
+     "measured": 45
+    },
+    "ios": {
+     "passing": 27,
+     "measured": 46
+    },
+    "android": {
+     "passing": 29,
+     "measured": 46
+    }
+   }
+  },
+  "css-writing-modes": {
+   "prev": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 36,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 30,
+     "measured": 48
+    },
+    "android": {
+     "passing": 27,
+     "measured": 48
+    }
+   }
+  },
+  "filter-effects": {
+   "prev": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 46
+    },
+    "android": {
+     "passing": 32,
+     "measured": 46
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 41,
+     "measured": 46
+    },
+    "ios": {
+     "passing": 36,
+     "measured": 46
+    },
+    "android": {
+     "passing": 32,
+     "measured": 46
+    }
+   }
+  },
+  "selectors": {
+   "prev": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   },
+   "cur": {
+    "web": {
+     "passing": 46,
+     "measured": 48
+    },
+    "ios": {
+     "passing": 41,
+     "measured": 48
+    },
+    "android": {
+     "passing": 38,
+     "measured": 48
+    }
+   }
+  }
+ },
+ "gained": [
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-001.html",
+   "platform": "android",
+   "prev": 0.451,
+   "cur": 0.9996,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-001.html",
+   "platform": "ios",
+   "prev": 0.4509,
+   "cur": 0.9995,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-001.html",
+   "platform": "web",
+   "prev": 0.4511,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-002.html",
+   "platform": "android",
+   "prev": 0.3389,
+   "cur": 0.9996,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-002.html",
+   "platform": "ios",
+   "prev": 0.3391,
+   "cur": 0.9994,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-backgrounds",
+   "test": "css/css-backgrounds/background-attachment-margin-root-002.html",
+   "platform": "web",
+   "prev": 0.339,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-002.html",
+   "platform": "android",
+   "prev": 0.9311,
+   "cur": 0.9974,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-002.html",
+   "platform": "ios",
+   "prev": 0.9322,
+   "cur": 0.9985,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "android",
+   "prev": 0.5355,
+   "cur": 0.9989,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "ios",
+   "prev": 0.5346,
+   "cur": 0.9995,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-contents-root-background.html",
+   "platform": "web",
+   "prev": 0.5341,
+   "cur": 1,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "platform": "ios",
+   "prev": 0.8935,
+   "cur": 0.9971,
+   "prevPass": false,
+   "curPass": true
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-span-001.html",
+   "platform": "ios",
+   "prev": 0.8652,
+   "cur": 0.9968,
+   "prevPass": false,
+   "curPass": true
+  }
+ ],
+ "lost": [],
+ "movers": [
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "platform": "android",
+   "prev": 0.9519,
+   "cur": 0.9972,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0453
+  },
+  {
+   "sec": "css-contain",
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "platform": "ios",
+   "prev": 0.9531,
+   "cur": 0.9984,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0453
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-flow-root-002.html",
+   "platform": "android",
+   "prev": 0.9734,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0266
+  },
+  {
+   "sec": "css-display",
+   "test": "css/css-display/display-flow-root-002.html",
+   "platform": "ios",
+   "prev": 0.9734,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0266
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-reset-reversed-nested.html",
+   "platform": "android",
+   "prev": 0.9509,
+   "cur": 0.9852,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0343
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-reset-reversed-nested.html",
+   "platform": "ios",
+   "prev": 0.9508,
+   "cur": 0.9989,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0481
+  },
+  {
+   "sec": "css-lists",
+   "test": "css/css-lists/counter-reset-reversed-nested.html",
+   "platform": "web",
+   "prev": 0.9506,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0494
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-001.html",
+   "platform": "android",
+   "prev": 0.9136,
+   "cur": 0.9301,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0165
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphenate-character-003.html",
+   "platform": "android",
+   "prev": 0.9168,
+   "cur": 0.9292,
+   "prevPass": false,
+   "curPass": false,
+   "delta": 0.0124
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "platform": "android",
+   "prev": 0.9685,
+   "cur": 0.9943,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0258
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "platform": "android",
+   "prev": 0.982,
+   "cur": 0.9943,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0123
+  },
+  {
+   "sec": "css-text",
+   "test": "css/css-text/hyphens/hyphens-span-001.html",
+   "platform": "android",
+   "prev": 0.9532,
+   "cur": 0.9937,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0405
+  },
+  {
+   "sec": "CSS2",
+   "test": "css/CSS2/css21-errata/s-11-1-1b-006.html",
+   "platform": "web",
+   "prev": 0.9941,
+   "cur": 1,
+   "prevPass": true,
+   "curPass": true,
+   "delta": 0.0059
+  }
+ ],
+ "newlyMeasured": [],
+ "unmeasuredNow": [],
+ "missingSections": [],
+ "columnShorts": []
+}

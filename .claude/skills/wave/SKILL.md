@@ -223,6 +223,22 @@ rules from the retrospective, none optional:
   capture-hash check**: sha1 every capture PNG against the previous gate;
   identical bytes → instrument-only flip, different bytes → a render change
   adjudicated in the `-cal` snapshot's `_note` (A1#2).
+- **A probe decides reverts under the plan's own rules, and the closing gate
+  is pre-registered AGAINST those decisions** (wave 53): when a probe fires a
+  revert rule, revert the unit, then write the decision into the generator
+  (`expectations.json` → `probeDecisions`: predictions withdrawn from R4,
+  the cells held to must-not-move in R5, the unit's carriers withdrawn from
+  the control) and prove the amended rules fail on the probe tree itself
+  before launching the gate.
+- **An upstream bake that positions runs (markers, glyph boxes) gets a
+  one-section DEVICE probe read with the family's geometry script before
+  the closing gate** — a replay composited onto the web picture cannot
+  predict native row assignment (wave 53 U2: SSIM rose 0.9547 → 0.9793 with
+  every Android marker on the wrong row; only the geometry row caught it).
+- **The installed-build hash is read right after provisioning** (the one-shot
+  `until grep 'attempt 1 starting' <driver log>` wait), never during the
+  fixture net — `test-all.sh` rebuilds and reinstalls the iOS harness per
+  fixture, so a mid-net read finds the built .app missing.
 
 The gate contract (post-overhaul): exit 3 aborts a section (fix the
 capture, never the check); exit 4 → fix or ledger with reason/owner/expires

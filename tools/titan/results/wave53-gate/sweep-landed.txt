@@ -11,3 +11,5 @@ swiftui            | rc=0 | 	 Executed 2192 tests, with 0 failures (0 unexpected
 ios-harness        | rc=0 | 	 Executed 30 tests, with 0 failures (0 unexpected) in 0.054 (0.060) seconds | 69s
 # finished 2026-10-07T14:53:07Z
 # tooling: # tests 2291 · # pass 2287 · # skipped 4 (env-gated); raw logs in the session scratchpad (not kept)
+# addendum (ship, 2026-10-07T17:03:25Z): tooling with tools/titan/results/corpus-v6-19.json present = # tests 2297 · # pass 2290 · # skipped 4 (the snapshot-shape pins iterate every corpus-v*.json; 2291 at sweep 3 before the file existed)
+# addendum 2 (ship): the all-then-color baselines were WITHDRAWN (label-chrome tripwire: 3 of 6 canvases carry no harness label on any platform) — tooling on the shipped tree = # tests 2291 · # pass 2287 · # fail 0 · # skipped 4

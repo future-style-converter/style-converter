@@ -1,0 +1,1146 @@
+{
+ "pre": "wave53-open",
+ "post": "wave53-final",
+ "lane": "L1-lists-bakes",
+ "sections": {
+  "CSS2": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+      "px": 400,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+      "px": 200,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-anchor-position": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-backgrounds": {
+   "web": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+      "px": 125944,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+      "px": 203344,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+      "px": 172757,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+      "px": 203344,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+      "px": 125944,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+      "px": 203344,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-break": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-cascade": {
+   "web": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 43,
+    "identical": 43,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-color": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-contain": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+      "px": 8000,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+      "px": 12000,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+      "px": 8000,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+      "px": 12000,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-counter-styles": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-display": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-display__display-contents-root-background",
+      "px": 233620,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-display__display-contents-root-background",
+      "px": 233853,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-display__display-flow-root-002",
+      "px": 606,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-display__display-contents-root-background",
+      "px": 233837,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-display__display-flow-root-002",
+      "px": 606,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-flexbox": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-gaps": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-grid": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-images": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-lists": {
+   "web": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-lists__counter-reset-reversed-nested",
+      "px": 3350,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-lists__counter-reset-reversed-nested"
+    ]
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-lists__counter-reset-reversed-nested",
+      "px": 3175,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-lists__counter-reset-reversed-nested"
+    ]
+   },
+   "android": {
+    "compared": 48,
+    "identical": 47,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-lists__counter-reset-reversed-nested",
+      "px": 3113,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": [
+     "wpt__css-lists__counter-reset-reversed-nested"
+    ]
+   }
+  },
+  "css-masking": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-multicol": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-overflow": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-position": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-pseudo": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-sizing": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-tables": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-text": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 46,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+      "px": 9016,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-span-001",
+      "px": 11484,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 42,
+    "reencoded": 0,
+    "changed": [
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+      "px": 3840,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+      "px": 4219,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+      "px": 748,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+      "px": 2041,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+      "px": 979,
+      "maxDelta": 255
+     },
+     {
+      "stem": "wpt__css-text__hyphens__hyphens-span-001",
+      "px": 3186,
+      "maxDelta": 255
+     }
+    ],
+    "carriers": []
+   }
+  },
+  "css-text-decor": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-transforms": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-ui": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-values": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-view-transitions": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "css-writing-modes": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "filter-effects": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  },
+  "selectors": {
+   "web": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "ios": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   },
+   "android": {
+    "compared": 48,
+    "identical": 48,
+    "reencoded": 0,
+    "changed": [],
+    "carriers": []
+   }
+  }
+ },
+ "totals": {
+  "web": {
+   "compared": 1435,
+   "identical": 1430,
+   "reencoded": 0,
+   "changed": 5,
+   "carriers": 1
+  },
+  "ios": {
+   "compared": 1435,
+   "identical": 1425,
+   "reencoded": 0,
+   "changed": 10,
+   "carriers": 1
+  },
+  "android": {
+   "compared": 1435,
+   "identical": 1422,
+   "reencoded": 0,
+   "changed": 13,
+   "carriers": 1
+  }
+ },
+ "leaks": [
+  {
+   "sec": "CSS2",
+   "platform": "web",
+   "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "px": 400,
+   "maxDelta": 255
+  },
+  {
+   "sec": "CSS2",
+   "platform": "ios",
+   "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "px": 200,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "web",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "px": 125944,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "web",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "px": 203344,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "ios",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "px": 172757,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "ios",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "px": 203344,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "android",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "px": 125944,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-backgrounds",
+   "platform": "android",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "px": 203344,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-contain",
+   "platform": "ios",
+   "stem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+   "px": 8000,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-contain",
+   "platform": "ios",
+   "stem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+   "px": 12000,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-contain",
+   "platform": "android",
+   "stem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+   "px": 8000,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-contain",
+   "platform": "android",
+   "stem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+   "px": 12000,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "web",
+   "stem": "wpt__css-display__display-contents-root-background",
+   "px": 233620,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "ios",
+   "stem": "wpt__css-display__display-contents-root-background",
+   "px": 233853,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "ios",
+   "stem": "wpt__css-display__display-flow-root-002",
+   "px": 606,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "android",
+   "stem": "wpt__css-display__display-contents-root-background",
+   "px": 233837,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-display",
+   "platform": "android",
+   "stem": "wpt__css-display__display-flow-root-002",
+   "px": 606,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "ios",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "px": 9016,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "ios",
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "px": 11484,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+   "px": 3840,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+   "px": 4219,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+   "px": 748,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "px": 2041,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "px": 979,
+   "maxDelta": 255
+  },
+  {
+   "sec": "css-text",
+   "platform": "android",
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "px": 3186,
+   "maxDelta": 255
+  }
+ ],
+ "wireLeaks": [],
+ "wireRenumbered": [
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-not-list-item-start",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-not-list-item",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-pseudo-001",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-pseudo-002",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-pseudo-003",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-001a",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-001b",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-002",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-siblings-003",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-reversed-with-regular",
+   "shift": 1,
+   "explainedBy": [
+    "wpt__css-lists__counter-reset-reversed-nested +1"
+   ]
+  }
+ ],
+ "wire": {
+  "compared": 1435,
+  "changed": 1,
+  "renumbered": 10
+ }
+}

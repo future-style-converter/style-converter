@@ -1,0 +1,65 @@
+score-gate  prev=wave53-open  cur=wave53-final
+  prev totals: web 1229/1372  ios 1119/1362  android 1111/1362
+  cur  totals: web 1232/1372  ios 1125/1362  android 1115/1362
+  per-cell: gained 13  lost 0  newly-measured 0  unmeasured-now 0  movers(|Δ|>=0.002) 14
+  per section (prev → cur):
+    CSS2                     web 44/47→44/47  ios 41/47→41/47  android 41/47→41/47
+    css-anchor-position      web 30/32→30/32  ios 24/32→24/32  android 27/32→27/32
+    css-backgrounds          web 24/29→26/29  ios 24/29→26/29  android 24/29→26/29
+    css-break                web 37/48→37/48  ios 29/48→29/48  android 31/48→31/48
+    css-cascade              web 36/41→36/41  ios 35/41→35/41  android 36/41→36/41
+    css-color                web 43/48→43/48  ios 43/48→43/48  android 44/48→44/48
+    css-contain              web 48/48→48/48  ios 40/48→41/48  android 38/48→39/48
+    css-counter-styles       web 40/48→40/48  ios 28/37→28/37  android 28/37→28/37
+    css-display              web 44/47→45/47  ios 40/47→41/47  android 40/47→41/47
+    css-flexbox              web 46/47→46/47  ios 45/47→45/47  android 45/47→45/47
+    css-gaps                 web 48/48→48/48  ios 46/48→46/48  android 46/48→46/48
+    css-grid                 web 48/48→48/48  ios 47/48→47/48  android 47/48→47/48
+    css-images               web 43/47→43/47  ios 35/47→35/47  android 35/47→35/47
+    css-lists                web 42/48→42/48  ios 41/48→41/48  android 41/48→41/48
+    css-masking              web 41/47→41/47  ios 41/47→41/47  android 40/47→40/47
+    css-multicol             web 45/48→45/48  ios 41/48→41/48  android 43/48→43/48
+    css-overflow             web 46/47→46/47  ios 47/47→47/47  android 46/47→46/47
+    css-position             web 36/41→36/41  ios 33/41→33/41  android 33/41→33/41
+    css-pseudo               web 33/42→33/42  ios 32/42→32/42  android 31/42→31/42
+    css-sizing               web 47/48→47/48  ios 44/48→44/48  android 45/48→45/48
+    css-tables               web 44/47→44/47  ios 36/47→36/47  android 37/47→37/47
+    css-text                 web 35/48→35/48  ios 34/48→36/48  android 34/48→34/48
+    css-text-decor           web 42/48→42/48  ios 31/48→31/48  android 29/48→29/48
+    css-transforms           web 46/47→46/47  ios 46/47→46/47  android 43/47→43/47
+    css-ui                   web 42/48→42/48  ios 42/48→42/48  android 41/48→41/48
+    css-values               web 44/48→44/48  ios 40/48→40/48  android 40/48→40/48
+    css-view-transitions     web 32/45→32/45  ios 27/46→27/46  android 29/46→29/46
+    css-writing-modes        web 36/48→36/48  ios 30/48→30/48  android 27/48→27/48
+    filter-effects           web 41/46→41/46  ios 36/46→36/46  android 32/46→32/46
+    selectors                web 46/48→46/48  ios 41/48→41/48  android 38/48→38/48
+  GAINED (f → P):
+    css-backgrounds/css/css-backgrounds/background-attachment-margin-root-001.html android  0.451 → 0.9996
+    css-backgrounds/css/css-backgrounds/background-attachment-margin-root-001.html ios  0.4509 → 0.9995
+    css-backgrounds/css/css-backgrounds/background-attachment-margin-root-001.html web  0.4511 → 1
+    css-backgrounds/css/css-backgrounds/background-attachment-margin-root-002.html android  0.3389 → 0.9996
+    css-backgrounds/css/css-backgrounds/background-attachment-margin-root-002.html ios  0.3391 → 0.9994
+    css-backgrounds/css/css-backgrounds/background-attachment-margin-root-002.html web  0.339 → 1
+    css-contain/css/css-contain/contain-inline-size-bfc-floats-002.html android  0.9311 → 0.9974
+    css-contain/css/css-contain/contain-inline-size-bfc-floats-002.html ios  0.9322 → 0.9985
+    css-display/css/css-display/display-contents-root-background.html android  0.5355 → 0.9989
+    css-display/css/css-display/display-contents-root-background.html ios  0.5346 → 0.9995
+    css-display/css/css-display/display-contents-root-background.html web  0.5341 → 1
+    css-text/css/css-text/hyphens/hyphens-out-of-flow-001.html ios  0.8935 → 0.9971
+    css-text/css/css-text/hyphens/hyphens-span-001.html ios  0.8652 → 0.9968
+  MOVERS (same verdict, |Δssim| >= 0.002):
+    css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html android  P 0.9519 → 0.9972 (+0.0453)
+    css-contain/css/css-contain/contain-inline-size-bfc-floats-001.html ios  P 0.9531 → 0.9984 (+0.0453)
+    css-display/css/css-display/display-flow-root-002.html android  P 0.9734 → 1 (+0.0266)
+    css-display/css/css-display/display-flow-root-002.html ios  P 0.9734 → 1 (+0.0266)
+    css-lists/css/css-lists/counter-reset-reversed-nested.html android  P 0.9509 → 0.9852 (+0.0343)
+    css-lists/css/css-lists/counter-reset-reversed-nested.html ios  P 0.9508 → 0.9989 (+0.0481)
+    css-lists/css/css-lists/counter-reset-reversed-nested.html web  P 0.9506 → 1 (+0.0494)
+    css-text/css/css-text/hyphens/hyphenate-character-001.html android  f 0.9136 → 0.9301 (+0.0165)
+    css-text/css/css-text/hyphens/hyphenate-character-003.html android  f 0.9168 → 0.9292 (+0.0124)
+    css-text/css/css-text/hyphens/hyphens-out-of-flow-001.html android  P 0.9685 → 0.9943 (+0.0258)
+    css-text/css/css-text/hyphens/hyphens-out-of-flow-002.html android  P 0.982 → 0.9943 (+0.0123)
+    css-text/css/css-text/hyphens/hyphens-span-001.html android  P 0.9532 → 0.9937 (+0.0405)
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-006.html ios  P 0.9953 → 0.9992 (+0.0039)
+    CSS2/css/CSS2/css21-errata/s-11-1-1b-006.html web  P 0.9941 → 1 (+0.0059)
+  json → tools/titan/results/wave53-gate/final/score-final-0002.json

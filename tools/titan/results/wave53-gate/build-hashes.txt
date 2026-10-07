@@ -23,3 +23,22 @@ android  MATCH
 ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b
 ios      MATCH
 
+== wave53-final corpus launch (30 sections; tree 77fe41e8 = fix pass + two probe reverts + seeded all-then-color baselines) — 2026-10-07T15:02:08Z — HEAD 77fe41e8
+android  serial=emulator-5554  built app-debug.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49  installed base.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b
+ios      MATCH
+
+== wave53-final fixture-net launch (--skip-corpus; same tree 77fe41e8) — 2026-10-07T16:46:32Z — HEAD 77fe41e8
+android  serial=emulator-5554  built app-debug.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49  installed base.apk sha1=7375a610014d1f5bb4923e1ee1ef9c85a5f29d49
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=MISSING  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b
+ios      MISMATCH
+# ^ read at 16:47 UTC while `BASELINE=1 ./test-all.sh --gate-set` was REBUILDING the iOS harness .app for the fixture net (test-all builds its own; the provision build was gone, the installed app still the corpus launch's 62d5b2b9…). The second read below, after that build landed, MATCHES (9d23766e… built = installed): same tree 77fe41e8, a new build identity.
+
+== wave53-final fixture-net launch, second read (--skip-corpus; same tree 77fe41e8) — 2026-10-07T16:47:17Z — HEAD 77fe41e8
+android  serial=emulator-5554  built app-debug.apk sha1=e1c5fa1c57a97c2bbf4e69305a9210ed16512170  installed base.apk sha1=e1c5fa1c57a97c2bbf4e69305a9210ed16512170
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=9d23766e3f3590a0e00330acda6dc992405d9deb  installed .app digest=9d23766e3f3590a0e00330acda6dc992405d9deb
+ios      MATCH
+

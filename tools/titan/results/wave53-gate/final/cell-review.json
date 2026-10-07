@@ -1,0 +1,125 @@
+{
+ "run": "wave53-final",
+ "against": "wave53-open",
+ "reviewer": "orchestrator, review-sheets.mjs (re-frozen ref | wave53-open | wave53-final) — every row looked at",
+ "date": "2026-10-07",
+ "gained": {
+  "css-backgrounds/background-attachment-margin-root-001.html android": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-backgrounds/background-attachment-margin-root-001.html ios": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-backgrounds/background-attachment-margin-root-001.html web": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-backgrounds/background-attachment-margin-root-002.html android": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-backgrounds/background-attachment-margin-root-002.html ios": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-backgrounds/background-attachment-margin-root-002.html web": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-contain/contain-inline-size-bfc-floats-002.html android": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-contain/contain-inline-size-bfc-floats-002.html ios": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-display/display-contents-root-background.html android": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-display/display-contents-root-background.html ios": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-display/display-contents-root-background.html web": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-text/hyphens/hyphens-out-of-flow-001.html ios": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  },
+  "css-text/hyphens/hyphens-span-001.html ios": {
+   "label": "FAITHFUL",
+   "what": "the final capture matches the reference where the wave53-open capture did not"
+  }
+ },
+ "movers": {
+  "css-contain/contain-inline-size-bfc-floats-001.html android": {
+   "label": "FAITHFUL (DEGENERATE → faithful)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-contain/contain-inline-size-bfc-floats-001.html ios": {
+   "label": "FAITHFUL (DEGENERATE → faithful)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-display/display-flow-root-002.html android": {
+   "label": "FAITHFUL (DEGENERATE → faithful)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-display/display-flow-root-002.html ios": {
+   "label": "FAITHFUL (DEGENERATE → faithful)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-lists/counter-reset-reversed-nested.html android": {
+   "label": "FAITHFUL (picture-correctness)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-lists/counter-reset-reversed-nested.html ios": {
+   "label": "FAITHFUL (picture-correctness)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-lists/counter-reset-reversed-nested.html web": {
+   "label": "FAITHFUL (picture-correctness)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-text/hyphens/hyphens-out-of-flow-001.html android": {
+   "label": "FAITHFUL (DEGENERATE → faithful)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-text/hyphens/hyphens-out-of-flow-002.html android": {
+   "label": "FAITHFUL (DEGENERATE → faithful)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-text/hyphens/hyphens-span-001.html android": {
+   "label": "FAITHFUL (DEGENERATE → faithful)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "CSS2/css21-errata/s-11-1-1b-006.html web": {
+   "label": "FAITHFUL (picture-correctness)",
+   "what": "the final picture matches the reference; the wave53-open pass did not earn its score"
+  },
+  "css-text/hyphens/hyphenate-character-001.html android": {
+   "label": "STILL FAILING (degenerate-by-construction mover)",
+   "what": "f → f; the reference breaks the word with no visible hyphen (-001) or a bullet (-003) and Android still paints a hyphen — pre-registered in expectations.degenerateByConstruction, a gain here would not be a fix"
+  },
+  "css-text/hyphens/hyphenate-character-003.html android": {
+   "label": "STILL FAILING (degenerate-by-construction mover)",
+   "what": "f → f; the reference breaks the word with no visible hyphen (-001) or a bullet (-003) and Android still paints a hyphen — pre-registered in expectations.degenerateByConstruction, a gain here would not be a fix"
+  }
+ },
+ "lost": {},
+ "notes": {
+  "background-attachment-margin-root-001/-002": "ref: the gradient tiles fill the whole canvas including the margin area, phase 66/166/… (-001) and 16/116/… (-002); open: tiles only inside the element box; final: full canvas, same phase as the ref (canvas-root.geometry.py: painted (16,16,373,583), starts match, frameDirty 0)",
+  "display-contents-root-background": "ref green canvas with the text; open white; final green (green ratio 0.9941–0.9946, chrome 1.0)",
+  "contain-inline-size-bfc-floats-001/-002": "ref: the orange bar beside/over the float at y288–307 (-001) / y88–107 (-002); open: the bar cleared below every float; final: as the ref",
+  "display-flow-root-002": "the flow-root outline x265–266 y115–316 beside the floats as the ref; open had it at the left edge",
+  "counter-reset-reversed-nested": "ref 3 / 2 / 11 / 9 / 8 / 1 with the nested three indented; open 12 / 11 / 10 / 9 / 8 flat and \"One\" missing (ios: \"Two\" bare); final as the ref on all three",
+  "hyphens-span-001 / hyphens-out-of-flow-001 / -002": "ref \"high-/way\" in every 46-px box; open android \"highwa/y\", \"h/ighway\", \"high/way\" with no hyphen, open ios 26-px boxes; final \"high-/way\" ×7 / ×9 in 46-px boxes on both natives",
+  "s-11-1-1b-006 web": "the black square at y56–75 as the ref (open: y66–85)",
+  "hyphenate-character-001/-003 android": "ref: \"im/ple/men/ta/tion\" with no hyphen glyph (-001) / \"im•/ple•…\" bullets (-003); final: \"im-/ple-/men-/ta-/tion\" — the breaks are now right (the L2 soft-hyphen admission) but hyphenate-character is not honoured on Compose; still f, as pre-registered"
+ }
+}

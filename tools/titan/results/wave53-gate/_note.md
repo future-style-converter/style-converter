@@ -170,3 +170,69 @@ reading).
 What the closing gate must now show vs `wave53-open`: the 8 remaining gains (margin-root-001/-002 ×3, bfc-floats-002 ×2,
 display-contents-root-background ×3 = 11 — minus none; bidi-lines-001 android withdrawn), the DEGENERATE→faithful movers of
 L2/L4/L3-A/B-web/B-ios, 0 lost, and every withdrawn cell back at its wave53-open value.
+
+## Closing gate `wave53-final` (2026-10-07; corpus 14:58 → 16:41 UTC, `gate-driver.sh wave53-final --skip-fixture-net`; tree 77fe41e8)
+
+Tree: the 16 landed commits + the S1 fix pass (568fd5be) + the probe's two reverts (d773ff6a B-android, b0edb788 U2) + the
+seeded all-then-color baselines. Host after stopping our processes: load1 2.92, free+inactive 4408 MB (swap ≈ 12 GB used — the
+machine stayed usable). Installed builds MATCH (`build-hashes.txt` 15:02 UTC; the iOS digest equals the probe's because the
+only Swift change between the trees was U2's comment). **30 / 30 sections OK on attempt 1, every column full**
+(css-view-transitions 31 min, inside the watchdog; the other 29 sections 2–3 min each).
+
+### Score of record (`final/score-final.txt`, `score-gate.mjs wave53-open wave53-final --watch …/watchlist.txt --movers 0.005`)
+
+**gained 13 · lost 0 · movers 13 · newly measured 0 · unmeasured-now 0 over 4096 cells** — web 1232/1372 · iOS 1125/1362 ·
+Android 1115/1362 (from 1229 / 1119 / 1111). Gains: web 3 · iOS 6 · Android 4. At |Δ| ≥ 0.002: 14 movers (the 13 + one).
+Must-not-move: **365 / 365 cells within 0.002** (`final/mnm-cells.txt`); the six cells the probe's reverts withdrew are back at
+their `wave53-open` values. `adjudicate.mjs`: **R1–R5 hold** (`final/adjudicate-final.txt`); no degenerate-by-construction
+gain (R6 silent — the hyphenate-character movers stayed f).
+
+### Control (`final/control-final-union.json`)
+
+web 1430/1435 identical + 5 carriers · iOS 1425/1435 + 10 · Android 1422/1435 + 13 · wire 1 content-changed carrier
+(counter-reset-reversed-nested, U1) + 10 renumbered (its +1 css-lists id shadow) · **0 leaks — CONTROL HOLDS** with the
+union carrier set minus the reverted units' stems (a change on counter-suffix, bidi-lines-001/-002, anchor-center-safe-rtl or
+006 android would have been a leak; none changed).
+
+### Geometry (`final/geometry-*.txt`)
+
+lists-bakes: nested ×3 OK; counter-suffix ×3 WRONG exactly as on `wave53-open` (web left x47, iOS right x126, Android left
+x152 vs the ref's x104–144 — U2 is out; the pre-existing degenerate state stands and is queued). soft-hyphen: every target OK
+on all three + the span-002 anchor; `hyphens-out-of-flow-002 web` WRONG as before (pre-existing). canvas-root 12 / 12 OK.
+float-avoid 12 / 12 OK. display-table-body 006: web and iOS squares at rows 56–75, Android rows 51–70 = `wave53-open`
+(B-android is out).
+
+### Every flipped and moved cell, looked at (`final/sheets-gained/`, `final/sheets-movers/`, `final/cell-review.json`)
+
+- **13 gained, all FAITHFUL**: background-attachment-margin-root-001 / -002 ×3 (the tiles fill the canvas at the ref's phase),
+  display-contents-root-background ×3 (green canvas), contain-inline-size-bfc-floats-002 iOS + Android (the orange bar beside
+  the float), hyphens-out-of-flow-001 and hyphens-span-001 iOS ("high-/way" in 46-px boxes).
+- **13 movers: 11 FAITHFUL** — bfc-floats-001 iOS + Android and display-flow-root-002 iOS + Android (DEGENERATE → faithful),
+  counter-reset-reversed-nested ×3 (3 / 2 / 11 / 9 / 8 / 1 nested, as the ref; was 12 / 11 / 10 / 9 / 8 flat), hyphens-span-001 /
+  -out-of-flow-001 / -002 Android (DEGENERATE → faithful: "high-/way" everywhere), s-11-1-1b-006 web (square at y56–75) —
+  and **2 STILL FAILING**: hyphenate-character-001 / -003 Android (f 0.9136 → 0.9301, 0.9168 → 0.9292): the word breaks are
+  right now, but Compose paints a hyphen where the reference paints none / a bullet; pre-registered degenerate-by-construction,
+  not a gain.
+- Red-square census (`final/red-square-census.txt`): PASSING red 164 (web 22 / iOS 66 / Android 76) over 90 tests, FAILING red
+  62 over 36 — the same classes as `wave53-open` (no flipped cell is a red-square test).
+
+### Fixture net (second launch, `--skip-corpus`)
+
+`BASELINE=1 ./test-all.sh --gate-set` (16:45 → 17:01 UTC, `gate-driver/fixture-net.log`): **exit 0 on all 9 gate fixtures** —
+visual-test (390 baselines) and filter-sepia-amounts against their committed baselines, the six gate-only fixtures through the
+cross-platform gate + spec oracle (0 violations; composition-test 24 checks with 2 waived), and `all-then-color` for the first
+time WITH baselines: 18 platform-comparisons, no regressions, 12 oracle checks, 0 violations. Installed builds: Android MATCH;
+iOS read twice — the first read at 16:47 caught test-all REBUILDING the harness .app (built side missing, installed = the corpus
+launch's), the second MATCHES the new build (`build-hashes.txt`, annotated). **`wave53-final` is complete: 30 / 30 sections +
+fixture net exit 0 ×9. Obligation: a lost cell outside the pre-registered list stops the ship — the list was empty and 0 cells
+were lost.**
+
+**Post-net correction — the all-then-color baselines are withdrawn** (revert of 77fe41e8 on the ship branch). After the net,
+the tooling suite on the shipped tree went red on three new `label chrome` stems: `001_ATC_PropsThenAll_InGreenParent`,
+`003_ATC_InitialUnderRedParent`, `005_ATC_DirectionSurvives` — "437/437 glyph px are ground" on Android, iOS and web alike.
+Those three canvases carry NO harness label (the contact sheet showed it; the look did not act on it — the tripwire did).
+The fixture's `all` reset reaches the capture-frame chrome on all three platforms while `000_ATC_AllThenProps` keeps its
+label: a harness defect, queued (BACKLOG obligation 0(e)). The net's all-then-color comparison (18 pairs, no regressions,
+12 oracle checks, 0 violations) stands as a measurement of that run; the committed tree keeps the fixture gate-only, as
+at `wave53-open`. No capture or score of `wave53-final` is affected.
+
