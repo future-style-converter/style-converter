@@ -86,3 +86,36 @@ Chrome and the emulator already gone; the booted simulator held 3.7 GB resident.
   on all 9") is MET; the toolchain change (macOS 27 / Xcode 27) moved nothing a score can see, and the natives' captures are
   byte-identical. In css-view-transitions the cross-host control reads: iOS 48/48 and Android 48/48 identical, wire 48/48
   identical, web 6 captures pixel-changed by small amounts (the same rasterizer effect as the five calibration sections).
+
+## Same-host probe `wave53-hh-probe` (2026-10-07 11:15 → 11:29 UTC; `gate-driver.sh wave53-hh-probe --sections css-cascade,css-counter-styles,css-flexbox,css-text --skip-fixture-net`)
+
+Tree: the shared tree with every lane's unseamed edits (L1–L5) — planned as L5's hygiene probe, it measured the union of the
+lanes' pre-seam radii as well (PLAN §10 item 7). Host after stopping our processes: load1 3.70, free+inactive 3410 MB. **Four
+sections OK on attempt 1** (css-cascade 43/43/43, the others 48/48/48), ~2.5 min a section.
+
+`control-check.mjs wave53-open wave53-hh-probe` (union carrier set, `control-hh-probe-union.json`):
+
+| platform | compared | identical | re-encoded | changed | of which carriers |
+|---|---:|---:|---:|---:|---:|
+| web | 187 | 186 | 0 | 1 | 1 (`counter-suffix`) |
+| iOS | 187 | 186 | 0 | 1 | 1 (`counter-suffix`) |
+| Android | 187 | 178 | 0 | 9 | 9 (`counter-suffix`, `bidi-lines-001/002`, the six hyphens tests) |
+| wire | 187 | 169 | — | 3 content-changed (all carriers) + 15 renumbered | — |
+
+**CONTROL HOLDS.** Two readings for the closing gate:
+
+- **Web capture is byte-deterministic run-to-run on this host** (186/187 identical bytes; the one difference is a carrier). The
+  "re-encoded" class is therefore unused on same-host pairs, and a web decoded-pixel change at `wave53-final` is a render
+  change, not an encoder effect — R4/R7's web rule stands as pre-registered.
+- **The wire control gained a "renumbered" class** after this run first reported 15 leaks: the 15 `cssom-*-setter{,-invalid}`
+  documents after `counter-suffix` in `tests.list`, each identical to its twin once the component-id counter is stripped and
+  each shifted by exactly +6 = `counter-suffix` 23 → 29 components. The extractor numbers a section's components with one
+  running counter; a carrier that gains components renumbers every later document's ids. The class is admitted only when the
+  uniform shift equals the running component-count delta of the content-changed documents before it (the explaining carrier is
+  printed per row); the pre-fix output (15 WIRE LEAK) is the classifier's mutation record. `expectations.json` →
+  `wireRenumbering`, PLAN §10 item 6.
+
+Per-lane controls on the same pair (for the record, not as evidence): `--lane L1-lists-bakes` FAILS on L2's six hyphens
+Android captures; `--lane L5-harness-hygiene` (empty carrier set) FAILS on L1+L2's 11 captures and 3 wire documents — on a
+shared-tree probe a per-lane control can only hold for the union; lane isolation is the revert units' job.
+

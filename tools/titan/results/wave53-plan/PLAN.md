@@ -1377,3 +1377,25 @@ Measured on `wave53-open` (29 of 30 sections; `tools/titan/results/wave53-gate/_
 5. **Host facts frozen for the wave** (no update between `wave53-open` and `wave53-final`): macOS 27.0.1 (26A434), Xcode 27.0
    (27A266a), simulator runtimes iOS 26.0 (23A8464) / 26.2 (23C54), Chrome for Testing 151.0.7922.47, puppeteer 25.4.0, Node 24
    (CI) / 22.21 (host).
+6. **Wire control: a "renumbered" class (measured, not pre-registered).** The hh-probe's wire control first reported 15 leaks:
+   every `css-counter-styles/cssom/cssom-*-setter{,-invalid}` document — the 15 tests after `counter-suffix` in `tests.list`.
+   Each is identical to its `wave53-open` twin once the component-id counter is stripped, every id shifted by exactly +6 =
+   counter-suffix's 23 → 29 components (L1 U1-B): the extractor numbers a section's components with ONE running counter, so
+   a carrier that gains components renumbers the ids of every later document in the section. Captures of the 15 are
+   byte-identical on all three platforms (ids are not rendered). `control-check.mjs` now classifies such a document as
+   "renumbered" when — and only when — its uniform id shift equals the running component-count delta of the content-changed
+   documents before it in `tests.list` order; the explaining carrier is printed per row, and a renumbering the carriers do
+   not explain is still a leak. Rule, instance and mutation in `expectations.json` → `wireRenumbering`. Blast-radius lesson:
+   a bake that adds components has a wire shadow over the rest of its section; the capture control is unaffected.
+7. **The hh-probe measured the shared tree, not L5 alone (deviation).** `wave53-hh-probe` (11:15 → 11:29 UTC, 4 sections OK on
+   attempt 1) ran with every lane's unseamed edits in the tree, so it measured same-host determinism PLUS the union of the
+   lanes' pre-seam radii. Result with the union carrier set: **web 186/187 byte-identical (0 re-encoded) + 1 carrier · iOS
+   186/187 + 1 · Android 178/187 + 9 carriers · wire 3 content-changed carriers + 15 renumbered · 0 leaks — CONTROL HOLDS.**
+   Web capture is byte-deterministic run-to-run on this host, so R4/R7's web rule stands unchanged and the "re-encoded" class
+   stays unused. Per-lane controls on this probe FAIL on the other lanes' carriers, as they must (`control-hh-probe-L1.json`,
+   `-L5.json`); per-lane isolation is what the revert units (§4) and the A/B drops are for. Also found in L5's smoke window:
+   `smoke.sh` never built the gitignored `apps/web-harness/public/fixtures/<Name>.json` the Tier 5/11 probes fetch — on a fresh
+   worktree both tiers failed every probe with `fixture-ready-timeout` (0/90, 0/15) even with the port guard working (vite on
+   :3400, the developer's server on :3000 named and left). Fixed in L5's ownership: `smoke.sh` runs `build-fixtures` (idempotent)
+   before the tiers and skips them with a named reason when the build fails. Record: `wave53-harness-hygiene/_note.md` T4.
+

@@ -20,7 +20,9 @@
 //      plan did not name is a leak even before a pixel moves.
 //
 // Usage: node control-check.mjs <preRun> <postRun> [--lane L1-lists-bakes] [--sections a,b,c] [--json out.json]
-// Exit 1 on any leak (a changed capture or wire document outside the carriers).
+// Exit 1 on any leak (a changed capture or wire document outside the carriers). A wire document
+// that is byte-different only because an earlier carrier renumbered the section's component ids
+// is reported as "renumbered", not as a leak — see the wire block for the exact rule.
 // Calibrations the plan requires before this is trusted (§6): leaks on
 // wave52-calib → wave52-final; 0/0 on wave52-preview → wave52-ship; and on the
 // cross-host pair wave52-ship → wave53-open (five sections) web re-encoded +
@@ -66,9 +68,9 @@ async function pixelDiff(a, b) {
   return px ? { px, maxDelta } : null;
 }
 
-const out = { pre: preId, post: postId, lane: laneId ?? 'union', sections: {}, totals: {}, leaks: [], wireLeaks: [] };
+const out = { pre: preId, post: postId, lane: laneId ?? 'union', sections: {}, totals: {}, leaks: [], wireLeaks: [], wireRenumbered: [] };
 for (const p of Object.keys(DIRS)) out.totals[p] = { compared: 0, identical: 0, reencoded: 0, changed: 0, carriers: 0 };
-let wireCompared = 0, wireChanged = 0;
+let wireCompared = 0, wireChanged = 0, wireRenumbered = 0;
 for (const sec of readdirSync(path.join(post, 'sections')).sort()) {
   if (only && !only.has(sec)) continue;
   const row = {};
@@ -94,23 +96,55 @@ for (const sec of readdirSync(path.join(post, 'sections')).sort()) {
     console.log(`${sec.padEnd(20)} ${platform.padEnd(8)} compared ${String(r.compared).padStart(2)}  identical ${String(r.identical).padStart(2)}  re-encoded ${String(r.reencoded).padStart(2)}  changed ${String(r.changed.length).padStart(2)} (carriers ${r.carriers.length})`);
     for (const c of r.changed) if (!allowed.has(c.stem)) console.log(`      LEAK  ${c.stem}  ${c.note ?? `${c.px} px, max channel delta ${c.maxDelta}`}`);
   }
-  // The wire: every per-test IR document, byte for byte, except the named carriers.
+  // The wire: every per-test IR document, byte for byte, except the named carriers — with one
+  // measured class set apart. The extractor numbers components with ONE counter per section run
+  // (`<name>-NNN`, in tests.list order), so a carrier that gains components renumbers every later
+  // document's ids without touching its content (wave 53 hh-probe: counter-suffix 23 → 29
+  // components shifted the 15 cssom-*-setter docs after it by exactly +6; captures byte-identical).
+  // Such a document is "renumbered": byte-different, identical once the id counter is stripped,
+  // AND its shift equals the running component-count delta of the content-changed documents before
+  // it in tests.list order. Anything else that is byte-different is a content change: a carrier or
+  // a leak. A renumbering whose shift the earlier carriers do NOT explain is still a leak.
   const wa = path.join(pre, 'sections', sec, 'per-test-ir'), wb = path.join(post, 'sections', sec, 'per-test-ir');
   if (existsSync(wa) && existsSync(wb)) {
-    for (const f of readdirSync(wb).filter((x) => x.endsWith('.json'))) {
-      const fa = path.join(wa, f);
+    const files = readdirSync(wb).filter((x) => x.endsWith('.json'));
+    // tests.list order (css/<sec>/<path>.html → wpt__<sec>__<path with __>); files it does not name sort last.
+    const listFile = path.join(post, 'sections', sec, 'tests.list');
+    const order = new Map(existsSync(listFile) ? readFileSync(listFile, 'utf8').split('\n').filter(Boolean)
+      .map((l, i) => ['wpt__' + l.replace(/^css\//, '').replace(/\.html?$/, '').split('/').join('__'), i]) : []);
+    files.sort((x, y) => (order.get(x.replace(/\.json$/, '')) ?? 1e9) - (order.get(y.replace(/\.json$/, '')) ?? 1e9) || x.localeCompare(y));
+    const comps = (d) => Array.isArray(d.components) ? d.components : Object.values(d.components ?? {});
+    const idNum = (c) => Number((String(c.id ?? '').match(/-(\d+)$/) ?? [])[1]);
+    const norm = (d) => JSON.stringify(d, (k, v) => (k === 'id' || k === 'parent') && typeof v === 'string' ? v.replace(/-\d+$/, '') : v);
+    let runShift = 0; const explainedBy = [];
+    for (const f of files) {
+      const fa = path.join(wa, f), fb = path.join(wb, f), stem = f.replace(/\.json$/, '');
       wireCompared++;
-      if (existsSync(fa) && sha(fa) === sha(path.join(wb, f))) continue;
+      if (existsSync(fa) && sha(fa) === sha(fb)) continue;
+      const a = existsSync(fa) ? JSON.parse(readFileSync(fa, 'utf8')) : null, b = JSON.parse(readFileSync(fb, 'utf8'));
+      const ca = a ? comps(a) : [], cb = comps(b);
+      // Every id shifted by the same amount, content identical → a renumbering candidate.
+      const shifts = new Set(cb.map((c, i) => ca[i] ? idNum(c) - idNum(ca[i]) : NaN));
+      const shift = shifts.size === 1 ? [...shifts][0] : NaN;
+      if (a && norm(a) === norm(b) && Number.isFinite(shift) && shift === runShift && shift !== 0) {
+        wireRenumbered++; out.wireRenumbered.push({ sec, stem, shift, explainedBy: [...explainedBy] });
+        continue;                                      // ids only, accounted for by the carriers before it
+      }
       wireChanged++;
-      const stem = f.replace(/\.json$/, '');
-      if (!wireCarriers.has(stem)) { out.wireLeaks.push({ sec, stem }); console.log(`      WIRE LEAK  ${sec}/${stem}`); }
+      runShift += cb.length - ca.length;               // this document's component-count delta shifts the later ids
+      // A leak that shifts the counter is named in the later rows too, tagged — the renumbering it
+      // causes is then "explained" only in the arithmetic sense; the leak itself fails the control.
+      const delta = `${cb.length - ca.length >= 0 ? '+' : ''}${cb.length - ca.length}`;
+      if (!wireCarriers.has(stem)) { out.wireLeaks.push({ sec, stem }); console.log(`      WIRE LEAK  ${sec}/${stem}`); explainedBy.push(`${stem} ${delta} (LEAK)`); }
+      else explainedBy.push(`${stem} ${delta}`);
     }
   }
   out.sections[sec] = row;
 }
 for (const [p, t] of Object.entries(out.totals)) console.log(`total ${p}: ${t.compared} compared · ${t.identical} identical · ${t.reencoded} re-encoded · ${t.changed} changed (${t.carriers} carriers)`);
-console.log(`wire: ${wireCompared} documents compared · ${wireChanged} changed · ${out.wireLeaks.length} outside the plan's wire carriers`);
-out.wire = { compared: wireCompared, changed: wireChanged };
+console.log(`wire: ${wireCompared} documents compared · ${wireChanged} content-changed · ${wireRenumbered} renumbered (ids only, explained by earlier carriers) · ${out.wireLeaks.length} outside the plan's wire carriers`);
+for (const r of out.wireRenumbered) console.log(`      renumbered ${r.sec}/${r.stem}  shift ${r.shift >= 0 ? '+' : ''}${r.shift}  by ${r.explainedBy.join(', ') || '(none!)'}`);
+out.wire = { compared: wireCompared, changed: wireChanged, renumbered: wireRenumbered };
 if (jsonOut) writeFileSync(jsonOut, JSON.stringify(out, null, 1));
 const bad = out.leaks.length + out.wireLeaks.length;
 console.log(bad ? `\nCONTROL FAILED: ${out.leaks.length} capture(s) and ${out.wireLeaks.length} wire document(s) changed outside the carriers` : '\nCONTROL HOLDS: every changed capture and wire document is a carrier the plan named');
