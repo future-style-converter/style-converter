@@ -593,4 +593,199 @@ final class WPTCaptureModeTests: XCTestCase {
         XCTAssertEqual(WPTCanvas.icbExtent(canvasExtent: 900),
                        900 - 2 * WPTCanvas.canvasFramePx)
     }
+    // MARK: - wave-53 lane L3 (item A) — the ROOT's background IMAGE on the canvas
+    //
+    // css-backgrounds-3 §2.11.2: the composed canvas propagated the body-root
+    // COLOUR only (wave52-ship display-contents-root-background ios f 0.5346,
+    // background-attachment-margin-root-001/-002 ios f 0.4509 / 0.3391). These
+    // pin the runtime's RootBackgroundPropagation (plan, strip) AND its
+    // RootCanvasBackground paint by an ImageRenderer pixel pass mounted exactly
+    // as ComposedCaptureCanvas mounts it (`.background(…)` on the 390-wide
+    // surface, before the colour). Payloads VERBATIM from
+    // tools/titan/runs/wave52-ship/sections/<section>/per-test-ir/.
+    //
+    // EXECUTED MUTATIONS (RootBackgroundPropagation.swift, these tests run
+    // alone, source restored byte-exact — sha256 in
+    // tools/titan/results/wave53-canvas-root/_note.md):
+    //   SA1 plan() returns nil (colour-only read)        → testRootBgA1* red.
+    //   SA2 the strip returns `roots`                     → testRootBgA1TargetPlanAndStrip red.
+    //   SA3 `uniform` forced true                         → testRootBgA2MarginRoot001* red.
+    //   SA4 attachment ignored (every layer `.scroll`)    → testRootBgA2MarginRoot002* red.
+    //   SA5 dataPngIs1x1 true for any PNG url             → testRootBgA3* red.
+    //   SA6 the `contained` early return dropped          → testRootBgA4* red.
+
+    /// css-display/display-contents-root-background — both roots, verbatim.
+    private let rootBgTarget = """
+        {"id":"wpt__css-display__display-contents-root-background__0-234","name":"wpt__css-display__display-contents-root-background__0","properties":[{"type":"Display","data":"CONTENTS"},{"type":"BackgroundImage","data":[{"url":"data:image/png,%89%50%4e%47%0d%0a%1a%0a%00%00%00%0d%49%48%44%52%00%00%00%01%00%00%00%01%01%03%00%00%00%25%db%56%ca%00%00%00%04%67%41%4d%41%00%00%af%c8%37%05%8a%e9%00%00%00%03%50%4c%54%45%00%80%00%9c%f9%a5%91%00%00%00%0a%49%44%41%54%78%da%63%60%00%00%00%02%00%01%e5%27%de%fc%00%00%00%19%74%45%58%74%53%6f%66%74%77%61%72%65%00%41%64%6f%62%65%20%49%6d%61%67%65%52%65%61%64%79%71%c9%65%3c%00%00%00%00%49%45%4e%44%ae%42%60%82","data":true}]}],"meta":{"role":"body-root"}},
+        {"id":"wpt__css-display__display-contents-root-background__1-235","name":"wpt__css-display__display-contents-root-background__1","properties":[],"text":"Pass if the background is green.","meta":{"sourceTag":"p"}}
+        """
+    /// css-backgrounds/background-attachment-margin-root-001 — verbatim (`scroll, fixed`).
+    private let rootBgMR001 = """
+        {"id":"wpt__css-backgrounds__background-attachment-margin-root-001__0-091","name":"wpt__css-backgrounds__background-attachment-margin-root-001__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"scroll"},{"type":"fixed"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}}
+        """
+    /// css-backgrounds/background-attachment-margin-root-002 — verbatim (`fixed, scroll`).
+    private let rootBgMR002 = """
+        {"id":"wpt__css-backgrounds__background-attachment-margin-root-002__0-092","name":"wpt__css-backgrounds__background-attachment-margin-root-002__0","properties":[{"type":"BackgroundImage","data":[{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":1,"b":0,"a":0.5},"original":{"r":0,"g":255,"b":0,"a":0.5}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":1,"a":0.5},"original":{"r":0,"g":0,"b":255,"a":0.5}},"position":null}]},{"type":"linear-gradient","stops":[{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null},{"color":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}},"position":null}]}]},{"type":"BackgroundAttachment","data":[{"type":"fixed"},{"type":"scroll"}]},{"type":"BackgroundSize","data":[{"w":{"px":100},"h":{"px":100}},{"w":{"px":100},"h":{"px":100}}]},{"type":"Height","data":{"type":"length","px":300}},{"type":"MarginTop","data":{"px":50}},{"type":"MarginRight","data":{"px":50}},{"type":"MarginBottom","data":{"px":50}},{"type":"MarginLeft","data":{"px":50}}],"meta":{"role":"body-root"}}
+        """
+    /// css-cascade/initial-background-color — verbatim (colour-only body).
+    private let rootBgInitial = """
+        {"id":"wpt__css-cascade__initial-background-color__0-033","name":"wpt__css-cascade__initial-background-color__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"}],"meta":{"role":"body-root"}},
+        {"id":"wpt__css-cascade__initial-background-color__1-034","name":"wpt__css-cascade__initial-background-color__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":0}},{"type":"Width","data":{"type":"percentage","value":100}},{"type":"Height","data":{"type":"percentage","value":100}},{"type":"BackgroundColor","data":{"original":"initial"}}]}
+        """
+    /// css-color/a98rgb-003 — verbatim (colour-only body).
+    private let rootBgA98 = """
+        {"id":"wpt__css-color__a98rgb-003__0-005","name":"wpt__css-color__a98rgb-003__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.5019607843137255,"g":0.5019607843137255,"b":0.5019607843137255},"original":"grey"}}],"meta":{"role":"body-root"}},
+        {"id":"wpt__css-color__a98rgb-003__1-006","name":"wpt__css-color__a98rgb-003__1","properties":[],"text":"Test passes if you see a single square, and not two rectangles of different colors.","meta":{"sourceTag":"p","role":"ws-after"}},
+        {"id":"wpt__css-color__a98rgb-003__2-007","name":"wpt__css-color__a98rgb-003__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.996078431372549,"g":0.996078431372549,"b":0.996078431372549},"original":{"r":254,"g":254,"b":254}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginBottom","data":{"px":0}}],"meta":{"role":"ws-after"}},
+        {"id":"wpt__css-color__a98rgb-003__3-008","name":"wpt__css-color__a98rgb-003__3","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.9999300658875595,"g":1,"b":1},"original":{"type":"color","colorSpace":"a98-rgb","values":[1,1,1]}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginTop","data":{"px":0}}]}
+        """
+    /// css-contain/contain-body-bg-001 — verbatim (contained colour body).
+    private let rootBgContain = """
+        {"id":"wpt__css-contain__contain-body-bg-001__0-003","name":"wpt__css-contain__contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Contain","data":["LAYOUT"]}],"meta":{"role":"body-root","lang":"en"}},
+        {"id":"contain-body-bg-001__0-004","name":"contain-body-bg-001__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Width","data":{"type":"length","px":300}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}}],"slot":{"parent":"wpt__css-contain__contain-body-bg-001__0-003"},"text":"Test passes if there is no red.","meta":{"sourceTag":"p","lang":"en"}}
+        """
+
+    /// Decode a v2 document's components exactly as the harness does.
+    private func rootBgRoots(_ componentsJSON: String) throws -> [IRComponent] {
+        let json = "{\"irVersion\":2,\"minReaderVersion\":2,\"components\":[\(componentsJSON)]}"
+        return try JSONDecoder().decode(IRDocument.self, from: Data(json.utf8)).components
+    }
+
+    /// The harness's resolver, verbatim in shape (CaptureCanvas.rootImagePlan).
+    private func rootBgPlan(_ roots: [IRComponent]) -> RootBackgroundPropagation.Plan? {
+        guard let body = roots.first(where: { $0.meta?.role == "body-root" }) else { return nil }
+        let m = UABlockMargin.canvasBodyMargin(roots)
+        let contain = body.properties.first(where: { $0.type == "Contain" })?.data.arrayValue?.compactMap { $0.stringValue }
+        return RootBackgroundPropagation.plan(body.properties, marginTop: m.top, marginLeft: m.left,
+                                              contained: WPTCanvas.containmentBlocksPropagation(contain))
+    }
+
+    /// Render the canvas background exactly as ComposedCaptureCanvas mounts it
+    /// (390×600 surface, the image view behind the content, the white colour
+    /// behind it), scale 1; returns (width, RGBA bytes).
+    @MainActor
+    private func rootBgPixels(_ roots: [IRComponent], _ plan: RootBackgroundPropagation.Plan) throws -> (Int, [UInt8]) {
+        let body = try XCTUnwrap(roots.first(where: { $0.meta?.role == "body-root" }))
+        let view = Color.clear.frame(width: 390, height: 600)
+            .background(RootCanvasBackground(properties: body.properties, plan: plan, frame: WPTCanvas.canvasFramePx))
+            .background(Color.white)
+        let renderer = ImageRenderer(content: view)
+        renderer.scale = 1
+        let cg = try XCTUnwrap(renderer.cgImage, "ImageRenderer produced no image")
+        var buf = [UInt8](repeating: 0, count: cg.width * cg.height * 4)
+        let ctx = try XCTUnwrap(CGContext(data: &buf, width: cg.width, height: cg.height, bitsPerComponent: 8,
+                                          bytesPerRow: cg.width * 4, space: CGColorSpaceCreateDeviceRGB(),
+                                          bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue))
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: cg.width, height: cg.height))
+        XCTAssertEqual(cg.width, 390); XCTAssertEqual(cg.height, 600)
+        return (cg.width, buf)
+    }
+
+    /// One pixel (r, g, b) at (x, y) of a rendered buffer.
+    private func rootBgAt(_ px: (Int, [UInt8]), _ x: Int, _ y: Int) -> (Int, Int, Int) {
+        let i = (y * px.0 + x) * 4
+        return (Int(px.1[i]), Int(px.1[i + 1]), Int(px.1[i + 2]))
+    }
+
+    /// The 16-px frame's pixel coordinates on the 390×600 surface.
+    private func rootBgFrame() -> [(Int, Int)] {
+        var out: [(Int, Int)] = []
+        for y in 0..<600 { for x in 0..<390 where x < 16 || x >= 374 || y < 16 || y >= 584 { out.append((x, y)) } }
+        return out
+    }
+
+    func testRootBgA1TargetPlanAndStrip() throws {
+        let roots = try rootBgRoots(rootBgTarget)
+        // One scroll layer at the ICB corner, uniform (1×1 PNG, initial repeat).
+        XCTAssertEqual(rootBgPlan(roots), RootBackgroundPropagation.Plan(
+            attachments: [.scroll], origins: [.init(x: 0, y: 0)], uniform: true))
+        // §2.11.2 "not painted again": the body-root keeps Display only.
+        let out = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, rootBgPlan(roots))
+        XCTAssertEqual(out.first(where: { $0.meta?.role == "body-root" })?.properties.map(\.type), ["Display"])
+        XCTAssertEqual(out[1].id, roots[1].id)
+    }
+
+    @MainActor
+    func testRootBgA1TargetPaintsTheFramedSurfaceGreen() throws {
+        let roots = try rootBgRoots(rootBgTarget)
+        let px = try rootBgPixels(roots, try XCTUnwrap(rootBgPlan(roots)))
+        // The 1×1 (0,128,0) tile covers the WHOLE surface, frame included (F2).
+        let green = { (p: (Int, Int, Int)) in p.0 <= 8 && abs(p.1 - 128) <= 8 && p.2 <= 8 }
+        let frame = rootBgFrame()
+        XCTAssertEqual(frame.filter { green(self.rootBgAt(px, $0.0, $0.1)) }.count, frame.count)
+        XCTAssertTrue(green(rootBgAt(px, 195, 300)))
+    }
+
+    func testRootBgA2MarginRoot001PlanIsIcbOnly() throws {
+        // Layer 0 is a real green→blue ramp → not uniform; origins per §3.4.
+        XCTAssertEqual(rootBgPlan(try rootBgRoots(rootBgMR001)), RootBackgroundPropagation.Plan(
+            attachments: [.scroll, .fixed], origins: [.init(x: 50, y: 50), .init(x: 0, y: 0)], uniform: false))
+    }
+
+    /// Rows on the x=195 column where green jumps by > 60 (navy → green: a 100-px band restarts).
+    private func rootBgBandStarts(_ px: (Int, [UInt8])) -> [Int] {
+        (17..<584).filter { rootBgAt(px, 195, $0).1 - rootBgAt(px, 195, $0 - 1).1 > 60 }
+    }
+
+    @MainActor
+    func testRootBgA2MarginRoot001PixelsFrameWhiteBandAt66() throws {
+        let roots = try rootBgRoots(rootBgMR001)
+        let px = try rootBgPixels(roots, try XCTUnwrap(rootBgPlan(roots)))
+        // The frame keeps the colour (white); the ICB is tiled, phase = the root box (y66).
+        XCTAssertEqual(rootBgFrame().filter { self.rootBgAt(px, $0.0, $0.1) != (255, 255, 255) }.count, 0)
+        XCTAssertEqual(rootBgBandStarts(px), [66, 166, 266, 366, 466, 566])
+    }
+
+    @MainActor
+    func testRootBgA2MarginRoot002PixelsBandAtTheIcbCorner() throws {
+        let roots = try rootBgRoots(rootBgMR002)
+        let plan = try XCTUnwrap(rootBgPlan(roots))
+        XCTAssertEqual(plan.origins, [.init(x: 0, y: 0), .init(x: 50, y: 50)])
+        // `fixed` top layer → phase = the viewport (ICB) corner: bands restart at y16.
+        let px = try rootBgPixels(roots, plan)
+        let starts = rootBgBandStarts(px)
+        XCTAssertEqual(starts, [116, 216, 316, 416, 516])
+        XCTAssertGreaterThan(rootBgAt(px, 195, 16).1, 100)  // the first band opens green at the ICB top
+    }
+
+    func testRootBgA3IhdrUniformity() throws {
+        let body = try XCTUnwrap(try rootBgRoots(rootBgTarget).first)
+        let url = try XCTUnwrap(body.properties.first(where: { $0.type == "BackgroundImage" })?.data.arrayValue?.first?["url"]?.stringValue)
+        XCTAssertTrue(RootBackgroundPropagation.dataPngIs1x1(url))
+        // The SAME payload with IHDR width/height patched to 2 → not uniform.
+        let twoByTwo = url.replacingOccurrences(of: "%49%48%44%52%00%00%00%01%00%00%00%01",
+                                                with: "%49%48%44%52%00%00%00%02%00%00%00%02")
+        XCTAssertNotEqual(twoByTwo, url)
+        XCTAssertFalse(RootBackgroundPropagation.dataPngIs1x1(twoByTwo))
+        XCTAssertFalse(RootBackgroundPropagation.dataPngIs1x1("data:image/gif,%47%49%46%38%39%61%01%00%01%00"))
+    }
+
+    func testRootBgA4ContainedDoesNotPropagate() throws {
+        // The target + `contain: layout` → off the propagation path (css-contain-2 §2).
+        let json = rootBgTarget.replacingOccurrences(of: "{\"type\":\"Display\",\"data\":\"CONTENTS\"}",
+            with: "{\"type\":\"Display\",\"data\":\"CONTENTS\"},{\"type\":\"Contain\",\"data\":[\"LAYOUT\"]}")
+        XCTAssertNotEqual(json, rootBgTarget)
+        XCTAssertNil(rootBgPlan(try rootBgRoots(json)))
+    }
+
+    @MainActor
+    func testRootBgA5ColourOnlyBodiesAreIdentity() throws {
+        for doc in [rootBgInitial, rootBgA98, rootBgContain] {
+            let roots = try rootBgRoots(doc)
+            XCTAssertNil(rootBgPlan(roots))
+            // No plan → the strip hands back the same components.
+            let out = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, nil)
+            XCTAssertEqual(out.map(\.properties), roots.map(\.properties))
+        }
+        // And the harness's empty background slot is paint-neutral: the SAME
+        // bytes with and without `.background(<no plan>)`.
+        let none: RootCanvasBackground? = nil
+        let base = Color.clear.frame(width: 390, height: 600).background(Color.white)
+        let withSlot = Color.clear.frame(width: 390, height: 600).background(none).background(Color.white)
+        let a = ImageRenderer(content: base); a.scale = 1
+        let b = ImageRenderer(content: withSlot); b.scale = 1
+        let da = try XCTUnwrap(a.cgImage?.dataProvider?.data) as Data
+        let db = try XCTUnwrap(b.cgImage?.dataProvider?.data) as Data
+        XCTAssertEqual(da, db)
+    }
 }

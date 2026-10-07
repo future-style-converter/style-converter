@@ -1,0 +1,20 @@
+run wave52-ship: docs 1435, body 284, multiBody 0, bodyImg 3, bodyImgNoneOnly 0, bodyColourOnly 86, bodyBgLess 195, bodyImgContained 0, tableLast 1, tableAny 1, tableishLast 2, bodyImgTypesNoImage 0, imgOnNonRootBody 0
+A (body-root with a painting BackgroundImage): 3
+   wpt__css-backgrounds__background-attachment-margin-root-001
+   wpt__css-backgrounds__background-attachment-margin-root-002
+   wpt__css-display__display-contents-root-background
+B (body-root LAST Display TABLE/INLINE_TABLE): 1
+   wpt__CSS2__css21-errata__s-11-1-1b-006
+near-miss table-ish body displays (last): 2
+   wpt__CSS2__css21-errata__s-11-1-1b-005 TABLE_CELL
+   wpt__CSS2__css21-errata__s-11-1-1b-006 TABLE
+run wave53-open: docs 1435, body 284, multiBody 0, bodyImg 3, bodyImgNoneOnly 0, bodyColourOnly 86, bodyBgLess 195, bodyImgContained 0, tableLast 1, tableAny 1, tableishLast 2, bodyImgTypesNoImage 0, imgOnNonRootBody 0
+A (body-root with a painting BackgroundImage): 3
+   wpt__css-backgrounds__background-attachment-margin-root-001
+   wpt__css-backgrounds__background-attachment-margin-root-002
+   wpt__css-display__display-contents-root-background
+B (body-root LAST Display TABLE/INLINE_TABLE): 1
+   wpt__CSS2__css21-errata__s-11-1-1b-006
+near-miss table-ish body displays (last): 2
+   wpt__CSS2__css21-errata__s-11-1-1b-005 TABLE_CELL
+   wpt__CSS2__css21-errata__s-11-1-1b-006 TABLE

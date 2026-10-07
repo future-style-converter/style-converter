@@ -376,9 +376,38 @@ struct ComposedCaptureCanvas: View {
         // UA-margin tag and no declared block margin gets that UA margin as
         // declared longhands (CSS 2.1 §9.3.2 — `top` offsets the margin edge);
         // identity for every other root.
+        // wave-53 lane L3 (item A) rides the same rewrite: the body-root is
+        // split WITHOUT the background-image layers the canvas now paints
+        // (§2.11.2 "not painted again") — the same array without a plan.
         FixedHoist.split(roots: UABlockMargin.withCanvasOwnedBodyMargin(
-            document.components, UABlockMargin.canvasBodyMargin(document.components))
+            RootBackgroundPropagation.withCanvasOwnedRootBackground(document.components, rootImagePlan),
+            UABlockMargin.canvasBodyMargin(document.components))
             .map(UABlockMargin.withUaBlockMarginOnHoistedRoot))
+    }
+
+    /// wave-53 lane L3 (item A) — the root background-IMAGE plan, or nil (no
+    /// body-root / no image layer / contained — the SAME css-contain-2 §2 gate
+    /// as `canvasBackground`). A scroll layer's tile origin is the root box:
+    /// the ICB plus the margin this canvas owns (`canvasBodyMargin`). Rule and
+    /// Catalyst pins: the runtime's RootBackgroundPropagation.
+    private var rootImagePlan: RootBackgroundPropagation.Plan? {
+        // One body per document, the same lookup as the colour.
+        guard let body = document.components.first(where: { $0.meta?.role == "body-root" }) else { return nil }
+        // The concrete margin sides the canvas owns (zero for a table-internal body).
+        let m = UABlockMargin.canvasBodyMargin(document.components)
+        return RootBackgroundPropagation.plan(body.properties, marginTop: m.top, marginLeft: m.left,
+            contained: WPTCanvas.containmentBlocksPropagation(Self.containKeywords(of: body)))
+    }
+
+    /// wave-53 lane L3 (item A) — the root's image layers as a canvas
+    /// background view (RootCanvasBackground: framed for a uniform stack,
+    /// padded in to the ICB otherwise — capture-frame chrome, padColorFor).
+    /// Empty without a plan.
+    @ViewBuilder private var rootImageBackground: some View {
+        if let plan = rootImagePlan,
+           let body = document.components.first(where: { $0.meta?.role == "body-root" }) {
+            RootCanvasBackground(properties: body.properties, plan: plan, frame: Self.padding)
+        }
     }
 
     /// TITAN Round 4 GAP 1 + RC-A4 (wave 19) — the per-root stack plan.
@@ -937,6 +966,12 @@ struct ComposedCaptureCanvas: View {
         // neither the viewport nor its crop. Twins: web `overflow-x: clip`
         // on the ICB div; Compose `clipRect` around the content draw.
         .clipShape(WPTCanvas.IcbClipBand(frame: Self.padding))
+        // wave-53 lane L3 (item A) — the root's background-IMAGE layers: ON
+        // the propagated colour (attached before it, so the colour paints
+        // further behind), UNDER every root, OUTSIDE the inline-axis clip (a
+        // uniform stack covers the frame) and inside a root clip (attached
+        // before `.rootCanvasClip`). Empty — no layer at all — without a plan.
+        .background(rootImageBackground)
         // GAP 2 — the ref canvas background: corpus-v4 WHITE by default, or
         // the document body-root's own background COMPOSITED over that white
         // when it declares one (opaque grey for a98rgb-003; translucent

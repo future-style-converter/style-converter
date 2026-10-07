@@ -63,6 +63,14 @@ import { buildStyles } from '@style-converter/web/core/renderer/StyleBuilder';
 // hops through; this canvas only decides WHERE to spend it. See
 // RootClipPathResolver's banner for the measurement.
 import { resolveRootClipPath } from '@style-converter/web/engine/effects/clip/RootClipPathResolver';
+// wave-53 lane L3 (item A) — the root's background-IMAGE layers propagate to
+// the canvas (css-backgrounds-3 §2.11.2): the pure plan, the surface CSS and
+// the forest strip live in the runtime's background category; this canvas only
+// decides WHERE to paint them (resolveCanvasRootBackground below).
+import {
+  rootBackgroundPlan, rootCanvasBackgroundStyle, withRootBackgroundStripped,
+  type RootBackgroundPlan,
+} from '@style-converter/web/engine/background/RootBackgroundPropagation';
 import { composeTree } from '../sdui/Composer';
 import { ComponentRenderer } from '../sdui/ComponentRenderer';
 
@@ -682,6 +690,36 @@ export function withCanvasOwnedBodyMargin<N extends { component: IRComponent }>(
   });
 }
 
+/**
+ * wave-53 lane L3 (item A) — the root background-IMAGE plan for one document,
+ * or null (no body-root, no image layer, or a contained body: the SAME
+ * css-contain-2 §2 gate the colour reads). The tile origin of a scroll layer
+ * is the root box, i.e. the ICB plus the margin this canvas owns
+ * (resolveCanvasMargin). Rule and pins: RootBackgroundPropagation.ts.
+ */
+export function resolveCanvasRootBackground(doc: IRDocument): RootBackgroundPlan | null {
+  // Same lookup rule as the colour resolver — a document has one body.
+  const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');
+  return bodyRoot ? rootBackgroundPlan(bodyRoot.properties, resolveCanvasMargin(doc),
+    bodyRootHasContainment(bodyRoot)) : null;
+}
+
+/**
+ * wave-53 lane L3 (item A) — ONE OWNER for the root's image layers, the twin
+ * of withCanvasOwnedBodyMargin: once the canvas paints them, the body-root
+ * node renders without them (§2.11.2 "not painted again"; margin-root-002's
+ * sized 300-px box would otherwise repaint wrong-phase tiles). Identity when
+ * there is no plan, so every other document renders the exact nodes it did.
+ */
+export function withCanvasOwnedRootBackground<N extends { component: IRComponent }>(
+  roots: N[], plan: RootBackgroundPlan | null,
+): N[] {
+  if (!plan) return roots;                                   // nothing owned → same array
+  return roots.map((node) => node.component.meta?.role !== 'body-root' ? node : {
+    ...node, component: { ...node.component, properties: withRootBackgroundStripped(node.component.properties) },
+  });
+}
+
 interface ComposedCaptureGalleryProps {
   /** The decoded COMBINED IR document (every WPT test's components, flat). */
   document: IRDocument;
@@ -830,8 +868,14 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // The forest the wrapper below renders: the body-root node minus the
   // margin sides the wrapper now owns (one owner, never applied twice).
   // The SAME array as `roots` whenever the margin is all-zero.
+  // wave-53 L3 (item A): the root's background-IMAGE plan (null for 1432 of
+  // 1435 documents — no image layer on the body-root), and the forest with
+  // those layers stripped from the body-root node (the SAME array when null).
+  const rootImagePlan = React.useMemo(() => resolveCanvasRootBackground(doc), [doc]);
+  const canvasRoots = React.useMemo(
+    () => withCanvasOwnedRootBackground(roots, rootImagePlan), [roots, rootImagePlan]);
   const flowRoots = React.useMemo(
-    () => withCanvasOwnedBodyMargin(roots, canvasMargin), [roots, canvasMargin]);
+    () => withCanvasOwnedBodyMargin(canvasRoots, canvasMargin), [canvasRoots, canvasMargin]);
   // wave-37 W6: the PRINCIPAL WRITING MODE (css-writing-modes-4 §8). Pure per
   // document like the two resolvers above — memoised on the same identity.
   // `undefined` for every horizontal document, which is what keeps the rest of
@@ -850,6 +894,19 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
   // which is what keeps the rest of the corpus byte-identical: no style key
   // is written and the background stays exactly where wave-25 put it.
   const canvasClipPath = React.useMemo(() => resolveRootClipPath(doc), [doc]);
+  // wave-53 L3 (item A) — WHERE the root's image layers paint (F2). A stack
+  // that is uniform by construction paints the FRAMED outer surface (the
+  // ref's padColorFor ring rule, capture-browser-ref.mjs:728, fills the 16-px
+  // frame with that one colour — capture-frame chrome); any other stack, and
+  // every stack under a root clip (css-masking-1 §5 puts the root background
+  // inside the clip, on the ICB), paints the ICB div only. `base` places the
+  // ICB corner inside the painted surface. Both null without a plan.
+  const rootImageBody = rootImagePlan
+    ? doc.components.find((c) => c.meta?.role === 'body-root') : undefined;
+  const rootImageOnIcb = !!rootImagePlan && (!rootImagePlan.uniform || !!canvasClipPath);
+  const rootImageCss = rootImagePlan && rootImageBody
+    ? rootCanvasBackgroundStyle(rootImageBody.properties, rootImagePlan, rootImageOnIcb ? 0 : CANVAS_FRAME_PX)
+    : null;
   return (
     <div
       data-capture-canvas
@@ -887,6 +944,13 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
         paddingRight: `${CANVAS_FRAME_PX}px`,
         paddingBottom: `${CANVAS_FRAME_PX}px`,
         paddingLeft: `${CANVAS_FRAME_PX}px`,
+        // wave-53 L3 (item A) — a uniform root image stack paints HERE, over
+        // the colour: the shorthand is unset (React skips `undefined`) and the
+        // same colour rides `background-color` beneath the image longhands, so
+        // no style object ever mixes shorthand and longhand. Spread LAST and
+        // conditionally: without a framed plan no key is written at all.
+        ...(rootImageCss && !rootImageOnIcb
+          ? { background: undefined, backgroundColor: canvasBackground, ...rootImageCss } : {}),
       }}
     >
       {/* wave-25 round 3 — THE INITIAL CONTAINING BLOCK.
@@ -950,6 +1014,17 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
           ...(canvasClipPath
             ? { background: canvasBackground, clipPath: canvasClipPath }
             : {}),
+          // wave-53 L3 (item A) — a non-uniform root image stack (and any
+          // stack under a root clip) paints on THIS box, the ref's viewport:
+          // the 16-px frame keeps the colour-layer value (padColorFor's
+          // non-uniform-ring fallback is white; the two agree on every
+          // carrier — none pairs a root colour with a non-uniform image).
+          // Under a clip the colour moves to `background-color`.
+          // Spread LAST and conditionally: no ICB plan writes no key.
+          ...(rootImageCss && rootImageOnIcb
+            ? { ...(canvasClipPath ? { background: undefined, backgroundColor: canvasBackground } : {}),
+                ...rootImageCss }
+            : {}),
         }}
       >
         {/* wave-52 lane L2 (M1) — the BODY BOX's margin. When the body-root
@@ -985,7 +1060,9 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
             ))}
           </div>
         ) : (
-          roots.map((root, i) => (
+          // wave-53 L3 (item A): the forest minus the canvas-owned image
+          // layers — the SAME array as `roots` for every plan-less document.
+          canvasRoots.map((root, i) => (
             <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
               <ComponentRenderer node={root} />
             </RootErrorBoundary>
