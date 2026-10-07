@@ -1,0 +1,2 @@
+  } catch (err) {
+    // A text-less fact makes planMarker decline the item with `marker-not-baked`.

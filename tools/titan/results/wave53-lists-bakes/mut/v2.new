@@ -1,0 +1,1 @@
+    if (e.rectCount === 0 || e.tag === 'br') continue;

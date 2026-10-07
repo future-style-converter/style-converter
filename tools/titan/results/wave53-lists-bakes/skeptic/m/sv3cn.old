@@ -1,0 +1,1 @@
+props: rootProperties(e.rect, e.position, hostsMarker ? e : null) });

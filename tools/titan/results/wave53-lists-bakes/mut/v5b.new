@@ -1,0 +1,2 @@
+    if (m?.lossy?.includes('marker-probe-mismatch')) return { bail: 'marker-probe-mismatch' };
+    if (m) markers.set(k, m);

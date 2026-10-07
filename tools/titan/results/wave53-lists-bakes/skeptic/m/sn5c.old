@@ -1,0 +1,1 @@
+            runs = listOf(IRRun(text = run.text + lead)) + runs.drop(1),

@@ -1,0 +1,1 @@
+    inst.implied = inst.negSum + value + (inst.lastNegBy === who ? 0 : inst.lastNeg);

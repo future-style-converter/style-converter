@@ -1,0 +1,1 @@
+        const scoped = pseudoSet(bag, own, nodeIdx);

@@ -68,9 +68,16 @@
 //     for each element in the counter's scope, in tree order:
 //         num += −(its increment)                       ← "incrementNegated"
 //         if it counter-SETs this counter:  num += that value;  STOP
-//     if the walk ran to the end:  num += the LAST NON-ZERO incrementNegated
+//     num += the LAST NON-ZERO incrementNegated seen so far   (step 4)
 //
-// (SIGNED, not absolute, on that trailing term.) For the ordinary all-(−1)
+// (SIGNED, not absolute, on that trailing term.) Wave-53 lane L1: step 4 runs
+// after a STOP too — the walk's break (step 3.3) leaves the loop, not the
+// algorithm. Bookkeeping detail: this bake applies an element's increment
+// BEFORE its set (see the walk), so a setter that STEPS THE COUNTER ITSELF has
+// already put its own −increment into `num`; that self-step stands in for the
+// step-4 term (li-value-reversed-001, `<li value=6>` with its own −1 step ⇒
+// 8, not 9), and the term is added only when the last non-zero step came from
+// a DIFFERENT box (`lastNegBy` ≠ the setter). For the ordinary all-(−1)
 // list this is still N+1 — first item prints N, last prints 1. The three
 // places it differs from the wave-37 formula are all pinned by references:
 //   • POSITIVE increments — li-value-reversed-006a's third list (three
@@ -91,12 +98,18 @@
 // (-1,-2,-1,-2 → 8 ⇒ 7,5,4,2), multiple (two counters at once ⇒ 2,4 / 1,2),
 // list-item and list-item-start (⇒ 7).
 //
-// KNOWN OUTLIER, measured and named rather than smoothed over:
-// li-value-reversed-019's INNER list (`<li>Four` whose own child `<div>` does
-// `counter-set: list-item 3`) wants initial 5; the walk above yields 4, so
-// that one item paints 3 where the reference paints 4. Every other reference
-// in the `li-value-reversed-*` family that this lane can see agrees with the
-// walk. One item on one test is not worth a second, unpinned rule.
+// THE FORMER "KNOWN OUTLIER" li-value-reversed-019 is the step-4 term: its
+// INNER list (`<li>Four` whose own child `<div>` does `counter-set: list-item
+// 3`) wants initial 5 = 1 + 3 + 1, and the pre-wave-53 walk stopped at 1 + 3
+// = 4 because it skipped step 4 after the stop. The same omission painted
+// css-lists/counter-reset-reversed-nested's `Eleven` as 10 where the
+// reference prints 11 (the `.set` item's counter-set: foo 10 is a setter
+// whose ::before — a DIFFERENT box — makes the step), and
+// li-value-reversed-008b's lists 10/8/6/5/3 and 10/7/5/4/−4 as 9/7/5/5/3 and
+// 8/5/5/4/−4 (its <meta name=assert>: "The last (non-zero) counter-increment
+// value before the first counter-set determines the start value"). Every
+// earlier pin agreed with the old walk only because each of its setters
+// (`<li value>`) also stepped the counter itself.
 //
 // NOT MODELLED, and left as a refusal or an untouched declaration rather than
 // an approximation:
@@ -211,25 +224,33 @@ function newInstance(name, value, reversed, key = null) {
     name, value, reversed, key,
     negSum: 0,       // Σ of −increment over the walk so far
     lastNeg: 0,      // the LAST NON-ZERO −increment (signed) — the trailing term
+    lastNegBy: null, // which box made that step (walk node index / pseudo key)
     stopped: false,  // a counter-set has frozen the walk
     implied: 0,      // the frozen num, once `stopped`
   };
 }
 
-function setCounter(set, name, value) {
+/** Apply a counter-set. `who` names the box doing it (the walk's node index,
+ *  or `"<index>::<pseudo>"` inside a pseudo bag) so the §4.4.2 step-4 term can
+ *  tell a self-stepping setter from one whose step came from another box. */
+function setCounter(set, name, value, who = null) {
   const inst = innermost(set, name);
   if (!inst) { (set[name] ??= []).push(newInstance(name, value, false)); return; }
-  // §4.4.2: the walk stops at the FIRST element that counter-sets this
-  // counter, adding the set VALUE to what it has accumulated so far. Recorded
-  // before the assignment because `negSum` must not include anything after.
+  // §4.4.2 step 3.3: the walk stops at the FIRST element that counter-sets
+  // this counter, adding the set VALUE to what it has accumulated so far;
+  // step 4 then adds the last non-zero incrementNegated — unless THIS setter
+  // made that step itself, whose −increment `negSum` already holds (the bake
+  // steps before it sets; see the IMPLIED VALUE banner). Recorded before the
+  // assignment because `negSum` must not include anything after.
   if (inst.reversed && !inst.stopped) {
-    inst.implied = inst.negSum + value;
+    inst.implied = inst.negSum + value + (inst.lastNegBy === who ? 0 : inst.lastNeg);
     inst.stopped = true;
   }
   inst.value = value;
 }
 
-function bumpCounter(set, name, delta) {
+/** Apply a counter-increment; `who` as for setCounter. */
+function bumpCounter(set, name, delta, who = null) {
   let inst = innermost(set, name);
   if (!inst) {
     inst = newInstance(name, 0, false);
@@ -242,14 +263,15 @@ function bumpCounter(set, name, delta) {
     inst.negSum += -delta;
     // "the last NON-ZERO incrementNegated" — a `counter-increment: x 0`
     // element takes part in the walk but cannot be the trailing term.
-    if (delta !== 0) inst.lastNeg = -delta;
+    // `lastNegBy` records the box that made it, for setCounter's step 4.
+    if (delta !== 0) { inst.lastNeg = -delta; inst.lastNegBy = who; }
   }
 }
 
 /** The counters set in force INSIDE one pseudo-element bag: a copy of the
  *  originating element's, with the bag's own counter-reset/-set/-increment
  *  applied. Returns null when a declaration there is unparseable. */
-function pseudoSet(bag, own) {
+function pseudoSet(bag, own, who = null) {
   const props = bag?.properties ?? {};
   if (props['counter-reset'] === undefined && props['counter-set'] === undefined
       && props['counter-increment'] === undefined) {
@@ -266,20 +288,22 @@ function pseudoSet(bag, own) {
     (set[entry.name] ??= []).push(
       newInstance(entry.name, entry.value ?? 0, entry.reversed));
   }
-  if (!applyPairs(set, props['counter-set'], 0, 'set')) return null;
-  if (!applyPairs(set, props['counter-increment'], 1, 'increment')) return null;
+  // `who` (the pseudo's own key) attributes these steps/sets to the pseudo.
+  if (!applyPairs(set, props['counter-set'], 0, 'set', who)) return null;
+  if (!applyPairs(set, props['counter-increment'], 1, 'increment', who)) return null;
   return set;
 }
 
 /** Apply a `counter-set` / `counter-increment` declaration. Returns false on
  *  an unparseable value, which aborts the whole bake (a refusal). */
-function applyPairs(set, raw, dflt, kind) {
+function applyPairs(set, raw, dflt, kind, who = null) {
   if (raw === undefined) return true;
   const pairs = parseCounterPairs(raw, dflt);
   if (pairs === null) return false;
   for (const p of pairs) {
-    if (kind === 'set') setCounter(set, p.name, p.value);
-    else bumpCounter(set, p.name, p.value);
+    // `who` rides through so each step/set is attributed to its box.
+    if (kind === 'set') setCounter(set, p.name, p.value, who);
+    else bumpCounter(set, p.name, p.value, who);
   }
   return true;
 }
@@ -349,9 +373,9 @@ function walk(components, implied, onUse) {
         // The UA `display: list-item` increment. Its SIGN follows the counter
         // it targets: a reversed list counts down.
         const li = innermost(own, 'list-item');
-        bumpCounter(own, 'list-item', li && li.reversed ? -1 : 1);
+        bumpCounter(own, 'list-item', li && li.reversed ? -1 : 1, nodeIdx);
       }
-      if (!applyPairs(own, incRaw, 1, 'increment')) { ok = false; return; }
+      if (!applyPairs(own, incRaw, 1, 'increment', nodeIdx)) { ok = false; return; }
       // HTML §4.4.8 `<li value=N>` — a `counter-set: list-item N` hint
       // (HTML §15.3.7), so the item prints N outright.
       //
@@ -365,7 +389,7 @@ function walk(components, implied, onUse) {
       // is byte-identical for every forward list and correct for both.
       // It is also what makes the §4.4.2 implied-value walk see this
       // element's own increment BEFORE its set, which the walk requires.
-      if (listItem && Number.isFinite(liValue)) setCounter(own, 'list-item', liValue);
+      if (listItem && Number.isFinite(liValue)) setCounter(own, 'list-item', liValue, nodeIdx);
       // ── counter-set, LAST ────────────────────────────────────────────
       // wave-44 lane H2 moved this from before counter-increment to after
       // it. MEASURED in the pinned headless Chromium (`<ol start=11><li
@@ -382,7 +406,7 @@ function walk(components, implied, onUse) {
       // the author declaration last (correct cascade — a presentational hint
       // loses), but the §4.4.2 walk anchors on whichever ran FIRST, i.e. the
       // hint. No corpus reference exercises the pair.
-      if (!applyPairs(own, node.properties?.['counter-set'], 0, 'set')) { ok = false; return; }
+      if (!applyPairs(own, node.properties?.['counter-set'], 0, 'set', nodeIdx)) { ok = false; return; }
       // ── uses, in css-content-3 §2.1 document order ──────────────────
       // A pseudo-element is a real box in the counter tree: it may carry its
       // own counter-reset/-set/-increment, and its INCREMENTS are visible to
@@ -393,7 +417,8 @@ function walk(components, implied, onUse) {
       const usePseudo = (name) => {
         const bag = node._pseudo?.[name];
         if (!bag) return;
-        const scoped = pseudoSet(bag, own);
+        // The pseudo is its OWN box for the step-4 attribution (wave 53).
+        const scoped = pseudoSet(bag, own, `${nodeIdx}::${name}`);
         if (scoped === null) { ok = false; return; }
         onUse(bag, scoped);
       };

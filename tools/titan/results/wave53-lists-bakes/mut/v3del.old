@@ -1,0 +1,1 @@
+      for (const k of Object.keys(cmp.properties ?? {})) if (k.startsWith('padding-')) delete cmp.properties[k];

@@ -63,10 +63,30 @@ package com.styleconverter.runtime.content
 //
 // The BUCKET question — can an inline run express this payload? — lives in
 // PseudoTextBridge, exactly as it does on iOS.
+//
+// WAVE-53 LANE L1 (nested-list-extractor D) — the ONE ::before this file
+// folds: a component carrying `meta.runs` whose first run is TEXT. CSS 2.1
+// §12.1 / css-pseudo-4 §4.1 make ::before the element's first inline content,
+// and CSS 2.1 §9.2.1.1 puts it in the anonymous block box with the leading
+// text — AHEAD of a block child such as a nested `<ol>`. The Row wrapper
+// instead lays the WHOLE content column (text + nested list) out to the
+// RIGHT of the ::before Text, which would push the nested rows right by the
+// marker's advance. So the ::before text is prefixed to BOTH `runs[0].text`
+// and `_text` (which one paints depends on whether the run plan engages) and
+// `before` is DROPPED from the copy's `pseudos`, so PseudoBucketExtractor
+// builds no `Row { before, content }` around it — no ComponentRenderer hunk.
+// MEASURED target: wave52-ship css-lists/counter-reset-reversed-nested's
+// `Two` (`runs [{text:"Two "},{child:<ol>}]`). Census over all 1435
+// wave52-ship per-test-ir documents (tools/titan/results/wave53-plan/
+// nested-list-extractor.wire-census.py): it is the ONLY component with runs
+// plus a ::before `_text`; the other runs+pseudos component
+// (display-contents-dynamic-before-after-001 __1__3) has no `_text`, so
+// PseudoTextBridge returns null there and the fold is identity.
 
 import com.styleconverter.runtime.PropertyTracker
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRLog
+import com.styleconverter.runtime.core.ir.IRRun
 import kotlinx.serialization.json.JsonObject
 
 /** Log tag for this fold's named refusals. */
@@ -108,6 +128,20 @@ object PseudoTextFold {
         // not a text run, and folding here would double-render it. Same
         // guard direction as RootPseudoBox's banner, from the other shore.
         if (component.role == "body-root") return Folded(component, false)
+        // `meta.runs` is AUTHORITATIVE over `_text` (schema/spec/03-children.md
+        // §4.1): wave-53 lane L1 folds a leading ::before into both channels
+        // (see the banner); the ::after keeps its named refusal here.
+        if (component.runs != null) {
+            // The pre-wave-53 refusal, unchanged: an ::after text bucket under
+            // a run plan would vanish with the text slot (a BOX-shaped one is
+            // PseudoBoxFold's, as before, and needs no line).
+            val after = pseudos["after"] as? JsonObject
+            if (after != null && PseudoGeneratedBox.claim(after, "after", component.role) == null) {
+                PropertyTracker.markUnhandled("PseudoText::runs")
+                IRLog.warn(TAG, "component carries meta.runs — ::after text not folded (runs own the content slot)")
+            }
+            return Folded(foldBeforeIntoRuns(component, pseudos, component.runs), afterFolded = false)
+        }
         // No `::after` payload → nothing for this file to do. (`before` and
         // `marker` are deliberately untouched: the wrapper and the list
         // marker path own them — see the SCOPE note in the file banner.)
@@ -116,15 +150,6 @@ object PseudoTextFold {
         // the SAME claim function PseudoBucketExtractor consults — so the
         // one payload can never render through two paths.
         if (PseudoGeneratedBox.claim(bucket, "after", component.role) != null) {
-            return Folded(component, false)
-        }
-        // `meta.runs` is AUTHORITATIVE over `_text` (schema/spec/03-children.md
-        // §4.1): when a run plan resolves, the renderer paints the listed
-        // entries and drops the text slot, so a fold into `_text` would
-        // silently vanish. Refuse and name it — never a silent fallthrough.
-        if (component.runs != null) {
-            PropertyTracker.markUnhandled("PseudoText::runs")
-            IRLog.warn(TAG, "component carries meta.runs — ::after text not folded (runs own the content slot)")
             return Folded(component, false)
         }
         // css-pseudo-4 §4.1 places ::after AFTER the element's children. A
@@ -196,6 +221,49 @@ object PseudoTextFold {
                 properties = component.properties + run.styling
             ),
             afterFolded = true
+        )
+    }
+
+    /**
+     * Wave-53 lane L1 — the run-plan ::before fold (see the file banner).
+     * Returns the SAME instance for every shape it does not claim: no
+     * `before` bucket, a child-first run list (no leading text run to
+     * prefix), a box-shaped ::before (PseudoGeneratedBox's), a bucket the
+     * bridge refuses, or a STYLED one (typed styling would restyle the whole
+     * leading run). Each refusal is named; none is silent.
+     */
+    private fun foldBeforeIntoRuns(
+        component: IRComponent,
+        pseudos: JsonObject,
+        runs: List<IRRun>
+    ): IRComponent {
+        // No ::before payload → nothing for this path to do.
+        val before = pseudos["before"] as? JsonObject ?: return component
+        // The leading run must be TEXT for a prefix to mean "first inline".
+        val lead = runs.firstOrNull()?.text
+        if (lead == null) {
+            PropertyTracker.markUnhandled("PseudoText::runs-child-first")
+            IRLog.warn(TAG, "meta.runs starts with a child — ::before not folded")
+            return component
+        }
+        // A block-level generated box stays with PseudoBoxFold's claim.
+        if (PseudoGeneratedBox.claim(before, "before", component.role) != null) return component
+        // The bridge's own gates (and their named refusals) decide the text.
+        val run = PseudoTextBridge.inlineRun(before, component) ?: return component
+        // css-cascade-5 §7.3: one uniform run cannot carry the pseudo's own
+        // styling without repainting the host's leading text in it.
+        if (run.styling.isNotEmpty()) {
+            PropertyTracker.markUnhandled("PseudoText::styled-nonuniform-before")
+            IRLog.warn(TAG, "::before styling cannot apply — the fold is not the component's sole text run")
+            return component
+        }
+        // The fold: the ::before text leads the first run AND `_text`, and
+        // `before` leaves `pseudos` so the Row wrapper cannot paint it again
+        // (the map stays non-null: `pseudos != null` gates elsewhere read it).
+        return component.copy(
+            _text = run.text + (component._text ?: ""),
+            runs = listOf(IRRun(text = run.text + lead)) + runs.drop(1),
+            pseudos = JsonObject(pseudos - "before")
         )
     }
 }

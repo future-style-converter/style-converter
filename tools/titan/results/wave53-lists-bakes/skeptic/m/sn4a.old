@@ -1,0 +1,3 @@
+        if let runs = component.meta?.runs {
+            return foldIntoRuns(component, pseudos: pseudos, runs: runs, emBasePx: emBasePx)
+        }
