@@ -756,3 +756,289 @@ test('bidi-bake: THIS module\'s CLI sweeps stale run lists too', () => {
   assert.ok(src.indexOf('dropStaleRuns(result.fixture)')
             < src.indexOf('await writeFixturePair(result)'));
 });
+
+// ── 9. Wave 53 lane L1 — hunk M (list markers) + hunk P (spent padding) ─────
+//
+// Built from the VERBATIM wave52-ship geometry of css-counter-styles/
+// counter-suffix (tools/titan/results/wave53-plan/rtl-marker-bake.md §3/§8:
+// root rects x0 y192/240 w160 h48; li x48 y+0/+24 w64 h24; text runs at
+// li-left +39.36 / +39.03, top +2, w 24.64 / 24.97, h 20) and of the frozen
+// bidi-baked fixtures (tools/titan/results/wave53-plan/bidi-baked-fixtures/,
+// PROVENANCE.txt). Only the per-glyph marker ADVANCES are model numbers (the
+// CDP probe is an orchestrator window): ' ' 4.48, '.' 4.42, tabular '1'/'2'
+// 9.9, 'א' 10.2, 'ב' 10.0 — placed so the ink lands at the ref's x133-145
+// frame (= bake 117-129). MUTATIONS (executed, red → restore → green, sha256):
+// tools/titan/results/wave53-lists-bakes/mutations.log.
+
+import {
+  planMarker, parseSnapshotMarkers, matchMarkers, collectMarkerFacts, MARKER_PROBE_EPS, MARKER_STAMPS,
+} from './bidi-marker-bake.mjs';
+import { paddingIsSpent } from './bidi-bake.mjs';
+import { bakeCounterStyles } from './counter-style-bake.mjs';
+
+// The text style the walker reads off counter-suffix's `<li>` (verbatim run props).
+const CS_STYLE = { color: 'rgb(0, 0, 0)',
+  fontFamily: 'Inter, -apple-system, "system-ui", "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif',
+  fontSize: '16px', fontStyle: 'normal', fontWeight: '400',
+  letterSpacing: 'normal', wordSpacing: '0px', textTransform: 'none' };
+// The computed ::marker style: the li's font + the UA tabular-nums (Appendix A).
+const MARKER_STYLE = { ...CS_STYLE, fontVariantNumeric: 'tabular-nums' };
+// One LTR word laid out at [x, x+w) on line y (per-char advances sum to w).
+const word = (text, x, y, adv) => {
+  let at = x;
+  return [{ style: CS_STYLE, chars: [...text].map((c, i) => {
+    const r = { x: +at.toFixed(2), y, w: adv[i], h: 20 }; at += adv[i]; return { c, rects: [r] };
+  }) }];
+};
+// counter-suffix's RTL list `k` (4 = decimal, 5 = hebrew): the root and its two items.
+const rtlList = (k, y0) => [
+  { ...el([0, k], { tag: 'ol', rect: { x: 0, y: y0, width: 160, height: 48 }, bidiAffected: true }),
+    padding: [0, 48, 0, 48], backgroundClip: 'border-box', backgroundOrigin: 'padding-box', overflow: ['visible', 'visible'] },
+  el([0, k, 0], { tag: 'li', display: 'list-item', bidiAffected: true, rect: { x: 48, y: y0, width: 64, height: 24 },
+    texts: word('foo', 87.36, y0 + 2, [5.4, 9.62, 9.62]) }),
+  el([0, k, 1], { tag: 'li', display: 'list-item', bidiAffected: true, rect: { x: 48, y: y0 + 24, width: 64, height: 24 },
+    texts: word('bar', 87.03, y0 + 26, [9.66, 8.72, 6.59]) }),
+];
+// The probe's answer for one RTL item: logical chars, rects relative to the span
+// (RTL visual order: the suffix space leftmost, at the li's border edge).
+const rtlProbe = (glyph, gw, { cdp = true, y = 192 } = {}) => {
+  const w = +(4.48 + 4.42 + gw).toFixed(2);
+  return { direction: 'rtl', position: 'outside', type: 'x', image: false, contentStart: 48, contentEnd: 112,
+    style: MARKER_STYLE, text: `${glyph}. `, textModelled: false,
+    cdpBox: cdp ? { x: 112, y, width: w, height: 24 } : null,
+    glyphs: { width: w, chars: [
+      { c: glyph, rects: [{ x: 8.9, y: 0, w: gw, h: 20 }] },
+      { c: '.', rects: [{ x: 4.48, y: 0, w: 4.42, h: 20 }] },
+      { c: ' ', rects: [{ x: 0, y: 0, w: 4.48, h: 20 }] },
+    ] } };
+};
+// The whole counter-suffix RTL half as a walk, with or without marker facts.
+const counterSuffixWalk = (markers = {}) => ({ bodyTextIsBidi: false, markers, elements: [
+  el([0], { rect: { x: 0, y: 0, width: 160, height: 288 } }), ...rtlList(4, 192), ...rtlList(5, 240)] });
+const CS_MARKERS = (opts = {}) => ({ '0.4.0': rtlProbe('1', 9.9, opts), '0.4.1': rtlProbe('2', 9.9, { ...opts, y: 216 }),
+  '0.5.0': rtlProbe('א', 10.2, { ...opts, y: 240 }), '0.5.1': rtlProbe('ב', 10.0, { ...opts, y: 264 }) });
+const runsOf = (plan, path) => plan.runs.filter((r) => r.ownerPath.join('.') === path);
+const pxNum = (v) => Number.parseFloat(v);
+
+test('V1 hunk M: RTL item markers bake as runs on the inline-START (right) side, `none` on the item', () => {
+  for (const cdp of [true, false]) {                      // the CDP box, then the analytic MODEL
+    const { bail, plan } = planBidiBake(counterSuffixWalk(CS_MARKERS({ cdp })));
+    assert.equal(bail, null);
+    // Every item box stops Blink's own marker (and the counter-style stamp).
+    for (const p of ['0.4.0', '0.4.1', '0.5.0', '0.5.1']) {
+      const box = plan.boxes.find((b) => b.path.join('.') === p);
+      assert.equal(box.props['list-style-type'], 'none', `${p} (cdp ${cdp})`);
+      // Marker runs sit at li-x ≥ 64: past the li's right border edge.
+      const marks = runsOf(plan, p).filter((r) => r.text !== 'foo' && r.text !== 'bar');
+      assert.ok(marks.length > 0 && marks.every((r) => pxNum(r.props.left) >= 64), `${p} side (cdp ${cdp})`);
+      // The analytic path is stamped as a model; the measured one is not.
+      assert.deepEqual(box.lossy ?? [], cdp ? [] : [MARKER_STAMPS.boxModel]);
+    }
+    // A no-strong-letter marker is split per grapheme, in visual order.
+    assert.deepEqual(runsOf(plan, '0.4.0').map((r) => r.text), ['foo', '.', '1']);
+    // A strong-R marker stays ONE run and states its own rtl direction.
+    const heb = runsOf(plan, '0.5.0').filter((r) => r.text !== 'foo');
+    assert.deepEqual(heb.map((r) => r.text), ['א.']);
+    assert.equal(heb[0].props.direction, 'rtl');
+    // The ink lands where the ref's does: '.' at bake x116.48 = li-left 68.48, top 2.
+    const dot = runsOf(plan, '0.4.0').find((r) => r.text === '.');
+    assert.deepEqual([dot.props.left, dot.props.top, dot.props['font-variant-numeric']], ['68.48px', '2px', 'tabular-nums']);
+    // 4 text runs + 6 marker runs — the brief's predicted `10 runs` log line.
+    assert.equal(plan.runs.length, 10);
+  }
+});
+
+test('V2 hunk M: a ROOT list item (arabic-indic-101 shape) gets no marker run', () => {
+  const walk = { bodyTextIsBidi: false, markers: { '0.0': rtlProbe('١', 9.9) }, elements: [
+    el([0], { tag: 'ol', rect: { x: 0, y: 0, width: 358, height: 48 } }),
+    { ...el([0, 0], { tag: 'li', display: 'list-item', bidiAffected: true, rect: { x: 48, y: 192, width: 64, height: 24 },
+      texts: word('foo', 87.36, 194, [5.4, 9.62, 9.62]) }), padding: [0, 0, 0, 0] },
+  ] };
+  const { plan } = planBidiBake(walk);
+  assert.deepEqual(plan.roots.map((r) => r.path), [[0, 0]]);
+  // Every runtime paints a root's marker today: no run, no `none`.
+  assert.deepEqual(plan.runs.map((r) => r.text), ['foo']);
+  assert.equal(plan.roots[0].props['list-style-type'], undefined);
+});
+
+// counter-suffix__0__4 VERBATIM (frozen bidi-baked-fixtures/css-counter-styles/
+// counter-suffix.json, sha1 6d4ae51b…): its `padding: "0 3em"` shorthand.
+const csRootNode = () => ({ id: 'counter-suffix__0__4', _tag: 'ol', properties: {
+  margin: '0', padding: '0 3em', 'line-height': '150%', 'list-style-type': 'decimal', direction: 'ltr',
+  width: '160px', height: '48px', 'box-sizing': 'border-box', 'unicode-bidi': 'normal', 'text-align': 'left',
+  position: 'relative' }, children: {} });
+const rootFixture = (stem, node, i) => ({ _wpt: {}, components: { [`${stem}__0`]: { properties: {}, children: { [`${stem}__0__${i}`]: node } } } });
+
+test('V3 hunk P: a NON-zero root padding becomes `padding: 0` alone; content-box keeps it', () => {
+  // With its marker facts: the shape that must hold under U2 AND U2-narrow.
+  const { plan } = planBidiBake(counterSuffixWalk(CS_MARKERS()));
+  const root = plan.roots.find((r) => r.path.join('.') === '0.4');
+  assert.equal(root.props.padding, '0');
+  const fx = rootFixture('counter-suffix', csRootNode(), 4);
+  applyBidiBakePlan(fx, 'counter-suffix', { roots: [root], boxes: [], hides: [], runs: [] });
+  const props = fx.components['counter-suffix__0'].children['counter-suffix__0__4'].properties;
+  assert.deepEqual(Object.keys(props).filter((k) => k.startsWith('padding')), ['padding']);
+  assert.equal(props.padding, '0');
+  // …in the shorthand's OWN key position (index 1, as authored): the smallest wire change.
+  assert.deepEqual(Object.keys(props).slice(0, 2), ['margin', 'padding']);
+  // A root spelling its padding as longhands / logical sides loses every one of them.
+  const longhand = { id: 'counter-suffix__0__4', properties: { 'padding-left': '48px', 'padding-inline-end': '48px', color: 'red' } };
+  const fx2 = rootFixture('counter-suffix', longhand, 4);
+  applyBidiBakePlan(fx2, 'counter-suffix', { roots: [root], boxes: [], hides: [], runs: [] });
+  const p2 = fx2.components['counter-suffix__0'].children['counter-suffix__0__4'].properties;
+  assert.deepEqual(Object.keys(p2).filter((k) => k.startsWith('padding')), ['padding']);
+  // The guard: a padding that clips/positions a background is NOT spent.
+  const rec = rtlList(4, 192)[0];
+  for (const g of [{ backgroundClip: 'content-box' }, { backgroundOrigin: 'content-box' }, { overflow: ['hidden', 'visible'] }]) {
+    assert.equal(paddingIsSpent({ ...rec, ...g }), false, JSON.stringify(g));
+    assert.equal(rootProperties(rec.rect, 'relative', { ...rec, ...g }).padding, undefined);
+  }
+  assert.equal(paddingIsSpent(rec), true);
+});
+
+test('V3 hunk P: bidi-lines-002\'s root (0 0.5ch) with its 5 hidden <br>', () => {
+  // Frozen bidi-baked-fixtures/css-text/bidi__bidi-lines-002.json root, verbatim
+  // props; the walk: 5 spans + 5 <br> under the bordered root (0.5ch at 32px).
+  const node = { id: 'bidi__bidi-lines-002__1', properties: { direction: 'ltr', 'unicode-bidi': 'normal',
+    'text-align': 'left', 'font-size': '2em', width: '346.19px', border: 'solid', padding: '0 0.5ch',
+    height: '206px', 'box-sizing': 'border-box', position: 'relative' }, children: {} };
+  const kids = [];
+  for (let i = 0; i < 10; i++) {
+    const id = `bidi__bidi-lines-002__1__${i}`;
+    node.children[id] = { id, _tag: i % 2 ? 'br' : 'span', properties: {} };
+    kids.push(i % 2 ? el([1, i], { tag: 'br', rect: { x: 0, y: 0, width: 0, height: 39 } })
+      : el([1, i], { tag: 'span', display: 'inline', rect: { x: 29, y: 111 + 20 * i, width: 9.2, height: 39 } }));
+  }
+  const walk = { bodyTextIsBidi: false, elements: [
+    { ...el([1], { rect: { x: 6, y: 108, width: 346.19, height: 206 }, borderLeft: 3, borderTop: 3,
+      bidiAffected: true, texts: word('Hello', 37.3, 151, [15, 15, 15, 15, 17.12]) }),
+      padding: [0, 9.92, 0, 9.92], backgroundClip: 'border-box', backgroundOrigin: 'padding-box', overflow: ['visible', 'visible'] },
+    ...kids] };
+  const { plan } = planBidiBake(walk);
+  assert.deepEqual(plan.hides.map((p) => p.join('.')), ['1.1', '1.3', '1.5', '1.7', '1.9']);
+  const fx = { _wpt: {}, components: { 'bidi__bidi-lines-002__1': node } };
+  applyBidiBakePlan(fx, 'bidi__bidi-lines-002', { roots: plan.roots, boxes: [], hides: plan.hides, runs: [] });
+  const out = fx.components['bidi__bidi-lines-002__1'];
+  assert.equal(out.properties.padding, '0');
+  assert.deepEqual(Object.keys(out.properties).filter((k) => k.startsWith('padding')), ['padding']);
+  // The <br>s generate no box, so the zeroed padding cannot move them either.
+  for (const i of [1, 3, 5, 7, 9]) assert.equal(out.children[`bidi__bidi-lines-002__1__${i}`].properties.display, 'none');
+});
+
+test('V3b hunk P: a ZERO-padding root (selectors/dir-style-02a) keeps its keys deep-equal AND in order', () => {
+  // Frozen bidi-baked-fixtures/selectors/dir-style-02a.json, root __0 verbatim.
+  const props = { 'text-align': 'left', color: 'rgb(0, 255, 0)', direction: 'ltr', position: 'relative',
+    width: '358px', height: '20px', 'box-sizing': 'border-box', 'margin-top': '0px', 'margin-right': '0px',
+    'margin-bottom': '0px', 'margin-left': '0px', 'padding-top': '0px', 'padding-right': '0px',
+    'padding-bottom': '0px', 'padding-left': '0px', 'border-top-width': '0px', display: 'block',
+    'overflow-x': 'visible', 'overflow-y': 'visible', 'unicode-bidi': 'normal' };
+  const before = structuredClone(props);
+  const rec = { ...el([0], { rect: { x: 0, y: 0, width: 358, height: 20 }, position: 'relative' }),
+    padding: [0, 0, 0, 0], backgroundClip: 'border-box', backgroundOrigin: 'padding-box', overflow: ['visible', 'visible'] };
+  const rp = rootProperties(rec.rect, rec.position, rec);
+  assert.equal('padding' in rp, false);
+  const fx = { _wpt: {}, components: { 'dir-style-02a__0': { properties: props } } };
+  applyBidiBakePlan(fx, 'dir-style-02a', { roots: [{ path: [0], props: rp }], boxes: [], hides: [], runs: [] });
+  const out = fx.components['dir-style-02a__0'].properties;
+  // Same keys, same values, same ORDER — the per-test IR stays byte-identical.
+  assert.deepEqual(Object.keys(out), Object.keys(before));
+  for (const k of Object.keys(before).filter((x) => x.startsWith('padding'))) assert.equal(out[k], before[k]);
+});
+
+// V4 needs the real corpus source (tools/wpt is gitignored) — skip-guarded.
+const CS_TEST = 'css/css-counter-styles/counter-suffix.html';
+const csReady = existsSync(join(REPO_ROOT, 'tools', 'wpt', CS_TEST)) && existsSync(join(__dirname, 'wpt-buckets.json'));
+test('V4 hunk M × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake)', { skip: !csReady }, async () => {
+  const { extractFixture } = await import('./extract-fixture.mjs');
+  const html = readFileSync(join(REPO_ROOT, 'tools', 'wpt', CS_TEST), 'utf8');
+  const run = async (markers) => {
+    const { fixture } = await extractFixture(CS_TEST);
+    applyBidiBakePlan(fixture, 'counter-suffix', planBidiBake(counterSuffixWalk(markers)).plan);
+    return { fixture, r: bakeCounterStyles(fixture, html) };
+  };
+  const off = await run({});
+  assert.deepEqual([off.r.stamped, off.r.declined], [10, 2]);
+  const on = await run(CS_MARKERS());
+  assert.deepEqual([on.r.stamped, on.r.declined], [6, 2]);
+  // No meta.markerText source on the four RTL items any more.
+  for (const k of [4, 5]) for (const i of [0, 1]) {
+    assert.equal(on.fixture.components['counter-suffix__0'].children[`counter-suffix__0__${k}`]
+      .children[`counter-suffix__0__${k}__${i}`]._markerText, undefined);
+  }
+});
+
+test('V5 hunk M: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail', () => {
+  const good = planBidiBake(counterSuffixWalk(CS_MARKERS())).plan;
+  const m = CS_MARKERS();
+  // Item 0.4.0's CDP box disagrees with the probe advance by 3 px (and sits elsewhere).
+  m['0.4.0'] = { ...m['0.4.0'], cdpBox: { x: 100, y: 192, width: m['0.4.0'].glyphs.width + 3, height: 24 } };
+  assert.ok(3 > MARKER_PROBE_EPS);
+  const { bail, plan } = planBidiBake(counterSuffixWalk(m));
+  assert.equal(bail, null);
+  assert.ok(plan, 'a plan, not { bail }');
+  // That item: the analytic inline-start edge (x112) — not the mismatching x100 — and the stamp.
+  assert.deepEqual(runsOf(plan, '0.4.0'), runsOf(good, '0.4.0'));
+  assert.deepEqual(plan.boxes.find((b) => b.path.join('.') === '0.4.0').lossy, [MARKER_STAMPS.mismatch]);
+  // Everything else — text runs, the other items' markers — is deep-equal.
+  for (const p of ['0.4.1', '0.5.0', '0.5.1']) assert.deepEqual(runsOf(plan, p), runsOf(good, p));
+  assert.deepEqual(plan.roots, good.roots);
+});
+
+test('planMarker: declines leave the item as it was, stamped; no ::marker → null', () => {
+  const first = { run: { y: 194 }, style: CS_STYLE };
+  assert.equal(planMarker(undefined, { x: 48, y: 192 }, first), null);
+  assert.equal(planMarker({ ...rtlProbe('1', 9.9), type: 'none' }, { x: 48, y: 192 }, first), null);
+  const declined = { lossy: [MARKER_STAMPS.notBaked] };
+  assert.deepEqual(planMarker({ ...rtlProbe('1', 9.9), image: true }, { x: 48, y: 192 }, first), declined);
+  assert.deepEqual(planMarker(rtlProbe('1', 9.9), { x: 48, y: 192 }, null), declined);
+  assert.deepEqual(planMarker({ ...rtlProbe('1', 9.9), text: null }, { x: 48, y: 192 }, first), declined);
+  // A marker font unlike the first line's: its glyph tops would be a guess.
+  assert.deepEqual(planMarker({ ...rtlProbe('1', 9.9), style: { ...MARKER_STYLE, fontSize: '20px' } },
+    { x: 48, y: 192 }, first), declined);
+  // A modelled string is stamped as such.
+  assert.deepEqual(planMarker({ ...rtlProbe('1', 9.9), textModelled: true }, { x: 48, y: 192 }, first).lossy,
+    [MARKER_STAMPS.textModel]);
+});
+
+test('parseSnapshotMarkers / matchMarkers: the CDP half, by tag + used box', () => {
+  // A minimal DOMSnapshot: node 0 <li>, node 1 its ::marker (box + LayoutText "1. ").
+  const snap = { strings: ['LI', '::marker', 'marker', '1. '], documents: [{
+    nodes: { parentIndex: [-1, 0], nodeName: [0, 1], pseudoType: { index: [1], value: [2] } },
+    layout: { nodeIndex: [0, 1, 1], bounds: [[48, 192, 64, 24], [112, 192, 18.8, 24], [112, 194, 18.8, 20]], text: [-1, -1, 3] },
+  }] };
+  const ms = parseSnapshotMarkers(snap);
+  assert.deepEqual(ms, [{ hostTag: 'li', hostRect: { x: 48, y: 192, width: 64, height: 24 },
+    box: { x: 112, y: 192, width: 18.8, height: 24 }, text: '1. ' }]);
+  assert.deepEqual(parseSnapshotMarkers({}), []);
+  // Match by tag + rect; an ambiguous match is no fact at all.
+  const cand = { key: '0.4.0', tag: 'li', rect: { x: 48, y: 192, width: 64, height: 24 } };
+  assert.equal(matchMarkers([cand], ms)['0.4.0'].text, '1. ');
+  assert.deepEqual(matchMarkers([cand], [...ms, ...ms]), {});
+  assert.deepEqual(matchMarkers([{ ...cand, tag: 'div' }], ms), {});
+});
+
+test('collectMarkerFacts: list-free → {} with no CDP call; a page fault declines items, never throws', async () => {
+  // The bake's call site has no try/catch of its own (extract-fixture.mjs), so a
+  // throw here would cost the WHOLE fixture — the 13 marker-free bidi docs too.
+  let cdpCalls = 0;
+  const page = { createCDPSession: async () => { cdpCalls++; throw new Error('no CDP'); },
+    evaluate: async () => { throw new Error('page gone'); } };
+  assert.deepEqual(await collectMarkerFacts(page, [el([0], { tag: 'div' })]), {});
+  assert.equal(cdpCalls, 0);
+  const facts = await collectMarkerFacts(page, [el([0, 0], { tag: 'li', display: 'list-item' })]);
+  assert.equal(cdpCalls, 1);
+  assert.match(facts['0.0'].error, /page gone/);
+  // …and that fact makes planMarker decline the item, loudly.
+  assert.deepEqual(planMarker(facts['0.0'], { x: 0, y: 0 }, { run: { y: 0 }, style: CS_STYLE }),
+    { lossy: [MARKER_STAMPS.notBaked] });
+});
+
+test('hunk M wiring: the marker facts are read AFTER the walk and the mapping check', () => {
+  // Source-scan pin (this file's wiring convention): the probe span must never
+  // perturb the page the walk measured, and a mapping bail must cost no CDP call.
+  const src = readFileSync(join(__dirname, 'bidi-bake.mjs'), 'utf8');
+  const at = (s) => src.indexOf(s);
+  assert.ok(at('page.evaluate(inPageBidiWalker') < at('await collectMarkerFacts(page'));
+  assert.ok(at("reason: `element-mapping-mismatch") < at('await collectMarkerFacts(page'));
+  assert.ok(at('await collectMarkerFacts(page') < at('const { bail, plan, note } = planBidiBake(walk);'));
+});
