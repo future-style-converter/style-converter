@@ -4,3 +4,10 @@ android  MATCH
 ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=d56c143debd2cd55d25f68de1ed19ee67a2cd8cf  installed .app digest=d56c143debd2cd55d25f68de1ed19ee67a2cd8cf
 ios      MATCH
 
+(02:19 UTC: a `--resume` launch for css-view-transitions was REFUSED by the driver's precondition check before provisioning; the hash script ran against no device and its MISSING/MISMATCH lines were removed from this record — they measured nothing.)
+== wave53-open (--resume for css-view-transitions, second try, after the simulator reboot settled) — 2026-10-07T02:25:01Z — HEAD 1f5112cc
+android  serial=emulator-5554  built app-debug.apk sha1=f77e7a29343dd3bbb2d490bba4f630e933127c38  installed base.apk sha1=f77e7a29343dd3bbb2d490bba4f630e933127c38
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=d56c143debd2cd55d25f68de1ed19ee67a2cd8cf  installed .app digest=d56c143debd2cd55d25f68de1ed19ee67a2cd8cf
+ios      MATCH
+

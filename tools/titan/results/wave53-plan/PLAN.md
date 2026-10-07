@@ -1352,3 +1352,28 @@ read the final state; neither this plan nor `wave53-probe` (which excludes css-v
 - 5 geometry probes, each with a ref self-check.
 - A 20-section `wave53-probe`, and a 4-section `wave53-hh-probe` that doubles as the web determinism read.
 - Three control calibrations; the new cross-host one carries two red mutations.
+
+## §10 pre-registration addendum (orchestrator, 2026-10-07, after `wave53-open`'s corpus and before any lane lands)
+
+Measured on `wave53-open` (29 of 30 sections; `tools/titan/results/wave53-gate/_note.md`):
+
+1. **Against `wave52-ship`: 0 gained / 0 lost / 0 movers at |Δ| ≥ 0.005 / 0 newly measured** over the 29 sections; `css-view-transitions`
+   timed out twice on the swapping host and is re-run with `--resume` before the lanes land (no lane targets or carries a cell in
+   it; its 137 cells are unmeasured in `score-open.json` only until then). **Predictions are read against `wave53-open`**: every
+   watched cell outside css-view-transitions has the `wave52-ship` value within ±0.0001 — the 22 web cells that moved by that
+   amount keep their stated `from` values (a ±0.0001 restatement changes no verdict and no floor); no iOS or Android cell moved.
+2. **The cross-host web change is a RASTERIZER change, not an encoder change** (§8 risk 1 corrected): all 236 byte-different web
+   captures in the five calibration sections differ in pixels (1–3948 px, max channel delta 8–108; glyph anti-aliasing), 0 are
+   pure re-encodes. So R4 compares decoded pixels AND every comparison is same-host, as §8 already said; the `controlCalibrations[2]`
+   expectation "re-encoded ≈ 235" in `expectations.json` is superseded by the measured "236 changed, 0 re-encoded" (left in the
+   file as written — it is the pre-registration; this addendum is the correction). Whether web is deterministic run-to-run on this
+   host is still what `wave53-hh-probe` measures first.
+3. **Orchestrator decision — lanes work on the SHARED tree**, not in private worktrees (§0 "Lanes work in private worktrees" is
+   superseded): disjoint ownership + seam patches is the pattern wave 52 proved; the orchestrator forms each lane's revert units
+   (§4) by committing its owned paths in the landing order. Every lane note still carries its `TREES:` line.
+4. **Device windows**: builder lanes run no Chromium, simulator or emulator step themselves; they write the exact commands under
+   "## ORCHESTRATOR WINDOW REQUESTS" in their note, and the orchestrator runs them (L1's CDP probe and gate-flag re-extraction,
+   L5's hh-probe, XCTest and Gradle window) when the device is idle, feeding results back through a follow-up agent.
+5. **Host facts frozen for the wave** (no update between `wave53-open` and `wave53-final`): macOS 27.0.1 (26A434), Xcode 27.0
+   (27A266a), simulator runtimes iOS 26.0 (23A8464) / 26.2 (23C54), Chrome for Testing 151.0.7922.47, puppeteer 25.4.0, Node 24
+   (CI) / 22.21 (host).
