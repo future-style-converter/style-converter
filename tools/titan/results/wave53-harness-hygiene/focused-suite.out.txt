@@ -1,0 +1,346 @@
+TAP version 13
+# Subtest: adb: the wedged server (the fork-server listener on the adb port) is killed
+ok 1 - adb: the wedged server (the fork-server listener on the adb port) is killed
+  ---
+  duration_ms: 490.676625
+  type: 'test'
+  ...
+# Subtest: adb: a foreign listener on the adb port and a connected fork-server CLIENT both survive
+ok 2 - adb: a foreign listener on the adb port and a connected fork-server CLIENT both survive
+  ---
+  duration_ms: 493.180791
+  type: 'test'
+  ...
+# Subtest: no live `pkill … adb` in the gate path; both timeout branches stop the server through the library
+ok 3 - no live `pkill … adb` in the gate path; both timeout branches stop the server through the library
+  ---
+  duration_ms: 1.713709
+  type: 'test'
+  ...
+# Subtest: gradle: a daemon that served only this checkout is stopped; another checkout's survives and is named
+ok 4 - gradle: a daemon that served only this checkout is stopped; another checkout's survives and is named
+  ---
+  duration_ms: 509.654083
+  type: 'test'
+  ...
+# Subtest: gradle: a mixed daemon, a sibling-prefix daemon, a nested-checkout daemon and a log-less daemon all survive
+ok 5 - gradle: a mixed daemon, a sibling-prefix daemon, a nested-checkout daemon and a log-less daemon all survive
+  ---
+  duration_ms: 597.443333
+  type: 'test'
+  ...
+# Subtest: gradle: with two roots, a daemon spanning both is stopped; one spanning a root and a foreign tree survives
+ok 6 - gradle: with two roots, a daemon spanning both is stopped; one spanning a root and a foreign tree survives
+  ---
+  duration_ms: 479.00625
+  type: 'test'
+  ...
+# Subtest: gradle (PLAN §8 step 7a): a PROJECT_ROOT + lane-tree daemon is left by the default call and stopped by the two-root call
+ok 7 - gradle (PLAN §8 step 7a): a PROJECT_ROOT + lane-tree daemon is left by the default call and stopped by the two-root call
+  ---
+  duration_ms: 880.7235
+  type: 'test'
+  ...
+# Subtest: gradle: TITAN_GRADLE_PIDS only narrows the scan
+ok 8 - gradle: TITAN_GRADLE_PIDS only narrows the scan
+  ---
+  duration_ms: 477.360334
+  type: 'test'
+  ...
+# Subtest: gradle DISCOVERY (unrestricted scan): pgrep finds a daemon by its argv; any host daemon has no log here and is left
+ok 9 - gradle DISCOVERY (unrestricted scan): pgrep finds a daemon by its argv; any host daemon has no log here and is left
+  ---
+  duration_ms: 455.07075
+  type: 'test'
+  ...
+# Subtest: gate-driver: stop_our_processes writes the Gradle helper's stopped/left lines into driver.log
+ok 10 - gate-driver: stop_our_processes writes the Gradle helper's stopped/left lines into driver.log
+  ---
+  duration_ms: 505.152959
+  type: 'test'
+  ...
+# Subtest: gate-driver.sh has no live `./gradlew --stop`; its one Gradle stop is the ownership-checked helper
+ok 11 - gate-driver.sh has no live `./gradlew --stop`; its one Gradle stop is the ownership-checked helper
+  ---
+  duration_ms: 0.469334
+  type: 'test'
+  ...
+# Subtest: a recorded emulator is stopped; an unrecorded one survives and is named
+ok 12 - a recorded emulator is stopped; an unrecorded one survives and is named
+  ---
+  duration_ms: 517.019417
+  type: 'test'
+  ...
+# Subtest: a recorded pid that is no longer an emulator survives (pid reuse)
+ok 13 - a recorded pid that is no longer an emulator survives (pid reuse)
+  ---
+  duration_ms: 488.611916
+  type: 'test'
+  ...
+# Subtest: no pool record means nothing is ours
+ok 14 - no pool record means nothing is ours
+  ---
+  duration_ms: 441.575292
+  type: 'test'
+  ...
+# Subtest: a test browser started from the checkout is stopped; one started OUTSIDE it survives
+ok 15 - a test browser started from the checkout is stopped; one started OUTSIDE it survives
+  ---
+  duration_ms: 873.953042
+  type: 'test'
+  ...
+# Subtest: gate-driver.sh stops emulators and browsers ONLY through the library
+ok 16 - gate-driver.sh stops emulators and browsers ONLY through the library
+  ---
+  duration_ms: 0.563625
+  type: 'test'
+  ...
+# Subtest: web capture runs the CANONICAL in-place driver in WPT_COMPOSED mode
+ok 17 - web capture runs the CANONICAL in-place driver in WPT_COMPOSED mode
+  ---
+  duration_ms: 1.110042
+  type: 'test'
+  ...
+# Subtest: Step 1 extraction engages post-load augmentation itself (RC-A5a)
+ok 18 - Step 1 extraction engages post-load augmentation itself (RC-A5a)
+  ---
+  duration_ms: 0.140666
+  type: 'test'
+  ...
+# Subtest: Step 1 extraction engages the bidi bake itself (wave-30 fix-T3)
+ok 19 - Step 1 extraction engages the bidi bake itself (wave-30 fix-T3)
+  ---
+  duration_ms: 0.175291
+  type: 'test'
+  ...
+# Subtest: Step 5b feeds BOTH natives in composed mode through per-device pool slots
+ok 20 - Step 5b feeds BOTH natives in composed mode through per-device pool slots
+  ---
+  duration_ms: 0.176667
+  type: 'test'
+  ...
+# Subtest: Step 5b runs the two native feeders CONCURRENTLY (independent hardware)
+ok 21 - Step 5b runs the two native feeders CONCURRENTLY (independent hardware)
+  ---
+  duration_ms: 0.120709
+  type: 'test'
+  ...
+# Subtest: provisioned devices skip in-feeder builds (concurrent-build collision guard)
+ok 22 - provisioned devices skip in-feeder builds (concurrent-build collision guard)
+  ---
+  duration_ms: 0.201291
+  type: 'test'
+  ...
+# Subtest: inject points at the per-section native dirs, never EMPTY_DIR
+ok 23 - inject points at the per-section native dirs, never EMPTY_DIR
+  ---
+  duration_ms: 0.300667
+  type: 'test'
+  ...
+# Subtest: per-section native capture dirs are defined
+ok 24 - per-section native capture dirs are defined
+  ---
+  duration_ms: 0.148958
+  type: 'test'
+  ...
+# Subtest: provision-devices.sh writes the exact markers Step 5b consumes
+ok 25 - provision-devices.sh writes the exact markers Step 5b consumes
+  ---
+  duration_ms: 6.6325
+  type: 'test'
+  ...
+# Subtest: ../../apps/web-harness/capture-screenshots.mjs launches puppeteer with --disable-gpu (GPU-raster deadlock fix)
+ok 26 - ../../apps/web-harness/capture-screenshots.mjs launches puppeteer with --disable-gpu (GPU-raster deadlock fix)
+  ---
+  duration_ms: 1.152917
+  type: 'test'
+  ...
+# Subtest: ../../apps/web-harness/capture-screenshots-hires.mjs launches puppeteer with --disable-gpu (GPU-raster deadlock fix)
+ok 27 - ../../apps/web-harness/capture-screenshots-hires.mjs launches puppeteer with --disable-gpu (GPU-raster deadlock fix)
+  ---
+  duration_ms: 0.747083
+  type: 'test'
+  ...
+# Subtest: ./capture-browser-ref.mjs launches puppeteer with --disable-gpu (GPU-raster deadlock fix)
+ok 28 - ./capture-browser-ref.mjs launches puppeteer with --disable-gpu (GPU-raster deadlock fix)
+  ---
+  duration_ms: 0.816333
+  type: 'test'
+  ...
+# Subtest: every native delivery failure sets NATIVE_SHORT (slot, split, per-test dir, feeder rc, count parity, inject exit 3)
+ok 29 - every native delivery failure sets NATIVE_SHORT (slot, split, per-test dir, feeder rc, count parity, inject exit 3)
+  ---
+  duration_ms: 0.39875
+  type: 'test'
+  ...
+# Subtest: the NATIVE_SHORT gate exits 1 AFTER the manifest is written and verified, BEFORE the success exit
+ok 30 - the NATIVE_SHORT gate exits 1 AFTER the manifest is written and verified, BEFORE the success exit
+  ---
+  duration_ms: 0.1055
+  type: 'test'
+  ...
+# Subtest: both inject invocations declare the platform scope via env $INJECT_ENV and survive exit 3
+ok 31 - both inject invocations declare the platform scope via env $INJECT_ENV and survive exit 3
+  ---
+  duration_ms: 0.540125
+  type: 'test'
+  ...
+# Subtest: the exit-code header documents the NATIVE_SHORT exit 1 and the disk exits
+ok 32 - the exit-code header documents the NATIVE_SHORT exit 1 and the disk exits
+  ---
+  duration_ms: 0.161
+  type: 'test'
+  ...
+# Subtest: disk preflight refuses below TITAN_MIN_FREE_GB (default 10) with exit 2, before the run dir exists
+ok 33 - disk preflight refuses below TITAN_MIN_FREE_GB (default 10) with exit 2, before the run dir exists
+  ---
+  duration_ms: 0.13125
+  type: 'test'
+  ...
+# Subtest: low-disk watchdog: poller → DISK_ABORT marker → USR1 → kill feeders → exit 2; every later EXIT trap stops it
+ok 34 - low-disk watchdog: poller → DISK_ABORT marker → USR1 → kill feeders → exit 2; every later EXIT trap stops it
+  ---
+  duration_ms: 0.393625
+  type: 'test'
+  ...
+# Subtest: provision-devices.sh reuses Shutdown titan-pool sims before creating, names new ones uniquely, and never pkills foreign emulators silently
+ok 35 - provision-devices.sh reuses Shutdown titan-pool sims before creating, names new ones uniquely, and never pkills foreign emulators silently
+  ---
+  duration_ms: 1.879208
+  type: 'test'
+  ...
+# Subtest: STATES has the 6 WCAG-relevant interaction states
+ok 36 - STATES has the 6 WCAG-relevant interaction states
+  ---
+  duration_ms: 1.785625
+  type: 'test'
+  ...
+# Subtest: COMPONENTS has the 15 Tier-3 component fixtures
+ok 37 - COMPONENTS has the 15 Tier-3 component fixtures
+  ---
+  duration_ms: 0.124333
+  type: 'test'
+  ...
+# Subtest: STATES × COMPONENTS = 90 expected captures
+ok 38 - STATES × COMPONENTS = 90 expected captures
+  ---
+  duration_ms: 0.041041
+  type: 'test'
+  ...
+# Subtest: WEB_PORT defaults to 3000 (vite default)
+ok 39 - WEB_PORT defaults to 3000 (vite default)
+  ---
+  duration_ms: 0.035166
+  type: 'test'
+  ...
+# Subtest: BASE_URL points at vite on the configured port
+ok 40 - BASE_URL points at vite on the configured port
+  ---
+  duration_ms: 0.064
+  type: 'test'
+  ...
+# Subtest: OUT_DIR is tools/visual/interaction-snapshots/ (gitignored)
+ok 41 - OUT_DIR is tools/visual/interaction-snapshots/ (gitignored)
+  ---
+  duration_ms: 0.032125
+  type: 'test'
+  ...
+# Subtest: snapshotiOS returns { skipped: true } with TIER5 task \#2 reason
+ok 42 - snapshotiOS returns { skipped: true } with TIER5 task \#2 reason
+  ---
+  duration_ms: 0.066458
+  type: 'test'
+  ...
+# Subtest: snapshotAndroid returns { skipped: true } with TIER5 task \#3 reason
+ok 43 - snapshotAndroid returns { skipped: true } with TIER5 task \#3 reason
+  ---
+  duration_ms: 0.035042
+  type: 'test'
+  ...
+# Subtest: snapshot stubs ignore their args
+ok 44 - snapshot stubs ignore their args
+  ---
+  duration_ms: 0.167959
+  type: 'test'
+  ...
+# Subtest: a free default port is used as is
+ok 45 - a free default port is used as is
+  ---
+  duration_ms: 368.129
+  type: 'test'
+  ...
+# Subtest: a default port held by a foreign server moves the smoke into 3400-3499, and the holder survives, named
+ok 46 - a default port held by a foreign server moves the smoke into 3400-3499, and the holder survives, named
+  ---
+  duration_ms: 398.168333
+  type: 'test'
+  ...
+# Subtest: a caller-chosen WEB_PORT held by a foreign server is an error, never swapped
+ok 47 - a caller-chosen WEB_PORT held by a foreign server is an error, never swapped
+  ---
+  duration_ms: 687.285167
+  type: 'test'
+  ...
+# Subtest: a free caller-chosen WEB_PORT is honoured over the default
+ok 48 - a free caller-chosen WEB_PORT is honoured over the default
+  ---
+  duration_ms: 677.651708
+  type: 'test'
+  ...
+# Subtest: smoke.sh: vite and both probes use the picked, exported port; nothing is hard-wired to :3000
+ok 49 - smoke.sh: vite and both probes use the picked, exported port; nothing is hard-wired to :3000
+  ---
+  duration_ms: 0.862333
+  type: 'test'
+  ...
+# Subtest: smoke's fallback range is disjoint from test-all's and section-runner's
+ok 50 - smoke's fallback range is disjoint from test-all's and section-runner's
+  ---
+  duration_ms: 0.657166
+  type: 'test'
+  ...
+# Subtest: a foreign listener on the port survives, and the guard reports it (exit 1)
+ok 51 - a foreign listener on the port survives, and the guard reports it (exit 1)
+  ---
+  duration_ms: 389.126708
+  type: 'test'
+  ...
+# Subtest: a vite-named listener OUTSIDE the checkout survives (name alone is not enough)
+ok 52 - a vite-named listener OUTSIDE the checkout survives (name alone is not enough)
+  ---
+  duration_ms: 385.200375
+  type: 'test'
+  ...
+# Subtest: a non-vite listener INSIDE the checkout survives (cwd alone is not enough)
+ok 53 - a non-vite listener INSIDE the checkout survives (cwd alone is not enough)
+  ---
+  duration_ms: 362.956459
+  type: 'test'
+  ...
+# Subtest: our own stale vite (vite in argv, cwd inside the checkout) IS killed, and the guard returns 0
+ok 54 - our own stale vite (vite in argv, cwd inside the checkout) IS killed, and the guard returns 0
+  ---
+  duration_ms: 378.559125
+  type: 'test'
+  ...
+# Subtest: wpg_free_port skips a busy port and fails when the whole range is taken
+ok 55 - wpg_free_port skips a busy port and fails when the whole range is taken
+  ---
+  duration_ms: 120.744541
+  type: 'test'
+  ...
+# Subtest: every capture script frees its port ONLY through the guard
+ok 56 - every capture script frees its port ONLY through the guard
+  ---
+  duration_ms: 1.414917
+  type: 'test'
+  ...
+1..56
+# tests 56
+# suites 0
+# pass 56
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 3957.723458

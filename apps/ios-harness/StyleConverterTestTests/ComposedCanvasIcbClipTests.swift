@@ -20,10 +20,13 @@
 //  CSS 2.1 §9.1.1: an author `body { padding }` moves neither the viewport
 //  nor its crop.
 //
-//  Source is read from disk at `#filePath`'s sibling path (the harness
-//  source is in this same xcodegen project), CODE LINES ONLY — `//` lines
-//  are dropped so prose that mentions a modifier cannot satisfy a pin. This
-//  is the Swift twin of the Android harness's
+//  Source is read from THIS test bundle — project.yml copies
+//  StyleConverterTest/Screenshot/CaptureCanvas.swift in with `buildPhase:
+//  resources` (wave 53, harness-hygiene T1-a: the bundle runs in the
+//  simulator, which is refused the host checkout, so the old `#filePath`
+//  read failed every pin here with NSCocoaErrorDomain 257) — CODE LINES
+//  ONLY: `//` lines are dropped so prose that mentions a modifier cannot
+//  satisfy a pin. This is the Swift twin of the Android harness's
 //  ComposedCanvasIcbClipSourceTest.
 //
 //  Two more wiring pins of the same composed body ride here (one source-scan
@@ -46,6 +49,9 @@
 //  (`if aboveFlow[idx] {` → `if true {`) and IOS-M7 the gate list reverted to
 //  the first cut's bare RC1 flag → testRc1LiftIsGatedByTheWholeListRule red
 //  (the skeptic fix: a `z-index: -1` RC1 box must stay below the flow).
+//  Wave 53: with the source a bundle resource the XCTest itself runs; its
+//  first executed Swift mutation (IOS-M1 on the real file) is recorded in
+//  tools/titan/results/wave53-harness-hygiene/_note.md.
 //
 
 import XCTest
@@ -53,13 +59,14 @@ import XCTest
 
 final class ComposedCanvasIcbClipTests: XCTestCase {
 
-    /// The harness canvas source, located relative to this test file:
-    /// apps/ios-harness/StyleConverterTestTests/<this> →
-    /// apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift.
+    /// The harness canvas source, as copied into this test bundle at build
+    /// time (project.yml, `buildPhase: resources`) — the same bytes the app
+    /// target compiles. No disk fallback and no skip guard: a missing
+    /// resource is a real failure (finding A8#3), never a silent skip.
     private func canvasSource() throws -> String {
-        let here = URL(fileURLWithPath: #filePath)
-        let url = here.deletingLastPathComponent().deletingLastPathComponent()
-            .appendingPathComponent("StyleConverterTest/Screenshot/CaptureCanvas.swift")
+        let url = try XCTUnwrap(
+            Bundle(for: Self.self).url(forResource: "CaptureCanvas", withExtension: "swift"),
+            "CaptureCanvas.swift is not a resource of StyleConverterTestTests — project.yml")
         return try String(contentsOf: url, encoding: .utf8)
     }
 

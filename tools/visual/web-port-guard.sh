@@ -16,6 +16,11 @@
 # Sourced (not executed) by test-all.sh and section-runner.sh; both define
 # $PROJECT_ROOT before sourcing. Pinned by tools/visual/web-port-guard.test.mjs
 # with real throwaway listeners (a foreign one must survive, ours must die).
+#
+# Fallback port ranges, disjoint so concurrent callers never race for a port:
+# section-runner 3100–3299, test-all.sh (and probe-text-metrics.sh) 3300–3399,
+# smoke.sh 3400–3499 (wave 53: tools/visual/smoke-port.sh, sourced by smoke.sh
+# after this file; pinned by tools/visual/smoke-port.test.mjs).
 
 # wpg_is_our_vite PID → 0 iff PID is a vite dev server started from this checkout.
 wpg_is_our_vite() {

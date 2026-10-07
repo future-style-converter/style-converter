@@ -21,16 +21,20 @@
 //  PAYLOADS: the verbatim per-test IR of the two documents
 //  InlineBlockAtom.swift's blast-radius enumeration names, vendored under
 //  tools/titan/fixtures/ (its README carries the provenance rules; the
-//  wave49-final copies are byte-identical to wave47/48-final). Read by
-//  #filePath hops — the pattern ConformanceTests and the runtime's own
-//  live-wire pins use — so no bundle-resource wiring is needed.
+//  wave49-final copies are byte-identical to wave47/48-final, and both
+//  are byte-identical to wave52-ship's and wave53-open's per-test IR —
+//  sha256 e7abf8a4… / 6a252a3c…, checked in wave 53). Read from THIS test
+//  bundle: project.yml copies both documents in with `buildPhase:
+//  resources`. Wave 53 (harness-hygiene T1-a) replaced the old `#filePath`
+//  hops, because the bundle runs in the simulator and the simulator process
+//  is refused the host checkout under ~/Documents (NSCocoaErrorDomain 257 —
+//  both document pins failed on 2026-10-06 without reading a byte).
 //
-//  HOW TO RUN — this bundle is NOT in any documented sweep (it needs a
-//  booted simulator; tools/visual/doc-staleness-check.sh warns about the
-//  gap on every run):
+//  HOW TO RUN — needs a booted simulator, so it sits outside the device-
+//  less sweep (CLAUDE.md's "ios-harness app (XCTest)" row):
 //
-//    cd apps/ios-harness && xcodebuild test -scheme StyleConverterTestTests \
-//      -destination 'platform=iOS Simulator,name=iPhone 16'
+//    cd apps/ios-harness && xcodebuild test -project StyleConverterTest.xcodeproj \
+//      -scheme StyleConverterTestTests -destination 'platform=iOS Simulator,name=<a booted device>'
 //
 //  Device-free in substance like ComposedCanvasPaddingTests:
 //  `composedRootInlineBoxes` is a pure function over the decoded IR.
@@ -47,27 +51,19 @@ final class ComposedRootInlineFlowTests: XCTestCase {
 
     // ── vendored corpus payloads ─────────────────────────────────────────
 
-    /// Repo root, reached from this file: drop the file name, then the
-    /// three directories …/apps/ios-harness/StyleConverterTestTests/.
-    private static var repoRoot: URL {
-        URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()   // StyleConverterTestTests/
-            .deletingLastPathComponent()   // ios-harness/
-            .deletingLastPathComponent()   // apps/
-            .deletingLastPathComponent()   // repo root
-    }
-
     /// Decode one vendored per-test document. The v2 decode slot-COMPOSES
     /// the flat wire, so `doc.components` are the composed ROOTS — exactly
-    /// what ComposedCaptureCanvas hands `composedRootInlineBoxes`.
+    /// what ComposedCaptureCanvas hands `composedRootInlineBoxes`. Bundle
+    /// resources are flat, so `section` only names the vendored path the
+    /// resource was copied from (for the failure message).
     private func composedRoots(_ section: String, _ stem: String) throws -> [IRComponent] {
-        let url = Self.repoRoot
-            .appendingPathComponent("tools/titan/fixtures/per-test-ir/wave49-final")
-            .appendingPathComponent(section)
-            .appendingPathComponent("\(stem).json")
-        // No skip guard: the fixture is committed, so an absent or renamed
-        // payload is a real failure (finding A8#3 — skip-guarded pins over
-        // pruned run dirs skipped forever instead of hermetically).
+        // No disk fallback and no skip guard: the fixture is committed and
+        // listed in project.yml, so an absent or renamed payload is a real
+        // failure (finding A8#3 — skip-guarded pins over pruned run dirs
+        // skipped forever instead of hermetically).
+        let url = try XCTUnwrap(
+            Bundle(for: Self.self).url(forResource: stem, withExtension: "json"),
+            "tools/titan/fixtures/per-test-ir/wave49-final/\(section)/\(stem).json is not a resource of StyleConverterTestTests — project.yml")
         let doc = try JSONDecoder().decode(IRDocument.self, from: Data(contentsOf: url))
         return doc.components
     }

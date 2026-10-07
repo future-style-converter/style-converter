@@ -85,6 +85,30 @@ targets:
     deploymentTarget: "16.0"
     sources:
       - path: StyleConverterTestTests
+      # Wave 53 (harness-hygiene T1-a): the files the source-scan and verbatim-
+      # wire pins read ride INSIDE the test bundle. The bundle runs in the
+      # simulator, which is refused a read of the host checkout under
+      # ~/Documents (NSCocoaErrorDomain 257 / EPERM on every `#filePath` read:
+      # 9 of the 13 failures of 2026-10-06), so the tests load these through
+      # `Bundle(for:)` instead. Each entry below lands in a phase of THIS
+      # target only; the app target still compiles CaptureCanvas.swift from
+      # its folder source above and never sees these copies (the gate builds
+      # `-target StyleConverterTest`).
+      # A Copy FILES phase into the bundle's resources, not `buildPhase:
+      # resources`: Xcode refuses a .swift file in Copy Bundle Resources
+      # ("cannot be processed by a Copy Bundle Resources build phase" — the
+      # file is silently left out; measured in wave 53), while Copy Files
+      # copies it byte-identical (dstSubfolderSpec 7 = Resources).
+      - path: StyleConverterTest/Screenshot/CaptureCanvas.swift
+        buildPhase:
+          copyFiles:
+            destination: resources
+      # The two verbatim per-test IR documents of ComposedRootInlineFlowTests
+      # (tools/titan/fixtures/README.md carries their provenance).
+      - path: ../../tools/titan/fixtures/per-test-ir/wave49-final/CSS2/wpt__CSS2__abspos__static-inside-inline-block.json
+        buildPhase: resources
+      - path: ../../tools/titan/fixtures/per-test-ir/wave49-final/css-cascade/wpt__css-cascade__scope-pseudo-element.json
+        buildPhase: resources
     dependencies:
       # Host inside the app so the test bundle can @testable import it.
       - target: StyleConverterTest

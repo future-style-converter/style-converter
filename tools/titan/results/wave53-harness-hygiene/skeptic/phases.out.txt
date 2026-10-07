@@ -1,0 +1,6 @@
+SAME StyleConverterTest PBXFrameworksBuildPhase 1→1 
+SAME StyleConverterTest PBXResourcesBuildPhase 5→5 
+SAME StyleConverterTest PBXSourcesBuildPhase 9→9 
+DIFF StyleConverterTestTests PBXCopyFilesBuildPhase(dstSubfolderSpec=7,dstPath='') -→1 ['CaptureCanvas.swift']
+DIFF StyleConverterTestTests PBXResourcesBuildPhase -→2 ['wpt__CSS2__abspos__static-inside-inline-block.json', 'wpt__css-cascade__scope-pseudo-element.json']
+SAME StyleConverterTestTests PBXSourcesBuildPhase 5→5 

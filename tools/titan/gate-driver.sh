@@ -129,14 +129,18 @@ stop_our_processes() {
   # then these two lines were host-wide pkills that also took down another
   # project's emulator or Playwright/puppeteer browser. A foreign one now
   # stays up, is named on stderr, and counts as load in the check below.
-  # STILL HOST-WIDE (queued in BACKLOG): `gradlew --stop` below stops every
-  # Gradle daemon of this Gradle version on the machine, not only those of
-  # the two build roots it is run from.
+  # Gradle too since wave 53 (harness-hygiene T2): the two `./gradlew --stop`
+  # calls that stood here stopped EVERY daemon of the user's Gradle version,
+  # whatever checkout it served. kill_own_gradle_daemons stops only a daemon
+  # whose log says every build it served was inside this checkout; the rest
+  # are named in driver.log and closed through their owner (PLAN §8 step 7a).
   kill_own_emulators
   kill_own_test_browsers
+  # JDK 21 for the provisioning builds that follow (provision-devices.sh).
   export JAVA_HOME="${JAVA_HOME:-$(/usr/libexec/java_home -v 21 2>/dev/null || true)}"
-  (cd "$PROJECT_ROOT" && ./gradlew --stop -q >/dev/null 2>&1) || true
-  (cd "$PROJECT_ROOT/apps/android-harness" && ./gradlew --stop -q >/dev/null 2>&1) || true
+  # Into driver.log: one line per daemon left up, then the stopped/left summary.
+  local line
+  while IFS= read -r line; do log "$line"; done < <(kill_own_gradle_daemons 2>&1)
 }
 
 mkdir -p "$DRV_DIR"

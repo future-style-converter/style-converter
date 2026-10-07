@@ -14,6 +14,10 @@
 //   • gate-driver.sh with one `pkill -f 'qemu-system'` restored → the source
 //     pin goes red.
 //
+// Wave 53 (harness-hygiene T2/T3): the Gradle-daemon and adb-server pins of
+// the same library live beside this file, in own-gradle-daemons.test.mjs and
+// own-adb-server.test.mjs.
+//
 // Run via `node --test tools/titan/own-processes.test.mjs`.
 
 import { test } from 'node:test';

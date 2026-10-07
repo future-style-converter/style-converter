@@ -1,0 +1,7 @@
+roots: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+version 8.12: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 8.13: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 8.14: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 8.2: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 9.6.1: logs=226 ours=216 not-ours=10 (shared with a root AND a foreign tree: 9)
+live pid 88966 (9.6.1): WOULD-LEAVE — served: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness /private/tmp/claude-501/-Users-dranak-Documents-Projects-Style-Converter--claude-worktrees-trusting-bohr-bd6fbf/0c47cad8-074d-4821-bf4c-b5997f23f535/scratchpad/export-l2/apps/android-harness

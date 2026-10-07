@@ -42,6 +42,10 @@ set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
+# kill_wedged_adb_server (wave 53): a wedged adb server is stopped by its
+# listener on the adb port, never by `pkill -x adb` (every session's clients).
+# shellcheck source=tools/titan/own-processes.sh
+source "$SCRIPT_DIR/own-processes.sh"
 POOL_ROOT="/tmp/titan-device-pool"
 BUNDLE_ID="com.styleconverter.test"
 IOS_DIR="$REPO_ROOT/apps/ios-harness"
@@ -124,7 +128,7 @@ _adb_devices() {
   local out=""
   for _a in 1 2; do
     if out=$(perl -e 'alarm 20; exec @ARGV' "$ADB" devices </dev/null 2>/dev/null); then printf '%s\n' "$out"; return 0; fi
-    perl -e 'alarm 10; exec @ARGV' "$ADB" kill-server </dev/null >/dev/null 2>&1; pkill -9 -x adb 2>/dev/null; sleep 1
+    perl -e 'alarm 10; exec @ARGV' "$ADB" kill-server </dev/null >/dev/null 2>&1; kill_wedged_adb_server; sleep 1
     nohup "$ADB" start-server >/dev/null 2>&1 </dev/null; sleep 2
   done
   printf '%s\n' "$out"

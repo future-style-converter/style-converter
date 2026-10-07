@@ -1,0 +1,30 @@
+=== L5 window 4: gradle daemon census (dry run) then kill_own_gradle_daemons
+roots: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+version 8.12: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 8.13: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 8.14: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 8.2: logs=0 ours=0 not-ours=0 (shared with a root AND a foreign tree: 0)
+version 9.6.1: logs=273 ours=217 not-ours=56 (shared with a root AND a foreign tree: 9)
+live pid 78497 (9.6.1): WOULD-STOP — served: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness
+[own-processes] kill_own_gradle_daemons roots=[/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf]: stopped [78497] left []
+No Gradle daemons are running.
+
+Only Daemons for the current Gradle version are displayed. For more on this, please refer to https://docs.gradle.org/9.6
+
+=== L5 window 1: XCTest on an exported base + L5's four iOS files (booted simulator)
+xctest-window rc=0
+[xctest-window 12:52:39] pbxproj 'CaptureCanvas.swift in Sources': 2 mentions (want 2)
+[xctest-window 12:52:39] pbxproj 'CaptureCanvas.swift in CopyFiles': 2 mentions (want 2)
+[xctest-window 12:52:39] pbxproj 'wpt__CSS2__abspos__static-inside-inline-block.json in Resources': 2 mentions (want 2)
+[xctest-window 12:52:39] pbxproj 'wpt__css-cascade__scope-pseudo-element.json in Resources': 2 mentions (want 2)
+[xctest-window 12:53:09] green: passed 30 failed 0 |  green: passed 30 failed 0 | 
+[xctest-window 12:53:22] M1: passed 2 failed 1 | testScopePseudoElementKeepsItsPassingRootRun(): t.get('failureText' M1: passed 2 failed 1 | testScopePseudoElem
+[xctest-window 12:53:22] M1: restored project.yml sha256 22ad24a0dcc84049 (BYTE-EXACT)
+[xctest-window 13:03:28] M2: passed 6 failed 1 | testClipPrecedesTheCanvasBackground(): t.get('failureText' M2: passed 6 failed 1 | testClipPrecedesTheCanvasBac
+[xctest-window 13:03:28] M2: restored CaptureCanvas.swift sha256 3da6fc574fbc98e8 (BYTE-EXACT)
+[xctest-window 13:03:44] M3: passed 4 failed 4 | testNegativePadClampsToZeroLeavingTheBareFrame(): t.get('failureText' ; testPhysicalSidesMapToLeadingTrailingCo
+[xctest-window 13:03:45] M3: restored CaptureCanvas.swift sha256 3da6fc574fbc98e8 (BYTE-EXACT)
+[xctest-window 13:03:51] green-after: passed 30 failed 0 |  green-after: passed 30 failed 0 | 
+
+=== L5 window 3: smoke --quick with a foreign listener on :3000
+port 3000 held by someone else — skipping the foreign-listener smoke

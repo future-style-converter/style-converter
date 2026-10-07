@@ -28,11 +28,25 @@
 #          captures); runs only the web-only Tier 5 + Tier 11 harnesses.
 #          Useful when you've just landed a web-only change and don't need
 #          to re-verify the native baselines.
+#
+# Tier 5 and Tier 11 fetch apps/web-harness/public/fixtures/<Name>.json (the
+# 15 Tier-3 components, converter output, GITIGNORED). This script builds them
+# first (`npm run build-fixtures`, idempotent on mtime): a fresh worktree has
+# none, and the first run pays ~15 JVM converter starts (~5 min); later runs
+# skip in about a second. Before wave 53 the step was missing and a fresh tree
+# failed both tiers with 90 + 15 "fixture-ready-timeout" rows — see
+# build_fixtures below.
 
 set -euo pipefail
 
 PROJECT_ROOT="$(cd "$(dirname "$0")/../.." && pwd)"
 cd "$PROJECT_ROOT"
+# The port guard test-all.sh and section-runner.sh use (only a vite of THIS
+# checkout may be killed), and smoke's port picker on top of it (wave 53).
+# shellcheck source=tools/visual/web-port-guard.sh
+source "$PROJECT_ROOT/tools/visual/web-port-guard.sh"
+# shellcheck source=tools/visual/smoke-port.sh
+source "$PROJECT_ROOT/tools/visual/smoke-port.sh"
 
 QUICK=0
 for arg in "$@"; do
@@ -50,14 +64,52 @@ log()  { echo -e "${G}[smoke]${N} $*"; }
 warn() { echo -e "${Y}[smoke]${N} $*" >&2; }
 err()  { echo -e "${R}[smoke]${N} $*" >&2; }
 
+# ── Tier-5/11 fixture JSONs ─────────────────────────────────────────────────
+#
+# interaction-states.mjs and a11y-audit.mjs open `/?fixture=<Name>` and the
+# page fetches apps/web-harness/public/fixtures/<Name>.json — the pre-flight
+# contract at the top of interaction-states.mjs ("`npm run build-fixtures` has
+# produced … for every COMPONENTS entry"). That directory is gitignored
+# converter output, so a fresh worktree has none; vite's SPA fallback then
+# answers index.html for the missing JSON ("Unexpected token '<' … is not valid
+# JSON" in the vite log) and every probe dies on `fixture-ready-timeout` — the
+# wave-53 symptom (Tier 5: 0 captured · 90 failed; Tier 11: 15 errored) once
+# the port guard had got vite up correctly on :3400. The step was simply never
+# in this script. build-fixtures.mjs skips files newer than their source, so a
+# built tree pays only the mtime checks.
+#
+# JDK 21 is selected the way test-all.sh does (macOS `java_home`; elsewhere the
+# ambient JAVA_HOME stands) — the converter's toolchain is pinned to 21.
+build_fixtures() {
+    log "building the Tier-5/11 fixture JSONs (apps/web-harness/public/fixtures/; first run ~5 min)…"
+    if [[ -x /usr/libexec/java_home ]] && /usr/libexec/java_home -v 21 &>/dev/null; then
+        export JAVA_HOME
+        JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+    fi
+    if (cd apps/web-harness && npm run --silent build-fixtures > /tmp/smoke-build-fixtures.log 2>&1); then
+        local summary
+        # build-fixtures.mjs ends with "N built · M skipped · F failed · T total available".
+        summary=$(grep -E "built · .* skipped · .* failed" /tmp/smoke-build-fixtures.log | tail -1)
+        log "fixtures: ${summary:-built (no summary line; see /tmp/smoke-build-fixtures.log)}"
+        add_result "fixtures: ${summary:-built}"
+    else
+        err "build-fixtures FAILED; tail of /tmp/smoke-build-fixtures.log:"
+        tail -20 /tmp/smoke-build-fixtures.log >&2
+        add_result "fixtures: FAILED"
+        return 1
+    fi
+}
+
 # ── Vite lifecycle (used by Tier 5 + Tier 11) ───────────────────────────────
 #
-# Both web-side harnesses need the vite dev server on :3000. We bring it up
-# once at the start, leave it running across both, then tear it down. Each
-# harness has its own pre-flight check that fails fast if vite isn't there.
+# Both web-side harnesses need the vite dev server on $WEB_PORT (picked by
+# smoke_pick_web_port and exported, so both probes read the same port). We
+# bring it up once at the start, leave it running across both, then tear it
+# down. Each harness has its own pre-flight check that fails fast if vite
+# isn't there.
 VITE_PID=""
 start_vite() {
-    log "starting vite on :3000…"
+    log "starting vite on :${WEB_PORT}…"
     # `set -m` + `exec` so VITE_PID is a PROCESS-GROUP leader running vite
     # itself, exactly as test-all.sh does. The old form backgrounded a
     # subshell running `npm run dev`; killing that subshell left npm's vite
@@ -67,7 +119,9 @@ start_vite() {
     # stop_vite). Group-kill takes npm, vite and its esbuild helpers down
     # together no matter who forked whom.
     set -m
-    ( cd apps/web-harness && exec npm run dev > /tmp/smoke-vite.log 2>&1 ) &
+    # --strictPort: vite must bind $WEB_PORT or exit — never drift to the next
+    # port while the poll below (and both probes) talk to whoever holds it.
+    ( cd apps/web-harness && exec npx vite --port "$WEB_PORT" --strictPort > /tmp/smoke-vite.log 2>&1 ) &
     VITE_PID=$!
     set +m
     # Poll until vite responds or 30s elapses. Faster than a fixed sleep,
@@ -75,14 +129,16 @@ start_vite() {
     # would also catch but with a less actionable error message.
     local elapsed=0
     while (( elapsed < 30 )); do
-        if curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/ 2>/dev/null | grep -q "^2"; then
+        # A vite that exited (port lost to a race) is a failure, not a wait.
+        kill -0 "$VITE_PID" 2>/dev/null || break
+        if curl -s -o /dev/null -w "%{http_code}" "http://localhost:${WEB_PORT}/" 2>/dev/null | grep -q "^2"; then
             log "vite ready (${elapsed}s)"
             return 0
         fi
         sleep 1
         elapsed=$((elapsed + 1))
     done
-    err "vite failed to start within 30s; tail of /tmp/smoke-vite.log:"
+    err "vite failed to start on :${WEB_PORT} within 30s; tail of /tmp/smoke-vite.log:"
     tail -20 /tmp/smoke-vite.log >&2
     return 1
 }
@@ -276,13 +332,31 @@ run_doc_staleness || EXIT_CODE=1
 # broken and the downstream captures would mismeasure.
 run_unit_tests || EXIT_CODE=1
 
-# Tier 5 + 11 both need vite. Bring it up once, run both, tear down.
-start_vite || { EXIT_CODE=1; }
-if [[ -n "$VITE_PID" ]]; then
-    run_tier5  || EXIT_CODE=1
-    run_tier11 || EXIT_CODE=1
+# Tier 5 + 11 both need vite. Bring it up once, run both, tear down. The
+# port is picked first and EXPORTED: interaction-states.mjs and a11y-audit.mjs
+# read WEB_PORT (default '3000'), so an unexported pick would aim them at
+# whatever holds :3000.
+# The fixture JSONs come first — without them both tiers time out on every
+# probe (see build_fixtures), so a failed build skips vite and the tiers
+# instead of printing 105 misleading timeout rows.
+FIXTURES_OK=0
+if build_fixtures; then FIXTURES_OK=1; else EXIT_CODE=1; fi
+if (( FIXTURES_OK )); then
+    if WEB_PORT="$(smoke_pick_web_port)"; then
+        export WEB_PORT
+        start_vite || { EXIT_CODE=1; }
+    else
+        err "no usable web port for Tier 5 / Tier 11 (see above)"; EXIT_CODE=1
+    fi
+    if [[ -n "$VITE_PID" ]]; then
+        run_tier5  || EXIT_CODE=1
+        run_tier11 || EXIT_CODE=1
+    fi
+    stop_vite
+else
+    err "Tier 5 / Tier 11 skipped: the fixture JSONs did not build"
+    add_result "Tier 5: SKIPPED (fixtures)"; add_result "Tier 11: SKIPPED (fixtures)"
 fi
-stop_vite
 
 # BASELINE=1 doesn't need vite — it owns its own vite lifecycle inside
 # test-all.sh. Skip when --quick is set.

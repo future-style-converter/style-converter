@@ -6,14 +6,29 @@
 //  ComposedCaptureCanvas.resolvedPadding, the composed canvas's per-side
 //  pad resolver.
 //
-//  WHY it exists: capture-browser-ref.mjs frames every reference page with
-//  a ZERO-specificity `:where(body) { padding: 16px }`. Per CSS Selectors
-//  L4 §17 `:where()` contributes no specificity, so a ref declaring its OWN
-//  `body { padding: 0 }` (0,0,1) WINS and renders with no body pad. The
-//  composed canvas hardcoded `Self.padding`, so every such test's whole
-//  render sat (+16,+16) off its ref — MEASURED as the ENTIRE divergence of
-//  css-masking/clip-path-circle-007, whose test AND ref both open with
-//  `body, div { padding: 0; margin: 0 }`.
+//  WHY it exists (wave 24): capture-browser-ref.mjs used to frame every
+//  reference page with a ZERO-specificity `:where(body) { padding: 16px }`.
+//  Per CSS Selectors L4 §17 `:where()` contributes no specificity, so a ref
+//  declaring its OWN `body { padding: 0 }` (0,0,1) WON and rendered with no
+//  body pad. The composed canvas hardcoded `Self.padding`, so every such
+//  test's whole render sat (+16,+16) off its ref — MEASURED as the ENTIRE
+//  divergence of css-masking/clip-path-circle-007, whose test AND ref both
+//  open with `body, div { padding: 0; margin: 0 }`.
+//
+//  WHAT CHANGED (wave 25 round 3 — the rule `resolvedPadding`'s doc comment
+//  states): at CAL-RC1 the ref stopped injecting a body padding at all. It
+//  renders at 358 wide with `padding: 0` and the 16px frame is memcpy'd
+//  around the finished PNG; an image-space translation has no cascade, so
+//  the FRAME is unconditional and the author's body padding is an
+//  ADDITIONAL inset inside it. Each side resolves to `frame + declared`
+//  (declared defaulting to 0, clamped at 0 by CSS 2.1 §8.4): nothing
+//  declared → 16, `padding: 0` → 16, `padding-left: 40px` → 56. The web
+//  (ComposedCanvasPadding.test.tsx) and Compose (ComposedCanvasPaddingTest.kt)
+//  twins moved to that rule in wave 25; this file kept the wave-24 rule
+//  because until 2026-10-06 its bundle could not run at all, and four of
+//  its pins failed with exactly the shipped arithmetic (16 / 56 / 20 / 16).
+//  Wave 53 (harness-hygiene T1-b) moved them to the wave-25 contract, named
+//  after the Compose twin.
 //
 //  The contract pinned here is the SAME one the web harness
 //  (resolveCanvasPadding) and Compose (resolveComposedCanvasPadding)
@@ -32,7 +47,8 @@ import StyleConverterRuntime
 
 final class ComposedCanvasPaddingTests: XCTestCase {
 
-    /// The pipeline default — capture-browser-ref.mjs's CANVAS_PAD_PX.
+    /// The image-space frame — capture-browser-ref.mjs's CANVAS_PAD_PX, the
+    /// canvas's `Self.padding` (WPTCanvas.canvasFramePx). Every side starts here.
     private let refPad: CGFloat = 16
 
     /// Build a one-body-root document whose body carries `props` (raw IR
@@ -87,25 +103,32 @@ final class ComposedCanvasPaddingTests: XCTestCase {
         XCTAssertEqual(pad.leading, refPad)
     }
 
-    // MARK: - The clip-path-circle-007 fix
+    // MARK: - The clip-path-circle-007 shape
 
-    func testZeroedBodyPadLandsOnEverySide() throws {
+    func testZeroedBodyPadKeepsTheImageFrameOnEverySide() throws {
+        // `body, div { padding: 0 }` expands to the four longhands at px 0.
+        // Wave 24 let that zero the canvas inset, because the frame WAS the
+        // (author-beatable) injected body padding. Since wave 25 round 3 the
+        // frame is applied to the ref PNG in image space, which no author
+        // rule can cancel, so the canvas keeps it and adds the declared zero.
         let doc = try document(bodyProps: uniformPad(0))
         let pad = ComposedCaptureCanvas(document: doc).resolvedPadding
-        XCTAssertEqual(pad.top, 0)
-        XCTAssertEqual(pad.leading, 0)
-        XCTAssertEqual(pad.bottom, 0)
-        XCTAssertEqual(pad.trailing, 0)
+        XCTAssertEqual(pad.top, refPad)
+        XCTAssertEqual(pad.leading, refPad)
+        XCTAssertEqual(pad.bottom, refPad)
+        XCTAssertEqual(pad.trailing, refPad)
     }
 
     // MARK: - Per-side resolution (the cascade is per-longhand)
 
-    func testUndeclaredSidesKeepTheDefault() throws {
-        // `body { padding-left: 40px }` leaves the injected `:where(body)`
-        // 16px standing on the other three sides.
+    func testResolutionIsPerSideUndeclaredSidesKeepTheBareFrame() throws {
+        // The cascade is per-LONGHAND: `body { padding-left: 40px }` leaves
+        // the other three sides at the bare frame and stacks 40 INSIDE the
+        // frame on the left (16 + 40 = 56) — the ref renders that 40px pad in
+        // its 358-wide viewport and the image frame adds 16 around it.
         let doc = try document(bodyProps: "{\"type\": \"PaddingLeft\", \"data\": {\"px\": 40.0}}")
         let pad = ComposedCaptureCanvas(document: doc).resolvedPadding
-        XCTAssertEqual(pad.leading, 40)
+        XCTAssertEqual(pad.leading, refPad + 40)
         XCTAssertEqual(pad.trailing, refPad)
         XCTAssertEqual(pad.top, refPad)
         XCTAssertEqual(pad.bottom, refPad)
@@ -114,13 +137,14 @@ final class ComposedCanvasPaddingTests: XCTestCase {
     func testPhysicalSidesMapToLeadingTrailingCorrectly() throws {
         // The WPT composed canvas is always LTR-framed, so PaddingLeft is
         // `leading` and PaddingRight is `trailing`. Asymmetric values catch
-        // a swap that symmetric ones would hide.
+        // a swap that symmetric ones would hide; each stacks on the frame
+        // (16 + 4 = 20, 16 + 9 = 25).
         let doc = try document(bodyProps:
             "{\"type\": \"PaddingLeft\", \"data\": {\"px\": 4.0}},"
             + "{\"type\": \"PaddingRight\", \"data\": {\"px\": 9.0}}")
         let pad = ComposedCaptureCanvas(document: doc).resolvedPadding
-        XCTAssertEqual(pad.leading, 4)
-        XCTAssertEqual(pad.trailing, 9)
+        XCTAssertEqual(pad.leading, refPad + 4)
+        XCTAssertEqual(pad.trailing, refPad + 9)
     }
 
     // MARK: - Honest fallbacks
@@ -134,11 +158,13 @@ final class ComposedCanvasPaddingTests: XCTestCase {
         XCTAssertEqual(ComposedCaptureCanvas(document: doc).resolvedPadding.top, refPad)
     }
 
-    func testNegativePadClampsToZero() throws {
+    func testNegativePadClampsToZeroLeavingTheBareFrame() throws {
         // CSS 2.1 §8.4 forbids negative padding; a malformed IR must never
         // pull canvas content outside the frame (and thus outside the crop).
+        // The AUTHOR term clamps at 0, so the side resolves to the bare
+        // frame — never inside it.
         let doc = try document(bodyProps: "{\"type\": \"PaddingTop\", \"data\": {\"px\": -8.0}}")
-        XCTAssertEqual(ComposedCaptureCanvas(document: doc).resolvedPadding.top, 0)
+        XCTAssertEqual(ComposedCaptureCanvas(document: doc).resolvedPadding.top, refPad)
     }
 
     // MARK: - The default geometry stays byte-identical

@@ -1,0 +1,13 @@
+9.6.1 logs: 226 {'ours': 216, 'mixed-with-root': 9, 'foreign': 1}
+  mixed-with-root daemon-14963.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf', '<SP>/conv/base']
+  mixed-with-root daemon-15426.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/iso/apps/android-harness', '<SP>/l4/x/apps/android-harness', '<SP>/l8/export/apps/android-harness']
+  foreign daemon-17991.out.log ['<SP>/iso/apps/android-harness']
+  mixed-with-root daemon-22249.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf', '<SP>/convA', '<SP>/convB', '<SP>/l5sk/conv']
+  mixed-with-root daemon-39177.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/l8/export/apps/android-harness']
+  mixed-with-root daemon-40466.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/l4/x/apps/android-harness']
+  mixed-with-root daemon-40966.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/l4/x/apps/android-harness', '<SP>/l8fix/export/apps/android-harness', '<SP>/l8sk/export/apps/android-harness', '<SP>/rv/x/apps/android-harness']
+  mixed-with-root daemon-7736.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/iso/apps/android-harness']
+  mixed-with-root daemon-88966.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/export-l2/apps/android-harness']
+  mixed-with-root daemon-94941.out.log ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/l8rv/export/apps/android-harness']
+LIVE 88966 9.6.1 log default-call: mixed-with-root | with extra roots: ours
+    ['/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/apps/android-harness', '<SP>/export-l2/apps/android-harness']

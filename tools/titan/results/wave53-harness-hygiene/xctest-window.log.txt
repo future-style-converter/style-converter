@@ -1,0 +1,17 @@
+[xctest-window 12:52:39] export at /tmp/wave53-l5-xctest/x: REV=762d3d30 + L5 overlay; CaptureCanvas.swift sha256=3da6fc574fbc98e8
+[xctest-window 12:52:39] pbxproj 'CaptureCanvas.swift in Sources': 2 mentions (want 2)
+[xctest-window 12:52:39] pbxproj 'CaptureCanvas.swift in CopyFiles': 2 mentions (want 2)
+[xctest-window 12:52:39] pbxproj 'wpt__CSS2__abspos__static-inside-inline-block.json in Resources': 2 mentions (want 2)
+[xctest-window 12:52:39] pbxproj 'wpt__css-cascade__scope-pseudo-element.json in Resources': 2 mentions (want 2)
+[xctest-window 12:53:09] green: passed 30 failed 0 |  green: passed 30 failed 0 | 
+[xctest-window 12:53:09] M1: mutated project.yml 22ad24a0dcc84049 → 65ebff29623bbd5d
+[xctest-window 12:53:22] M1: passed 2 failed 1 | testScopePseudoElementKeepsItsPassingRootRun(): t.get('failureText' M1: passed 2 failed 1 | testScopePseudoElementKeepsItsPassingRootRun(): '')[:140]
+[xctest-window 12:53:22] M1: restored project.yml sha256 22ad24a0dcc84049 (BYTE-EXACT)
+[xctest-window 12:53:22] M2: mutated CaptureCanvas.swift 3da6fc574fbc98e8 → 86026d0a67e36d79
+[xctest-window 13:03:28] M2: passed 6 failed 1 | testClipPrecedesTheCanvasBackground(): t.get('failureText' M2: passed 6 failed 1 | testClipPrecedesTheCanvasBackground(): '')[:140]
+[xctest-window 13:03:28] M2: restored CaptureCanvas.swift sha256 3da6fc574fbc98e8 (BYTE-EXACT)
+[xctest-window 13:03:28] M3: mutated CaptureCanvas.swift 3da6fc574fbc98e8 → 4207321183f950be
+[xctest-window 13:03:44] M3: passed 4 failed 4 | testNegativePadClampsToZeroLeavingTheBareFrame(): t.get('failureText' ; testPhysicalSidesMapToLeadingTrailingCorrectly(): t.get('failureText' ; testResolutionIsPerSideUndeclaredSidesKeepTheBareFrame(): t.get('failureText' ; testZeroedBodyPadKeepsTheImageFrameOnEverySide(): t.get('failureText' M3: passed 4 failed 4 | testNegativePadClampsToZeroLeavingTheBareFrame(): '')[:140] ; testPhysicalSidesMapToLeadingTrailingCorrectly(): '')[:140] ; testResolutionIsPerSideUndeclaredSidesKeepTheBareFrame(): '')[:140] ; testZeroedBodyPadKeepsTheImageFrameOnEverySide(): '')[:140]
+[xctest-window 13:03:45] M3: restored CaptureCanvas.swift sha256 3da6fc574fbc98e8 (BYTE-EXACT)
+[xctest-window 13:03:51] green-after: passed 30 failed 0 |  green-after: passed 30 failed 0 | 
+[xctest-window 13:03:51] done — /tmp/wave53-l5-xctest/xctest-window.log
