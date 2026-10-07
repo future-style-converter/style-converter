@@ -1,0 +1,633 @@
+{
+ "run": "wave52-ship",
+ "docs": 1435,
+ "markerTextAndOutOfFlow": [
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__0-624",
+   "sourceTag": "li",
+   "markerText": "1.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "decimal",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__1-626",
+   "sourceTag": "li",
+   "markerText": "2.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "decimal",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__0-629",
+   "sourceTag": "li",
+   "markerText": "א.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "hebrew",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__1-631",
+   "sourceTag": "li",
+   "markerText": "ב.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "hebrew",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  }
+ ],
+ "liOutOfFlow": [
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__0-624",
+   "sourceTag": "li",
+   "markerText": "1.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "decimal",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__1-626",
+   "sourceTag": "li",
+   "markerText": "2.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "decimal",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__0-629",
+   "sourceTag": "li",
+   "markerText": "א.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "hebrew",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__1-631",
+   "sourceTag": "li",
+   "markerText": "ב.",
+   "position": "ABSOLUTE",
+   "parentListStyleType": "hebrew",
+   "ownListStyleType": null,
+   "listStylePosition": null
+  }
+ ],
+ "bidiBakeRootDocs": [
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "roots": 4
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3",
+   "roots": 1
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4",
+   "roots": 1
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-101",
+   "roots": 9
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-102",
+   "roots": 24
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-103",
+   "roots": 2
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "roots": 2
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-001",
+   "roots": 2
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "roots": 1
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "roots": 8
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "roots": 8
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-005",
+   "roots": 2
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__bidi-plaintext-br-001",
+   "roots": 6
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-003",
+   "roots": 1
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-004",
+   "roots": 1
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "roots": 6
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-03a",
+   "roots": 1
+  }
+ ],
+ "bidiBakeRootDocsWithListItems": [
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-101",
+   "listItems": [
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__0-004",
+     "markerText": "١.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__1-006",
+     "markerText": "٢.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__2-008",
+     "markerText": "٣.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__3-010",
+     "markerText": "٤.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__4-012",
+     "markerText": "٥.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__5-014",
+     "markerText": "٦.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__6-016",
+     "markerText": "٧.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__7-018",
+     "markerText": "٨.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__8-020",
+     "markerText": "٩.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    }
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-102",
+   "listItems": [
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__0__0-025",
+     "markerText": "١٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__0__1-027",
+     "markerText": "١١.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__0__2-029",
+     "markerText": "١٢.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__1__0-032",
+     "markerText": "٤٣.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__2__0-035",
+     "markerText": "٧٧.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__3__0-038",
+     "markerText": "٨٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__4__0-041",
+     "markerText": "٩٩.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__4__1-043",
+     "markerText": "١٠٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__4__2-045",
+     "markerText": "١٠١.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__5__0-048",
+     "markerText": "٢٢٢.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__6__0-051",
+     "markerText": "٥٤٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__7__0-054",
+     "markerText": "٩٩٩.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__7__1-056",
+     "markerText": "١٠٠٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__8__0-059",
+     "markerText": "١٠٠٥.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__9__0-062",
+     "markerText": "١٠٦٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__10__0-065",
+     "markerText": "١٠٦٥.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__11__0-068",
+     "markerText": "١٨٠٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__12__0-071",
+     "markerText": "١٨٦٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__13__0-074",
+     "markerText": "١٨٦٥.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__14__0-077",
+     "markerText": "٥٨٦٥.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__15__0-080",
+     "markerText": "٧٠٠٥.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__16__0-083",
+     "markerText": "٧٨٠٠.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__17__0-086",
+     "markerText": "٧٨٦٤.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__18__0-089",
+     "markerText": "٩٩٩٩.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    }
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-103",
+   "listItems": [
+    {
+     "id": "arabic-indic__css3-counter-styles-103__1__0__0-094",
+     "markerText": "١.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-103__1__0__1-096",
+     "markerText": "٢.",
+     "position": "RELATIVE",
+     "parentListStyleType": null
+    }
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "listItems": [
+    {
+     "id": "counter-suffix__0__4__0-624",
+     "markerText": "1.",
+     "position": "ABSOLUTE",
+     "parentListStyleType": "decimal"
+    },
+    {
+     "id": "counter-suffix__0__4__1-626",
+     "markerText": "2.",
+     "position": "ABSOLUTE",
+     "parentListStyleType": "decimal"
+    },
+    {
+     "id": "counter-suffix__0__5__0-629",
+     "markerText": "א.",
+     "position": "ABSOLUTE",
+     "parentListStyleType": "hebrew"
+    },
+    {
+     "id": "counter-suffix__0__5__1-631",
+     "markerText": "ב.",
+     "position": "ABSOLUTE",
+     "parentListStyleType": "hebrew"
+    }
+   ]
+  }
+ ],
+ "rtlListsUnbaked": [
+  {
+   "stem": "wpt__css-cascade__all-prop-001",
+   "id": "wpt__css-cascade__all-prop-001__1-002",
+   "sourceTag": null,
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-cascade__all-prop-001",
+   "id": "all-prop-001__1__0-003",
+   "sourceTag": "bdo",
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": null,
+   "listStylePosition": null
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles",
+   "id": "counter-style-at-rule__disclosure-styles__0__1__0-546",
+   "sourceTag": "li",
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": "disclosure-closed2",
+   "listStylePosition": "INSIDE"
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles",
+   "id": "counter-style-at-rule__disclosure-styles__0__1__1-547",
+   "sourceTag": "li",
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": "disclosure-open2",
+   "listStylePosition": "INSIDE"
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles",
+   "id": "counter-style-at-rule__disclosure-styles__1__1__0-555",
+   "sourceTag": "li",
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": "disclosure-closed2",
+   "listStylePosition": "INSIDE"
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles",
+   "id": "counter-style-at-rule__disclosure-styles__1__1__1-556",
+   "sourceTag": "li",
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": "disclosure-open2",
+   "listStylePosition": "INSIDE"
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles",
+   "id": "counter-style-at-rule__disclosure-styles__2__1__0-564",
+   "sourceTag": "li",
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": "disclosure-closed2",
+   "listStylePosition": "INSIDE"
+  },
+  {
+   "stem": "wpt__css-counter-styles__counter-style-at-rule__disclosure-styles",
+   "id": "counter-style-at-rule__disclosure-styles__2__1__1-565",
+   "sourceTag": "li",
+   "markerText": null,
+   "position": null,
+   "parentListStyleType": null,
+   "ownListStyleType": "disclosure-open2",
+   "listStylePosition": "INSIDE"
+  }
+ ],
+ "markerTextDocs": 34,
+ "markerTextComponents": 221,
+ "carriers": {
+  "note": "The changed code path is tools/titan/bidi-bake.mjs, which runs ONLY on the 17 bidi-baked docs (bidiBakeRootDocs). control-check: a changed composed capture is ALLOWED only in allowedToChange; every other capture in the run (all 1435 docs x 3) must be byte-identical. wave52-ship scored cells of the 17 docs: 40 (31 P, 9 f); anchor-center-safe-rtl and attachment-local-positioning-3/-4 are scoreEligible:false, css3-counter-styles-102 is scored on web only.",
+  "allowedToChange": {
+   "web": [
+    "wpt__css-counter-styles__counter-suffix"
+   ],
+   "ios": [
+    "wpt__css-counter-styles__counter-suffix"
+   ],
+   "android": [
+    "wpt__css-counter-styles__counter-suffix",
+    "wpt__css-text__bidi__bidi-lines-001",
+    "wpt__css-text__bidi__bidi-lines-002",
+    "wpt__css-anchor-position__anchor-center-safe-rtl"
+   ]
+  },
+  "mustBeByteIdentical_bidiBaked": {
+   "web+ios": [
+    "wpt__css-text__bidi__bidi-lines-001",
+    "wpt__css-text__bidi__bidi-lines-002",
+    "wpt__css-anchor-position__anchor-center-safe-rtl"
+   ],
+   "all3": [
+    "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3",
+    "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4",
+    "wpt__css-counter-styles__arabic-indic__css3-counter-styles-101",
+    "wpt__css-counter-styles__arabic-indic__css3-counter-styles-102",
+    "wpt__css-counter-styles__arabic-indic__css3-counter-styles-103",
+    "wpt__css-text__bidi__bidi-tab-001",
+    "wpt__css-text__boundary-shaping__boundary-shaping-009",
+    "wpt__css-text__hyphens__hyphenate-character-005",
+    "wpt__css-writing-modes__bidi-plaintext-br-001",
+    "wpt__selectors__dir-selector-change-003",
+    "wpt__selectors__dir-selector-change-004",
+    "wpt__selectors__dir-style-02a",
+    "wpt__selectors__dir-style-03a"
+   ]
+  },
+  "scoredCellsOfTheCodePath_wave52ship": [
+   "wave52-ship css-counter-styles/arabic-indic/css3-counter-styles-101 android P 0.9736",
+   "wave52-ship css-counter-styles/arabic-indic/css3-counter-styles-101 ios P 0.9943",
+   "wave52-ship css-counter-styles/arabic-indic/css3-counter-styles-101 web P 0.9932",
+   "wave52-ship css-counter-styles/arabic-indic/css3-counter-styles-102 web P 0.9791",
+   "wave52-ship css-counter-styles/arabic-indic/css3-counter-styles-103 android P 0.9913",
+   "wave52-ship css-counter-styles/arabic-indic/css3-counter-styles-103 ios P 0.9978",
+   "wave52-ship css-counter-styles/arabic-indic/css3-counter-styles-103 web P 0.9986",
+   "wave52-ship css-text/bidi/bidi-lines-001 android f 0.8934",
+   "wave52-ship css-text/bidi/bidi-lines-001 ios P 0.9926",
+   "wave52-ship css-text/bidi/bidi-lines-001 web P 0.9999",
+   "wave52-ship css-text/bidi/bidi-lines-002 android P 0.9534",
+   "wave52-ship css-text/bidi/bidi-lines-002 ios P 0.989",
+   "wave52-ship css-text/bidi/bidi-lines-002 web P 0.993",
+   "wave52-ship css-text/bidi/bidi-tab-001 android P 0.9805",
+   "wave52-ship css-text/bidi/bidi-tab-001 ios P 0.9829",
+   "wave52-ship css-text/bidi/bidi-tab-001 web P 0.9978",
+   "wave52-ship css-text/boundary-shaping/boundary-shaping-009 android f 0.7531",
+   "wave52-ship css-text/boundary-shaping/boundary-shaping-009 ios f 0.8919",
+   "wave52-ship css-text/boundary-shaping/boundary-shaping-009 web f 0.9482",
+   "wave52-ship css-text/hyphens/hyphenate-character-005 android f 0.9474",
+   "wave52-ship css-text/hyphens/hyphenate-character-005 ios f 0.9428",
+   "wave52-ship css-text/hyphens/hyphenate-character-005 web P 0.974",
+   "wave52-ship css-writing-modes/bidi-plaintext-br-001 android f 0.9482",
+   "wave52-ship css-writing-modes/bidi-plaintext-br-001 ios P 0.9572",
+   "wave52-ship css-writing-modes/bidi-plaintext-br-001 web P 1",
+   "wave52-ship selectors/dir-selector-change-003 android P 0.9994",
+   "wave52-ship selectors/dir-selector-change-003 ios P 0.9996",
+   "wave52-ship selectors/dir-selector-change-003 web P 1",
+   "wave52-ship selectors/dir-selector-change-004 android P 0.9944",
+   "wave52-ship selectors/dir-selector-change-004 ios P 0.9958",
+   "wave52-ship selectors/dir-selector-change-004 web P 1",
+   "wave52-ship selectors/dir-style-02a android f 0.9425",
+   "wave52-ship selectors/dir-style-02a ios f 0.9455",
+   "wave52-ship selectors/dir-style-02a web P 1",
+   "wave52-ship selectors/dir-style-03a android P 0.9974",
+   "wave52-ship selectors/dir-style-03a ios P 0.9986",
+   "wave52-ship selectors/dir-style-03a web P 1",
+   "wave52-ship css-counter-styles/counter-suffix android P 0.9547",
+   "wave52-ship css-counter-styles/counter-suffix ios P 0.9802",
+   "wave52-ship css-counter-styles/counter-suffix web P 0.9818"
+  ],
+  "watchlist": [
+   "css-counter-styles/counter-suffix",
+   "css-text/bidi/bidi-lines-001 android",
+   "css-text/bidi/bidi-lines-002 android"
+  ],
+  "paddedBakeRoots": [
+   "counter-suffix__0__4-623 (3em L/R)",
+   "counter-suffix__0__5-628 (3em L/R)",
+   "wpt__css-text__bidi__bidi-lines-001__1-007 (0.5ch L/R)",
+   "wpt__css-text__bidi__bidi-lines-002__1-015 (0.5ch L/R)",
+   "wpt__css-anchor-position__anchor-center-safe-rtl__2-475 (10px)",
+   "wpt__css-anchor-position__anchor-center-safe-rtl__4-480 (10px)"
+  ]
+ },
+ "replay": {
+  "script": "tools/titan/results/wave53-plan/rtl-marker-bake.replay.py + rtl-marker-bake.replay-score.mjs (diffWebVsRef, reproduces the shipped 0.9818/0.9802/0.9547 exactly)",
+  "counter-suffix": {
+   "web ship": 0.9818,
+   "ios ship": 0.9802,
+   "android ship": 0.9547,
+   "web M": 1.0,
+   "ios M": 0.9888,
+   "android M alone": 0.9466,
+   "android P alone": 0.9815,
+   "android M+P": 0.99
+  },
+  "bidi-lines (android, hunk P, crude 4px shift)": {
+   "bidi-lines-002 ship": 0.9534,
+   "bidi-lines-002 P": 0.9818,
+   "bidi-lines-001 ship": 0.8934,
+   "bidi-lines-001 P": 0.9629
+  },
+  "caveat": "pixel simulations: marker ink is the REF's own pixels pasted at the predicted place, so the marker half is an upper bound"
+ }
+}

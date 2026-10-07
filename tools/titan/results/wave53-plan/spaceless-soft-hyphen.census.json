@@ -1,0 +1,626 @@
+{
+ "run": "wave52-ship",
+ "generatedBy": "wave53-plan spaceless-soft-hyphen brief (python over per-test-ir; no device)",
+ "shyDocuments": [
+  "wpt__css-overflow__line-clamp__block-ellipsis-014",
+  "wpt__css-overflow__line-clamp__block-ellipsis-028",
+  "wpt__css-text__hyphens__hyphenate-character-001",
+  "wpt__css-text__hyphens__hyphenate-character-003",
+  "wpt__css-text__hyphens__hyphenate-character-004",
+  "wpt__css-text__hyphens__hyphenate-character-005",
+  "wpt__css-text__hyphens__hyphens-auto-control",
+  "wpt__css-text__hyphens__hyphens-manual-011",
+  "wpt__css-text__hyphens__hyphens-manual-012",
+  "wpt__css-text__hyphens__hyphens-manual-013",
+  "wpt__css-text__hyphens__hyphens-manual-inline-011",
+  "wpt__css-text__hyphens__hyphens-manual-inline-012",
+  "wpt__css-text__hyphens__hyphens-none-011",
+  "wpt__css-text__hyphens__hyphens-none-shy-on-2nd-line-001",
+  "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+  "wpt__css-text__hyphens__hyphens-span-001",
+  "wpt__css-text__hyphens__hyphens-vertical-001"
+ ],
+ "spacelessShyStrings": [
+  {
+   "stem": "wpt__css-text__hyphens__hyphenate-character-001",
+   "component": "wpt__css-text__hyphens__hyphenate-character-001__1-177",
+   "path": "run",
+   "text": "im­ple­men­ta­tion",
+   "hyphens": "MANUAL",
+   "lang": "en",
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: im‐/ple‐/men‐/ta‐/tion at 4.5ch|5.5ch, imple‐/menta‐/tion at 6.5ch (U+2010 baked; HyphenateCharacter not threaded — 4(f) note)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphenate-character-003",
+   "component": "wpt__css-text__hyphens__hyphenate-character-003__1-193",
+   "path": "run",
+   "text": "im­ple­men­ta­tion",
+   "hyphens": "MANUAL",
+   "lang": "en",
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: im‐/ple‐/men‐/ta‐/tion at 4.5ch|5.5ch, imple‐/menta‐/tion at 6.5ch (U+2010 baked; HyphenateCharacter not threaded — 4(f) note)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphenate-character-004",
+   "component": "wpt__css-text__hyphens__hyphenate-character-004__1-201",
+   "path": "run",
+   "text": "im­ple­men­ta­tion",
+   "hyphens": "MANUAL",
+   "lang": "en",
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: im‐/ple‐/men‐/ta‐/tion at 4.5ch|5.5ch, imple‐/menta‐/tion at 6.5ch (U+2010 baked; HyphenateCharacter not threaded — 4(f) note)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphenate-character-005",
+   "component": "hyphens__hyphenate-character-005__1__0-220",
+   "path": "leaf",
+   "text": "قىل­",
+   "hyphens": "initial(manual)",
+   "lang": "ug",
+   "whiteSpace": "PRE",
+   "writingMode": null,
+   "composeF1": "declined before the guard (softWrapAllowed=false) — unchanged"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-auto-control",
+   "component": "wpt__css-text__hyphens__hyphens-auto-control__0-235",
+   "path": "leaf",
+   "text": "fragilistic­expiali",
+   "hyphens": "AUTO",
+   "lang": "en-us",
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "enters the fold; identity (dictionaryHyphenation vetoes both triggers) — unchanged"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-auto-control",
+   "component": "wpt__css-text__hyphens__hyphens-auto-control__2-237",
+   "path": "leaf",
+   "text": "fragilistic­expiali",
+   "hyphens": "AUTO",
+   "lang": "en-us",
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "enters the fold; identity (dictionaryHyphenation vetoes both triggers) — unchanged"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-auto-control",
+   "component": "wpt__css-text__hyphens__hyphens-auto-control__4-239",
+   "path": "leaf",
+   "text": "fragilistic­expiali",
+   "hyphens": "AUTO",
+   "lang": "en-us",
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "enters the fold; identity (dictionaryHyphenation vetoes both triggers) — unchanged"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "component": "wpt__css-text__hyphens__hyphens-out-of-flow-001__1-270",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "component": "wpt__css-text__hyphens__hyphens-out-of-flow-001__2-271",
+   "path": "run",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "component": "wpt__css-text__hyphens__hyphens-out-of-flow-001__3-273",
+   "path": "run",
+   "text": "igh­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "enters the fold; fits one line (capture: ink x25..77 < content edge x84) -> identity"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "component": "wpt__css-text__hyphens__hyphens-out-of-flow-001__4-275",
+   "path": "run",
+   "text": "­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "enters the fold; word-initial shy is no op -> identity"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "component": "wpt__css-text__hyphens__hyphens-out-of-flow-001__5-277",
+   "path": "run",
+   "text": "high­",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "enters the fold; word-final shy is no usable op -> identity"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "component": "wpt__css-text__hyphens__hyphens-out-of-flow-001__6-279",
+   "path": "run",
+   "text": "high­wa",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "enters the fold; fits one line (capture: ink x25..77 < content edge x84) -> identity"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "component": "wpt__css-text__hyphens__hyphens-out-of-flow-001__7-281",
+   "path": "run",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__1-301",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__2-302",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__3-303",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__4-304",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__5-305",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__6-306",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__7-307",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__8-308",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-span-001",
+   "component": "wpt__css-text__hyphens__hyphens-span-001__9-309",
+   "path": "leaf",
+   "text": "high­way",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": null,
+   "composeF1": "FIRES: \"high‐\\nway\" (softWrap off)"
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-vertical-001",
+   "component": "wpt__css-text__hyphens__hyphens-vertical-001__2-320",
+   "path": "leaf",
+   "text": "hyphen­ation",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "whiteSpace": null,
+   "writingMode": "VERTICAL_RL",
+   "composeF1": "declined before the guard (vertical: wrapWidthPx stays -1) — unchanged"
+  }
+ ],
+ "f2AbsposInertMembers": [
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__2-271",
+   "member": "hyphens__hyphens-out-of-flow-001__2__0-272",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__3-273",
+   "member": "hyphens__hyphens-out-of-flow-001__3__0-274",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__4-275",
+   "member": "hyphens__hyphens-out-of-flow-001__4__0-276",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__5-277",
+   "member": "hyphens__hyphens-out-of-flow-001__5__0-278",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__6-279",
+   "member": "hyphens__hyphens-out-of-flow-001__6__0-280",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__7-281",
+   "member": "hyphens__hyphens-out-of-flow-001__7__0-282",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__2-285",
+   "member": "hyphens__hyphens-out-of-flow-002__2__0-286",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287",
+   "member": "hyphens__hyphens-out-of-flow-002__3__0-288",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289",
+   "member": "hyphens__hyphens-out-of-flow-002__4__0-290",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291",
+   "member": "hyphens__hyphens-out-of-flow-002__5__0-292",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293",
+   "member": "hyphens__hyphens-out-of-flow-002__6__0-294",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  },
+  {
+   "stem": "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__7-295",
+   "member": "hyphens__hyphens-out-of-flow-002__7__0-296",
+   "tag": "span",
+   "props": [
+    "Position",
+    "Color"
+   ],
+   "transparentInk": true
+  }
+ ],
+ "f2AbsposStillBail": [
+  {
+   "stem": "wpt__CSS2__abspos__between-float-and-text",
+   "host": "wpt__css2__abspos__between-float-and-text__1-002",
+   "member": "abspos__between-float-and-text__1__0-003",
+   "tag": null,
+   "props": [
+    "Position",
+    "Width",
+    "Height",
+    "BackgroundColor"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__CSS2__abspos__hypothetical-inline-alone-on-second-line",
+   "host": "wpt__css2__abspos__hypothetical-inline-alone-on-second-line__1-006",
+   "member": "abspos__hypothetical-inline-alone-on-second-line__1__1-008",
+   "tag": "span",
+   "props": [
+    "Position",
+    "PaddingLeft"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__CSS2__abspos__static-inside-inline-001",
+   "host": "abspos__static-inside-inline-001__2__0-022",
+   "member": "abspos__static-inside-inline-001__2__0__0-023",
+   "tag": null,
+   "props": [
+    "Position",
+    "BackgroundColor",
+    "Width",
+    "Height"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__CSS2__abspos__static-inside-inline-002",
+   "host": "abspos__static-inside-inline-002__2__0-027",
+   "member": "abspos__static-inside-inline-002__2__0__0-028",
+   "tag": null,
+   "props": [
+    "Position",
+    "BackgroundColor",
+    "Width",
+    "Height"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__CSS2__abspos__static-inside-inline-003",
+   "host": "abspos__static-inside-inline-003__2__0-032",
+   "member": "abspos__static-inside-inline-003__2__0__0-033",
+   "tag": null,
+   "props": [
+    "Position",
+    "BackgroundColor",
+    "Width",
+    "Height"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__css-position__position-absolute-semi-replaced-stretch-other",
+   "host": "wpt__css-position__position-absolute-semi-replaced-stretch-other__2-160",
+   "member": "position-absolute-semi-replaced-stretch-other__2__0-161",
+   "tag": "label",
+   "props": [
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "Position",
+    "BoxSizing",
+    "Top",
+    "Right",
+    "Bottom",
+    "Left",
+    "OutlineWidth",
+    "OutlineStyle",
+    "OutlineColor",
+    "Width",
+    "Height"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__css-pseudo__first-letter-list-item-dynamic-001",
+   "host": "wpt__css-pseudo__first-letter-list-item-dynamic-001__1-147",
+   "member": "first-letter-list-item-dynamic-001__1__0-148",
+   "tag": null,
+   "props": [
+    "Position",
+    "Top",
+    "Left",
+    "Width",
+    "Height",
+    "BoxSizing",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "PaddingTop",
+    "PaddingRight",
+    "PaddingBottom",
+    "PaddingLeft",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "BackgroundColor",
+    "Display",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__css-tables__abspos-container-change-dynamic-001",
+   "host": "abspos-container-change-dynamic-001__0__0__0__1-054",
+   "member": "abspos-container-change-dynamic-001__0__0__0__1__0-055",
+   "tag": null,
+   "props": [
+    "Position",
+    "Top",
+    "Left",
+    "Width",
+    "Height",
+    "BackgroundColor",
+    "BoxSizing",
+    "MarginTop",
+    "MarginRight",
+    "MarginBottom",
+    "MarginLeft",
+    "PaddingTop",
+    "PaddingRight",
+    "PaddingBottom",
+    "PaddingLeft",
+    "BorderTopWidth",
+    "BorderRightWidth",
+    "BorderBottomWidth",
+    "BorderLeftWidth",
+    "BorderTopStyle",
+    "BorderRightStyle",
+    "BorderBottomStyle",
+    "BorderLeftStyle",
+    "BorderTopColor",
+    "BorderRightColor",
+    "BorderBottomColor",
+    "BorderLeftColor",
+    "Display",
+    "OverflowX",
+    "OverflowY"
+   ],
+   "transparentInk": false
+  },
+  {
+   "stem": "wpt__css-values__ch-unit-001",
+   "host": "wpt__css-values__ch-unit-001__2-168",
+   "member": "ch-unit-001__2__0-169",
+   "tag": "span",
+   "props": [
+    "BackgroundColor",
+    "Color",
+    "Top",
+    "Bottom",
+    "Position",
+    "Width"
+   ],
+   "transparentInk": false
+  }
+ ],
+ "carrierSets": {
+  "android": [
+   "wpt__css-text__hyphens__hyphenate-character-001",
+   "wpt__css-text__hyphens__hyphenate-character-003",
+   "wpt__css-text__hyphens__hyphenate-character-004",
+   "wpt__css-text__hyphens__hyphens-auto-control",
+   "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "wpt__css-text__hyphens__hyphens-out-of-flow-002",
+   "wpt__css-text__hyphens__hyphens-span-001"
+  ],
+  "ios": [
+   "wpt__css-text__hyphens__hyphenate-character-001",
+   "wpt__css-text__hyphens__hyphenate-character-003",
+   "wpt__css-text__hyphens__hyphenate-character-004",
+   "wpt__css-text__hyphens__hyphens-out-of-flow-001",
+   "wpt__css-text__hyphens__hyphens-span-001",
+   "wpt__css-text__hyphens__hyphens-vertical-001"
+  ],
+  "web": []
+ },
+ "note": "carrierSets = stems a fix MAY change (control-check allowed sets). android = F1 (PreBreakPipeline guard) reachers + F2 (InlineRunFold inert out-of-flow member) hosts; ios = F1-iOS (ComponentRenderer.swift pre-break guard, seam hunk) reachers. Every other capture must stay byte-identical."
+}

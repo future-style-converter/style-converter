@@ -1,0 +1,292 @@
+{
+  "_wpt": {
+    "test": "css/css-anchor-position/anchor-center-safe-rtl.html",
+    "ref": "css/css-anchor-position/anchor-center-safe-rtl-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "body-inherited-baked",
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "css-anchor-position",
+    "bidiBaked": true
+  },
+  "components": {
+    "anchor-center-safe-rtl__body": {
+      "properties": {
+        "direction": "rtl",
+        "display": "inline"
+      },
+      "_role": "body-root"
+    },
+    "anchor-center-safe-rtl__0": {
+      "properties": {
+        "position": "fixed",
+        "top": "0px",
+        "right": "0px",
+        "height": "30px",
+        "color": "white",
+        "background-color": "green",
+        "anchor-name": "--myAnchor",
+        "direction": "ltr",
+        "width": "54.72px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left"
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ],
+      "children": {
+        "anchor-center-safe-rtl__0__0": {
+          "id": "anchor-center-safe-rtl__0__0",
+          "properties": {
+            "position": "absolute",
+            "left": "0px",
+            "top": "0px",
+            "width": "54.72px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(255, 255, 255)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "Anchor"
+        }
+      }
+    },
+    "anchor-center-safe-rtl__1": {
+      "properties": {
+        "color": "darkblue",
+        "background-color": "azure",
+        "border": "1px solid #ddd",
+        "padding": "10px",
+        "position": "fixed",
+        "position-anchor": "--myAnchor",
+        "top": "calc(anchor(bottom) + 5px)",
+        "right": "0px",
+        "justify-self": "safe anchor-center",
+        "direction": "ltr",
+        "width": "281.41px",
+        "height": "74px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left"
+      },
+      "children": {
+        "anchor-center-safe-rtl__1__0": {
+          "id": "anchor-center-safe-rtl__1__0",
+          "properties": {
+            "position": "absolute",
+            "left": "10px",
+            "top": "26px",
+            "width": "259.41px",
+            "height": "20px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "p",
+          "children": {
+            "anchor-center-safe-rtl__1__0__0": {
+              "id": "anchor-center-safe-rtl__1__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "259.41px",
+                "height": "20px",
+                "line-height": "20px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 139)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "16px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "Anchored element with justify-self"
+            }
+          }
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "anchor-center-safe-rtl__2": {
+      "properties": {
+        "position": "fixed",
+        "top": "0px",
+        "right": "390px",
+        "width": "100px",
+        "height": "30px",
+        "color": "white",
+        "background-color": "green",
+        "anchor-name": "--myAnchor2",
+        "direction": "ltr",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left"
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ],
+      "children": {
+        "anchor-center-safe-rtl__2__0": {
+          "id": "anchor-center-safe-rtl__2__0",
+          "properties": {
+            "position": "absolute",
+            "left": "45.28px",
+            "top": "0px",
+            "width": "54.72px",
+            "height": "20px",
+            "line-height": "20px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(255, 255, 255)",
+            "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+            "font-size": "16px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "Anchor"
+        }
+      }
+    },
+    "anchor-center-safe-rtl__3": {
+      "properties": {
+        "color": "darkblue",
+        "background-color": "azure",
+        "border": "1px solid #ddd",
+        "padding": "10px",
+        "position": "fixed",
+        "position-anchor": "--myAnchor2",
+        "top": "calc(anchor(right) + 5px)",
+        "right": "calc(anchor(left) + 5px)",
+        "align-self": "safe anchor-center",
+        "direction": "ltr",
+        "width": "95.58px",
+        "height": "134px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "text-align": "left"
+      },
+      "children": {
+        "anchor-center-safe-rtl__3__0": {
+          "id": "anchor-center-safe-rtl__3__0",
+          "properties": {
+            "position": "absolute",
+            "left": "10px",
+            "top": "26px",
+            "width": "73.58px",
+            "height": "80px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "p",
+          "children": {
+            "anchor-center-safe-rtl__3__0__0": {
+              "id": "anchor-center-safe-rtl__3__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "73.58px",
+                "height": "20px",
+                "line-height": "20px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 139)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "16px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "Anchored"
+            },
+            "anchor-center-safe-rtl__3__0__1": {
+              "id": "anchor-center-safe-rtl__3__0__1",
+              "properties": {
+                "position": "absolute",
+                "left": "13.02px",
+                "top": "20px",
+                "width": "60.56px",
+                "height": "20px",
+                "line-height": "20px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 139)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "16px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "element"
+            },
+            "anchor-center-safe-rtl__3__0__2": {
+              "id": "anchor-center-safe-rtl__3__0__2",
+              "properties": {
+                "position": "absolute",
+                "left": "41.91px",
+                "top": "40px",
+                "width": "31.67px",
+                "height": "20px",
+                "line-height": "20px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 139)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "16px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "with"
+            },
+            "anchor-center-safe-rtl__3__0__3": {
+              "id": "anchor-center-safe-rtl__3__0__3",
+              "properties": {
+                "position": "absolute",
+                "left": "2.64px",
+                "top": "60px",
+                "width": "70.94px",
+                "height": "20px",
+                "line-height": "20px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 139)",
+                "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                "font-size": "16px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "align-self"
+            }
+          }
+        }
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    }
+  }
+}

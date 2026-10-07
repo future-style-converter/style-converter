@@ -1,0 +1,133 @@
+{
+  "_wpt": {
+    "test": "css/css-counter-styles/arabic-indic/css3-counter-styles-103.html",
+    "ref": "css/css-counter-styles/arabic-indic/css3-counter-styles-103-ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "em/rem",
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "css-counter-styles",
+    "bidiBaked": true,
+    "counterStyleBaked": true
+  },
+  "components": {
+    "arabic-indic__css3-counter-styles-103__0": {
+      "properties": {},
+      "_text": "Test passes if the numbers AND the suffix in each of the two columns is the same.",
+      "_tag": "p",
+      "_lang": "en",
+      "_role": "ws-after"
+    },
+    "arabic-indic__css3-counter-styles-103__1": {
+      "properties": {
+        "font-size": "25px"
+      },
+      "_lang": "en",
+      "children": {
+        "arabic-indic__css3-counter-styles-103__1__0": {
+          "id": "arabic-indic__css3-counter-styles-103__1__0",
+          "properties": {
+            "margin": "0",
+            "padding-left": "8em",
+            "list-style-position": "inside"
+          },
+          "_lossy": true,
+          "_lossyReasons": [
+            "em/rem"
+          ],
+          "_tag": "ol",
+          "_lang": "en",
+          "children": {
+            "arabic-indic__css3-counter-styles-103__1__0__0": {
+              "id": "arabic-indic__css3-counter-styles-103__1__0__0",
+              "properties": {
+                "list-style-type": "arabic-indic",
+                "width": "158px",
+                "height": "31.25px",
+                "box-sizing": "border-box",
+                "direction": "ltr",
+                "unicode-bidi": "normal",
+                "text-align": "left",
+                "position": "relative"
+              },
+              "_tag": "li",
+              "_lang": "en",
+              "_role": "ws-after",
+              "_lossy": true,
+              "_lossyReasons": [
+                "baked-bidi-visual-order"
+              ],
+              "children": {
+                "arabic-indic__css3-counter-styles-103__1__0__0__0": {
+                  "id": "arabic-indic__css3-counter-styles-103__1__0__0__0",
+                  "properties": {
+                    "position": "absolute",
+                    "left": "26.58px",
+                    "top": "0px",
+                    "width": "20.34px",
+                    "height": "30px",
+                    "line-height": "30px",
+                    "white-space": "pre",
+                    "direction": "ltr",
+                    "text-align": "left",
+                    "color": "rgb(0, 0, 0)",
+                    "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                    "font-size": "25px",
+                    "font-style": "normal",
+                    "font-weight": "400"
+                  },
+                  "_text": "١."
+                }
+              },
+              "_markerText": "١."
+            },
+            "arabic-indic__css3-counter-styles-103__1__0__1": {
+              "id": "arabic-indic__css3-counter-styles-103__1__0__1",
+              "properties": {
+                "list-style-type": "arabic-indic",
+                "width": "158px",
+                "height": "31.25px",
+                "box-sizing": "border-box",
+                "direction": "ltr",
+                "unicode-bidi": "normal",
+                "text-align": "left",
+                "position": "relative"
+              },
+              "_tag": "li",
+              "_lang": "en",
+              "_lossy": true,
+              "_lossyReasons": [
+                "baked-bidi-visual-order"
+              ],
+              "children": {
+                "arabic-indic__css3-counter-styles-103__1__0__1__0": {
+                  "id": "arabic-indic__css3-counter-styles-103__1__0__1__0",
+                  "properties": {
+                    "position": "absolute",
+                    "left": "26.58px",
+                    "top": "0px",
+                    "width": "20.34px",
+                    "height": "30px",
+                    "line-height": "30px",
+                    "white-space": "pre",
+                    "direction": "ltr",
+                    "text-align": "left",
+                    "color": "rgb(0, 0, 0)",
+                    "font-family": "Inter, -apple-system, \"system-ui\", \"Segoe UI\", Roboto, Oxygen, Ubuntu, sans-serif",
+                    "font-size": "25px",
+                    "font-style": "normal",
+                    "font-weight": "400"
+                  },
+                  "_text": "٢."
+                }
+              },
+              "_markerText": "٢."
+            }
+          }
+        }
+      }
+    }
+  }
+}

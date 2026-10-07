@@ -1,0 +1,3 @@
+web      shipped 0.5340  simulated-post-fix 1.0000
+ios      shipped 0.5346  simulated-post-fix 0.9995
+android  shipped 0.5355  simulated-post-fix 0.9991

@@ -1,0 +1,1765 @@
+{
+ "run": "wave52-ship",
+ "predicate": "per-test IR component with meta.role == 'body-root' AND a property of type 'BackgroundImage' (the only wire shape that reaches the changed canvas path)",
+ "docs": 1435,
+ "carrierStems": [
+  "wpt__css-backgrounds__background-attachment-margin-root-001",
+  "wpt__css-backgrounds__background-attachment-margin-root-002",
+  "wpt__css-display__display-contents-root-background"
+ ],
+ "carrierCells": [
+  "css-backgrounds/background-attachment-margin-root-001 web f 0.4511",
+  "css-backgrounds/background-attachment-margin-root-001 ios f 0.4509",
+  "css-backgrounds/background-attachment-margin-root-001 android f 0.451",
+  "css-backgrounds/background-attachment-margin-root-002 web f 0.339",
+  "css-backgrounds/background-attachment-margin-root-002 ios f 0.3391",
+  "css-backgrounds/background-attachment-margin-root-002 android f 0.3389",
+  "css-display/display-contents-root-background web f 0.534",
+  "css-display/display-contents-root-background ios f 0.5346",
+  "css-display/display-contents-root-background android f 0.5355"
+ ],
+ "totals": {
+  "carriers": {
+   "tests": 3,
+   "cells": 9,
+   "pass": 0
+  },
+  "bodyRootBackgroundColorOnly": {
+   "tests": 86,
+   "cells": 252,
+   "pass": 178
+  },
+  "bodyRootNoBackground": {
+   "tests": 195,
+   "cells": 555,
+   "pass": 444
+  },
+  "noBodyRoot": {
+   "tests": 1151
+  }
+ },
+ "carriers": [
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundImage",
+    "BackgroundAttachment",
+    "BackgroundSize"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.4511",
+    "ios": "f 0.4509",
+    "android": "f 0.451"
+   }
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-margin-root-002",
+   "bodyRootBackgroundTypes": [
+    "BackgroundImage",
+    "BackgroundAttachment",
+    "BackgroundSize"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.339",
+    "ios": "f 0.3391",
+    "android": "f 0.3389"
+   }
+  },
+  {
+   "section": "css-display",
+   "stem": "wpt__css-display__display-contents-root-background",
+   "bodyRootBackgroundTypes": [
+    "BackgroundImage"
+   ],
+   "display": [
+    "CONTENTS"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "f 0.534",
+    "ios": "f 0.5346",
+    "android": "f 0.5355"
+   }
+  }
+ ],
+ "controlBodyRootBackgroundColor": [
+  {
+   "section": "CSS2",
+   "stem": "wpt__CSS2__css-e-notation-test-2",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.9035",
+    "ios": "f 0.8996",
+    "android": "f 0.9002"
+   }
+  },
+  {
+   "section": "CSS2",
+   "stem": "wpt__CSS2__css21-errata__s-11-1-1b-005",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "TABLE_CELL"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9658",
+    "ios": "f 0.9536",
+    "android": "f 0.9307"
+   }
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__animations__background-color-animation-in-body",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__animations__background-color-transparent-animation-in-body",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {}
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-max-height-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6858",
+    "ios": "f 0.4489",
+    "android": "f 0.41"
+   }
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-max-height-001b",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6732",
+    "ios": "f 0.4672",
+    "android": "f 0.4108"
+   }
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-max-height-002",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6858",
+    "ios": "f 0.4489",
+    "android": "f 0.41"
+   }
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-max-height-002b",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6732",
+    "ios": "f 0.4672",
+    "android": "f 0.4108"
+   }
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-max-height-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6858",
+    "ios": "f 0.4489",
+    "android": "f 0.41"
+   }
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-max-height-003b",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6732",
+    "ios": "f 0.4672",
+    "android": "f 0.4108"
+   }
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-min-height-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6979",
+    "ios": "f 0.4263",
+    "android": "f 0.3877"
+   }
+  },
+  {
+   "section": "css-break",
+   "stem": "wpt__css-break__block-min-height-001b",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6899",
+    "ios": "f 0.3982",
+    "android": "f 0.3584"
+   }
+  },
+  {
+   "section": "css-cascade",
+   "stem": "wpt__css-cascade__initial-background-color",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-cascade",
+   "stem": "wpt__css-cascade__initial-color-background-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9992",
+    "ios": "P 0.997",
+    "android": "P 0.9955"
+   }
+  },
+  {
+   "section": "css-color",
+   "stem": "wpt__css-color__a98rgb-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9985",
+    "android": "P 0.9976"
+   }
+  },
+  {
+   "section": "css-color",
+   "stem": "wpt__css-color__display-p3-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-color",
+   "stem": "wpt__css-color__display-p3-005",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-color",
+   "stem": "wpt__css-color__display-p3-linear-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-color",
+   "stem": "wpt__css-color__display-p3-linear-005",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-bg-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-bg-002",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-bg-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-bg-004",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-bg-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-bg-002",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-bg-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-bg-004",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "section": "css-display",
+   "stem": "wpt__css-display__display-flow-root-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.8156",
+    "android": "f 0.8156"
+   }
+  },
+  {
+   "section": "css-display",
+   "stem": "wpt__css-display__display-flow-root-list-item-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.8003",
+    "ios": "f 0.8615",
+    "android": "f 0.8615"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-decreasing-hue-hsl",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9986",
+    "android": "P 0.9994"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-decreasing-hue-lch",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9584",
+    "android": "f 0.9583"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-hue-direction",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.997",
+    "android": "P 0.9973"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-increasing-hue-hsl",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9986",
+    "android": "P 0.9994"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-increasing-hue-lch",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9584",
+    "android": "f 0.9582"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-002",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-004",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-005",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-006",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-007",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-008",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__gradient__gradient-single-stop-longer-hue-hsl",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9999",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-masking",
+   "stem": "wpt__css-masking__clip-path__clip-path-document-element-will-change",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-masking",
+   "stem": "wpt__css-masking__clip-path__clip-path-document-element",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__overlay__overlay-transition-backdrop-entry",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {}
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.987",
+    "ios": "P 0.9707",
+    "android": "P 0.9848"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-002",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.989",
+    "ios": "P 0.9706",
+    "android": "P 0.9858"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-003",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9859",
+    "ios": "P 0.9706",
+    "android": "P 0.984"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-004",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9935",
+    "ios": "P 0.9634",
+    "android": "P 0.9859"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-005",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9983",
+    "ios": "f 0.8995",
+    "android": "f 0.9"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-006",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9985",
+    "ios": "f 0.8987",
+    "android": "f 0.8993"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-007",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9913",
+    "ios": "f 0.8732",
+    "android": "f 0.8579"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-008",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9917",
+    "ios": "f 0.8762",
+    "android": "f 0.8637"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-009",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9715",
+    "ios": "P 0.9585",
+    "android": "P 0.9638"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-011",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9949",
+    "ios": "f 0.6999",
+    "android": "f 0.6852"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-012",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.9405",
+    "ios": "f 0.8932",
+    "android": "f 0.881"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-013",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.9417",
+    "ios": "f 0.8968",
+    "android": "f 0.9162"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-014",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9975",
+    "ios": "f 0.9238",
+    "android": "f 0.923"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-015",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9806",
+    "ios": "P 0.971",
+    "android": "P 0.9812"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-016",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9761",
+    "ios": "P 0.9659",
+    "android": "P 0.9758"
+   }
+  },
+  {
+   "section": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-024",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9869",
+    "ios": "P 0.9707",
+    "android": "P 0.9812"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__attr-color-invalid-cast",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__attr-color-valid",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__attr-in-max",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__attr-length-invalid-cast",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__attr-length-valid-zero-nofallback",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__attr-length-valid-zero",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__attr-length-valid",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__calc-in-media-queries-001",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.9997",
+    "ios": "f 0.9997",
+    "android": "f 0.9997"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__calc-in-media-queries-002",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.9997",
+    "ios": "f 0.9997",
+    "android": "f 0.9997"
+   }
+  },
+  {
+   "section": "css-values",
+   "stem": "wpt__css-values__calc-invalid-range-clamping",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__3d-transform-incoming",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9328",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__3d-transform-outgoing",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9488",
+    "android": "P 0.9504"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order-with-entry",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-paint-order",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9791",
+    "ios": "P 0.9791",
+    "android": "P 0.9791"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__css-tags-shared-element",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-new",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-old",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9206",
+    "android": "f 0.8658"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-with-overflow-children-new",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9996"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-with-overflow-children-old",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9996"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-with-shadow-new",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9984",
+    "android": "P 0.9975"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fractional-box-with-shadow-old",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9984",
+    "android": "P 0.9975"
+   }
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-boundary",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.9184",
+    "ios": "f 0.9181",
+    "android": "f 0.9183"
+   }
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-inline-positioning",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "f 0.8813",
+    "ios": "f 0.4685",
+    "android": "f 0.4204"
+   }
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-root-element",
+   "bodyRootBackgroundTypes": [
+    "BackgroundColor"
+   ],
+   "display": [],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9998"
+   }
+  }
+ ],
+ "controlBodyRootDisplayOrContain": [
+  {
+   "section": "CSS2",
+   "stem": "wpt__CSS2__css21-errata__s-11-1-1b-006",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "TABLE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9941",
+    "ios": "P 0.9953",
+    "android": "P 0.9944"
+   }
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "INLINE"
+   ],
+   "contain": false,
+   "cells": {}
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-dir-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-dir-002",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-dir-003",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-dir-004",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-overflow-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-overflow-003",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-overflow-004",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-w-m-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-w-m-002",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-w-m-003",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-body-w-m-004",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-dir-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-dir-002",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-dir-003",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-dir-004",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-overflow-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-overflow-002",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-overflow-003",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-overflow-004",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-w-m-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-w-m-002",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-w-m-003",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-contain",
+   "stem": "wpt__css-contain__contain-html-w-m-004",
+   "bodyRootBackgroundTypes": [],
+   "display": [],
+   "contain": true,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "section": "css-display",
+   "stem": "wpt__css-display__display-contents-sharing-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "CONTENTS"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "f 0.6815",
+    "ios": "f 0.6815",
+    "android": "f 0.6816"
+   }
+  },
+  {
+   "section": "css-display",
+   "stem": "wpt__css-display__display-contents-text-only-001",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "CONTENTS"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.999",
+    "android": "P 0.9979"
+   }
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__position-absolute-root-element-flex",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "FLEX"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "f 0.7619",
+    "ios": "f 0.7626",
+    "android": "f 0.7222"
+   }
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__position-absolute-root-element-grid",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "GRID"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "f 0.7619",
+    "ios": "f 0.7626",
+    "android": "f 0.7222"
+   }
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__position-fixed-root-element-flex",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "FLEX"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "f 0.8456",
+    "ios": "f 0.8467",
+    "android": "f 0.712"
+   }
+  },
+  {
+   "section": "css-position",
+   "stem": "wpt__css-position__position-fixed-root-element-grid",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "GRID"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "f 0.8456",
+    "ios": "f 0.8467",
+    "android": "f 0.712"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__content-visibility-auto-shared-element",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__element-is-grouping-during-animation",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "section": "css-view-transitions",
+   "stem": "wpt__css-view-transitions__fragmented-at-start-ignored",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "NONE"
+   ],
+   "contain": false,
+   "cells": {
+    "web": "P 0.9684",
+    "ios": "P 0.9684",
+    "android": "P 0.9684"
+   }
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__direction-propagation-body-contain-root",
+   "bodyRootBackgroundTypes": [],
+   "display": [
+    "INLINE"
+   ],
+   "contain": true,
+   "cells": {
+    "web": "f 0.971",
+    "ios": "f 0.971",
+    "android": "f 0.971"
+   }
+  }
+ ],
+ "sourceCensus": {
+  "method": "regex over the 1435 tests.list WPT sources: a <style> rule whose selector names html/body/:root with `background(-image)?:` holding url( or gradient(, a style= attribute on <html>/<body> with the same, or a legacy background= attribute; plus documentElement/body .style.background script writes",
+  "hits": [
+   "css/css-backgrounds/background-attachment-margin-root-001.html",
+   "css/css-backgrounds/background-attachment-margin-root-002.html",
+   "css/css-display/display-contents-root-background.html"
+  ],
+  "scriptWrites": 0,
+  "note": "identical to the IR carrier set: no source-declared root background-image is lost before the wire"
+ }
+}

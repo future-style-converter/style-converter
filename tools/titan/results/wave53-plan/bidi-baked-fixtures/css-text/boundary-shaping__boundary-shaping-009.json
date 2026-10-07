@@ -1,0 +1,641 @@
+{
+  "_wpt": {
+    "test": "css/css-text/boundary-shaping/boundary-shaping-009.html",
+    "ref": "css/css-text/boundary-shaping/reference/boundary-shaping-009.ref.html",
+    "bucket": "A",
+    "lossy": true,
+    "lossyReasons": [
+      "body-inherited-baked",
+      "baked-bidi-visual-order"
+    ],
+    "specSection": "css-text",
+    "bidiBaked": true
+  },
+  "components": {
+    "boundary-shaping__boundary-shaping-009__body": {
+      "properties": {
+        "font": "36px sans-serif"
+      },
+      "_role": "body-root"
+    },
+    "boundary-shaping__boundary-shaping-009__0": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__0__0": {
+          "id": "boundary-shaping__boundary-shaping-009__0__0",
+          "properties": {
+            "padding-right": "10px",
+            "position": "absolute",
+            "left": "100.31px",
+            "top": "1px",
+            "width": "75.11px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__0__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__0__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "65.11px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "عليكم"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__0__1": {
+          "id": "boundary-shaping__boundary-shaping-009__0__1",
+          "properties": {
+            "position": "absolute",
+            "left": "175.42px",
+            "top": "1px",
+            "width": "82.27px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "السلام"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "boundary-shaping__boundary-shaping-009__1": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__1__0": {
+          "id": "boundary-shaping__boundary-shaping-009__1__0",
+          "properties": {
+            "margin-left": "10px",
+            "position": "absolute",
+            "left": "175.42px",
+            "top": "1px",
+            "width": "82.27px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__1__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__1__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "82.27px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "السلام"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__1__1": {
+          "id": "boundary-shaping__boundary-shaping-009__1__1",
+          "properties": {
+            "position": "absolute",
+            "left": "100.31px",
+            "top": "1px",
+            "width": "65.11px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "عليكم"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "boundary-shaping__boundary-shaping-009__2": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__2__0": {
+          "id": "boundary-shaping__boundary-shaping-009__2__0",
+          "properties": {
+            "padding-right": "10px",
+            "position": "absolute",
+            "left": "100.11px",
+            "top": "1px",
+            "width": "76.67px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__2__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__2__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "66.67px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "عليكم"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__2__1": {
+          "id": "boundary-shaping__boundary-shaping-009__2__1",
+          "properties": {
+            "position": "absolute",
+            "left": "176.78px",
+            "top": "1px",
+            "width": "81.11px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "السلام"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "boundary-shaping__boundary-shaping-009__3": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__3__0": {
+          "id": "boundary-shaping__boundary-shaping-009__3__0",
+          "properties": {
+            "margin-left": "10px",
+            "position": "absolute",
+            "left": "176.78px",
+            "top": "1px",
+            "width": "81.11px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__3__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__3__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "81.11px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(0, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "السلام"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__3__1": {
+          "id": "boundary-shaping__boundary-shaping-009__3__1",
+          "properties": {
+            "position": "absolute",
+            "left": "100.11px",
+            "top": "1px",
+            "width": "66.67px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "عليكم"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "boundary-shaping__boundary-shaping-009__4": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__4__0": {
+          "id": "boundary-shaping__boundary-shaping-009__4__0",
+          "properties": {
+            "color": "red",
+            "padding-left": "10px",
+            "position": "absolute",
+            "left": "100.11px",
+            "top": "1px",
+            "width": "76.67px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__4__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__4__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "10px",
+                "top": "0px",
+                "width": "66.67px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(255, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "عليكم"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__4__1": {
+          "id": "boundary-shaping__boundary-shaping-009__4__1",
+          "properties": {
+            "position": "absolute",
+            "left": "176.78px",
+            "top": "1px",
+            "width": "81.11px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "السلام"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "boundary-shaping__boundary-shaping-009__5": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__5__0": {
+          "id": "boundary-shaping__boundary-shaping-009__5__0",
+          "properties": {
+            "color": "red",
+            "margin-right": "10px",
+            "position": "absolute",
+            "left": "166.78px",
+            "top": "1px",
+            "width": "81.11px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__5__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__5__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "81.11px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(255, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "السلام"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__5__1": {
+          "id": "boundary-shaping__boundary-shaping-009__5__1",
+          "properties": {
+            "position": "absolute",
+            "left": "100.11px",
+            "top": "1px",
+            "width": "66.67px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "عليكم"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "boundary-shaping__boundary-shaping-009__6": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__6__0": {
+          "id": "boundary-shaping__boundary-shaping-009__6__0",
+          "properties": {
+            "color": "red",
+            "padding-left": "10px",
+            "position": "absolute",
+            "left": "100.31px",
+            "top": "1px",
+            "width": "75.11px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__6__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__6__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "10px",
+                "top": "0px",
+                "width": "65.11px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(255, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "عليكم"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__6__1": {
+          "id": "boundary-shaping__boundary-shaping-009__6__1",
+          "properties": {
+            "position": "absolute",
+            "left": "175.42px",
+            "top": "1px",
+            "width": "82.27px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "السلام"
+        }
+      },
+      "_role": "ws-after",
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    },
+    "boundary-shaping__boundary-shaping-009__7": {
+      "properties": {
+        "text-align": "left",
+        "direction": "ltr",
+        "font-size": "36px",
+        "font-family": "sans-serif",
+        "line-height": "normal",
+        "width": "358px",
+        "height": "49px",
+        "box-sizing": "border-box",
+        "unicode-bidi": "normal",
+        "position": "relative"
+      },
+      "children": {
+        "boundary-shaping__boundary-shaping-009__7__0": {
+          "id": "boundary-shaping__boundary-shaping-009__7__0",
+          "properties": {
+            "color": "red",
+            "margin-right": "10px",
+            "position": "absolute",
+            "left": "165.42px",
+            "top": "1px",
+            "width": "82.27px",
+            "height": "41px",
+            "box-sizing": "border-box"
+          },
+          "_tag": "span",
+          "children": {
+            "boundary-shaping__boundary-shaping-009__7__0__0": {
+              "id": "boundary-shaping__boundary-shaping-009__7__0__0",
+              "properties": {
+                "position": "absolute",
+                "left": "0px",
+                "top": "0px",
+                "width": "82.27px",
+                "height": "41px",
+                "line-height": "41px",
+                "white-space": "pre",
+                "direction": "ltr",
+                "text-align": "left",
+                "color": "rgb(255, 0, 0)",
+                "font-family": "sans-serif",
+                "font-size": "36px",
+                "font-style": "normal",
+                "font-weight": "400"
+              },
+              "_text": "السلام"
+            }
+          }
+        },
+        "boundary-shaping__boundary-shaping-009__7__1": {
+          "id": "boundary-shaping__boundary-shaping-009__7__1",
+          "properties": {
+            "position": "absolute",
+            "left": "100.31px",
+            "top": "1px",
+            "width": "65.11px",
+            "height": "41px",
+            "line-height": "41px",
+            "white-space": "pre",
+            "direction": "ltr",
+            "text-align": "left",
+            "color": "rgb(0, 0, 0)",
+            "font-family": "sans-serif",
+            "font-size": "36px",
+            "font-style": "normal",
+            "font-weight": "400"
+          },
+          "_text": "عليكم"
+        }
+      },
+      "_lossy": true,
+      "_lossyReasons": [
+        "body-inherited-baked",
+        "baked-bidi-visual-order"
+      ]
+    }
+  }
+}

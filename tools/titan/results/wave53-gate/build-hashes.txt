@@ -1,0 +1,6 @@
+== wave53-open (opening gate of wave 53: dev cdb8a845 = wave52-ship content; first gate on macOS 27.0.1 / Xcode 27.0) — 2026-10-06T23:11:13Z — HEAD cdb8a845
+android  serial=emulator-5554  built app-debug.apk sha1=89ffe4ec299159610d8e10f55218366afec3f486  installed base.apk sha1=89ffe4ec299159610d8e10f55218366afec3f486
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=d56c143debd2cd55d25f68de1ed19ee67a2cd8cf  installed .app digest=d56c143debd2cd55d25f68de1ed19ee67a2cd8cf
+ios      MATCH
+

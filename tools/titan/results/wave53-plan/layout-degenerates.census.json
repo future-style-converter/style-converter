@@ -1,0 +1,1372 @@
+{
+ "_what": "wave-53 family brief layout-degenerates \u2014 census over tools/titan/runs/wave52-ship per-test IR + scores (score-gate.mjs loadRun). Method: per-test IR components grouped by slot.parent; a float = Float LEFT|RIGHT|INLINE_START|INLINE_END; a BFC root = Display FLOW_ROOT|FLEX|GRID|TABLE, Overflow* not VISIBLE/CLIP, Contain with LAYOUT|PAINT|STRICT|CONTENT, or ColumnCount/ColumnWidth. Red = strict r>200&&g<80&&b<80 (red-square-census predicate) on the wave52-ship PNGs.",
+ "fixCarrierSet": {
+  "_what": "FloatAvoidPlan gate engages on exactly these 3 tests (iOS + Android). control-check: allowed changed stems on ios/android = controlCheckStems; web allowed = none.",
+  "controlCheckStems": [
+   "wpt__css-contain__contain-inline-size-bfc-floats-001",
+   "wpt__css-contain__contain-inline-size-bfc-floats-002",
+   "wpt__css-display__display-flow-root-002"
+  ],
+  "cells": [
+   {
+    "cell": "css/css-contain/contain-inline-size-bfc-floats-001.html|ios",
+    "controlCheckStem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+    "wave51fix": "f 0.9406",
+    "wave52ship": "P 0.9531"
+   },
+   {
+    "cell": "css/css-contain/contain-inline-size-bfc-floats-001.html|android",
+    "controlCheckStem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+    "wave51fix": "f 0.9394",
+    "wave52ship": "P 0.9519"
+   },
+   {
+    "cell": "css/css-contain/contain-inline-size-bfc-floats-001.html|web",
+    "controlCheckStem": "wpt__css-contain__contain-inline-size-bfc-floats-001",
+    "wave51fix": "P 0.9876",
+    "wave52ship": "P 1.0000"
+   },
+   {
+    "cell": "css/css-contain/contain-inline-size-bfc-floats-002.html|ios",
+    "controlCheckStem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+    "wave51fix": "f 0.9198",
+    "wave52ship": "f 0.9322"
+   },
+   {
+    "cell": "css/css-contain/contain-inline-size-bfc-floats-002.html|android",
+    "controlCheckStem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+    "wave51fix": "f 0.9186",
+    "wave52ship": "f 0.9311"
+   },
+   {
+    "cell": "css/css-contain/contain-inline-size-bfc-floats-002.html|web",
+    "controlCheckStem": "wpt__css-contain__contain-inline-size-bfc-floats-002",
+    "wave51fix": "P 0.9876",
+    "wave52ship": "P 1.0000"
+   },
+   {
+    "cell": "css/css-display/display-flow-root-002.html|ios",
+    "controlCheckStem": "wpt__css-display__display-flow-root-002",
+    "wave51fix": "P 0.9655",
+    "wave52ship": "P 0.9734"
+   },
+   {
+    "cell": "css/css-display/display-flow-root-002.html|android",
+    "controlCheckStem": "wpt__css-display__display-flow-root-002",
+    "wave51fix": "P 0.9655",
+    "wave52ship": "P 0.9734"
+   },
+   {
+    "cell": "css/css-display/display-flow-root-002.html|web",
+    "controlCheckStem": "wpt__css-display__display-flow-root-002",
+    "wave51fix": "P 0.9938",
+    "wave52ship": "P 1.0000"
+   }
+  ]
+ },
+ "gateExcludedFloatThenBfcShapes": {
+  "_what": "every sibling list with a float followed by an in-flow BFC root that the gate must NOT engage (Clear present, auto-width BFC, em widths, or float runs) \u2014 must be byte-identical",
+  "rows": [
+   {
+    "test": "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-002.html",
+    "parent": "floats-clear__adjoining-float-nested-forced-clearance-002__1__2__0__0-173",
+    "bfc": [
+     [
+      "floats-clear__adjoining-float-nested-forced-clearance-002__1__2__0__0__2-176",
+      [
+       "OverflowX:HIDDEN",
+       "OverflowY:HIDDEN"
+      ]
+     ]
+    ],
+    "status": {
+     "web": "P 1.0000",
+     "ios": "P 0.9656",
+     "android": "P 0.9648"
+    }
+   },
+   {
+    "test": "css/CSS2/floats-clear/adjoining-float-new-fc.html",
+    "parent": "floats-clear__adjoining-float-new-fc__1__0-204",
+    "bfc": [
+     [
+      "floats-clear__adjoining-float-new-fc__1__0__1-206",
+      [
+       "OverflowX:HIDDEN",
+       "OverflowY:HIDDEN"
+      ]
+     ]
+    ],
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9974",
+     "android": "P 0.9967"
+    }
+   },
+   {
+    "test": "css/CSS2/floats-clear/floats-bfc-003.html",
+    "parent": "floats-clear__floats-bfc-003__1__0-254",
+    "bfc": [
+     [
+      "floats-clear__floats-bfc-003__1__0__2-257",
+      [
+       "OverflowX:HIDDEN",
+       "OverflowY:HIDDEN"
+      ]
+     ]
+    ],
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9973",
+     "android": "P 0.9966"
+    }
+   },
+   {
+    "test": "css/css-contain/contain-content-001.html",
+    "parent": "__ROOT__",
+    "bfc": [
+     [
+      "wpt__css-contain__contain-content-001__2-038",
+      [
+       "contain:CONTENT"
+      ]
+     ]
+    ],
+    "status": {
+     "web": "P 1.0000",
+     "ios": "f 0.8908",
+     "android": "f 0.8898"
+    }
+   },
+   {
+    "test": "css/css-display/display-flow-root-001.html",
+    "parent": "wpt__css-display__display-flow-root-001__3-284",
+    "bfc": [
+     [
+      "display-flow-root-001__2__1-286",
+      [
+       "display:FLOW_ROOT"
+      ]
+     ]
+    ],
+    "status": {
+     "web": "P 1.0000",
+     "ios": "f 0.8156",
+     "android": "f 0.8156"
+    }
+   },
+   {
+    "test": "css/css-writing-modes/direction-upright-001.html",
+    "parent": "__ROOT__",
+    "bfc": [
+     [
+      "wpt__css-writing-modes__direction-upright-001__6-538",
+      [
+       "OverflowX:HIDDEN",
+       "OverflowY:HIDDEN"
+      ]
+     ]
+    ],
+    "status": {
+     "web": "f 0.9269",
+     "ios": "f 0.5491",
+     "android": "f 0.4896"
+    }
+   },
+   {
+    "test": "css/css-writing-modes/direction-upright-002.html",
+    "parent": "__ROOT__",
+    "bfc": [
+     [
+      "wpt__css-writing-modes__direction-upright-002__6-655",
+      [
+       "OverflowX:HIDDEN",
+       "OverflowY:HIDDEN"
+      ]
+     ]
+    ],
+    "status": {
+     "web": "f 0.7002",
+     "ios": "f 0.6092",
+     "android": "f 0.5935"
+    }
+   }
+  ]
+ },
+ "floatCarryingControlSet": {
+  "_what": "all wave52-ship tests with a Float wire, minus the 3 carriers: the seam runs its gate in every capture-mode block child loop, so all of these must be byte-identical",
+  "tests": 92,
+  "nativeCellsPassing": [
+   "css/CSS2/floats-clear/adjoining-float-before-clearance.html|ios",
+   "css/CSS2/floats-clear/adjoining-float-before-clearance.html|android",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-002.html|ios",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-002.html|android",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-003.html|ios",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-003.html|android",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-004.html|ios",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-004.html|android",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance.html|ios",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance.html|android",
+   "css/CSS2/floats-clear/adjoining-float-new-fc.html|ios",
+   "css/CSS2/floats-clear/adjoining-float-new-fc.html|android",
+   "css/CSS2/floats-clear/clear-on-child-with-margins-2.html|ios",
+   "css/CSS2/floats-clear/clear-on-child-with-margins-2.html|android",
+   "css/CSS2/floats-clear/clear-on-child-with-margins.html|ios",
+   "css/CSS2/floats-clear/clear-on-child-with-margins.html|android",
+   "css/CSS2/floats-clear/clear-on-parent-with-margins-no-clearance.html|ios",
+   "css/CSS2/floats-clear/clear-on-parent-with-margins-no-clearance.html|android",
+   "css/CSS2/floats-clear/clear-on-parent-with-margins.html|ios",
+   "css/CSS2/floats-clear/clear-on-parent-with-margins.html|android",
+   "css/CSS2/floats-clear/clear-on-parent.html|ios",
+   "css/CSS2/floats-clear/clear-on-parent.html|android",
+   "css/CSS2/floats-clear/clear-with-top-margin-after-cleared-empty-block.html|ios",
+   "css/CSS2/floats-clear/clear-with-top-margin-after-cleared-empty-block.html|android",
+   "css/CSS2/floats-clear/floats-bfc-003.html|ios",
+   "css/CSS2/floats-clear/floats-bfc-003.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-000.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-000.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-001.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-001.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-002.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-002.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-003.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-003.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-002.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-002.html|android",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html|ios",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html|android",
+   "css/CSS2/floats-clear/negative-clearance-after-adjoining-float.html|ios",
+   "css/CSS2/floats-clear/negative-clearance-after-adjoining-float.html|android",
+   "css/css-break/block-in-inline-011.html|android",
+   "css/css-cascade/all-prop-001.html|ios",
+   "css/css-cascade/all-prop-001.html|android",
+   "css/css-display/display-contents-float-001.html|ios",
+   "css/css-display/display-contents-float-001.html|android",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html|ios",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html|android",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html|ios",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html|android",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-001.html|ios",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-001.html|android",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-002.html|ios",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-002.html|android",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-003.html|ios",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-003.html|android",
+   "css/css-grid/abspos/descendant-static-position-001.html|ios",
+   "css/css-grid/abspos/descendant-static-position-001.html|android",
+   "css/css-grid/abspos/descendant-static-position-002.html|ios",
+   "css/css-grid/abspos/descendant-static-position-002.html|android",
+   "css/css-grid/abspos/descendant-static-position-003.html|ios",
+   "css/css-grid/abspos/descendant-static-position-003.html|android",
+   "css/css-grid/abspos/descendant-static-position-004.html|ios",
+   "css/css-grid/abspos/descendant-static-position-004.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-001.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-002.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-002.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-img-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-img-001.html|android",
+   "css/css-masking/clip-path/clip-path-marginBox-1b.html|ios",
+   "css/css-masking/clip-path/clip-path-marginBox-1b.html|android",
+   "css/css-masking/clip-path/clip-path-marginBox-1c.html|ios",
+   "css/css-masking/clip-path/clip-path-marginBox-1c.html|android",
+   "css/css-masking/clip-path/clip-path-marginBox-1d.html|ios",
+   "css/css-masking/clip-path/clip-path-marginBox-1d.html|android",
+   "css/css-position/position-absolute-dynamic-relayout-004.html|ios",
+   "css/css-position/position-absolute-dynamic-relayout-004.html|android",
+   "css/css-pseudo/first-letter-002.html|ios",
+   "css/css-pseudo/first-letter-002.html|android",
+   "css/css-pseudo/first-letter-003.html|ios",
+   "css/css-pseudo/first-letter-003.html|android",
+   "css/css-pseudo/first-letter-list-item-dynamic-001.html|ios",
+   "css/css-pseudo/first-letter-list-item-dynamic-001.html|android",
+   "css/css-writing-modes/float-in-htb-in-vrl.html|ios",
+   "css/css-writing-modes/float-in-htb-in-vrl.html|android",
+   "css/css-writing-modes/float-vlr-014.html|ios",
+   "css/css-writing-modes/float-vlr-014.html|android",
+   "css/css-writing-modes/inline-box-orthogonal-child-with-margins.html|ios",
+   "css/css-writing-modes/inline-box-orthogonal-child-with-margins.html|android",
+   "css/selectors/dir-pseudo-update-document-element.html|ios",
+   "css/selectors/dir-pseudo-update-document-element.html|android"
+  ],
+  "nativeCellsFailing": [
+   "css/CSS2/abspos/between-float-and-text.html|ios",
+   "css/CSS2/abspos/between-float-and-text.html|android",
+   "css/CSS2/borders/border-conflict-style-107.html|ios",
+   "css/CSS2/borders/border-conflict-style-107.html|android",
+   "css/CSS2/floats-clear/clear-after-top-margin.html|ios",
+   "css/CSS2/floats-clear/clear-after-top-margin.html|android",
+   "css/css-break/block-in-inline-011.html|ios",
+   "css/css-contain/contain-content-001.html|ios",
+   "css/css-contain/contain-content-001.html|android",
+   "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html|ios",
+   "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html|android",
+   "css/css-display/display-flow-root-001.html|ios",
+   "css/css-display/display-flow-root-001.html|android",
+   "css/css-display/display-flow-root-list-item-001.html|ios",
+   "css/css-display/display-flow-root-list-item-001.html|android",
+   "css/css-flexbox/align-self-016.html|ios",
+   "css/css-flexbox/align-self-016.html|android",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-safe-001.html|ios",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-safe-001.html|android",
+   "css/css-lists/counter-list-item.html|ios",
+   "css/css-lists/counter-list-item.html|android",
+   "css/css-values/ch-unit-001.html|ios",
+   "css/css-values/ch-unit-001.html|android",
+   "css/css-writing-modes/abs-pos-border-offset-001.html|ios",
+   "css/css-writing-modes/abs-pos-border-offset-001.html|android",
+   "css/css-writing-modes/abs-pos-border-offset-002.html|ios",
+   "css/css-writing-modes/abs-pos-border-offset-002.html|android",
+   "css/css-writing-modes/direction-upright-001.html|ios",
+   "css/css-writing-modes/direction-upright-001.html|android",
+   "css/css-writing-modes/direction-upright-002.html|ios",
+   "css/css-writing-modes/direction-upright-002.html|android"
+  ],
+  "testList": [
+   "css/CSS2/abspos/between-float-and-text.html",
+   "css/CSS2/borders/border-conflict-style-107.html",
+   "css/CSS2/floats-clear/adjoining-float-before-clearance.html",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-002.html",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-003.html",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance-004.html",
+   "css/CSS2/floats-clear/adjoining-float-nested-forced-clearance.html",
+   "css/CSS2/floats-clear/adjoining-float-new-fc.html",
+   "css/CSS2/floats-clear/clear-after-top-margin.html",
+   "css/CSS2/floats-clear/clear-on-child-with-margins-2.html",
+   "css/CSS2/floats-clear/clear-on-child-with-margins.html",
+   "css/CSS2/floats-clear/clear-on-parent-and-child.html",
+   "css/CSS2/floats-clear/clear-on-parent-with-margins-no-clearance.html",
+   "css/CSS2/floats-clear/clear-on-parent-with-margins.html",
+   "css/CSS2/floats-clear/clear-on-parent.html",
+   "css/CSS2/floats-clear/clear-with-top-margin-after-cleared-empty-block.html",
+   "css/CSS2/floats-clear/floats-bfc-003.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-000.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-001.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-002.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-003.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-000.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-001.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-002.html",
+   "css/CSS2/floats-clear/floats-clear-multicol-balancing-003.html",
+   "css/CSS2/floats-clear/negative-clearance-after-adjoining-float.html",
+   "css/css-anchor-position/anchor-center-overflow-001.html",
+   "css/css-anchor-position/anchor-center-overflow-002.html",
+   "css/css-anchor-position/anchor-center-overflow-003.html",
+   "css/css-anchor-position/anchor-center-overflow-004.html",
+   "css/css-break/block-in-inline-011.html",
+   "css/css-cascade/all-prop-001.html",
+   "css/css-contain/contain-content-001.html",
+   "css/css-counter-styles/counter-style-at-rule/name-case-sensitivity.html",
+   "css/css-display/display-contents-float-001.html",
+   "css/css-display/display-flow-root-001.html",
+   "css/css-display/display-flow-root-list-item-001.html",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-fallback-justify-content-001.html",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-justify-self-001.html",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-001.html",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-002.html",
+   "css/css-flexbox/abspos/flex-abspos-staticpos-margin-003.html",
+   "css/css-flexbox/align-self-016.html",
+   "css/css-grid/abspos/descendant-static-position-001.html",
+   "css/css-grid/abspos/descendant-static-position-002.html",
+   "css/css-grid/abspos/descendant-static-position-003.html",
+   "css/css-grid/abspos/descendant-static-position-004.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-img-last-baseline-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-last-baseline-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-003.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-004.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-003.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-rtl-last-baseline-004.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-safe-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-003.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-004.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-003.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-align-self-vertWM-last-baseline-004.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-001.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-002.html",
+   "css/css-grid/abspos/grid-abspos-staticpos-justify-self-img-001.html",
+   "css/css-lists/counter-list-item.html",
+   "css/css-masking/clip-path/clip-path-marginBox-1b.html",
+   "css/css-masking/clip-path/clip-path-marginBox-1c.html",
+   "css/css-masking/clip-path/clip-path-marginBox-1d.html",
+   "css/css-position/position-absolute-dynamic-relayout-004.html",
+   "css/css-pseudo/first-letter-002.html",
+   "css/css-pseudo/first-letter-003.html",
+   "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "css/css-values/ch-unit-001.html",
+   "css/css-writing-modes/abs-pos-border-offset-001.html",
+   "css/css-writing-modes/abs-pos-border-offset-002.html",
+   "css/css-writing-modes/direction-upright-001.html",
+   "css/css-writing-modes/direction-upright-002.html",
+   "css/css-writing-modes/float-in-htb-in-vrl.html",
+   "css/css-writing-modes/float-vlr-014.html",
+   "css/css-writing-modes/inline-box-orthogonal-child-with-margins.html",
+   "css/selectors/dir-pseudo-update-document-element.html"
+  ]
+ },
+ "containInlineSizeOrSizeComponents": [
+  {
+   "test": "css/css-break/block-in-inline-008.html",
+   "id": "block-in-inline-008__1__0__0__0__0-146",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": null,
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css/css-break/block-in-inline-009.html",
+   "id": "block-in-inline-009__1__0__2__0__0-154",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": null,
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9907",
+    "android": "P 0.9966"
+   }
+  },
+  {
+   "test": "css/css-break/block-in-inline-011.html",
+   "id": "block-in-inline-011__1__0__1__0__0-161",
+   "contain": [
+    "SIZE"
+   ],
+   "display": "BLOCK",
+   "width": {
+    "type": "length",
+    "px": 25
+   },
+   "status": {
+    "web": "P 0.9990",
+    "ios": "f 0.9339",
+    "android": "P 0.9760"
+   }
+  },
+  {
+   "test": "css/css-break/block-in-inline-011.html",
+   "id": "block-in-inline-011__1__0__1__0__1-162",
+   "contain": [
+    "SIZE"
+   ],
+   "display": "BLOCK",
+   "width": {
+    "type": "length",
+    "px": 25
+   },
+   "status": {
+    "web": "P 0.9990",
+    "ios": "f 0.9339",
+    "android": "P 0.9760"
+   }
+  },
+  {
+   "test": "css/css-break/block-in-inline-011.html",
+   "id": "block-in-inline-011__1__0__1__0__2-163",
+   "contain": [
+    "SIZE"
+   ],
+   "display": "BLOCK",
+   "width": {
+    "type": "length",
+    "px": 25
+   },
+   "status": {
+    "web": "P 0.9990",
+    "ios": "f 0.9339",
+    "android": "P 0.9760"
+   }
+  },
+  {
+   "test": "css/css-break/block-in-inline-011.html",
+   "id": "block-in-inline-011__1__0__2-164",
+   "contain": [
+    "SIZE"
+   ],
+   "display": "BLOCK",
+   "width": {
+    "type": "length",
+    "px": 25
+   },
+   "status": {
+    "web": "P 0.9990",
+    "ios": "f 0.9339",
+    "android": "P 0.9760"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-animation-001.html",
+   "id": "wpt__css-contain__contain-animation-001__1-002",
+   "contain": [
+    "STRICT"
+   ],
+   "display": null,
+   "width": null,
+   "status": {
+    "web": "P 0.9990",
+    "ios": "f 0.9169",
+    "android": "f 0.9162"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-body-bg-003.html",
+   "id": "wpt__css-contain__contain-body-bg-003__0-007",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 300
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-body-dir-003.html",
+   "id": "wpt__css-contain__contain-body-dir-003__0-015",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 200
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-body-overflow-003.html",
+   "id": "wpt__css-contain__contain-body-overflow-003__0-022",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 200
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-body-w-m-003.html",
+   "id": "wpt__css-contain__contain-body-w-m-003__0-032",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 200
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-html-bg-003.html",
+   "id": "wpt__css-contain__contain-html-bg-003__0-068",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 300
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9995",
+    "android": "P 0.9988"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-html-dir-003.html",
+   "id": "wpt__css-contain__contain-html-dir-003__0-076",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 200
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9992",
+    "android": "P 0.9667"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-html-overflow-003.html",
+   "id": "wpt__css-contain__contain-html-overflow-003__0-086",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 200
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9996",
+    "android": "P 0.9989"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-html-w-m-003.html",
+   "id": "wpt__css-contain__contain-html-w-m-003__0-096",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 200
+   },
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-bfc-floats-001.html",
+   "id": "contain-inline-size-bfc-floats-001__1__3-105",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": "FLOW_ROOT",
+   "width": "fit-content",
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9531",
+    "android": "P 0.9519"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-bfc-floats-002.html",
+   "id": "contain-inline-size-bfc-floats-002__1__3-113",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": "FLOW_ROOT",
+   "width": "fit-content",
+   "status": {
+    "web": "P 1.0000",
+    "ios": "f 0.9322",
+    "android": "f 0.9311"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-fieldset.html",
+   "id": "wpt__css-contain__contain-inline-size-fieldset__1-116",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": null,
+   "width": "fit-content",
+   "status": {
+    "web": "P 0.9609",
+    "ios": "f 0.8686",
+    "android": "f 0.8267"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-flex.html",
+   "id": "wpt__css-contain__contain-inline-size-flex__1-121",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": "FLEX",
+   "width": "fit-content",
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9535",
+    "android": "P 0.9528"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-flexitem.html",
+   "id": "contain-inline-size-flexitem__1__0__0-126",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": null,
+   "width": null,
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-grid-auto-fit.html",
+   "id": "contain-inline-size-grid-auto-fit__1__0-130",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": "GRID",
+   "width": null,
+   "status": {
+    "web": "P 1.0000",
+    "ios": "f 0.9551",
+    "android": "f 0.9542"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-grid-indefinite-height-min-height-flex-row.html",
+   "id": "wpt__css-contain__contain-inline-size-grid-indefinite-height-min-height-flex-row__1-133",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": "GRID",
+   "width": null,
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9721",
+    "android": "P 0.9713"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-grid-stretches-auto-rows.html",
+   "id": "wpt__css-contain__contain-inline-size-grid-stretches-auto-rows__1-137",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": "GRID",
+   "width": null,
+   "status": {
+    "web": "P 1.0000",
+    "ios": "P 0.9721",
+    "android": "P 0.9713"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-grid.html",
+   "id": "wpt__css-contain__contain-inline-size-grid__1-141",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": "GRID",
+   "width": "fit-content",
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9535",
+    "android": "P 0.9528"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-intrinsic.html",
+   "id": "wpt__css-contain__contain-inline-size-intrinsic__1-144",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": null,
+   "width": "fit-content",
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9694",
+    "android": "P 0.9686"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-intrinsic.html",
+   "id": "wpt__css-contain__contain-inline-size-intrinsic__2-147",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": null,
+   "width": {
+    "type": "length",
+    "px": 100
+   },
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9694",
+    "android": "P 0.9686"
+   }
+  },
+  {
+   "test": "css/css-contain/contain-inline-size-legend.html",
+   "id": "contain-inline-size-legend__1__0-152",
+   "contain": [
+    "INLINE_SIZE"
+   ],
+   "display": null,
+   "width": null,
+   "status": {
+    "web": "P 1.0000",
+    "ios": "f 0.8535",
+    "android": "f 0.8427"
+   }
+  },
+  {
+   "test": "css/css-position/change-insets-inside-strict-containment-nested.html",
+   "id": "wpt__css-position__change-insets-inside-strict-containment-nested__1-011",
+   "contain": [
+    "STRICT"
+   ],
+   "display": "BLOCK",
+   "width": {
+    "type": "length",
+    "px": 100
+   },
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9594",
+    "android": "P 0.9589"
+   }
+  },
+  {
+   "test": "css/css-position/change-insets-inside-strict-containment-nested.html",
+   "id": "change-insets-inside-strict-containment-nested__1__0__0-013",
+   "contain": [
+    "STRICT"
+   ],
+   "display": "BLOCK",
+   "width": {
+    "type": "length",
+    "px": 100
+   },
+   "status": {
+    "web": "P 0.9990",
+    "ios": "P 0.9594",
+    "android": "P 0.9589"
+   }
+  },
+  {
+   "test": "css/css-sizing/aspect-ratio/abspos-014.html",
+   "id": "aspect-ratio__abspos-014__1__0-094",
+   "contain": [
+    "SIZE"
+   ],
+   "display": null,
+   "width": null,
+   "status": {
+    "web": "P 0.9990",
+    "ios": "f 0.9532",
+    "android": "f 0.6409"
+   }
+  }
+ ],
+ "anchorFamily": {
+  "_what": "anchor-position-multicol-007 context: anchors inside multicol + position-area carriers; cells passing while their capture carries strict red and the ref none",
+  "anchorInMulticol": [
+   {
+    "test": "css/css-anchor-position/anchor-name-multicol-003.html",
+    "vertical": false,
+    "status": {
+     "web": "P 1.0000",
+     "ios": "P 0.9804",
+     "android": "P 0.9598"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-name-multicol-004.html",
+    "vertical": false,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9974",
+     "android": "P 0.9966"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-grid-001.html",
+    "vertical": false,
+    "status": {
+     "web": "P 1.0000",
+     "ios": "f 0.9069",
+     "android": "P 0.9553"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-002.html",
+    "vertical": false,
+    "status": {
+     "web": "P 1.0000",
+     "ios": "f 0.9175",
+     "android": "f 0.9381"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-004.html",
+    "vertical": false,
+    "status": {
+     "web": "P 0.9897",
+     "ios": "P 0.9712",
+     "android": "P 0.9686"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "f 0.9398",
+     "android": "P 0.9519"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-008.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9699",
+     "android": "P 0.9804"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-011.html",
+    "vertical": false,
+    "status": {
+     "web": "P 0.9870",
+     "ios": "P 0.9974",
+     "android": "P 0.9967"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-012.html",
+    "vertical": false,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9706",
+     "android": "P 0.9699"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-013.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9762",
+     "android": "P 0.9807"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-014.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9741",
+     "android": "P 0.9807"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-015.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9689",
+     "android": "P 0.9871"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-016.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9689",
+     "android": "P 0.9871"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-017.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9511",
+     "android": "P 0.9823"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-colspan-003.html",
+    "vertical": true,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9768",
+     "android": "P 0.9919"
+    }
+   }
+  ],
+  "positionArea": [
+   {
+    "test": "css/css-anchor-position/anchor-center-scroll-003.html",
+    "positionAreaBoxes": 1,
+    "bakedTopLeftZero": 0,
+    "status": {
+     "web": "\u2014",
+     "ios": "\u2014",
+     "android": "\u2014"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-007.html",
+    "positionAreaBoxes": 2,
+    "bakedTopLeftZero": 2,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "f 0.9398",
+     "android": "P 0.9519"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-013.html",
+    "positionAreaBoxes": 1,
+    "bakedTopLeftZero": 1,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9762",
+     "android": "P 0.9807"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-014.html",
+    "positionAreaBoxes": 1,
+    "bakedTopLeftZero": 1,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9741",
+     "android": "P 0.9807"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-015.html",
+    "positionAreaBoxes": 1,
+    "bakedTopLeftZero": 1,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9689",
+     "android": "P 0.9871"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-016.html",
+    "positionAreaBoxes": 1,
+    "bakedTopLeftZero": 1,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9689",
+     "android": "P 0.9871"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-017.html",
+    "positionAreaBoxes": 1,
+    "bakedTopLeftZero": 1,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9511",
+     "android": "P 0.9823"
+    }
+   },
+   {
+    "test": "css/css-anchor-position/anchor-position-multicol-colspan-003.html",
+    "positionAreaBoxes": 1,
+    "bakedTopLeftZero": 1,
+    "status": {
+     "web": "P 0.9990",
+     "ios": "P 0.9768",
+     "android": "P 0.9919"
+    }
+   }
+  ],
+  "passingWithForbiddenRed": [
+   {
+    "cell": "css/css-anchor-position/anchor-name-multicol-003.html|ios",
+    "verdict": "P",
+    "ssim": 0.9804,
+    "redCap": 3000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-name-multicol-003.html|android",
+    "verdict": "P",
+    "ssim": 0.9598,
+    "redCap": 3000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-name-multicol-003.html|web",
+    "verdict": "P",
+    "ssim": 1,
+    "redCap": 1500,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-name-multicol-004.html|android",
+    "verdict": "P",
+    "ssim": 0.9966,
+    "redCap": 1700,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-grid-001.html|android",
+    "verdict": "P",
+    "ssim": 0.9553,
+    "redCap": 1750,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-004.html|ios",
+    "verdict": "P",
+    "ssim": 0.9712,
+    "redCap": 1025,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-004.html|android",
+    "verdict": "P",
+    "ssim": 0.9686,
+    "redCap": 1800,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-007.html|android",
+    "verdict": "P",
+    "ssim": 0.9519,
+    "redCap": 800,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-008.html|ios",
+    "verdict": "P",
+    "ssim": 0.9699,
+    "redCap": 7160,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-008.html|android",
+    "verdict": "P",
+    "ssim": 0.9804,
+    "redCap": 3500,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-012.html|ios",
+    "verdict": "P",
+    "ssim": 0.9706,
+    "redCap": 5000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-012.html|android",
+    "verdict": "P",
+    "ssim": 0.9699,
+    "redCap": 5000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-013.html|ios",
+    "verdict": "P",
+    "ssim": 0.9762,
+    "redCap": 5600,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-013.html|android",
+    "verdict": "P",
+    "ssim": 0.9807,
+    "redCap": 8000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-014.html|ios",
+    "verdict": "P",
+    "ssim": 0.9741,
+    "redCap": 5600,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-014.html|android",
+    "verdict": "P",
+    "ssim": 0.9807,
+    "redCap": 8000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-015.html|ios",
+    "verdict": "P",
+    "ssim": 0.9689,
+    "redCap": 5100,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-015.html|android",
+    "verdict": "P",
+    "ssim": 0.9871,
+    "redCap": 8000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-016.html|ios",
+    "verdict": "P",
+    "ssim": 0.9689,
+    "redCap": 5100,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-016.html|android",
+    "verdict": "P",
+    "ssim": 0.9871,
+    "redCap": 8000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-017.html|ios",
+    "verdict": "P",
+    "ssim": 0.9511,
+    "redCap": 7800,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-017.html|android",
+    "verdict": "P",
+    "ssim": 0.9823,
+    "redCap": 8000,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-colspan-003.html|ios",
+    "verdict": "P",
+    "ssim": 0.9768,
+    "redCap": 4960,
+    "redRef": 0
+   },
+   {
+    "cell": "css/css-anchor-position/anchor-position-multicol-colspan-003.html|android",
+    "verdict": "P",
+    "ssim": 0.9919,
+    "redCap": 4400,
+    "redRef": 0
+   }
+  ]
+ },
+ "simulatedFixSsim": {
+  "_what": "ssim.js fast mssim (the scorer idiom, inject-wpt-block.mjs) on the wave52-ship capture vs the frozen ref, before and after repainting the misplaced box at the reference position; calibration reproduces the scored number exactly",
+  "rows": [
+   [
+    "contain-inline-size-bfc-floats-001",
+    "ios",
+    0.9531,
+    0.9984
+   ],
+   [
+    "contain-inline-size-bfc-floats-001",
+    "android",
+    0.9519,
+    0.9972
+   ],
+   [
+    "contain-inline-size-bfc-floats-002",
+    "ios",
+    0.9322,
+    0.9985
+   ],
+   [
+    "contain-inline-size-bfc-floats-002",
+    "android",
+    0.9311,
+    0.9974
+   ],
+   [
+    "display-flow-root-002",
+    "ios",
+    0.9734,
+    1.0
+   ],
+   [
+    "display-flow-root-002",
+    "android",
+    0.9734,
+    1.0
+   ]
+  ]
+ }
+}
