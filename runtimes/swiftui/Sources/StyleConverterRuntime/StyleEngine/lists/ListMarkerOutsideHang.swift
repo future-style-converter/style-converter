@@ -34,18 +34,11 @@
 //  SwiftUI's Layout engine mirrors every `place(at:)` x about the layout
 //  bounds under an RTL layoutDirection (probe-verified — see
 //  FloatBlockLayout.placedX), so the physical `-(w + gap)` handed in here
-//  lands at `width + gap`: the inline-START side of an RTL item, which is
-//  where css-lists-3 §3.5 puts an outside marker (its start edge is the
-//  physical right), with no code of its own. (Compose's `place` is NOT
-//  mirrored, so the Kotlin twin spells the mirror explicitly.) The corpus's
-//  only RTL list rows (css-counter-styles/counter-suffix, `dir=rtl`) never
-//  reach this hang: the extractor's bidi bake makes each of their `<li>`
-//  ABSOLUTELY positioned, and the positioned overlay has no marker branch —
-//  the wire DID carry `meta.markerText` for them. Wave-53 lane L1 bakes
-//  those markers upstream instead (tools/titan/bidi-marker-bake.mjs): the
-//  marker becomes positioned glyph runs and the item gets
-//  `list-style-type: none`, so no `meta.markerText` reaches them now — this
-//  file still moves no RTL cell, stated, not hidden.
+//  lands at `width + gap`: the inline-END side css-lists-3 §3.5 asks for,
+//  with no code of its own. (Compose's `place` is NOT mirrored, so the
+//  Kotlin twin spells the mirror explicitly.) The corpus's RTL rows still
+//  lack markers for an UPSTREAM reason (no `meta.markerText` reaches
+//  them), so this does not move a cell this wave — stated, not hidden.
 //
 //  Staged as a DEVICE A/B: the `markerPlacement` seam that swaps the HStack
 //  for this Layout is tools/titan/results/wave52-counters-and-lists/
