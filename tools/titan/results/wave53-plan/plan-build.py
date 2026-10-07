@@ -188,7 +188,13 @@ L2 = {
                'hyphens/hyphens-out-of-flow-001 ios': GEO_OK},
     'geometryGating': ['hyphens/hyphens-span-001 android', 'hyphens/hyphens-out-of-flow-001 android',
                        'hyphens/hyphens-out-of-flow-002 android', 'hyphens/hyphens-span-001 ios'],
-    'onWave52Ship': 'the five target rows print GEOMETRY WRONG (box height 26 vs 46 on ios; line-1 ink x25-76 / x25-54 vs x25-61 on android); every ref row prints GEOMETRY OK',
+    # Wave-53 L2 skeptic D1 (restated before L2 lands, PLAN §10 addendum): the probe's line ink is max(r,g,b) < 200 —
+    # the old r+g+b < 300 could not see Android's grey hyphen (darkest (114,114,114)) and printed a CORRECT high‐/way
+    # picture as WRONG — and hyphens-span-002 (correct on every platform, L2 must-not-move) is a self-check anchor.
+    'inkRule': 'max(r,g,b) < 200 (was geometry_common.dark, r+g+b < 300; hunk-for-orchestrator-1.patch)',
+    'selfCheck': {'anchor': 'hyphens/hyphens-span-002', 'rows': ['ref', 'web', 'ios', 'android'], 'expect': GEO_OK,
+                  'onFail': 'prints SELF-CHECK FAILED (ANCHOR FAILED: hyphens/hyphens-span-002) and exits 1 — the rule (or a must-not-move leak, R4/R7), never the lane'},
+    'onWave52Ship': 'the five target rows print GEOMETRY WRONG (ios: box 1 height 26 vs ref 46; android: span-001 and -out-of-flow-001 box 1 line 1 ink x25-77 vs ref x25-61, -out-of-flow-002 box 3 line 1 ink x25-31 vs ref x25-61); every ref row and all four hyphens-span-002 anchor rows print GEOMETRY OK; exit 0 (same on wave53-open)',
   },
   # Round-2 must-fix 1 (iii): F1 and F2 are separate commits. hyphens-out-of-flow-001 android is carried by both
   # (F1 alone ~0.975): a trigger on it reverts F2 first and re-probes css-text; F1 goes only if the re-probe still fails.
@@ -398,7 +404,18 @@ expectations = {
   # PLAN §4 step 2 (round-2 should-fix 4): L5's own probe, which also measures web run-to-run determinism on this host.
   'hhProbe': {'runId': 'wave53-hh-probe', 'sections': ['css-cascade', 'css-counter-styles', 'css-flexbox', 'css-text'],
               'cmd': 'tools/titan/gate-driver.sh wave53-hh-probe --sections css-cascade,css-counter-styles,css-flexbox,css-text --skip-fixture-net',
-              'expect': '0 changed composed captures vs wave53-open by DECODED pixels on all three platforms (empty carrier set); any web decoded-pixel difference restates R4/R7 web in the PLAN §10 addendum before any further lane lands'},
+              'expect': '0 changed composed captures vs wave53-open by DECODED pixels on all three platforms (empty carrier set); any web decoded-pixel difference restates R4/R7 web in the PLAN §10 addendum before any further lane lands',
+              # Measured 2026-10-07 (orchestrator; PLAN §10 items 6-7; wave53-gate/_note.md). The probe ran on the SHARED tree with
+              # every lane's unseamed edits, so it measured same-host determinism plus the union of the lanes' pre-seam radii.
+              'measured': {
+                'when': '2026-10-07 11:15 -> 11:29 UTC, 4 sections OK attempt 1 (43/43/43, 48/48/48 x3)',
+                'tree': 'the SHARED tree with every lane\'s unseamed edits applied (L1-L5) — NOT L5 alone: the probe measured same-host determinism + the union of the lanes\' pre-seam blast radii (deviation, recorded in PLAN §10 item 7)',
+                'web': '187 compared, 186 byte-identical, 0 re-encoded, 1 changed (counter-suffix — a carrier): web capture IS byte-deterministic run-to-run on this host; the re-encoded class is unused',
+                'ios': '187 compared, 186 identical, 1 changed (counter-suffix — a carrier)',
+                'android': '187 compared, 178 identical, 9 changed, all carriers (counter-suffix; bidi-lines-001/002; hyphenate-character-001/003/004, hyphens-out-of-flow-001/002, hyphens-span-001)',
+                'wire': '187 compared: 3 content-changed (counter-suffix, bidi-lines-001, bidi-lines-002 — all carriers), 15 renumbered (the cssom shadow, see wireRenumbering), 0 outside the union carriers',
+                'verdict': 'CONTROL HOLDS with the union carrier set (wave53-gate/control-hh-probe-union.json); per-lane controls FAIL on the other lanes\' carriers as they must on a shared-tree probe (control-hh-probe-L1.json: 6 hyphens android leaks = L2\'s carriers; control-hh-probe-L5.json: 11 capture + 3 wire leaks = L1+L2\'s carriers); R4/R7 web rule unchanged — same-host web is byte-stable, so a web decoded-pixel change in a later run is a render change',
+              }},
   # PLAN §6 (round-2 should-fix 3): the wave-53 control-check is trusted only after these three calibrations and mutations.
   'controlCalibrations': [
     {'pair': 'wave52-calib -> wave52-final', 'expect': 'leaks reported (747 under the old byte rule)'},
@@ -408,7 +425,27 @@ expectations = {
                 '(129 px, max delta 27) and every other decoded-pixel difference; ios and android: 0 changed, 0 re-encoded'),
      'mutations': ['byte rule only (no decode) -> 236 changed, 0 re-encoded -> red',
                    'decode without a pixel compare (every byte difference "re-encoded") -> counter-suffix web re-encoded -> red']},
+    # Measured 2026-10-07 — the first same-host pair (orchestrator; wave53-gate/_note.md "Same-host probe").
+    {'pair': 'wave53-open -> wave53-hh-probe', 'sections': ['css-cascade', 'css-counter-styles', 'css-flexbox', 'css-text'],
+     'expect': 'same host, lanes\' unseamed edits applied: every changed capture and wire document a union carrier; web 0 re-encoded (byte-stable run-to-run)',
+     'measured': ('HOLDS: web 186/187 identical + 1 carrier · ios 186/187 + 1 · android 178/187 + 9 carriers · wire 3 content-changed carriers '
+                  '+ 15 renumbered (cssom shadow of counter-suffix +6) · 0 leaks'),
+     'mutations': ['renumbering classifier off -> 15 WIRE LEAK -> red', '--lane L5-harness-hygiene (empty carrier set) -> 11 capture + 3 wire leaks -> red']},
   ],
+  # Measured 2026-10-07, NOT pre-registered (PLAN §10 item 6): the extractor numbers a section's components with one running
+  # counter, so a carrier that gains components renumbers every later document's ids. control-check.mjs reports the class.
+  'wireRenumbering': {
+    'rule': ('The extractor numbers a section\'s components with ONE running counter (<name>-NNN, tests.list order). A per-test IR document '
+             'that is byte-different ONLY because an earlier content-changed document in the same section changed its component count — '
+             'identical once the id counter is stripped from id/slot.parent, every id shifted by the same amount, that amount equal to the '
+             'running component-count delta of the content-changed documents before it — is RENUMBERED, not a wire leak. control-check.mjs '
+             'reports it as its own class with the carrier that explains it; a renumbering the earlier carriers do not explain stays a leak.'),
+    'addedAfter': ('wave53-hh-probe (2026-10-07): the wire control first reported 15 leaks — every css-counter-styles cssom-*-setter / '
+                   '-setter-invalid document after counter-suffix in tests.list, each shifted +6 = counter-suffix 23 -> 29 components '
+                   '(L1 U1-B counter-bake), content identical; captures byte-identical on all three platforms.'),
+    'mutation': 'classifier disabled (byte rule only) -> the same 15 reported as WIRE LEAK -> red (the pre-fix output of the hh-probe control)',
+    'measuredShadow': {'css-counter-styles': {'after': 'wpt__css-counter-styles__counter-suffix', 'shift': 6, 'documents': 15}},
+  },
   'expected': {'lost': [], 'unmeasuredNow': [], 'newlyMeasured': [], 'missingSections': 0, 'columnShorts': 0,
                'fixtureNet': 'exit 0 on all 9 gate fixtures'},
   'unionCaptureCarriers': union,
