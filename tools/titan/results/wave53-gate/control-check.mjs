@@ -49,8 +49,15 @@ if (!pre || !post) { console.error('usage: control-check.mjs <preRun> <postRun> 
 // Carriers: a lane's, or the union across lanes; the wire set likewise.
 const lane = laneId ? EXP.lanes[laneId] : null;
 if (laneId && !lane) { console.error(`no lane ${laneId} in expectations.json (have ${Object.keys(EXP.lanes).join(', ')})`); process.exit(2); }
-const carriers = lane ? lane.captureCarriers : EXP.unionCaptureCarriers;
-const wireCarriers = new Set(lane ? lane.wireCarriers : EXP.unionWireCarriers);
+// Units the probe reverted (expectations.probeDecisions) give their carriers back: a change on one of those
+// stems at the closing gate is a leak again, because the code that moved them is no longer in the tree.
+const withdrawn = ((EXP.probeDecisions && EXP.probeDecisions.reverted) || []).map((d) => d.carriersWithdrawn || {});
+const withdrawnCap = (platform) => new Set(withdrawn.flatMap((w) => (w.captures || {})[platform] || []));
+const withdrawnWire = new Set(withdrawn.flatMap((w) => w.wire || []));
+const rawCarriers = lane ? lane.captureCarriers : EXP.unionCaptureCarriers;
+const carriers = Object.fromEntries(Object.entries(rawCarriers).map(([pf, stems]) => [pf, (stems || []).filter((s) => !withdrawnCap(pf).has(s))]));
+const wireCarriers = new Set((lane ? lane.wireCarriers : EXP.unionWireCarriers).filter((s) => !withdrawnWire.has(s)));
+if (withdrawn.length) console.log(`carriers withdrawn by the probe's reverts: ${withdrawn.flatMap((w) => Object.values(w.captures || {}).flat()).length} capture stem(s), ${withdrawnWire.size} wire stem(s)`);
 const only = sectionsOpt ? new Set(sectionsOpt.split(',')) : null;
 const DIRS = { web: 'screenshots', ios: 'ios-screenshots', android: 'android-screenshots' };
 const sha = (f) => createHash('sha1').update(readFileSync(f)).digest('hex');

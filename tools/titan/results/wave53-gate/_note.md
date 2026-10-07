@@ -119,3 +119,54 @@ Per-lane controls on the same pair (for the record, not as evidence): `--lane L1
 Android captures; `--lane L5-harness-hygiene` (empty carrier set) FAILS on L1+L2's 11 captures and 3 wire documents — on a
 shared-tree probe a per-lane control can only hold for the union; lane isolation is the revert units' job.
 
+## Probe `wave53-probe` (2026-10-07 13:42 → 14:39 UTC; 20 sections, `--skip-fixture-net`; tree 7843a523 = the S1 fix pass + docs)
+
+Host after stopping our processes: load1 5.29, free+inactive 5657 MB (swap 12.3 of 13.3 GB used — it did not matter: no
+view-transition section in the probe). **20 / 20 sections OK on attempt 1, every column full** (~2.5–3 min a section).
+Installed builds MATCH (`build-hashes.txt`, 13:46 UTC). Full read-out: `probe/` (score, controls, geometry, prediction cells).
+
+### What the score and the controls say (`probe/score-probe.txt`, `probe/control-union.txt`)
+
+- `score-gate.mjs wave53-open wave53-probe --watch …/watchlist.txt --movers 0.005`: **gained 14 · lost 0 · movers 17 ·
+  newly measured 0 · unmeasured-now 1427** (= the 10 sections the probe did not run). At |Δ| ≥ 0.002: 19 movers.
+- Union control **HOLDS**: web 949/955 identical + 6 carriers · iOS 944 + 11 · Android 937 + 18 · wire 5 content-changed
+  (all carriers) + **25 renumbered** (10 css-lists documents +1 after counter-reset-reversed-nested — U1's shadow, as the fix
+  pass derived — and the 15 cssom documents +6 after counter-suffix — U2's) · 0 leaks. Per-lane controls fail on the other
+  lanes' carriers, as a shared-tree run must.
+- Every gating prediction met its floor (17 of 17 measured). The gains, cell by cell, are in `probe/prediction-cells.txt`.
+- `adjudicate.mjs` on the partial run: R1 ok; R2/R3 fail on the 10 unprobed sections (informational); R5's "moved 7" were
+  the 7 must-not-move cells in those sections (unmeasured-now) — not movement.
+
+### Geometry (the probes the plan reads instead of SSIM)
+
+| probe | result |
+|---|---|
+| lists-bakes | nested web/ios/android **OK**; counter-suffix web/ios **OK**; **counter-suffix android WRONG** (rtl row 1 right x126 vs ref x144; rows 1–3 right edges 126/134/134 vs 144/144/145) |
+| soft-hyphen | every target OK on web/ios/android (span-001, out-of-flow-001/-002); the span-002 self-check anchor OK ×4. `hyphens-out-of-flow-002 web` prints WRONG (box 4 height 26 vs ref 46) — **pre-existing**: f 0.9411 on wave52-ship, wave53-open and the probe alike; a web-runtime defect outside L2, queued |
+| canvas-root | display-contents-root-background ×3 + background-attachment-margin-root-001/-002 ×3 — 12 / 12 OK |
+| float-avoid | bfc-floats-001/-002 + display-flow-root-002 ×3 — 12 / 12 OK |
+| display-table-body 006 | web OK, ios OK, **android WRONG** (square x24-63 vs ref x24-43 — 40 px wide) |
+
+### The revert rules fired twice (pictures looked at, both)
+
+1. **L3 B-android** (`276757ea` → revert `d773ff6a`): the pre-declared probeGatedRevert row. The Android picture shows an
+   extra empty outlined cell beside the black square (the anonymous table forest draws a second cell); score 0.9944 → 0.9906
+   (rule 2 as well). B-web and B-ios stay (006 web P 1, ios 0.9992, squares at y56-75).
+2. **L1 U2** (`a8ffd1c6` → revert `b0edb788`): rule 4 on the geometryGating row counter-suffix android. The Android picture:
+   the baked RTL markers land on the wrong rows — "foo" bare, "bar ·", "foo ·", "bar .א", then a lone "ב." (ref: "foo .1 /
+   bar .2 / foo .א / bar .ב") — while SSIM rose 0.9547 → 0.9793: SSIM rewarding a wrong picture, which is exactly why the
+   geometry probe gates. iOS (0.9873) and web (1) were picture-correct, but the unit is one commit (M never lands without P;
+   P alone was never pre-registered) and pNarrowFallback does not apply (no bidi-lines / anchor leak; it keeps the
+   counter-suffix rows). Withdrawn with it: bidi-lines-001 android f 0.8934 → P 0.9629 and bidi-lines-002 android +0.028
+   (hunk P's gains). U1 stays (nested ×3 OK).
+
+Both decisions are pre-registered for the closing gate in `expectations.json` → `probeDecisions` (`plan-build.py`):
+`adjudicate.mjs` withdraws the six predictions from R4 and holds their cells to must-not-move (R5); `control-check.mjs`
+withdraws the units' carriers (7 capture stems, 4 wire stems), so a change on them at `wave53-final` is a leak again.
+Proof the amended rules can fail: re-read against the probe itself (which HAD both units) they report 12 must-not-move
+violations and 7 capture + 4 wire leaks — exactly the reverted content (`probe/adjudicate-probe.txt` was the pre-amendment
+reading).
+
+What the closing gate must now show vs `wave53-open`: the 8 remaining gains (margin-root-001/-002 ×3, bfc-floats-002 ×2,
+display-contents-root-background ×3 = 11 — minus none; bidi-lines-001 android withdrawn), the DEGENERATE→faithful movers of
+L2/L4/L3-A/B-web/B-ios, 0 lost, and every withdrawn cell back at its wave53-open value.

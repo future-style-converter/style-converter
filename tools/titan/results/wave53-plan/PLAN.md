@@ -1468,3 +1468,15 @@ a floor, a `gating` flag, a `geometryGating` row or a must-not-move cell: `plan-
     - L5 `smoke.sh`: `build_fixtures` moved to a sourced `tools/visual/smoke-fixtures.sh`, its body unchanged.
     - Suite counts move with the new pins — tooling +5, compose +2, android-harness +1, swiftui +2 — so the orchestrator
       re-runs the sweep and restamps the doc tables before `wave53-probe` (`doc-staleness-check.sh` fails until then).
+13. **The probe read-out and its two reverts (2026-10-07).** `wave53-probe`: 20/20 sections OK on attempt 1; gained 14 ·
+    lost 0 · movers 17; union control HOLDS (25 renumbered documents = U1's +1 css-lists shadow and U2's +6 cssom shadow);
+    every gating floor met. Two geometry rows failed and the pre-registered rules fired: **B-android reverted** (rule 4
+    probeGatedRevert, 006 android square 40 px wide — the extra empty cell is visible in the picture; also rule 2, −0.0038)
+    and **L1 U2 reverted** (rule 4 on counter-suffix android: GEOMETRY WRONG, the baked RTL markers on the wrong rows in the
+    Android picture while SSIM rose 0.9547 → 0.9793; pNarrowFallback not triggered and not applicable; M+P is one unit, so
+    bidi-lines-001/-002 android's hunk-P gains go with it; U1 stays). Pre-registered for the closing gate as
+    `expectations.json` → `probeDecisions`: six predictions withdrawn from R4 and held to must-not-move in R5; the units'
+    carriers withdrawn in the control (a change on them at `wave53-final` is a leak). Pre-existing, not ours:
+    `hyphens-out-of-flow-002 web` f 0.9411 unchanged across wave52-ship / wave53-open / probe (box 4 at 26 px — web
+    runtime; queued). Record: `wave53-gate/_note.md` "Probe", `wave53-gate/probe/`.
+

@@ -312,3 +312,23 @@ STATUS: COMPLETE
   678/678. `bidi-marker-bake.mjs` stays at 200 lines.
 
 STATUS: COMPLETE
+
+## Probe verdict (orchestrator, 2026-10-07) — U1 KEPT, U2 REVERTED
+
+- **U1 holds**: counter-reset-reversed-nested web P 0.9506 → **1**, ios 0.9508 → **0.9989**, android 0.9509 → **0.9852**;
+  geometry OK on all three; wire shadow +1 over the 10 later css-lists documents, as the fix pass derived (control: renumbered).
+- **U2 reverted under revert rule 4** (`b0edb788` reverts `a8ffd1c6`): the geometryGating row counter-suffix ANDROID printed
+  `GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)` — rows 1–3 right edges 126/134/134 vs ref 144/144/145 — while the cell's
+  SSIM rose 0.9547 → 0.9793. The Android picture (`tools/titan/runs/wave53-probe/sections/css-counter-styles/
+  android-screenshots/wpt__css-counter-styles__counter-suffix.png`): the baked marker runs land on the WRONG rows — row 1
+  "foo" has no marker, row 2 "bar ·", row 3 "foo ·", row 4 "bar .א", and a fifth line carries a lone "ב." (ref: "foo .1 /
+  bar .2 / foo .א / bar .ב"). iOS (0.9873) and web (1) were picture-correct. The lane's label "RTL rows picture-correct" was
+  therefore wrong for Android, and its replay (M+P 0.9900) did not predict the row assignment on the device — the replay
+  composited the measured marker boxes onto the web picture and never ran the Compose text layout. What to re-do (BACKLOG):
+  the marker runs must be positioned by the ROW they belong to on Compose (the Android capture assigns each baked run to
+  the next row — a y-origin off by one line-height, or runs sorted after the item text), with a device probe BEFORE a gate;
+  and hunk P (padding kept on a bidi-bake root) deserves its own pre-registered unit — it alone replayed 0.9815 on
+  counter-suffix android and carried bidi-lines-001 android f → P 0.9629 / -002 +0.028, all withdrawn with the revert.
+- The ListMarkerOutsideHang.swift comment and the V1–V5 / VF / P pins went with U2; `bidi-marker-bake.mjs` is out of the tree
+  (this lane dir keeps `marker-probe.mjs` and the window records as the evidence for the re-do).
+

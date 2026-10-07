@@ -485,6 +485,35 @@ expectations = {
   },
   'expected': {'lost': [], 'unmeasuredNow': [], 'newlyMeasured': [], 'missingSections': 0, 'columnShorts': 0,
                'fixtureNet': 'exit 0 on all 9 gate fixtures'},
+  # Measured at wave53-probe (2026-10-07 13:42 → 14:39 UTC; 20/20 sections OK on attempt 1; tools/titan/results/wave53-gate/probe/).
+  # The revert rules fired twice; both units are reverted on the tree the closing gate measures (d773ff6a, b0edb788).
+  # adjudicate.mjs skips the withdrawn predictions (R4) and holds their cells to must-not-move (R5); control-check.mjs
+  # withdraws their carriers, so a change on them at wave53-final is a LEAK again.
+  'probeDecisions': {
+    'run': 'wave53-probe', 'scoreVsOpen': 'gained 14 · lost 0 · movers(0.005) 17 · unmeasured-now 1427 (the 10 sections not probed)',
+    'control': 'union HOLDS: web 949/955 identical + 6 carriers · ios 944 + 11 · android 937 + 18 · wire 5 content-changed carriers + 25 renumbered (10 css-lists +1 after counter-reset-reversed-nested, 15 cssom +6 after counter-suffix) · 0 leaks',
+    'gatingFloors': 'every gating prediction met its floor (17/17 measured); geometry: lists-bakes nested ×3 OK, counter-suffix web/ios OK, counter-suffix ANDROID WRONG; soft-hyphen all targets OK (self-check anchor OK); canvas-root 12/12 OK; float-avoid 12/12 OK; display-table-body 006 web/ios OK, ANDROID WRONG (square x24-63 vs 24-43)',
+    'reverted': [
+      {'unit': 'L3-B-android', 'commit': '276757ea', 'revertCommit': 'd773ff6a',
+       'rule': 'rule 4 probeGatedRevert (006 android: square 40 px wide — an extra empty cell beside the black square in the picture) and rule 2 (P 0.9944 → 0.9906, Δ −0.0038)',
+       'withdrawnPredictions': ['CSS2/css21-errata/s-11-1-1b-006.html android'],
+       'mustNotMoveAfter': ['CSS2/css21-errata/s-11-1-1b-006.html android'],
+       'carriersWithdrawn': {'captures': {'web': [], 'ios': [], 'android': ['wpt__CSS2__css21-errata__s-11-1-1b-006']}, 'wire': []}},
+      {'unit': 'L1-U2', 'commit': 'a8ffd1c6', 'revertCommit': 'b0edb788',
+       'rule': 'rule 4: geometryGating row counter-suffix android printed GEOMETRY WRONG (rtl row 1 right x126 vs ref x144; rows 1-3 right edges 126/134/134 vs 144/144/145) while SSIM rose 0.9547 → 0.9793; the picture: the baked RTL markers land on the wrong rows ("foo" bare, "bar ·", "foo ·", "bar .א", then a lone "ב."; ref "foo .1 / bar .2 / foo .א / bar .ב"). pNarrowFallback did not trigger (no bidi-lines / anchor leak) and keeps the counter-suffix rows unchanged, so it does not address this; M never lands without P and P alone was never pre-registered — the whole unit goes, U1 stays',
+       'withdrawnPredictions': ['css-counter-styles/counter-suffix.html web', 'css-counter-styles/counter-suffix.html ios', 'css-counter-styles/counter-suffix.html android',
+                                'css-text/bidi/bidi-lines-001.html android', 'css-text/bidi/bidi-lines-002.html android'],
+       'mustNotMoveAfter': ['css-counter-styles/counter-suffix.html web', 'css-counter-styles/counter-suffix.html ios', 'css-counter-styles/counter-suffix.html android',
+                            'css-text/bidi/bidi-lines-001.html android', 'css-text/bidi/bidi-lines-002.html android'],
+       'carriersWithdrawn': {'captures': {'web': ['wpt__css-counter-styles__counter-suffix'], 'ios': ['wpt__css-counter-styles__counter-suffix'],
+                                          'android': ['wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001', 'wpt__css-text__bidi__bidi-lines-002', 'wpt__css-anchor-position__anchor-center-safe-rtl']},
+                             'wire': ['wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001', 'wpt__css-text__bidi__bidi-lines-002', 'wpt__css-anchor-position__anchor-center-safe-rtl']},
+       'lostWithIt': 'bidi-lines-001 android f 0.8934 → P 0.9629 and bidi-lines-002 android 0.9534 → 0.9818 (hunk P) go back to wave53-open; counter-suffix web 1 → 0.9818, ios 0.9873 → 0.9802, android 0.9793 → 0.9547'},
+    ],
+    'kept': 'L1 U1 (nested ×3 at floor/geometry OK), L2 F1 + F2 (all floors + geometry OK), L3 A + B-web + B-ios (floors + geometry OK), L4 android + ios (floors + geometry OK), L5',
+    'preExisting': ['css-text/hyphens/hyphens-out-of-flow-002.html web: f 0.9411 on wave52-ship, wave53-open and wave53-probe alike; the probe prints box 4 height 26 vs ref 46 — a web-runtime defect outside L2 (queued in BACKLOG), not a wave-53 change'],
+    'r5OnPartialRun': '7 must-not-move cells lie in the 10 unprobed sections and were counted as moved by R5 (unmeasured-now) — informational; the closing gate measures all 30',
+  },
   'unionCaptureCarriers': union,
   'unionWireCarriers': sorted({s for l in lanes.values() for s in l['wireCarriers']}),
   'degenerateByConstruction': ['css-text/hyphens/hyphenate-character-001.html', 'css-text/hyphens/hyphenate-character-003.html',

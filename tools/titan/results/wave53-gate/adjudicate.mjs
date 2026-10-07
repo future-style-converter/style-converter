@@ -59,12 +59,18 @@ rule('R2', surpriseOut.length === 0 && surpriseIn.length === 0, `unmeasured-now 
 // R3 — a gate with a hole in it is not a gate.
 rule('R3', score.missingSections.length === 0 && score.columnShorts.length === 0, `missing sections ${score.missingSections.length}, short columns ${score.columnShorts.length}`);
 
+// Units the probe reverted (expectations.probeDecisions): their predictions are withdrawn from R4 and
+// their cells are must-not-move for R5 — the closing gate must show them back at wave53-open.
+const decisions = (EXP.probeDecisions && EXP.probeDecisions.reverted) || [];
+const withdrawn = new Set(decisions.flatMap((d) => d.withdrawnPredictions || []));
+const heldCells = decisions.flatMap((d) => (d.mustNotMoveAfter || []).map((c) => [`probe-revert:${d.unit}`, c]));
 // R4 — gating predictions with a floor.
 let gatingFail = 0, gatingTotal = 0;
 console.log('\npredictions (gating ones enforced):');
 for (const [laneId, lane] of Object.entries(EXP.lanes)) {
   for (const p of lane.predictions || []) {
     if (!/ (web|ios|android)$/.test(p.cell)) { console.log(`  ${laneId}  ${p.cell}: ${p.from} → ${p.to} (not a corpus cell — read elsewhere)`); continue; }
+    if (withdrawn.has(p.cell)) { console.log(`  ~ ${laneId}  ${p.cell}: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead`); continue; }
     const cell = byKey.get(p.cell);
     const wantPass = /^P/.test(p.to);
     const measured = cell ? `${cell.curPass ? 'P' : 'f'} ${cell.cur}` : 'unchanged (not in any list)';
@@ -82,8 +88,9 @@ rule('R4', gatingFail === 0, `gating predictions ${gatingTotal}, missed ${gating
 
 // R5 — must-not-move cells: not in lost/gained, and movers within 0.002.
 let mnmBroken = 0, mnmTotal = 0;
-for (const [laneId, lane] of Object.entries(EXP.lanes)) {
-  for (const cellName of lane.mustNotMove || []) {
+const mnmPairs = [...Object.entries(EXP.lanes).flatMap(([laneId, lane]) => (lane.mustNotMove || []).map((c) => [laneId, c])), ...heldCells];
+for (const [laneId, cellName] of mnmPairs) {
+  {
     mnmTotal++;
     const cell = byKey.get(cellName);
     if (!cell) continue;   // unchanged within the scorer's mover threshold

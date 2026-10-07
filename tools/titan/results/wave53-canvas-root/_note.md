@@ -293,3 +293,15 @@ STATUS: COMPLETE
 - TREES (fix pass): Gradle ran only in exports under the session scratchpad (`--no-daemon`), never in this tree.
 
 STATUS: COMPLETE
+
+## Probe verdict (orchestrator, 2026-10-07) — A, B-web, B-ios KEPT; B-android REVERTED (as pre-declared)
+
+- **A**: display-contents-root-background web/ios/android f 0.53 → **P 1 / 0.9995 / 0.9989**; background-attachment-margin-root-001
+  and -002 f 0.45 / 0.34 → P ≥ 0.9994 on all three; canvas-root geometry 12 / 12 OK.
+- **B-web / B-ios**: s-11-1-1b-006 web P 0.9941 → **1** (square y56-75), ios 0.9953 → **0.9992** (square y56-75); geometry OK.
+- **B-android reverted** (`d773ff6a` reverts `276757ea`) — the lane's own probeGatedRevert row: 006 android square
+  `x 24-63` vs ref `x 24-43` (40 px wide) and 0.9944 → 0.9906 (rule 2 too). The picture: an extra EMPTY outlined cell to the
+  left of the black square — the Compose anonymous table forest draws a second cell. The web and iOS halves of the same forest
+  are right, so the defect is in the Compose fixup's cell emission for the display: table body (queued with the picture).
+- A's revert order (B-android → B-ios → B-web → A; `a-only-revert.patch`) was not needed.
+

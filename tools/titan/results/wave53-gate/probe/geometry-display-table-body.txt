@@ -1,0 +1,36 @@
+001 ref      square rows 78-97 (20) x 16-35 | red px 0
+001 web      square rows 77-101 (25) x 18-37 | red px 180
+001 ios      square rows 73-97 (25) x 16-35 | red px 100
+001 android  square rows 73-97 (25) x 16-35 | red px 100
+002 ref      square rows 112-131 (20) x 16-35 | red px 0
+002 web      square rows 82-103 (22) x 18-37 | red px 0
+002 ios      square rows 78-102 (25) x 16-35 | red px 200
+002 android  square rows 78-102 (25) x 16-35 | red px 200
+003 ref      square rows 78-97 (20) x 16-35 | red px 0
+003 web      square rows 55-74 (20) x 18-37 | red px 0
+003 ios      square rows 68-72 (5) x 16-35 | red px 0
+003 android  square rows 68-72 (5) x 16-35 | red px 0
+004 ref      square rows 78-97 (20) x 16-35 | red px 0
+004 web      square rows 55-74 (20) x 18-37 | red px 0
+004 ios      square rows 68-72 (5) x 16-35 | red px 0
+004 android  square rows 68-72 (5) x 16-35 | red px 0
+005 ref      square rows 56-75 (20) x 24-43 | red px 0
+005 web      no square | red px 0
+005 ios      no square | red px 0
+005 android  no square | red px 0
+006 ref      square rows 56-75 (20) x 24-43 | red px 0
+006 web      square rows 56-75 (20) x 24-43 | red px 0
+006 ios      square rows 56-75 (20) x 24-43 | red px 0
+006 android  square rows 56-75 (20) x 24-63 | red px 0
+007 ref      square rows 68-87 (20) x 26-45 | red px 0
+007 web      square rows 68-79 (12) x 18-37 | red px 0
+007 ios      square rows 68-87 (20) x 26-45 | red px 0
+007 android  square rows 68-87 (20) x 26-45 | red px 0
+008 ref      square rows 78-97 (20) x 16-35 | red px 0
+008 web      square rows 77-101 (25) x 18-37 | red px 180
+008 ios      square rows 73-97 (25) x 16-35 | red px 100
+008 android  square rows 73-97 (25) x 16-35 | red px 100
+009 ref      square rows 78-97 (20) x 16-35 | red px 0
+009 web      square rows 81-105 (25) x 18-37 | red px 180
+009 ios      square rows 73-97 (25) x 16-35 | red px 100
+009 android  square rows 73-97 (25) x 16-35 | red px 100

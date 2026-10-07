@@ -17,3 +17,9 @@ android  MATCH
 ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=4de0a9b47577c5098b529ae17f8f2505584bdf32  installed .app digest=4de0a9b47577c5098b529ae17f8f2505584bdf32
 ios      MATCH
 
+== wave53-probe (20 sections; fix-pass tree 568fd5be + docs 7843a523) — 2026-10-07T13:46:35Z — HEAD 7843a523
+android  serial=emulator-5554  built app-debug.apk sha1=49d88832c5f14c8498b7a004f195c9f31314b7e9  installed base.apk sha1=49d88832c5f14c8498b7a004f195c9f31314b7e9
+android  MATCH
+ios      udid=0BB986A6-1EAD-4916-9276-079235324DA1  built .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b  installed .app digest=62d5b2b9f7e6b15eba6c57bbd2666c06496ca67b
+ios      MATCH
+
