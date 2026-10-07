@@ -78,4 +78,11 @@ Chrome and the emulator already gone; the booted simulator held 3.7 GB resident.
   the slowness is a wedged renderer state under memory pressure that a fresh browser escapes, not a property of the tests.
   Installed builds MATCH (`build-hashes.txt`; the APK/.app digests differ from the 23:11 launch only because HEAD moved from
   cdb8a845 to the plan commit 1f5112cc between them — no source changed, Gradle/Xcode embed the build identity).
-- **`wave53-open` is complete: 30/30 sections.** Scored below.
+- **`wave53-open` is complete: 30/30 sections.** `score-gate.mjs wave52-ship wave53-open --watch …/wave52-plan/watchlist.txt`
+  (`score-open.txt` / `.json`, re-scored over all 30): **0 gained / 0 lost / 0 movers (|Δ| ≥ 0.005) / 0 newly measured / 0
+  unmeasured-now over 4096 cells** — web 1229/1372 · iOS 1119/1362 · Android 1111/1362, the corpus-v6.18 numbers exactly.
+  At |Δ| ≥ 0.00005: 22 web cells moved by ±0.0001, none in css-view-transitions, no iOS or Android cell. Obligation 0's
+  requirement ("0 gained / 0 lost / 0 movers / 0 newly measured / 0 unmeasured-now against wave52-ship and fixture net exit 0
+  on all 9") is MET; the toolchain change (macOS 27 / Xcode 27) moved nothing a score can see, and the natives' captures are
+  byte-identical. In css-view-transitions the cross-host control reads: iOS 48/48 and Android 48/48 identical, wire 48/48
+  identical, web 6 captures pixel-changed by small amounts (the same rasterizer effect as the five calibration sections).
