@@ -1,0 +1,15 @@
+{
+ "file": "runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/wrapping/SoftHyphenPolicy.swift",
+ "sha256_before": "28a2f7f52842fe2ba602e5c5fc069a88cf642f08cbb73b5abe892636319d2ec3",
+ "sha256_restored": "28a2f7f52842fe2ba602e5c5fc069a88cf642f08cbb73b5abe892636319d2ec3",
+ "red_exit": 65,
+ "red_ran": 89,
+ "red_failing": [
+  "SoftHyphenPolicyTests.testThePreWave53ClausesAreUnchanged"
+ ],
+ "green_exit": 0,
+ "green_ran": 89,
+ "green_failing": [],
+ "mutation_old": "        if text.contains(\" \") || dictionary { return true }",
+ "mutation_new": "        if (text.contains(\" \") || dictionary) && horizontal { return true }"
+}

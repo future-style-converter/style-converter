@@ -1,0 +1,16 @@
+{
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineRunFold.kt",
+ "sha256_before": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+ "sha256_restored": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+ "red_exit": 1,
+ "red_ran": 42,
+ "red_failing": [
+  "InlineRunFoldTest.hyphens-out-of-flow-001 - the paint-inert abspos member drops and the word folds whole",
+  "InlineRunFoldTest.hyphens-out-of-flow-002 box 4 - the split highway folds to one dictionary word"
+ ],
+ "green_exit": 0,
+ "green_ran": 42,
+ "green_failing": [],
+ "mutation_old": "} else if (tag in TEXT_MEMBER_TAGS && InertOutOfFlowMember.admits(child)) {",
+ "mutation_new": "} else if (false) {"
+}

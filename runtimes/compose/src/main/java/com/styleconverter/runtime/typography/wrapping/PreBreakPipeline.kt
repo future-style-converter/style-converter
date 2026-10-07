@@ -158,12 +158,27 @@ object PreBreakPipeline {
         if (allowMidWordBreak) return identity
         if (preservesSpaces) return identity
         if (wrapWidthPx <= 0f) return identity
-        // No space ⇒ the greedy breaker can only ever return the run
-        // itself, and the WHOLE-RUN gate wave 21 built (B-RC7: softWrap
-        // off when `DecorationOps.hasSoftWrapOpportunity` is false) already
-        // owns that case at the call site. Declining here keeps exactly one
-        // owner per case and keeps those captures byte-identical.
-        if (text.indexOf(' ') < 0) return identity
+        // No space AND no soft hyphen ⇒ the greedy breaker can only ever
+        // return the run itself, and the WHOLE-RUN gate wave 21 built
+        // (B-RC7: softWrap off when `DecorationOps.hasSoftWrapOpportunity`
+        // is false) owns that case at the call site. Declining here keeps
+        // exactly one owner per case and keeps those captures byte-identical
+        // (the guard's population is unchanged: every space-less run that
+        // declined before and carries no U+00AD still declines here).
+        // Wave 53 (lane L2, F1) — a space-less run that DOES carry U+00AD
+        // is NOT that gate's: `hasSoftWrapOpportunity` counts the soft
+        // hyphen as an opportunity, so the wave-21 gate leaves softWrap ON
+        // and, under Compose's `Hyphens.None` (TextWrapApplier maps
+        // `manual` there), Minikin ignores U+00AD and emergency-breaks the
+        // word at the box edge with no hyphen glyph — css-text/hyphens/
+        // hyphens-span-001 android painted `highwa`/`y` in all nine boxes
+        // (wave52-ship P 0.9532, DEGENERATE). css-text-3 §5.3 `manual`:
+        // U+00AD IS a break opportunity and the UA paints the hyphenate
+        // character when the line breaks there; §5.5 `overflow-wrap:
+        // normal` forbids the emergency break. Nobody else claims such a
+        // run, so it enters the fold below, whose F5 taken-soft-hyphen
+        // trigger then fires with the measured `high‐`/`way` lines.
+        if (text.indexOf(' ') < 0 && text.indexOf('\u00AD') < 0) return identity
 
         // Reproduce the CSS line breaking, then ask whether any committed
         // line is an unbreakable overflow (the rule-B trigger).

@@ -195,4 +195,27 @@ final class GreedyLineBreakerTests: XCTestCase {
         // No limit reached the label (LineClampCap nils a suppressed one).
         XCTAssertNil(GreedyLineBreaker.drawnClamp(limit: nil, properties: clamp025))
     }
+
+    // MARK: - Wave 53 (lane L2, F1-iOS): what an admitted space-less run folds to
+
+    /// hyphens-span-001's `high<U+00AD>way` (VERBATIM, wave52-ship per-test IR
+    /// `…hyphens-span-001__1-301`) in the ref's 6ch box: `highway` (7ch) does
+    /// not fit, so the opening word breaks at its soft hyphen and the UA
+    /// hyphen is painted (css-text-3 §5.3) — the two lines the seam-1 label
+    /// now pins at 2 × the line box. Same lines as the Kotlin twin's
+    /// PreBreakPipelineTest pin (a).
+    func testASpacelessSoftHyphenWordBreaksAtItsSoftHyphen() {
+        XCTAssertEqual(GreedyLineBreaker.lines(text: "high\u{AD}way", maxWidth: 6 * ch, measure: mono),
+                       ["high\u{2010}", "way"])
+    }
+
+    /// hyphenate-character-001's run piece 1 (VERBATIM, `…__1-177`
+    /// meta.runs[0].text) at that test's 4.5ch: every usable soft hyphen is
+    /// taken — the ref's five lines (U+2010 baked; BACKLOG 4(f)). Kotlin
+    /// twin: PreBreakPipelineTest pin (d).
+    func testAMultiOpportunitySpacelessRunSplitsIntoFiveLines() {
+        XCTAssertEqual(
+            GreedyLineBreaker.lines(text: "im\u{AD}ple\u{AD}men\u{AD}ta\u{AD}tion", maxWidth: 4.5 * ch, measure: mono),
+            ["im\u{2010}", "ple\u{2010}", "men\u{2010}", "ta\u{2010}", "tion"])
+    }
 }

@@ -192,4 +192,58 @@ final class SoftHyphenPolicyTests: XCTestCase {
                                             measure: charWidth)
         XCTAssertEqual(lines, ["Deoxyribonucleic", "acid"])
     }
+
+    // MARK: - Wave 53 (lane L2, F1-iOS) — admitsPreBreak
+    //
+    // The label's pre-break precondition (ComponentRenderer.swift seam-1).
+    // Strings VERBATIM off tools/titan/runs/wave52-ship/sections/css-text/
+    // per-test-ir (byte-identical to wave53-open): hyphens-span-001 box 1
+    // (`…hyphens-span-001__1-301`, `text` = high U+00AD way — also the six
+    // hyphens-out-of-flow-001 host mirrors the iOS leading label reads) and
+    // hyphens-vertical-001 box 1 (`…hyphens-vertical-001__2-320`, VERTICAL_RL).
+    // MUTATION PROOF: tools/titan/results/wave53-soft-hyphen/_note.md §3
+    // (S-shy: the U+00AD clause dropped; S-d3: the horizontal guard dropped).
+
+    /// The measured defect: a space-less `manual` run with no language was
+    /// refused, so TextKit broke it at the soft hyphen while the line-box
+    /// pin counted ONE line (26 px boxes vs the ref's 46). Admitted now.
+    func testASpacelessSoftHyphenRunIsAdmitted() {
+        XCTAssertTrue(SoftHyphenPolicy.admitsPreBreak("high\u{AD}way", dictionary: false, horizontal: true))
+    }
+
+    /// A space-less run with NO soft hyphen stays refused — wave 21's
+    /// whole-run gate keeps it (hyphens-manual-010's overflowing word).
+    func testASpacelessRunWithoutASoftHyphenIsStillRefused() {
+        XCTAssertFalse(SoftHyphenPolicy.admitsPreBreak("Deoxyribonucleic", dictionary: false, horizontal: true))
+    }
+
+    /// The pre-wave-53 precondition, verbatim: a space, or a dictionary —
+    /// in EITHER writing mode (the D3 gate covers only the new clause).
+    func testThePreWave53ClausesAreUnchanged() {
+        XCTAssertTrue(SoftHyphenPolicy.admitsPreBreak("Deoxyribonucleic acid", dictionary: false, horizontal: true))
+        XCTAssertTrue(SoftHyphenPolicy.admitsPreBreak("Deoxyribonucleic acid", dictionary: false, horizontal: false))
+        XCTAssertTrue(SoftHyphenPolicy.admitsPreBreak("highway", dictionary: true, horizontal: true))
+        XCTAssertTrue(SoftHyphenPolicy.admitsPreBreak("highway", dictionary: true, horizontal: false))
+    }
+
+    /// PLAN §9 D3: hyphens-vertical-001's space-less soft-hyphen run is NOT
+    /// admitted — the label's wrap width is the physical width, the wrong
+    /// axis for a vertical line — so its capture stays byte-identical.
+    func testAVerticalSpacelessSoftHyphenRunIsRefused() {
+        XCTAssertFalse(SoftHyphenPolicy.admitsPreBreak("hyphen\u{AD}ation", dictionary: false, horizontal: false))
+    }
+
+    /// The must-not-move control hyphens-auto-control (`fragilistic<U+00AD>
+    /// expiali`, `hyphens: auto`, lang `en-us`, VERBATIM `…auto-control__0-235`)
+    /// was ALREADY admitted before wave 53 — by the dictionary arm — so the new
+    /// clause cannot change it. That rests on `en-us` having a CF hyphenation
+    /// dictionary (`hyphenLocale != nil` at the seam); pinned here on Catalyst,
+    /// the nearest platform this suite can run (the iOS simulator's own CF is
+    /// the residual the closing gate's control-check reads).
+    func testTheAutoControlRunIsAdmittedByItsDictionaryAsBefore() {
+        let tag = AutoHyphenation.localeTag("AUTO", "en-us")
+        XCTAssertEqual(tag, "en-us")
+        XCTAssertNotNil(tag.flatMap { AutoHyphenation.locale(for: $0) })
+        XCTAssertTrue(SoftHyphenPolicy.admitsPreBreak("fragilistic\u{AD}expiali", dictionary: true, horizontal: true))
+    }
 }

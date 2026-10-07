@@ -1,0 +1,126 @@
+{
+ "greenBefore": {
+  "exit": 0,
+  "total": 66,
+  "failed": [],
+  "tail": ""
+ },
+ "mutations": [
+  {
+   "id": "x5",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+   "sha256Before": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "sha256Mutated": "5a4bfb11d7a2aaa7cf1fce6a219b2c5c59b1b7d3ba97cf0ed4e3713b06244618",
+   "sha256Restored": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "red": {
+    "exit": 1,
+    "total": 45,
+    "failed": [
+     "InlineRunFoldTest.the inert predicate refuses every colour that is not fully transparent"
+    ],
+    "tail": ""
+   },
+   "green": {
+    "exit": 0,
+    "total": 45,
+    "failed": [],
+    "tail": ""
+   },
+   "verdict": "RED->GREEN"
+  },
+  {
+   "id": "x2",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+   "sha256Before": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "sha256Mutated": "ea016c43a4328cd9f994434cc85adfc49890e4035144fd1a5cb6f9d54719d9a2",
+   "sha256Restored": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "red": {
+    "exit": 1,
+    "total": 45,
+    "failed": [
+     "InlineRunFoldTest.the inert predicate refuses every colour that is not fully transparent"
+    ],
+    "tail": ""
+   },
+   "green": {
+    "exit": 0,
+    "total": 45,
+    "failed": [],
+    "tail": ""
+   },
+   "verdict": "RED->GREEN"
+  },
+  {
+   "id": "x3p",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+   "sha256Before": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "sha256Mutated": "6ba66b8c98aa29e7248e7b105e7a2d090f8187c2d50f462a56cba169b47b1afd",
+   "sha256Restored": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "red": {
+    "exit": 1,
+    "total": 45,
+    "failed": [
+     "InlineRunFoldTest.the inert predicate refuses every colour that is not fully transparent"
+    ],
+    "tail": ""
+   },
+   "green": {
+    "exit": 0,
+    "total": 45,
+    "failed": [],
+    "tail": ""
+   },
+   "verdict": "RED->GREEN"
+  },
+  {
+   "id": "x1",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+   "sha256Before": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "sha256Mutated": "ba0e8f7be33e9dc9714d78d67cbe23fb663242105d38631b671d607854176b36",
+   "sha256Restored": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+   "red": {
+    "exit": 1,
+    "total": 45,
+    "failed": [
+     "InlineRunFoldTest.the inert predicate refuses structure and border colours, and admits fixed"
+    ],
+    "tail": ""
+   },
+   "green": {
+    "exit": 0,
+    "total": 45,
+    "failed": [],
+    "tail": ""
+   },
+   "verdict": "RED->GREEN"
+  },
+  {
+   "id": "x4",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineRunFold.kt",
+   "sha256Before": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+   "sha256Mutated": "7ea06c14b1c46350c0bef86480b11efb1dbaa86c6a605911d4260a896c9fd18d",
+   "sha256Restored": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+   "red": {
+    "exit": 1,
+    "total": 45,
+    "failed": [
+     "InlineRunFoldTest.hyphens-out-of-flow-001 as a mark member - a UA-painted tag keeps the tag wall"
+    ],
+    "tail": ""
+   },
+   "green": {
+    "exit": 0,
+    "total": 45,
+    "failed": [],
+    "tail": ""
+   },
+   "verdict": "RED->GREEN"
+  }
+ ],
+ "greenAfter": {
+  "exit": 0,
+  "total": 66,
+  "failed": [],
+  "tail": ""
+ }
+}

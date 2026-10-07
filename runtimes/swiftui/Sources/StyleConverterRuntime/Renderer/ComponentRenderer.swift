@@ -3196,6 +3196,9 @@ public struct ComponentRenderer: View {
             // bakes; nil for no clamp / a suppressed marker / bare max-lines.
             blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
                 limit: style.text.lineClampLimit, properties: component.properties),
+            // Wave 53 (lane L2, D3) — the pre-break's soft-hyphen clause is
+            // horizontal-only; the merged list carries an inherited mode.
+            horizontalWritingMode: WritingModeExtractor.extract(from: resolvedProperties)?.isVertical != true,
         )
     }
 
@@ -3482,7 +3485,10 @@ public struct ComponentRenderer: View {
                     // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
                     // bakes; nil for no clamp / a suppressed marker / bare max-lines.
                     blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
-                        limit: style.text.lineClampLimit, properties: component.properties)
+                        limit: style.text.lineClampLimit, properties: component.properties),
+                    // Wave 53 (lane L2, D3) — horizontal-only soft-hyphen clause
+                    // (the fold itself already refuses vertical hosts).
+                    horizontalWritingMode: WritingModeExtractor.extract(from: resolvedProperties)?.isVertical != true
                 )
             }
             if let t = component.text, !t.isEmpty, runPlan == nil,
@@ -3538,7 +3544,9 @@ public struct ComponentRenderer: View {
                     // Wave 52 (lane L9, F4) — the drawn-marker clamp the pre-break
                     // bakes; nil for no clamp / a suppressed marker / bare max-lines.
                     blockEllipsisClamp: GreedyLineBreaker.drawnClamp(
-                        limit: style.text.lineClampLimit, properties: component.properties)
+                        limit: style.text.lineClampLimit, properties: component.properties),
+                    // Wave 53 (lane L2, D3) — horizontal-only soft-hyphen clause.
+                    horizontalWritingMode: WritingModeExtractor.extract(from: resolvedProperties)?.isVertical != true
                 )
             }
             // Phase 7 step 2: sort children by CSS `order` BEFORE rendering.
@@ -4280,7 +4288,10 @@ public struct ComponentRenderer: View {
                 // nil outside WPT capture (byte-identical decline there).
                 verticalUprightBudgetPx: VerticalUprightGate.budgetPx(
                     style: style, viewport: styleViewport,
-                    wptCaptureMode: wptCaptureMode)
+                    wptCaptureMode: wptCaptureMode),
+                // Wave 53 (lane L2, D3) — horizontal-only soft-hyphen clause:
+                // hyphens-vertical-001's own VERTICAL_RL leaf is the case.
+                horizontalWritingMode: WritingModeExtractor.extract(from: resolvedProperties)?.isVertical != true
             )
         }
     }
@@ -4827,6 +4838,16 @@ private struct PlaceholderLabel: View {
     // keeps the pre-wave-52 decline to the horizontal label.
     var verticalUprightBudgetPx: CGFloat? = nil
 
+    // Wave 53 (lane L2, F1-iOS; PLAN §9 D3) — the run's USED writing mode is
+    // horizontal-tb (WritingModeExtractor over the call site's MERGED list —
+    // `writing-mode` is inherited, css-writing-modes-4 §3.2). Read ONLY by
+    // the pre-break precondition's soft-hyphen clause
+    // (SoftHyphenPolicy.admitsPreBreak), which is horizontal-only because
+    // `wrapWidth` is the PHYSICAL width — the block axis of a vertical run.
+    // Deliberately no default: every call site states it, so no label can
+    // admit a vertical soft-hyphen run by omission.
+    var horizontalWritingMode: Bool
+
     var body: some View {
         // Resolve the visible string: rawText wins when present (the IR
         // carried explicit element text content), otherwise fall back to
@@ -4901,6 +4922,14 @@ private struct PlaceholderLabel: View {
         //     css-text/hyphens-span-002's seven boxes), and the old guard
         //     was written when the breaker could only split on spaces;
         //   • `hasUnbreakableOverflowingLine`'s per-line claim (see there).
+        //
+        // Wave 53 (lane L2, F1-iOS) — the precondition moved into
+        // SoftHyphenPolicy.admitsPreBreak (its two pre-wave-53 clauses kept
+        // verbatim and evaluated first) and gained ONE: a space-less run that
+        // carries U+00AD in a horizontal line. css-text-3 §5.3 `manual` makes
+        // the soft hyphen a break opportunity; declined, TextKit still took
+        // it, but `singleLineText` below pinned the box to ONE line box
+        // (hyphens-span-001 / -out-of-flow-001 ios: 26 px boxes, ref 46).
         let hyphenLocaleTag = AutoHyphenation.localeTag(textConfig.hyphensMode, lang)
         let hyphenLocale = hyphenLocaleTag.flatMap { AutoHyphenation.locale(for: $0) }
         // No-silent-fallthrough: `auto` degrades to `manual`'s explicit
@@ -4918,7 +4947,9 @@ private struct PlaceholderLabel: View {
         let broken: (text: String, preBroken: Bool, overlong: Bool) = {
             guard let cb = wrapWidth, !textConfig.noWrap,
                   !textConfig.preservesSpaces,
-                  transformedText.contains(" ") || hyphenLocale != nil
+                  SoftHyphenPolicy.admitsPreBreak(transformedText,
+                                                  dictionary: hyphenLocale != nil,
+                                                  horizontal: horizontalWritingMode)
             else { return (transformedText, false, false) }
             // Text width available inside the label: the content box
             // minus the 4px breathing inset each side (dropped in WPT

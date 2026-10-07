@@ -1,0 +1,111 @@
+[
+ {
+  "id": "M-a",
+  "why": "restore the space-only guard (pre-F1)",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+  "sha256Before": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "sha256Mutated": "e06fea90be2a7a785004106534843283b9953335dafcd655b3899ac948d22420",
+  "sha256Restored": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "red": {
+   "exit": 1,
+   "total": 20,
+   "failed": [
+    "PreBreakPipelineTest.aMultiOpportunitySpacelessRunSplitsIntoFiveLines",
+    "PreBreakPipelineTest.aSpacelessSoftHyphenRunFiresWithTheTakenHyphen"
+   ],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 20,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ },
+ {
+  "id": "M-b",
+  "why": "drop the !unbreakableOverflow && !tookSoftHyphen early return",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+  "sha256Before": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "sha256Mutated": "7bbf81af29d1ad1d15a069d151ec28c9070e9856bc323dea6a20d4cddf254050",
+  "sha256Restored": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "red": {
+   "exit": 1,
+   "total": 20,
+   "failed": [
+    "PreBreakPipelineTest.aDictionarySpacelessSoftHyphenRunStaysIdentity",
+    "PreBreakPipelineTest.aFittingSpacelessSoftHyphenRunIsIdentity",
+    "PreBreakPipelineTest.aRunThatFitsIsUntouched",
+    "PreBreakPipelineTest.anOrdinaryWrappingRunIsUntouched",
+    "PreBreakPipelineTest.anUntakenSoftHyphenDoesNotFire",
+    "PreBreakPipelineTest.declinesWhenTheOverlongWordIsHyphenated",
+    "PreBreakPipelineTest.theClampAloneNeverFires",
+    "PreBreakPipelineTest.theSoftHyphenTriggerStaysOutOfDictionaryRuns"
+   ],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 20,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ },
+ {
+  "id": "M-c",
+  "why": "remove !dictionaryHyphenation && from the F5 trigger",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+  "sha256Before": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "sha256Mutated": "91793d9d3258d9299de9d8faac393647d33db7e276a734834e8edef714ff54f0",
+  "sha256Restored": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "red": {
+   "exit": 1,
+   "total": 20,
+   "failed": [
+    "PreBreakPipelineTest.aDictionarySpacelessSoftHyphenRunStaysIdentity",
+    "PreBreakPipelineTest.theSoftHyphenTriggerStaysOutOfDictionaryRuns"
+   ],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 20,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ },
+ {
+  "id": "M-over",
+  "why": "over-widening: delete the space-less guard outright",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+  "sha256Before": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "sha256Mutated": "0efc6ab03590bd7e242accea7974f853d166c0d06a14f0d5b6103974a458d966",
+  "sha256Restored": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+  "red": {
+   "exit": 1,
+   "total": 20,
+   "failed": [
+    "PreBreakPipelineTest.declinesForASpacelessRunTheWholeRunGateOwns"
+   ],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 20,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "RED->GREEN"
+ }
+]

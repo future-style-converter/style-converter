@@ -1,0 +1,117 @@
+[
+ {
+  "id": "x5",
+  "why": "any declared Color counts as transparent ink",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+  "sha256Before": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "sha256Mutated": "6dae11ee51a92ffc6e531240553ac608fe068eba7e25d6760ce451adb12ec5ce",
+  "sha256Restored": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "red": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "NOT-PROVEN"
+ },
+ {
+  "id": "x2",
+  "why": "any explicit alpha counts as transparent",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+  "sha256Before": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "sha256Mutated": "371ebdea1b0bbdaf01dc21958c1b4db3440db4b377d1c09ab150b9eeb2684470",
+  "sha256Restored": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "red": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "NOT-PROVEN"
+ },
+ {
+  "id": "x3",
+  "why": "a missing alpha counts as transparent",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+  "sha256Before": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "sha256Mutated": "2101f9f33ceafbe3a2524dd4b93644826ed5cdd30596777925127997f993e2e4",
+  "sha256Restored": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "red": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "NOT-PROVEN"
+ },
+ {
+  "id": "x1",
+  "why": "delete the children/runs/decorations structure check",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+  "sha256Before": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "sha256Mutated": "4e2e1bef42d4432bd36fbf1af0b48590911fb554c4810ecb568d0b95aa5bcda1",
+  "sha256Restored": "3810bd8f261cf56332f5fcca17290e9be06e01200c02f5cf2affdcb26716aa52",
+  "red": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "NOT-PROVEN"
+ },
+ {
+  "id": "x4",
+  "why": "drop the TEXT_MEMBER_TAGS test from the F2 arm",
+  "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InlineRunFold.kt",
+  "sha256Before": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+  "sha256Mutated": "7ea06c14b1c46350c0bef86480b11efb1dbaa86c6a605911d4260a896c9fd18d",
+  "sha256Restored": "917d877dbab8e2190232ffa69402016a8f6870ac46cbafdc0b840356d3f02d6a",
+  "red": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "green": {
+   "exit": 0,
+   "total": 42,
+   "failed": [],
+   "compileError": false,
+   "tail": ""
+  },
+  "verdict": "NOT-PROVEN"
+ }
+]

@@ -1,0 +1,55 @@
+# hunk-for-orchestrator-2.patch — wave 53 L2 (soft-hyphen) FIX lane, skeptic D1 (must-fix), second half:
+# restate L2's geometry expectation lines in the orchestrator-owned generator AND its generated output.
+# Targets (NOT edited by L2): tools/titan/results/wave53-plan/plan-build.py, tools/titan/results/wave53-plan/expectations.json
+# Base: campaign/applier-campaign e330e255 (both committed at 1f5112cc; sha256 plan-build.py
+#   f42459a1317b878348348c32fa6e4b68616273623b37125df853a5af4633d2dd, expectations.json
+#   80077c40ad5ef6b513a0737a9847f3e4c442202e4228e68c0c4ce75908240c2a).
+# The expectations.json half is EXACTLY what the patched plan-build.py regenerates (verified in a git-archive copy of
+# wave53-plan/: unpatched plan-build.py reproduces both committed outputs byte-identically; patched, watchlist.txt is
+# byte-identical and expectations.json differs only in lanes.L2-soft-hyphen.geometryProbe: + inkRule, + selfCheck,
+# onWave52Ship restated to the restated probe's wave52-ship / wave53-open output).
+# Apply AFTER hunk-for-orchestrator-1.patch (the probe it describes). Apply: git apply <this file>
+diff --git a/tools/titan/results/wave53-plan/plan-build.py b/tools/titan/results/wave53-plan/plan-build.py
+index 6dc1cbfd..53c9eec5 100644
+--- a/tools/titan/results/wave53-plan/plan-build.py
++++ b/tools/titan/results/wave53-plan/plan-build.py
+@@ -188,7 +188,13 @@ L2 = {
+                'hyphens/hyphens-out-of-flow-001 ios': GEO_OK},
+     'geometryGating': ['hyphens/hyphens-span-001 android', 'hyphens/hyphens-out-of-flow-001 android',
+                        'hyphens/hyphens-out-of-flow-002 android', 'hyphens/hyphens-span-001 ios'],
+-    'onWave52Ship': 'the five target rows print GEOMETRY WRONG (box height 26 vs 46 on ios; line-1 ink x25-76 / x25-54 vs x25-61 on android); every ref row prints GEOMETRY OK',
++    # Wave-53 L2 skeptic D1 (restated before L2 lands, PLAN §10 addendum): the probe's line ink is max(r,g,b) < 200 —
++    # the old r+g+b < 300 could not see Android's grey hyphen (darkest (114,114,114)) and printed a CORRECT high‐/way
++    # picture as WRONG — and hyphens-span-002 (correct on every platform, L2 must-not-move) is a self-check anchor.
++    'inkRule': 'max(r,g,b) < 200 (was geometry_common.dark, r+g+b < 300; hunk-for-orchestrator-1.patch)',
++    'selfCheck': {'anchor': 'hyphens/hyphens-span-002', 'rows': ['ref', 'web', 'ios', 'android'], 'expect': GEO_OK,
++                  'onFail': 'prints SELF-CHECK FAILED (ANCHOR FAILED: hyphens/hyphens-span-002) and exits 1 — the rule (or a must-not-move leak, R4/R7), never the lane'},
++    'onWave52Ship': 'the five target rows print GEOMETRY WRONG (ios: box 1 height 26 vs ref 46; android: span-001 and -out-of-flow-001 box 1 line 1 ink x25-77 vs ref x25-61, -out-of-flow-002 box 3 line 1 ink x25-31 vs ref x25-61); every ref row and all four hyphens-span-002 anchor rows print GEOMETRY OK; exit 0 (same on wave53-open)',
+   },
+   # Round-2 must-fix 1 (iii): F1 and F2 are separate commits. hyphens-out-of-flow-001 android is carried by both
+   # (F1 alone ~0.975): a trigger on it reverts F2 first and re-probes css-text; F1 goes only if the re-probe still fails.
+diff --git a/tools/titan/results/wave53-plan/expectations.json b/tools/titan/results/wave53-plan/expectations.json
+index 5c486a23..2c47c1ff 100644
+--- a/tools/titan/results/wave53-plan/expectations.json
++++ b/tools/titan/results/wave53-plan/expectations.json
+@@ -678,7 +678,19 @@
+      "hyphens/hyphens-out-of-flow-002 android",
+      "hyphens/hyphens-span-001 ios"
+     ],
+-    "onWave52Ship": "the five target rows print GEOMETRY WRONG (box height 26 vs 46 on ios; line-1 ink x25-76 / x25-54 vs x25-61 on android); every ref row prints GEOMETRY OK"
++    "inkRule": "max(r,g,b) < 200 (was geometry_common.dark, r+g+b < 300; hunk-for-orchestrator-1.patch)",
++    "selfCheck": {
++     "anchor": "hyphens/hyphens-span-002",
++     "rows": [
++      "ref",
++      "web",
++      "ios",
++      "android"
++     ],
++     "expect": "GEOMETRY OK",
++     "onFail": "prints SELF-CHECK FAILED (ANCHOR FAILED: hyphens/hyphens-span-002) and exits 1 — the rule (or a must-not-move leak, R4/R7), never the lane"
++    },
++    "onWave52Ship": "the five target rows print GEOMETRY WRONG (ios: box 1 height 26 vs ref 46; android: span-001 and -out-of-flow-001 box 1 line 1 ink x25-77 vs ref x25-61, -out-of-flow-002 box 3 line 1 ink x25-31 vs ref x25-61); every ref row and all four hyphens-span-002 anchor rows print GEOMETRY OK; exit 0 (same on wave53-open)"
+    },
+    "revertUnits": {
+     "F1": {

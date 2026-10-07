@@ -1,0 +1,46 @@
+// tools/titan/results/wave53-soft-hyphen/skeptic-f2-census.kt.txt — wave 53 L2 SKEPTIC's own JVM fold census (kept as text;
+// copied into the skeptic's EXPORT tree only, never into the shared tree). For every per-test IR document of wave52-ship it
+// decodes through the production IRDocumentDecoder + SlotComposer, walks every component, and for every `meta.runs` host
+// whose plan resolves AND that references a {child} member with Position ABSOLUTE|FIXED, prints the fold outcome — then,
+// for every Folded merge and every leaf/run string holding U+00AD with no U+0020, the PreBreakPipeline decision at the
+// host's own ch Width (mono 19.2 px; the DECISION is censused, not pixels). Output: SKEPTIC_F2_CENSUS_OUT (env) path.
+package com.styleconverter.runtime.typography.inline
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import com.styleconverter.runtime.core.ir.IRDocumentDecoder
+import com.styleconverter.runtime.core.renderer.InlineRunPlan
+import com.styleconverter.runtime.core.renderer.SlotComposer
+import org.junit.Test
+
+class SkepticF2Census {
+    @Test
+    fun census() {
+        val runsRoot = java.io.File(System.getenv("SKEPTIC_RUN_SECTIONS")!!)
+        val out = StringBuilder()
+        var hosts = 0; var folded = 0; var dropped = 0
+        val docs = runsRoot.listFiles()!!.sortedBy { it.name }.flatMap { s ->
+            (java.io.File(s, "per-test-ir").listFiles() ?: emptyArray()).filter { it.name.endsWith(".json") }.sortedBy { it.name } }
+        fun isOof(c: IRComponent) = c.properties.any { it.type == "Position" &&
+            it.data.toString().trim('"').uppercase() in setOf("ABSOLUTE", "FIXED") }
+        for (f in docs) {
+            val roots = SlotComposer.compose(IRDocumentDecoder.decode(f.readText()))
+            fun walk(c: IRComponent) {
+                val plan = InlineRunPlan.resolve(c.runs, c.children)
+                if (plan != null && c.children!!.any { isOof(it) }) {
+                    hosts++
+                    val o = InlineRunFold.fold(plan.entries, c.children!!, c.properties, c.lang)
+                    val line = when (o) {
+                        is InlineRunFold.Outcome.Folded -> { folded++; dropped += o.droppedOutOfFlowMembers
+                            "Folded\t${o.text.replace("­", "<SHY>")}\toof=${o.droppedOutOfFlowMembers}" }
+                        is InlineRunFold.Outcome.Bailed -> "Bailed\t${o.reason}"
+                    }
+                    out.append("OOFHOST\t${f.name.removeSuffix(".json")}\t${c.id}\t$line\n")
+                }
+                c.children?.forEach { walk(it) }
+            }
+            roots.forEach { walk(it) }
+        }
+        out.insert(0, "# hosts-with-oof-member $hosts folded $folded droppedOutOfFlow $dropped\n")
+        java.io.File(System.getenv("SKEPTIC_F2_CENSUS_OUT")!!).writeText(out.toString())
+    }
+}

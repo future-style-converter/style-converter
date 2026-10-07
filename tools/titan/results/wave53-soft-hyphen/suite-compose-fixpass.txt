@@ -1,0 +1,17 @@
+# fix-pass focused Compose suite on the FINAL fix-pass bytes (InertOutOfFlowMember.kt 608ebe36…, InlineRunFoldTest.kt bd835388…);
+# shared tree, no seam-2 applied: RunFoldBreadcrumbSeamTest is red BY DESIGN until seam-2 is spliced.
+# cmd: (cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest -q --tests '*PreBreakPipelineTest' --tests '*InlineRunFoldTest' --tests '*GreedyLineBreakerTest' --tests '*WordBreakOpportunitiesTest' --tests '*SoftHyphenPolicyTest' --tests '*AutoHyphenationTest' --tests '*SeamReachabilityTest' --tests '*InlineSpanRingTest' --tests '*InlineSpanContentTest' --tests '*InlineAtomContentTest' --tests '*LineBoxCensusTest' --tests '*InlineRunPlanTest' --tests '*RunFoldBreadcrumbSeamTest')
+core.renderer.InlineRunPlanTest tests=8 failing=0 at 2026-10-07T04:46:18.246Z
+core.renderer.RunFoldBreadcrumbSeamTest tests=1 failing=1 at 2026-10-07T04:46:18.278Z
+core.renderer.SeamReachabilityTest tests=3 failing=0 at 2026-10-07T04:46:18.293Z
+typography.inline.InlineAtomContentTest tests=5 failing=0 at 2026-10-07T04:46:19.498Z
+typography.inline.InlineRunFoldTest tests=45 failing=0 at 2026-10-07T04:46:19.518Z
+typography.inline.InlineSpanContentTest tests=7 failing=0 at 2026-10-07T04:46:19.543Z
+typography.inline.InlineSpanRingTest tests=18 failing=0 at 2026-10-07T04:46:19.544Z
+typography.inline.LineBoxCensusTest tests=18 failing=0 at 2026-10-07T04:46:19.546Z
+typography.wrapping.AutoHyphenationTest tests=8 failing=0 at 2026-10-07T04:46:19.571Z
+typography.wrapping.GreedyLineBreakerTest tests=23 failing=0 at 2026-10-07T04:46:19.572Z
+typography.wrapping.PreBreakPipelineTest tests=20 failing=0 at 2026-10-07T04:46:19.577Z
+typography.wrapping.SoftHyphenPolicyTest tests=9 failing=0 at 2026-10-07T04:46:19.579Z
+typography.wrapping.WordBreakOpportunitiesTest tests=9 failing=0 at 2026-10-07T04:46:19.580Z
+TOTAL 174 run, 1 failing

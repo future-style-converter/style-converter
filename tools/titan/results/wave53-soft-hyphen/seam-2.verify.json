@@ -1,0 +1,30 @@
+{
+ "sha256Head": "e6c2a650ac435a58a8d6cd3412514e8e3bc545f9e0b4a4c4ba996ed946c54adb",
+ "sha256DiskBefore": "e6c2a650ac435a58a8d6cd3412514e8e3bc545f9e0b4a4c4ba996ed946c54adb",
+ "sha256Patched": "d251ace7442ef6e6a3eb90c750d886a804082b1b639217a03c02e1178ad54b3f",
+ "greenWithPatch": {
+  "exit": 0,
+  "total": 66,
+  "failed": [],
+  "compileError": false,
+  "tail": ""
+ },
+ "sha256Mutated": "54a7b5524dfcfe4ee5a3bc55b13a6f370add7566ef26758a5f8032919d6268c5",
+ "redMseam2": {
+  "exit": 1,
+  "total": 1,
+  "failed": [
+   "RunFoldBreadcrumbSeamTest.the runs-fold breadcrumb names the dropped out-of-flow members"
+  ],
+  "compileError": false,
+  "tail": ""
+ },
+ "greenAfterMutationRestore": {
+  "exit": 0,
+  "total": 1,
+  "failed": [],
+  "compileError": false,
+  "tail": ""
+ },
+ "sha256DiskAfter": "e6c2a650ac435a58a8d6cd3412514e8e3bc545f9e0b4a4c4ba996ed946c54adb"
+}

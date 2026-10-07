@@ -1,0 +1,13 @@
+{
+ "sha256Head": "ffa03357a06d5eaa7240dfbec020025ad2e63d02d903430ef8bd9d638212db5f",
+ "sha256DiskBefore": "ffa03357a06d5eaa7240dfbec020025ad2e63d02d903430ef8bd9d638212db5f",
+ "sha256Patched": "524e31581a58fd9d5faeb08c9477e857cc15a67bbe73bc134c46adc287ee5cea",
+ "greenWithPatch": {
+  "exit": 0,
+  "total": 89,
+  "failed": [],
+  "compileError": false,
+  "tail": ""
+ },
+ "sha256DiskAfter": "ffa03357a06d5eaa7240dfbec020025ad2e63d02d903430ef8bd9d638212db5f"
+}

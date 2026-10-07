@@ -122,10 +122,13 @@ class PreBreakPipelineTest {
         assertSame(dna, fire(wrapWidthPx = 0f).text)
     }
 
-    /** A run with NO space is the WHOLE-RUN case wave 21's B-RC7 gate
-     *  already owns (softWrap off when `hasSoftWrapOpportunity` is false).
-     *  One owner per case: the pipeline stands down so those captures stay
-     *  byte-identical. */
+    /** A run with NO space (and, since wave 53, no U+00AD either) is the
+     *  WHOLE-RUN case wave 21's B-RC7 gate already owns (softWrap off when
+     *  `hasSoftWrapOpportunity` is false). One owner per case: the pipeline
+     *  stands down so those captures stay byte-identical. Also the
+     *  over-widening pin for wave 53's F1: deleting the guard outright makes
+     *  the fold fire rule B on this overflowing word (a new String
+     *  instance), so `assertSame` fails. */
     @Test
     fun declinesForASpacelessRunTheWholeRunGateOwns() {
         val text = "Deoxyribonucleic"
@@ -237,6 +240,89 @@ class PreBreakPipelineTest {
         val r = fire(text = MANUAL_INLINE_012, wrapWidthPx = 40 * CH)
         assertFalse(r.fired)
         assertSame(MANUAL_INLINE_012, r.text)
+    }
+
+    // ── Wave 53 (lane L2, F1) — the SPACE-LESS soft-hyphen run ────────
+    //
+    // The `:166` decline used to stand down for EVERY space-less run on the
+    // claim that wave 21's whole-run gate owns them. It does not own a run
+    // that carries U+00AD: `DecorationOps.hasSoftWrapOpportunity` counts the
+    // soft hyphen, so softWrap stays on and Minikin (Hyphens.None under
+    // `manual`) emergency-breaks the word with no hyphen glyph —
+    // hyphens-span-001 android painted `highwa`/`y` (wave52-ship P 0.9532,
+    // DEGENERATE). Every payload below is VERBATIM off tools/titan/runs/
+    // wave52-ship/sections/css-text/per-test-ir (byte-identical to
+    // wave53-open: sha1 7b52d8c7… for hyphens-span-001.json on both).
+    //
+    // MUTATION PROOF: tools/titan/results/wave53-soft-hyphen/_note.md §3
+    // (M-a … M-d, red → restore byte-exact sha256 → green, executed).
+
+    /** hyphens-span-001 box 1 (`…hyphens-span-001__1-301`), the leaf
+     *  component VERBATIM (minified only): 6ch, `hyphens: manual`. */
+    private val SPAN_001_BOX1 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-text__hyphens__hyphens-span-001__1-301","name":"wpt__css-text__hyphens__hyphens-span-001__1","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"MANUAL"}],"text":"high­way","meta":{"role":"ws-after"}}]}"""
+
+    /** hyphens-auto-control box 1 (`…hyphens-auto-control__0-235`),
+     *  VERBATIM: 12ch, `hyphens: auto`, lang en-us. */
+    private val AUTO_CONTROL_BOX1 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-text__hyphens__hyphens-auto-control__0-235","name":"wpt__css-text__hyphens__hyphens-auto-control__0","properties":[{"type":"Display","data":"BLOCK"},{"type":"Hyphens","data":"AUTO"},{"type":"BorderTopWidth","data":{"px":1}},{"type":"BorderRightWidth","data":{"px":1}},{"type":"BorderBottomWidth","data":{"px":1}},{"type":"BorderLeftWidth","data":{"px":1}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"FontFamily","data":["Courier New","Courier","monospace"]},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"CH"}}}],"text":"fragilistic­expiali","meta":{"sourceTag":"code","role":"ws-after","lang":"en-us"}}]}"""
+
+    /** The leaf's own `text` through the PRODUCTION decoder — so a pin
+     *  that holds on a hand-typed literal but not on the wire cannot pass. */
+    private fun leafText(doc: String): String =
+        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(doc))[0]._text!!
+
+    /** Pin (a): the measured defect. At the ref's 6ch box `highway` does
+     *  not fit, the fold takes the authored soft hyphen (greedy, §5.3) and
+     *  the F5 trigger fires — the ref's `high‐`/`way`, hyphen painted. */
+    @Test
+    fun aSpacelessSoftHyphenRunFiresWithTheTakenHyphen() {
+        val text = leafText(SPAN_001_BOX1)
+        // The wire really is the space-less U+00AD string.
+        assertEquals("high\u00ADway", text)
+        val r = fire(text = text, wrapWidthPx = 6 * CH)
+        assertTrue(r.fired)
+        assertEquals("high\u2010\nway", r.text)
+    }
+
+    /** Pin (b): the same run in a box wide enough for `highway` takes no
+     *  break — identity (the SAME instance), so a fitting U+00AD run keeps
+     *  Minikin's frozen rendering. */
+    @Test
+    fun aFittingSpacelessSoftHyphenRunIsIdentity() {
+        val text = leafText(SPAN_001_BOX1)
+        val r = fire(text = text, wrapWidthPx = 8 * CH)
+        assertFalse(r.fired)
+        assertSame(text, r.text)
+    }
+
+    /** Pin (c): hyphens-auto-control's `fragilistic­expiali` now ENTERS the
+     *  pipeline (it carries U+00AD), and the fold does take the soft hyphen
+     *  at 12ch — but the run is `hyphens: auto` + a language tag, so its
+     *  opportunities are Minikin's dictionary's (AutoHyphenation) and the
+     *  taken-hyphen trigger stays out: identity, the must-not-move control. */
+    @Test
+    fun aDictionarySpacelessSoftHyphenRunStaysIdentity() {
+        val text = leafText(AUTO_CONTROL_BOX1)
+        // The production gate reads exactly this wire as engaged.
+        assertTrue(AutoHyphenation.engaged("AUTO", "en-us"))
+        val r = PreBreakPipeline.preBreak(
+            text = text, wrapWidthPx = 12 * CH, enabled = true,
+            softWrapAllowed = true, allowMidWordBreak = false, preservesSpaces = false,
+            dictionaryHyphenation = true, measure = mono)
+        assertFalse(r.fired)
+        assertSame(text, r.text)
+    }
+
+    /** Pin (d): a multi-opportunity space-less run — hyphenate-character-
+     *  001's run piece 1 VERBATIM (`…hyphenate-character-001__1-177`
+     *  meta.runs[0].text) at that test's 4.5ch box — splits at EVERY usable
+     *  soft hyphen into the ref's five lines (the `hyphenate-character`
+     *  wire is not threaded — U+2010 is baked, BACKLOG 4(f)). */
+    @Test
+    fun aMultiOpportunitySpacelessRunSplitsIntoFiveLines() {
+        val r = fire(text = "im\u00ADple\u00ADmen\u00ADta\u00ADtion", wrapWidthPx = 4.5f * CH)
+        assertTrue(r.fired)
+        assertEquals("im\u2010\nple\u2010\nmen\u2010\nta\u2010\ntion", r.text)
     }
 
     // ── Wave 52 (lane L9, F4) — the drawn-marker CLAMP on a fired run ──

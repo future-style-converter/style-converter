@@ -44,7 +44,12 @@
 //
 //  Twin: SoftHyphenPolicy.kt (Compose), same two entry points, same
 //  identity contract. Pure + Foundation-only so XCTest pins it without
-//  a renderer.
+//  a renderer — the one side effect is wave 53's `admitsPreBreak`
+//  refusal breadcrumb (PropertyTracker.logOnce, stderr, deduped). Its
+//  Compose counterpart is the PreBreakPipeline `:166` guard (wave 53
+//  F1), which needs no vertical clause: Compose's wrap-width latch is
+//  written by the horizontal Text only, so a vertical run declines there
+//  by construction.
 //
 
 import Foundation
@@ -101,5 +106,67 @@ enum SoftHyphenPolicy {
     static func displayString(_ text: String, mode: String?) -> String {
         guard suppresses(mode), text.contains(softHyphen) else { return text }
         return String(text.filter { $0 != softHyphen })
+    }
+
+    // MARK: - Wave 53 (lane L2, F1-iOS) — who may enter the greedy pre-break
+
+    /// U+00AD as a SCALAR: the membership test below walks unicode scalars,
+    /// not Characters, so a soft hyphen can never hide inside a grapheme
+    /// cluster with a neighbour (U+00AD is GCB=Control and stands alone in
+    /// practice; the scalar walk makes that a non-question).
+    private static let softHyphenScalar: Unicode.Scalar = "\u{00AD}"
+
+    /// May the label's greedy pre-break (ComponentRenderer.swift's `broken`
+    /// closure) take this run? The precondition the seam used to spell
+    /// inline, plus ONE new clause.
+    ///
+    /// - Until wave 53: `text.contains(" ") || dictionary` — a space to split
+    ///   on, or a `hyphens: auto` dictionary that can break a single word.
+    ///   Kept VERBATIM and evaluated FIRST, so every run it admitted is
+    ///   still admitted by the same test.
+    /// - Wave 53 (css-text-3 §5.3 `manual`: U+00AD IS a break opportunity
+    ///   and the hyphenate character is painted when the line breaks there):
+    ///   a SPACE-LESS run that carries a soft hyphen is admitted too. Before,
+    ///   TextKit took the soft hyphen on its own (drawing `high-`/`way`) but
+    ///   the composed line-box pin counted ONE line — `singleLineText`, since
+    ///   U+00AD is not whitespace — so every hyphens-span-001 / -out-of-flow-
+    ///   001 box was 26 px tall where the ref's is 46 px (wave52-ship ios f
+    ///   0.8652 / 0.8935). Pre-broken, the run reaches the label as
+    ///   `high‐\nway`: `preBroken` makes the line count exact (2) and the box
+    ///   pins at 2 × 20 + 6 px (CSS 2.1 §10.8), the hyphens-out-of-flow-002
+    ///   shape that already passes (its `lang` satisfies the dictionary arm).
+    /// - PLAN wave 53 §9 D3: the U+00AD clause is HORIZONTAL-ONLY. The label's
+    ///   wrap width (`textWrapWidth`) is the PHYSICAL width whatever the
+    ///   writing mode, so in a vertical run it is the block axis, not the
+    ///   line axis (css-writing-modes-4 §3) — pre-breaking there would fit
+    ///   lines against the wrong extent. hyphens-vertical-001's
+    ///   `hyphen\u{AD}ation` box reaches this test; it is refused, named once
+    ///   (no silent fallthrough), and keeps its pre-wave-53 rendering byte for
+    ///   byte. (A vertical run admitted by the two older clauses is untouched:
+    ///   that is pre-existing behaviour this lane does not own.)
+    ///
+    /// - Parameters:
+    ///   - text: the display string after text-transform and the `hyphens:
+    ///     none` strip — exactly what the pre-break would measure.
+    ///   - dictionary: a `hyphens: auto` dictionary is live for this run
+    ///     (`hyphenLocale != nil` at the seam).
+    ///   - horizontal: the run's USED writing mode is horizontal-tb.
+    static func admitsPreBreak(_ text: String, dictionary: Bool, horizontal: Bool) -> Bool {
+        // The pre-wave-53 precondition, verbatim and first.
+        if text.contains(" ") || dictionary { return true }
+        // No space, no dictionary, no soft hyphen: nothing to break — wave
+        // 21's whole-run gate (`wptUnbreakableRun`) owns the run, as before.
+        guard text.unicodeScalars.contains(softHyphenScalar) else { return false }
+        // D3: a vertical run's wrap width is the wrong axis — refuse, named.
+        guard horizontal else {
+            _ = PropertyTracker.logOnce(
+                key: "soft-hyphen:prebreak:vertical",
+                message: "hyphens: a space-less soft-hyphen run in a vertical writing "
+                    + "mode is not pre-broken (the label's wrap width is the physical "
+                    + "width, not the vertical line axis); TextKit keeps the run")
+            return false
+        }
+        // A space-less U+00AD run in a horizontal line: the fold owns it.
+        return true
     }
 }

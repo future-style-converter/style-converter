@@ -1,0 +1,57 @@
+# skeptic census over wave52-ship: 1435 docs
+docs holding U+00AD anywhere: 17
+  key .components[].meta.runs[].text: 18
+  key .components[].text: 33
+space-less U+00AD strings (leaf+run+mirror): 30  by kind: Counter({'leaf': 15, 'run': 9, 'mirror': 6})
+SPACELESS	css-text__hyphens__hyphenate-character-001	1-177	run	im<SHY>ple<SHY>men<SHY>ta<SHY>tion	ctx=Hyphens="MANUAL"@0,FontFamily=["monospace"]@0	width={"type": "length", "original": {"v": 4.5, "u": "CH"}}@0	lang=en@0
+SPACELESS	css-text__hyphens__hyphenate-character-003	1-193	run	im<SHY>ple<SHY>men<SHY>ta<SHY>tion	ctx=Hyphens="MANUAL"@0,FontFamily=["monospace"]@0	width={"type": "length", "original": {"v": 5.5, "u": "CH"}}@0	lang=en@0
+SPACELESS	css-text__hyphens__hyphenate-character-004	1-201	run	im<SHY>ple<SHY>men<SHY>ta<SHY>tion	ctx=Hyphens="MANUAL"@0,FontFamily=["monospace"]@0	width={"type": "length", "original": {"v": 6.5, "u": "CH"}}@0	lang=en@0
+SPACELESS	css-text__hyphens__hyphenate-character-005	0-220	leaf	قىل<SHY>	ctx=WhiteSpace="PRE"@0,FontFamily=["sans-serif"]@0	width={"type": "length", "px": 36.25}@0	lang=ug@1
+SPACELESS	css-text__hyphens__hyphens-auto-control	0-235	leaf	fragilistic<SHY>expiali	ctx=Hyphens="AUTO"@0,FontFamily=["Courier New", "Courier", "monospace"]@0	width={"type": "length", "original": {"v": 12, "u": "CH"}}@0	lang=en-us@0
+SPACELESS	css-text__hyphens__hyphens-auto-control	2-237	leaf	fragilistic<SHY>expiali	ctx=Hyphens="AUTO"@0,FontFamily=["Courier New", "Courier", "monospace"]@0	width={"type": "length", "original": {"v": 14, "u": "CH"}}@0	lang=en-us@0
+SPACELESS	css-text__hyphens__hyphens-auto-control	4-239	leaf	fragilistic<SHY>expiali	ctx=Hyphens="AUTO"@0,FontFamily=["Courier New", "Courier", "monospace"]@0	width={"type": "length", "original": {"v": 16, "u": "CH"}}@0	lang=en-us@0
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	1-270	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	2-271	mirror	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	2-271	run	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	3-273	mirror	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	3-273	run	igh<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	4-275	mirror	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	4-275	run	<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	5-277	mirror	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	5-277	run	high<SHY>	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	6-279	mirror	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	6-279	run	high<SHY>wa	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	7-281	mirror	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-out-of-flow-001	7-281	run	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	1-301	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	2-302	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	3-303	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	4-304	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	5-305	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	6-306	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	7-307	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	8-308	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-span-001	9-309	leaf	high<SHY>way	ctx=Hyphens="MANUAL"@0	width={"type": "length", "original": {"v": 6, "u": "CH"}}@0	lang=-
+SPACELESS	css-text__hyphens__hyphens-vertical-001	2-320	leaf	hyphen<SHY>ation	ctx=Hyphens="MANUAL"@0,WritingMode="VERTICAL_RL"@0,FontFamily=["monospace"]@0	width={"type": "length", "original": {"v": 3, "u": "EM"}}@0	lang=-
+abspos/fixed members in runs hosts: 21  inert(F2-predicate): 12  empty-arm: 8
+OOF	CSS2__abspos__between-float-and-text	1-002	abspos__between-float-and-text__1__0	tag=None	pos=ABSOLUTE	alpha=None	others=['Width', 'Height', 'BackgroundColor']	struct=False	empty=True	bail	None
+OOF	CSS2__abspos__hypothetical-inline-alone-on-second-line	1-006	abspos__hypothetical-inline-alone-on-second-line__1__1	tag=span	pos=ABSOLUTE	alpha=None	others=['PaddingLeft']	struct=False	empty=False	bail	'Line 2'
+OOF	CSS2__abspos__static-inside-inline-001	0-022	abspos__static-inside-inline-001__2__0__0	tag=None	pos=ABSOLUTE	alpha=None	others=['BackgroundColor', 'Width', 'Height']	struct=False	empty=True	bail	None
+OOF	CSS2__abspos__static-inside-inline-002	0-027	abspos__static-inside-inline-002__2__0__0	tag=None	pos=ABSOLUTE	alpha=None	others=['BackgroundColor', 'Width', 'Height']	struct=False	empty=True	bail	None
+OOF	CSS2__abspos__static-inside-inline-003	0-032	abspos__static-inside-inline-003__2__0__0	tag=None	pos=ABSOLUTE	alpha=None	others=['BackgroundColor', 'Width', 'Height']	struct=False	empty=True	bail	None
+OOF	css-position__position-absolute-semi-replaced-stretch-other	2-160	position-absolute-semi-replaced-stretch-other__2__0	tag=label	pos=ABSOLUTE	alpha=None	others=['MarginTop', 'MarginRight', 'MarginBottom', 'MarginLeft', 'BoxSizing', 'Top', 'Right', 'Bottom', 'Left', 'OutlineWidth', 'OutlineStyle', 'OutlineColor', 'Width', 'Height']	struct=False	empty=True	bail	None
+OOF	css-pseudo__first-letter-list-item-dynamic-001	1-147	first-letter-list-item-dynamic-001__1__0	tag=None	pos=FIXED	alpha=None	others=['Top', 'Left', 'Width', 'Height', 'BoxSizing', 'MarginTop', 'MarginRight', 'MarginBottom', 'MarginLeft', 'PaddingTop', 'PaddingRight', 'PaddingBottom', 'PaddingLeft', 'BorderTopWidth', 'BorderRightWidth', 'BorderBottomWidth', 'BorderLeftWidth', 'BorderTopStyle', 'BorderRightStyle', 'BorderBottomStyle', 'BorderLeftStyle', 'BackgroundColor', 'Display', 'OverflowX', 'OverflowY']	struct=False	empty=True	bail	None
+OOF	css-tables__abspos-container-change-dynamic-001	1-054	abspos-container-change-dynamic-001__0__0__0__1__0	tag=None	pos=ABSOLUTE	alpha=None	others=['Top', 'Left', 'Width', 'Height', 'BackgroundColor', 'BoxSizing', 'MarginTop', 'MarginRight', 'MarginBottom', 'MarginLeft', 'PaddingTop', 'PaddingRight', 'PaddingBottom', 'PaddingLeft', 'BorderTopWidth', 'BorderRightWidth', 'BorderBottomWidth', 'BorderLeftWidth', 'BorderTopStyle', 'BorderRightStyle', 'BorderBottomStyle', 'BorderLeftStyle', 'Display', 'OverflowX', 'OverflowY']	struct=False	empty=True	bail	None
+OOF	css-text__hyphens__hyphens-out-of-flow-001	2-271	hyphens__hyphens-out-of-flow-001__2__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-001	3-273	hyphens__hyphens-out-of-flow-001__3__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-001	4-275	hyphens__hyphens-out-of-flow-001__4__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-001	5-277	hyphens__hyphens-out-of-flow-001__5__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-001	6-279	hyphens__hyphens-out-of-flow-001__6__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-001	7-281	hyphens__hyphens-out-of-flow-001__7__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-002	2-285	hyphens__hyphens-out-of-flow-002__2__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-002	3-287	hyphens__hyphens-out-of-flow-002__3__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-002	4-289	hyphens__hyphens-out-of-flow-002__4__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-002	5-291	hyphens__hyphens-out-of-flow-002__5__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-002	6-293	hyphens__hyphens-out-of-flow-002__6__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-text__hyphens__hyphens-out-of-flow-002	7-295	hyphens__hyphens-out-of-flow-002__7__0	tag=span	pos=ABSOLUTE	alpha=0	others=[]	struct=False	empty=False	INERT	'abspos'
+OOF	css-values__ch-unit-001	2-168	ch-unit-001__2__0	tag=span	pos=ABSOLUTE	alpha=None	others=['BackgroundColor', 'Top', 'Bottom', 'Width']	struct=False	empty=True	bail	None
