@@ -892,7 +892,8 @@ and gate scripts must never stop a process this checkout did not start".
 | | before `val floatSegments =` (`:3670`) FloatAvoidLayout branch, mutually exclusive with float runs by G5 | L4 | `wave53-float-avoid/seam-1.patch` | ~150 lines above L2's hunk, no textual overlap; apply AFTER L2's seam-2, `git apply --check` first, re-cut against the L2-applied tree if it does not apply with offset |
 | `apps/web-harness/src/sdui/ComponentRenderer.tsx` | — | — | — | no lane needs it |
 
-Five seam patches (L1 one, L2 two, L4 two) carry seven hunks; L1's extractor patch holds three of them. No two hunks overlap. The two native ComponentRenderers each get one L2 hunk and one L4
+Five seam patches (L1 one, L2 two, L4 two) carry seven hunks; L1's extractor patch holds three of them. **[Restated at §10
+item 10 (fix pass): as landed they carry 13 seam-file hunks plus 2 patch-borne test files — L2's seam-1 alone is 7 hunks.]** No two hunks overlap. The two native ComponentRenderers each get one L2 hunk and one L4
 hunk, so L2 is applied before L4 on both. The JVM and Catalyst focused suites of both lanes are re-run after each applied patch.
 
 ## 4. Landing order (and the conflicts it resolves)
@@ -917,7 +918,8 @@ hunk, so L2 is applied before L4 on both. The JVM and Catalyst focused suites of
    - Gate before each commit: the gate-flag wire differential over all 30 sections must change exactly that commit's expected
      set and nothing else (plan-skeptic round 2, nit 11; `expectations.json` `lanes.L1-lists-bakes.revertUnits.*.wire`).
      - Unit 1 against cdb8a845: {`counter-reset-reversed-nested`}. The nested-list brief §6 measured (A)+(B) changing 1 of 1435
-       fixtures.
+       fixtures. **[§10 item 9 (fix pass): that is the CONTENT-changed set; U1 also renumbers the 10 later css-lists documents
+       by +1, ids only.]**
      - Unit 2 against the Unit-1 tree: {`counter-suffix`, `bidi-lines-001`, `bidi-lines-002`, `anchor-center-safe-rtl`}.
      - Cumulative, against cdb8a845: the five wire carriers.
      - Under a P-narrow re-land, Unit 2's set is {`counter-suffix`}.
@@ -1100,7 +1102,8 @@ reverted out of the integrated tree when ANY of rules 1-5 holds for a cell or ca
 
    A cell carried by two commits of one lane (`hyphens-out-of-flow-001` android: F1 + F2) reverts the later commit first. The
    earlier one goes only if the re-probe of its sections still fails. Reverting U2 never takes U1 with it, and the same holds
-   for every other pair.
+   for every other pair. **[False for L3 unit A, measured at the fix pass — §10 item 8: A's commit-level revert is
+   B-android → B-ios → B-web → A, or the prepared `wave53-canvas-root/a-only-revert.patch`.]**
 7. **P-narrow, not a revert.** A web or iOS change on `bidi-lines-001`, `bidi-lines-002` or `anchor-center-safe-rtl`, or a rule-1
    or rule-2 trigger on `bidi-lines-001` / `-002` android, re-lands U2 as U2-narrow (§2 L1 (P);
    `lanes.L1-lists-bakes.pNarrowFallback`). Hunk P alone reaches those three documents: they host no marker, so hunk M never
@@ -1380,7 +1383,7 @@ Measured on `wave53-open` (29 of 30 sections; `tools/titan/results/wave53-gate/_
 6. **Wire control: a "renumbered" class (measured, not pre-registered).** The hh-probe's wire control first reported 15 leaks:
    every `css-counter-styles/cssom/cssom-*-setter{,-invalid}` document — the 15 tests after `counter-suffix` in `tests.list`.
    Each is identical to its `wave53-open` twin once the component-id counter is stripped, every id shifted by exactly +6 =
-   counter-suffix's 23 → 29 components (L1 U1-B): the extractor numbers a section's components with ONE running counter, so
+   counter-suffix's 23 → 29 components (L1 U1-B **[corrected at §10 item 9: L1 U2, hunk M's six marker runs]**): the extractor numbers a section's components with ONE running counter, so
    a carrier that gains components renumbers the ids of every later document in the section. Captures of the 15 are
    byte-identical on all three platforms (ids are not rendered). `control-check.mjs` now classifies such a document as
    "renumbered" when — and only when — its uniform id shift equals the running component-count delta of the content-changed
@@ -1399,3 +1402,69 @@ Measured on `wave53-open` (29 of 30 sections; `tools/titan/results/wave53-gate/_
    :3400, the developer's server on :3000 named and left). Fixed in L5's ownership: `smoke.sh` runs `build-fixtures` (idempotent)
    before the tiers and skips them with a named reason when the build fails. Record: `wave53-harness-hygiene/_note.md` T4.
 
+## §10 addendum, part 2 (wave-53 fix pass, 2026-10-07 — after the S1 combined-tree skeptic, before `wave53-probe` is read)
+
+Each item restates a pre-registration record that the S1 skeptic (`tools/titan/results/wave53-S1/_note.md`) falsified by
+execution. The fix lane re-ran every check before acting (`wave53-S1/_note.md` "## Fix pass"). No item moves a carrier set,
+a floor, a `gating` flag, a `geometryGating` row or a must-not-move cell: `plan-build.py` regenerated `expectations.json`
+(the fields `adjudicate.mjs` / `control-check.mjs` read are byte-identical) and `watchlist.txt` is byte-identical (405 lines).
+
+8. **L3 unit A is not independently revertible (S1 M1).** A 3-way `git revert add9de84` on HEAD conflicts in
+   `ScreenshotCaptureScreen.kt`, `CaptureCanvas.swift` and `ComposedCaptureGallery.tsx`; it reverts clean only after B-android
+   (276757ea), B-ios (06c41979) and B-web (adfb3fe8). Every other unit, F2 → F1 and U2 → U1 revert clean (`wave53-S1/
+   revert-orders.out.txt`; the fix lane's re-run in a scratch clone printed the same 13 lines). The cause is structural: every
+   B call site lives inside A's code. Pre-registered now:
+   - A commit-level revert of A is the ORDER B-android → B-ios → B-web → A, and it takes `s-11-1-1b-006` web / ios / android
+     back to their `wave53-open` captures (`expectations.json` `lanes.L3-canvas-root.revertUnits.A.revertOrder` / `revertTakes`).
+   - When only A trips a rule (rules 1-5 on A's carriers or its gating rows while the B rows hold), apply
+     `tools/titan/results/wave53-canvas-root/a-only-revert.patch` INSTEAD (`revertUnits.A.aOnlyRevert`, the u2-narrow
+     precedent). It removes item A on all three platforms and keeps every B unit, re-wired onto the unstripped forest.
+     `git apply --check` is clean on the fixed tree; its header carries the base sha256 of every path it touches and the
+     export verification (web-harness 324/324 and web runtime 1361/1361 = A's 6 + 8 pins gone, both `tsc` 0; compose
+     3434/3434; android-harness 160/160 = A's 9 pins gone, B-android's stack pin red under mutation BK; Catalyst in the S1
+     note).
+   - Either form re-probes the B rows' sections on the reverted tree (rule 6). `ios-callsite-pins.mjs` is RED in both states
+     by design: it pins A's iOS call sites.
+9. **L1's wire radius and its renumbering shadows (S1 M2).** The extractor numbers a section's components with one running
+   counter (contiguous on `wave53-open`: the nested document holds ids 381-387 and the next one starts at 388).
+   - **U1** content-changes exactly `counter-reset-reversed-nested` (7 → 8 components with the real extractor, "1. One"
+     restored; `wave53-S1/component-counts.out.txt`; 1/1435 in `wave53-S1/u1-differential.out.txt`) and renumbers the 10
+     css-lists documents after it (index 38 of 48 in `tests.list`) by +1. Derived, not yet gate-measured: the hh-probe ran
+     without seam-1 and without css-lists.
+   - **U2** owns the css-counter-styles +6 × 15 shadow of item 6: hunk M's six marker runs (hh-probe `extract.log`
+     `[bidi-bake: baked — 2 roots, 10 runs]` against `wave53-open`'s `4 runs`). U1-B cannot be its source: counter-bake's
+     U1 hunk changes only reversed counters and `counter-suffix.html` has none; its static count is 19 → 19.
+   - So item 6's "(L1 U1-B)" is wrong, and §4 step 3's "Unit 1 … {`counter-reset-reversed-nested`}" is true of content
+     only. The wire control is unaffected — `control-check.mjs`'s classifier is generic (shift = the running component-count
+     delta of the content-changed documents before it) and none of the 25 shadow documents references an id outside
+     `id` / `slot.parent` — but a revert of U1 or U2 changes which shadow exists. `expectations.json`
+     `wireRenumbering.measuredShadow` now carries both, each with its unit and basis, and `revertUnits.U1/U2.wireShadow`
+     name them.
+10. **The §3 seam registry, restated (S1 S1).** L2's `seam-1.patch` carries 7 hunks in `ComponentRenderer.swift`, not one:
+    the `horizontalWritingMode` stored property on PlaceholderLabel (:4860), its four call sites (:3218, :3507, :3566,
+    :4310), the moved-precondition comment block (:4944) and the guard → `SoftHyphenPolicy.admitsPreBreak` (:4969). The D3
+    horizontal gate needs the label's writing mode as an input (L2 note §1 "Where the tree disagreed" item 1; the patch
+    header). Totals as landed: **13 seam-file hunks** — `extract-fixture.mjs` 3 (L1), `ComponentRenderer.swift` 8 (L2 7,
+    L4 1), `ComponentRenderer.kt` 2 (L2 1, L4 1), `ComponentRenderer.tsx` 0 — plus **2 patch-borne new test files**
+    (`FloatAvoidSeamWiringTest.kt`, `FloatAvoidLayoutRasterTests.swift`). Every hunk replays MATCH from its lane patch onto
+    its unit commit's parent (`wave53-S1/seamcheck.out.txt`).
+11. **The counter-suffix native labels (S1 S3 = L1 skeptic D6 and nit 11).** U2 makes the RTL rows right, but iOS rows 3-4
+    (the Hebrew period swap) and iOS + Android rows 5-6 (the CJK marker 4 px left) keep wrong ink, and no wave-53 lane touches
+    them. The two rows are labelled "RTL rows picture-correct; cell stays DEGENERATE on rows 3-6 (iOS)" / "… rows 5-6
+    (Android)" (`expectations.json` `kind`), never "faithful". §1's "L1 6" picture-correct cells are 4 cells fully + the two
+    counter-suffix natives partially. The ios row's `gating: true` is its 0.95 FLOOR only (rule 3; §2 L1 "0.95 · report"): its
+    geometry line is report-only, which is why `geometryProbe.geometryGating` omits it (now stated in the row's `gatingMeans`).
+12. **What the fix pass changed after the sweep, with its pre-registered radius** (so the probe reader knows what it reads):
+    - L1 `bidi-marker-bake.mjs`: an item the in-page probe cannot re-find by its rect gets an error fact (declined, stamped
+      `marker-not-baked`) instead of a silent skip; marker glyph tops drop the probe span's half-leading. Radius 0 on the
+      corpus: the only list items inside bake roots are `counter-suffix`'s four RTL items (census over the 17 frozen
+      bidi-baked fixtures), and the CDP probe re-found all four with every marker top at the text's 2 px
+      (`wave53-lists-bakes/marker-probe.out.txt`).
+    - L4 `FloatAvoidPlan.{kt,swift}`: a float whose Position is not absent / STATIC / RELATIVE is refused (CSS 2.1 §9.7).
+      Radius 0: both census pins, now on `ContentsUnboxing.resolve`, still admit exactly the 3 carriers.
+    - L3 `RootBackgroundPropagation.{kt,swift,ts}`: the uniformity predicates moved verbatim to
+      `RootBackgroundUniformity.{kt,swift,ts}`; Compose `canvasModifier` consumes a pure `canvasPaintPlan` (same layer order,
+      same tile base, same overpaint). Behaviour-identical by construction; A's pins are green and were re-mutated red.
+    - L5 `smoke.sh`: `build_fixtures` moved to a sourced `tools/visual/smoke-fixtures.sh`, its body unchanged.
+    - Suite counts move with the new pins — tooling +5, compose +2, android-harness +1, swiftui +2 — so the orchestrator
+      re-runs the sweep and restamps the doc tables before `wave53-probe` (`doc-staleness-check.sh` fails until then).

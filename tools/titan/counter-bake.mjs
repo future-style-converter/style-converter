@@ -239,9 +239,13 @@ function setCounter(set, name, value, who = null) {
   // §4.4.2 step 3.3: the walk stops at the FIRST element that counter-sets
   // this counter, adding the set VALUE to what it has accumulated so far;
   // step 4 then adds the last non-zero incrementNegated — unless THIS setter
-  // made that step itself, whose −increment `negSum` already holds (the bake
-  // steps before it sets; see the IMPLIED VALUE banner). Recorded before the
-  // assignment because `negSum` must not include anything after.
+  // made that step itself, whose −increment `negSum` already holds (on an
+  // ELEMENT the bake steps before it sets; see the IMPLIED VALUE banner).
+  // KNOWN GAP (L1 skeptic D4 P2; 0 corpus carriers): inside a PSEUDO bag
+  // pseudoSet applies the bag's set BEFORE its increment (pre-existing order),
+  // so a ::before that both steps and sets a reversed counter takes the
+  // PREVIOUS box's step as its term (11, 8, 7 where §4.4.2 gives 14, …).
+  // Recorded before the assignment because `negSum` must not include anything after.
   if (inst.reversed && !inst.stopped) {
     inst.implied = inst.negSum + value + (inst.lastNegBy === who ? 0 : inst.lastNeg);
     inst.stopped = true;

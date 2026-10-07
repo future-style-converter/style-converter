@@ -1,0 +1,27 @@
+{
+ "label": "L5-boundary",
+ "file": "tools/titan/own-processes.sh",
+ "sha_before": "c4bbf32ce5f7a1b3fc3a37ee89660093c05674fb1a4c6804d896b5eed4151dc7",
+ "sha_mutated": "2cc5a2dcf5d2fdf83b9f18dd2ac85c75c3ce3b8cacdbed0d1943801293cb355e",
+ "sha_restored": "c4bbf32ce5f7a1b3fc3a37ee89660093c05674fb1a4c6804d896b5eed4151dc7",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "# pass 7",
+  "# fail 0"
+ ],
+ "red_lines": [
+  "not ok 2 - gradle: a mixed daemon, a sibling-prefix daemon, a nested-checkout daemon and a log-less daemon all survive",
+  "name: 'AssertionError'",
+  "# pass 6",
+  "# fail 1"
+ ],
+ "green_after": [
+  "# pass 7",
+  "# fail 0"
+ ]
+}

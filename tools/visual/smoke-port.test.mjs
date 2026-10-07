@@ -127,3 +127,25 @@ test('smoke\'s fallback range is disjoint from test-all\'s and section-runner\'s
   // The default stays the vite.config.ts port the two probes fall back to.
   assert.match(read('tools', 'visual', 'smoke-port.sh'), /local default="\$\{1:-3000\}"/);
 });
+
+// wave53 fix pass (S1 S7): build_fixtures moved to tools/visual/smoke-fixtures.sh (PLAN §0
+// size rule), so its wiring is pinned here. MUTATION (executed, red → byte-exact restore →
+// green; sha256 in tools/titan/results/wave53-S1/_note.md "## Fix pass"): SF1 the
+// smoke-fixtures.sh `source` line dropped from smoke.sh → red.
+test('smoke.sh: the Tier-5/11 fixture JSONs are built (smoke-fixtures.sh, sourced) before vite and both tiers', () => {
+  const src = readFileSync(join(REPO, 'tools', 'visual', 'smoke.sh'), 'utf8');
+  const fx = readFileSync(join(REPO, 'tools', 'visual', 'smoke-fixtures.sh'), 'utf8');
+  const live = src.split('\n').filter((l) => !/^\s*#/.test(l));    // code lines only
+  assert.match(src, /^source "\$PROJECT_ROOT\/tools\/visual\/smoke-fixtures\.sh"$/m, 'smoke sources build_fixtures');
+  // The function is defined there, and only there, and builds through the harness's own script.
+  assert.match(fx, /^build_fixtures\(\) \{$/m);
+  assert.equal(live.filter((l) => /^build_fixtures\(\)/.test(l)).length, 0, 'no second definition in smoke.sh');
+  assert.match(fx, /npm run --silent build-fixtures/);
+  // A failed build skips vite (and so both tiers): build → gate → start vite.
+  const at = (re) => { const i = live.findIndex((l) => re.test(l)); assert.ok(i >= 0, `missing ${re}`); return i; };
+  const buildAt = at(/^if build_fixtures; then FIXTURES_OK=1; else EXIT_CODE=1; fi$/);
+  const gateAt = at(/^if \(\( FIXTURES_OK \)\); then$/), startAt = at(/^\s*start_vite \|\|/);
+  assert.ok(buildAt < gateAt && gateAt < startAt, 'build, gate, then vite');
+  // Both scripts parse (bash -n: no execution).
+  for (const f of ['smoke.sh', 'smoke-fixtures.sh']) assert.equal(spawnSync('bash', ['-n', join(REPO, 'tools', 'visual', f)]).status, 0, f);
+});

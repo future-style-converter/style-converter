@@ -414,3 +414,25 @@ test('a counter STYLE name is case-sensitive: `Decimal` is not `decimal`', () =>
   assert.equal(bakeCounters({ components: upper }).status, 'refused');
   assert.deepEqual(contents(upper), ['counter(c, Decimal)']);
 });
+
+// Wave 53 fix pass (S1 S2 = L1 skeptic D4): the step-4 attribution key of a
+// PSEUDO setter (`"<index>::<pseudo>"`). No WPT reference exercises it, so the
+// expectation is the css-lists-3 §4.4.2 arithmetic, written out below.
+// MUTATION (executed, red → byte-exact restore → green; sha256 in
+// tools/titan/results/wave53-S1/_note.md "## Fix pass"): FX5 the pseudo key
+// collapsed to the node index (L1 skeptic SN3C) → 11, 10, 9 → red.
+test('§4.4.2 step 4: a ::before setter after its ELEMENT\'s own step takes that step as its term (12, 10, 9)', () => {
+  // a{inc −1} a::before; b{inc −1} b::before{counter-set: foo 10}; c{inc −1} c::before.
+  // Walk: a 1 → b 1 (= 2) → b::before sets 10 (= 12), stop; step 4 adds the last
+  // non-zero −increment (b's own 1 — a DIFFERENT box from b::before) = 13 ⇒ 12, 10, 9.
+  const bag = (props = {}) => ({ before: { properties: { ...props, content: 'counter(foo)' } } });
+  const components = {
+    ol: cmp({ 'counter-reset': 'reversed(foo)' }, { children: {
+      a: cmp({ 'counter-increment': 'foo -1' }, { _pseudo: bag() }),
+      b: cmp({ 'counter-increment': 'foo -1' }, { _pseudo: bag({ 'counter-set': 'foo 10' }) }),
+      c: cmp({ 'counter-increment': 'foo -1' }, { _pseudo: bag() }),
+    } }),
+  };
+  bakeCounters({ components });
+  assert.deepEqual(contents(components), ['"12"', '"10"', '"9"']);
+});

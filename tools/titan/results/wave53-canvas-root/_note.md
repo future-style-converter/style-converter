@@ -155,8 +155,11 @@ Notes on the pins:
   configs the existing ColorApplier paints (offsets 66/16 for 001), the strip through the real `composedCanvasRoots`, and a
   source pin of the call-site placement (`.then(rootImageModifier)` after `?: Modifier.background(canvasBackground)`, before
   `composedIcbClipBandPx(`). On the JVM the url layer's synchronous BitmapFactory decode is stubbed, so ColorApplier skips
-  it there (measured: the target's `canvasModifier` is `Modifier` on the JVM); on device the same payload decodes
-  (`css-image-fallbacks-and-annotations002` android P 0.9982).
+  it there (measured: the target's `canvasModifier` is `Modifier` on the JVM); on device the same layer SHAPE decodes —
+  **corrected citation (fix pass, L3 skeptic should-fix 3):** `css-break/background-image-000/-001/-002` android P 1
+  (`cells.mjs`, wave52-ship and wave53-open), plain `{url: data:image/png…}` layers through ColorApplier, the target's own
+  path. The earlier citation, `css-image-fallbacks-and-annotations002` android P 0.9982, is the `image()` notation
+  (`ImageNotation`), a different path.
 
 Focused suites, all green on the final tree:
 - web-harness `npx vitest run tests/ui/ComposedCanvas tests/ui/ComposedCaptureGallery.test.tsx` — 11 files, 78 tests;
@@ -257,5 +260,36 @@ Nothing this lane needs BEFORE landing requires a device. At integration / probe
 - Web markup is pinned with `renderToStaticMarkup` outside `?wpt=1` mode (the harness's WPT_MODE min-size suppression is
   off there); the census compares like with like, and the asserted keys (canvas/ICB/wrapper styles) are WPT_MODE-independent.
 - The full suites were not run (single-writer rule); the orchestrator's sweep owns them.
+
+STATUS: COMPLETE
+
+## Fix pass (wave-53 S1, 2026-10-07; full record in `tools/titan/results/wave53-S1/_note.md` "## Fix pass")
+
+- **S1 M1 — unit A is not independently revertible; an A-only revert is now PREPARED.** `a-only-revert.patch` (this
+  directory; header = provenance, base sha256 per path, the export verification) removes item A on all three platforms
+  and keeps B-web / B-ios / B-android on the unstripped forest. Verified on exports: web-harness 324/324, web runtime
+  1361/1361, both `tsc` 0, compose 3434/3434, android-harness 160/160 (B-android's stack pin red under BK), Catalyst
+  2184/2184; patch-on-the-fixed-tree equals the verified tree byte for byte (tracked files). PLAN §10 item 8 and
+  `expectations.json` `revertUnits.A` (`revertOrder` B-android → B-ios → B-web → A, `aOnlyRevert`).
+- **Skeptic should-fix 2 (XI1) — the iOS call sites are pinned.** `ios-callsite-pins.mjs` (no device): five pins on
+  `CaptureCanvas.swift` (image layer between the ICB clip and the colour, before the root clip; the split strips the image
+  then builds the table forest; the plan reads the canvas-owned margin and the colour's containment gate; the paint reads
+  the unstripped body at the frame), six in-memory mutations XI1-XI6 all RED (`ios-callsite-pins.out.txt`).
+  `../wave52-composed-canvas/ios-source-pins.mjs` stays 7/7.
+- **Skeptic should-fix 1 (XC1-3) — the Android paint composition is pure and pinned.** `RootBackgroundPropagation.kt`
+  `canvasPaintPlan(props, plan, frame)` → `CanvasPaint(bottomUp, overpaintFrame)`; `canvasModifier` consumes it (same
+  order, base, overpaint). Pin **a7** in ComposedCanvasRootBackgroundTest on verbatim 001: bottom-up [(16,16) black,
+  (66,66) ramp], overpaint true; the target overpaint false; a source pin that `canvasModifier` spends the plan. XC1, XC2,
+  XC3 and XC9 (the modifier ignoring the flag) → red.
+- **Skeptic should-fix 3 — citation corrected** (§ "Android cannot draw…" above): `css-break/background-image-000/-001/-002`
+  android P 1.
+- **S1 S7 — size.** The F2 uniformity predicates moved verbatim to `RootBackgroundUniformity.{kt,swift,ts}`:
+  RootBackgroundPropagation.kt 223 → 188 (+ 75), .swift 218 → 161 (+ 84), .ts 211 → 138 (+ 91). Replayed: web RW1/RW3,
+  Swift SA5 and a stack-uniformity mutation all red. Remaining exceptions (call sites in already-oversized files, recorded
+  for the PR): ComposedCaptureGallery.tsx +95, ScreenshotCaptureScreen.kt +72, CaptureCanvas.swift +42 (each holds the
+  canvas-local helpers A/B need: the plan resolver, the forest strip, the paint view); ComposedCanvasRootBackgroundTest.kt
+  250 lines.
+- **Nit 8 — "the engine's own" ×4 → "the runtime's own".**
+- TREES (fix pass): Gradle ran only in exports under the session scratchpad (`--no-daemon`), never in this tree.
 
 STATUS: COMPLETE

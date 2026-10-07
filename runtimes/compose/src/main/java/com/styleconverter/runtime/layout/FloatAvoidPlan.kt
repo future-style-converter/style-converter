@@ -56,6 +56,8 @@ object FloatAvoidPlan {
         // G6 — floats: plain childless px boxes, no box-model bands, block display.
         if (floats.any { !plainBox(it) || !it.children.isNullOrEmpty() || boxBails(it) }) return null
         if (floats.any { keyword(pairs(it), "Display") !in setOf(null, "BLOCK") }) return null
+        // CSS 2.1 §9.7: an absolute/fixed box's `float` computes to none (out of flow) — no float to avoid.
+        if (floats.any { keyword(pairs(it), "Position") !in FLOAT_POSITIONS }) return null
         val widths = floats.map { lengthPx(it, "Width") ?: return null }
         val heights = floats.map { lengthPx(it, "Height") ?: return null }
         val bp = pairs(bfc)                                          // G4 — the in-flow BFC root itself
@@ -189,6 +191,7 @@ object FloatAvoidPlan {
     )
     private val BLOCK_DISPLAYS = setOf(null, "BLOCK", "FLOW_ROOT")   // absent = block (div / anonymous)
     private val STATIC = setOf(null, "STATIC")                       // absent = the initial `static`
+    private val FLOAT_POSITIONS = setOf(null, "STATIC", "RELATIVE")  // §9.7: the positions a float keeps
     private val INTRINSIC_WIDTHS = setOf("FIT_CONTENT", "MIN_CONTENT", "MAX_CONTENT") // css-sizing-3 §3.2
     private val INLINE_LEVEL = setOf("INLINE", "INLINE_BLOCK", "INLINE_FLEX", "INLINE_GRID", "INLINE_TABLE")
 }

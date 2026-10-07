@@ -1,0 +1,29 @@
+{
+ "label": "L5-fallback",
+ "file": "tools/visual/smoke-port.sh",
+ "sha_before": "dbfcd94eb87efda5d7793f3120ddf5ae21bd7accc4dfb5188411950926995d2e",
+ "sha_mutated": "4e0fd461e2f9a6e26f500ecb2afdcf45bba2562960b4ebb7e11fad51a544fd0c",
+ "sha_restored": "dbfcd94eb87efda5d7793f3120ddf5ae21bd7accc4dfb5188411950926995d2e",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "# pass 6",
+  "# fail 0"
+ ],
+ "red_lines": [
+  "not ok 2 - a default port held by a foreign server moves the smoke into 3400-3499, and the holder survives, named",
+  "name: 'AssertionError'",
+  "not ok 6 - smoke's fallback range is disjoint from test-all's and section-runner's",
+  "name: 'AssertionError'",
+  "# pass 4",
+  "# fail 2"
+ ],
+ "green_after": [
+  "# pass 6",
+  "# fail 0"
+ ]
+}

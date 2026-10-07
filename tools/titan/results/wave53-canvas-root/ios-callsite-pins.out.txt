@@ -1,0 +1,7 @@
+IOS-L3-LIVE apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift sha=606a2de14003827a pins=5/5 verdict=GREEN
+XI1 apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift sha=606a2de14003827a in-memory target=rootImageLayerSitsBetweenTheClipAndTheColour verdict=RED restored=n/a(read-only)
+XI2 apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift sha=606a2de14003827a in-memory target=rootImageLayerSitsBetweenTheClipAndTheColour verdict=RED restored=n/a(read-only)
+XI3 apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift sha=606a2de14003827a in-memory target=splitStripsTheImageThenBuildsTheTableForest verdict=RED restored=n/a(read-only)
+XI4 apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift sha=606a2de14003827a in-memory target=splitStripsTheImageThenBuildsTheTableForest verdict=RED restored=n/a(read-only)
+XI5 apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift sha=606a2de14003827a in-memory target=paintReadsTheUnstrippedBodyAtTheFrame verdict=RED restored=n/a(read-only)
+XI6 apps/ios-harness/StyleConverterTest/Screenshot/CaptureCanvas.swift sha=606a2de14003827a in-memory target=planReadsTheColourContainmentGate verdict=RED restored=n/a(read-only)

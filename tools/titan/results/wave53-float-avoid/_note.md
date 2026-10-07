@@ -78,9 +78,15 @@ Seam call sites (delivered as patches, never left in the tree):
 - Result, both platforms: **1435 documents, 10712 components, 3 admitted** — `contain-inline-size-bfc-floats-001__1-101`,
   `-002__1-109`, `display-flow-root-002__0-291`; no Swift crash on any document (`census-compose.out.txt`,
   `census-swift.out.txt`).
-- Raw vs runtime: the census reads raw IR; the runtime container list is the inheritance-merged one. Merging only ADDS
-  inherited types, and the gate only refuses on inherited types (WritingMode / Direction), so the runtime admits a
-  subset of the census set; the 3 carriers are roots with nothing inherited.
+- Raw vs runtime (**restated at the wave-53 fix pass**; the sentence it replaces, "merging only ADDS inherited types … so
+  the runtime admits a subset of the census set", was false — L4 skeptic should-fix 3): the natives do more than merge
+  inherited types before the block loop. They drop guaranteed-invalid `var()` declarations (DynamicValueResolver), apply
+  AllReset, and run `ContentsUnboxing.resolve`, which splices `display: contents` children into `children` and strips an
+  unboxable root to its inheritable declarations. Each of these can make the runtime ADMIT a container the raw census
+  refuses, so the raw census is not an upper bound by construction. Since the fix pass both census pins walk the
+  renderer-entry rewrite (`ContentsUnboxing.resolve`, recursively) and still give exactly the 3 carriers (1435 documents,
+  10668 resolved components on both twins). The var()/AllReset folds stay unmodelled in the pins; the L4 skeptic's R7
+  (its T1 tier ignores every container-property clause) also gives 3, which is the evidence the number holds there.
 - Carrier set (control-check): ios + android `{wpt__css-contain__contain-inline-size-bfc-floats-001, -002,
   wpt__css-display__display-flow-root-002}`, web none — equal to `expectations.json lanes.L4-float-avoid.captureCarriers`.
   Today: 4 of the 6 native cells pass (all DEGENERATE), 2 fail (002 ×2).
@@ -177,4 +183,22 @@ above (no other native capture in those sections may change by decoded pixels).
 - The full JVM / Catalyst suites were not run (focused classes only, per §0).
 
 TREES: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+STATUS: COMPLETE
+
+## Fix pass (wave-53 S1, 2026-10-07; full record in `tools/titan/results/wave53-S1/_note.md` "## Fix pass")
+
+- **Should-fix 1 — the density scale is pinned.** **P9** (both twins, via the .tmpl files + `gen-pins.py`): on verbatim
+  001 at scale 2.75, float 1 x 550, BFC (0, 550), width 1100; a derived 120-px BFC lands at (0, 825); every output equals
+  the CSS-px plan × 2.75. S1 (`containerWidthPx * scale` dropped) and S4 (`bfcInlineSizePx * scale` dropped) → red on
+  both twins.
+- **Should-fix 2 — CSS 2.1 §9.7.** Both gates refuse a float whose Position is not absent / STATIC / RELATIVE. **P5d G6**:
+  float 2 of verbatim 001 with ABSOLUTE or FIXED → null everywhere; RELATIVE stays admitted. Mutation (the Position test
+  dropped) → red on both twins. Radius 0 (the census below).
+- **Should-fix 3 — the "subset" sentence is restated** (§2 "Raw vs runtime" above).
+- **Should-fix 4 — the census pins walk `ContentsUnboxing.resolve`.** Both twins: 1435 documents, 10668 resolved
+  components, exactly the 3 carriers (the raw walk saw 10712).
+- Sizes: FloatAvoidPlan.kt 197, FloatAvoidPlan.swift 200 (the §9.7 test rides the Display guard). The generated pin files
+  grow past 200 (FloatAvoidPlanTest.kt, FloatAvoidPlanTests.swift: the embedded verbatim payloads plus two pins) — recorded.
+- Suites on exports of the fixed tree: compose 3434/3434, Catalyst 2192/2192.
+
 STATUS: COMPLETE

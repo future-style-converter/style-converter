@@ -40,9 +40,10 @@ enum FloatAvoidPlan {
         let sides = floats.compactMap(sideOf)                          // every leading child floats
         guard sides.count == floats.count else { return nil }
         if zip(sides, sides.dropFirst()).contains(where: { $0 == $1 }) { return nil } // G5 — runs: FloatRowPacking
-        // G6 — floats: plain childless px boxes, no box-model bands, block display.
+        // G6 — floats: plain childless px boxes, no box-model bands, block display, static/relative (CSS 2.1 §9.7).
         guard floats.allSatisfy({ plainBox($0) && ($0.children ?? []).isEmpty && !boxBails($0) }) else { return nil }
-        guard floats.allSatisfy({ [nil, "BLOCK"].contains(keyword($0.properties, "Display")) }) else { return nil }
+        guard floats.allSatisfy({ [nil, "BLOCK"].contains(keyword($0.properties, "Display"))       // abs/fixed: float → none
+            && [nil, "STATIC", "RELATIVE"].contains(keyword($0.properties, "Position")) }) else { return nil }
         let widths = floats.compactMap { lengthPx($0, "Width") }, heights = floats.compactMap { lengthPx($0, "Height") }
         guard widths.count == floats.count, heights.count == floats.count else { return nil } // every float px-sized
         let bp = bfc.properties                                        // G4 — the in-flow BFC root itself

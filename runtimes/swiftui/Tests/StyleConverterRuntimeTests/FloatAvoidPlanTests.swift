@@ -106,6 +106,14 @@ final class FloatAvoidPlanTests: XCTestCase {
                            #""px":400}}],"slot":{"parent":"wpt__css-contain__contain-inline-size-bfc-floats-001__0-100"}}"#))
     }
 
+    /// wave53 fix pass (L4 skeptic should-fix 2): CSS 2.1 §9.7 — an absolute/fixed float computes to
+    /// `float: none`; the gate keeps only static/relative floats (float 2 of verbatim 001 is edited).
+    func testP5d_G6_AbsoluteOrFixedFloatIsNoFloat() throws {
+        let float2 = #"{"type":"Float","data":"LEFT"}"#
+        for pos in ["ABSOLUTE", "FIXED"] { try refused(derive(Self.P001, float2, float2 + #",{"type":"Position","data":"\#(pos)"}"#)) }
+        XCTAssertNotNil(FloatAvoidPlan.shape(try roots(derive(Self.P001, float2, float2 + #",{"type":"Position","data":"RELATIVE"}"#))[1]))
+    }
+
     func testP6_ReportedHeightsAreTheBfcBottoms() throws {
         XCTAssertEqual(try solve(Self.P001, 1, h: 170).height, 370)
         XCTAssertEqual(try solve(Self.P002, 1, h: 20).height, 20)
@@ -128,6 +136,30 @@ final class FloatAvoidPlanTests: XCTestCase {
         XCTAssertEqual(try bfcAt(Self.P002, 300, 20), [0, 300])
     }
 
+    /// wave53 fix pass (L4 skeptic should-fix 1): twin of Compose P9 — at any scale the placement is the
+    /// CSS-px placement times that scale (the Swift adapter passes points, scale 1, today).
+    func testP9_ScaledPlacementIsTheCssPlacementTimesTheScale() throws {
+        let s = 2.75
+        func dev(_ sh: FloatAvoidPlan.Shape) -> FloatAvoidPlan.Placement {
+            FloatAvoidPlan.place(sh, floatWidths: sh.floatWidthsPx.map { $0 * s }, floatHeights: sh.floatHeightsPx.map { $0 * s },
+                                 incomingWidth: 358 * s, bfcHeight: 170 * s, scale: s)
+        }
+        let verbatim = try shape(Self.P001, 1)
+        var wide = verbatim; wide.bfcInlineSizePx = 120                // below every float at y300 (CSS px)
+        XCTAssertEqual(at(dev(verbatim))[0][0], 550); XCTAssertEqual(at(dev(verbatim))[3], [0, 550]); XCTAssertEqual(dev(verbatim).width, 1100)
+        XCTAssertEqual(at(dev(wide))[3], [0, 825])
+        for sh in [verbatim, wide] {
+            let c = FloatAvoidPlan.place(sh, floatWidths: sh.floatWidthsPx, floatHeights: sh.floatHeightsPx, incomingWidth: 358, bfcHeight: 170)
+            XCTAssertEqual(dev(sh).x, c.x.map { $0 * s }); XCTAssertEqual(dev(sh).y, c.y.map { $0 * s }); XCTAssertEqual(dev(sh).height, c.height * s)
+        }
+    }
+
+    /// wave53 fix pass (L4 skeptic should-fix 4): the renderer composes ContentsUnboxing.resolve(raw) (its child
+    /// list splices `display: contents` children), so the census walks that rewritten tree, not the raw one.
+    private func resolved(_ c: IRComponent) -> [IRComponent] {
+        let r = ContentsUnboxing.resolve(c); return [r] + (r.children ?? []).flatMap(resolved)
+    }
+
     /// S-L4's Swift half: the planner runs in EVERY capture-mode block loop, so it must admit exactly the three
     /// carriers over the whole corpus — and not crash on any document. Local-only (tools/titan/runs/ is gitignored).
     func testCensusExactlyTheThreeCarriers() throws {
@@ -147,7 +179,7 @@ final class FloatAvoidPlanTests: XCTestCase {
         for f in files {
             let rs = try roots(try String(contentsOf: f, encoding: .utf8))
             for (ri, r) in rs.enumerated() {
-                for c in all(r) {
+                for c in resolved(r) {
                     components += 1
                     guard FloatAvoidPlan.shape(c) != nil else { continue }
                     hits.append("\(f.lastPathComponent)#\(c.id)")

@@ -1,0 +1,32 @@
+{
+ "label": "L2-F2-absonly",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/inline/InertOutOfFlowMember.kt",
+ "sha_before": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+ "sha_mutated": "39dfdb117786941e88ae3c07be0fe5a77a04f3a980138abb78620f6eabc01957",
+ "sha_restored": "608ebe36ef60615175641cb2e7559427542f9a2cb8c8eab2b2eab4750abc1677",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "BUILD SUCCESSFUL in 4s"
+ ],
+ "red_lines": [
+  "> Task :runtime:testDebugUnitTest FAILED",
+  "InlineRunFoldTest > the inert predicate refuses every colour that is not fully transparent FAILED",
+  "java.lang.AssertionError at InlineRunFoldTest.kt:259",
+  "InlineRunFoldTest > the inert predicate needs BOTH out-of-flow and transparent ink FAILED",
+  "java.lang.AssertionError at InlineRunFoldTest.kt:226",
+  "InlineRunFoldTest > hyphens-out-of-flow-001 - the paint-inert abspos member drops and the word folds whole FAILED",
+  "InlineRunFoldTest > hyphens-out-of-flow-002 box 4 - the split highway folds to one dictionary word FAILED",
+  "45 tests completed, 4 failed",
+  "FAILURE: Build failed with an exception.",
+  "Execution failed for task ':runtime:testDebugUnitTest'.",
+  "BUILD FAILED in 4s"
+ ],
+ "green_after": [
+  "BUILD SUCCESSFUL in 4s"
+ ]
+}

@@ -1,0 +1,31 @@
+{
+ "label": "L1-N1-depth",
+ "file": "tools/titan/extract-fixture.mjs",
+ "sha_before": "845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9",
+ "sha_mutated": "dd79d8cd9bd4da0df30c7e6b6ffa563c3ba5345f2c69be1acd6d887fc9d612e3",
+ "sha_restored": "845a3d263a14369babae5a67aa4ea54748e0e53e20ae5b99921d33897cbfe5c9",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "# pass 4",
+  "# fail 0"
+ ],
+ "red_lines": [
+  "not ok 2 - findImpliedClose: an `<li>` inside a nested list is skipped (HTML §13.2.6.4.7)",
+  "name: 'AssertionError'",
+  "not ok 3 - N2: the run proto of `<li>A<ol><li>B</li></ol></li>tail` has ONE element entry",
+  "name: 'AssertionError'",
+  "not ok 4 - N1: counter-reset-reversed-nested extracts NESTED with 3. 2. 11. 9. 8. 1.",
+  "name: 'AssertionError'",
+  "# pass 1",
+  "# fail 3"
+ ],
+ "green_after": [
+  "# pass 4",
+  "# fail 0"
+ ]
+}

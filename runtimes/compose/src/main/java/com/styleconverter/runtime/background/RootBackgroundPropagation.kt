@@ -16,7 +16,8 @@ package com.styleconverter.runtime.background
 // capture-browser-ref.mjs padColorFor (:728) fills the 16-px frame with the
 // ring colour only for a uniform ring, so only a stack uniform BY
 // CONSTRUCTION (every layer one sRGBA, repeating on both axes) may cover the
-// frame; any other stack leaves the frame at the colour-layer value.
+// frame; any other stack leaves the frame at the colour-layer value. Those
+// uniformity predicates live in RootBackgroundUniformity.kt (fix-pass split).
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -30,7 +31,6 @@ import com.styleconverter.runtime.color.BackgroundPositionConfig
 import com.styleconverter.runtime.color.ColorApplier
 import com.styleconverter.runtime.color.ColorConfig
 import com.styleconverter.runtime.color.ColorExtractor
-import com.styleconverter.runtime.core.images.DataUri
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRProperty
 import kotlinx.serialization.json.JsonArray
@@ -39,7 +39,6 @@ import kotlinx.serialization.json.JsonNull
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive
 import kotlinx.serialization.json.contentOrNull
-import kotlinx.serialization.json.doubleOrNull
 
 object RootBackgroundPropagation {
 
@@ -77,10 +76,6 @@ object RootBackgroundPropagation {
             else -> listOf(d)                                              // a scalar: one layer
         }
 
-    /** A `none` layer (bare string or `{type:"none"}`) paints nothing. */
-    private fun isNone(l: JsonElement): Boolean =
-        (l as? JsonPrimitive)?.contentOrNull == "none" || ((l as? JsonObject)?.get("type") as? JsonPrimitive)?.contentOrNull == "none"
-
     /** The keyword of one entry: a bare string, or the `type` of an object. */
     private fun keyword(e: JsonElement?): String? =
         (e as? JsonPrimitive)?.contentOrNull ?: ((e as? JsonObject)?.get("type") as? JsonPrimitive)?.contentOrNull
@@ -96,50 +91,8 @@ object RootBackgroundPropagation {
         }
     }
 
-    /** One stop's sRGBA key; null = no colour (hint/shape word), "?" = not static sRGB. */
-    private fun stopKey(stop: JsonElement): String? {
-        val c = (stop as? JsonObject)?.get("color") ?: return null         // a hint / shape word: no colour
-        if (c is JsonNull) return null                                     // an explicit colour-less stop
-        val s = (c as? JsonObject)?.get("srgb") as? JsonObject ?: return "?"   // currentColor / var(): unknown
-        val ch = listOf("r", "g", "b").map { (s[it] as? JsonPrimitive)?.doubleOrNull ?: return "?" }
-        return "${ch[0]},${ch[1]},${ch[2]},${(s["a"] as? JsonPrimitive)?.doubleOrNull ?: 1.0}"  // alpha defaults to 1
-    }
-
-    /** css-images-3 §3: every stop shares one sRGBA ⇒ the gradient paints one colour. */
-    private fun gradientIsUniform(o: JsonObject): Boolean {
-        val keys = (o["stops"] as? JsonArray ?: return false).mapNotNull(::stopKey)  // colour-less entries dropped
-        return keys.isNotEmpty() && keys.all { it != "?" && it == keys[0] }          // one static sRGBA
-    }
-
-    /** PNG (ISO 15948 §5.2/§11.2.2): signature, then IHDR width/height — true iff 1×1. */
-    fun dataPngIs1x1(url: String): Boolean {
-        if (!url.lowercase().let { it.startsWith("data:image/png,") || it.startsWith("data:image/png;") }) return false
-        val b = DataUri.decode(url) ?: return false                        // the runtime's RFC 2397 decoder
-        if (b.size < 24) return false                                      // no full IHDR
-        val sig = intArrayOf(0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a)   // the PNG signature
-        if (sig.indices.any { (b[it].toInt() and 0xff) != sig[it] }) return false
-        if (String(b, 12, 4, Charsets.US_ASCII) != "IHDR") return false   // the first chunk must be IHDR
-        fun be32(o: Int) = (0..3).fold(0L) { acc, k -> (acc shl 8) or (b[o + k].toLong() and 0xff) }  // big-endian
-        return be32(16) == 1L && be32(20) == 1L                            // width, height
-    }
-
-    /** One layer paints a single colour across its tile (F2's per-layer test). */
-    private fun layerIsUniform(l: JsonElement): Boolean {
-        if (isNone(l)) return true                                         // transparent everywhere
-        val o = l as? JsonObject ?: return false                           // bare URL string: unknown pixels
-        (o["url"] as? JsonPrimitive)?.contentOrNull?.let { return dataPngIs1x1(it) }   // a 1×1 raster tile
-        val type = (o["type"] as? JsonPrimitive)?.contentOrNull ?: return false
-        return type.endsWith("gradient") && gradientIsUniform(o)            // linear/radial/conic, plain or repeating
-    }
-
-    /** §3.7: one entry is `repeat` on both axes (string tokens or an {x,y} pair). */
-    private fun entryRepeatsBoth(e: JsonElement): Boolean {
-        fun rep(v: JsonElement?) = (v as? JsonPrimitive)?.contentOrNull?.lowercase() == "repeat"
-        // String shape: `repeat` / `repeat repeat` (any other keyword leaves a gap or a single tile).
-        (e as? JsonPrimitive)?.contentOrNull?.let { s -> return s.trim().split(Regex("\\s+")).all { it.lowercase() == "repeat" } }
-        val o = e as? JsonObject ?: return false                           // unknown shape: not uniform
-        return rep(o["x"]) && rep(o["y"])                                  // axis-pair shape
-    }
+    /** PNG IHDR 1×1 test, public for the harness pins (the rule lives in [RootBackgroundUniformity]). */
+    fun dataPngIs1x1(url: String): Boolean = RootBackgroundUniformity.dataPngIs1x1(url)
 
     /** JVM-safe breadcrumb: PropertyTracker marks the type, android.util.Log is stubbed off-device. */
     private fun breadcrumb(type: String, context: String) {
@@ -155,7 +108,7 @@ object RootBackgroundPropagation {
     fun plan(props: List<IRProperty>, marginTop: Float, marginLeft: Float, contained: Boolean): Plan? {
         if (contained) return null                                         // off the propagation path
         val layers = rawList(props, "BackgroundImage")                     // the raw per-layer list
-        if (layers.isEmpty() || layers.all(::isNone)) return null          // nothing to paint
+        if (layers.isEmpty() || layers.all(RootBackgroundUniformity::isNone)) return null   // nothing to paint
         // Index parity with the applier: a dropped layer would mis-pair every attachment.
         if (ColorExtractor.extractBackgroundImages(JsonArray(layers)).size != layers.size) {
             breadcrumb("BackgroundImage", "root canvas background: a layer the extractor cannot paint"); return null
@@ -166,7 +119,7 @@ object RootBackgroundPropagation {
         // §3.4: fixed → the viewport (ICB) corner; scroll/local → the root box's padding edge.
         val origins = attachments.map { if (it == Attachment.FIXED) LayerOrigin(0f, 0f) else LayerOrigin(marginLeft, marginTop) }
         // F2: every layer one colour AND repeating on both axes (no gaps) ⇒ the ring is uniform.
-        val uniform = layers.all(::layerIsUniform) && rawList(props, "BackgroundRepeat").all(::entryRepeatsBoth)
+        val uniform = RootBackgroundUniformity.stackIsUniform(layers, rawList(props, "BackgroundRepeat"))
         return Plan(attachments, origins, uniform)
     }
 
@@ -183,7 +136,7 @@ object RootBackgroundPropagation {
      * then paints it. [base] = where the ICB corner sits in the painted box.
      */
     fun layerConfigs(props: List<IRProperty>, plan: Plan, base: Float): List<ColorConfig> {
-        val full = ColorExtractor.extractColorConfig(props.map { it.type to it.data })  // the engine's own reading
+        val full = ColorExtractor.extractColorConfig(props.map { it.type to it.data })  // the runtime's own reading
         return full.backgroundImages.mapIndexed { i, image ->
             val o = plan.origins[i]                                        // plan() pinned the index parity
             ColorConfig(                                                   // no colour, no opacity: image only
@@ -199,19 +152,31 @@ object RootBackgroundPropagation {
         }
     }
 
+    /** The canvas paint as data: per-layer configs BOTTOM-UP (the order the chain applies them) + the F2 overpaint. */
+    data class CanvasPaint(val bottomUp: List<ColorConfig>, val overpaintFrame: Boolean)
+
     /**
-     * The canvas-surface paint: the layers bottom-up over the framed surface
-     * (tile origins at the ICB corner = [frame]), and — for a non-uniform stack —
-     * the 16-px frame band repainted in [frameColor] above them (capture-frame
-     * chrome: padPngBuffer fills the frame with the pad colour). [Modifier] itself
-     * (identity under `then`) without a plan.
+     * The canvas-surface composition, pure so the JVM pins it (wave-53 fix pass,
+     * L3 skeptic should-fix 1): Compose chains paint later entries on top, so the
+     * LAST source layer is applied first; tile origins sit at the ICB corner =
+     * [frame]; only a non-uniform stack gets the frame band repainted (F2).
+     */
+    fun canvasPaintPlan(props: List<IRProperty>, plan: Plan, frame: Float): CanvasPaint =
+        CanvasPaint(layerConfigs(props, plan, frame).asReversed(), overpaintFrame = !plan.uniform)
+
+    /**
+     * The canvas-surface paint: [canvasPaintPlan]'s layers bottom-up over the
+     * framed surface, and — for a non-uniform stack — the 16-px frame band
+     * repainted in [frameColor] above them (capture-frame chrome: padPngBuffer
+     * fills the frame with the pad colour). [Modifier] itself (identity under
+     * `then`) without a plan.
      */
     fun canvasModifier(props: List<IRProperty>, plan: Plan?, frame: Dp, frameColor: Color): Modifier {
         if (plan == null) return Modifier                                  // identity: `then(Modifier)` is a no-op
-        // Compose chains paint later entries on top: the LAST source layer first.
+        val paint = canvasPaintPlan(props, plan, frame.value)              // the pinned composition
         var m: Modifier = Modifier
-        layerConfigs(props, plan, frame.value).asReversed().forEach { m = ColorApplier.applyColors(m, it) }
-        if (plan.uniform) return m                                         // F2: the stack may cover the frame
+        paint.bottomUp.forEach { m = ColorApplier.applyColors(m, it) }     // first applied = bottom-most
+        if (!paint.overpaintFrame) return m                                // F2: the stack may cover the frame
         return m.drawBehind {                                              // drawn above the layers, below content
             val f = frame.toPx(); val w = size.width; val h = size.height  // the frame band, in this box's px
             drawRect(frameColor, Offset.Zero, Size(w, f))                       // top band

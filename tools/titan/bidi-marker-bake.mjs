@@ -27,8 +27,8 @@
 // start content edge (`marker-box-modelled`; a box missing the advance by > EPS
 // takes it too, `marker-probe-mismatch`); no CDP string → the counter-style
 // bake's on a CLONE, ". " suffix space restored (`marker-text-modelled`). An
-// image marker, no first-line run or a marker font unlike the first line's
-// leaves the item as it was, stamped `marker-not-baked`.
+// image marker, no first-line run, a marker font unlike the first line's or an
+// item not re-found by its rect leaves it as it was, stamped `marker-not-baked`.
 
 // The bidi bake's own run machinery — one definition of a run, never a copy.
 import { groupCharRuns, runProperties, hasStrongLtrCodepoint, hasStrongRtlLetter, RUN_ADJACENCY_EPS } from './bidi-bake.mjs';
@@ -95,7 +95,7 @@ function inPageMarkerProbe(items) {
     && Math.abs(r.width - q.width) <= 0.02 && Math.abs(r.height - q.height) <= 0.02;
   for (const it of items) {
     const el = [...document.getElementsByTagName(it.tag)].find((n) => near(n.getBoundingClientRect(), it.rect));
-    if (!el) continue;
+    if (!el) { out[it.key] = { error: 'list item not re-found by rect' }; continue; }   // declined + stamped, never skipped
     const cs = getComputedStyle(el), ms = getComputedStyle(el, '::marker'), r = el.getBoundingClientRect();
     const f = {
       direction: cs.direction, position: cs.listStylePosition, type: cs.listStyleType,
@@ -143,8 +143,8 @@ export async function collectMarkerFacts(page, elements, { fixture = null, html 
     const cdp = matchMarkers(cands, snap), model = fixture ? modelMarkerTexts(fixture, html, stem, cands) : {};
     const items = cands.map((c) => ({ key: c.key, tag: c.tag, rect: c.rect, text: cdp[c.key]?.text ?? model[c.key] ?? null }));
     const facts = await page.evaluate(inPageMarkerProbe, items);
-    // The CDP half joins the in-page half; `textModelled` records the fallback.
-    for (const it of items.filter((i) => facts[i.key])) Object.assign(facts[it.key], { text: it.text,
+    // The CDP half joins the in-page half (an error fact stays text-less: declined); `textModelled` records the fallback.
+    for (const it of items.filter((i) => facts[i.key] && !facts[i.key].error)) Object.assign(facts[it.key], { text: it.text,
       cdpBox: cdp[it.key]?.box ?? null, textModelled: !cdp[it.key]?.text && it.text !== null });
     return facts;
   } catch (err) {
@@ -187,9 +187,9 @@ export function planMarker(f, origin, first) {
     lossy.push(f.cdpBox ? MARKER_STAMPS.mismatch : MARKER_STAMPS.boxModel);
   }
   if (f.textModelled) lossy.push(MARKER_STAMPS.textModel);
-  // Probe glyphs → absolute boxes: x from the chosen box, tops from the first run.
-  const chars = f.glyphs.chars.map((ch) => ({ c: ch.c,
-    rects: ch.rects.map((q) => ({ x: x + q.x, y: first.run.y + q.y, w: q.w, h: q.h })) }));
+  // Probe glyphs → absolute boxes: x from the chosen box, tops from the first run, less the span's half-leading (q0).
+  const q0 = f.glyphs.chars.flatMap((ch) => ch.rects)[0]?.y ?? 0, chars = f.glyphs.chars.map((ch) => ({ c: ch.c,
+    rects: ch.rects.map((q) => ({ x: x + q.x, y: first.run.y + q.y - q0, w: q.w, h: q.h })) }));
   const runs = groupCharRuns(chars).flatMap((r) =>
     (hasStrongLtrCodepoint(r.text) || hasStrongRtlLetter(r.text) ? [r] : splitWeakRun(r, chars)));
   const props = (r) => ({ ...runProperties(r, f.style, origin),

@@ -113,6 +113,16 @@ class FloatAvoidPlanTest {
     fun `P5d G2 - the same container nested in a non-BFC parent can see outside floats`() =
         refused(derive(P001, """"px":400}}]}""", """"px":400}}],"slot":{"parent":"wpt__css-contain__contain-inline-size-bfc-floats-001__0-100"}}"""))
 
+    // wave53 fix pass (L4 skeptic should-fix 2): CSS 2.1 §9.7 — an absolute/fixed float computes to `float:
+    // none`; the gate keeps only static/relative floats. Float 2 of verbatim 001 is the edited one.
+    private val float2 = """{"type":"Float","data":"LEFT"}"""
+
+    @Test
+    fun `P5d G6 - an absolute or fixed float is no float - refused - a relative one stays admitted`() {
+        for (pos in listOf("ABSOLUTE", "FIXED")) refused(derive(P001, float2, "$float2,{\"type\":\"Position\",\"data\":\"$pos\"}"))
+        assertNotNull(FloatAvoidPlan.shape(roots(derive(P001, float2, "$float2,{\"type\":\"Position\",\"data\":\"RELATIVE\"}"))[1]))
+    }
+
     @Test
     fun `P6 - reported heights are the BFC bottoms 370, 20, 300 - floats excluded`() {
         assertEquals(370.0, solve(P001, 1, 170.0).height, 0.0)
@@ -136,6 +146,38 @@ class FloatAvoidPlanTest {
         assertEquals(0.0 to 300.0, at(P002, 300.0, 20.0))
     }
 
+    // wave53 fix pass (L4 skeptic should-fix 1): the adapter passes DEVICE px with scale = density. Every
+    // output must be the CSS-px plan times the density — 2.75 is a common phone density, exact in binary.
+    @Test
+    fun `P9 - device px - the placement is the CSS-px placement times the density`() {
+        val s = 2.75
+        fun dev(sh: FloatAvoidShape, h: Double) =
+            FloatAvoidPlan.place(sh, sh.floatWidthsPx.map { it * s }, sh.floatHeightsPx.map { it * s }, 358.0 * s, h * s, s)
+        fun css(sh: FloatAvoidShape, h: Double) = FloatAvoidPlan.place(sh, sh.floatWidthsPx, sh.floatHeightsPx, 358.0, h)
+        val verbatim = shape(P001, 1)
+        // Verbatim 001: float 1 hugs the 1100-px (400 CSS px) container's right edge; the BFC sits at (0, 550).
+        val p = dev(verbatim, 170.0)
+        assertEquals(550.0, p.x[0], 1e-9)
+        assertEquals(0.0 to 550.0, p.at(3))
+        assertEquals(1100.0, p.width, 1e-9)
+        // A derived px-width BFC (120 CSS px: wider than float 3's 100-px gap, so it lands below every float at
+        // y300) makes the used-size scale load-bearing too: unscaled, 120 device px would fit at y550.
+        val wide = verbatim.copy(bfcInlineSizePx = 120.0)
+        assertEquals(0.0 to 825.0, dev(wide, 170.0).at(3))
+        for (sh in listOf(verbatim, wide)) {
+            val d = dev(sh, 170.0); val c = css(sh, 170.0)
+            assertEquals(c.x.map { it * s }, d.x); assertEquals(c.y.map { it * s }, d.y)
+            assertEquals(c.width * s, d.width, 1e-9); assertEquals(c.height * s, d.height, 1e-9)
+        }
+    }
+
+    // wave53 fix pass (L4 skeptic should-fix 4): the census runs the renderer-entry rewrite first — every
+    // component the renderer composes is ContentsUnboxing.resolve(raw), whose child list has any
+    // `display: contents` children spliced in (ComponentRenderer.kt RenderComponent), so a contents wrapper
+    // around a float-then-BFC list is seen here exactly as the block loop sees it.
+    private fun resolved(c: IRComponent): List<IRComponent> =
+        com.styleconverter.runtime.core.renderer.ContentsUnboxing.resolve(c).let { r -> listOf(r) + r.children.orEmpty().flatMap(::resolved) }
+
     @Test
     fun `census - exactly the three carriers over all wave52-ship documents`() {
         // Local-only (tools/titan/runs/ is gitignored): skipped where the corpus is absent.
@@ -150,7 +192,7 @@ class FloatAvoidPlanTest {
         for (f in files) {
             val rs = roots(f.readText())
             rs.forEachIndexed { ri, r ->
-                all(r).forEach { c ->
+                resolved(r).forEach { c ->
                     components++
                     if (FloatAvoidPlan.shape(c) == null) return@forEach
                     hits += "${f.name}#${c.id}"

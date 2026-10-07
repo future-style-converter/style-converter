@@ -35,7 +35,7 @@
 # none, and the first run pays ~15 JVM converter starts (~5 min); later runs
 # skip in about a second. Before wave 53 the step was missing and a fresh tree
 # failed both tiers with 90 + 15 "fixture-ready-timeout" rows — see
-# build_fixtures below.
+# build_fixtures in tools/visual/smoke-fixtures.sh.
 
 set -euo pipefail
 
@@ -47,6 +47,10 @@ cd "$PROJECT_ROOT"
 source "$PROJECT_ROOT/tools/visual/web-port-guard.sh"
 # shellcheck source=tools/visual/smoke-port.sh
 source "$PROJECT_ROOT/tools/visual/smoke-port.sh"
+# build_fixtures — the Tier-5/11 fixture JSONs (split out at the wave-53 fix
+# pass, PLAN §0 size rule; it calls log/err/add_result, defined below).
+# shellcheck source=tools/visual/smoke-fixtures.sh
+source "$PROJECT_ROOT/tools/visual/smoke-fixtures.sh"
 
 QUICK=0
 for arg in "$@"; do
@@ -63,42 +67,6 @@ B="\033[1;34m"; G="\033[0;32m"; Y="\033[1;33m"; R="\033[0;31m"; N="\033[0m"
 log()  { echo -e "${G}[smoke]${N} $*"; }
 warn() { echo -e "${Y}[smoke]${N} $*" >&2; }
 err()  { echo -e "${R}[smoke]${N} $*" >&2; }
-
-# ── Tier-5/11 fixture JSONs ─────────────────────────────────────────────────
-#
-# interaction-states.mjs and a11y-audit.mjs open `/?fixture=<Name>` and the
-# page fetches apps/web-harness/public/fixtures/<Name>.json — the pre-flight
-# contract at the top of interaction-states.mjs ("`npm run build-fixtures` has
-# produced … for every COMPONENTS entry"). That directory is gitignored
-# converter output, so a fresh worktree has none; vite's SPA fallback then
-# answers index.html for the missing JSON ("Unexpected token '<' … is not valid
-# JSON" in the vite log) and every probe dies on `fixture-ready-timeout` — the
-# wave-53 symptom (Tier 5: 0 captured · 90 failed; Tier 11: 15 errored) once
-# the port guard had got vite up correctly on :3400. The step was simply never
-# in this script. build-fixtures.mjs skips files newer than their source, so a
-# built tree pays only the mtime checks.
-#
-# JDK 21 is selected the way test-all.sh does (macOS `java_home`; elsewhere the
-# ambient JAVA_HOME stands) — the converter's toolchain is pinned to 21.
-build_fixtures() {
-    log "building the Tier-5/11 fixture JSONs (apps/web-harness/public/fixtures/; first run ~5 min)…"
-    if [[ -x /usr/libexec/java_home ]] && /usr/libexec/java_home -v 21 &>/dev/null; then
-        export JAVA_HOME
-        JAVA_HOME="$(/usr/libexec/java_home -v 21)"
-    fi
-    if (cd apps/web-harness && npm run --silent build-fixtures > /tmp/smoke-build-fixtures.log 2>&1); then
-        local summary
-        # build-fixtures.mjs ends with "N built · M skipped · F failed · T total available".
-        summary=$(grep -E "built · .* skipped · .* failed" /tmp/smoke-build-fixtures.log | tail -1)
-        log "fixtures: ${summary:-built (no summary line; see /tmp/smoke-build-fixtures.log)}"
-        add_result "fixtures: ${summary:-built}"
-    else
-        err "build-fixtures FAILED; tail of /tmp/smoke-build-fixtures.log:"
-        tail -20 /tmp/smoke-build-fixtures.log >&2
-        add_result "fixtures: FAILED"
-        return 1
-    fi
-}
 
 # ── Vite lifecycle (used by Tier 5 + Tier 11) ───────────────────────────────
 #

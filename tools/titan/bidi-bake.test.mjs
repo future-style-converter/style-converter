@@ -1042,3 +1042,69 @@ test('hunk M wiring: the marker facts are read AFTER the walk and the mapping ch
   assert.ok(at("reason: `element-mapping-mismatch") < at('await collectMarkerFacts(page'));
   assert.ok(at('await collectMarkerFacts(page') < at('const { bail, plan, note } = planBidiBake(walk);'));
 });
+
+// ── 10. Wave 53 fix pass (S1 S2 = L1 skeptic D1 / D3 / D5) ──────────────────
+// MUTATIONS (executed, red → byte-exact restore → green, sha256 in
+// tools/titan/results/wave53-S1/_note.md "## Fix pass"): FX1 `if (!el) continue;`
+// restored; FX2 the error-fact filter dropped from collectMarkerFacts' merge;
+// FX3 applyBidiBakePlan's box `_lossyReasons` merge deleted (L1 skeptic S-svx2);
+// FX4 the half-leading term `- q0` dropped from planMarker.
+
+test('VF1 hunk M: an item the in-page probe cannot re-find by its rect is DECLINED and stamped, never skipped', async () => {
+  // The REAL inPageMarkerProbe (the fake page's evaluate calls it) against a
+  // document whose only <li> sits nowhere near the walked rects — the path that
+  // used to `continue`, leaving the baked <li> its marker with NO stamp.
+  const saved = Object.getOwnPropertyDescriptor(globalThis, 'document');
+  globalThis.document = { getElementsByTagName: () => [{ getBoundingClientRect: () => ({ left: 0, top: 0, width: 1, height: 1 }) }] };
+  try {
+    const page = { createCDPSession: async () => ({ send: async () => ({ strings: [], documents: [] }), detach: async () => {} }),
+      evaluate: async (fn, arg) => fn(arg) };
+    const walk = counterSuffixWalk();
+    const facts = await collectMarkerFacts(page, walk.elements);
+    // One error fact per list item — no CDP / model fields merged into it.
+    assert.deepEqual(Object.keys(facts).sort(), ['0.4.0', '0.4.1', '0.5.0', '0.5.1']);
+    for (const f of Object.values(facts)) assert.deepEqual(f, { error: 'list item not re-found by rect' });
+    // planBidiBake: each item keeps its marker (no `none`), stamped; only the 4 text runs.
+    const { bail, plan } = planBidiBake({ ...walk, markers: facts });
+    assert.equal(bail, null);
+    for (const p of ['0.4.0', '0.4.1', '0.5.0', '0.5.1']) {
+      const box = plan.boxes.find((b) => b.path.join('.') === p);
+      assert.equal(box.props['list-style-type'], undefined, p);
+      assert.deepEqual(box.lossy, [MARKER_STAMPS.notBaked], p);
+    }
+    assert.deepEqual(plan.runs.map((r) => r.text), ['foo', 'bar', 'foo', 'bar']);
+  } finally {
+    // Restore the global exactly (node has no `document`).
+    if (saved) Object.defineProperty(globalThis, 'document', saved); else delete globalThis.document;
+  }
+});
+
+test('VF2 hunk M: a box\'s marker stamps reach the FIXTURE component (_lossy + _lossyReasons, merged once)', () => {
+  // The honesty contract rests on this merge: a declined / modelled marker is
+  // read back from the fixture (and the gate's extract log), not from the plan.
+  const fixture = { _wpt: { test: 't', lossy: false, lossyReasons: [] }, components: { s__0: { properties: {}, children: {
+    s__0__0: { id: 's__0__0', properties: {}, _lossyReasons: ['percentage'] },
+    s__0__1: { id: 's__0__1', properties: {} } } } } };
+  applyBidiBakePlan(fixture, 's', { roots: [{ path: [0], props: {} }], hides: [], runs: [], boxes: [
+    { path: [0, 0], props: { position: 'absolute' }, lossy: [MARKER_STAMPS.notBaked, MARKER_STAMPS.notBaked, 'percentage'] },
+    { path: [0, 1], props: { position: 'absolute' } }] });
+  const [stamped, plain] = ['s__0__0', 's__0__1'].map((k) => fixture.components.s__0.children[k]);
+  assert.equal(stamped._lossy, true);
+  assert.deepEqual(stamped._lossyReasons, ['percentage', MARKER_STAMPS.notBaked]);
+  // A box with no marker stamp gains no lossy field at all.
+  assert.equal('_lossy' in plain, false);
+  assert.equal('_lossyReasons' in plain, false);
+});
+
+test('VF3 hunk M: marker glyph tops drop the probe span\'s half-leading (a tall body line-height)', () => {
+  // The span inherits BODY's line-height, so each glyph's q.y carries that
+  // line's half-leading; `first.run.y` is already a content-area top. q.y 14 =
+  // a body `line-height: 48px` over a 20-px content area ((48 − 20) / 2).
+  const first = { run: { y: 194 }, style: CS_STYLE };
+  const shifted = (qy) => { const f = rtlProbe('1', 9.9);
+    return { ...f, glyphs: { ...f.glyphs, chars: f.glyphs.chars.map((ch) => ({ ...ch, rects: ch.rects.map((q) => ({ ...q, y: q.y + qy })) })) } }; };
+  const tops = (m) => m.runs.map((r) => r.props.top);
+  // Same tops as the text run (li-top 192 + 2) with or without the leading.
+  assert.deepEqual(tops(planMarker(shifted(0), { x: 48, y: 192 }, first)), ['2px', '2px']);
+  assert.deepEqual(tops(planMarker(shifted(14), { x: 48, y: 192 }, first)), ['2px', '2px']);
+});

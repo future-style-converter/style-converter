@@ -1,0 +1,8 @@
+{
+ "tests": 1435,
+ "changed": [
+  "css/css-lists/counter-reset-reversed-nested.html"
+ ],
+ "errorsPre": 0,
+ "errorsHead": 0
+}

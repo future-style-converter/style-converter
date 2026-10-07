@@ -45,6 +45,11 @@ import java.io.File
  *   CA4 attachmentAt always SCROLL (attachment ignored)                      → a2_marginRoot002 red.
  *   CA5 dataPngIs1x1 returns true for any PNG url                             → a3_ihdr red.
  *   CA6 the `contained` early return dropped                                  → a4_contained red.
+ * wave-53 fix pass (L3 skeptic should-fix 1; sha256 in tools/titan/results/wave53-S1/_note.md "## Fix pass"):
+ *   XC1 canvasPaintPlan's overpaint forced false (`!plan.uniform` → `false`)  → a7 red.
+ *   XC2 canvasPaintPlan passes 0 as the tile base instead of [frame]         → a7 red.
+ *   XC3 canvasPaintPlan drops `.asReversed()` (source order applied)         → a7 red.
+ *   XC9 canvasModifier ignores the plan's overpaint flag (always returns m)   → a7 red (source pin).
  */
 class ComposedCanvasRootBackgroundTest {
 
@@ -182,10 +187,41 @@ class ComposedCanvasRootBackgroundTest {
         // …while a planned stack's modifier is a real chain. (Measured on the
         // gradient pair: on the JVM the url layer's synchronous BitmapFactory
         // decode is stubbed, so ColorApplier skips it there — on device the
-        // same payload decodes; css-image-fallbacks-and-annotations002 android P.)
+        // same plain `{url: data:image/png…}` layer shape decodes through
+        // ColorApplier: css-break/background-image-000/-001/-002 android P 1
+        // (wave52-ship; the earlier citation, css-image-fallbacks-and-
+        // annotations002, is the `image()` notation, a different path).)
         val roots = rootsOf(marginRoot001)
         assertNotSame(Modifier, RootBackgroundPropagation.canvasModifier(bodyProps(roots),
             resolveComposedCanvasRootBackground(roots), 16.dp, androidx.compose.ui.graphics.Color.White))
+    }
+
+    @Test
+    fun a7_canvasPaintPlan_marginRoot001_blackUnderTheRamp_frameBandRepainted() {
+        // The composition canvasModifier spends (the JVM cannot draw it): verbatim 001.
+        val roots = rootsOf(marginRoot001)
+        val paint = RootBackgroundPropagation.canvasPaintPlan(bodyProps(roots), resolveComposedCanvasRootBackground(roots)!!, 16f)
+        // BOTTOM-UP = applied first: source layer 1 (the opaque black, `fixed`, ICB corner = the 16-px frame) under
+        // source layer 0 (the translucent green→blue ramp, `scroll`, root box = 50 + 16).
+        assertEquals(listOf(16.dp to 16.dp, 66.dp to 66.dp),
+            paint.bottomUp.map { it.backgroundPosition.xOffset to it.backgroundPosition.yOffset })
+        // A non-uniform stack never covers the frame: the band is repainted in the colour-layer value.
+        assertTrue(paint.overpaintFrame)
+        // The target's 1×1 green tile IS uniform: it covers the frame, no band repaint.
+        val t = rootsOf(target)
+        assertFalse(RootBackgroundPropagation.canvasPaintPlan(bodyProps(t), resolveComposedCanvasRootBackground(t)!!, 16f).overpaintFrame)
+        // …and canvasModifier spends exactly that plan (source pin: the JVM cannot draw the chain).
+        assertTrue(runtimeCode.contains("val paint = canvasPaintPlan(props, plan, frame.value)"))
+        assertTrue(runtimeCode.contains("paint.bottomUp.forEach { m = ColorApplier.applyColors(m, it) }"))
+        assertTrue(runtimeCode.contains("if (!paint.overpaintFrame) return m"))
+    }
+
+    /** The runtime's RootBackgroundPropagation.kt, comment lines dropped (repo-root walk-up). */
+    private val runtimeCode: String by lazy {
+        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/background/RootBackgroundPropagation.kt"
+        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
+        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
+        File(requireNotNull(dir), anchor).readText().lines().filter { !it.trim().startsWith("//") }.joinToString("\n")
     }
 
     // ── the call site (the JVM cannot draw the chain, so its PLACEMENT is pinned) ──

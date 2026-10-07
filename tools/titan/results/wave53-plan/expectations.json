@@ -33,7 +33,7 @@
   "3 floor: a gating prediction (every HIGH / MED-HIGH row; 17) below its floor reverts the commit that carries it",
   "4 geometry: a geometryGating row whose probe line does not end in its exact expect string reverts the commit that carries it; 006 ios / 006 android are probeGatedRevert rows (B-ios / B-android)",
   "5 leak: a composed capture outside every carrier set that differs in decoded pixels (R4), or a per-test IR document outside the wire carriers that differs in bytes (R4b), reverts the commit it is bisected to — except rule 7",
-  "6 unit: the commit (lanes.*.revertUnits); a cell carried by two commits of one lane (hyphens-out-of-flow-001 android: F1 + F2) reverts the later commit first, then its probe sections are re-probed",
+  "6 unit: the commit (lanes.*.revertUnits); a cell carried by two commits of one lane (hyphens-out-of-flow-001 android: F1 + F2) reverts the later commit first, then its probe sections are re-probed. Exception, measured at the fix pass (PLAN §10 item 8): L3 A is not independently revertible — its revert is B-android -> B-ios -> B-web -> A (lanes.L3-canvas-root.revertUnits.A.revertOrder) unless the prepared A-only revert patch is applied",
   "7 P-narrow: a web/ios change on bidi-lines-001, bidi-lines-002 or anchor-center-safe-rtl, or rule 1 / 2 on bidi-lines-001 / -002 android, re-lands L1 U2 as U2-narrow (lanes.L1-lists-bakes.pNarrowFallback); it never reverts U1 or the whole lane; U2 goes only if U2-narrow still trips a rule",
   "tier: MED and below carry no floor and no geometry trigger; a shortfall against their predicted magnitude is read and labelled, never a trigger. Rules 1, 2 and 5 apply to every tier"
  ],
@@ -101,13 +101,22 @@
  ],
  "wireRenumbering": {
   "rule": "The extractor numbers a section's components with ONE running counter (<name>-NNN, tests.list order). A per-test IR document that is byte-different ONLY because an earlier content-changed document in the same section changed its component count — identical once the id counter is stripped from id/slot.parent, every id shifted by the same amount, that amount equal to the running component-count delta of the content-changed documents before it — is RENUMBERED, not a wire leak. control-check.mjs reports it as its own class with the carrier that explains it; a renumbering the earlier carriers do not explain stays a leak.",
-  "addedAfter": "wave53-hh-probe (2026-10-07): the wire control first reported 15 leaks — every css-counter-styles cssom-*-setter / -setter-invalid document after counter-suffix in tests.list, each shifted +6 = counter-suffix 23 -> 29 components (L1 U1-B counter-bake), content identical; captures byte-identical on all three platforms.",
+  "addedAfter": "wave53-hh-probe (2026-10-07): the wire control first reported 15 leaks — every css-counter-styles cssom-*-setter / -setter-invalid document after counter-suffix in tests.list, each shifted +6 = counter-suffix 23 -> 29 components (L1 U2 hunk M: bidi-marker-bake's 6 marker runs, bidi-bake 4 -> 10 runs — corrected at the fix pass, PLAN §10 item 9; the hh-probe ran without U1's seam-1 and counter-suffix holds no reversed counter), content identical; captures byte-identical on all three platforms.",
   "mutation": "classifier disabled (byte rule only) -> the same 15 reported as WIRE LEAK -> red (the pre-fix output of the hh-probe control)",
   "measuredShadow": {
    "css-counter-styles": {
     "after": "wpt__css-counter-styles__counter-suffix",
     "shift": 6,
-    "documents": 15
+    "documents": 15,
+    "unit": "L1 U2 (hunk M, bidi-marker-bake marker runs)",
+    "basis": "measured: wave53-hh-probe wire control (extract.log [bidi-bake: baked — 2 roots, 10 runs] vs wave53-open 4 runs)"
+   },
+   "css-lists": {
+    "after": "wpt__css-lists__counter-reset-reversed-nested",
+    "shift": 1,
+    "documents": 10,
+    "unit": "L1 U1 (A, seam-1 findImpliedClose)",
+    "basis": "derived, not yet gate-measured: static extraction 7 -> 8 (wave53-S1/component-counts.out.txt) + the contiguous wave53-open id counter; the hh-probe did not run css-lists"
    }
   }
  },
@@ -277,17 +286,18 @@
      "cell": "css-counter-styles/counter-suffix.html ios",
      "from": "P 0.9802 DEGENERATE",
      "to": "P ~0.986",
-     "kind": "degenerate->faithful",
+     "kind": "RTL rows picture-correct; cell stays DEGENERATE on rows 3-6 (iOS)",
      "confidence": "HIGH (stays P) / MED (magnitude, geometry)",
      "floor": 0.95,
      "gating": true,
-     "geometry": "GEOMETRY OK"
+     "geometry": "GEOMETRY OK",
+     "gatingMeans": "floor 0.95 only (rule 3); geometry report-only, not in geometryProbe.geometryGating"
     },
     {
      "cell": "css-counter-styles/counter-suffix.html android",
      "from": "P 0.9547 DEGENERATE",
      "to": "P ~0.985",
-     "kind": "degenerate->faithful",
+     "kind": "RTL rows picture-correct; cell stays DEGENERATE on rows 5-6 (Android)",
      "confidence": "MED-HIGH",
      "floor": 0.975,
      "gating": true,
@@ -451,7 +461,13 @@
      },
      "wire": [
       "wpt__css-lists__counter-reset-reversed-nested"
-     ]
+     ],
+     "wireShadow": {
+      "css-lists": {
+       "shift": 1,
+       "documents": 10
+      }
+     }
     },
     "U2": {
      "commit": "bidi-marker-bake.mjs + bidi-bake.mjs (hunks M + P) + ListMarkerOutsideHang.swift comment + pins V1-V5",
@@ -474,7 +490,13 @@
       "wpt__css-text__bidi__bidi-lines-001",
       "wpt__css-text__bidi__bidi-lines-002",
       "wpt__css-anchor-position__anchor-center-safe-rtl"
-     ]
+     ],
+     "wireShadow": {
+      "css-counter-styles": {
+       "shift": 6,
+       "documents": 15
+      }
+     }
     }
    },
    "pNarrowFallback": {
@@ -1041,7 +1063,7 @@
    },
    "revertUnits": {
     "A": {
-     "commit": "RootBackgroundPropagation twins + the three canvas call sites + ColorApplier / BackgroundImageApplier one-liners + pins A1-A6",
+     "commit": "RootBackgroundPropagation triplet (kt / swift / ts) + the three canvas call sites (ScreenshotCaptureScreen.kt, CaptureCanvas.swift, ComposedCaptureGallery.tsx) + pins A1-A6 (ComposedCanvasRootBackgroundTest.kt, WPTCaptureModeTests.swift, ComposedCanvasRootBackgroundImage.test.tsx, RootBackgroundPropagation.test.ts)",
      "captures": {
       "web": [
        "wpt__css-backgrounds__background-attachment-margin-root-001",
@@ -1059,7 +1081,15 @@
        "wpt__css-display__display-contents-root-background"
       ]
      },
-     "wire": []
+     "wire": [],
+     "revertOrder": [
+      "B-android",
+      "B-ios",
+      "B-web",
+      "A"
+     ],
+     "revertTakes": "every B unit: s-11-1-1b-006 web / ios / android return to their wave53-open captures with it",
+     "aOnlyRevert": "tools/titan/results/wave53-canvas-root/a-only-revert.patch (prepared at the fix pass; see that lane note) — applied INSTEAD of the four-commit revert when only A trips a rule, so the B units stay on the unstripped forest"
     },
     "B-web": {
      "commit": "CanvasTableBody.ts + its ComposedCaptureGallery.tsx call + B-web pin",
@@ -1070,7 +1100,10 @@
       "ios": [],
       "android": []
      },
-     "wire": []
+     "wire": [],
+     "revertOrder": [
+      "B-web"
+     ]
     },
     "B-ios": {
      "commit": "TableBodyForest.swift + its CaptureCanvas.swift call site (FixedHoist.split input) + Catalyst B pins",
@@ -1081,7 +1114,10 @@
       ],
       "android": []
      },
-     "wire": []
+     "wire": [],
+     "revertOrder": [
+      "B-ios"
+     ]
     },
     "B-android": {
      "commit": "TableBodyForest.kt + its ScreenshotCaptureScreen.kt call site + JVM B pins / B-stack",
@@ -1092,7 +1128,10 @@
        "wpt__CSS2__css21-errata__s-11-1-1b-006"
       ]
      },
-     "wire": []
+     "wire": [],
+     "revertOrder": [
+      "B-android"
+     ]
     }
    }
   },
@@ -1433,7 +1472,7 @@
    ],
    "revertUnits": {
     "L5": {
-     "commit": "own-processes.sh helpers + gate-driver / section-runner / provision-devices / smoke.sh call sites + ios-harness project.yml + tests",
+     "commit": "own-processes.sh helpers + gate-driver / section-runner / provision-devices / smoke.sh call sites + tools/visual/smoke-port.sh (+ the fix-pass smoke-fixtures.sh) + ios-harness project.yml + tests (incl. own-gradle-daemons.test.mjs, own-adb-server.test.mjs, smoke-port.test.mjs)",
      "captures": {
       "web": [],
       "ios": [],

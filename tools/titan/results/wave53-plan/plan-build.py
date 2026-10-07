@@ -78,8 +78,16 @@ L1 = {
     pred('css-lists/counter-reset-reversed-nested.html ios', 'P 0.9508', 'P >= 0.99', 'picture-correctness', 'MED-HIGH', 0.99, True, GEO_OK),
     pred('css-lists/counter-reset-reversed-nested.html android', 'P 0.9509', 'P >= 0.99', 'picture-correctness', 'MED', None, False, GEO_OK),
     pred('css-counter-styles/counter-suffix.html web', 'P 0.9818', 'P >= 0.995', 'picture-correctness', 'HIGH (P + geometry) / MED (magnitude)', PASS, True, GEO_OK),
-    pred('css-counter-styles/counter-suffix.html ios', 'P 0.9802 DEGENERATE', 'P ~0.986', 'degenerate->faithful', 'HIGH (stays P) / MED (magnitude, geometry)', PASS, True, GEO_OK),
-    pred('css-counter-styles/counter-suffix.html android', 'P 0.9547 DEGENERATE', 'P ~0.985', 'degenerate->faithful', 'MED-HIGH', 0.975, True, GEO_OK),
+    # wave53 fix pass (S1 S3 = L1 skeptic D6): U2 makes the RTL rows right, but iOS rows 3-4 (Hebrew period swap) and
+    # iOS + Android rows 5-6 (CJK marker 4 px left) keep wrong ink (L1 skeptic §(d), decoded PNGs) — no wave-53 lane
+    # touches them, so the cell stays DEGENERATE and is never called faithful.
+    dict(pred('css-counter-styles/counter-suffix.html ios', 'P 0.9802 DEGENERATE', 'P ~0.986',
+              'RTL rows picture-correct; cell stays DEGENERATE on rows 3-6 (iOS)', 'HIGH (stays P) / MED (magnitude, geometry)', PASS, True, GEO_OK),
+         # L1 skeptic nit 11: `gating` here is the FLOOR only (revert rule 3, PLAN §2 L1 "0.95 · report"); the geometry
+         # line is report-only, which is why geometryProbe.geometryGating omits this row (revert rule 4 never fires on it).
+         gatingMeans='floor 0.95 only (rule 3); geometry report-only, not in geometryProbe.geometryGating'),
+    pred('css-counter-styles/counter-suffix.html android', 'P 0.9547 DEGENERATE', 'P ~0.985',
+         'RTL rows picture-correct; cell stays DEGENERATE on rows 5-6 (Android)', 'MED-HIGH', 0.975, True, GEO_OK),
     pred('css-text/bidi/bidi-lines-002.html android', 'P 0.9534', 'P 0.975-0.98', 'mover (up)', 'MED'),
     pred('css-text/bidi/bidi-lines-001.html android', 'f 0.8934', '~0.95-0.96 (f->P possible)', 'possible flip', 'MED-LOW'),
   ],
@@ -106,13 +114,20 @@ L1 = {
   'revertUnits': {
     'U1': {'commit': 'seam-1 (findImpliedClose at both trigger sites) + counter-bake.mjs (B) + PseudoTextFold.swift (C) + PseudoTextFold.kt (D) + pins N1-N5',
            'captures': {p: ['wpt__css-lists__counter-reset-reversed-nested'] for p in ('web', 'ios', 'android')},
-           'wire': ['wpt__css-lists__counter-reset-reversed-nested']},
+           'wire': ['wpt__css-lists__counter-reset-reversed-nested'],
+           # wave53 fix pass (S1 M2): U1 also RENUMBERS — nested 7 -> 8 components, so the 10 css-lists documents after it
+           # in tests.list shift +1 (ids only). Not content-changed, so not in `wire`; see wireRenumbering.measuredShadow.
+           'wireShadow': {'css-lists': {'shift': 1, 'documents': 10}}},
     'U2': {'commit': 'bidi-marker-bake.mjs + bidi-bake.mjs (hunks M + P) + ListMarkerOutsideHang.swift comment + pins V1-V5',
            'captures': {'web': ['wpt__css-counter-styles__counter-suffix'], 'ios': ['wpt__css-counter-styles__counter-suffix'],
                         'android': ['wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001',
                                     'wpt__css-text__bidi__bidi-lines-002', 'wpt__css-anchor-position__anchor-center-safe-rtl']},
            'wire': ['wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001',
-                    'wpt__css-text__bidi__bidi-lines-002', 'wpt__css-anchor-position__anchor-center-safe-rtl']},
+                    'wpt__css-text__bidi__bidi-lines-002', 'wpt__css-anchor-position__anchor-center-safe-rtl'],
+           # wave53 fix pass (S1 M2): hunk M's 6 marker runs (bidi-bake 4 -> 10 runs) put counter-suffix at 23 -> 29
+           # components, so the 15 css-counter-styles documents after it shift +6 (ids only) — U2's shadow, not U1-B's
+           # (counter-suffix holds no reversed counter, the only thing U1-B's counter-bake hunk touches).
+           'wireShadow': {'css-counter-styles': {'shift': 6, 'documents': 15}}},
   },
   # Plan-skeptic round 2, should-fix 5: hunk P's web/iOS invariance is argued, not captured (rtl-marker-bake.md §9 risk 3).
   # Its pre-registered fallback is P-narrow, so a web/iOS change on the three marker-less hunk-P documents re-lands U2
@@ -269,14 +284,23 @@ L3 = {
   # Round-2 must-fix 1 (iii): item A, B-web and each native B call site are separate commits, so the existing per-native
   # probe-gated revert of item B is a commit revert.
   'revertUnits': {
-    'A': {'commit': 'RootBackgroundPropagation twins + the three canvas call sites + ColorApplier / BackgroundImageApplier one-liners + pins A1-A6',
-          'captures': {p: crb_stems for p in ('web', 'ios', 'android')}, 'wire': []},
+    # wave53 fix pass: the 10 paths unit A landed with (add9de84; the lane edited neither ColorApplier nor
+    # BackgroundImageApplier — L3 note §1 "where the tree won", L3 skeptic note; S1 nit N4).
+    'A': {'commit': 'RootBackgroundPropagation triplet (kt / swift / ts) + the three canvas call sites (ScreenshotCaptureScreen.kt, CaptureCanvas.swift, ComposedCaptureGallery.tsx) + pins A1-A6 (ComposedCanvasRootBackgroundTest.kt, WPTCaptureModeTests.swift, ComposedCanvasRootBackgroundImage.test.tsx, RootBackgroundPropagation.test.ts)',
+          'captures': {p: crb_stems for p in ('web', 'ios', 'android')}, 'wire': [],
+          # wave53 fix pass (S1 M1, EXECUTED: tools/titan/results/wave53-S1/revert-orders.out.txt, a 3-way `git revert` in a
+          # scratch clone): A is NOT independently revertible — every B call site lives inside A's code (B-android's
+          # TableBodyForest.rewrite inside A's composedCanvasRoots, B-ios's inside A's splitRoots strip, B-web's wrapper
+          # branch beside A's gallery hunk). Alone it conflicts in all three canvas files; it reverts clean only last.
+          'revertOrder': ['B-android', 'B-ios', 'B-web', 'A'],
+          'revertTakes': 'every B unit: s-11-1-1b-006 web / ios / android return to their wave53-open captures with it',
+          'aOnlyRevert': 'tools/titan/results/wave53-canvas-root/a-only-revert.patch (prepared at the fix pass; see that lane note) — applied INSTEAD of the four-commit revert when only A trips a rule, so the B units stay on the unstripped forest'},
     'B-web': {'commit': 'CanvasTableBody.ts + its ComposedCaptureGallery.tsx call + B-web pin',
-              'captures': {'web': dtb['carriers'], 'ios': [], 'android': []}, 'wire': []},
+              'captures': {'web': dtb['carriers'], 'ios': [], 'android': []}, 'wire': [], 'revertOrder': ['B-web']},
     'B-ios': {'commit': 'TableBodyForest.swift + its CaptureCanvas.swift call site (FixedHoist.split input) + Catalyst B pins',
-              'captures': {'web': [], 'ios': dtb['carriers'], 'android': []}, 'wire': []},
+              'captures': {'web': [], 'ios': dtb['carriers'], 'android': []}, 'wire': [], 'revertOrder': ['B-ios']},
     'B-android': {'commit': 'TableBodyForest.kt + its ScreenshotCaptureScreen.kt call site + JVM B pins / B-stack',
-                  'captures': {'web': [], 'ios': [], 'android': dtb['carriers']}, 'wire': []},
+                  'captures': {'web': [], 'ios': [], 'android': dtb['carriers']}, 'wire': [], 'revertOrder': ['B-android']},
   },
 }
 
@@ -343,7 +367,9 @@ L5 = {
                   'css-flexbox/align-items-007.html ios', 'css-gaps/flex/flex-gap-decorations-027.html ios',
                   'css-masking/clip-path/clip-path-circle-007.html ios'],
   'geometry': ['driver.log of every later run: no "gradlew --stop", one kill_own_gradle_daemons line naming what it stopped and what it left'],
-  'revertUnits': {'L5': {'commit': 'own-processes.sh helpers + gate-driver / section-runner / provision-devices / smoke.sh call sites + ios-harness project.yml + tests',
+  # wave53 fix pass (S1 nit N4): the unit also holds the lane's three disclosed new files (L5 note §1), and the fix pass's
+  # smoke-fixtures.sh split (build_fixtures, moved out of smoke.sh) lands with it if L5 is ever reverted.
+  'revertUnits': {'L5': {'commit': 'own-processes.sh helpers + gate-driver / section-runner / provision-devices / smoke.sh call sites + tools/visual/smoke-port.sh (+ the fix-pass smoke-fixtures.sh) + ios-harness project.yml + tests (incl. own-gradle-daemons.test.mjs, own-adb-server.test.mjs, smoke-port.test.mjs)',
                          'captures': {'web': [], 'ios': [], 'android': []}, 'wire': []}},
 }
 
@@ -391,7 +417,7 @@ expectations = {
     '3 floor: a gating prediction (every HIGH / MED-HIGH row; 17) below its floor reverts the commit that carries it',
     '4 geometry: a geometryGating row whose probe line does not end in its exact expect string reverts the commit that carries it; 006 ios / 006 android are probeGatedRevert rows (B-ios / B-android)',
     '5 leak: a composed capture outside every carrier set that differs in decoded pixels (R4), or a per-test IR document outside the wire carriers that differs in bytes (R4b), reverts the commit it is bisected to — except rule 7',
-    '6 unit: the commit (lanes.*.revertUnits); a cell carried by two commits of one lane (hyphens-out-of-flow-001 android: F1 + F2) reverts the later commit first, then its probe sections are re-probed',
+    '6 unit: the commit (lanes.*.revertUnits); a cell carried by two commits of one lane (hyphens-out-of-flow-001 android: F1 + F2) reverts the later commit first, then its probe sections are re-probed. Exception, measured at the fix pass (PLAN §10 item 8): L3 A is not independently revertible — its revert is B-android -> B-ios -> B-web -> A (lanes.L3-canvas-root.revertUnits.A.revertOrder) unless the prepared A-only revert patch is applied',
     '7 P-narrow: a web/ios change on bidi-lines-001, bidi-lines-002 or anchor-center-safe-rtl, or rule 1 / 2 on bidi-lines-001 / -002 android, re-lands L1 U2 as U2-narrow (lanes.L1-lists-bakes.pNarrowFallback); it never reverts U1 or the whole lane; U2 goes only if U2-narrow still trips a rule',
     'tier: MED and below carry no floor and no geometry trigger; a shortfall against their predicted magnitude is read and labelled, never a trigger. Rules 1, 2 and 5 apply to every tier',
   ],
@@ -442,9 +468,20 @@ expectations = {
              'reports it as its own class with the carrier that explains it; a renumbering the earlier carriers do not explain stays a leak.'),
     'addedAfter': ('wave53-hh-probe (2026-10-07): the wire control first reported 15 leaks — every css-counter-styles cssom-*-setter / '
                    '-setter-invalid document after counter-suffix in tests.list, each shifted +6 = counter-suffix 23 -> 29 components '
-                   '(L1 U1-B counter-bake), content identical; captures byte-identical on all three platforms.'),
+                   '(L1 U2 hunk M: bidi-marker-bake\'s 6 marker runs, bidi-bake 4 -> 10 runs — corrected at the fix pass, PLAN §10 item 9; '
+                   'the hh-probe ran without U1\'s seam-1 and counter-suffix holds no reversed counter), content identical; captures '
+                   'byte-identical on all three platforms.'),
     'mutation': 'classifier disabled (byte rule only) -> the same 15 reported as WIRE LEAK -> red (the pre-fix output of the hh-probe control)',
-    'measuredShadow': {'css-counter-styles': {'after': 'wpt__css-counter-styles__counter-suffix', 'shift': 6, 'documents': 15}},
+    'measuredShadow': {
+      'css-counter-styles': {'after': 'wpt__css-counter-styles__counter-suffix', 'shift': 6, 'documents': 15,
+                             'unit': 'L1 U2 (hunk M, bidi-marker-bake marker runs)',
+                             'basis': 'measured: wave53-hh-probe wire control (extract.log [bidi-bake: baked — 2 roots, 10 runs] vs wave53-open 4 runs)'},
+      # wave53 fix pass (S1 M2): U1 restores "1. One" (nested 7 -> 8 components, the real extractor), so the 10 css-lists
+      # documents after it in tests.list (index 38 of 48; wave53-open's per-section id counter is contiguous) shift +1.
+      'css-lists': {'after': 'wpt__css-lists__counter-reset-reversed-nested', 'shift': 1, 'documents': 10,
+                    'unit': 'L1 U1 (A, seam-1 findImpliedClose)',
+                    'basis': 'derived, not yet gate-measured: static extraction 7 -> 8 (wave53-S1/component-counts.out.txt) + the contiguous wave53-open id counter; the hh-probe did not run css-lists'},
+    },
   },
   'expected': {'lost': [], 'unmeasuredNow': [], 'newlyMeasured': [], 'missingSections': 0, 'columnShorts': 0,
                'fixtureNet': 'exit 0 on all 9 gate fixtures'},

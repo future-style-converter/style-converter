@@ -1,0 +1,27 @@
+{
+ "label": "L3-A-contained",
+ "file": "runtimes/web/src/engine/background/RootBackgroundPropagation.ts",
+ "sha_before": "59ec2cbab8ca97726fcd674634fa3dce94bf9a151ad65c6c6d5ca9b6b7a89ab3",
+ "sha_mutated": "420dd52408efab35c61b31739377b02698ca36ac1947774a5385de21f635090a",
+ "sha_restored": "59ec2cbab8ca97726fcd674634fa3dce94bf9a151ad65c6c6d5ca9b6b7a89ab3",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "Tests  8 passed (8)"
+ ],
+ "red_lines": [
+  "❯ tests/background/RootBackgroundPropagation.test.ts (8 tests | 1 failed) 5ms",
+  "× a4_contained_noPropagation 2ms",
+  "Test Files  1 failed (1)",
+  "Tests  1 failed | 7 passed (8)",
+  "⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯",
+  "AssertionError: expected { attachments: [ 'scroll' ], …(2) } to be null"
+ ],
+ "green_after": [
+  "Tests  8 passed (8)"
+ ]
+}

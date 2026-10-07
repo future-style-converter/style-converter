@@ -42,7 +42,7 @@ describe('rootBackgroundPlan — css-backgrounds-3 §2.11.2 / §3.4', () => {
     // One `scroll` image layer, ICB-relative origin (0,0), uniform (1×1 PNG, repeat).
     expect(rootBackgroundPlan(BODY_TARGET.properties, NO_MARGIN, false)).toEqual({
       attachments: ['scroll'], origins: [{ x: 0, y: 0 }], uniform: true });
-    // The canvas paints exactly that URL (the engine's own url() serialiser).
+    // The canvas paints exactly that URL (the runtime's own url() serialiser).
     const css = rootCanvasBackgroundStyle(BODY_TARGET.properties,
       rootBackgroundPlan(BODY_TARGET.properties, NO_MARGIN, false)!, 16);
     expect(css.backgroundImage).toBe(`url("${TARGET_URL}")`);

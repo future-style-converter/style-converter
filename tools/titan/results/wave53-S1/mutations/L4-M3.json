@@ -1,0 +1,32 @@
+{
+ "label": "L4-right-edge",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/FloatAvoidPlan.kt",
+ "sha_before": "fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7",
+ "sha_mutated": "196014dece9ba2e8eb03efd0919708e7f2835d385feb7bf2923c80ac9e6dfa8b",
+ "sha_restored": "fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "BUILD SUCCESSFUL in 4s"
+ ],
+ "red_lines": [
+  "> Task :runtime:testDebugUnitTest FAILED",
+  "FloatAvoidPlanTest > P1 - 001 floats at 200,0 0,100 100,200 and the BFC beside float 3 at 0,200 FAILED",
+  "java.lang.AssertionError at FloatAvoidPlanTest.kt:60",
+  "FloatAvoidPlanTest > P3 - flow-root-002 floats at 150,0 and 0,100, the zero-width BFC at 250,100 FAILED",
+  "java.lang.AssertionError at FloatAvoidPlanTest.kt:71",
+  "FloatAvoidPlanTest > P7 - right floats are placed from the 400px container, not a 358 proposal FAILED",
+  "java.lang.AssertionError at FloatAvoidPlanTest.kt:126",
+  "15 tests completed, 3 failed, 1 skipped",
+  "FAILURE: Build failed with an exception.",
+  "Execution failed for task ':runtime:testDebugUnitTest'.",
+  "BUILD FAILED in 5s"
+ ],
+ "green_after": [
+  "BUILD SUCCESSFUL in 4s"
+ ]
+}

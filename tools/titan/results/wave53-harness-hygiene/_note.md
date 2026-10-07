@@ -321,3 +321,17 @@ STATUS: COMPLETE
    counter-suffix +6, PLAN §10 item 6) — **CONTROL HOLDS**. `--lane L5-harness-hygiene` on the same pair FAILS on L1+L2's
    carriers (`control-hh-probe-L5.json`), as a shared-tree probe must; L5's "no capture, no wire change" prediction is re-read
    at the closing gate. The driver's own-processes path ran (`kill_own_gradle_daemons roots=[this tree]`); pid 87017 untouched.
+
+## Fix pass (wave-53 S1, 2026-10-07; full record in `tools/titan/results/wave53-S1/_note.md` "## Fix pass")
+
+- **Skeptic D1 / S1 S6 — the copy phase is named.** `ComposedCanvasIcbClipTests.swift`'s header and `canvasSource()` doc
+  now say Copy Files (`buildPhase: copyFiles: destination: resources`, dstSubfolderSpec 7), and that `buildPhase:
+  resources` (Copy Bundle Resources) silently drops a `.swift`. Comment-only.
+- **S1 S7 — `build_fixtures` moved** out of `smoke.sh` (386 → 354 lines) into a sourced `tools/visual/smoke-fixtures.sh`
+  (body unchanged; it calls smoke.sh's log/err/add_result at call time). New pin in `smoke-port.test.mjs` (source line,
+  single definition, build → gate → vite order, `bash -n` of both); mutation SF1 (the source line dropped) → red.
+  smoke.sh stays over 300 lines (312 before the wave) — recorded for the PR.
+- S1 nit N4: `expectations.json` `revertUnits.L5` now names smoke-port.sh, own-gradle-daemons.test.mjs and
+  own-adb-server.test.mjs.
+
+STATUS: COMPLETE

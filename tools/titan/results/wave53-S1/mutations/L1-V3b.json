@@ -1,0 +1,31 @@
+{
+ "label": "L1-V3b-nonzero",
+ "file": "tools/titan/bidi-bake.mjs",
+ "sha_before": "5bce87101194d0d2047551b7e60c92f1211aa6150b8c84ba6a9e7bd4ef0d32a4",
+ "sha_mutated": "dcd2c3e8db14a9139d47666cb7dce6bc11735a986dad11681cc82b403406171e",
+ "sha_restored": "5bce87101194d0d2047551b7e60c92f1211aa6150b8c84ba6a9e7bd4ef0d32a4",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "ok 56 - V4 hunk M × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake)",
+  "# pass 56",
+  "# fail 0"
+ ],
+ "red_lines": [
+  "not ok 55 - V3b hunk P: a ZERO-padding root (selectors/dir-style-02a) keeps its keys deep-equal AND in order",
+  "name: 'AssertionError'",
+  "# Subtest: V4 hunk M × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake)",
+  "ok 56 - V4 hunk M × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake)",
+  "# pass 55",
+  "# fail 1"
+ ],
+ "green_after": [
+  "ok 56 - V4 hunk M × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake)",
+  "# pass 56",
+  "# fail 0"
+ ]
+}

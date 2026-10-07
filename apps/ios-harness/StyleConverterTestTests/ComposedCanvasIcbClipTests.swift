@@ -21,10 +21,13 @@
 //  nor its crop.
 //
 //  Source is read from THIS test bundle — project.yml copies
-//  StyleConverterTest/Screenshot/CaptureCanvas.swift in with `buildPhase:
-//  resources` (wave 53, harness-hygiene T1-a: the bundle runs in the
-//  simulator, which is refused the host checkout, so the old `#filePath`
-//  read failed every pin here with NSCocoaErrorDomain 257) — CODE LINES
+//  StyleConverterTest/Screenshot/CaptureCanvas.swift in with a Copy Files
+//  phase (`buildPhase: copyFiles: destination: resources`, dstSubfolderSpec
+//  7 — NOT `buildPhase: resources`, whose Copy Bundle Resources phase
+//  silently drops a .swift file) (wave 53, harness-hygiene T1-a: the
+//  bundle runs in the simulator, which is refused the host checkout, so
+//  the old `#filePath` read failed every pin here with NSCocoaErrorDomain
+//  257) — CODE LINES
 //  ONLY: `//` lines are dropped so prose that mentions a modifier cannot
 //  satisfy a pin. This is the Swift twin of the Android harness's
 //  ComposedCanvasIcbClipSourceTest.
@@ -60,7 +63,9 @@ import XCTest
 final class ComposedCanvasIcbClipTests: XCTestCase {
 
     /// The harness canvas source, as copied into this test bundle at build
-    /// time (project.yml, `buildPhase: resources`) — the same bytes the app
+    /// time (project.yml's Copy Files phase, `copyFiles: destination:
+    /// resources` — never `buildPhase: resources`, which drops a .swift
+    /// silently) — the same bytes the app
     /// target compiles. No disk fallback and no skip guard: a missing
     /// resource is a real failure (finding A8#3), never a silent skip.
     private func canvasSource() throws -> String {

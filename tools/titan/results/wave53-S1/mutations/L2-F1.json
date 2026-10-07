@@ -1,0 +1,30 @@
+{
+ "label": "L2-F1-guard",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/typography/wrapping/PreBreakPipeline.kt",
+ "sha_before": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+ "sha_mutated": "e06fea90be2a7a785004106534843283b9953335dafcd655b3899ac948d22420",
+ "sha_restored": "0915c0a221cbc284e0ce9e5cf9f3ec1986377cc0e7fac63fc4e9a2b14f9bd677",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "BUILD SUCCESSFUL in 4s"
+ ],
+ "red_lines": [
+  "> Task :runtime:testDebugUnitTest FAILED",
+  "PreBreakPipelineTest > aMultiOpportunitySpacelessRunSplitsIntoFiveLines FAILED",
+  "java.lang.AssertionError at PreBreakPipelineTest.kt:324",
+  "PreBreakPipelineTest > aSpacelessSoftHyphenRunFiresWithTheTakenHyphen FAILED",
+  "java.lang.AssertionError at PreBreakPipelineTest.kt:283",
+  "20 tests completed, 2 failed",
+  "FAILURE: Build failed with an exception.",
+  "Execution failed for task ':runtime:testDebugUnitTest'.",
+  "BUILD FAILED in 5s"
+ ],
+ "green_after": [
+  "BUILD SUCCESSFUL in 4s"
+ ]
+}

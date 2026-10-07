@@ -165,8 +165,8 @@ Focused suites, final state:
 | counter-reset-reversed-nested ios P 0.9508 | P ≥ 0.99, GEOMETRY OK | MED-HIGH | C puts "2. " on both channels; nested-ol indent/no-gap already native (brief §5) |
 | counter-reset-reversed-nested android P 0.9509 | P ≥ 0.99 | MED | D removes the Row wrapper; run-plan engagement on device unverified |
 | counter-suffix web P 0.9818 | P ≥ 0.995, GEOMETRY OK, rows 0-207 identical | HIGH | Blink's left markers gone (`none`), Chromium's own glyph boxes painted right |
-| counter-suffix ios P 0.9802 (DEGENERATE) | P ≈ 0.986 (replay 0.9888) | HIGH stays P / MED magnitude | out-of-family LTR residuals cap it below 0.99 |
-| counter-suffix android P 0.9547 (DEGENERATE) | P ≈ 0.985 (replay 0.9900), GEOMETRY OK | MED-HIGH | P moves RTL text x151 → 103; M adds `.1` at x133-145 |
+| counter-suffix ios P 0.9802 (DEGENERATE) | P ≈ 0.986 (replay 0.9888); **RTL rows picture-correct, cell stays DEGENERATE on rows 3-6** (fix-pass label) | HIGH stays P / MED magnitude | out-of-family LTR residuals cap it below 0.99: rows 3-4 Hebrew period swap, rows 5-6 CJK marker 4 px left (skeptic D6) |
+| counter-suffix android P 0.9547 (DEGENERATE) | P ≈ 0.985 (replay 0.9900), GEOMETRY OK; **RTL rows picture-correct, cell stays DEGENERATE on rows 5-6** (fix-pass label) | MED-HIGH | P moves RTL text x151 → 103; M adds `.1` at x133-145; rows 5-6 keep the CJK marker 4 px left (skeptic D6) |
 | bidi-lines-002 android P 0.9534 | P 0.975-0.98 | MED | P removes the +4 px content-box shift |
 | bidi-lines-001 android f 0.8934 | ≈ 0.95-0.96, f→P possible | MED-LOW | same mechanism |
 
@@ -275,12 +275,40 @@ STATUS: COMPLETE
    of which 4 `ListStyleType NONE` and 0 of those carry `meta.markerText`, `FontVariantNumeric` present.
 4. **Replay with the measured box** — `replay-score.measured-box.txt`: android P-only 0.9815, M+P **0.9900** (the brief's 0.9900);
    bidi-lines-002 android 0.9534 → 0.9818, bidi-lines-001 android 0.8934 → 0.9629 (the brief's numbers).
-5. **Wire renumbering shadow (found by the hh-probe control, 2026-10-07)** — the counter-bake's +6 components on `counter-suffix`
-   renumber the component ids of the 15 css-counter-styles documents after it in `tests.list` (every `cssom/cssom-*-setter`
-   and `-setter-invalid`): `<name>-677…680` → `-683…686`, content identical, captures byte-identical on all three platforms.
-   The extractor's component counter runs per section, not per test — so U1-B's wire radius is "counter-suffix + an id shadow
-   over the rest of its section", wider than the lane's census (1 document) by 15 id-only documents. The gate's wire control
+5. **Wire renumbering shadow (found by the hh-probe control, 2026-10-07; attribution CORRECTED at the fix pass, PLAN §10
+   item 9)** — the +6 components on `counter-suffix` are U2 hunk M's six marker runs (the bidi bake went from 4 to 10 runs;
+   U1-B's counter-bake hunk touches only reversed counters and `counter-suffix.html` has none — the earlier "counter-bake's
+   +6" / "U1-B" reading was wrong). They renumber the component ids of the 15 css-counter-styles documents after it in
+   `tests.list` (every `cssom/cssom-*-setter` and `-setter-invalid`): `<name>-677…680` → `-683…686`, content identical,
+   captures byte-identical on all three platforms. The extractor's component counter runs per section, not per test — so
+   U2's wire radius is "its 4 content-changed documents + an id shadow of 15 over the rest of css-counter-styles", and U1's
+   is "counter-reset-reversed-nested (7 → 8 components) + an id shadow of 10 over the rest of css-lists" (+1 each; derived
+   from the static extractor and the contiguous `wave53-open` counter, not yet gate-measured). The gate's wire control
    (`wave53-gate/control-check.mjs`) now reports this class as "renumbered" with the explaining carrier (PLAN §10 item 6,
    `expectations.json` → `wireRenumbering`); the lane's `wireCarriers` entry stays `counter-suffix` alone, which is the
    content-changed set. Nothing in the lane's code changes for this.
 
+
+## Fix pass (wave-53 S1, 2026-10-07; full record in `tools/titan/results/wave53-S1/_note.md` "## Fix pass")
+
+- **Skeptic D1 / S1 S2 — the silent fallthrough is closed.** `bidi-marker-bake.mjs` `inPageMarkerProbe`: an item not
+  re-found by its walked rect now gets `{ error: 'list item not re-found by rect' }`, and `collectMarkerFacts` no longer
+  merges the CDP/model fields into an error fact, so `planMarker` declines the item and stamps `marker-not-baked`. Pin
+  **VF1** runs the REAL in-page function (fake `document`); mutations FX1 (`continue` restored) and FX2 (merge filter
+  dropped) turn it red. `skeptic/silent-skip-repro.mjs` still prints `facts {}`: its fake page returns `{}` from
+  `page.evaluate` itself (the OLD in-page answer), so it no longer models this code — VF1 replaces it.
+- **D3 — the fixture-side stamp merge is pinned.** **VF2**: `applyBidiBakePlan` puts a box's `lossy` on the fixture
+  component (`_lossy`, de-duplicated `_lossyReasons`) and gives an unstamped box none. FX3 (= S-svx2) → red.
+- **D4 — the pseudo `who` key is pinned, the P2 corner named.** counter-bake.test.mjs P1 pin (12, 10, 9, the §4.4.2
+  arithmetic); FX5 (= SN3C) → red. `setCounter`'s comment now says the self-step rule holds on ELEMENTS, and names the
+  pseudo-bag set-before-increment corner (P2: 11, 8, 7; 0 corpus carriers) as a KNOWN GAP. `pseudoSet`'s order is unchanged.
+- **D5 — the half-leading is removed.** `planMarker` places glyph tops at `first.run.y + q.y − q0` (q0 = the span's first
+  glyph top). **VF3** pins tops 2px/2px at q.y 0 and 14; FX4 → red. Corpus radius 0: the CDP probe measured every
+  counter-suffix marker top at the text's 2 px (q.y 0), and the only list items in any bake root are counter-suffix's 4.
+- **D6 / S1 S3 — labels.** §4's counter-suffix rows now read "RTL rows picture-correct; cell stays DEGENERATE on rows 3-6
+  (iOS) / 5-6 (Android)"; `expectations.json` carries the same `kind` (PLAN §10 item 11).
+- **S1 M2 — window result 5 corrected above** (the +6 shadow is U2's; U1 has its own +1 × 10 css-lists shadow).
+- Focused, on the shared tree: the six "May run" node files + smoke-port/interaction-states/a11y-audit/web-port-guard,
+  678/678. `bidi-marker-bake.mjs` stays at 200 lines.
+
+STATUS: COMPLETE

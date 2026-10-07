@@ -1,0 +1,28 @@
+{
+ "label": "L4-height-1067",
+ "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/layout/FloatAvoidPlan.kt",
+ "sha_before": "fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7",
+ "sha_mutated": "8cfdf67aa787d4bc1fd6b6b6f34f59e7936026b23d0b7fa1fda04e0b7d17383a",
+ "sha_restored": "fb440ee49aee27361bd417079006bdf0a09a5fcc22413dad8d4657a71c0d47d7",
+ "restored_byte_exact": true,
+ "green_before_rc": 0,
+ "red_rc": 1,
+ "expected_pin_in_red": true,
+ "green_after_rc": 0,
+ "verdict": "RED->GREEN",
+ "green_before": [
+  "BUILD SUCCESSFUL in 3s"
+ ],
+ "red_lines": [
+  "> Task :runtime:testDebugUnitTest FAILED",
+  "FloatAvoidPlanTest > P6 - reported heights are the BFC bottoms 370, 20, 300 - floats excluded FAILED",
+  "java.lang.AssertionError at FloatAvoidPlanTest.kt:119",
+  "15 tests completed, 1 failed, 1 skipped",
+  "FAILURE: Build failed with an exception.",
+  "Execution failed for task ':runtime:testDebugUnitTest'.",
+  "BUILD FAILED in 4s"
+ ],
+ "green_after": [
+  "BUILD SUCCESSFUL in 4s"
+ ]
+}
