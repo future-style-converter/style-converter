@@ -25,6 +25,7 @@ package com.styleconverter.runtime.typography.inline
 import com.styleconverter.runtime.core.ir.IRComponent
 import com.styleconverter.runtime.core.ir.IRDocumentDecoder
 import com.styleconverter.runtime.core.ir.IRProperty
+import com.styleconverter.runtime.core.ir.IRRun
 import com.styleconverter.runtime.core.renderer.InlineRunPlan
 import com.styleconverter.runtime.core.renderer.SlotComposer
 import kotlinx.serialization.json.Json
@@ -148,13 +149,170 @@ class InlineRunFoldTest {
 
     // ── the two deferred shapes, verbatim wire ───────────────────────────
 
+    // ── Wave 53 (lane L2, F2) — the PAINT-INERT OUT-OF-FLOW member ───────
+    //
+    // Until wave 53 the pin below asserted Bailed("member-prop:Position"):
+    // the abspos span sent the host to the stacked fallback, one paragraph
+    // per text run, which split `high­way` into `h` / `igh­way` (android
+    // P 0.9685, DEGENERATE). OUT_OF_FLOW_001_HOST3 is byte-identical to
+    // wave52-ship's wire (checked component by component); the four new
+    // payloads are wave52-ship per-test IR VERBATIM (minified; a nested
+    // host's own slot dropped, as the existing trimmed payloads do).
+    // MUTATION PROOF: tools/titan/results/wave53-soft-hyphen/_note.md §3
+    // (M-F2-off / M-F2-wide, red → restore byte-exact sha256 → green).
+
     @Test
-    fun `hyphens-out-of-flow-001 - an abspos member bails to the stacked fallback`() {
+    fun `hyphens-out-of-flow-001 - the paint-inert abspos member drops and the word folds whole`() {
         val outcome = foldOf(root(OUT_OF_FLOW_001_HOST3, 0))
-        // Position is not in the member property sets: out-of-flow members
-        // are wave-scope-deferred (they need a static-position mount, not
-        // a glyph contribution) — the bail names the offending type.
+        // `h` + (abspos, dropped) + `igh­way` → ONE word, its soft hyphen
+        // intact for the leaf pipeline (F1 then breaks it `high‐`/`way`).
+        val folded = outcome as InlineRunFold.Outcome.Folded
+        assertEquals("high\u00ADway", folded.text)
+        // The drop is counted — the seam's breadcrumb names it (seam-2).
+        assertEquals(1, folded.droppedOutOfFlowMembers)
+        // Nothing else rode: no adoption (the member declares no Hyphens),
+        // no empty-member drop, no atom, no span.
+        assertEquals(false, folded.adoptedHyphens)
+        assertEquals(0, folded.droppedEmptyMembers)
+        assertTrue(folded.atoms.isEmpty() && folded.spans.isEmpty())
+        // The host's own MANUAL governs the paragraph, untouched.
+        assertEquals(JsonPrimitive("MANUAL"), folded.properties.last { it.type == "Hyphens" }.data)
+    }
+
+    @Test
+    fun `hyphens-out-of-flow-002 box 4 - the split highway folds to one dictionary word`() {
+        // `high` + (abspos) + `way`, `hyphens: auto`, lang en: the merged
+        // word reaches Minikin's dictionary exactly like box 1's leaf.
+        val folded = foldOf(root(OUT_OF_FLOW_002_HOST4, 0)) as InlineRunFold.Outcome.Folded
+        assertEquals("highway", folded.text)
+        assertEquals(1, folded.droppedOutOfFlowMembers)
+        assertEquals(JsonPrimitive("AUTO"), folded.properties.last { it.type == "Hyphens" }.data)
+    }
+
+    @Test
+    fun `hypothetical-inline-alone-on-second-line - a VISIBLE abspos member still bails`() {
+        // `Line 2` paints (no transparent Color, PaddingLeft) — not inert,
+        // so the wave-44 bail stands verbatim. The pin that turns red when
+        // the predicate is widened to "any abspos".
+        val outcome = foldOf(root(HYPOTHETICAL_LINE2_HOST, 0))
         assertEquals("member-prop:Position", (outcome as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    @Test
+    fun `ch-unit-001 - an empty abspos member never reaches the out-of-flow arm`() {
+        // A text-less member takes the EMPTY arm first, where Position /
+        // BackgroundColor were never admitted — the F2 arm sits on the
+        // glyph side only. (On device this RELATIVE host never folds at
+        // all — ComponentRenderer's lane-P exclusion — the fold-level bail
+        // is pinned so a future reorder cannot start dropping it.)
+        val outcome = foldOf(root(CH_UNIT_001_HOST, 0))
+        assertEquals("member-prop:BackgroundColor", (outcome as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    @Test
+    fun `static-inside-inline-001 - a tagless abspos member keeps the tag wall`() {
+        // The converter omits sourceTag for `<div>`s (InlineRunFold's tag
+        // wall banner); the tag check precedes the F2 arm.
+        val outcome = foldOf(root(STATIC_INSIDE_INLINE_001_HOST, 0))
+        assertEquals("member-tag:none", (outcome as InlineRunFold.Outcome.Bailed).reason)
+    }
+
+    @Test
+    fun `the inert predicate needs BOTH out-of-flow and transparent ink`() {
+        // Synthetic negatives on the verbatim member shape: an in-flow
+        // transparent span (no Position) and an opaque abspos span — each
+        // refused, so the fold never drops a box that could paint or flow.
+        val member = root(OUT_OF_FLOW_001_HOST3, 0).children!![0]
+        assertTrue(InertOutOfFlowMember.admits(member))
+        assertEquals(false, InertOutOfFlowMember.admits(
+            member.copy(properties = member.properties.filter { it.type != "Position" })))
+        assertEquals(false, InertOutOfFlowMember.admits(
+            member.copy(properties = member.properties.filter { it.type != "Color" })))
+        assertEquals(false, InertOutOfFlowMember.admits(member.copy(properties = member.properties.map {
+            if (it.type == "Position") IRProperty("Position", JsonPrimitive("RELATIVE")) else it })))
+        assertEquals(false, InertOutOfFlowMember.admits(member.copy(properties = member.properties +
+            IRProperty("BackgroundColor", Json.parseToJsonElement("""{"srgb":{"r":0,"g":1,"b":0}}""")))))
+    }
+
+    // ── Wave 53 fix pass (L2 skeptic D2 / D3 / D4 / D7) ──────────────────
+    // The pin above only REMOVES declarations, so three predicate halves
+    // were unproven (skeptic mutations x1-x5 survived 42/42). Each test
+    // below is a synthetic negative on the VERBATIM wave52-ship member
+    // (OUT_OF_FLOW_001_HOST3's abspos span) changing ONE fact; the
+    // positive control proves the edit, not the shape, is what refuses.
+    // MUTATION PROOF: tools/titan/results/wave53-soft-hyphen/_note.md
+    // "## Fix pass" (x1-x8, red → restore byte-exact sha256 → green).
+
+    /** The verbatim member with its Color declaration replaced by [json]. */
+    private fun memberWithColor(json: String): IRComponent {
+        // The abspos `<span>` of out-of-flow-001 box 3, decoded on the wire.
+        val member = root(OUT_OF_FLOW_001_HOST3, 0).children!![0]
+        // Swap only the Color data; Position ABSOLUTE stays as authored.
+        return member.copy(properties = member.properties.map {
+            if (it.type == "Color") IRProperty("Color", Json.parseToJsonElement(json)) else it
+        })
+    }
+
+    @Test
+    fun `the inert predicate refuses every colour that is not fully transparent`() {
+        // Positive control: the verbatim transparent ink still passes.
+        assertTrue(InertOutOfFlowMember.admits(
+            memberWithColor("""{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}""")))
+        // `color: red` — the converter omits alpha for an opaque colour
+        // (schema/spec/02-values.md; css-color-4 §4.1: absent = 1), so an
+        // abspos red span paints glyphs: dropping it would erase ink.
+        // Red under "any declared Color is transparent" (x5) and "a
+        // missing alpha is transparent" (x3).
+        assertEquals(false, InertOutOfFlowMember.admits(
+            memberWithColor("""{"srgb":{"r":1,"g":0,"b":0},"original":"red"}""")))
+        // Half-transparent ink still paints (css-color-4 §4.2 alpha
+        // compositing) — red under "any explicit alpha is transparent" (x2).
+        assertEquals(false, InertOutOfFlowMember.admits(
+            memberWithColor("""{"srgb":{"r":0,"g":0,"b":0,"a":0.5}}""")))
+        // D7: a malformed, non-primitive alpha REFUSES — it must never
+        // throw out of the fold (red under the throwing cast, x7).
+        assertEquals(false, InertOutOfFlowMember.admits(
+            memberWithColor("""{"srgb":{"r":0,"g":0,"b":0,"a":{"v":0}}}""")))
+    }
+
+    @Test
+    fun `the inert predicate refuses structure and border colours, and admits fixed`() {
+        // The verbatim abspos + transparent member (admitted as authored).
+        val member = root(OUT_OF_FLOW_001_HOST3, 0).children!![0]
+        // CSS 2.1 §9.3.1: `position: fixed` is out of flow exactly like
+        // absolute — admitted (red if FIXED is dropped from the set, x6).
+        assertTrue(InertOutOfFlowMember.admits(member.copy(properties = member.properties.map {
+            if (it.type == "Position") IRProperty("Position", JsonPrimitive("FIXED")) else it })))
+        // A member with its own nested node or text runs is not ONE inert
+        // box — its subtree could paint (red if the structure check is
+        // deleted, x1).
+        assertEquals(false, InertOutOfFlowMember.admits(
+            member.copy(children = listOf(member.copy(id = "nested", name = "nested")))))
+        assertEquals(false, InertOutOfFlowMember.admits(member.copy(runs = listOf(IRRun(text = "abspos")))))
+        // D4: the converter's `border: inherit` dialect — four
+        // Border*Color {"original":"inherit"} and nothing else, which
+        // InlineAtomRing decodes as the HOST's painted border — must not be
+        // dropped as inert; an authored bare colour refuses with it (no
+        // carrier needs the tolerance). Red if it is re-admitted (x8).
+        assertEquals(false, InertOutOfFlowMember.admits(member.copy(properties = member.properties +
+            IRProperty("BorderTopColor", Json.parseToJsonElement("""{"original":"inherit"}""")))))
+        assertEquals(false, InertOutOfFlowMember.admits(member.copy(properties = member.properties +
+            IRProperty("BorderLeftColor", Json.parseToJsonElement("""{"srgb":{"r":1,"g":0,"b":0},"original":"red"}""")))))
+    }
+
+    @Test
+    fun `hyphens-out-of-flow-001 as a mark member - a UA-painted tag keeps the tag wall`() {
+        // D3: the F2 arm is gated on InlineRunFold's no-UA-styling TEXT
+        // ring. `<mark>`'s UA yellow background (HTML rendering §15.3.4)
+        // never rides the wire, so a transparent abspos <mark> still
+        // paints a box: the fold keeps the wall instead of dropping it
+        // (red if the arm's TEXT_MEMBER_TAGS test is removed, x4).
+        val doc = OUT_OF_FLOW_001_HOST3.replace(
+            "\"meta\":{\"sourceTag\":\"span\"}", "\"meta\":{\"sourceTag\":\"mark\"}")
+        // The member's tag is the ONLY byte that changed.
+        assertTrue(doc != OUT_OF_FLOW_001_HOST3)
+        val outcome = foldOf(root(doc, 0))
+        assertEquals("member-tag:mark", (outcome as InlineRunFold.Outcome.Bailed).reason)
     }
 
     @Test
@@ -713,6 +871,14 @@ class InlineRunFoldTest {
         // wpt__css-text__hyphens__hyphens-out-of-flow-001.json — host __3 and
         // its abspos child, verbatim (siblings trimmed).
         private val OUT_OF_FLOW_001_HOST3 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-001__3-273","name":"wpt__css-text__hyphens__hyphens-out-of-flow-001__3","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"MANUAL"}],"text":"high­way","meta":{"role":"ws-after","runs":[{"text":"h"},{"child":"hyphens__hyphens-out-of-flow-001__3__0"},{"text":"igh­way"}]}},{"id":"hyphens__hyphens-out-of-flow-001__3__0-274","name":"hyphens__hyphens-out-of-flow-001__3__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__3-273"},"text":"abspos","meta":{"sourceTag":"span"}}]}"""
+        // wave52-ship per-test IR, VERBATIM (minified): hyphens-out-of-flow-002 host __4 + its abspos child.
+        private val OUT_OF_FLOW_002_HOST4 = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en","runs":[{"text":"high"},{"child":"hyphens__hyphens-out-of-flow-002__4__0"},{"text":"way"}]}},{"id":"hyphens__hyphens-out-of-flow-002__4__0-290","name":"hyphens__hyphens-out-of-flow-002__4__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}]}"""
+        // wave52-ship per-test IR, VERBATIM (minified): CSS2/abspos/hypothetical-inline-alone-on-second-line host __1 + both members.
+        private val HYPOTHETICAL_LINE2_HOST = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css2__abspos__hypothetical-inline-alone-on-second-line__1-006","name":"wpt__CSS2__abspos__hypothetical-inline-alone-on-second-line__1","properties":[{"type":"PaddingLeft","data":{"px":100}}],"text":"Line 1","meta":{"sourceTag":"span","runs":[{"text":"Line 1"},{"child":"abspos__hypothetical-inline-alone-on-second-line__1__0"},{"text":" "},{"child":"abspos__hypothetical-inline-alone-on-second-line__1__1"}]}},{"id":"abspos__hypothetical-inline-alone-on-second-line__1__0-007","name":"abspos__hypothetical-inline-alone-on-second-line__1__0","properties":[{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":0}}],"slot":{"parent":"wpt__css2__abspos__hypothetical-inline-alone-on-second-line__1-006"},"meta":{"sourceTag":"br","role":"line-break"}},{"id":"abspos__hypothetical-inline-alone-on-second-line__1__1-008","name":"abspos__hypothetical-inline-alone-on-second-line__1__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"PaddingLeft","data":{"px":100}}],"slot":{"parent":"wpt__css2__abspos__hypothetical-inline-alone-on-second-line__1-006"},"text":"Line 2","meta":{"sourceTag":"span"}}]}"""
+        // wave52-ship per-test IR, VERBATIM (minified): css-values/ch-unit-001 host __2 + its abspos member.
+        private val CH_UNIT_001_HOST = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"wpt__css-values__ch-unit-001__2-168","name":"wpt__css-values__ch-unit-001__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Color","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Position","data":"RELATIVE"},{"type":"Height","data":{"type":"length","original":{"v":10,"u":"CH"}}},{"type":"Width","data":"auto"},{"type":"Float","data":"LEFT"}],"text":"00000","meta":{"runs":[{"child":"ch-unit-001__2__0"},{"text":"00000"}]}},{"id":"ch-unit-001__2__0-169","name":"ch-unit-001__2__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Top","data":{"px":0}},{"type":"Bottom","data":{"px":0}},{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","original":{"v":5,"u":"CH"}}}],"slot":{"parent":"wpt__css-values__ch-unit-001__2-168"},"meta":{"sourceTag":"span"}}]}"""
+        // wave52-ship per-test IR, VERBATIM (minified): CSS2/abspos/static-inside-inline-001 nested host __2__0 (own slot dropped) + its member.
+        private val STATIC_INSIDE_INLINE_001_HOST = """{"irVersion":2,"minReaderVersion":2,"components":[{"id":"abspos__static-inside-inline-001__2__0-022","name":"abspos__static-inside-inline-001__2__0","properties":[{"type":"LineHeight","data":{"original":{"type":"length","px":100}}},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"text":"X","meta":{"sourceTag":"span","runs":[{"child":"abspos__static-inside-inline-001__2__0__0"},{"text":" X"}]}},{"id":"abspos__static-inside-inline-001__2__0__0-023","name":"abspos__static-inside-inline-001__2__0__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}}],"slot":{"parent":"abspos__static-inside-inline-001__2__0-022"}}]}"""
 
         // tools/titan/runs/wave43-final/sections/css-text-decor/per-test-ir/
         // wpt__css-text-decor__text-decoration-inset-014.json — the runs host

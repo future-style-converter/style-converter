@@ -3830,6 +3830,15 @@ object ComponentRenderer {
                                             (if (runFold.adoptedHyphens) ", member hyphens adopted" else "") +
                                             (if (runFold.droppedEmptyMembers > 0)
                                                 ", ${runFold.droppedEmptyMembers} empty member(s) dropped" else "") +
+                                            // Wave 53 (lane L2, F2) — a paint-inert OUT-OF-FLOW
+                                            // member (abspos/fixed with transparent ink —
+                                            // InertOutOfFlowMember) left the mounted tree: the
+                                            // count is named here so the removal is never
+                                            // silent (its unmodelled static position is the
+                                            // stated loss). 0 for every pre-wave-53 fold, so
+                                            // those breadcrumbs read byte-identically.
+                                            (if (runFold.droppedOutOfFlowMembers > 0)
+                                                ", ${runFold.droppedOutOfFlowMembers} out-of-flow member(s) dropped" else "") +
                                             // Wave 47 (lane Z6) — the styled-span ring's
                                             // breadcrumbs: how many member ranges carry
                                             // attribution, and any STATED LOSS (border box
