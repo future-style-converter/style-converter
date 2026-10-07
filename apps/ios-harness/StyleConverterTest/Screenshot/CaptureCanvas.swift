@@ -379,8 +379,14 @@ struct ComposedCaptureCanvas: View {
         // wave-53 lane L3 (item A) rides the same rewrite: the body-root is
         // split WITHOUT the background-image layers the canvas now paints
         // (§2.11.2 "not painted again") — the same array without a plan.
+        // wave-53 lane L3 (item B): a `display: table` body's in-flow run is
+        // split as ONE synthetic table (runtime TableBodyForest, CSS 2.1
+        // §17.2.1 rule 2 + §8.3) — the same array for every other body. It
+        // commutes with the margin strip and the T6 map (those rewrite only
+        // the body-root and hoisted roots, which it leaves untouched).
         FixedHoist.split(roots: UABlockMargin.withCanvasOwnedBodyMargin(
-            RootBackgroundPropagation.withCanvasOwnedRootBackground(document.components, rootImagePlan),
+            TableBodyForest.rewrite(
+                RootBackgroundPropagation.withCanvasOwnedRootBackground(document.components, rootImagePlan)),
             UABlockMargin.canvasBodyMargin(document.components))
             .map(UABlockMargin.withUaBlockMarginOnHoistedRoot))
     }
