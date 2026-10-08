@@ -138,8 +138,9 @@ enum GapDecorationSegments {
         for i in 0..<(lines.count - 1) {
             // The band between two adjacent line boxes.
             let gap = GapSpan(start: lines[i].crossEnd, end: lines[i + 1].crossStart)
-            // A zero/negative band (touching lines) decorates nothing.
-            guard gap.isPositive else { continue }
+            // A negative band (overlapping lines) decorates nothing; a zero
+            // one (touching lines) still positions a rule (wave 54, L4: 033).
+            guard gap.isPositionable else { continue }
             let cross = GapIntervals.band(gap: gap, widthPx: w)
             // Default run: the whole content main extent — refs 003/010/
             // 011 all pin the row rule at the full 170px content width.

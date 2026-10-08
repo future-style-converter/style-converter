@@ -352,4 +352,79 @@ final class GapDecorationSegmentsTests: XCTestCase {
             items: [], contentSize: threeLineSize, mainHorizontal: true,
             config: redBlue(width: 10)).isEmpty)
     }
+
+    // MARK: - Wave 54 (lane L4, GAP-ios): WPT 033, rules on ZERO gaps
+
+    /// 033's container declarations, VERBATIM from wave53-final's per-test IR
+    /// (tools/titan/runs/wave53-final/sections/css-gaps/per-test-ir/
+    /// wpt__css-gaps__flex__flex-gap-decorations-033.json): `width: 150px;
+    /// flex-wrap: wrap`, no gap, 10px red column rules, 10px blue row rules.
+    private func config033() throws -> GapDecorationsConfig {
+        let json = #"[{"type":"Display","data":"FLEX"},{"type":"RowRuleStyle","data":"SOLID"},{"type":"RowRuleColor","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}},{"type":"RowRuleWidth","data":{"type":"length","px":10}},{"type":"ColumnRuleStyle","data":"SOLID"},{"type":"ColumnRuleColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"ColumnRuleWidth","data":{"type":"length","px":10}},{"type":"Width","data":{"type":"length","px":150}},{"type":"FlexWrap","data":"WRAP"}]"#
+        let props = try JSONDecoder().decode([IRProperty].self, from: Data(json.utf8))
+        return try XCTUnwrap(GapDecorationsExtractor.extract(from: props))
+    }
+
+    /// 033's items in its 150×150 content box, DOM order: 50/50/50 | 100/50
+    /// | 50/50/50, all 50 tall — items AND lines touch (ref: red at x61-70 /
+    /// x111-120, blue full-width at y61-70 / y111-120, content origin 16).
+    private let frames033: [CGRect] = [
+        CGRect(x: 0, y: 0, width: 50, height: 50), CGRect(x: 50, y: 0, width: 50, height: 50),
+        CGRect(x: 100, y: 0, width: 50, height: 50),
+        CGRect(x: 0, y: 50, width: 100, height: 50), CGRect(x: 100, y: 50, width: 50, height: 50),
+        CGRect(x: 0, y: 100, width: 50, height: 50), CGRect(x: 50, y: 100, width: 50, height: 50),
+        CGRect(x: 100, y: 100, width: 50, height: 50),
+    ]
+
+    /// css-gap-decorations-1 centres a rule of the declared width on a 0px
+    /// gap: 2 + 1 + 2 column rules, line by line — line 2's ONE rule sits at
+    /// the RIGHT boundary (x95-105), the order a mis-indexed gap would break.
+    func test033TouchingItemsPositionColumnRulesLineByLine() throws {
+        let segs = GapDecorationSegments.build(
+            items: frames033, contentSize: CGSize(width: 150, height: 150),
+            mainHorizontal: true, config: try config033())
+        XCTAssertEqual(rects(segs, rowRule: false), [
+            CGRect(x: 45, y: 0, width: 10, height: 50), CGRect(x: 95, y: 0, width: 10, height: 50),
+            CGRect(x: 95, y: 50, width: 10, height: 50),
+            CGRect(x: 45, y: 100, width: 10, height: 50), CGRect(x: 95, y: 100, width: 10, height: 50),
+        ])
+    }
+
+    /// Touching lines still position two full-width row rules (a zero gap
+    /// cuts nothing), painted LAST (row-over-column initial: blue over red).
+    func test033TouchingLinesPositionFullWidthRowRulesPaintedLast() throws {
+        let segs = GapDecorationSegments.build(
+            items: frames033, contentSize: CGSize(width: 150, height: 150),
+            mainHorizontal: true, config: try config033())
+        XCTAssertEqual(rects(segs, rowRule: true), [
+            CGRect(x: 0, y: 45, width: 150, height: 10), CGRect(x: 0, y: 95, width: 150, height: 10),
+        ])
+        XCTAssertEqual(segs.last?.isRowRule, true)
+        XCTAssertEqual(segs.count, 7)
+    }
+
+    /// Whole-pixel bands snap to themselves (GapDecorationsPainter.snapped).
+    func test033WholePixelRulesSnapToThemselves() throws {
+        let segs = GapDecorationSegments.build(
+            items: frames033, contentSize: CGSize(width: 150, height: 150),
+            mainHorizontal: true, config: try config033())
+        for r in rects(segs, rowRule: false) { XCTAssertEqual(GapDecorationsPainter.snapped(r), r) }
+    }
+
+    /// A NEGATIVE extent stays dropped: no rule is centred on an overlap —
+    /// the boundary the zero-gap rule must keep. Items overlapping by 4px
+    /// read as a wrap here (groupIntoLines' backtrack), so the decisive row
+    /// is two LINES overlapping by 10px: line 2's items start at y40 while
+    /// line 1 ends at y50 → a [50, 40] band, which must position nothing.
+    func testOverlappingItemsPositionNoRule() throws {
+        let segs = GapDecorationSegments.build(
+            items: [CGRect(x: 0, y: 0, width: 54, height: 50), CGRect(x: 50, y: 0, width: 50, height: 50)],
+            contentSize: CGSize(width: 100, height: 50), mainHorizontal: true, config: try config033())
+        XCTAssertEqual(rects(segs, rowRule: false), [])
+        let lines = GapDecorationSegments.build(
+            items: [CGRect(x: 0, y: 0, width: 50, height: 50), CGRect(x: 50, y: 0, width: 50, height: 50),
+                    CGRect(x: 0, y: 40, width: 50, height: 50)],
+            contentSize: CGSize(width: 100, height: 90), mainHorizontal: true, config: try config033())
+        XCTAssertEqual(rects(lines, rowRule: true), [])
+    }
 }
