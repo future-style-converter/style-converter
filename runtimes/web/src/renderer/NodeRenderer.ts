@@ -336,7 +336,7 @@ export function NodeRenderer(
     // (≥2 consecutive left-floating children, the only shape planChildRuns
     // groups) is ZERO. The skip is inert on the new population, not merely
     // defensible on it.
-    const inlineRuns = resolveRuns(component.meta?.runs, node.children, component.id);
+    const inlineRuns = resolveRuns(component.meta?.runs, node.children, component.id, { hyphensAuto: styles.hyphens === 'auto' }); // wave-54 L6 (W1): the host's OWN hyphens arms InertOutOfFlowWordJoin
     if (inlineRuns) {
       // The runs own the content slot; the sibling walk carries only the
       // children the list did NOT name (spec 03 §4.1 rule 4), so a

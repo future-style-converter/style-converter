@@ -31,6 +31,9 @@
 
 import type { IRRun } from '../core/ir/IRModels';
 import type { ComposedNode } from './Composer';
+// wave-54 lane L6 (W1): a paint-inert out-of-flow member no longer splits an
+// `auto`-hyphenated word — see InertOutOfFlowWordJoin.ts for the measurement.
+import { joinWordsAroundInertOutOfFlow } from './InertOutOfFlowWordJoin';
 
 /** One resolved entry — a text run, or an index into `node.children`. */
 export type ResolvedRun =
@@ -43,6 +46,14 @@ export interface RunsPlacement {
   entries: ResolvedRun[];
   /** Indices of children no entry named, in sibling order. */
   unreferenced: number[];
+  /**
+   * wave-54 L6 (W1): paint-inert out-of-flow members moved to the end of
+   * the word they split (InertOutOfFlowWordJoin.ts) — a reader deviation
+   * from spec 03 §4.1 rule 1, counted here so it is never silent (the web
+   * twin of Compose `Folded.droppedOutOfFlowMembers`). 0 for every host
+   * whose own `hyphens` is not `auto`.
+   */
+  joinedOutOfFlowMembers: number;
 }
 
 /**
@@ -51,6 +62,9 @@ export interface RunsPlacement {
  * @param runs     the wire list (any shape — this function validates it).
  * @param children the composed children, in flat-array sibling order.
  * @param ownerId  the owning component's id, for warning provenance only.
+ * @param opts     wave-54 L6 (W1): `hyphensAuto` — the host's OWN computed
+ *                 `hyphens` is `auto` (css-text-3 §5.4), which arms the
+ *                 inert out-of-flow word join. Omitted = off (byte-identical).
  * @returns the plan, or `null` to mean "no usable runs — take the default
  *          leading-text-then-children path". Returning null rather than an
  *          empty plan is what keeps every pre-wave-32 document's DOM
@@ -61,6 +75,7 @@ export function resolveRuns(
   runs: IRRun[] | null | undefined,
   children: ComposedNode[],
   ownerId: string,
+  opts: { hyphensAuto?: boolean } = {},
 ): RunsPlacement | null {
   // Omit-when-absent is the common case by an enormous margin — bail
   // before allocating anything.
@@ -142,9 +157,15 @@ export function resolveRuns(
   // pre-wave-32 approximation instead of painting nothing.
   if (entries.length === 0) return null;
 
+  // wave-54 L6 (W1): under `hyphens: auto` a paint-inert out-of-flow member
+  // that splits a word moves to the word's end (css-text-3 §5.1: it adds no
+  // soft wrap opportunity). The member stays `claimed`, so rule 4 can never
+  // paint it a second time; identity (0 joined) for every other host.
+  const join = joinWordsAroundInertOutOfFlow(entries, children, opts.hyphensAuto === true);
+
   // Rule 4 — leftovers, in sibling order, after the runs.
   const unreferenced: number[] = [];
   children.forEach((_, index) => { if (!claimed.has(index)) unreferenced.push(index); });
 
-  return { entries, unreferenced };
+  return { entries: join.entries, unreferenced, joinedOutOfFlowMembers: join.joined };
 }
