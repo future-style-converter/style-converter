@@ -7138,6 +7138,15 @@ object ComponentRenderer {
             // a run that does not fire keeps Minikin's wrapping and gets its
             // marker from placeholderOverflow below (F3) — one owner each.
             clampLines = com.styleconverter.runtime.typography.wrapping.DrawnLineClamp.cap(properties),
+            // Wave 54 (lane L3, U2-android) — css-text-4 §6.3 `hyphenate-character`:
+            // the string a taken soft hyphen paints enters the FOLD, because its
+            // width decides the breaks (HyphenateCharacterApplier's banner). No
+            // declaration / `auto` yields the UA hyphen that is preBreak's default,
+            // so every other run is byte-identical by construction; a hyphens:auto
+            // run is reported once (Minikin paints its own dictionary hyphen).
+            hyphenChar = com.styleconverter.runtime.typography.wrapping.HyphenateCharacterApplier.preBreakString(
+                com.styleconverter.runtime.typography.wrapping.HyphenateCharacterExtractor.extract(properties),
+                dictionaryHyphenation),
             // Single-line advance through the EXACT render style and the
             // EXACT run transform (runAnnotated), so measure and paint can
             // never disagree. getLineWidth(0) is the raw float advance —
