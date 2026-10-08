@@ -1138,10 +1138,27 @@ object ComponentRenderer {
         // for every non-container and every own-declaring container, so no
         // committed capture moves. See ListStyleUaRule for the full
         // argument and the nested-list KNOWN GAP.
-        val rawProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
+        val listUaProperties = com.styleconverter.runtime.lists.ListStyleUaRule.apply(
             component._tag,
             allReset.own,
             mergeInherited(allReset.own, allReset.inherited)
+        )
+        // Wave 54 (lane L5, U1-android) - the SECOND tag-keyed UA rule, twin
+        // of iOS UAElementFontRule at the same cascade step for the same
+        // css-cascade-4 §4.3 reason: `h1…h6 { font-size: <n>em; font-weight:
+        // bold }` and `sub, sup { font-size: smaller }` (HTML §15.3) beat the
+        // inherited body face and lose to the author's own. It runs BEFORE
+        // DynamicValueResolver (below) so `em` / `ch` on the heading resolve
+        // against the UA face. The heading half stands down for an element
+        // that hosts child boxes (headingStandsDown - iOS's wave-40 gate,
+        // verbatim). Same list instance for every untagged component (the
+        // 327-pair corpus carries no `_tag`), so no committed capture moves.
+        // UAElementFontRuleSeamWiringTest pins this call's exact arguments.
+        val rawProperties = com.styleconverter.runtime.typography.UAElementFontRule.apply(
+            component._tag,
+            allReset.own,
+            listUaProperties,
+            standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),
         )
         // The `all` reset already ran above (AllReset, before the merge); the
         // post-merge drop-everything it replaced is gone.

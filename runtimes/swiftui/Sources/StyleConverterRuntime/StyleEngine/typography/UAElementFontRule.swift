@@ -76,17 +76,20 @@
 //     16 / 1.2 = 13.33 by a third of a pixel. Naming the difference is cheaper
 //     than carrying a "this size came from a keyword" channel the wire does
 //     not have.
+//   * `all: initial | unset | inherit` on a heading still gets the UA face
+//     (AllReset runs first and this rule cannot see the keyword; only
+//     `revert` is right). 0 corpus headings carry `all` (wave-54 L5 skeptic).
 //
-//  TWIN STATUS: still iOS-only. `typography/UAElementFontRule.kt` does not
-//  exist; Android shows the identical defect in the same captures
-//  (`css-text-decor/text-decoration-color` android 0.6164 F at
-//  wave49-final). The wave-40 reason given here — "this lane owns no Android
-//  device" — was a LANE's constraint, not a standing one, and it stood as
-//  the whole plan for nine waves without ever becoming work (retro finding
-//  A4#7). It is now a QUEUED backlog item: docs/BACKLOG.md ranked-queue
-//  entry (g), which carries the target cell and the iOS gate table's caveat
-//  that only leaf-text hosts improve (iOS 0.674 after the gated heading
-//  face). Point a port at that entry, not at this banner.
+//  TWIN STATUS (wave 54, lane L5): PORTED. The Compose twin is
+//  `runtimes/compose/…/typography/UAElementFontRule.kt` — same table, same
+//  em base, same in-place substitution, and the SAME heading gate as this
+//  file (`headingStandsDown` = this call site's `hasElementChildren`), run
+//  at ComponentRenderer.kt's ListStyleUaRule site before
+//  DynamicValueResolver. Its target: css-break/block-in-inline-015-print
+//  android f 0.9489 (four 16px regular lines where this rule gives iOS
+//  P 0.9894 on the same IR). The wave-40 reason it waited — "this lane owns
+//  no Android device" — was a LANE's constraint that stood for fourteen
+//  waves (retro finding A4#7, BACKLOG 0(g)).
 //
 
 import Foundation
@@ -154,6 +157,15 @@ enum UAElementFontRule {
     /// The REAL fix for the stacked cells is an inline formatting context on
     /// this platform, which is a wave-scale mechanism of its own; when it
     /// lands, this gate should be deleted, not widened.
+    ///
+    /// Wave 54 (lane L5) re-measured it: the wave-44/45 inline-run fold now
+    /// paints inset-005/-006/-014 as ONE paragraph, so narrowing the gate to
+    /// the hosts the fold refuses was built — and HELD. Those `<h1>`s are
+    /// abspos, and neither native gives an abspos heading its UA `.67em`
+    /// margin, so the 2em face alone lands ~21px above the ref and a
+    /// calibrated replay scores all six native cells LOWER
+    /// (tools/titan/results/wave54-ua-heading-face/: skeptic.md repro 14, the
+    /// held gate in `held/`). It lands after that margin does.
     static func headingAppliesTo(hasElementChildren: Bool) -> Bool {
         !hasElementChildren
     }
