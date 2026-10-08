@@ -38,7 +38,9 @@ commit() { # <title> <body> <paths…>
 apply() { git apply --check --whitespace=nowarn "$1" && git apply --whitespace=nowarn "$1" || { echo "seam patch failed: $1" >&2; exit 1; }; }
 CHECK=0; [[ "${1:-}" == "--check" ]] && CHECK=1
 if (( CHECK )); then   # verify every unit path exists and every seam patch applies on HEAD's seam bytes — no commit
-  commit() { local title="$1"; shift 2; local bad=0; for p in "$@"; do [[ -e "$p" ]] || { echo "  MISSING $p   (unit: $title)"; bad=1; }; done; (( bad )) && exit 1; echo "paths ok   ${title%%:*}"; }
+  # a path a seam patch CREATES (patch-borne test files) is absent until that patch applies — not a defect
+  borne() { grep -lsq -- "^+++ b/$1\$" "$R"/wave54-*/seam-*.patch; }
+  commit() { local title="$1"; shift 2; local bad=0; for p in "$@"; do [[ -e "$p" ]] || borne "$p" || { echo "  MISSING $p   (unit: $title)"; bad=1; }; done; (( bad )) && exit 1; echo "paths ok   ${title%%:*}"; }
   apply() { git apply --check --whitespace=nowarn "$1" 2>/dev/null && echo "patch ok   ${1#$R/}" || echo "  PATCH DOES NOT APPLY ON THE CURRENT TREE: ${1#$R/} (expected when an earlier patch of the same seam file is not yet applied in --check mode)"; }
 fi
 KT=runtimes/compose/src/main/java/com/styleconverter/runtime
@@ -62,17 +64,19 @@ commit "wave54 L7 U1: the label-chrome tripwire learns the capture contract's 'i
 
 # ── L1 P, then M′ (patch replay on HEAD's bytes of the two shared files) ─────
 L1=$R/wave54-rtl-marker-bake
-SAVE="$(mktemp -d)"; for p in tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs tools/titan/bidi-marker-bake.mjs; do mkdir -p "$SAVE/$(dirname $p)"; [ -f "$p" ] && cp "$p" "$SAVE/$p"; done
-git checkout -q HEAD -- tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs; rm -f tools/titan/bidi-marker-bake.mjs
-apply "$L1/unit-P.patch"
+if (( ! CHECK )); then   # the replay rewinds the two shared files to HEAD's bytes — NEVER in --check mode (it wiped the lane's edits once)
+  SAVE="$(mktemp -d)"; for p in tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs tools/titan/bidi-marker-bake.mjs; do mkdir -p "$SAVE/$(dirname $p)"; [ -f "$p" ] && cp "$p" "$SAVE/$p"; done
+  git checkout -q HEAD -- tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs; rm -f tools/titan/bidi-marker-bake.mjs
+  apply "$L1/unit-P.patch"
+else echo "check: L1 replay skipped (unit-P.patch / unit-Mprime.patch verified by make-units.sh, see make-units.pre-landing.out.txt)"; fi
 commit "wave54 L1 P: a bidi-bake root's spent padding is zeroed (paddingIsSpent; CSS 2.1 §10.1 item 4)" \
 "Revert unit L1-P ($L1/_note.md). Reverting moves bidi-lines-001/-002 android and anchor-center-safe-rtl back to wave54-open. M′ depends on P (revertOrder [Mprime, P])." \
   tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs
-apply "$L1/unit-Mprime.patch"
+(( CHECK )) || apply "$L1/unit-Mprime.patch"
 commit "wave54 L1 M′: RTL list markers baked as runs owned by the bake ROOT (bidi-marker-bake.mjs; css-lists-3 outside marker on the inline-start side) — device-gated at stage 1" \
 "Revert unit L1-Mprime ($L1/_note.md). Reverting undoes counter-suffix's RTL markers on all three platforms; never lands without P." \
   tools/titan/bidi-marker-bake.mjs tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs
-for p in tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs tools/titan/bidi-marker-bake.mjs; do cmp -s "$p" "$SAVE/$p" || { echo "L1 replay differs from the lane's tree: $p" >&2; exit 1; }; done; rm -rf "$SAVE"
+if (( ! CHECK )); then for p in tools/titan/bidi-bake.mjs tools/titan/bidi-bake.test.mjs tools/titan/bidi-marker-bake.mjs; do cmp -s "$p" "$SAVE/$p" || { echo "L1 replay differs from the lane's tree: $p" >&2; exit 1; }; done; rm -rf "$SAVE"; fi
 
 # ── L2 TB-android (+ kt seam-1) ──────────────────────────────────────────────
 L2=$R/wave54-table-body-cell
