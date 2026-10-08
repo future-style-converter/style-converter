@@ -183,6 +183,11 @@ object TableApplier {
      * @param shrinkToFit CSS 2.1 §17.5.2 auto table width — see the
      *   guarded-intrinsic banner inside. `false` (the default) is the
      *   frozen behaviour for every existing call site.
+     * @param cellsHugContent CSS 2.1 §17.5.2.2 — the cells take their
+     *   column's max-content width instead of the BLOCK path's fill
+     *   (wave 54, TableCellHug: only the anonymous table of
+     *   TableBodyForest asks for it). `false` (the default) is the frozen
+     *   behaviour for every existing call site.
      * @param modifier Modifier for the table
      * @param content Table rows
      */
@@ -194,6 +199,7 @@ object TableApplier {
         borderWidth: Dp = 1.dp,
         fabricatedCellBorder: Boolean = true,
         shrinkToFit: Boolean = false,
+        cellsHugContent: Boolean = false,
         modifier: Modifier = Modifier,
         content: @Composable () -> Unit
     ) {
@@ -201,7 +207,9 @@ object TableApplier {
             LocalTableConfig provides config,
             LocalTableBorderColor provides borderColor,
             LocalTableBorderWidth provides borderWidth,
-            LocalTableFabricatedCellBorder provides fabricatedCellBorder
+            LocalTableFabricatedCellBorder provides fabricatedCellBorder,
+            // Per table, so a nested table never inherits its host's hug.
+            TableCellHug.LocalTableCellsHugContent provides cellsHugContent
         ) {
             // Wave 39 (lane A6) — CSS 2.1 §17.5.2 auto table width, ENFORCED.
             //
@@ -492,6 +500,9 @@ object TableApplier {
         Box(
             modifier = modifier
                 .then(cellModifier)
+                // §17.5.2.2 max-content column (TableCellHug); the receiver
+                // itself when the table does not ask — the frozen chain.
+                .hugColumn(TableCellHug.LocalTableCellsHugContent.current)
                 .fillMaxHeight()
                 .then(borderModifier),
             // Wave 32 (lane P) — the fabricated `.padding(8.dp)` that used

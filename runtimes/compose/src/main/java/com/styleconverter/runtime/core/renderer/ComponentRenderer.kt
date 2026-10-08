@@ -2650,6 +2650,21 @@ object ComponentRenderer {
                     // which is the pre-wave-34 result byte-for-byte.
                     sourceTag = if (LocalWptCaptureMode.current) component._tag else null
                 )
+                // Wave 54 (lane L2, TB-android) — the chrome of the table box
+                // (table/TableCellHug.kt): TableBodyForest's synthetic
+                // ANONYMOUS table paints no demo cell stroke (CSS 2.1
+                // §17.2.1, §17.6.1) and sizes its cells at max-content
+                // (§17.5.2.2). Every other table gets `fabricatedDefault`
+                // back as its stroke — the wave-38 expression below, moved
+                // here verbatim — and hug = false, so it is byte-identical.
+                val chrome = com.styleconverter.runtime.table.TableCellHug.chrome(
+                    component,
+                    fabricatedDefault = !(LocalWptCaptureMode.current &&
+                        component.properties.none { it.type == "Display" } &&
+                        com.styleconverter.runtime.table.TableBoxTree
+                            .uaRoleOf(component._tag) ==
+                            com.styleconverter.runtime.table.TableBoxTree.Role.TABLE)
+                )
                 TableApplier.Table(
                     config = tableConfig,
                     // Wave-38 finish pass — a table this runtime reached
@@ -2666,12 +2681,10 @@ object ComponentRenderer {
                     // above makes — role from the tag, no declared `Display`,
                     // capture-gated — so the border decision and the spacing
                     // decision can never disagree about where this table box
-                    // came from.
-                    fabricatedCellBorder = !(LocalWptCaptureMode.current &&
-                        component.properties.none { it.type == "Display" } &&
-                        com.styleconverter.runtime.table.TableBoxTree
-                            .uaRoleOf(component._tag) ==
-                            com.styleconverter.runtime.table.TableBoxTree.Role.TABLE),
+                    // came from. (Wave 54: that predicate is `chrome`'s
+                    // fabricatedDefault above; only an anonymous table
+                    // turns it off.)
+                    fabricatedCellBorder = chrome.stroke,
                     // Wave 39 (lane A6) — CSS 2.1 §17.5.2 auto table width.
                     // RenderComponent's `isShrinkToFitTable` already keeps
                     // this box out of the composed-WPT block-fill channel;
@@ -2691,6 +2704,9 @@ object ComponentRenderer {
                             ),
                             composedCapture = LocalWptComposedMode.current
                         ),
+                    // Wave 54 (lane L2) — §17.5.2.2: the anonymous table's
+                    // columns take their max-content widths (TableCellHug).
+                    cellsHugContent = chrome.hug,
                     modifier = modifier
                 ) {
                     RenderTableContent(component, textColor)

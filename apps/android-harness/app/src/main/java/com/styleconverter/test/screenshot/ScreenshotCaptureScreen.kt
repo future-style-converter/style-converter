@@ -1547,13 +1547,15 @@ internal fun withCanvasOwnedBodyMargin(roots: List<IRComponent>, margin: CanvasM
 }
 
 /**
- * wave-53 lane L3 — the forest rewrite the composed canvas adds AFTER the
+ * wave-53 lane L3 — the two forest rewrites the composed canvas adds AFTER the
  * wave-52 M1 margin strip + T6 hoisted-UA-margin map (the composable applies
  * those first, verbatim, then calls this). Each is identity for a document it
- * does not concern, so 1432 of the 1435 documents come back unchanged:
+ * does not concern, so 1431 of the 1435 documents come back unchanged:
  *  - item A: the body-root loses the image layers the canvas paints;
+ *  - item B: a table body's in-flow run becomes one synthetic table (runtime
+ *    TableBodyForest, CSS 2.1 §17.2.1 rule 2 + §8.3).
  * Commutes with T6 (that map touches canvas-hoisted roots only; neither step
- * here touches one). One function so ComposedCanvasRootBackgroundTest pins the
+ * here touches one). One function so ComposedCanvasTableBodyTest pins the
  * REAL chain the Column stacks.
  */
 internal fun composedCanvasRoots(
@@ -1562,7 +1564,8 @@ internal fun composedCanvasRoots(
 ): List<IRComponent> {
     // Item A: the body-root minus the image layers the canvas owns.
     val owned = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, rootImagePlan)
-    return owned
+    // Item B: a table body's in-flow run as one synthetic table (identity otherwise).
+    return com.styleconverter.runtime.table.TableBodyForest.rewrite(owned)
 }
 
 /**
@@ -1757,6 +1760,9 @@ private fun ComposedCaptureCanvas(
     // wave-53 L3 (item A) rides the same rewrite: the body-root composes
     // WITHOUT the image layers the canvas now owns (§2.11.2 "not painted
     // again") — the same list instance whenever there is no plan.
+    // wave-53 L3 (item B) rides it too: a `display: table` body's in-flow
+    // run becomes ONE synthetic table (CSS 2.1 §17.2.1 rule 2) — see
+    // composedCanvasRoots, the whole rewrite as one testable function.
     @Suppress("NAME_SHADOWING")
     val roots = androidx.compose.runtime.remember(roots, canvasMargin, rootImagePlan) {
         composedCanvasRoots(
