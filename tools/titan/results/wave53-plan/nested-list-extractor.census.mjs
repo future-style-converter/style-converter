@@ -4,6 +4,10 @@
 // element) — i.e. tests whose wire the extractor fix would change.
 import fs from 'node:fs';
 import path from 'node:path';
+// The comment / script / style stripping is the shared non-regex scanner (tools/titan/html-blocks.mjs,
+// wave 52): a regex that strips `<script…</script>` is CodeQL's js/bad-tag-filter and leaves `<scrip<script…`
+// behind; the scanner walks offsets and drops whole blocks.
+import { stripScripts, stripBetween } from '../../html-blocks.mjs';
 const ROOT = '/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf';
 const RUN = path.join(ROOT, 'tools/titan/runs/wave52-ship/sections');
 const tests = [];
@@ -12,9 +16,9 @@ for (const sec of fs.readdirSync(RUN)) {
   if (!fs.existsSync(tl)) continue;
   for (const t of fs.readFileSync(tl, 'utf8').split('\n').filter(Boolean)) tests.push({ sec, t });
 }
-const strip = (h) => h.replace(/<!--[\s\S]*?-->/g, '')
-  .replace(/<script\b[\s\S]*?<\/script\s*>/gi, '')
-  .replace(/<style\b[\s\S]*?<\/style\s*>/gi, '');
+// Comments, then script blocks, then `<style>…</style>` spans (WPT sources write the tag lower-case; an
+// unclosed span stays, as the lazy regexes left it).
+const strip = (h) => stripBetween(stripScripts(stripBetween(h, '<!--', '-->')), '<style', '</style>');
 // Special elements that stop the li/dd/dt scope walk (HTML "special" category minus address/div/p).
 const SPECIAL = new Set(['ol','ul','menu','dl','table','blockquote','section','article','aside','nav','header','footer','main','details','fieldset','figure','figcaption','form','center','dir','button','select','template','object','marquee','applet','td','th','caption','li','dd','dt']);
 const TRIG = { li: new Set(['li']), dd: new Set(['dd','dt']), dt: new Set(['dd','dt']) };
@@ -51,7 +55,7 @@ for (const { sec, t } of tests) {
     // text before the first nested container
     let firstNested = -1;
     for (let j = k + 1; j < cur; j++) if (!toks[j].close && ['ol','ul','menu','dl','table'].includes(toks[j].tag)) { firstNested = j; break; }
-    const before = h.slice(o.end, toks[firstNested].at).replace(/<[^>]*>/g, '').trim();
+    const before = stripBetween(h.slice(o.end, toks[firstNested].at), '<', '>').trim();   // every `<…>` span dropped, no regex
     hits.push({ tag: o.tag, container: toks[firstNested].tag, nestedDepthAtTrigger: stack.length, textBefore: before.slice(0, 40) });
   }
   if (hits.length) out.push({ sec, test: t, hits });

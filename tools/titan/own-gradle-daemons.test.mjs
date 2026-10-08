@@ -188,9 +188,12 @@ test('gate-driver: stop_our_processes writes the Gradle helper\'s stopped/left l
   try {
     daemonLog(home, ours.pid, [join(checkout, 'apps', 'android-harness')]);
     daemonLog(home, foreign.pid, [other]);
-    const script = [`PROJECT_ROOT="${checkout}"; DRV_DIR="${drv}"; LOG="${drv}/driver.log"`, `source "${LIB}"`,
+    // The scratch paths travel as ENVIRONMENT variables and the script reads them: nothing file-system
+    // derived is interpolated into the shell text (CodeQL js/shell-command-injection-from-environment).
+    const script = ['PROJECT_ROOT="$T_CHECKOUT"; DRV_DIR="$T_DRV"; LOG="$T_DRV/driver.log"', 'source "$T_LIB"',
       'kill_own_emulators() { :; }; kill_own_test_browsers() { :; }', logFn, stopFn, 'stop_our_processes'].join('\n');
-    const r = spawnSync('bash', ['-c', script], { encoding: 'utf8', env: { ...process.env, GRADLE_USER_HOME: home, TITAN_GRADLE_PIDS: `${ours.pid} ${foreign.pid}` } });
+    const r = spawnSync('bash', ['-c', script], { encoding: 'utf8', env: { ...process.env, GRADLE_USER_HOME: home, TITAN_GRADLE_PIDS: `${ours.pid} ${foreign.pid}`,
+      T_CHECKOUT: checkout, T_DRV: drv, T_LIB: LIB } });
     assert.equal(r.status, 0, r.stderr);
     const log = readFileSync(join(drv, 'driver.log'), 'utf8');
     assert.match(log, new RegExp(`\\[gate-driver [0-9:]+\\] \\[own-processes\\] gradle daemon pid ${foreign.pid} \\(9\\.6\\.1\\) served \\[${other}\\] — not only this checkout's, not touching it`));

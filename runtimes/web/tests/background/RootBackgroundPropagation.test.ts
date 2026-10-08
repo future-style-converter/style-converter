@@ -80,7 +80,9 @@ describe('rootBackgroundPlan — css-backgrounds-3 §2.11.2 / §3.4', () => {
   it('a3_ihdr1x1_isUniform_ihdr2x2_isNot', () => {
     expect(dataPngIs1x1(TARGET_URL)).toBe(true);
     // The SAME payload with IHDR width/height patched to 2.
-    const twoByTwo = TARGET_URL.replace('%49%48%44%52%00%00%00%01%00%00%00%01', '%49%48%44%52%00%00%00%02%00%00%00%02');
+    // split/join patches EVERY occurrence (there is exactly one IHDR; a first-only replace reads as an
+    // incomplete sanitization to CodeQL — the ES2020 lib has no replaceAll).
+    const twoByTwo = TARGET_URL.split('%49%48%44%52%00%00%00%01%00%00%00%01').join('%49%48%44%52%00%00%00%02%00%00%00%02');
     expect(twoByTwo).not.toBe(TARGET_URL);
     expect(dataPngIs1x1(twoByTwo)).toBe(false);
     // …and the plan follows: a 2×2 tile is never stretched into the frame.
