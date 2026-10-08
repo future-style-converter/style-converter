@@ -1,0 +1,13 @@
+css-break/block-in-inline-015-print                                          android f 0.9489  h1+size+bold h1+size+bold h1+size+bold h1+size+bold
+css-lists/counter-list-item                                                  android f 0.7307  h2+size+bold
+css-lists/counter-reset-increment-overflow-underflow                         android f 0.8699  h3+size+bold h3+size+bold h3+size+bold h3+size+bold h3+size+bold h3+size+bold
+css-text-decor/text-decoration-color                                         android f 0.6164  h3+size+bold sub+size sup+size
+css-text-decor/text-decoration-inset-005                                     android f 0.9     h1+size+bold(1 kids) sup+size sub+size
+css-text-decor/text-decoration-inset-006                                     android f 0.8993  h1+size+bold(1 kids) sup+size sub+size
+css-text-decor/text-decoration-inset-011                                     android f 0.6852  h1+size+bold(3 kids)
+css-text-decor/text-decoration-inset-014                                     android f 0.923   h1+size+bold(1 kids)
+css-text-decor/text-decoration-subelements-002                               android f 0.9047  sup+size sup+size sup+size sup+size
+css-text-decor/text-decoration-subelements-003                               android f 0.9084  sup+size
+filter-effects/backdrop-filter-border-radius-change                          android f 0.5977  h1+bold h1+bold
+filter-effects/backdrop-filter-corner-shape-change                           android f 0.4904  h1+bold h1+bold
+12 documents carry an h1-h6/sub/sup the Compose UA rule would restyle

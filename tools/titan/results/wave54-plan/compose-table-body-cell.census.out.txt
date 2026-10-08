@@ -1,0 +1,88 @@
+run wave53-final: 1435 docs; 86 carry a table-family display or UA table tag; 60 route ≥1 box to Compose DisplayType.TABLE (declared 22, ua-fold 38)
+forest trigger (body-root TABLE/INLINE_TABLE): CSS2/css21-errata/s-11-1-1b-006
+
+D1 fabricated-stroke docs (declared-Display table, SEPARATE model, ≥1 row): 12
+  css-break/background-image-006                                             android P 0.9966  ios P 0.9712  web P 0.999
+  css-position/position-absolute-center-006                                  android P 0.9692  ios P 0.9699  web P 0.999
+  css-position/position-absolute-center-007                                  android f 0.9445  ios f 0.9451  web P 0.999
+  css-tables/abspos-container-change-dynamic-001                             android P 0.9654  ios P 1       web P 1
+  css-tables/anonymous-table-cell-margin-collapsing                          android f 0.9953  ios P 0.9541  web P 0.999
+  css-tables/fixup-dynamic-anonymous-inline-table-002                        android f 0.9434  ios f 0.9456  web P 1
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-003 android P 0.9954  ios P 0.9974  web P 0.999
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-004 android P 0.9954  ios P 0.9974  web P 0.999
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-005 android P 0.9954  ios P 0.9974  web P 0.999
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-006 android P 0.9954  ios P 0.9974  web P 0.999
+  css-text/hanging-punctuation/hanging-scrollable-001                        android P 0.9742  ios P 0.9912  web P 0.9914
+  selectors/invalidation/nth-child-of-attr-largedom                          android f 0.9442  ios P 0.9863  web P 1
+
+D2 first-fill docs (a row of ≥2 cells whose non-last cell takes the block fill): 8
+  css-contain/contain-content-004                                            android f 0.8286  ios f 0.8094  web P 0.9985
+  css-display/display-contents-td-001                                        android P 0.9753  ios P 0.9762  web P 0.968
+  css-tables/baseline-empty-cell-001                                         android P 0.9956  ios P 0.9985  web P 1
+  css-tables/baseline-vertical                                               android f 0.5727  ios f 0.6209  web f 0.8028
+  css-tables/border-conflict-resolution                                      android f 0.8394  ios f 0.8539  web f 0.9404
+  css-tables/colspan-004                                                     android P 0.9873  ios P 0.9847  web f 0.999
+  css-values/calc-height-table-1                                             android f 0.8989  ios f 0.8742  web P 1
+  css-writing-modes/direction-upright-002                                    android f 0.5935  ios f 0.6092  web f 0.7002
+
+All Compose-table docs:
+  CSS2/borders/border-conflict-style-107                                     android f 0.3262  ios f 0.6564  web f 0.9381  [ua-fold:table/COLLAPSE r1 c1; ua-fold:table/COLLAPSE r1 c1; ua-fold:table/COLLAPSE r1 c1]
+  CSS2/css21-errata/s-11-1-1b-003                                            android P 0.9908  ios P 0.9917  web P 0.9905  [ua-fold:table/SEPARATE r1 c1]
+  CSS2/css21-errata/s-11-1-1b-004                                            android P 0.9908  ios P 0.9917  web P 0.9905  [ua-fold:table/SEPARATE r1 c1]
+  CSS2/css21-errata/s-11-1-1b-006                                            android P 0.9944  ios P 0.9992  web P 1  [declared:TABLE/SEPARATE r0 c0]
+  CSS2/css21-errata/s-11-1-1b-007                                            android P 0.9983  ios P 0.9992  web P 0.994  [ua-fold:table/SEPARATE r1 c1]
+  css-backgrounds/animations/background-color-animation-with-table1          android P 0.9998  ios P 1       web P 1  [ua-fold:table/SEPARATE r2 c2]
+  css-backgrounds/animations/background-color-animation-with-table2          android P 0.9998  ios P 0.9971  web P 1  [ua-fold:table/SEPARATE r2 c2]
+  css-backgrounds/animations/background-color-animation-with-table3          android P 0.9998  ios P 1       web P 1  [ua-fold:table/SEPARATE r2 c2]
+  css-backgrounds/animations/background-color-animation-with-table4          android P 0.9935  ios P 1       web P 1  [ua-fold:table/SEPARATE r2 c2]
+  css-break/background-image-006                                             android P 0.9966  ios P 0.9712  web P 0.999  [declared:TABLE/SEPARATE r1 c1 D1]
+  css-contain/contain-content-004                                            android f 0.8286  ios f 0.8094  web P 0.9985  [ua-fold:table/SEPARATE r2 c4 D2×2]
+  css-display/display-contents-td-001                                        android P 0.9753  ios P 0.9762  web P 0.968  [ua-fold:table/SEPARATE r1 c4 D2×1]
+  css-position/position-absolute-center-006                                  android P 0.9692  ios P 0.9699  web P 0.999  [declared:TABLE/SEPARATE r1 c1 D1]
+  css-position/position-absolute-center-007                                  android f 0.9445  ios f 0.9451  web P 0.999  [declared:TABLE/SEPARATE r1 c1 D1]
+  css-position/position-relative-008                                         android P 0.9984  ios P 0.9558  web P 0.9845  [ua-fold:table/SEPARATE r1 c1]
+  css-tables/absolute-tables-007                                             android P 0.9967  ios P 0.9974  web P 0.999  [declared:TABLE/SEPARATE r0 c0]
+  css-tables/absolute-tables-016                                             android P 0.9967  ios P 0.9974  web P 0.999  [declared:TABLE/SEPARATE r0 c0]
+  css-tables/abspos-container-change-dynamic-001                             android P 0.9654  ios P 1       web P 1  [declared:TABLE/SEPARATE r1 c2 D1]
+  css-tables/anonymous-table-cell-margin-collapsing                          android f 0.9953  ios P 0.9541  web P 0.999  [declared:TABLE/SEPARATE r3 c4 D1]
+  css-tables/anonymous-table-ws-001                                          android P 0.9936  ios P 0.9988  web P 1  [declared:TABLE/SEPARATE r0 c0]
+  css-tables/background-clip-001                                             android P 0.9949  ios P 0.9974  web P 0.999  [ua-fold:table/COLLAPSE r1 c1]
+  css-tables/baseline-empty-cell-001                                         android P 0.9956  ios P 0.9985  web P 1  [ua-fold:table/COLLAPSE r1 c2 D2×1]
+  css-tables/baseline-vertical                                               android f 0.5727  ios f 0.6209  web f 0.8028  [ua-fold:table/SEPARATE r1 c2 D2×1]
+  css-tables/border-collapse-dynamic-col-001                                 android P 0.9812  ios f 0.9404  web P 1  [declared:TABLE/COLLAPSE r4 c16]
+  css-tables/border-collapse-dynamic-oof                                     android P 0.9692  ios f 0.9367  web P 0.999  [declared:TABLE/COLLAPSE r1 c1]
+  css-tables/border-collapse-dynamic-section                                 android P 0.9949  ios P 0.9974  web P 0.999  [declared:TABLE/COLLAPSE r2 c2]
+  css-tables/border-collapse-empty-cell                                      android f 0.929   ios f 0.9309  web P 1  [ua-fold:table/COLLAPSE r2 c4]
+  css-tables/border-collapse-rowspan-cell                                    android P 0.9926  ios P 0.9984  web P 0.9954  [ua-fold:table/COLLAPSE r2 c2]
+  css-tables/border-conflict-resolution                                      android f 0.8394  ios f 0.8539  web f 0.9404  [ua-fold:table/COLLAPSE r2 c5 D2×1]
+  css-tables/box-shadow-001                                                  android P 0.9948  ios P 0.9973  web P 0.999  [ua-fold:table/COLLAPSE r1 c1]
+  css-tables/collapsed-border-color-change-with-compositing                  android P 0.9822  ios P 0.986   web P 1  [declared:TABLE/COLLAPSE r2 c4]
+  css-tables/collapsed-border-positioned-tr-td                               android P 0.974   ios P 0.9826  web P 1  [ua-fold:table/COLLAPSE r2 c6]
+  css-tables/collapsed-border-remove-row-group                               android P 0.9972  ios P 0.9853  web P 1  [declared:TABLE/COLLAPSE r2 c2]
+  css-tables/collapsed-border-sideways-rl-rtl-overflow                       android f 0.8549  ios f 0.8732  web P 1  [ua-fold:table/COLLAPSE r2 c4]
+  css-tables/collapsed-border-vertical-lr-rtl-overflow                       android f 0.8578  ios f 0.8675  web P 1  [ua-fold:table/COLLAPSE r2 c4]
+  css-tables/collapsed-border-vertical-rtl-overflow                          android f 0.8549  ios f 0.8732  web P 1  [ua-fold:table/COLLAPSE r2 c4]
+  css-tables/colspan-004                                                     android P 0.9873  ios P 0.9847  web f 0.999  [ua-fold:table/SEPARATE r2 c5 D2×1]
+  css-tables/empty-table-height                                              android P 1       ios P 1       web P 1  [declared:TABLE/SEPARATE r0 c0]
+  css-tables/fixup-dynamic-anonymous-inline-table-002                        android f 0.9434  ios f 0.9456  web P 1  [declared:TABLE_ROW/SEPARATE r1 c1 D1]
+  css-tables/height-distribution/extra-height-given-to-all-row-groups-001    android P 0.9952  ios P 0.9974  web P 0.999  [ua-fold:table/COLLAPSE r1 c1]
+  css-tables/height-distribution/extra-height-given-to-all-row-groups-002    android P 0.9952  ios P 0.9974  web P 0.999  [ua-fold:table/COLLAPSE r1 c1]
+  css-tables/height-distribution/extra-height-given-to-all-row-groups-005    android P 0.9952  ios P 0.9974  web P 0.999  [ua-fold:table/COLLAPSE r1 c1]
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-003 android P 0.9954  ios P 0.9974  web P 0.999  [declared:TABLE/SEPARATE r1 c1 D1]
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-004 android P 0.9954  ios P 0.9974  web P 0.999  [declared:TABLE/SEPARATE r1 c1 D1]
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-005 android P 0.9954  ios P 0.9974  web P 0.999  [declared:TABLE/SEPARATE r1 c1 D1]
+  css-tables/height-distribution/percentage-sizing-of-table-cell-children-006 android P 0.9954  ios P 0.9974  web P 0.999  [declared:TABLE/SEPARATE r2 c2 D1]
+  css-tables/height-distribution/td-different-subpixel-padding-in-same-row-vertical-rl android P 0.9609  ios P 0.9638  web P 1  [ua-fold:table/COLLAPSE r1 c5]
+  css-text/hanging-punctuation/hanging-scrollable-001                        android P 0.9742  ios P 0.9912  web P 0.9914  [declared:TABLE/SEPARATE r1 c1 D1]
+  css-text-decor/text-decoration-propagation-05                              android P 0.9928  ios P 0.9841  web P 1  [ua-fold:table/SEPARATE r1 c1]
+  css-values/calc-height-table-1                                             android f 0.8989  ios f 0.8742  web P 1  [ua-fold:table/SEPARATE r2 c4 D2×2]
+  css-writing-modes/ch-units-vrl-001                                         android f 0.8744  ios f 0.8771  web f 0.9254  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/ch-units-vrl-002                                         android f 0.8744  ios f 0.8771  web f 0.9254  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/ch-units-vrl-003                                         android P 0.9507  ios P 0.9535  web P 0.9761  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/ch-units-vrl-004                                         android P 0.9507  ios P 0.9535  web P 0.9761  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/ch-units-vrl-005                                         android f 0.9347  ios f 0.942   web P 0.9578  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/ch-units-vrl-006                                         android f 0.9347  ios f 0.942   web P 0.9578  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/ch-units-vrl-007                                         android f 0.9034  ios f 0.911   web f 0.917  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/ch-units-vrl-008                                         android f 0.9034  ios f 0.911   web f 0.917  [ua-fold:table/COLLAPSE r1 c1]
+  css-writing-modes/direction-upright-002                                    android f 0.5935  ios f 0.6092  web f 0.7002  [ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1; ua-fold:table/SEPARATE r1 c3 D2×1]
+  selectors/invalidation/nth-child-of-attr-largedom                          android f 0.9442  ios P 0.9863  web P 1  [declared:TABLE/SEPARATE r147 c147 D1]

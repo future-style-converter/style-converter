@@ -1,0 +1,22 @@
+CSS2/wpt__CSS2__abspos__between-float-and-text abspos__between-float-and-text__1__0 inert=false midword=false hostHyphens=-
+CSS2/wpt__CSS2__abspos__hypothetical-inline-alone-on-second-line abspos__hypothetical-inline-alone-on-second-line__1__1 inert=false midword=false hostHyphens=-
+CSS2/wpt__CSS2__abspos__static-inside-inline-001 abspos__static-inside-inline-001__2__0__0 inert=false midword=false hostHyphens=-
+CSS2/wpt__CSS2__abspos__static-inside-inline-002 abspos__static-inside-inline-002__2__0__0 inert=false midword=false hostHyphens=-
+CSS2/wpt__CSS2__abspos__static-inside-inline-003 abspos__static-inside-inline-003__2__0__0 inert=false midword=false hostHyphens=-
+css-position/wpt__css-position__position-absolute-semi-replaced-stretch-other position-absolute-semi-replaced-stretch-other__2__0 inert=false midword=false hostHyphens=-
+css-pseudo/wpt__css-pseudo__first-letter-list-item-dynamic-001 first-letter-list-item-dynamic-001__1__0 inert=false midword=false hostHyphens=-
+css-tables/wpt__css-tables__abspos-container-change-dynamic-001 abspos-container-change-dynamic-001__0__0__0__1__0 inert=false midword=false hostHyphens=-
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001 hyphens__hyphens-out-of-flow-001__2__0 inert=true midword=false hostHyphens=MANUAL
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001 hyphens__hyphens-out-of-flow-001__3__0 inert=true midword=true hostHyphens=MANUAL
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001 hyphens__hyphens-out-of-flow-001__4__0 inert=true midword=false hostHyphens=MANUAL
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001 hyphens__hyphens-out-of-flow-001__5__0 inert=true midword=false hostHyphens=MANUAL
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001 hyphens__hyphens-out-of-flow-001__6__0 inert=true midword=true hostHyphens=MANUAL
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001 hyphens__hyphens-out-of-flow-001__7__0 inert=true midword=false hostHyphens=MANUAL
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002 hyphens__hyphens-out-of-flow-002__2__0 inert=true midword=false hostHyphens=AUTO
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002 hyphens__hyphens-out-of-flow-002__3__0 inert=true midword=true hostHyphens=AUTO  <== W1 JOINS
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002 hyphens__hyphens-out-of-flow-002__4__0 inert=true midword=true hostHyphens=AUTO  <== W1 JOINS
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002 hyphens__hyphens-out-of-flow-002__5__0 inert=true midword=true hostHyphens=AUTO  <== W1 JOINS
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002 hyphens__hyphens-out-of-flow-002__6__0 inert=true midword=true hostHyphens=AUTO  <== W1 JOINS
+css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002 hyphens__hyphens-out-of-flow-002__7__0 inert=true midword=false hostHyphens=AUTO
+css-values/wpt__css-values__ch-unit-001 ch-unit-001__2__0 inert=false midword=false hostHyphens=-
+out-of-flow run members 21, inert 12, W1 joins 4 in 1 documents

@@ -1,0 +1,1534 @@
+{
+ "_generated_by": "tools/titan/results/wave54-plan/label-chrome-all-reset.census.mjs",
+ "_sources": {
+  "fixtures": "git ls-files fixtures (446 json)",
+  "gateList": "tools/visual/gate-fixtures.txt",
+  "baselines": "tools/visual/baseline (390 png)",
+  "ir": "tools/titan/results/wave52-all-reset-postload-colour/convert-out/all-then-color/tmpOutput.json",
+  "corpus": "tools/titan/runs/wave53-final/sections"
+ },
+ "allDecls": [
+  {
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "path": "ATC_AllThenProps",
+   "keyword": "initial",
+   "position": "1/5",
+   "before": [],
+   "after": [
+    "display",
+    "width",
+    "height",
+    "background-color"
+   ],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": true,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "path": "ATC_PropsThenAll_InGreenParent/reset",
+   "keyword": "revert",
+   "position": "4/4",
+   "before": [
+    "width",
+    "height",
+    "background-color"
+   ],
+   "after": [],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": true,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "path": "ATC_InitialUnderRedParent/span",
+   "keyword": "initial",
+   "position": "1/5",
+   "before": [],
+   "after": [
+    "display",
+    "width",
+    "height",
+    "background-color"
+   ],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": true,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "path": "ATC_DirectionSurvives",
+   "keyword": "initial",
+   "position": "2/8",
+   "before": [
+    "direction"
+   ],
+   "after": [
+    "display",
+    "width",
+    "height",
+    "background-color",
+    "color",
+    "font-size"
+   ],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": true,
+   "labelDueOnOwnCapture": false,
+   "gateListed": true,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/global/longtail.json",
+   "path": "All_Initial",
+   "keyword": "initial",
+   "position": "4/4",
+   "before": [
+    "width",
+    "height",
+    "background-color"
+   ],
+   "after": [],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": false,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/global/longtail.json",
+   "path": "All_Inherit",
+   "keyword": "inherit",
+   "position": "4/4",
+   "before": [
+    "width",
+    "height",
+    "background-color"
+   ],
+   "after": [],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": false,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/global/longtail.json",
+   "path": "All_Unset",
+   "keyword": "unset",
+   "position": "4/4",
+   "before": [
+    "width",
+    "height",
+    "background-color"
+   ],
+   "after": [],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": false,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/global/longtail.json",
+   "path": "All_Revert",
+   "keyword": "revert",
+   "position": "4/4",
+   "before": [
+    "width",
+    "height",
+    "background-color"
+   ],
+   "after": [],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": false,
+   "nameHasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/global/longtail.json",
+   "path": "All_RevertLayer",
+   "keyword": "revert-layer",
+   "position": "4/4",
+   "before": [
+    "width",
+    "height",
+    "background-color"
+   ],
+   "after": [],
+   "capturedRootHasChildren": false,
+   "capturedRootHasText": false,
+   "labelDueOnOwnCapture": true,
+   "gateListed": false,
+   "nameHasCommittedBaseline": false
+  }
+ ],
+ "fixturesWithExemptCaptures": [
+  {
+   "fixture": "fixtures/_metric_probes/b9_aa_lines/b9_diagonals.json",
+   "nodes": 10,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "nodes": 6,
+   "exempt": 3,
+   "exemptContainers": 2,
+   "exemptTextRoots": 1,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/blend-isolation.json",
+   "nodes": 9,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/nested-transforms.json",
+   "nodes": 8,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/opacity-blend.json",
+   "nodes": 10,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/opacity-filter-stacking.json",
+   "nodes": 8,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/radius-overflow-transform.json",
+   "nodes": 8,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/transform-abspos-pivot.json",
+   "nodes": 12,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/composition-test.json",
+   "nodes": 42,
+   "exempt": 18,
+   "exemptContainers": 18,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/dynamic/dark-mode.json",
+   "nodes": 4,
+   "exempt": 3,
+   "exemptContainers": 0,
+   "exemptTextRoots": 3,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/dynamic/states.json",
+   "nodes": 6,
+   "exempt": 6,
+   "exemptContainers": 0,
+   "exemptTextRoots": 6,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/placement/flex-order.json",
+   "nodes": 15,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/placement/grid-areas.json",
+   "nodes": 13,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/placement/grid-lines.json",
+   "nodes": 13,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/placement/mixed-claims.json",
+   "nodes": 18,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/placement/self-alignment.json",
+   "nodes": 15,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/placement/z-stack.json",
+   "nodes": 11,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/tokens/calc-units.json",
+   "nodes": 10,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/tokens/token-fallbacks.json",
+   "nodes": 9,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/tokens/token-theme.json",
+   "nodes": 11,
+   "exempt": 5,
+   "exemptContainers": 4,
+   "exemptTextRoots": 1,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/block-flow.json",
+   "nodes": 12,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/flex-column.json",
+   "nodes": 17,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/flex-row.json",
+   "nodes": 17,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/grid-2col.json",
+   "nodes": 20,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/inheritance-color.json",
+   "nodes": 12,
+   "exempt": 12,
+   "exemptContainers": 5,
+   "exemptTextRoots": 7,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/inheritance-extended.json",
+   "nodes": 16,
+   "exempt": 10,
+   "exemptContainers": 8,
+   "exemptTextRoots": 2,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/inheritance-typography.json",
+   "nodes": 12,
+   "exempt": 12,
+   "exemptContainers": 4,
+   "exemptTextRoots": 8,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/mixed-direction.json",
+   "nodes": 17,
+   "exempt": 7,
+   "exemptContainers": 7,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/fidelity/trees/nested-3level.json",
+   "nodes": 18,
+   "exempt": 8,
+   "exemptContainers": 8,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/borders/border-radius-overflow-visible.json",
+   "nodes": 5,
+   "exempt": 3,
+   "exemptContainers": 2,
+   "exemptTextRoots": 1,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/color/blend-modes.json",
+   "nodes": 34,
+   "exempt": 17,
+   "exemptContainers": 17,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/color/mix-blend-mode.json",
+   "nodes": 8,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/columns/nested-multicol.json",
+   "nodes": 4,
+   "exempt": 2,
+   "exemptContainers": 2,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/effects/filter-blur-overflow.json",
+   "nodes": 4,
+   "exempt": 2,
+   "exemptContainers": 2,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/effects/filter-on-text.json",
+   "nodes": 4,
+   "exempt": 4,
+   "exemptContainers": 0,
+   "exemptTextRoots": 4,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/effects/overflow-clip-radius.json",
+   "nodes": 14,
+   "exempt": 7,
+   "exemptContainers": 7,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/absolute-positioned-children.json",
+   "nodes": 14,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/anchor-positioning.json",
+   "nodes": 24,
+   "exempt": 12,
+   "exemptContainers": 12,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/audit-phase12.json",
+   "nodes": 59,
+   "exempt": 17,
+   "exemptContainers": 17,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/clear.json",
+   "nodes": 12,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/fixed-sticky-in-scroll.json",
+   "nodes": 9,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-align-content.json",
+   "nodes": 42,
+   "exempt": 7,
+   "exemptContainers": 7,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-align-items.json",
+   "nodes": 35,
+   "exempt": 10,
+   "exemptContainers": 10,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-align-self.json",
+   "nodes": 30,
+   "exempt": 10,
+   "exemptContainers": 10,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-direction.json",
+   "nodes": 16,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-display.json",
+   "nodes": 24,
+   "exempt": 8,
+   "exemptContainers": 8,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-gap-vs-margin.json",
+   "nodes": 20,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-grow-shrink-basis.json",
+   "nodes": 36,
+   "exempt": 11,
+   "exemptContainers": 11,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-justify-content.json",
+   "nodes": 42,
+   "exempt": 12,
+   "exemptContainers": 12,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-order.json",
+   "nodes": 20,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-parent-with-margin-children.json",
+   "nodes": 13,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/flex-wrap.json",
+   "nodes": 17,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/float.json",
+   "nodes": 15,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-align-items.json",
+   "nodes": 15,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-align-self.json",
+   "nodes": 12,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-align-tracks.json",
+   "nodes": 21,
+   "exempt": 7,
+   "exemptContainers": 7,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-area.json",
+   "nodes": 18,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-auto-columns.json",
+   "nodes": 25,
+   "exempt": 7,
+   "exemptContainers": 7,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-auto-flow.json",
+   "nodes": 22,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-auto-rows.json",
+   "nodes": 21,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-column-start-end.json",
+   "nodes": 14,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-display.json",
+   "nodes": 13,
+   "exempt": 3,
+   "exemptContainers": 3,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-justify-items.json",
+   "nodes": 15,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-justify-self.json",
+   "nodes": 12,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-justify-tracks.json",
+   "nodes": 21,
+   "exempt": 7,
+   "exemptContainers": 7,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-row-start-end.json",
+   "nodes": 12,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-template-areas.json",
+   "nodes": 29,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-template-columns.json",
+   "nodes": 45,
+   "exempt": 12,
+   "exemptContainers": 12,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-template-rows.json",
+   "nodes": 29,
+   "exempt": 8,
+   "exemptContainers": 8,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/grid-with-gap-and-padding.json",
+   "nodes": 19,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/inset-logical.json",
+   "nodes": 10,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/masonry-auto-flow.json",
+   "nodes": 26,
+   "exempt": 8,
+   "exemptContainers": 8,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/multicol-in-flex-item.json",
+   "nodes": 10,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/multicol-in-grid-cell.json",
+   "nodes": 5,
+   "exempt": 2,
+   "exemptContainers": 2,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/nested-flex-grid.json",
+   "nodes": 17,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/offset-anchor.json",
+   "nodes": 10,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/offset-distance.json",
+   "nodes": 10,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/offset-path.json",
+   "nodes": 16,
+   "exempt": 8,
+   "exemptContainers": 8,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/offset-position.json",
+   "nodes": 12,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/offset-rotate.json",
+   "nodes": 10,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/overlay.json",
+   "nodes": 4,
+   "exempt": 2,
+   "exemptContainers": 2,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/position-keywords.json",
+   "nodes": 14,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/position-right-bottom.json",
+   "nodes": 12,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/position-top-left.json",
+   "nodes": 12,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/position-try.json",
+   "nodes": 28,
+   "exempt": 14,
+   "exemptContainers": 14,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/reading-flow.json",
+   "nodes": 18,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/layout/z-index.json",
+   "nodes": 12,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/sizing/audit-phase12.json",
+   "nodes": 17,
+   "exempt": 1,
+   "exemptContainers": 1,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/sizing/intrinsic-keyword-multicol.json",
+   "nodes": 16,
+   "exempt": 8,
+   "exemptContainers": 8,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/sizing/logical-sizing.json",
+   "nodes": 9,
+   "exempt": 1,
+   "exemptContainers": 1,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/sizing/width-units.json",
+   "nodes": 31,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing-all.json",
+   "nodes": 178,
+   "exempt": 71,
+   "exemptContainers": 71,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing/audit-phase12.json",
+   "nodes": 46,
+   "exempt": 19,
+   "exemptContainers": 19,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing/gap.json",
+   "nodes": 49,
+   "exempt": 11,
+   "exemptContainers": 11,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing/margin-basic.json",
+   "nodes": 30,
+   "exempt": 15,
+   "exemptContainers": 15,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing/margin-trim.json",
+   "nodes": 23,
+   "exempt": 7,
+   "exemptContainers": 7,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing/margin-units.json",
+   "nodes": 22,
+   "exempt": 11,
+   "exemptContainers": 11,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing/padding-absolute.json",
+   "nodes": 28,
+   "exempt": 14,
+   "exemptContainers": 14,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/spacing/padding-units.json",
+   "nodes": 26,
+   "exempt": 13,
+   "exemptContainers": 13,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/table/multicol-in-cell.json",
+   "nodes": 13,
+   "exempt": 8,
+   "exemptContainers": 8,
+   "exemptTextRoots": 0,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/color.json",
+   "nodes": 8,
+   "exempt": 8,
+   "exemptContainers": 0,
+   "exemptTextRoots": 8,
+   "gateListed": false,
+   "hasCommittedBaseline": true
+  },
+  {
+   "fixture": "fixtures/properties/typography/font-family.json",
+   "nodes": 16,
+   "exempt": 16,
+   "exemptContainers": 0,
+   "exemptTextRoots": 16,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/font-language-override.json",
+   "nodes": 4,
+   "exempt": 4,
+   "exemptContainers": 0,
+   "exemptTextRoots": 4,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/font-size.json",
+   "nodes": 17,
+   "exempt": 17,
+   "exemptContainers": 0,
+   "exemptTextRoots": 17,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/font-style.json",
+   "nodes": 8,
+   "exempt": 8,
+   "exemptContainers": 0,
+   "exemptTextRoots": 8,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/font-weight.json",
+   "nodes": 14,
+   "exempt": 14,
+   "exemptContainers": 0,
+   "exemptTextRoots": 14,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/initial-letter.json",
+   "nodes": 5,
+   "exempt": 5,
+   "exemptContainers": 0,
+   "exemptTextRoots": 5,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/letter-spacing.json",
+   "nodes": 8,
+   "exempt": 8,
+   "exemptContainers": 0,
+   "exemptTextRoots": 8,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/line-height.json",
+   "nodes": 9,
+   "exempt": 9,
+   "exemptContainers": 0,
+   "exemptTextRoots": 9,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/line-snap.json",
+   "nodes": 3,
+   "exempt": 3,
+   "exemptContainers": 0,
+   "exemptTextRoots": 3,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/text-align.json",
+   "nodes": 7,
+   "exempt": 7,
+   "exemptContainers": 0,
+   "exemptTextRoots": 7,
+   "gateListed": false,
+   "hasCommittedBaseline": true
+  },
+  {
+   "fixture": "fixtures/properties/typography/text-decoration-line.json",
+   "nodes": 7,
+   "exempt": 7,
+   "exemptContainers": 0,
+   "exemptTextRoots": 7,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/text-decoration-metrics.json",
+   "nodes": 8,
+   "exempt": 8,
+   "exemptContainers": 0,
+   "exemptTextRoots": 8,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/text-group-align.json",
+   "nodes": 6,
+   "exempt": 6,
+   "exemptContainers": 0,
+   "exemptTextRoots": 6,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/text-orientation.json",
+   "nodes": 3,
+   "exempt": 3,
+   "exemptContainers": 0,
+   "exemptTextRoots": 3,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/text-shadow.json",
+   "nodes": 10,
+   "exempt": 10,
+   "exemptContainers": 0,
+   "exemptTextRoots": 10,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/text-transform.json",
+   "nodes": 6,
+   "exempt": 6,
+   "exemptContainers": 0,
+   "exemptTextRoots": 6,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/unicode-bidi.json",
+   "nodes": 6,
+   "exempt": 6,
+   "exemptContainers": 0,
+   "exemptTextRoots": 6,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/word-spacing.json",
+   "nodes": 6,
+   "exempt": 6,
+   "exemptContainers": 0,
+   "exemptTextRoots": 6,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/typography/word-wrap.json",
+   "nodes": 3,
+   "exempt": 3,
+   "exemptContainers": 0,
+   "exemptTextRoots": 3,
+   "gateListed": false,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/visual-test-controls.json",
+   "nodes": 359,
+   "exempt": 359,
+   "exemptContainers": 0,
+   "exemptTextRoots": 359,
+   "gateListed": false,
+   "hasCommittedBaseline": true
+  }
+ ],
+ "gateFixtures": [
+  {
+   "fixture": "fixtures/combinations/all-then-color.json",
+   "nodes": 6,
+   "exempt": 3,
+   "exemptContainers": 2,
+   "exemptTextRoots": 1,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/blend-isolation.json",
+   "nodes": 9,
+   "exempt": 6,
+   "exemptContainers": 6,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/nested-transforms.json",
+   "nodes": 8,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/opacity-blend.json",
+   "nodes": 10,
+   "exempt": 5,
+   "exemptContainers": 5,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/radius-overflow-transform.json",
+   "nodes": 8,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/combinations/transform-abspos-pivot.json",
+   "nodes": 12,
+   "exempt": 4,
+   "exemptContainers": 4,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/composition-test.json",
+   "nodes": 42,
+   "exempt": 18,
+   "exemptContainers": 18,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": false
+  },
+  {
+   "fixture": "fixtures/properties/effects/filter-sepia-amounts.json",
+   "nodes": 8,
+   "exempt": 0,
+   "exemptContainers": 0,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": true
+  },
+  {
+   "fixture": "fixtures/visual-test.json",
+   "nodes": 109,
+   "exempt": 0,
+   "exemptContainers": 0,
+   "exemptTextRoots": 0,
+   "gateListed": true,
+   "hasCommittedBaseline": true
+  }
+ ],
+ "fixtureTotals": {
+  "fixtures": 445,
+  "nodes": 5330,
+  "exempt": 1212,
+  "fixturesWithExempt": 121
+ },
+ "baselineStems": {
+  "stems": 130,
+  "ownedExactlyOnce": 129,
+  "labelDue": 129,
+  "byOwner": {
+   "fixtures/properties/effects/filter-grayscale-basis.json": 4,
+   "fixtures/properties/sizing/aspect-ratio.json": 9,
+   "fixtures/properties/effects/filter-sepia-amounts.json": 8,
+   "fixtures/visual-test-controls.json": 1,
+   "fixtures/visual-test.json": 109
+  },
+  "unowned": [],
+  "multiOwner": [
+   {
+    "stem": "000_Sizing_Fixed",
+    "owners": [
+     {
+      "fixture": "fixtures/visual-test-controls.json",
+      "labelDue": false
+     },
+     {
+      "fixture": "fixtures/visual-test.json",
+      "labelDue": true
+     }
+    ]
+   }
+  ]
+ },
+ "allThenColorCaptures": [
+  {
+   "stem": "000_ATC_AllThenProps",
+   "id": "atc_allthenprops-001",
+   "rootAll": "INITIAL @1/5",
+   "composedChildren": [],
+   "text": null,
+   "labelDue": true
+  },
+  {
+   "stem": "001_ATC_PropsThenAll_InGreenParent",
+   "id": "atc_propsthenall_ingreenparent-002",
+   "rootAll": null,
+   "composedChildren": [
+    "reset"
+   ],
+   "text": null,
+   "labelDue": false
+  },
+  {
+   "stem": "002_reset",
+   "id": "reset-003",
+   "rootAll": "REVERT @4/4",
+   "composedChildren": [],
+   "text": null,
+   "labelDue": true
+  },
+  {
+   "stem": "003_ATC_InitialUnderRedParent",
+   "id": "atc_initialunderredparent-004",
+   "rootAll": null,
+   "composedChildren": [
+    "span"
+   ],
+   "text": null,
+   "labelDue": false
+  },
+  {
+   "stem": "004_span",
+   "id": "span-005",
+   "rootAll": "INITIAL @1/5",
+   "composedChildren": [],
+   "text": null,
+   "labelDue": true
+  },
+  {
+   "stem": "005_ATC_DirectionSurvives",
+   "id": "atc_directionsurvives-006",
+   "rootAll": "INITIAL @2/8",
+   "composedChildren": [],
+   "text": "123",
+   "labelDue": false
+  }
+ ],
+ "corpus": {
+  "run": "wave53-final",
+  "docs": 1435,
+  "docsWithAll": [
+   {
+    "section": "css-cascade",
+    "doc": "wpt__css-cascade__all-prop-001.json",
+    "keywords": [
+     "INITIAL",
+     "INITIAL"
+    ]
+   },
+   {
+    "section": "css-cascade",
+    "doc": "wpt__css-cascade__all-prop-002.json",
+    "keywords": [
+     "INHERIT",
+     "INHERIT"
+    ]
+   },
+   {
+    "section": "css-cascade",
+    "doc": "wpt__css-cascade__all-prop-inherit-color.json",
+    "keywords": [
+     "INHERIT"
+    ]
+   },
+   {
+    "section": "css-cascade",
+    "doc": "wpt__css-cascade__all-prop-initial-color.json",
+    "keywords": [
+     "INITIAL"
+    ]
+   },
+   {
+    "section": "css-cascade",
+    "doc": "wpt__css-cascade__all-prop-initial-visited.json",
+    "keywords": [
+     "INITIAL"
+    ]
+   },
+   {
+    "section": "css-cascade",
+    "doc": "wpt__css-cascade__all-prop-revert-color.json",
+    "keywords": [
+     "REVERT"
+    ]
+   },
+   {
+    "section": "css-cascade",
+    "doc": "wpt__css-cascade__all-prop-unset-color.json",
+    "keywords": [
+     "UNSET"
+    ]
+   },
+   {
+    "section": "css-display",
+    "doc": "wpt__css-display__display-contents-button.json",
+    "keywords": [
+     "INITIAL"
+    ]
+   },
+   {
+    "section": "css-display",
+    "doc": "wpt__css-display__display-contents-details.json",
+    "keywords": [
+     "INITIAL",
+     "INITIAL"
+    ]
+   },
+   {
+    "section": "css-display",
+    "doc": "wpt__css-display__display-contents-fieldset.json",
+    "keywords": [
+     "INITIAL",
+     "INITIAL"
+    ]
+   },
+   {
+    "section": "css-ui",
+    "doc": "wpt__css-ui__appearance-revert-001.tentative.json",
+    "keywords": [
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT",
+     "REVERT"
+    ]
+   }
+  ]
+ }
+}

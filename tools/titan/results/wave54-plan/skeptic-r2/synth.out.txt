@@ -1,0 +1,34 @@
+css-text/bidi/bidi-lines-001.html android                                from f 0.8934 predicted 0.9629 floor 0.955  
+css-text/bidi/bidi-lines-002.html android                                from P 0.9534 predicted 0.9818 floor 0.975  
+css-counter-styles/counter-suffix.html android                           from P 0.9547 predicted 0.9815 floor 0.97  
+css-counter-styles/counter-suffix.html web                               from P 0.9818 predicted 1 floor 0.999  
+css-counter-styles/counter-suffix.html ios                               from P 0.9802 predicted 0.987 floor 0.985  
+CSS2/css21-errata/s-11-1-1b-006.html android                             from P 0.9944 predicted 0.9983 floor 0.996  
+css-text/hyphens/hyphenate-character-001.html ios                        from f 0.9287 predicted 0.979 floor 0.965  
+css-text/hyphens/hyphenate-character-003.html ios                        from f 0.9337 predicted 0.977 floor 0.965  
+css-overflow/line-clamp/block-ellipsis-002.html web                      from P 0.9868 predicted 1 floor 0.995  
+css-overflow/line-clamp/block-ellipsis-004.html web                      from P 0.9737 predicted 0.998 floor 0.99  
+css-overflow/line-clamp/block-ellipsis-005.html web                      from P 0.9735 predicted 0.998 floor 0.99  
+css-overflow/line-clamp/block-ellipsis-006.html web                      from P 0.9735 predicted 0.998 floor 0.99  
+css-contain/contain-content-003.html android                             from f 0.9405 predicted 0.997 floor 0.99  
+css-contain/contain-content-011.html android                             from f 0.9284 predicted 0.985 floor 0.97  
+css-position/position-relative-004.html ios                              from P 0.9594 predicted 0.9974 floor 0.99  
+css-position/position-relative-004.html android                          from P 0.9589 predicted 0.9967 floor 0.99  
+css-position/change-insets-inside-strict-containment-nested.html ios     from P 0.9594 predicted 0.9974 floor 0.99  
+css-position/change-insets-inside-strict-containment-nested.html android from P 0.9589 predicted 0.9967 floor 0.99  
+CSS2/abspos/static-fixed-inside-abspos.html ios                          from P 0.9841 predicted 0.9974 floor 0.99  
+CSS2/abspos/static-fixed-inside-abspos.html android                      from P 0.9835 predicted 0.9967 floor 0.99  
+filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  from f 0.9574 predicted 0.99 floor 0.96  
+filter-effects/backdrop-filter-nested-border-radius-clip.html android    from P 0.9649 predicted 0.99 floor 0.98  
+filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  from P 0.9689 predicted 0.99 floor 0.98  
+filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  from P 0.977 predicted 0.99 floor 0.98  
+css-flexbox/abspos/abspos-autopos-htb-ltr.html android                   from P 0.9966 predicted 0.9967 floor 0.995  FLOOR<=FROM (vacuous)
+css-flexbox/abspos/abspos-autopos-vlr-ltr.html android                   from P 0.9966 predicted 0.9967 floor 0.995  FLOOR<=FROM (vacuous)
+css-flexbox/abspos/abspos-autopos-vrl-ltr.html android                   from P 0.9966 predicted 0.9967 floor 0.995  FLOOR<=FROM (vacuous)
+css-gaps/flex/flex-gap-decorations-033.html ios                          from f 0.94 predicted 1 floor 0.99  
+css-gaps/flex/flex-gap-decorations-033.html android                      from f 0.94 predicted 1 floor 0.99  
+css-break/block-in-inline-015-print.html android                         from f 0.9489 predicted 0.989 floor 0.97  
+css-ui/box-sizing-007.html web                                           from f 0.9036 predicted 0.985 floor 0.975  
+css-ui/box-sizing-008.html web                                           from f 0.8943 predicted 0.974 floor 0.965  
+css-ui/box-sizing-022.html web                                           from f 0.9442 predicted 0.97 floor 0.96  
+css-text/hyphens/hyphens-out-of-flow-002.html web                        from f 0.9411 predicted 1 floor 0.995  

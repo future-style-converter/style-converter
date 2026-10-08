@@ -1,0 +1,12 @@
+11 documents carry All
+css-cascade/wpt__css-cascade__all-prop-001
+css-cascade/wpt__css-cascade__all-prop-002
+css-cascade/wpt__css-cascade__all-prop-inherit-color
+css-cascade/wpt__css-cascade__all-prop-initial-color
+css-cascade/wpt__css-cascade__all-prop-initial-visited
+css-cascade/wpt__css-cascade__all-prop-revert-color
+css-cascade/wpt__css-cascade__all-prop-unset-color
+css-display/wpt__css-display__display-contents-button
+css-display/wpt__css-display__display-contents-details
+css-display/wpt__css-display__display-contents-fieldset
+css-ui/wpt__css-ui__appearance-revert-001.tentative

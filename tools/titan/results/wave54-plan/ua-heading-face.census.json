@@ -1,0 +1,680 @@
+{
+ "run": "wave53-final",
+ "rows": [
+  {
+   "sec": "css-break",
+   "stem": "wpt__css-break__block-in-inline-015-print",
+   "key": "css/css-break/block-in-inline-015-print.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "block-in-inline-015-print__0__0-190"
+    },
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "block-in-inline-015-print__2__0-194"
+    },
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "block-in-inline-015-print__4__0-198"
+    },
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "block-in-inline-015-print__6__0-202"
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9894",
+    "android": "f 0.9489"
+   }
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-list-item",
+   "key": "css/css-lists/counter-list-item.html",
+   "hits": [
+    {
+     "tag": "h2",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "wpt__css-lists__counter-list-item__0-278"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9975",
+    "ios": "f 0.7864",
+    "android": "f 0.7307"
+   }
+  },
+  {
+   "sec": "css-lists",
+   "stem": "wpt__css-lists__counter-reset-increment-overflow-underflow",
+   "key": "css/css-lists/counter-reset-increment-overflow-underflow.html",
+   "hits": [
+    {
+     "tag": "h3",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "counter-reset-increment-overflow-underflow__0__0-330"
+    },
+    {
+     "tag": "h3",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "counter-reset-increment-overflow-underflow__0__1-331"
+    },
+    {
+     "tag": "h3",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "counter-reset-increment-overflow-underflow__0__2-332"
+    },
+    {
+     "tag": "h3",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "counter-reset-increment-overflow-underflow__1__0-334"
+    },
+    {
+     "tag": "h3",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "counter-reset-increment-overflow-underflow__1__1-335"
+    },
+    {
+     "tag": "h3",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "counter-reset-increment-overflow-underflow__1__2-336"
+    }
+   ],
+   "cells": {
+    "web": "P 0.997",
+    "ios": "f 0.857",
+    "android": "f 0.8699"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-color",
+   "key": "css/css-text-decor/text-decoration-color.html",
+   "hits": [
+    {
+     "tag": "h3",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "wpt__css-text-decor__text-decoration-color__0-021"
+    },
+    {
+     "tag": "sub",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-color__9__0__0-032"
+    },
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-color__9__0__1-033"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9898",
+    "ios": "f 0.674",
+    "android": "f 0.6164"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-001",
+   "key": "css/css-text-decor/text-decoration-inset-001.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-001__1__0-053"
+    }
+   ],
+   "cells": {
+    "web": "P 0.987",
+    "ios": "P 0.9707",
+    "android": "P 0.9848"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-002",
+   "key": "css/css-text-decor/text-decoration-inset-002.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-002__1__0-057"
+    }
+   ],
+   "cells": {
+    "web": "P 0.989",
+    "ios": "P 0.9706",
+    "android": "P 0.9858"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-003",
+   "key": "css/css-text-decor/text-decoration-inset-003.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-003__1__0-061"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9859",
+    "ios": "P 0.9706",
+    "android": "P 0.984"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-004",
+   "key": "css/css-text-decor/text-decoration-inset-004.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-004__1__0-065"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9935",
+    "ios": "P 0.9634",
+    "android": "P 0.9859"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-005",
+   "key": "css/css-text-decor/text-decoration-inset-005.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "folded",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-005__1__0-069"
+    },
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": true,
+     "id": "text-decoration-inset-005__1__0__0__0-071"
+    },
+    {
+     "tag": "sub",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": true,
+     "id": "text-decoration-inset-005__1__0__0__1-072"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9983",
+    "ios": "f 0.8995",
+    "android": "f 0.9"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-006",
+   "key": "css/css-text-decor/text-decoration-inset-006.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "folded",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-006__1__0-076"
+    },
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": true,
+     "id": "text-decoration-inset-006__1__0__0__0-078"
+    },
+    {
+     "tag": "sub",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": true,
+     "id": "text-decoration-inset-006__1__0__0__1-079"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9985",
+    "ios": "f 0.8987",
+    "android": "f 0.8993"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-007",
+   "key": "css/css-text-decor/text-decoration-inset-007.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-007__1__0-083"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9913",
+    "ios": "f 0.8732",
+    "android": "f 0.8579"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-008",
+   "key": "css/css-text-decor/text-decoration-inset-008.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-008__1__0-087"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9917",
+    "ios": "f 0.8762",
+    "android": "f 0.8637"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-009",
+   "key": "css/css-text-decor/text-decoration-inset-009.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-009__1__0-091"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9715",
+    "ios": "P 0.9585",
+    "android": "P 0.9638"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-011",
+   "key": "css/css-text-decor/text-decoration-inset-011.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "folded",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-011__1__0-095"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9948",
+    "ios": "f 0.6999",
+    "android": "f 0.6852"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-012",
+   "key": "css/css-text-decor/text-decoration-inset-012.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-012__1__0-102"
+    }
+   ],
+   "cells": {
+    "web": "f 0.9405",
+    "ios": "f 0.8932",
+    "android": "f 0.881"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-013",
+   "key": "css/css-text-decor/text-decoration-inset-013.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-013__1__0-106"
+    }
+   ],
+   "cells": {
+    "web": "f 0.9417",
+    "ios": "f 0.8968",
+    "android": "f 0.9162"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-014",
+   "key": "css/css-text-decor/text-decoration-inset-014.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "folded",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-014__1__0-110"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9975",
+    "ios": "f 0.9238",
+    "android": "f 0.923"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-015",
+   "key": "css/css-text-decor/text-decoration-inset-015.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-015__1__0-115"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9806",
+    "ios": "P 0.971",
+    "android": "P 0.9812"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-016",
+   "key": "css/css-text-decor/text-decoration-inset-016.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-016__1__0-119"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9761",
+    "ios": "P 0.9659",
+    "android": "P 0.9758"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-inset-024",
+   "key": "css/css-text-decor/text-decoration-inset-024.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": true,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "text-decoration-inset-024__1__0-123"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9869",
+    "ios": "P 0.9707",
+    "android": "P 0.9812"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-subelements-002",
+   "key": "css/css-text-decor/text-decoration-subelements-002.html",
+   "hits": [
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": true,
+     "runMember": true,
+     "id": "text-decoration-subelements-002__1__0__0__0__0-257"
+    },
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": true,
+     "runMember": true,
+     "id": "text-decoration-subelements-002__1__1__0__0__0-261"
+    },
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": true,
+     "runMember": true,
+     "id": "text-decoration-subelements-002__1__1__0__0__1-262"
+    },
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": true,
+     "runMember": true,
+     "id": "text-decoration-subelements-002__1__1__0__0__2-263"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9988",
+    "ios": "f 0.7975",
+    "android": "f 0.9047"
+   }
+  },
+  {
+   "sec": "css-text-decor",
+   "stem": "wpt__css-text-decor__text-decoration-subelements-003",
+   "key": "css/css-text-decor/text-decoration-subelements-003.html",
+   "hits": [
+    {
+     "tag": "sup",
+     "shape": "leaf",
+     "ownSize": false,
+     "ownWeight": false,
+     "ancestorSize": true,
+     "runMember": true,
+     "id": "text-decoration-subelements-003__1__0__0-267"
+    }
+   ],
+   "cells": {
+    "web": "P 0.9987",
+    "ios": "f 0.9043",
+    "android": "f 0.9084"
+   }
+  },
+  {
+   "sec": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-border-radius-change",
+   "key": "css/filter-effects/backdrop-filter-border-radius-change.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "wpt__filter-effects__backdrop-filter-border-radius-change__0-026"
+    },
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "wpt__filter-effects__backdrop-filter-border-radius-change__2-028"
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.6636",
+    "android": "f 0.5977"
+   }
+  },
+  {
+   "sec": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-corner-shape-change",
+   "key": "css/filter-effects/backdrop-filter-corner-shape-change.html",
+   "hits": [
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "wpt__filter-effects__backdrop-filter-corner-shape-change__0-091"
+    },
+    {
+     "tag": "h1",
+     "shape": "leaf",
+     "ownSize": true,
+     "ownWeight": false,
+     "ancestorSize": false,
+     "runMember": false,
+     "id": "wpt__filter-effects__backdrop-filter-corner-shape-change__2-093"
+    }
+   ],
+   "cells": {
+    "web": "f 0.8454",
+    "ios": "f 0.5503",
+    "android": "f 0.4904"
+   }
+  }
+ ]
+}

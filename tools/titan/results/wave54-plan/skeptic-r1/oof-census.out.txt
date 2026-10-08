@@ -1,0 +1,49 @@
+android: 9 documents
+  CSS2/wpt__CSS2__abspos__static-fixed-inside-abspos
+      abspos__static-fixed-inside-abspos__1__0__0 F3 no-inset FIXED: stops hoisting (stays under its positioned ancestor)
+  css-contain/wpt__css-contain__contain-content-003
+      contain-content-003__1__0 ABSOLUTE CB canvas -> wpt__css-contain__contain-content-003__1
+      contain-content-003__1__1 ABSOLUTE CB canvas -> wpt__css-contain__contain-content-003__1
+  css-contain/wpt__css-contain__contain-content-004
+      contain-content-004__1__1__1__1 ABSOLUTE CB canvas -> contain-content-004__1__1__1
+  css-contain/wpt__css-contain__contain-content-011
+      contain-content-011__1__0 ABSOLUTE CB canvas -> wpt__css-contain__contain-content-011__2
+      contain-content-011__1__1 ABSOLUTE CB canvas -> wpt__css-contain__contain-content-011__2
+  css-position/wpt__css-position__change-insets-inside-strict-containment-nested
+      change-insets-inside-strict-containment-nested__1__0 FIXED CB canvas -> wpt__css-position__change-insets-inside-strict-containment-nested__1
+      change-insets-inside-strict-containment-nested__1__0__0__0 FIXED CB canvas -> change-insets-inside-strict-containment-nested__1__0__0
+  css-position/wpt__css-position__position-fixed-scroll-nested-fixed
+      wpt__css-position__position-fixed-scroll-nested-fixed__0 F3 no-inset FIXED: joins RC1 static position
+      position-fixed-scroll-nested-fixed__0__0 F3 no-inset FIXED: stops hoisting (stays under its positioned ancestor)
+  css-position/wpt__css-position__position-relative-003
+      position-relative-003__1__0__0__0 F3 no-inset FIXED: stops hoisting (stays under its positioned ancestor)
+  css-position/wpt__css-position__position-relative-004
+      position-relative-004__1__0__0__0 FIXED CB canvas -> wpt__css-position__position-relative-004__1
+  filter-effects/wpt__filter-effects__backdrop-filter-containing-block
+      backdrop-filter-containing-block__1__0 FIXED CB canvas -> wpt__filter-effects__backdrop-filter-containing-block__1
+      backdrop-filter-containing-block__1__1 ABSOLUTE CB canvas -> wpt__filter-effects__backdrop-filter-containing-block__1
+ios: 6 documents
+  CSS2/wpt__CSS2__abspos__static-fixed-inside-abspos
+      abspos__static-fixed-inside-abspos__1__0__0 F3 no-inset FIXED: stops hoisting (stays under its positioned ancestor)
+  css-position/wpt__css-position__change-insets-inside-strict-containment-nested
+      change-insets-inside-strict-containment-nested__1__0 FIXED CB canvas -> wpt__css-position__change-insets-inside-strict-containment-nested__1
+      change-insets-inside-strict-containment-nested__1__0__0__0 FIXED CB canvas -> change-insets-inside-strict-containment-nested__1__0__0
+  css-position/wpt__css-position__position-fixed-scroll-nested-fixed
+      wpt__css-position__position-fixed-scroll-nested-fixed__0 F3 no-inset FIXED: joins RC1 static position
+      position-fixed-scroll-nested-fixed__0__0 F3 no-inset FIXED: stops hoisting (stays under its positioned ancestor)
+  css-position/wpt__css-position__position-relative-003
+      position-relative-003__1__0__0__0 F3 no-inset FIXED: stops hoisting (stays under its positioned ancestor)
+  css-position/wpt__css-position__position-relative-004
+      position-relative-004__1__0__0__0 FIXED CB canvas -> wpt__css-position__position-relative-004__1
+  filter-effects/wpt__filter-effects__backdrop-filter-containing-block
+      backdrop-filter-containing-block__1__0 FIXED CB canvas -> wpt__filter-effects__backdrop-filter-containing-block__1
+hostFlips (7):
+  css-contain/wpt__css-contain__contain-content-003 true -> false
+  css-contain/wpt__css-contain__contain-content-004 true -> false
+  css-contain/wpt__css-contain__contain-content-011 true -> false
+  css-position/wpt__css-position__change-insets-inside-strict-containment-nested true -> false
+  css-position/wpt__css-position__position-relative-003 true -> false
+  css-position/wpt__css-position__position-relative-004 true -> false
+  filter-effects/wpt__filter-effects__backdrop-filter-containing-block true -> false
+establisher components (rule table, excluding self-positioned): 99 in 58 documents
+FIXED boxes under a SELF-POSITIONED establisher (F1's inert clause; spec would make it the CB): 0

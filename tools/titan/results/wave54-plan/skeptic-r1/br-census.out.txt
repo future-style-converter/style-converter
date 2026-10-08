@@ -1,0 +1,29 @@
+U3: 54 brs 20 -> 0 in 18 documents
+  css-cascade/wpt__css-cascade__revert-layer-006.json                            6
+  css-cascade/wpt__css-cascade__revert-val-001.json                              6
+  css-cascade/wpt__css-cascade__revert-val-002.json                              6
+  css-masking/wpt__css-masking__clip-path__clip-path-filter-order.json           1
+  css-multicol/wpt__css-multicol__balance-grid-container.json                    2
+  css-multicol/wpt__css-multicol__column-height-009.json                         15
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-002.json            2
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-004.json            1
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-005.json            1
+  css-overflow/wpt__css-overflow__line-clamp__block-ellipsis-006.json            1
+  css-text/wpt__css-text__hyphens__hyphenate-character-001.json                  2
+  css-text/wpt__css-text__hyphens__hyphenate-character-002.json                  2
+  css-text/wpt__css-text__hyphens__hyphenate-character-003.json                  2
+  css-text/wpt__css-text__hyphens__hyphenate-character-004.json                  2
+  filter-effects/wpt__filter-effects__backdrop-filter-clip-rect.json             2
+  filter-effects/wpt__filter-effects__backdrop-filter-edge-clipping.json         1
+  filter-effects/wpt__filter-effects__backdrop-filter-paint-order.json           1
+  filter-effects/wpt__filter-effects__backdrop-filter-plus-filter.json           1
+U3b (line-start br, host LineHeight resolving != 20): 12 brs in 4 documents
+  css-text/wpt__css-text__hyphens__hyphenate-character-001.json                  hyphens__hyphenate-character-001__1__1→19.2 hyphens__hyphenate-character-001__1__3→19.2 hyphens__hyphenate-character-001__1__5→19.2
+  css-text/wpt__css-text__hyphens__hyphenate-character-002.json                  hyphens__hyphenate-character-002__1__1→19.2 hyphens__hyphenate-character-002__1__3→19.2 hyphens__hyphenate-character-002__1__5→19.2
+  css-text/wpt__css-text__hyphens__hyphenate-character-003.json                  hyphens__hyphenate-character-003__1__1→19.2 hyphens__hyphenate-character-003__1__3→19.2 hyphens__hyphenate-character-003__1__5→19.2
+  css-text/wpt__css-text__hyphens__hyphenate-character-004.json                  hyphens__hyphenate-character-004__1__1→19.2 hyphens__hyphenate-character-004__1__3→19.2 hyphens__hyphenate-character-004__1__5→19.2
+U3b reach (line-start br in ANY host carrying LineHeight): 12 brs in 4 documents
+  css-text/wpt__css-text__hyphens__hyphenate-character-001.json                  3 e.g. hyphens__hyphenate-character-001__1__1:{"multiplier":1.2,"original":"normal"}→19.2
+  css-text/wpt__css-text__hyphens__hyphenate-character-002.json                  3 e.g. hyphens__hyphenate-character-002__1__1:{"multiplier":1.2,"original":"normal"}→19.2
+  css-text/wpt__css-text__hyphens__hyphenate-character-003.json                  3 e.g. hyphens__hyphenate-character-003__1__1:{"multiplier":1.2,"original":"normal"}→19.2
+  css-text/wpt__css-text__hyphens__hyphenate-character-004.json                  3 e.g. hyphens__hyphenate-character-004__1__1:{"multiplier":1.2,"original":"normal"}→19.2

@@ -1,0 +1,5 @@
+allmet: moverThreshold 0 — gained 13 lost 0 movers 4083
+floor: moverThreshold 0 — gained 13 lost 0 movers 4083
+  mnm3 moves CSS2/abspos/static-fixed-inside-abspos.html web from 0.999 by 0.003
+mnm3: moverThreshold 0 — gained 13 lost 0 movers 4083
+mnm3-old: moverThreshold 0.005 — gained 13 lost 0 movers 17

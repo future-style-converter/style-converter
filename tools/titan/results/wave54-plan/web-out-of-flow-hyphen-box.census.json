@@ -1,0 +1,966 @@
+{
+ "summary": {
+  "run": "wave53-final",
+  "perTestIrDocs": 1435,
+  "runsHosts": 264,
+  "runsTextEntries": 521,
+  "testsWithRunsHosts": 129,
+  "outOfFlowMembersInRuns": 24,
+  "byKindWhere": {
+   "abspos/spaced": 5,
+   "float/spaced": 3,
+   "abspos/word-edge": 8,
+   "abspos/mid-word": 8
+  },
+  "midWordUnderHyphensAuto": 4,
+  "w1ReachUngated": {
+   "members": 8,
+   "tests": [
+    "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+    "css/css-text/hyphens/hyphens-out-of-flow-002.html"
+   ]
+  },
+  "w1ReachHyphensAuto": {
+   "members": 4,
+   "hosts": [
+    "wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287",
+    "wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289",
+    "wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291",
+    "wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293"
+   ],
+   "tests": [
+    "css/css-text/hyphens/hyphens-out-of-flow-002.html"
+   ]
+  },
+  "paintInertOutOfFlowMembers": 12,
+  "w2Reach": {
+   "runsHosts": 264,
+   "tests": 129
+  }
+ },
+ "outOfFlowMembers": [
+  {
+   "test": "css/CSS2/abspos/between-float-and-text.html",
+   "host": "wpt__css2__abspos__between-float-and-text__1-002",
+   "entry": 1,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    "  ",
+    "<? abspos>",
+    " "
+   ],
+   "member": {
+    "id": "abspos__between-float-and-text__1__0-003",
+    "tag": null,
+    "props": [
+     "Position",
+     "Width",
+     "Height",
+     "BackgroundColor"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.922",
+    "android": "f 0.9527"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/CSS2/abspos/between-float-and-text.html",
+   "host": "wpt__css2__abspos__between-float-and-text__1-002",
+   "entry": 3,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    " ",
+    "<? float>",
+    null
+   ],
+   "member": {
+    "id": "abspos__between-float-and-text__1__1-004",
+    "tag": null,
+    "props": [
+     "Float",
+     "MarginTop",
+     "Width",
+     "Height",
+     "BackgroundColor"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.922",
+    "android": "f 0.9527"
+   },
+   "kind": "float"
+  },
+  {
+   "test": "css/CSS2/abspos/hypothetical-inline-alone-on-second-line.html",
+   "host": "wpt__css2__abspos__hypothetical-inline-alone-on-second-line__1-006",
+   "entry": 3,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    " ",
+    "<span abspos>",
+    null
+   ],
+   "member": {
+    "id": "abspos__hypothetical-inline-alone-on-second-line__1__1-008",
+    "tag": "span",
+    "props": [
+     "Position",
+     "PaddingLeft"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9922",
+    "android": "P 0.9852"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/CSS2/abspos/static-inside-inline-001.html",
+   "host": "abspos__static-inside-inline-001__2__0-022",
+   "entry": 0,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    null,
+    "<? abspos>",
+    " X"
+   ],
+   "member": {
+    "id": "abspos__static-inside-inline-001__2__0__0-023",
+    "tag": null,
+    "props": [
+     "Position",
+     "BackgroundColor",
+     "Width",
+     "Height"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/CSS2/abspos/static-inside-inline-002.html",
+   "host": "abspos__static-inside-inline-002__2__0-027",
+   "entry": 0,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    null,
+    "<? abspos>",
+    " X"
+   ],
+   "member": {
+    "id": "abspos__static-inside-inline-002__2__0__0-028",
+    "tag": null,
+    "props": [
+     "Position",
+     "BackgroundColor",
+     "Width",
+     "Height"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.963",
+    "ios": "P 0.9622",
+    "android": "P 0.9617"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/CSS2/abspos/static-inside-inline-003.html",
+   "host": "abspos__static-inside-inline-003__2__0-032",
+   "entry": 0,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    null,
+    "<? abspos>",
+    " X"
+   ],
+   "member": {
+    "id": "abspos__static-inside-inline-003__2__0__0-033",
+    "tag": null,
+    "props": [
+     "Position",
+     "BackgroundColor",
+     "Width",
+     "Height"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-cascade/all-prop-001.html",
+   "host": "wpt__css-cascade__all-prop-001__1-002",
+   "entry": 0,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    null,
+    "<bdo float>",
+    " 321"
+   ],
+   "member": {
+    "id": "all-prop-001__1__0-003",
+    "tag": "bdo",
+    "props": [
+     "BorderTopStyle",
+     "BorderRightStyle",
+     "BorderBottomStyle",
+     "BorderLeftStyle",
+     "BorderTopColor",
+     "BorderRightColor",
+     "BorderBottomColor",
+     "BorderLeftColor",
+     "BackgroundColor",
+     "Color",
+     "TextDecorationLine",
+     "FontWeight",
+     "FontStyle",
+     "FontVariantCaps",
+     "FontSize",
+     "FontFamily",
+     "LineHeight",
+     "OutlineStyle",
+     "OutlineColor",
+     "Float",
+     "LetterSpacing",
+     "Display",
+     "TextAlign",
+     "Width",
+     "MarginTop",
+     "MarginRight",
+     "MarginBottom",
+     "MarginLeft",
+     "OverflowX",
+     "OverflowY",
+     "All",
+     "Direction"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.9689",
+    "ios": "P 0.9641",
+    "android": "P 0.9642"
+   },
+   "kind": "float"
+  },
+  {
+   "test": "css/css-position/position-absolute-semi-replaced-stretch-other.html",
+   "host": "wpt__css-position__position-absolute-semi-replaced-stretch-other__2-160",
+   "entry": 0,
+   "where": "word-edge",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    null,
+    "<label abspos>",
+    "label"
+   ],
+   "member": {
+    "id": "position-absolute-semi-replaced-stretch-other__2__0-161",
+    "tag": "label",
+    "props": [
+     "MarginTop",
+     "MarginRight",
+     "MarginBottom",
+     "MarginLeft",
+     "Position",
+     "BoxSizing",
+     "Top",
+     "Right",
+     "Bottom",
+     "Left",
+     "OutlineWidth",
+     "OutlineStyle",
+     "OutlineColor",
+     "Width",
+     "Height"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "f 0.941",
+    "ios": "f 0.4623",
+    "android": "f 0.4396"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "host": "wpt__css-pseudo__first-letter-list-item-dynamic-001__1-147",
+   "entry": 1,
+   "where": "word-edge",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    "X",
+    "<? abspos>",
+    null
+   ],
+   "member": {
+    "id": "first-letter-list-item-dynamic-001__1__0-148",
+    "tag": null,
+    "props": [
+     "Position",
+     "Top",
+     "Left",
+     "Width",
+     "Height",
+     "BoxSizing",
+     "MarginTop",
+     "MarginRight",
+     "MarginBottom",
+     "MarginLeft",
+     "PaddingTop",
+     "PaddingRight",
+     "PaddingBottom",
+     "PaddingLeft",
+     "BorderTopWidth",
+     "BorderRightWidth",
+     "BorderBottomWidth",
+     "BorderLeftWidth",
+     "BorderTopStyle",
+     "BorderRightStyle",
+     "BorderBottomStyle",
+     "BorderLeftStyle",
+     "BorderTopColor",
+     "BorderRightColor",
+     "BorderBottomColor",
+     "BorderLeftColor",
+     "BackgroundColor",
+     "Display",
+     "OverflowX",
+     "OverflowY"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9995",
+    "android": "P 0.9987"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-pseudo/first-letter-list-item-dynamic-001.html",
+   "host": "wpt__css-pseudo__first-letter-list-item-dynamic-001__1-147",
+   "entry": 2,
+   "where": "spaced",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    null,
+    "<? float>",
+    null
+   ],
+   "member": {
+    "id": "first-letter-list-item-dynamic-001__1__1-149",
+    "tag": null,
+    "props": [
+     "Float",
+     "Position",
+     "Width",
+     "Height",
+     "BoxSizing",
+     "MarginTop",
+     "MarginRight",
+     "MarginBottom",
+     "MarginLeft",
+     "PaddingTop",
+     "PaddingRight",
+     "PaddingBottom",
+     "PaddingLeft",
+     "BorderTopWidth",
+     "BorderRightWidth",
+     "BorderBottomWidth",
+     "BorderLeftWidth",
+     "BorderTopStyle",
+     "BorderRightStyle",
+     "BorderBottomStyle",
+     "BorderLeftStyle",
+     "BorderTopColor",
+     "BorderRightColor",
+     "BorderBottomColor",
+     "BorderLeftColor",
+     "BackgroundColor",
+     "Display",
+     "OverflowX",
+     "OverflowY"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.9999",
+    "ios": "P 0.9995",
+    "android": "P 0.9987"
+   },
+   "kind": "float"
+  },
+  {
+   "test": "css/css-tables/abspos-container-change-dynamic-001.html",
+   "host": "abspos-container-change-dynamic-001__0__0__0__1-054",
+   "entry": 1,
+   "where": "word-edge",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    "B",
+    "<? abspos>",
+    null
+   ],
+   "member": {
+    "id": "abspos-container-change-dynamic-001__0__0__0__1__0-055",
+    "tag": null,
+    "props": [
+     "Position",
+     "Top",
+     "Left",
+     "Width",
+     "Height",
+     "BackgroundColor",
+     "BoxSizing",
+     "MarginTop",
+     "MarginRight",
+     "MarginBottom",
+     "MarginLeft",
+     "PaddingTop",
+     "PaddingRight",
+     "PaddingBottom",
+     "PaddingLeft",
+     "BorderTopWidth",
+     "BorderRightWidth",
+     "BorderBottomWidth",
+     "BorderLeftWidth",
+     "BorderTopStyle",
+     "BorderRightStyle",
+     "BorderBottomStyle",
+     "BorderLeftStyle",
+     "BorderTopColor",
+     "BorderRightColor",
+     "BorderBottomColor",
+     "BorderLeftColor",
+     "Display",
+     "OverflowX",
+     "OverflowY"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9654"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__2-271",
+   "entry": 0,
+   "where": "word-edge",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "split": [
+    null,
+    "<span abspos>",
+    "high­way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-001__2__0-272",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__3-273",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "split": [
+    "h",
+    "<span abspos>",
+    "igh­way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-001__3__0-274",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__4-275",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "split": [
+    "high",
+    "<span abspos>",
+    "­way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-001__4__0-276",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__5-277",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "split": [
+    "high­",
+    "<span abspos>",
+    "way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-001__5__0-278",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__6-279",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "split": [
+    "high­wa",
+    "<span abspos>",
+    "y"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-001__6__0-280",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-001.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-001__7-281",
+   "entry": 1,
+   "where": "word-edge",
+   "hyphens": "MANUAL",
+   "lang": null,
+   "split": [
+    "high­way",
+    "<span abspos>",
+    null
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-001__7__0-282",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__2-285",
+   "entry": 0,
+   "where": "word-edge",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    null,
+    "<span abspos>",
+    "highway"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__2__0-286",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "h",
+    "<span abspos>",
+    "ighway"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__3__0-288",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "high",
+    "<span abspos>",
+    "way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__4__0-290",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "high",
+    "<span abspos>",
+    "way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__5__0-292",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "highwa",
+    "<span abspos>",
+    "y"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__6__0-294",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__7-295",
+   "entry": 1,
+   "where": "word-edge",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "highway",
+    "<span abspos>",
+    null
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__7__0-296",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   },
+   "kind": "abspos"
+  },
+  {
+   "test": "css/css-values/ch-unit-001.html",
+   "host": "wpt__css-values__ch-unit-001__2-168",
+   "entry": 0,
+   "where": "word-edge",
+   "hyphens": "MANUAL(initial)",
+   "lang": null,
+   "split": [
+    null,
+    "<span abspos>",
+    "00000"
+   ],
+   "member": {
+    "id": "ch-unit-001__2__0-169",
+    "tag": "span",
+    "props": [
+     "BackgroundColor",
+     "Color",
+     "Top",
+     "Bottom",
+     "Position",
+     "Width"
+    ],
+    "paintInert": false
+   },
+   "cells": {
+    "web": "P 0.9779",
+    "ios": "f 0.8235",
+    "android": "f 0.8229"
+   },
+   "kind": "abspos"
+  }
+ ],
+ "midWordUnderHyphensAuto": [
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "h",
+    "<span abspos>",
+    "ighway"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__3__0-288",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "high",
+    "<span abspos>",
+    "way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__4__0-290",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "high",
+    "<span abspos>",
+    "way"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__5__0-292",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   }
+  },
+  {
+   "test": "css/css-text/hyphens/hyphens-out-of-flow-002.html",
+   "host": "wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293",
+   "entry": 1,
+   "where": "mid-word",
+   "hyphens": "AUTO",
+   "lang": "en",
+   "split": [
+    "highwa",
+    "<span abspos>",
+    "y"
+   ],
+   "member": {
+    "id": "hyphens__hyphens-out-of-flow-002__6__0-294",
+    "tag": "span",
+    "props": [
+     "Position",
+     "Color"
+    ],
+    "paintInert": true
+   },
+   "cells": {
+    "web": "f 0.9411",
+    "ios": "P 0.9971",
+    "android": "P 0.9943"
+   }
+  }
+ ]
+}

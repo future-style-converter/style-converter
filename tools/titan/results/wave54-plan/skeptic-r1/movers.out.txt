@@ -1,0 +1,36 @@
+L3-hyphenate-character css-text/hyphens/hyphenate-character-004.html android                       f 0.905   -> ≈0.945 stays f (U3); ≈0.976-0.981 with U3b | LOW
+L3-hyphenate-character css-text/hyphens/hyphenate-character-002.html ios                           f 0.9261  -> mover | LOW
+L3-hyphenate-character css-text/hyphens/hyphenate-character-002.html android                       f 0.9223  -> stays f (Minikin paints its own dictionary hyphen: a logged wall) | LOW
+L3-hyphenate-character css-text/hyphens/hyphenate-limit-chars-001.html ios                         f 0.8919  -> mover (U+2010 -> U+002D in the dictionary fold) | LOW
+L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-002.html android                     P 0.9884  -> identical or up (two lines painted; the clamp interplay is unknown) | LOW
+L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-004.html ios                         P 0.9713  -> byte-identical expected (no stray gap on the natives) | MED
+L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-004.html android                     P 0.9792  -> byte-identical expected (no stray gap on the natives) | MED
+L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-005.html ios                         P 0.9705  -> byte-identical expected (no stray gap on the natives) | MED
+L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-005.html android                     P 0.9786  -> byte-identical expected (no stray gap on the natives) | MED
+L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-006.html ios                         P 0.9705  -> byte-identical expected (no stray gap on the natives) | MED
+L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-006.html android                     P 0.9786  -> byte-identical expected (no stray gap on the natives) | MED
+L3-hyphenate-character filter-effects/backdrop-filter-plus-filter.html web                         P 1       -> stays (the stray br is the <p>'s trailing one; nothing in flow below it) | MED
+L3-hyphenate-character filter-effects/backdrop-filter-plus-filter.html ios                         f 0.9499  -> stays (the stray br is the <p>'s trailing one; nothing in flow below it) | MED
+L3-hyphenate-character filter-effects/backdrop-filter-plus-filter.html android                     P 0.9709  -> stays (the stray br is the <p>'s trailing one; nothing in flow below it) | MED
+L3-hyphenate-character css-masking/clip-path/clip-path-filter-order.html web                       f 0.8586  -> up or unchanged | LOW
+L3-hyphenate-character css-masking/clip-path/clip-path-filter-order.html ios                       f 0.8578  -> up or unchanged | LOW
+L3-hyphenate-character css-masking/clip-path/clip-path-filter-order.html android                   f 0.8406  -> up or unchanged | LOW
+L3-hyphenate-character css-multicol/balance-grid-container.html web                                f 0.9207  -> up or unchanged | LOW
+L3-hyphenate-character css-multicol/balance-grid-container.html ios                                f 0.862   -> up or unchanged | LOW
+L3-hyphenate-character css-multicol/balance-grid-container.html android                            f 0.8724  -> up or unchanged | LOW
+L3-hyphenate-character css-multicol/column-height-009.html web                                     f 0.8827  -> up or unchanged | LOW
+L3-hyphenate-character css-multicol/column-height-009.html ios                                     f 0.8072  -> up or unchanged | LOW
+L3-hyphenate-character css-multicol/column-height-009.html android                                 f 0.742   -> up or unchanged | LOW
+L4-oof-layout          css-contain/contain-content-004.html android                                f 0.8286  -> moves, stays f (the table itself renders wrong on both natives) | MED
+L4-oof-layout          css-gaps/flex/flex-gap-decorations-006.html android                         f 0.8223  -> may move, stays f (VerticalTextFlowLayout budget reads LocalContainingBlock) | LOW
+L5-ua-heading-face     css-lists/counter-list-item.html android                                    f 0.7307  -> moves (iOS with the rule: f 0.7864) | LOW
+L5-ua-heading-face     css-text-decor/text-decoration-subelements-003.html android                 f 0.9084  -> moves (stacked sup -> smaller) | LOW
+L5-ua-heading-face     filter-effects/backdrop-filter-border-radius-change.html android            f 0.5977  -> moves (bold half only) | LOW
+L5-ua-heading-face     filter-effects/backdrop-filter-corner-shape-change.html android             f 0.4904  -> moves (bold half only) | LOW
+L6-web-tail            css-display/display-flow-root-list-item-001.html web                        f 0.8003  -> mover | LOW
+L6-web-tail            CSS2/abspos/static-inside-inline-block.html web                             P 0.9803  -> stays or rises (the separator replays a space the SOURCE had) | MED
+L6-web-tail            css-break/block-in-inline-015-print.html web                                P 1       -> stays or rises (the separator replays a space the SOURCE had) | MED
+L6-web-tail            css-ui/appearance-auto-input-non-widget-001.html web                        P 0.9873  -> stays or rises (the separator replays a space the SOURCE had) | MED
+L6-web-tail            css-values/attr-style-sharing-1.html web                                    P 0.9939  -> stays or rises (the separator replays a space the SOURCE had) | MED
+L6-web-tail            css-writing-modes/baseline-with-orthogonal-flow-001.html web                P 0.9854  -> stays or rises (the separator replays a space the SOURCE had) | MED
+L6-web-tail            css-ui/box-sizing-009.html web                                              P 0.9811  -> stays or rises (the separator replays a space the SOURCE had) | MED

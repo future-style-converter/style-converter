@@ -1,0 +1,148 @@
+lane                 probe                                    key                                                      gate         white  ref    down6  right6
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-001 android                          P            FAIL   PASS   FAIL   FAIL  
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-002 android                          P            FAIL   PASS   PASS   FAIL    <== GATING KEY PASSES A WRONG PICTURE
+      down6: [P] bidi/bidi-lines-002 android line starts y164:x31 y244:x276 → GEOMETRY OK
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-001 web                              None         FAIL   PASS   FAIL   FAIL  
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-001 ios                              None         FAIL   PASS   FAIL   FAIL  
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-002 web                              None         FAIL   PASS   PASS   FAIL  
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [P] bidi/bidi-lines-002 ios                              None         FAIL   PASS   PASS   FAIL  
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [M] counter-suffix web                                   Mprime       FAIL   FAIL   FAIL   FAIL  
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [M] counter-suffix ios                                   Mprime       FAIL   FAIL   FAIL   FAIL  
+L1-rtl-marker-bake   rtl-marker-bake.geometry.py              [M] counter-suffix android                               Mprime       FAIL   FAIL   FAIL   FAIL  
+L1-rtl-marker-bake   lists-bakes.geometry.py                  counter-suffix web                                       Mprime       FAIL   FAIL   FAIL   FAIL  
+L1-rtl-marker-bake   lists-bakes.geometry.py                  counter-suffix ios                                       None         FAIL   FAIL   FAIL   FAIL  
+L1-rtl-marker-bake   lists-bakes.geometry.py                  counter-suffix android                                   Mprime       FAIL   FAIL   FAIL   FAIL  
+L1-rtl-marker-bake   lists-bakes.geometry.py                  counter-reset-reversed-nested web                        None         FAIL   PASS   FAIL   FAIL  
+L1-rtl-marker-bake   lists-bakes.geometry.py                  counter-reset-reversed-nested ios                        None         FAIL   PASS   FAIL   FAIL  
+L1-rtl-marker-bake   lists-bakes.geometry.py                  counter-reset-reversed-nested android                    None         FAIL   PASS   FAIL   FAIL  
+L2-table-body-cell   compose-table-body-cell.geometry.py      006 web                                                  None         FAIL   PASS   FAIL   FAIL  
+L2-table-body-cell   compose-table-body-cell.geometry.py      006 ios                                                  None         FAIL   PASS   FAIL   FAIL  
+L2-table-body-cell   compose-table-body-cell.geometry.py      006 android                                              TB-android   FAIL   PASS   FAIL   FAIL  
+L2-table-body-cell   display-table-body.geometry.py           006 web                                                  None         FAIL   PASS   FAIL   FAIL  
+L2-table-body-cell   display-table-body.geometry.py           006 ios                                                  None         FAIL   PASS   FAIL   FAIL  
+L2-table-body-cell   display-table-body.geometry.py           006 android                                              TB-android   FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-001 web                              None         FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-001 ios                              U2-ios|U3    FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-001 android                          None         FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-003 web                              None         FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-003 ios                              U2-ios|U3    FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-003 android                          None         FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-004 web                              None         FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-004 ios                              None         FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact hyphenate-character.geometry.py          hyphenate-character-004 android                          None         FAIL   PASS   FAIL   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-span-002 web                             None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-span-002 ios                             None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-span-002 android                         None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-span-001 web                             None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-span-001 ios                             None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-span-001 android                         None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-out-of-flow-001 web                      None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-out-of-flow-001 ios                      None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-out-of-flow-001 android                  None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-out-of-flow-002 ios                      None         FAIL   PASS   PASS   FAIL  
+L3-hyphenate-charact soft-hyphen.geometry.py                  hyphens/hyphens-out-of-flow-002 android                  None         FAIL   PASS   PASS   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         position-relative-003 web                                None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         position-relative-003 ios                                None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         position-relative-003 android                            None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         abspos/static-fixed-inside-abspos web                    None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         abspos/static-fixed-inside-abspos ios                    OOF-ios      FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         abspos/static-fixed-inside-abspos android                OOF-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         position-relative-004 web                                None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         position-relative-004 ios                                OOF-ios      FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         position-relative-004 android                            OOF-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         change-insets-inside-strict-containment-nested web       None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         change-insets-inside-strict-containment-nested ios       OOF-ios      FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         change-insets-inside-strict-containment-nested android   OOF-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         contain-content-003 web                                  None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         contain-content-003 ios                                  None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         contain-content-003 android                              OOF-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         contain-content-011 web                                  None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         contain-content-011 ios                                  None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         contain-content-011 android                              OOF-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         backdrop-filter-containing-block web                     None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         backdrop-filter-containing-block ios                     None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        oof-containing-block.geometry.py         backdrop-filter-containing-block android                 None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-htb-ltr web                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-htb-ltr android                    CBB-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vlr-ltr web                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vlr-ltr android                    CBB-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vrl-ltr web                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vrl-ltr android                    CBB-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-htb-rtl web                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-htb-rtl android                    None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vlr-rtl web                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vlr-rtl android                    None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vrl-rtl web                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vrl-rtl android                    None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-htb-ltr ios                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vlr-ltr ios                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vrl-ltr ios                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-htb-rtl ios                        None         FAIL   FAIL   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vlr-rtl ios                        None         FAIL   FAIL   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   abspos/abspos-autopos-vrl-rtl ios                        None         FAIL   FAIL   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip web            None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip ios            None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip android        CBB-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-2 web          None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-2 ios          None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-2 android      CBB-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-3 web          None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-3 ios          None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-3 android      CBB-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-4 web          None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-4 ios          None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        compose-wpt-content-box-cb.geometry.py   backdrop-filter-nested-border-radius-clip-4 android      CBB-android  FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        flex-zero-gap-rules.geometry.py          flex/flex-gap-decorations-033 web                        None         FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        flex-zero-gap-rules.geometry.py          flex/flex-gap-decorations-033 ios                        GAP-ios      FAIL   PASS   FAIL   FAIL  
+L4-oof-layout        flex-zero-gap-rules.geometry.py          flex/flex-gap-decorations-033 android                    GAP-android  FAIL   PASS   FAIL   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              block-in-inline-015-print web                            None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              block-in-inline-015-print ios                            None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              block-in-inline-015-print android                        U1-android   FAIL   PASS   PASS   FAIL    <== GATING KEY PASSES A WRONG PICTURE
+      down6: block-in-inline-015-print android bands [(35, 52, 17, 72), (71, 92, 16, 73), (109, 132, 16, 96), (148, 172, 16, 79)] → GEOMETRY OK
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-005 web                            None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-005 ios                            None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-005 android                        None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-006 web                            None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-006 ios                            None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-006 android                        None         FAIL   PASS   PASS   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-014 web                            None         FAIL   PASS   PASS   PASS  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-014 ios                            None         FAIL   PASS   PASS   PASS  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-014 android                        None         FAIL   PASS   PASS   PASS  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-011 web                            None         PASS   PASS   PASS   PASS  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-011 ios                            None         FAIL   FAIL   FAIL   FAIL  
+L5-ua-heading-face   ua-heading-face.geometry.py              text-decoration-inset-011 android                        None         FAIL   FAIL   FAIL   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-007 web                                       RS           FAIL   PASS   PASS   FAIL    <== GATING KEY PASSES A WRONG PICTURE
+      down6: box-sizing-007 web edge x151 → GEOMETRY OK
+L6-web-tail          web-root-separator.geometry.py           box-sizing-008 web                                       RS           FAIL   PASS   PASS   FAIL    <== GATING KEY PASSES A WRONG PICTURE
+      down6: box-sizing-008 web edge x151 → GEOMETRY OK
+L6-web-tail          web-root-separator.geometry.py           box-sizing-010 web                                       None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-013 web                                       None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-022 web                                       RS           FAIL   PASS   PASS   FAIL    <== GATING KEY PASSES A WRONG PICTURE
+      down6: box-sizing-022 web edge x151 → GEOMETRY OK
+L6-web-tail          web-root-separator.geometry.py           position-absolute-semi-replaced-stretch-other web        None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           position-absolute-semi-replaced-stretch-input web        None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-007 ios                                       None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-007 android                                   None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-008 ios                                       None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-008 android                                   None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-010 ios                                       None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-010 android                                   None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-022 ios                                       None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-022 android                                   None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-013 ios                                       None         PASS   FAIL   FAIL   FAIL  
+L6-web-tail          web-root-separator.geometry.py           box-sizing-013 android                                   None         PASS   FAIL   FAIL   FAIL  
+L6-web-tail          web-root-separator.geometry.py           position-absolute-semi-replaced-stretch-other ios        None         PASS   FAIL   FAIL   FAIL  
+L6-web-tail          web-root-separator.geometry.py           position-absolute-semi-replaced-stretch-other android    None         PASS   FAIL   FAIL   FAIL  
+L6-web-tail          web-root-separator.geometry.py           position-absolute-semi-replaced-stretch-input ios        None         PASS   FAIL   FAIL   FAIL  
+L6-web-tail          web-root-separator.geometry.py           position-absolute-semi-replaced-stretch-input android    None         PASS   FAIL   FAIL   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-span-002 web                             None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-span-002 ios                             None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-span-002 android                         None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-out-of-flow-001 web                      None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-out-of-flow-001 ios                      None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-out-of-flow-001 android                  None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-out-of-flow-002 web                      W1           FAIL   PASS   PASS   FAIL    <== GATING KEY PASSES A WRONG PICTURE
+      down6: ut-of-flow-002 web heights [46, 46, 46, 46, 46, 46, 46] ink-right [(61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54), (61, 54)] → GEOMETRY OK
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-out-of-flow-002 ios                      None         FAIL   PASS   PASS   FAIL  
+L6-web-tail          web-out-of-flow-hyphen-box.geometry.py   hyphens/hyphens-out-of-flow-002 android                  None         FAIL   PASS   PASS   FAIL  
+

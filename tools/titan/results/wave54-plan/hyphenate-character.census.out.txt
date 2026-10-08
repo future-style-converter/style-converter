@@ -1,0 +1,41 @@
+docs scanned: 1435 (run wave53-final)
+
+(1) hyphenate-character carriers: 14 properties in 6 docs
+  css-text/hyphens/hyphenate-character-001.html Generic rawValue ""                    rejected=true escape=false hyphens=MANUAL shy=true | {"web":"f 0.935","ios":"f 0.9287","android":"f 0.9301"}
+  css-text/hyphens/hyphenate-character-002.html Generic rawValue ""                    rejected=true escape=false hyphens=AUTO shy=false | {"web":"f 0.92","ios":"f 0.9261","android":"f 0.9223"}
+  css-text/hyphens/hyphenate-character-003.html {"type":"string","value":"\\2022"}     rejected=false escape=true hyphens=MANUAL shy=true | {"web":"f 0.8812","ios":"f 0.9337","android":"f 0.9292"}
+  css-text/hyphens/hyphenate-character-004.html {"type":"string","value":"/-/"}        rejected=false escape=false hyphens=MANUAL shy=true | {"web":"f 0.9249","ios":"f 0.9134","android":"f 0.905"}
+  css-text/hyphens/hyphenate-character-005.html {"type":"string","value":"\\00a0\\0640"} rejected=false escape=true hyphens=null shy=false | {"web":"P 0.974","ios":"f 0.9428","android":"f 0.9474"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+  css-text/hyphens/hyphenate-limit-chars-001.html {"type":"string","value":"-"}          rejected=false escape=false hyphens=AUTO shy=false | {"web":"f 0.9068","ios":"f 0.8919","android":"f 0.8581"}
+
+(2) br-height radius: 54 brs (20px after interleaved text) in 18 docs
+  css-cascade/revert-layer-006.html                            brs  6 | web P 0.999 · ios P 0.9974 · android P 0.9967
+  css-cascade/revert-val-001.html                              brs  6 | web P 0.999 · ios P 0.9974 · android P 0.9967
+  css-cascade/revert-val-002.html                              brs  6 | web P 0.999 · ios P 0.9974 · android P 0.9967
+  css-masking/clip-path/clip-path-filter-order.html            brs  1 | web f 0.8586 · ios f 0.8578 · android f 0.8406
+  css-multicol/balance-grid-container.html                     brs  2 | web f 0.9207 · ios f 0.862 · android f 0.8724
+  css-multicol/column-height-009.html                          brs 15 | web f 0.8827 · ios f 0.8072 · android f 0.742
+  css-overflow/line-clamp/block-ellipsis-002.html              brs  2 | web P 0.9868 · ios P 0.9813 · android P 0.9884
+  css-overflow/line-clamp/block-ellipsis-004.html              brs  1 | web P 0.9737 · ios P 0.9713 · android P 0.9792
+  css-overflow/line-clamp/block-ellipsis-005.html              brs  1 | web P 0.9735 · ios P 0.9705 · android P 0.9786
+  css-overflow/line-clamp/block-ellipsis-006.html              brs  1 | web P 0.9735 · ios P 0.9705 · android P 0.9786
+  css-text/hyphens/hyphenate-character-001.html                brs  2 | web f 0.935 · ios f 0.9287 · android f 0.9301
+  css-text/hyphens/hyphenate-character-002.html                brs  2 | web f 0.92 · ios f 0.9261 · android f 0.9223
+  css-text/hyphens/hyphenate-character-003.html                brs  2 | web f 0.8812 · ios f 0.9337 · android f 0.9292
+  css-text/hyphens/hyphenate-character-004.html                brs  2 | web f 0.9249 · ios f 0.9134 · android f 0.905
+  filter-effects/backdrop-filter-clip-rect.html                brs  2 | web P 0.959 · ios P 0.956 · android f 0.9315
+  filter-effects/backdrop-filter-edge-clipping.html            brs  1 | web P 0.9595 · ios P 0.9578 · android f 0.929
+  filter-effects/backdrop-filter-paint-order.html              brs  1 | web P 0.9595 · ios P 0.9578 · android f 0.929
+  filter-effects/backdrop-filter-plus-filter.html              brs  1 | web P 1 · ios f 0.9499 · android P 0.9709
+  cells: web 11P/18 · ios 10P/18 · android 8P/18
+
+(3) other typed data with a backslash-hex escape: 1 properties in 1 docs
+  css-view-transitions/escaped-name.html             ViewTransitionName {"type":"named","name":"third\\000021"}

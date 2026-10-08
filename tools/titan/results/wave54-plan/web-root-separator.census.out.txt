@@ -1,0 +1,29 @@
+run wave53-final: 27 documents carry ≥1 root-level inline-level ws-after pair
+CSS2/abspos/static-inside-inline-block.html                              2 inline_block>inline_block    web P 0.9803 | ios P 0.9974 | android P 0.9967
+css-break/block-in-inline-015-print.html                                 6 inline>inline                web P 1 | ios P 0.9894 | android f 0.9489
+css-cascade/scope-pseudo-element.html                                    2 inline_block>inline_block    web f 0.9353 | ios f 0.9668 | android P 0.9752
+css-display/display-flow-root-list-item-001.html                         1 span>span                    web f 0.8003 | ios f 0.8615 | android f 0.8615
+css-position/overlay/overlay-button-appearance.html                      1 button>button                web — | ios — | android —
+css-position/position-absolute-semi-replaced-stretch-input.html          8 inline_block>inline_block    web P 0.9596 | ios f 0.4425 | android f 0.4117
+css-position/position-absolute-semi-replaced-stretch-other.html          6 inline_block>inline_block    web f 0.941 | ios f 0.4623 | android f 0.4396
+css-ui/appearance-auto-input-non-widget-001.html                         2 input>input                  web P 0.9873 | ios P 0.958 | android P 0.9582
+css-ui/box-sizing-007.html                                              19 img>img                      web f 0.9036 | ios P 0.9845 | android P 0.9844
+css-ui/box-sizing-008.html                                               5 inline_block>img img>img     web f 0.8943 | ios P 0.9726 | android P 0.9712
+css-ui/box-sizing-009.html                                               5 inline_block>img img>img     web P 0.9811 | ios P 0.9799 | android P 0.9789
+css-ui/box-sizing-010.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-011.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-013.html                                               1 inline_block>img             web P 0.9538 | ios f 0.945 | android f 0.9436
+css-ui/box-sizing-014.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-015.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-016.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-017.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-018.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-019.html                                               1 inline_block>img             web P 0.9713 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-020.html                                               1 inline_block>img             web P 0.9599 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-021.html                                               1 inline_block>img             web P 0.9599 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-022.html                                               1 inline_block>img             web f 0.9442 | ios f 0.8788 | android f 0.8773
+css-ui/box-sizing-024.html                                               1 inline_block>img             web P 0.9599 | ios P 0.982 | android P 0.9811
+css-ui/box-sizing-025.html                                               1 inline_block>img             web P 0.9599 | ios P 0.982 | android P 0.9811
+css-values/attr-style-sharing-1.html                                     1 span>span                    web P 0.9939 | ios f 0.9445 | android f 0.9447
+css-writing-modes/baseline-with-orthogonal-flow-001.html                 1 inline_block>inline_block    web P 0.9854 | ios P 0.9834 | android P 0.9817
+web cells: 20 P (at risk) / 6 f (candidates)

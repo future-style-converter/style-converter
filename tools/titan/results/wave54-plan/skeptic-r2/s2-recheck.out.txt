@@ -1,0 +1,2 @@
+box-sizing-007                                   web      edge x151 → GEOMETRY WRONG (second atom edge x146 vs ref x151 on band rows 222-321 (row 271))
+box-sizing-008                                   web      edge x151 → GEOMETRY WRONG (second atom edge x146 vs ref x151 on band rows 272-421 (row 346))

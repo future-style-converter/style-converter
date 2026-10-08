@@ -1,0 +1,26 @@
+000_ATC_AllThenProps                 Android  390x92 due=True  rootAll=True  label 224/224 band-ground=False fill=(16, 16, 176, 76) → GEOMETRY OK
+000_ATC_AllThenProps                 iOS      390x92 due=True  rootAll=True  label 224/224 band-ground=False fill=(16, 16, 176, 76) → GEOMETRY OK
+000_ATC_AllThenProps                 web      390x92 due=True  rootAll=True  label 224/224 band-ground=False fill=(16, 16, 176, 76) → GEOMETRY OK
+001_ATC_PropsThenAll_InGreenParent   Android  390x92 due=False rootAll=False label 0/437 band-ground=True  fill=(16, 16, 176, 76) → GEOMETRY OK
+001_ATC_PropsThenAll_InGreenParent   iOS      390x92 due=False rootAll=False label 0/437 band-ground=True  fill=(16, 16, 176, 76) → GEOMETRY OK
+001_ATC_PropsThenAll_InGreenParent   web      390x92 due=False rootAll=False label 0/437 band-ground=True  fill=(16, 16, 176, 76) → GEOMETRY OK
+002_reset                            Android  390x62 due=True  rootAll=True  label 80/80 band-ground=False fill=None → GEOMETRY OK
+002_reset                            iOS      390x62 due=True  rootAll=True  label 80/80 band-ground=False fill=None → GEOMETRY OK
+002_reset                            web      390x62 due=True  rootAll=True  label 80/80 band-ground=False fill=None → GEOMETRY OK
+003_ATC_InitialUnderRedParent        Android  390x92 due=False rootAll=False label 0/369 band-ground=True  fill=(16, 16, 216, 76) → GEOMETRY OK
+003_ATC_InitialUnderRedParent        iOS      390x92 due=False rootAll=False label 0/369 band-ground=True  fill=(16, 16, 216, 76) → GEOMETRY OK
+003_ATC_InitialUnderRedParent        web      390x92 due=False rootAll=False label 0/369 band-ground=True  fill=(16, 16, 216, 76) → GEOMETRY OK
+004_span                             Android  390x92 due=True  rootAll=True  label 65/65 band-ground=False fill=(16, 16, 216, 76) → GEOMETRY OK
+004_span                             iOS      390x92 due=True  rootAll=True  label 65/65 band-ground=False fill=(16, 16, 216, 76) → GEOMETRY OK
+004_span                             web      390x92 due=True  rootAll=True  label 65/65 band-ground=False fill=(16, 16, 216, 76) → GEOMETRY OK
+005_ATC_DirectionSurvives            Android  390x72 due=False rootAll=True  label 0/293 band-ground=True  fill=(16, 16, 216, 56) → GEOMETRY OK
+005_ATC_DirectionSurvives            iOS      390x72 due=False rootAll=True  label 0/293 band-ground=True  fill=(16, 16, 216, 56) → GEOMETRY OK
+005_ATC_DirectionSurvives            web      390x72 due=False rootAll=True  label 0/293 band-ground=True  fill=(16, 16, 216, 56) → GEOMETRY OK
+000_ATC_AllThenProps                 band rows 0..15 byte-identical ×3: True
+001_ATC_PropsThenAll_InGreenParent   band rows 0..15 byte-identical ×3: True
+002_reset                            band rows 0..15 byte-identical ×3: True
+003_ATC_InitialUnderRedParent        band rows 0..15 byte-identical ×3: True
+004_span                             band rows 0..15 byte-identical ×3: True
+005_ATC_DirectionSurvives            band rows 0..15 byte-identical ×3: True
+label drawn ⇔ label-due (fixture: no children, no _text): 18/18
+label drawn ⇔ captured root declares no `all` (BACKLOG 0(e) premise): 3/18

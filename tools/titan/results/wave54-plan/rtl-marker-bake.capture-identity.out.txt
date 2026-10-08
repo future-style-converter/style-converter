@@ -1,0 +1,15 @@
+css-text__bidi__bidi-lines-001                       screenshots          open 40679d1fa246 probe 40679d1fa246 final 40679d1fa246  probe == open
+css-text__bidi__bidi-lines-001                       ios-screenshots      open 101516ff959f probe 101516ff959f final 101516ff959f  probe == open
+css-text__bidi__bidi-lines-001                       android-screenshots  open f210e3837bba probe d2bd0795452d final f210e3837bba  probe != open
+css-text__bidi__bidi-lines-002                       screenshots          open eae43d3d1934 probe eae43d3d1934 final eae43d3d1934  probe == open
+css-text__bidi__bidi-lines-002                       ios-screenshots      open 2e189f62759a probe 2e189f62759a final 2e189f62759a  probe == open
+css-text__bidi__bidi-lines-002                       android-screenshots  open 8787e0bd1651 probe edd9ab6ad678 final 8787e0bd1651  probe != open
+css-anchor-position__anchor-center-safe-rtl          screenshots          open 942af7da72b1 probe 942af7da72b1 final 942af7da72b1  probe == open
+css-anchor-position__anchor-center-safe-rtl          ios-screenshots      open 3757843ca765 probe 3757843ca765 final 3757843ca765  probe == open
+css-anchor-position__anchor-center-safe-rtl          android-screenshots  open 5fad8f4ca1ce probe 8e2c466dd5af final 5fad8f4ca1ce  probe != open
+css-counter-styles__counter-suffix                   screenshots          open a7c4ed75047f probe 8acf030c4c29 final a7c4ed75047f  probe != open
+css-counter-styles__counter-suffix                   ios-screenshots      open 3ee54fe409d1 probe f2777e019f68 final 3ee54fe409d1  probe != open
+css-counter-styles__counter-suffix                   android-screenshots  open 92ade24e56e7 probe da9e831beeed final 92ade24e56e7  probe != open
+selectors__dir-style-02a                             screenshots          open 53a599a70cc7 probe 53a599a70cc7 final 53a599a70cc7  probe == open
+selectors__dir-style-02a                             ios-screenshots      open 0ae04eb2022a probe 0ae04eb2022a final 0ae04eb2022a  probe == open
+selectors__dir-style-02a                             android-screenshots  open f5868c6089fe probe f5868c6089fe final f5868c6089fe  probe == open

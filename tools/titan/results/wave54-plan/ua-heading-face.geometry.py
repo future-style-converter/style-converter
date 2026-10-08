@@ -1,0 +1,97 @@
+#!/usr/bin/env python3
+# tools/titan/results/wave54-plan/ua-heading-face.geometry.py — post-gate GEOMETRY probe for the
+# queue-scout-text-web.md §A lane (ua-heading-face).
+#
+# Why: the natives paint an author-unsized <h1> at the 16 px (13 px monospace) REGULAR body face — Android
+# everywhere (no UAElementFontRule twin), iOS whenever the heading hosts child boxes (headingAppliesTo stands down,
+# even when the inline fold paints it as ONE paragraph). The face is visible as the heading's ink-band HEIGHT and
+# EXTENT, and, for the folded inset hosts, as the line count (the 2em bold paragraph wraps "fox" onto line 2).
+# Each line ends in "→ GEOMETRY OK" or "→ GEOMETRY WRONG (<why>)".
+#
+# Rules (dark ink bands, rows merged across ≤2 blank rows; geometry_common.bands):
+#   block-in-inline-015-print — 4 bands; each height ±2 px, right edge ±3 px and TOP ±3 px of the ref's. The top
+#     check (plan-skeptic r1 M2) is what sees a line-pitch / line-height error: heights and right edges alone pass a
+#     picture whose lines are each 2 px further apart (line 4 6 px low, ssim 0.9709 >= the 0.97 floor). ±3 px keeps
+#     the iOS anchor (the identical rule on the same IR: tops 30/66/105/144 vs the ref's 29/65/103/142) OK.
+#   text-decoration-inset-005/-006 — below y110: exactly 2 bands; band 1 height ≥ 30 px (the 2em line with its
+#     sup/sub); band 2 ("fox") right edge ±4 px of the ref's x64.
+#   text-decoration-inset-014 — below y110: exactly 2 bands, each ≥ 20 px tall (26 px DejaVu Sans Mono Bold);
+#     band 2 ("brown fox") right edge ±6 px of the ref's x155.
+#   text-decoration-inset-011 — CONTROL (its fold bails: blue/green TextDecorationColor ≠ ink, TextUnderlineOffset),
+#     so its bands must equal the wave53-final bands recorded below EXACTLY on the natives.
+# The ref rows (and web, which renders a real <h1>) must print OK; the ref is a self-check (exit 1 otherwise).
+#
+# Usage: python3 tools/titan/results/wave54-plan/ua-heading-face.geometry.py [run-id]   (default wave53-final)
+# Decodes 20 PNGs.
+import os
+import sys
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'wave53-plan'))
+from geometry_common import paths, load, dark, bands  # noqa: E402
+
+run = sys.argv[1] if len(sys.argv) > 1 else 'wave53-final'
+ref_failed = False
+
+# wave53-final native bands of the CONTROL (measured by this probe's own band scan, 2026-10-08):
+CONTROL_011 = {
+    'ios': [(137, 151, 57, 184), (169, 186, 85, 183), (208, 208, 170, 185), (265, 282, 39, 184), (297, 314, 147, 184)],
+    'android': [(136, 155, 57, 184), (168, 187, 80, 184), (209, 209, 166, 180), (265, 283, 41, 184), (299, 314, 148, 184)],
+}
+
+
+def verdict_015(b, rb):
+    if len(b) != 4:
+        return f'{len(b)} bands vs ref 4'
+    for (t, bt, _, x1), (rt, rbt, _, rx1) in zip(b, rb):
+        if abs((bt - t) - (rbt - rt)) > 2:
+            return f'band height {bt - t + 1} vs ref {rbt - rt + 1} (y{t})'
+        if abs(x1 - rx1) > 3:
+            return f'band right edge x{x1} vs ref x{rx1} (y{t})'
+        # checked last so every pre-existing WRONG line (a height or edge failure) reads exactly as before
+        if abs(t - rt) > 3:
+            return f'band top y{t} vs ref y{rt} (line pitch / line-height)'
+    return None
+
+
+def verdict_inset(b, rb, min_h1, min_h2, tol2):
+    if len(b) != 2:
+        return f'{len(b)} heading line band(s) vs ref 2 (bands {b})'
+    (t1, b1, _, _), (t2, b2, _, x2) = b
+    if b1 - t1 + 1 < min_h1:
+        return f'line-1 band {b1 - t1 + 1} px tall (< {min_h1}: the 2em face is missing)'
+    if b2 - t2 + 1 < min_h2:
+        return f'line-2 band {b2 - t2 + 1} px tall (< {min_h2})'
+    if abs(x2 - rb[1][3]) > tol2:
+        return f'line-2 right edge x{x2} vs ref x{rb[1][3]}'
+    return None
+
+
+CASES = [
+    ('css-break', 'block-in-inline-015-print', 0, 'b015'),
+    ('css-text-decor', 'text-decoration-inset-005', 110, 'i005'),
+    ('css-text-decor', 'text-decoration-inset-006', 110, 'i005'),
+    ('css-text-decor', 'text-decoration-inset-014', 110, 'i014'),
+    ('css-text-decor', 'text-decoration-inset-011', 110, 'c011'),
+]
+for section, test, y0, kind in CASES:
+    rb = None
+    for label, path in paths(run, section, test):
+        im, px = load(path)
+        if im is None:
+            print(f'{test:<30} {label:<8} MISSING → GEOMETRY WRONG (no capture)')
+            continue
+        w, h = im.size
+        b = bands(px, 0, w, y0, min(h, 330), dark, gap=2)
+        if label == 'ref':
+            rb = b
+        if kind == 'b015':
+            why = verdict_015(b, rb)
+        elif kind == 'i005':
+            why = verdict_inset(b, rb, 30, 18, 4)
+        elif kind == 'i014':
+            why = verdict_inset(b, rb, 20, 20, 6)
+        else:  # control: natives must keep their wave53-final bands; ref/web only report
+            why = None if label in ('ref', 'web') or b == CONTROL_011[label] else f'control moved: {b}'
+        if label == 'ref' and why:
+            ref_failed = True
+        print(f'{test:<30} {label:<8} bands {b[:4]} → ' + ('GEOMETRY OK' if not why else f'GEOMETRY WRONG ({why})'))
+sys.exit(1 if ref_failed else 0)

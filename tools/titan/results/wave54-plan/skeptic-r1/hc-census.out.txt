@@ -1,0 +1,15 @@
+css-text/wpt__css-text__hyphens__hyphenate-character-001.json wpt__css-text__hyphens__hyphenate-character-001__1 Generic {"propertyName":"hyphenate-character","rawValue":"\"\"","_unmapped":true}
+css-text/wpt__css-text__hyphens__hyphenate-character-002.json wpt__css-text__hyphens__hyphenate-character-002__1 Generic {"propertyName":"hyphenate-character","rawValue":"\"\"","_unmapped":true}
+css-text/wpt__css-text__hyphens__hyphenate-character-003.json wpt__css-text__hyphens__hyphenate-character-003__1 HyphenateCharacter {"type":"string","value":"\\2022"}
+css-text/wpt__css-text__hyphens__hyphenate-character-004.json wpt__css-text__hyphens__hyphenate-character-004__1 HyphenateCharacter {"type":"string","value":"/-/"}
+css-text/wpt__css-text__hyphens__hyphenate-character-005.json wpt__css-text__hyphens__hyphenate-character-005__1 HyphenateCharacter {"type":"string","value":"\\00a0\\0640"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__0 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__1 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__2 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__3 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__4 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__5 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__6 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__7 HyphenateCharacter {"type":"string","value":"-"}
+css-text/wpt__css-text__hyphens__hyphenate-limit-chars-001.json hyphens__hyphenate-limit-chars-001__0__8 HyphenateCharacter {"type":"string","value":"-"}
+14 declarations in 6 documents

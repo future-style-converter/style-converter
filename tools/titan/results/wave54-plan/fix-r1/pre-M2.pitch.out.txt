@@ -1,0 +1,4 @@
+pitch+1: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (66, 87, 16, 73), (105, 128, 16, 96), (145, 169, 16, 79)] → GEOMETRY OK
+pitch+2: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (67, 88, 16, 73), (107, 130, 16, 96), (148, 172, 16, 79)] → GEOMETRY OK
+pitch+3: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (68, 89, 16, 73), (109, 132, 16, 96), (151, 175, 16, 79)] → GEOMETRY OK
+pitch+4: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (69, 90, 16, 73), (111, 134, 16, 96), (154, 178, 16, 79)] → GEOMETRY OK

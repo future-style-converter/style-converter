@@ -1,0 +1,26 @@
+# check (5a): plan-build.py regenerated in a copy dir (skeptic-r1/regen/, ROOT patched to the repo root, inputs copied)
+regen rc=0; stdout identical to plan-build.out.txt
+46c339a544cf61c18eb3374c0c5e3b72ce42fc8a554d8d211a89665859358949  ../expectations.json
+8ef1b789f25ea9d4acd1e1ab7b84548b1bef47a3dec629462d342463cb6827a2  ../watchlist.txt
+46c339a544cf61c18eb3374c0c5e3b72ce42fc8a554d8d211a89665859358949  regen/expectations.json
+8ef1b789f25ea9d4acd1e1ab7b84548b1bef47a3dec629462d342463cb6827a2  regen/watchlist.txt
+
+# hook self-test: REVERTED=[L1 Mprime @wave54-pre, L2 TB-android @wave54-pre, L3 U3b @wave54-probe]
+Mprime withdrawnPredictions ["css-counter-styles/counter-suffix.html web","css-counter-styles/counter-suffix.html ios"] carriersWithdrawn {"captures":{"web":["wpt__css-counter-styles__counter-suffix"],"ios":["wpt__css-counter-styles__counter-suffix"],"android":[]},"wire":[]}
+TB-android withdrawnPredictions ["CSS2/css21-errata/s-11-1-1b-006.html android"] carriersWithdrawn {"captures":{"web":[],"ios":[],"android":["wpt__CSS2__css21-errata__s-11-1-1b-006"]},"wire":[]}
+U3b withdrawnPredictions [] carriersWithdrawn {"captures":{"web":[],"ios":[],"android":[]},"wire":[]}
+L1-rtl-marker-bake geometryProbes unchanged by REVERTED: true
+L2-table-body-cell geometryProbes unchanged by REVERTED: true
+L3-hyphenate-character geometryProbes unchanged by REVERTED: true
+L4-oof-layout geometryProbes unchanged by REVERTED: true
+L5-ua-heading-face geometryProbes unchanged by REVERTED: true
+L6-web-tail geometryProbes unchanged by REVERTED: true
+L7-label-chrome geometryProbes unchanged by REVERTED: true
+
+# geometry-gate.py (copy reading the hook expectations) on wave53-probe --base wave53-open --lanes L1,L2 — the hook-regenerated expectations still gate the two REVERTED units; on wave53-final pictures (what the [M]/006 cells return to once their unit is reverted) the same keys FAIL too (geogate-final.out.txt), so geometry-gate exits 1 after any legitimate probe revert:
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix android                                 FAIL       [GATING -> revert Mprime]
+!! L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix android                                     FAIL       [GATING -> revert Mprime]
+!! L2-table-body-cell       compose-table-body-cell.geometry.py        006 android                                                FAIL       [GATING -> revert TB-android]
+!! L2-table-body-cell       display-table-body.geometry.py             006 android                                                FAIL       [GATING -> revert TB-android]
+geometry-gate wave53-probe (base wave53-open): 21 keys — PASS 17 · FAIL 4 (gating 4) · UNMEASURED 0 · probe self-check failures 0
+revert rule 4 names: Mprime, TB-android

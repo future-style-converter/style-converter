@@ -1,0 +1,4 @@
+box-sizing-007 web: shipped 0.9036; partial fix (only rows y98-197 separated) 0.9118 < floor 0.975
+box-sizing-008 web: shipped 0.8943; partial fix (only rows y98-247 separated) 0.9209 < floor 0.965
+box-sizing-007                                   web      edge x151 → GEOMETRY OK
+box-sizing-008                                   web      edge x151 → GEOMETRY OK

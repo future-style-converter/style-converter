@@ -1,0 +1,8 @@
+pitch +1 px/line (line 4 displaced 3 px): ssim 0.984 >= floor 0.97 (floor PASSES it)
+pitch +2 px/line (line 4 displaced 6 px): ssim 0.9709 >= floor 0.97 (floor PASSES it)
+pitch +3 px/line (line 4 displaced 9 px): ssim 0.966 < floor 0.97
+pitch +4 px/line (line 4 displaced 12 px): ssim 0.9613 < floor 0.97
+pitch+1: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (66, 87, 16, 73), (105, 128, 16, 96), (145, 169, 16, 79)] → GEOMETRY OK
+pitch+2: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (67, 88, 16, 73), (107, 130, 16, 96), (148, 172, 16, 79)] → GEOMETRY OK
+pitch+3: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (68, 89, 16, 73), (109, 132, 16, 96), (151, 175, 16, 79)] → GEOMETRY OK
+pitch+4: block-in-inline-015-print      android  bands [(29, 46, 17, 72), (69, 90, 16, 73), (111, 134, 16, 96), (154, 178, 16, 79)] → GEOMETRY OK

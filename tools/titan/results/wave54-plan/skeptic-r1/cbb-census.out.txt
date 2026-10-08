@@ -1,0 +1,36 @@
+CBB radius (a CB reader whose provided containing block differs today vs after): 12 documents
+  css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-htb-ltr  (1)
+      abspos__abspos-autopos-htb-ltr__1__0 [Width,Height] CB {"w":70,"h":80}→{"w":100,"h":100}
+  css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-htb-rtl  (1)
+      abspos__abspos-autopos-htb-rtl__1__0 [Width,Height] CB {"w":70,"h":80}→{"w":100,"h":100}
+  css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr  (1)
+      abspos__abspos-autopos-vlr-ltr__1__0 [Width,Height] CB {"w":70,"h":80}→{"w":100,"h":100}
+  css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl  (1)
+      abspos__abspos-autopos-vlr-rtl__1__0 [Width,Height] CB {"w":70,"h":80}→{"w":100,"h":100}
+  css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr  (1)
+      abspos__abspos-autopos-vrl-ltr__1__0 [Width,Height] CB {"w":70,"h":80}→{"w":100,"h":100}
+  css-flexbox/wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl  (1)
+      abspos__abspos-autopos-vrl-rtl__1__0 [Width,Height] CB {"w":70,"h":80}→{"w":100,"h":100}
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-006  (6)
+      flex__flex-gap-decorations-006__0__0 [vertical-text] CB {"w":296,"h":296}→{"w":300,"h":300}
+      flex__flex-gap-decorations-006__0__1 [vertical-text] CB {"w":296,"h":296}→{"w":300,"h":300}
+      flex__flex-gap-decorations-006__0__2 [vertical-text] CB {"w":296,"h":296}→{"w":300,"h":300}
+  css-images/wpt__css-images__cross-fade-target-alpha  (1)
+      cross-fade-target-alpha__1__0 [Width,Height] CB {"w":400,"h":400}→{"w":500,"h":500}
+  filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2  (3)
+      backdrop-filter-nested-border-radius-clip-2__0__0 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip-2__0__0__0 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip-2__0__0__1 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+  filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3  (4)
+      backdrop-filter-nested-border-radius-clip-3__0__0 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip-3__0__0__0 [Width,Height] CB {"w":160,"h":60}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip-3__0__0__0__0 [Width,Height] CB {"w":160,"h":60}→{"w":200,"h":100}
+  filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4  (4)
+      backdrop-filter-nested-border-radius-clip-4__0__0 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip-4__0__0__0 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip-4__0__0__0__0 [Width,Height] CB {"w":144,"h":64}→{"w":160,"h":80}
+  filter-effects/wpt__filter-effects__backdrop-filter-nested-border-radius-clip  (3)
+      backdrop-filter-nested-border-radius-clip__0__0 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip__0__0__0 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+      backdrop-filter-nested-border-radius-clip__0__0__1 [Width,Height] CB {"w":180,"h":80}→{"w":200,"h":100}
+reader property types: [["Width",21],["Height",21]]

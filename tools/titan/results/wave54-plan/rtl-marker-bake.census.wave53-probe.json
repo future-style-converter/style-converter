@@ -1,0 +1,599 @@
+{
+ "run": "wave53-probe",
+ "docs": 955,
+ "hostInactiveDocs": 780,
+ "stackShape": [
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "id": "anchor-center-safe-rtl__3__0-481",
+   "sourceTag": "p",
+   "hostActivates": true,
+   "oofChildren": 4,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "Anchored",
+    "element",
+    "with",
+    "align-self"
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-position-multicol-004",
+   "id": "anchor-position-multicol-004__1__0__1__3-663",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-position-multicol-nested-001",
+   "id": "anchor-position-multicol-nested-001__1__1__0__2-771",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 4,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-position-multicol-nested-001",
+   "id": "anchor-position-multicol-nested-001__1__2-776",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 4,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "section": "css-color",
+   "stem": "wpt__css-color__composited-filters-under-opacity",
+   "id": "wpt__css-color__composited-filters-under-opacity__1-244",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__0-624",
+   "sourceTag": "li",
+   "hostActivates": false,
+   "oofChildren": 3,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "foo",
+    ".",
+    "1"
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__1-628",
+   "sourceTag": "li",
+   "hostActivates": false,
+   "oofChildren": 3,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "bar",
+    ".",
+    "2"
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__0-633",
+   "sourceTag": "li",
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "foo",
+    "א."
+   ]
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__1-636",
+   "sourceTag": "li",
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "bar",
+    "ב."
+   ]
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__conic-gradient-line-height-relative-units-003",
+   "id": "wpt__css-images__conic-gradient-line-height-relative-units-003__0-009",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "css-images",
+   "stem": "wpt__css-images__conic-gradient-line-height-relative-units-004",
+   "id": "wpt__css-images__conic-gradient-line-height-relative-units-004__0-012",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-basic-blur",
+   "id": "wpt__filter-effects__backdrop-filter-basic-blur__1-009",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 3,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-clip-rect-zoom",
+   "id": "wpt__filter-effects__backdrop-filter-clip-rect-zoom__2-064",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-clip-rect",
+   "id": "wpt__filter-effects__backdrop-filter-clip-rect__2-073",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-edge-clipping",
+   "id": "wpt__filter-effects__backdrop-filter-edge-clipping__4-114",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 4,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null,
+    null,
+    null
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-fixed-clip",
+   "id": "backdrop-filter-fixed-clip__1__0-134",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "filter-effects",
+   "stem": "wpt__filter-effects__backdrop-filter-plus-filter",
+   "id": "wpt__filter-effects__backdrop-filter-plus-filter__1-202",
+   "sourceTag": null,
+   "hostActivates": true,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-003",
+   "id": "dir-selector-change-003__0__0-037",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-004",
+   "id": "dir-selector-change-004__0__0-042",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    null,
+    null
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__3__2-092",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "This element is rtl",
+    "."
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__4__0-096",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "This element should inherit rtl",
+    "."
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "id": "dir-style-02a__4__2-101",
+   "sourceTag": null,
+   "hostActivates": false,
+   "oofChildren": 2,
+   "inFlowChildren": 0,
+   "childTexts": [
+    "This element is rtl",
+    "."
+   ]
+  }
+ ],
+ "markerTextAndOutOfFlow": [],
+ "bakeBoxListItems": [
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__0-624",
+   "markerText": null,
+   "listStyleType": "none"
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__4__1-628",
+   "markerText": null,
+   "listStyleType": "none"
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__0-633",
+   "markerText": null,
+   "listStyleType": "none"
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "id": "counter-suffix__0__5__1-636",
+   "markerText": null,
+   "listStyleType": "none"
+  }
+ ],
+ "bakeDocs": [
+  {
+   "section": "css-anchor-position",
+   "stem": "wpt__css-anchor-position__anchor-center-safe-rtl",
+   "hostActivates": true,
+   "roots": 4,
+   "paddedRoots": [],
+   "boxes": 2,
+   "multiRunBoxes": [
+    {
+     "id": "anchor-center-safe-rtl__3__0-481",
+     "sourceTag": "p",
+     "runs": [
+      "Anchored",
+      "element",
+      "with",
+      "align-self"
+     ]
+    }
+   ]
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3",
+   "hostActivates": false,
+   "roots": 1,
+   "paddedRoots": [],
+   "boxes": 2,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-backgrounds",
+   "stem": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4",
+   "hostActivates": false,
+   "roots": 1,
+   "paddedRoots": [],
+   "boxes": 2,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-101",
+   "hostActivates": false,
+   "roots": 9,
+   "paddedRoots": [],
+   "boxes": 0,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-102",
+   "hostActivates": false,
+   "roots": 24,
+   "paddedRoots": [],
+   "boxes": 0,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__arabic-indic__css3-counter-styles-103",
+   "hostActivates": false,
+   "roots": 2,
+   "paddedRoots": [],
+   "boxes": 0,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-counter-styles",
+   "stem": "wpt__css-counter-styles__counter-suffix",
+   "hostActivates": false,
+   "roots": 2,
+   "paddedRoots": [],
+   "boxes": 4,
+   "multiRunBoxes": [
+    {
+     "id": "counter-suffix__0__4__0-624",
+     "sourceTag": "li",
+     "runs": [
+      "foo",
+      ".",
+      "1"
+     ]
+    },
+    {
+     "id": "counter-suffix__0__4__1-628",
+     "sourceTag": "li",
+     "runs": [
+      "bar",
+      ".",
+      "2"
+     ]
+    },
+    {
+     "id": "counter-suffix__0__5__0-633",
+     "sourceTag": "li",
+     "runs": [
+      "foo",
+      "א."
+     ]
+    },
+    {
+     "id": "counter-suffix__0__5__1-636",
+     "sourceTag": "li",
+     "runs": [
+      "bar",
+      "ב."
+     ]
+    }
+   ]
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-001",
+   "hostActivates": false,
+   "roots": 2,
+   "paddedRoots": [],
+   "boxes": 0,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-lines-002",
+   "hostActivates": false,
+   "roots": 1,
+   "paddedRoots": [],
+   "boxes": 5,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__bidi__bidi-tab-001",
+   "hostActivates": false,
+   "roots": 8,
+   "paddedRoots": [],
+   "boxes": 8,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "hostActivates": false,
+   "roots": 8,
+   "paddedRoots": [],
+   "boxes": 8,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-text",
+   "stem": "wpt__css-text__hyphens__hyphenate-character-005",
+   "hostActivates": false,
+   "roots": 2,
+   "paddedRoots": [],
+   "boxes": 1,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "css-writing-modes",
+   "stem": "wpt__css-writing-modes__bidi-plaintext-br-001",
+   "hostActivates": false,
+   "roots": 6,
+   "paddedRoots": [],
+   "boxes": 0,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-003",
+   "hostActivates": false,
+   "roots": 1,
+   "paddedRoots": [],
+   "boxes": 3,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-selector-change-004",
+   "hostActivates": false,
+   "roots": 1,
+   "paddedRoots": [],
+   "boxes": 3,
+   "multiRunBoxes": []
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-02a",
+   "hostActivates": false,
+   "roots": 6,
+   "paddedRoots": [],
+   "boxes": 6,
+   "multiRunBoxes": [
+    {
+     "id": "dir-style-02a__3__2-092",
+     "sourceTag": null,
+     "runs": [
+      "This element is rtl",
+      "."
+     ]
+    },
+    {
+     "id": "dir-style-02a__4__0-096",
+     "sourceTag": null,
+     "runs": [
+      "This element should inherit rtl",
+      "."
+     ]
+    },
+    {
+     "id": "dir-style-02a__4__2-101",
+     "sourceTag": null,
+     "runs": [
+      "This element is rtl",
+      "."
+     ]
+    }
+   ]
+  },
+  {
+   "section": "selectors",
+   "stem": "wpt__selectors__dir-style-03a",
+   "hostActivates": false,
+   "roots": 1,
+   "paddedRoots": [],
+   "boxes": 0,
+   "multiRunBoxes": []
+  }
+ ],
+ "summary": {
+  "stackShapeParents": 22,
+  "stackShapeHostInactive": 12,
+  "stackShapeHostInactiveDocs": [
+   "css-anchor-position/wpt__css-anchor-position__anchor-position-multicol-004",
+   "css-anchor-position/wpt__css-anchor-position__anchor-position-multicol-nested-001",
+   "css-counter-styles/wpt__css-counter-styles__counter-suffix",
+   "selectors/wpt__selectors__dir-selector-change-003",
+   "selectors/wpt__selectors__dir-selector-change-004",
+   "selectors/wpt__selectors__dir-style-02a"
+  ],
+  "bakeDocs": 17,
+  "bakeDocsHostInactive": [
+   "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3",
+   "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4",
+   "wpt__css-counter-styles__arabic-indic__css3-counter-styles-101",
+   "wpt__css-counter-styles__arabic-indic__css3-counter-styles-102",
+   "wpt__css-counter-styles__arabic-indic__css3-counter-styles-103",
+   "wpt__css-counter-styles__counter-suffix",
+   "wpt__css-text__bidi__bidi-lines-001",
+   "wpt__css-text__bidi__bidi-lines-002",
+   "wpt__css-text__bidi__bidi-tab-001",
+   "wpt__css-text__boundary-shaping__boundary-shaping-009",
+   "wpt__css-text__hyphens__hyphenate-character-005",
+   "wpt__css-writing-modes__bidi-plaintext-br-001",
+   "wpt__selectors__dir-selector-change-003",
+   "wpt__selectors__dir-selector-change-004",
+   "wpt__selectors__dir-style-02a",
+   "wpt__selectors__dir-style-03a"
+  ],
+  "bakeDocsWithMultiRunBox": [
+   "wpt__css-anchor-position__anchor-center-safe-rtl (1)",
+   "wpt__css-counter-styles__counter-suffix (4)",
+   "wpt__selectors__dir-style-02a (3)"
+  ],
+  "paddedRoots": 0,
+  "paddedRootDocs": []
+ }
+}

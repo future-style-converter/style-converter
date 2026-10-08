@@ -1,0 +1,29 @@
+WWS root pairs: 73 in 27 documents
+  CSS2/wpt__CSS2__abspos__static-inside-inline-block 2
+  css-break/wpt__css-break__block-in-inline-015-print 6
+  css-cascade/wpt__css-cascade__scope-pseudo-element 2
+  css-display/wpt__css-display__display-flow-root-list-item-001 1
+  css-position/wpt__css-position__overlay__overlay-button-appearance 1
+  css-position/wpt__css-position__position-absolute-semi-replaced-stretch-input 8
+  css-position/wpt__css-position__position-absolute-semi-replaced-stretch-other 6
+  css-ui/wpt__css-ui__appearance-auto-input-non-widget-001 2
+  css-ui/wpt__css-ui__box-sizing-007 19
+  css-ui/wpt__css-ui__box-sizing-008 5
+  css-ui/wpt__css-ui__box-sizing-009 5
+  css-ui/wpt__css-ui__box-sizing-010 1
+  css-ui/wpt__css-ui__box-sizing-011 1
+  css-ui/wpt__css-ui__box-sizing-013 1
+  css-ui/wpt__css-ui__box-sizing-014 1
+  css-ui/wpt__css-ui__box-sizing-015 1
+  css-ui/wpt__css-ui__box-sizing-016 1
+  css-ui/wpt__css-ui__box-sizing-017 1
+  css-ui/wpt__css-ui__box-sizing-018 1
+  css-ui/wpt__css-ui__box-sizing-019 1
+  css-ui/wpt__css-ui__box-sizing-020 1
+  css-ui/wpt__css-ui__box-sizing-021 1
+  css-ui/wpt__css-ui__box-sizing-022 1
+  css-ui/wpt__css-ui__box-sizing-024 1
+  css-ui/wpt__css-ui__box-sizing-025 1
+  css-values/wpt__css-values__attr-style-sharing-1 1
+  css-writing-modes/wpt__css-writing-modes__baseline-with-orthogonal-flow-001 1
+WIDGET-branch-only root pairs (no ws-after marker, both widget tags): 0 in 0 documents

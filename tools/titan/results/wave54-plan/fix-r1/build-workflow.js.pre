@@ -1,0 +1,100 @@
+export const meta = {
+  name: 'wave54-build',
+  description: 'Wave 54 builders (seven lanes on the shared tree, disjoint ownership, seam patches), one executed-repro skeptic per lane, fix lanes, re-verification; file-driven and resumable',
+  phases: [
+    { title: 'Build', detail: 'L1 rtl-marker-bake · L2 table-body-cell · L3 hyphenate-character · L4 oof-layout · L5 ua-heading-face · L6 web-tail · L7 label-chrome', model: 'opus' },
+    { title: 'Skeptics', detail: 'one per lane: own census, executed repros, mutation replay', model: 'opus' },
+    { title: 'Fix', detail: 'must-fix defects, then re-verification', model: 'opus' },
+  ],
+}
+// tools/titan/results/wave54-plan/build-workflow.js — the wave-53 fan-out (wave53-plan/build-workflow.js) adapted to the
+// seven wave-54 lanes of PLAN.md §1. What is the same: the shared tree (PLAN §10 item 3 of wave 53 → wave-54 §0), model
+// opus, file-driven lane notes ending in a STATUS line, seam files only through patch files under a mkdir lock, window
+// requests written into the note instead of device steps. What is new: the evidence base is wave53-final (= wave54-open
+// by the opening obligation), lanes must leave the tree COMPILING without their seam patches (the wave-53 hygiene-probe
+// lesson: anything that builds from the shared tree measures the union), and every lane re-runs its geometry probe on
+// wave53-final as a self-test before it claims a rule.
+// args: { tree, head, done?: ['L1', …], only?: ['L2'], model? }
+const T = args.tree
+const HEAD = args.head
+const DONE = new Set(args.done || [])
+const ONLY = args.only ? new Set(args.only) : null
+const M = args.model || 'opus'
+const PLAN = `${T}/tools/titan/results/wave54-plan/PLAN.md`
+const EXP = `${T}/tools/titan/results/wave54-plan/expectations.json`
+const G52 = `${T}/tools/titan/results/wave52-gate`
+const REFS = `${T}/tools/wpt/refs/9b5435e55e0b54a6cd09c1c563861eb3c999cef1/white-black-ink-font-lh-imgpad-htmlpins-rootbg-uamargin`
+const L = { L1: 'rtl-marker-bake', L2: 'table-body-cell', L3: 'hyphenate-character', L4: 'oof-layout', L5: 'ua-heading-face', L6: 'web-tail', L7: 'label-chrome' }
+const SECTION = Object.fromEntries(Object.entries(L).map(([id, name]) => [id, `### ${id} · ${name}`]))
+const OUT = (id) => `${T}/tools/titan/results/wave54-${L[id]}`
+
+const RULES = (id) => `HARD RULES — the shared tree ${T}, branch campaign/applier-campaign, HEAD ${HEAD} (= dev 7cce3b22 + the committed wave-54 plan). Six other lanes edit this tree at the same time under DISJOINT ownership. Read ${PLAN} §0 (rules), §1, YOUR section ("${SECTION[id]}" in §2), §3 (seam registry), §4 (landing order), §6 (what the probes and the closing gate will check) and your briefs under ${T}/tools/titan/results/wave54-plan/ before touching anything.
+(0) RESUME FIRST: if ${OUT(id)}/_note.md exists, read it and \`git -C ${T} status --short\` / \`git -C ${T} diff\` on your OWNED paths — a dead earlier attempt may have left partial edits or an un-restored mutation. Continue, do not restart.
+(1) OWNERSHIP: touch only the paths in your lane's "own:" list (and ${OUT(id)}/). Lanes work on the SHARED tree: no worktree of your own, no git commit / checkout / stash / reset (the orchestrator commits each lane's revert units from its ownership list in the PLAN §4 landing order). A change needed in a file you do not own is a HUNK for its owner, written to ${OUT(id)}/hunk-for-<lane>-<n>.patch with a header naming the base.
+(2) SEAM FILES are never edited (runtimes/compose/…/core/renderer/ComponentRenderer.kt, runtimes/swiftui/…/Renderer/ComponentRenderer.swift, apps/web-harness/src/sdui/ComponentRenderer.tsx, tools/titan/extract-fixture.mjs). A lane that needs one delivers ${OUT(id)}/seam-<n>.patch exactly as PLAN §3 registers it, applying clean on ${HEAD} (\`git apply --check\`; header: the base sha, the seam file's sha256 at base, the hunk's line anchor), and VERIFIES its pins with the patch applied under the per-file lock: \`mkdir ${T}/tools/titan/runs/wave54-lock/<basename>\` (mkdir is the mutex — if it exists, wait 60 s and retry), apply, run the focused suite, then restore the seam file byte-exact (\`git -C ${T} show HEAD:<path> > <path>\`, sha256 before/after in your note), then \`rmdir\` the lock. Never leave a seam file modified.
+(2b) THE TREE MUST COMPILE WITHOUT YOUR SEAM PATCH: an owned file in the working tree may not import a symbol that only your seam patch creates (e.g. an export lifted out of a seam file). An edit that consumes such a symbol rides INSIDE the seam patch as a patch-borne hunk (it enters the tree only with the seam, at landing); a new file of yours takes the symbol as a parameter instead of importing it. Anything that builds from the shared tree before landing measures every lane's unseamed edits at once (BACKLOG "Wave 53 lessons").
+(3) ANOTHER LANE'S IN-FLIGHT EDIT may break compilation of a module you share (Compose :runtime is shared by L2/L3/L4/L5; the SwiftUI package by L3/L4/L5; the web-harness by L6/L7's suite). If the compile error is in a file you do not own, wait 3 minutes and retry (up to 5 times); never touch it. Kotlin IC-cache errors: delete ${T}/runtimes/compose/build/kotlin and retry. xcodebuild "database is locked" / "build already in progress": wait 3 minutes and retry.
+(4) HOST: NO device, NO Chromium, NO emulator/simulator, no test-all.sh, no section-runner, no gate-driver, no feed-*.mjs, no puppeteer, no full suites. Focused tests only — Compose \`(cd ${T}/apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '<Class>')\` (harness code: :app:testDebugUnitTest); SwiftUI from ${T}: \`xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac Catalyst,arch=arm64' -only-testing:StyleConverterRuntimeTests/<Class>\`; web runtime \`(cd ${T}/runtimes/web && npx vitest run <path>)\`; web-harness \`npm -w apps/web-harness run test -- <path>\`; tooling \`node --test <file>\`; converter \`./gradlew :converter:test --tests '<filter>'\` (JDK 21: \`export JAVA_HOME=$(/usr/libexec/java_home -v 21)\`). Anything PLAN §2 marks as an ORCHESTRATOR WINDOW (a CDP probe, a gate-flag re-extraction, a converter hop over gate fixtures, a device seeding, a probe run) you do NOT run: write the exact command(s), the expected output and the decision it feeds into ${OUT(id)}/_note.md under "## ORCHESTRATOR WINDOW REQUESTS" and continue with everything that does not depend on them.
+(5) VERIFICATION OWED (${PLAN} §0 + your §2 entry): pins on the VERBATIM per-test IR from ${T}/tools/titan/runs/wave53-final/sections/*/per-test-ir/ (the opening gate's obligation makes it byte-identical to wave54-open; if PLAN §10 says otherwise, use wave54-open's), every pin PROVEN able to fail by an EXECUTED mutation of the mechanism — red → restore byte-exact (sha256 logged) → green — recorded in your note; your own blast-radius census (which corpus documents / captures your change can reach — the lane's CARRIER SET for control-check.mjs — and how many pass today), cross-checked against ${EXP} lanes["${id}-${L[id]}"] (captureCarriers, wireCarriers, revertUnits); predictions per target cell with confidence; must-not-move cells. Re-run your lane's geometry probe(s) on wave53-final (\`python3 ${T}/tools/titan/results/wave54-plan/geometry-gate.py wave53-final --base wave53-open --lanes ${id}\`) and confirm every gating row FAILS today and every control PASSES — a rule that cannot fail is not a gate. LOOK AT THE PNGS (reference under ${REFS}/<section>/, capture under ${T}/tools/titan/runs/wave53-final/sections/<section>/{screenshots,ios-screenshots,android-screenshots}/) before and after reasoning about a fix.
+(6) HOUSE RULES: every line commented (the WHY; CSS spec section or parser file for extractors, platform API for appliers); new logic in NEW files ≤ 200 lines (an oversized file gets only a call site, a defaulted parameter or a one-line condition); no silent fallthrough (PropertyTracker breadcrumb or TODO); "runtime", never "engine"; honest labels (a pass whose picture does not earn it is DEGENERATE and is never a fix; never label a native "picture-correct" from a replay).
+(7) DURABLE NOTE ${OUT(id)}/_note.md (create the dir): what changed and why with file:symbol pointers; one section per REVERT UNIT (PLAN §2 / expectations revertUnits) naming exactly the paths that unit's commit holds; the census with its method; pins + executed mutations (red/green, sha256); predictions with confidence; must-not-move cells; hand-offs (seam patches, hunks, orchestrator window requests); what you could NOT verify; a \`TREES:\` line (${T}, plus any export tree you ran Gradle in); and the last line \`STATUS: COMPLETE\` or \`STATUS: PARTIAL — <what is left>\`. Probe scripts you want kept go in ${OUT(id)}/ (never a scratchpad path in the note). Grep your own diff for "probe"/"Probe" leftovers in owned source files before finishing.
+(8) Report DATA per the schema; be honest in notVerified.
+`
+
+const LANE = {
+  type: 'object',
+  properties: {
+    lane: { type: 'string' }, status: { type: 'string', enum: ['COMPLETE', 'PARTIAL'] }, summary: { type: 'string' },
+    filesChanged: { type: 'array', items: { type: 'string' } },
+    revertUnits: { type: 'array', items: { type: 'object', properties: { unit: { type: 'string' }, paths: { type: 'array', items: { type: 'string' } }, seamPatch: { type: 'string' } }, required: ['unit', 'paths'] } },
+    seamPatches: { type: 'array', items: { type: 'string' } },
+    windowRequests: { type: 'array', items: { type: 'string' }, description: 'commands the orchestrator must run in a device-idle window, verbatim, each with its expected output and the decision it feeds' },
+    pins: { type: 'array', items: { type: 'object', properties: { test: { type: 'string' }, mutation: { type: 'string' }, result: { type: 'string' } }, required: ['test', 'mutation', 'result'] } },
+    predictedFlips: { type: 'array', items: { type: 'string' } },
+    notVerified: { type: 'array', items: { type: 'string' } },
+    remaining: { type: 'array', items: { type: 'string' } },
+  },
+  required: ['lane', 'status', 'summary', 'filesChanged', 'revertUnits', 'seamPatches', 'windowRequests', 'pins', 'predictedFlips', 'notVerified'],
+}
+const SKEPTIC = {
+  type: 'object',
+  properties: {
+    skeptic: { type: 'string' }, verdict: { type: 'string', enum: ['CLAIM-HOLDS', 'MIXED', 'DEFECT-CONFIRMED'] },
+    executedRepros: { type: 'array', items: { type: 'string' } },
+    defects: { type: 'array', items: { type: 'object', properties: { severity: { type: 'string', enum: ['must-fix', 'should-fix', 'nit'] }, file: { type: 'string' }, what: { type: 'string' }, evidence: { type: 'string' }, fix: { type: 'string' } }, required: ['severity', 'file', 'what', 'evidence', 'fix'] } },
+    mustFixBeforeGate: { type: 'boolean' },
+  },
+  required: ['skeptic', 'verdict', 'executedRepros', 'defects', 'mustFixBeforeGate'],
+}
+
+const buildPrompt = (id) => `You are builder lane ${id} (${L[id]}) of wave 54 of the Style-Converter applier campaign — a VERIFICATION-FIRST wave: seven lanes, each aimed at a picture that is wrong today, each with the mechanism traced in its brief before code, each landing as one or more REVERT UNITS (one commit each) that the device probes can take out alone.
+${RULES(id)}
+YOUR LANE: ${PLAN} "${SECTION[id]}" is your contract — targets, mechanism, the change, spec citation, ownership, revert units, carrier set, pins + mutations, predictions, must-not-move cells, window requests, what you may run. The briefs it cites sit beside it (with censuses, replays and geometry probes). Build exactly that; where the brief and the tree disagree, the tree wins and your note says so. Deliver seam patches as registered in §3, one patch per revert unit that needs one. Finish with the note and the structured report.`
+
+const skepticPrompt = (id) => `You are the adversarial SKEPTIC of builder lane ${id} (${L[id]}) of wave 54 of the Style-Converter applier campaign. Read ${OUT(id)}/_note.md, the lane's §2 contract in ${PLAN} ("${SECTION[id]}"), its briefs, and its diff on its owned paths (\`git -C ${T} diff -- <owned paths>\`, plus its new files and patches under ${OUT(id)}/). Your job is to find what is WRONG, by EXECUTED repros — never by reading for plausibility.
+${RULES(id).replace('You are builder lane', 'You are the skeptic of')}
+MUST DO: (a) replay every pin's mutation yourself (apply, run the focused test, confirm red, restore byte-exact, confirm green); (b) re-derive the lane's blast-radius census with YOUR OWN script over the per-test IR / sources (never the lane's script) and compare it with ${EXP} lanes["${id}-${L[id]}"] captureCarriers / wireCarriers and each revertUnits entry — an under-reported radius is the dangerous direction; (c) check every claimed verdict/score with \`node ${G52}/cells.mjs '<terms>' wave53-final\`; (d) open the PNGs the lane reasoned from and check the described geometry; (e) look for silent fallthroughs, untested branches, files over 200 lines of new logic, uncommented lines, scratchpad pointers, probe leftovers, edits outside ownership (git status), seam files left modified, lock dirs left behind, an owned file that does not compile without the lane's seam patch (rule 2b); (f) check every seam patch applies clean on HEAD and that the lane's pins were run with it applied; (g) check each revert unit's path list is complete and disjoint (a unit commit that cannot stand alone is a must-fix); (h) honesty: are predicted flips labelled DEGENERATE where the picture would still be wrong? Write ${OUT(id)}/skeptic.md (verdict, repros with outputs, defects ranked, what you could not check) and return the schema.`
+
+const fixPrompt = (id, defects) => `You are the FIX lane for builder lane ${id} (${L[id]}) of wave 54 of the Style-Converter applier campaign. The skeptic found these defects with executed evidence (${OUT(id)}/skeptic.md has the full text):
+${JSON.stringify(defects, null, 1)}
+${RULES(id).replace('You are builder lane', 'You are the fix lane of')}
+Re-run each skeptic check first; fix every must-fix (and should-fix when safe) inside the lane's ownership; re-run the touched focused suites; re-execute the affected mutations; append a "## Fix pass" section to ${OUT(id)}/_note.md (defect → action or refusal with reason) and keep the STATUS line true. Return the lane schema.`
+
+const reverifyPrompt = (id) => `You are the RE-VERIFIER of builder lane ${id} (${L[id]}) of wave 54. ${OUT(id)}/skeptic.md lists must-fix defects and ${OUT(id)}/_note.md "## Fix pass" claims each is fixed. For EACH must-fix: re-run the skeptic's own check and report fixed / not fixed with the command and output. Also confirm: no seam file modified (\`git -C ${T} status --short -- <the four seam files>\` empty), no lock dir left under ${T}/tools/titan/runs/wave54-lock/, no probe leftovers in owned sources, the owned files compile without the lane's seam patches. Append "## Re-verification" to ${OUT(id)}/_note.md. Return the skeptic schema (verdict CLAIM-HOLDS when everything is fixed).
+${RULES(id).replace('You are builder lane', 'You are the re-verifier of')}`
+
+const ids = Object.keys(L).filter((id) => !DONE.has(id) && (!ONLY || ONLY.has(id)))
+log(`lanes this run: ${ids.join(' ')} (done: ${[...DONE].join(' ') || 'none'})`)
+
+phase('Build')
+const results = await parallel(ids.map((id) => async () => {
+  const built = await agent(buildPrompt(id), { label: `build:${id}-${L[id]}`, phase: 'Build', model: M, schema: LANE })
+  if (!built) return { id, built: null }
+  const sk = await agent(skepticPrompt(id), { label: `skeptic:${id}`, phase: 'Skeptics', model: M, schema: SKEPTIC })
+  if (!sk || !sk.mustFixBeforeGate) return { id, built, skeptic: sk }
+  const must = sk.defects.filter((d) => d.severity !== 'nit')
+  const fixed = await agent(fixPrompt(id, must), { label: `fix:${id}`, phase: 'Fix', model: M, schema: LANE })
+  const re = await agent(reverifyPrompt(id), { label: `reverify:${id}`, phase: 'Fix', model: M, schema: SKEPTIC })
+  return { id, built, skeptic: sk, fixed, reverified: re }
+}))
+return { lanes: results.filter(Boolean).map((r) => ({ id: r.id, status: r.built?.status, summary: r.built?.summary?.slice(0, 400), revertUnits: r.built?.revertUnits, seamPatches: r.built?.seamPatches, windowRequests: r.built?.windowRequests, skeptic: r.skeptic?.verdict, mustFix: r.skeptic?.mustFixBeforeGate, defects: (r.skeptic?.defects || []).filter((d) => d.severity === 'must-fix').map((d) => d.what.slice(0, 160)), fixed: r.fixed?.status, reverified: r.reverified?.verdict, notVerified: r.built?.notVerified })) }

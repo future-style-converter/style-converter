@@ -1,0 +1,79 @@
+### geometry-gate on wave53-probe --lanes L1,L2 with the REVERTED=[Mprime, TB-android, U3b] expectations
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 android                            PASS       [GATING -> revert P]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 android                            PASS       [GATING -> revert P]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 ios                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 ios                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix web                                     PASS       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix ios                                     PASS       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+ - L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix android                                 FAIL       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+     line: roid text y214-225:x104-126 y239-249:x104-126 y262-273:x104-126 y287-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225 (marker ink y244-245 below the line))
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix web                                         PASS       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix ios                                         PASS       [report: expected WRONG until the target is fixed]
+ - L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix android                                     FAIL       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+     line: counter-suffix android y214-225:x104-126 y239-249:x104-134 y262-273:x104-134 y285-297:x104-145 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested web                          PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested ios                          PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested android                      PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 ios                                                    PASS       [control: expected to stay PASS]
+ - L2-table-body-cell       compose-table-body-cell.geometry.py        006 android                                                FAIL       [WITHDRAWN (was gating -> TB-android; unit TB-android reverted at wave54-pre (rule 4))]
+     line: wave53-probe 006 android square block solid 76/400 | stray ink 400 (x 44-63, rows 56-75) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (76/400 black); 400 ink px outside the block)
+   L2-table-body-cell       display-table-body.geometry.py             006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       display-table-body.geometry.py             006 ios                                                    PASS       [control: expected to stay PASS]
+ - L2-table-body-cell       display-table-body.geometry.py             006 android                                                FAIL       [WITHDRAWN (was gating -> TB-android; unit TB-android reverted at wave54-pre (rule 4))]
+     line: 006 android square rows 56-75 (20) x 24-63 | red px 0
+
+geometry-gate wave53-probe (base wave53-open): 21 keys — PASS 17 · FAIL 4 (gating 0) · UNMEASURED 0 · probe self-check failures 0
+  by class: gating 2 (PASS 2 FAIL 0) · control 11 (PASS 11 FAIL 0) · report 1 (PASS 1 FAIL 0) · withdrawn 7 (PASS 3 FAIL 4)
+exit 0
+
+### the same on wave53-final (the pictures the withdrawn cells return to)
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 android                            FAIL       [GATING -> revert P]
+     line: [P] bidi/bidi-lines-001 android line starts y117:x33 y159:x278 → GEOMETRY WRONG (line y117 left x33 vs ref x29±1)
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 android                            FAIL       [GATING -> revert P]
+     line: [P] bidi/bidi-lines-002 android line starts y159:x35 y239:x280 → GEOMETRY WRONG (line y159 left x35 vs ref x31±1)
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 ios                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 ios                                PASS       [control: expected to stay PASS]
+ - L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix web                                     FAIL       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+     line: [M] counter-suffix web text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+ - L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix ios                                     FAIL       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+     line: [M] counter-suffix ios text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+ - L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix android                                 FAIL       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+     line: [M] counter-suffix android text | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl text rows 0/4 in x95-128 (text at x152-174))
+ - L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix web                                         FAIL       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+     line: counter-suffix web y214-225:x47-126 y238-249:x47-127 y262-273:x46-126 y286-297:x47-127 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 left x47 vs ref x104)
+ - L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix ios                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: counter-suffix ios y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+ - L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix android                                     FAIL       [WITHDRAWN (was gating -> Mprime; unit Mprime reverted at wave54-pre (rule 4))]
+     line: counter-suffix android y214-225:x152-174 y239-249:x152-174 y262-273:x152-174 y287-297:x152-174 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 left x152 vs ref x104)
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested web                          PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested ios                          PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested android                      PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 ios                                                    PASS       [control: expected to stay PASS]
+ - L2-table-body-cell       compose-table-body-cell.geometry.py        006 android                                                FAIL       [WITHDRAWN (was gating -> TB-android; unit TB-android reverted at wave54-pre (rule 4))]
+     line: wave53-final 006 android square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+   L2-table-body-cell       display-table-body.geometry.py             006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       display-table-body.geometry.py             006 ios                                                    PASS       [control: expected to stay PASS]
+ - L2-table-body-cell       display-table-body.geometry.py             006 android                                                FAIL       [WITHDRAWN (was gating -> TB-android; unit TB-android reverted at wave54-pre (rule 4))]
+     line: 006 android square rows 51-70 (20) x 24-43 | red px 0
+
+geometry-gate wave53-final (base wave53-open): 21 keys — PASS 11 · FAIL 10 (gating 2) · UNMEASURED 0 · probe self-check failures 0
+  by class: gating 2 (PASS 0 FAIL 2) · control 11 (PASS 11 FAIL 0) · report 1 (PASS 0 FAIL 1) · withdrawn 7 (PASS 0 FAIL 7)
+revert rule 4 names: P
+exit 1
+
+### STALE guard: the skeptic's hook expectations (probeDecisions present, gating keys NOT withdrawn)
+STALE expectations.json — gating keys of reverted units (re-run plan-build.py):
+  L1-rtl-marker-bake [M] counter-suffix web needs Mprime
+  L1-rtl-marker-bake [M] counter-suffix ios needs Mprime
+  L1-rtl-marker-bake [M] counter-suffix android needs Mprime
+  L1-rtl-marker-bake counter-suffix web needs Mprime
+  L1-rtl-marker-bake counter-suffix android needs Mprime
+  L2-table-body-cell 006 android needs TB-android
+  L2-table-body-cell 006 android needs TB-android
+exit 2

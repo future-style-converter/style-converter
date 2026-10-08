@@ -1,0 +1,2 @@
+box-sizing-007                                   web      edge x151 → GEOMETRY OK
+box-sizing-008                                   web      edge x151 → GEOMETRY OK

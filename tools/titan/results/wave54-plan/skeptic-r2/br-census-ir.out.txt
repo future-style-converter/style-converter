@@ -1,0 +1,23 @@
+documents with meta.runs: 129; 20-px brs inside a runs host: 67
+U3 (re-arm) brs: 54 in 18 documents
+   wpt__css-cascade__revert-layer-006                                  6 wire carrier
+   wpt__css-cascade__revert-val-001                                    6 wire carrier
+   wpt__css-cascade__revert-val-002                                    6 wire carrier
+   wpt__css-masking__clip-path__clip-path-filter-order                 1 wire carrier
+   wpt__css-multicol__balance-grid-container                           2 wire carrier
+   wpt__css-multicol__column-height-009                               15 wire carrier
+   wpt__css-overflow__line-clamp__block-ellipsis-002                   2 wire carrier
+   wpt__css-overflow__line-clamp__block-ellipsis-004                   1 wire carrier
+   wpt__css-overflow__line-clamp__block-ellipsis-005                   1 wire carrier
+   wpt__css-overflow__line-clamp__block-ellipsis-006                   1 wire carrier
+   wpt__css-text__hyphens__hyphenate-character-001                     2 wire carrier
+   wpt__css-text__hyphens__hyphenate-character-002                     2 wire carrier
+   wpt__css-text__hyphens__hyphenate-character-003                     2 wire carrier
+   wpt__css-text__hyphens__hyphenate-character-004                     2 wire carrier
+   wpt__filter-effects__backdrop-filter-clip-rect                      2 wire carrier
+   wpt__filter-effects__backdrop-filter-edge-clipping                  1 wire carrier
+   wpt__filter-effects__backdrop-filter-paint-order                    1 wire carrier
+   wpt__filter-effects__backdrop-filter-plus-filter                    1 wire carrier
+L3 wire carriers not reached by U3: wpt__css-text__hyphens__hyphenate-character-005
+U3b line-start 20-px brs (after U3): host declares line-height 12 in 4 docs: wpt__css-text__hyphens__hyphenate-character-001, wpt__css-text__hyphens__hyphenate-character-002, wpt__css-text__hyphens__hyphenate-character-003, wpt__css-text__hyphens__hyphenate-character-004
+   ancestor-only line-height (the inherited reading U3b must NOT take): 0 in 0 docs: 

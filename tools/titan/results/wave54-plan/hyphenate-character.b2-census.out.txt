@@ -1,0 +1,5 @@
+line-start 20px brs kept by U3: 76 in 32 docs; in a parent whose declared line height != 20px: 12 in 4 docs
+  css-text/wpt__css-text__hyphens__hyphenate-character-001.json                  3 | {"web":"f 0.935","ios":"f 0.9287","android":"f 0.9301"}
+  css-text/wpt__css-text__hyphens__hyphenate-character-002.json                  3 | {"web":"f 0.92","ios":"f 0.9261","android":"f 0.9223"}
+  css-text/wpt__css-text__hyphens__hyphenate-character-003.json                  3 | {"web":"f 0.8812","ios":"f 0.9337","android":"f 0.9292"}
+  css-text/wpt__css-text__hyphens__hyphenate-character-004.json                  3 | {"web":"f 0.9249","ios":"f 0.9134","android":"f 0.905"}

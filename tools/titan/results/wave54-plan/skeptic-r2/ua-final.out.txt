@@ -1,0 +1,20 @@
+block-in-inline-015-print      ref      bands [(29, 46, 17, 72), (65, 86, 16, 73), (103, 126, 16, 96), (142, 166, 16, 79)] → GEOMETRY OK
+block-in-inline-015-print      web      bands [(29, 46, 17, 72), (65, 86, 16, 73), (103, 126, 16, 96), (142, 166, 16, 79)] → GEOMETRY OK
+block-in-inline-015-print      ios      bands [(30, 47, 17, 72), (66, 87, 16, 72), (105, 127, 16, 96), (144, 167, 16, 79)] → GEOMETRY OK
+block-in-inline-015-print      android  bands [(23, 31, 17, 42), (42, 51, 17, 42), (61, 71, 17, 53), (80, 91, 17, 45)] → GEOMETRY WRONG (band height 9 vs ref 18 (y23))
+text-decoration-inset-005      ref      bands [(134, 173, 16, 336), (188, 212, 16, 64)] → GEOMETRY OK
+text-decoration-inset-005      web      bands [(134, 173, 16, 328), (188, 212, 16, 64)] → GEOMETRY OK
+text-decoration-inset-005      ios      bands [(110, 130, 16, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 191)]))
+text-decoration-inset-005      android  bands [(110, 131, 17, 191)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 191)]))
+text-decoration-inset-006      ref      bands [(134, 173, 16, 331), (188, 212, 16, 64)] → GEOMETRY OK
+text-decoration-inset-006      web      bands [(134, 173, 16, 333), (188, 212, 16, 64)] → GEOMETRY OK
+text-decoration-inset-006      ios      bands [(110, 130, 16, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 130, 16, 194)]))
+text-decoration-inset-006      android  bands [(110, 131, 17, 194)] → GEOMETRY WRONG (1 heading line band(s) vs ref 2 (bands [(110, 131, 17, 194)]))
+text-decoration-inset-014      ref      bands [(129, 154, 17, 258), (163, 186, 16, 155)] → GEOMETRY OK
+text-decoration-inset-014      web      bands [(129, 154, 17, 250), (163, 186, 16, 155)] → GEOMETRY OK
+text-decoration-inset-014      ios      bands [(111, 121, 17, 133), (128, 137, 16, 84)] → GEOMETRY WRONG (line-1 band 11 px tall (< 20: the 2em face is missing))
+text-decoration-inset-014      android  bands [(111, 122, 17, 132), (127, 138, 16, 84)] → GEOMETRY WRONG (line-1 band 12 px tall (< 20: the 2em face is missing))
+text-decoration-inset-011      ref      bands [(144, 178, 31, 345), (192, 194, 30, 335), (206, 237, 245, 345), (256, 258, 295, 345)] → GEOMETRY OK
+text-decoration-inset-011      web      bands [(144, 178, 31, 345), (192, 194, 30, 345), (206, 237, 245, 345), (256, 258, 286, 345)] → GEOMETRY OK
+text-decoration-inset-011      ios      bands [(137, 151, 57, 184), (169, 186, 85, 183), (208, 208, 170, 185), (265, 282, 39, 184)] → GEOMETRY OK
+text-decoration-inset-011      android  bands [(136, 155, 57, 184), (168, 187, 80, 184), (209, 209, 166, 180), (265, 283, 41, 184)] → GEOMETRY OK

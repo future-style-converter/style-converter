@@ -1,0 +1,34 @@
+           L1-rtl-marker-bake     css-text/bidi/bidi-lines-001.html android                                f 0.8934 -> floor 0.955 HIGH | geometry keys failing today: 1/1
+           L1-rtl-marker-bake     css-text/bidi/bidi-lines-002.html android                                P 0.9534 -> floor 0.975 HIGH | geometry keys failing today: 1/1
+           L1-rtl-marker-bake     css-counter-styles/counter-suffix.html android                           P 0.9547 -> floor 0.97 MED-HIGH ( | geometry keys failing today: 2/2
+           L1-rtl-marker-bake     css-counter-styles/counter-suffix.html web                               P 0.9818 -> floor 0.999 HIGH | geometry keys failing today: 2/2
+           L1-rtl-marker-bake     css-counter-styles/counter-suffix.html ios                               P 0.9802 -> floor 0.985 MED-HIGH | geometry keys failing today: 1/1
+           L2-table-body-cell     CSS2/css21-errata/s-11-1-1b-006.html android                             P 0.9944 -> floor 0.996 MED-HIGH ( | geometry keys failing today: 2/2
+           L3-hyphenate-character css-text/hyphens/hyphenate-character-001.html ios                        f 0.9287 -> floor 0.965 MED-HIGH | geometry keys failing today: 1/1
+           L3-hyphenate-character css-text/hyphens/hyphenate-character-003.html ios                        f 0.9337 -> floor 0.965 MED-HIGH | geometry keys failing today: 1/1
+           L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-002.html web                      P 0.9868 -> floor 0.995 MED-HIGH | geometry keys failing today: 0/0
+           L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-004.html web                      P 0.9737 -> floor 0.99 MED-HIGH | geometry keys failing today: 0/0
+           L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-005.html web                      P 0.9735 -> floor 0.99 MED-HIGH | geometry keys failing today: 0/0
+           L3-hyphenate-character css-overflow/line-clamp/block-ellipsis-006.html web                      P 0.9735 -> floor 0.99 MED-HIGH | geometry keys failing today: 0/0
+           L4-oof-layout          css-contain/contain-content-003.html android                             f 0.9405 -> floor 0.99 HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          css-contain/contain-content-011.html android                             f 0.9284 -> floor 0.97 MED-HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          css-position/position-relative-004.html ios                              P 0.9594 -> floor 0.99 MED-HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          css-position/position-relative-004.html android                          P 0.9589 -> floor 0.99 MED-HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          css-position/change-insets-inside-strict-containment-nested.html ios     P 0.9594 -> floor 0.99 MED-HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          css-position/change-insets-inside-strict-containment-nested.html android P 0.9589 -> floor 0.99 MED-HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          CSS2/abspos/static-fixed-inside-abspos.html ios                          P 0.9841 -> floor 0.99 HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          CSS2/abspos/static-fixed-inside-abspos.html android                      P 0.9835 -> floor 0.99 MED-HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip-3.html android  f 0.9574 -> floor 0.96 MED-HIGH | geometry keys failing today: 2/2
+           L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip.html android    P 0.9649 -> floor 0.98 MED-HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip-2.html android  P 0.9689 -> floor 0.98 MED-HIGH | geometry keys failing today: 2/2
+           L4-oof-layout          filter-effects/backdrop-filter-nested-border-radius-clip-4.html android  P 0.977 -> floor 0.98 MED-HIGH | geometry keys failing today: 2/2
+FLOOR<=FROM L4-oof-layout          css-flexbox/abspos/abspos-autopos-htb-ltr.html android                   P 0.9966 -> floor 0.995 HIGH | geometry keys failing today: 1/1
+FLOOR<=FROM L4-oof-layout          css-flexbox/abspos/abspos-autopos-vlr-ltr.html android                   P 0.9966 -> floor 0.995 HIGH | geometry keys failing today: 1/1
+FLOOR<=FROM L4-oof-layout          css-flexbox/abspos/abspos-autopos-vrl-ltr.html android                   P 0.9966 -> floor 0.995 HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          css-gaps/flex/flex-gap-decorations-033.html ios                          f 0.94 -> floor 0.99 HIGH | geometry keys failing today: 1/1
+           L4-oof-layout          css-gaps/flex/flex-gap-decorations-033.html android                      f 0.94 -> floor 0.99 HIGH | geometry keys failing today: 1/1
+           L5-ua-heading-face     css-break/block-in-inline-015-print.html android                         f 0.9489 -> floor 0.97 HIGH | geometry keys failing today: 1/1
+           L6-web-tail            css-ui/box-sizing-007.html web                                           f 0.9036 -> floor 0.975 HIGH | geometry keys failing today: 1/1
+           L6-web-tail            css-ui/box-sizing-008.html web                                           f 0.8943 -> floor 0.965 HIGH | geometry keys failing today: 1/1
+           L6-web-tail            css-ui/box-sizing-022.html web                                           f 0.9442 -> floor 0.96 MED-HIGH | geometry keys failing today: 1/1
+           L6-web-tail            css-text/hyphens/hyphens-out-of-flow-002.html web                        f 0.9411 -> floor 0.995 HIGH (bran | geometry keys failing today: 1/1

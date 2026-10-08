@@ -1,0 +1,47 @@
+(A) fixtures with `all`: 9 declarations in 2 fixtures
+    fixtures/combinations/all-then-color.json ATC_AllThenProps all:initial @1/5 root-children=false text=false labelDue=true gate=true baselined=false
+    fixtures/combinations/all-then-color.json ATC_PropsThenAll_InGreenParent/reset all:revert @4/4 root-children=false text=false labelDue=true gate=true baselined=false
+    fixtures/combinations/all-then-color.json ATC_InitialUnderRedParent/span all:initial @1/5 root-children=false text=false labelDue=true gate=true baselined=false
+    fixtures/combinations/all-then-color.json ATC_DirectionSurvives all:initial @2/8 root-children=false text=true labelDue=false gate=true baselined=false
+    fixtures/properties/global/longtail.json All_Initial all:initial @4/4 root-children=false text=false labelDue=true gate=false baselined=false
+    fixtures/properties/global/longtail.json All_Inherit all:inherit @4/4 root-children=false text=false labelDue=true gate=false baselined=false
+    fixtures/properties/global/longtail.json All_Unset all:unset @4/4 root-children=false text=false labelDue=true gate=false baselined=false
+    fixtures/properties/global/longtail.json All_Revert all:revert @4/4 root-children=false text=false labelDue=true gate=false baselined=false
+    fixtures/properties/global/longtail.json All_RevertLayer all:revert-layer @4/4 root-children=false text=false labelDue=true gate=false baselined=false
+(A) label-exempt nodes: 1212 of 5330 in 121 of 445 fixtures
+    gate fixtures/combinations/all-then-color.json: 6 nodes, 3 exempt (2 containers, 1 text roots), baselined=false
+    gate fixtures/combinations/blend-isolation.json: 9 nodes, 6 exempt (6 containers, 0 text roots), baselined=false
+    gate fixtures/combinations/nested-transforms.json: 8 nodes, 4 exempt (4 containers, 0 text roots), baselined=false
+    gate fixtures/combinations/opacity-blend.json: 10 nodes, 5 exempt (5 containers, 0 text roots), baselined=false
+    gate fixtures/combinations/radius-overflow-transform.json: 8 nodes, 4 exempt (4 containers, 0 text roots), baselined=false
+    gate fixtures/combinations/transform-abspos-pivot.json: 12 nodes, 4 exempt (4 containers, 0 text roots), baselined=false
+    gate fixtures/composition-test.json: 42 nodes, 18 exempt (18 containers, 0 text roots), baselined=false
+    gate fixtures/properties/effects/filter-sepia-amounts.json: 8 nodes, 0 exempt (0 containers, 0 text roots), baselined=true
+    gate fixtures/visual-test.json: 109 nodes, 0 exempt (0 containers, 0 text roots), baselined=true
+(B) baseline stems: 130, owned once 129, label-due in every owner 129, unowned 0 {
+  'fixtures/properties/effects/filter-grayscale-basis.json': 4,
+  'fixtures/properties/sizing/aspect-ratio.json': 9,
+  'fixtures/properties/effects/filter-sepia-amounts.json': 8,
+  'fixtures/visual-test-controls.json': 1,
+  'fixtures/visual-test.json': 109
+}
+    multi-owner 000_Sizing_Fixed: fixtures/visual-test-controls.json labelDue=false | fixtures/visual-test.json labelDue=true
+(C) all-then-color captures (device flatten order over the tracked IR):
+    000_ATC_AllThenProps                 rootAll=INITIAL @1/5   children=[] text=null labelDue=true
+    001_ATC_PropsThenAll_InGreenParent   rootAll=null           children=[reset] text=null labelDue=false
+    002_reset                            rootAll=REVERT @4/4    children=[] text=null labelDue=true
+    003_ATC_InitialUnderRedParent        rootAll=null           children=[span] text=null labelDue=false
+    004_span                             rootAll=INITIAL @1/5   children=[] text=null labelDue=true
+    005_ATC_DirectionSurvives            rootAll=INITIAL @2/8   children=[] text="123" labelDue=false
+(D) wave53-final: 11 of 1435 per-test IR docs carry `All`
+    css-cascade/wpt__css-cascade__all-prop-001.json INITIAL,INITIAL
+    css-cascade/wpt__css-cascade__all-prop-002.json INHERIT,INHERIT
+    css-cascade/wpt__css-cascade__all-prop-inherit-color.json INHERIT
+    css-cascade/wpt__css-cascade__all-prop-initial-color.json INITIAL
+    css-cascade/wpt__css-cascade__all-prop-initial-visited.json INITIAL
+    css-cascade/wpt__css-cascade__all-prop-revert-color.json REVERT
+    css-cascade/wpt__css-cascade__all-prop-unset-color.json UNSET
+    css-display/wpt__css-display__display-contents-button.json INITIAL
+    css-display/wpt__css-display__display-contents-details.json INITIAL,INITIAL
+    css-display/wpt__css-display__display-contents-fieldset.json INITIAL,INITIAL
+    css-ui/wpt__css-ui__appearance-revert-001.tentative.json REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT,REVERT

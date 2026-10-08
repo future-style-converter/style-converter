@@ -1,0 +1,42 @@
+## Swift -only-testing classes named in PLAN (exists? file)
+OutOfFlowContainingBlockTests -> NONE
+FixedHoistTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift
+TransformContainingBlockTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/TransformContainingBlockTests.swift
+GapDecorationSegmentsTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift
+GapDecorationBandsTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationBandsTests.swift
+GapDecorationGrammarTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationGrammarTests.swift
+GapDecorationLinesTests -> NONE
+GreedyLineBreakerTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/GreedyLineBreakerTests.swift
+TypographyTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyTests.swift
+SoftHyphenPolicyTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/SoftHyphenPolicyTests.swift
+UAElementFontRuleTests -> runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift
+UAHeadingFoldGateTests -> NONE
+## Compose --tests patterns (runtime src/test + app src/test)
+*TableBodyForest* -> 0 files 
+*TableCellHug* -> 0 files 
+*TableBoxTree* -> 1 files TableBoxTreeTest.kt 
+*ComposedCanvas* -> 5 files ComposedCanvasPaddingTest.kt ComposedCanvasRootBackgroundTest.kt ComposedCanvasRc1ZOrderSourceTest.kt 
+*UaBlockMargins* -> 1 files UaBlockMarginsTest.kt 
+*PreBreakPipelineTest* -> 1 files PreBreakPipelineTest.kt 
+*GreedyLineBreakerTest* -> 1 files GreedyLineBreakerTest.kt 
+*HyphenateCharacter* -> 0 files 
+*WordBreakOpportunities* -> 1 files WordBreakOpportunitiesTest.kt 
+*SoftHyphenPolicy* -> 1 files SoftHyphenPolicyTest.kt 
+*OutOfFlowContainingBlock* -> 0 files 
+*CanvasRootHoist* -> 1 files CanvasRootHoistTest.kt 
+*TransformContainingBlock* -> 1 files TransformContainingBlockTest.kt 
+*DynamicValueResolver* -> 1 files DynamicValueResolverTest.kt 
+*GapDecoration* -> 6 files SkepticGapDecorationProbeTest.kt GapDecorationSegmentsTest.kt GapDecorationExtractorTest.kt 
+*UAElementFontRule* -> 0 files 
+*UAHeadingFoldGate* -> 0 files 
+*InlineRunFoldTest* -> 1 files InlineRunFoldTest.kt 
+## web/tooling test paths
+OK runtimes/web/tests/renderer/InlineRuns.test.tsx
+OK tools/titan/bidi-bake.test.mjs
+OK tools/titan/counter-style-bake.test.mjs
+OK tools/titan/counter-bake.test.mjs
+OK tools/titan/extract-fixture.test.mjs
+OK tools/visual/label-chrome-tripwire.test.mjs
+OK apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+OK runtimes/web/src/renderer/InlineRuns.ts
+OK runtimes/web/src/renderer/NodeRenderer.ts

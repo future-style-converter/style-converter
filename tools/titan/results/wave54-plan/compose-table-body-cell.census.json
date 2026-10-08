@@ -1,0 +1,2331 @@
+{
+ "summary": {
+  "run": "wave53-final",
+  "docs": 1435,
+  "tableFamilyDocs": 86,
+  "forestTriggerDocs": [
+   "CSS2/css21-errata/s-11-1-1b-006"
+  ],
+  "composeTableDocs": 60,
+  "routes": {
+   "declared": 22,
+   "uaFold": 38
+  },
+  "d1FabricatedStrokeDocs": [
+   "css-break/background-image-006",
+   "css-position/position-absolute-center-006",
+   "css-position/position-absolute-center-007",
+   "css-tables/abspos-container-change-dynamic-001",
+   "css-tables/anonymous-table-cell-margin-collapsing",
+   "css-tables/fixup-dynamic-anonymous-inline-table-002",
+   "css-tables/height-distribution/percentage-sizing-of-table-cell-children-003",
+   "css-tables/height-distribution/percentage-sizing-of-table-cell-children-004",
+   "css-tables/height-distribution/percentage-sizing-of-table-cell-children-005",
+   "css-tables/height-distribution/percentage-sizing-of-table-cell-children-006",
+   "css-text/hanging-punctuation/hanging-scrollable-001",
+   "selectors/invalidation/nth-child-of-attr-largedom"
+  ],
+  "d2FirstFillDocs": [
+   "css-contain/contain-content-004",
+   "css-display/display-contents-td-001",
+   "css-tables/baseline-empty-cell-001",
+   "css-tables/baseline-vertical",
+   "css-tables/border-conflict-resolution",
+   "css-tables/colspan-004",
+   "css-values/calc-height-table-1",
+   "css-writing-modes/direction-upright-002"
+  ]
+ },
+ "docs": [
+  {
+   "test": "CSS2/abspos/static-inside-table-cell",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE_CELL"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "CSS2/abspos/table-caption-is-containing-block-001",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:caption",
+    "ua:table"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.992",
+    "ios": "P 0.9903",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "CSS2/abspos/table-caption-passes-abspos-up-001",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:caption",
+    "ua:table"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9955",
+    "ios": "P 0.9903",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "CSS2/borders/border-conflict-style-107",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 41,
+   "displays": [
+    "ua:col",
+    "ua:colgroup",
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css2__borders__border-conflict-style-107__1-056",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    },
+    {
+     "id": "wpt__css2__borders__border-conflict-style-107__9-073",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    },
+    {
+     "id": "wpt__css2__borders__border-conflict-style-107__11-078",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "f 0.9381",
+    "ios": "f 0.6564",
+    "android": "f 0.3262"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-001",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:caption",
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9941",
+    "ios": "P 0.9962",
+    "android": "P 0.9953"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-002",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:caption",
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9891",
+    "ios": "P 0.9875",
+    "android": "P 0.9866"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-003",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css2__css21-errata__s-11-1-1b-003__1-130",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9905",
+    "ios": "P 0.9917",
+    "android": "P 0.9908"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-004",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css2__css21-errata__s-11-1-1b-004__1-135",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9905",
+    "ios": "P 0.9917",
+    "android": "P 0.9908"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-005",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE_CELL"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9658",
+    "ios": "f 0.9536",
+    "android": "f 0.9307"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-006",
+   "section": "CSS2",
+   "forestTrigger": true,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css2__css21-errata__s-11-1-1b-006__0-141",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 0,
+     "cells": 0,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9944"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-007",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css2__css21-errata__s-11-1-1b-007__1-146",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.994",
+    "ios": "P 0.9992",
+    "android": "P 0.9983"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-008",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:caption",
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9941",
+    "ios": "P 0.9962",
+    "android": "P 0.9953"
+   }
+  },
+  {
+   "test": "CSS2/css21-errata/s-11-1-1b-009",
+   "section": "CSS2",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "INLINE_TABLE",
+    "ua:caption",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9938",
+    "ios": "P 0.9962",
+    "android": "P 0.9953"
+   }
+  },
+  {
+   "test": "css-backgrounds/animations/background-color-animation-with-table1",
+   "section": "css-backgrounds",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-backgrounds__animations__background-color-animation-with-table1__0-006",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9998"
+   }
+  },
+  {
+   "test": "css-backgrounds/animations/background-color-animation-with-table2",
+   "section": "css-backgrounds",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "ua:col",
+    "ua:colgroup",
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-backgrounds__animations__background-color-animation-with-table2__0-011",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9971",
+    "android": "P 0.9998"
+   }
+  },
+  {
+   "test": "css-backgrounds/animations/background-color-animation-with-table3",
+   "section": "css-backgrounds",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-backgrounds__animations__background-color-animation-with-table3__0-018",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9998"
+   }
+  },
+  {
+   "test": "css-backgrounds/animations/background-color-animation-with-table4",
+   "section": "css-backgrounds",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-backgrounds__animations__background-color-animation-with-table4__0-023",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9935"
+   }
+  },
+  {
+   "test": "css-break/background-image-006",
+   "section": "css-break",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE"
+   ],
+   "composeTables": [
+    {
+     "id": "background-image-006__1__1-083",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9712",
+    "android": "P 0.9966"
+   }
+  },
+  {
+   "test": "css-contain/contain-content-004",
+   "section": "css-contain",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-contain__contain-content-004__1-049",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 2
+    }
+   ],
+   "cells": {
+    "web": "P 0.9985",
+    "ios": "f 0.8094",
+    "android": "f 0.8286"
+   }
+  },
+  {
+   "test": "css-display/display-contents-td-001",
+   "section": "css-display",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 6,
+   "displays": [
+    "CONTENTS",
+    "ua:table",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-display__display-contents-td-001__2-251",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    }
+   ],
+   "cells": {
+    "web": "P 0.968",
+    "ios": "P 0.9762",
+    "android": "P 0.9753"
+   }
+  },
+  {
+   "test": "css-display/display-contents-tr-001",
+   "section": "css-display",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "CONTENTS",
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9937",
+    "ios": "P 0.9924",
+    "android": "P 0.992"
+   }
+  },
+  {
+   "test": "css-position/position-absolute-center-006",
+   "section": "css-position",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE"
+   ],
+   "composeTables": [
+    {
+     "id": "position-absolute-center-006__1__0-065",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9699",
+    "android": "P 0.9692"
+   }
+  },
+  {
+   "test": "css-position/position-absolute-center-007",
+   "section": "css-position",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE"
+   ],
+   "composeTables": [
+    {
+     "id": "position-absolute-center-007__1__0-069",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9451",
+    "android": "f 0.9445"
+   }
+  },
+  {
+   "test": "css-position/position-absolute-dynamic-static-position-table-cell",
+   "section": "css-position",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE_CELL"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css-position/position-relative-008",
+   "section": "css-position",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-position__position-relative-008__1-216",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9845",
+    "ios": "P 0.9558",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-006",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {}
+  },
+  {
+   "test": "css-tables/absolute-tables-007",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE"
+   ],
+   "composeTables": [
+    {
+     "id": "absolute-tables-007__1__0-006",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 0,
+     "cells": 0,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-008.tentative",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9911",
+    "ios": "P 0.9707",
+    "android": "P 0.9702"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-009.tentative",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9911",
+    "ios": "P 0.9915",
+    "android": "P 0.9913"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-010.tentative",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9911",
+    "ios": "P 0.9707",
+    "android": "P 0.9913"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-011.tentative",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9911",
+    "ios": "P 0.9707",
+    "android": "P 0.9939"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-012",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "ua:table"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9992",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-013",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9854",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-014",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9854",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-015",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9854",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css-tables/absolute-tables-016",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE"
+   ],
+   "composeTables": [
+    {
+     "id": "absolute-tables-016__1__1-049",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 0,
+     "cells": 0,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css-tables/abspos-container-change-dynamic-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL",
+    "TABLE_ROW",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__abspos-container-change-dynamic-001__0-050",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 2,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 0.9654"
+   }
+  },
+  {
+   "test": "css-tables/anonymous-table-cell-margin-collapsing",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "TABLE",
+    "TABLE_ROW"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__anonymous-table-cell-margin-collapsing__1-057",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 3,
+     "cells": 4,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9541",
+    "android": "f 0.9953"
+   }
+  },
+  {
+   "test": "css-tables/anonymous-table-ws-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__anonymous-table-ws-001__1-066",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 0,
+     "cells": 0,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9988",
+    "android": "P 0.9936"
+   }
+  },
+  {
+   "test": "css-tables/background-clip-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__background-clip-001__1-068",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9949"
+   }
+  },
+  {
+   "test": "css-tables/baseline-empty-cell-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__baseline-empty-cell-001__0-072",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9985",
+    "android": "P 0.9956"
+   }
+  },
+  {
+   "test": "css-tables/baseline-vertical",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 8,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__baseline-vertical__0-076",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    }
+   ],
+   "cells": {
+    "web": "f 0.8028",
+    "ios": "f 0.6209",
+    "android": "f 0.5727"
+   }
+  },
+  {
+   "test": "css-tables/border-collapse-dynamic-col-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 22,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL",
+    "TABLE_COLUMN",
+    "TABLE_COLUMN_GROUP",
+    "TABLE_ROW",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__border-collapse-dynamic-col-001__0-088",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 4,
+     "cells": 16,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9404",
+    "android": "P 0.9812"
+   }
+  },
+  {
+   "test": "css-tables/border-collapse-dynamic-oof",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL"
+   ],
+   "composeTables": [
+    {
+     "id": "border-collapse-dynamic-oof__1__0-112",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "f 0.9367",
+    "android": "P 0.9692"
+   }
+  },
+  {
+   "test": "css-tables/border-collapse-dynamic-section",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL",
+    "TABLE_ROW",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__border-collapse-dynamic-section__1-116",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9949"
+   }
+  },
+  {
+   "test": "css-tables/border-collapse-empty-cell",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__border-collapse-empty-cell__0-123",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9309",
+    "android": "f 0.929"
+   }
+  },
+  {
+   "test": "css-tables/border-collapse-rowspan-cell",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__border-collapse-rowspan-cell__0-130",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9954",
+    "ios": "P 0.9984",
+    "android": "P 0.9926"
+   }
+  },
+  {
+   "test": "css-tables/border-conflict-resolution",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 8,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__border-conflict-resolution__1-136",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 5,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    }
+   ],
+   "cells": {
+    "web": "f 0.9404",
+    "ios": "f 0.8539",
+    "android": "f 0.8394"
+   }
+  },
+  {
+   "test": "css-tables/box-shadow-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__box-shadow-001__1-145",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9973",
+    "android": "P 0.9948"
+   }
+  },
+  {
+   "test": "css-tables/caption-relative-positioning",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:caption",
+    "ua:table"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.9842",
+    "ios": "P 0.9825",
+    "android": "P 0.9967"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-color-change-with-compositing",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 8,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL",
+    "TABLE_ROW",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__collapsed-border-color-change-with-compositing__0-155",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.986",
+    "android": "P 0.9822"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-paint-phase-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9973",
+    "android": "P 0.9702"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-paint-phase-002",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9534"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-positioned-tr-td",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 9,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__collapsed-border-positioned-tr-td__0-173",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 6,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9826",
+    "android": "P 0.974"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-remove-row-group",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL",
+    "TABLE_HEADER_GROUP",
+    "TABLE_ROW",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__collapsed-border-remove-row-group__0-182",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9853",
+    "android": "P 0.9972"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-sideways-rl-rtl-overflow",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "collapsed-border-sideways-rl-rtl-overflow__0__0-191",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.8732",
+    "android": "f 0.8549"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-vertical-lr-rtl-overflow",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "collapsed-border-vertical-lr-rtl-overflow__0__0-200",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.8675",
+    "android": "f 0.8578"
+   }
+  },
+  {
+   "test": "css-tables/collapsed-border-vertical-rtl-overflow",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "collapsed-border-vertical-rtl-overflow__0__0-209",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 2,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.8732",
+    "android": "f 0.8549"
+   }
+  },
+  {
+   "test": "css-tables/colspan-004",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 8,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "colspan-004__1__0-218",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 5,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    }
+   ],
+   "cells": {
+    "web": "f 0.999",
+    "ios": "P 0.9847",
+    "android": "P 0.9873"
+   }
+  },
+  {
+   "test": "css-tables/empty-table-height",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 1,
+   "displays": [
+    "TABLE"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__empty-table-height__0-227",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 0,
+     "cells": 0,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 1",
+    "android": "P 1"
+   }
+  },
+  {
+   "test": "css-tables/fixup-dynamic-anonymous-inline-table-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "TABLE_CELL",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9456",
+    "android": "f 0.944"
+   }
+  },
+  {
+   "test": "css-tables/fixup-dynamic-anonymous-inline-table-002",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "TABLE_CELL",
+    "TABLE_ROW"
+   ],
+   "composeTables": [
+    {
+     "id": "fixup-dynamic-anonymous-inline-table-002__1__1-240",
+     "route": "declared",
+     "display": "TABLE_ROW",
+     "tag": "span",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9456",
+    "android": "f 0.9434"
+   }
+  },
+  {
+   "test": "css-tables/fixup-dynamic-anonymous-inline-table-003",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "TABLE_CELL"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9827",
+    "android": "P 0.9984"
+   }
+  },
+  {
+   "test": "css-tables/fixup-dynamic-anonymous-table-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "TABLE_CELL"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.9451",
+    "android": "P 0.9709"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/extra-height-given-to-all-row-groups-001",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:thead",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-001__2-256",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9952"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/extra-height-given-to-all-row-groups-002",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-002__2-263",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9952"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/extra-height-given-to-all-row-groups-005",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tfoot",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__extra-height-given-to-all-row-groups-005__2-270",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9952"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/percentage-sizing-of-table-cell-007",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "ua:table",
+    "ua:td"
+   ],
+   "composeTables": [],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9558",
+    "android": "f 0.9412"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/percentage-sizing-of-table-cell-children-003",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__2-281",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9954"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/percentage-sizing-of-table-cell-children-004",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-004__2-286",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9954"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/percentage-sizing-of-table-cell-children-005",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 2,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-005__2-291",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9954"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/percentage-sizing-of-table-cell-children-006",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-006__2-297",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": null,
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 2,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.999",
+    "ios": "P 0.9974",
+    "android": "P 0.9954"
+   }
+  },
+  {
+   "test": "css-tables/height-distribution/td-different-subpixel-padding-in-same-row-vertical-rl",
+   "section": "css-tables",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 7,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-tables__height-distribution__td-different-subpixel-padding-in-same-row-vertical-rl__1-302",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 5,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9638",
+    "android": "P 0.9609"
+   }
+  },
+  {
+   "test": "css-text/hanging-punctuation/hanging-scrollable-001",
+   "section": "css-text",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "TABLE",
+    "TABLE_CELL",
+    "TABLE_ROW",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-text__hanging-punctuation__hanging-scrollable-001__1-171",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9914",
+    "ios": "P 0.9912",
+    "android": "P 0.9742"
+   }
+  },
+  {
+   "test": "css-text-decor/text-decoration-propagation-05",
+   "section": "css-text-decor",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 3,
+   "displays": [
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "text-decoration-propagation-05__0__0-225",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9841",
+    "android": "P 0.9928"
+   }
+  },
+  {
+   "test": "css-values/calc-height-table-1",
+   "section": "css-values",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 8,
+   "displays": [
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-values__calc-height-table-1__0-057",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 2,
+     "cells": 4,
+     "fabricatedStroke": false,
+     "firstFillRows": 2
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "f 0.8742",
+    "android": "f 0.8989"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-001",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-001__2-440",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "f 0.9254",
+    "ios": "f 0.8771",
+    "android": "f 0.8744"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-002",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-002__2-448",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "f 0.9254",
+    "ios": "f 0.8771",
+    "android": "f 0.8744"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-003",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:col",
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-003__2-456",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9761",
+    "ios": "P 0.9535",
+    "android": "P 0.9507"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-004",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:colgroup",
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-004__2-465",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9761",
+    "ios": "P 0.9535",
+    "android": "P 0.9507"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-005",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-005__2-474",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9578",
+    "ios": "f 0.942",
+    "android": "f 0.9347"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-006",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 4,
+   "displays": [
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-006__2-482",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 0.9578",
+    "ios": "f 0.942",
+    "android": "f 0.9347"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-007",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:col",
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-007__2-490",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "f 0.917",
+    "ios": "f 0.911",
+    "android": "f 0.9034"
+   }
+  },
+  {
+   "test": "css-writing-modes/ch-units-vrl-008",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 5,
+   "displays": [
+    "ua:colgroup",
+    "ua:table",
+    "ua:tbody",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__css-writing-modes__ch-units-vrl-008__2-499",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "COLLAPSE",
+     "rows": 1,
+     "cells": 1,
+     "fabricatedStroke": false,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "f 0.917",
+    "ios": "f 0.911",
+    "android": "f 0.9034"
+   }
+  },
+  {
+   "test": "css-writing-modes/direction-upright-002",
+   "section": "css-writing-modes",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 90,
+   "displays": [
+    "ua:col",
+    "ua:colgroup",
+    "ua:table",
+    "ua:td",
+    "ua:tr"
+   ],
+   "composeTables": [
+    {
+     "id": "direction-upright-002__1__0-561",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__2__0-580",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__3__0-599",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__4__0-618",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__5__0-637",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__7__0-657",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__8__0-676",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__9__0-695",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__10__0-714",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    },
+    {
+     "id": "direction-upright-002__11__0-733",
+     "route": "ua-fold",
+     "display": null,
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 1,
+     "cells": 3,
+     "fabricatedStroke": false,
+     "firstFillRows": 1
+    }
+   ],
+   "cells": {
+    "web": "f 0.7002",
+    "ios": "f 0.6092",
+    "android": "f 0.5935"
+   }
+  },
+  {
+   "test": "selectors/invalidation/nth-child-of-attr-largedom",
+   "section": "selectors",
+   "forestTrigger": false,
+   "tableFamilyBoxes": 297,
+   "displays": [
+    "NONE",
+    "TABLE",
+    "TABLE_CELL",
+    "TABLE_HEADER_GROUP",
+    "TABLE_ROW",
+    "TABLE_ROW_GROUP"
+   ],
+   "composeTables": [
+    {
+     "id": "wpt__selectors__invalidation__nth-child-of-attr-largedom__0-248",
+     "route": "declared",
+     "display": "TABLE",
+     "tag": "table",
+     "model": "SEPARATE",
+     "rows": 147,
+     "cells": 147,
+     "fabricatedStroke": true,
+     "firstFillRows": 0
+    }
+   ],
+   "cells": {
+    "web": "P 1",
+    "ios": "P 0.9863",
+    "android": "f 0.9442"
+   }
+  }
+ ]
+}

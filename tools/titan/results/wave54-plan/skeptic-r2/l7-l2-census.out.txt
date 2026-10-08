@@ -1,0 +1,14 @@
+documents carrying All: 11
+   wpt__css-cascade__all-prop-001
+   wpt__css-cascade__all-prop-002
+   wpt__css-cascade__all-prop-inherit-color
+   wpt__css-cascade__all-prop-initial-color
+   wpt__css-cascade__all-prop-initial-visited
+   wpt__css-cascade__all-prop-revert-color
+   wpt__css-cascade__all-prop-unset-color
+   wpt__css-display__display-contents-button
+   wpt__css-display__display-contents-details
+   wpt__css-display__display-contents-fieldset
+   wpt__css-ui__appearance-revert-001.tentative
+body-roots whose last Display is TABLE/INLINE_TABLE: 1
+   wpt__CSS2__css21-errata__s-11-1-1b-006 TABLE

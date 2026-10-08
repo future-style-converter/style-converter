@@ -1,0 +1,7 @@
+cells checked OK 212 (multi-cell citations 33); mismatches 6; unparsed 0
+  MISMATCH PLAN.md:191  "`text-decoration-inset-005/-006/-014` ios/android f 0.8987" -> css-text-decor/text-decoration-inset-005.html ios: cited f 0.8987, wave53-final f 0.8995
+  MISMATCH PLAN.md:191  "`text-decoration-inset-005/-006/-014` ios/android f 0.8987" -> css-text-decor/text-decoration-inset-005.html android: cited f 0.8987, wave53-final f 0.9
+  MISMATCH PLAN.md:191  "`text-decoration-inset-005/-006/-014` ios/android f 0.8987" -> css-text-decor/text-decoration-inset-006.html android: cited f 0.8987, wave53-final f 0.8993
+  MISMATCH PLAN.md:191  "`text-decoration-inset-005/-006/-014` ios/android f 0.8987" -> css-text-decor/text-decoration-inset-014.html ios: cited f 0.8987, wave53-final f 0.9238
+  MISMATCH PLAN.md:191  "`text-decoration-inset-005/-006/-014` ios/android f 0.8987" -> css-text-decor/text-decoration-inset-014.html android: cited f 0.8987, wave53-final f 0.923
+  MISMATCH PLAN.md:616  "`block-ellipsis-002` ios / android | P 0.9813" -> css-overflow/line-clamp/block-ellipsis-002.html android: cited P 0.9813, wave53-final P 0.9884

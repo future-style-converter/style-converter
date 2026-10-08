@@ -1,0 +1,14 @@
+FLEX: 45 containers in 45 docs; zero gap on a decorated axis: 10
+INLINE_FLEX: 1 containers in 1 docs; zero gap on a decorated axis: 0
+MULTICOL: 5 containers in 4 docs; zero gap on a decorated axis: 0
+zero-gap decorated containers:
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-033 FLEX cg=null rg=null RowRuleStyle,RowRuleColor,RowRuleWidth,ColumnRuleStyle,ColumnRuleColor,ColumnRuleWidth
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-040 FLEX cg=null rg=null ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-041 FLEX cg=null rg=null ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-042 FLEX cg=null rg=null ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-043 FLEX cg=null rg=null RowRuleWidth,RowRuleStyle,RowRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-045 FLEX cg=5 rg=null RowRuleWidth,RowRuleStyle,RowRuleColor,ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-047 FLEX cg=null rg=null RowRuleWidth,RowRuleStyle,RowRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-048 FLEX cg=null rg=null RowRuleWidth,RowRuleStyle,RowRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-049 FLEX cg=null rg=null RowRuleWidth,RowRuleStyle,RowRuleColor
+  css-gaps/wpt__css-gaps__flex__flex-gap-decorations-050 FLEX cg=null rg=10 ColumnRuleWidth,ColumnRuleStyle,ColumnRuleColor,RowRuleWidth,RowRuleColor,RowRuleStyle,RowRuleBreak

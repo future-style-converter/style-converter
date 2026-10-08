@@ -1,0 +1,135 @@
+CSS2                 web      compared 48  identical 47  re-encoded  0  changed  1 (carriers 0)
+      LEAK  wpt__CSS2__css21-errata__s-11-1-1b-006  400 px, max channel delta 255
+CSS2                 ios      compared 48  identical 47  re-encoded  0  changed  1 (carriers 0)
+      LEAK  wpt__CSS2__css21-errata__s-11-1-1b-006  200 px, max channel delta 255
+CSS2                 android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-anchor-position  web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-anchor-position  ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-anchor-position  android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-backgrounds      web      compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-backgrounds__background-attachment-margin-root-001  125944 px, max channel delta 255
+      LEAK  wpt__css-backgrounds__background-attachment-margin-root-002  203344 px, max channel delta 255
+css-backgrounds      ios      compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-backgrounds__background-attachment-margin-root-001  172757 px, max channel delta 255
+      LEAK  wpt__css-backgrounds__background-attachment-margin-root-002  203344 px, max channel delta 255
+css-backgrounds      android  compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-backgrounds__background-attachment-margin-root-001  125944 px, max channel delta 255
+      LEAK  wpt__css-backgrounds__background-attachment-margin-root-002  203344 px, max channel delta 255
+css-break            web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-break            ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-break            android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-cascade          web      compared 43  identical 43  re-encoded  0  changed  0 (carriers 0)
+css-cascade          ios      compared 43  identical 43  re-encoded  0  changed  0 (carriers 0)
+css-cascade          android  compared 43  identical 43  re-encoded  0  changed  0 (carriers 0)
+css-color            web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-color            ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-color            android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-contain          web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-contain          ios      compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-contain__contain-inline-size-bfc-floats-001  8000 px, max channel delta 255
+      LEAK  wpt__css-contain__contain-inline-size-bfc-floats-002  12000 px, max channel delta 255
+css-contain          android  compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-contain__contain-inline-size-bfc-floats-001  8000 px, max channel delta 255
+      LEAK  wpt__css-contain__contain-inline-size-bfc-floats-002  12000 px, max channel delta 255
+css-counter-styles   web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-counter-styles   ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-counter-styles   android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-display          web      compared 48  identical 47  re-encoded  0  changed  1 (carriers 0)
+      LEAK  wpt__css-display__display-contents-root-background  233620 px, max channel delta 255
+css-display          ios      compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-display__display-contents-root-background  233853 px, max channel delta 255
+      LEAK  wpt__css-display__display-flow-root-002  606 px, max channel delta 255
+css-display          android  compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-display__display-contents-root-background  233837 px, max channel delta 255
+      LEAK  wpt__css-display__display-flow-root-002  606 px, max channel delta 255
+css-flexbox          web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-flexbox          ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-flexbox          android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-gaps             web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-gaps             ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-gaps             android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-grid             web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-grid             ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-grid             android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-images           web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-images           ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-images           android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-lists            web      compared 48  identical 47  re-encoded  0  changed  1 (carriers 0)
+      LEAK  wpt__css-lists__counter-reset-reversed-nested  3350 px, max channel delta 255
+css-lists            ios      compared 48  identical 47  re-encoded  0  changed  1 (carriers 0)
+      LEAK  wpt__css-lists__counter-reset-reversed-nested  3175 px, max channel delta 255
+css-lists            android  compared 48  identical 47  re-encoded  0  changed  1 (carriers 0)
+      LEAK  wpt__css-lists__counter-reset-reversed-nested  3113 px, max channel delta 255
+      WIRE LEAK  css-lists/wpt__css-lists__counter-reset-reversed-nested
+css-masking          web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-masking          ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-masking          android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-multicol         web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-multicol         ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-multicol         android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-overflow         web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-overflow         ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-overflow         android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-position         web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-position         ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-position         android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-pseudo           web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-pseudo           ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-pseudo           android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-sizing           web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-sizing           ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-sizing           android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-tables           web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-tables           ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-tables           android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text             web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text             ios      compared 48  identical 46  re-encoded  0  changed  2 (carriers 0)
+      LEAK  wpt__css-text__hyphens__hyphens-out-of-flow-001  9016 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphens-span-001  11484 px, max channel delta 255
+css-text             android  compared 48  identical 42  re-encoded  0  changed  6 (carriers 0)
+      LEAK  wpt__css-text__hyphens__hyphenate-character-001  3840 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphenate-character-003  4219 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphenate-character-004  748 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphens-out-of-flow-001  2041 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphens-out-of-flow-002  979 px, max channel delta 255
+      LEAK  wpt__css-text__hyphens__hyphens-span-001  3186 px, max channel delta 255
+css-text-decor       web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text-decor       ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-text-decor       android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-transforms       web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-transforms       ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-transforms       android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-ui               web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-ui               ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-ui               android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-values           web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-values           ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-values           android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-view-transitions web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-view-transitions ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-view-transitions android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-writing-modes    web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-writing-modes    ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+css-writing-modes    android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+filter-effects       web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+filter-effects       ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+filter-effects       android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+selectors            web      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+selectors            ios      compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+selectors            android  compared 48  identical 48  re-encoded  0  changed  0 (carriers 0)
+total web: 1435 compared · 1430 identical · 0 re-encoded · 5 changed (0 carriers)
+total ios: 1435 compared · 1425 identical · 0 re-encoded · 10 changed (0 carriers)
+total android: 1435 compared · 1422 identical · 0 re-encoded · 13 changed (0 carriers)
+wire: 1435 documents compared · 1 content-changed · 10 renumbered (ids only, explained by earlier carriers) · 1 outside the plan's wire carriers
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-not-list-item-start  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-not-list-item  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-pseudo-001  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-pseudo-002  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-pseudo-003  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-siblings-001a  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-siblings-001b  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-siblings-002  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-siblings-003  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+      renumbered css-lists/wpt__css-lists__counter-reset-reversed-with-regular  shift +1  by wpt__css-lists__counter-reset-reversed-nested +1 (LEAK)
+
+CONTROL FAILED: 28 capture(s) and 1 wire document(s) changed outside the carriers
