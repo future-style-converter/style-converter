@@ -1,0 +1,12 @@
+## fix-r2/fake-gap-blue
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+exit=0
+## fix-r2/fake-gap-line3
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+exit=0

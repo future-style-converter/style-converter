@@ -1,0 +1,2 @@
+revert rule 4 names: TB-android
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

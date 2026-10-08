@@ -1,0 +1,5 @@
+union carrier captures 122 · unscored / error / excluded: 4
+  css/css-position/overlay/overlay-button-appearance.html web ssim=0.989 excl=true err=undefined
+  css/css-position/position-fixed-scroll-nested-fixed.html ios ssim=1 excl=true err=undefined
+  css/css-anchor-position/anchor-center-safe-rtl.html android ssim=0.8842 excl=true err=undefined
+  css/css-position/position-fixed-scroll-nested-fixed.html android ssim=1 excl=true err=undefined

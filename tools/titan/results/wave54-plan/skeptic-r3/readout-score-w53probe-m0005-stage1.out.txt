@@ -1,0 +1,1 @@
+NOT A --movers 0 RECORD: 1458 cells listed (gained + lost + movers + unmeasured-now) vs 4096 scored on wave53-open; a cell absent from every list would read as "unchanged". Re-run score-gate.mjs with --movers 0.

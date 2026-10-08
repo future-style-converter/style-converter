@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 # integrate-seams.sh — wave 54: apply the lanes' seam patches in the landing order of PLAN.md §3/§4. One patch at a
-# time: `git apply --check`, then `git apply`; the first failure stops the run with the patch named, so nothing lands
-# half-applied out of order. Run from the repo root on a tree whose four seam files are clean
+# time: `git apply --check`, then `git apply`; the first failure stops the run with the patch named, so no patch lands
+# OUT OF ORDER — but the patches before it STAY APPLIED in a real run (fix r2, plan-skeptic N6; --dry-run discards its
+# worktree): restore the four seam files (`git checkout -- <the SEAMS below>`) before re-running. Run from the repo root
+# on a tree whose four seam files are clean
 # (`git status --short -- <seams>` empty). The wave-53 script (tools/titan/results/wave53-plan/integrate-seams.sh)
 # with the wave-54 registry; land-units.sh (written at integration from the lane notes, as in wave 53) applies the
 # same patches one unit at a time right before each unit's commit — this script is the "do they all go in together,

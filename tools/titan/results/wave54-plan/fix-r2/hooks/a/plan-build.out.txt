@@ -1,0 +1,24 @@
+watchlist.txt: 775 watch lines
+expectations.json: union capture carriers {'web': 44, 'ios': 27, 'android': 51} · wire carriers 23
+stage-1 probe (4): CSS2,css-counter-styles,css-tables,css-text
+probe sections (26): CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-writing-modes,filter-effects,selectors · not probed: css-color,css-grid,css-sizing,css-view-transitions
+gating predictions with numeric floors: 31
+revert units (commits): 19
+predicted f->P flips by tier: {"web": {"HIGH/MED-HIGH": 4, "MED/MED-LOW": 5, "LOW": 0}, "ios": {"HIGH/MED-HIGH": 3, "MED/MED-LOW": 6, "LOW": 0}, "android": {"HIGH/MED-HIGH": 6, "MED/MED-LOW": 4, "LOW": 0}}
+  L1-rtl-marker-bake: carriers [1, 1, 4] wire 4 predictions 5 mustNotMove 80 units ['P', 'Mprime']
+  L2-table-body-cell: carriers [0, 0, 1] wire 0 predictions 1 mustNotMove 97 units ['TB-android']
+  L3-hyphenate-character: carriers [15, 16, 15] wire 19 predictions 46 mustNotMove 74 units ['U1', 'U2-android', 'U2-ios', 'U3', 'U3b']
+  L4-oof-layout: carriers [0, 7, 21] wire 0 predictions 26 mustNotMove 253 units ['OOF-android', 'OOF-ios', 'CBB-android', 'GAP-android', 'GAP-ios']
+  L5-ua-heading-face: carriers [0, 3, 10] wire 0 predictions 13 mustNotMove 46 units ['U1-android', 'U2-ios']
+  L6-web-tail: carriers [28, 0, 0] wire 0 predictions 27 mustNotMove 68 units ['RS', 'W1']
+  L7-label-chrome: carriers [0, 0, 0] wire 0 predictions 6 mustNotMove 33 units ['U1', 'U2-seed']
+undirected prediction rows (exempt from revert rule 2): 24: css-text/hyphens/hyphenate-character-002.html ios; css-text/hyphens/hyphenate-limit-chars-001.html ios; filter-effects/backdrop-filter-clip-rect.html web; filter-effects/backdrop-filter-clip-rect.html ios; filter-effects/backdrop-filter-edge-clipping.html web; filter-effects/backdrop-filter-edge-clipping.html ios; filter-effects/backdrop-filter-paint-order.html web; filter-effects/backdrop-filter-paint-order.html ios; filter-effects/backdrop-filter-clip-rect.html android; filter-effects/backdrop-filter-edge-clipping.html android; filter-effects/backdrop-filter-paint-order.html android; css-multicol/balance-grid-container.html ios; css-multicol/balance-grid-container.html android; css-multicol/column-height-009.html web; css-multicol/column-height-009.html ios; css-multicol/column-height-009.html android; css-contain/contain-content-004.html android; css-gaps/flex/flex-gap-decorations-006.html android; css-lists/counter-list-item.html android; css-lists/counter-reset-increment-overflow-underflow.html android; css-text-decor/text-decoration-subelements-003.html android; filter-effects/backdrop-filter-border-radius-change.html android; filter-effects/backdrop-filter-corner-shape-change.html android; css-display/display-flow-root-list-item-001.html web
+geometry keys: 185 = gating 30 + report 36 + control 112 + withdrawn 7
+picture-correct tally: 37 in full + 2 in part, each with its geometry key
+probe decision L1-rtl-marker-bake Mprime: withdrawn predictions 2, demoted [], geometry keys ['rtl-marker-bake.geometry.py [M] counter-suffix android', 'rtl-marker-bake.geometry.py [M] counter-suffix ios', 'rtl-marker-bake.geometry.py [M] counter-suffix web', 'lists-bakes.geometry.py counter-suffix android', 'lists-bakes.geometry.py counter-suffix web'], captures 2
+probe decision L2-table-body-cell TB-android: withdrawn predictions 1, demoted [], geometry keys ['compose-table-body-cell.geometry.py 006 android', 'display-table-body.geometry.py 006 android'], captures 1
+must-not-move exclusions (another lane's carrier on that platform): 3
+    L2-table-body-cell: css-contain/contain-content-004.html android  -> carrier of L4-oof-layout
+    L5-ua-heading-face: css-break/block-in-inline-015-print.html web  -> carrier of L6-web-tail
+    L6-web-tail: css-break/block-in-inline-015-print.html android  -> carrier of L5-ua-heading-face
+exit 0

@@ -1,0 +1,14 @@
+rows 12
+  ('filter-effects/backdrop-filter-clip-rect.html android', 'up; a flip is possible', 'up-or-stay')
+  ('filter-effects/backdrop-filter-edge-clipping.html android', 'up; a flip is possible', 'up-or-stay')
+  ('filter-effects/backdrop-filter-paint-order.html android', 'up; a flip is possible', 'up-or-stay')
+  ('css-masking/clip-path/clip-path-filter-order.html web', 'up or unchanged', 'up-or-stay')
+  ('css-masking/clip-path/clip-path-filter-order.html ios', 'up or unchanged', 'up-or-stay')
+  ('css-masking/clip-path/clip-path-filter-order.html android', 'up or unchanged', 'up-or-stay')
+  ('css-multicol/balance-grid-container.html web', 'up or unchanged', 'up-or-stay')
+  ('css-multicol/balance-grid-container.html ios', 'up or unchanged', 'up-or-stay')
+  ('css-multicol/balance-grid-container.html android', 'up or unchanged', 'up-or-stay')
+  ('css-multicol/column-height-009.html web', 'up or unchanged', 'up-or-stay')
+  ('css-multicol/column-height-009.html ios', 'up or unchanged', 'up-or-stay')
+  ('css-multicol/column-height-009.html android', 'up or unchanged', 'up-or-stay')
+undirected 10

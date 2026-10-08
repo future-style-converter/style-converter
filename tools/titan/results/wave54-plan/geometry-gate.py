@@ -22,7 +22,10 @@
 # Usage: python3 tools/titan/results/wave54-plan/geometry-gate.py <run> [--base wave54-open] [--lanes L1,L4]
 #        [--json out.json] [--exp expectations.json] [--self-test]
 #   exit 1 on a GATING FAIL or a probe self-check failure; exit 2 when expectations.json is STALE (a gating key needs a
-#   unit that probeDecisions lists as reverted: re-run plan-build.py).
+#   unit that probeDecisions lists as reverted: re-run plan-build.py); exit 3 when no gating key FAILs but at least one
+#   GATING key is UNMEASURED (fix r2, plan-skeptic R2-S2: a gating key whose capture is MISSING or whose line is absent
+#   is never a pass — R6 / revert rule 4 read "exit 0", which now means every gating key of a unit still on the tree
+#   PASSED). A run that legitimately lacks a lane's sections is read with --lanes narrowed to the lanes it covers.
 #   --self-test (the lanes' build-workflow rule 5, on wave53-final --base wave53-open): exit 0 iff every GATING key
 #   FAILs, every control PASSes and every report key FAILs — the rules can fail and the controls hold.
 # Executed at planning (PLAN §6) and re-executed at the fix pass: wave53-final --base wave53-open fails every gating
@@ -118,10 +121,12 @@ for lane_id, lane in EXP['lanes'].items():
 n = {v: sum(1 for r in report if r['verdict'] == v) for v in ('PASS', 'FAIL', 'UNMEASURED')}
 by = lambda c, v: sum(1 for r in report if r['class'] == c and r['verdict'] == v)
 print(f'\ngeometry-gate {run} (base {base}): {len(report)} keys — PASS {n["PASS"]} · FAIL {n["FAIL"]} '
-      f'(gating {gating_fail}) · UNMEASURED {n["UNMEASURED"]} · probe self-check failures {selfcheck_fail}')
+      f'(gating {gating_fail}) · UNMEASURED {n["UNMEASURED"]} (gating {by("gating", "UNMEASURED")}) · probe self-check failures {selfcheck_fail}')
 print('  by class: ' + ' · '.join(f'{c} {sum(1 for r in report if r["class"] == c)} (PASS {by(c, "PASS")} FAIL {by(c, "FAIL")})'
                                   for c in ('gating', 'control', 'report', 'withdrawn')))
 units = sorted({r['gatingUnit'] for r in report if r['verdict'] == 'FAIL' and r['class'] == 'gating'})
+# fix r2 (R2-S2): a GATING key that could not be read gates as "not PASS" — never silently green.
+gating_unmeasured = [r for r in report if r['class'] == 'gating' and r['verdict'] == 'UNMEASURED']
 if units:
     print('revert rule 4 names:', ', '.join(units))
 bad_ctl = [r for r in report if r['class'] == 'control' and r['verdict'] == 'FAIL']
@@ -129,8 +134,14 @@ if bad_ctl:
     print(f'CONTROL FAILS ({len(bad_ctl)}) — a must-not-move picture moved; diagnose through rules 5 / R4:')
     for r in bad_ctl:
         print(f'   {r["lane"]} {r["script"]} {r["key"]}')
+if gating_unmeasured:
+    print(f'UNMEASURED GATING KEYS ({len(gating_unmeasured)}) — not a pass: re-run the section (R3) or narrow --lanes to the lanes '
+          f'this run covers; exit 3 unless a gating key FAILed (exit 1):')
+    for r in gating_unmeasured:
+        print(f'   {r["lane"]} {r["script"]} {r["key"]} [unit {r["gatingUnit"]}]')
 if json_out:
-    json.dump({'run': run, 'base': base, 'rows': report, 'gatingFail': gating_fail, 'selfCheckFail': selfcheck_fail},
+    json.dump({'run': run, 'base': base, 'rows': report, 'gatingFail': gating_fail, 'selfCheckFail': selfcheck_fail,
+               'gatingUnmeasured': len(gating_unmeasured)},
               open(json_out, 'w'), indent=1, ensure_ascii=False)
 if self_test:
     # The rules can fail (every gating key FAILs on the pre-fix pictures), the controls hold, the report keys are honest.
@@ -140,4 +151,4 @@ if self_test:
         print(f'SELF-TEST VIOLATION {r["class"]} {r["verdict"]}: {r["lane"]} {r["script"]} {r["key"]}')
     print(f'self-test: {"HOLDS" if not viol and not selfcheck_fail else "FAILS"} — {len(viol)} violation(s), {selfcheck_fail} self-check failure(s)')
     sys.exit(0 if not viol and not selfcheck_fail else 1)
-sys.exit(1 if gating_fail or selfcheck_fail else 0)
+sys.exit(1 if gating_fail or selfcheck_fail else 3 if gating_unmeasured else 0)

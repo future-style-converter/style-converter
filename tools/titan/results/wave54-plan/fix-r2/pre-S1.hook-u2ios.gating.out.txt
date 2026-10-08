@@ -1,0 +1,5 @@
+pre-S1 css-text/hyphens/hyphenate-character-001.html ios gating True floor 0.965
+pre-S1 css-text/hyphens/hyphenate-character-003.html ios gating True floor 0.965
+pre-S1 css-text/hyphens/hyphenate-character-004.html ios gating False floor None
+pre-S1 css-text/hyphens/hyphenate-character-002.html ios gating False floor None
+pre-S1 gating total 34

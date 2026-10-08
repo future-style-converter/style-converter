@@ -1,0 +1,1 @@
+ORDER: this record is score-gate.mjs wave53-probe → wave53-open; the probe read needs wave53-open FIRST (score-gate.mjs wave53-open <probe> --movers 0 --json …), so that Δ = probe − wave53-open. Refusing.

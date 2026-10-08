@@ -1,0 +1,9 @@
+undirected 24 · P today 6 · f today 18
+  P filter-effects/backdrop-filter-clip-rect.html web P 0.959
+  P filter-effects/backdrop-filter-clip-rect.html ios P 0.956
+  P filter-effects/backdrop-filter-edge-clipping.html web P 0.9595
+  P filter-effects/backdrop-filter-edge-clipping.html ios P 0.9578
+  P filter-effects/backdrop-filter-paint-order.html web P 0.9595
+  P filter-effects/backdrop-filter-paint-order.html ios P 0.9578
+directed with direction field present on every corpus row: True
+every undirected row has directionWhy: True

@@ -1,0 +1,4 @@
+807:  'scoreReadout': ('node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt'
+808-                   ' --movers 0.005 > tools/titan/results/wave54-gate/score-final.txt   (the human-readable mover list for the PR; adjudicates nothing)'),
+movers0005 mentions: plan-build 0 PLAN 0
+1469:13. **Ship** per wave skill Phase 6. The corpus snapshot gets `artifact` / `reproduce --run-id` = `wave54-final`. BACKLOG

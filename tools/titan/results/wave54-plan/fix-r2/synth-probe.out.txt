@@ -1,0 +1,7 @@
+fall filter-effects/backdrop-filter-plus-filter.html web 1; undirected css-contain/contain-content-004.html android 0.8286; lost css-overflow/line-clamp/block-ellipsis-002.html android 0.9884; leak mnm CSS2/abspos/static-fixed-inside-abspos.html web 0.999; leak free CSS2/abspos/between-float-and-text.html ios 0.922
+allmet: gained 13 lost 0 movers 3514 unmeasured-now 569 missing sections css-color,css-grid,css-sizing,css-view-transitions
+fall: gained 13 lost 0 movers 3514 unmeasured-now 569 missing sections css-color,css-grid,css-sizing,css-view-transitions
+undirected: gained 13 lost 0 movers 3514 unmeasured-now 569 missing sections css-color,css-grid,css-sizing,css-view-transitions
+lost: gained 13 lost 1 movers 3513 unmeasured-now 569 missing sections css-color,css-grid,css-sizing,css-view-transitions
+leak: gained 13 lost 0 movers 3514 unmeasured-now 569 missing sections css-color,css-grid,css-sizing,css-view-transitions
+missing: gained 11 lost 0 movers 3372 unmeasured-now 713 missing sections css-color,css-gaps,css-grid,css-sizing,css-view-transitions

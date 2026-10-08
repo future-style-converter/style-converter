@@ -1,0 +1,25 @@
+wave53-final           ref      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+wave53-final           web      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+wave53-final           ios      {65: [], 115: []} → COLUMN READ WRONG (red runs col 65 [] vs ref [(16, 60), (121, 165)])
+wave53-final           android  {65: [], 115: []} → COLUMN READ WRONG (red runs col 65 [] vs ref [(16, 60), (121, 165)])
+wave54-open            ref      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+wave54-open            web      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+wave54-open            ios      {65: [], 115: []} → COLUMN READ WRONG (red runs col 65 [] vs ref [(16, 60), (121, 165)])
+wave54-open            android  {65: [], 115: []} → COLUMN READ WRONG (red runs col 65 [] vs ref [(16, 60), (121, 165)])
+fake-gap               ref      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+fake-gap               web      {65: [(16, 60), (71, 110), (121, 165)], 115: [(16, 60), (121, 165)]} → COLUMN READ WRONG (red runs col 65 [(16, 60), (71, 110), (121, 165)] vs ref [(16, 60), (121, 165)])
+fake-gap               ios      {65: [(16, 60), (71, 110), (121, 165)], 115: [(16, 60), (121, 165)]} → COLUMN READ WRONG (red runs col 65 [(16, 60), (71, 110), (121, 165)] vs ref [(16, 60), (121, 165)])
+fake-gap               android  {65: [(16, 60), (71, 110), (121, 165)], 115: [(16, 60), (121, 165)]} → COLUMN READ WRONG (red runs col 65 [(16, 60), (71, 110), (121, 165)] vs ref [(16, 60), (121, 165)])
+fake-gap-blue          ref      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+fake-gap-blue          web      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+fake-gap-blue          ios      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+fake-gap-blue          android  {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+fake-gap-line3         ref      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+fake-gap-line3         web      {65: [(16, 60)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ WRONG (red runs col 65 [(16, 60)] vs ref [(16, 60), (121, 165)])
+fake-gap-line3         ios      {65: [(16, 60)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ WRONG (red runs col 65 [(16, 60)] vs ref [(16, 60), (121, 165)])
+fake-gap-line3         android  {65: [(16, 60)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ WRONG (red runs col 65 [(16, 60)] vs ref [(16, 60), (121, 165)])
+fake-gap-vshift5       ref      {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 110), (121, 165)]} → COLUMN READ OK
+fake-gap-vshift5       web      {65: [(16, 60), (121, 165)], 115: [(16, 60), (76, 115), (121, 165)]} → COLUMN READ WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)])
+fake-gap-vshift5       ios      {65: [(16, 60), (121, 165)], 115: [(16, 60), (76, 115), (121, 165)]} → COLUMN READ WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)])
+fake-gap-vshift5       android  {65: [(16, 60), (121, 165)], 115: [(16, 60), (76, 115), (121, 165)]} → COLUMN READ WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)])
+fake-gap-line2-short4  android  {65: [(16, 60), (121, 165)], 115: [(16, 60), (71, 106), (121, 165)]} → COLUMN READ WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 11

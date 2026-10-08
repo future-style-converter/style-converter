@@ -186,7 +186,7 @@ There are seven builder lanes, at the top of the 5–7 band.
 |---|---|---|---|---|---|---|
 | L1 | rtl-marker-bake | rtl-marker-bake (GO) | `bidi-lines-001` android f 0.8934, `-002` android P 0.9534; `counter-suffix` web P 0.9818 (wrong-side markers) / ios P 0.9802 / android P 0.9547 (DEGENERATE) | +1 android (HIGH, device-measured); counter-suffix web faithful (HIGH), ios/android RTL rows picture-correct (MED-HIGH / MED, device-gated at stage 1) | **P**, **M′** | S–M |
 | L2 | table-body-cell | compose-table-body-cell (GO-SMALL) | `s-11-1-1b-006` android P 0.9944 (DEGENERATE, the square 5 px too high) | 0 flips; DEGENERATE → faithful (MED-HIGH, device-gated at stage 1) | **TB-android** | S |
-| L3 | hyphenate-character | hyphenate-character-compose (GO) | `hyphenate-character-001/-003/-004` ×3 f 0.8812–0.935 (DEGENERATE by construction since wave 53); the 18-document br radius | +2 ios (MED-HIGH); +1 ios, +2 web at MED / MED-LOW; 5 P→P picture-correct (block-ellipsis ×4 web, -002 ios) | **U1**, **U2-android**, **U2-ios**, **U3**, **U3b** | M |
+| L3 | hyphenate-character | hyphenate-character-compose (GO) | `hyphenate-character-001/-003/-004` ×3 f 0.8812–0.935 (DEGENERATE by construction since wave 53); the 18-document br radius | +2 ios (MED-HIGH); +2 ios, +4 web at MED / MED-LOW (incl. clip-path-filter-order web / iOS and balance-grid-container web on replay B, fix round 2); 4 P→P picture-correct (block-ellipsis ×4 web; -002 ios is OUT and stays DEGENERATE, fix round 1 S3) | **U1**, **U2-android**, **U2-ios**, **U3**, **U3b** | M |
 | L4 | oof-layout | oof-containing-block (GO), compose-wpt-content-box-cb (GO-SMALL), flex-zero-gap-rules (GO-SMALL) | `contain-content-003/-011` android f 0.9405 / 0.9284; `backdrop-filter-containing-block` ios f 0.7955 / android f 0.7506; `nested-border-radius-clip-3` android f 0.9574; `flex-gap-decorations-033` ios/android f 0.94; 17 red-ink / short-box DEGENERATE passes | +4 android, +1 ios (HIGH / MED-HIGH); +1 / +1 at MED; 17 DEGENERATE → faithful | **OOF-android**, **OOF-ios**, **CBB-android**, **GAP-android**, **GAP-ios** | M |
 | L5 | ua-heading-face | ua-heading-face (GO) | `block-in-inline-015-print` android f 0.9489; `text-decoration-inset-005/-006/-014` ios/android f 0.8987–0.9238 | +1 android (HIGH); +2 ios / +2 android at MED; +1 ios / +1 android at MED-LOW | **U1-android**, **U2-ios** | S–M |
 | L6 | web-tail | web-root-separator (GO), web-out-of-flow-hyphen-box (GO-SMALL) | `box-sizing-007/-008/-022` web f 0.9036 / 0.8943 / 0.9442; `semi-replaced-stretch-other` web f 0.941; `hyphens-out-of-flow-002` web f 0.9411 (never moved in 13 runs); 14 web DEGENERATE passes | +4 web (HIGH / MED-HIGH); +1 at MED; 14 DEGENERATE → faithful | **RS**, **W1** | S |
@@ -194,9 +194,12 @@ There are seven builder lanes, at the top of the 5–7 band.
 
 **Expected movement against `wave54-open`** (which should equal `wave53-final`; §8 step 1).
 - **HIGH and MED-HIGH flips: web +4 · iOS +3 · Android +6**, giving **web 1236/1372 · iOS 1128/1362 · Android 1121/1362**.
-- With the MED and MED-LOW flips: web +3 · iOS +5 · Android +4 more, a ceiling of **web 1239 · iOS 1133 · Android 1125**.
-- LOW / LOW-MED possibles, never counted: web `hyphenate-character-002/-004`; Android `hyphenate-character-001/-003`,
-  `backdrop-filter-clip-rect` / `-edge-clipping` / `-paint-order`.
+- With the MED and MED-LOW flips: web +5 · iOS +6 · Android +4 more, a ceiling of **web 1241 · iOS 1134 · Android 1125**
+  (fix round 2, R2-S4: replay B on their own pixels adds `clip-path-filter-order` web / iOS and `balance-grid-container`
+  web at MED; it was web +3 · iOS +5, 1239 / 1133).
+- LOW / LOW-MED possibles, never counted: web `hyphenate-character-002/-004`; Android `hyphenate-character-001/-003` and
+  `clip-path-filter-order` (replay B 0.9549). The three `backdrop-filter-*` Android rows are undirected movers now (not
+  replayable: R2-S4).
 - **Lost 0. Unmeasured-now 0. Newly measured 0.**
 
 **Passing cells made picture-correct with no change of verdict: 37 in full and 2 in part** (fix round 1, S3; 38 before).
@@ -288,10 +291,12 @@ device probe and a geometry gate (stage 1).**
 **Lane facts.**
 - **own:**
   - `tools/titan/bidi-bake.mjs`: hunk P plus the two M′ call-site lines and the import. The wave-53 fix-pass state was
-    +95 / −4 over today's 1172 lines (`git diff --stat a8ffd1c6^ b0edb788^`); the lane keeps every NEW function except
+    +91 / −4 over today's 1172 lines (`git diff --numstat a8ffd1c6^ b0edb788^ -- tools/titan/bidi-bake.mjs`; the 95 written
+    here before fix round 2 was the `--stat` line total); the lane keeps every NEW function except
     `paddingIsSpent` in `bidi-marker-bake.mjs` and reports the final delta (a 0(d) size exception, §9 D8).
   - `tools/titan/bidi-marker-bake.mjs` (restored).
-  - `tools/titan/bidi-bake.test.mjs`, with the pins split per unit.
+  - `tools/titan/bidi-bake.test.mjs`, with the pins split per unit (758 lines at HEAD, already past the ~300-line split
+    line: the lane adds its pins in per-unit `describe` blocks and reports the final count, like the 0(d) exception, §9 D8).
   - `tools/titan/results/wave54-rtl-marker-bake/`: the note, mutation logs, and an adapted COPY of
     `wave53-lists-bakes/marker-probe.mjs` asserting root-owned runs. The original asserts `kids.slice(1)` of each `<li>`,
     which must fail under M′ by design.
@@ -599,7 +604,11 @@ all. Web needs no runtime change: it renders the wire faithfully, so fixing the 
 
     Mutation: drop the re-arm. The wire census after seam-3 changes exactly 54 brs in 18 documents (+12 in 4 for U3b).
 - **Predictions** (46 rows; `expectations.json`). Floors on the six MED-HIGH rows (001 / 003 ios, block-ellipsis-002 /
-  -004 / -005 / -006 web); every other row is read and labelled, but rules 1/2 bind it.
+  -004 / -005 / -006 web); every other row is read and labelled. Rules 1 and 5 bind every row; rule 2 binds every row
+  except the **16 undirected** ones (002 ios, limit-chars-001 ios, the nine backdrop-filter rows, balance-grid-container
+  ios / android, column-height-009 ×3: fix round 2, R2-S4). U3b is ADDITIVE in every L3 row's `requires` (its revert keeps
+  the U3-only value the row gives first), so a U3b revert demotes nothing; a U1 / U2-<p> / U3 revert demotes the rows
+  that need it (fix round 2, R2-S1).
 
   | cell | → predicted | confidence | gate floor · geometry | units |
   |---|---|---|---|---|
@@ -615,10 +624,12 @@ all. Web needs no runtime change: it renders the wire faithfully, so fixing the 
   | `block-ellipsis-004/-005/-006` web | P 0.9737 / 0.9735 / 0.9735 → P ≈0.998 (B replay) | MED-HIGH | 0.99 · gating (`block-ellipsis-br`) | U3 |
   | `block-ellipsis-002` ios / android | P 0.9813 DEGENERATE → ≈0.993, stays DEGENERATE (Line 4, no "…") / P 0.9884 → identical or up | MED / LOW | report (control lines `4 bands vs ref 3` / `2 bands vs ref 3`) | U3 |
   | `block-ellipsis-004/-005/-006` natives | byte-identical expected (no stray gap there) | MED | report | U3 |
-  | `backdrop-filter-clip-rect / -edge-clipping / -paint-order` web, ios | P 0.959-0.9595 / 0.956-0.9578 → up | MED | report | U3 |
-  | the same three android | f 0.9315 / 0.929 / 0.929 → up, a flip is possible | LOW | report | U3 |
+  | `backdrop-filter-clip-rect / -edge-clipping / -paint-order` web, ios | P 0.959-0.9595 / 0.956-0.9578 → moves, expected up; **undirected** (not replayable: the stray line sits under abspos boxes that do not move with the flow and text shows through their backdrop filter; fix round 2 extends R2-S4 to these six) | MED | report | U3 |
+  | the same three android | f 0.9315 / 0.929 / 0.929 → moves, expected up; **undirected** (same reason, R2-S4) | LOW | report | U3 |
   | `backdrop-filter-plus-filter` ×3 | stays (the stray br is the `<p>`'s trailing one) | MED | report | U3 |
-  | `clip-path-filter-order`, `balance-grid-container`, `column-height-009` ×3 | f → up or unchanged | LOW | report | U3 |
+  | `clip-path-filter-order` web / ios / android | f 0.8586 / 0.8578 / 0.8406 → **P ≈1.0 / P ≈0.998 / ≈0.955** (replay B on their own pixels 1 / 0.9978 / 0.9549, `hyphenate-character.replay-b-u3f-score.out.txt`; LOOKED at: `fix-r2/look-clip-path-filter-order-ref-Bweb-Bios-Bandroid.png`) | MED / MED / LOW-MED | report | U3 |
+  | `balance-grid-container` web | f 0.9207 → **P ≈1.0** (replay B 1: the two stray blank lines removed give the ref, `fix-r2/look-balance-grid-container-ref-Bweb.png`) | MED | report | U3 |
+  | `balance-grid-container` ios / android, `column-height-009` ×3 | f → moves; **undirected** (not replayable: the natives paint the address on one line; column-height-009's 15 brs feed a multicol balance) | LOW | report | U3 |
 
   - **DEGENERATE-by-construction, honestly** (`expectations.json` `degenerateByConstruction` + `degenerateRetirement`).
     001/003/004 stay on the conservative list. A cell on platform p is relabelled faithful ONLY when U1, U2-p and U3 are all
@@ -852,10 +863,13 @@ DEFERRED"), and the real mechanism under 4(b′).
   the face to inset-011's STACKED fallback (the wave-40 WORSE case), and leaves the runtime gap for every non-WPT heading.
 - **own:**
   - NEW `runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt` and `UAHeadingFoldGate.kt`,
-    with their JVM tests under `runtimes/compose/src/test/java/com/styleconverter/runtime/typography/`;
+    with their JVM tests NEW `runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt`
+    and `UAHeadingFoldGateTest.kt` — these two files only, not the directory (it holds earlier waves' tests, and L3's
+    `typography/wrapping/PreBreakPipelineTest.kt` sits under it; fix round 2, R2-N8);
   - NEW `runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift` and
     `Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift`;
-  - `StyleEngine/typography/UAElementFontRule.swift` (docs only) and `UAElementFontRuleTests.swift` (additions);
+  - `StyleEngine/typography/UAElementFontRule.swift` (docs only; 274 lines at HEAD, so the doc edits keep it under the
+    ~300-line split line or the re-dated table moves to the lane note: fix round 2, N7) and `UAElementFontRuleTests.swift` (additions);
   - `tools/titan/results/wave54-ua-heading-face/`.
 - **Seams:** `ComponentRenderer.kt` → `seam-1.patch` (U1-android, :1141); `ComponentRenderer.swift` → `seam-2.patch`
   (U2-ios, :343-356).
@@ -924,7 +938,7 @@ disjoint files.
 - **Change.**
   - NEW `apps/web-harness/src/ui/ComposedRootSeparator.ts` (≤ 120 lines): `interleaveRootSeparators(roots, render,
     container)`. It DECLINES for the table-body plan's `display: table` wrapper (CSS 2.1 §17.2.1).
-  - seam-1 lifts the WWS branch of `renderChildSeparator` (:1105-1158) into an exported pure `wsAfterSeparator(prev, next,
+  - seam-1 lifts the WWS branch of `renderChildSeparator` (:1108-1153; the widget rule at :1105-1107 stays in place) into an exported pure `wsAfterSeparator(prev, next,
     container)`, which `HARNESS_OPTIONS` calls, so the child-level DOM stays byte-identical.
   - The two gallery `.map` sites call the new file.
   - Rule 2b (the tree compiles without the seam): `ComposedRootSeparator.ts` takes the separator predicate as a PARAMETER
@@ -972,7 +986,10 @@ disjoint files.
   writes `wave54-web-tail/step0-probe.mjs` FIRST and requests it).
   - Pre-registered: V1 = 26, V3 = 46, V5 = 46. Predicted (MED): V6 boxes 4/5 = 26 and V0 = 26, i.e. branch R.
   - The decision table is `lanes.L6-web-tail.step0.decision`.
-  - **V3 ≠ 46 stops W1:** its row is withdrawn and RS proceeds alone.
+  - **V3 ≠ 46 stops W1:** its row is withdrawn and RS proceeds alone. The withdrawal is MECHANICAL (fix round 2, R2-S1):
+    the orchestrator enters `{'lane': 'L6-web-tail', 'unit': 'W1', 'run': 'step0', 'rule': 'step 0: V3 != 46, W1 not built'}`
+    in `plan-build.py` `REVERTED` and regenerates, which withdraws the -002 web row (gating 34 → 33), its geometry key and its
+    carrier (dry run: `fix-r2/hooks/w1/`).
 - **Carrier set** (web only):
   - RS: the 27 documents of `web-root-separator.census.out.txt` (26 scored + `overlay-button-appearance`).
   - W1: `hyphens-out-of-flow-002`.
@@ -1053,7 +1070,8 @@ for every stem, and has no clause for the contract's "iff".
     - (c) synthetic controls;
     - (d) a HINT on a red (i) stem whose P is fully ground ×3: a message, never a pass;
     - optionally, NEW `tools/visual/label-chrome-check.mjs` (the pure checker, so replays import it without registering
-      node:test cases).
+      node:test cases). Size: the tripwire is 209 lines at HEAD, so U1's new logic belongs in this file whenever adding it
+      inline would take the test past the ~300-line split line (fix round 2, N7).
   - **U2-seed** (a device step on the CLOSING tree, §8 step 10):
     - `UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/all-then-color.json`, then LOOK at the six canvases ×3 (labels
       on 000/002/004 only);
@@ -1065,7 +1083,10 @@ for every stem, and has no clause for the contract's "iff".
   decision (§5). (R-c) Infer the exemption from stem names: ambiguous on `000_Sizing_Fixed`. (R-d) Infer it from pixels:
   circular.
 - **own:** `tools/visual/label-chrome-tripwire.test.mjs`, NEW `tools/visual/label-chrome-exempt.json`, optional NEW
-  `tools/visual/label-chrome-check.mjs` (U1); the 18 `tools/visual/baseline/{Android,iOS,web}__00{0..5}_*.png` (U2-seed);
+  `tools/visual/label-chrome-check.mjs` (U1); the 18 `tools/visual/baseline/{Android,iOS,web}__{000_ATC_AllThenProps,
+  001_ATC_PropsThenAll_InGreenParent,002_reset,003_ATC_InitialUnderRedParent,004_span,005_ATC_DirectionSurvives}.png` —
+  exactly these names (`label-chrome-all-reset.seeded-77fe41e8/`); the glob `__00{0..5}_*.png` also matches 66 committed
+  baselines of four other fixtures (fix round 2, N3) — (U2-seed);
   `tools/titan/results/wave54-label-chrome/`.
 - **Seams:** none.
 - **Read-only:** the three drawers and predicates (`CaptureGallery.tsx`, `FixtureCanvas.tsx`, `LabelChrome.tsx`,
@@ -1103,7 +1124,7 @@ for every stem, and has no clause for the contract's "iff".
 | | `:7072` `PreBreakPipeline.preBreak(…, hyphenChar = HyphenateCharacterApplier.preBreakString(HyphenateCharacterExtractor.extract(properties)))` | L3 · U2-android | `wave54-hyphenate-character/seam-1.patch` | needs L3's new triplet in the same commit |
 | `runtimes/swiftui/…/Renderer/ComponentRenderer.swift` | `:343-356` `mergedProperties(now:)`: `hasElementChildren:` → `UAHeadingFoldGate.standsDown(component:inFlowChildren:mergedPreUA:)` | L5 · U2-ios | `wave54-ua-heading-face/seam-2.patch` | `inFlowChildren` is :781 |
 | | `:5011` `hyphenChar: textConfig.hyphenateCharacter ?? AutoHyphenation.defaultHyphenCharacter`; `:5026` `spentHyphen: textConfig.hyphenateCharacter` | L3 · U2-ios | `wave54-hyphenate-character/seam-2.patch` | ~4650 lines from L5's hunk; nil keeps every other run byte-identical |
-| `apps/web-harness/src/sdui/ComponentRenderer.tsx` | `:1099-1158` lift the WWS branch of `renderChildSeparator` into an exported pure `wsAfterSeparator(prev, next, container)`, called by `HARNESS_OPTIONS` | L6 · RS | `wave54-web-tail/seam-1.patch` | child-level DOM byte-identical (call-equivalence pin) |
+| `apps/web-harness/src/sdui/ComponentRenderer.tsx` | `:1099-1154` (the WWS branch is :1108-1153) lift the WWS branch of `renderChildSeparator` into an exported pure `wsAfterSeparator(prev, next, container)`, called by `HARNESS_OPTIONS` | L6 · RS | `wave54-web-tail/seam-1.patch` | child-level DOM byte-identical (call-equivalence pin) |
 | | `:991` `renderText`: a bare string for the pieces of a host whose runs carry a mid-word inert out-of-flow member | L6 · W1 | `wave54-web-tail/seam-2.patch` | **branch H only** (step 0); under R / H2 there is no seam-2 |
 | `tools/titan/extract-fixture.mjs` | `buildNode` children loop (`:11706` region): re-arm `childLineCtx.hasInline` on interleaved non-whitespace `{text}` | L3 · U3 | `wave54-hyphenate-character/seam-3.patch` | the child-scope twin of `:11727-11733`; the only lane on this seam |
 | | the br-height rule (`:11457-11459`): a line-start br in a host declaring `line-height` gets that line box | L3 · U3b | `wave54-hyphenate-character/seam-3b.patch` | a SEPARATE patch so U3b reverts alone |
@@ -1268,16 +1289,23 @@ then `node tools/titan/results/wave54-gate/adjudicate.mjs tools/titan/results/wa
 - Why: `score-gate.mjs:125` lists a same-verdict cell only when |Δ| ≥ the threshold, and `adjudicate.mjs` R4 reads a cell
   absent from every list as "did not move". With 0.005 it failed a closing gate in which every prediction came true: the
   four P→P gating rows predicted below 0.005 (autopos-{htb,vlr,vrl}-ltr android Δ0.0001, s-11-1-1b-006 android Δ0.0039)
-  and counter-suffix iOS landing on its floor (Δ0.0048). R5 could not see a must-not-move move in (0.002, 0.005).
-- With `--movers 0` every scored cell is in a list, so R4 reads each gating cell's measured score against its floor and R5
-  applies its own 0.002 rule to every must-not-move cell.
-- The three autopos-ltr android floors (0.995) sit below today's 0.9966, so R4 is vacuous on them: **their gate is R6
-  alone** (the CBB-android geometry keys), said here rather than implied.
-- The human-readable mover list for the PR is the same command with `--movers 0.005` and no `--json` (`score-final.txt`);
-  it adjudicates nothing.
-- Calibrated (`expectations.json` `adjudicateCalibrations`, "Fix pass (round 1)"): all predictions met → R1–R5 hold; counter-suffix iOS at
-  exactly 0.985 → hold; one must-not-move cell +0.003 → R5 FAIL (with the old threshold the same picture shows R5 moved 0);
-  the identity pair `wave53-final → wave54-open` → R4 FAIL, missed 31 (34 minus the 3 vacuous autopos floors).
+  and counter-suffix iOS landing on its floor (Δ0.0048). adjudicate's R5 could not see a must-not-move move in (0.002, 0.005).
+- With `--movers 0` every scored cell is in a list, so adjudicate's R4 reads each gating cell's measured score against its
+  floor and adjudicate's R5 applies its own 0.002 rule to every must-not-move cell. (adjudicate.mjs numbers its own rules R1–R6:
+  its R1–R3 are the table's R1–R3; its R4 is this paragraph's gating-floor read, which has no row in the table below; its
+  R5 is the table's R7; its R6 is the DEGENERATE clause of the table's R5. The table keeps the plan's own R1–R9.)
+- The three autopos-ltr android floors (0.995) sit below today's 0.9966, so adjudicate's R4 is vacuous on them: **their
+  gate is R6 alone** (the CBB-android geometry keys), said here rather than implied.
+- The human-readable mover list for the PR is the same command with `--movers 0.005` and
+  `--json tools/titan/results/wave54-gate/score-final.movers0005.json` (`score-final.txt`, `expectations.json`
+  `scoreReadout`); it adjudicates nothing. **It is the corpus snapshot's source** (§8 step 13, `corpusSnapshotSource`):
+  `make-corpus.mjs` publishes `movers: record.movers.length` under a hardcoded `--movers 0.005` scorer string, and the
+  `--movers 0` record lists every same-verdict cell (4096 "movers" on the identity pair) (fix round 2, R2-S3).
+- Calibrated (`expectations.json` `adjudicateCalibrations`, "Fix pass (round 1)"; re-run at fix round 2 on the regenerated
+  JSON with the string-fixed adjudicate.mjs): all predictions met → adjudicate R1–R5 hold; counter-suffix iOS at exactly
+  0.985 → hold; one must-not-move cell +0.003 → adjudicate R5 FAIL (with the old threshold the same picture shows R5
+  moved 0); the identity pair `wave53-final → wave54-open` → adjudicate R4 FAIL, missed 31 (34 minus the 3 vacuous
+  autopos floors).
 
 | rule | expectation | on failure |
 |---|---|---|
@@ -1287,14 +1315,14 @@ then `node tools/titan/results/wave54-gate/adjudicate.mjs tools/titan/results/wa
 | **R4 capture control** | `control-check` (wave-54 copy) `wave54-open wave54-final` with the union carrier set, **web 44 · iOS 27 · Android 51** captures, minus every carrier withdrawn by `probeDecisions`. Every other composed capture is decoded-pixel identical. Per-lane counts are printed. | A leak is a finding: bisect by commit (revert rules 5, 6). |
 | **R4b wire control** | Every `per-test-ir/*.json` byte-identical to `wave54-open` except the **23** wire carriers (L1 4, L3 19) and the **15** "renumbered" `css-counter-styles/cssom/*` documents (+6 after counter-suffix, M′). The three zero-padding selectors documents are identical. | A changed document outside them is an extraction or converter leak. Stop. |
 | **R5 gains** | Every gained cell is a carrier with a prediction row (`lanes.*.predictions`; the LOW "possible flip" rows count as listed, never as claimed). Every gain is PNG-checked against the frozen ref before it is written as a pass. A gain on `hyphenate-character-001/-003/-004` is DEGENERATE by construction unless `degenerateRetirement` holds for that cell. | A gain outside the list is looked at and explained in the PR, never claimed unseen. |
-| **R6 picture-correctness** | `python3 tools/titan/results/wave54-plan/geometry-gate.py wave54-final --base wave54-open` exits 0: **every gating key of a unit still on the tree** PASS, no probe self-check failure. Keys of a unit reverted at a probe print `WITHDRAWN` (`plan-build.py` `REVERTED` demotes them; the gate exits 2 on a stale JSON that still gates them). Every report key is read and labelled; every control key is expected PASS (a FAIL is diagnosed through R4/R7). A §1 tally cell is counted only when its `pictureCorrectTally` key is OK. | A target whose gating key is not PASS stays with its old picture: DEGENERATE, as before. Say so; do not count it. |
+| **R6 picture-correctness** | `python3 tools/titan/results/wave54-plan/geometry-gate.py wave54-final --base wave54-open` exits 0: **every gating key of a unit still on the tree** PASS, no probe self-check failure. A gating key that is UNMEASURED (capture MISSING or no line) is not a pass: the gate exits 3 (fix round 2, R2-S2), so "exit 0" is "every gating key PASS, UNMEASURED-gating 0". Keys of a unit reverted at a probe print `WITHDRAWN` (`plan-build.py` `REVERTED` demotes them; the gate exits 2 on a stale JSON that still gates them). Every report key is read and labelled; every control key is expected PASS (a FAIL is diagnosed through R4/R7). A §1 tally cell is counted only when its `pictureCorrectTally` key is OK. | A target whose gating key is not PASS stays with its old picture: DEGENERATE, as before. Say so; do not count it. |
 | **R7 must-not-move** | Every must-not-move line of `watchlist.txt` prints `prev == cur` (`adjudicate` R5: within 0.002, never lost/gained; with the `--movers 0` JSON R5 reads every one of the 651 cells). R4 implies it for every capture outside the carrier sets. | A move is an R4 leak or a carrier mislabel. Diagnose it. |
 | **R8 fixture net** | `BASELINE=1 ./test-all.sh --gate-set` exits 0 on all 9 gate fixtures. **all-then-color compares against its newly committed baselines** (`✓ no regressions vs baseline (18 platform-comparisons ran)`). | Exit-code recipes (wave skill Phase 5). |
 | **R9 tooling on the ship tree** (new) | The full tooling suite (`node --test tools/visual/*.test.mjs tools/titan/*.test.mjs`) is green on the tree that ships, AFTER the seeding. The tripwire covers 136 stems. | The step wave 53 skipped (label-chrome brief U2.3): a red suite is fixed before the ship, never ledgered. |
 
 **Expected totals** (if `wave54-open` = `wave53-final`):
 - HIGH / MED-HIGH: **web 1236/1372 · iOS 1128/1362 · Android 1121/1362**, i.e. gained web 4 · iOS 3 · Android 6.
-- The ceiling with MED and MED-LOW: 1239 / 1133 / 1125.
+- The ceiling with MED and MED-LOW: 1241 / 1134 / 1125 (fix round 2, R2-S4; was 1239 / 1133 / 1125).
 - Lost 0; unmeasured-now 0; newly measured 0.
 
 **The ring-fenced test** is reported plainly with its number. No code names it.
@@ -1309,19 +1337,39 @@ set (BACKLOG "Wave 53 lessons").
 - It is the "one-section DEVICE probe of the lane tree" that BACKLOG 0(a) and the wave-53 lesson require for L1 (counter-suffix
   in css-counter-styles; `[P]` in css-text). It is also L2's Android device probe (CSS2 + css-tables).
 - It **decides L1 (P, M′) and L2 (TB-android) only**, by `stage1Decision`:
-  - `python3 geometry-gate.py wave54-pre --base wave54-open --lanes L1,L2`;
+  - `python3 geometry-gate.py wave54-pre --base wave54-open --lanes L1,L2` (exit 0 = every L1 / L2 gating key PASS; 1 a
+    FAIL; 3 a gating key UNMEASURED — on a stage-1-shaped run every L1 / L2 gating key is measured, `fix-r2/post-S2.geogate-stage1-shaped.out.txt`);
+  - `node tools/titan/score-gate.mjs wave54-open wave54-pre --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 --json tools/titan/results/wave54-gate/score-pre.json`,
+    then **`node tools/titan/results/wave54-plan/probe-readout.mjs tools/titan/results/wave54-gate/score-pre.json --stage1`**
+    (revert rules 1-3 for L1 / L2, every other lane's rows recorded; fix round 2, R2-M2);
   - `node tools/titan/results/wave54-gate/control-check.mjs wave54-open wave54-pre --sections CSS2,css-counter-styles,css-tables,css-text`;
   - `node tools/titan/results/wave52-gate/cells.mjs 'counter-suffix|bidi-lines|s-11-1-1b-006' wave54-open wave54-pre`;
   - OPEN counter-suffix ×3 and 006 android.
 - Every other lane's cells in these four sections are recorded and decided at stage 2.
 - A unit reverted here is entered in `plan-build.py` `REVERTED` (the JSON is regenerated, never edited) before stage 2. The
-  regeneration withdraws its predictions, its carriers AND its gating geometry keys (`probeDecisions.reverted[].withdrawnGeometryKeys`).
+  regeneration withdraws its predictions, its carriers AND its gating geometry keys (`probeDecisions.reverted[].withdrawnGeometryKeys`),
+  and DEMOTES every prediction that keeps other units but `requires` the reverted one (`demotedPredictions`: gating off,
+  floor none, undirected; fix round 2, R2-S1). `plan-build.py` asserts that no gating prediction needs a reverted unit
+  unless `RESTATE` re-registers it with its own `gating`, `floor` and `why`. The same mechanism carries L6's step-0
+  decision: W1-not-built is entered as `{'unit': 'W1', 'run': 'step0'}` (§2 L6, §8 step 3).
 
 **Stage 2, `wave54-probe`** (`expectations.json` `probeRun`):
 `tools/titan/gate-driver.sh wave54-probe --sections CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-writing-modes,filter-effects,selectors --skip-fixture-net`.
 That is 26 sections, about 65 min on a quiet host.
-- Then `ab-diff.mjs wave54-probe wave54-open --threshold 0.002`, the R4 / R4b controls restricted to those sections, and
-  `geometry-gate.py wave54-probe --base wave54-open`.
+- Then, **base first in every command** (fix round 2, R2-M2 — `ab-diff.mjs` is `<excludeRun> <includeRun>` and prints
+  Δ = include − exclude, so the order written here before printed Δ = open − probe and labelled every probe gain
+  `flip P→f`: wave 53's own pair printed `background-attachment-margin-root-002` web `P 1 → f 0.339 Δ-0.661`,
+  `fix-r2/pre-M2.abdiff-plan-order.wave53-probe.out.txt`; `expectations.json` `probeRun.readOut`):
+  - `node tools/titan/results/wave52-gate/ab-diff.mjs wave54-open wave54-probe --threshold 0.002` (Δ = probe − open; the
+    same pair of wave 53 prints that cell `flip f→P f 0.339 → P 1 Δ+0.661`, `fix-r2/post-M2.abdiff-fixed-order.wave53-probe.out.txt`);
+  - **the floor reader:** `node tools/titan/score-gate.mjs wave54-open wave54-probe --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 --json tools/titan/results/wave54-gate/score-probe.json`,
+    then `node tools/titan/results/wave54-plan/probe-readout.mjs tools/titan/results/wave54-gate/score-probe.json`. It reads
+    revert rules 1, 2 and 3 over every carrier, every prediction row and every non-carrier cell of the probed sections,
+    names each unit with its `revertOrder`, REFUSES a record whose `prev` is not `wave54-open` (exit 2) or that was written
+    with a mover threshold (exit 2: an unlisted gating cell would read as "unchanged", the M1 hole), and exits 3 when a
+    probed section is missing;
+  - the R4 / R4b controls restricted to those sections (`control-check.mjs wave54-open wave54-probe --sections …`: rule 5);
+  - `geometry-gate.py wave54-probe --base wave54-open` (rule 4; exit 3 on an UNMEASURED gating key).
 - **Not probed, with the check that replaces each:**
   - css-color, css-grid, css-sizing: no carrier and no named control; the closing gate's R4/R7.
   - css-view-transitions: two L4 `fixedControls` (P ×3). Replaced by L4's skeptic P3 pure-walk census over all 26
@@ -1345,17 +1393,23 @@ the **commit**. A commit is reverted out of the integrated tree when ANY of thes
 1. **Lost at the probe.** A carrier cell (any lane, any tier, predicted or not) is P on `wave54-open` and f on the probe. This
    is R1's empty lost list applied at the probe.
 2. **Moved down.** Δ ≤ −0.002 on any prediction row whose `direction` is `up-or-stay`, at any tier. No prediction in this
-   plan forecasts a fall. **Ten rows predict a move whose sign is not pre-registered** (`direction: "undirected"`, each with
-   its `directionWhy`): hyphenate-character-002 ios, hyphenate-limit-chars-001 ios, contain-content-004 android,
+   plan forecasts a fall. **Twenty-four rows predict a move whose sign is not pre-registered** (`direction: "undirected"`,
+   each with its `directionWhy`): hyphenate-character-002 ios, hyphenate-limit-chars-001 ios, contain-content-004 android,
    flex-gap-decorations-006 android, counter-list-item / counter-reset-increment-overflow-underflow /
    text-decoration-subelements-003 / backdrop-filter-border-radius-change / -corner-shape-change android,
-   display-flow-root-list-item-001 web. They are **exempt from rule 2**, so a LOW coin flip cannot revert a commit that
-   carries HIGH flips (OOF-android, U1-android, RS, U2-ios). A fall on one is looked at against the ref and named with its
-   cause in the probe read-out and the PR; it reverts nothing by itself. Rules 1 and 5 still bind them (all ten are f
-   today, so rule 1 cannot fire on them; what they gate is nothing — said plainly). Same-host noise is 0 on every platform
-   (BACKLOG "Wave 53 lessons").
-3. **Below floor.** A gating prediction (every HIGH / MED-HIGH row; 34) scores below its `floor`.
-4. **Wrong geometry.** A gating key of `geometry-gate.py` is not PASS. The runner names the unit.
+   display-flow-root-list-item-001 web, and (fix round 2, R2-S4: no replay is possible on them) backdrop-filter-clip-rect /
+   -edge-clipping / -paint-order ×3, balance-grid-container ios / android, column-height-009 ×3. They are **exempt from
+   rule 2**, so a coin flip cannot revert a commit that carries HIGH flips (OOF-android, U1-android, RS, U2-ios, U3). A
+   fall on one is looked at against the ref and named with its cause in the probe read-out and the PR (`probe-readout.mjs`
+   prints it as `READ`); it reverts nothing by itself. Rules 1 and 5 still bind them: eighteen are f today, so rule 1
+   cannot fire on them; the six backdrop-filter web / iOS rows are P today, so a P → f there still reverts U3. The four
+   U3-radius rows with a replay (clip-path-filter-order ×3, balance-grid-container web) stay directed. A row DEMOTED by a
+   probe decision (R2-S1) becomes undirected too. Same-host noise is 0 on every platform (BACKLOG "Wave 53 lessons").
+3. **Below floor.** A gating prediction (every HIGH / MED-HIGH row; 34) scores below its `floor`. Read by
+   `probe-readout.mjs` over the `--movers 0` probe record (a gating cell that did not move is READ and fails; fix round 2,
+   R2-M2). A row demoted by a probe decision has no floor (R2-S1).
+4. **Wrong geometry.** A gating key of `geometry-gate.py` is not PASS (FAIL: exit 1, the runner names the unit;
+   UNMEASURED: exit 3, re-run its section — never a pass; fix round 2, R2-S2).
 5. **Leak.** A composed capture outside every carrier set differs in decoded pixels (R4), or a per-test IR document outside
    the wire carriers differs in bytes and is not "renumbered" (R4b). It is bisected to a commit, one re-probe of the leaked
    section per step; never guessed.
@@ -1372,8 +1426,8 @@ the **commit**. A commit is reverted out of the integrated tree when ANY of thes
 
 **Tier.** Confidence decides only whether a cell has a floor and a geometry trigger. A MED or lower cell that rises less than
 predicted, or not at all, is read and labelled, never a trigger. Rules 1 and 5 apply to every row of every tier and rule 2
-to every `up-or-stay` row of every tier, so "read and labelled" never covers a P → f, and covers a fall only on the ten
-undirected rows. A score that does not move is a falsification wherever the floor sits above
+to every `up-or-stay` row of every tier, so "read and labelled" never covers a P → f, and covers a fall only on the
+twenty-four undirected rows (and on rows a probe decision demoted). A score that does not move is a falsification wherever the floor sits above
 today's value. **The closing gate runs only on a tree whose probes hold.**
 
 ## 7. The watchlist — `tools/titan/results/wave54-plan/watchlist.txt`
@@ -1434,6 +1488,8 @@ today's value. **The closing gate runs only on a tree whose probes hold.**
      BEFORE any lane lands.
 2. **Commit `tools/titan/results/wave54-plan/`** (§4 step 1).
 3. **[W-L6] step 0** can run as soon as L6 has written its probe script (Chromium, ~1 min, no device). L6's branch follows it.
+   If step 0 says V3 ≠ 46, W1 is not built: enter `{'lane': 'L6-web-tail', 'unit': 'W1', 'run': 'step0', …}` in
+   `plan-build.py` `REVERTED` and regenerate (R2-S1; it withdraws the -002 web row, its geometry key and its carrier).
 4. **Builder lanes L1–L7:** `build-workflow.js` (one Workflow, model opus, file-driven, resumable through `args.done` /
    `args.only`) on the shared tree, with skeptics and fix lanes inside it. The orchestrator serves the window requests in
    device-idle slots: [W1] and [W2] (L1), [W-L6], and [W-L3] after landing. Lanes pause during any device step.
@@ -1446,9 +1502,11 @@ today's value. **The closing gate runs only on a tree whose probes hold.**
 7. **7a. Before EVERY device run** (stage 1, stage 2, the seeding, the closing gate, the A/B):
    `source tools/titan/own-processes.sh && kill_own_gradle_daemons "$PROJECT_ROOT" <every tree on a TREES: line>`. One
    multi-root call, never `./gradlew --stop` (`expectations.json` `beforeEveryDeviceRun`).
-8. **Stage 1 `wave54-pre`** (4 sections, ~10 min), decided per §6 for L1 and L2. Reverts go into `plan-build.py`
-   `REVERTED`, the JSON is regenerated, and the reverted sections are re-probed if anything else in them is to be read.
-9. **Stage 2 `wave54-probe`** (26 sections, ~65 min), read per §6: `ab-diff`, the controls, `geometry-gate.py`. Every
+8. **Stage 1 `wave54-pre`** (4 sections, ~10 min), decided per §6 for L1 and L2 (`stage1Probe.readOut`: base first;
+   `probe-readout.mjs … --stage1`). Reverts go into `plan-build.py` `REVERTED`, the JSON is regenerated (withdrawing and
+   demoting what the revert touches), and the reverted sections are re-probed if anything else in them is to be read.
+9. **Stage 2 `wave54-probe`** (26 sections, ~65 min), read per §6 (`probeRun.readOut`, base first): `ab-diff.mjs
+   wave54-open wave54-probe`, the `--movers 0` score + `probe-readout.mjs` (rules 1-3), the controls, `geometry-gate.py`. Every
    commit that trips revert rules 1–8 is reverted, the U3b decision is taken, the reverted sections are re-probed, and
    `REVERTED` / `RESTATE` are updated and regenerated.
 10. **Seeding** (L7 U2-seed, [W-L7]) on the tree the closing gate will measure: the seed, LOOK at the canvases, the seed
@@ -1466,7 +1524,9 @@ today's value. **The closing gate runs only on a tree whose probes hold.**
     - **drop-M′** if M′ is on the closing tree (css-counter-styles): attributes counter-suffix android between P and M′;
     - **drop-U3b** if U3b stays (css-text): attributes the drift gain;
     - any lane that claims a further mechanism at the gate gets its own arm under the same hash rule.
-13. **Ship** per wave skill Phase 6. The corpus snapshot gets `artifact` / `reproduce --run-id` = `wave54-final`. BACKLOG
+13. **Ship** per wave skill Phase 6. The corpus snapshot gets `artifact` / `reproduce --run-id` = `wave54-final`, and its
+    `<record.json>` (`make-corpus.mjs`) is **`tools/titan/results/wave54-gate/score-final.movers0005.json`** (the
+    `scoreReadout` JSON, `corpusSnapshotSource`), never the `--movers 0` `score-final.json` (R2-S3). BACKLOG
     gets the §5 hand-offs and the obligations for wave 55.
 
 ## 9. Decisions taken against (or beyond) a brief
@@ -1555,3 +1615,47 @@ lists only this directory). Every check was re-run BEFORE the fix (`fix-r1/pre-*
 **Not done here** (outside this directory or not in the defect list):
 - `wave54-gate/adjudicate.mjs` is unchanged. The restated score of record makes its R4 / R5 correct as written; the stale comment about an absent key is the orchestrator's to fix.
 - Nits N1 and N3–N7 are untouched. N2 is answered in §6 (the vacuous autopos floors).
+
+## Fix pass (round 2)
+
+Applies `plan-skeptic-round-2.md`: R2-M1, R2-M2, R2-S1…S4, and the nits R2-N1, R2-N3, R2-N7 (round-1 N1, N3–N7) and
+R2-N8. Written only under `tools/titan/results/wave54-plan/` and, for R2-N3's strings, `tools/titan/results/wave54-gate/adjudicate.mjs`.
+Nothing committed; no source, test, doc or lane file touched; no Gradle, xcodebuild, emulator, simulator or Chromium run.
+`build-workflow.js` is untouched (the builders run it). Every edited file was replaced atomically (written aside, then
+renamed), so a lane reading `expectations.json` or a probe mid-pass never sees a partial file. Each check was run BEFORE
+the fix (`fix-r2/pre-*.out.txt`) and after it (`fix-r2/post-*.out.txt`); pre-fix copies of every edited file are
+`fix-r2/*.pre`. The edits themselves are `fix-r2/patch-plan-build.py` and `fix-r2/patch-plan-md.py`.
+
+| defect | action | executed proof |
+|---|---|---|
+| **R2-M1** the GAP probe passes a mis-indexed rule segment (fake SSIM 0.9919 ≥ floor 0.99) | `flex-zero-gap-rules.geometry.py` now checks the red runs on a row through EVERY flex line (y20 / y95 / y145: ref `[(61,70),(111,120)]` / `[(111,120)]` / `[(61,70),(111,120)]`) and the blue runs on a column through every item column (x40 / x90 / x140), each ±1 px against the ref, plus a ref-structure self-check (2 / 1 / 2 red runs, 2 / 2 / 2 blue) | Pre: the skeptic's `skeptic-r2/fake-gap` prints `GEOMETRY OK` on web / ios / android (`fix-r2/pre-M1.fake-gap.out.txt`). Post (`fix-r2/post-M1.runs.out.txt`): **fake WRONG ×3** (`red runs row 95 [(61, 70)] vs ref [(111, 120)]`); wave53-final and wave54-open: ref OK, web OK, ios / android WRONG (`redPx 0 vs ref 2200`), exit 0. Two more count-preserving fakes (`fix-r2/gap-fakes.py`, `fix-r2/post-M1.own-fakes.out.txt`): a blue row-rule segment moved 10 px inside its column (SSIM 0.9913) → WRONG `blue runs col 90`; line 3's left rule moved into an item (SSIM 0.9899) → WRONG `red runs row 145`. `geometry-gate.py` on the fake `--lanes L4` names **GAP-android, GAP-ios** (`fix-r2/post-M1.geogate-fake-gap-L4.out.txt`). `geometry-gate.py wave53-final --base wave53-open`: all 185 verdict lines identical to the planning record (only the flex `line:` text and the summary format differ); record refreshed (`geometry-gate.wave53-final.out.txt`, old copy `fix-r2/*.pre`); `--self-test` HOLDS on the whole run and on L4 alone. |
+| **R2-M2** the stage-2 `ab-diff` order is inverted; rule 3 has no reader | §6 stage 1 / stage 2, §8 steps 8 / 9 and `expectations.json` `stage1Probe.readOut` / `probeRun.readOut` now read **base first**: `ab-diff.mjs wave54-open <probe>`; `score-gate.mjs wave54-open <probe> --movers 0 --json …/score-{pre,probe}.json`, then NEW **`probe-readout.mjs`** (rules 1, 2, 3 over every carrier, prediction row and non-carrier cell of the probed sections; units named with their `revertOrder`; refuses a record whose `prev` is not the base, or a thresholded record, exit 2; exit 3 on a missing probed section); the controls; `geometry-gate.py`. `revertRule` 3 names the reader | Pre (the plan's order on wave 53's real probe pair, `fix-r2/pre-M2.abdiff-plan-order.wave53-probe.out.txt`): `flip P→f web P 1 → f 0.339 Δ-0.661 background-attachment-margin-root-002`. Post (`ab-diff.mjs wave53-open wave53-probe`): **`flip f→P web f 0.339 → P 1 Δ+0.661`**, counter-reset-reversed-nested ×3 Δ+0.0494 / +0.0481 / +0.0343. `probe-readout.mjs` (`fix-r2/post-M2.readout-*.out.txt`): on `score-gate wave53-open wave53-probe --movers 0` it prints margin-root-002 ×3 as f → P (leak signals: not wave-54 carriers) and fires rule 3 + rule 2 on 006 android (0.9906 < 0.996, Δ-0.0038) → **TB-android**, as wave 53 itself reverted (the other wave-54 gating rows fire rule 3 there too: their changes are not on that tree); the reversed record → exit 2 `ORDER`; a `--movers 0.005` record → exit 2; the identity record (`wave53-final → wave54-open`) → **rule 3 fires 31** (34 minus the 3 vacuous autopos floors, = adjudicate R4), 6 with `--stage1`; synthetic probe records (`fix-r2/synth-probe.mjs`, the 4 non-probed sections dropped): all-met → exit 0; plus-filter web −0.003 → rule 2 names U3; contain-content-004 android −0.05 (undirected) → `READ`, exit 0; block-ellipsis-002 android P → f → rule 1 names U3; a must-not-move cell +0.003 and a free cell +0.0001 → 2 leak signals; css-gaps missing → exit 3. A stage-1-shaped run (wave53-probe's 4 sections) `--stage1`: the L1 rows ok, TB-android named. |
+| **R2-S1** a partial revert leaves unmeetable gating floors (U2-ios: `FAIL R4 … missed 2`, then a rule-3 cascade into U3b / U3) | Every prediction carries `requires` (default: its units; M′ additive on counter-suffix android, U3b additive on every L3 row). `probe_decisions()` DEMOTES a row that keeps other units but requires a reverted one (gating off, floor none, undirected, `demotedFrom` kept; `probeDecisions.reverted[].demotedPredictions`); a withdrawn row gates nothing either. Asserted: no gating row needs a reverted unit unless `RESTATE` re-registers it with `gating`, `floor` and `why`. §2 L6, §6 stage 1, §8 step 3: W1-not-built is entered in `REVERTED` with `run: step0` | Pre: U2-ios reverted → 001 / 003 ios still `gating True floor 0.965`, 34 gating (`fix-r2/pre-S1.hook-u2ios.gating.out.txt`). Post (`fix-r2/hooks/*/plan-build.out.txt`): U2-ios → **32 gating**, demoted 001 / 003 / 004 / 002 ios, limit-chars ios withdrawn; U1 → 32; Mprime + TB-android → 31 (counter-suffix android stays gating at 0.970: P alone, replay 0.9815); **W1 at step0 → 33** (the -002 web row, its geometry key and carrier withdrawn); U3b → 34, nothing demoted. A `RESTATE` that re-gates 001 ios without a `why` → `AssertionError`; with `why` + floor → 33, exit 0. The skeptic's U2-ios closing score (`skeptic-r2/synth-u2ios.mjs` on the hook JSON): adjudicate **`R4 gating predictions 32, missed 0` · R1–R5 hold** (was `FAIL R4 … missed 2`), 003 ios printed DEGENERATE-BY-CONSTRUCTION; `probe-readout.mjs` on it: rule 3 fired 0 (`fix-r2/hooks/u2ios/`). |
+| **R2-S2** `geometry-gate.py` exits 0 with an UNMEASURED gating key | exit **3** when no gating key FAILs but one is UNMEASURED (FAIL / self-check stay exit 1, STALE exit 2); the summary counts UNMEASURED gating and names them. R6 and revert rule 4 say "exit 0 = every gating key PASS, UNMEASURED-gating 0" | Pre: `wave53-probe --base wave53-open --lanes L5` → 15 UNMEASURED incl. `block-in-inline-015-print android [GATING -> revert U1-android]`, **exit 0** (`fix-r2/pre-S2.geogate-probe-L5.out.txt`). Post: the same → `UNMEASURED GATING KEYS (1) … [unit U1-android]`, **exit 3**. A stage-1-shaped run (CSS2, css-counter-styles, css-tables, css-text of wave53-probe) `--lanes L1,L2`: UNMEASURED gating **0** (3 UNMEASURED controls, counter-reset-reversed-nested in css-lists), exit 1 on the Mprime / TB-android FAILs; a stage-2-shaped run (the 26 probe sections of wave53-final): **0 of 185 UNMEASURED** (`fix-r2/post-S2.*`). `--self-test` unchanged (HOLDS). |
+| **R2-S3** the `--movers 0` record would break the corpus snapshot | `scoreReadout` writes `--json tools/titan/results/wave54-gate/score-final.movers0005.json`; new `corpusSnapshotSource`; §6 and §8 step 13 name it as `make-corpus.mjs`'s `<record.json>` | `make-corpus.mjs:66,71` publishes `movers: record.movers.length` under `--movers 0.005`; `fix-r2/pre-S3.scoreReadout.out.txt` shows the old command had no `--json` and 0 mentions of the file. |
+| **R2-S4** 12 "up or unchanged" rows without a replay bind rule 2 and can revert U3 | Replay B on their own pixels (NEW `hyphenate-character.replay-b-u3f.py` + `-score.mjs`, the gate's `diffWebVsRef`; the capture column reproduces the manifest). Replayable where everything below the stray band is in flow: **clip-path-filter-order web / ios / android f 0.8586 / 0.8578 / 0.8406 → B 1 / 0.9978 / 0.9549; balance-grid-container web f 0.9207 → B 1**. LOOKED at (`fix-r2/look-clip-path-filter-order-ref-Bweb-Bios-Bandroid.png`, `fix-r2/look-balance-grid-container-ref-Bweb.png`): web B is the ref, iOS matches, Android keeps its leading-space residual. The presence / colour / coverage vetoes are false on all four; `degenerateFailed` is true but that veto ships OFF (`inject-wpt-block.mjs` `computeWptPass`), so raw SSIM ≥ 0.95 decides. These four stay directed with the replay value (MED / MED / LOW-MED / MED). NOT replayable, so **undirected** with a `directionWhy`: column-height-009 ×3 (multicol re-balance), balance-grid-container ios / android (one-line address: no band to cut), backdrop-filter ×3 android (the stray line sits under abspos boxes, text shows through the backdrop filter). The six backdrop-filter web / iOS "up" MED rows have the same missing replay and reason, so they are undirected too (an extension beyond the skeptic's 12; rule 1 still binds them, they are P today) | `hyphenate-character.replay-b-u3f.out.txt` / `-score.out.txt`. `plan-build.out.txt`: undirected **10 → 24**; flips by tier MED / MED-LOW **web 3 → 5, iOS 5 → 6** (ceiling 1241 / 1134 / 1125, §1 and §6 restated); HIGH / MED-HIGH unchanged (4 / 3 / 6). |
+| **R2-N1** stale sentences | §1 L3 row (4 P→P, -002 ios OUT), the L3 predictions header (rules 1 / 5 bind every row, rule 2 every directed row; 16 L3 rows undirected), §6 score-of-record text names "adjudicate's R4 / R5" and maps its numbering to the table's | text |
+| **R2-N3** wave-53 strings in `wave54-gate/adjudicate.mjs` | header path and "Wave 54's", usage `wave54-open wave54-final --movers 0 --json`, `WITHDRAWN at <run> (unit <u>)` from the decision, the absent-key comments (an absent key is a cell scored on neither side under `--movers 0`), "back at wave54-open", a demoted row's read-out line. No rule logic changed | `node --check`; 0 `wave53` strings left. Re-run on the regenerated JSON: identity → R4 missed 31; all-met → R1–R5 hold; counter-suffix ios at 0.985 → hold; mnm +0.003 → R5 moved 1 (`fix-r2/post-N3.adjudicate-*.out.txt`), the fix-round-1 calibrations unchanged. |
+| **R2-N7** round-1 nits | N1: L1 own `+91 / −4` (`git diff --numstat a8ffd1c6^ b0edb788^ -- tools/titan/bidi-bake.mjs` → `91 4`). N3: the 18 seed names spelled out in §2 L7 and in `plan-build.py` U2-seed. N4: §2 L6 `:1108-1153` and §3 `:1099-1154` (HEAD `ComponentRenderer.tsx`: `renderChildSeparator` :1099, widget rule :1105-1107, WWS :1108-1153, close :1154). N5: `compose-table-body-cell.geometry.py` prints `→ GEOMETRY WRONG`. N6: `integrate-seams.sh` header says earlier patches stay applied after a mid-run failure. N7: sizes at HEAD in §2: `bidi-bake.test.mjs` 758, `label-chrome-tripwire.test.mjs` 209, `UAElementFontRule.swift` 274 | N5: the 13 probe lines on wave52-ship / wave53-open / wave53-probe / wave53-final equal the planning record once the arrow is dropped (`fix-r2/post-N5.ctbc.out.txt`); `--self-test --lanes L2` HOLDS. N6: `bash -n` clean. |
+| **R2-N8** L5 `own:` names a directory | names `UAElementFontRuleTest.kt` and `UAHeadingFoldGateTest.kt` (NEW), not `typography/` (it holds L3's `typography/wrapping/PreBreakPipelineTest.kt`) | text |
+
+**Regenerated** (`plan-build.out.txt`): `expectations.json` sha256 `50906759…` → **`8f870f8e…`**; `watchlist.txt` **`2557d870…`
+unchanged**. Byte-stable: two staged runs and the in-place `python3 plan-build.py` give identical bytes (`fix-r2/post-sha.out.txt`).
+Unchanged totals: gating 34 · units 19 · carriers web 44 · iOS 27 · Android 51 · wire 23 · must-not-move 651 · geometry
+keys 185 = gating 37 + report 36 + control 112 · tally 37 + 2. Changed: undirected 24; MED / MED-LOW flips web 5 · iOS 6 ·
+Android 4. Re-held on the installed JSON: watchlist-check `unmatched 0` on wave53-final and wave54-open
+(`fix-r2/post-watchlist-check.out.txt`); `geometry-gate.py --self-test` HOLDS; control C2 (`wave53-final → wave54-open`)
+HOLDS and its JSON is byte-identical to `wave54-gate/control-calib-identity.json` (`fix-r2/control-C2-identity.*`).
+
+**Deleted after use (regenerable):** the score / synthetic records above 300 kB, the hook dirs' `expectations.json` /
+`watchlist.txt`, and the two symlinked stage-shaped run dirs. To regenerate: `node tools/titan/score-gate.mjs wave53-open
+wave53-probe --movers 0 --json …/fix-r2/score-w53probe-movers0.json` (and reversed); `node …/fix-r2/synth-probe.mjs`;
+`python3 …/plan-build.py --out …/fix-r2/hooks/<h> --reverted …/fix-r2/hooks/<h>.reverted.json` (the reverted / restate
+JSONs are kept); `node …/skeptic-r2/synth-u2ios.mjs …/fix-r2/hooks/u2ios/expectations.json …/fix-r1/score-identity-movers0.json
+…/fix-r2/hooks/u2ios/synth-closing.json`; the stage-shaped runs are `fix-r2/run-stage{1,2}/sections/<sec>` symlinks to
+`tools/titan/runs/wave53-probe` (CSS2, css-counter-styles, css-tables, css-text) and `wave53-final` (the 26 probe sections).
+
+**Not done here:** R2-N2 (the block-ellipsis-002 android control that would fail loudly on an improvement), R2-N4 (no L4 A/B
+arm), R2-N5 (Gradle `--tests` filters can match nothing) and R2-N6 (an equivalence pin for U2-android) are outside this
+pass's list. R2-N5 and R2-N6 belong in the lanes' notes and `build-workflow.js`, which this pass does not touch while the
+builders run.

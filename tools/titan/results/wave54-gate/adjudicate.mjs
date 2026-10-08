@@ -1,7 +1,7 @@
 #!/usr/bin/env node
-// tools/titan/results/wave53-gate/adjudicate.mjs
+// tools/titan/results/wave54-gate/adjudicate.mjs (the wave-53 copy; only the expectations path and message strings differ)
 //
-// Wave 53's closing-gate adjudication, read off the plan's pre-registered
+// Wave 54's closing-gate adjudication, read off the plan's pre-registered
 // expectations (tools/titan/results/wave54-plan/expectations.json, written
 // before any lane landed) instead of hand-written rules:
 //   R1  lost cells ⊆ expected.lost (EMPTY this wave — no instrument change);
@@ -17,7 +17,7 @@
 //       reported as DEGENERATE, never counted as a gain.
 // Exit 0 when R1–R5 hold, 1 otherwise. The read-out names every cell.
 //
-// Usage: node adjudicate.mjs <score.json>   (score-gate.mjs wave53-open → <final> --json)
+// Usage: node adjudicate.mjs <score.json>   (score-gate.mjs wave54-open wave54-final --movers 0 --json: PLAN §6 "Score of record")
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -34,9 +34,11 @@ const key = (c) => `${c.test.replace(/^css\//, '')} ${c.platform}`;
 const fmt = (c) => `    ${key(c)}  ${c.prev ?? '—'} → ${c.cur ?? '—'}`;
 const byKey = new Map();
 for (const list of ['gained', 'lost', 'movers', 'newlyMeasured', 'unmeasuredNow']) for (const c of score[list]) byKey.set(key(c), { ...c, list });
-// Per-section tables carry every scored cell's totals only; for must-not-move
-// reads we need the cell itself — the scorer's lists hold only the cells that
-// moved, so an absent key means "unchanged within the mover threshold".
+// The score of record is written with --movers 0 (PLAN §6), so every cell
+// scored on BOTH sides is in gained / lost / movers and every one-sided cell in
+// newlyMeasured / unmeasuredNow: an absent key is a cell scored on neither side.
+// (Under a thresholded record an absent key would mean "moved less than the
+// threshold" — the wave-54 plan-skeptic M1 hole — which is why R4 counts it as a miss.)
 
 let bad = 0;
 const rule = (id, ok, text) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${id}  ${text}`); if (!ok) bad++; };
@@ -60,9 +62,10 @@ rule('R2', surpriseOut.length === 0 && surpriseIn.length === 0, `unmeasured-now 
 rule('R3', score.missingSections.length === 0 && score.columnShorts.length === 0, `missing sections ${score.missingSections.length}, short columns ${score.columnShorts.length}`);
 
 // Units the probe reverted (expectations.probeDecisions): their predictions are withdrawn from R4 and
-// their cells are must-not-move for R5 — the closing gate must show them back at wave53-open.
+// their cells are must-not-move for R5 — the closing gate must show them back at wave54-open.
 const decisions = (EXP.probeDecisions && EXP.probeDecisions.reverted) || [];
 const withdrawn = new Set(decisions.flatMap((d) => d.withdrawnPredictions || []));
+const withdrawnAt = new Map(decisions.flatMap((d) => (d.withdrawnPredictions || []).map((c) => [c, `${d.run} (unit ${d.unit})`])));
 const heldCells = decisions.flatMap((d) => (d.mustNotMoveAfter || []).map((c) => [`probe-revert:${d.unit}`, c]));
 // R4 — gating predictions with a floor.
 let gatingFail = 0, gatingTotal = 0;
@@ -70,10 +73,10 @@ console.log('\npredictions (gating ones enforced):');
 for (const [laneId, lane] of Object.entries(EXP.lanes)) {
   for (const p of lane.predictions || []) {
     if (!/ (web|ios|android)$/.test(p.cell)) { console.log(`  ${laneId}  ${p.cell}: ${p.from} → ${p.to} (not a corpus cell — read elsewhere)`); continue; }
-    if (withdrawn.has(p.cell)) { console.log(`  ~ ${laneId}  ${p.cell}: WITHDRAWN at wave53-probe (its unit was reverted — probeDecisions); held to must-not-move instead`); continue; }
+    if (withdrawn.has(p.cell)) { console.log(`  ~ ${laneId}  ${p.cell}: WITHDRAWN at ${withdrawnAt.get(p.cell)} (its units were reverted — probeDecisions); held to must-not-move instead`); continue; }
     const cell = byKey.get(p.cell);
     const wantPass = /^P/.test(p.to);
-    const measured = cell ? `${cell.curPass ? 'P' : 'f'} ${cell.cur}` : 'unchanged (not in any list)';
+    const measured = cell ? `${cell.curPass ? 'P' : 'f'} ${cell.cur}` : 'not in any list (scored on neither side)';
     let ok = true;
     if (p.gating && p.floor != null) {
       gatingTotal++;
@@ -81,7 +84,7 @@ for (const [laneId, lane] of Object.entries(EXP.lanes)) {
       else ok = (cell.curPass === wantPass) && (typeof cell.cur === 'number' && cell.cur >= p.floor);
       if (!ok) gatingFail++;
     }
-    console.log(`  ${ok ? ' ' : '!'} ${laneId}  ${p.cell}: predicted ${p.from} → ${p.to} (${p.confidence}${p.gating ? ', gating' : ''}${p.floor != null ? `, floor ${p.floor}` : ''}) — measured ${measured}`);
+    console.log(`  ${ok ? ' ' : '!'} ${laneId}  ${p.cell}: predicted ${p.from} → ${p.to} (${p.confidence}${p.gating ? ', gating' : ''}${p.floor != null ? `, floor ${p.floor}` : ''}${p.demotedFrom ? `, demoted at ${p.demotedFrom.run}: unit ${p.demotedFrom.unit} reverted` : ''}) — measured ${measured}`);
   }
 }
 rule('R4', gatingFail === 0, `gating predictions ${gatingTotal}, missed ${gatingFail}`);
@@ -93,7 +96,7 @@ for (const [laneId, cellName] of mnmPairs) {
   {
     mnmTotal++;
     const cell = byKey.get(cellName);
-    if (!cell) continue;   // unchanged within the scorer's mover threshold
+    if (!cell) continue;   // scored on neither side (the --movers 0 record lists every two-sided cell)
     const moved = cell.list === 'lost' || cell.list === 'gained' || cell.list === 'unmeasuredNow' || cell.list === 'newlyMeasured' || Math.abs((cell.cur ?? 0) - (cell.prev ?? 0)) > 0.002;
     if (moved) { mnmBroken++; console.log(`    must-not-move MOVED (${laneId}): ${cellName}  ${cell.prev} → ${cell.cur} [${cell.list}]`); }
   }

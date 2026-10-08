@@ -1,0 +1,4 @@
+css-masking/clip-path__clip-path-filter-order web     capture 0.8586 B 1  Δ+0.1414
+css-masking/clip-path__clip-path-filter-order ios     capture 0.8578 B 0.9978  Δ+0.1400
+css-masking/clip-path__clip-path-filter-order android capture 0.8406 B 0.9549  Δ+0.1143
+css-multicol/balance-grid-container web     capture 0.9207 B 1  Δ+0.0793

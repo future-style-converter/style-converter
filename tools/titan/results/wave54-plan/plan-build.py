@@ -87,8 +87,15 @@ def pred(line, frm, to, kind, confidence, floor=None, gating=False, units=(), ge
            # "stays / byte-identical") is bound by revert rule 2 (delta <= -0.002 reverts its commit). 'undirected' (a
            # move whose sign the brief could not pre-register) is EXEMPT from rule 2 — a coin-flip row must not revert a
            # commit that carries HIGH flips — and is read and labelled instead; rules 1 and 5 still bind it.
-           'direction': extra.pop('direction', 'up-or-stay')}
+           'direction': extra.pop('direction', 'up-or-stay'),
+           # fix r2 (plan-skeptic R2-S1): the units that must be ON THE TREE for `to` (and a gating row's floor) to be
+           # reachable. Default: every unit of the row. A unit missing from `requires` is ADDITIVE (its revert leaves a
+           # pre-registered remainder: L1's M′ on counter-suffix android, L3's U3b everywhere). probe_decisions() demotes
+           # a row one of whose required units is reverted (gating -> False, direction -> undirected) unless RESTATE
+           # re-registers it, and an assertion below refuses a gating row that still needs a reverted unit.
+           'requires': list(extra.pop('requires', units))}
     row.update(extra)
+    assert set(row['requires']) <= set(row['units']), f'{line}: requires names a unit the row does not carry'
     assert row['direction'] in ('up-or-stay', 'undirected'), row
     assert row['direction'] == 'up-or-stay' or not gating, f'{line}: a gating row must have a direction'
     return row
@@ -142,7 +149,7 @@ L1 = {
          'mover up; stays DEGENERATE (the orange "!" sits on the LEFT on all three platforms: a bake-measurement defect, not P)', 'HIGH', 0.975, True, ['P'], GEO_OK),
     pred(f'{CS} android', 'P 0.9547 DEGENERATE', 'P ≈0.9815 with P alone (replay); ≈0.989 with M′ on P (replay 0.9894 / 0.9900)',
          'P: RTL text moves to the ref x, still no marker (DEGENERATE). M′: RTL rows picture-correct ONLY if [M] android prints GEOMETRY OK; the cell stays DEGENERATE on rows 5-6 (CJK marker 4 px left)',
-         'MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated)', 0.970, True, ['P', 'Mprime'], GEO_OK),
+         'MED-HIGH (P floor) / MED (M′ magnitude, geometry-gated)', 0.970, True, ['P', 'Mprime'], GEO_OK, requires=['P']),
     pred(f'{CS} web', 'P 0.9818', 'P 1 (wave53-probe measured 1 with the same marker geometry)',
          'faithful (the RTL markers move from the left x46-58 to the inline-start side)', 'HIGH', 0.999, True, ['Mprime'], GEO_OK),
     pred(f'{CS} ios', 'P 0.9802 DEGENERATE', 'P ≈0.987 (wave53-probe measured 0.9873)',
@@ -249,6 +256,18 @@ u2_default_population = [T('css-text', 'hyphens', t) for t in (
 assert len(u2_default_population) == 19, len(u2_default_population)
 GLYPH = 'GEOMETRY OK'
 u3_units = ['U3', 'U3b']
+# fix r2 (R2-S4): the U3-radius rows the plan had written "up or unchanged" / "up" without a replay.
+CPF, BGC, CH9 = U3F
+U3F_B = {  # (to, kind, confidence) from replay B on the cell's own pixels (hyphenate-character.replay-b-u3f-score.out.txt)
+  (CPF, 'web'): ('P ≈1.0 (replay B on its own pixels: 1 — the capture minus the stray 20 px IS the ref)', 'flip (U3 removes the stray blank line; replay B)', 'MED'),
+  (CPF, 'ios'): ('P ≈0.998 (replay B 0.9978)', 'flip (U3 removes the stray blank line; replay B)', 'MED'),
+  (CPF, 'android'): ('up, ≈0.955 at best (replay B 0.9549: the leading-space residual stays)', 'possible flip (replay B)', 'LOW-MED'),
+  (BGC, 'web'): ('P ≈1.0 (replay B 1: the two stray blank lines removed give the ref)', 'flip (U3 removes the stray blank lines; replay B)', 'MED'),
+}
+U3F_WHY = {(CH9, p): 'not replayable: the 15 stray brs feed a multicol balance (web: 3 balanced columns; natives: one column); removing them re-balances the columns, which no row cut models (skeptic-r2/look-column-height-009-ref-web-ios-android.png)' for p in PLATS}
+U3F_WHY |= {(BGC, p): 'not replayable: the native paints the address on ONE line (no blank band to cut); the 20 px br height changes that line box, which a row cut does not model' for p in ('ios', 'android')}
+BF_WHY = ('not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, '
+          'and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)')
 L3 = {
   'dir': 'tools/titan/results/wave54-hyphenate-character',
   'briefs': ['hyphenate-character-compose.md'],
@@ -289,11 +308,26 @@ L3 = {
     pred(f'{BE[2]} android', 'P 0.9884', 'identical or up (two lines painted; the clamp interplay is unknown)', 'watch', 'LOW', None, False, ['U3']),
   ] + [pred(f'{BE[n]} web', CELLS[f'{BE[n]} web'], 'P ≈0.998 (B replay 0.998)', 'picture-correctness (stray blank line removed)', 'MED-HIGH', 0.99, True, ['U3'], GEO_OK) for n in (4, 5, 6)]
     + [pred(f'{BE[n]} {p}', CELLS[f'{BE[n]} {p}'], 'byte-identical expected (no stray gap on the natives)', 'watch', 'MED', None, False, ['U3']) for n in (4, 5, 6) for p in ('ios', 'android')]
-    + [pred(f'{BF[n]} {p}', CELLS[f'{BF[n]} {p}'], 'up', 'mover (stray blank line before "No dark/black…" removed)', 'MED', None, False, ['U3'])
+    # fix r2 (plan-skeptic R2-S4): no row cut models U3 on backdrop-filter-clip-rect / -edge-clipping / -paint-order — the
+    # stray blank line sits UNDER absolutely positioned boxes that do not move with the flow, and text shows through
+    # their backdrop filter (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png; hyphenate-character.replay-b-u3f.py
+    # prints them NOT REPLAYABLE). The skeptic listed the three Android rows; the six web / iOS "up" rows have the same
+    # missing replay and the same reason, so all nine are undirected (rule 1 still binds the six that are P today).
+    + [pred(f'{BF[n]} {p}', CELLS[f'{BF[n]} {p}'], 'moves (the stray blank line before "No dark/black…" is removed); expected up, not replayable',
+            'mover (undirected)', 'MED', None, False, ['U3'], direction='undirected', directionWhy=BF_WHY)
        for n in ('clip-rect', 'edge-clipping', 'paint-order') for p in ('web', 'ios')]
-    + [pred(f'{BF[n]} android', CELLS[f'{BF[n]} android'], 'up; a flip is possible', 'mover', 'LOW', None, False, ['U3']) for n in ('clip-rect', 'edge-clipping', 'paint-order')]
+    + [pred(f'{BF[n]} android', CELLS[f'{BF[n]} android'], 'moves; expected up (a flip was called possible), not replayable', 'mover (undirected)', 'LOW', None, False, ['U3'],
+            direction='undirected', directionWhy=BF_WHY) for n in ('clip-rect', 'edge-clipping', 'paint-order')]
     + [pred(f'{BF["plus-filter"]} {p}', CELLS[f'{BF["plus-filter"]} {p}'], 'stays (the stray br is the <p>\'s trailing one; nothing in flow below it)', 'watch', 'MED', None, False, ['U3']) for p in PLATS]
-    + [pred(f'{t} {p}', CELLS[f'{t} {p}'], 'up or unchanged', 'mover', 'LOW', None, False, ['U3']) for t in U3F for p in PLATS],
+    # fix r2 (R2-S4): replay B on their OWN pixels (hyphenate-character.replay-b-u3f.py, scored by -score.mjs with the
+    # gate's metric; the capture column reproduces the manifest). Four cells are faithfully replayable (everything below
+    # the stray band is in flow) and LOOKED at (fix-r2/look-clip-path-filter-order-ref-Bweb-Bios-Bandroid.png,
+    # fix-r2/look-balance-grid-container-ref-Bweb.png): they carry the replay value and stay directed. The other five
+    # are NOT replayable (U3F_WHY) and are undirected.
+    + [pred(f'{t} {p}', CELLS[f'{t} {p}'], *U3F_B[(t, p)], None, False, ['U3']) if (t, p) in U3F_B
+       else pred(f'{t} {p}', CELLS[f'{t} {p}'], 'moves (not replayable)', 'mover (undirected)', 'LOW', None, False, ['U3'],
+                 direction='undirected', directionWhy=U3F_WHY[(t, p)])
+       for t in U3F for p in PLATS],
   'mustNotMove': sorted(set(
       cells_of([HC[5]]) + cells_of(INVARIANT_U3) + cells_of([HLC], ('web', 'android'))
       + cells_of(u2_default_population, ('ios', 'android'))
@@ -352,6 +386,9 @@ L3 = {
   },
   'sequencing': 'U3 never lands without U1 + U2-android + U2-ios in the tree before it (U3 alone manufactures a DEGENERATE -003 ios pass, replay B 0.9566); the landing order guarantees it, and a later revert of U1/U2-<p> keeps that platform\'s 001/003/004 flips labelled DEGENERATE by construction',
 }
+
+for _p in L3['predictions']:
+    _p['requires'] = [u for u in _p['units'] if u != 'U3b']     # fix r2 (R2-S1): U3b is additive (its revert keeps the U3-only value)
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 # L4 · oof-layout — oof-containing-block (per native) + compose-wpt-content-box-cb + flex-zero-gap-rules (per native).
@@ -631,7 +668,7 @@ L7 = {
   'revertUnits': {
     'U1': {'commit': 'tools/visual/label-chrome-tripwire.test.mjs (verified exempt manifest, P = empty path, clause (iv), synthetic controls, hint on red) + tools/visual/label-chrome-exempt.json (new) + optional tools/visual/label-chrome-check.mjs (new, the pure checker)',
            'captures': caps(), 'wire': [], 'revertOrder': ['U2-seed', 'U1']},
-    'U2-seed': {'commit': 'the 18 tools/visual/baseline/{Android,iOS,web}__00{0..5}_*.png from UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/all-then-color.json on the CLOSING tree + the orchestrator doc lines (DYNAMIC_CAPTURE.md §5, tripwire header 130 -> 136 / 390 -> 408, STATUS.md:19, tooling counts, gate-fixtures.txt comment, fixture _comment, BACKLOG 0(e), wave53-gate/_note.md + STATUS.md:2678 correction lines)',
+    'U2-seed': {'commit': 'the 18 tools/visual/baseline/{Android,iOS,web}__{000_ATC_AllThenProps,001_ATC_PropsThenAll_InGreenParent,002_reset,003_ATC_InitialUnderRedParent,004_span,005_ATC_DirectionSurvives}.png (exactly these names: label-chrome-all-reset.seeded-77fe41e8/; the glob __00{0..5}_*.png also matches 66 committed baselines of four other fixtures) from UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/all-then-color.json on the CLOSING tree + the orchestrator doc lines (DYNAMIC_CAPTURE.md §5, tripwire header 130 -> 136 / 390 -> 408, STATUS.md:19, tooling counts, gate-fixtures.txt comment, fixture _comment, BACKLOG 0(e), wave53-gate/_note.md + STATUS.md:2678 correction lines)',
                 'captures': caps(), 'wire': [], 'revertOrder': ['U2-seed'],
                 'note': 'PNGs without U1 re-create the wave-53 red in CI test-tooling: U2-seed is reverted before U1, never after'},
   },
@@ -774,6 +811,10 @@ def probe_decisions():
         unit = lane['revertUnits'][r['unit']]
         gone = [p['cell'] for p in lane['predictions'] if p['units'] and all((r['lane'], u) in rev for u in p['units'])
                 and r['unit'] in p['units'] and p['kind'] != 'non-corpus']
+        for p in lane['predictions']:      # fix r2: a withdrawn row gates nothing (held to must-not-move by adjudicate R5)
+            if p['cell'] in gone and 'demotedFrom' not in p:
+                p['demotedFrom'] = {'gating': p['gating'], 'floor': p['floor'], 'direction': p['direction'], 'unit': r['unit'], 'run': r['run'], 'rule': r['rule'], 'withdrawn': True}
+                p.update(gating=False, floor=None)
         # fix r1 (plan-skeptic M3): a gating geometry key that needs this unit can no longer pass once the unit is out
         # of the tree (its cell returns to the old picture), so it is WITHDRAWN — demoted out of `gating` into
         # `withdrawn` (geometry-gate.py prints it, never gates on it) — instead of naming a unit that is already gone.
@@ -785,15 +826,60 @@ def probe_decisions():
                                                           f"{r['run']} (rule {r['rule']})")
                 del probe['gating'][key]
                 geo.append(f'{script} {key}')
-        out.append(dict(r, withdrawnPredictions=gone, mustNotMoveAfter=gone, withdrawnGeometryKeys=geo,
+        # fix r2 (plan-skeptic R2-S1): a prediction that keeps SOME units but needs this one (`requires`) can no longer
+        # reach its `to` — a gating floor would then be unmeetable (U2-ios reverted: 001 / 003 ios at U3 alone, replay
+        # B 0.9304 f / 0.9566 P with hyphens for bullets) and rule 3 + rule 6 would cascade into U3b and U3. It is
+        # DEMOTED: gating -> False, floor -> None, direction -> undirected (the remaining units' sign is not
+        # pre-registered), the old values kept in `demotedFrom`. RESTATE (applied after) may re-register it.
+        demoted = []
+        for p in lane['predictions']:
+            if p['cell'] in gone or p['kind'] == 'non-corpus' or r['unit'] not in p.get('requires', p['units']) or 'demotedFrom' in p:
+                continue
+            p['demotedFrom'] = {'gating': p['gating'], 'floor': p['floor'], 'direction': p['direction'], 'unit': r['unit'], 'run': r['run'], 'rule': r['rule']}
+            p.update(gating=False, floor=None, direction='undirected',
+                     directionWhy=f"demoted: required unit {r['unit']} reverted at {r['run']} (rule {r['rule']}); the remaining units' sign is not pre-registered")
+            demoted.append(p['cell'])
+        out.append(dict(r, withdrawnPredictions=gone, mustNotMoveAfter=gone, demotedPredictions=demoted, withdrawnGeometryKeys=geo,
                         carriersWithdrawn={'captures': {p: [s for s in unit['captures'][p] if s not in still[p]] for p in PLATS},
                                            'wire': [s for s in unit['wire'] if s not in still_wire]}))
     for name, lane in lanes.items():
         for p in lane['predictions']:
             if p['cell'] in RESTATE:
-                p.update({k: v for k, v in RESTATE[p['cell']].items() if k in ('to', 'floor', 'confidence', 'gating', 'kind')})
+                p.update({k: v for k, v in RESTATE[p['cell']].items() if k in ('to', 'floor', 'confidence', 'gating', 'kind', 'direction', 'directionWhy')})
                 p['restated'] = RESTATE[p['cell']].get('why', 'PLAN §10')
+    # fix r2 (R2-S1), asserted: no gating prediction needs a reverted unit unless RESTATE re-registered it explicitly
+    # (with its own `gating` and `why`); a withdrawn row (all units reverted) is never gating either.
+    for name, lane in lanes.items():
+        for p in lane['predictions']:
+            need = [u for u in p.get('requires', p['units']) if (name, u) in rev]
+            if p['gating'] and need:
+                assert p['cell'] in RESTATE and 'gating' in RESTATE[p['cell']] and 'why' in RESTATE[p['cell']], \
+                    f'{name} {p["cell"]}: gating, but its required unit(s) {need} are reverted — demote it or RESTATE it with a why'
+                assert p.get('floor') is not None, f'{p["cell"]}: RESTATE re-gates it without a floor'
     return {'reverted': out} if out else None
+
+# fix r2 (plan-skeptic R2-M2): the read-out of a device probe, base FIRST everywhere. ab-diff.mjs is
+# <excludeRun> <includeRun> and prints Δ = include − exclude, so `ab-diff.mjs wave54-open <probe>` prints Δ = probe −
+# open (the planned `ab-diff.mjs <probe> wave54-open` labelled every probe gain "flip P→f": wave 53's margin-root-002
+# web, fix-r2/pre-M2.abdiff-plan-order.wave53-probe.out.txt). Rule 3 (floors) gets an executable reader:
+# probe-readout.mjs over a --movers 0 score record (it refuses the wrong order and a thresholded record).
+def PROBE_READOUT(run, sections, stage1=False):
+    secs = ','.join(sections)
+    tail = ' --stage1' if stage1 else ''
+    return {
+      'order': f'base first everywhere: wave54-open is the PREVIOUS / EXCLUDE run, {run} the CURRENT / INCLUDE run, so every Δ printed is {run} − wave54-open (a gain is +)',
+      'abDiff': f'node tools/titan/results/wave52-gate/ab-diff.mjs wave54-open {run} --threshold 0.002   (per-cell flips and |Δ| >= 0.002, sections absent from {run} print "not compared")',
+      'score': (f'node tools/titan/score-gate.mjs wave54-open {run} --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 '
+                f'--json tools/titan/results/wave54-gate/score-{run.split("-")[1]}.json > tools/titan/results/wave54-gate/score-{run.split("-")[1]}.movers0.txt'),
+      'floors': (f'node tools/titan/results/wave54-plan/probe-readout.mjs tools/titan/results/wave54-gate/score-{run.split("-")[1]}.json{tail}'
+                 '   (revert rules 1, 2, 3 over every carrier, prediction row and non-carrier cell of the probed sections; exit 0 none fired, 1 fired (units named, each with its revertOrder), 2 wrong order / not --movers 0, 3 a probed section missing)'),
+      'controls': f'node tools/titan/results/wave54-gate/control-check.mjs wave54-open {run} --sections {secs}   (R4 / R4b restricted to the probed sections: rule 5)',
+      'geometry': (f'python3 tools/titan/results/wave54-plan/geometry-gate.py {run} --base wave54-open' + (' --lanes L1,L2' if stage1 else '')
+                   + '   (rule 4; exit 0 = every gating key of a unit on the tree PASS; 1 a gating FAIL; 3 a gating key UNMEASURED)'),
+      'executedAtPlanning': ('fix-r2/post-M2.*: ab-diff wave53-open wave53-probe prints background-attachment-margin-root-002 web "flip f→P f 0.339 → P 1 Δ+0.661"; '
+                             'probe-readout --stage1 on a stage-1-shaped record (wave53-probe\'s CSS2, css-counter-styles, css-tables, css-text) passes the L1 rows and names only L2 TB-android (006 android 0.9906 < 0.996, Δ-0.0038), the unit wave 53 itself reverted; on the full wave-53 pair it prints margin-root-002 ×3 as f→P; '
+                             'the reversed record exits 2 (ORDER); a --movers 0.005 record exits 2; the identity record fires rule 3 on 31 rows (34 minus the 3 vacuous autopos floors), 6 with --stage1'),
+    }
 
 expectations = {
   'wave': 54,
@@ -805,7 +891,13 @@ expectations = {
                     ' --movers 0 --json tools/titan/results/wave54-gate/score-final.json > tools/titan/results/wave54-gate/score-final.movers0.txt'),
   'adjudicate': 'node tools/titan/results/wave54-gate/adjudicate.mjs tools/titan/results/wave54-gate/score-final.json',
   'scoreReadout': ('node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt'
-                   ' --movers 0.005 > tools/titan/results/wave54-gate/score-final.txt   (the human-readable mover list for the PR; adjudicates nothing)'),
+                   ' --movers 0.005 --json tools/titan/results/wave54-gate/score-final.movers0005.json > tools/titan/results/wave54-gate/score-final.txt'
+                   '   (the human-readable mover list for the PR; adjudicates nothing)'),
+  # fix r2 (plan-skeptic R2-S3): make-corpus.mjs publishes `movers: record.movers.length` under a hardcoded
+  # "--movers 0.005" scorer string, and the --movers 0 record lists EVERY same-verdict cell (4096 movers on the
+  # identity pair) — so the snapshot is built from the 0.005 JSON, never from score-final.json.
+  'corpusSnapshotSource': ('tools/titan/results/wave54-gate/score-final.movers0005.json (the <record.json> of tools/titan/results/wave52-gate/make-corpus.mjs; '
+                           'its perCellDiff.movers then counts |Δ| >= 0.005 exactly as its scorer string says — score-final.json, the --movers 0 record of R4/R5, would publish ≈4000)'),
   'adjudicateCalibrations': [
     {'input': 'skeptic-r1/synth-score.json (every gating row at its predicted value, built with the old --movers 0.005 rule)',
      'expect': 'FAIL R4 missed 4 (abspos-autopos-{htb,vlr,vrl}-ltr android, s-11-1-1b-006 android): the defect, reproduced', 'out': 'fix-r1/pre-M1.adjudicate-synth.out.txt'},
@@ -829,21 +921,23 @@ expectations = {
   'stage1Probe': {'runId': 'wave54-pre', 'sections': STAGE1,
                   'cmd': 'tools/titan/gate-driver.sh wave54-pre --sections ' + ','.join(STAGE1) + ' --skip-fixture-net',
                   'decides': ['L1-rtl-marker-bake P / Mprime', 'L2-table-body-cell TB-android'],
-                  'readWith': 'the UNION carrier set (BACKLOG wave-53 lesson: a probe of a shared tree measures the union); per-lane geometry decides L1 and L2 only; every other lane\'s cells in these sections are recorded and decided at wave54-probe'},
+                  'readWith': 'the UNION carrier set (BACKLOG wave-53 lesson: a probe of a shared tree measures the union); per-lane geometry decides L1 and L2 only; every other lane\'s cells in these sections are recorded and decided at wave54-probe',
+                  'readOut': PROBE_READOUT('wave54-pre', STAGE1, stage1=True)},
   'probeRun': {'runId': 'wave54-probe', 'sections': PROBE,
                'cmd': 'tools/titan/gate-driver.sh wave54-probe --sections ' + ','.join(PROBE) + ' --skip-fixture-net',
+               'readOut': PROBE_READOUT('wave54-probe', PROBE),
                'notProbed': {s: {'css-color': 'no carrier, no named control; the closing gate R4/R7',
                                  'css-grid': 'no carrier, no named control (the wave-53 float controls are closed); the closing gate R4/R7',
                                  'css-sizing': 'no carrier; holds only the unstaffed web singleton aspect-ratio/abspos-016; the closing gate R4/R7',
                                  'css-view-transitions': 'two L4 fixed controls (content-with-child-with-transparent-background, content-with-transparent-background, P x3) — replaced by the L4 skeptic\'s P3 pure-walk census over all 26 fixedControls payloads (JVM + Catalyst) and the closing gate R4/R7; the section runs 8-30 min under swap'}[s]
                              for s in NOT_PROBED}},
   'geometryGate': {'cmd': 'python3 tools/titan/results/wave54-plan/geometry-gate.py <run> --base wave54-open',
-                   'what': 'runs every lane\'s geometryProbes, prints one PASS/FAIL per expect key, names the unit each failing gating row reverts (rule 4), exits 1 on a gating FAIL or a probe self-check failure'},
+                   'what': 'runs every lane\'s geometryProbes, prints one PASS/FAIL per expect key, names the unit each failing gating row reverts (rule 4), exits 1 on a gating FAIL or a probe self-check failure, 2 on a STALE json, 3 when no gating key FAILs but one is UNMEASURED (fix r2, R2-S2: never a silent pass); R6 = exit 0'},
   'revertRule': [
     '1 lost: a carrier cell (any lane, any tier, predicted or not) that is P on wave54-open and f on the probe reverts the commit that carries it (R1\'s empty lost list applied at the probe)',
     '2 moved down: delta <= -0.002 wave54-open -> probe on any prediction row whose direction is "up-or-stay" (any tier) reverts the commit that carries it. A row with direction "undirected" (a move whose sign is not pre-registered; lanes.*.predictions[].directionWhy) is EXEMPT from rule 2: its fall is looked at against the ref and named with its cause in the probe read-out and the PR, never a revert by itself; rules 1 and 5 still bind it',
-    '3 floor: a gating prediction (every HIGH / MED-HIGH row) below its floor reverts the commit that carries it',
-    '4 geometry: a geometryProbes gating key whose line does not end in its exact expect string (or lacks its contains string) reverts the unit geometry-gate.py names',
+    '3 floor: a gating prediction (every HIGH / MED-HIGH row) below its floor reverts the commit that carries it. Read by probe-readout.mjs over the --movers 0 probe record (stage1Probe.readOut / probeRun.readOut). A row demoted by a probe decision (probeDecisions.reverted[].demotedPredictions: a required unit is gone) has no floor',
+    '4 geometry: a geometryProbes gating key whose line does not end in its exact expect string (or lacks its contains string) reverts the unit geometry-gate.py names; an UNMEASURED gating key is not a pass (geometry-gate.py exit 3: re-run the section)',
     '5 leak: a composed capture outside every carrier set that differs in decoded pixels (R4), or a per-test IR document outside the wire carriers that differs in bytes and is not "renumbered" (R4b), reverts the commit it is bisected to (one re-probe of the leaked section per step; never guessed)',
     '6 unit: the commit (lanes.*.revertUnits); a cell carried by several commits of one lane reverts them in that unit\'s revertOrder (latest first), re-probing its sections between steps. Lane dependencies: M′ before P (M′ never without P); U3b before U3; U2-seed before U1. L3 reasons: a `glyph:` failure names U2-<platform> (U1 on web), an `offset:`/`lines:` failure names U3b, then U3',
     '6x shared cells (L4 sharedCells): carriers are disjoint by construction, so a cell always names ONE lane\'s commits; L4\'s invariance claims on L3 / L1 carriers are pinned in-lane (P1/P3) and attributed at the closing A/B',
@@ -1005,7 +1099,7 @@ open(os.path.join(OUT, 'watchlist.txt'), 'w').write('\n'.join(out) + '\n')
 gating = [p for l in lanes.values() for p in l['predictions'] if p['gating']]
 assert all(isinstance(p['floor'], float) for p in gating), 'every gating prediction needs a numeric floor'
 assert all(p['gating'] for l in lanes.values() for p in l['predictions']
-           if p['confidence'].startswith(('HIGH', 'MED-HIGH')) and p['kind'] != 'non-corpus'), 'a HIGH/MED-HIGH prediction is not gating'
+           if p['confidence'].startswith(('HIGH', 'MED-HIGH')) and p['kind'] != 'non-corpus' and 'demotedFrom' not in p), 'a HIGH/MED-HIGH prediction is not gating'
 print(f"watchlist.txt: {sum(1 for l in out if l and not l.startswith('#'))} watch lines")
 print('expectations.json: union capture carriers', {p: len(v) for p, v in union.items()}, '· wire carriers', len(wire_owner))
 print(f'stage-1 probe ({len(STAGE1)}):', ','.join(STAGE1))
@@ -1038,7 +1132,7 @@ print(f'geometry keys: {_ak} = gating {_gk} + report {_rk} + control {_ak - _gk 
 print(f"picture-correct tally: {len(TALLY['full'])} in full + {len(TALLY['part'])} in part, each with its geometry key")
 if _pd:
     for d in _pd['reverted']:
-        print(f"probe decision {d['lane']} {d['unit']}: withdrawn predictions {len(d['withdrawnPredictions'])}, "
+        print(f"probe decision {d['lane']} {d['unit']}: withdrawn predictions {len(d['withdrawnPredictions'])}, demoted {d['demotedPredictions']}, "
               f"geometry keys {d['withdrawnGeometryKeys']}, captures {sum(len(v) for v in d['carriersWithdrawn']['captures'].values())}")
 print(f'must-not-move exclusions (another lane\'s carrier on that platform): {len(excluded)}')
 for lane_name, line, o in excluded:

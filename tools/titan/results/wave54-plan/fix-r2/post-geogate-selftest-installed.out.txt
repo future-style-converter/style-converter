@@ -1,0 +1,2 @@
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+exit 0

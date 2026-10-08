@@ -6,7 +6,7 @@
 #   (1) the 20x20 block x 24-43 x rows 56-75 is SOLID black (every pixel sum < 30 — the reference's td at (8,40)),
 #   (2) no other dark ink in the band x 0-389 x rows 52-140 (no outline stroke, no displaced square, no second box),
 #   (3) no red ink (the s-11-1-1b family's failure colour).
-# One line per (run, platform), ending in "→ GEOMETRY OK" or "GEOMETRY WRONG (<why>)".
+# One line per (run, platform), ending in "→ GEOMETRY OK" or "→ GEOMETRY WRONG (<why>)".
 #
 # Usage: python3 compose-table-body-cell.geometry.py [run-id ...]     (default: wave53-open wave53-probe wave53-final)
 # Self-check (the wave-53 geometry_common contract): the REF row must print OK, else the rule is wrong → exit 1.
@@ -55,7 +55,8 @@ def verdict(path):
     if reds:
         why.append(f'{reds} red px')
     ok = not why
-    return head + (' → GEOMETRY OK' if ok else f' GEOMETRY WRONG ({"; ".join(why)})'), ok
+    # fix r2 (plan-skeptic N5): the WRONG verdict carries the same "→" separator as the OK one
+    return head + (' → GEOMETRY OK' if ok else f' → GEOMETRY WRONG ({"; ".join(why)})'), ok
 
 
 runs = sys.argv[1:] or ['wave53-open', 'wave53-probe', 'wave53-final']

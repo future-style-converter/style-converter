@@ -3,7 +3,8 @@
  "readAgainst": "wave53-final",
  "scoreOfRecord": "node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 --json tools/titan/results/wave54-gate/score-final.json > tools/titan/results/wave54-gate/score-final.movers0.txt",
  "adjudicate": "node tools/titan/results/wave54-gate/adjudicate.mjs tools/titan/results/wave54-gate/score-final.json",
- "scoreReadout": "node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0.005 > tools/titan/results/wave54-gate/score-final.txt   (the human-readable mover list for the PR; adjudicates nothing)",
+ "scoreReadout": "node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0.005 --json tools/titan/results/wave54-gate/score-final.movers0005.json > tools/titan/results/wave54-gate/score-final.txt   (the human-readable mover list for the PR; adjudicates nothing)",
+ "corpusSnapshotSource": "tools/titan/results/wave54-gate/score-final.movers0005.json (the <record.json> of tools/titan/results/wave52-gate/make-corpus.mjs; its perCellDiff.movers then counts |Δ| >= 0.005 exactly as its scorer string says — score-final.json, the --movers 0 record of R4/R5, would publish ≈4000)",
  "adjudicateCalibrations": [
   {
    "input": "skeptic-r1/synth-score.json (every gating row at its predicted value, built with the old --movers 0.005 rule)",
@@ -54,7 +55,16 @@
    "L1-rtl-marker-bake P / Mprime",
    "L2-table-body-cell TB-android"
   ],
-  "readWith": "the UNION carrier set (BACKLOG wave-53 lesson: a probe of a shared tree measures the union); per-lane geometry decides L1 and L2 only; every other lane's cells in these sections are recorded and decided at wave54-probe"
+  "readWith": "the UNION carrier set (BACKLOG wave-53 lesson: a probe of a shared tree measures the union); per-lane geometry decides L1 and L2 only; every other lane's cells in these sections are recorded and decided at wave54-probe",
+  "readOut": {
+   "order": "base first everywhere: wave54-open is the PREVIOUS / EXCLUDE run, wave54-pre the CURRENT / INCLUDE run, so every Δ printed is wave54-pre − wave54-open (a gain is +)",
+   "abDiff": "node tools/titan/results/wave52-gate/ab-diff.mjs wave54-open wave54-pre --threshold 0.002   (per-cell flips and |Δ| >= 0.002, sections absent from wave54-pre print \"not compared\")",
+   "score": "node tools/titan/score-gate.mjs wave54-open wave54-pre --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 --json tools/titan/results/wave54-gate/score-pre.json > tools/titan/results/wave54-gate/score-pre.movers0.txt",
+   "floors": "node tools/titan/results/wave54-plan/probe-readout.mjs tools/titan/results/wave54-gate/score-pre.json --stage1   (revert rules 1, 2, 3 over every carrier, prediction row and non-carrier cell of the probed sections; exit 0 none fired, 1 fired (units named, each with its revertOrder), 2 wrong order / not --movers 0, 3 a probed section missing)",
+   "controls": "node tools/titan/results/wave54-gate/control-check.mjs wave54-open wave54-pre --sections CSS2,css-counter-styles,css-tables,css-text   (R4 / R4b restricted to the probed sections: rule 5)",
+   "geometry": "python3 tools/titan/results/wave54-plan/geometry-gate.py wave54-pre --base wave54-open --lanes L1,L2   (rule 4; exit 0 = every gating key of a unit on the tree PASS; 1 a gating FAIL; 3 a gating key UNMEASURED)",
+   "executedAtPlanning": "fix-r2/post-M2.*: ab-diff wave53-open wave53-probe prints background-attachment-margin-root-002 web \"flip f→P f 0.339 → P 1 Δ+0.661\"; probe-readout --stage1 on a stage-1-shaped record (wave53-probe's CSS2, css-counter-styles, css-tables, css-text) passes the L1 rows and names only L2 TB-android (006 android 0.9906 < 0.996, Δ-0.0038), the unit wave 53 itself reverted; on the full wave-53 pair it prints margin-root-002 ×3 as f→P; the reversed record exits 2 (ORDER); a --movers 0.005 record exits 2; the identity record fires rule 3 on 31 rows (34 minus the 3 vacuous autopos floors), 6 with --stage1"
+  }
  },
  "probeRun": {
   "runId": "wave54-probe",
@@ -87,6 +97,15 @@
    "selectors"
   ],
   "cmd": "tools/titan/gate-driver.sh wave54-probe --sections CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-writing-modes,filter-effects,selectors --skip-fixture-net",
+  "readOut": {
+   "order": "base first everywhere: wave54-open is the PREVIOUS / EXCLUDE run, wave54-probe the CURRENT / INCLUDE run, so every Δ printed is wave54-probe − wave54-open (a gain is +)",
+   "abDiff": "node tools/titan/results/wave52-gate/ab-diff.mjs wave54-open wave54-probe --threshold 0.002   (per-cell flips and |Δ| >= 0.002, sections absent from wave54-probe print \"not compared\")",
+   "score": "node tools/titan/score-gate.mjs wave54-open wave54-probe --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 --json tools/titan/results/wave54-gate/score-probe.json > tools/titan/results/wave54-gate/score-probe.movers0.txt",
+   "floors": "node tools/titan/results/wave54-plan/probe-readout.mjs tools/titan/results/wave54-gate/score-probe.json   (revert rules 1, 2, 3 over every carrier, prediction row and non-carrier cell of the probed sections; exit 0 none fired, 1 fired (units named, each with its revertOrder), 2 wrong order / not --movers 0, 3 a probed section missing)",
+   "controls": "node tools/titan/results/wave54-gate/control-check.mjs wave54-open wave54-probe --sections CSS2,css-anchor-position,css-backgrounds,css-break,css-cascade,css-contain,css-counter-styles,css-display,css-flexbox,css-gaps,css-images,css-lists,css-masking,css-multicol,css-overflow,css-position,css-pseudo,css-tables,css-text,css-text-decor,css-transforms,css-ui,css-values,css-writing-modes,filter-effects,selectors   (R4 / R4b restricted to the probed sections: rule 5)",
+   "geometry": "python3 tools/titan/results/wave54-plan/geometry-gate.py wave54-probe --base wave54-open   (rule 4; exit 0 = every gating key of a unit on the tree PASS; 1 a gating FAIL; 3 a gating key UNMEASURED)",
+   "executedAtPlanning": "fix-r2/post-M2.*: ab-diff wave53-open wave53-probe prints background-attachment-margin-root-002 web \"flip f→P f 0.339 → P 1 Δ+0.661\"; probe-readout --stage1 on a stage-1-shaped record (wave53-probe's CSS2, css-counter-styles, css-tables, css-text) passes the L1 rows and names only L2 TB-android (006 android 0.9906 < 0.996, Δ-0.0038), the unit wave 53 itself reverted; on the full wave-53 pair it prints margin-root-002 ×3 as f→P; the reversed record exits 2 (ORDER); a --movers 0.005 record exits 2; the identity record fires rule 3 on 31 rows (34 minus the 3 vacuous autopos floors), 6 with --stage1"
+  },
   "notProbed": {
    "css-color": "no carrier, no named control; the closing gate R4/R7",
    "css-grid": "no carrier, no named control (the wave-53 float controls are closed); the closing gate R4/R7",
@@ -96,13 +115,13 @@
  },
  "geometryGate": {
   "cmd": "python3 tools/titan/results/wave54-plan/geometry-gate.py <run> --base wave54-open",
-  "what": "runs every lane's geometryProbes, prints one PASS/FAIL per expect key, names the unit each failing gating row reverts (rule 4), exits 1 on a gating FAIL or a probe self-check failure"
+  "what": "runs every lane's geometryProbes, prints one PASS/FAIL per expect key, names the unit each failing gating row reverts (rule 4), exits 1 on a gating FAIL or a probe self-check failure, 2 on a STALE json, 3 when no gating key FAILs but one is UNMEASURED (fix r2, R2-S2: never a silent pass); R6 = exit 0"
  },
  "revertRule": [
   "1 lost: a carrier cell (any lane, any tier, predicted or not) that is P on wave54-open and f on the probe reverts the commit that carries it (R1's empty lost list applied at the probe)",
   "2 moved down: delta <= -0.002 wave54-open -> probe on any prediction row whose direction is \"up-or-stay\" (any tier) reverts the commit that carries it. A row with direction \"undirected\" (a move whose sign is not pre-registered; lanes.*.predictions[].directionWhy) is EXEMPT from rule 2: its fall is looked at against the ref and named with its cause in the probe read-out and the PR, never a revert by itself; rules 1 and 5 still bind it",
-  "3 floor: a gating prediction (every HIGH / MED-HIGH row) below its floor reverts the commit that carries it",
-  "4 geometry: a geometryProbes gating key whose line does not end in its exact expect string (or lacks its contains string) reverts the unit geometry-gate.py names",
+  "3 floor: a gating prediction (every HIGH / MED-HIGH row) below its floor reverts the commit that carries it. Read by probe-readout.mjs over the --movers 0 probe record (stage1Probe.readOut / probeRun.readOut). A row demoted by a probe decision (probeDecisions.reverted[].demotedPredictions: a required unit is gone) has no floor",
+  "4 geometry: a geometryProbes gating key whose line does not end in its exact expect string (or lacks its contains string) reverts the unit geometry-gate.py names; an UNMEASURED gating key is not a pass (geometry-gate.py exit 3: re-run the section)",
   "5 leak: a composed capture outside every carrier set that differs in decoded pixels (R4), or a per-test IR document outside the wire carriers that differs in bytes and is not \"renumbered\" (R4b), reverts the commit it is bisected to (one re-probe of the leaked section per step; never guessed)",
   "6 unit: the commit (lanes.*.revertUnits); a cell carried by several commits of one lane reverts them in that unit's revertOrder (latest first), re-probing its sections between steps. Lane dependencies: M′ before P (M′ never without P); U3b before U3; U2-seed before U1. L3 reasons: a `glyph:` failure names U2-<platform> (U1 on web), an `offset:`/`lines:` failure names U3b, then U3",
   "6x shared cells (L4 sharedCells): carriers are disjoint by construction, so a cell always names ONE lane's commits; L4's invariance claims on L3 / L1 carriers are pinned in-lane (P1/P3) and attributed at the closing A/B",
@@ -427,7 +446,10 @@
      "units": [
       "P"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "P"
+     ]
     },
     {
      "cell": "css-text/bidi/bidi-lines-002.html android",
@@ -441,7 +463,10 @@
      "units": [
       "P"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "P"
+     ]
     },
     {
      "cell": "css-counter-styles/counter-suffix.html android",
@@ -456,7 +481,10 @@
       "P",
       "Mprime"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "P"
+     ]
     },
     {
      "cell": "css-counter-styles/counter-suffix.html web",
@@ -470,7 +498,10 @@
      "units": [
       "Mprime"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "Mprime"
+     ]
     },
     {
      "cell": "css-counter-styles/counter-suffix.html ios",
@@ -484,7 +515,10 @@
      "units": [
       "Mprime"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "Mprime"
+     ]
     }
    ],
    "neverShip": "M′ without P (counter-suffix android → f ≈0.947, the wave-53 replay); M′ is reverted before P, never cherry-picked alone",
@@ -725,7 +759,10 @@
      "units": [
       "TB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "TB-android"
+     ]
     }
    ],
    "mustNotMove": [
@@ -984,7 +1021,12 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1",
+      "U2-ios",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-003.html ios",
@@ -1001,7 +1043,12 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1",
+      "U2-ios",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-004.html ios",
@@ -1017,7 +1064,11 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U2-ios",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-001.html web",
@@ -1033,7 +1084,11 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-003.html web",
@@ -1049,7 +1104,11 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-004.html web",
@@ -1064,7 +1123,10 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-001.html android",
@@ -1081,7 +1143,12 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1",
+      "U2-android",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-003.html android",
@@ -1098,7 +1165,12 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1",
+      "U2-android",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-004.html android",
@@ -1114,7 +1186,11 @@
       "U3",
       "U3b"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U2-android",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-002.html web",
@@ -1129,7 +1205,11 @@
       "U1",
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1",
+      "U3"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphenate-character-002.html ios",
@@ -1146,6 +1226,11 @@
       "U3"
      ],
      "direction": "undirected",
+     "requires": [
+      "U1",
+      "U2-ios",
+      "U3"
+     ],
      "directionWhy": "U3 alone replays UP (B 0.9382) but U1 + U2-ios change the glyph of a CF-dictionary fold that no replay models"
     },
     {
@@ -1161,6 +1246,9 @@
       "U3"
      ],
      "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ],
      "directionWhy": "U3 is its only unit (U2-android is identity on a dictionary run) and replay B, which models U3 alone, gives 0.923 >= 0.9223"
     },
     {
@@ -1176,6 +1264,9 @@
       "U2-ios"
      ],
      "direction": "undirected",
+     "requires": [
+      "U2-ios"
+     ],
      "directionWhy": "the glyph swap is not replayed; no sign is pre-registered"
     },
     {
@@ -1190,7 +1281,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-002.html ios",
@@ -1204,7 +1298,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-002.html android",
@@ -1218,7 +1315,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-004.html web",
@@ -1232,7 +1332,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-005.html web",
@@ -1246,7 +1349,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-006.html web",
@@ -1260,7 +1366,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-004.html ios",
@@ -1274,7 +1383,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-004.html android",
@@ -1288,7 +1400,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-005.html ios",
@@ -1302,7 +1417,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-005.html android",
@@ -1316,7 +1434,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-006.html ios",
@@ -1330,7 +1451,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-overflow/line-clamp/block-ellipsis-006.html android",
@@ -1344,13 +1468,16 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-clip-rect.html web",
      "from": "P 0.959",
-     "to": "up",
-     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "to": "moves (the stray blank line before \"No dark/black…\" is removed); expected up, not replayable",
+     "kind": "mover (undirected)",
      "confidence": "MED",
      "floor": null,
      "gating": false,
@@ -1358,13 +1485,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-clip-rect.html ios",
      "from": "P 0.956",
-     "to": "up",
-     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "to": "moves (the stray blank line before \"No dark/black…\" is removed); expected up, not replayable",
+     "kind": "mover (undirected)",
      "confidence": "MED",
      "floor": null,
      "gating": false,
@@ -1372,13 +1503,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-edge-clipping.html web",
      "from": "P 0.9595",
-     "to": "up",
-     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "to": "moves (the stray blank line before \"No dark/black…\" is removed); expected up, not replayable",
+     "kind": "mover (undirected)",
      "confidence": "MED",
      "floor": null,
      "gating": false,
@@ -1386,13 +1521,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-edge-clipping.html ios",
      "from": "P 0.9578",
-     "to": "up",
-     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "to": "moves (the stray blank line before \"No dark/black…\" is removed); expected up, not replayable",
+     "kind": "mover (undirected)",
      "confidence": "MED",
      "floor": null,
      "gating": false,
@@ -1400,13 +1539,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-paint-order.html web",
      "from": "P 0.9595",
-     "to": "up",
-     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "to": "moves (the stray blank line before \"No dark/black…\" is removed); expected up, not replayable",
+     "kind": "mover (undirected)",
      "confidence": "MED",
      "floor": null,
      "gating": false,
@@ -1414,13 +1557,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-paint-order.html ios",
      "from": "P 0.9578",
-     "to": "up",
-     "kind": "mover (stray blank line before \"No dark/black…\" removed)",
+     "to": "moves (the stray blank line before \"No dark/black…\" is removed); expected up, not replayable",
+     "kind": "mover (undirected)",
      "confidence": "MED",
      "floor": null,
      "gating": false,
@@ -1428,13 +1575,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-clip-rect.html android",
      "from": "f 0.9315",
-     "to": "up; a flip is possible",
-     "kind": "mover",
+     "to": "moves; expected up (a flip was called possible), not replayable",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1442,13 +1593,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-edge-clipping.html android",
      "from": "f 0.929",
-     "to": "up; a flip is possible",
-     "kind": "mover",
+     "to": "moves; expected up (a flip was called possible), not replayable",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1456,13 +1611,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-paint-order.html android",
      "from": "f 0.929",
-     "to": "up; a flip is possible",
-     "kind": "mover",
+     "to": "moves; expected up (a flip was called possible), not replayable",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1470,7 +1629,11 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the stray blank line sits under absolutely positioned boxes (green box, backdrop-filtered pill / white box) that do not move with the flow, and text shows through their backdrop filter; a row cut would move the boxes too (fix-r2/look-backdrop-filter-*-ref-web-ios-android.png)"
     },
     {
      "cell": "filter-effects/backdrop-filter-plus-filter.html web",
@@ -1484,7 +1647,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-plus-filter.html ios",
@@ -1498,7 +1664,10 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-plus-filter.html android",
@@ -1512,69 +1681,84 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-masking/clip-path/clip-path-filter-order.html web",
      "from": "f 0.8586",
-     "to": "up or unchanged",
-     "kind": "mover",
-     "confidence": "LOW",
+     "to": "P ≈1.0 (replay B on its own pixels: 1 — the capture minus the stray 20 px IS the ref)",
+     "kind": "flip (U3 removes the stray blank line; replay B)",
+     "confidence": "MED",
      "floor": null,
      "gating": false,
      "geometry": null,
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-masking/clip-path/clip-path-filter-order.html ios",
      "from": "f 0.8578",
-     "to": "up or unchanged",
-     "kind": "mover",
-     "confidence": "LOW",
+     "to": "P ≈0.998 (replay B 0.9978)",
+     "kind": "flip (U3 removes the stray blank line; replay B)",
+     "confidence": "MED",
      "floor": null,
      "gating": false,
      "geometry": null,
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-masking/clip-path/clip-path-filter-order.html android",
      "from": "f 0.8406",
-     "to": "up or unchanged",
-     "kind": "mover",
-     "confidence": "LOW",
+     "to": "up, ≈0.955 at best (replay B 0.9549: the leading-space residual stays)",
+     "kind": "possible flip (replay B)",
+     "confidence": "LOW-MED",
      "floor": null,
      "gating": false,
      "geometry": null,
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-multicol/balance-grid-container.html web",
      "from": "f 0.9207",
-     "to": "up or unchanged",
-     "kind": "mover",
-     "confidence": "LOW",
+     "to": "P ≈1.0 (replay B 1: the two stray blank lines removed give the ref)",
+     "kind": "flip (U3 removes the stray blank lines; replay B)",
+     "confidence": "MED",
      "floor": null,
      "gating": false,
      "geometry": null,
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U3"
+     ]
     },
     {
      "cell": "css-multicol/balance-grid-container.html ios",
      "from": "f 0.862",
-     "to": "up or unchanged",
-     "kind": "mover",
+     "to": "moves (not replayable)",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1582,13 +1766,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the native paints the address on ONE line (no blank band to cut); the 20 px br height changes that line box, which a row cut does not model"
     },
     {
      "cell": "css-multicol/balance-grid-container.html android",
      "from": "f 0.8724",
-     "to": "up or unchanged",
-     "kind": "mover",
+     "to": "moves (not replayable)",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1596,13 +1784,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the native paints the address on ONE line (no blank band to cut); the 20 px br height changes that line box, which a row cut does not model"
     },
     {
      "cell": "css-multicol/column-height-009.html web",
      "from": "f 0.8827",
-     "to": "up or unchanged",
-     "kind": "mover",
+     "to": "moves (not replayable)",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1610,13 +1802,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the 15 stray brs feed a multicol balance (web: 3 balanced columns; natives: one column); removing them re-balances the columns, which no row cut models (skeptic-r2/look-column-height-009-ref-web-ios-android.png)"
     },
     {
      "cell": "css-multicol/column-height-009.html ios",
      "from": "f 0.8072",
-     "to": "up or unchanged",
-     "kind": "mover",
+     "to": "moves (not replayable)",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1624,13 +1820,17 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the 15 stray brs feed a multicol balance (web: 3 balanced columns; natives: one column); removing them re-balances the columns, which no row cut models (skeptic-r2/look-column-height-009-ref-web-ios-android.png)"
     },
     {
      "cell": "css-multicol/column-height-009.html android",
      "from": "f 0.742",
-     "to": "up or unchanged",
-     "kind": "mover",
+     "to": "moves (not replayable)",
+     "kind": "mover (undirected)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1638,7 +1838,11 @@
      "units": [
       "U3"
      ],
-     "direction": "up-or-stay"
+     "direction": "undirected",
+     "requires": [
+      "U3"
+     ],
+     "directionWhy": "not replayable: the 15 stray brs feed a multicol balance (web: 3 balanced columns; natives: one column); removing them re-balances the columns, which no row cut models (skeptic-r2/look-column-height-009-ref-web-ios-android.png)"
     }
    ],
    "mustNotMove": [
@@ -2068,7 +2272,10 @@
      "units": [
       "OOF-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-android"
+     ]
     },
     {
      "cell": "css-contain/contain-content-011.html android",
@@ -2082,7 +2289,10 @@
      "units": [
       "OOF-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-android"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-containing-block.html ios",
@@ -2096,7 +2306,10 @@
      "units": [
       "OOF-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-ios"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-containing-block.html android",
@@ -2110,7 +2323,10 @@
      "units": [
       "OOF-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-android"
+     ]
     },
     {
      "cell": "css-position/position-relative-004.html ios",
@@ -2124,7 +2340,10 @@
      "units": [
       "OOF-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-ios"
+     ]
     },
     {
      "cell": "css-position/position-relative-004.html android",
@@ -2138,7 +2357,10 @@
      "units": [
       "OOF-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-android"
+     ]
     },
     {
      "cell": "css-position/change-insets-inside-strict-containment-nested.html ios",
@@ -2152,7 +2374,10 @@
      "units": [
       "OOF-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-ios"
+     ]
     },
     {
      "cell": "css-position/change-insets-inside-strict-containment-nested.html android",
@@ -2166,7 +2391,10 @@
      "units": [
       "OOF-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-android"
+     ]
     },
     {
      "cell": "CSS2/abspos/static-fixed-inside-abspos.html ios",
@@ -2180,7 +2408,10 @@
      "units": [
       "OOF-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-ios"
+     ]
     },
     {
      "cell": "CSS2/abspos/static-fixed-inside-abspos.html android",
@@ -2194,7 +2425,10 @@
      "units": [
       "OOF-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-android"
+     ]
     },
     {
      "cell": "css-position/position-relative-003.html ios",
@@ -2208,7 +2442,10 @@
      "units": [
       "OOF-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-ios"
+     ]
     },
     {
      "cell": "css-position/position-relative-003.html android",
@@ -2222,7 +2459,10 @@
      "units": [
       "OOF-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "OOF-android"
+     ]
     },
     {
      "cell": "css-contain/contain-content-004.html android",
@@ -2237,6 +2477,9 @@
       "OOF-android"
      ],
      "direction": "undirected",
+     "requires": [
+      "OOF-android"
+     ],
      "directionWhy": "oof-containing-block.md §10 R1: the positioned-container Box now hosts 004's in-flow <span>FAIL</span>; its sign is not pre-registered"
     },
     {
@@ -2251,7 +2494,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-nested-border-radius-clip.html android",
@@ -2265,7 +2511,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-2.html android",
@@ -2279,7 +2528,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "filter-effects/backdrop-filter-nested-border-radius-clip-4.html android",
@@ -2293,7 +2545,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-htb-ltr.html android",
@@ -2307,7 +2562,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vlr-ltr.html android",
@@ -2321,7 +2579,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vrl-ltr.html android",
@@ -2335,7 +2596,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-htb-rtl.html android",
@@ -2349,7 +2613,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vlr-rtl.html android",
@@ -2363,7 +2630,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-flexbox/abspos/abspos-autopos-vrl-rtl.html android",
@@ -2377,7 +2647,10 @@
      "units": [
       "CBB-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-gaps/flex/flex-gap-decorations-006.html android",
@@ -2392,6 +2665,9 @@
       "CBB-android"
      ],
      "direction": "undirected",
+     "requires": [
+      "CBB-android"
+     ],
      "directionWhy": "a side reader of the corrected containing block; no replay"
     },
     {
@@ -2406,7 +2682,10 @@
      "units": [
       "GAP-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "GAP-ios"
+     ]
     },
     {
      "cell": "css-gaps/flex/flex-gap-decorations-033.html android",
@@ -2420,7 +2699,10 @@
      "units": [
       "GAP-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "GAP-android"
+     ]
     }
    ],
    "mustNotMove": [
@@ -2936,7 +3218,10 @@
      "units": [
       "U1-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1-android"
+     ]
     },
     {
      "cell": "css-text-decor/text-decoration-inset-005.html android",
@@ -2950,7 +3235,10 @@
      "units": [
       "U1-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1-android"
+     ]
     },
     {
      "cell": "css-text-decor/text-decoration-inset-006.html android",
@@ -2964,7 +3252,10 @@
      "units": [
       "U1-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1-android"
+     ]
     },
     {
      "cell": "css-text-decor/text-decoration-inset-005.html ios",
@@ -2978,7 +3269,10 @@
      "units": [
       "U2-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U2-ios"
+     ]
     },
     {
      "cell": "css-text-decor/text-decoration-inset-006.html ios",
@@ -2992,7 +3286,10 @@
      "units": [
       "U2-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U2-ios"
+     ]
     },
     {
      "cell": "css-text-decor/text-decoration-inset-014.html ios",
@@ -3006,7 +3303,10 @@
      "units": [
       "U2-ios"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U2-ios"
+     ]
     },
     {
      "cell": "css-text-decor/text-decoration-inset-014.html android",
@@ -3020,7 +3320,10 @@
      "units": [
       "U1-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1-android"
+     ]
     },
     {
      "cell": "css-text-decor/text-decoration-color.html android",
@@ -3034,7 +3337,10 @@
      "units": [
       "U1-android"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "U1-android"
+     ]
     },
     {
      "cell": "css-lists/counter-list-item.html android",
@@ -3049,6 +3355,9 @@
       "U1-android"
      ],
      "direction": "undirected",
+     "requires": [
+      "U1-android"
+     ],
      "directionWhy": "only a cross-platform anchor (iOS), which the brief declined to turn into a magnitude"
     },
     {
@@ -3064,6 +3373,9 @@
       "U1-android"
      ],
      "direction": "undirected",
+     "requires": [
+      "U1-android"
+     ],
      "directionWhy": "the brief says \"direction unknown\"; the iOS anchor (0.857) sits BELOW today's 0.8699"
     },
     {
@@ -3079,6 +3391,9 @@
       "U1-android"
      ],
      "direction": "undirected",
+     "requires": [
+      "U1-android"
+     ],
      "directionWhy": "no replay; the stacked sup face change has no pre-registered sign"
     },
     {
@@ -3094,6 +3409,9 @@
       "U1-android"
      ],
      "direction": "undirected",
+     "requires": [
+      "U1-android"
+     ],
      "directionWhy": "bold-only half of a sized h1; no replay"
     },
     {
@@ -3109,6 +3427,9 @@
       "U1-android"
      ],
      "direction": "undirected",
+     "requires": [
+      "U1-android"
+     ],
      "directionWhy": "bold-only half of a sized h1; no replay"
     }
    ],
@@ -3311,7 +3632,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-008.html web",
@@ -3325,7 +3649,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-022.html web",
@@ -3339,7 +3666,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-position/position-absolute-semi-replaced-stretch-other.html web",
@@ -3353,7 +3683,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-010.html web",
@@ -3367,7 +3700,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-011.html web",
@@ -3381,7 +3717,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-014.html web",
@@ -3395,7 +3734,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-015.html web",
@@ -3409,7 +3751,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-016.html web",
@@ -3423,7 +3768,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-017.html web",
@@ -3437,7 +3785,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-018.html web",
@@ -3451,7 +3802,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-019.html web",
@@ -3465,7 +3819,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-020.html web",
@@ -3479,7 +3836,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-021.html web",
@@ -3493,7 +3853,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-024.html web",
@@ -3507,7 +3870,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-025.html web",
@@ -3521,7 +3887,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-013.html web",
@@ -3535,7 +3904,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-position/position-absolute-semi-replaced-stretch-input.html web",
@@ -3549,7 +3921,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-cascade/scope-pseudo-element.html web",
@@ -3563,7 +3938,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-display/display-flow-root-list-item-001.html web",
@@ -3578,6 +3956,9 @@
       "RS"
      ],
      "direction": "undirected",
+     "requires": [
+      "RS"
+     ],
      "directionWhy": "in the RS 27-document radius; not simulated"
     },
     {
@@ -3592,7 +3973,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-break/block-in-inline-015-print.html web",
@@ -3606,7 +3990,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/appearance-auto-input-non-widget-001.html web",
@@ -3620,7 +4007,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-values/attr-style-sharing-1.html web",
@@ -3634,7 +4024,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-writing-modes/baseline-with-orthogonal-flow-001.html web",
@@ -3648,7 +4041,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-ui/box-sizing-009.html web",
@@ -3662,7 +4058,10 @@
      "units": [
       "RS"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "RS"
+     ]
     },
     {
      "cell": "css-text/hyphens/hyphens-out-of-flow-002.html web",
@@ -3676,7 +4075,10 @@
      "units": [
       "W1"
      ],
-     "direction": "up-or-stay"
+     "direction": "up-or-stay",
+     "requires": [
+      "W1"
+     ]
     }
    ],
    "mustNotMove": [
@@ -4079,7 +4481,7 @@
      ]
     },
     "U2-seed": {
-     "commit": "the 18 tools/visual/baseline/{Android,iOS,web}__00{0..5}_*.png from UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/all-then-color.json on the CLOSING tree + the orchestrator doc lines (DYNAMIC_CAPTURE.md §5, tripwire header 130 -> 136 / 390 -> 408, STATUS.md:19, tooling counts, gate-fixtures.txt comment, fixture _comment, BACKLOG 0(e), wave53-gate/_note.md + STATUS.md:2678 correction lines)",
+     "commit": "the 18 tools/visual/baseline/{Android,iOS,web}__{000_ATC_AllThenProps,001_ATC_PropsThenAll_InGreenParent,002_reset,003_ATC_InitialUnderRedParent,004_span,005_ATC_DirectionSurvives}.png (exactly these names: label-chrome-all-reset.seeded-77fe41e8/; the glob __00{0..5}_*.png also matches 66 committed baselines of four other fixtures) from UPDATE_BASELINE=1 ./test-all.sh fixtures/combinations/all-then-color.json on the CLOSING tree + the orchestrator doc lines (DYNAMIC_CAPTURE.md §5, tripwire header 130 -> 136 / 390 -> 408, STATUS.md:19, tooling counts, gate-fixtures.txt comment, fixture _comment, BACKLOG 0(e), wave53-gate/_note.md + STATUS.md:2678 correction lines)",
      "captures": {
       "web": [],
       "ios": [],

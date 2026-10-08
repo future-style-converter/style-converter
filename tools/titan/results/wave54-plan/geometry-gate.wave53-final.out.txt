@@ -149,9 +149,9 @@
      line: backdrop-filter-nested-border-radius-clip-4 android {'green': (42, 26, 185, 89), 'greenPx': 9177, 'failInkPx': 3385} → GEOMETRY WRONG (green (42, 26, 185, 89) vs ref (26, 26, 185, 105))
    L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 web                          PASS       [control: expected to stay PASS]
 !! L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 ios                          FAIL       [GATING -> revert GAP-ios]
-     line: flex/flex-gap-decorations-033 ios {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRunsRow20': []} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+     line: flex/flex-gap-decorations-033 ios {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
 !! L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 android                      FAIL       [GATING -> revert GAP-android]
-     line: flex/flex-gap-decorations-033 android {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRunsRow20': []} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+     line: flex/flex-gap-decorations-033 android {'red': None, 'redPx': 0, 'blue': None, 'bluePx': 0, 'redRuns': {20: [], 95: [], 145: []}, 'blueRuns': {40: [], 90: [], 140: []}} → GEOMETRY WRONG (redPx 0 vs ref 2200)
    L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print web                              PASS       [control: expected to stay PASS]
    L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print ios                              PASS       [control: expected to stay PASS]
 !! L5-ua-heading-face       ua-heading-face.geometry.py                block-in-inline-015-print android                          FAIL       [GATING -> revert U1-android]
@@ -257,6 +257,6 @@
    L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 ios                        PASS       [control: expected to stay PASS]
    L6-web-tail              web-out-of-flow-hyphen-box.geometry.py     hyphens/hyphens-out-of-flow-002 android                    PASS       [control: expected to stay PASS]
 
-geometry-gate wave53-final (base wave53-open): 185 keys — PASS 112 · FAIL 73 (gating 37) · UNMEASURED 0 · probe self-check failures 0
+geometry-gate wave53-final (base wave53-open): 185 keys — PASS 112 · FAIL 73 (gating 37) · UNMEASURED 0 (gating 0) · probe self-check failures 0
   by class: gating 37 (PASS 0 FAIL 37) · control 112 (PASS 112 FAIL 0) · report 36 (PASS 0 FAIL 36) · withdrawn 0 (PASS 0 FAIL 0)
 revert rule 4 names: CBB-android, GAP-android, GAP-ios, Mprime, OOF-android, OOF-ios, P, RS, TB-android, U1-android, U2-ios|U3, U3, W1
