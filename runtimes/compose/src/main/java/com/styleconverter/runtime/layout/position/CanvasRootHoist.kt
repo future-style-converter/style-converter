@@ -218,9 +218,18 @@ object CanvasRootHoist {
      * Threaded down the composition as [LocalHasTransformedAncestor] and
      * down the pure walk as `ancestorTransformed`, exactly like the
      * positioned flag above.
+     *
+     * Wave 54 (lane L4, OOF-android) — the name keeps its wave-35 meaning
+     * "claims BOTH out-of-flow classes", now for the non-transform clauses
+     * too: [OutOfFlowContainingBlock] (contain layout|paint, filter,
+     * backdrop-filter, their will-change hints; css-contain-2 §3.2 / §3.4,
+     * filter-effects-1 §5, filter-effects-2 §2) is OR-ed in HERE, the one
+     * choke point both pure walks and ComponentRenderer's composition
+     * channel (`childHasTransformedAncestor`, `transformCbHostsOutOfFlowChild`)
+     * read, so the three can never disagree.
      */
     internal fun establishesTransformContainingBlock(properties: List<IRProperty>): Boolean =
-        TransformContainingBlock.establishes(properties)
+        TransformContainingBlock.establishes(properties) || OutOfFlowContainingBlock.establishes(properties)
 
     /**
      * Wave 49 (lane A4) — css-masking-1 §5: does this box paint a
@@ -285,10 +294,12 @@ object CanvasRootHoist {
      * The hoist decision (pure, from BASE declarations — a selector/media
      * bucket that flips `position` at runtime is out of the emulation's
      * scope, same conservatism as the §8.3.1 collapse plan's B6):
-     *  - FIXED always hoists — its containing block is the viewport
+     *  - FIXED hoists — its containing block is the viewport
      *    regardless of positioned ancestors (css-position-3 §2.1; pin S3:
      *    a fixed child of an in-flow relative parent paints at canvas
-     *    (left, top), NOT parent + offset);
+     *    (left, top), NOT parent + offset) — when an inset anchors it there
+     *    (wave 54 lane L4: an all-auto-inset fixed box takes its static
+     *    position instead, see [rendersInFlowAsStaticPosition]);
      *  - ABSOLUTE hoists only when NO positioned ancestor exists — then its
      *    containing block is the initial containing block, i.e. the canvas
      *    (css-position-3 §3.1; pin S2) — AND (wave 18, RC1) only when at
@@ -335,9 +346,12 @@ object CanvasRootHoist {
         // rules that pull a fixed box back out of the viewport. Chromium-measured
         // (probes C/D/E in _diag35/laneB1/probe-chromium.mjs: fixed under
         // transform, under perspective and under preserve-3d all anchor at
-        // the styled ancestor, never at the viewport). A no-inset fixed box
-        // with no such ancestor keeps the wave-17 canvas-origin anchor.
-        PositionType.FIXED -> !hasTransformedAncestor
+        // the styled ancestor, never at the viewport). Wave 54 (lane L4, F3):
+        // only a DECLARED inset anchors it there — an all-auto-inset fixed box
+        // sits at its STATIC position (css-position-3 §3.5.3), so it no longer
+        // hoists to the canvas origin (static-fixed-inside-abspos,
+        // position-relative-003). Declared, not resolved: see declaresAnyInset.
+        PositionType.FIXED -> !hasTransformedAncestor && OutOfFlowContainingBlock.declaresAnyInset(properties)
         // ICB-anchored only without ANY containing-block ancestor — positioned
         // (F2, css-position-3 §3.1) or transformed (probe B) — and only when
         // an inset actually anchors it there (RC1 — see kdoc above).
@@ -384,11 +398,16 @@ object CanvasRootHoist {
     ): Boolean = !staticPositionOwned && (
         // Wave-18 RC1, verbatim: an all-auto-inset absolute box with no
         // positioned ancestor paints at its STATIC position, not the canvas
-        // origin (css-position-3 §3.1).
+        // origin (css-position-3 §3.1). Wave 54 (lane L4, F3): a FIXED box
+        // joins the class on the SAME inset test the hoist's FIXED arm reads
+        // (declared, OutOfFlowContainingBlock.declaresAnyInset), so the two
+        // classes stay disjoint; ABSOLUTE keeps its frozen resolved-px test.
         (
-            positionTypeOf(properties) == PositionType.ABSOLUTE &&
-                !hasPositionedAncestor &&
-                !hasAnyInset(properties)
+            when (positionTypeOf(properties)) {
+                PositionType.ABSOLUTE -> !hasAnyInset(properties)
+                PositionType.FIXED -> !OutOfFlowContainingBlock.declaresAnyInset(properties)
+                else -> false
+            } && !hasPositionedAncestor
             ) ||
             // Wave-49 A4: the box the clip veto pulled back out of the
             // overlay. It must land in the SAME in-slot, zero-flow-footprint

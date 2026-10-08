@@ -188,7 +188,9 @@ class CanvasRootHoistTest {
         // fixed parent instead.
         val innerFixed = comp("inner-fixed", positioned("fixed", left = 30.0))
         val innerAbs = comp("inner-abs", positioned("absolute", left = 40.0))
-        val outerFixed = comp("outer-fixed", positioned("fixed"), children = listOf(innerFixed, innerAbs))
+        // Wave 54 (lane L4): the outer box carries an inset — a no-inset fixed
+        // box now takes its static position instead of hoisting (P2 below).
+        val outerFixed = comp("outer-fixed", positioned("fixed", top = 0.0), children = listOf(innerFixed, innerAbs))
         assertEquals(
             // Outer first (document order), inner fixed collected through
             // the hoisted subtree, absolute left to its positioned parent.
@@ -249,11 +251,57 @@ class CanvasRootHoistTest {
         assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(logical.properties, hasPositionedAncestor = false))
     }
 
-    @Test fun `RC1 fixed keeps the wave-17 canvas anchor even with no inset — kept behavior`() {
-        // css-position-3 §2.1: the viewport IS a no-inset fixed box's
-        // containing block; the wave-17 canvas-origin anchor stays (all
-        // six wave-17 css-position greens ride it).
+    // ── Wave 54 (lane L4, OOF-android) P2: the hoist decision table ────────
+    // Until wave 54 a no-inset fixed box kept the wave-17 canvas-origin anchor
+    // (the row this block replaces). css-position-3 §3.5.3 gives an all-auto
+    // fixed box its STATIC position, and css-contain-2 §3.2 / §3.4 /
+    // filter-effects make contain/filter/backdrop-filter boxes its containing
+    // block (OutOfFlowContainingBlock, OR-ed into the transform clause).
+
+    @Test fun `P2 fixed with no inset does NOT hoist — it takes its static position`() {
         val fixed = comp("rc1-fixed", positioned("fixed"))
+        // No canvas anchor any more…
+        assertFalse(CanvasRootHoist.shouldHoistToCanvasRoot(fixed.properties, hasPositionedAncestor = false))
+        // …the RC1 zero-flow mount owns it when nothing positioned is above…
+        assertTrue(CanvasRootHoist.rendersInFlowAsStaticPosition(fixed.properties, hasPositionedAncestor = false))
+        // …and a positioned parent's own slot (PositionedParentFlowSlot / the
+        // Box branch) owns it otherwise — static-fixed-inside-abspos's shape.
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(fixed.properties, hasPositionedAncestor = true))
+    }
+
+    @Test fun `P2 fixed with Top and no establisher still hoists to the viewport`() {
+        // css-position-3 §2.1: the viewport is its containing block.
+        val fixed = comp("p2-top", positioned("fixed", top = 0.0))
+        assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(fixed.properties, hasPositionedAncestor = false))
+        assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(fixed.properties, hasPositionedAncestor = false))
+    }
+
+    @Test fun `P2 fixed with Top under a contain-strict ancestor does not hoist`() {
+        // change-insets-inside-strict-containment-nested's shape.
+        val fixed = comp("p2-fixed", positioned("fixed", left = 0.0, top = 0.0))
+        val strict = comp("p2-strict", listOf(prop("Contain", """["STRICT"]""")), children = listOf(fixed))
+        assertTrue(CanvasRootHoist.collectCanvasHoisted(listOf(strict)).isEmpty())
+        // The flag the composition channel threads is the same one the walk reads.
+        assertTrue(CanvasRootHoist.establishesTransformContainingBlock(strict.properties))
+        assertFalse(CanvasRootHoist.shouldHoistToCanvasRoot(fixed.properties, false, hasTransformedAncestor = true))
+    }
+
+    @Test fun `P2 absolute with Top under a static contain-content parent does not hoist`() {
+        // contain-content-003's shape: the contain box, not the ICB, is the containing block.
+        val abs = comp("p2-abs", positioned("absolute", top = 0.0))
+        val content = comp("p2-content", listOf(prop("Contain", """["CONTENT"]""")), children = listOf(abs))
+        assertTrue(CanvasRootHoist.collectCanvasHoisted(listOf(content)).isEmpty())
+        assertFalse(CanvasRootHoist.hostActivates(listOf(content)))
+    }
+
+    @Test fun `P2 a declared but unresolvable fixed inset keeps the viewport hoist`() {
+        // anchor-center-safe-rtl `__4-480` verbatim insets: hasAnyInset reads
+        // null for both, but they are declared, so the box is NOT static.
+        val fixed = comp("p2-anchor", listOf(
+            prop("Position", "\"FIXED\""),
+            prop("Top", """{"expr":"calc(anchor(right) + 5px)"}"""),
+            prop("Right", """{"expr":"calc(anchor(left) + 5px)"}"""),
+        ))
         assertTrue(CanvasRootHoist.shouldHoistToCanvasRoot(fixed.properties, hasPositionedAncestor = false))
         assertFalse(CanvasRootHoist.rendersInFlowAsStaticPosition(fixed.properties, hasPositionedAncestor = false))
     }
