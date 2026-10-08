@@ -11710,6 +11710,25 @@ export function buildComponents(cleaned, rules, idPrefix, ctx = null, keyframes 
       const lastChildIdx = node.children.length - 1;
       node.children.forEach((child, i) => {
         const childId = `${id}__${i}`;
+        // wave-54 lane L3 U3 — the child-scope twin of the body scope's
+        // re-arm below (`bodyRuns.some((run) => run.afterElemIndex === idx)`):
+        // text INTERLEAVED between element children — a `{text}` entry of
+        // node.runs after child i-1 and before child i — puts inline content
+        // on the open line, so a br at i ENDS that line (CSS 2.1 §9.5) instead
+        // of adding a blank 20px one. Only the seed above re-armed before
+        // (once, from ownText), so every LATER text line's br stayed 20px:
+        // hyphenate-character-001's two stray blank lines, on all three
+        // runtimes. Collapsible white space alone is no content (css-text-3
+        // §4.1.1: space, tab, segment break — the body scanner's ASCII class).
+        const runAt = node.runs ? node.runs.findIndex((e) => e.childIndex === i) : -1;
+        // Entries strictly between child i-1 and child i (from 0 for i = 0).
+        const runFrom = node.runs ? node.runs.findIndex((e) => e.childIndex === i - 1) + 1 : 0;
+        // Re-arm only — a block sibling still closes the line (the
+        // non-br rule in buildNode), exactly as at body scope.
+        if (runAt > 0 && node.runs.slice(runFrom, runAt)
+          .some((e) => e.childIndex === undefined && /[^ \t\n\r\f]/.test(e.text))) {
+          childLineCtx.hasInline = true;
+        }
         const childCmp = buildNode(child, childId, childLineCtx);
         stampWsAfter(childCmp, child, i < lastChildIdx);
         childMap[childId] = { id: childId, ...childCmp };
