@@ -308,9 +308,6 @@
    "wpt__css-position__position-fixed-scroll-nested-fixed",
    "wpt__css-position__position-relative-003",
    "wpt__css-position__position-relative-004",
-   "wpt__css-text-decor__text-decoration-inset-005",
-   "wpt__css-text-decor__text-decoration-inset-006",
-   "wpt__css-text-decor__text-decoration-inset-014",
    "wpt__css-text__hyphens__hyphenate-character-001",
    "wpt__css-text__hyphens__hyphenate-character-002",
    "wpt__css-text__hyphens__hyphenate-character-003",
@@ -349,13 +346,13 @@
    "wpt__css-overflow__line-clamp__block-ellipsis-005",
    "wpt__css-overflow__line-clamp__block-ellipsis-006",
    "wpt__css-position__change-insets-inside-strict-containment-nested",
+   "wpt__css-position__position-absolute-semi-replaced-stretch-button",
+   "wpt__css-position__position-absolute-semi-replaced-stretch-input",
+   "wpt__css-position__position-absolute-semi-replaced-stretch-other",
    "wpt__css-position__position-fixed-scroll-nested-fixed",
    "wpt__css-position__position-relative-003",
    "wpt__css-position__position-relative-004",
    "wpt__css-text-decor__text-decoration-color",
-   "wpt__css-text-decor__text-decoration-inset-005",
-   "wpt__css-text-decor__text-decoration-inset-006",
-   "wpt__css-text-decor__text-decoration-inset-014",
    "wpt__css-text-decor__text-decoration-subelements-003",
    "wpt__css-text__bidi__bidi-lines-001",
    "wpt__css-text__bidi__bidi-lines-002",
@@ -437,7 +434,11 @@
   "css-text/bidi/bidi-lines-002.html android (orange \"!\" on the left: bake measurement)",
   "css-counter-styles/counter-suffix.html ios (rows 3-6)",
   "css-counter-styles/counter-suffix.html android (rows 5-6)",
-  "css-overflow/line-clamp/block-ellipsis-002.html ios (Line 4 painted and no \"…\": the iOS clamp is not applied; U3 only removes the stray blank lines)"
+  "css-overflow/line-clamp/block-ellipsis-002.html ios (Line 4 painted and no \"…\": the iOS clamp is not applied; U3 only removes the stray blank lines)",
+  "css-contain/contain-content-011.html android (the \"25\" counter, ref \"17\": wrong on all three platforms; OOF-android moves only the green square)",
+  "css-text/hyphens/hyphenate-character-002.html web (Chromium en dictionary: im-/ple-/men-/tation, groups [4,4,4,3] vs ref [5,4,3,3])",
+  "css-text/hyphens/hyphenate-character-002.html ios (TextKit emergency breaks tati/on, izat/ion)",
+  "css-text/hyphens/hyphenate-character-002.html android (Minikin paints its own dictionary hyphen)"
  ],
  "recordedWall": [
   "css-anchor-position/anchor-position-multicol-007.html android"
@@ -1252,8 +1253,8 @@
     {
      "cell": "css-text/hyphens/hyphenate-character-002.html web",
      "from": "f 0.92",
-     "to": "≈0.96 (Chromium en breaks equal the shys; B alone 0.9426)",
-     "kind": "possible flip",
+     "to": "≈0.96 score-only read (B alone 0.9426; the dictionary reason is REFUTED by the capture)",
+     "kind": "possible flip in score only — DEGENERATE even if P (S1)",
      "confidence": "LOW-MED",
      "floor": null,
      "gating": false,
@@ -1272,7 +1273,7 @@
      "cell": "css-text/hyphens/hyphenate-character-002.html ios",
      "from": "f 0.9261",
      "to": "mover",
-     "kind": "mover",
+     "kind": "mover — DEGENERATE even if P (S1: TextKit emergency-breaks tati/on and izat/ion, not hyphenation positions)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -1294,7 +1295,7 @@
      "cell": "css-text/hyphens/hyphenate-character-002.html android",
      "from": "f 0.9223",
      "to": "stays f (Minikin paints its own dictionary hyphen: a logged wall)",
-     "kind": "mover",
+     "kind": "mover — DEGENERATE even if P (S1)",
      "confidence": "LOW",
      "floor": null,
      "gating": false,
@@ -2286,6 +2287,9 @@
      "wpt__css-gaps__flex__flex-gap-decorations-006",
      "wpt__css-gaps__flex__flex-gap-decorations-033",
      "wpt__css-position__change-insets-inside-strict-containment-nested",
+     "wpt__css-position__position-absolute-semi-replaced-stretch-button",
+     "wpt__css-position__position-absolute-semi-replaced-stretch-input",
+     "wpt__css-position__position-absolute-semi-replaced-stretch-other",
      "wpt__css-position__position-fixed-scroll-nested-fixed",
      "wpt__css-position__position-relative-003",
      "wpt__css-position__position-relative-004",
@@ -2299,7 +2303,7 @@
    "wireCarriers": [],
    "carrierRule": {
     "OOF": "an out-of-flow box whose spec containing block is a non-positioned contain:layout|paint|strict|content / filter / backdrop-filter (or will-change of one) ancestor (M2: 10 boxes in 6 tests), or an all-auto-inset FIXED box (M1: 4 boxes in 3 tests); Compose host activation flips true -> false on exactly the 7 hostFlips documents",
-    "CBB": "a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control cross-fade-target-alpha); side reader flex-gap-decorations-006 (VerticalTextFlowLayout budget, watched)",
+    "CBB": "a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control cross-fade-target-alpha); side reader flex-gap-decorations-006 (VerticalTextFlowLayout budget, watched); + the 3 semi-replaced-stretch px-inset stretch documents found by the L4 builder behavioural census (android)",
     "GAP": "a flex container with a rule family on an axis whose gap is 0 or absent AND touching neighbours/lines: 033 only of the 17 gapzero containers"
    },
    "probeSections": [
@@ -2338,7 +2342,7 @@
      "cell": "css-contain/contain-content-011.html android",
      "from": "f 0.9284",
      "to": "P ≈0.985 (sim ≤0.9854, an upper bound)",
-     "kind": "flip; the \"25\" counter (ref \"17\") stays wrong on ALL THREE platforms — not this lane",
+     "kind": "flip in score only — DEGENERATE even if P: the \"25\" counter (ref \"17\") stays wrong on ALL THREE platforms (not this lane); stayDegenerateEvenIfPass",
      "confidence": "MED-HIGH",
      "floor": 0.97,
      "gating": true,
@@ -2726,6 +2730,57 @@
       "CBB-android"
      ],
      "directionWhy": "a side reader of the corrected containing block; no replay"
+    },
+    {
+     "cell": "css-position/position-absolute-semi-replaced-stretch-button.html android",
+     "from": "f 0.9739",
+     "to": "up, stays f (replay 0.9843: the stretch box grows 138x88 -> 144x94; the native control chrome is not this unit's)",
+     "kind": "mover",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
+    },
+    {
+     "cell": "css-position/position-absolute-semi-replaced-stretch-input.html android",
+     "from": "f 0.4117",
+     "to": "up, stays f (replay 0.4555: the stretch box grows 138x88 -> 144x94; the native control chrome is not this unit's)",
+     "kind": "mover",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
+    },
+    {
+     "cell": "css-position/position-absolute-semi-replaced-stretch-other.html android",
+     "from": "f 0.4396",
+     "to": "up, stays f (replay 0.4677: the stretch box grows 138x88 -> 144x94; the native control chrome is not this unit's)",
+     "kind": "mover",
+     "confidence": "MED",
+     "floor": null,
+     "gating": false,
+     "geometry": null,
+     "units": [
+      "CBB-android"
+     ],
+     "direction": "up-or-stay",
+     "requires": [
+      "CBB-android"
+     ]
     },
     {
      "cell": "css-gaps/flex/flex-gap-decorations-033.html ios",
@@ -3183,6 +3238,9 @@
        "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr",
        "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl",
        "wpt__css-gaps__flex__flex-gap-decorations-006",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-button",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-input",
+       "wpt__css-position__position-absolute-semi-replaced-stretch-other",
        "wpt__filter-effects__backdrop-filter-nested-border-radius-clip",
        "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2",
        "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3",
@@ -3237,26 +3295,19 @@
    ],
    "captureCarriers": {
     "web": [],
-    "ios": [
-     "wpt__css-text-decor__text-decoration-inset-005",
-     "wpt__css-text-decor__text-decoration-inset-006",
-     "wpt__css-text-decor__text-decoration-inset-014"
-    ],
+    "ios": [],
     "android": [
      "wpt__css-break__block-in-inline-015-print",
      "wpt__css-lists__counter-list-item",
      "wpt__css-lists__counter-reset-increment-overflow-underflow",
      "wpt__css-text-decor__text-decoration-color",
-     "wpt__css-text-decor__text-decoration-inset-005",
-     "wpt__css-text-decor__text-decoration-inset-006",
-     "wpt__css-text-decor__text-decoration-inset-014",
      "wpt__css-text-decor__text-decoration-subelements-003",
      "wpt__filter-effects__backdrop-filter-border-radius-change",
      "wpt__filter-effects__backdrop-filter-corner-shape-change"
     ]
    },
    "wireCarriers": [],
-   "carrierRule": "an author-UNSIZED h1-h6 (no own FontSize/Font/FontWeight; 8 documents) or a sub/sup leaf, on Compose; on iOS only a FOLDED heading host (the stand-down retires only where InlineRunFold/InlineRunFlow returns Folded): inset-005/-006/-014. 14 sized-heading documents stand down (byte-identical) except the bold-only half on two filter-effects h1s (android movers)",
+   "carrierRule": "GO-SMALL (lane fix pass): on Compose only, an author-UNSIZED LEAF h1-h6 (no own FontSize/Font/FontWeight, no composed children) or a RENDERED sub/sup leaf: block-in-inline-015-print, counter-list-item, counter-reset-increment-overflow-underflow, text-decoration-color, subelements-003, plus the bold-only half of two filter-effects h1s (7 documents). Every heading host with child boxes (inset-005/-006/-011/-014) stands down (UAElementFontRule.headingStandsDown = the iOS wave-40 gate) and its sup/sub are consumed by the fold: byte-identical. iOS: none (U2-ios HELD). Sized headings (14 documents): same list instance",
    "probeSections": [
     "css-text-decor",
     "css-break",
@@ -3272,108 +3323,6 @@
      "confidence": "HIGH",
      "floor": 0.97,
      "gating": true,
-     "geometry": "GEOMETRY OK",
-     "units": [
-      "U1-android"
-     ],
-     "direction": "up-or-stay",
-     "requires": [
-      "U1-android"
-     ]
-    },
-    {
-     "cell": "css-text-decor/text-decoration-inset-005.html android",
-     "from": "f 0.9",
-     "to": "P ≈0.98 (anchors inset-001…004 android 0.984-0.9859)",
-     "kind": "flip",
-     "confidence": "MED",
-     "floor": null,
-     "gating": false,
-     "geometry": "GEOMETRY OK",
-     "units": [
-      "U1-android"
-     ],
-     "direction": "up-or-stay",
-     "requires": [
-      "U1-android"
-     ]
-    },
-    {
-     "cell": "css-text-decor/text-decoration-inset-006.html android",
-     "from": "f 0.8993",
-     "to": "P ≈0.98",
-     "kind": "flip",
-     "confidence": "MED",
-     "floor": null,
-     "gating": false,
-     "geometry": "GEOMETRY OK",
-     "units": [
-      "U1-android"
-     ],
-     "direction": "up-or-stay",
-     "requires": [
-      "U1-android"
-     ]
-    },
-    {
-     "cell": "css-text-decor/text-decoration-inset-005.html ios",
-     "from": "f 0.8995",
-     "to": "P ≈0.965 (anchors ios 0.9634-0.9707)",
-     "kind": "flip",
-     "confidence": "MED",
-     "floor": null,
-     "gating": false,
-     "geometry": "GEOMETRY OK",
-     "units": [
-      "U2-ios"
-     ],
-     "direction": "up-or-stay",
-     "requires": [
-      "U2-ios"
-     ]
-    },
-    {
-     "cell": "css-text-decor/text-decoration-inset-006.html ios",
-     "from": "f 0.8987",
-     "to": "P ≈0.965",
-     "kind": "flip",
-     "confidence": "MED",
-     "floor": null,
-     "gating": false,
-     "geometry": "GEOMETRY OK",
-     "units": [
-      "U2-ios"
-     ],
-     "direction": "up-or-stay",
-     "requires": [
-      "U2-ios"
-     ]
-    },
-    {
-     "cell": "css-text-decor/text-decoration-inset-014.html ios",
-     "from": "f 0.9238",
-     "to": "P (no monospace anchor; the probe decides)",
-     "kind": "flip",
-     "confidence": "MED-LOW",
-     "floor": null,
-     "gating": false,
-     "geometry": "GEOMETRY OK",
-     "units": [
-      "U2-ios"
-     ],
-     "direction": "up-or-stay",
-     "requires": [
-      "U2-ios"
-     ]
-    },
-    {
-     "cell": "css-text-decor/text-decoration-inset-014.html android",
-     "from": "f 0.923",
-     "to": "P (no monospace anchor; the probe decides)",
-     "kind": "flip",
-     "confidence": "MED-LOW",
-     "floor": null,
-     "gating": false,
      "geometry": "GEOMETRY OK",
      "units": [
       "U1-android"
@@ -3507,7 +3456,11 @@
     "css-text-decor/text-decoration-inset-003.html ios",
     "css-text-decor/text-decoration-inset-004.html android",
     "css-text-decor/text-decoration-inset-004.html ios",
+    "css-text-decor/text-decoration-inset-005.html android",
+    "css-text-decor/text-decoration-inset-005.html ios",
     "css-text-decor/text-decoration-inset-005.html web",
+    "css-text-decor/text-decoration-inset-006.html android",
+    "css-text-decor/text-decoration-inset-006.html ios",
     "css-text-decor/text-decoration-inset-006.html web",
     "css-text-decor/text-decoration-inset-007.html android",
     "css-text-decor/text-decoration-inset-007.html ios",
@@ -3522,6 +3475,8 @@
     "css-text-decor/text-decoration-inset-012.html ios",
     "css-text-decor/text-decoration-inset-013.html android",
     "css-text-decor/text-decoration-inset-013.html ios",
+    "css-text-decor/text-decoration-inset-014.html android",
+    "css-text-decor/text-decoration-inset-014.html ios",
     "css-text-decor/text-decoration-inset-014.html web",
     "css-text-decor/text-decoration-inset-015.html android",
     "css-text-decor/text-decoration-inset-015.html ios",
@@ -3570,6 +3525,7 @@
       "text-decoration-inset-014 ios",
       "text-decoration-inset-014 android"
      ],
+     "heldNote": "GO-SMALL: the six inset-005/-006/-014 native report rows are no longer targets; they stay WRONG (their captures are must-not-move, gated by R4 / R7). The band-top check of hunk-for-plan-1.patch keeps a future folded-host face honest",
      "note": "inset-011 is the CONTROL: the probe prints OK only while its native bands EQUAL the recorded wave53-final bands",
      "onWave53Final": "7 target rows WRONG (android band 9 vs ref 18; inset-005/-006 one band vs 2; inset-014 line-1 11/12 px); ref, web, iOS block-in-inline and the inset-011 control OK",
      "teeth": "fix r1 (plan-skeptic M2): block-in-inline-015-print also checks every band TOP within ±3 px of the ref; the skeptic's pitch fakes print WRONG from +2 px/line (fix-r1/post-M2.pitch-down6.out.txt), the iOS anchor (tops 30/66/105/144 vs 29/65/103/142) stays OK"
@@ -3577,7 +3533,7 @@
    ],
    "revertUnits": {
     "U1-android": {
-     "commit": "Compose typography/UAElementFontRule.kt (new twin) + typography/UAHeadingFoldGate.kt (new) + their JVM tests + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply, before DynamicValueResolver :1206)",
+     "commit": "Compose typography/UAElementFontRule.kt (new twin, with headingStandsDown) + UAElementFontRuleTest.kt + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply(standsDown = headingStandsDown), before DynamicValueResolver :1211; carries the patch-borne UAElementFontRuleSeamWiringTest.kt) + Swift UAElementFontRule.swift (docs only: TWIN STATUS PORTED) + the lane dir",
      "captures": {
       "web": [],
       "ios": [],
@@ -3586,9 +3542,6 @@
        "wpt__css-lists__counter-list-item",
        "wpt__css-lists__counter-reset-increment-overflow-underflow",
        "wpt__css-text-decor__text-decoration-color",
-       "wpt__css-text-decor__text-decoration-inset-005",
-       "wpt__css-text-decor__text-decoration-inset-006",
-       "wpt__css-text-decor__text-decoration-inset-014",
        "wpt__css-text-decor__text-decoration-subelements-003",
        "wpt__filter-effects__backdrop-filter-border-radius-change",
        "wpt__filter-effects__backdrop-filter-corner-shape-change"
@@ -3598,25 +3551,12 @@
      "revertOrder": [
       "U1-android"
      ]
-    },
-    "U2-ios": {
-     "commit": "Swift StyleEngine/typography/UAHeadingFoldGate.swift (new) + UAHeadingFoldGateTests.swift + UAElementFontRule.swift (docs only) + UAElementFontRuleTests.swift (additions) + ComponentRenderer.swift seam-2 (:343-356 the hasElementChildren: argument)",
-     "captures": {
-      "web": [],
-      "ios": [
-       "wpt__css-text-decor__text-decoration-inset-005",
-       "wpt__css-text-decor__text-decoration-inset-006",
-       "wpt__css-text-decor__text-decoration-inset-014"
-      ],
-      "android": []
-     },
-     "wire": [],
-     "revertOrder": [
-      "U2-ios"
-     ]
     }
    },
-   "stopRule": "if the lane's first JVM / Catalyst pins say the verbatim inset-005/-006/-014 hosts BAIL (not Folded), the 005/006/014 rows are void and the lane stops at the GO-SMALL fallback (U1 leaf-only)"
+   "heldUnits": {
+    "U2-ios": "HELD at the lane fix pass (GO-SMALL): UAHeadingFoldGate.swift + tests + seam-2 are parked in wave54-ua-heading-face/held/ until \"UA .67em-family margin for a positioned heading on both natives\" lands; no Swift behaviour change this wave"
+   },
+   "stopRule": "if the lane's first JVM / Catalyst pins say the verbatim inset-005/-006/-014 hosts BAIL (not Folded), the 005/006/014 rows are void and the lane stops at the GO-SMALL fallback (U1 leaf-only). TAKEN at the lane fix pass for a different reason: the hosts fold, but the face alone is predicted to LOWER all six cells (the missing abspos UA margin)"
   },
   "L6-web-tail": {
    "dir": "tools/titan/results/wave54-web-tail",
@@ -4153,9 +4093,7 @@
     "css-cascade/scope-pseudo-element.html ios",
     "css-display/display-flow-root-list-item-001.html android",
     "css-display/display-flow-root-list-item-001.html ios",
-    "css-position/position-absolute-semi-replaced-stretch-input.html android",
     "css-position/position-absolute-semi-replaced-stretch-input.html ios",
-    "css-position/position-absolute-semi-replaced-stretch-other.html android",
     "css-position/position-absolute-semi-replaced-stretch-other.html ios",
     "css-pseudo/first-letter-list-item-dynamic-001.html web",
     "css-tables/abspos-container-change-dynamic-001.html web",

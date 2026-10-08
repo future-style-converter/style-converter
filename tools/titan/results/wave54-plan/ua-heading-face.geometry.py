@@ -17,6 +17,9 @@
 #     sup/sub); band 2 ("fox") right edge ±4 px of the ref's x64.
 #   text-decoration-inset-014 — below y110: exactly 2 bands, each ≥ 20 px tall (26 px DejaVu Sans Mono Bold);
 #     band 2 ("brown fox") right edge ±6 px of the ref's x155.
+#   Both inset rules also check every band TOP within ±3 px of the ref's (wave-54 L5 skeptic, finding 2): the folded
+#     <h1> is abspos, and no native gives it the UA `.67em` margin, so a face-right, wrap-right paragraph can sit
+#     ~21 px (014: ~17 px) HIGH — heights and the line-2 edge alone print OK on the ref lifted 10/21/24 px.
 #   text-decoration-inset-011 — CONTROL (its fold bails: blue/green TextDecorationColor ≠ ink, TextUnderlineOffset),
 #     so its bands must equal the wave53-final bands recorded below EXACTLY on the natives.
 # The ref rows (and web, which renders a real <h1>) must print OK; the ref is a self-check (exit 1 otherwise).
@@ -62,6 +65,10 @@ def verdict_inset(b, rb, min_h1, min_h2, tol2):
         return f'line-2 band {b2 - t2 + 1} px tall (< {min_h2})'
     if abs(x2 - rb[1][3]) > tol2:
         return f'line-2 right edge x{x2} vs ref x{rb[1][3]}'
+    # checked last so every pre-existing WRONG line (a band count, height or edge failure) reads exactly as before
+    for (t, _, _, _), (rt, _, _, _) in zip(b, rb):
+        if abs(t - rt) > 3:
+            return f'band top y{t} vs ref y{rt} (the abspos heading\'s UA margin)'
     return None
 
 

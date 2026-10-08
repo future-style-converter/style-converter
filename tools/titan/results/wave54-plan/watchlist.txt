@@ -339,6 +339,9 @@ css-flexbox/abspos/abspos-autopos-htb-rtl.html android
 css-flexbox/abspos/abspos-autopos-vlr-rtl.html android
 css-flexbox/abspos/abspos-autopos-vrl-rtl.html android
 css-gaps/flex/flex-gap-decorations-006.html android
+css-position/position-absolute-semi-replaced-stretch-button.html android
+css-position/position-absolute-semi-replaced-stretch-input.html android
+css-position/position-absolute-semi-replaced-stretch-other.html android
 css-gaps/flex/flex-gap-decorations-033.html ios
 css-gaps/flex/flex-gap-decorations-033.html android
 # L4 oof-layout — must not move
@@ -595,14 +598,8 @@ filter-effects/backdrop-filter-zero-size.html web
 filter-effects/backdrop-filters-blur-large.html android
 filter-effects/backdrop-filters-blur-large.html ios
 filter-effects/backdrop-filters-blur-large.html web
-# L5 ua-heading-face — targets + movers (U1-android, U2-ios)
+# L5 ua-heading-face — targets + movers (U1-android)
 css-break/block-in-inline-015-print.html android
-css-text-decor/text-decoration-inset-005.html android
-css-text-decor/text-decoration-inset-006.html android
-css-text-decor/text-decoration-inset-005.html ios
-css-text-decor/text-decoration-inset-006.html ios
-css-text-decor/text-decoration-inset-014.html ios
-css-text-decor/text-decoration-inset-014.html android
 css-text-decor/text-decoration-color.html android
 css-lists/counter-list-item.html android
 css-lists/counter-reset-increment-overflow-underflow.html android
@@ -625,7 +622,11 @@ css-text-decor/text-decoration-inset-003.html android
 css-text-decor/text-decoration-inset-003.html ios
 css-text-decor/text-decoration-inset-004.html android
 css-text-decor/text-decoration-inset-004.html ios
+css-text-decor/text-decoration-inset-005.html android
+css-text-decor/text-decoration-inset-005.html ios
 css-text-decor/text-decoration-inset-005.html web
+css-text-decor/text-decoration-inset-006.html android
+css-text-decor/text-decoration-inset-006.html ios
 css-text-decor/text-decoration-inset-006.html web
 css-text-decor/text-decoration-inset-007.html android
 css-text-decor/text-decoration-inset-007.html ios
@@ -640,6 +641,8 @@ css-text-decor/text-decoration-inset-012.html android
 css-text-decor/text-decoration-inset-012.html ios
 css-text-decor/text-decoration-inset-013.html android
 css-text-decor/text-decoration-inset-013.html ios
+css-text-decor/text-decoration-inset-014.html android
+css-text-decor/text-decoration-inset-014.html ios
 css-text-decor/text-decoration-inset-014.html web
 css-text-decor/text-decoration-inset-015.html android
 css-text-decor/text-decoration-inset-015.html ios
@@ -697,9 +700,7 @@ css-cascade/scope-pseudo-element.html android
 css-cascade/scope-pseudo-element.html ios
 css-display/display-flow-root-list-item-001.html android
 css-display/display-flow-root-list-item-001.html ios
-css-position/position-absolute-semi-replaced-stretch-input.html android
 css-position/position-absolute-semi-replaced-stretch-input.html ios
-css-position/position-absolute-semi-replaced-stretch-other.html android
 css-position/position-absolute-semi-replaced-stretch-other.html ios
 css-tables/abspos-container-change-dynamic-001.html web
 css-ui/appearance-auto-input-non-widget-001.html android

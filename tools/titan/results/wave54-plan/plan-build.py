@@ -293,10 +293,12 @@ L3 = {
     pred(f'{HC[1]} android', 'f 0.9301', '≈0.957 (U3); ≈0.976-0.981 with U3b', 'possible flip', 'LOW-MED', None, False, ['U1', 'U2-android', 'U3', 'U3b'], GEO_OK),
     pred(f'{HC[3]} android', 'f 0.9292', '≈0.953 (U3); ≈0.976-0.981 with U3b', 'possible flip', 'LOW', None, False, ['U1', 'U2-android', 'U3', 'U3b'], GEO_OK),
     pred(f'{HC[4]} android', 'f 0.905', '≈0.945 stays f (U3); ≈0.976-0.981 with U3b', 'mover', 'LOW', None, False, ['U2-android', 'U3', 'U3b'], GEO_OK),
-    pred(f'{HC[2]} web', 'f 0.92', '≈0.96 (Chromium en breaks equal the shys; B alone 0.9426)', 'possible flip', 'LOW-MED', None, False, ['U1', 'U3']),
-    pred(f'{HC[2]} ios', 'f 0.9261', 'mover', 'mover', 'LOW', None, False, ['U1', 'U2-ios', 'U3'], direction='undirected',
+    # L3 skeptic S1 (orchestrator restatement): Chromium's en dictionary does not split `tation` (002 web shows im-/ple-/men-/tation,
+    # band groups [4,4,4,3] vs the ref's [5,4,3,3]); U1/U2/U3 change none of that, so a 002 pass on any platform is DEGENERATE.
+    pred(f'{HC[2]} web', 'f 0.92', '≈0.96 score-only read (B alone 0.9426; the dictionary reason is REFUTED by the capture)', 'possible flip in score only — DEGENERATE even if P (S1)', 'LOW-MED', None, False, ['U1', 'U3']),
+    pred(f'{HC[2]} ios', 'f 0.9261', 'mover', 'mover — DEGENERATE even if P (S1: TextKit emergency-breaks tati/on and izat/ion, not hyphenation positions)', 'LOW', None, False, ['U1', 'U2-ios', 'U3'], direction='undirected',
          directionWhy='U3 alone replays UP (B 0.9382) but U1 + U2-ios change the glyph of a CF-dictionary fold that no replay models'),
-    pred(f'{HC[2]} android', 'f 0.9223', 'stays f (Minikin paints its own dictionary hyphen: a logged wall)', 'mover', 'LOW', None, False, ['U3'],
+    pred(f'{HC[2]} android', 'f 0.9223', 'stays f (Minikin paints its own dictionary hyphen: a logged wall)', 'mover — DEGENERATE even if P (S1)', 'LOW', None, False, ['U3'],
          directionWhy='U3 is its only unit (U2-android is identity on a dictionary run) and replay B, which models U3 alone, gives 0.923 >= 0.9223'),
     pred(f'{HLC} ios', 'f 0.8919', 'mover (U+2010 -> U+002D in the dictionary fold)', 'mover', 'LOW', None, False, ['U2-ios'], direction='undirected',
          directionWhy='the glyph swap is not replayed; no sign is pre-registered'),
@@ -409,6 +411,14 @@ oof_android = [stem(t) for t in m2_tests + m1_tests if t != 'css-position/positi
 oof_ios = [stem(t) for t in (CHG, PR4, BFCB, SFA, PR3)] + [PFSNF]
 cbb_tests = sorted({r['test'] for r in lay['cbborder']} - {T('css-images', 'cross-fade-target-alpha')})
 assert len(cbb_tests) == 10, cbb_tests
+# L4 builder census (2026-10-08; tools/titan/results/wave54-oof-layout/_note.md "CBB-android census"): the BEHAVIOURAL census
+# (DynamicValueResolverTest `CBB census`, wave54-oof-layout/cbb-census.out.txt) finds three more readers of the corrected
+# block that the static cbborder predicate misses (it requires a % child): `top/right/bottom/left: 3px` stretch children
+# (AbsposInsetStretch) of a 3px-bordered content-box parent grow 138x88 -> 144x94. Compose-only, so android only. Pixel
+# replay (wave54-oof-layout/cbb-semi-replaced.replay-score.out.txt): button 0.9739 -> 0.9843, input 0.4117 -> 0.4555,
+# other 0.4396 -> 0.4677; all stay f (button's coverage-ratio veto reads the native button chrome, not this unit's).
+CBB_STRETCH = [T('css-position', f'position-absolute-semi-replaced-stretch-{k}') for k in ('button', 'input', 'other')]
+CBB_REPLAY = {'button': '0.9843', 'input': '0.4555', 'other': '0.4677'}
 G006, G033 = T('css-gaps', 'flex', 'flex-gap-decorations-006'), T('css-gaps', 'flex', 'flex-gap-decorations-033')
 APOS = {k: T('css-flexbox', 'abspos', f'abspos-autopos-{k}') for k in ('htb-ltr', 'vlr-ltr', 'vrl-ltr', 'htb-rtl', 'vlr-rtl', 'vrl-rtl')}
 NBR = {k: T('filter-effects', f'backdrop-filter-nested-border-radius-clip{k}') for k in ('', '-2', '-3', '-4')}
@@ -419,18 +429,21 @@ L4 = {
   'dir': 'tools/titan/results/wave54-oof-layout',
   'briefs': ['oof-containing-block.md', 'compose-wpt-content-box-cb.md', 'flex-zero-gap-rules.md', 'queue-scout-layout.md'],
   'captureCarriers': caps(ios=oof_ios + [stem(G033)],
-                          android=oof_android + [stem(t) for t in cbb_tests] + [stem(G006), stem(G033)]),
+                          android=oof_android + [stem(t) for t in cbb_tests + CBB_STRETCH] + [stem(G006), stem(G033)]),
   'wireCarriers': [],
   'carrierRule': {
     'OOF': 'an out-of-flow box whose spec containing block is a non-positioned contain:layout|paint|strict|content / filter / backdrop-filter (or will-change of one) ancestor (M2: 10 boxes in 6 tests), or an all-auto-inset FIXED box (M1: 4 boxes in 3 tests); Compose host activation flips true -> false on exactly the 7 hostFlips documents',
-    'CBB': 'a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control cross-fade-target-alpha); side reader flex-gap-decorations-006 (VerticalTextFlowLayout budget, watched)',
+    'CBB': 'a content-box (no BoxSizing BORDER_BOX) container with a px/% size, a non-zero padding/border band and an out-of-flow child carrying a % size or inset: 10 containers in 10 tests (+ the in-flow control cross-fade-target-alpha); side reader flex-gap-decorations-006 (VerticalTextFlowLayout budget, watched); + the 3 semi-replaced-stretch px-inset stretch documents found by the L4 builder behavioural census (android)',
     'GAP': 'a flex container with a rule family on an axis whose gap is 0 or absent AND touching neighbours/lines: 033 only of the 17 gapzero containers',
   },
   'probeSections': ['css-position', 'css-contain', 'CSS2', 'filter-effects', 'css-transforms', 'css-flexbox', 'css-images',
                     'css-gaps', 'css-anchor-position', 'css-display', 'css-masking', 'css-pseudo'],
   'predictions': [
     pred(f'{CC["03"]} android', 'f 0.9405', 'P ≈0.997 (sim 0.9967)', 'flip (red-ink failure becomes the ref picture)', 'HIGH', 0.99, True, ['OOF-android'], GEO_OK),
-    pred(f'{CC["11"]} android', 'f 0.9284', 'P ≈0.985 (sim ≤0.9854, an upper bound)', 'flip; the "25" counter (ref "17") stays wrong on ALL THREE platforms — not this lane', 'MED-HIGH', 0.97, True, ['OOF-android'], GEO_OK),
+    # L4 fix pass (lane skeptic defect 3): the score may flip, the picture cannot earn it — the test passes only on "a
+    # filled green square, no red and the number 17", and every platform paints "25". Kept gating (floor + geometry key on
+    # the green square); listed in stayDegenerateEvenIfPass, never claimed as a fix.
+    pred(f'{CC["11"]} android', 'f 0.9284', 'P ≈0.985 (sim ≤0.9854, an upper bound)', 'flip in score only — DEGENERATE even if P: the "25" counter (ref "17") stays wrong on ALL THREE platforms (not this lane); stayDegenerateEvenIfPass', 'MED-HIGH', 0.97, True, ['OOF-android'], GEO_OK),
     pred(f'{BFCB} ios', 'f 0.7955', 'P (sim bracket 0.9414 … 1.0)', 'flip', 'MED', None, False, ['OOF-ios'], GEO_OK),
     pred(f'{BFCB} android', 'f 0.7506', 'P (sim bracket 0.9414 … 1.0)', 'flip', 'MED', None, False, ['OOF-android'], GEO_OK),
     pred(f'{PR4} ios', 'P 0.9594 DEGENERATE', 'P ≈0.9974', 'degenerate->faithful', 'MED-HIGH', 0.99, True, ['OOF-ios'], GEO_OK),
@@ -449,6 +462,8 @@ L4 = {
     + [pred(f'{APOS[k]} android', CELLS[f'{APOS[k]} android'] + ' DEGENERATE', 'P ≈0.9967 (the rtl static-position arithmetic runs with the corrected size for the first time)', 'degenerate->faithful', 'MED', None, False, ['CBB-android'], GEO_OK) for k in ('htb-rtl', 'vlr-rtl', 'vrl-rtl')]
     + [pred(f'{G006} android', 'f 0.8223', 'may move, stays f (VerticalTextFlowLayout budget reads LocalContainingBlock)', 'watched side reader', 'LOW', None, False, ['CBB-android'], direction='undirected',
             directionWhy='a side reader of the corrected containing block; no replay'),
+     ] + [pred(f'{t} android', CELLS[f'{t} android'], f'up, stays f (replay {CBB_REPLAY[t.split("-")[-1][:-5]]}: the stretch box grows 138x88 -> 144x94; the native control chrome is not this unit\'s)',
+               'mover', 'MED', None, False, ['CBB-android']) for t in CBB_STRETCH] + [
        pred(f'{G033} ios', 'f 0.94', 'P ≈1.000 (sim 1.0000: every non-rule pixel is already ref-exact)', 'flip', 'HIGH', 0.99, True, ['GAP-ios'], GEO_OK),
        pred(f'{G033} android', 'f 0.94', 'P ≈1.000 (sim 1.0000)', 'flip', 'HIGH', 0.99, True, ['GAP-android'], GEO_OK)],
   'mustNotMove': [],     # filled below (needs every lane's carriers)
@@ -487,7 +502,7 @@ L4 = {
     'OOF-ios': {'commit': 'Swift StyleEngine/layout/position/OutOfFlowContainingBlock.swift (new) + FixedHoist.swift call-site lines :309, :347, :115 + OutOfFlowContainingBlockTests.swift + FixedHoist test rows',
                 'captures': caps(ios=oof_ios), 'wire': [], 'revertOrder': ['OOF-ios']},
     'CBB-android': {'commit': 'DynamicValueResolver.kt childContainingBlock(…, wptCaptureMode = false) + one condition (or ContainingBlockBands.kt ≤ 60 lines) + DynamicValueResolverTest rows + ComponentRenderer.kt seam (:1934 one named argument)',
-                    'captures': caps(android=[stem(t) for t in cbb_tests] + [stem(G006)]), 'wire': [], 'revertOrder': ['CBB-android']},
+                    'captures': caps(android=[stem(t) for t in cbb_tests + CBB_STRETCH] + [stem(G006)]), 'wire': [], 'revertOrder': ['CBB-android']},
     'GAP-android': {'commit': 'Compose columns/GapDecoration{Lines,Segments,Geometry}.kt (keep a zero-extent gap as a rule position; isPositionable) + GapDecoration*Test rows',
                     'captures': caps(android=[stem(G033)]), 'wire': [], 'revertOrder': ['GAP-android']},
     'GAP-ios': {'commit': 'Swift StyleEngine/columns/GapDecoration{Lines,Segments,Geometry}.swift (the byte-parallel twin) + GapDecoration*Tests rows',
@@ -501,7 +516,11 @@ L4 = {
 }
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
-# L5 · ua-heading-face — the Compose UAElementFontRule twin + the fold-aware heading gate on both natives.
+# L5 · ua-heading-face — the Compose UAElementFontRule twin (GO-SMALL since the lane fix pass: leaf headings only).
+# The fold-aware heading gate (UAHeadingFoldGate.{kt,swift}, unit U2-ios and the folded-host half of U1-android) is HELD
+# (wave54-ua-heading-face/_note.md "Fix pass"; skeptic.md repros 13-14): the folded inset-005/-006/-014 <h1>s are abspos,
+# no native gives an abspos heading its UA .67em margin, and with the 2em face alone the calibrated replay scores all six
+# native cells LOWER (Δ -0.011…-0.017) — up-or-stay rows that would revert U1-android and its HIGH flip by rule 2.
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
 BII = T('css-break', 'block-in-inline-015-print')
 INS = {n: T('css-text-decor', f'text-decoration-inset-{n}') for n in ('001', '002', '003', '004', '005', '006', '007', '008', '009', '011', '012', '013', '014', '015', '016', '024')}
@@ -509,24 +528,19 @@ TDC = T('css-text-decor', 'text-decoration-color')
 SUB2, SUB3 = T('css-text-decor', 'text-decoration-subelements-002'), T('css-text-decor', 'text-decoration-subelements-003')
 CLI, CRIOU = T('css-lists', 'counter-list-item'), T('css-lists', 'counter-reset-increment-overflow-underflow')
 BRC, CSC = T('filter-effects', 'backdrop-filter-border-radius-change'), T('filter-effects', 'backdrop-filter-corner-shape-change')
-ua_android = [BII, INS['005'], INS['006'], INS['014'], TDC, SUB3, CLI, CRIOU, BRC, CSC]
-ua_ios = [INS['005'], INS['006'], INS['014']]
+ua_android = [BII, TDC, SUB3, CLI, CRIOU, BRC, CSC]   # GO-SMALL census: fix/census-go-small.wave53-final.out.txt (7)
+ua_ios = []                                           # U2-ios HELD: no iOS carrier this wave
+UA_HELD = [INS['005'], INS['006'], INS['014']]        # the folded hosts: stand down on both natives (byte-identical)
 assert {r['key'].replace('css/', '', 1) for r in uah['rows']} >= set(ua_android)
 L5 = {
   'dir': 'tools/titan/results/wave54-ua-heading-face',
   'briefs': ['ua-heading-face.md', 'queue-scout-text-web.md'],
-  'captureCarriers': caps(ios=[stem(t) for t in ua_ios], android=[stem(t) for t in ua_android]),
+  'captureCarriers': caps(android=[stem(t) for t in ua_android]),
   'wireCarriers': [],
-  'carrierRule': 'an author-UNSIZED h1-h6 (no own FontSize/Font/FontWeight; 8 documents) or a sub/sup leaf, on Compose; on iOS only a FOLDED heading host (the stand-down retires only where InlineRunFold/InlineRunFlow returns Folded): inset-005/-006/-014. 14 sized-heading documents stand down (byte-identical) except the bold-only half on two filter-effects h1s (android movers)',
+  'carrierRule': 'GO-SMALL (lane fix pass): on Compose only, an author-UNSIZED LEAF h1-h6 (no own FontSize/Font/FontWeight, no composed children) or a RENDERED sub/sup leaf: block-in-inline-015-print, counter-list-item, counter-reset-increment-overflow-underflow, text-decoration-color, subelements-003, plus the bold-only half of two filter-effects h1s (7 documents). Every heading host with child boxes (inset-005/-006/-011/-014) stands down (UAElementFontRule.headingStandsDown = the iOS wave-40 gate) and its sup/sub are consumed by the fold: byte-identical. iOS: none (U2-ios HELD). Sized headings (14 documents): same list instance',
   'probeSections': ['css-text-decor', 'css-break', 'css-lists', 'filter-effects'],
   'predictions': [
     pred(f'{BII} android', 'f 0.9489', 'P ≈0.989 (the identical rule on iOS gives P 0.9894 on the same IR)', 'flip', 'HIGH', 0.97, True, ['U1-android'], GEO_OK),
-    pred(f'{INS["005"]} android', 'f 0.9', 'P ≈0.98 (anchors inset-001…004 android 0.984-0.9859)', 'flip', 'MED', None, False, ['U1-android'], GEO_OK),
-    pred(f'{INS["006"]} android', 'f 0.8993', 'P ≈0.98', 'flip', 'MED', None, False, ['U1-android'], GEO_OK),
-    pred(f'{INS["005"]} ios', 'f 0.8995', 'P ≈0.965 (anchors ios 0.9634-0.9707)', 'flip', 'MED', None, False, ['U2-ios'], GEO_OK),
-    pred(f'{INS["006"]} ios', 'f 0.8987', 'P ≈0.965', 'flip', 'MED', None, False, ['U2-ios'], GEO_OK),
-    pred(f'{INS["014"]} ios', 'f 0.9238', 'P (no monospace anchor; the probe decides)', 'flip', 'MED-LOW', None, False, ['U2-ios'], GEO_OK),
-    pred(f'{INS["014"]} android', 'f 0.923', 'P (no monospace anchor; the probe decides)', 'flip', 'MED-LOW', None, False, ['U1-android'], GEO_OK),
     pred(f'{TDC} android', 'f 0.6164', '≈0.67 (the iOS anchor with the rule is f 0.674)', 'mover; look, never count', 'LOW', None, False, ['U1-android']),
     pred(f'{CLI} android', 'f 0.7307', 'moves (iOS with the rule: f 0.7864)', 'mover', 'LOW', None, False, ['U1-android'], direction='undirected',
          directionWhy='only a cross-platform anchor (iOS), which the brief declined to turn into a magnitude'),
@@ -546,17 +560,17 @@ L5 = {
                                              'text-decoration-inset-014', 'text-decoration-inset-011') for p in PLATS},
      'gating': {'block-in-inline-015-print android': 'U1-android'},
      'report': [f'text-decoration-inset-{n} {p}' for n in ('005', '006', '014') for p in ('ios', 'android')],
+     'heldNote': 'GO-SMALL: the six inset-005/-006/-014 native report rows are no longer targets; they stay WRONG (their captures are must-not-move, gated by R4 / R7). The band-top check of hunk-for-plan-1.patch keeps a future folded-host face honest',
      'note': 'inset-011 is the CONTROL: the probe prints OK only while its native bands EQUAL the recorded wave53-final bands',
      'onWave53Final': '7 target rows WRONG (android band 9 vs ref 18; inset-005/-006 one band vs 2; inset-014 line-1 11/12 px); ref, web, iOS block-in-inline and the inset-011 control OK',
      'teeth': 'fix r1 (plan-skeptic M2): block-in-inline-015-print also checks every band TOP within ±3 px of the ref; the skeptic\'s pitch fakes print WRONG from +2 px/line (fix-r1/post-M2.pitch-down6.out.txt), the iOS anchor (tops 30/66/105/144 vs 29/65/103/142) stays OK'},
   ],
   'revertUnits': {
-    'U1-android': {'commit': 'Compose typography/UAElementFontRule.kt (new twin) + typography/UAHeadingFoldGate.kt (new) + their JVM tests + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply, before DynamicValueResolver :1206)',
+    'U1-android': {'commit': 'Compose typography/UAElementFontRule.kt (new twin, with headingStandsDown) + UAElementFontRuleTest.kt + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply(standsDown = headingStandsDown), before DynamicValueResolver :1211; carries the patch-borne UAElementFontRuleSeamWiringTest.kt) + Swift UAElementFontRule.swift (docs only: TWIN STATUS PORTED) + the lane dir',
                    'captures': caps(android=[stem(t) for t in ua_android]), 'wire': [], 'revertOrder': ['U1-android']},
-    'U2-ios': {'commit': 'Swift StyleEngine/typography/UAHeadingFoldGate.swift (new) + UAHeadingFoldGateTests.swift + UAElementFontRule.swift (docs only) + UAElementFontRuleTests.swift (additions) + ComponentRenderer.swift seam-2 (:343-356 the hasElementChildren: argument)',
-               'captures': caps(ios=[stem(t) for t in ua_ios]), 'wire': [], 'revertOrder': ['U2-ios']},
   },
-  'stopRule': 'if the lane\'s first JVM / Catalyst pins say the verbatim inset-005/-006/-014 hosts BAIL (not Folded), the 005/006/014 rows are void and the lane stops at the GO-SMALL fallback (U1 leaf-only)',
+  'heldUnits': {'U2-ios': 'HELD at the lane fix pass (GO-SMALL): UAHeadingFoldGate.swift + tests + seam-2 are parked in wave54-ua-heading-face/held/ until "UA .67em-family margin for a positioned heading on both natives" lands; no Swift behaviour change this wave'},
+  'stopRule': 'if the lane\'s first JVM / Catalyst pins say the verbatim inset-005/-006/-014 hosts BAIL (not Folded), the 005/006/014 rows are void and the lane stops at the GO-SMALL fallback (U1 leaf-only). TAKEN at the lane fix pass for a different reason: the hosts fold, but the face alone is predicted to LOWER all six cells (the missing abspos UA margin)',
 }
 
 # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
@@ -728,9 +742,10 @@ L4['mustNotMove'] = mnm('L4-oof-layout',
 L5['mustNotMove'] = mnm('L5-ua-heading-face',
     cells_of([BII], ('ios', 'web'))
     + cells_of([INS[n] for n in ('011', '001', '002', '003', '004', '009', '015', '016', '024', '007', '008', '012', '013')], ('ios', 'android'))
+    + cells_of(UA_HELD, ('ios', 'android'))
     + cells_of([SUB2], ('ios', 'android'))
     + cells_of([TDC, SUB3, CLI, CRIOU, BRC, CSC], ('ios',))
-    + cells_of(ua_android + ua_ios + [INS['011'], SUB2], ('web',)))
+    + cells_of(ua_android + UA_HELD + [INS['011'], SUB2], ('web',)))
 L6['mustNotMove'] = mnm('L6-web-tail',
     cells_of(rs_scored, ('ios', 'android'))
     + cells_of([OOF1, T('css-text', 'hyphens', 'hyphens-span-002'), T('css-text', 'hyphens', 'hyphens-auto-control'),
@@ -1028,7 +1043,17 @@ expectations = {
                                 'units': {'web': ['U1', 'U3'], 'ios': ['U1', 'U2-ios', 'U3'], 'android': ['U1', 'U2-android', 'U3']},
                                 'keys': {HC[n]: f'hyphenate-character-00{n}' for n in (1, 3, 4)}},
   'stayDegenerateEvenIfPass': [f'{BL2} android (orange "!" on the left: bake measurement)', f'{CS} ios (rows 3-6)', f'{CS} android (rows 5-6)',
-                               f'{BE[2]} ios (Line 4 painted and no "…": the iOS clamp is not applied; U3 only removes the stray blank lines)'],
+                               f'{BE[2]} ios (Line 4 painted and no "…": the iOS clamp is not applied; U3 only removes the stray blank lines)',
+                               # L4 fix pass (lane skeptic defect 3): the pass condition names "the number 17"; web, iOS and Android all
+                               # paint "25", and OOF-android moves only the green square, so a P here is DEGENERATE (web / iOS 011 are
+                               # DEGENERATE passes today for the same reason; they are must-not-move, not targets).
+                               f'{CC["11"]} android (the "25" counter, ref "17": wrong on all three platforms; OOF-android moves only the green square)',
+                               # L3 skeptic S1 (orchestrator): hyphenate-character-002's pictures stay wrong on every platform whatever U1/U2/U3 do —
+                               # web: Chromium's en dictionary does not split `tation` (groups [4,4,4,3] vs ref [5,4,3,3]); iOS: TextKit emergency
+                               # breaks tati/on, izat/ion; Android: Minikin paints visible hyphens (the logged wall). A pass here is never a fix.
+                               f'{HC[2]} web (Chromium en dictionary: im-/ple-/men-/tation, groups [4,4,4,3] vs ref [5,4,3,3])',
+                               f'{HC[2]} ios (TextKit emergency breaks tati/on, izat/ion)',
+                               f'{HC[2]} android (Minikin paints its own dictionary hyphen)'],
   'recordedWall': ['css-anchor-position/anchor-position-multicol-007.html android'],
   'ringFenced': 'filter-effects/backdrop-filter-basic-blur — report only, never a target, never carved out (not a carrier of any lane; L4 OOF claims its leaf boxes inertly, L3 U3 does not reach it)',
   'lanes': lanes,
