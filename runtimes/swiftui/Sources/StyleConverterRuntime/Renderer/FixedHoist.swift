@@ -91,9 +91,10 @@ public enum FixedHoist {
     /// stack (split keeps it) and the canvas wraps it in
     /// [StaticPositionAnchor] so it paints at its slot origin while
     /// reserving NO flow space (§2.1 — the S5 zero-report, iOS edition).
-    /// FIXED keeps the wave-17 always-hoist behavior (its containing
-    /// block IS the viewport, and every wave-17 css-position green rides
-    /// the canvas anchor). public: split's callers (the composed canvas)
+    /// FIXED kept the wave-17 always-hoist behavior until wave 54 (lane L4,
+    /// F3): an all-auto-inset fixed box now joins this class too, while an
+    /// inset one keeps the canvas anchor (every wave-17 css-position green
+    /// carries an inset). public: split's callers (the composed canvas)
     /// use the same classifier to attach the anchor — one decision, two
     /// consumers, mirroring the Compose harness's shouldHoistToCanvasRoot
     /// gap-injection reuse.
@@ -112,9 +113,15 @@ public enum FixedHoist {
         _ component: IRComponent,
         hasPositionedAncestor: Bool = false
     ) -> Bool {
-        LayoutExtractor.extract(from: component.properties)?.position == .absolute
-            && !hasPositionedAncestor
-            && !hasAnyInset(component)
+        // Wave 54 (lane L4, F3): a FIXED box joins the class on the SAME
+        // declared-inset test the fixed strip reads (css-position-3 §3.5.3 —
+        // all-auto insets ⇒ static position), so the two stay disjoint; the
+        // ABSOLUTE arm keeps its frozen resolved-px test (Compose twin: RC1).
+        switch LayoutExtractor.extract(from: component.properties)?.position {
+        case .absolute?: return !hasPositionedAncestor && !hasAnyInset(component)
+        case .fixed?: return !hasPositionedAncestor && !OutOfFlowContainingBlock.declaresAnyInset(component.properties)
+        default: return false
+        }
     }
 
     /// Split a document's ROOT list into the in-flow half (rendered in
@@ -307,6 +314,11 @@ public enum FixedHoist {
         // once per level, not per child.
         let childTransformed = hasTransformedAncestor
             || TransformContainingBlock.establishes(component)
+            // Wave 54 (lane L4, F2): contain layout|paint / filter /
+            // backdrop-filter / their will-change hints claim fixed
+            // descendants too (OutOfFlowContainingBlock, the Compose twin's
+            // CanvasRootHoist OR) — the same keep-in-tree route.
+            || OutOfFlowContainingBlock.establishes(component)
         // Wave 52 (F3): the positioned chain the children see — §10.1
         // OR-accumulation, restarted at a spanner from its multicol
         // container's state (the two MulticolSpannerContainingBlock rules,
@@ -344,7 +356,10 @@ public enum FixedHoist {
                                                 hasPositionedAncestor: childPositioned,
                                                 positionedAtMulticol: childAtMulticol,
                                                 underSpanner: childUnderSpanner)
-            if isFixed(child) && !childTransformed {
+            // Wave 54 (lane L4, F3): only a DECLARED inset anchors a fixed box
+            // at the viewport; an all-auto one stays in the tree and paints at
+            // its parent's overlay origin — its static position (§3.5.3).
+            if isFixed(child) && !childTransformed && OutOfFlowContainingBlock.declaresAnyInset(child.properties) {
                 // F1: the fixed box leaves its parent entirely — no flow
                 // space, no parent-anchored inset basis. Its own subtree
                 // is stripped too (a fixed box nested in a fixed box

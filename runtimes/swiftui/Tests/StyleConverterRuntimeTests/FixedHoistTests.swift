@@ -493,16 +493,57 @@ final class FixedHoistTests: XCTestCase {
     /// the documented approximation: the auto axis anchors at the canvas
     /// origin), and every wave-17 css-position case — all inset-carrying
     /// — splits byte-identically to before (the regression guard).
-    func testRC1InsetCarryingAbsoluteAndAllFixedStillHoist() throws {
+    func testRC1InsetCarryingAbsoluteAndInsetFixedStillHoist() throws {
         let leftOnly = try box(id: "l", position: "ABSOLUTE", left: 100, w: 50, h: 50, rgb: (0, 0, 1))
         XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(leftOnly))
-        let noInsetFixed = try box(id: "f", position: "FIXED", w: 50, h: 50, rgb: (1, 0, 0))
-        // Fixed keeps the always-hoist rule even with no inset — its
-        // containing block IS the viewport (css-position-3 §2.1).
-        XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(noInsetFixed))
-        let split = FixedHoist.split(roots: [leftOnly, noInsetFixed])
+        // Wave 54 (lane L4, F3): an INSET fixed box keeps the viewport hoist
+        // (css-position-3 §2.1); the no-inset one is the row below.
+        let topFixed = try box(id: "f", position: "FIXED", top: 0, w: 50, h: 50, rgb: (1, 0, 0))
+        XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(topFixed))
+        let split = FixedHoist.split(roots: [leftOnly, topFixed])
         XCTAssertTrue(split.flow.isEmpty)
         XCTAssertEqual(split.hoisted.map(\.id), ["l", "f"])
+    }
+
+    /// Wave 54 (lane L4) P2 — until wave 54 a no-inset fixed box kept the
+    /// wave-17 always-hoist rule. css-position-3 §3.5.3 gives an all-auto
+    /// fixed box its STATIC position: as a root it joins the RC1 class (flow
+    /// half + StaticPositionAnchor), as a descendant it stays in its parent's
+    /// tree (its out-of-flow overlay origin) instead of being stripped.
+    func testP2NoInsetFixedTakesItsStaticPosition() throws {
+        let noInsetFixed = try box(id: "f", position: "FIXED", w: 50, h: 50, rgb: (1, 0, 0))
+        XCTAssertTrue(FixedHoist.rendersInFlowAsStaticPosition(noInsetFixed))
+        // Under a positioned ancestor the parent's overlay owns it, not RC1.
+        XCTAssertFalse(FixedHoist.rendersInFlowAsStaticPosition(noInsetFixed, hasPositionedAncestor: true))
+        let rootSplit = FixedHoist.split(roots: [noInsetFixed])
+        XCTAssertEqual(rootSplit.flow.map(\.id), ["f"])
+        XCTAssertTrue(rootSplit.hoisted.isEmpty)
+        // As a descendant of a static block: kept, not stripped.
+        let child = try box(id: "c", position: "FIXED", w: 50, h: 50, rgb: (1, 0, 0))
+        let parent = try component(#"{"id":"p","name":"p","properties":[]}"#)
+        let tree = IRComponent(id: parent.id, name: parent.name, properties: parent.properties,
+                               selectors: parent.selectors, media: parent.media, children: [child],
+                               slot: parent.slot, text: parent.text, pseudos: parent.pseudos,
+                               meta: parent.meta, variables: parent.variables)
+        let split = FixedHoist.split(roots: [tree])
+        XCTAssertTrue(split.hoisted.isEmpty)
+        XCTAssertEqual(split.flow.first?.children?.map(\.id), ["c"])
+    }
+
+    /// Wave 54 (lane L4) P2 — a fixed box WITH an inset under a
+    /// `contain: strict` box is claimed by it (css-contain-2 §3.2 / §3.4,
+    /// OutOfFlowContainingBlock): kept in the tree, not stripped to the
+    /// viewport — change-insets-inside-strict-containment-nested's shape.
+    func testP2InsetFixedUnderContainStrictIsKept() throws {
+        let fixed = try box(id: "f", position: "FIXED", left: 0, top: 0, w: 50, h: 100, rgb: (0, 1, 0))
+        let strict = try component(#"{"id":"s","name":"s","properties":[{"type":"Contain","data":["STRICT"]}]}"#)
+        let tree = IRComponent(id: strict.id, name: strict.name, properties: strict.properties,
+                               selectors: strict.selectors, media: strict.media, children: [fixed],
+                               slot: strict.slot, text: strict.text, pseudos: strict.pseudos,
+                               meta: strict.meta, variables: strict.variables)
+        let split = FixedHoist.split(roots: [tree])
+        XCTAssertTrue(split.hoisted.isEmpty)
+        XCTAssertEqual(split.flow.first?.children?.map(\.id), ["f"])
     }
 
     /// Logical insets anchor exactly like physical ones — one wire
