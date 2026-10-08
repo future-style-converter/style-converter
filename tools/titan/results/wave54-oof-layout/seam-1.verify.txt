@@ -1,0 +1,15 @@
+lock acquired 2026-10-08T17:42:26Z
+sha256 before: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+applied
+sha256 applied: b5921e56f825fb46f21226f09f47aa3b56acbc65becf987de5b36fca8e02437a
+BUILD SUCCESSFUL in 4s
+testsuite name="com.styleconverter.runtime.core.renderer.ChildContainingBlockSeamWiringTest" tests="1" skipped="0" failures="0"
+testsuite name="com.styleconverter.runtime.core.variables.DynamicValueResolverTest" tests="32" skipped="0" failures="0"
+--- mutation: drop the named argument (seam applied) ---
+sha256 mutated: 11a463a1ddf2750d3f74d29f06161be8e648236dec414f3733071431d71f6cdc
+> Task :runtime:testDebugUnitTest FAILED
+ChildContainingBlockSeamWiringTest > the child containing block is computed with the WPT capture mode FAILED
+BUILD FAILED in 2s
+--- restore seam file byte-exact from HEAD, remove patch-borne test ---
+sha256 after: da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db
+lock released 2026-10-08T17:42:33Z

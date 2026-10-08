@@ -1,0 +1,6 @@
+EX-A seam-1 applied
+EX-A gradle rc=0
+testsuite name="com.styleconverter.runtime.typography.UAElementFontRuleTest" tests="11" skipped="0" failures="0" errors="0"
+testsuite name="com.styleconverter.runtime.typography.UAHeadingFoldGateTest" tests="9" skipped="0" failures="0" errors="0"
+testsuite name="com.styleconverter.runtime.typography.inline.InlineRunFoldTest" tests="45" skipped="0" failures="0" errors="0"
+EX-A compiled renderer gate-refs 2

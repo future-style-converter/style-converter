@@ -1,0 +1,3 @@
+EX-RV seam-1 applied: renderer sha256 c6a83ecdb6e36ae4 (+ runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt)
+EX-RV probe appended to the EXPORT copy only; shared-tree test sha256 4c9dd1258c9ed0cd
+export test re-seeded (shared-tree copy + corrected probe)

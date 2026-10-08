@@ -1,0 +1,1 @@
+        properties.contains { insetTypes.contains($0.type) && $0.data.stringValue != "auto" }

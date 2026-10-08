@@ -1,0 +1,13 @@
+(1) tracked fixture JSONs 446, with components 445; declaring a seeded name (or ATC_* / reset / span, any case):
+    fixtures/combinations/all-then-color.json: ATC_AllThenProps, ATC_PropsThenAll_InGreenParent, reset, ATC_InitialUnderRedParent, span, ATC_DirectionSurvives
+(2) gate fixtures — has committed baselines (test-all rule): today (390 PNGs) → after seed (408)
+    fixtures/visual-test.json                            true → true
+    fixtures/composition-test.json                       false → false
+    fixtures/properties/effects/filter-sepia-amounts.json true → true
+    fixtures/combinations/nested-transforms.json         false → false
+    fixtures/combinations/radius-overflow-transform.json false → false
+    fixtures/combinations/transform-abspos-pivot.json    false → false
+    fixtures/combinations/blend-isolation.json           false → false
+    fixtures/combinations/opacity-blend.json             false → false
+    fixtures/combinations/all-then-color.json            false → true
+(3) wave53-final: 1435 per-test IR docs; components named exactly a seeded name: 0

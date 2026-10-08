@@ -1,0 +1,14 @@
+	 Executed 8 tests, with 4 failures (0 unexpected) in 6.210 (6.240) seconds
+	 Executed 8 tests, with 4 failures (0 unexpected) in 6.210 (6.240) seconds
+	 Executed 8 tests, with 4 failures (0 unexpected) in 6.210 (6.241) seconds
+Test Suite 'OutOfFlowContainingBlockTests' failed at 2026-10-08 22:16:02.956.
+Test Suite 'Selected tests' failed at 2026-10-08 22:16:02.956.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:16:02.956.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:105: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:105: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:105: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' failed (1.478 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:155: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : XCTAssertEqual failed: ("[]") is not equal to ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]")
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (4.725 seconds).
+** TEST FAILED **
+xcodebuild rc=65

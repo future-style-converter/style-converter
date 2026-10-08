@@ -1,0 +1,14 @@
+=== selectors
+      48
+identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+renumbered: []
+content-changed: []
+=== css-anchor-position
+      48
+CHANGED wpt__css-anchor-position__anchor-center-safe-rtl.json: components 14 -> 14
+  ~ wpt__css-anchor-position__anchor-center-safe-rtl__2 props [('PaddingBottom', {'px': 10}, {'px': 0}), ('PaddingLeft', {'px': 10}, {'px': 0}), ('PaddingRight', {'px': 10}, {'px': 0}), ('PaddingTop', {'px': 10}, {'px': 0})] other []
+  ~ wpt__css-anchor-position__anchor-center-safe-rtl__4 props [('PaddingBottom', {'px': 10}, {'px': 0}), ('PaddingLeft', {'px': 10}, {'px': 0}), ('PaddingRight', {'px': 10}, {'px': 0}), ('PaddingTop', {'px': 10}, {'px': 0})] other []
+  stack-shape parents: base ['anchor-center-safe-rtl__3__0-481'] -> new ['anchor-center-safe-rtl__3__0-481']
+identical 47 · renumbered 0 · content-changed 1 · missing-in-base 0
+renumbered: []
+content-changed: ['wpt__css-anchor-position__anchor-center-safe-rtl']

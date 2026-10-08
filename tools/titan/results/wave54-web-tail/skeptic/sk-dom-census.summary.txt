@@ -1,0 +1,8 @@
+DOM census (skeptic, export trees from git archive db6e8aa0 + lane files; real ComposedCaptureGallery; wave53-final)
+sections 30 canvases (combined out/tmpOutput.json) 1435 per-test docs 1435
+lift      section-level changed 0  per-test changed 0  []
+rs        section-level changed 27  per-test changed 27
+w1        section-level changed 1  per-test changed 1  ['css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002.json']
+landed    section-level changed 28  per-test changed 28
+lift-mut  section-level changed 24  per-test changed 24
+w1u       section-level changed 2  per-test changed 2  ['css-text/wpt__css-text__hyphens__hyphens-out-of-flow-001.json', 'css-text/wpt__css-text__hyphens__hyphens-out-of-flow-002.json']

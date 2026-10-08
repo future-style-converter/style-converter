@@ -1,0 +1,36 @@
+# L1 orchestrator windows — run 2026-10-08 17:32Z on the shared tree (base db6e8aa0 + every lane's in-flight edits; L1 units P + M′ present), JDK 21, host device-idle (no gate running)
+
+## [W1] CDP marker probe — MARKER PROBE: ALL PASS, exit 0 (marker-probe.w54.out.txt)
+outcome {"status":"baked","trigger":"dir-attribute","roots":2,"runs":10,"touched":16}
+PASS baked — 2 roots, 10 runs
+PASS 2 RTL bake roots (found 2)
+PASS counter-suffix__0__4 padding: 0 alone (unit P)
+PASS counter-suffix__0__4 children start with its 2 items
+PASS counter-suffix__0__4 root-owned marker runs [".","1",".","2"] (got [".","1",".","2"])
+PASS counter-suffix__0__4__0 list-style-type none
+PASS counter-suffix__0__4__0 no marker-* stamp (measured, not modelled)
+PASS counter-suffix__0__4__0 keeps exactly ONE child (its text run)
+PASS counter-suffix__0__4__1 list-style-type none
+PASS counter-suffix__0__4__1 no marker-* stamp (measured, not modelled)
+PASS counter-suffix__0__4__1 keeps exactly ONE child (its text run)
+PASS counter-suffix__0__4 "." frame x132.30-136.60 ⊂ [131,148]
+PASS counter-suffix__0__4 "." top 2 = an item's top + 2 (±1)
+PASS counter-suffix__0__4 "1" frame x136.59-146.97 ⊂ [131,148]
+PASS counter-suffix__0__4 "1" top 2 = an item's top + 2 (±1)
+PASS counter-suffix__0__4 "." frame x132.30-136.60 ⊂ [131,148]
+PASS counter-suffix__0__4 "." top 26 = an item's top + 2 (±1)
+PASS counter-suffix__0__4 "2" frame x136.59-146.97 ⊂ [131,148]
+PASS counter-suffix__0__4 "2" top 26 = an item's top + 2 (±1)
+
+## [W2] converter hop, counter-suffix — W2 CHECK: ALL PASS, exit 0 (w2.counter-suffix.out.txt)
+extracted css/css-counter-styles/counter-suffix.html → fixtures/wpt/css-counter-styles/counter-suffix.json (+ ref) [bidi-bake: baked — 2 roots, 10 runs] [counter-bake: baked — 6 markers, 2 declined]
+converter: no warning lines
+ok   counter-suffix components 23 → 29 (expect 23 → 29)
+ok   6 added components: ["counter-suffix__0__4__2","counter-suffix__0__4__3","counter-suffix__0__4__4","counter-suffix__0__4__5","counter-suffix__0__5__2","counter-suffix__0__5__3"]
+W2 CHECK: ALL PASS
+
+## [W2b] css-counter-styles — W2 CHECK: ALL PASS (documents 48: identical 32 · renumbered 15 · content-changed 1)
+## [W2b] selectors — W2 CHECK: ALL PASS (documents 48: identical 48 · renumbered 0 · content-changed 0)
+## [W2b] css-anchor-position — W2 CHECK: ALL PASS (documents 48: identical 47 · renumbered 0 · content-changed 1)
+
+DECISION (per the lane's window table): no FAIL anywhere → M′ proceeds to stage 1 (wave54-pre), where the geometry gate decides; P's root props held (padding: 0 alone). css-text W2b deliberately NOT run on the shared tree (L3's in-flight converter/extractor units pollute it) — its L1 lines are read from the stage-1 / stage-2 wire control instead.

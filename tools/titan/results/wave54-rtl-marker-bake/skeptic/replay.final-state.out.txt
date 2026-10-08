@@ -1,0 +1,92 @@
+OK               P-1 remove the `padding: 0` line (rootProperties)
+    sha256 98ad650e4219 -> fe4cbe361a96 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 66 # fail 3 # skipped 0 red=["V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position", 'V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>', 'V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               P-2 drop the content-box guard
+    sha256 98ad650e4219 -> 474464c4bd40 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['V3 unit P: a padding that paints (content-box clip / origin) is NOT spent']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               P-3 drop the NON-zero guard (any padding array counts)
+    sha256 98ad650e4219 -> 98324f590c12 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['V3b unit P: VERBATIM zero-padding roots (dir-style-02a ×6, dir-selector-change-003/-004) stay deep-equal AND in order']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               P-4 drop the overflow guard
+    sha256 98ad650e4219 -> f5f4ecbd9a9c -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['V3 unit P: a clipping / scrolling root keeps its padding (the overflow guard)']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               P-5 drop the padding-* longhand delete loop (applyBidiBakePlan)
+    sha256 98ad650e4219 -> b13b0e314363 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=["V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position"]
+    restored: # pass 69 # fail 0 # skipped 0
+OK               P-6 planBidiBake stops passing the walk record (the pre-P call)
+    sha256 98ad650e4219 -> 99081590017c -> 98ad650e4219 byte-exact=True
+    mutated: # pass 66 # fail 3 # skipped 0 red=["V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position", 'V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>', 'V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               P-7 the walker stops recording the resolved padding
+    sha256 98ad650e4219 -> ff75ad86faf8 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=["unit P wiring: the in-page walker records the resolved padding and both guards' inputs"]
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-1 (V1 m1) planMarker drops `list-style-type: none` on the item
+    sha256 4ded3874bba8 -> 6bbbefa88327 -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 66 # fail 3 # skipped 0 red=['V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry', 'V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-2 (V1 m2) the analytic RTL edge hangs the marker LEFT (li.left − w)
+    sha256 4ded3874bba8 -> 8e4892f56ddf -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 67 # fail 2 # skipped 0 red=['V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-3 (V1 m3) no per-grapheme split of a no-strong-letter run
+    sha256 4ded3874bba8 -> 55b12ed75f5b -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 65 # fail 4 # skipped 0 red=['V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry', 'V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped', "VF3 unit M′: marker glyph tops drop the probe span's half-leading (a tall body line-height)"]
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-4 (V2) a ROOT list item is planned a marker too
+    sha256 98ad650e4219 -> c7d69cdece6f -> 98ad650e4219 byte-exact=True
+    mutated: # pass 56 # fail 13 # skipped 0 red=['planBidiBake: the happy path — root, box, run, hide', 'planBidiBake: <br> inside a root is hidden even when it HAS a box', 'planBidiBake: a direction-ambiguous run bails the whole test', 'planBidiBake: the run budget is enforced', "V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position", 'V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>', 'V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V2 unit M′: a ROOT list item (arabic-indic-101 shape) gets no marker run', 'V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry', 'V7 unit M′: no item box owns more runs than it has text runs (the Compose stack-shape guard)', 'V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped', 'V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail', 'VF1 unit M′: an item the in-page probe cannot re-find by its rect is DECLINED and stamped, never skipped']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-5 (V5 a) the probe self-check is deleted (a mismatching CDP box is used)
+    sha256 4ded3874bba8 -> 5adeec1df544 -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-6 (V5 b) a probe mismatch becomes a whole-test bail
+    sha256 98ad650e4219 -> ea6cb4cb40fc -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['V5 unit M′: a > EPS probe mismatch is MARKER-scoped — analytic edge + stamp, never a whole-test bail']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-7 (VF) collectMarkerFacts rethrows a page fault
+    sha256 4ded3874bba8 -> cd7e7c570299 -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['VF unit M′: collectMarkerFacts — list-free → {} with no CDP call; a page fault declines items, never throws']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-8 (FX1) an item not re-found by rect is skipped silently
+    sha256 4ded3874bba8 -> d7719302abe0 -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['VF1 unit M′: an item the in-page probe cannot re-find by its rect is DECLINED and stamped, never skipped']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-9 (FX2) the error-fact filter is dropped from the CDP merge
+    sha256 4ded3874bba8 -> aca20c7c8da4 -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['VF1 unit M′: an item the in-page probe cannot re-find by its rect is DECLINED and stamped, never skipped']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-10 (FX3) applyBidiBakePlan's box `_lossyReasons` merge is deleted
+    sha256 98ad650e4219 -> 013d6e59effb -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=["VF2 unit M′: a box's marker stamps reach the FIXTURE component (_lossy + _lossyReasons, merged once)"]
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-11 (FX4) the half-leading term `- q0` is dropped
+    sha256 4ded3874bba8 -> 8c6ef4281866 -> 4ded3874bba8 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=["VF3 unit M′: marker glyph tops drop the probe span's half-leading (a tall body line-height)"]
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-12 (V6 owner) the marker runs are owned by the `<li>` again (wave-53 shape; = V7's 'push the runs to the box')
+    sha256 98ad650e4219 -> a9aed43aa607 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 65 # fail 4 # skipped 0 red=['V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry', 'V7 unit M′: no item box owns more runs than it has text runs (the Compose stack-shape guard)', 'V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-13 (V6 origin) the marker runs are measured from the `<li>`'s padding box again
+    sha256 98ad650e4219 -> e73b4d960ef8 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 67 # fail 2 # skipped 0 red=['V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-14 (V7) the marker runs are ALSO pushed to the item box (root copy kept)
+    sha256 98ad650e4219 -> cd16f690fbf8 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 65 # fail 4 # skipped 0 red=['V1 unit M′: RTL item markers bake as ROOT-owned runs on the inline-START (right) side, `none` on the item', 'V6 unit M′: every marker run is owned by its ENCLOSING ROOT at the measured root-relative geometry', 'V7 unit M′: no item box owns more runs than it has text runs (the Compose stack-shape guard)', 'V4 unit M′ × counter-style bake: stamped 6, declined 2 (10 / 2 without the marker bake); root runs never stamped']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-15 (wiring) the marker facts are collected BEFORE the mapping check
+    sha256 98ad650e4219 -> 7d741fcbaff7 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['unit M′ wiring: the marker facts are read AFTER the walk and the mapping check']
+    restored: # pass 69 # fail 0 # skipped 0
+OK               M-4b (V2, no crash) a ROOT list item is planned a marker, owned and measured by itself
+    sha256 98ad650e4219 -> aa4e357dd9f4 -> 98ad650e4219 byte-exact=True
+    mutated: # pass 68 # fail 1 # skipped 0 red=['V2 unit M′: a ROOT list item (arabic-indic-101 shape) gets no marker run']
+    restored: # pass 69 # fail 0 # skipped 0

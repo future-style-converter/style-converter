@@ -1,0 +1,15 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.141 (0.283) seconds
+	 Executed 75 tests, with 1 failure (0 unexpected) in 5.644 (6.197) seconds
+	 Executed 75 tests, with 1 failure (0 unexpected) in 5.644 (6.198) seconds
+Test Suite 'FixedHoistTests' passed at 2026-10-08 22:09:30.912.
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 22:09:31.117.
+Test Suite 'GapDecorationGrammarTests' passed at 2026-10-08 22:09:31.225.
+Test Suite 'GapDecorationSegmentsTests' passed at 2026-10-08 22:09:31.441.
+Test Suite 'OutOfFlowContainingBlockTests' failed at 2026-10-08 22:09:35.384.
+Test Suite 'Selected tests' failed at 2026-10-08 22:09:35.667.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:09:35.667.
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 22:09:35.667.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:79: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets] : XCTAssertFalse failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' failed (0.003 seconds).
+** TEST FAILED **
+xcodebuild rc=65

@@ -1,0 +1,11 @@
+[M3s-old-hasChildren-gate] file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift sha256 before=2ca760a686e7b8cb13c87e9ba6275c34987ddea77b923c94b64852c3a5cbea31 mutated=7e189b269366ec38d6623c6748ebf8399fc5d623f2318f8adfd164c3886de666
+[M3s-old-hasChildren-gate] red run rc=65
+	 Executed 25 tests, with 5 failures (0 unexpected) in 1.234 (1.241) seconds
+    RED: UAHeadingFoldGateTests.swift:114 testInset005FoldedHostTakesTheFace :: XCTAssertFalse failed
+    RED: UAHeadingFoldGateTests.swift:118 testInset005FoldedHostTakesTheFace :: XCTAssertEqualWithAccuracy failed: ("0.0") is not equal to ("32.0") +/- ("1e-09")
+    RED: UAHeadingFoldGateTests.swift:119 testInset005FoldedHostTakesTheFace :: XCTAssertNotNil failed
+    RED: UAHeadingFoldGateTests.swift:125 testInset006FoldedHostTakesTheFace :: XCTAssertEqualWithAccuracy failed: ("0.0") is not equal to ("32.0") +/- ("1e-09")
+    RED: UAHeadingFoldGateTests.swift:132 testInset014FoldedMonospaceHostTakesTwentySix :: XCTAssertEqualWithAccuracy failed: ("0.0") is not equal to ("26.0") +/- ("1e-09")
+[M3s-old-hasChildren-gate] restored sha256 after=2ca760a686e7b8cb13c87e9ba6275c34987ddea77b923c94b64852c3a5cbea31 BYTE-EXACT
+[M3s-old-hasChildren-gate] green run rc=0
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.135 (0.306) seconds

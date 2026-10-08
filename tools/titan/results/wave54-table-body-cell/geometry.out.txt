@@ -1,0 +1,60 @@
+$ python3 tools/titan/results/wave54-plan/compose-table-body-cell.geometry.py wave53-final wave53-probe wave54-open
+ref           006 ref      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-final  006 web      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-final  006 ios      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-final  006 android  square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+wave53-probe  006 web      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-probe  006 ios      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave53-probe  006 android  square block solid 76/400 | stray ink 400 (x 44-63, rows 56-75) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (76/400 black); 400 ink px outside the block)
+wave54-open   006 web      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave54-open   006 ios      square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+wave54-open   006 android  square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+exit 0
+$ python3 tools/titan/results/wave53-plan/display-table-body.geometry.py wave53-final 006
+006 ref      square rows 56-75 (20) x 24-43 | red px 0
+006 web      square rows 56-75 (20) x 24-43 | red px 0
+006 ios      square rows 56-75 (20) x 24-43 | red px 0
+006 android  square rows 51-70 (20) x 24-43 | red px 0
+exit 0
+$ python3 tools/titan/results/wave53-plan/display-table-body.geometry.py wave53-probe 006
+006 ref      square rows 56-75 (20) x 24-43 | red px 0
+006 web      square rows 56-75 (20) x 24-43 | red px 0
+006 ios      square rows 56-75 (20) x 24-43 | red px 0
+006 android  square rows 56-75 (20) x 24-63 | red px 0
+exit 0
+$ python3 tools/titan/results/wave53-plan/display-table-body.geometry.py wave54-open 006
+006 ref      square rows 56-75 (20) x 24-43 | red px 0
+006 web      square rows 56-75 (20) x 24-43 | red px 0
+006 ios      square rows 56-75 (20) x 24-43 | red px 0
+006 android  square rows 51-70 (20) x 24-43 | red px 0
+exit 0
+$ python3 tools/titan/results/wave54-plan/geometry-gate.py wave53-final --base wave53-open --lanes L2 --self-test
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 ios                                                    PASS       [control: expected to stay PASS]
+!! L2-table-body-cell       compose-table-body-cell.geometry.py        006 android                                                FAIL       [GATING -> revert TB-android]
+     line: wave53-final 006 android square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+   L2-table-body-cell       display-table-body.geometry.py             006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       display-table-body.geometry.py             006 ios                                                    PASS       [control: expected to stay PASS]
+!! L2-table-body-cell       display-table-body.geometry.py             006 android                                                FAIL       [GATING -> revert TB-android]
+     line: 006 android square rows 51-70 (20) x 24-43 | red px 0
+
+geometry-gate wave53-final (base wave53-open): 6 keys — PASS 4 · FAIL 2 (gating 2) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 2 (PASS 0 FAIL 2) · control 4 (PASS 4 FAIL 0) · report 0 (PASS 0 FAIL 0) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: TB-android
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+exit 0
+$ python3 tools/titan/results/wave54-plan/geometry-gate.py wave54-open --base wave53-open --lanes L2 --self-test
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       compose-table-body-cell.geometry.py        006 ios                                                    PASS       [control: expected to stay PASS]
+!! L2-table-body-cell       compose-table-body-cell.geometry.py        006 android                                                FAIL       [GATING -> revert TB-android]
+     line: wave54-open 006 android square block solid 300/400 | stray ink 80 (x 24-43, rows 52-55) | red px 0 GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (300/400 black); 80 ink px outside the block)
+   L2-table-body-cell       display-table-body.geometry.py             006 web                                                    PASS       [control: expected to stay PASS]
+   L2-table-body-cell       display-table-body.geometry.py             006 ios                                                    PASS       [control: expected to stay PASS]
+!! L2-table-body-cell       display-table-body.geometry.py             006 android                                                FAIL       [GATING -> revert TB-android]
+     line: 006 android square rows 51-70 (20) x 24-43 | red px 0
+
+geometry-gate wave54-open (base wave53-open): 6 keys — PASS 4 · FAIL 2 (gating 2) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 2 (PASS 0 FAIL 2) · control 4 (PASS 4 FAIL 0) · report 0 (PASS 0 FAIL 0) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: TB-android
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+exit 0

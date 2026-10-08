@@ -1,0 +1,16 @@
+[MS2-standsDown-false] lock taken 21:58:26; seam sha256 before=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db (HEAD da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db)
+[MS2-standsDown-false] seam-1 applied: seam sha256=c6a83ecdb6e36ae44ae21c7c9ce76bdd0797b4584fbbd85450e386da00148a0d, +runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+[MS2-standsDown-false] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 c6a83ecdb6e36ae4 → 17eb8a03e2512dbb
+[MS2-standsDown-false] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/MS2-standsDown-false.red.log)
+[MS2-standsDown-false] red: UAElementFontRuleSeamWiringTest tests=2 failures=2 errors=0 ts=2026-10-08T19:58:28.507Z
+[MS2-standsDown-false] red:   RED DynamicValueResolver resolves the UA step's output, after it :: java.lang.AssertionError: the UA font step call is missing
+[MS2-standsDown-false] red:   RED the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict :: java.lang.AssertionError: the UA font step call expected:<1> but was:<0>
+[MS2-standsDown-false] red: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:58:28.582Z
+[MS2-standsDown-false] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:58:28.646Z
+[MS2-standsDown-false] restored runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256=c6a83ecdb6e36ae4 BYTE-EXACT
+[MS2-standsDown-false] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/MS2-standsDown-false.green.log)
+[MS2-standsDown-false] green: UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0 ts=2026-10-08T19:58:30.408Z
+[MS2-standsDown-false] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:58:30.784Z
+[MS2-standsDown-false] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:58:30.830Z
+[MS2-standsDown-false] seam restored sha256=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-HEAD; patch-borne test removed=True
+[MS2-standsDown-false] lock released 21:58:30

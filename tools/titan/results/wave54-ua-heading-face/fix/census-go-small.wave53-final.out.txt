@@ -1,0 +1,69 @@
+css-break/wpt__css-break__block-in-inline-015-print.json
+  h1 block-in-inline-015-print__0__0-190 shape=leaf rendered=true fires=true standsDown=false size=null→32.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h1 block-in-inline-015-print__2__0-194 shape=leaf rendered=true fires=true standsDown=false size=null→32.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h1 block-in-inline-015-print__4__0-198 shape=leaf rendered=true fires=true standsDown=false size=null→32.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h1 block-in-inline-015-print__6__0-202 shape=leaf rendered=true fires=true standsDown=false size=null→32.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+css-lists/wpt__css-lists__counter-list-item.json
+  h2 wpt__css-lists__counter-list-item__0-278 shape=leaf rendered=true fires=true standsDown=false size=null→24.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+css-lists/wpt__css-lists__counter-reset-increment-overflow-underflow.json
+  h3 counter-reset-increment-overflow-underflow__0__0-330 shape=leaf rendered=true fires=true standsDown=false size=null→18.72 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h3 counter-reset-increment-overflow-underflow__0__1-331 shape=leaf rendered=true fires=true standsDown=false size=null→18.72 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h3 counter-reset-increment-overflow-underflow__0__2-332 shape=leaf rendered=true fires=true standsDown=false size=null→18.72 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h3 counter-reset-increment-overflow-underflow__1__0-334 shape=leaf rendered=true fires=true standsDown=false size=null→18.72 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h3 counter-reset-increment-overflow-underflow__1__1-335 shape=leaf rendered=true fires=true standsDown=false size=null→18.72 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h3 counter-reset-increment-overflow-underflow__1__2-336 shape=leaf rendered=true fires=true standsDown=false size=null→18.72 weight=null→{"weight":700} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-color.json
+  h3 wpt__css-text-decor__text-decoration-color__0-021 shape=leaf rendered=true fires=true standsDown=false size=null→18.72 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  sub text-decoration-color__9__0__0-032 shape=leaf rendered=true fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+  sup text-decoration-color__9__0__1-033 shape=leaf rendered=true fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-001.json
+  h1 text-decoration-inset-001__1__0-053 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-002.json
+  h1 text-decoration-inset-002__1__0-057 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-003.json
+  h1 text-decoration-inset-003__1__0-061 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-004.json
+  h1 text-decoration-inset-004__1__0-065 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-005.json
+  h1 text-decoration-inset-005__1__0-069 shape=runs-host rendered=true fires=false standsDown=true size=null→null weight=null→null iosHeadingFlagFlip=false
+  sup text-decoration-inset-005__1__0__0__0-071 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+  sub text-decoration-inset-005__1__0__0__1-072 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-006.json
+  h1 text-decoration-inset-006__1__0-076 shape=runs-host rendered=true fires=false standsDown=true size=null→null weight=null→null iosHeadingFlagFlip=false
+  sup text-decoration-inset-006__1__0__0__0-078 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+  sub text-decoration-inset-006__1__0__0__1-079 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-007.json
+  h1 text-decoration-inset-007__1__0-083 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-008.json
+  h1 text-decoration-inset-008__1__0-087 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-009.json
+  h1 text-decoration-inset-009__1__0-091 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-011.json
+  h1 text-decoration-inset-011__1__0-095 shape=runs-host rendered=true fires=false standsDown=true size=null→null weight=null→null iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-012.json
+  h1 text-decoration-inset-012__1__0-102 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-013.json
+  h1 text-decoration-inset-013__1__0-106 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-014.json
+  h1 text-decoration-inset-014__1__0-110 shape=runs-host rendered=true fires=false standsDown=true size=null→null weight=null→null iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-015.json
+  h1 text-decoration-inset-015__1__0-115 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-016.json
+  h1 text-decoration-inset-016__1__0-119 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-inset-024.json
+  h1 text-decoration-inset-024__1__0-123 shape=leaf rendered=true fires=false standsDown=false size=32.0→32.0 weight={"weight":700,"original":"bold"}→{"weight":700,"original":"bold"} iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-subelements-002.json
+  sup text-decoration-subelements-002__1__0__0__0__0-257 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+  sup text-decoration-subelements-002__1__1__0__0__0-261 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+  sup text-decoration-subelements-002__1__1__0__0__1-262 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+  sup text-decoration-subelements-002__1__1__0__0__2-263 shape=leaf rendered=false fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+css-text-decor/wpt__css-text-decor__text-decoration-subelements-003.json
+  sup text-decoration-subelements-003__1__0__0-267 shape=leaf rendered=true fires=true standsDown=false size=null→13.333333 weight=null→null iosHeadingFlagFlip=false
+filter-effects/wpt__filter-effects__backdrop-filter-border-radius-change.json
+  h1 wpt__filter-effects__backdrop-filter-border-radius-change__0-026 shape=leaf rendered=true fires=true standsDown=false size=100.0→100.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h1 wpt__filter-effects__backdrop-filter-border-radius-change__2-028 shape=leaf rendered=true fires=true standsDown=false size=100.0→100.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+filter-effects/wpt__filter-effects__backdrop-filter-corner-shape-change.json
+  h1 wpt__filter-effects__backdrop-filter-corner-shape-change__0-091 shape=leaf rendered=true fires=true standsDown=false size=100.0→100.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+  h1 wpt__filter-effects__backdrop-filter-corner-shape-change__2-093 shape=leaf rendered=true fires=true standsDown=false size=100.0→100.0 weight=null→{"weight":700} iosHeadingFlagFlip=false
+run=wave53-final documents=1435 tagged-components=43 firing-components=27 rendered-firing=19 ios-heading-flag-flips=0
+android-capture-carriers(7): css-break/wpt__css-break__block-in-inline-015-print css-lists/wpt__css-lists__counter-list-item css-lists/wpt__css-lists__counter-reset-increment-overflow-underflow css-text-decor/wpt__css-text-decor__text-decoration-color css-text-decor/wpt__css-text-decor__text-decoration-subelements-003 filter-effects/wpt__filter-effects__backdrop-filter-border-radius-change filter-effects/wpt__filter-effects__backdrop-filter-corner-shape-change

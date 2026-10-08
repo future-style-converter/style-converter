@@ -1,0 +1,1 @@
+            out = substituting(out, WEIGHT_TYPE, JsonObject(mapOf("weight" to JsonPrimitive(BOLD))))

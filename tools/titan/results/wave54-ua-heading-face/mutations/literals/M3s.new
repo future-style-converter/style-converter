@@ -1,0 +1,2 @@
+        guard component.children?.isEmpty == false else { return false }
+        if true { return true }

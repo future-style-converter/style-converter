@@ -1,0 +1,82 @@
+{
+ "seam": "runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt",
+ "lock": "tools/titan/runs/wave54-lock/ComponentRenderer.kt",
+ "runs": [
+  {
+   "step": "GREEN with seam-1 applied",
+   "rc": 0,
+   "tests": 112,
+   "classes": {
+    "TableBoxTreeTest": 11,
+    "TableBodyForestTest": 7,
+    "TableCellHugTest": 8,
+    "TableCellHugSeamWiringTest": 2,
+    "UaBlockMarginsTest": 49,
+    "ComposedCanvasIcbClipSourceTest": 4,
+    "ComposedCanvasRc1ZOrderSourceTest": 4,
+    "ComposedCanvasRootBackgroundTest": 9,
+    "ComposedCanvasMarginTest": 10,
+    "ComposedCanvasTableBodyTest": 1,
+    "ComposedCanvasPaddingTest": 7
+   },
+   "red": {},
+   "compileErrors": []
+  },
+  {
+   "step": "S1",
+   "rc": 1,
+   "tests": 28,
+   "classes": {
+    "TableBoxTreeTest": 11,
+    "TableBodyForestTest": 7,
+    "TableCellHugTest": 8,
+    "TableCellHugSeamWiringTest": 2
+   },
+   "red": {
+    "TableCellHugSeamWiringTest": [
+     "the call spends both halves of the chrome and no inline stroke expression is left"
+    ]
+   },
+   "compileErrors": []
+  },
+  {
+   "step": "S2",
+   "rc": 1,
+   "tests": 28,
+   "classes": {
+    "TableBoxTreeTest": 11,
+    "TableBodyForestTest": 7,
+    "TableCellHugTest": 8,
+    "TableCellHugSeamWiringTest": 2
+   },
+   "red": {
+    "TableCellHugSeamWiringTest": [
+     "the call spends both halves of the chrome and no inline stroke expression is left"
+    ]
+   },
+   "compileErrors": []
+  },
+  {
+   "step": "S0 seam absent (HEAD bytes)",
+   "rc": 1,
+   "tests": 28,
+   "classes": {
+    "TableBoxTreeTest": 11,
+    "TableBodyForestTest": 7,
+    "TableCellHugTest": 8,
+    "TableCellHugSeamWiringTest": 2
+   },
+   "red": {
+    "TableCellHugSeamWiringTest": [
+     "the call spends both halves of the chrome and no inline stroke expression is left",
+     "the arm computes the chrome from today's stroke expression, verbatim"
+    ]
+   },
+   "compileErrors": []
+  }
+ ],
+ "sha256Before": "da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db",
+ "sha256Patched": "eaf9111e77596e0c3b730a84d26ead113002bbe45a1f36e308d10bf79bcac8d0",
+ "sha256After": "da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db",
+ "restoredByteExact": true
+}

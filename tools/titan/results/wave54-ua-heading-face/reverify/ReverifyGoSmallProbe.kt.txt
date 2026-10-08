@@ -1,0 +1,65 @@
+
+// ── RE-VERIFIER PROBE (wave 54 L5) — appended ONLY to the EXPORT tree's copy of UAElementFontRuleTest.kt, never to the
+// shared tree. For every per-test IR document of a run it replays the SHIPPED seam-1 step (merge → ListStyleUaRule →
+// UAElementFontRule with standsDown = headingStandsDown) and, for every runs host, the RENDERER's own fold gate
+// (ComponentRenderer.kt :3362-3375: no RELATIVE host, WPT capture mode's float/atom segment refusals, InlineRunPlan,
+// then InlineRunFold.fold with hostProperties = component.properties, which at that site is `mergedComponent`'s
+// EFFECTIVE list (:1841 component.copy(properties = effectiveProperties)) — modelled here by the post-UA merged list,
+// exact under the asserted no-var() premise). It prints raw facts as JSON lines; the carrier
+// set is derived from them in Python (reverify/derive-carriers.py), independently of the lane's census harness.
+class ReverifyGoSmallProbe {
+    private fun q(s: String?) = if (s == null) "null" else "\"" + s.replace("\\", "\\\\").replace("\"", "\\\"") + "\""
+    private fun foldVerdict(c: com.styleconverter.runtime.core.ir.IRComponent, eff: List<com.styleconverter.runtime.core.ir.IRProperty>): String {
+        if (c.runs.isNullOrEmpty() || c.children.isNullOrEmpty()) return "not-a-runs-host"
+        val pos = com.styleconverter.runtime.core.types.ValueExtractors.extractKeyword(eff.firstOrNull { it.type == "Position" }?.data)
+        if (pos?.uppercase() == "RELATIVE") return "relative-host"
+        if (com.styleconverter.runtime.core.renderer.ComponentRenderer.blockFloatSegments(c.children!!, eff) != null) return "float-segments"
+        if (com.styleconverter.runtime.core.renderer.ComponentRenderer.blockInlineAtomSegments(c.children!!) != null) return "atom-segments"
+        val plan = com.styleconverter.runtime.core.renderer.InlineRunPlan.resolve(c.runs, c.children) ?: return "no-plan"
+        return when (val o = com.styleconverter.runtime.typography.inline.InlineRunFold.fold(plan.entries, c.children!!, eff, c.lang)) {
+            is com.styleconverter.runtime.typography.inline.InlineRunFold.Outcome.Folded -> "Folded"
+            is com.styleconverter.runtime.typography.inline.InlineRunFold.Outcome.Bailed -> "Bailed:" + o.reason
+            else -> o.toString()
+        }
+    }
+    @org.junit.Test
+    fun probe() {
+        val ws = java.io.File("/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf")
+        val tags = setOf("h1", "h2", "h3", "h4", "h5", "h6", "sub", "sup")
+        for (run in listOf("wave53-final", "wave54-open")) {
+            val out = StringBuilder()
+            var docs = 0
+            for (sec in java.io.File(ws, "tools/titan/runs/$run/sections").listFiles()!!.sortedBy { it.name }) {
+                val dir = java.io.File(sec, "per-test-ir"); if (!dir.isDirectory) continue
+                for (f in dir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }) {
+                    docs++
+                    val roots = com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+                        com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(f.readText()))
+                    fun walk(node: com.styleconverter.runtime.core.ir.IRComponent, inherited: List<com.styleconverter.runtime.core.ir.IRProperty>, hosts: List<String>) {
+                        val own = node.properties
+                        val pre = com.styleconverter.runtime.lists.ListStyleUaRule.apply(node._tag, own,
+                            com.styleconverter.runtime.core.renderer.ComponentRenderer.mergeInherited(own, inherited))
+                        val stands = UAElementFontRule.headingStandsDown(node)
+                        val post = UAElementFontRule.apply(node._tag, own, pre, stands)
+                        val tag = node._tag?.lowercase()
+                        val fv = foldVerdict(node, post)
+                        if (tag in tags) {
+                            out.append("{\"doc\":${q(sec.name + "/" + f.name.removeSuffix(".json"))},\"id\":${q(node.id)},\"tag\":${q(tag)}," +
+                                "\"kids\":${node.children?.size ?: 0},\"standsDown\":$stands,\"same\":${post === pre}," +
+                                "\"size\":[${com.styleconverter.runtime.core.variables.DynamicValueResolver.fontSizePxOf(pre)},${com.styleconverter.runtime.core.variables.DynamicValueResolver.fontSizePxOf(post)}]," +
+                                "\"weight\":[${q(pre.firstOrNull { it.type == "FontWeight" }?.data?.toString())},${q(post.firstOrNull { it.type == "FontWeight" }?.data?.toString())}]," +
+                                "\"ownFold\":${q(fv)},\"ancestorFolds\":[${hosts.joinToString(",") { q(it) }}]," +
+                                "\"all\":${own.any { it.type == "All" }},\"var\":${own.any { "var(" in it.data.toString() }}}\n")
+                        }
+                        val childInh = post.filter { it.type in com.styleconverter.runtime.core.renderer.ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                        val childHosts = if (fv == "not-a-runs-host") hosts else hosts + "${node.id}=$fv"
+                        node.children.orEmpty().forEach { walk(it, childInh, childHosts) }
+                    }
+                    roots.forEach { walk(it, emptyList(), emptyList()) }
+                }
+            }
+            out.append("{\"summary\":true,\"run\":${q(run)},\"documents\":$docs}\n")
+            java.io.File(ws, "tools/titan/results/wave54-ua-heading-face/reverify/probe.$run.jsonl").writeText(out.toString())
+        }
+    }
+}

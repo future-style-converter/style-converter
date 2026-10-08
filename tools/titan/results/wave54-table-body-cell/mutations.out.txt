@@ -1,0 +1,43 @@
+2026-10-08T19:14:44 BS runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 25 red 7 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m2_cellLosesItsMargins
+    red: TableBodyForestTest::m3_absposStaysARoot_neverWrapped
+    red: TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell
+    red: TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+2026-10-08T19:14:46 BM1 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m1_identity_onNonTableBodies
+2026-10-08T19:14:47 BM2 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m2_cellLosesItsMargins
+2026-10-08T19:14:49 BM3 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 25 red 2 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m3_absposStaysARoot_neverWrapped
+    red: TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos
+2026-10-08T19:14:51 BM4 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 25 red 3 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos
+2026-10-08T19:14:52 BM5 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing
+2026-10-08T19:14:55 BK apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt sha256 b98e80ee33db68fd → mutated → restored b98e80ee33db68fd byte-exact | rc 1 tests 109 red 1 expected-red-seen True RED-OK
+    red: ComposedCanvasTableBodyTest::stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot
+2026-10-08T19:14:57 m6 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt sha256 d80054ce72a079d3 → mutated → restored d80054ce72a079d3 byte-exact | rc 1 tests 25 red 2 expected-red-seen True RED-OK
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+2026-10-08T19:14:58 T1 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 838f3c936b220e08 → mutated → restored 838f3c936b220e08 byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+2026-10-08T19:15:00 T2 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 838f3c936b220e08 → mutated → restored 838f3c936b220e08 byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+2026-10-08T19:15:01 T3 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 838f3c936b220e08 → mutated → restored 838f3c936b220e08 byte-exact | rc 1 tests 25 red 4 expected-red-seen True RED-OK
+    red: TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug
+    red: TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug
+    red: TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug
+    red: TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug
+2026-10-08T19:15:03 T4 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt sha256 838f3c936b220e08 → mutated → restored 838f3c936b220e08 byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableCellHugTest::hugColumn_disabled_isTheReceiverItself
+2026-10-08T19:15:05 T5 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt sha256 0d58a4633762893c → mutated → restored 0d58a4633762893c byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+2026-10-08T19:15:06 T6 runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt sha256 0d58a4633762893c → mutated → restored 0d58a4633762893c byte-exact | rc 1 tests 25 red 1 expected-red-seen True RED-OK
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+GREEN-AFTER-RESTORE rc 0 tests 109 red [] compile-errors []
+EXIT=0

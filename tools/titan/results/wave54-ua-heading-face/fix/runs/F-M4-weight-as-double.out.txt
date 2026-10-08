@@ -1,0 +1,12 @@
+[F-M4-weight-as-double] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 c78f355705a8c45f → 2d08ca96b9b0a667
+[F-M4-weight-as-double] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M4-weight-as-double.red.log)
+[F-M4-weight-as-double] red: UAElementFontRuleTest tests=10 failures=4 errors=0 ts=2026-10-08T19:57:16.512Z
+[F-M4-weight-as-double] red:   RED block-in-inline-015-print - every leaf h1 takes the UA 2em bold face :: java.lang.AssertionError: expected:<700> but was:<null>
+[F-M4-weight-as-double] red:   RED text-decoration-color - the leaf sup takes smaller and the leaf h3 takes 1_17em bold :: java.lang.AssertionError: expected:<700> but was:<null>
+[F-M4-weight-as-double] red:   RED inset-014 - the rule's em base on the verbatim monospace host is 13 (gate forced open) :: java.lang.AssertionError: expected:<700> but was:<null>
+[F-M4-weight-as-double] red:   RED block-in-inline-015-print - TextStyleApplier paints the injected face :: java.lang.AssertionError: expected:<FontWeight(weight=700)> but was:<null>
+[F-M4-weight-as-double] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:16.591Z
+[F-M4-weight-as-double] restored runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256=c78f355705a8c45f BYTE-EXACT
+[F-M4-weight-as-double] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M4-weight-as-double.green.log)
+[F-M4-weight-as-double] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:57:17.938Z
+[F-M4-weight-as-double] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:18.382Z

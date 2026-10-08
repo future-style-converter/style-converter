@@ -1,0 +1,25 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.089 (0.241) seconds
+	 Executed 75 tests, with 8 failures (0 unexpected) in 8.317 (9.283) seconds
+	 Executed 75 tests, with 8 failures (0 unexpected) in 8.317 (9.284) seconds
+Test Suite 'FixedHoistTests' failed at 2026-10-08 22:02:06.716.
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 22:02:07.025.
+Test Suite 'GapDecorationGrammarTests' passed at 2026-10-08 22:02:07.223.
+Test Suite 'GapDecorationSegmentsTests' passed at 2026-10-08 22:02:07.591.
+Test Suite 'OutOfFlowContainingBlockTests' failed at 2026-10-08 22:02:13.399.
+Test Suite 'Selected tests' failed at 2026-10-08 22:02:13.640.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:02:13.640.
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 22:02:13.640.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:545: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:546: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(["f"])")
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept]' failed (1.652 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - PAINT
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - STRICT
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - CONTENT
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - LAYOUT
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' failed (0.184 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:73: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' failed (0.001 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:155: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : XCTAssertEqual failed: ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]") is not equal to ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]")
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (5.438 seconds).
+** TEST FAILED **
+xcodebuild rc=65

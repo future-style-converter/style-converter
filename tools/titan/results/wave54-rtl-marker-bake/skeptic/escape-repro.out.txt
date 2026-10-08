@@ -1,0 +1,5 @@
+item counter-suffix__0__4__0 _lossyReasons: ["percentage"] | plan box lossy: []
+counter-suffix__0__4__0__0 "foo" parent=counter-suffix__0__4__0 | opacity reaches: true · visibility:hidden reaches: true · text-shadow reaches: true | own: []
+counter-suffix__0__4__2 "." parent=counter-suffix__0__4 | opacity reaches: false · visibility:hidden reaches: false · text-shadow reaches: false | own: []
+counter-suffix__0__4__3 "1" parent=counter-suffix__0__4 | opacity reaches: false · visibility:hidden reaches: false · text-shadow reaches: false | own: []
+REPRO: the item's text run is hidden, its marker runs (owned by the root) are NOT — and no marker-* stamp records it

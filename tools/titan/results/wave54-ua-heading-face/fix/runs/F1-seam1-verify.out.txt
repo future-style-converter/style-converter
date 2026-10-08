@@ -1,0 +1,9 @@
+[F1-seam1-verify] lock taken 21:58:19; seam sha256 before=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db (HEAD da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db)
+[F1-seam1-verify] seam-1 applied: seam sha256=c6a83ecdb6e36ae44ae21c7c9ce76bdd0797b4584fbbd85450e386da00148a0d, +runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+[F1-seam1-verify] run: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F1-seam1-verify.run.log)
+[F1-seam1-verify] run: UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0 ts=2026-10-08T19:58:20.857Z
+[F1-seam1-verify] run: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:58:20.887Z
+[F1-seam1-verify] run: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:58:20.946Z
+[F1-seam1-verify] seam restored sha256=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-HEAD; patch-borne test removed=True
+[F1-seam1-verify] lock released 21:58:21
+compiled renderer Oct  8 21:58:00 2026: headingStandsDown=1 typography/UAElementFontRule=2 UAHeadingFoldGate=0

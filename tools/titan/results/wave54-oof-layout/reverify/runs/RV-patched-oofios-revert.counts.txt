@@ -1,0 +1,4 @@
+CanvasRootHoistTest tests=29 skipped=0 failures=0 errors=0
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TOTAL tests=37 skipped=0 failures=0 errors=0
+gradle rc=0

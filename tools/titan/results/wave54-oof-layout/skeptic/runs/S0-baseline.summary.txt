@@ -1,0 +1,13 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.046 (0.051) seconds
+	 Executed 75 tests, with 0 failures (0 unexpected) in 6.420 (6.976) seconds
+	 Executed 75 tests, with 0 failures (0 unexpected) in 6.420 (6.977) seconds
+Test Suite 'FixedHoistTests' passed at 2026-10-08 21:52:55.998.
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 21:52:56.178.
+Test Suite 'GapDecorationGrammarTests' passed at 2026-10-08 21:52:56.274.
+Test Suite 'GapDecorationSegmentsTests' passed at 2026-10-08 21:52:56.546.
+Test Suite 'OutOfFlowContainingBlockTests' passed at 2026-10-08 21:53:00.772.
+Test Suite 'Selected tests' passed at 2026-10-08 21:53:00.823.
+Test Suite 'StyleConverterRuntimeTests.xctest' passed at 2026-10-08 21:53:00.823.
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 21:53:00.823.
+** TEST SUCCEEDED **
+xcodebuild rc=0

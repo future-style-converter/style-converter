@@ -1,0 +1,11 @@
+label=S-SG1 file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationLines.swift
+sha256 before=e6300c6a5c4ebf65cf546e3d0c0f837c18a6b6008bf78fc414c78dee5d98297b mutated=8e115c032add530db32c23d0b4b5972c2b9a9bd534b4f97cd132b4ca40ba0e07 after=e6300c6a5c4ebf65cf546e3d0c0f837c18a6b6008bf78fc414c78dee5d98297b restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.117 (0.118) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.658 (5.855) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.658 (5.855) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:386: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine] : XCTAssertEqual failed: ("[]") is not equal to ("[(45.0, 0.0, 10.0, 50.0), (95.0, 0.0, 10.0, 50.0), (95.0, 50.0, 10.0, 50.0), (45.0, 100.0, 10.0, 50.0), (95.0, 100.0, 10.0, 50.0)]")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine]' failed (0.106 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:403: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("2") is not equal to ("7")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast]' failed (0.001 seconds).
+** TEST FAILED **

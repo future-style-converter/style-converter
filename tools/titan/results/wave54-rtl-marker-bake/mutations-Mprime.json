@@ -1,0 +1,143 @@
+[
+ {
+  "label": "M-1 (V1 m1) planMarker drops `list-style-type: none` on the item",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "  return { boxProps: { 'list-style-type': 'none' }, lossy,",
+  "new": "  return { boxProps: {}, lossy,",
+  "expectRed": [
+   "V1 unit M′",
+   "V6 unit M′",
+   "V4 unit M′"
+  ]
+ },
+ {
+  "label": "M-2 (V1 m2) the analytic RTL edge hangs the marker LEFT (li.left − w)",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "    x = f.direction === 'rtl' ? f.contentEnd : f.contentStart - w;",
+  "new": "    x = f.contentStart - w;",
+  "expectRed": [
+   "V1 unit M′"
+  ]
+ },
+ {
+  "label": "M-3 (V1 m3) no per-grapheme split of a no-strong-letter run",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "    (hasStrongLtrCodepoint(r.text) || hasStrongRtlLetter(r.text) ? [r] : splitWeakRun(r, chars)));",
+  "new": "    ([r]));",
+  "expectRed": [
+   "V1 unit M′",
+   "V6 unit M′"
+  ]
+ },
+ {
+  "label": "M-4 (V2) a ROOT list item is planned a marker too",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "    if (isRootPath(e.path) || e.rectCount === 0 || e.tag === 'br') continue;\n    const rootPath",
+  "new": "    if (e.rectCount === 0 || e.tag === 'br') continue;\n    const rootPath",
+  "expectRed": [
+   "V2 unit M′"
+  ]
+ },
+ {
+  "label": "M-5 (V5 a) the probe self-check is deleted (a mismatching CDP box is used)",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "  if (f.cdpBox && Math.abs(f.cdpBox.width - w) <= MARKER_PROBE_EPS) x = f.cdpBox.x;",
+  "new": "  if (f.cdpBox) x = f.cdpBox.x;",
+  "expectRed": [
+   "V5 unit M′"
+  ]
+ },
+ {
+  "label": "M-6 (V5 b) a probe mismatch becomes a whole-test bail",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "    if (m) markers.set(k, { ...m, rootPath });",
+  "new": "    if (m?.lossy?.includes('marker-probe-mismatch')) return { bail: 'marker probe mismatch' };\n    if (m) markers.set(k, { ...m, rootPath });",
+  "expectRed": [
+   "V5 unit M′"
+  ]
+ },
+ {
+  "label": "M-7 (VF) collectMarkerFacts rethrows a page fault",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "    return Object.fromEntries(cands.map((c) => [c.key, { error: String(err?.message ?? err) }]));",
+  "new": "    throw err;",
+  "expectRed": [
+   "VF unit M′"
+  ]
+ },
+ {
+  "label": "M-8 (FX1) an item not re-found by rect is skipped silently",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "    if (!el) { out[it.key] = { error: 'list item not re-found by rect' }; continue; }",
+  "new": "    if (!el) continue;",
+  "expectRed": [
+   "VF1 unit M′"
+  ]
+ },
+ {
+  "label": "M-9 (FX2) the error-fact filter is dropped from the CDP merge",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "    for (const it of items.filter((i) => facts[i.key] && !facts[i.key].error)) Object.assign(",
+  "new": "    for (const it of items.filter((i) => facts[i.key])) Object.assign(",
+  "expectRed": [
+   "VF1 unit M′"
+  ]
+ },
+ {
+  "label": "M-10 (FX3) applyBidiBakePlan's box `_lossyReasons` merge is deleted",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "      cmp._lossyReasons = [...new Set([...(cmp._lossyReasons ?? []), ...lossy])];\n    }\n    touched++;",
+  "new": "    }\n    touched++;",
+  "expectRed": [
+   "VF2 unit M′"
+  ]
+ },
+ {
+  "label": "M-11 (FX4) the half-leading term `- q0` is dropped",
+  "file": "tools/titan/bidi-marker-bake.mjs",
+  "old": "y: first.run.y + q.y - q0,",
+  "new": "y: first.run.y + q.y,",
+  "expectRed": [
+   "VF3 unit M′"
+  ]
+ },
+ {
+  "label": "M-12 (V6 owner) the marker runs are owned by the `<li>` again (wave-53 shape; = V7's 'push the runs to the box')",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "plan.runs.push({ ownerPath: markers.get(key).rootPath, props: r.props, text: r.text });",
+  "new": "plan.runs.push({ ownerPath: e.path, props: r.props, text: r.text });",
+  "expectRed": [
+   "V6 unit M′",
+   "V7 unit M′",
+   "V1 unit M′"
+  ]
+ },
+ {
+  "label": "M-13 (V6 origin) the marker runs are measured from the `<li>`'s padding box again",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "originOf.get(rootPath.join('.')), runsByPath.get(k)?.[0]);",
+  "new": "originOf.get(k), runsByPath.get(k)?.[0]);",
+  "expectRed": [
+   "V6 unit M′",
+   "V1 unit M′"
+  ]
+ },
+ {
+  "label": "M-14 (V7) the marker runs are ALSO pushed to the item box (root copy kept)",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "plan.runs.push({ ownerPath: markers.get(key).rootPath, props: r.props, text: r.text });",
+  "new": "plan.runs.push({ ownerPath: markers.get(key).rootPath, props: r.props, text: r.text }, { ownerPath: e.path, props: r.props, text: r.text });",
+  "expectRed": [
+   "V7 unit M′"
+  ]
+ },
+ {
+  "label": "M-15 (wiring) the marker facts are collected BEFORE the mapping check",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "    const mismatch = mappingMismatch(staticPaths, walk.elements);",
+  "new": "    walk.markers = await collectMarkerFacts(page, walk.elements, { fixture, html, stem: fixtureStem(testRel) });\n    const mismatch = mappingMismatch(staticPaths, walk.elements);",
+  "expectRed": [
+   "unit M′ wiring"
+  ]
+ }
+]

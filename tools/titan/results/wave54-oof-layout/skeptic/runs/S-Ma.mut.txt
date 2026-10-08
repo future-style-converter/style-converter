@@ -1,0 +1,15 @@
+label=S-Ma file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+sha256 before=2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8 mutated=f5725f23dea8832b3b7de62376bd599812b8047e45e1e02b56f97c76ea7308b3 after=2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8 restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.089 (0.241) seconds
+	 Executed 75 tests, with 8 failures (0 unexpected) in 8.317 (9.283) seconds
+	 Executed 75 tests, with 8 failures (0 unexpected) in 8.317 (9.284) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:545: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:546: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(["f"])")
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept]' failed (1.652 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - PAINT
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - STRICT
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - CONTENT
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:41: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish] : XCTAssertTrue failed - LAYOUT
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' failed (0.184 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:73: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim] : XCTAssertTrue failed

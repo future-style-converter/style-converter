@@ -1,0 +1,11 @@
+export: /var/folders/34/h7173byn5kb_lddtbn4hqt9w0000gn/T/tmp.jIhltaTgQX (HEAD 029139fd)
+ok   unit-P.patch applies on HEAD
+ok   P state bidi-bake.mjs = state-P/bidi-bake.mjs.txt (f266b46bb9ec)
+ok   P state bidi-bake.test.mjs = state-P/bidi-bake.test.mjs.txt (fac220e92c5b)
+ok   P state has no bidi-marker-bake.mjs
+ok   P state suites: # pass 115 # fail 0 # skipped 6 
+ok   unit-Mprime.patch applies on the P state
+ok   P+M′ state bidi-bake.mjs = shared tree (98ad650e4219)
+ok   P+M′ state bidi-bake.test.mjs = shared tree (d85f66366524)
+ok   P+M′ state bidi-marker-bake.mjs = shared tree (4ded3874bba8)
+ok   P+M′ state suites: # pass 127 # fail 0 # skipped 7 

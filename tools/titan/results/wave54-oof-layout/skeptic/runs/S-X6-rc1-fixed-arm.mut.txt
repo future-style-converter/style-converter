@@ -1,0 +1,11 @@
+label=S-X6-rc1-fixed-arm file=runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/FixedHoist.swift
+sha256 before=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 mutated=315e7c751c213bc809155d8a0e612e698c12e46b21bff91de42183c573ce1dea after=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.038 (0.040) seconds
+	 Executed 75 tests, with 3 failures (0 unexpected) in 5.554 (5.878) seconds
+	 Executed 75 tests, with 3 failures (0 unexpected) in 5.554 (5.879) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:515: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:519: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertEqual failed: ("[]") is not equal to ("["f"]")
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:520: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition]' failed (1.219 seconds).
+** TEST FAILED **

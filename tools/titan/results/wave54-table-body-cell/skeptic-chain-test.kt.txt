@@ -1,0 +1,50 @@
+// SKEPTIC repro (export tree only: HEAD + the TB-android unit files + seam-1.patch, copied to
+// runtimes/compose/src/test/java/com/styleconverter/runtime/table/SkepticL2ChainTest.kt there; NEVER in the shared tree).
+// Run: (cd <export>/apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '*SkepticL2Chain*' -i) → GREEN, prints SKEPTIC-CHAIN.
+package com.styleconverter.runtime.table
+
+import com.styleconverter.runtime.core.ir.IRComponent
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+
+// SKEPTIC (export tree only, never in the shared tree): the FULL pure chain from the composed canvas to the TABLE arm.
+class SkepticL2ChainTest {
+    private fun rootsOf(componentsJson: String): List<IRComponent> =
+        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
+                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
+    private val s006 = """
+        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__0-141","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"MarginTop","data":{"px":40}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}}],"meta":{"role":"body-root"}},
+        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__1-142","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__1","properties":[{"type":"Generic","data":{"propertyName":"display","rawValue":"caption","_unmapped":true}},{"type":"MarginBottom","data":{"px":10}}],"meta":{"role":"ws-after"}},
+        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__2-143","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__2","properties":[{"type":"Display","data":"TABLE_CELL"},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"meta":{"role":"ws-after"}},
+        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__3-144","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__3","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":8}}],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
+    """.trimIndent()
+    @Test
+    fun chainKeepsTheMarkerToTheTableArm() {
+        val raw = rootsOf(s006)
+        val roots = TableBodyForest.rewrite(com.styleconverter.runtime.background.RootBackgroundPropagation.withCanvasOwnedRootBackground(raw, null))
+        val t0 = roots[1]
+        // ComponentHost.Render
+        val prepared = com.styleconverter.runtime.color.BackgroundColorInheritance.resolve(t0)
+        // RenderComponent folds
+        val folded = com.styleconverter.runtime.content.PseudoBoxFold.resolve(
+            com.styleconverter.runtime.content.PseudoTextFold.resolve(
+                com.styleconverter.runtime.core.renderer.ContentsUnboxing.resolve(prepared)).component)
+        val merged = folded.copy(properties = folded.properties)
+        assertTrue(com.styleconverter.runtime.table.TableBodyForest.isAnonymous(merged))
+        val fab = !(true && merged.properties.none { it.type == "Display" } &&
+            com.styleconverter.runtime.table.TableBoxTree.uaRoleOf(merged._tag) == com.styleconverter.runtime.table.TableBoxTree.Role.TABLE)
+        assertEquals(com.styleconverter.runtime.table.TableCellHug.Chrome(false, true),
+            com.styleconverter.runtime.table.TableCellHug.chrome(merged, fab))
+        // the rows the TABLE arm's RenderTableContent iterates (UA tag channel on, as under WPT capture)
+        val rows = com.styleconverter.runtime.table.TableBoxTree.rowsOf(merged.children, useUaTagDefaults = true)
+        assertEquals(1, rows.size)
+        assertEquals(listOf(raw[0].id + "#cell0", raw[2].id), rows[0].children!!.map { it.id })
+        // cell0 routes as a cell (BLOCK path) and holds only the caption div; the td lost its margin (§8.3)
+        assertEquals(listOf(raw[1].id), rows[0].children!![0].children!!.map { it.id })
+        assertTrue(rows[0].children!![1].properties.none { it.type.startsWith("Margin") })
+        println("SKEPTIC-CHAIN roots=" + roots.map { it.id } + " shrinkToFitRole=" +
+            com.styleconverter.runtime.table.TableBoxTree.roleOf(merged, useUaTagDefaults = true))
+    }
+}

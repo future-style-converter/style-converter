@@ -1,0 +1,69 @@
+
+// ── TEMPORARY census harness (wave 54 lane L5 FIX PASS, GO-SMALL) — appended to the owned UAElementFontRuleTest.kt
+// for ONE run and removed byte-exact (sha256 in the lane note). It walks EVERY per-test IR document of
+// tools/titan/runs/<run> through the production decoder + composer and replays seam-1 (merge → ListStyleUaRule →
+// UAElementFontRule with standsDown = headingStandsDown) at every node, recording each tagged component: fires
+// (post !== pre), rendered (not consumed by an engaged fold of an ancestor), and whether the iOS heading flag would
+// flip (by construction it cannot: headingStandsDown IS the iOS call site's hasElementChildren).
+class UAHeadingFaceCensusGoSmallTest {
+    private val root = java.io.File(System.getProperty("user.dir")).let { d ->
+        generateSequence(d) { it.parentFile }.first { java.io.File(it, "tools/titan/runs").isDirectory }
+    }
+    private fun folds(c: com.styleconverter.runtime.core.ir.IRComponent, props: List<com.styleconverter.runtime.core.ir.IRProperty>): Boolean {
+        if (c.children.isNullOrEmpty() || c.runs.isNullOrEmpty()) return false
+        val pos = props.firstOrNull { it.type == "Position" }
+        if (com.styleconverter.runtime.core.types.ValueExtractors.extractKeyword(pos?.data)?.uppercase() == "RELATIVE") return false
+        val plan = com.styleconverter.runtime.core.renderer.InlineRunPlan.resolve(c.runs, c.children) ?: return false
+        return com.styleconverter.runtime.typography.inline.InlineRunFold.fold(plan.entries, c.children!!, props, c.lang) is
+            com.styleconverter.runtime.typography.inline.InlineRunFold.Outcome.Folded
+    }
+    @org.junit.Test
+    fun census() {
+        for (run in listOf("wave53-final", "wave54-open")) {
+            val out = StringBuilder()
+            val tags = setOf("h1", "h2", "h3", "h4", "h5", "h6", "sub", "sup")
+            var docs = 0; var tagged = 0; var firing = 0; var renderedFiring = 0; var iosFlips = 0
+            val carriers = sortedSetOf<String>()
+            val sections = java.io.File(root, "tools/titan/runs/$run/sections").listFiles()!!.sortedBy { it.name }
+            for (sec in sections) {
+                val dir = java.io.File(sec, "per-test-ir"); if (!dir.isDirectory) continue
+                for (f in dir.listFiles()!!.filter { it.name.endsWith(".json") }.sortedBy { it.name }) {
+                    docs++
+                    val roots = com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+                        com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(f.readText()))
+                    val rows = mutableListOf<String>()
+                    fun walk(node: com.styleconverter.runtime.core.ir.IRComponent, inherited: List<com.styleconverter.runtime.core.ir.IRProperty>, consumed: Boolean) {
+                        val own = node.properties
+                        val pre = com.styleconverter.runtime.lists.ListStyleUaRule.apply(node._tag, own,
+                            com.styleconverter.runtime.core.renderer.ComponentRenderer.mergeInherited(own, inherited))
+                        val stands = UAElementFontRule.headingStandsDown(node)
+                        val post = UAElementFontRule.apply(node._tag, own, pre, stands)
+                        val tag = node._tag?.lowercase()
+                        if (tag in tags) {
+                            tagged++
+                            val fires = post !== pre
+                            if (fires) firing++
+                            if (fires && !consumed) { renderedFiring++; carriers += "${sec.name}/${f.name.removeSuffix(".json")}" }
+                            val iosFlip = UAElementFontRule.isBold(tag) && (!node.children.isNullOrEmpty()) != stands
+                            if (iosFlip) iosFlips++
+                            val shape = when { node.children.isNullOrEmpty() -> "leaf"; node.runs.isNullOrEmpty() -> "stacked"; else -> "runs-host" }
+                            rows += "  $tag ${node.id} shape=$shape rendered=${!consumed} fires=$fires standsDown=$stands" +
+                                " size=${com.styleconverter.runtime.core.variables.DynamicValueResolver.fontSizePxOf(pre)}→${com.styleconverter.runtime.core.variables.DynamicValueResolver.fontSizePxOf(post)}" +
+                                " weight=${pre.firstOrNull { it.type == "FontWeight" }?.data}→${post.firstOrNull { it.type == "FontWeight" }?.data}" +
+                                " iosHeadingFlagFlip=$iosFlip" + (if (own.any { it.type == "All" }) " ALL" else "") +
+                                (if (own.any { "var(" in it.data.toString() }) " VAR" else "")
+                        }
+                        val childInherited = post.filter { it.type in com.styleconverter.runtime.core.renderer.ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                        val consumesKids = consumed || folds(node, post)
+                        node.children.orEmpty().forEach { walk(it, childInherited, consumesKids) }
+                    }
+                    roots.forEach { walk(it, emptyList(), false) }
+                    if (rows.isNotEmpty()) out.append("${sec.name}/${f.name}\n").append(rows.joinToString("\n")).append("\n")
+                }
+            }
+            out.append("run=$run documents=$docs tagged-components=$tagged firing-components=$firing rendered-firing=$renderedFiring ios-heading-flag-flips=$iosFlips\n")
+            out.append("android-capture-carriers(${carriers.size}): ${carriers.joinToString(" ")}\n")
+            java.io.File(root, "tools/titan/results/wave54-ua-heading-face/fix/census-go-small.$run.out.txt").writeText(out.toString())
+        }
+    }
+}

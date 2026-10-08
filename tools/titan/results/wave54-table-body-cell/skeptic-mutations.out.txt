@@ -1,0 +1,60 @@
+19:49:42 GREEN0 rc 0 tests 110 red [] errs [] 4.8s ['BUILD SUCCESSFUL in 4s']
+19:49:44 BS [forest never applied] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 8 1.8s errs []
+    red: TableBodyForestTest::m2_cellLosesItsMargins
+    red: TableBodyForestTest::m3_absposStaysARoot_neverWrapped
+    red: TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell
+    red: TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos
+    red: TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+19:49:46 BM1 [trigger dropped] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 1 2.0s errs []
+    red: TableBodyForestTest::m1_identity_onNonTableBodies
+19:49:48 BM2 [§8.3 strip skipped] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 1 1.9s errs []
+    red: TableBodyForestTest::m2_cellLosesItsMargins
+19:49:50 BM3 [abspos wrapped] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 2 1.7s errs []
+    red: TableBodyForestTest::m3_absposStaysARoot_neverWrapped
+    red: TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos
+19:49:51 BM4 [non-cell not wrapped] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 3 1.7s errs []
+    red: TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos
+19:49:53 BM5 [BorderSpacing not copied] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 1 1.7s errs []
+    red: TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing
+19:49:56 BK [harness call site dropped] ScreenshotCaptureScreen.kt b98e80ee33db68fd→b98e80ee33db68fd byte-exact | rc 1 tests 110 red 1 2.8s errs []
+    red: ComposedCanvasTableBodyTest::stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot
+19:49:58 m6 [marker dropped] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 3 1.8s errs []
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+19:49:59 T1 [D1 off] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 26 red 2 1.7s errs []
+    red: TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+19:50:02 T2 [D2 off] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 26 red 2 2.5s errs []
+    red: TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds
+    red: TableCellHugTest::anonymousTable_noStroke_cellsHug
+19:50:04 T3 [D2 for every table] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 26 red 4 1.7s errs []
+    red: TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug
+    red: TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug
+    red: TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug
+    red: TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug
+19:50:05 T4 [disabled hug adds a node] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 26 red 1 1.4s errs []
+    red: TableCellHugTest::hugColumn_disabled_isTheReceiverItself
+19:50:07 T5 [TableCell drops the hug] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 26 red 1 1.5s errs []
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+19:50:08 T6 [provider dropped] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 26 red 1 1.7s errs []
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+19:50:10 X1 [hug after fillMaxHeight] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 26 red 1 1.6s errs []
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+19:50:12 X2 [every table hugs via the provider] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 1 tests 26 red 1 1.7s errs []
+    red: TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight
+19:50:13 X3 [hug at MIN-content (wrong §17.5.2.2 quantity)] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 0 tests 26 red 0 1.9s errs []
+19:50:15 X4 [enabled hug is a no-op wrapper] TableCellHug.kt fac6c37431056468→fac6c37431056468 byte-exact | rc 1 tests 26 red 1 1.6s errs []
+    red: TableCellHugTest::hugColumn_disabled_isTheReceiverItself
+19:50:17 X5 [null-role tables read as anonymous] TableBodyForest.kt d80054ce72a079d3→d80054ce72a079d3 byte-exact | rc 1 tests 26 red 4 1.6s errs []
+    red: TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot
+    red: TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug
+    red: TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug
+    red: TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug
+19:50:18 X6 [weight dropped (vacuous order assert?)] TableApplier.kt 0d58a4633762893c→0d58a4633762893c byte-exact | rc 0 tests 26 red 0 1.6s errs []
+19:50:21 GREEN1 rc 0 tests 110 red [] errs [] 3.0s ['BUILD SUCCESSFUL in 2s']

@@ -1,0 +1,6 @@
+=== css-text identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+=== css-anchor-position identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+=== selectors identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+=== css-backgrounds identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+=== css-writing-modes identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+=== css-counter-styles identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0

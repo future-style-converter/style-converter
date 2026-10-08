@@ -1,0 +1,5 @@
+label=K-X9-drop-condition file=runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/DynamicValueResolver.kt
+sha256 before=19b15addf9166f07bcaf7bca45f34502e7e2fa1b0adde872592c8f97e59163ea mutated=6fc3d286a2c93e381c8aa6fa607f1ff36435ed264226609f4049d5dd45d5314d after=19b15addf9166f07bcaf7bca45f34502e7e2fa1b0adde872592c8f97e59163ea restored=OK
+suite rc=1 (RED)
+DynamicValueResolverTest tests=32 skipped=0 failures=3 errors=0 FAILED: ['CBB WPT nested clip chain keeps 200 by 100 at both levels', 'CBB WPT content-box container publishes its declared size', 'CBB census - the readers that see a different block are exactly the carriers and the control']
+TOTAL tests=124 skipped=0 failures=3 errors=0

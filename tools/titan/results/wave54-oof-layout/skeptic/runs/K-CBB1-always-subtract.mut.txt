@@ -1,0 +1,5 @@
+label=K-CBB1-always-subtract file=runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+sha256 before=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=4237459d15c7379726990b904f9268aa40870330864b59f540041a8a9051de57 after=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 restored=OK
+suite rc=1 (RED)
+DynamicValueResolverTest tests=32 skipped=0 failures=3 errors=0 FAILED: ['CBB WPT nested clip chain keeps 200 by 100 at both levels', 'CBB WPT content-box container publishes its declared size', 'CBB census - the readers that see a different block are exactly the carriers and the control']
+TOTAL tests=124 skipped=0 failures=3 errors=0

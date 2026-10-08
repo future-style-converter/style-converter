@@ -1,0 +1,17 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.117 (0.118) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.658 (5.855) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 5.658 (5.855) seconds
+Test Suite 'FixedHoistTests' passed at 2026-10-08 22:10:44.214.
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 22:10:44.313.
+Test Suite 'GapDecorationGrammarTests' passed at 2026-10-08 22:10:44.421.
+Test Suite 'GapDecorationSegmentsTests' failed at 2026-10-08 22:10:44.635.
+Test Suite 'OutOfFlowContainingBlockTests' passed at 2026-10-08 22:10:48.315.
+Test Suite 'Selected tests' failed at 2026-10-08 22:10:48.433.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:10:48.433.
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 22:10:48.433.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:386: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine] : XCTAssertEqual failed: ("[]") is not equal to ("[(45.0, 0.0, 10.0, 50.0), (95.0, 0.0, 10.0, 50.0), (95.0, 50.0, 10.0, 50.0), (45.0, 100.0, 10.0, 50.0), (95.0, 100.0, 10.0, 50.0)]")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine]' failed (0.106 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:403: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("2") is not equal to ("7")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast]' failed (0.001 seconds).
+** TEST FAILED **
+xcodebuild rc=65

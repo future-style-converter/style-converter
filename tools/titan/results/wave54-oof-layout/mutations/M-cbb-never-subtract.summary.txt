@@ -1,0 +1,3 @@
+label=M-cbb-never-subtract file=runtimes/compose/src/main/java/com/styleconverter/runtime/core/variables/ContainingBlockBands.kt
+sha256 before=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 mutated=18b6eea12faf985d7e99edd410d9acc8a26bd673aa79f8abe7ca69837f7c810a after=f4bb43ff3ce079d18eef4dfd513bb71b0f95d9cacdb464e8d38b0aa2bae79cb0 restored=OK
+suite rc=1 (RED)

@@ -1,0 +1,50 @@
+diff --git a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift
+index 710f9e8b..b9a6f642 100644
+--- a/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift
++++ b/runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift
+@@ -193,10 +193,11 @@ final class UAElementFontRuleTests: XCTestCase {
+ 
+     // MARK: - 5. The stacked-chain gate
+ 
+-    /// A heading that hosts child boxes stands down (the container stacks
+-    /// them; a 2em face only magnifies that — see headingAppliesTo for the
+-    /// measured cells). inset-005/011/014's `<h1>` wrapping a `<u>` is this
+-    /// shape, and all three must come out byte-identical to wave39-final.
++    /// A heading whose children paint STACKED stands down (a 2em face only
++    /// magnifies the stack — see headingAppliesTo for the wave-40 cells).
++    /// Wave 54 (lane L5): the flag is now UAHeadingFoldGate's verdict, true
++    /// only when the host's runs do not fold — inset-011 keeps this shape;
++    /// inset-005/-006/-014 fold and take the face (UAHeadingFoldGateTests).
+     func testHeadingWithChildrenStandsDown() {
+         let merged = props([("FontSize", .object(["px": .double(16)]))])
+         let out = UAElementFontRule.apply(sourceTag: "h1", own: [], merged: merged,
+@@ -224,6 +225,29 @@ final class UAElementFontRuleTests: XCTestCase {
+ 
+     // MARK: - 6. End-to-end through StyleBuilder
+ 
++    /// Wave 54 (lane L5) — the iOS ANCHOR of the Compose twin's HIGH target:
++    /// block-in-inline-015-print's verbatim leaf `<h1>` (author `margin: 0`,
++    /// no font) through seam-2 and StyleBuilder paints 32px bold — the face
++    /// iOS already passes with (P 0.9894) and Android lacked (f 0.9489).
++    func testVerbatimLeafH1PaintsTheUAFace() throws {
++        let site = try UAHeadingFaceReplay.site(UAHeadingFaceWire.blockInInline015Print,
++                                                "block-in-inline-015-print__6__0-202")
++        let style = StyleBuilder.build(from: UAHeadingFaceReplay.seam(site))
++        XCTAssertEqual(Double(style.text.fontSize ?? 0), 32, accuracy: 1e-6)
++        XCTAssertEqual(style.text.fontWeight, .bold)
++    }
++
++    /// Wave 54 (lane L5) — the extractor-baked `<h1>` (inset-001: own 32px +
++    /// bold, the UA_H1_PROPS bake) passes through untouched: both halves
++    /// stand down for an author declaration (css-cascade-4 §6.1).
++    func testVerbatimBakedH1IsUntouched() throws {
++        let site = try UAHeadingFaceReplay.site(UAHeadingFaceWire.inset001,
++                                                "text-decoration-inset-001__1__0-053")
++        let out = UAHeadingFaceReplay.seam(site)
++        XCTAssertEqual(out.map(\.type), site.mergedPreUA.map(\.type))
++        XCTAssertEqual(firstFontSizePx(out) ?? 0, 32, accuracy: 1e-9)
++    }
++
+     /// The whole point of substituting in place: the built style's text face
+     /// must carry the UA size, which is the value PlaceholderLabel paints.
+     func testStyleBuilderConsumesTheInjectedFace() {

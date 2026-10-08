@@ -1,0 +1,141 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -scheme StyleConverterRuntime -destination "platform=macOS,variant=Mac Catalyst,arch=arm64" "-only-testing:StyleConverterRuntimeTests/OutOfFlowContainingBlockTests" "-only-testing:StyleConverterRuntimeTests/FixedHoistTests"
+
+Resolve Package Graph
+2026-10-08 22:46:59.295 xcodebuild[60834:4510269] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+
+
+Resolved source packages:
+  StyleConverterRuntime: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'StyleConverterRuntime-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntimeTests-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/.swiftpm/xcode
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+2026-10-08 22:47:12.555 xcodebuild[60834:4511439]  DVTAssertions: Warning in IDEFrameworks/IDEFoundation/Execution/LaunchSystem/IDELaunchSession.m:395
+Details:  setRunnablePIDWithDiagnostics:logSection:andCompletionHandler: called without a completion handler - blocking until diagnostics setup completes. Callers should migrate to using a completion handler for better performance.
+Object:   <IDELaunchSession: 0x7790bf2280>
+Method:   -setRunnablePIDWithDiagnostics:logSection:andCompletionHandler:
+Thread:   <NSThread: 0x77a7d3bec0>{number = 13, name = (null)}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+Test Suite 'Selected tests' started at 2026-10-08 22:47:12.915.
+Test Suite 'StyleConverterRuntimeTests.xctest' started at 2026-10-08 22:47:12.916.
+Test Suite 'FixedHoistTests' started at 2026-10-08 22:47:12.916.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testEXPECTED_DIVERGENCE_nestedInsetAbsoluteWithNoContainingBlockAncestor]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testEXPECTED_DIVERGENCE_nestedInsetAbsoluteWithNoContainingBlockAncestor]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1InsetCarryingAbsoluteAndInsetFixedStillHoist]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1InsetCarryingAbsoluteAndInsetFixedStillHoist]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1LogicalInsetCountsAsAnchor]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1LogicalInsetCountsAsAnchor]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1NoInsetAbsoluteRootStaysInFlow]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1NoInsetAbsoluteRootStaysInFlow]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1StaticPositionPaintsInFlowSlotWithZeroFootprint]' started.
+2026-10-08 22:47:13.088206+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:47:13.092368+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:47:13.092985+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testRC1StaticPositionPaintsInFlowSlotWithZeroFootprint] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1StaticPositionPaintsInFlowSlotWithZeroFootprint]' passed (0.506 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS1RootFixedAnchorsAtTheIcbCorner]' started.
+2026-10-08 22:47:13.482182+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS1RootFixedAnchorsAtTheIcbCorner] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS1RootFixedAnchorsAtTheIcbCorner]' passed (0.004 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS2RootAbsoluteAnchorsAtTheIcbCorner]' started.
+2026-10-08 22:47:13.487789+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS2RootAbsoluteAnchorsAtTheIcbCorner] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS2RootAbsoluteAnchorsAtTheIcbCorner]' passed (0.004 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS3FixedChildOfMovedRelativeParentDoesNotCompound]' started.
+2026-10-08 22:47:13.491322+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:47:13.570347+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS3FixedChildOfMovedRelativeParentDoesNotCompound] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS3FixedChildOfMovedRelativeParentDoesNotCompound]' passed (0.084 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS4AbsoluteChildAnchorsAtAncestorPaddingBox]' started.
+[PropertyTracker] margin-collapse emulation off for 'x': out-of-flow child — legacy sum spacing applies
+2026-10-08 22:47:13.576260+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:47:13.577663+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS4AbsoluteChildAnchorsAtAncestorPaddingBox] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS4AbsoluteChildAnchorsAtAncestorPaddingBox]' passed (0.080 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS5InFlowSiblingStartsWhereFixedBoxWouldHaveBeen]' started.
+2026-10-08 22:47:13.655581+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:47:13.656334+0200 xctest[61010:4511845] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS5InFlowSiblingStartsWhereFixedBoxWouldHaveBeen] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS5InFlowSiblingStartsWhereFixedBoxWouldHaveBeen]' passed (0.004 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitHoistsOutOfFlowRootsAndKeepsFlowOrder]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitHoistsOutOfFlowRootsAndKeepsFlowOrder]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitIsIdentityForFixedFreeDocuments]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitIsIdentityForFixedFreeDocuments]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitKeepsNestedAbsoluteChildren]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitKeepsNestedAbsoluteChildren]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitStripsNestedFixedDescendants]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitStripsNestedFixedDescendants]' passed (0.001 seconds).
+Test Suite 'FixedHoistTests' passed at 2026-10-08 22:47:13.739.
+	 Executed 16 tests, with 0 failures (0 unexpected) in 0.690 (0.823) seconds
+Test Suite 'OutOfFlowContainingBlockTests' started at 2026-10-08 22:47:13.739.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainSizeInlineSizeStyleNoneDoNot]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainSizeInlineSizeStyleNoneDoNot]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1FilterBackdropFilterAndWillChangeHintsEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1FilterBackdropFilterAndWillChangeHintsEstablish]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1NoneFormsAndWillChangeOpacityDoNotEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1NoneFormsAndWillChangeOpacityDoNotEstablish]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' started.
+[PropertyTracker] ContainingBlock[positioned-establisher-fixed-descendant]: claim withheld on a positioned establisher
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' passed (3.806 seconds).
+Test Suite 'OutOfFlowContainingBlockTests' passed at 2026-10-08 22:47:17.631.
+	 Executed 8 tests, with 0 failures (0 unexpected) in 3.811 (3.891) seconds
+Test Suite 'StyleConverterRuntimeTests.xctest' passed at 2026-10-08 22:47:17.631.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 4.501 (4.715) seconds
+Test Suite 'Selected tests' passed at 2026-10-08 22:47:17.631.
+	 Executed 24 tests, with 0 failures (0 unexpected) in 4.501 (4.716) seconds
+2026-10-08 22:47:23.594 xcodebuild[60834:4510269] [MT] IDETestOperationsObserverDebug: 11.388 elapsed -- Testing started completed.
+2026-10-08 22:47:23.594 xcodebuild[60834:4510269] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-08 22:47:23.594 xcodebuild[60834:4510269] [MT] IDETestOperationsObserverDebug: 11.388 sec, +11.388 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/dranak/Library/Developer/Xcode/DerivedData/StyleConverterRuntime-dhqlkcumqhjmieaikvonqofhsxnu/Logs/Test/Test-StyleConverterRuntime-2026.10.08_22-46-59-+0200.xcresult
+
+** TEST SUCCEEDED **
+
+Testing started

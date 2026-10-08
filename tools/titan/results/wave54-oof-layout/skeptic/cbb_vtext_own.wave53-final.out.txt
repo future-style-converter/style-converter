@@ -1,0 +1,3 @@
+own-level vertical-text readers: 2
+  wpt__css-text__hyphens__hyphens-vertical-001.json wpt__css-text__hyphens__hyphens-vertical-001__2-320 VERTICAL_RL None UPRIGHT-CAPABLE 'hyphen\xadation'
+  wpt__css-text__hyphens__hyphens-vertical-001.json wpt__css-text__hyphens__hyphens-vertical-001__3-321 VERTICAL_RL None UPRIGHT-CAPABLE 'hyphen‐ation'

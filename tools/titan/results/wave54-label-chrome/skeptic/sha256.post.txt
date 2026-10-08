@@ -1,0 +1,3 @@
+fad373782a0de0eda2664e2a5cad0d4ea7b85b3bdd759fb91b39388e40dd7b65  tools/visual/label-chrome-check.mjs
+9d8f2b22b8b454b62dc0872d774567bfeca22849ffe434ab9c8647d6a2a23ed5  tools/visual/label-chrome-tripwire.test.mjs
+5d5ea832eb713aaf31e83cd38304914b34491c168a8fa727bae0fcfcf1298753  tools/visual/label-chrome-exempt.json

@@ -1,0 +1,3 @@
+label=M-e-compose-revert-222 file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/CanvasRootHoist.kt
+sha256 before=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 mutated=5fe6cc954349db57b597c6606a9861f3b90d6de8343d8762b4663aa76f267a7a after=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 restored=OK
+suite rc=1 (RED)

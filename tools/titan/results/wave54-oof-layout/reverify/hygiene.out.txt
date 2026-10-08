@@ -1,0 +1,10 @@
+## seam status (empty = clean)
+## end seam status
+ComponentRenderer.kt work=da2df0b4cca689ad head=da2df0b4cca689ad
+ComponentRenderer.swift work=905d1669d3856364 head=905d1669d3856364
+ComponentRenderer.tsx work=cc39ab6e98342c49 head=cc39ab6e98342c49
+extract-fixture.mjs work=845a3d263a14369b head=845a3d263a14369b
+## lock dir
+(entries: 0)
+## probe grep over owned sources (diff vs HEAD for tracked, whole file for new)
+## end probe grep

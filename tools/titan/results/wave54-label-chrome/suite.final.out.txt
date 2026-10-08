@@ -1,0 +1,12 @@
+#   exempt-entry 001_ATC_PropsThenAll_InGreenParent [container, fixtures/combinations/all-then-color.json] pending — no committed baseline names any component of the fixture yet (test-all.sh runs it gate-only); exempts nothing until seeded
+#   exempt-entry 003_ATC_InitialUnderRedParent [container, fixtures/combinations/all-then-color.json] pending — no committed baseline names any component of the fixture yet (test-all.sh runs it gate-only); exempts nothing until seeded
+#   exempt-entry 005_ATC_DirectionSurvives [text, fixtures/combinations/all-then-color.json] pending — no committed baseline names any component of the fixture yet (test-all.sh runs it gate-only); exempts nothing until seeded
+# Subtest: label chrome exempt-entry 001_ATC_PropsThenAll_InGreenParent
+ok 16 - label chrome exempt-entry 001_ATC_PropsThenAll_InGreenParent
+# Subtest: label chrome exempt-entry 003_ATC_InitialUnderRedParent
+ok 17 - label chrome exempt-entry 003_ATC_InitialUnderRedParent
+# Subtest: label chrome exempt-entry 005_ATC_DirectionSurvives
+ok 18 - label chrome exempt-entry 005_ATC_DirectionSurvives
+# tests 148
+# pass 148
+# fail 0

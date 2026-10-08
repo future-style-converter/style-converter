@@ -1,0 +1,39 @@
+
+// ── SKEPTIC PROBE (temporary; removed byte-exact after one run) ──────────────
+class SkepticFoldProbe {
+    @Test
+    fun probe() {
+        val base = "/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/runs/wave53-final/sections/css-text-decor/per-test-ir/"
+        val out = StringBuilder()
+        for (stem in listOf("subelements-002", "subelements-003", "inset-005", "inset-006", "inset-011", "inset-014", "color")) {
+            val name = "wpt__css-text-decor__text-decoration-$stem"
+            val doc = java.io.File("$base$name.json").readText()
+            val roots = com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+                com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(doc))
+            fun walk(node: IRComponent, inherited: List<IRProperty>, depth: Int) {
+                val own = node.properties
+                val pre = com.styleconverter.runtime.lists.ListStyleUaRule.apply(node._tag, own,
+                    com.styleconverter.runtime.core.renderer.ComponentRenderer.mergeInherited(own, inherited))
+                val stands = UAHeadingFoldGate.standsDown(node, pre)
+                val post = UAElementFontRule.apply(node._tag, own, pre, stands)
+                val fs = post.firstOrNull { it.type == "FontSize" }?.data
+                var line = "  ".repeat(depth) + "${node.id} tag=${node._tag} kids=${node.children?.size ?: 0} fired=${post !== pre} standsDown=$stands FontSize=$fs"
+                if (!node.runs.isNullOrEmpty() && !node.children.isNullOrEmpty()) {
+                    val plan = InlineRunPlan.resolve(node.runs, node.children)
+                    val o = plan?.let { InlineRunFold.fold(it.entries, node.children!!, post, node.lang) }
+                    line += " RUNS-HOST plan=${plan != null} fold=" + when (o) {
+                        null -> "null"
+                        is InlineRunFold.Outcome.Bailed -> "Bailed(${o.reason})"
+                        is InlineRunFold.Outcome.Folded -> "Folded(\"${o.text}\")"
+                        else -> o.toString()
+                    }
+                }
+                out.append("$stem $line\n")
+                val inh = post.filter { it.type in com.styleconverter.runtime.core.renderer.ComponentRenderer.INHERITED_PROPERTY_TYPES }
+                node.children?.forEach { walk(it, inh, depth + 1) }
+            }
+            roots.forEach { walk(it, emptyList(), 0) }
+        }
+        java.io.File("/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/tools/titan/results/wave54-ua-heading-face/skeptic/fold-probe.out.txt").writeText(out.toString())
+    }
+}

@@ -1,0 +1,21 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.157 (0.159) seconds
+	 Executed 75 tests, with 5 failures (0 unexpected) in 7.412 (7.887) seconds
+	 Executed 75 tests, with 5 failures (0 unexpected) in 7.412 (7.887) seconds
+Test Suite 'FixedHoistTests' failed at 2026-10-08 22:03:29.238.
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 22:03:29.386.
+Test Suite 'GapDecorationGrammarTests' passed at 2026-10-08 22:03:29.519.
+Test Suite 'GapDecorationSegmentsTests' passed at 2026-10-08 22:03:29.957.
+Test Suite 'OutOfFlowContainingBlockTests' failed at 2026-10-08 22:03:34.357.
+Test Suite 'Selected tests' failed at 2026-10-08 22:03:34.517.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:03:34.516.
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 22:03:34.516.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:529: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:530: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(["c"])")
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition]' failed (1.526 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:105: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:105: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' failed (0.121 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:155: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : XCTAssertEqual failed: ("["wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]") is not equal to ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]")
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (4.272 seconds).
+** TEST FAILED **
+xcodebuild rc=65

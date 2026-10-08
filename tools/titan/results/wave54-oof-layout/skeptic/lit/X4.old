@@ -1,0 +1,3 @@
+        is JsonObject -> true
+        else -> false
+    }

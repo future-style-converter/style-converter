@@ -1,0 +1,4 @@
+semi-replaced-stretch-other android capture    edge xNone (probe expects today's line: xNone)
+semi-replaced-stretch-other android CBB replay edge xNone (probe expects today's line: xNone)
+semi-replaced-stretch-input android capture    edge xNone (probe expects today's line: xNone)
+semi-replaced-stretch-input android CBB replay edge xNone (probe expects today's line: xNone)

@@ -1,0 +1,14 @@
+label=S-Md file=runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/FixedHoist.swift
+sha256 before=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 mutated=5e45605e681ef36bdf8eaa5be5dbc4210b89d855234001ffaa8c9a229864ad0c after=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.075 (0.077) seconds
+	 Executed 75 tests, with 4 failures (0 unexpected) in 5.628 (6.145) seconds
+	 Executed 75 tests, with 4 failures (0 unexpected) in 5.628 (6.145) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:545: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:546: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(["f"])")
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept]' failed (1.043 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:105: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' failed (0.084 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:155: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : XCTAssertEqual failed: ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json"]") is not equal to ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]")
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (3.776 seconds).
+** TEST FAILED **

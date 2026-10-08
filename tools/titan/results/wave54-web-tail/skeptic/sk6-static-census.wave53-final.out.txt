@@ -1,0 +1,33 @@
+RS: 27 documents, 73 separators
+    2 wpt__CSS2__abspos__static-inside-inline-block
+    6 wpt__css-break__block-in-inline-015-print
+    2 wpt__css-cascade__scope-pseudo-element
+    1 wpt__css-display__display-flow-root-list-item-001
+    1 wpt__css-position__overlay__overlay-button-appearance
+    8 wpt__css-position__position-absolute-semi-replaced-stretch-input
+    6 wpt__css-position__position-absolute-semi-replaced-stretch-other
+    2 wpt__css-ui__appearance-auto-input-non-widget-001
+   19 wpt__css-ui__box-sizing-007
+    5 wpt__css-ui__box-sizing-008
+    5 wpt__css-ui__box-sizing-009
+    1 wpt__css-ui__box-sizing-010
+    1 wpt__css-ui__box-sizing-011
+    1 wpt__css-ui__box-sizing-013
+    1 wpt__css-ui__box-sizing-014
+    1 wpt__css-ui__box-sizing-015
+    1 wpt__css-ui__box-sizing-016
+    1 wpt__css-ui__box-sizing-017
+    1 wpt__css-ui__box-sizing-018
+    1 wpt__css-ui__box-sizing-019
+    1 wpt__css-ui__box-sizing-020
+    1 wpt__css-ui__box-sizing-021
+    1 wpt__css-ui__box-sizing-022
+    1 wpt__css-ui__box-sizing-024
+    1 wpt__css-ui__box-sizing-025
+    1 wpt__css-values__attr-style-sharing-1
+    1 wpt__css-writing-modes__baseline-with-orthogonal-flow-001
+W1: 4 joins in 1 documents
+   wpt__css-text__hyphens__hyphens-out-of-flow-002 wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287
+   wpt__css-text__hyphens__hyphens-out-of-flow-002 wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289
+   wpt__css-text__hyphens__hyphens-out-of-flow-002 wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291
+   wpt__css-text__hyphens__hyphens-out-of-flow-002 wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293

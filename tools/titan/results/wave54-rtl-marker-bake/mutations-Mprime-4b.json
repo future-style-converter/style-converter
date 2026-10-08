@@ -1,0 +1,11 @@
+[
+ {
+  "label": "M-4b (V2, no crash) a ROOT list item is planned a marker, owned and measured by itself",
+  "file": "tools/titan/bidi-bake.mjs",
+  "old": "    if (isRootPath(e.path) || e.rectCount === 0 || e.tag === 'br') continue;\n    const rootPath = rootKeys.find((rp) => isDescendantPath(rp, e.path));",
+  "new": "    if (e.rectCount === 0 || e.tag === 'br') continue;\n    const rootPath = isRootPath(e.path) ? e.path : rootKeys.find((rp) => isDescendantPath(rp, e.path));",
+  "expectRed": [
+   "V2 unit M′"
+  ]
+ }
+]

@@ -1,0 +1,59 @@
+######## head
+mode=head PNGs=390
+# tests 136
+# pass 136
+# fail 0
+exit=0
+######## u1
+mode=u1 PNGs=390
+# tests 148
+# pass 148
+# fail 0
+#   exempt-entry 001_ATC_PropsThenAll_InGreenParent [container, fixtures/combinations/all-then-color.json] pending — no committed baseline names any component of the fixture yet (test-all.sh runs it gate-only); exempts nothing until seeded
+#   exempt-entry 003_ATC_InitialUnderRedParent [container, fixtures/combinations/all-then-color.json] pending — no committed baseline names any component of the fixture yet (test-all.sh runs it gate-only); exempts nothing until seeded
+#   exempt-entry 005_ATC_DirectionSurvives [text, fixtures/combinations/all-then-color.json] pending — no committed baseline names any component of the fixture yet (test-all.sh runs it gate-only); exempts nothing until seeded
+ok 16 - label chrome exempt-entry 001_ATC_PropsThenAll_InGreenParent
+ok 17 - label chrome exempt-entry 003_ATC_InitialUnderRedParent
+ok 18 - label chrome exempt-entry 005_ATC_DirectionSurvives
+exit=0
+######## head-seed
+mode=head-seed PNGs=408
+# tests 142
+# pass 139
+# fail 3
+#   000_ATC_AllThenProps [band-identical, 224 glyph px] ok
+#   001_ATC_PropsThenAll_InGreenParent [band-identical, 437 glyph px] RED (i) Android: 437/437 glyph px are ground; (i) iOS: 437/437 glyph px are ground; (i) web: 437/437 glyph px are ground
+#   002_reset [band-identical, 80 glyph px] ok
+#   003_ATC_InitialUnderRedParent [band-identical, 369 glyph px] RED (i) Android: 369/369 glyph px are ground; (i) iOS: 369/369 glyph px are ground; (i) web: 369/369 glyph px are ground
+#   004_span [band-identical, 65 glyph px] ok
+#   005_ATC_DirectionSurvives [band-identical, 293 glyph px] RED (i) Android: 293/293 glyph px are ground; (i) iOS: 293/293 glyph px are ground; (i) web: 293/293 glyph px are ground
+ok 7 - label chrome 000_ATC_AllThenProps
+not ok 12 - label chrome 001_ATC_PropsThenAll_InGreenParent
+    001_ATC_PropsThenAll_InGreenParent: (i) Android: 437/437 glyph px are ground; (i) iOS: 437/437 glyph px are ground; (i) web: 437/437 glyph px are ground
+not ok 22 - label chrome 003_ATC_InitialUnderRedParent
+    003_ATC_InitialUnderRedParent: (i) Android: 369/369 glyph px are ground; (i) iOS: 369/369 glyph px are ground; (i) web: 369/369 glyph px are ground
+not ok 31 - label chrome 005_ATC_DirectionSurvives
+    005_ATC_DirectionSurvives: (i) Android: 293/293 glyph px are ground; (i) iOS: 293/293 glyph px are ground; (i) web: 293/293 glyph px are ground
+exit=1
+######## u1-seed
+mode=u1-seed PNGs=408
+# tests 154
+# pass 154
+# fail 0
+#   exempt-entry 001_ATC_PropsThenAll_InGreenParent [container, fixtures/combinations/all-then-color.json] verified
+#   exempt-entry 003_ATC_InitialUnderRedParent [container, fixtures/combinations/all-then-color.json] verified
+#   exempt-entry 005_ATC_DirectionSurvives [text, fixtures/combinations/all-then-color.json] verified
+#   000_ATC_AllThenProps [band-identical, 224 glyph px] ok
+#   001_ATC_PropsThenAll_InGreenParent [exempt band-identical, 0 glyph px] ok
+#   002_reset [band-identical, 80 glyph px] ok
+#   003_ATC_InitialUnderRedParent [exempt band-identical, 0 glyph px] ok
+#   004_span [band-identical, 65 glyph px] ok
+#   005_ATC_DirectionSurvives [exempt band-identical, 0 glyph px] ok
+ok 16 - label chrome exempt-entry 001_ATC_PropsThenAll_InGreenParent
+ok 17 - label chrome exempt-entry 003_ATC_InitialUnderRedParent
+ok 18 - label chrome exempt-entry 005_ATC_DirectionSurvives
+ok 19 - label chrome 000_ATC_AllThenProps
+ok 24 - label chrome 001_ATC_PropsThenAll_InGreenParent
+ok 34 - label chrome 003_ATC_InitialUnderRedParent
+ok 43 - label chrome 005_ATC_DirectionSurvives
+exit=0

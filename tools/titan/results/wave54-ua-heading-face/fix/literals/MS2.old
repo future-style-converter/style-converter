@@ -1,0 +1,1 @@
+            standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),

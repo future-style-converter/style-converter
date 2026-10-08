@@ -1,0 +1,3 @@
+label=M-d-swift file=runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/FixedHoist.swift
+sha256 before=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 mutated=5e45605e681ef36bdf8eaa5be5dbc4210b89d855234001ffaa8c9a229864ad0c after=e88a6433ec0562190fb03d5ccc2d8f1c7e42f3ec5524422df7b784b0e639f441 restored=OK
+suite rc=65 (RED)

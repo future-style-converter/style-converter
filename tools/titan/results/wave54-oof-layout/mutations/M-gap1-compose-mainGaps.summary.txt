@@ -1,0 +1,3 @@
+label=M-gap1-compose-mainGaps file=runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationLines.kt
+sha256 before=0bd66570795a3ffebee97fbe6483e81a5de748bfeca34a8d14200cee849ba20f mutated=aed8fe94323f131e1b5c1d155733b206e50aaa67fab4806a123d19e02a674f64 after=0bd66570795a3ffebee97fbe6483e81a5de748bfeca34a8d14200cee849ba20f restored=OK
+suite rc=1 (RED)

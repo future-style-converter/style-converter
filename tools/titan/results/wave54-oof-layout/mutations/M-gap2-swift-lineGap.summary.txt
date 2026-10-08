@@ -1,0 +1,3 @@
+label=M-gap2-swift-lineGap file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationSegments.swift
+sha256 before=8f1bc461428dbf389b9606aad9e556fece485b79fda3902fb48a954c90051b7d mutated=756282e9f8d339d410d7a929d49af3d0f05b172289ee4e06398fb9f67851eae0 after=8f1bc461428dbf389b9606aad9e556fece485b79fda3902fb48a954c90051b7d restored=OK
+suite rc=65 (RED)

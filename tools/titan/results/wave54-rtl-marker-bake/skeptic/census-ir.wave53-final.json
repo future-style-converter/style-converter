@@ -1,0 +1,1358 @@
+{
+ "run": "wave53-final",
+ "docs": {
+  "wpt__css-anchor-position__anchor-center-safe-rtl": {
+   "section": "css-anchor-position",
+   "roots": [
+    {
+     "id": "wpt__css-anchor-position__anchor-center-safe-rtl__1-473",
+     "tag": null,
+     "position": "FIXED",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-anchor-position__anchor-center-safe-rtl__2-475",
+     "tag": null,
+     "position": "FIXED",
+     "padding": {
+      "PaddingTop": {
+       "px": 10
+      },
+      "PaddingRight": {
+       "px": 10
+      },
+      "PaddingBottom": {
+       "px": 10
+      },
+      "PaddingLeft": {
+       "px": 10
+      }
+     },
+     "nonZeroPadding": true,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-anchor-position__anchor-center-safe-rtl__3-478",
+     "tag": null,
+     "position": "FIXED",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-anchor-position__anchor-center-safe-rtl__4-480",
+     "tag": null,
+     "position": "FIXED",
+     "padding": {
+      "PaddingTop": {
+       "px": 10
+      },
+      "PaddingRight": {
+       "px": 10
+      },
+      "PaddingBottom": {
+       "px": 10
+      },
+      "PaddingLeft": {
+       "px": 10
+      }
+     },
+     "nonZeroPadding": true,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    }
+   ],
+   "stackShape": [
+    "anchor-center-safe-rtl__3__0-481"
+   ]
+  },
+  "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3": {
+   "section": "css-backgrounds",
+   "roots": [
+    {
+     "id": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-3__0-079",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "HIDDEN",
+      "OverflowY": "HIDDEN"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4": {
+   "section": "css-backgrounds",
+   "roots": [
+    {
+     "id": "wpt__css-backgrounds__background-attachment-local__attachment-local-positioning-4__0-083",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "HIDDEN",
+      "OverflowY": "HIDDEN"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-counter-styles__arabic-indic__css3-counter-styles-101": {
+   "section": "css-counter-styles",
+   "roots": [
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__0-004",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__1-006",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__2-008",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__3-010",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__4-012",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__5-014",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__6-016",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__7-018",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-101__1__0__8-020",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-counter-styles__arabic-indic__css3-counter-styles-102": {
+   "section": "css-counter-styles",
+   "roots": [
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__0__0-025",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__0__1-027",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__0__2-029",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__10__0-065",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__11__0-068",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__12__0-071",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__13__0-074",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__14__0-077",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__15__0-080",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__16__0-083",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__17__0-086",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__18__0-089",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__1__0-032",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__2__0-035",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__3__0-038",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__4__0-041",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__4__1-043",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__4__2-045",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__5__0-048",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__6__0-051",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__7__0-054",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__7__1-056",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__8__0-059",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-102__1__9__0-062",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-counter-styles__arabic-indic__css3-counter-styles-103": {
+   "section": "css-counter-styles",
+   "roots": [
+    {
+     "id": "arabic-indic__css3-counter-styles-103__1__0__0-094",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "arabic-indic__css3-counter-styles-103__1__0__1-096",
+     "tag": "li",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": true,
+     "items": [],
+     "directRuns": 1
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-counter-styles__counter-suffix": {
+   "section": "css-counter-styles",
+   "roots": [
+    {
+     "id": "counter-suffix__0__4-623",
+     "tag": "ol",
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "original": {
+        "v": 3,
+        "u": "EM"
+       }
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "original": {
+        "v": 3,
+        "u": "EM"
+       }
+      }
+     },
+     "nonZeroPadding": true,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [
+      {
+       "id": "counter-suffix__0__4__0-624",
+       "markerText": "1.",
+       "position": "ABSOLUTE",
+       "listStyleType": null,
+       "directChild": true,
+       "escapedEffects": [],
+       "ownRuns": 1
+      },
+      {
+       "id": "counter-suffix__0__4__1-626",
+       "markerText": "2.",
+       "position": "ABSOLUTE",
+       "listStyleType": null,
+       "directChild": true,
+       "escapedEffects": [],
+       "ownRuns": 1
+      }
+     ],
+     "directRuns": 0
+    },
+    {
+     "id": "counter-suffix__0__5-628",
+     "tag": "ol",
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "original": {
+        "v": 3,
+        "u": "EM"
+       }
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "original": {
+        "v": 3,
+        "u": "EM"
+       }
+      }
+     },
+     "nonZeroPadding": true,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [
+      {
+       "id": "counter-suffix__0__5__0-629",
+       "markerText": "א.",
+       "position": "ABSOLUTE",
+       "listStyleType": null,
+       "directChild": true,
+       "escapedEffects": [],
+       "ownRuns": 1
+      },
+      {
+       "id": "counter-suffix__0__5__1-631",
+       "markerText": "ב.",
+       "position": "ABSOLUTE",
+       "listStyleType": null,
+       "directChild": true,
+       "escapedEffects": [],
+       "ownRuns": 1
+      }
+     ],
+     "directRuns": 0
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-text__bidi__bidi-lines-001": {
+   "section": "css-text",
+   "roots": [
+    {
+     "id": "wpt__css-text__bidi__bidi-lines-001__0-001",
+     "tag": "p",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 5
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-lines-001__1-007",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "original": {
+        "v": 0.5,
+        "u": "CH"
+       }
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "original": {
+        "v": 0.5,
+        "u": "CH"
+       }
+      }
+     },
+     "nonZeroPadding": true,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 6
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-text__bidi__bidi-lines-002": {
+   "section": "css-text",
+   "roots": [
+    {
+     "id": "wpt__css-text__bidi__bidi-lines-002__1-015",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "original": {
+        "v": 0.5,
+        "u": "CH"
+       }
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "original": {
+        "v": 0.5,
+        "u": "CH"
+       }
+      }
+     },
+     "nonZeroPadding": true,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 2
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-text__bidi__bidi-tab-001": {
+   "section": "css-text",
+   "roots": [
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__1-034",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__2-037",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__3-040",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__4-043",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__6-047",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__7-050",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__8-053",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__css-text__bidi__bidi-tab-001__9-056",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-text__boundary-shaping__boundary-shaping-009": {
+   "section": "css-text",
+   "roots": [
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__1-123",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__2-127",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__3-131",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__4-135",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__5-139",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__6-143",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__7-147",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__css-text__boundary-shaping__boundary-shaping-009__8-151",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-text__hyphens__hyphenate-character-005": {
+   "section": "css-text",
+   "roots": [
+    {
+     "id": "wpt__css-text__hyphens__hyphenate-character-005__0-208",
+     "tag": "p",
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 8
+    },
+    {
+     "id": "wpt__css-text__hyphens__hyphenate-character-005__1-219",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 2
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__css-writing-modes__bidi-plaintext-br-001": {
+   "section": "css-writing-modes",
+   "roots": [
+    {
+     "id": "wpt__css-writing-modes__bidi-plaintext-br-001__0-412",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 2
+    },
+    {
+     "id": "wpt__css-writing-modes__bidi-plaintext-br-001__1-415",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 2
+    },
+    {
+     "id": "wpt__css-writing-modes__bidi-plaintext-br-001__2-418",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 3
+    },
+    {
+     "id": "wpt__css-writing-modes__bidi-plaintext-br-001__3-423",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 3
+    },
+    {
+     "id": "wpt__css-writing-modes__bidi-plaintext-br-001__4-428",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 3
+    },
+    {
+     "id": "wpt__css-writing-modes__bidi-plaintext-br-001__5-433",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 3
+    }
+   ],
+   "stackShape": []
+  },
+  "wpt__selectors__dir-selector-change-003": {
+   "section": "selectors",
+   "roots": [
+    {
+     "id": "wpt__selectors__dir-selector-change-003__0-036",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    }
+   ],
+   "stackShape": [
+    "dir-selector-change-003__0__0-037"
+   ]
+  },
+  "wpt__selectors__dir-selector-change-004": {
+   "section": "selectors",
+   "roots": [
+    {
+     "id": "wpt__selectors__dir-selector-change-004__0-041",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    }
+   ],
+   "stackShape": [
+    "dir-selector-change-004__0__0-042"
+   ]
+  },
+  "wpt__selectors__dir-style-02a": {
+   "section": "selectors",
+   "roots": [
+    {
+     "id": "wpt__selectors__dir-style-02a__1-079",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 2
+    },
+    {
+     "id": "wpt__selectors__dir-style-02a__2-082",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 1
+    },
+    {
+     "id": "wpt__selectors__dir-style-02a__3-084",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 2
+    },
+    {
+     "id": "wpt__selectors__dir-style-02a__4-087",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__selectors__dir-style-02a__5-095",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 0
+    },
+    {
+     "id": "wpt__selectors__dir-style-02a__6-104",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {
+      "PaddingTop": {
+       "px": 0
+      },
+      "PaddingRight": {
+       "px": 0
+      },
+      "PaddingBottom": {
+       "px": 0
+      },
+      "PaddingLeft": {
+       "px": 0
+      }
+     },
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {
+      "OverflowX": "VISIBLE",
+      "OverflowY": "VISIBLE"
+     },
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 3
+    }
+   ],
+   "stackShape": [
+    "dir-style-02a__3__2-092",
+    "dir-style-02a__4__0-096",
+    "dir-style-02a__4__2-101"
+   ]
+  },
+  "wpt__selectors__dir-style-03a": {
+   "section": "selectors",
+   "roots": [
+    {
+     "id": "wpt__selectors__dir-style-03a__0-108",
+     "tag": null,
+     "position": "RELATIVE",
+     "padding": {},
+     "nonZeroPadding": false,
+     "uaPaddedNoAuthored": false,
+     "guards": {},
+     "listItemRoot": false,
+     "items": [],
+     "directRuns": 2
+    }
+   ],
+   "stackShape": []
+  }
+ },
+ "bakedManifest": [
+  "css/css-anchor-position/anchor-center-safe-rtl.html",
+  "css/css-backgrounds/background-attachment-local/attachment-local-positioning-3.html",
+  "css/css-backgrounds/background-attachment-local/attachment-local-positioning-4.html",
+  "css/css-counter-styles/arabic-indic/css3-counter-styles-101.html",
+  "css/css-counter-styles/arabic-indic/css3-counter-styles-102.html",
+  "css/css-counter-styles/arabic-indic/css3-counter-styles-103.html",
+  "css/css-counter-styles/counter-suffix.html",
+  "css/css-text/bidi/bidi-lines-001.html",
+  "css/css-text/bidi/bidi-lines-002.html",
+  "css/css-text/bidi/bidi-tab-001.html",
+  "css/css-text/boundary-shaping/boundary-shaping-009.html",
+  "css/css-text/hyphens/hyphenate-character-005.html",
+  "css/css-writing-modes/bidi-plaintext-br-001.html",
+  "css/selectors/dir-selector-change-003.html",
+  "css/selectors/dir-selector-change-004.html",
+  "css/selectors/dir-style-02a.html",
+  "css/selectors/dir-style-03a.html"
+ ]
+}

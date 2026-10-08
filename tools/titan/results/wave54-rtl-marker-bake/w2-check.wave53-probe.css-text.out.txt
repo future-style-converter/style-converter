@@ -1,0 +1,7 @@
+documents 48: identical 46 · renumbered 0 · content-changed 2
+ok   content-changed ⊆ L1 wire carriers: ["wpt__css-text__bidi__bidi-lines-001","wpt__css-text__bidi__bidi-lines-002"]
+ok   wpt__css-text__bidi__bidi-lines-001: 13 → 13 components (no component added)
+ok   wpt__css-text__bidi__bidi-lines-001 wpt__css-text__bidi__bidi-lines-001__1: changed ["PaddingRight","PaddingLeft"] → all Padding* {px:0}
+ok   wpt__css-text__bidi__bidi-lines-002: 19 → 19 components (no component added)
+ok   wpt__css-text__bidi__bidi-lines-002 wpt__css-text__bidi__bidi-lines-002__1: changed ["PaddingRight","PaddingLeft"] → all Padding* {px:0}
+W2 CHECK: ALL PASS

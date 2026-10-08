@@ -1,0 +1,360 @@
+seam-1.patch — wave 54, lane L6 (web-tail), revert unit RS (PLAN §3 row "ComponentRenderer.tsx :1099-1158").
+Base: db6e8aa0 (= dev 7cce3b22 + the committed wave-54 plan; the two edited files are byte-identical at both).
+Seam file: apps/web-harness/src/sdui/ComponentRenderer.tsx
+  sha256 at base: cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e (blob 8413fb90)
+  hunk 1 anchor: after `function isInlineLevelSibling` (:327-332) — the exported pure `wsAfterSeparator(prev, next, container)`
+  hunk 2 anchor: `HARNESS_OPTIONS.renderChildSeparator` (:1099); its WWS branch :1115-1153 becomes
+                 `return wsAfterSeparator(prev, next, ctx.styles);` after the kept WPT_MODE / WPT_COMPOSED_MODE gates.
+Patch-borne (PLAN §0 rule 2b — they consume the lifted export, so they enter the tree only with this seam):
+  apps/web-harness/src/ui/ComposedCaptureGallery.tsx (sha256 at base 87ac9ca4f30471e59dd954883f41a5f4a6c851ad2f868082e797bac3becb47b9,
+    blob 329edbe2): the import, and the two root `.map` sites (:1070 flowRoots, :1079 canvasRoots) → interleaveRootSeparators.
+  apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx (NEW): the verbatim-wire + call-equivalence pins.
+Requires on the tree (unit RS, not in this patch): apps/web-harness/src/ui/ComposedRootSeparator.ts.
+Apply: git apply --check tools/titan/results/wave54-web-tail/seam-1.patch && git apply tools/titan/results/wave54-web-tail/seam-1.patch
+
+diff --git a/apps/web-harness/src/sdui/ComponentRenderer.tsx b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+index 8413fb9..1dfb454 100644
+--- a/apps/web-harness/src/sdui/ComponentRenderer.tsx
++++ b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+@@ -331,6 +331,63 @@ function isInlineLevelSibling(node: ComposedNode): boolean {
+   return !!tag && INLINE_LEVEL_SOURCE_TAGS.has(tag);
+ }
+ 
++/**
++ * wave-26 lane WWS — the inter-INLINE whitespace predicate, LIFTED out of
++ * HARNESS_OPTIONS.renderChildSeparator by wave-54 lane L6 (unit RS) as a
++ * pure export, so the composed canvas can ask the SAME question one level
++ * up, between the body's sibling ROOTS (ComposedRootSeparator.ts). The body
++ * below is the old WWS branch verbatim, with `ctx.styles` renamed to the
++ * `container` it always meant; renderChildSeparator keeps its two mode gates
++ * and calls this after them, so the child-level DOM is byte-identical
++ * (pinned: ComposedRootSeparatorWire.test.tsx call-equivalence + the
++ * interInlineWs suite). Returns `' '` to separate, null for flush.
++ */
++export function wsAfterSeparator(
++  prev: ComposedNode,
++  next: ComposedNode,
++  container: { display?: unknown; whiteSpace?: unknown },
++): string | null {
++  // The source must actually have separated them (the whole honesty
++  // gate — see WS_AFTER_ROLE). Marker sits on the EARLIER sibling.
++  if (!isWsAfterMarked(prev)) return null;
++  // Only an INLINE FORMATTING CONTEXT turns a collapsed space into a
++  // visible advance. Flex/grid containers drop whitespace-only children
++  // outright (css-flexbox-1 §4 / css-grid-1 §6), so a separator there is
++  // dead DOM bytes — skip explicitly rather than lean on that.
++  const d = container.display;
++  if (d === 'flex' || d === 'grid' || d === 'inline-flex' || d === 'inline-grid') return null;
++  // A whitespace-PRESERVING container replays the run verbatim instead of
++  // collapsing it (CSS Text §4.1.1): the ref shows the source's real
++  // newline + indent there, and injecting one space would substitute a
++  // different wrong answer for the current one. Out of contract — the
++  // preserved-run case needs the ordered inline-run wire, not this hook.
++  // Set mirrors the extractor's WHITESPACE_PRESERVING plus `pre-line`
++  // (which collapses spaces but KEEPS the newline, so the ref breaks the
++  // line where we would have put a space).
++  //
++  // KNOWN REACH LIMIT, measured not assumed: at child level `container` is
++  // `ctx.styles`, the RAW engine output for THIS container's own declared
++  // properties, so the gate catches `white-space` declared ON the container
++  // and NOT a value inherited from an ancestor — `<div style="white-space:pre"><div>
++  // <span>a</span> <span>b</span></div></div>` still emits the space.
++  // Resolving that needs the inherited cascade, which this hook has no
++  // handle on (it sees prev/next/container, not the ancestor chain).
++  // Bounded cost: in an inherited-pre context the ref paints a LINE BREAK
++  // and both our variants keep one line, so the separator moves an
++  // already-wrong layout by one space advance — it cannot turn a passing
++  // comparison into a failing one. Promote to a resolved-style read when
++  // the renderer grows an inheritance context.
++  const ws = container.whiteSpace;
++  if (typeof ws === 'string' && WHITESPACE_PRESERVING_CONTAINERS.has(ws)) return null;
++  // Both neighbours must be inline-level, or there is no line box for
++  // the advance to land on (whitespace between blocks paints nothing —
++  // CSS 2.1 §9.2.2.1 — so this is precision, not correctness).
++  if (!isInlineLevelSibling(prev) || !isInlineLevelSibling(next)) return null;
++  // A REAL collapsed-whitespace text node: the browser measures the
++  // advance in the capture's own font, exactly as it does in the ref.
++  return ' ';
++}
++
+ /**
+  * Detect the display/layout type from properties.
+  */
+@@ -1112,45 +1169,10 @@ const HARNESS_OPTIONS: RendererOptions = {
+     // component on its own canvas with no page geometry to match, and
+     // widening it would move captures no ref-page comparison reads.
+     if (!WPT_COMPOSED_MODE) return null;
+-    // The source must actually have separated them (the whole honesty
+-    // gate — see WS_AFTER_ROLE). Marker sits on the EARLIER sibling.
+-    if (!isWsAfterMarked(prev)) return null;
+-    // Only an INLINE FORMATTING CONTEXT turns a collapsed space into a
+-    // visible advance. Flex/grid containers drop whitespace-only children
+-    // outright (css-flexbox-1 §4 / css-grid-1 §6), so a separator there is
+-    // dead DOM bytes — skip explicitly rather than lean on that.
+-    const d = ctx.styles.display;
+-    if (d === 'flex' || d === 'grid' || d === 'inline-flex' || d === 'inline-grid') return null;
+-    // A whitespace-PRESERVING container replays the run verbatim instead of
+-    // collapsing it (CSS Text §4.1.1): the ref shows the source's real
+-    // newline + indent there, and injecting one space would substitute a
+-    // different wrong answer for the current one. Out of contract — the
+-    // preserved-run case needs the ordered inline-run wire, not this hook.
+-    // Set mirrors the extractor's WHITESPACE_PRESERVING plus `pre-line`
+-    // (which collapses spaces but KEEPS the newline, so the ref breaks the
+-    // line where we would have put a space).
+-    //
+-    // KNOWN REACH LIMIT, measured not assumed: `ctx.styles` is the RAW
+-    // engine output for THIS container's own declared properties, so the
+-    // gate catches `white-space` declared ON the container and NOT a value
+-    // inherited from an ancestor — `<div style="white-space:pre"><div>
+-    // <span>a</span> <span>b</span></div></div>` still emits the space.
+-    // Resolving that needs the inherited cascade, which this hook has no
+-    // handle on (it sees prev/next/container, not the ancestor chain).
+-    // Bounded cost: in an inherited-pre context the ref paints a LINE BREAK
+-    // and both our variants keep one line, so the separator moves an
+-    // already-wrong layout by one space advance — it cannot turn a passing
+-    // comparison into a failing one. Promote to a resolved-style read when
+-    // the renderer grows an inheritance context.
+-    const ws = ctx.styles.whiteSpace;
+-    if (typeof ws === 'string' && WHITESPACE_PRESERVING_CONTAINERS.has(ws)) return null;
+-    // Both neighbours must be inline-level, or there is no line box for
+-    // the advance to land on (whitespace between blocks paints nothing —
+-    // CSS 2.1 §9.2.2.1 — so this is precision, not correctness).
+-    if (!isInlineLevelSibling(prev) || !isInlineLevelSibling(next)) return null;
+-    // A REAL collapsed-whitespace text node: the browser measures the
+-    // advance in the capture's own font, exactly as it does in the ref.
+-    return ' ';
++    // wave-54 L6 (RS): the WWS gates live in the pure `wsAfterSeparator`
++    // above (lifted verbatim), so the composed canvas's ROOT walk asks the
++    // identical question; here the container is this component's styles.
++    return wsAfterSeparator(prev, next, ctx.styles);
+   },
+ };
+ 
+diff --git a/apps/web-harness/src/ui/ComposedCaptureGallery.tsx b/apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+index 329edbe..e577952 100644
+--- a/apps/web-harness/src/ui/ComposedCaptureGallery.tsx
++++ b/apps/web-harness/src/ui/ComposedCaptureGallery.tsx
+@@ -75,7 +75,11 @@ import {
+ // below a table box, so Chrome runs CSS 2.1 §17.2.1's fixup itself.
+ import { resolveCanvasTableBody } from './CanvasTableBody';
+ import { composeTree } from '../sdui/Composer';
+-import { ComponentRenderer } from '../sdui/ComponentRenderer';
++// wave-54 lane L6 (RS): the WWS predicate lifted out of renderChildSeparator,
++// handed to the root walk below so roots are spaced by the child-level rule.
++import { ComponentRenderer, wsAfterSeparator } from '../sdui/ComponentRenderer';
++// wave-54 lane L6 (RS): the root-level twin of NodeRenderer's separator slot.
++import { interleaveRootSeparators, rootSeparatorContainer } from './ComposedRootSeparator';
+ 
+ /**
+  * The pipeline's default composed-canvas background — the WHITE the ref
+@@ -1067,20 +1071,22 @@ function ComposedTestCanvas({ testKey, doc, index }: ComposedTestCanvasProps) {
+               ...(canvasTableBody?.borderSpacing ? { borderSpacing: canvasTableBody.borderSpacing } : {}),
+             }}
+           >
+-            {flowRoots.map((root, i) => (
++            {/* wave-54 L6 (RS): source whitespace between inline-level roots → one ' ' (ComposedRootSeparator.ts). */}
++            {interleaveRootSeparators(flowRoots, (root, i) => (
+               <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
+                 <ComponentRenderer node={root} />
+               </RootErrorBoundary>
+-            ))}
++            ), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)}
+           </div>
+         ) : (
+           // wave-53 L3 (item A): the forest minus the canvas-owned image
+           // layers — the SAME array as `roots` for every plan-less document.
+-          canvasRoots.map((root, i) => (
++          // wave-54 L6 (RS): the same root-level separator, in the ICB's flow-root.
++          interleaveRootSeparators(canvasRoots, (root, i) => (
+             <RootErrorBoundary key={root.component.id || i} componentId={root.component.id}>
+               <ComponentRenderer node={root} />
+             </RootErrorBoundary>
+-          ))
++          ), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)
+         )}
+       </div>
+     </div>
+diff --git a/apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx b/apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx
+new file mode 100644
+index 0000000..5c8013f
+--- /dev/null
++++ b/apps/web-harness/tests/ui/ComposedRootSeparatorWire.test.tsx
+@@ -0,0 +1,178 @@
++// wave-54 lane L6 (unit RS) — the root-level separator on VERBATIM wire, with
++// the REAL predicate. This file rides seam-1.patch (PLAN §3) because it imports
++// `wsAfterSeparator`, the WWS branch the patch lifts out of
++// HARNESS_OPTIONS.renderChildSeparator (ComponentRenderer.tsx) — the tree
++// without the seam must still compile (PLAN §0 rule 2b).
++//
++// THE DEFECT. The body's element children are SIBLING ROOTS of the flat v2
++// forest; ComposedCaptureGallery rendered them flush, so two root `<img>`s
++// abutted. MEASURED on wave53-final css-ui/box-sizing-007 web f 0.9036: the
++// second atom column starts at x146 where the ref has x151 (one Inter 16-px
++// space advance; web-root-separator.md §2). CSS 2.1 §16.6.1 / css-text-3
++// §4.1.1: collapsible white space between inline-level boxes renders as one
++// space; §9.2.2.1: none between blocks.
++//
++// THE CONTRACT pinned here: box-sizing-007's 20 root <img>s get exactly 19
++// separators — none after the body-root or the <p> (block-level) — in the
++// real gallery's markup; an unmarked (flush-authored) pair stays flush; a
++// table-body wrapper declines; and the lift is CALL-EQUIVALENT: the child walk
++// (renderChildSeparator, composed mode) spaces a pair iff `wsAfterSeparator`
++// says so, across marker × level × container display × white-space.
++//
++// Components VERBATIM from tools/titan/runs/wave53-final/sections/css-ui/per-test-ir/
++// wpt__css-ui__box-sizing-007.json (sha256 8f7b0da0…, byte-identical at wave54-open).
++//
++// EXECUTED MUTATIONS (sha256 before/after in tools/titan/results/wave54-web-tail/_note.md):
++//   RS-m1 the `isWsAfterMarked` gate removed from wsAfterSeparator → flush_* red.
++//   RS-m2 the table-box decline removed (ComposedRootSeparator.ts) → tableBody_* red.
++//   RS-m4 / RS-m4b each gallery call site handed a never-separating predicate
++//         (the flow-wrapper site / the ICB site) → bs007_gallery_flowWrapper* / bs007_gallery_markup* red.
++
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import { renderToStaticMarkup } from 'react-dom/server';
++import type { IRDocument, IRProperty } from '@style-converter/web/core/ir/IRModels';
++import { composeTree, type ComposedNode } from '../../src/sdui/Composer';
++import { interleaveRootSeparators, rootSeparatorContainer } from '../../src/ui/ComposedRootSeparator';
++
++/** css-ui/box-sizing-007 — all 22 components, verbatim. */
++const BS007 = [{"id":"wpt__css-ui__box-sizing-007__0-290","name":"wpt__css-ui__box-sizing-007__0","properties":[{"type":"MaxWidth","data":{"type":"length","px":700}}],"meta":{"role":"body-root"}},{"id":"wpt__css-ui__box-sizing-007__1-291","name":"wpt__css-ui__box-sizing-007__1","properties":[],"text":"Test passes if there are 20 filled green squares and they are the same size.","meta":{"sourceTag":"p","role":"ws-after"}},{"id":"wpt__css-ui__box-sizing-007__2-292","name":"wpt__css-ui__box-sizing-007__2","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":10}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_h100.svg"}}},{"id":"wpt__css-ui__box-sizing-007__3-293","name":"wpt__css-ui__box-sizing-007__3","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_h100.svg"}}},{"id":"wpt__css-ui__box-sizing-007__4-294","name":"wpt__css-ui__box-sizing-007__4","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_h100.svg"}}},{"id":"wpt__css-ui__box-sizing-007__5-295","name":"wpt__css-ui__box-sizing-007__5","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":{"type":"length","px":120}},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_h100.svg"}}},{"id":"wpt__css-ui__box-sizing-007__6-296","name":"wpt__css-ui__box-sizing-007__6","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":{"type":"length","px":120}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_h100.svg"}}},{"id":"wpt__css-ui__box-sizing-007__7-297","name":"wpt__css-ui__box-sizing-007__7","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":10}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__8-298","name":"wpt__css-ui__box-sizing-007__8","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__9-299","name":"wpt__css-ui__box-sizing-007__9","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__10-300","name":"wpt__css-ui__box-sizing-007__10","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":{"type":"length","px":120}},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__11-301","name":"wpt__css-ui__box-sizing-007__11","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":{"type":"length","px":120}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/w100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__12-302","name":"wpt__css-ui__box-sizing-007__12","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":10}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/h100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__13-303","name":"wpt__css-ui__box-sizing-007__13","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/h100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__14-304","name":"wpt__css-ui__box-sizing-007__14","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/h100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__15-305","name":"wpt__css-ui__box-sizing-007__15","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":{"type":"length","px":120}},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/h100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__16-306","name":"wpt__css-ui__box-sizing-007__16","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":{"type":"length","px":120}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/h100_r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__17-307","name":"wpt__css-ui__box-sizing-007__17","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":10}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__18-308","name":"wpt__css-ui__box-sizing-007__18","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__19-309","name":"wpt__css-ui__box-sizing-007__19","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__20-310","name":"wpt__css-ui__box-sizing-007__20","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":{"type":"length","px":120}},{"type":"Height","data":"auto"},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":10}},{"type":"MarginLeft","data":{"px":-10}},{"type":"PaddingLeft","data":{"px":20}}],"meta":{"sourceTag":"img","role":"ws-after","attrs":{"src":"css/css-ui/support/r1-1.svg"}}},{"id":"wpt__css-ui__box-sizing-007__21-311","name":"wpt__css-ui__box-sizing-007__21","properties":[{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Width","data":"auto"},{"type":"Height","data":{"type":"length","px":120}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":10}},{"type":"MarginRight","data":{"px":10}},{"type":"MarginBottom","data":{"px":-10}},{"type":"MarginLeft","data":{"px":10}},{"type":"PaddingBottom","data":{"px":20}}],"meta":{"sourceTag":"img","attrs":{"src":"css/css-ui/support/r1-1.svg"}}}];
++
++/** A per-test document over a component list. */
++const doc = (components: unknown[]): IRDocument =>
++  ({ irVersion: 2, minReaderVersion: 2, components }) as unknown as IRDocument;
++/** Render each root as its id token, so the interleaved array reads as data. */
++const ids = (r: ComposedNode): string => r.component.id;
++/** Separator positions: the index (in forest order) of the root each ' ' FOLLOWS. */
++const gapsAfter = (out: unknown[]): string[] =>
++  out.flatMap((x, i) => (x === ' ' ? [String(out[i - 1])] : []));
++/** Root-level separators in the gallery markup: a ' ' text node between two root <img>s. */
++const imgGaps = (html: string): number => (html.match(/\/> <img/g) ?? []).length;
++/** Root <img> elements in the gallery markup (20 on box-sizing-007). */
++const imgCount = (html: string): number => (html.match(/<img /g) ?? []).length;
++
++// Both read-once module constants on (the composed capture URL), then import
++// the modules that read them — the harness suites' stub-and-reimport pattern.
++let wsAfterSeparator: typeof import('../../src/sdui/ComponentRenderer').wsAfterSeparator;
++let ComponentRenderer: typeof import('../../src/sdui/ComponentRenderer').ComponentRenderer;
++let ComposedCaptureGallery: typeof import('../../src/ui/ComposedCaptureGallery').ComposedCaptureGallery;
++// The container styles exactly as the child walk hands them over (ctx.styles = buildStyles).
++let cssOf: (p: IRProperty[]) => { display?: unknown; whiteSpace?: unknown };
++beforeAll(async () => {
++  vi.stubGlobal('window', { location: { search: '?wpt=1&wptComposed=1' } });
++  vi.resetModules();
++  ({ wsAfterSeparator, ComponentRenderer } = await import('../../src/sdui/ComponentRenderer'));
++  ({ ComposedCaptureGallery } = await import('../../src/ui/ComposedCaptureGallery'));
++  const { buildStyles } = await import('@style-converter/web/core/renderer/StyleBuilder');
++  cssOf = (p) => buildStyles(p);
++}, 30000); // Generous timeout: cold vite import can hit ~15s.
++afterAll(() => { vi.unstubAllGlobals(); });
++
++/** The whole composed gallery for one per-test document (static markup). */
++const gallery = (components: unknown[]): string =>
++  renderToStaticMarkup(<ComposedCaptureGallery document={doc(components)} />);
++
++describe('root separators on verbatim box-sizing-007 (wave-54 L6 RS)', () => {
++  it('bs007_interleave_19Separators_noneAfterBodyRootOrP', () => {
++    const d = doc(BS007);
++    const roots = composeTree(d);
++    const out = interleaveRootSeparators(roots, ids, rootSeparatorContainer(d, null), wsAfterSeparator);
++    const gaps = gapsAfter(out);
++    // 20 root imgs → 19 inline-level marked pairs.
++    expect(gaps).toHaveLength(19);
++    // Neither block-level root (the body-root, the ws-after <p>) is followed by one.
++    expect(gaps).not.toContain('wpt__css-ui__box-sizing-007__0-290');
++    expect(gaps).not.toContain('wpt__css-ui__box-sizing-007__1-291');
++    // The last img (no marker) is never followed by one either (it is last).
++    expect(gaps).not.toContain('wpt__css-ui__box-sizing-007__21-311');
++  });
++
++  it('bs007_gallery_markupCarries19RootGaps', () => {
++    const html = gallery(BS007);
++    // All 20 atoms render; 19 real collapsed-space text nodes sit between them.
++    expect(imgCount(html)).toBe(20);
++    expect(imgGaps(html)).toBe(19);
++  });
++
++  it('bs007_gallery_flowWrapperSite_alsoSeparates', () => {
++    // A body margin routes the forest through the data-capture-flow wrapper
++    // (wave-52 L2 M1) — the SECOND call site; no corpus carrier takes it today.
++    const margined = BS007.map((c, i) => (i === 0
++      ? { ...c, properties: [...c.properties, { type: 'MarginLeft', data: { px: 8 } }] } : c));
++    const html = gallery(margined);
++    expect(html).toContain('data-capture-flow');
++    expect(imgGaps(html)).toBe(19);
++  });
++
++  it('flush_anUnmarkedPairStaysFlush_onVerbatimWire', () => {
++    // The anti-invention pin: strip the marker from img 6 (index 6, id …6-296);
++    // the source then had no whitespace between it and img 7 → no separator.
++    const flush = BS007.map((c, i) => (i === 6 ? { ...c, meta: { ...c.meta, role: undefined } } : c));
++    const d = doc(flush);
++    const gaps = gapsAfter(interleaveRootSeparators(composeTree(d), ids, rootSeparatorContainer(d, null), wsAfterSeparator));
++    expect(gaps).toHaveLength(18);
++    expect(gaps).not.toContain('wpt__css-ui__box-sizing-007__6-296');
++    // The gallery agrees.
++    expect(imgGaps(gallery(flush))).toBe(18);
++  });
++
++  it('tableBody_wrapperDeclines_inTheRealGallery', () => {
++    // The same roots under a `display: table` body (wave-53 CanvasTableBody plan).
++    const tableBody = BS007.map((c, i) => (i === 0
++      ? { ...c, properties: [...c.properties, { type: 'Display', data: 'TABLE' }] } : c));
++    const html = gallery(tableBody);
++    expect(html).toContain('display:table');
++    expect(imgGaps(html)).toBe(0);
++  });
++
++  it('preBody_declines_throughTheBodysWhiteSpace', () => {
++    // A white-space-preserving body: the ref keeps the source's newlines, not one space.
++    const preBody = BS007.map((c, i) => (i === 0
++      ? { ...c, properties: [...c.properties, { type: 'WhiteSpace', data: 'PRE' }] } : c));
++    expect(imgGaps(gallery(preBody))).toBe(0);
++  });
++});
++
++/** A v2 component with only what the predicate reads. */
++const comp = (id: string, properties: IRProperty[], meta: Record<string, unknown> = {}) =>
++  ({ id, name: id, properties, meta });
++/** A leaf ComposedNode. */
++const leaf = (c: ReturnType<typeof comp>): ComposedNode => ({ component: c, children: [] }) as unknown as ComposedNode;
++
++describe('call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS)', () => {
++  // Neighbour kinds: inline by declared display, inline by UA tag, block by display, block by tag.
++  const kinds: Array<[string, IRProperty[], Record<string, unknown>]> = [
++    ['ib', [{ type: 'Display', data: 'INLINE_BLOCK' }], {}],
++    ['span', [], { sourceTag: 'span' }],
++    ['blk', [{ type: 'Display', data: 'BLOCK' }], {}],
++    ['p', [], { sourceTag: 'p' }],
++  ];
++  // Container declarations: none, flex, grid, inline-flex, pre, pre-line, normal.
++  const containers: IRProperty[][] = [
++    [], [{ type: 'Display', data: 'FLEX' }], [{ type: 'Display', data: 'GRID' }],
++    [{ type: 'Display', data: 'INLINE_FLEX' }], [{ type: 'WhiteSpace', data: 'PRE' }],
++    [{ type: 'WhiteSpace', data: 'PRE_LINE' }], [{ type: 'WhiteSpace', data: 'NORMAL' }],
++  ];
++
++  it('everyMarkerLevelContainerCombination_spacesIffThePredicateSays', () => {
++    let checked = 0; let spaced = 0;
++    for (const [pk, pp, pm] of kinds) for (const [nk, np, nm] of kinds) for (const marked of [true, false]) {
++      for (const [ci, cp] of containers.entries()) {
++        const prev = leaf(comp(`a-${pk}`, pp, { ...pm, ...(marked ? { role: 'ws-after' } : {}) }));
++        const next = leaf(comp(`b-${nk}`, np, nm));
++        const parent = { component: comp(`row-${ci}`, cp), children: [prev, next] } as unknown as ComposedNode;
++        const html = renderToStaticMarkup(<ComponentRenderer node={parent} />);
++        // The character right before `next`'s opening tag: ' ' = separated, '>' = flush.
++        const at = html.lastIndexOf('<', html.indexOf(`data-component-id="b-${nk}"`));
++        const childSpaced = html[at - 1] === ' ';
++        // The predicate on the SAME container styles the child walk passes (ctx.styles).
++        expect(childSpaced, `${pk}${marked ? '*' : ''}>${nk} in container #${ci}`)
++          .toBe(wsAfterSeparator(prev, next, cssOf(cp)) === ' ');
++        checked++; if (childSpaced) spaced++;
++      }
++    }
++    // 4 × 4 × 2 × 7 = 224 combinations, of which only marked inline pairs in
++    // a block/normal container separate: 2 × 2 (inline kinds) × 2 containers.
++    expect(checked).toBe(224);
++    expect(spaced).toBe(8);
++  });
++});

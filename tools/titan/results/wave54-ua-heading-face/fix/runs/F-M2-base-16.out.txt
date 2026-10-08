@@ -1,0 +1,9 @@
+[F-M2-base-16] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 c78f355705a8c45f → 0579136aa3ba4333
+[F-M2-base-16] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M2-base-16.red.log)
+[F-M2-base-16] red: UAElementFontRuleTest tests=10 failures=1 errors=0 ts=2026-10-08T19:57:12.938Z
+[F-M2-base-16] red:   RED inset-014 - the rule's em base on the verbatim monospace host is 13 (gate forced open) :: java.lang.AssertionError: expected:<26.0> but was:<32.0>
+[F-M2-base-16] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:13.017Z
+[F-M2-base-16] restored runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256=c78f355705a8c45f BYTE-EXACT
+[F-M2-base-16] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M2-base-16.green.log)
+[F-M2-base-16] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:57:14.297Z
+[F-M2-base-16] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:14.769Z

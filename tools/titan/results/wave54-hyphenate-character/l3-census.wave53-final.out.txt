@@ -1,0 +1,42 @@
+run wave53-final: 1435 per-test IR documents
+
+(1) U1 — hyphenate-character on the wire: 14 declarations in 6 documents
+   wpt__css-text__hyphens__hyphenate-character-001            Generic "\"\""               -> ""                     CHANGES (Generic -> typed)
+   wpt__css-text__hyphens__hyphenate-character-002            Generic "\"\""               -> ""                     CHANGES (Generic -> typed)
+   wpt__css-text__hyphens__hyphenate-character-003            "\\2022"                     -> "\u2022"               CHANGES
+   wpt__css-text__hyphens__hyphenate-character-004            "/-/"                        -> "/-/"                  byte-identical
+   wpt__css-text__hyphens__hyphenate-character-005            "\\00a0\\0640"               -> "\u00a0\u0640"         CHANGES
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          "-"                          -> "-"                    byte-identical
+   U1 wire carriers (value changes): 4: hyphenate-character-001, hyphenate-character-002, hyphenate-character-003, hyphenate-character-005
+
+(2) U2-android reach (non-auto, U+00AD piece, not pre, not hyphens:auto): 3 documents
+   wpt__css-text__hyphens__hyphenate-character-001            wpt__css-text__hyphens__hyphenate-character-001__1-177 5 shy pieces
+   wpt__css-text__hyphens__hyphenate-character-003            wpt__css-text__hyphens__hyphenate-character-003__1-193 5 shy pieces
+   wpt__css-text__hyphens__hyphenate-character-004            wpt__css-text__hyphens__hyphenate-character-004__1-201 5 shy pieces
+    U2-ios reach (same + the CF-dictionary fold of hyphens:auto runs): 5 documents
+   wpt__css-text__hyphens__hyphenate-character-001            wpt__css-text__hyphens__hyphenate-character-001__1-177 5 shy pieces (1 components)
+   wpt__css-text__hyphens__hyphenate-character-002            wpt__css-text__hyphens__hyphenate-character-002__1-185 dictionary-fold (no shy; lang en) (1 components)
+   wpt__css-text__hyphens__hyphenate-character-003            wpt__css-text__hyphens__hyphenate-character-003__1-193 5 shy pieces (1 components)
+   wpt__css-text__hyphens__hyphenate-character-004            wpt__css-text__hyphens__hyphenate-character-004__1-201 5 shy pieces (1 components)
+   wpt__css-text__hyphens__hyphenate-limit-chars-001          hyphens__hyphenate-limit-chars-001__0__0-223 dictionary-fold (no shy; lang en-us); hyphens__hyphenate-limit-chars-001__0__1-224 dictionary-fold (no shy; lang en-us) … (9 components)
+
+(3) U3 (static differential): 18 documents; U3b: 4 documents
+
+(4) cross-check vs expectations.json lanes["L3-hyphenate-character"]
+   wire carriers: mine 19 / plan 19 — equal: True
+   captures web      mine 15 / plan 15 — equal: True
+   captures ios      mine 16 / plan 16 — equal: True
+   captures android  mine 15 / plan 15 — equal: True
+   revertUnit U1          captures web/ios/android [3, 3, 2] wire 4
+   revertUnit U2-android  captures web/ios/android [0, 0, 3] wire 0
+   revertUnit U2-ios      captures web/ios/android [0, 5, 0] wire 0
+   revertUnit U3          captures web/ios/android [15, 15, 15] wire 18
+   revertUnit U3b         captures web/ios/android [4, 4, 4] wire 4

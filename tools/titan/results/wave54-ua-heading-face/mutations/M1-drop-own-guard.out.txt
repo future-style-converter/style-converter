@@ -1,0 +1,9 @@
+[M1-drop-own-guard] file=runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 mutated=b6e163be183520f9c506450b6dbc15849ea054c5a624cf6e33cdd1ff6edf54cf
+[M1-drop-own-guard] mutated run rc=1
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=1 errors=0
+    RED: inset-001 - the extractor-baked h1 (own 32 and 700) comes back as the SAME list :: java.lang.AssertionError: expected same:<[IRProperty(type=Color, data={"srgb":{"r":0,"g":0,"b":0},"original":"black"}), IRProperty(type=Position, data="ABSOLUTE
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M1-drop-own-guard] restored sha256 after=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 BYTE-EXACT
+[M1-drop-own-guard] restored run rc=0
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=0 errors=0
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0

@@ -1,0 +1,29 @@
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 android                            FAIL       [GATING -> revert P]
+     line: [P] bidi/bidi-lines-001 android line starts y117:x33 y159:x278 → GEOMETRY WRONG (line y117 left x33 vs ref x29±1)
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 android                            FAIL       [GATING -> revert P]
+     line: [P] bidi/bidi-lines-002 android line starts y159:x35 y239:x280 → GEOMETRY WRONG (line y159 left x35 vs ref x31±1)
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-001 ios                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 web                                PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [P] bidi/bidi-lines-002 ios                                PASS       [control: expected to stay PASS]
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix web                                     FAIL       [GATING -> revert Mprime]
+     line: [M] counter-suffix web text y214-225:x104-126 y238-249:x104-127 y262-273:x104-126 y286-297:x104-127 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix ios                                     FAIL       [GATING -> revert Mprime]
+     line: [M] counter-suffix ios text y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 no marker ink on text row y214-225)
+!! L1-rtl-marker-bake       rtl-marker-bake.geometry.py                [M] counter-suffix android                                 FAIL       [GATING -> revert Mprime]
+     line: [M] counter-suffix android text | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl text rows 0/4 in x95-128 (text at x152-174))
+!! L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix web                                         FAIL       [GATING -> revert Mprime]
+     line: counter-suffix web y214-225:x47-126 y238-249:x47-127 y262-273:x46-126 y286-297:x47-127 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 left x47 vs ref x104)
+ - L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix ios                                         FAIL       [report: expected WRONG until the target is fixed]
+     line: counter-suffix ios y214-225:x103-126 y238-249:x104-126 y262-273:x103-126 y286-297:x104-126 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 right x126 vs ref x144)
+!! L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-suffix android                                     FAIL       [GATING -> revert Mprime]
+     line: counter-suffix android y214-225:x152-174 y239-249:x152-174 y262-273:x152-174 y287-297:x152-174 | rows 0-207 identical to wave53-open → GEOMETRY WRONG (rtl row 1 left x152 vs ref x104)
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested web                          PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested ios                          PASS       [control: expected to stay PASS]
+   L1-rtl-marker-bake       lists-bakes.geometry.py                    counter-reset-reversed-nested android                      PASS       [control: expected to stay PASS]
+
+geometry-gate wave53-final (base wave53-open): 15 keys — PASS 7 · FAIL 8 (gating 7) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 7 (PASS 0 FAIL 7) · control 7 (PASS 7 FAIL 0) · report 1 (PASS 0 FAIL 1) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: Mprime, P
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)
+exit=0

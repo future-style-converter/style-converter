@@ -1,0 +1,9 @@
+extracted css/css-anchor-position/anchor-center-safe-rtl.html → fixtures/wpt/css-anchor-position/anchor-center-safe-rtl.json (+ ref) [post-load: bailed — anchor-inset-undeliverable (1/2 anchor-aligned boxes: resolved inset != painted offset (worst 76.59px at path 1))] [bidi-bake: baked — 4 roots, 7 runs]
+converter: no warning lines
+documents 48: identical 47 · renumbered 0 · content-changed 1
+ok   content-changed ⊆ L1 wire carriers: ["wpt__css-anchor-position__anchor-center-safe-rtl"]
+ok   wpt__css-anchor-position__anchor-center-safe-rtl: 14 → 14 components (no component added)
+ok   wpt__css-anchor-position__anchor-center-safe-rtl wpt__css-anchor-position__anchor-center-safe-rtl__2: changed ["PaddingTop","PaddingRight","PaddingBottom","PaddingLeft"] → all Padding* {px:0}
+ok   wpt__css-anchor-position__anchor-center-safe-rtl wpt__css-anchor-position__anchor-center-safe-rtl__4: changed ["PaddingTop","PaddingRight","PaddingBottom","PaddingLeft"] → all Padding* {px:0}
+W2 CHECK: ALL PASS
+exit 0

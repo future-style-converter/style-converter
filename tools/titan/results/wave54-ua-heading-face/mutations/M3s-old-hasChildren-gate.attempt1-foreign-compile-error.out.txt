@@ -1,0 +1,6 @@
+[M3s-old-hasChildren-gate] file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift sha256 before=01e33eb2b97ee88fef39b40b47c54b672eb1f6f275e41311dbc3f6f34080f76e mutated=d3df5189ef9eab21472226d027ea765a5d1d04bf0e181ea9b2a2a9cfa6a80fb4
+[M3s-old-hasChildren-gate] red run rc=65
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/TypographyTests.swift:311:102: error: value of type 'HyphenateCharacterConfig' has no member 'keyword'
+[M3s-old-hasChildren-gate] restored sha256 after=01e33eb2b97ee88fef39b40b47c54b672eb1f6f275e41311dbc3f6f34080f76e BYTE-EXACT
+[M3s-old-hasChildren-gate] green run rc=0
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.436 (0.727) seconds

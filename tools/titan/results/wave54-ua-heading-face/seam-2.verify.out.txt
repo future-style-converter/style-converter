@@ -1,0 +1,11 @@
+[seam-2] lock taken; seam sha256 before=905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e (HEAD 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e)
+[seam-2] patch applied: 0ba22748341697614b147990e82454e3a920203401d9248d3551196bbde405bf
+Thu Oct  8 19:47:27 CEST 2026
+renderer-object: Oct 8 19:48:23 2026 gate-symbol-refs=1
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.342 (0.349) seconds
+	 Executed 25 tests, with 0 failures (0 unexpected) in 0.342 (0.350) seconds
+** TEST SUCCEEDED **
+Thu Oct  8 19:48:39 CEST 2026
+[seam-2] focused suite rc=0
+[seam-2] restored seam sha256 after=905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e BYTE-EXACT-HEAD
+[seam-2] lock released

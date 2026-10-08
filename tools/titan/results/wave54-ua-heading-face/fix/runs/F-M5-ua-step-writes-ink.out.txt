@@ -1,0 +1,9 @@
+[F-M5-ua-step-writes-ink] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 c78f355705a8c45f → 06d05854400a6011
+[F-M5-ua-step-writes-ink] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M5-ua-step-writes-ink.red.log)
+[F-M5-ua-step-writes-ink] red: UAElementFontRuleTest tests=10 failures=1 errors=0 ts=2026-10-08T19:57:20.124Z
+[F-M5-ua-step-writes-ink] red:   RED the step writes only FontSize and FontWeight (every other entry kept, in order) :: java.lang.AssertionError: block-in-inline-015-print__0__0-190 expected:<[IRProperty(type=MarginTop, data={"px":0}), IRProperty(type=MarginRight, data={"px":0}), IRPropert
+[F-M5-ua-step-writes-ink] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:20.202Z
+[F-M5-ua-step-writes-ink] restored runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256=c78f355705a8c45f BYTE-EXACT
+[F-M5-ua-step-writes-ink] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/F-M5-ua-step-writes-ink.green.log)
+[F-M5-ua-step-writes-ink] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:57:21.366Z
+[F-M5-ua-step-writes-ink] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:57:21.771Z

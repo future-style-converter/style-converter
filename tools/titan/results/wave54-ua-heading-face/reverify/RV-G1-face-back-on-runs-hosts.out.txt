@@ -1,0 +1,14 @@
+[RV-G1-face-back-on-runs-hosts] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt: sha256 c78f355705a8c45f -> c0599b9a3f4ae39b  ('!component.children.isNullOrEmpty()' -> '!component.children.isNullOrEmpty() && component.runs.isNullOrEmpty()')
+[RV-G1-face-back-on-runs-hosts.red] gradle rc=1 22:15:00
+> Task :runtime:testDebugUnitTest FAILED
+UAElementFontRuleTest > GO-SMALL - every heading host with child boxes keeps its list (005, 006, 014 held, 011 control) FAILED
+BUILD FAILED in 2s
+[RV-G1-face-back-on-runs-hosts.red] UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0 ts=2026-10-08T20:15:00.247Z
+[RV-G1-face-back-on-runs-hosts.red] UAElementFontRuleTest tests=10 failures=1 errors=0 ts=2026-10-08T20:15:00.301Z
+[RV-G1-face-back-on-runs-hosts.red]   RED GO-SMALL - every heading host with child boxes keeps its list (005, 006, 014 held, 011 control) :: java.lang.AssertionError: text-decoration-inset-005__1__0-069
+[RV-G1-face-back-on-runs-hosts.red] InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T20:15:00.374Z
+[RV-G1-face-back-on-runs-hosts] restored runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt: sha256 c78f355705a8c45f BYTE-EXACT
+[RV-G1-face-back-on-runs-hosts.green] gradle rc=0 22:15:02
+[RV-G1-face-back-on-runs-hosts.green] UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0 ts=2026-10-08T20:15:02.474Z
+[RV-G1-face-back-on-runs-hosts.green] UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T20:15:02.025Z
+[RV-G1-face-back-on-runs-hosts.green] InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T20:15:02.544Z

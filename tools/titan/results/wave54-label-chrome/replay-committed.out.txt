@@ -1,0 +1,30 @@
+R0  pre-(iv) rule (every stem label-due) on the 77fe41e8 PNGs
+R0 000_ATC_AllThenProps                 [band-identical, 224 glyph px] ok
+R0 001_ATC_PropsThenAll_InGreenParent   [band-identical, 437 glyph px] RED (i) Android: 437/437 glyph px are ground; (i) iOS: 437/437 glyph px are ground; (i) web: 437/437 glyph px are ground
+R0 002_reset                            [band-identical, 80 glyph px] ok
+R0 003_ATC_InitialUnderRedParent        [band-identical, 369 glyph px] RED (i) Android: 369/369 glyph px are ground; (i) iOS: 369/369 glyph px are ground; (i) web: 369/369 glyph px are ground
+R0 004_span                             [band-identical, 65 glyph px] ok
+R0 005_ATC_DirectionSurvives            [band-identical, 293 glyph px] RED (i) Android: 293/293 glyph px are ground; (i) iOS: 293/293 glyph px are ground; (i) web: 293/293 glyph px are ground
+R1  committed rule, manifest verified against the post-seed listing (committed ∪ 18 seeded)
+R1  manifest 001_ATC_PropsThenAll_InGreenParent: verified
+R1  manifest 003_ATC_InitialUnderRedParent: verified
+R1  manifest 005_ATC_DirectionSurvives: verified
+R1 000_ATC_AllThenProps                 [band-identical, 224 glyph px] ok
+R1 001_ATC_PropsThenAll_InGreenParent   [exempt band-identical, 0 glyph px] ok
+R1 002_reset                            [band-identical, 80 glyph px] ok
+R1 003_ATC_InitialUnderRedParent        [exempt band-identical, 0 glyph px] ok
+R1 004_span                             [band-identical, 65 glyph px] ok
+R1 005_ATC_DirectionSurvives            [exempt band-identical, 0 glyph px] ok
+R2  mutations — each must be RED under the committed rule
+R2 m1 label drawn ×3 on exempt 001                                      [exempt glyph-mask, 0 glyph px] RED (iv) Android: 437/437 label px drawn on a label-exempt capture; (iv) iOS: 437/437 label px drawn on a label-exempt capture; (iv) web: 437/437 label px drawn on a label-exempt capture
+R2 m2 label drawn on web only, exempt 003                                      [exempt glyph-mask, 0 glyph px] RED (iv) web: 369/369 label px drawn on a label-exempt capture
+R2 m3 label erased ×3 on due 000                                      [band-identical, 224 glyph px] RED (i) Android: 224/224 glyph px are ground; (i) iOS: 224/224 glyph px are ground; (i) web: 224/224 glyph px are ground
+R2 m4 manifest lists leaf 000: RED manifest: "ATC_AllThenProps" in fixtures/combinations/all-then-color.json is a leaf, entry says container — a childless textless root IS labelled
+R2 m5 stale manifest entry: RED manifest: fixtures/combinations/all-then-color.json declares no component "ATC_Gone"; manifest: 007_ATC_Gone has no committed PNG while fixtures/combinations/all-then-color.json has committed baselines (stale entry)
+R3  the committed stems through the committed decision on TODAY's listing, vs HEAD's checker
+R3  manifest 001_ATC_PropsThenAll_InGreenParent: pending
+R3  manifest 003_ATC_InitialUnderRedParent: pending
+R3  manifest 005_ATC_DirectionSurvives: pending
+R3  130 stems: green 130/130, verdict object identical to HEAD 130/130 (HEAD dump 130), exempted 0
+REPLAY OK — committed rule: R0 reproduces the wave-53 reds; R1 6/6 green with 3 entries verified post-seed; R2 m1-m5 red; R3 verdicts identical to HEAD on the committed set
+replay exit=0

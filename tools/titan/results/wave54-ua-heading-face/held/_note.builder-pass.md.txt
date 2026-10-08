@@ -1,0 +1,251 @@
+# wave 54 · L5 ua-heading-face — lane note
+
+Builder lane L5 of wave 54 (PLAN `tools/titan/results/wave54-plan/PLAN.md` "### L5 · ua-heading-face", brief
+`wave54-plan/ua-heading-face.md`). Shared tree, HEAD db6e8aa0. Nothing committed; no seam file left modified
+(sha256 checks below); no device, Chromium, simulator, emulator, gate or full suite was run.
+
+## What changed and why
+
+**The defect (wave53-final, looked at):** both natives paint author-unsized headings at the 16 px regular body face
+where the ref paints the UA `2em/1.5em/1.17em bold` face.
+- Android `css-break/block-in-inline-015-print` f 0.9489: four 16 px regular lines (bands 9–12 px, right edges x42–53)
+  against the ref's four bold lines (18–25 px, x72–96). iOS passes the same IR at P 0.9894 because it has the rule.
+- `text-decoration-inset-005/-006` ios/android: ONE 16 px line, sup raised and sub lowered inside it (the fold IS
+  engaged), where the ref wraps a 2em bold paragraph onto two lines ("…b(row)n" / "fox").
+- `inset-014` ios/android: the right 16ch two-line wrap at 13 px where the ref paints 26 px bold monospace.
+- `inset-011` (control): Arabic runs stacked, no colored underlines (the fold refuses). Unchanged by design.
+
+**Mechanism (traced; agrees with the brief, verified on the tree):**
+- Compose had no UA font step: `ComponentRenderer.kt` :1141 ran `ListStyleUaRule.apply` as the only tag-keyed rule.
+- iOS `UAElementFontRule.headingAppliesTo(hasElementChildren:)` stood the heading half down for every heading with
+  children (wave-40 measurement on the pre-fold STACKED render).
+- Fold admission never reads FontSize/FontWeight (brief §4 D) — now PINNED on both natives (soundness pins below).
+
+**U1-android (Compose):**
+- NEW `runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt` (198 lines) —
+  `UAElementFontRule.apply(sourceTag, own, merged, standsDown)`: h1…h6 `2/1.5/1.17/1/.83/.67` + bold, sub/sup
+  `1/1.2`; em base `DynamicValueResolver.fontSizePxOf(merged) ?: MonospaceUAFontSize.resolveSp(merged) ?: 16`; the
+  author's own FontSize/Font/FontWeight wins; in-place substitution; returns the SAME list instance when nothing fires.
+  FontWeight is emitted as the INTEGER `{"weight":700}` (ValueExtractors/TextStyleApplier read `intOrNull`; a 700.0
+  double reads as null — mutation M4 proves the pin catches it).
+- NEW `…/typography/UAHeadingFoldGate.kt` (105 lines) — `standsDown(component, mergedPreUa)`: false for a leaf;
+  true for a non-heading with children (the old flag, never read); for a heading with children, true unless
+  RenderContent would resolve a run plan (runs present, host not `position: relative`) AND `InlineRunFold.fold` on it
+  returns `Folded`. Host lang = `component.lang` (what RenderComponent provides as LocalContentLanguage, verbatim).
+- seam-1 (below) hoists the ListStyleUaRule result into `listUaProperties` and wraps it in the UA font step, BEFORE
+  DynamicValueResolver (:1206), so `ch`/`em` on the heading resolve against the UA face.
+
+**U2-ios (SwiftUI):**
+- NEW `runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift` (85 lines) —
+  `standsDown(component:inFlowChildren:mergedPreUA:)`: same predicate, calling `InlineRunFlow.fold` with the call
+  site's inputs (`FlexboxApplier.sorted(inFlowChildren)`, total child count, `meta.lang`).
+- seam-2 (below): the `hasElementChildren:` argument of `UAElementFontRule.apply` in `mergedProperties(now:)` becomes
+  the gate's verdict.
+- `StyleEngine/typography/UAElementFontRule.swift`: DOCS ONLY (verified: `git diff` has no non-comment line) — TWIN
+  STATUS re-trued (ported), `headingAppliesTo` re-dated (the wave-40 table kept as the stacked-render record, the
+  wave-54 narrowing stated), the `hasElementChildren` parameter doc.
+
+**Where the tree and the brief disagree (tree wins):**
+- Brief: `standsDown(component, mergedPreUa, lang)`. Tree: the lang the renderer hands the fold is the host's own
+  `component.lang` (LocalContentLanguage is provided verbatim per component, never `?:`-chained — ComponentRenderer.kt
+  :270-292), so the Kotlin gate takes no lang parameter.
+- The Compose renderer suppresses the run plan for a `position: relative` host (RenderContent :3366); the gate mirrors
+  that (pinned). The WPT float/atom packer suppressions (:3371-3373) are NOT mirrored: those members are refused by the
+  fold's own member ring anyway, and no corpus heading host reaches them (census).
+
+## Revert unit U1-android (one commit)
+
+Paths:
+- `runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt` (new)
+- `runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt` (new)
+- `runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleTest.kt` (new)
+- `runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFoldGateTest.kt` (new)
+- `runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFaceReplay.kt` (new, test helper)
+- `runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAHeadingFaceWire.kt` (new, generated verbatim wire)
+- `runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt` ← `seam-1.patch`
+
+## Revert unit U2-ios (one commit)
+
+Paths:
+- `runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAHeadingFoldGate.swift` (new)
+- `runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/typography/UAElementFontRule.swift` (docs only)
+- `runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAHeadingFoldGateTests.swift` (new; also holds the test-target
+  enums `UAHeadingFaceReplay` and `UAHeadingFaceWire` that the UAElementFontRuleTests additions use — same unit)
+- `runtimes/swiftui/Tests/StyleConverterRuntimeTests/UAElementFontRuleTests.swift` (additions + one comment re-trued)
+- `runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift` ← `seam-2.patch`
+
+The two units are independent in code (either reverts alone and both trees compile). Doc coupling only: if U1-android
+is reverted alone, `UAElementFontRule.swift`'s TWIN STATUS ("PORTED") becomes false; if U2-ios is reverted alone, the
+Kotlin gate's banner ("Twin of SwiftUI …UAHeadingFoldGate.swift") does. Either is a one-paragraph docs-pass fix.
+
+Lane record (not a revert unit): `tools/titan/results/wave54-ua-heading-face/` (this note, patches, scripts, outputs).
+
+## Seam patches (hand-off; PLAN §3)
+
+| patch | seam file (sha256 at db6e8aa0 = 7cce3b22) | anchor | unit |
+|---|---|---|---|
+| `seam-1.patch` (sha256 97f8e4cf…) | `ComponentRenderer.kt` da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db | :1141 `val rawProperties = …ListStyleUaRule.apply(` | U1-android |
+| `seam-2.patch` (sha256 9a5c02cf…) | `ComponentRenderer.swift` 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e | :343-356 `return UAElementFontRule.apply(` | U2-ios |
+
+- Both `git apply --check` clean on the tree (seam files clean at HEAD).
+- Landing-order dry run (scratch repo, current versions of the other lanes' patches): L2 seam-1 → **L5 seam-1** → L4
+  seam-1 → L3 seam-1 on `.kt`, then **L5 seam-2** → L3 seam-2 on `.swift`: all six applied.
+- Verified under the per-file lock (`seam-verify.sh`: mkdir lock → apply → focused suite → restore from HEAD → rmdir):
+  - seam-1 (`seam-1.verify.out.txt`): patched sha256 0cef8ca1…; `compileDebugKotlin` executed, the compiled
+    `ComponentRenderer.class` references `UAHeadingFoldGate` (gate-refs=1); UAElementFontRuleTest 11/0, UAHeadingFoldGateTest
+    9/0, InlineRunFoldTest 45/0 (tests/failures); restored sha256 da2df0b4… **BYTE-EXACT-HEAD**; lock released.
+  - seam-2 (`seam-2.verify.out.txt`, `seam-2.catalyst.log`): patched sha256 0ba22748…; the renderer object was rebuilt
+    inside the window (19:48:23) with `UAHeadingFoldGate` symbol refs 0 → 1; **Executed 25 tests, with 0 failures**;
+    restored sha256 905d1669… **BYTE-EXACT-HEAD**; lock released.
+- Rule 2b: no owned file imports a seam-only symbol (the seams consume the new files, not the reverse); the unpatched
+  tree compiles (every focused run below is on it).
+
+## Pins (verbatim wire) and executed mutations
+
+Verbatim payloads: `tools/titan/runs/wave53-final/sections/*/per-test-ir/` — byte-identical in `wave54-open` (sha256 per
+file, `gen-wire-constants.py`): block-in-inline-015-print 1470c4b9…, inset-001 57d3cf01…, inset-005 13530ccf…,
+inset-006 802e7ac1…, inset-011 f5edf747…, inset-014 1445c423…, text-decoration-color f815b121…. Embedded as raw
+strings, generated by `gen-wire-constants.py --kt / --swift` (never hand-edited). The pins replay the seam's cascade
+step root→target (`UAHeadingFaceReplay`: merge → ListStyleUaRule → UA font step with the gate → inheritable subset),
+asserting the replay's premises per node (no `All`, no buckets, no `var()`).
+
+**JVM** `(cd apps/android-harness && ./gradlew :runtime:testDebugUnitTest --tests '*UAElementFontRule*' --tests
+'*UAHeadingFoldGate*' --tests '*InlineRunFoldTest')` — green: UAElementFontRuleTest 11/0, UAHeadingFoldGateTest 9/0,
+InlineRunFoldTest 45/0.
+- UAElementFontRuleTest: the four block-in-inline leaf h1s → 32 / 700, one entry each; TextStyleApplier paints 32.sp
+  Bold; inset-001 (own 32/700) → SAME instance; inset-014 → 26 / 700; inset-005/-006 hosts → 32 / 700; inset-011 →
+  SAME instance (control); text-decoration-color sup → 13.333, no weight; its h3 → 18.72 / 700; untagged → SAME
+  instance; inherited 20 px → h2 30 in place; `standsDown` withholds the heading half, never the sup half.
+- UAHeadingFoldGateTest: inset-005 (fold `Folded`, text "the ultra-quick brown fox") / -006 / -014 → applies; inset-011
+  → `Bailed member-prop:TextDecorationColor-divergence` → stands down; leaf → applies; `u` (non-heading) → old flag;
+  relative host → stands down even though its runs fold; no runs → stands down; soundness: fold outcome pre-UA ==
+  post-UA (face forced on) for all four hosts.
+
+**Catalyst** `xcodebuild test -scheme StyleConverterRuntime -destination 'platform=macOS,variant=Mac
+Catalyst,arch=arm64' -only-testing:StyleConverterRuntimeTests/UAElementFontRuleTests
+-only-testing:StyleConverterRuntimeTests/UAHeadingFoldGateTests` → **Executed 25 tests, with 0 failures** (18 + 7;
+`catalyst-1.log`). UAHeadingFoldGateTests: inset-005/-006/-014 fold (non-nil) and take 32/32/26; inset-011 nil →
+stands down, list types unchanged; leaf h1 → 32; `u` → old flag; soundness `Folded` equality pre/post UA.
+UAElementFontRuleTests additions: verbatim leaf h1 → StyleBuilder 32 px `.bold`; verbatim inset-001 untouched.
+
+**STOP RULE checked:** the first JVM and Catalyst pins say the verbatim inset-005/-006/-014 hosts FOLD on both natives
+(not Bailed), so the 005/006/014 rows stand and the lane is NOT reduced to the GO-SMALL fallback.
+
+**Executed mutations** (`mutate-compose.sh` / `mutate-swift.sh`; one exact literal swapped from
+`mutations/literals/`; outputs `mutations/<name>.out.txt`, logs `.red.log` / `.green.log`; final pass on the final
+file contents):
+
+| # | mechanism mutated | file sha256 before → mutated → after | red (pins that failed) | green after restore |
+|---|---|---|---|---|
+| M1 | drop the own-declaration guard (size half) | UAElementFontRule.kt aaceeebf… → b6e163be… → aaceeebf… BYTE-EXACT | `inset-001 … SAME list` | 11/0 · 9/0 |
+| M2 | em base 16 instead of MonospaceUAFontSize | aaceeebf… → 268d2139… → aaceeebf… BYTE-EXACT | `inset-014 …` expected 26.0 was 32.0 | 11/0 · 9/0 |
+| M3 | gate = the old hasChildren gate | UAHeadingFoldGate.kt e0e3186d… → b6c24f56… → e0e3186d… BYTE-EXACT | gate inset-005/-006/-014 + rule inset-005/-006, -014 (5) | 11/0 · 9/0 |
+| M4 | FontWeight emitted as 700.0 | aaceeebf… → 005085f9… → aaceeebf… BYTE-EXACT | 5 incl. `TextStyleApplier paints` (Bold → null) | 11/0 · 9/0 |
+| M5 | the UA step also writes Color (breaks §4 D) | aaceeebf… → dc8d6a6a… → aaceeebf… BYTE-EXACT | `soundness …` inset-005 Folded → Bailed | 11/0 · 9/0 |
+| M3s | Swift gate = the old hasChildren gate | UAHeadingFoldGate.swift 2ca760a6… → 7e189b26… → 2ca760a6… BYTE-EXACT | 5 failures: testInset005 (×3), -006, -014 | Executed 25, 0 failures |
+| M5s | Swift UA step also writes Color | UAElementFontRule.swift 97146660… → 62b01672… → 97146660… BYTE-EXACT | 3 failures: `testFoldVerdictIsInvariantUnderTheUAFace` | Executed 25, 0 failures |
+
+Retries, stated: the first final-pass M1 green run and M2 red run hit foreign interference (another lane's
+`PlaceholderFloorBorderBoxTest.kt` compile error and a concurrent Gradle run racing on `test-results/binary`); both
+were re-run clean (the table rows). The first M3s red run hit L3's in-flight `HyphenateCharacterConfig` compile error
+(`mutations/M3s-old-hasChildren-gate.attempt1-foreign-compile-error.out.txt`) and was re-run clean. M5/M5s guard the
+soundness pin from the UA side; the fold side (InlineRunFold.kt / InlineRunFlow.swift) is read-only for this lane, so
+"a future fold that reads the face" is guarded by the same assertion but was not mutated.
+
+## Geometry probe
+
+`python3 tools/titan/results/wave54-plan/geometry-gate.py wave53-final --base wave53-open --lanes L5 --self-test` →
+**exit 0**, `self-test: HOLDS` (`geometry-gate.self-test.wave53-final.out.txt`): 15 keys — gating 1 (block-in-inline
+android) FAIL `band height 9 vs ref 18 (y23)`; control 8 PASS (ref/web rows, block-in-inline ios, inset-011 ×3 exact
+bands); report 6 FAIL (inset-005/-006 "1 heading line band vs ref 2", inset-014 "line-1 band 11|12 px"). Revert rule 4
+names U1-android today, as it must before the lane lands.
+
+## Census (blast radius) — own method
+
+`census-jvm.kt.txt` (a temporary JUnit harness run once in the Compose test tree, then moved out of it) walks EVERY
+per-test IR document of a run through the production decoder + composer and replays the seam at every node (merge →
+ListStyleUaRule → UAHeadingFoldGate → UAElementFontRule → inheritable subset), recording each tagged component's
+pre/post FontSize and FontWeight, whether the step fires (`post !== pre`), whether the component is RENDERED as its own
+component on Compose (not consumed by an engaged fold of an ancestor), and whether the iOS heading flag flips
+(old `children non-empty` vs the new gate verdict). Outputs: `census-jvm.wave53-final.out.txt` and
+`census-jvm.wave54-open.out.txt` — identical apart from the run id: **1435 documents, 43 tagged components, 30 firing**.
+
+- **Android carriers (fires AND rendered), 10 documents** — exactly `expectations.json` captureCarriers.android:
+  block-in-inline-015-print (4 h1 → 32/700), counter-list-item (h2 → 24/700), counter-reset-increment-overflow-underflow
+  (6 h3 → 18.72/700), text-decoration-color (h3 18.72/700; sub, sup → 13.33), inset-005 / -006 (h1 host → 32/700),
+  inset-014 (h1 host → 26/700), subelements-003 (stacked sup → 13.33), backdrop-filter-border-radius-change /
+  -corner-shape-change (own 100 px h1s → bold half only).
+- Firing but NOT rendered (consumed by an engaged fold — the fold reads the member's OWN properties, so no pixel can
+  move): inset-005/-006 sup + sub, subelements-002's four sups.
+- Not firing: inset-001/002/003/004/007/008/009/012/013/015/016/024 (own 32/700, SAME instance), inset-011 (gate
+  stands down, SAME instance).
+- **iOS carriers: 3 documents** — the heading flag flips only on inset-005, -006, -014 (inset-011 stays true). iOS
+  leaf and sup/sub paths do not read the changed flag, so nothing else on iOS can move. The four Swift fold verdicts
+  are pinned on the verbatim wire.
+- **Web: 0** (no web file touched). Wire: **0** documents (no converter / extractor change).
+- Fixture net: the 9 `tools/visual/gate-fixtures.txt` fixtures carry no `_tag` (grep: 0 each), and no fixture under
+  `fixtures/properties|components|fidelity|combinations` does → the rule's same-instance fast path → byte-identical.
+- **Passing cells among the carriers today: 0** (`carrier-cells.out.txt`; all 13 carrier cells are f, wave53-final ==
+  wave54-open).
+- Cross-check: matches `expectations.json` lanes["L5-ua-heading-face"] captureCarriers (web 0 · ios 3 · android 10),
+  wireCarriers [] and revertUnits (U1-android: the 10 android stems; U2-ios: the 3 ios stems) exactly.
+
+## Predictions (against wave54-open = wave53-final)
+
+| cell | from → predicted | confidence | gate | unit |
+|---|---|---|---|---|
+| css-break/block-in-inline-015-print android | f 0.9489 → **P ≈0.989** (iOS gives P 0.9894 with the identical rule on the same IR) | HIGH | floor 0.97 + geometry gating | U1-android |
+| text-decoration-inset-005 android / -006 android | f 0.9 / 0.8993 → P ≈0.98 | MED | report | U1-android |
+| text-decoration-inset-005 ios / -006 ios | f 0.8995 / 0.8987 → P ≈0.965 | MED | report | U2-ios |
+| text-decoration-inset-014 ios / android | f 0.9238 / 0.923 → P | MED-LOW | report | U2-ios / U1-android |
+| text-decoration-color android | f 0.6164 → ≈0.67 (iOS with the rule: f 0.674), stays f | LOW, directed | — | U1-android |
+| counter-list-item, counter-reset-increment-overflow-underflow, subelements-003, backdrop-filter-border-radius-change, -corner-shape-change android | move, stay f | LOW, undirected | — | U1-android |
+
+The MED rows' named risk (unverifiable here): an abspos `<h1>` with `width: auto` must wrap at its containing block at
+the 2em face. At 16 px today the line is 191 px and never needed to wrap; the ref's 2em line 1 is 320 px plus "fox".
+Compose measures abspos boxes through `absposOverflowMeasure` (unbounded) unless the static-position shrink-to-fit
+applies; if the paragraph is measured unbounded, -005/-006 stay f with "1 heading line band". inset-014 has an explicit
+16ch width (it wraps today), so its risk is the `ch` re-resolution against 26 px, not the wrap.
+
+## Must not move (46 cells, `expectations.json` mustNotMove; census basis)
+
+block-in-inline-015-print ios (leaf path unchanged); inset-011 ios/android (gate stands down → same instance /
+unchanged flag) and web; inset-001/002/003/004/007/008/009/012/013/015/016/024 ios+android (own size+weight → same
+instance; iOS leaf path unchanged); subelements-002 ios/android/web (members consumed by the fold); the iOS and web
+cells of counter-list-item, counter-reset-increment-overflow-underflow, text-decoration-color, subelements-003 and the
+two backdrop-filter documents (iOS paths that read no changed flag; no web change); inset-005/-006/-014 web.
+`block-in-inline-015-print` web is L6's carrier (§4), not listed here.
+
+## Hand-offs
+
+- Seam patches: `seam-1.patch` (U1-android), `seam-2.patch` (U2-ios) — above.
+- Hunks for other lanes: none.
+- Docs (orchestrator's docs pass): BACKLOG 0(g) (the Compose twin is no longer deferred), the 4(b′) mechanism sentence
+  (brief §4 E: the decoration-colour refusal no longer limits inset-005/006/014 — the div carries `Color black`; the
+  residual was the face). `UAElementFontRule.swift`'s TWIN STATUS is already re-trued inside U2-ios.
+- Sweep restamp (§4 step 5): Compose `:runtime` +20 tests (UAElementFontRuleTest 11, UAHeadingFoldGateTest 9);
+  SwiftUI +9 (UAHeadingFoldGateTests 7, UAElementFontRuleTests +2). No new `*Applier` file → coverage-audit
+  `registered` / `real` unchanged.
+
+## ORCHESTRATOR WINDOW REQUESTS
+
+None (PLAN §2 L5 "Window requests: none"). The lane's device evidence arrives with stage 2 (`wave54-probe`) and the
+closing gate: `python3 tools/titan/results/wave54-plan/ua-heading-face.geometry.py <run>` must print block-in-inline
+android `→ GEOMETRY OK` (gating U1-android, floor 0.97) and keep the inset-011 rows OK (exact bands).
+
+## What I could NOT verify
+
+- Any device picture: the 2em face on Android, the abspos auto-width wrap of inset-005/-006 at 32 px on either native,
+  inset-014's 16ch re-resolution against 26 px on device, and every SSIM prediction above. No replay was run; nothing
+  here is labelled picture-correct.
+- That the Compose branch actually taken for a heading host (positioned-container with a transform containing block,
+  flex/grid, the WPT float/atom packers, float-avoid) agrees with the gate beyond the mirrored plan suppressions — the
+  census shows 0 corpus heading hosts on an unmirrored branch, but it is not pinned.
+- That a future InlineRunFold/InlineRunFlow change cannot make admission read the face: the soundness pins catch it,
+  but the fold files are read-only for this lane, so that direction was not mutated (M5/M5s mutate the UA side).
+- Full suites (single-writer sweep is the orchestrator's).
+
+TREES: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf (Gradle ran in its
+`apps/android-harness`; no export tree)
+
+STATUS: COMPLETE

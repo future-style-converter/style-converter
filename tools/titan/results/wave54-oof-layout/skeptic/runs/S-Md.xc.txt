@@ -1,0 +1,281 @@
+Command line invocation:
+    /Applications/Xcode.app/Contents/Developer/usr/bin/xcodebuild test -scheme StyleConverterRuntime -destination "platform=macOS,variant=Mac Catalyst,arch=arm64" "-only-testing:StyleConverterRuntimeTests/OutOfFlowContainingBlockTests" "-only-testing:StyleConverterRuntimeTests/FixedHoistTests" "-only-testing:StyleConverterRuntimeTests/TransformContainingBlockTests" "-only-testing:StyleConverterRuntimeTests/GapDecorationSegmentsTests" "-only-testing:StyleConverterRuntimeTests/GapDecorationBandsTests" "-only-testing:StyleConverterRuntimeTests/GapDecorationGrammarTests"
+
+Resolve Package Graph
+2026-10-08 22:05:45.800 xcodebuild[45441:4422590] [MT] IDERunDestination: Supported platforms for the buildables in the current scheme is empty.
+
+
+Resolved source packages:
+  StyleConverterRuntime: /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (4 targets)
+    Target 'StyleConverterRuntime-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntimeTests-product' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime' in project 'StyleConverterRuntime'
+        ➜ Explicit dependency on target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime'
+    Target 'StyleConverterRuntime_StyleConverterRuntime' in project 'StyleConverterRuntime' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ClangStatCache /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/.swiftpm/xcode
+    /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX27.0.sdk -o /Users/dranak/Library/Developer/Xcode/DerivedData/SDKStatCaches.noindex/macosx27.0-26A425-7231f6df4def33e022ae2eb8f782df1a.sdkstatcache
+
+ProcessInfoPlistFile /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime.bundle/Contents/Info.plist /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime-b.build/empty-StyleConverterRuntime_StyleConverterRuntime.plist (in target 'StyleConverterRuntime_StyleConverterRuntime' from project 'StyleConverterRuntime')
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+    builtin-infoPlistUtility /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime-b.build/empty-StyleConverterRuntime_StyleConverterRuntime.plist -producttype com.apple.product-type.bundle -expandbuildsettings -platform macosx -o /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntime_StyleConverterRuntime.bundle/Contents/Info.plist
+
+ProcessInfoPlistFile /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Info.plist /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/empty-StyleConverterRuntimeTests.plist (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+    builtin-infoPlistUtility /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/empty-StyleConverterRuntimeTests.plist -producttype com.apple.product-type.bundle.unit-test -expandbuildsettings -platform macosx -scanforprivacyfile /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Resources/StyleConverterRuntime_StyleConverterRuntime.bundle -o /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Info.plist
+
+CopySwiftLibs /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest (in target 'StyleConverterRuntimeTests-product' from project 'StyleConverterRuntime')
+    cd /Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf
+    builtin-swiftStdLibTool --copy --verbose --scan-executable /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/MacOS/StyleConverterRuntimeTests --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/PlugIns --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Library/SystemExtensions --scan-folder /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Extensions --platform macosx --toolchain /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain --destination /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Products/Debug-maccatalyst/StyleConverterRuntimeTests.xctest/Contents/Frameworks --strip-bitcode --scan-executable /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/usr/lib/libXCTestSwiftSupport.dylib --strip-bitcode-tool /Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/bitcode_strip --emit-dependency-info /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/StyleConverterRuntime.build/Debug-maccatalyst/StyleConverterRuntimeTests-p.build/SwiftStdLibToolInputDependencies.dep --filter-for-swift-os --back-deploy-swift-span
+Ignoring --strip-bitcode because --sign was not passed
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/SwiftExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/SDKExplicitPrecompiledModules
+
+PruneExplicitPrecompiledModules /Users/dranak/Library/Developer/Xcode/DerivedData/trusting-bohr-bd6fbf-dhqlkcumqhjmieaikvonqofhsxnu/Build/Intermediates.noindex/ExplicitPrecompiledModules
+
+2026-10-08 22:05:59.492 xcodebuild[45441:4423805]  DVTAssertions: Warning in IDEFrameworks/IDEFoundation/Execution/LaunchSystem/IDELaunchSession.m:395
+Details:  setRunnablePIDWithDiagnostics:logSection:andCompletionHandler: called without a completion handler - blocking until diagnostics setup completes. Callers should migrate to using a completion handler for better performance.
+Object:   <IDELaunchSession: 0x7cadf42280>
+Method:   -setRunnablePIDWithDiagnostics:logSection:andCompletionHandler:
+Thread:   <NSThread: 0x7caf42d840>{number = 9, name = (null)}
+Please file a bug at https://feedbackassistant.apple.com with this warning message and any useful information you can provide.
+Test Suite 'Selected tests' started at 2026-10-08 22:06:00.015.
+Test Suite 'StyleConverterRuntimeTests.xctest' started at 2026-10-08 22:06:00.015.
+Test Suite 'FixedHoistTests' started at 2026-10-08 22:06:00.015.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testEXPECTED_DIVERGENCE_nestedInsetAbsoluteWithNoContainingBlockAncestor]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testEXPECTED_DIVERGENCE_nestedInsetAbsoluteWithNoContainingBlockAncestor]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept]' started.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:545: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:546: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(["f"])")
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2InsetFixedUnderContainStrictIsKept]' failed (1.043 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1InsetCarryingAbsoluteAndInsetFixedStillHoist]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1InsetCarryingAbsoluteAndInsetFixedStillHoist]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1LogicalInsetCountsAsAnchor]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1LogicalInsetCountsAsAnchor]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1NoInsetAbsoluteRootStaysInFlow]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1NoInsetAbsoluteRootStaysInFlow]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1StaticPositionPaintsInFlowSlotWithZeroFootprint]' started.
+2026-10-08 22:06:01.230077+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:06:01.236721+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:06:01.237271+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testRC1StaticPositionPaintsInFlowSlotWithZeroFootprint] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testRC1StaticPositionPaintsInFlowSlotWithZeroFootprint]' passed (0.170 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS1RootFixedAnchorsAtTheIcbCorner]' started.
+2026-10-08 22:06:01.277858+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS1RootFixedAnchorsAtTheIcbCorner] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS1RootFixedAnchorsAtTheIcbCorner]' passed (0.004 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS2RootAbsoluteAnchorsAtTheIcbCorner]' started.
+2026-10-08 22:06:01.358746+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS2RootAbsoluteAnchorsAtTheIcbCorner] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS2RootAbsoluteAnchorsAtTheIcbCorner]' passed (0.003 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS3FixedChildOfMovedRelativeParentDoesNotCompound]' started.
+2026-10-08 22:06:01.361803+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:06:01.362402+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS3FixedChildOfMovedRelativeParentDoesNotCompound] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS3FixedChildOfMovedRelativeParentDoesNotCompound]' passed (0.080 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS4AbsoluteChildAnchorsAtAncestorPaddingBox]' started.
+[PropertyTracker] margin-collapse emulation off for 'x': out-of-flow child — legacy sum spacing applies
+2026-10-08 22:06:01.443187+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:06:01.445049+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS4AbsoluteChildAnchorsAtAncestorPaddingBox] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS4AbsoluteChildAnchorsAtAncestorPaddingBox]' passed (0.007 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS5InFlowSiblingStartsWhereFixedBoxWouldHaveBeen]' started.
+2026-10-08 22:06:01.527189+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+2026-10-08 22:06:01.528282+0200 xctest[45661:4424193] [SwiftUI] Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Sources/StyleConverterRuntime/Renderer/ComponentRenderer.swift:1405: warning: -[StyleConverterRuntimeTests.FixedHoistTests testS5InFlowSiblingStartsWhereFixedBoxWouldHaveBeen] : Accessing FocusState's value outside of the body of a View. This will result in a constant Binding of the initial value and will not update.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testS5InFlowSiblingStartsWhereFixedBoxWouldHaveBeen]' passed (0.082 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitHoistsOutOfFlowRootsAndKeepsFlowOrder]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitHoistsOutOfFlowRootsAndKeepsFlowOrder]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitIsIdentityForFixedFreeDocuments]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitIsIdentityForFixedFreeDocuments]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitKeepsNestedAbsoluteChildren]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitKeepsNestedAbsoluteChildren]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitStripsNestedFixedDescendants]' started.
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testSplitStripsNestedFixedDescendants]' passed (0.001 seconds).
+Test Suite 'FixedHoistTests' failed at 2026-10-08 22:06:01.662.
+	 Executed 16 tests, with 2 failures (0 unexpected) in 1.396 (1.647) seconds
+Test Suite 'GapDecorationBandsTests' started at 2026-10-08 22:06:01.662.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testBandsThatDisagreeWithPlacedItemsAreRejected]' started.
+[PropertyTracker] gap decorations: rebuilt line bands do not contain the placed items — kept the item-union extents
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testBandsThatDisagreeWithPlacedItemsAreRejected]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testExtractorReadsTheContainerGapsAndAlignContent]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testExtractorReadsTheContainerGapsAndAlignContent]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testGoldRowRulesMoveOntoTheLineBoxGaps046]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testGoldRowRulesMoveOntoTheLineBoxGaps046]' passed (0.088 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testGoldRowRulesSpanTheStretchedLine045]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testGoldRowRulesSpanTheStretchedLine045]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testLineBoxesTileTheContentBox045]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testLineBoxesTileTheContentBox045]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testLinesThatAlreadyTileAreReturnedUntouched]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testLinesThatAlreadyTileAreReturnedUntouched]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testPositioningAlignContentRefusesTheReconstruction]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testPositioningAlignContentRefusesTheReconstruction]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testRedColumnRuleLandsOnTheRefBand045]' started.
+[PropertyTracker] gap decorations: cross gap unresolved — kept the item-union line extents
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testRedColumnRuleLandsOnTheRefBand045]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testSingleLineIsNeverRebuilt]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testSingleLineIsNeverRebuilt]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testUnionModelReproducesTheShippedInk046]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testUnionModelReproducesTheShippedInk046]' passed (0.086 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testUnresolvedCrossGapRefusesTheReconstruction]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationBandsTests testUnresolvedCrossGapRefusesTheReconstruction]' passed (0.000 seconds).
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 22:06:01.841.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.177 (0.179) seconds
+Test Suite 'GapDecorationGrammarTests' started at 2026-10-08 22:06:01.841.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testExplicitZeroWidthStaysDark]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testExplicitZeroWidthStaysDark]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testIntersectionStillDiffersFromNormal]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testIntersectionStillDiffersFromNormal]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testLineWidthKeywordsResolveToChromiumsUsedValues]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testLineWidthKeywordsResolveToChromiumsUsedValues]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testNormalReproducesTheRef003ColumnGeometry]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testNormalReproducesTheRef003ColumnGeometry]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testOmittedWidthPaintsAtMedium]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testOmittedWidthPaintsAtMedium]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testPercentageInsetFallsBackToZero]' started.
+[PropertyTracker] ColumnRuleInset: non-length inset (percentage/overlap-join) — used 0
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testPercentageInsetFallsBackToZero]' passed (0.102 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testRef015ColumnDirectionGeometry]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testRef015ColumnDirectionGeometry]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testReverseMainAxisDegeneratesToOneLinePerItem]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testReverseMainAxisDegeneratesToOneLinePerItem]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testSpanningItemIsIndistinguishableFromNormal]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testSpanningItemIsIndistinguishableFromNormal]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testStyleRemainsTheDarkStageGate]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testStyleRemainsTheDarkStageGate]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testWrapReverseDropsEveryLineGapRule]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationGrammarTests testWrapReverseDropsEveryLineGapRule]' passed (0.000 seconds).
+Test Suite 'GapDecorationGrammarTests' passed at 2026-10-08 22:06:01.950.
+	 Executed 11 tests, with 0 failures (0 unexpected) in 0.107 (0.109) seconds
+Test Suite 'GapDecorationSegmentsTests' started at 2026-10-08 22:06:01.950.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033WholePixelRulesSnapToThemselves]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033WholePixelRulesSnapToThemselves]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testAlignItemsFlexEndRuleSpansWholeLine]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testAlignItemsFlexEndRuleSpansWholeLine]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testBandCentresAndInsetCanCollapse]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testBandCentresAndInsetCanCollapse]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testBetweenLineGapsReportsTheRowBands]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testBetweenLineGapsReportsTheRowBands]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testColumnDirectionSwapsWhichFamilyOwnsWhichGap]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testColumnDirectionSwapsWhichFamilyOwnsWhichGap]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testDefaultRowBreakLeavesRowRuleUncut]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testDefaultRowBreakLeavesRowRuleUncut]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testInertConfigurationsPaintNothing]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testInertConfigurationsPaintNothing]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testIntersectionBreakCutsRowRuleOverBothNeighbourBands]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testIntersectionBreakCutsRowRuleOverBothNeighbourBands]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testIntervalSubtractProducesTheSurvivingRuns]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testIntervalSubtractProducesTheSurvivingRuns]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testIntervalUnionFusesTouchingCuts]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testIntervalUnionFusesTouchingCuts]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testItemGapRuleStopsAtEveryLineEdge]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testItemGapRuleStopsAtEveryLineEdge]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testLineGroupingUnionsCrossExtents]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testLineGroupingUnionsCrossExtents]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testNegativeInsetExtendsColumnRuleBeyondTheLineBox]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testNegativeInsetExtendsColumnRuleBeyondTheLineBox]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testNowrapOverflowKeepsOneLineAndPaintsEveryGap]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testNowrapOverflowKeepsOneLineAndPaintsEveryGap]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testOverlappingItemsPositionNoRule]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testOverlappingItemsPositionNoRule]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testPositiveInsetShortensBothEnds]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testPositiveInsetShortensBothEnds]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testSpanningItemBreakStopsAtLineEdgeAndColumnOverRowPaintsLast]' started.
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests testSpanningItemBreakStopsAtLineEdgeAndColumnOverRowPaintsLast]' passed (0.000 seconds).
+Test Suite 'GapDecorationSegmentsTests' passed at 2026-10-08 22:06:02.218.
+	 Executed 19 tests, with 0 failures (0 unexpected) in 0.009 (0.268) seconds
+Test Suite 'OutOfFlowContainingBlockTests' started at 2026-10-08 22:06:02.218.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainLayoutPaintStrictContentEstablish]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainSizeInlineSizeStyleNoneDoNot]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1ContainSizeInlineSizeStyleNoneDoNot]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1DeclaredInsets]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1FilterBackdropFilterAndWillChangeHintsEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1FilterBackdropFilterAndWillChangeHintsEstablish]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1NoneFormsAndWillChangeOpacityDoNotEstablish]' started.
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1NoneFormsAndWillChangeOpacityDoNotEstablish]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' started.
+[PropertyTracker] ContainingBlock[positioned-establisher-fixed-descendant]: claim withheld on a positioned establisher
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' started.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:105: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCarriersHoistNothing]' failed (0.084 seconds).
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' started.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:155: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers] : XCTAssertEqual failed: ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json"]") is not equal to ("["wpt__CSS2__abspos__static-fixed-inside-abspos.json", "wpt__css-position__change-insets-inside-strict-containment-nested.json", "wpt__css-position__position-fixed-scroll-nested-fixed.json", "wpt__css-position__position-relative-003.json", "wpt__css-position__position-relative-004.json", "wpt__filter-effects__backdrop-filter-containing-block.json"]")
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers]' failed (3.776 seconds).
+Test Suite 'OutOfFlowContainingBlockTests' failed at 2026-10-08 22:06:06.083.
+	 Executed 8 tests, with 2 failures (0 unexpected) in 3.863 (3.864) seconds
+Test Suite 'TransformContainingBlockTests' started at 2026-10-08 22:06:06.083.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testATransformedROOTStillClaimsItsOwnFixedDescendants]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testATransformedROOTStillClaimsItsOwnFixedDescendants]' passed (0.002 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testCrossNativeShapeMatrixHoldsClauseForClause]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testCrossNativeShapeMatrixHoldsClauseForClause]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testFixedDescendantUnderTransformedAncestorIsNotStripped]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testFixedDescendantUnderTransformedAncestorIsNotStripped]' passed (0.068 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testFixedDescendantWithoutTransformedAncestorStillStrips]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testFixedDescendantWithoutTransformedAncestorStillStrips]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testNonDegenerateRotationsAreNotSingular]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testNonDegenerateRotationsAreNotSingular]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testSingularRotationsAreDetectedIndependentlyOfPerspective]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testSingularRotationsAreDetectedIndependentlyOfPerspective]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheAggregateLevelPredicateSeesBothChannels]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheAggregateLevelPredicateSeesBothChannels]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheDefaultArgumentKeepsEveryPreWave35CallSiteIdentical]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheDefaultArgumentKeepsEveryPreWave35CallSiteIdentical]' passed (0.001 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheDeterminantSliceIsTheProjectiveOneSwiftUIMustInvert]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheDeterminantSliceIsTheProjectiveOneSwiftUIMustInvert]' passed (0.000 seconds).
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheEpsilonLeavesNearlyEdgeOnBoxesVisible]' started.
+Test Case '-[StyleConverterRuntimeTests.TransformContainingBlockTests testTheEpsilonLeavesNearlyEdgeOnBoxesVisible]' passed (0.000 seconds).
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 22:06:06.160.
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.075 (0.077) seconds
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:06:06.160.
+	 Executed 75 tests, with 4 failures (0 unexpected) in 5.628 (6.145) seconds
+Test Suite 'Selected tests' failed at 2026-10-08 22:06:06.160.
+	 Executed 75 tests, with 4 failures (0 unexpected) in 5.628 (6.145) seconds
+2026-10-08 22:06:12.472 xcodebuild[45441:4422590] [MT] IDETestOperationsObserverDebug: 13.415 elapsed -- Testing started completed.
+2026-10-08 22:06:12.472 xcodebuild[45441:4422590] [MT] IDETestOperationsObserverDebug: 0.000 sec, +0.000 sec -- start
+2026-10-08 22:06:12.472 xcodebuild[45441:4422590] [MT] IDETestOperationsObserverDebug: 13.415 sec, +13.415 sec -- end
+
+Test session results, code coverage, and logs:
+	/Users/dranak/Library/Developer/Xcode/DerivedData/StyleConverterRuntime-dhqlkcumqhjmieaikvonqofhsxnu/Logs/Test/Test-StyleConverterRuntime-2026.10.08_22-05-46-+0200.xcresult
+
+Failing tests:
+	FixedHoistTests.testP2InsetFixedUnderContainStrictIsKept()
+	FixedHoistTests.testP2InsetFixedUnderContainStrictIsKept()
+	OutOfFlowContainingBlockTests.testP3TheCarriersHoistNothing()
+	OutOfFlowContainingBlockTests.testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers()
+
+** TEST FAILED **
+
+Testing started

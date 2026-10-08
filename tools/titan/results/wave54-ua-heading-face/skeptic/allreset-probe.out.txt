@@ -1,0 +1,4 @@
+all:INITIAL h1 (parent 20px) -> FontSize=32.0 FontWeight={"weight":700}
+all:UNSET h1 (parent 20px) -> FontSize=40.0 FontWeight={"weight":700}
+all:INHERIT h1 (parent 20px) -> FontSize=40.0 FontWeight={"weight":700}
+all:REVERT h1 (parent 20px) -> FontSize=40.0 FontWeight={"weight":700}

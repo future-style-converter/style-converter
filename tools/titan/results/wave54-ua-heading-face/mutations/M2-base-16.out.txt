@@ -1,0 +1,9 @@
+[M2-base-16] file=runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAElementFontRule.kt sha256 before=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 mutated=268d21398193b548587cc08239a8445b088e918bccb7cab9dd03d763f8b1b9b8
+[M2-base-16] mutated run rc=1
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=1 errors=0
+    RED: inset-014 - the folded monospace h1 resolves 2em against the 13px fixed default :: java.lang.AssertionError: expected:<26.0> but was:<32.0>
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0
+[M2-base-16] restored sha256 after=aaceeebf4218d2bca7f2b2017e999f33ff4f06848d415fe7cb1046025aa08c64 BYTE-EXACT
+[M2-base-16] restored run rc=0
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=0 errors=0
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0

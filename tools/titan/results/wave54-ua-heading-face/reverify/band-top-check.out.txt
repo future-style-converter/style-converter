@@ -1,0 +1,22 @@
+(1) wave53-final: real exit 0, patched exit 0; stdout BYTE-IDENTICAL (20 lines)
+(2) text-decoration-inset-005 lift  0: patched → OK | unpatched → OK
+(2) text-decoration-inset-005 lift  2: patched → OK | unpatched → OK
+(2) text-decoration-inset-005 lift  3: patched → OK | unpatched → OK
+(2) text-decoration-inset-005 lift  4: patched → WRONG (band top y130 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-005 lift 10: patched → WRONG (band top y124 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-005 lift 17: patched → WRONG (band top y117 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-005 lift 21: patched → WRONG (band top y113 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-006 lift  0: patched → OK | unpatched → OK
+(2) text-decoration-inset-006 lift  2: patched → OK | unpatched → OK
+(2) text-decoration-inset-006 lift  3: patched → OK | unpatched → OK
+(2) text-decoration-inset-006 lift  4: patched → WRONG (band top y130 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-006 lift 10: patched → WRONG (band top y124 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-006 lift 17: patched → WRONG (band top y117 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-006 lift 21: patched → WRONG (band top y113 vs ref y134 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-014 lift  0: patched → OK | unpatched → OK
+(2) text-decoration-inset-014 lift  2: patched → OK | unpatched → OK
+(2) text-decoration-inset-014 lift  3: patched → OK | unpatched → OK
+(2) text-decoration-inset-014 lift  4: patched → WRONG (band top y125 vs ref y129 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-014 lift 10: patched → WRONG (band top y119 vs ref y129 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-014 lift 17: patched → WRONG (band top y112 vs ref y129 (the abspos heading's UA margin)) | unpatched → OK
+(2) text-decoration-inset-014 lift 21: patched → WRONG (band top y110 vs ref y129 (the abspos heading's UA margin)) | unpatched → OK

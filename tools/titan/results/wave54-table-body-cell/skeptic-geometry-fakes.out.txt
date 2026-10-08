@@ -1,0 +1,7 @@
+fix                                OK  square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK
+d1-only_square-x44                 BAD square block solid 0/400 | stray ink 400 (x 44-63, rows 56-75) | red px 0 → GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (0/400 black); 400 ink px outside the block)
+hug-ok_stroke-kept_0w-cell         BAD square block solid 400/400 | stray ink 20 (x 23-23, rows 56-75) | red px 0 → GEOMETRY WRONG (20 ink px outside the block)
+square-1px-right                   BAD square block solid 380/400 | stray ink 20 (x 44-44, rows 56-75) | red px 0 → GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (380/400 black); 20 ink px outside the block)
+square-1px-low                     BAD square block solid 380/400 | stray ink 20 (x 24-43, rows 76-76) | red px 0 → GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (380/400 black); 20 ink px outside the block)
+square-19x20                       BAD square block solid 380/400 | stray ink 0 | red px 0 → GEOMETRY WRONG (the block x24-43 rows 56-75 is not solid (380/400 black))
+fix+grey-antialias-edge            OK  square block solid 400/400 | stray ink 0 | red px 0 → GEOMETRY OK

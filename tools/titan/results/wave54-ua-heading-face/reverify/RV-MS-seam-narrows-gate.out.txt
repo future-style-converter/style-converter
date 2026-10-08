@@ -1,0 +1,16 @@
+[RV-MS-seam-narrows-gate] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt: sha256 c6a83ecdb6e36ae4 -> 9d26bec0c80ea180  ('standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component),' -> 'standsDown = com.styleconverter.runtime.typography.UAElementFontRule.headingStandsDown(component) && component.runs.isNullOrEmpty(),')
+[RV-MS-seam-narrows-gate.red] gradle rc=1 22:15:13
+> Task :runtime:testDebugUnitTest FAILED
+UAElementFontRuleSeamWiringTest > DynamicValueResolver resolves the UA step's output, after it FAILED
+UAElementFontRuleSeamWiringTest > the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict FAILED
+BUILD FAILED in 3s
+[RV-MS-seam-narrows-gate.red] UAElementFontRuleSeamWiringTest tests=2 failures=2 errors=0 ts=2026-10-08T20:15:13.317Z
+[RV-MS-seam-narrows-gate.red]   RED DynamicValueResolver resolves the UA step's output, after it :: java.lang.AssertionError: the UA font step call is missing
+[RV-MS-seam-narrows-gate.red]   RED the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict :: java.lang.AssertionError: the UA font step call expected:<1> but was:<0>
+[RV-MS-seam-narrows-gate.red] UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T20:15:13.361Z
+[RV-MS-seam-narrows-gate.red] InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T20:15:13.414Z
+[RV-MS-seam-narrows-gate] restored runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt: sha256 c6a83ecdb6e36ae4 BYTE-EXACT
+[RV-MS-seam-narrows-gate.green] gradle rc=0 22:15:16
+[RV-MS-seam-narrows-gate.green] UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0 ts=2026-10-08T20:15:15.474Z
+[RV-MS-seam-narrows-gate.green] UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T20:15:15.959Z
+[RV-MS-seam-narrows-gate.green] InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T20:15:16.027Z

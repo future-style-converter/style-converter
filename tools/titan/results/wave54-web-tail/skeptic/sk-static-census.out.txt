@@ -1,0 +1,38 @@
+RS: docs 27 pairs 73 table-body docs [] body white-space decl []
+    2 wpt__CSS2__abspos__static-inside-inline-block  bodyFont=None
+    6 wpt__css-break__block-in-inline-015-print  bodyFont=[]
+    2 wpt__css-cascade__scope-pseudo-element  bodyFont=None
+    1 wpt__css-display__display-flow-root-list-item-001  bodyFont=['FontFamily', 'FontSize', 'LineHeight']
+    1 wpt__css-position__overlay__overlay-button-appearance  bodyFont=[]
+    8 wpt__css-position__position-absolute-semi-replaced-stretch-input  bodyFont=None
+    6 wpt__css-position__position-absolute-semi-replaced-stretch-other  bodyFont=None
+    2 wpt__css-ui__appearance-auto-input-non-widget-001  bodyFont=None
+   19 wpt__css-ui__box-sizing-007  bodyFont=[]
+    5 wpt__css-ui__box-sizing-008  bodyFont=[]
+    5 wpt__css-ui__box-sizing-009  bodyFont=[]
+    1 wpt__css-ui__box-sizing-010  bodyFont=None
+    1 wpt__css-ui__box-sizing-011  bodyFont=None
+    1 wpt__css-ui__box-sizing-013  bodyFont=None
+    1 wpt__css-ui__box-sizing-014  bodyFont=None
+    1 wpt__css-ui__box-sizing-015  bodyFont=None
+    1 wpt__css-ui__box-sizing-016  bodyFont=None
+    1 wpt__css-ui__box-sizing-017  bodyFont=None
+    1 wpt__css-ui__box-sizing-018  bodyFont=None
+    1 wpt__css-ui__box-sizing-019  bodyFont=None
+    1 wpt__css-ui__box-sizing-020  bodyFont=None
+    1 wpt__css-ui__box-sizing-021  bodyFont=None
+    1 wpt__css-ui__box-sizing-022  bodyFont=None
+    1 wpt__css-ui__box-sizing-024  bodyFont=None
+    1 wpt__css-ui__box-sizing-025  bodyFont=None
+    1 wpt__css-values__attr-style-sharing-1  bodyFont=None
+    1 wpt__css-writing-modes__baseline-with-orthogonal-flow-001  bodyFont=None
+W1 joined hosts 4
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-002', 'wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287')
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-002', 'wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289')
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-002', 'wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291')
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-002', 'wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293')
+W1 inert mid-word members NOT own-auto (manual/none/inherited): 4
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-001', 'wpt__css-text__hyphens__hyphens-out-of-flow-001__3-273', ['MANUAL'])
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-001', 'wpt__css-text__hyphens__hyphens-out-of-flow-001__4-275', ['MANUAL'])
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-001', 'wpt__css-text__hyphens__hyphens-out-of-flow-001__5-277', ['MANUAL'])
+   ('wpt__css-text__hyphens__hyphens-out-of-flow-001', 'wpt__css-text__hyphens__hyphens-out-of-flow-001__6-279', ['MANUAL'])

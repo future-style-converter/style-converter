@@ -1,0 +1,21 @@
+mirror PNGs: 408
+# tests 154
+# pass 154
+# fail 0
+#   exempt-entry 001_ATC_PropsThenAll_InGreenParent [container, fixtures/combinations/all-then-color.json] verified
+#   exempt-entry 003_ATC_InitialUnderRedParent [container, fixtures/combinations/all-then-color.json] verified
+#   exempt-entry 005_ATC_DirectionSurvives [text, fixtures/combinations/all-then-color.json] verified
+#   000_ATC_AllThenProps [band-identical, 224 glyph px] ok
+#   001_ATC_PropsThenAll_InGreenParent [exempt band-identical, 0 glyph px] ok
+#   002_reset [band-identical, 80 glyph px] ok
+#   003_ATC_InitialUnderRedParent [exempt band-identical, 0 glyph px] ok
+#   004_span [band-identical, 65 glyph px] ok
+#   005_ATC_DirectionSurvives [exempt band-identical, 0 glyph px] ok
+ok 16 - label chrome exempt-entry 001_ATC_PropsThenAll_InGreenParent
+ok 17 - label chrome exempt-entry 003_ATC_InitialUnderRedParent
+ok 18 - label chrome exempt-entry 005_ATC_DirectionSurvives
+ok 19 - label chrome 000_ATC_AllThenProps
+ok 24 - label chrome 001_ATC_PropsThenAll_InGreenParent
+ok 34 - label chrome 003_ATC_InitialUnderRedParent
+ok 43 - label chrome 005_ATC_DirectionSurvives
+exit=0

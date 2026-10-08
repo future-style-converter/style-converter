@@ -1,0 +1,2 @@
+committed        column-presence-e2e pickTrio(5): 000_GrayBasis_Red.png 000_Ratio_16_9.png 000_Sepia_Zero.png 000_Sizing_Fixed.png 001_GrayBasis_Green.png | cross-platform-gate-e2e same/other: Android__000_GrayBasis_Red.png iOS__000_Ratio_16_9.png
+committed+seed   column-presence-e2e pickTrio(5): 000_ATC_AllThenProps.png 000_GrayBasis_Red.png 000_Ratio_16_9.png 000_Sepia_Zero.png 000_Sizing_Fixed.png | cross-platform-gate-e2e same/other: Android__000_ATC_AllThenProps.png iOS__000_GrayBasis_Red.png

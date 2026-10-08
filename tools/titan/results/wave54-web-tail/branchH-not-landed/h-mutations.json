@@ -1,0 +1,27 @@
+{
+ "H-m1": {
+  "file": "apps/web-harness/src/sdui/InertSplitBareText.ts",
+  "old": "  if (ctx.styles.hyphens !== 'auto') return false;",
+  "new": "  // MUTATION H-m1: auto gate dropped"
+ },
+ "H-m2": {
+  "file": "apps/web-harness/src/sdui/InertSplitBareText.ts",
+  "old": "    if (p.length === 0 || n.length === 0 || WHITE_SPACE.test(p[p.length - 1]) || WHITE_SPACE.test(n[0])) continue;",
+  "new": "    void p; void n; // MUTATION H-m2: mid-word test dropped"
+ },
+ "H-m3": {
+  "file": "apps/web-harness/src/sdui/InertSplitBareText.ts",
+  "old": "  const c = member.component;\n  // The ring first",
+  "new": "  const c = member.component;\n  if (c.properties.some((p) => p.type === 'Position')) return true; // MUTATION H-m3\n  // The ring first"
+ },
+ "H-m4": {
+  "file": "apps/web-harness/src/sdui/ComponentRenderer.tsx",
+  "old": "(splitsWordAroundInertOutOfFlow(ctx) ? text : <span>{text}</span>)",
+  "new": "(false && splitsWordAroundInertOutOfFlow(ctx) ? text : <span>{text}</span>)"
+ },
+ "H-m5": {
+  "file": "apps/web-harness/src/sdui/InertSplitBareText.ts",
+  "old": "  const raw = srgb.a;",
+  "new": "  const raw = srgb.alpha;"
+ }
+}

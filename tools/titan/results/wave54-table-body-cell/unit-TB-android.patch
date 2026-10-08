@@ -1,0 +1,772 @@
+# unit-TB-android.patch — wave 54 lane L2, revert unit TB-android: the lane-owned working-tree files vs HEAD db6e8aa01dac7ca1209435bdbcc014e3f980dba2.
+# The seam half (ComponentRenderer.kt + the patch-borne TableCellHugSeamWiringTest.kt) is seam-1.patch, applied right before this unit's commit.
+# Record / re-cut aid only: the orchestrator commits the files themselves (PLAN §4).
+diff --git a/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt b/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+index 5ca7a594..e48e40c6 100644
+--- a/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
++++ b/apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt
+@@ -1547,13 +1547,15 @@ internal fun withCanvasOwnedBodyMargin(roots: List<IRComponent>, margin: CanvasM
+ }
+ 
+ /**
+- * wave-53 lane L3 — the forest rewrite the composed canvas adds AFTER the
++ * wave-53 lane L3 — the two forest rewrites the composed canvas adds AFTER the
+  * wave-52 M1 margin strip + T6 hoisted-UA-margin map (the composable applies
+  * those first, verbatim, then calls this). Each is identity for a document it
+- * does not concern, so 1432 of the 1435 documents come back unchanged:
++ * does not concern, so 1431 of the 1435 documents come back unchanged:
+  *  - item A: the body-root loses the image layers the canvas paints;
++ *  - item B: a table body's in-flow run becomes one synthetic table (runtime
++ *    TableBodyForest, CSS 2.1 §17.2.1 rule 2 + §8.3).
+  * Commutes with T6 (that map touches canvas-hoisted roots only; neither step
+- * here touches one). One function so ComposedCanvasRootBackgroundTest pins the
++ * here touches one). One function so ComposedCanvasTableBodyTest pins the
+  * REAL chain the Column stacks.
+  */
+ internal fun composedCanvasRoots(
+@@ -1562,7 +1564,8 @@ internal fun composedCanvasRoots(
+ ): List<IRComponent> {
+     // Item A: the body-root minus the image layers the canvas owns.
+     val owned = RootBackgroundPropagation.withCanvasOwnedRootBackground(roots, rootImagePlan)
+-    return owned
++    // Item B: a table body's in-flow run as one synthetic table (identity otherwise).
++    return com.styleconverter.runtime.table.TableBodyForest.rewrite(owned)
+ }
+ 
+ /**
+@@ -1757,6 +1760,9 @@ private fun ComposedCaptureCanvas(
+     // wave-53 L3 (item A) rides the same rewrite: the body-root composes
+     // WITHOUT the image layers the canvas now owns (§2.11.2 "not painted
+     // again") — the same list instance whenever there is no plan.
++    // wave-53 L3 (item B) rides it too: a `display: table` body's in-flow
++    // run becomes ONE synthetic table (CSS 2.1 §17.2.1 rule 2) — see
++    // composedCanvasRoots, the whole rewrite as one testable function.
+     @Suppress("NAME_SHADOWING")
+     val roots = androidx.compose.runtime.remember(roots, canvasMargin, rootImagePlan) {
+         composedCanvasRoots(
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt
+index bec66347..d7551757 100644
+--- a/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt
+@@ -183,6 +183,11 @@ object TableApplier {
+      * @param shrinkToFit CSS 2.1 §17.5.2 auto table width — see the
+      *   guarded-intrinsic banner inside. `false` (the default) is the
+      *   frozen behaviour for every existing call site.
++     * @param cellsHugContent CSS 2.1 §17.5.2.2 — the cells take their
++     *   column's max-content width instead of the BLOCK path's fill
++     *   (wave 54, TableCellHug: only the anonymous table of
++     *   TableBodyForest asks for it). `false` (the default) is the frozen
++     *   behaviour for every existing call site.
+      * @param modifier Modifier for the table
+      * @param content Table rows
+      */
+@@ -194,6 +199,7 @@ object TableApplier {
+         borderWidth: Dp = 1.dp,
+         fabricatedCellBorder: Boolean = true,
+         shrinkToFit: Boolean = false,
++        cellsHugContent: Boolean = false,
+         modifier: Modifier = Modifier,
+         content: @Composable () -> Unit
+     ) {
+@@ -201,7 +207,9 @@ object TableApplier {
+             LocalTableConfig provides config,
+             LocalTableBorderColor provides borderColor,
+             LocalTableBorderWidth provides borderWidth,
+-            LocalTableFabricatedCellBorder provides fabricatedCellBorder
++            LocalTableFabricatedCellBorder provides fabricatedCellBorder,
++            // Per table, so a nested table never inherits its host's hug.
++            TableCellHug.LocalTableCellsHugContent provides cellsHugContent
+         ) {
+             // Wave 39 (lane A6) — CSS 2.1 §17.5.2 auto table width, ENFORCED.
+             //
+@@ -492,6 +500,9 @@ object TableApplier {
+         Box(
+             modifier = modifier
+                 .then(cellModifier)
++                // §17.5.2.2 max-content column (TableCellHug); the receiver
++                // itself when the table does not ask — the frozen chain.
++                .hugColumn(TableCellHug.LocalTableCellsHugContent.current)
+                 .fillMaxHeight()
+                 .then(borderModifier),
+             // Wave 32 (lane P) — the fabricated `.padding(8.dp)` that used
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+new file mode 100644
+index 00000000..e1dc8601
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt
+@@ -0,0 +1,134 @@
++package com.styleconverter.runtime.table
++
++// wave-53 lane L3 (item B) — a `display: table` BODY forms a table on the
++// composed canvas (CSS 2.1 §17.2.1 rule 2). Twin of SwiftUI
++// StyleEngine/table/TableBodyForest.swift; the web harness lets Chrome do the
++// same fixup (apps/web-harness/src/ui/CanvasTableBody.ts).
++//
++// WHY: the extractor emits html+body as ONE synthetic `body-root` whose element
++// children are SIBLING ROOTS (extract-fixture.mjs slots them under the body
++// only when it declares a height), so `Display TABLE` on the body-root applied
++// to an EMPTY box and its children stacked as blocks. MEASURED on wave52-ship
++// CSS2/css21-errata/s-11-1-1b-006 android P 0.9944 (DEGENERATE): the td's
++// square at image rows 51-70 (a 10-px caption-div gap, then the td's own −15
++// margin-top) where the reference — Chrome laying the body out as a table —
++// has 56-75.
++//
++// The rewrite: the run of in-flow roots after the body-root becomes one
++// synthetic TABLE (carrying the body's BorderSpacing / BorderCollapse) → one
++// TABLE_ROW → cells, by §17.2.1 rule 2 ("generate missing child wrappers"):
++// each run of consecutive non-cell roots goes into ONE anonymous TABLE_CELL,
++// and cell roots pass through without their Margin* (CSS 2.1 §8.3: margins do
++// not apply to table-internal boxes). Out-of-flow roots stay roots in place
++// (they are hoisted to the ICB anyway). The body-root itself is untouched —
++// every canvas resolver (colour, padding, margin) reads it.
++//
++// wave-54 lane L2 (TB-android) — re-landed from 276757ea (reverted at the
++// wave-53 probe, d773ff6a) plus ONE marker: the three synthetic boxes carry
++// `role = ANONYMOUS_ROLE`, the key TableCellHug.chrome reads so the anonymous
++// table paints no demo cell stroke (CSS 2.1 §17.2.1: anonymous boxes carry no
++// border) and sizes its cells at max-content (§17.5.2.2). The role lives only
++// in memory (never serialized; every runtime reader compares role against
++// "body-root" / "line-break" only, so the new value reads as null to all of
++// them). ASYMMETRY, deliberate: the Swift twin keeps `meta: nil` — iOS has no
++// demo stroke and TableSeparatedLayout already sizes cells at their ideal
++// width (wave-53 B-ios shipped right), so editing it would rebuild iOS for
++// nothing.
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.core.ir.IRProperty
++import com.styleconverter.runtime.layout.position.CanvasRootHoist
++import kotlinx.serialization.json.JsonElement
++import kotlinx.serialization.json.JsonObject
++import kotlinx.serialization.json.JsonPrimitive
++import kotlinx.serialization.json.contentOrNull
++import kotlinx.serialization.json.doubleOrNull
++
++object TableBodyForest {
++
++    /** The in-memory role of the synthetic table / row / cell (wave 54; read by TableCellHug.chrome). */
++    const val ANONYMOUS_ROLE = "anonymous-table"
++
++    /** Is [c] one of this forest's synthetic anonymous boxes? (§17.2.1; the wire never carries this role.) */
++    fun isAnonymous(c: IRComponent): Boolean = c.role == ANONYMOUS_ROLE
++
++    /** The body displays that make the body a table box (css-display-3 §2.3). */
++    private val TABLE_BODY = setOf("TABLE", "INLINE_TABLE")
++
++    /** Proper table children other than cells (§17.2.1): a run holding one bails. */
++    private val PROPER_NON_CELL = setOf("TABLE_ROW", "TABLE_ROW_GROUP", "TABLE_HEADER_GROUP",
++        "TABLE_FOOTER_GROUP", "TABLE_CAPTION", "TABLE_COLUMN", "TABLE_COLUMN_GROUP")
++
++    /** The margin longhands §8.3 says do not apply to a table cell. */
++    private val MARGIN_TYPES = setOf("MarginTop", "MarginRight", "MarginBottom", "MarginLeft",
++        "MarginBlockStart", "MarginBlockEnd", "MarginInlineStart", "MarginInlineEnd")
++
++    /** The body's table-box properties the synthetic table inherits (§17.6). */
++    private val TABLE_BOX_TYPES = setOf("BorderSpacing", "BorderCollapse")
++
++    /** A component's LAST declared `Display` enum leaf, uppercased (null when absent). */
++    private fun displayOf(c: IRComponent): String? =
++        (c.properties.lastOrNull { it.type == "Display" }?.data as? JsonPrimitive)?.contentOrNull?.uppercase()  // cascade: last wins
++
++    /** Out of flow at the root: hoisted to the ICB, or an RC1 static-position abspos (no ancestors). */
++    private fun isOutOfFlow(c: IRComponent): Boolean =
++        CanvasRootHoist.shouldHoistToCanvasRoot(c.properties, hasPositionedAncestor = false) ||   // fixed / inset abspos
++            CanvasRootHoist.rendersInFlowAsStaticPosition(c.properties, hasPositionedAncestor = false)  // RC1 abspos
++
++    /** A length leaf that is a concrete 0 px (`{px:0}` or the wrapped `{original:{px:0}}`). */
++    private fun isZeroPx(d: JsonElement): Boolean {
++        val o = d as? JsonObject ?: return false                            // keywords (thin/medium/auto): not zero
++        val px = (o["px"] as? JsonPrimitive)?.doubleOrNull                  // `{px:N}`
++            ?: ((o["original"] as? JsonObject)?.get("px") as? JsonPrimitive)?.doubleOrNull  // `{original:{px:N}}`
++        return px == 0.0                                                    // em / % / calc: not a known zero
++    }
++
++    /** The body declares a non-zero padding or border width: it paints its own box, so bail. */
++    private fun paintsOwnEdges(body: IRComponent): Boolean = body.properties.any { p ->
++        (p.type.startsWith("Padding") || (p.type.startsWith("Border") && p.type.endsWith("Width"))) &&
++            !isZeroPx(p.data)                                               // 0 carriers: bail, never guess
++    }
++
++    /** A synthetic component: id/name derived from the body's, children attached, marked anonymous. */
++    private fun synthetic(body: IRComponent, suffix: String, props: List<IRProperty>, kids: List<IRComponent>) =
++        IRComponent(id = body.id + suffix, name = body.name + suffix, properties = props, children = kids,
++            role = ANONYMOUS_ROLE)                                          // the §17.2.1 marker; no slot
++
++    /** One `Display` enum leaf, the shape the converter emits (`{"type":"Display","data":"TABLE"}`). */
++    private fun display(value: String) = IRProperty("Display", JsonPrimitive(value))   // read by DisplayExtractor
++
++    /**
++     * The rewritten forest, or [roots] itself (the SAME instance) when the
++     * body-root is not a table, paints its own edges, has no in-flow run after
++     * it, or that run already holds a proper non-cell table child.
++     */
++    fun rewrite(roots: List<IRComponent>): List<IRComponent> {
++        val bodyIdx = roots.indexOfFirst { it.role == "body-root" }       // one body per document
++        if (bodyIdx < 0) return roots                                       // no body bag at all
++        val body = roots[bodyIdx]
++        if (displayOf(body) !in TABLE_BODY || paintsOwnEdges(body)) return roots   // the trigger + edge bail
++        val after = roots.drop(bodyIdx + 1)                                // the body's (sibling) children
++        val run = after.filterNot(::isOutOfFlow)                           // the in-flow run
++        if (run.isEmpty() || run.any { displayOf(it) in PROPER_NON_CELL }) return roots   // 0 carriers: bail
++        // §17.2.1 rule 2: consecutive non-cells share ONE anonymous cell; cells pass through.
++        val cells = mutableListOf<IRComponent>()                            // the row's children, in order
++        val pending = mutableListOf<IRComponent>()                          // the open run of non-cells
++        fun flush() {                                                       // close the open anonymous cell
++            if (pending.isEmpty()) return                                   // nothing open
++            cells += synthetic(body, "#cell${cells.size}", listOf(display("TABLE_CELL")), pending.toList())
++            pending.clear()                                                 // the next non-cell opens a new one
++        }
++        for (r in run) {
++            if (displayOf(r) == "TABLE_CELL") {                             // a proper cell
++                flush()                                                     // ends any open anonymous cell
++                cells += r.copy(properties = r.properties.filterNot { it.type in MARGIN_TYPES })  // §8.3
++            } else pending += r                                             // joins the open anonymous cell
++        }
++        flush()                                                             // close the trailing run
++        val row = synthetic(body, "#row", listOf(display("TABLE_ROW")), cells)   // rule 2's anonymous row
++        val tableProps = listOf(display("TABLE")) + body.properties.filter { it.type in TABLE_BOX_TYPES }
++        val table = synthetic(body, "#table", tableProps, listOf(row))     // the body's table box
++        // The table takes the run's first position; out-of-flow roots keep their order after it.
++        return roots.take(bodyIdx + 1) + table + after.filter(::isOutOfFlow)
++    }
++}
+diff --git a/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt
+new file mode 100644
+index 00000000..49c49287
+--- /dev/null
++++ b/runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt
+@@ -0,0 +1,111 @@
++package com.styleconverter.runtime.table
++
++// wave-54 lane L2 (TB-android) — the CHROME of an ANONYMOUS table: the one
++// table box this runtime fabricates itself (TableBodyForest's synthetic
++// `#table` → `#row` → `#cell<k>` for a `display: table` body, CSS 2.1 §17.2.1
++// rule 2). Two Compose table-renderer behaviours are wrong on it, and both
++// were traced to the pixel on wave53-probe CSS2/css21-errata/s-11-1-1b-006
++// android (tools/titan/results/wave54-plan/compose-table-body-cell.md §3):
++//
++//  D1 — the demo stroke. ComponentRenderer's `fabricatedCellBorder`
++//       expression is TRUE for a table that DECLARES `Display` and has no
++//       `_tag` — exactly the synthetic table — so TableApplier.TableCell
++//       painted its 1-dp black "demo default" (NO CSS basis, see
++//       TableApplier.LocalTableFabricatedCellBorder) around the empty
++//       anonymous cell: the 76-px outline at x 24-43, rows 56-75.
++//       §17.2.1: anonymous boxes carry no border (`border` is not inherited);
++//       §17.6.1: in the separated model a cell paints only its OWN borders.
++//  D2 — the first cell takes the block fill. The anonymous cell, first in
++//       the `fillMaxWidth` TableRow, routes to the BLOCK path whose
++//       composed-WPT `blockFlowWidth` is `fillMaxWidth()`, so it took the
++//       whole 20-px shrink-to-fit table width; the td was then measured at
++//       max-width 0 and ExactWidthOverflow painted its 20-px fill
++//       start-anchored past its 0-wide slot (x 44-63). §17.5.2.2 (auto
++//       layout, room available): each column gets its MAX-CONTENT width —
++//       0 for the empty anonymous cell, 20 for the td.
++//
++// SCOPE — keyed on ONE marker only the forest creates
++// (TableBodyForest.ANONYMOUS_ROLE): 1 of the 1435 corpus documents
++// (s-11-1-1b-006). Every other table gets `Chrome(stroke = today's
++// expression, hug = false)` and TableApplier's frozen defaults, so its
++// layout is byte-identical by construction. The general versions (every
++// declared table loses the stroke / every cell hugs) move 12 D1 + 8 D2
++// documents and are queued, not done here (PLAN.md §2 L2, brief §5).
++//
++// iOS needs none of this (TableSeparatedLayout sizes each cell at its ideal
++// size and paints no demo stroke); web lets Chrome run §17.2.1 itself.
++
++import androidx.compose.runtime.compositionLocalOf                  // the per-table hug switch
++import androidx.compose.ui.Modifier                                    // hugColumn's receiver
++import com.styleconverter.runtime.core.ir.IRComponent                  // chrome's input (the TABLE-routed box)
++import com.styleconverter.runtime.layout.IntrinsicChannel              // the guarded max-content read
++
++object TableCellHug {
++
++    /**
++     * Do the current table's cells take their column's max-content width
++     * (§17.5.2.2) instead of the BLOCK path's fill? Provided per table by
++     * `TableApplier.Table(cellsHugContent = …)`, so a nested table resets it
++     * to its own value. `false` is the frozen behaviour of every table.
++     */
++    val LocalTableCellsHugContent = compositionLocalOf { false }
++
++    /**
++     * The two chrome decisions for one table box at the renderer's
++     * `TableApplier.Table(…)` call.
++     *
++     * @property stroke may the separated-model cells paint the applier's
++     *   demo default stroke (TableApplier.Table's `fabricatedCellBorder`).
++     * @property hug do the cells size at max-content (`cellsHugContent`).
++     */
++    data class Chrome(val stroke: Boolean, val hug: Boolean)
++
++    /**
++     * Pure (component + one Boolean in, two Booleans out) so the whole
++     * decision is pinned on the JVM against verbatim corpus payloads
++     * (TableCellHugTest) — the TableBoxTree "extract the decision" idiom.
++     *
++     * @param component the box the renderer routed to `DisplayType.TABLE`.
++     * @param fabricatedDefault the renderer's frozen `fabricatedCellBorder`
++     *   expression, passed VERBATIM by the call site so its every existing
++     *   value survives for every non-anonymous table.
++     */
++    fun chrome(component: IRComponent, fabricatedDefault: Boolean): Chrome {
++        // The only box this runtime fabricates as a table (TableBodyForest).
++        val anonymous = TableBodyForest.isAnonymous(component)
++        return Chrome(
++            // D1: §17.2.1 — an anonymous table's cells carry no border.
++            stroke = fabricatedDefault && !anonymous,
++            // D2: §17.5.2.2 — its columns take their max-content widths.
++            hug = anonymous,
++        )
++    }
++
++    /** Logged ONCE by IntrinsicChannel.probe when a cell subtree refuses the intrinsic read. */
++    internal const val CELL_HUG_REFUSAL =
++        "CSS 2.1 §17.5.2 column max-content skipped — this anonymous cell's " +
++            "subtree has no intrinsic channel; the cell keeps the fill."
++}
++
++/**
++ * Size a table cell at its max-content width when [enabled] (§17.5.2.2 auto
++ * layout with room: each column gets its max-content width); otherwise the
++ * receiver ITSELF, so a non-hugging table's modifier chain is the frozen one
++ * node-for-node.
++ *
++ * Built on [IntrinsicChannel.widthAtMaxIntrinsic] — the same guarded
++ * primitive TableApplier.Table already spends on the table's own
++ * shrink-to-fit width (whose read on wave53-probe answered 20 = 0 + 20 for
++ * this very subtree). The incoming Row bound still clamps the result, so
++ * the used width is `min(max-content, remaining)`; on refusal (a
++ * SubcomposeLayout below the cell) the cell keeps the fill, logged once
++ * with [TableCellHug.CELL_HUG_REFUSAL] — never a dead capture.
++ */
++fun Modifier.hugColumn(enabled: Boolean): Modifier =
++    if (!enabled) this                                                      // frozen chain, no extra node
++    else with(IntrinsicChannel) {                                           // member-extension scope
++        this@hugColumn.widthAtMaxIntrinsic(                                 // Modifier.width(IntrinsicSize.Max), guarded
++            logTag = "TableCellHug",                                        // logcat points at THIS mechanism
++            refusalContext = TableCellHug.CELL_HUG_REFUSAL,                 // what was skipped, what is kept
++        )
++    }
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt
+new file mode 100644
+index 00000000..4801ea5d
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableBodyForestTest.kt
+@@ -0,0 +1,158 @@
++package com.styleconverter.runtime.table
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import kotlinx.serialization.json.JsonPrimitive
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertSame
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++/**
++ * wave-53 lane L3 (item B) — pins for [TableBodyForest], the composed canvas's
++ * `display: table` BODY rewrite (CSS 2.1 §17.2.1 rule 2, §8.3), on the VERBATIM
++ * wave52-ship per-test IR (decoded + slot-composed exactly as the harness does).
++ * The Swift twin is TableBodyForestTests; the stack consequence (0 gap above
++ * the synthetic table) is pinned in the harness's ComposedCanvasTableBodyTest.
++ *
++ * WHY: s-11-1-1b-006's body children are sibling ROOTS, so `Display TABLE`
++ * applied to an empty box (wave52-ship android P 0.9944, DEGENERATE: the
++ * square at rows 51-70, ref 56-75).
++ *
++ * EXECUTED MUTATIONS (TableBodyForest.kt, this class run alone, source
++ * restored byte-exact — sha256 in tools/titan/results/wave53-canvas-root/_note.md):
++ *   BS  the run re-parented under the body-root (no fresh TABLE root) → shape red.
++ *   BM1 the `Display ∈ {TABLE, INLINE_TABLE}` trigger dropped       → m1 red (a98rgb-003 —
++ *       005 and 001 are identity even without it: 005's only other box is
++ *       slotted under the body, 001 has no body-root).
++ *   BM2 the §8.3 Margin* strip skipped                               → m2 red.
++ *   BM3 the out-of-flow filter dropped                               → m3 red.
++ *   BM4 a non-cell root placed straight into the row                 → m4 red.
++ *   BM5 BorderSpacing not copied onto the synthetic table            → m5 red.
++ *
++ * wave-54 lane L2 (TB-android) re-lands this class with 276757ea and adds m6
++ * (the anonymous marker TableCellHug keys on). The payloads are byte-identical
++ * in wave52-ship, wave53-final and wave54-open (sha256 8d15388d… for 006); the
++ * re-land re-executed BS, BM1-BM5 and m6's mutation (lane note
++ * tools/titan/results/wave54-table-body-cell/_note.md):
++ *   m6  `synthetic` without `role = ANONYMOUS_ROLE`                  → m6 red.
++ */
++class TableBodyForestTest {
++
++    /** Decode + slot-compose a v2 document exactly as the harness does. */
++    private fun rootsOf(componentsJson: String): List<IRComponent> =
++        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
++            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
++                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
++
++    /** CSS2/css21-errata/s-11-1-1b-006 — all four roots, verbatim (`body { display: table }`). */
++    private val s006 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__0-141","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"MarginTop","data":{"px":40}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__1-142","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__1","properties":[{"type":"Generic","data":{"propertyName":"display","rawValue":"caption","_unmapped":true}},{"type":"MarginBottom","data":{"px":10}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__2-143","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__2","properties":[{"type":"Display","data":"TABLE_CELL"},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__3-144","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__3","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":8}}],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    /** CSS2/css21-errata/s-11-1-1b-005 — verbatim (`display: table-cell` body). */
++    private val s005 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-005__0-139","name":"wpt__CSS2__css21-errata__s-11-1-1b-005__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE_CELL"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"MarginTop","data":{"px":-15}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}}],"meta":{"role":"body-root"}},
++        {"id":"css21-errata__s-11-1-1b-005__0-140","name":"css21-errata__s-11-1-1b-005__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}}],"slot":{"parent":"wpt__css2__css21-errata__s-11-1-1b-005__0-139"},"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    /** CSS2/css21-errata/s-11-1-1b-001 — verbatim (a real <table>, no body-root). */
++    private val s001 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-001__0-117","name":"wpt__CSS2__css21-errata__s-11-1-1b-001__0","properties":[],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p","role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-001__1-118","name":"wpt__CSS2__css21-errata__s-11-1-1b-001__1","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"BorderSpacing","data":{"type":"single","px":0}}],"meta":{"sourceTag":"table"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__0-119","name":"css21-errata__s-11-1-1b-001__1__0","properties":[{"type":"MarginBottom","data":{"px":10}}],"slot":{"parent":"wpt__css2__css21-errata__s-11-1-1b-001__1-118"},"meta":{"sourceTag":"caption","role":"ws-after"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__1-120","name":"css21-errata__s-11-1-1b-001__1__1","properties":[],"slot":{"parent":"wpt__css2__css21-errata__s-11-1-1b-001__1-118"},"meta":{"sourceTag":"tr"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__1__0-121","name":"css21-errata__s-11-1-1b-001__1__1__0","properties":[{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}}],"slot":{"parent":"css21-errata__s-11-1-1b-001__1__1-120"},"meta":{"sourceTag":"td"}},
++        {"id":"css21-errata__s-11-1-1b-001__1__1__0__0-122","name":"css21-errata__s-11-1-1b-001__1__1__0__0","properties":[{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":25}},{"type":"BorderTopWidth","data":{"px":10}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"slot":{"parent":"css21-errata__s-11-1-1b-001__1__1__0-121"}}
++    """.trimIndent()
++
++    /** css-color/a98rgb-003 — verbatim (a colour-only body-root followed by in-flow roots). */
++    private val a98 = """
++        {"id":"wpt__css-color__a98rgb-003__0-005","name":"wpt__css-color__a98rgb-003__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.5019607843137255,"g":0.5019607843137255,"b":0.5019607843137255},"original":"grey"}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css-color__a98rgb-003__1-006","name":"wpt__css-color__a98rgb-003__1","properties":[],"text":"Test passes if you see a single square, and not two rectangles of different colors.","meta":{"sourceTag":"p","role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__2-007","name":"wpt__css-color__a98rgb-003__2","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.996078431372549,"g":0.996078431372549,"b":0.996078431372549},"original":{"r":254,"g":254,"b":254}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginBottom","data":{"px":0}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css-color__a98rgb-003__3-008","name":"wpt__css-color__a98rgb-003__3","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0.9999300658875595,"g":1,"b":1},"original":{"type":"color","colorSpace":"a98-rgb","values":[1,1,1]}}},{"type":"Width","data":{"type":"length","original":{"v":12,"u":"EM"}}},{"type":"Height","data":{"type":"length","original":{"v":6,"u":"EM"}}},{"type":"MarginTop","data":{"px":0}}]}
++    """.trimIndent()
++
++    /** A component's Display enum leaf. */
++    private fun displayOf(c: IRComponent) = (c.properties.lastOrNull { it.type == "Display" }?.data as? JsonPrimitive)?.content
++
++    @Test
++    fun shape_bodyRootUnchanged_tableRowCells_abspos() {
++        val roots = rootsOf(s006)
++        val out = TableBodyForest.rewrite(roots)
++        assertEquals(3, out.size)
++        // [body-root unchanged, TABLE#table → ROW → [CELL{1-142}, 2-143], 3-144 unchanged]
++        assertSame(roots[0], out[0])
++        val table = out[1]
++        assertEquals(roots[0].id + "#table", table.id)
++        assertEquals("TABLE", displayOf(table))
++        val row = table.children!!.single()
++        assertEquals("TABLE_ROW", displayOf(row))
++        assertEquals(listOf(roots[0].id + "#cell0", roots[2].id), row.children!!.map { it.id })
++        assertEquals(listOf(roots[1]), row.children!![0].children)
++        assertSame(roots[3], out[2])
++    }
++
++    @Test
++    fun m1_identity_onNonTableBodies() {
++        // No trigger → the SAME instance (005: table-cell body; 001: no body-root;
++        // a98rgb-003: a plain colour body followed by in-flow roots).
++        for (doc in listOf(s005, s001, a98)) {
++            val roots = rootsOf(doc)
++            assertSame(roots, TableBodyForest.rewrite(roots))
++        }
++    }
++
++    @Test
++    fun m2_cellLosesItsMargins() {
++        // CSS 2.1 §8.3: margin-top does not apply to a table cell.
++        val td = TableBodyForest.rewrite(rootsOf(s006))[1].children!!.single().children!![1]
++        assertFalse(td.properties.any { it.type.startsWith("Margin") })
++        // …and keeps everything else (its 20×20 size and black fill).
++        assertEquals(listOf("Display", "Width", "Height", "BackgroundColor"), td.properties.map { it.type })
++    }
++
++    @Test
++    fun m3_absposStaysARoot_neverWrapped() {
++        val roots = rootsOf(s006)
++        val out = TableBodyForest.rewrite(roots)
++        assertSame(roots[3], out[2])
++        // Exactly two cells: the anonymous one and the td — the abspos <p> is in neither.
++        val cells = out[1].children!!.single().children!!
++        assertEquals(2, cells.size)
++        assertTrue(cells.none { c -> c.id == roots[3].id || c.children.orEmpty().any { it.id == roots[3].id } })
++    }
++
++    @Test
++    fun m4_nonCellRunIsWrappedInAnAnonymousCell() {
++        val first = TableBodyForest.rewrite(rootsOf(s006))[1].children!!.single().children!![0]
++        assertEquals("TABLE_CELL", displayOf(first))
++    }
++
++    @Test
++    fun m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot() {
++        // The §17.2.1 marker TableCellHug.chrome keys on: the three boxes the
++        // forest fabricates carry it; nothing the author wrote does.
++        val roots = rootsOf(s006)
++        val out = TableBodyForest.rewrite(roots)
++        val table = out[1]
++        val row = table.children!!.single()
++        val cell0 = row.children!![0]
++        for (box in listOf(table, row, cell0)) assertTrue(box.id, TableBodyForest.isAnonymous(box))
++        // The td (2-143), the caption div (1-142), the body-root and the abspos <p> (3-144).
++        val authored = listOf(row.children!![1], cell0.children!!.single(), out[0], out[2])
++        for (box in authored) assertFalse(box.id, TableBodyForest.isAnonymous(box))
++        assertEquals(listOf(roots[2].id, roots[1].id, roots[0].id, roots[3].id), authored.map { it.id })
++    }
++
++    @Test
++    fun m5_tableCarriesTheBodysBorderSpacing() {
++        val table = TableBodyForest.rewrite(rootsOf(s006))[1]
++        assertEquals("""{"type":"single","px":0}""",
++            table.properties.single { it.type == "BorderSpacing" }.data.toString())
++    }
++}
+diff --git a/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableCellHugTest.kt b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableCellHugTest.kt
+new file mode 100644
+index 00000000..70f0792f
+--- /dev/null
++++ b/runtimes/compose/src/test/java/com/styleconverter/runtime/table/TableCellHugTest.kt
+@@ -0,0 +1,186 @@
++package com.styleconverter.runtime.table
++
++import androidx.compose.ui.Modifier
++import com.styleconverter.runtime.core.ir.IRComponent
++import java.io.File
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertNotSame
++import org.junit.Assert.assertSame
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++/**
++ * wave-54 lane L2 (TB-android) — pins for [TableCellHug]: the chrome of the
++ * one table box this runtime fabricates (TableBodyForest's anonymous table,
++ * CSS 2.1 §17.2.1) and TableApplier's half of its wiring. The renderer's half
++ * (ComponentRenderer's `DisplayType.TABLE ->` arm spends `chrome`) is pinned
++ * by TableCellHugSeamWiringTest, which ships inside the lane's seam patch.
++ *
++ * Payloads VERBATIM from tools/titan/runs/wave53-final/sections/<section>/per-test-ir/
++ * (byte-identical in wave54-open), generated by
++ * tools/titan/results/wave54-table-body-cell/gen-pins.py — decoded and
++ * slot-composed exactly as the harness does.
++ *
++ * WHY each row: the synthetic table is the ONLY box whose chrome changes
++ * (no demo stroke, cells hug); every other Compose table — a declared
++ * `display: table` (006's own body-root, percentage-sizing-003: the 396-px
++ * rim the general fix would remove, queued), a UA `<table>` (baseline-empty-
++ * cell-001, contain-content-004: L4's carrier, PLAN §9 D15) — keeps today's
++ * stroke expression and hug = false, so it renders byte-identically.
++ *
++ * EXECUTED MUTATIONS (lane note §"Pins and executed mutations"; each source
++ * restored byte-exact, sha256 logged):
++ *   T1 `stroke = fabricatedDefault` (drop `!anonymous`)     → the synthetic row red.
++ *   T2 `hug = false`                                        → the synthetic row red.
++ *   T3 `hug = true` for every table                         → the four declared/UA rows red.
++ *   T4 hugColumn(false) no longer returns its receiver      → the identity pin red.
++ *   T5 TableCell without `.hugColumn(…)`                    → the applier source pin red.
++ *   T6 Table without the LocalTableCellsHugContent provider → the applier source pin red.
++ *   m6 (TableBodyForest) the synthetic boxes lose the role  → the synthetic row and the fold pin red.
++ */
++class TableCellHugTest {
++
++    /** Decode + slot-compose a v2 document exactly as the harness does. */
++    private fun rootsOf(componentsJson: String): List<IRComponent> =
++        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
++            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
++                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
++
++    /**
++     * ComponentRenderer.kt's frozen `fabricatedCellBorder` expression (the
++     * `DisplayType.TABLE ->` arm, wave 38) under WPT capture — what the seam
++     * passes as `fabricatedDefault`, verbatim (TableCellHugSeamWiringTest).
++     */
++    private fun todaysStroke(c: IRComponent): Boolean = !(true &&           // LocalWptCaptureMode.current
++        c.properties.none { it.type == "Display" } &&                       // no declared display
++        TableBoxTree.uaRoleOf(c._tag) == TableBoxTree.Role.TABLE)          // a UA <table>
++
++    /** CSS2/css21-errata/s-11-1-1b-006 — all four roots (`body { display: table }`). */
++    private val s006 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__0-141","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"MarginTop","data":{"px":40}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__1-142","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__1","properties":[{"type":"Generic","data":{"propertyName":"display","rawValue":"caption","_unmapped":true}},{"type":"MarginBottom","data":{"px":10}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__2-143","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__2","properties":[{"type":"Display","data":"TABLE_CELL"},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__3-144","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__3","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":8}}],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    /** css-tables/height-distribution/percentage-sizing-of-table-cell-children-003 — a declared `display: table`. */
++    private val pct003 = """
++        {"id":"wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__0-279","name":"wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__0","properties":[],"text":"Test passes if there is a filled green square and no red.","meta":{"sourceTag":"p","role":"ws-after"}},
++        {"id":"wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__1-280","name":"wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__1","properties":[{"type":"Height","data":{"type":"length","px":100}},{"type":"Width","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Position","data":"ABSOLUTE"},{"type":"ZIndex","data":{"value":-1,"original":{"type":"integer","value":-1}}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__2-281","name":"wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__2","properties":[{"type":"Display","data":"TABLE"}]},
++        {"id":"height-distribution__percentage-sizing-of-table-cell-children-003__2__0-282","name":"height-distribution__percentage-sizing-of-table-cell-children-003__2__0","properties":[{"type":"Display","data":"TABLE_CELL"},{"type":"Height","data":{"type":"percentage","value":100}}],"slot":{"parent":"wpt__css-tables__height-distribution__percentage-sizing-of-table-cell-children-003__2-281"}},
++        {"id":"height-distribution__percentage-sizing-of-table-cell-children-003__2__0__0-283","name":"height-distribution__percentage-sizing-of-table-cell-children-003__2__0__0","properties":[{"type":"OverflowY","data":"AUTO"},{"type":"Height","data":{"type":"percentage","value":100}},{"type":"Width","data":{"type":"length","px":100}},{"type":"MinHeight","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}],"slot":{"parent":"height-distribution__percentage-sizing-of-table-cell-children-003__2__0-282"}}
++    """.trimIndent()
++
++    /** css-tables/baseline-empty-cell-001 — a UA `<table>` (no declared display). */
++    private val bec001 = """
++        {"id":"wpt__css-tables__baseline-empty-cell-001__0-072","name":"wpt__css-tables__baseline-empty-cell-001__0","properties":[{"type":"BorderCollapse","data":"COLLAPSE"}],"meta":{"sourceTag":"table"}},
++        {"id":"baseline-empty-cell-001__0__0-073","name":"baseline-empty-cell-001__0__0","properties":[{"type":"VerticalAlign","data":{"type":"keyword","value":"BASELINE"}}],"slot":{"parent":"wpt__css-tables__baseline-empty-cell-001__0-072"},"meta":{"sourceTag":"tr"}},
++        {"id":"baseline-empty-cell-001__0__0__0-074","name":"baseline-empty-cell-001__0__0__0","properties":[{"type":"Height","data":{"type":"length","px":30}},{"type":"BorderTopWidth","data":{"px":1}},{"type":"BorderRightWidth","data":{"px":1}},{"type":"BorderBottomWidth","data":{"px":1}},{"type":"BorderLeftWidth","data":{"px":1}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"PaddingTop","data":{"px":1}},{"type":"PaddingRight","data":{"px":1}},{"type":"PaddingBottom","data":{"px":1}},{"type":"PaddingLeft","data":{"px":1}}],"slot":{"parent":"baseline-empty-cell-001__0__0-073"},"text":"ABCDE","meta":{"sourceTag":"td"}},
++        {"id":"baseline-empty-cell-001__0__0__1-075","name":"baseline-empty-cell-001__0__0__1","properties":[{"type":"Height","data":{"type":"length","px":30}},{"type":"BorderTopWidth","data":{"px":1}},{"type":"BorderRightWidth","data":{"px":1}},{"type":"BorderBottomWidth","data":{"px":1}},{"type":"BorderLeftWidth","data":{"px":1}},{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}},{"type":"PaddingTop","data":{"px":1}},{"type":"PaddingRight","data":{"px":1}},{"type":"PaddingBottom","data":{"px":1}},{"type":"PaddingLeft","data":{"px":1}}],"slot":{"parent":"baseline-empty-cell-001__0__0-073"},"meta":{"sourceTag":"td"}}
++    """.trimIndent()
++
++    /** css-contain/contain-content-004 — a UA `<table>`, L4's OOF carrier (D2 radius, PLAN §9 D15). */
++    private val cc004 = """
++        {"id":"wpt__css-contain__contain-content-004__0-048","name":"wpt__css-contain__contain-content-004__0","properties":[],"text":"Test passes if there is the word PASS and if there is no red.","meta":{"sourceTag":"p"}},
++        {"id":"wpt__css-contain__contain-content-004__1-049","name":"wpt__css-contain__contain-content-004__1","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":1},"original":"blue"}},{"type":"BorderSpacing","data":{"type":"single","px":2}},{"type":"Height","data":{"type":"length","px":206}},{"type":"TableLayout","data":"FIXED"},{"type":"Width","data":{"type":"length","px":206}}],"meta":{"sourceTag":"table"}},
++        {"id":"contain-content-004__1__0-050","name":"contain-content-004__1__0","properties":[],"slot":{"parent":"wpt__css-contain__contain-content-004__1-049"},"meta":{"sourceTag":"tr"}},
++        {"id":"contain-content-004__1__0__0-051","name":"contain-content-004__1__0__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"VerticalAlign","data":{"type":"keyword","value":"TOP"}}],"slot":{"parent":"contain-content-004__1__0-050"},"text":" ","meta":{"sourceTag":"td"}},
++        {"id":"contain-content-004__1__0__1-052","name":"contain-content-004__1__0__1","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"VerticalAlign","data":{"type":"keyword","value":"TOP"}}],"slot":{"parent":"contain-content-004__1__0-050"},"text":" ","meta":{"sourceTag":"td"}},
++        {"id":"contain-content-004__1__1-053","name":"contain-content-004__1__1","properties":[],"slot":{"parent":"wpt__css-contain__contain-content-004__1-049"},"meta":{"sourceTag":"tr"}},
++        {"id":"contain-content-004__1__1__0-054","name":"contain-content-004__1__1__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"VerticalAlign","data":{"type":"keyword","value":"TOP"}}],"slot":{"parent":"contain-content-004__1__1-053"},"text":" ","meta":{"sourceTag":"td"}},
++        {"id":"contain-content-004__1__1__1-055","name":"contain-content-004__1__1__1","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"VerticalAlign","data":{"type":"keyword","value":"TOP"}},{"type":"Contain","data":["CONTENT"]}],"slot":{"parent":"contain-content-004__1__1-053"},"meta":{"sourceTag":"td"}},
++        {"id":"contain-content-004__1__1__1__0-056","name":"contain-content-004__1__1__1__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Color","data":{"srgb":{"r":1,"g":1,"b":0},"original":"yellow"}},{"type":"FontFamily","data":["monospace"]},{"type":"VerticalAlign","data":{"type":"keyword","value":"TOP"}}],"slot":{"parent":"contain-content-004__1__1__1-055"},"text":"FAIL","meta":{"sourceTag":"span"}},
++        {"id":"contain-content-004__1__1__1__1-057","name":"contain-content-004__1__1__1__1","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Color","data":{"srgb":{"r":1,"g":1,"b":1},"original":"white"}},{"type":"FontFamily","data":["monospace"]},{"type":"Left","data":{"px":0}},{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}}],"slot":{"parent":"contain-content-004__1__1__1-055"},"text":"PASS"}
++    """.trimIndent()
++
++    /** The synthetic table the composed canvas renders for 006 (TableBodyForest, §17.2.1 rule 2). */
++    private val syntheticTable: IRComponent by lazy { TableBodyForest.rewrite(rootsOf(s006))[1] }
++
++    @Test
++    fun anonymousTable_noStroke_cellsHug() {
++        // The forest's synthetic box — today's expression says "stroke" (it
++        // declares Display and has no _tag); §17.2.1 says no border.
++        val t = syntheticTable
++        assertEquals("wpt__css2__css21-errata__s-11-1-1b-006__0-141#table", t.id)
++        assertTrue(todaysStroke(t))
++        assertEquals(TableCellHug.Chrome(stroke = false, hug = true), TableCellHug.chrome(t, todaysStroke(t)))
++    }
++
++    @Test
++    fun anonymousMarker_survivesTheRenderersPreDisplayFolds() {
++        // RenderComponent rebinds `component` through these folds before its
++        // display switch reaches the TABLE arm the seam lives in
++        // (ContentsUnboxing → PseudoTextFold → PseudoBoxFold, then
++        // `copy(properties = effectiveProperties)`): each must keep the
++        // in-memory role, or the device would paint the wave53-probe picture.
++        val folded = com.styleconverter.runtime.content.PseudoBoxFold.resolve(
++            com.styleconverter.runtime.content.PseudoTextFold.resolve(
++                com.styleconverter.runtime.core.renderer.ContentsUnboxing.resolve(syntheticTable)).component)
++        val merged = folded.copy(properties = folded.properties)          // the mergedComponent shape
++        assertTrue(TableBodyForest.isAnonymous(merged))
++        assertEquals(TableCellHug.Chrome(stroke = false, hug = true), TableCellHug.chrome(merged, todaysStroke(merged)))
++    }
++
++    @Test
++    fun declaredTableBodyRoot_keepsTodaysStroke_noHug() {
++        // 006's own body-root (an empty declared TABLE): not anonymous.
++        val body = rootsOf(s006)[0]
++        assertEquals("body-root", body.role)
++        assertEquals(TableCellHug.Chrome(stroke = true, hug = false), TableCellHug.chrome(body, todaysStroke(body)))
++    }
++
++    @Test
++    fun declaredTable_percentageSizing003_keepsTodaysStroke_noHug() {
++        // The declared `display: table` box (2-281) — the D1 rim stays (queued).
++        val table = rootsOf(pct003).single { it.id.endsWith("__2-281") }
++        assertEquals(TableCellHug.Chrome(stroke = true, hug = false), TableCellHug.chrome(table, todaysStroke(table)))
++    }
++
++    @Test
++    fun uaTable_baselineEmptyCell001_noStroke_noHug() {
++        // A UA `<table>`: today's expression is already false; no hug (the D2 shape stays, queued).
++        val table = rootsOf(bec001).single { it._tag == "table" }
++        assertEquals(false, todaysStroke(table))
++        assertEquals(TableCellHug.Chrome(stroke = false, hug = false), TableCellHug.chrome(table, todaysStroke(table)))
++    }
++
++    @Test
++    fun uaTable_containContent004_isTodaysExpression_noHug() {
++        // L4's carrier: chrome must return (today's expression, false) — the pin behind PLAN §9 D15.
++        val table = rootsOf(cc004).single { it._tag == "table" }
++        assertEquals(TableCellHug.Chrome(stroke = todaysStroke(table), hug = false),
++            TableCellHug.chrome(table, todaysStroke(table)))
++    }
++
++    @Test
++    fun hugColumn_disabled_isTheReceiverItself() {
++        // Byte-identity of every non-anonymous table's cell chain: no extra node.
++        val m = Modifier.then(Modifier)
++        assertSame(m, m.hugColumn(false))
++        // …and enabled it really adds the intrinsic read.
++        assertNotSame(m, m.hugColumn(true))
++    }
++
++    /** TableApplier.kt, found by walking up to the repo root (the SeamReachabilityTest walk-up). */
++    private val applier: String by lazy {
++        val anchor = "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt"
++        var dir: File? = File(System.getProperty("user.dir") ?: ".").absoluteFile
++        while (dir != null && !File(dir, anchor).exists()) dir = dir.parentFile
++        File(requireNotNull(dir) { "repo root not found" }, anchor).readText()
++    }
++
++    @Test
++    fun applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight() {
++        // Table(…): the parameter with the frozen default, provided per table.
++        assertTrue(applier.contains("cellsHugContent: Boolean = false,"))
++        assertTrue(applier.contains("TableCellHug.LocalTableCellsHugContent provides cellsHugContent"))
++        // TableCell: the hug sits between the cell's weight and fillMaxHeight.
++        val cell = applier.substring(applier.indexOf("fun RowScope.TableCell("))
++        val hug = cell.indexOf(".hugColumn(TableCellHug.LocalTableCellsHugContent.current)")
++        val fill = cell.indexOf(".fillMaxHeight()")
++        assertTrue("TableCell does not chain hugColumn", hug >= 0)
++        assertTrue("hugColumn is not chained before fillMaxHeight", hug < fill)
++        assertTrue(cell.indexOf(".then(cellModifier)") < hug)
++    }
++}
+diff --git a/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt b/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+new file mode 100644
+index 00000000..0f46839c
+--- /dev/null
++++ b/apps/android-harness/app/src/test/java/com/styleconverter/test/screenshot/ComposedCanvasTableBodyTest.kt
+@@ -0,0 +1,62 @@
++package com.styleconverter.test.screenshot
++
++import com.styleconverter.runtime.core.ir.IRComponent
++import com.styleconverter.runtime.layout.position.CanvasRootHoist
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertTrue
++import org.junit.Test
++
++/**
++ * wave-53 lane L3 (item B) — the STACK consequence of the table-body rewrite,
++ * through the REAL composed-canvas chain ([composedCanvasRoots] → the pure
++ * [composedRootStackPlan] / [collapsedRootStackGapsPx] fold the Column spends).
++ *
++ * THE DEFECT: on wave52-ship CSS2/css21-errata/s-11-1-1b-006 the composed
++ * Column stacked the caption div (1-142, `margin-bottom: 10px`) and the td
++ * (2-143) as separate roots: a 10-px gap above the td, then its own −15
++ * margin-top as an offset — square at image rows 51-70, ref 56-75 (android
++ * P 0.9944, DEGENERATE). With the body laid out as a table (CSS 2.1 §17.2.1
++ * rule 2) the div's margin lives INSIDE the anonymous cell and the td's
++ * margin does not apply (§8.3), so nothing stands between the canvas-owned
++ * body margin and the table: 0 gap above it.
++ *
++ * Payload VERBATIM from tools/titan/runs/wave52-ship/sections/CSS2/per-test-ir/.
++ *
++ * EXECUTED MUTATION (ScreenshotCaptureScreen.kt, this class run alone, source
++ * restored byte-exact — sha256 in tools/titan/results/wave53-canvas-root/_note.md):
++ *   BK  composedCanvasRoots skips TableBodyForest (`return owned`) → the
++ *       caption div stays in the stack, the 10-px gap is back → red.
++ */
++class ComposedCanvasTableBodyTest {
++
++    /** Decode + slot-compose a v2 document exactly as the harness does. */
++    private fun rootsOf(componentsJson: String): List<IRComponent> =
++        com.styleconverter.runtime.core.renderer.SlotComposer.compose(
++            com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(
++                """{"irVersion":2,"minReaderVersion":2,"components":[$componentsJson]}"""))
++
++    /** CSS2/css21-errata/s-11-1-1b-006 — all four roots, verbatim. */
++    private val s006 = """
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__0-141","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__0","properties":[{"type":"OverflowX","data":"HIDDEN"},{"type":"OverflowY","data":"HIDDEN"},{"type":"Display","data":"TABLE"},{"type":"BorderSpacing","data":{"type":"single","px":0}},{"type":"MarginTop","data":{"px":40}},{"type":"MarginRight","data":{"px":8}},{"type":"MarginBottom","data":{"px":8}},{"type":"MarginLeft","data":{"px":8}}],"meta":{"role":"body-root"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__1-142","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__1","properties":[{"type":"Generic","data":{"propertyName":"display","rawValue":"caption","_unmapped":true}},{"type":"MarginBottom","data":{"px":10}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__2-143","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__2","properties":[{"type":"Display","data":"TABLE_CELL"},{"type":"Width","data":{"type":"length","px":20}},{"type":"Height","data":{"type":"length","px":20}},{"type":"MarginTop","data":{"px":-15}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":"black"}}],"meta":{"role":"ws-after"}},
++        {"id":"wpt__css2__css21-errata__s-11-1-1b-006__3-144","name":"wpt__CSS2__css21-errata__s-11-1-1b-006__3","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":8}}],"text":"Test passes if there is a black square below.","meta":{"sourceTag":"p"}}
++    """.trimIndent()
++
++    @Test
++    fun stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot() {
++        val raw = rootsOf(s006)
++        // The chain the composable stacks, with the margin it resolves (40/8/8/8).
++        val roots = composedCanvasRoots(withCanvasOwnedBodyMargin(raw, resolveComposedCanvasMargin(raw))
++            .map(::withUaBlockMarginOnHoistedRoot), resolveComposedCanvasRootBackground(raw))
++        // The td is no longer a root: it lives in the synthetic table's row.
++        assertTrue(roots.none { it.id == raw[2].id })
++        val tableIdx = roots.indexOfFirst { it.id == raw[0].id + "#table" }
++        assertEquals(1, tableIdx)
++        // The fold the Column spends: no gap above the table (nor above the body-root).
++        val hostActive = CanvasRootHoist.hostActivates(roots)
++        val gaps = collapsedRootStackGapsPx(roots.map { composedRootStackPlan(it, hostActive) })
++        assertEquals(0f, gaps[0], 0f)
++        assertEquals(0f, gaps[tableIdx], 0f)
++    }
++}

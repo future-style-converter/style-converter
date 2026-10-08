@@ -1,0 +1,8 @@
+lock acquired Thu Oct  8 20:58:48 CEST 2026
+pre sha256 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e
+patched sha256 0ba22748341697614b147990e82454e3a920203401d9248d3551196bbde405bf
+xcodebuild rc=0 	 Executed 25 tests, with 0 failures (0 unexpected) in 0.070 (0.304) seconds
+renderer compiled in window: 0 log lines naming ComponentRenderer.swift
+restored sha256 905d1669d3856364c57fa0c821449eabfb28380b781eab557279e0280c996e1e BYTE-EXACT-HEAD
+lock released Thu Oct  8 21:00:26 CEST 2026
+Catalyst object: Debug-maccatalyst/.../ComponentRenderer.o mtime Oct 8 20:59:22 (inside the 20:58:48–21:00:26 lock window), UAHeadingFoldGate refs=1 → the patched renderer was compiled and the pins ran against it

@@ -1,0 +1,8 @@
+applied wave54-table-body-cell/seam-1.patch
+applied wave54-ua-heading-face/seam-1.patch
+applied wave54-oof-layout/seam-1.patch
+applied wave54-hyphenate-character/seam-1.patch
+skip wave54-ua-heading-face/seam-2.patch (absent)
+applied wave54-hyphenate-character/seam-2.patch
+UAElementFontRule.apply( calls in .kt: 1 · headingStandsDown: 1 · UAHeadingFoldGate in .swift: 0
+after L2+L5+L4+L3 kt hunks: listStep x1 fontStep x1 apply x1 order list<font<handoff<resolve: True

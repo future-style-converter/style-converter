@@ -1,0 +1,15 @@
+import { defineConfig } from 'vitest/config';
+import react from '@vitejs/plugin-react';
+const T = '__TREE__';
+export default defineConfig({
+  plugins: [react()],
+  root: T,
+  resolve: { alias: [
+    { find: /^@style-converter\/web$/, replacement: T + '/runtimes/web/src/index.ts' },
+    { find: /^@style-converter\/web\/(.*)$/, replacement: T + '/runtimes/web/src/$1' },
+    { find: /^@\/(.*)$/, replacement: T + '/apps/web-harness/src/$1' },
+    { find: /^@sdui\/(.*)$/, replacement: T + '/apps/web-harness/src/sdui/$1' },
+    { find: /^@ui\/(.*)$/, replacement: T + '/apps/web-harness/src/ui/$1' },
+  ] },
+  test: { include: [T + '/census.sk6.test.tsx'], testTimeout: 1800000 },
+});

@@ -1,0 +1,3 @@
+label=M-gap3-swift-negative file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationGeometry.swift
+sha256 before=80a314e0c94906c37e85644e7c7240fc131b549952d0480b9eb3e721b286b06e mutated=d28ee9ed4b75716952315c84749597ec61d1ca8f30c792d138df920a684fde21 after=80a314e0c94906c37e85644e7c7240fc131b549952d0480b9eb3e721b286b06e restored=OK
+suite rc=65 (RED)

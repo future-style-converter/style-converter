@@ -1,0 +1,41 @@
+> Task :runtime:preBuild UP-TO-DATE
+> Task :runtime:preDebugBuild UP-TO-DATE
+> Task :runtime:generateDebugResources UP-TO-DATE
+> Task :runtime:packageDebugResources UP-TO-DATE
+> Task :runtime:processDebugNavigationResources UP-TO-DATE
+> Task :runtime:parseDebugLocalResources UP-TO-DATE
+> Task :runtime:generateDebugRFile UP-TO-DATE
+> Task :runtime:javaPreCompileDebug UP-TO-DATE
+> Task :runtime:preDebugUnitTestBuild UP-TO-DATE
+> Task :runtime:generateDebugUnitTestStubRFile UP-TO-DATE
+> Task :runtime:javaPreCompileDebugUnitTest UP-TO-DATE
+> Task :runtime:compileDebugKotlin
+> Task :runtime:compileDebugJavaWithJavac NO-SOURCE
+> Task :runtime:processDebugJavaRes UP-TO-DATE
+> Task :runtime:bundleLibRuntimeToJarDebug
+> Task :runtime:bundleLibCompileToJarDebug
+> Task :runtime:compileDebugUnitTestKotlin UP-TO-DATE
+> Task :runtime:compileDebugUnitTestJavaWithJavac NO-SOURCE
+> Task :runtime:processDebugUnitTestJavaRes UP-TO-DATE
+
+> Task :runtime:testDebugUnitTest FAILED
+
+GapDecorationSegmentsTest > 033 touching items still position 2 + 1 + 2 column rules, line by line FAILED
+    java.lang.AssertionError at GapDecorationSegmentsTest.kt:222
+
+GapDecorationSegmentsTest > 033 touching lines still position two full-width row rules painted last FAILED
+    java.lang.AssertionError at GapDecorationSegmentsTest.kt:239
+
+52 tests completed, 2 failed
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':runtime:testDebugUnitTest'.
+> There were failing tests. See the report at: file:///Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/compose/build/reports/tests/testDebugUnitTest/index.html
+
+* Try:
+> Run with --scan to get full insights from a Build Scan (powered by Develocity).
+
+BUILD FAILED in 2s
+15 actionable tasks: 4 executed, 11 up-to-date

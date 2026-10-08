@@ -1,0 +1,68 @@
+{
+ "RS-m1": {
+  "file": "apps/web-harness/src/sdui/ComponentRenderer.tsx",
+  "old": "  if (!isWsAfterMarked(prev)) return null;\n  // Only an INLINE FORMATTING CONTEXT",
+  "new": "  // MUTATION RS-m1: marker gate removed\n  // Only an INLINE FORMATTING CONTEXT",
+  "what": "lane replay"
+ },
+ "RS-m2": {
+  "file": "apps/web-harness/src/ui/ComposedRootSeparator.ts",
+  "old": "const declined = typeof container.display === 'string' && TABLE_BOX_DISPLAYS.has(container.display);",
+  "new": "const declined = false && typeof container.display === 'string' && TABLE_BOX_DISPLAYS.has(container.display);",
+  "what": "lane replay"
+ },
+ "RS-m3": {
+  "file": "apps/web-harness/src/ui/ComposedRootSeparator.ts",
+  "old": "if (index === 0 || declined) return [el];",
+  "new": "if (declined) return [el];",
+  "what": "lane replay"
+ },
+ "RS-m4": {
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)}",
+  "new": "), rootSeparatorContainer(doc, canvasTableBody), () => null)}",
+  "what": "lane replay"
+ },
+ "RS-m4b": {
+  "file": "apps/web-harness/src/ui/ComposedCaptureGallery.tsx",
+  "old": "          ), rootSeparatorContainer(doc, canvasTableBody), wsAfterSeparator)\n",
+  "new": "          ), rootSeparatorContainer(doc, canvasTableBody), () => null)\n",
+  "what": "lane replay"
+ },
+ "SK6-r1": {
+  "file": "apps/web-harness/src/sdui/ComponentRenderer.tsx",
+  "what": "marker read on NEXT instead of PREV",
+  "old": "  if (!isWsAfterMarked(prev)) return null;\n  // Only an INLINE FORMATTING CONTEXT",
+  "new": "  if (!isWsAfterMarked(next)) return null;\n  // Only an INLINE FORMATTING CONTEXT"
+ },
+ "SK6-r2": {
+  "file": "apps/web-harness/src/sdui/ComponentRenderer.tsx",
+  "what": "child walk passes {} instead of ctx.styles",
+  "old": "return wsAfterSeparator(prev, next, ctx.styles);",
+  "new": "return wsAfterSeparator(prev, next, {});"
+ },
+ "SK6-r3": {
+  "file": "apps/web-harness/src/ui/ComposedRootSeparator.ts",
+  "what": "decline only 'table' (inline-table dropped)",
+  "old": "new Set(['table', 'inline-table'])",
+  "new": "new Set(['table'])"
+ },
+ "SK6-r4": {
+  "file": "apps/web-harness/src/ui/ComposedRootSeparator.ts",
+  "what": "predicate asked about (next, prev)",
+  "old": "const sep = separator(roots[index - 1], root, container);",
+  "new": "const sep = separator(root, roots[index - 1], container);"
+ },
+ "SK6-r5": {
+  "file": "apps/web-harness/src/ui/ComposedRootSeparator.ts",
+  "what": "body white-space read from the FIRST component, not the body-root",
+  "old": "const bodyRoot = doc.components.find((c) => c.meta?.role === 'body-root');",
+  "new": "const bodyRoot = doc.components[0];"
+ },
+ "SK6-r6": {
+  "file": "apps/web-harness/src/sdui/ComponentRenderer.tsx",
+  "what": "inline-level gate checks prev only",
+  "old": "if (!isInlineLevelSibling(prev) || !isInlineLevelSibling(next)) return null;\n  // A REAL",
+  "new": "if (!isInlineLevelSibling(prev)) return null;\n  // A REAL"
+ }
+}

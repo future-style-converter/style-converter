@@ -1,0 +1,1 @@
+        if (!ContainingBlockBands.subtracts(properties, wptCaptureMode)) return ContainingBlock(widthPx = w, heightPx = h)

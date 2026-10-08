@@ -1,0 +1,50 @@
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-001 web                                FAIL       [report: expected WRONG until the target is fixed]
+     line: racter-001 web groups 5 4 4 3 → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-42 end-cell 2px vs ref x18-34 end-cell 9px; offset: group 3 line 1 top y345 vs ref y320)
+!! L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-001 ios                                FAIL       [GATING -> revert U2-ios|U3]
+     line: racter-001 ios groups 5 5 4 3 → GEOMETRY WRONG (lines: groups [5, 5, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x17-41 end-cell 2px vs ref x18-34 end-cell 9px; offset: group 2 line 3 top y270 vs ref y263)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-001 android                            FAIL       [report: expected WRONG until the target is fixed]
+     line: er-001 android groups 5 4 4 3 → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-34 end-cell 9px; offset: group 3 line 1 top y345 vs ref y320)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-003 web                                FAIL       [report: expected WRONG until the target is fixed]
+     line: acter-003 web groups 5 4 4 3 → GEOMETRY WRONG (lines: groups [5, 4, 4, 3] lines vs ref [5, 4, 3, 3]; glyph: group 1 line 1 ink x18-81 end-cell 12px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y322 vs ref y300)
+!! L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-003 ios                                FAIL       [GATING -> revert U2-ios|U3]
+     line: hyphenate-character-003 ios groups 5 4 3 3 → GEOMETRY WRONG (glyph: group 1 line 1 ink x17-41 end-cell 2px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y320 vs ref y300)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-003 android                            FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphenate-character-003 android groups 5 4 3 3 → GEOMETRY WRONG (glyph: group 1 line 1 ink x18-41 end-cell 1px vs ref x18-42 end-cell 5px; offset: group 3 line 1 top y322 vs ref y300)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-004 web                                FAIL       [report: expected WRONG until the target is fixed]
+     line: hyphenate-character-004 web groups 4 4 4 3 → GEOMETRY WRONG (offset: group 3 line 1 top y303 vs ref y281)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-004 ios                                FAIL       [report: expected WRONG until the target is fixed]
+     line: acter-004 ios groups 3 4 3 3 → GEOMETRY WRONG (lines: groups [3, 4, 3, 3] lines vs ref [4, 4, 4, 3]; glyph: group 1 line 1 ink x17-70 end-cell 2px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y167 vs ref y186)
+ - L3-hyphenate-character   hyphenate-character.geometry.py            hyphenate-character-004 android                            FAIL       [report: expected WRONG until the target is fixed]
+     line: r-004 android groups 3 4 3 3 → GEOMETRY WRONG (lines: groups [3, 4, 3, 3] lines vs ref [4, 4, 4, 3]; glyph: group 1 line 1 ink x18-70 end-cell 1px vs ref x18-62 end-cell 11px; offset: group 2 line 1 top y168 vs ref y186)
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-002 web                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-002 ios                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-002 android                           PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-001 web                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-001 ios                               PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-span-001 android                           PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-001 web                        PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-001 ios                        PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-001 android                    PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-002 ios                        PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   soft-hyphen.geometry.py                    hyphens/hyphens-out-of-flow-002 android                    PASS       [control: expected to stay PASS]
+!! L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-002 web                                     FAIL       [GATING -> revert U3]
+     line: block-ellipsis-002 web bands [(19, 32, 17, 61), (39, 52, 17, 63), (79, 92, 17, 78)] → GEOMETRY WRONG (band top y79 vs ref y59)
+!! L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-004 web                                     FAIL       [GATING -> revert U3]
+     line: block-ellipsis-004 web bands [(19, 32, 17, 57), (39, 52, 17, 60), (74, 105, 16, 101)] → GEOMETRY WRONG (3 bands vs ref 2)
+!! L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-005 web                                     FAIL       [GATING -> revert U3]
+     line: block-ellipsis-005 web bands [(19, 32, 17, 57), (39, 52, 17, 60), (74, 105, 16, 101)] → GEOMETRY WRONG (3 bands vs ref 2)
+!! L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-006 web                                     FAIL       [GATING -> revert U3]
+     line: block-ellipsis-006 web bands [(19, 32, 17, 57), (39, 52, 17, 60), (74, 105, 16, 101)] → GEOMETRY WRONG (3 bands vs ref 2)
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-002 ios                                     PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-002 android                                 PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-004 ios                                     PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-005 ios                                     PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-006 ios                                     PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-004 android                                 PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-005 android                                 PASS       [control: expected to stay PASS]
+   L3-hyphenate-character   block-ellipsis-br.geometry.py              block-ellipsis-006 android                                 PASS       [control: expected to stay PASS]
+
+geometry-gate wave53-final (base wave53-open): 32 keys — PASS 19 · FAIL 13 (gating 6) · UNMEASURED 0 (gating 0) · probe self-check failures 0
+  by class: gating 6 (PASS 0 FAIL 6) · control 19 (PASS 19 FAIL 0) · report 7 (PASS 0 FAIL 7) · withdrawn 0 (PASS 0 FAIL 0)
+revert rule 4 names: U2-ios|U3, U3
+self-test: HOLDS — 0 violation(s), 0 self-check failure(s)

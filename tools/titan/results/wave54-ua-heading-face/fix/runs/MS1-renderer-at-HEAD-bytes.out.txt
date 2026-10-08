@@ -1,0 +1,16 @@
+[MS1-renderer-at-HEAD-bytes] lock taken 21:58:21; seam sha256 before=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db (HEAD da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db)
+[MS1-renderer-at-HEAD-bytes] seam-1 applied: seam sha256=c6a83ecdb6e36ae44ae21c7c9ce76bdd0797b4584fbbd85450e386da00148a0d, +runtimes/compose/src/test/java/com/styleconverter/runtime/typography/UAElementFontRuleSeamWiringTest.kt
+[MS1-renderer-at-HEAD-bytes] MUTATED runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256 c6a83ecdb6e36ae4 → da2df0b4cca689ad
+[MS1-renderer-at-HEAD-bytes] red: gradle rc=1 (log tools/titan/results/wave54-ua-heading-face/fix/runs/MS1-renderer-at-HEAD-bytes.red.log)
+[MS1-renderer-at-HEAD-bytes] red: UAElementFontRuleSeamWiringTest tests=2 failures=2 errors=0 ts=2026-10-08T19:58:23.932Z
+[MS1-renderer-at-HEAD-bytes] red:   RED DynamicValueResolver resolves the UA step's output, after it :: java.lang.AssertionError: the UA font step call is missing
+[MS1-renderer-at-HEAD-bytes] red:   RED the UA font step wraps the list UA rule's output with the tag, own list and stand-down verdict :: java.lang.AssertionError: the ListStyleUaRule binding expected:<1> but was:<0>
+[MS1-renderer-at-HEAD-bytes] red: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:58:23.973Z
+[MS1-renderer-at-HEAD-bytes] red: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:58:24.028Z
+[MS1-renderer-at-HEAD-bytes] restored runtimes/compose/src/main/java/com/styleconverter/runtime/core/renderer/ComponentRenderer.kt sha256=c6a83ecdb6e36ae4 BYTE-EXACT
+[MS1-renderer-at-HEAD-bytes] green: gradle rc=0 (log tools/titan/results/wave54-ua-heading-face/fix/runs/MS1-renderer-at-HEAD-bytes.green.log)
+[MS1-renderer-at-HEAD-bytes] green: UAElementFontRuleSeamWiringTest tests=2 failures=0 errors=0 ts=2026-10-08T19:58:25.829Z
+[MS1-renderer-at-HEAD-bytes] green: UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T19:58:26.228Z
+[MS1-renderer-at-HEAD-bytes] green: InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T19:58:26.279Z
+[MS1-renderer-at-HEAD-bytes] seam restored sha256=da2df0b4cca689ad30943213a5e10253881073b7287c45eabf42cb743e1d04db BYTE-EXACT-HEAD; patch-borne test removed=True
+[MS1-renderer-at-HEAD-bytes] lock released 21:58:26

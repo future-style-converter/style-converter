@@ -1,0 +1,90 @@
+# hunk-for-plan-2.patch — wave 54 lane L5 FIX PASS (skeptic finding 1, must-fix: GO-SMALL) for the ORCHESTRATOR (owner of wave54-plan/)
+# file: tools/titan/results/wave54-plan/plan-build.py
+# base: 029139fd2f121feb23b91fbbc5206b11d5d96890 (plan-build.py byte-identical to HEAD at the fix pass); file sha256 at base: 70646549b999e757e76bd30db3b13b020e36e2850d8ef09e51c4d6b702593ab8
+# anchor: the L5 block (:504-560) and L5['mustNotMove'] (:728-733)
+# effect (dry run, fix/plan-build-dry/): L5 carriers [web 0, ios 0, android 7] (was [0, 3, 10]); predictions 7 (was 13: the six inset-005/-006/-014
+#   native rows withdrawn); mustNotMove 52 (was 46: +the six inset-005/-006/-014 native cells); units ['U1-android'] (U2-ios HELD,
+#   'heldUnits'); union carriers web 44 · iOS 24 · Android 48; revert units 18; MED/MED-LOW flips iOS 6→3, Android 4→1.
+#   The unpatched dry run reproduces the committed expectations.json byte-for-byte (the method check).
+# then: python3 tools/titan/results/wave54-plan/plan-build.py && RUN=wave53-final WATCH=tools/titan/results/wave54-plan/watchlist.txt node tools/titan/results/wave52-plan/watchlist-check.mjs
+diff --git a/tools/titan/results/wave54-plan/plan-build.py b/tools/titan/results/wave54-plan/plan-build.py
+index ec57eda..6d79f8f 100644
+--- a/tools/titan/results/wave54-plan/plan-build.py
++++ b/tools/titan/results/wave54-plan/plan-build.py
+@@ -501,7 +501,11 @@ L4 = {
+ }
+ 
+ # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+-# L5 · ua-heading-face — the Compose UAElementFontRule twin + the fold-aware heading gate on both natives.
++# L5 · ua-heading-face — the Compose UAElementFontRule twin (GO-SMALL since the lane fix pass: leaf headings only).
++# The fold-aware heading gate (UAHeadingFoldGate.{kt,swift}, unit U2-ios and the folded-host half of U1-android) is HELD
++# (wave54-ua-heading-face/_note.md "Fix pass"; skeptic.md repros 13-14): the folded inset-005/-006/-014 <h1>s are abspos,
++# no native gives an abspos heading its UA .67em margin, and with the 2em face alone the calibrated replay scores all six
++# native cells LOWER (Δ -0.011…-0.017) — up-or-stay rows that would revert U1-android and its HIGH flip by rule 2.
+ # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+ BII = T('css-break', 'block-in-inline-015-print')
+ INS = {n: T('css-text-decor', f'text-decoration-inset-{n}') for n in ('001', '002', '003', '004', '005', '006', '007', '008', '009', '011', '012', '013', '014', '015', '016', '024')}
+@@ -509,24 +513,19 @@ TDC = T('css-text-decor', 'text-decoration-color')
+ SUB2, SUB3 = T('css-text-decor', 'text-decoration-subelements-002'), T('css-text-decor', 'text-decoration-subelements-003')
+ CLI, CRIOU = T('css-lists', 'counter-list-item'), T('css-lists', 'counter-reset-increment-overflow-underflow')
+ BRC, CSC = T('filter-effects', 'backdrop-filter-border-radius-change'), T('filter-effects', 'backdrop-filter-corner-shape-change')
+-ua_android = [BII, INS['005'], INS['006'], INS['014'], TDC, SUB3, CLI, CRIOU, BRC, CSC]
+-ua_ios = [INS['005'], INS['006'], INS['014']]
++ua_android = [BII, TDC, SUB3, CLI, CRIOU, BRC, CSC]   # GO-SMALL census: fix/census-go-small.wave53-final.out.txt (7)
++ua_ios = []                                           # U2-ios HELD: no iOS carrier this wave
++UA_HELD = [INS['005'], INS['006'], INS['014']]        # the folded hosts: stand down on both natives (byte-identical)
+ assert {r['key'].replace('css/', '', 1) for r in uah['rows']} >= set(ua_android)
+ L5 = {
+   'dir': 'tools/titan/results/wave54-ua-heading-face',
+   'briefs': ['ua-heading-face.md', 'queue-scout-text-web.md'],
+-  'captureCarriers': caps(ios=[stem(t) for t in ua_ios], android=[stem(t) for t in ua_android]),
++  'captureCarriers': caps(android=[stem(t) for t in ua_android]),
+   'wireCarriers': [],
+-  'carrierRule': 'an author-UNSIZED h1-h6 (no own FontSize/Font/FontWeight; 8 documents) or a sub/sup leaf, on Compose; on iOS only a FOLDED heading host (the stand-down retires only where InlineRunFold/InlineRunFlow returns Folded): inset-005/-006/-014. 14 sized-heading documents stand down (byte-identical) except the bold-only half on two filter-effects h1s (android movers)',
++  'carrierRule': 'GO-SMALL (lane fix pass): on Compose only, an author-UNSIZED LEAF h1-h6 (no own FontSize/Font/FontWeight, no composed children) or a RENDERED sub/sup leaf: block-in-inline-015-print, counter-list-item, counter-reset-increment-overflow-underflow, text-decoration-color, subelements-003, plus the bold-only half of two filter-effects h1s (7 documents). Every heading host with child boxes (inset-005/-006/-011/-014) stands down (UAElementFontRule.headingStandsDown = the iOS wave-40 gate) and its sup/sub are consumed by the fold: byte-identical. iOS: none (U2-ios HELD). Sized headings (14 documents): same list instance',
+   'probeSections': ['css-text-decor', 'css-break', 'css-lists', 'filter-effects'],
+   'predictions': [
+     pred(f'{BII} android', 'f 0.9489', 'P ≈0.989 (the identical rule on iOS gives P 0.9894 on the same IR)', 'flip', 'HIGH', 0.97, True, ['U1-android'], GEO_OK),
+-    pred(f'{INS["005"]} android', 'f 0.9', 'P ≈0.98 (anchors inset-001…004 android 0.984-0.9859)', 'flip', 'MED', None, False, ['U1-android'], GEO_OK),
+-    pred(f'{INS["006"]} android', 'f 0.8993', 'P ≈0.98', 'flip', 'MED', None, False, ['U1-android'], GEO_OK),
+-    pred(f'{INS["005"]} ios', 'f 0.8995', 'P ≈0.965 (anchors ios 0.9634-0.9707)', 'flip', 'MED', None, False, ['U2-ios'], GEO_OK),
+-    pred(f'{INS["006"]} ios', 'f 0.8987', 'P ≈0.965', 'flip', 'MED', None, False, ['U2-ios'], GEO_OK),
+-    pred(f'{INS["014"]} ios', 'f 0.9238', 'P (no monospace anchor; the probe decides)', 'flip', 'MED-LOW', None, False, ['U2-ios'], GEO_OK),
+-    pred(f'{INS["014"]} android', 'f 0.923', 'P (no monospace anchor; the probe decides)', 'flip', 'MED-LOW', None, False, ['U1-android'], GEO_OK),
+     pred(f'{TDC} android', 'f 0.6164', '≈0.67 (the iOS anchor with the rule is f 0.674)', 'mover; look, never count', 'LOW', None, False, ['U1-android']),
+     pred(f'{CLI} android', 'f 0.7307', 'moves (iOS with the rule: f 0.7864)', 'mover', 'LOW', None, False, ['U1-android'], direction='undirected',
+          directionWhy='only a cross-platform anchor (iOS), which the brief declined to turn into a magnitude'),
+@@ -546,17 +545,17 @@ L5 = {
+                                              'text-decoration-inset-014', 'text-decoration-inset-011') for p in PLATS},
+      'gating': {'block-in-inline-015-print android': 'U1-android'},
+      'report': [f'text-decoration-inset-{n} {p}' for n in ('005', '006', '014') for p in ('ios', 'android')],
++     'heldNote': 'GO-SMALL: the six inset-005/-006/-014 native report rows are no longer targets; they stay WRONG (their captures are must-not-move, gated by R4 / R7). The band-top check of hunk-for-plan-1.patch keeps a future folded-host face honest',
+      'note': 'inset-011 is the CONTROL: the probe prints OK only while its native bands EQUAL the recorded wave53-final bands',
+      'onWave53Final': '7 target rows WRONG (android band 9 vs ref 18; inset-005/-006 one band vs 2; inset-014 line-1 11/12 px); ref, web, iOS block-in-inline and the inset-011 control OK',
+      'teeth': 'fix r1 (plan-skeptic M2): block-in-inline-015-print also checks every band TOP within ±3 px of the ref; the skeptic\'s pitch fakes print WRONG from +2 px/line (fix-r1/post-M2.pitch-down6.out.txt), the iOS anchor (tops 30/66/105/144 vs 29/65/103/142) stays OK'},
+   ],
+   'revertUnits': {
+-    'U1-android': {'commit': 'Compose typography/UAElementFontRule.kt (new twin) + typography/UAHeadingFoldGate.kt (new) + their JVM tests + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply, before DynamicValueResolver :1206)',
++    'U1-android': {'commit': 'Compose typography/UAElementFontRule.kt (new twin, with headingStandsDown) + UAElementFontRuleTest.kt + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply(standsDown = headingStandsDown), before DynamicValueResolver :1211; carries the patch-borne UAElementFontRuleSeamWiringTest.kt) + Swift UAElementFontRule.swift (docs only: TWIN STATUS PORTED) + the lane dir',
+                    'captures': caps(android=[stem(t) for t in ua_android]), 'wire': [], 'revertOrder': ['U1-android']},
+-    'U2-ios': {'commit': 'Swift StyleEngine/typography/UAHeadingFoldGate.swift (new) + UAHeadingFoldGateTests.swift + UAElementFontRule.swift (docs only) + UAElementFontRuleTests.swift (additions) + ComponentRenderer.swift seam-2 (:343-356 the hasElementChildren: argument)',
+-               'captures': caps(ios=[stem(t) for t in ua_ios]), 'wire': [], 'revertOrder': ['U2-ios']},
+   },
+-  'stopRule': 'if the lane\'s first JVM / Catalyst pins say the verbatim inset-005/-006/-014 hosts BAIL (not Folded), the 005/006/014 rows are void and the lane stops at the GO-SMALL fallback (U1 leaf-only)',
++  'heldUnits': {'U2-ios': 'HELD at the lane fix pass (GO-SMALL): UAHeadingFoldGate.swift + tests + seam-2 are parked in wave54-ua-heading-face/held/ until "UA .67em-family margin for a positioned heading on both natives" lands; no Swift behaviour change this wave'},
++  'stopRule': 'if the lane\'s first JVM / Catalyst pins say the verbatim inset-005/-006/-014 hosts BAIL (not Folded), the 005/006/014 rows are void and the lane stops at the GO-SMALL fallback (U1 leaf-only). TAKEN at the lane fix pass for a different reason: the hosts fold, but the face alone is predicted to LOWER all six cells (the missing abspos UA margin)',
+ }
+ 
+ # ═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════
+@@ -728,9 +727,10 @@ L4['mustNotMove'] = mnm('L4-oof-layout',
+ L5['mustNotMove'] = mnm('L5-ua-heading-face',
+     cells_of([BII], ('ios', 'web'))
+     + cells_of([INS[n] for n in ('011', '001', '002', '003', '004', '009', '015', '016', '024', '007', '008', '012', '013')], ('ios', 'android'))
++    + cells_of(UA_HELD, ('ios', 'android'))
+     + cells_of([SUB2], ('ios', 'android'))
+     + cells_of([TDC, SUB3, CLI, CRIOU, BRC, CSC], ('ios',))
+-    + cells_of(ua_android + ua_ios + [INS['011'], SUB2], ('web',)))
++    + cells_of(ua_android + UA_HELD + [INS['011'], SUB2], ('web',)))
+ L6['mustNotMove'] = mnm('L6-web-tail',
+     cells_of(rs_scored, ('ios', 'android'))
+     + cells_of([OOF1, T('css-text', 'hyphens', 'hyphens-span-002'), T('css-text', 'hyphens', 'hyphens-auto-control'),

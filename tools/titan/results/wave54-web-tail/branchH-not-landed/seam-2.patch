@@ -1,0 +1,266 @@
+NOT LANDED — the [W-L6] step-0 probe ran 2026-10-08 19:10 and printed `BRANCH R` (../step0-probe.out.txt), so W1 lands as
+the runtime files and this branch-H alternative is kept ONLY as the verified record of the other branch. It lives
+outside the registry path (integrate-seams.sh / land-units.sh read tools/titan/results/wave54-web-tail/seam-2.patch,
+which deliberately does not exist). Do not apply.
+
+seam-2.patch — wave 54, lane L6 (web-tail), revert unit W1 — BRANCH H ONLY (PLAN §3 row "ComponentRenderer.tsx :991 renderText").
+LAND ONLY IF the [W-L6] step-0 probe prints `BRANCH H` (exit 10). Under branch R / H2 this patch is NOT applied and W1 is the
+runtime files (InertOutOfFlowWordJoin.ts, InlineRuns.ts, NodeRenderer.ts :339, the runtime test). Under branch H those runtime
+files are NOT landed (restore InlineRuns.ts / NodeRenderer.ts to HEAD, drop the two new runtime files) and W1 = this patch alone.
+Base: db6e8aa0 (= dev 7cce3b22 + the committed wave-54 plan; ComponentRenderer.tsx byte-identical at both).
+Seam file: apps/web-harness/src/sdui/ComponentRenderer.tsx
+  sha256 at base: cc39ab6e98342c493b2404a4d9a52d1fba997063b2d42b2edc89cea7809a4d8e (blob 8413fb90)
+  hunk 1 anchor: the import block after `import { uaBoxlessDisplay } from './UaBoxlessDisplay';` (:65)
+  hunk 2 anchor: `HARNESS_OPTIONS.renderText` (:991) — `(text) => <span>{text}</span>` becomes
+                 `(text, ctx) => (splitsWordAroundInertOutOfFlow(ctx) ? text : <span>{text}</span>)`.
+Patch-borne NEW files: apps/web-harness/src/sdui/InertSplitBareText.ts (the predicate + host test),
+  apps/web-harness/tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx (the pins).
+Applies clean on db6e8aa0 and on top of seam-1.patch (hunks disjoint: seam-1 is :327-332 and :1099-1154).
+Apply: git apply --check tools/titan/results/wave54-web-tail/seam-2.patch && git apply tools/titan/results/wave54-web-tail/seam-2.patch
+
+diff --git a/apps/web-harness/src/sdui/ComponentRenderer.tsx b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+index 8413fb9..3cbf36a 100644
+--- a/apps/web-harness/src/sdui/ComponentRenderer.tsx
++++ b/apps/web-harness/src/sdui/ComponentRenderer.tsx
+@@ -63,6 +63,8 @@ import type { ComposedNode } from './Composer';
+ // module banner for the measured 002-fallbacks case).
+ import { routeCorpusAssetStyles } from './CorpusAssetRoute';
+ import { uaBoxlessDisplay } from './UaBoxlessDisplay';
++// wave-54 lane L6 (W1, branch H): which hosts' run pieces render bare.
++import { splitsWordAroundInertOutOfFlow } from './InertSplitBareText';
+ 
+ /**
+  * WPT-mode detector — reads the `?wpt=1` query parameter once per module load.
+@@ -988,7 +990,11 @@ const HARNESS_OPTIONS: RendererOptions = {
+   // swarm-002 Bug 1 shape) — the parent's color / text-decoration /
+   // font-* reach the glyphs via inheritance, and tests/tooling can
+   // target the run. The package default is a bare text node.
+-  renderText: (text) => <span>{text}</span>,
++  // wave-54 L6 (W1, branch H): EXCEPT the pieces of an `auto` host whose runs
++  // split a word around a paint-inert out-of-flow member — the wrapper hides
++  // the word's hyphenation point from Chromium there (step 0: V1 = 26 while
++  // the bare-text V2 = 46), so they render bare (InertSplitBareText.ts).
++  renderText: (text, ctx) => (splitsWordAroundInertOutOfFlow(ctx) ? text : <span>{text}</span>),
+   // Divergence #5: the image source for <img>. The wire's own
+   // `meta.attrs.src` wins when it has one (wave-36 lane M1 — a corpus path
+   // routed through /wpt-image/, see wptImageSrc); otherwise the harness
+diff --git a/apps/web-harness/src/sdui/InertSplitBareText.ts b/apps/web-harness/src/sdui/InertSplitBareText.ts
+new file mode 100644
+index 0000000..9aefc82
+--- /dev/null
++++ b/apps/web-harness/src/sdui/InertSplitBareText.ts
+@@ -0,0 +1,107 @@
++// InertSplitBareText.ts — wave-54 lane L6, unit W1, BRANCH H ONLY (seam-2.patch;
++// land it ONLY when the [W-L6] step-0 probe prints `BRANCH H`).
++//
++// WHY (branch H): hyphens-out-of-flow-002 web boxes 4/5 (`high<span abspos>
++// abspos</span>way`, hyphens:auto, 6ch) render as one 26-px line where the
++// ref has `high‐` / `way` (web-out-of-flow-hyphen-box.md §2). Branch H is the
++// step-0 finding that host Chromium hyphenates the RAW markup (V0 / V6 = 46)
++// and the package-default DOM (V2 = 46) but NOT the harness shape (V1 = 26):
++// the harness's per-piece `<span>` wrapper (renderText, the swarm-002 Bug 1
++// shape) is what hides the `high|way` point. The runtime is right there, so
++// the fix stays in the harness: the pieces of such a host render as BARE text
++// nodes, the package default — the member keeps its wire slot (spec 03 §4.1
++// rule 1 intact).
++//
++// REACH: a host whose OWN computed `hyphens` is `auto` (css-text-3 §5.4) and
++// whose wire runs put a paint-inert out-of-flow member BETWEEN two word
++// fragments (no white space on either side). Census (wave53-final): 4 hosts,
++// all in hyphens-out-of-flow-002. The general wrapper question (W2: bare text
++// for all 264 runs hosts) is a BACKLOG item, not this file's.
++//
++// Under branch H the runtime twin (runtimes/web/src/renderer/
++// InertOutOfFlowWordJoin.ts) does not land, so the Compose predicate is
++// restated here (third copy: Compose InertOutOfFlowMember.admits + the
++// InlineRunFold TEXT_MEMBER_TAGS ring).
++
++import type { RenderContext } from '@style-converter/web/renderer/RendererOptions';
++import type { ComposedNode } from './Composer';
++
++/** CSS 2.1 §9.3.1: absolute and fixed take the box out of flow. */
++const OUT_OF_FLOW_POSITIONS: ReadonlySet<string> = new Set(['ABSOLUTE', 'FIXED']);
++/** Compose InlineRunFold TEXT_MEMBER_TAGS: tags whose text carries no UA styling (keeps <img>/<input> out). */
++const TEXT_MEMBER_TAGS: ReadonlySet<string> = new Set(['span', 'time', 'data']);
++/** CSS document white space (css-text-3 §4.1; CSS 2.1 adds form feed). */
++const WHITE_SPACE = /[ \t\n\r\f]/;
++
++/** A JSON-object value (Kotlin `as? JsonObject`). */
++const asObject = (v: unknown): Record<string, unknown> | null =>
++  (v !== null && typeof v === 'object' && !Array.isArray(v) ? (v as Record<string, unknown>) : null);
++/** A JSON primitive's content (Kotlin `contentOrNull`). */
++const primitiveContent = (v: unknown): string | null =>
++  (typeof v === 'string' ? v : (typeof v === 'number' || typeof v === 'boolean') ? String(v) : null);
++
++/** Compose ValueExtractors.extractKeyword: a bare primitive, else `keyword` then `value`. */
++function keywordOf(data: unknown): string | null {
++  const o = asObject(data);
++  return o === null ? primitiveContent(data) : (primitiveContent(o.keyword) ?? primitiveContent(o.value));
++}
++
++/** Compose alphaIsZero: `srgb.a` present, numeric and ≤ 0 (absent alpha = opaque → refuse). */
++function alphaIsZero(data: unknown): boolean {
++  const srgb = asObject(asObject(data)?.srgb);
++  if (srgb === null) return false;
++  const raw = srgb.a;
++  const a = typeof raw === 'number' ? raw
++    : (typeof raw === 'string' && /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(raw)) ? Number(raw) : NaN;
++  return a <= 0;
++}
++
++/** Compose InertOutOfFlowMember.admits, restated, behind the TEXT tag ring. */
++export function isInertTextMember(member: ComposedNode): boolean {
++  const c = member.component;
++  // The ring first: only no-UA-ink text tags.
++  const tag = c.meta?.sourceTag?.toLowerCase();
++  if (!tag || !TEXT_MEMBER_TAGS.has(tag)) return false;
++  // Structure of its own could paint.
++  if (member.children.length > 0 || (c.meta?.runs?.length ?? 0) > 0 || (c.meta?.decorations?.length ?? 0) > 0) return false;
++  let outOfFlow = false;
++  let transparentInk = false;
++  for (const p of c.properties) {
++    if (p.type === 'Position') {
++      // Out of flow only for absolute/fixed.
++      if (OUT_OF_FLOW_POSITIONS.has(keywordOf(p.data)?.toUpperCase() ?? '')) outOfFlow = true; else return false;
++    } else if (p.type === 'Color') {
++      // Only fully transparent ink is paint-inert.
++      if (alphaIsZero(p.data)) transparentInk = true; else return false;
++    } else if (p.type !== 'Hyphens') {
++      // Anything else could paint or move ink.
++      return false;
++    }
++  }
++  return outOfFlow && transparentInk;
++}
++
++/**
++ * True when this host's text pieces must render as BARE text nodes: its own
++ * `hyphens` is `auto` and its wire runs split a word around a paint-inert
++ * out-of-flow member. False for every other host (the `<span>` stays).
++ */
++export function splitsWordAroundInertOutOfFlow(ctx: RenderContext): boolean {
++  // Only an `auto` host has a dictionary point to lose.
++  if (ctx.styles.hyphens !== 'auto') return false;
++  const runs = ctx.component.meta?.runs;
++  if (!Array.isArray(runs)) return false;
++  for (let i = 1; i + 1 < runs.length; i++) {
++    const [prev, cur, next] = [runs[i - 1], runs[i], runs[i + 1]];
++    // A child entry between two text entries…
++    if (typeof cur?.child !== 'string' || typeof prev?.text !== 'string' || typeof next?.text !== 'string') continue;
++    // …that sits MID-word (no white space on either side of it)…
++    const p = prev.text; const n = next.text;
++    if (p.length === 0 || n.length === 0 || WHITE_SPACE.test(p[p.length - 1]) || WHITE_SPACE.test(n[0])) continue;
++    // …and resolves (authoring key: name first, then id — InlineRuns.ts) to a paint-inert member.
++    const member = ctx.node.children.find((c) => c.component.name === cur.child)
++      ?? ctx.node.children.find((c) => c.component.id === cur.child);
++    if (member && isInertTextMember(member)) return true;
++  }
++  return false;
++}
+diff --git a/apps/web-harness/tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx b/apps/web-harness/tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx
+new file mode 100644
+index 0000000..b9d45ff
+--- /dev/null
++++ b/apps/web-harness/tests/sdui/ComponentRenderer.inertSplitBareText.test.tsx
+@@ -0,0 +1,101 @@
++// wave-54 lane L6 (unit W1, BRANCH H ONLY) — rides seam-2.patch: the harness
++// renderText calibration renders the pieces of an `auto` host whose runs split
++// a word around a paint-inert out-of-flow member as BARE text nodes
++// (apps/web-harness/src/sdui/InertSplitBareText.ts). Land only when the
++// [W-L6] step-0 probe prints `BRANCH H` (host Chromium hyphenates the raw and
++// the package-default shapes, V0 / V2 / V6 = 46, but not the harness's
++// per-piece <span> shape, V1 = 26); then the W1 runtime files do NOT land.
++//
++// Inputs VERBATIM from tools/titan/runs/wave53-final/sections/*/per-test-ir/
++// (byte-identical at wave54-open): hyphens-out-of-flow-002 (all 15
++// components), hyphens-out-of-flow-001 box 4, and the 24 out-of-flow run
++// members of tools/titan/results/wave54-plan/web-out-of-flow-hyphen-box.census.json.
++//
++// EXECUTED MUTATIONS (sha256 in tools/titan/results/wave54-web-tail/_note.md):
++//   H-m1 the `auto` gate dropped               → (H-d) red
++//   H-m2 the mid-word test dropped             → (H-c) red
++//   H-m3 widened to any abspos                 → (H-e) red
++//   H-m4 renderText ignores the predicate      → (H-a) red
++//   H-m5 predicate drift: alpha from srgb.alpha → (H-g) red
++
++import { describe, it, expect, vi, beforeAll, afterAll } from 'vitest';
++import { renderToStaticMarkup } from 'react-dom/server';
++import type { IRDocument } from '@style-converter/web/core/ir/IRModels';
++import { composeTree, type ComposedNode } from '../../src/sdui/Composer';
++import { isInertTextMember } from '../../src/sdui/InertSplitBareText';
++
++/** css-text/hyphens/hyphens-out-of-flow-002 — all 15 components, verbatim. */
++const DOC002 = [{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__0-283","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__0","properties":[],"text":"Test passes if the text in all orange boxes below is identical (including the presence and position of a hyphen).","meta":{"sourceTag":"p"}},{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__1-284","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__1","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en"}},{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__2-285","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__2","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en","runs":[{"child":"hyphens__hyphens-out-of-flow-002__2__0"},{"text":"highway"}]}},{"id":"hyphens__hyphens-out-of-flow-002__2__0-286","name":"hyphens__hyphens-out-of-flow-002__2__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__2-285"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}},{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__3","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en","runs":[{"text":"h"},{"child":"hyphens__hyphens-out-of-flow-002__3__0"},{"text":"ighway"}]}},{"id":"hyphens__hyphens-out-of-flow-002__3__0-288","name":"hyphens__hyphens-out-of-flow-002__3__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}},{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en","runs":[{"text":"high"},{"child":"hyphens__hyphens-out-of-flow-002__4__0"},{"text":"way"}]}},{"id":"hyphens__hyphens-out-of-flow-002__4__0-290","name":"hyphens__hyphens-out-of-flow-002__4__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}},{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__5","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en","runs":[{"text":"high"},{"child":"hyphens__hyphens-out-of-flow-002__5__0"},{"text":"way"}]}},{"id":"hyphens__hyphens-out-of-flow-002__5__0-292","name":"hyphens__hyphens-out-of-flow-002__5__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}},{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__6","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"role":"ws-after","lang":"en","runs":[{"text":"highwa"},{"child":"hyphens__hyphens-out-of-flow-002__6__0"},{"text":"y"}]}},{"id":"hyphens__hyphens-out-of-flow-002__6__0-294","name":"hyphens__hyphens-out-of-flow-002__6__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}},{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-002__7-295","name":"wpt__css-text__hyphens__hyphens-out-of-flow-002__7","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"AUTO"}],"text":"highway","meta":{"lang":"en","runs":[{"text":"highway"},{"child":"hyphens__hyphens-out-of-flow-002__7__0"}]}},{"id":"hyphens__hyphens-out-of-flow-002__7__0-296","name":"hyphens__hyphens-out-of-flow-002__7__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__7-295"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}];
++/** css-text/hyphens/hyphens-out-of-flow-001 box 4 (`hyphens: manual`) — host + member, verbatim. */
++const DOC001_BOX4 = [{"id":"wpt__css-text__hyphens__hyphens-out-of-flow-001__4-275","name":"wpt__css-text__hyphens__hyphens-out-of-flow-001__4","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0.6470588235294118,"b":0},"original":"orange"}},{"type":"MarginTop","data":{"px":5}},{"type":"MarginRight","data":{"px":5}},{"type":"MarginBottom","data":{"px":5}},{"type":"MarginLeft","data":{"px":5}},{"type":"Width","data":{"type":"length","original":{"v":6,"u":"CH"}}},{"type":"Hyphens","data":"MANUAL"}],"text":"high­way","meta":{"role":"ws-after","runs":[{"text":"high"},{"child":"hyphens__hyphens-out-of-flow-001__4__0"},{"text":"­way"}]}},{"id":"hyphens__hyphens-out-of-flow-001__4__0-276","name":"hyphens__hyphens-out-of-flow-001__4__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__4-275"},"text":"abspos","meta":{"sourceTag":"span"}}];
++/** The 24 out-of-flow run members of the W1 census, verbatim, with the census's Compose-predicate verdict. */
++const MEMBERS24: Array<{ paintInert: boolean; component: Record<string, unknown> }> = [{"paintInert":false,"component":{"id":"abspos__between-float-and-text__1__0-003","name":"abspos__between-float-and-text__1__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","px":200}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}}],"slot":{"parent":"wpt__css2__abspos__between-float-and-text__1-002"},"meta":{"role":"ws-after"}}},{"paintInert":false,"component":{"id":"abspos__between-float-and-text__1__1-004","name":"abspos__between-float-and-text__1__1","properties":[{"type":"Float","data":"LEFT"},{"type":"MarginTop","data":{"px":20}},{"type":"Width","data":{"type":"length","px":200}},{"type":"Height","data":{"type":"length","px":200}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}}],"slot":{"parent":"wpt__css2__abspos__between-float-and-text__1-002"}}},{"paintInert":false,"component":{"id":"abspos__hypothetical-inline-alone-on-second-line__1__1-008","name":"abspos__hypothetical-inline-alone-on-second-line__1__1","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"PaddingLeft","data":{"px":100}}],"slot":{"parent":"wpt__css2__abspos__hypothetical-inline-alone-on-second-line__1-006"},"text":"Line 2","meta":{"sourceTag":"span"}}},{"paintInert":false,"component":{"id":"abspos__static-inside-inline-001__2__0__0-023","name":"abspos__static-inside-inline-001__2__0__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}}],"slot":{"parent":"abspos__static-inside-inline-001__2__0-022"}}},{"paintInert":false,"component":{"id":"abspos__static-inside-inline-002__2__0__0-028","name":"abspos__static-inside-inline-002__2__0__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}}],"slot":{"parent":"abspos__static-inside-inline-002__2__0-027"}}},{"paintInert":false,"component":{"id":"abspos__static-inside-inline-003__2__0__0-033","name":"abspos__static-inside-inline-003__2__0__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}}],"slot":{"parent":"abspos__static-inside-inline-003__2__0-032"}}},{"paintInert":false,"component":{"id":"all-prop-001__1__0-003","name":"all-prop-001__1__0","properties":[{"type":"BorderTopStyle","data":"SOLID"},{"type":"BorderRightStyle","data":"SOLID"},{"type":"BorderBottomStyle","data":"SOLID"},{"type":"BorderLeftStyle","data":"SOLID"},{"type":"BorderTopColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"BorderRightColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"BorderBottomColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"BorderLeftColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"BackgroundColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Color","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"TextDecorationLine","data":["LINE_THROUGH"]},{"type":"FontWeight","data":{"weight":700,"original":"bold"}},{"type":"FontStyle","data":"italic"},{"type":"FontVariantCaps","data":"SMALL_CAPS"},{"type":"FontSize","data":{"px":20,"original":{"type":"length","px":20}}},{"type":"FontFamily","data":["monospace"]},{"type":"LineHeight","data":{"multiplier":1.2,"original":"normal"}},{"type":"OutlineStyle","data":"SOLID"},{"type":"OutlineColor","data":{"srgb":{"r":1,"g":0,"b":0},"original":"red"}},{"type":"Float","data":"LEFT"},{"type":"LetterSpacing","data":{"px":0,"original":{"type":"length","original":{"v":1,"u":"EM"}}}},{"type":"Display","data":"LIST_ITEM"},{"type":"TextAlign","data":"CENTER"},{"type":"Width","data":{"type":"length","original":{"v":0.5,"u":"EM"}}},{"type":"MarginTop","data":{"original":{"v":10,"u":"EM"}}},{"type":"MarginRight","data":{"original":{"v":10,"u":"EM"}}},{"type":"MarginBottom","data":{"original":{"v":10,"u":"EM"}}},{"type":"MarginLeft","data":{"original":{"v":10,"u":"EM"}}},{"type":"OverflowX","data":"SCROLL"},{"type":"OverflowY","data":"SCROLL"},{"type":"All","data":"INITIAL"},{"type":"Direction","data":"RTL"}],"slot":{"parent":"wpt__css-cascade__all-prop-001__1-002"},"text":"987 654","meta":{"sourceTag":"bdo"}}},{"paintInert":false,"component":{"id":"position-absolute-semi-replaced-stretch-other__2__0-161","name":"position-absolute-semi-replaced-stretch-other__2__0","properties":[{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"Position","data":"ABSOLUTE"},{"type":"BoxSizing","data":"BORDER_BOX"},{"type":"Top","data":{"px":3}},{"type":"Right","data":{"px":3}},{"type":"Bottom","data":{"px":3}},{"type":"Left","data":{"px":3}},{"type":"OutlineWidth","data":{"type":"length","px":2}},{"type":"OutlineStyle","data":"SOLID"},{"type":"OutlineColor","data":{"srgb":{"r":0,"g":1,"b":0},"original":"lime"}},{"type":"Width","data":"auto"},{"type":"Height","data":"auto"}],"slot":{"parent":"wpt__css-position__position-absolute-semi-replaced-stretch-other__2-160"},"meta":{"sourceTag":"label"}}},{"paintInert":false,"component":{"id":"first-letter-list-item-dynamic-001__1__0-148","name":"first-letter-list-item-dynamic-001__1__0","properties":[{"type":"Position","data":"FIXED"},{"type":"Top","data":{"px":52}},{"type":"Left","data":{"px":0}},{"type":"Width","data":{"type":"length","px":0}},{"type":"Height","data":{"type":"length","px":0}},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},{"type":"Display","data":"BLOCK"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"slot":{"parent":"wpt__css-pseudo__first-letter-list-item-dynamic-001__1-147"}}},{"paintInert":false,"component":{"id":"first-letter-list-item-dynamic-001__1__1-149","name":"first-letter-list-item-dynamic-001__1__1","properties":[{"type":"Float","data":"LEFT"},{"type":"Position","data":"STATIC"},{"type":"Width","data":{"type":"length","px":358}},{"type":"Height","data":{"type":"length","px":0}},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":{"r":0,"g":0,"b":0,"a":0}}},{"type":"Display","data":"BLOCK"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"slot":{"parent":"wpt__css-pseudo__first-letter-list-item-dynamic-001__1-147"}}},{"paintInert":false,"component":{"id":"abspos-container-change-dynamic-001__0__0__0__1__0-055","name":"abspos-container-change-dynamic-001__0__0__0__1__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Top","data":{"px":0}},{"type":"Left","data":{"px":0}},{"type":"Width","data":{"type":"length","px":100}},{"type":"Height","data":{"type":"length","px":100}},{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":1,"b":0},"original":{"r":0,"g":255,"b":0}}},{"type":"BoxSizing","data":"CONTENT_BOX"},{"type":"MarginTop","data":{"px":0}},{"type":"MarginRight","data":{"px":0}},{"type":"MarginBottom","data":{"px":0}},{"type":"MarginLeft","data":{"px":0}},{"type":"PaddingTop","data":{"px":0}},{"type":"PaddingRight","data":{"px":0}},{"type":"PaddingBottom","data":{"px":0}},{"type":"PaddingLeft","data":{"px":0}},{"type":"BorderTopWidth","data":{"px":0}},{"type":"BorderRightWidth","data":{"px":0}},{"type":"BorderBottomWidth","data":{"px":0}},{"type":"BorderLeftWidth","data":{"px":0}},{"type":"BorderTopStyle","data":"NONE"},{"type":"BorderRightStyle","data":"NONE"},{"type":"BorderBottomStyle","data":"NONE"},{"type":"BorderLeftStyle","data":"NONE"},{"type":"BorderTopColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderRightColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderBottomColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"BorderLeftColor","data":{"srgb":{"r":0,"g":0,"b":0},"original":{"r":0,"g":0,"b":0}}},{"type":"Display","data":"BLOCK"},{"type":"OverflowX","data":"VISIBLE"},{"type":"OverflowY","data":"VISIBLE"}],"slot":{"parent":"abspos-container-change-dynamic-001__0__0__0__1-054"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-001__2__0-272","name":"hyphens__hyphens-out-of-flow-001__2__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__2-271"},"text":"abspos","meta":{"sourceTag":"span"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-001__3__0-274","name":"hyphens__hyphens-out-of-flow-001__3__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__3-273"},"text":"abspos","meta":{"sourceTag":"span"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-001__4__0-276","name":"hyphens__hyphens-out-of-flow-001__4__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__4-275"},"text":"abspos","meta":{"sourceTag":"span"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-001__5__0-278","name":"hyphens__hyphens-out-of-flow-001__5__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__5-277"},"text":"abspos","meta":{"sourceTag":"span"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-001__6__0-280","name":"hyphens__hyphens-out-of-flow-001__6__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__6-279"},"text":"abspos","meta":{"sourceTag":"span"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-001__7__0-282","name":"hyphens__hyphens-out-of-flow-001__7__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-001__7-281"},"text":"abspos","meta":{"sourceTag":"span"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-002__2__0-286","name":"hyphens__hyphens-out-of-flow-002__2__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__2-285"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-002__3__0-288","name":"hyphens__hyphens-out-of-flow-002__3__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__3-287"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-002__4__0-290","name":"hyphens__hyphens-out-of-flow-002__4__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-002__5__0-292","name":"hyphens__hyphens-out-of-flow-002__5__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__5-291"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-002__6__0-294","name":"hyphens__hyphens-out-of-flow-002__6__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__6-293"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}},{"paintInert":true,"component":{"id":"hyphens__hyphens-out-of-flow-002__7__0-296","name":"hyphens__hyphens-out-of-flow-002__7__0","properties":[{"type":"Position","data":"ABSOLUTE"},{"type":"Color","data":{"srgb":{"r":0,"g":0,"b":0,"a":0},"original":"transparent"}}],"slot":{"parent":"wpt__css-text__hyphens__hyphens-out-of-flow-002__7-295"},"text":"abspos","meta":{"sourceTag":"span","lang":"en"}}},{"paintInert":false,"component":{"id":"ch-unit-001__2__0-169","name":"ch-unit-001__2__0","properties":[{"type":"BackgroundColor","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Color","data":{"srgb":{"r":0,"g":0.5019607843137255,"b":0},"original":"green"}},{"type":"Top","data":{"px":0}},{"type":"Bottom","data":{"px":0}},{"type":"Position","data":"ABSOLUTE"},{"type":"Width","data":{"type":"length","original":{"v":5,"u":"CH"}}}],"slot":{"parent":"wpt__css-values__ch-unit-001__2-168"},"meta":{"sourceTag":"span"}}}];
++
++const doc = (components: unknown[]): IRDocument =>
++  ({ irVersion: 2, minReaderVersion: 2, components }) as unknown as IRDocument;
++/** The composed host whose id ends with `suffix`. */
++function host(components: unknown[], suffix: string): ComposedNode {
++  const h = composeTree(doc(components)).find((r) => r.component.id.endsWith(suffix));
++  if (!h) throw new Error(`no host ${suffix}`);
++  return h;
++}
++/** -002 with box 4's member or runs replaced. */
++const withBox4Member = (patch: (m: Record<string, unknown>) => Record<string, unknown>) =>
++  DOC002.map((c) => (c.id === 'hyphens__hyphens-out-of-flow-002__4__0-290' ? patch({ ...c }) : c));
++const withBox4Runs = (runs: unknown[]) =>
++  DOC002.map((c) => (c.id === 'wpt__css-text__hyphens__hyphens-out-of-flow-002__4-289'
++    ? { ...c, meta: { ...(c.meta as object), runs } } : c));
++const M4 = { child: 'hyphens__hyphens-out-of-flow-002__4__0' };
++
++// Composed capture constants on (the harness suites' stub-and-reimport pattern).
++let ComponentRenderer: typeof import('../../src/sdui/ComponentRenderer').ComponentRenderer;
++beforeAll(async () => {
++  vi.stubGlobal('window', { location: { search: '?wpt=1&wptComposed=1' } });
++  vi.resetModules();
++  ({ ComponentRenderer } = await import('../../src/sdui/ComponentRenderer'));
++}, 30000);
++afterAll(() => { vi.unstubAllGlobals(); });
++const html = (n: ComposedNode) => renderToStaticMarkup(<ComponentRenderer node={n} />);
++/** The member element's opening-tag prefix (its slot is what the assertions read around). */
++const MEMBER = '<span data-component-id="hyphens__hyphens-out-of-flow-002__';
++
++describe('branch H — bare run text around a mid-word inert member (wave-54 L6 W1)', () => {
++  it('(H-a) boxes 3-6 render their pieces bare, member at its wire slot', () => {
++    const want: Record<string, [string, string]> = {
++      '__3-287': ['h', 'ighway'], '__4-289': ['high', 'way'], '__5-291': ['high', 'way'], '__6-293': ['highwa', 'y'],
++    };
++    for (const [suffix, [p, n]] of Object.entries(want)) {
++      const m = html(host(DOC002, suffix));
++      // `…>P<span member…>abspos</span>N</div>`: bare text on both sides, no wrapper span.
++      expect(m, suffix).toContain(`>${p}${MEMBER}`);
++      expect(m, suffix).toContain(`>abspos</span>${n}</div>`);
++      expect(m, suffix).not.toContain(`<span>${p}</span>`);
++    }
++  });
++
++  it('(H-c) word-edge boxes 2 / 7 and a SPACED split keep the <span> wrapper', () => {
++    expect(html(host(DOC002, '__2-285'))).toContain('<span>highway</span>');
++    expect(html(host(DOC002, '__7-295'))).toContain('<span>highway</span>');
++    expect(html(host(withBox4Runs([{ text: 'high ' }, M4, { text: 'way' }]), '__4-289'))).toContain('<span>high </span>');
++  });
++
++  it('(H-d) -001 box 4 (hyphens: manual) keeps the wrapper', () => {
++    expect(html(host(DOC001_BOX4, '__4-275'))).toContain('<span>high</span>');
++  });
++
++  it('(H-e) a member that could paint keeps the wrapper (alpha 1, a background, an <img>)', () => {
++    const variants: Array<(m: Record<string, unknown>) => Record<string, unknown>> = [
++      (m) => ({ ...m, properties: [{ type: 'Position', data: 'ABSOLUTE' }, { type: 'Color', data: { srgb: { r: 0, g: 0, b: 0, a: 1 }, original: 'black' } }] }),
++      (m) => ({ ...m, properties: [...(m.properties as object[]), { type: 'BackgroundColor', data: { srgb: { r: 1, g: 0, b: 0 }, original: 'red' } }] }),
++      (m) => ({ ...m, meta: { ...(m.meta as object), sourceTag: 'img' } }),
++    ];
++    for (const patch of variants) expect(html(host(withBox4Member(patch), '__4-289'))).toContain('<span>high</span>');
++  });
++
++  it('(H-g) the restated predicate over the 24 census members gives the same 12 trues as Compose', () => {
++    const leaf = (c: Record<string, unknown>) => ({ component: c, children: [] }) as unknown as ComposedNode;
++    const got = MEMBERS24.map((m) => isInertTextMember(leaf(m.component)));
++    expect(got).toEqual(MEMBERS24.map((m) => m.paintInert));
++    expect(got.filter(Boolean)).toHaveLength(12);
++  });
++});

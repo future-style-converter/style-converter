@@ -1,0 +1,4 @@
+text-decoration-inset-001 ref: first band (115, 145, 16, 322) | web: first band (115, 145, 16, 323) | ios: first band (117, 146, 16, 323) | android: first band (116, 145, 16, 323)
+text-decoration-inset-005 ref: first band (134, 173, 16, 336) | web: first band (134, 173, 16, 328) | ios: first band (109, 130, 16, 191) | android: first band (107, 131, 17, 191)
+text-decoration-inset-006 ref: first band (134, 173, 16, 331) | web: first band (134, 173, 16, 333) | ios: first band (109, 130, 16, 194) | android: first band (107, 131, 17, 194)
+text-decoration-inset-014 ref: first band (129, 154, 17, 258) | web: first band (129, 154, 17, 250) | ios: first band (111, 121, 17, 133) | android: first band (111, 122, 17, 132)

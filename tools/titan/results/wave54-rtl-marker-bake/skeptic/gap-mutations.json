@@ -1,0 +1,18 @@
+[
+ {"label": "G-1 the `'padding' in props` guard is dropped (every root loses its padding-* longhands)", "file": "tools/titan/bidi-bake.mjs",
+  "old": "    if ('padding' in props) {\n      for (const k of Object.keys(cmp.properties ?? {})) if (k.startsWith('padding-')) delete cmp.properties[k];\n    }\n",
+  "new": "    for (const k of Object.keys(cmp.properties ?? {})) if (k.startsWith('padding-')) delete cmp.properties[k];\n",
+  "expectRed": []},
+ {"label": "G-2 the marker owner is the item's PARENT, not the enclosing root (equal only when the item is a direct child of its root)", "file": "tools/titan/bidi-bake.mjs",
+  "old": "    const rootPath = rootKeys.find((rp) => isDescendantPath(rp, e.path));",
+  "new": "    const rootPath = e.path.slice(0, -1);",
+  "expectRed": []},
+ {"label": "G-3 marker runs pushed BEFORE the item's own text runs (root-run / id order)", "file": "tools/titan/bidi-bake.mjs",
+  "old": "    for (const { run, style } of runsByPath.get(key) ?? []) {\n      // The MEASURED",
+  "new": "    for (const r of markers.get(key)?.runs ?? []) plan.runs.unshift({ ownerPath: markers.get(key).rootPath, props: r.props, text: r.text });\n    for (const { run, style } of runsByPath.get(key) ?? []) {\n      // The MEASURED",
+  "expectRed": []},
+ {"label": "G-4 marker runs skip the hidden-element check (a list item hidden by rectCount 0 still gets root-owned runs)", "file": "tools/titan/bidi-bake.mjs",
+  "old": "    if (isRootPath(e.path) || e.rectCount === 0 || e.tag === 'br') continue;\n    const rootPath",
+  "new": "    if (isRootPath(e.path)) continue;\n    const rootPath",
+  "expectRed": []}
+]

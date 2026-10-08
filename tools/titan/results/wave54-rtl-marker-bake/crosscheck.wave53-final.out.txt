@@ -1,0 +1,18 @@
+OK       unit P wire carriers (non-zero unguarded padding roots): census ['wpt__css-anchor-position__anchor-center-safe-rtl', 'wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001', 'wpt__css-text__bidi__bidi-lines-002']
+OK       unit P android captures: census ['wpt__css-anchor-position__anchor-center-safe-rtl', 'wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001', 'wpt__css-text__bidi__bidi-lines-002']
+OK       unit P web/ios captures (none: abspos insets resolve against the padding box): census []
+OK       unit M′ wire carriers: census ['wpt__css-counter-styles__counter-suffix']
+OK       unit M′ web captures: census ['wpt__css-counter-styles__counter-suffix']
+OK       lane web capture carriers: census ['wpt__css-counter-styles__counter-suffix']
+OK       unit M′ ios captures: census ['wpt__css-counter-styles__counter-suffix']
+OK       lane ios capture carriers: census ['wpt__css-counter-styles__counter-suffix']
+OK       unit M′ android captures: census ['wpt__css-counter-styles__counter-suffix']
+OK       lane android capture carriers: census ['wpt__css-anchor-position__anchor-center-safe-rtl', 'wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001', 'wpt__css-text__bidi__bidi-lines-002']
+OK       lane wire carriers: census ['wpt__css-anchor-position__anchor-center-safe-rtl', 'wpt__css-counter-styles__counter-suffix', 'wpt__css-text__bidi__bidi-lines-001', 'wpt__css-text__bidi__bidi-lines-002']
+OK       M′ id shadow (later tests renumbered): census [15]
+P roots 6 in 4 docs; M′ items 4 in 1 docs; UA-padding roots 0
+carrier cells today: css-anchor-position/anchor-center-safe-rtl.html android unscored; css-counter-styles/counter-suffix.html web P 0.9818; css-counter-styles/counter-suffix.html ios P 0.9802; css-counter-styles/counter-suffix.html android P 0.9547; css-text/bidi/bidi-lines-001.html android f 0.8934; css-text/bidi/bidi-lines-002.html android P 0.9534
+  scored 5, passing 4
+must-not-move re-derived: 80 scored cells (64 P today); plan lists 80
+  in census, not in plan: —
+  in plan, not in census: —

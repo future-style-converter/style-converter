@@ -1,0 +1,22 @@
+=== css-text
+CHANGED wpt__css-text__bidi__bidi-lines-001.json: components 13 -> 13
+  ~ wpt__css-text__bidi__bidi-lines-001__1 props [('PaddingLeft', {'original': {'v': 0.5, 'u': 'CH'}}, {'px': 0}), ('PaddingRight', {'original': {'v': 0.5, 'u': 'CH'}}, {'px': 0})] other []
+CHANGED wpt__css-text__bidi__bidi-lines-002.json: components 19 -> 19
+  ~ wpt__css-text__bidi__bidi-lines-002__1 props [('PaddingLeft', {'original': {'v': 0.5, 'u': 'CH'}}, {'px': 0}), ('PaddingRight', {'original': {'v': 0.5, 'u': 'CH'}}, {'px': 0})] other []
+identical 46 · renumbered 0 · content-changed 2 · missing-in-base 0
+content-changed: ['wpt__css-text__bidi__bidi-lines-001', 'wpt__css-text__bidi__bidi-lines-002']
+=== css-anchor-position
+CHANGED wpt__css-anchor-position__anchor-center-safe-rtl.json: components 14 -> 14
+  ~ wpt__css-anchor-position__anchor-center-safe-rtl__2 props [('PaddingBottom', {'px': 10}, {'px': 0}), ('PaddingLeft', {'px': 10}, {'px': 0}), ('PaddingRight', {'px': 10}, {'px': 0}), ('PaddingTop', {'px': 10}, {'px': 0})] other []
+  ~ wpt__css-anchor-position__anchor-center-safe-rtl__4 props [('PaddingBottom', {'px': 10}, {'px': 0}), ('PaddingLeft', {'px': 10}, {'px': 0}), ('PaddingRight', {'px': 10}, {'px': 0}), ('PaddingTop', {'px': 10}, {'px': 0})] other []
+identical 47 · renumbered 0 · content-changed 1 · missing-in-base 0
+content-changed: ['wpt__css-anchor-position__anchor-center-safe-rtl']
+=== selectors
+identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+content-changed: []
+=== css-backgrounds
+identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+content-changed: []
+=== css-writing-modes
+identical 48 · renumbered 0 · content-changed 0 · missing-in-base 0
+content-changed: []

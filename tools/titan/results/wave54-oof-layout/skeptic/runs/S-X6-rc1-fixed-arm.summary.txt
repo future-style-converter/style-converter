@@ -1,0 +1,17 @@
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.038 (0.040) seconds
+	 Executed 75 tests, with 3 failures (0 unexpected) in 5.554 (5.878) seconds
+	 Executed 75 tests, with 3 failures (0 unexpected) in 5.554 (5.879) seconds
+Test Suite 'FixedHoistTests' failed at 2026-10-08 22:07:13.166.
+Test Suite 'GapDecorationBandsTests' passed at 2026-10-08 22:07:13.254.
+Test Suite 'GapDecorationGrammarTests' passed at 2026-10-08 22:07:13.436.
+Test Suite 'GapDecorationSegmentsTests' passed at 2026-10-08 22:07:13.641.
+Test Suite 'OutOfFlowContainingBlockTests' passed at 2026-10-08 22:07:17.243.
+Test Suite 'Selected tests' failed at 2026-10-08 22:07:17.283.
+Test Suite 'StyleConverterRuntimeTests.xctest' failed at 2026-10-08 22:07:17.283.
+Test Suite 'TransformContainingBlockTests' passed at 2026-10-08 22:07:17.283.
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:515: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertTrue failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:519: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertEqual failed: ("[]") is not equal to ("["f"]")
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/FixedHoistTests.swift:520: error: -[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition] : XCTAssertTrue failed
+Test Case '-[StyleConverterRuntimeTests.FixedHoistTests testP2NoInsetFixedTakesItsStaticPosition]' failed (1.219 seconds).
+** TEST FAILED **
+xcodebuild rc=65

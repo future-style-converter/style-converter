@@ -1,0 +1,10 @@
+label=S-Mc file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/layout/position/OutOfFlowContainingBlock.swift
+sha256 before=2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8 mutated=3bfe83085a8e763d5405a15532e96bad6fb6246660c4b983e27db57926ca90a8 after=2682c94c607c3a73734043060e416d7b7f732e4aa9bbc7add4159ac8bfe14ea8 restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.282 (0.285) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 6.600 (7.294) seconds
+	 Executed 75 tests, with 2 failures (0 unexpected) in 6.600 (7.295) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:69: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim] : XCTAssertFalse failed
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/OutOfFlowContainingBlockTests.swift:72: error: -[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim] : XCTAssertFalse failed
+Test Case '-[StyleConverterRuntimeTests.OutOfFlowContainingBlockTests testP1PositionedEstablisherWithholdsTheClaim]' failed (0.003 seconds).
+** TEST FAILED **

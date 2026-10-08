@@ -1,0 +1,13 @@
+label=S-X11-strict-positive file=runtimes/swiftui/Sources/StyleConverterRuntime/StyleEngine/columns/GapDecorationGeometry.swift
+sha256 before=80a314e0c94906c37e85644e7c7240fc131b549952d0480b9eb3e721b286b06e mutated=f329fbc18d6fc9e9d5de4420e3c94f272615905b338e752e57b22c59c994c37d after=80a314e0c94906c37e85644e7c7240fc131b549952d0480b9eb3e721b286b06e restored=OK
+suite rc=65 (RED)
+	 Executed 10 tests, with 0 failures (0 unexpected) in 0.100 (0.225) seconds
+	 Executed 75 tests, with 4 failures (0 unexpected) in 5.576 (6.249) seconds
+	 Executed 75 tests, with 4 failures (0 unexpected) in 5.576 (6.250) seconds
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:386: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine] : XCTAssertEqual failed: ("[]") is not equal to ("[(45.0, 0.0, 10.0, 50.0), (95.0, 0.0, 10.0, 50.0), (95.0, 50.0, 10.0, 50.0), (45.0, 100.0, 10.0, 50.0), (95.0, 100.0, 10.0, 50.0)]")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingItemsPositionColumnRulesLineByLine]' failed (0.004 seconds).
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:399: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("[]") is not equal to ("[(0.0, 45.0, 150.0, 10.0), (0.0, 95.0, 150.0, 10.0)]")
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:402: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("nil") is not equal to ("Optional(true)")
+/Users/dranak/Documents/Projects/Style-Converter/.claude/worktrees/trusting-bohr-bd6fbf/runtimes/swiftui/Tests/StyleConverterRuntimeTests/GapDecorationSegmentsTests.swift:403: error: -[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast] : XCTAssertEqual failed: ("0") is not equal to ("7")
+Test Case '-[StyleConverterRuntimeTests.GapDecorationSegmentsTests test033TouchingLinesPositionFullWidthRowRulesPaintedLast]' failed (0.080 seconds).
+** TEST FAILED **

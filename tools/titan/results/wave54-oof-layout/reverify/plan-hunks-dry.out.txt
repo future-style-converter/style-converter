@@ -1,0 +1,62 @@
+== base () plan-build rc=0
+   CBB-android android captures 11 (semi-replaced-stretch: [])
+   L4 captureCarriers {web: 0, ios: 7, android: 21} · predictions 26 · mustNotMove 253
+   union carriers web 44 · ios 27 · android 51; semi-replaced android in union: 0
+   L6 mustNotMove 68 (semi-replaced android lines left: 2)
+   stayDegenerateEvenIfPass 4; 011 android in it: False
+   011 android prediction: kind='flip; the "25" counter (ref "17") stays wrong on ALL THREE platforms — not this lane' floor=0.97 gating=True confidence=MED-HIGH
+   watchlist lines 775
+   watchlist-check wave53-final:   unmatched 0
+   watchlist-check wave54-open:   unmatched 0
+   expectations.json == installed
+   watchlist.txt == installed
+== h1 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-1.patch) plan-build rc=0
+   CBB-android android captures 14 (semi-replaced-stretch: ['position-absolute-semi-replaced-stretch-button', 'position-absolute-semi-replaced-stretch-input', 'position-absolute-semi-replaced-stretch-other'])
+   L4 captureCarriers {web: 0, ios: 7, android: 24} · predictions 29 · mustNotMove 253
+   union carriers web 44 · ios 27 · android 54; semi-replaced android in union: 3
+   L6 mustNotMove 66 (semi-replaced android lines left: 0)
+   stayDegenerateEvenIfPass 4; 011 android in it: False
+   011 android prediction: kind='flip; the "25" counter (ref "17") stays wrong on ALL THREE platforms — not this lane' floor=0.97 gating=True confidence=MED-HIGH
+   watchlist lines 776
+   watchlist-check wave53-final:   unmatched 0
+   watchlist-check wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt differs from installed
+== h2 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-2.patch) plan-build rc=0
+   CBB-android android captures 11 (semi-replaced-stretch: [])
+   L4 captureCarriers {web: 0, ios: 7, android: 21} · predictions 26 · mustNotMove 253
+   union carriers web 44 · ios 27 · android 51; semi-replaced android in union: 0
+   L6 mustNotMove 68 (semi-replaced android lines left: 2)
+   stayDegenerateEvenIfPass 5; 011 android in it: True
+   011 android prediction: kind='flip in score only — DEGENERATE even if P: the "25" counter (ref "17") stays wrong on ALL THREE platforms (not this lane); stayDegenerateEvenIfPass' floor=0.97 gating=True confidence=MED-HIGH
+   watchlist lines 775
+   watchlist-check wave53-final:   unmatched 0
+   watchlist-check wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt == installed
+== h1h2 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-1.patch tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-2.patch) plan-build rc=0
+   CBB-android android captures 14 (semi-replaced-stretch: ['position-absolute-semi-replaced-stretch-button', 'position-absolute-semi-replaced-stretch-input', 'position-absolute-semi-replaced-stretch-other'])
+   L4 captureCarriers {web: 0, ios: 7, android: 24} · predictions 29 · mustNotMove 253
+   union carriers web 44 · ios 27 · android 54; semi-replaced android in union: 3
+   L6 mustNotMove 66 (semi-replaced android lines left: 0)
+   stayDegenerateEvenIfPass 5; 011 android in it: True
+   011 android prediction: kind='flip in score only — DEGENERATE even if P: the "25" counter (ref "17") stays wrong on ALL THREE platforms (not this lane); stayDegenerateEvenIfPass' floor=0.97 gating=True confidence=MED-HIGH
+   watchlist lines 776
+   watchlist-check wave53-final:   unmatched 0
+   watchlist-check wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt differs from installed
+== h2h1 (tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-2.patch tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-1.patch) plan-build rc=0
+   CBB-android android captures 14 (semi-replaced-stretch: ['position-absolute-semi-replaced-stretch-button', 'position-absolute-semi-replaced-stretch-input', 'position-absolute-semi-replaced-stretch-other'])
+   L4 captureCarriers {web: 0, ios: 7, android: 24} · predictions 29 · mustNotMove 253
+   union carriers web 44 · ios 27 · android 54; semi-replaced android in union: 3
+   L6 mustNotMove 66 (semi-replaced android lines left: 0)
+   stayDegenerateEvenIfPass 5; 011 android in it: True
+   011 android prediction: kind='flip in score only — DEGENERATE even if P: the "25" counter (ref "17") stays wrong on ALL THREE platforms (not this lane); stayDegenerateEvenIfPass' floor=0.97 gating=True confidence=MED-HIGH
+   watchlist lines 776
+   watchlist-check wave53-final:   unmatched 0
+   watchlist-check wave54-open:   unmatched 0
+   expectations.json differs from installed
+   watchlist.txt differs from installed
+order-independent: h1h2 == h2h1 (expectations.json)
+plan dir untouched (sha256 before = after)

@@ -1,0 +1,12 @@
+GapDecorationBandsTest tests=11 skipped=0 failures=0 errors=0
+GapDecorationExtractorTest tests=7 skipped=0 failures=0 errors=0
+GapDecorationLinesTest tests=6 skipped=0 failures=0 errors=0
+GapDecorationSegmentsTest tests=12 skipped=0 failures=0 errors=0
+GapDecorationWptPinsTest tests=4 skipped=0 failures=0 errors=0
+SkepticGapDecorationProbeTest tests=7 skipped=0 failures=0 errors=0
+DynamicValueResolverTest tests=32 skipped=0 failures=3 errors=0 FAILED: ['CBB WPT nested clip chain keeps 200 by 100 at both levels', 'CBB WPT content-box container publishes its declared size', 'CBB census - the readers that see a different block are exactly the carriers and the control']
+CanvasRootHoistTest tests=29 skipped=0 failures=0 errors=0
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TransformContainingBlockTest tests=8 skipped=0 failures=0 errors=0
+TOTAL tests=124 skipped=0 failures=3 errors=0
+gradle rc=1

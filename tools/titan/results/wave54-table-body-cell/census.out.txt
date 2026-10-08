@@ -1,0 +1,5 @@
+run wave53-final: 1435 per-test IR documents
+meta.role values on the wire: {"null": 5692, "body-root": 284, "line-break": 371, "ws-after": 4366}
+anonymous-table on the wire: 0
+(a) forest trigger (body-root last Display TABLE/INLINE_TABLE): 1 ['wpt__CSS2__css21-errata__s-11-1-1b-006']
+(c) documents with a declared-TABLE box or a UA <table> (the chrome call radius, upper bound): 78

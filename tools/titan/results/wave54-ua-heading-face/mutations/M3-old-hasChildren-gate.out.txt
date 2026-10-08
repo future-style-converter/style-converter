@@ -1,0 +1,13 @@
+[M3-old-hasChildren-gate] file=runtimes/compose/src/main/java/com/styleconverter/runtime/typography/UAHeadingFoldGate.kt sha256 before=e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578 mutated=b6c24f568852c34844b881d55671890121c8dcd45a452f505df21cdee43e9b50
+[M3-old-hasChildren-gate] mutated run rc=1
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=2 errors=0
+    RED: inset-005 and -006 - the folded h1 hosts take 32 and bold :: java.lang.NullPointerException
+    RED: inset-014 - the folded monospace h1 resolves 2em against the 13px fixed default :: java.lang.NullPointerException
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=3 errors=0
+    RED: inset-006 - the folded h1 host applies :: java.lang.AssertionError
+    RED: inset-014 - the folded monospace h1 host applies :: java.lang.AssertionError
+    RED: inset-005 - the folded h1 host applies (Folded, not the stacked stand-down) :: java.lang.AssertionError
+[M3-old-hasChildren-gate] restored sha256 after=e0e3186dcbd7cddc05d80d32e3a4a582eee893ec40bee93889f47a66efccc578 BYTE-EXACT
+[M3-old-hasChildren-gate] restored run rc=0
+  com.styleconverter.runtime.typography.UAElementFontRuleTest tests=11 failures=0 errors=0
+  com.styleconverter.runtime.typography.UAHeadingFoldGateTest tests=9 failures=0 errors=0

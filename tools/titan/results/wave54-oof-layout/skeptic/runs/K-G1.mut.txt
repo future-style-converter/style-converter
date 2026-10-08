@@ -1,0 +1,5 @@
+label=K-G1 file=runtimes/compose/src/main/java/com/styleconverter/runtime/columns/GapDecorationLines.kt
+sha256 before=0bd66570795a3ffebee97fbe6483e81a5de748bfeca34a8d14200cee849ba20f mutated=aed8fe94323f131e1b5c1d155733b206e50aaa67fab4806a123d19e02a674f64 after=0bd66570795a3ffebee97fbe6483e81a5de748bfeca34a8d14200cee849ba20f restored=OK
+suite rc=1 (RED)
+GapDecorationSegmentsTest tests=12 skipped=0 failures=2 errors=0 FAILED: ['033 touching items still position 2 + 1 + 2 column rules, line by line', '033 touching lines still position two full-width row rules painted last']
+TOTAL tests=124 skipped=0 failures=2 errors=0

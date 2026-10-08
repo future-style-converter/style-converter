@@ -1,0 +1,42 @@
+{
+ "W1-m1": {
+  "file": "runtimes/web/src/renderer/InlineRuns.ts",
+  "old": "const join = joinWordsAroundInertOutOfFlow(entries, children, opts.hyphensAuto === true);",
+  "new": "const join = joinWordsAroundInertOutOfFlow(entries, children, false && opts.hyphensAuto === true);"
+ },
+ "W1-m2": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "&& inWordEnd(last.text) && inWordStart(next.text) && joinsAcrossWord(children[e.index])) {",
+  "new": "&& inWordEnd(last.text) && inWordStart(next.text) && last.text.length >= 3 && next.text.length >= 3 && joinsAcrossWord(children[e.index])) {"
+ },
+ "W1-m3": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "&& inWordEnd(last.text) && inWordStart(next.text) && joinsAcrossWord(children[e.index])) {",
+  "new": "&& joinsAcrossWord(children[e.index])) {"
+ },
+ "W1-m4": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  if (!hyphensAuto) return { entries, joined: 0 };",
+  "new": "  // MUTATION W1-m4: auto gate dropped"
+ },
+ "W1-m5": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  return outOfFlow && transparentInk;\n}",
+  "new": "  return outOfFlow || transparentInk || true;\n}"
+ },
+ "W1-m6": {
+  "file": "runtimes/web/src/renderer/NodeRenderer.ts",
+  "old": "component.id, { hyphensAuto: styles.hyphens === 'auto' });",
+  "new": "component.id);"
+ },
+ "W1-m7": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  const raw = srgb.a;",
+  "new": "  const raw = srgb.alpha;"
+ },
+ "W1-m5b": {
+  "file": "runtimes/web/src/renderer/InertOutOfFlowWordJoin.ts",
+  "old": "  const c = member.component;\n  // Nested nodes",
+  "new": "  const c = member.component;\n  if (c.properties.some((p) => p.type === 'Position' && p.data === 'ABSOLUTE')) return true; // MUTATION W1-m5b: any abspos\n  // Nested nodes"
+ }
+}

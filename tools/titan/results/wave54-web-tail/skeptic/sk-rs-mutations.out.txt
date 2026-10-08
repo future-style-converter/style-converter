@@ -1,0 +1,38 @@
+BASELINE rc=0 14 passed (14)
+RS-m1 marker gate removed (wsAfterSeparator): RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 c780ac1c76c2…==c780ac1c76c2… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS) > everyMarkerLevelContainerCombination_spacesIffThePredicateSays
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > flush_anUnmarkedPairStaysFlush_onVerbatimWire
+RS-m2 table-box decline removed: RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 1df076a63252…==1df076a63252… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparator.test.ts > interleaveRootSeparators — mechanics (wave-54 L6 RS) > table_andInlineTable_wrapperDeclines_evenWhenThePredicateSeparates
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > tableBody_wrapperDeclines_inTheRealGallery
+RS-m3 first-root guard removed: RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 1df076a63252…==1df076a63252… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparator.test.ts > interleaveRootSeparators — mechanics (wave-54 L6 RS) > firstRoot_neverGetsASeparatorSlot_andPairsInterleaveInForestOrder
+     red: tests/ui/ComposedRootSeparator.test.ts > interleaveRootSeparators — mechanics (wave-54 L6 RS) > predicate_isAskedAbout(prev, next, container)_inOrder
+RS-m4 flow-wrapper call site never separates: RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 badb03dca3c7…==badb03dca3c7… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_flowWrapperSite_alsoSeparates
+RS-m4b ICB call site never separates: RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 badb03dca3c7…==badb03dca3c7… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_markupCarries19RootGaps
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > flush_anUnmarkedPairStaysFlush_onVerbatimWire
+SK-r1 white-space decline dropped (wsAfterSeparator): RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 c780ac1c76c2…==c780ac1c76c2… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS) > everyMarkerLevelContainerCombination_spacesIffThePredicateSays
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > preBody_declines_throughTheBodysWhiteSpace
+SK-r2 inline-level gate dropped (wsAfterSeparator): RED -> GREEN | mutated: 3 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 c780ac1c76c2…==c780ac1c76c2… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS) > everyMarkerLevelContainerCombination_spacesIffThePredicateSays
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_interleave_19Separators_noneAfterBodyRootOrP
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > flush_anUnmarkedPairStaysFlush_onVerbatimWire
+SK-r3 container ignores the table plan: RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 1df076a63252…==1df076a63252… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparator.test.ts > rootSeparatorContainer — the container read (wave-54 L6 RS) > table_whenTheBodyIsATableBox
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > tableBody_wrapperDeclines_inTheRealGallery
+SK-r4 container never reads the body white-space: RED -> GREEN | mutated: 2 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 1df076a63252…==1df076a63252… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparator.test.ts > rootSeparatorContainer — the container read (wave-54 L6 RS) > whiteSpace_isTheBodyRootsOwnDeclaration_inCssSpelling
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > preBody_declines_throughTheBodysWhiteSpace
+SK-r5 renderChildSeparator stops calling the lift (child level flush): RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 c780ac1c76c2…==c780ac1c76c2… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS) > everyMarkerLevelContainerCombination_spacesIffThePredicateSays
+SK-r6 flex decline dropped: RED -> GREEN | mutated: 1 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 c780ac1c76c2…==c780ac1c76c2… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS) > everyMarkerLevelContainerCombination_spacesIffThePredicateSays
+SK-r7 separator text changed to NBSP: RED -> GREEN | mutated: 5 ⎯⎯⎯⎯⎯⎯⎯ | restored sha256 c780ac1c76c2…==c780ac1c76c2… True | restored: 14 passed (14)
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > call-equivalence: renderChildSeparator ≡ wsAfterSeparator (wave-54 L6 RS) > everyMarkerLevelContainerCombination_spacesIffThePredicateSays
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_flowWrapperSite_alsoSeparates
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_gallery_markupCarries19RootGaps
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > bs007_interleave_19Separators_noneAfterBodyRootOrP
+     red: tests/ui/ComposedRootSeparatorWire.test.tsx > root separators on verbatim box-sizing-007 (wave-54 L6 RS) > flush_anUnmarkedPairStaysFlush_onVerbatimWire

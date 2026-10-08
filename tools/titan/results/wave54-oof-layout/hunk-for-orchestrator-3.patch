@@ -1,0 +1,65 @@
+# hunk-for-orchestrator-3.patch — wave 54 lane L4 (oof-layout) FIX PASS → the orchestrator: tools/titan/results/wave54-plan/land-units.sh
+# Why (lane skeptic defect 2, must-fix): the installed land-units.sh commits the WHOLE lane dir "$L4" inside the OOF-android
+#   unit, including census-swift.base.txt, which OOF-ios's corpus pin (OutOfFlowContainingBlockTests
+#   testP3TheCorpusMovesInExactlyTheSixOOFiosCarriers) reads. A `git revert` of OOF-android alone (PLAN §9 D1: "a native that
+#   falsifies on device goes alone"; revert rule 6) would delete that file and turn OOF-ios red on every local Catalyst run.
+#   Executed (fix/standalone.sh, fix/runs/standalone.log): census-swift.base.txt aside → Catalyst "Executed 8 tests, with
+#   1 failure (1 unexpected)", Code=260 file not found (RED); restored f7aabc60… = before.
+# Change: OOF-android commits its 4 files + census-compose.base.txt; OOF-ios commits its 4 files + census-swift.base.txt;
+#   the rest of the lane dir (note, censuses, scripts, mutation logs, seam / plan hunks, skeptic + fix records — read by no
+#   test) lands in its OWN commit right after GAP-ios ("wave54 L4 evidence"), as the lane note's per-unit sections say.
+#   CBB-android, GAP-android and GAP-ios are unchanged. L4 lands 5 unit commits + 1 evidence commit.
+# Proof (executed): fix/unit-closure-check.py (every path literal a unit's tests read must be committed by THAT unit or be
+#   gitignored) → installed copy "closure: 1 FAIL(s)" rc 1, patched copy "closure: HOLDS" rc 0
+#   (fix/unit-closure-check.{installed,patched}.out.txt). Stand-alone under the split: census-compose.base.txt aside →
+#   Catalyst OutOfFlowContainingBlockTests + FixedHoistTests "Executed 24 tests, with 0 failures", the corpus pin passed;
+#   census-swift.base.txt aside → Compose OutOfFlowContainingBlockTest + CanvasRootHoistTest 37 tests, 0 failures, the
+#   corpus pin ran (both restored byte-exact). `bash -n` clean on the patched script.
+# Base: tools/titan/results/wave54-plan/land-units.sh (UNTRACKED at HEAD 029139fd) sha256
+#   672c74b93f884312acd8aa645b373c39db51392730e08bbda443ecd95b14f0b8 (the orchestrator's working copy, mtime 2026-10-08 21:43).
+# Anchors at base: header line :10; the L4 block :93-110 (OOF-android path line :97, OOF-ios path line :100, GAP-ios :110).
+# Apply from the repo root: git apply tools/titan/results/wave54-oof-layout/hunk-for-orchestrator-3.patch
+--- a/tools/titan/results/wave54-plan/land-units.sh
++++ b/tools/titan/results/wave54-plan/land-units.sh
+@@ -7,7 +7,7 @@
+ #   L2 TB-android (+ kt seam-1)                                           → 1 commit
+ #   L6 RS (+ tsx seam-1), then W1 (runtime files; branch R — no seam)     → 2 commits
+ #   L5 U1-android (+ kt seam-1), then U2-ios (+ swift seam-2)             → 2 commits
+-#   L4 OOF-android, OOF-ios, CBB-android (+ kt seam-1), GAP-android, GAP-ios → 5 commits
++#   L4 OOF-android, OOF-ios, CBB-android (+ kt seam-1), GAP-android, GAP-ios → 5 commits, then the L4 lane evidence → 1
+ #   L3 U1, U2-android (+ kt seam-1), U2-ios (+ swift seam-2), U3 (+ seam-3), U3b (+ seam-3b) → 5 commits, LAST
+ #      (the only lane that changes the wire corpus-wide; [W-L3] runs on the fully landed tree)
+ #
+@@ -90,14 +90,19 @@
+ "Revert unit L5-U2-ios ($L5/_note.md). Reverting undoes the text-decoration-inset-005/-006/-014 ios movers." \
+   "$SW/StyleEngine/typography/UAHeadingFoldGate.swift" "$SW/StyleEngine/typography/UAElementFontRule.swift" "$SWT/UAHeadingFoldGateTests.swift" "$SWT/UAElementFontRuleTests.swift" "$CR_SW"
+ 
+-# ── L4 OOF-android, OOF-ios, CBB-android (+ kt seam-1), GAP-android, GAP-ios ─
++# ── L4 OOF-android, OOF-ios, CBB-android (+ kt seam-1), GAP-android, GAP-ios, then the lane evidence ─
+ L4=$R/wave54-oof-layout
++# Each OOF unit commits the ONE corpus-pin base file its own test reads, and nothing else of the lane dir (lane note
++# "Unit OOF-android" / "Unit OOF-ios"; L4 fix pass, skeptic defect 2): OOF-ios's testP3TheCorpusMovesInExactlyTheSixOOFios-
++# Carriers reads census-swift.base.txt, so a revert of OOF-android (PLAN §9 D1: a native that falsifies goes alone) must
++# not delete it. The rest of "$L4" (note, censuses, scripts, mutation logs, seam / plan hunks, skeptic + fix records) is
++# read by no test and lands in its own commit after GAP-ios.
+ commit "wave54 L4 OOF-android: a fixed box's containing block is the nearest positioned/transformed/contained ancestor on Compose (OutOfFlowContainingBlock; CSS Positioned Layout 3 §3.1, css-contain)" \
+ "Revert unit L4-OOF-android ($L4/_note.md). Reverting undoes contain-content-003/-011 android and the fixed-position carriers." \
+-  "$KT/layout/position/OutOfFlowContainingBlock.kt" "$KTT/layout/position/OutOfFlowContainingBlockTest.kt" "$KT/layout/position/CanvasRootHoist.kt" "$KTT/layout/position/CanvasRootHoistTest.kt" "$L4"
++  "$KT/layout/position/OutOfFlowContainingBlock.kt" "$KTT/layout/position/OutOfFlowContainingBlockTest.kt" "$KT/layout/position/CanvasRootHoist.kt" "$KTT/layout/position/CanvasRootHoistTest.kt" "$L4/census-compose.base.txt"
+ commit "wave54 L4 OOF-ios: the SwiftUI twin of the out-of-flow containing block (OutOfFlowContainingBlock.swift / FixedHoist)" \
+ "Revert unit L4-OOF-ios ($L4/_note.md)." \
+-  "$SW/StyleEngine/layout/position/OutOfFlowContainingBlock.swift" "$SWT/OutOfFlowContainingBlockTests.swift" "$SW/Renderer/FixedHoist.swift" "$SWT/FixedHoistTests.swift"
++  "$SW/StyleEngine/layout/position/OutOfFlowContainingBlock.swift" "$SWT/OutOfFlowContainingBlockTests.swift" "$SW/Renderer/FixedHoist.swift" "$SWT/FixedHoistTests.swift" "$L4/census-swift.base.txt"
+ apply "$L4/seam-1.patch"
+ commit "wave54 L4 CBB-android: under WPT capture a content-box box sizes against its containing block's content band (ContainingBlockBands; CSS 2.1 §10.2)" \
+ "Revert unit L4-CBB-android ($L4/_note.md)." \
+@@ -108,6 +113,9 @@
+ commit "wave54 L4 GAP-ios: the SwiftUI twin of the zero-extent gap rule" \
+ "Revert unit L4-GAP-ios ($L4/_note.md). Reverting undoes flex-gap-decorations-033 ios." \
+   "$SW/StyleEngine/columns/GapDecorationGeometry.swift" "$SW/StyleEngine/columns/GapDecorationLines.swift" "$SW/StyleEngine/columns/GapDecorationSegments.swift" "$SWT/GapDecorationSegmentsTests.swift"
++commit "wave54 L4 evidence: the oof-layout lane's note, censuses, replays, mutation logs, seam / plan hunks, skeptic and fix-pass records" \
++"Lane evidence for the five L4 revert units ($L4/_note.md). No runtime code; read by no test (each OOF unit carries its own corpus-pin base file). Reverting any L4 unit never needs this commit reverted." \
++  "$L4"
+ 
+ # ── L3 (filled from tools/titan/results/wave54-hyphenate-character/_note.md once the lane is COMPLETE) ──
+ if [[ "${L3_READY:-0}" != "1" ]]; then echo "landed $n unit commits (L7, L1, L2, L6, L5, L4); L3 block not yet filled — set L3_READY=1 after adding it"; git status --short | head -20; exit 0; fi

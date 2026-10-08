@@ -1,0 +1,28 @@
+OK               P-1 remove the `padding: 0` line (rootProperties)
+    sha256 f266b46bb9ec -> 05f9992f712c -> f266b46bb9ec byte-exact=True
+    mutated: # pass 54 # fail 2 # skipped 0 red=["V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position", 'V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>']
+    restored: # pass 56 # fail 0 # skipped 0
+OK               P-2 drop the content-box guard
+    sha256 f266b46bb9ec -> e8c00dacf012 -> f266b46bb9ec byte-exact=True
+    mutated: # pass 55 # fail 1 # skipped 0 red=['V3 unit P: a padding that paints (content-box clip / origin) is NOT spent']
+    restored: # pass 56 # fail 0 # skipped 0
+OK               P-3 drop the NON-zero guard (any padding array counts)
+    sha256 f266b46bb9ec -> 068ab7c3bd9c -> f266b46bb9ec byte-exact=True
+    mutated: # pass 55 # fail 1 # skipped 0 red=['V3b unit P: VERBATIM zero-padding roots (dir-style-02a ×6, dir-selector-change-003/-004) stay deep-equal AND in order']
+    restored: # pass 56 # fail 0 # skipped 0
+OK               P-4 drop the overflow guard
+    sha256 f266b46bb9ec -> a1b726a6588e -> f266b46bb9ec byte-exact=True
+    mutated: # pass 55 # fail 1 # skipped 0 red=['V3 unit P: a clipping / scrolling root keeps its padding (the overflow guard)']
+    restored: # pass 56 # fail 0 # skipped 0
+OK               P-5 drop the padding-* longhand delete loop (applyBidiBakePlan)
+    sha256 f266b46bb9ec -> 9427a70d5454 -> f266b46bb9ec byte-exact=True
+    mutated: # pass 55 # fail 1 # skipped 0 red=["V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position"]
+    restored: # pass 56 # fail 0 # skipped 0
+OK               P-6 planBidiBake stops passing the walk record (the pre-P call)
+    sha256 f266b46bb9ec -> 141d40caf20d -> f266b46bb9ec byte-exact=True
+    mutated: # pass 54 # fail 2 # skipped 0 red=["V3 unit P: verbatim counter-suffix__0__4 — `padding: 0` alone, in the shorthand's own key position", 'V3 unit P: verbatim bidi-lines-002 root (`0 0.5ch`) with its 5 hidden <br>']
+    restored: # pass 56 # fail 0 # skipped 0
+OK               P-7 the walker stops recording the resolved padding
+    sha256 f266b46bb9ec -> 35806d734bde -> f266b46bb9ec byte-exact=True
+    mutated: # pass 55 # fail 1 # skipped 0 red=["unit P wiring: the in-page walker records the resolved padding and both guards' inputs"]
+    restored: # pass 56 # fail 0 # skipped 0

@@ -1,0 +1,242 @@
+{
+ "tests": 1435,
+ "errors": [],
+ "u3": {
+  "changed": [
+   {
+    "t": "css/css-cascade/revert-layer-006.html",
+    "moved": [
+     "revert-layer-006__1__0__1:20px->0px",
+     "revert-layer-006__1__0__2:20px->0px",
+     "revert-layer-006__1__0__3:20px->0px",
+     "revert-layer-006__1__0__4:20px->0px",
+     "revert-layer-006__1__0__5:20px->0px",
+     "revert-layer-006__1__0__6:20px->0px"
+    ],
+    "nonBrDiff": -6
+   },
+   {
+    "t": "css/css-cascade/revert-val-001.html",
+    "moved": [
+     "revert-val-001__1__0__1:20px->0px",
+     "revert-val-001__1__0__2:20px->0px",
+     "revert-val-001__1__0__3:20px->0px",
+     "revert-val-001__1__0__4:20px->0px",
+     "revert-val-001__1__0__5:20px->0px",
+     "revert-val-001__1__0__6:20px->0px"
+    ],
+    "nonBrDiff": -6
+   },
+   {
+    "t": "css/css-cascade/revert-val-002.html",
+    "moved": [
+     "revert-val-002__1__0__1:20px->0px",
+     "revert-val-002__1__0__2:20px->0px",
+     "revert-val-002__1__0__3:20px->0px",
+     "revert-val-002__1__0__4:20px->0px",
+     "revert-val-002__1__0__5:20px->0px",
+     "revert-val-002__1__0__6:20px->0px"
+    ],
+    "nonBrDiff": -6
+   },
+   {
+    "t": "css/css-masking/clip-path/clip-path-filter-order.html",
+    "moved": [
+     "clip-path__clip-path-filter-order__0__0__1:20px->0px"
+    ],
+    "nonBrDiff": -1
+   },
+   {
+    "t": "css/css-multicol/balance-grid-container.html",
+    "moved": [
+     "balance-grid-container__0__0__3__0__1:20px->0px",
+     "balance-grid-container__0__0__3__0__2:20px->0px"
+    ],
+    "nonBrDiff": -2
+   },
+   {
+    "t": "css/css-multicol/column-height-009.html",
+    "moved": [
+     "column-height-009__0__0__0__1:20px->0px",
+     "column-height-009__0__0__0__2:20px->0px",
+     "column-height-009__0__0__0__3:20px->0px",
+     "column-height-009__0__0__0__4:20px->0px",
+     "column-height-009__0__0__0__5:20px->0px",
+     "column-height-009__0__0__0__6:20px->0px",
+     "column-height-009__0__0__0__7:20px->0px",
+     "column-height-009__0__0__0__8:20px->0px",
+     "column-height-009__0__0__0__9:20px->0px",
+     "column-height-009__0__0__0__10:20px->0px",
+     "column-height-009__0__0__0__11:20px->0px",
+     "column-height-009__0__0__0__12:20px->0px",
+     "column-height-009__0__0__0__13:20px->0px",
+     "column-height-009__0__0__0__14:20px->0px",
+     "column-height-009__0__0__0__15:20px->0px"
+    ],
+    "nonBrDiff": -15
+   },
+   {
+    "t": "css/css-overflow/line-clamp/block-ellipsis-002.html",
+    "moved": [
+     "line-clamp__block-ellipsis-002__0__1:20px->0px",
+     "line-clamp__block-ellipsis-002__0__2:20px->0px"
+    ],
+    "nonBrDiff": -2
+   },
+   {
+    "t": "css/css-overflow/line-clamp/block-ellipsis-004.html",
+    "moved": [
+     "line-clamp__block-ellipsis-004__0__1:20px->0px"
+    ],
+    "nonBrDiff": -1
+   },
+   {
+    "t": "css/css-overflow/line-clamp/block-ellipsis-005.html",
+    "moved": [
+     "line-clamp__block-ellipsis-005__0__1:20px->0px"
+    ],
+    "nonBrDiff": -1
+   },
+   {
+    "t": "css/css-overflow/line-clamp/block-ellipsis-006.html",
+    "moved": [
+     "line-clamp__block-ellipsis-006__0__1:20px->0px"
+    ],
+    "nonBrDiff": -1
+   },
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-001.html",
+    "moved": [
+     "hyphens__hyphenate-character-001__1__2:20px->0px",
+     "hyphens__hyphenate-character-001__1__4:20px->0px"
+    ],
+    "nonBrDiff": -2
+   },
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-002.html",
+    "moved": [
+     "hyphens__hyphenate-character-002__1__2:20px->0px",
+     "hyphens__hyphenate-character-002__1__4:20px->0px"
+    ],
+    "nonBrDiff": -2
+   },
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-003.html",
+    "moved": [
+     "hyphens__hyphenate-character-003__1__2:20px->0px",
+     "hyphens__hyphenate-character-003__1__4:20px->0px"
+    ],
+    "nonBrDiff": -2
+   },
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-004.html",
+    "moved": [
+     "hyphens__hyphenate-character-004__1__2:20px->0px",
+     "hyphens__hyphenate-character-004__1__4:20px->0px"
+    ],
+    "nonBrDiff": -2
+   },
+   {
+    "t": "css/filter-effects/backdrop-filter-clip-rect.html",
+    "moved": [
+     "backdrop-filter-clip-rect__0__0__1:20px->0px",
+     "backdrop-filter-clip-rect__0__0__2:20px->0px"
+    ],
+    "nonBrDiff": -2
+   },
+   {
+    "t": "css/filter-effects/backdrop-filter-edge-clipping.html",
+    "moved": [
+     "backdrop-filter-edge-clipping__0__0__1:20px->0px"
+    ],
+    "nonBrDiff": -1
+   },
+   {
+    "t": "css/filter-effects/backdrop-filter-paint-order.html",
+    "moved": [
+     "backdrop-filter-paint-order__0__0__1:20px->0px"
+    ],
+    "nonBrDiff": -1
+   },
+   {
+    "t": "css/filter-effects/backdrop-filter-plus-filter.html",
+    "moved": [
+     "backdrop-filter-plus-filter__0__1:20px->0px"
+    ],
+    "nonBrDiff": -1
+   }
+  ],
+  "refChanged": [
+   "css/css-masking/clip-path/clip-path-filter-order.html",
+   "css/css-multicol/balance-grid-container.html",
+   "css/css-overflow/line-clamp/block-ellipsis-002.html",
+   "css/css-overflow/line-clamp/block-ellipsis-004.html",
+   "css/css-overflow/line-clamp/block-ellipsis-005.html",
+   "css/css-overflow/line-clamp/block-ellipsis-006.html",
+   "css/css-text/hanging-punctuation/hanging-punctuation-block-bound-001.html",
+   "css/css-text/hyphens/hyphenate-character-001.html",
+   "css/css-text/hyphens/hyphenate-character-002.html",
+   "css/css-text/hyphens/hyphenate-character-003.html",
+   "css/css-text/hyphens/hyphenate-character-004.html",
+   "css/css-text/hyphens/hyphenate-limit-chars-001.html",
+   "css/css-text/hyphens/hyphens-auto-010.html",
+   "css/css-text/hyphens/hyphens-auto-inline-010.html",
+   "css/css-text/hyphens/hyphens-manual-inline-011.html",
+   "css/css-text/hyphens/hyphens-manual-inline-012.html",
+   "css/css-text/hyphens/hyphens-none-012.html",
+   "css/css-text/hyphens/hyphens-none-013.html",
+   "css/filter-effects/backdrop-filter-clip-rect.html",
+   "css/filter-effects/backdrop-filter-edge-clipping.html",
+   "css/filter-effects/backdrop-filter-paint-order.html",
+   "css/filter-effects/backdrop-filter-plus-filter.html"
+  ],
+  "brs": 54
+ },
+ "u3b": {
+  "changed": [
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-001.html",
+    "moved": [
+     "hyphens__hyphenate-character-001__1__1:20px->19.2px",
+     "hyphens__hyphenate-character-001__1__3:20px->19.2px",
+     "hyphens__hyphenate-character-001__1__5:20px->19.2px"
+    ],
+    "nonBrDiff": 6
+   },
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-002.html",
+    "moved": [
+     "hyphens__hyphenate-character-002__1__1:20px->19.2px",
+     "hyphens__hyphenate-character-002__1__3:20px->19.2px",
+     "hyphens__hyphenate-character-002__1__5:20px->19.2px"
+    ],
+    "nonBrDiff": 6
+   },
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-003.html",
+    "moved": [
+     "hyphens__hyphenate-character-003__1__1:20px->19.2px",
+     "hyphens__hyphenate-character-003__1__3:20px->19.2px",
+     "hyphens__hyphenate-character-003__1__5:20px->19.2px"
+    ],
+    "nonBrDiff": 6
+   },
+   {
+    "t": "css/css-text/hyphens/hyphenate-character-004.html",
+    "moved": [
+     "hyphens__hyphenate-character-004__1__1:20px->19.2px",
+     "hyphens__hyphenate-character-004__1__3:20px->19.2px",
+     "hyphens__hyphenate-character-004__1__5:20px->19.2px"
+    ],
+    "nonBrDiff": 6
+   }
+  ],
+  "refChanged": [
+   "css/css-text/hyphens/hyphenate-character-001.html",
+   "css/css-text/hyphens/hyphenate-character-002.html",
+   "css/css-text/hyphens/hyphenate-character-003.html",
+   "css/css-text/hyphens/hyphenate-character-004.html"
+  ],
+  "brs": 12
+ }
+}

@@ -1,0 +1,660 @@
+{
+ "runs": [
+  {
+   "id": "GREEN0",
+   "rc": 0,
+   "tests": 110,
+   "red": [],
+   "errs": [],
+   "secs": 2.9
+  },
+  {
+   "id": "BS",
+   "what": "forest never applied",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m2_cellLosesItsMargins",
+    "TableBodyForestTest::m3_absposStaysARoot_neverWrapped",
+    "TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell",
+    "TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing",
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 10.2
+  },
+  {
+   "id": "BM1",
+   "what": "trigger dropped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m1_identity_onNonTableBodies"
+   ],
+   "errs": [],
+   "secs": 2.3
+  },
+  {
+   "id": "BM2",
+   "what": "\u00a78.3 strip skipped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m2_cellLosesItsMargins"
+   ],
+   "errs": [],
+   "secs": 1.8
+  },
+  {
+   "id": "BM3",
+   "what": "abspos wrapped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m3_absposStaysARoot_neverWrapped",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos"
+   ],
+   "errs": [],
+   "secs": 1.9
+  },
+  {
+   "id": "BM4",
+   "what": "non-cell not wrapped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell",
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos"
+   ],
+   "errs": [],
+   "secs": 2.0
+  },
+  {
+   "id": "BM5",
+   "what": "BorderSpacing not copied",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing"
+   ],
+   "errs": [],
+   "secs": 2.0
+  },
+  {
+   "id": "BK",
+   "what": "harness call site dropped",
+   "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+   "sha256": "b98e80ee33db68fd1ab7937db92c882ce0e41fcc66eea004024a1843b05cdb4d",
+   "restored": "b98e80ee33db68fd1ab7937db92c882ce0e41fcc66eea004024a1843b05cdb4d",
+   "rc": 1,
+   "tests": 110,
+   "red": [
+    "ComposedCanvasTableBodyTest::stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot"
+   ],
+   "errs": [],
+   "secs": 3.3
+  },
+  {
+   "id": "m6",
+   "what": "marker dropped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 2.1
+  },
+  {
+   "id": "T1",
+   "what": "D1 off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 2.2
+  },
+  {
+   "id": "T2",
+   "what": "D2 off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 1.8
+  },
+  {
+   "id": "T3",
+   "what": "D2 for every table",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "T4",
+   "what": "disabled hug adds a node",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "T5",
+   "what": "TableCell drops the hug",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "T6",
+   "what": "provider dropped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 1.8
+  },
+  {
+   "id": "X1",
+   "what": "hug after fillMaxHeight",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 2.0
+  },
+  {
+   "id": "X2",
+   "what": "every table hugs via the provider",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 1.9
+  },
+  {
+   "id": "X3",
+   "what": "hug at MIN-content (wrong \u00a717.5.2.2 quantity)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 0,
+   "tests": 26,
+   "red": [],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "X4",
+   "what": "enabled hug is a no-op wrapper",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "errs": [],
+   "secs": 2.6
+  },
+  {
+   "id": "X5",
+   "what": "null-role tables read as anonymous",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "errs": [],
+   "secs": 2.1
+  },
+  {
+   "id": "X6",
+   "what": "weight dropped (vacuous order assert?)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 0,
+   "red": [],
+   "errs": [],
+   "secs": 3.1
+  },
+  {
+   "id": "GREEN1",
+   "rc": 0,
+   "tests": 84,
+   "red": [],
+   "errs": [],
+   "secs": 26.4
+  },
+  {
+   "id": "X6",
+   "what": "weight dropped (vacuous order assert?)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 0,
+   "tests": 26,
+   "red": [],
+   "errs": [],
+   "secs": 2.0
+  },
+  {
+   "id": "X3",
+   "what": "hug at MIN-content (wrong \u00a717.5.2.2 quantity)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 0,
+   "tests": 26,
+   "red": [],
+   "errs": [],
+   "secs": 1.9
+  },
+  {
+   "id": "GREEN2",
+   "rc": 0,
+   "tests": 110,
+   "red": [],
+   "errs": [],
+   "secs": 2.8
+  },
+  {
+   "id": "GREEN0",
+   "rc": 0,
+   "tests": 110,
+   "red": [],
+   "errs": [],
+   "secs": 4.8
+  },
+  {
+   "id": "BS",
+   "what": "forest never applied",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m2_cellLosesItsMargins",
+    "TableBodyForestTest::m3_absposStaysARoot_neverWrapped",
+    "TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell",
+    "TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing",
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 1.8
+  },
+  {
+   "id": "BM1",
+   "what": "trigger dropped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m1_identity_onNonTableBodies"
+   ],
+   "errs": [],
+   "secs": 2.0
+  },
+  {
+   "id": "BM2",
+   "what": "\u00a78.3 strip skipped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m2_cellLosesItsMargins"
+   ],
+   "errs": [],
+   "secs": 1.9
+  },
+  {
+   "id": "BM3",
+   "what": "abspos wrapped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m3_absposStaysARoot_neverWrapped",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "BM4",
+   "what": "non-cell not wrapped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m4_nonCellRunIsWrappedInAnAnonymousCell",
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableBodyForestTest::shape_bodyRootUnchanged_tableRowCells_abspos"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "BM5",
+   "what": "BorderSpacing not copied",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m5_tableCarriesTheBodysBorderSpacing"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "BK",
+   "what": "harness call site dropped",
+   "file": "apps/android-harness/app/src/main/java/com/styleconverter/test/screenshot/ScreenshotCaptureScreen.kt",
+   "sha256": "b98e80ee33db68fd1ab7937db92c882ce0e41fcc66eea004024a1843b05cdb4d",
+   "restored": "b98e80ee33db68fd1ab7937db92c882ce0e41fcc66eea004024a1843b05cdb4d",
+   "rc": 1,
+   "tests": 110,
+   "red": [
+    "ComposedCanvasTableBodyTest::stack_zeroGapAboveTheSyntheticTable_tdIsNoRoot"
+   ],
+   "errs": [],
+   "secs": 2.8
+  },
+  {
+   "id": "m6",
+   "what": "marker dropped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 1.8
+  },
+  {
+   "id": "T1",
+   "what": "D1 off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "T2",
+   "what": "D2 off",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::anonymousMarker_survivesTheRenderersPreDisplayFolds",
+    "TableCellHugTest::anonymousTable_noStroke_cellsHug"
+   ],
+   "errs": [],
+   "secs": 2.5
+  },
+  {
+   "id": "T3",
+   "what": "D2 for every table",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::declaredTableBodyRoot_keepsTodaysStroke_noHug",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "T4",
+   "what": "disabled hug adds a node",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "errs": [],
+   "secs": 1.4
+  },
+  {
+   "id": "T5",
+   "what": "TableCell drops the hug",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 1.5
+  },
+  {
+   "id": "T6",
+   "what": "provider dropped",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "X1",
+   "what": "hug after fillMaxHeight",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 1.6
+  },
+  {
+   "id": "X2",
+   "what": "every table hugs via the provider",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::applierSource_tableProvidesTheHug_cellChainsHugBeforeFillMaxHeight"
+   ],
+   "errs": [],
+   "secs": 1.7
+  },
+  {
+   "id": "X3",
+   "what": "hug at MIN-content (wrong \u00a717.5.2.2 quantity)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 0,
+   "tests": 26,
+   "red": [],
+   "errs": [],
+   "secs": 1.9
+  },
+  {
+   "id": "X4",
+   "what": "enabled hug is a no-op wrapper",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableCellHug.kt",
+   "sha256": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "restored": "fac6c37431056468906efc1a372364a26bc16de10c7a07eb0273dcaad878a703",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableCellHugTest::hugColumn_disabled_isTheReceiverItself"
+   ],
+   "errs": [],
+   "secs": 1.6
+  },
+  {
+   "id": "X5",
+   "what": "null-role tables read as anonymous",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableBodyForest.kt",
+   "sha256": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "restored": "d80054ce72a079d3a8a33b2509e85812c82240860794b22b35592fc6acf31e55",
+   "rc": 1,
+   "tests": 26,
+   "red": [
+    "TableBodyForestTest::m6_syntheticBoxesAreAnonymous_authoredBoxesAreNot",
+    "TableCellHugTest::declaredTable_percentageSizing003_keepsTodaysStroke_noHug",
+    "TableCellHugTest::uaTable_baselineEmptyCell001_noStroke_noHug",
+    "TableCellHugTest::uaTable_containContent004_isTodaysExpression_noHug"
+   ],
+   "errs": [],
+   "secs": 1.6
+  },
+  {
+   "id": "X6",
+   "what": "weight dropped (vacuous order assert?)",
+   "file": "runtimes/compose/src/main/java/com/styleconverter/runtime/table/TableApplier.kt",
+   "sha256": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "restored": "0d58a4633762893c71062326ba88aff5cf4d1d37f2ea0564ad0e605b6c4560d3",
+   "rc": 0,
+   "tests": 26,
+   "red": [],
+   "errs": [],
+   "secs": 1.6
+  },
+  {
+   "id": "GREEN1",
+   "rc": 0,
+   "tests": 110,
+   "red": [],
+   "errs": [],
+   "secs": 3.0
+  }
+ ]
+}

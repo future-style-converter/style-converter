@@ -1,0 +1,22 @@
+GO-SMALL dry run L5 captureCarriers: {'web': 0, 'ios': 0, 'android': 7}
+android carriers == re-verifier derivation: True
+units: ['U1-android'] | heldUnits: ['U2-ios']
+U1-android commit: Compose typography/UAElementFontRule.kt (new twin, with headingStandsDown) + UAElementFontRuleTest.kt + ComponentRenderer.kt seam-1 (:1141 wrap ListStyleUaRule.apply in UAElementFontRule.apply(standsDown = headingStandsDown), before DynamicValueResolver :1211; carries the patch-borne UAElementFontRu
+U1-android captures android: 7 True
+predictions: 7
+    {'cell': 'css-break/block-in-inline-015-print.html android', 'confidence': 'HIGH', 'direction': 'up-or-stay', 'floor': 0.97}
+    {'cell': 'css-text-decor/text-decoration-color.html android', 'confidence': 'LOW', 'direction': 'up-or-stay', 'floor': None}
+    {'cell': 'css-lists/counter-list-item.html android', 'confidence': 'LOW', 'direction': 'undirected', 'floor': None}
+    {'cell': 'css-lists/counter-reset-increment-overflow-underflow.html android', 'confidence': 'LOW', 'direction': 'undirected', 'floor': None}
+    {'cell': 'css-text-decor/text-decoration-subelements-003.html android', 'confidence': 'LOW', 'direction': 'undirected', 'floor': None}
+    {'cell': 'filter-effects/backdrop-filter-border-radius-change.html android', 'confidence': 'LOW', 'direction': 'undirected', 'floor': None}
+    {'cell': 'filter-effects/backdrop-filter-corner-shape-change.html android', 'confidence': 'LOW', 'direction': 'undirected', 'floor': None}
+mustNotMove: 52
+inset-005/-006/-014 native cells in mustNotMove: 6
+    css-text-decor/text-decoration-inset-005.html android
+    css-text-decor/text-decoration-inset-005.html ios
+    css-text-decor/text-decoration-inset-006.html android
+    css-text-decor/text-decoration-inset-006.html ios
+    css-text-decor/text-decoration-inset-014.html android
+    css-text-decor/text-decoration-inset-014.html ios
+any prediction on inset-005/006/014: False

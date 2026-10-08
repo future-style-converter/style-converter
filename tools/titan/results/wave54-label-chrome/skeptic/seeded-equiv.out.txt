@@ -1,0 +1,2 @@
+baseline dir committed (390 PNGs): fixtures 446, shell-seeded 14, js-seeded 14, disagreements 0
+baseline dir committed+seed (408 PNGs): fixtures 446, shell-seeded 15, js-seeded 15, disagreements 0

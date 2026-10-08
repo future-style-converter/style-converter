@@ -1,0 +1,12 @@
+== wave53-final: sections 30 documents 1435 corpus-sha256 9cf2f2cf7732266f
+   meta.role on the wire: {'ws-after': 4366, None: 5692, 'line-break': 371, 'body-root': 284}  | "anonymous-table" on the wire: 0
+   body-root last Display in TABLE/INLINE_TABLE (or non-primitive): 1
+      ('CSS2', 'wpt__CSS2__css21-errata__s-11-1-1b-006.json', 'TABLE', False, 3, [None, 'TABLE_CELL', None], ['wpt__css2__css21-errata__s-11-1-1b-006__1-142', 'wpt__css2__css21-errata__s-11-1-1b-006__2-143', 'wpt__css2__css21-errata__s-11-1-1b-006__3-144'])
+   body-root with a Generic display containing "table" (trigger blind to it): 0 []
+   non-body ROOTS after the body that are tables (the forest never rewrites them): 0
+== wave54-open: sections 30 documents 1435 corpus-sha256 9cf2f2cf7732266f
+   meta.role on the wire: {'ws-after': 4366, None: 5692, 'line-break': 371, 'body-root': 284}  | "anonymous-table" on the wire: 0
+   body-root last Display in TABLE/INLINE_TABLE (or non-primitive): 1
+      ('CSS2', 'wpt__CSS2__css21-errata__s-11-1-1b-006.json', 'TABLE', False, 3, [None, 'TABLE_CELL', None], ['wpt__css2__css21-errata__s-11-1-1b-006__1-142', 'wpt__css2__css21-errata__s-11-1-1b-006__2-143', 'wpt__css2__css21-errata__s-11-1-1b-006__3-144'])
+   body-root with a Generic display containing "table" (trigger blind to it): 0 []
+   non-body ROOTS after the body that are tables (the forest never rewrites them): 0

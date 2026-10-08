@@ -1,0 +1,5 @@
+001_ATC_PropsThenAll_InGreenParent   web      390x92 due=False rootAll=False label 437/437 band-ground=False fill=(16, 16, 176, 76) → GEOMETRY WRONG (label on an exempt capture: 437/437 glyph px lit)
+004_span                             Android  390x92 due=True  rootAll=True  label 0/65 band-ground=True  fill=(16, 16, 216, 76) → GEOMETRY WRONG (label absent: 65/65 glyph px ground)
+label drawn ⇔ label-due (fixture: no children, no _text): 16/18
+label drawn ⇔ captured root declares no `all` (BACKLOG 0(e) premise): 5/18
+exit=1

@@ -1,0 +1,2 @@
+        if (children.isNullOrEmpty()) return false
+        if (true) return true

@@ -1,0 +1,6 @@
+label=K-Me file=runtimes/compose/src/main/java/com/styleconverter/runtime/layout/position/CanvasRootHoist.kt
+sha256 before=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 mutated=5fe6cc954349db57b597c6606a9861f3b90d6de8343d8762b4663aa76f267a7a after=367775501a88ac1742c11cd3b39c7fd191ed29fd7d2f7fd0c7316de877565603 restored=OK
+suite rc=1 (RED)
+CanvasRootHoistTest tests=29 skipped=0 failures=2 errors=0 FAILED: ['P2 fixed with Top under a contain-strict ancestor does not hoist', 'P2 absolute with Top under a static contain-content parent does not hoist']
+OutOfFlowContainingBlockTest tests=8 skipped=0 failures=2 errors=0 FAILED: ['P3 P4 the corpus moves in exactly the 9 OOF-android carriers and the host in exactly 7', 'P3 the carriers hoist nothing and the M2 hosts stay inactive']
+TOTAL tests=124 skipped=0 failures=4 errors=0

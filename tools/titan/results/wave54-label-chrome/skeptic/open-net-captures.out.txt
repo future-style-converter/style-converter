@@ -1,0 +1,27 @@
+total 48
+drwxr-xr-x@  8 dranak  staff   256 Oct  8 16:52 .
+drwxr-xr-x@ 15 dranak  staff   480 Oct  8 16:52 ..
+SAME Android 000_ATC_AllThenProps.png Oct  8 16:52:58 2026
+SAME Android 001_ATC_PropsThenAll_InGreenParent.png Oct  8 16:52:58 2026
+SAME Android 002_reset.png Oct  8 16:52:58 2026
+SAME Android 003_ATC_InitialUnderRedParent.png Oct  8 16:52:58 2026
+SAME Android 004_span.png Oct  8 16:52:58 2026
+SAME Android 005_ATC_DirectionSurvives.png Oct  8 16:52:58 2026
+total 48
+drwxr-xr-x@  8 dranak  staff   256 Oct  8 16:52 .
+drwxr-xr-x@ 10 dranak  staff   320 Oct  8 16:52 ..
+SAME iOS 000_ATC_AllThenProps.png Oct  8 16:52:47 2026
+SAME iOS 001_ATC_PropsThenAll_InGreenParent.png Oct  8 16:52:47 2026
+SAME iOS 002_reset.png Oct  8 16:52:47 2026
+SAME iOS 003_ATC_InitialUnderRedParent.png Oct  8 16:52:47 2026
+SAME iOS 004_span.png Oct  8 16:52:47 2026
+SAME iOS 005_ATC_DirectionSurvives.png Oct  8 16:52:47 2026
+total 48
+drwxr-xr-x@  8 dranak  staff   256 Oct  8 16:53 .
+drwxr-xr-x@ 19 dranak  staff   608 Oct  8 16:53 ..
+SAME web 000_ATC_AllThenProps.png Oct  8 16:53:05 2026
+SAME web 001_ATC_PropsThenAll_InGreenParent.png Oct  8 16:53:05 2026
+SAME web 002_reset.png Oct  8 16:53:05 2026
+SAME web 003_ATC_InitialUnderRedParent.png Oct  8 16:53:05 2026
+SAME web 004_span.png Oct  8 16:53:05 2026
+SAME web 005_ATC_DirectionSurvives.png Oct  8 16:53:05 2026

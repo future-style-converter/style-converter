@@ -1,0 +1,3 @@
+[R0-shared-unseamed] gradle rc=0 22:10:37
+[R0-shared-unseamed] UAElementFontRuleTest tests=10 failures=0 errors=0 ts=2026-10-08T20:10:37.573Z
+[R0-shared-unseamed] InlineRunFoldTest tests=45 failures=0 errors=0 ts=2026-10-08T20:10:37.664Z

@@ -1,0 +1,4 @@
+  ok      1  css-overflow/line-clamp/discard/discard-multicol-003.html web
+  unmatched 0
+  ok      1  css-overflow/line-clamp/discard/discard-multicol-003.html web
+  unmatched 0
