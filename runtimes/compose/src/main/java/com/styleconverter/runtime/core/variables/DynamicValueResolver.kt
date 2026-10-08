@@ -206,7 +206,12 @@ object DynamicValueResolver {
      */
     fun childContainingBlock(
         properties: List<IRProperty>,
-        parent: ContainingBlock
+        parent: ContainingBlock,
+        // Wave 54 (lane L4, CBB-android) — the composed WPT capture draws an
+        // unset box-sizing as content-box, whose content box IS the declared
+        // size (ContainingBlockBands). Default false keeps the frozen
+        // border-box subtraction on the dark stage and at every other caller.
+        wptCaptureMode: Boolean = false,
     ): ContainingBlock {
         // Top-level px of the first matching property (post-resolution all
         // definite lengths carry it, both typed and bare shapes).
@@ -232,6 +237,9 @@ object DynamicValueResolver {
         }
         val w = sizeOf(parent.widthPx, "Width", "InlineSize")
         val h = sizeOf(parent.heightPx, "Height", "BlockSize")
+        // Wave 54 (CBB-android): an effective content-box keeps its bands
+        // outside the declared size — the children see it unsubtracted.
+        if (!ContainingBlockBands.subtracts(properties, wptCaptureMode)) return ContainingBlock(widthPx = w, heightPx = h)
         // Border-band widths: raw px reads. A border with style:none would
         // compute to 0 in CSS; fixtures never declare width without style,
         // so the raw read is an accepted approximation (documented).

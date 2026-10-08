@@ -444,4 +444,149 @@ class DynamicValueResolverTest {
         assertNull(cb.widthPx)
         assertNull(cb.heightPx)
     }
+
+    // ── Wave 54 (lane L4, CBB-android): the WPT content-box band rule ─────
+    // ContainingBlockBands: under the composed WPT capture an unset
+    // box-sizing is drawn content-box (SizingApplier.effectiveBoxSizing), so
+    // the block a box publishes for its children IS its declared size; the
+    // dark stage keeps the frozen subtraction (the 300 → 276 row above).
+    // Payload rows are VERBATIM wave53-final per-test IR (byte-identical to
+    // wave54-open): tools/titan/runs/wave53-final/sections/<sec>/per-test-ir/.
+
+    /** css-flexbox/abspos/abspos-autopos-htb-ltr's flex container, verbatim properties. */
+    private val autoposContainer = listOf(
+        prop("Display", "\"FLEX\""), prop("Position", "\"RELATIVE\""), prop("WritingMode", "\"HORIZONTAL_TB\""),
+        prop("Direction", "\"LTR\""), prop("Width", """{"type":"length","px":100}"""),
+        prop("Height", """{"type":"length","px":100}"""),
+        prop("BorderLeftWidth", """{"px":20}"""), prop("Left", """{"px":-20}"""),
+        prop("BorderTopWidth", """{"px":5}"""), prop("Top", """{"px":-5}"""),
+        prop("BorderRightWidth", """{"px":10}"""), prop("BorderBottomWidth", """{"px":15}"""),
+    )
+
+    /** filter-effects/backdrop-filter-nested-border-radius-clip's `#outer`, verbatim sizing/padding properties. */
+    private val nestedClipOuter = listOf(
+        prop("Position", "\"RELATIVE\""), prop("Width", """{"type":"length","px":200}"""),
+        prop("Height", """{"type":"length","px":100}"""),
+        prop("PaddingTop", """{"px":10}"""), prop("PaddingRight", """{"px":10}"""),
+        prop("PaddingBottom", """{"px":10}"""), prop("PaddingLeft", """{"px":10}"""),
+    )
+
+    /** …and its `#middle` (`width/height: 100%`, no bands). */
+    private val nestedClipMiddle = listOf(
+        prop("Position", "\"RELATIVE\""), prop("Width", """{"type":"percentage","value":100}"""),
+        prop("Height", """{"type":"percentage","value":100}"""),
+    )
+
+    @Test
+    fun `CBB WPT content-box container publishes its declared size`() {
+        // abspos-autopos-htb-ltr: 100×100 content box inside 20/5/10/15 borders.
+        val cb = DynamicValueResolver.childContainingBlock(autoposContainer, ContainingBlock(widthPx = 358f), wptCaptureMode = true)
+        assertEquals(100f, cb.widthPx)
+        assertEquals(100f, cb.heightPx)
+    }
+
+    @Test
+    fun `CBB WPT nested clip chain keeps 200 by 100 at both levels`() {
+        // #outer's padding sits OUTSIDE its 200×100 content box under content-box…
+        val outer = DynamicValueResolver.childContainingBlock(nestedClipOuter, ContainingBlock(widthPx = 358f), wptCaptureMode = true)
+        assertEquals(200f, outer.widthPx)
+        assertEquals(100f, outer.heightPx)
+        // …so #middle's 100% resolves to 200×100 and publishes it unchanged.
+        val middle = DynamicValueResolver.childContainingBlock(nestedClipMiddle, outer, wptCaptureMode = true)
+        assertEquals(200f, middle.widthPx)
+        assertEquals(100f, middle.heightPx)
+    }
+
+    @Test
+    fun `CBB an explicit border-box under WPT still subtracts its bands`() {
+        // css-sizing-3 §3: a declared border-box keeps the border-box reading.
+        val props = nestedClipOuter + prop("BoxSizing", "\"BORDER_BOX\"")
+        val cb = DynamicValueResolver.childContainingBlock(props, ContainingBlock(widthPx = 358f), wptCaptureMode = true)
+        assertEquals(180f, cb.widthPx)
+        assertEquals(80f, cb.heightPx)
+    }
+
+    @Test
+    fun `CBB the dark stage keeps the frozen subtraction even for those payloads`() {
+        // wptCaptureMode = false (the default): byte-identical to wave53-final.
+        val cb = DynamicValueResolver.childContainingBlock(autoposContainer, ContainingBlock(widthPx = 358f))
+        assertEquals(70f, cb.widthPx)
+        assertEquals(80f, cb.heightPx)
+    }
+
+    // ── CBB census over the whole corpus (local-only: tools/titan/runs is gitignored) ──
+    // Walk every wave53-final document twice — the frozen reading (false) and
+    // the WPT reading (true) — threading the block each box publishes; record
+    // every box whose INCOMING block differs and that reads it: an out-of-flow
+    // box (absposCb), a percentage / expression value, or text under a vertical
+    // writing mode (VerticalTextFlowLayout's upright budget).
+
+    private fun cbbCensus(rs: List<com.styleconverter.runtime.core.ir.IRComponent>): List<String> {
+        val out = mutableListOf<String>()
+        // A raw-wire percentage on a margin / padding / inset (ElementContainingBlock / PercentInsetPositioned readers).
+        val pctLeaf = Regex("\"type\":\"percentage\"|\"PERCENT\"")
+        val spacing = Regex("^(Margin|Padding|Top|Right|Bottom|Left|Inset)")
+        fun walk(n: com.styleconverter.runtime.core.ir.IRComponent, o: ContainingBlock, w: ContainingBlock, vert: Boolean) {
+            val wm = (n.properties.lastOrNull { it.type == "WritingMode" }?.data as? JsonPrimitive)?.contentOrNull
+            val v = wm?.let { it.startsWith("VERTICAL") || it.startsWith("SIDEWAYS") } ?: vert
+            if (o != w) {
+                val why = mutableListOf<String>()
+                // 1. the pre-resolution pass (calc()/% originals against the block).
+                val ro = DynamicValueResolver.resolve(n.properties, emptyMap(), ctx(o.widthPx, o.heightPx)).properties
+                val rw = DynamicValueResolver.resolve(n.properties, emptyMap(), ctx(w.widthPx, w.heightPx)).properties
+                if (ro != rw) why += "dyn"
+                // 2. the out-of-flow lane: % sizes, inset stretch, auto margins (WPT path).
+                if (com.styleconverter.runtime.core.renderer.ComponentRenderer.isOutOfFlowChild(n.properties)) {
+                    fun oof(rp: List<IRProperty>, cb: ContainingBlock) = com.styleconverter.runtime.layout.position.AbsposAutoMargin.inject(
+                        com.styleconverter.runtime.layout.position.AbsposInsetStretch.inject(
+                            com.styleconverter.runtime.core.renderer.ComponentRenderer.resolveOutOfFlowPercentSizes(rp, cb), cb, n._tag), cb)
+                    if (oof(ro, o) != oof(rw, w)) why += "oof"
+                }
+                // 3. % margins / paddings / insets read the element's block.
+                if (n.properties.any { spacing.containsMatchIn(it.type) && pctLeaf.containsMatchIn(it.data.toString()) }) why += "spc"
+                // 4. vertical text's upright budget (VerticalTextFlowLayout).
+                if (v && (!n._text.isNullOrEmpty() || !n.runs.isNullOrEmpty())) why += "vtext"
+                if (why.isNotEmpty()) out += "${n.id} $why ${o.widthPx}x${o.heightPx}->${w.widthPx}x${w.heightPx}"
+            }
+            val co = DynamicValueResolver.childContainingBlock(n.properties, o)
+            val cw = DynamicValueResolver.childContainingBlock(n.properties, w, wptCaptureMode = true)
+            n.children.orEmpty().forEach { walk(it, co, cw, v) }
+        }
+        rs.forEach { walk(it, ContainingBlock(widthPx = 358f), ContainingBlock(widthPx = 358f), false) }
+        return out
+    }
+
+    @Test
+    fun `CBB census - the readers that see a different block are exactly the carriers and the control`() {
+        var dir: java.io.File? = java.io.File(System.getProperty("user.dir") ?: ".").absoluteFile
+        while (dir != null && !java.io.File(dir, "tools/titan/runs/wave53-final/sections").isDirectory) dir = dir.parentFile
+        org.junit.Assume.assumeTrue("wave53-final corpus not present", dir != null)
+        val files = java.io.File(dir, "tools/titan/runs/wave53-final/sections").listFiles().orEmpty()
+            .flatMap { java.io.File(it, "per-test-ir").listFiles().orEmpty().toList() }
+            .filter { it.name.endsWith(".json") }.sortedBy { it.name }
+        val lines = files.flatMap { f ->
+            cbbCensus(com.styleconverter.runtime.core.renderer.SlotComposer.compose(
+                com.styleconverter.runtime.core.ir.IRDocumentDecoder.decode(f.readText()))).map { "${f.name} $it" }
+        }
+        java.io.File(dir, "runtimes/compose/build/cbb-census.now.txt").writeText(lines.joinToString("\n", postfix = "\n"))
+        assertEquals(1435, files.size)
+        // The radius, by document: the 10 CBB carriers, the watched vertical-text
+        // side reader (006), and — found by THIS census, missed by the planning
+        // one (it required a % child) — the three semi-replaced-stretch
+        // documents, whose `top/right/bottom/left: 3px` children stretch
+        // against the block through AbsposInsetStretch (144×94 → 150×100).
+        assertEquals(listOf(
+            "wpt__css-flexbox__abspos__abspos-autopos-htb-ltr.json", "wpt__css-flexbox__abspos__abspos-autopos-htb-rtl.json",
+            "wpt__css-flexbox__abspos__abspos-autopos-vlr-ltr.json", "wpt__css-flexbox__abspos__abspos-autopos-vlr-rtl.json",
+            "wpt__css-flexbox__abspos__abspos-autopos-vrl-ltr.json", "wpt__css-flexbox__abspos__abspos-autopos-vrl-rtl.json",
+            "wpt__css-gaps__flex__flex-gap-decorations-006.json",
+            "wpt__css-position__position-absolute-semi-replaced-stretch-button.json",
+            "wpt__css-position__position-absolute-semi-replaced-stretch-input.json",
+            "wpt__css-position__position-absolute-semi-replaced-stretch-other.json",
+            "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-2.json",
+            "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-3.json",
+            "wpt__filter-effects__backdrop-filter-nested-border-radius-clip-4.json",
+            "wpt__filter-effects__backdrop-filter-nested-border-radius-clip.json",
+        ), lines.map { it.substringBefore(' ') }.distinct())
+    }
 }

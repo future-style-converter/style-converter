@@ -1947,8 +1947,12 @@ object ComponentRenderer {
         val childContainingBlock = androidx.compose.runtime.remember(
             effectiveProperties, containingBlock, component.children, wptCaptureModeForStretch,
         ) {
+            // Wave 54 (lane L4, CBB-android): under the composed WPT capture an
+            // unset box-sizing is drawn content-box, so the block published
+            // for the children is the declared size, bands outside
+            // (ContainingBlockBands); the dark stage keeps the subtraction.
             val declared = com.styleconverter.runtime.core.variables.DynamicValueResolver
-                .childContainingBlock(effectiveProperties, containingBlock)
+                .childContainingBlock(effectiveProperties, containingBlock, wptCaptureMode = wptCaptureModeForStretch)
             // Wave-33 lane C — the auto-height ABSPOS fallback. When the
             // declared channel above found no block size (this box's height
             // is `auto`), evaluate CSS 2.2 §10.6.3 statically over the
