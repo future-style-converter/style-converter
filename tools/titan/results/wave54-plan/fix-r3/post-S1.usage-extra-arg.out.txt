@@ -1,0 +1,2 @@
+usage: adjudicate.mjs <score.json> [--geometry <geometry.json>] [--base wave54-open] [--exp <expectations.json>]
+exit=2

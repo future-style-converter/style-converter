@@ -1,0 +1,2 @@
+fix-r3/fake-gap-vshift3-up     ssim 0.9997  >= floor 0.99
+fix-r3/fake-gap-line3-short3   ssim 0.9994  >= floor 0.99

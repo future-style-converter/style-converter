@@ -1,0 +1,66 @@
+## wave53-final
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+exit=0
+## wave54-open
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (redPx 0 vs ref 2200)
+exit=0
+## ../results/wave54-plan/skeptic-r2/fake-gap
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs row 95 [(61, 70)] vs ref [(111, 120)])
+exit=0
+## ../results/wave54-plan/fix-r2/fake-gap-blue
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (blue runs col 90 [(71, 80), (111, 120)] vs ref [(61, 70), (111, 120)])
+exit=0
+## ../results/wave54-plan/fix-r2/fake-gap-line3
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs row 145 [(86, 95), (111, 120)] vs ref [(61, 70), (111, 120)])
+exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-vshift5
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (76, 115), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-line2-short4
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 106), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-short6
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (redPx 2140 vs ref 2200)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (redPx 2140 vs ref 2200)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (redPx 2140 vs ref 2200)
+exit=0
+## ../results/wave54-plan/skeptic-r3/fake-gap-line1-short4
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (redPx 2120 vs ref 2200)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (redPx 2120 vs ref 2200)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (redPx 2120 vs ref 2200)
+exit=0
+## ../results/wave54-plan/fix-r3/fake-gap-vshift3-up
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (68, 107), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 2 column-rule vertical extent)
+exit=0
+## ../results/wave54-plan/fix-r3/fake-gap-line3-short3
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs col 65 [(16, 60), (121, 162)] vs ref [(16, 60), (121, 165)]: flex line 3 column-rule vertical extent)
+exit=0

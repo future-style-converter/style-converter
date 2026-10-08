@@ -1,0 +1,30 @@
+## fake-ref-as-run
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY OK
+exit=0
+## fake-red-l1r-down2
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs col 115 [(18, 62), (71, 110), (121, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 1 column-rule vertical extent)
+exit=0
+## fake-red-l3r-up2
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY WRONG (red runs col 115 [(16, 60), (71, 110), (119, 165)] vs ref [(16, 60), (71, 110), (121, 165)]: flex line 3 column-rule vertical extent)
+exit=0
+## fake-blue-r1-short5
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY OK
+exit=0
+## fake-blue-r2-lshort4
+flex/flex-gap-decorations-033 ref      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 web      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 ios      {…} → GEOMETRY OK
+flex/flex-gap-decorations-033 android  {…} → GEOMETRY OK
+exit=0

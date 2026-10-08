@@ -1,0 +1,12 @@
+added   /abRead
+changed /adjudicate
+changed /adjudicateCalibrations
+added   /closingGateFiles
+added   /degenerateRetirementCheck
+added   /geometryGate/closingCmd
+changed /geometryGate/what
+changed /lanes/L3-hyphenate-character/revertUnits/U3b/probeDecided
+added   /lanes/L4-oof-layout/geometryProbes[2]/reads
+changed /revertRule[1]
+predictions (cell, gating, floor, direction) identical: True
+mustNotMove identical: True

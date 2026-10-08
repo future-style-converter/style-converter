@@ -1,0 +1,2 @@
+GEOMETRY PAIR: fix-r3/geometry-otherpair.json is geometry-gate.py wave53-final --base wave53-open; the score record is wave54-open → wave54-final. Refusing.
+exit=2

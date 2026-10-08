@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-// tools/titan/results/wave54-gate/adjudicate.mjs (the wave-53 copy; only the expectations path and message strings differ)
+// tools/titan/results/wave54-gate/adjudicate.mjs (the wave-53 copy: the expectations path and message strings differ, and fix r3
+// added the input guards (exit 2) and R6's degenerateRetirement read; the R1–R5 rule bodies are the wave-53 ones)
 //
 // Wave 54's closing-gate adjudication, read off the plan's pre-registered
 // expectations (tools/titan/results/wave54-plan/expectations.json, written
@@ -14,31 +15,89 @@
 //   R5  every must-not-move cell of every lane is unchanged in verdict and
 //       within 0.002 in score.
 //   R6  a flip onto a cell the plan marks degenerate-by-construction is
-//       reported as DEGENERATE, never counted as a gain.
-// Exit 0 when R1–R5 hold, 1 otherwise. The read-out names every cell.
+//       reported as DEGENERATE, never counted as a gain — UNLESS the plan's
+//       `degenerateRetirement` holds for that cell (fix r3, plan-skeptic R3-S2):
+//       every unit `degenerateRetirementCheck.units[<platform>]` names is still
+//       on the tree (none in probeDecisions.reverted) AND the geometry-gate
+//       JSON (--geometry) reads its `hyphenate-character.geometry.py` row PASS,
+//       ending "→ GEOMETRY OK". Then it is RETIRED from the list and is a gain.
+//       Without --geometry nothing is retired (honest by default). Read-out
+//       only: R6 never changes the exit code (R6 picture-correctness is
+//       geometry-gate.py's exit, PLAN §6).
+// Exit 0 when R1–R5 hold, 1 otherwise, 2 when the input cannot be adjudicated
+// (fix r3, plan-skeptic R3-S1 — the two guards probe-readout.mjs already has):
+//   ORDER    the record's `prev` is not --base (default wave54-open): Δ = cur − prev must mean final − wave54-open;
+//   NOT A --movers 0 RECORD  gained + lost + movers + unmeasured-now ≠ the cells scored on `prev` (or gained + lost +
+//            movers + newly-measured ≠ the cells scored on `cur`): a thresholded record — e.g. score-final.movers0005.json,
+//            the corpus snapshot's source — drops every same-verdict cell below its threshold, so R4 would read a met
+//            P→P row as "scored on neither side" and R5 would not see a must-not-move move in (0.002, threshold);
+//   GEOMETRY PAIR  the --geometry JSON was written for another run pair than the score record.
+// The read-out names every cell.
 //
-// Usage: node adjudicate.mjs <score.json>   (score-gate.mjs wave54-open wave54-final --movers 0 --json: PLAN §6 "Score of record")
+// Usage: node adjudicate.mjs <score.json> [--geometry <geometry.json>] [--base wave54-open] [--exp <expectations.json>]
+//   <score.json>    expectations.json `scoreOfRecord`: score-gate.mjs wave54-open wave54-final --movers 0
+//                   --json tools/titan/results/wave54-gate/score-final.json (PLAN §6 "Score of record"; NEVER the
+//                   --movers 0.005 score-final.movers0005.json, which is `scoreReadout` / `corpusSnapshotSource`)
+//   <geometry.json> expectations.json `geometryGate.closingCmd`: geometry-gate.py wave54-final --base wave54-open
+//                   --json tools/titan/results/wave54-gate/geometry-final.json (read for R6's retirement only)
+//   --exp           a dry-run expectations.json (plan-build.py --out …) instead of the installed one
 import { readFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO = path.resolve(HERE, '..', '..', '..', '..');
-const EXP = JSON.parse(readFileSync(path.join(REPO, 'tools/titan/results/wave54-plan/expectations.json'), 'utf8'));
-const [scorePath] = process.argv.slice(2);
-if (!scorePath) { console.error('usage: adjudicate.mjs <score.json>'); process.exit(2); }
+const args = process.argv.slice(2);
+const opt = (name, dflt) => { const i = args.indexOf(name); return i < 0 ? dflt : args.splice(i, 2)[1]; };
+const expPath = opt('--exp', path.join(REPO, 'tools/titan/results/wave54-plan/expectations.json'));
+const base = opt('--base', 'wave54-open');
+const geometryPath = opt('--geometry', null);
+const EXP = JSON.parse(readFileSync(expPath, 'utf8'));
+const [scorePath] = args;
+if (!scorePath || args.length !== 1) {
+  console.error('usage: adjudicate.mjs <score.json> [--geometry <geometry.json>] [--base wave54-open] [--exp <expectations.json>]');
+  process.exit(2);
+}
 const score = JSON.parse(readFileSync(scorePath, 'utf8'));
+
+// ── the order guard (fix r3, R3-S1): Δ = cur − prev must mean <closing run> − <base> ──
+if (score.prev !== base) {
+  console.error(`ORDER: this record is score-gate.mjs ${score.prev} → ${score.cur}; adjudication needs ${base} FIRST ` +
+    `(${EXP.scoreOfRecord || `score-gate.mjs ${base} <run> --movers 0 --json …`}). Refusing.`);
+  process.exit(2);
+}
+// ── the --movers 0 guard (fix r3, R3-S1): every cell scored on both sides must be in gained / lost / movers ──
+const measuredOn = (t) => ['web', 'ios', 'android'].reduce((n, p) => n + t[p].measured, 0);
+const listedPrev = score.gained.length + score.lost.length + score.movers.length + score.unmeasuredNow.length;
+const listedCur = score.gained.length + score.lost.length + score.movers.length + score.newlyMeasured.length;
+if (listedPrev !== measuredOn(score.totals.prev) || listedCur !== measuredOn(score.totals.cur)) {
+  console.error(`NOT A --movers 0 RECORD: ${listedPrev} cells listed against ${measuredOn(score.totals.prev)} scored on ${score.prev} ` +
+    `(${listedCur} against ${measuredOn(score.totals.cur)} on ${score.cur}); a same-verdict cell below the record's mover threshold is ` +
+    `absent from every list, so R4 would read a met P→P row as a miss and R5 would not see a must-not-move move. ` +
+    `Adjudicate the --movers 0 record (${EXP.scoreOfRecord ? 'expectations.json scoreOfRecord' : 'score-gate.mjs … --movers 0'}); ` +
+    `the --movers 0.005 JSON is the PR read-out and the corpus snapshot's source only (scoreReadout / corpusSnapshotSource). Refusing.`);
+  process.exit(2);
+}
+// ── the geometry JSON R6 reads must be for the same pair (fix r3, R3-S2) ──
+const geometry = geometryPath ? JSON.parse(readFileSync(geometryPath, 'utf8')) : null;
+if (geometry && (geometry.run !== score.cur || geometry.base !== score.prev)) {
+  console.error(`GEOMETRY PAIR: ${geometryPath} is geometry-gate.py ${geometry.run} --base ${geometry.base}; the score record is ` +
+    `${score.prev} → ${score.cur}. Refusing.`);
+  process.exit(2);
+}
 
 // The plan writes a cell as "css-lists/counter-reset-reversed-nested.html web"; the scorer as test "css/css-lists/….html" + platform.
 const key = (c) => `${c.test.replace(/^css\//, '')} ${c.platform}`;
 const fmt = (c) => `    ${key(c)}  ${c.prev ?? '—'} → ${c.cur ?? '—'}`;
 const byKey = new Map();
 for (const list of ['gained', 'lost', 'movers', 'newlyMeasured', 'unmeasuredNow']) for (const c of score[list]) byKey.set(key(c), { ...c, list });
-// The score of record is written with --movers 0 (PLAN §6), so every cell
-// scored on BOTH sides is in gained / lost / movers and every one-sided cell in
-// newlyMeasured / unmeasuredNow: an absent key is a cell scored on neither side.
-// (Under a thresholded record an absent key would mean "moved less than the
-// threshold" — the wave-54 plan-skeptic M1 hole — which is why R4 counts it as a miss.)
+// The score of record is written with --movers 0 (PLAN §6) and the guard above
+// refuses any other, so every cell scored on BOTH sides is in gained / lost /
+// movers and every one-sided cell in newlyMeasured / unmeasuredNow: an absent key
+// is a cell scored on neither side. (Under a thresholded record an absent key
+// would mean "moved less than the threshold" — the wave-54 plan-skeptic M1 /
+// R3-S1 hole — which is why such a record is refused, and R4 still counts an
+// absent gating cell as a miss.)
 
 let bad = 0;
 const rule = (id, ok, text) => { console.log(`${ok ? 'ok  ' : 'FAIL'} ${id}  ${text}`); if (!ok) bad++; };
@@ -103,11 +162,36 @@ for (const [laneId, cellName] of mnmPairs) {
 }
 rule('R5', mnmBroken === 0, `must-not-move cells ${mnmTotal}, moved ${mnmBroken}`);
 
-// R6 — degenerate-by-construction flips are named, not celebrated.
+// R6 — degenerate-by-construction flips are named, not celebrated — unless degenerateRetirement holds (fix r3, R3-S2).
 const degenerate = new Set((EXP.degenerateByConstruction || []).map((t) => t.replace(/^css\//, '')));
 const degenerateGains = score.gained.filter((c) => degenerate.has(c.test.replace(/^css\//, '').replace(/ .*$/, '')) || [...degenerate].some((t) => c.test.endsWith(t)));
-if (degenerateGains.length) { console.log(`\nDEGENERATE-BY-CONSTRUCTION gains (not fixes): ${degenerateGains.length}`); degenerateGains.forEach((c) => console.log(fmt(c))); }
+const RC = EXP.degenerateRetirementCheck;   // plan-build.py: the machine form of EXP.degenerateRetirement
+// Why a degenerate gain is NOT retired (null = retired): units first (a reverted unit cannot be repaired by a picture),
+// then the geometry row of THIS run pair.
+function notRetired(c) {
+  if (!RC) return 'expectations.json has no degenerateRetirementCheck';
+  const test = c.test.replace(/^css\//, '');
+  const gone = (RC.units[c.platform] || []).filter((u) => decisions.some((d) => d.lane === RC.lane && d.unit === u));
+  if (gone.length) return `unit ${gone.join(', ')} reverted (probeDecisions)`;
+  if (!geometry) return 'degenerateRetirement not read: no --geometry JSON (geometry-gate.py <run> --base <base> --json …)';
+  const geoKey = `${RC.keys[test]} ${c.platform}`;
+  const row = geometry.rows.find((r) => r.script === RC.script && r.key === geoKey);
+  if (!row) return `no ${RC.script} "${geoKey}" row in ${geometryPath}`;
+  if (row.verdict !== 'PASS' || !row.line.endsWith(RC.lineEndsWith)) return `${RC.script} "${geoKey}" ${row.verdict}: …${row.line.slice(-120)}`;
+  return null;
+}
+const judged = degenerateGains.map((c) => ({ c, why: notRetired(c) }));
+const stillDegenerate = judged.filter((j) => j.why), retired = judged.filter((j) => !j.why);
+if (stillDegenerate.length) {
+  console.log(`\nDEGENERATE-BY-CONSTRUCTION gains (not fixes): ${stillDegenerate.length} — degenerateRetirement does not hold for them`);
+  stillDegenerate.forEach(({ c, why }) => console.log(`${fmt(c)}  — ${why}`));
+}
+if (retired.length) {
+  console.log(`\nRETIRED from degenerateByConstruction (degenerateRetirement holds — gains): ${retired.length}`);
+  retired.forEach(({ c }) => console.log(`${fmt(c)}  — units ${RC.units[c.platform].join(', ')} on the tree; ${RC.script} "${RC.keys[c.test.replace(/^css\//, '')]} ${c.platform}" PASS (${RC.lineEndsWith})`));
+}
 
-console.log(`\ngained ${score.gained.length}: ${['web', 'ios', 'android'].map((p) => `${p} ${score.gained.filter((c) => c.platform === p).length}`).join('  ')}`);
+console.log(`\ngained ${score.gained.length}: ${['web', 'ios', 'android'].map((p) => `${p} ${score.gained.filter((c) => c.platform === p).length}`).join('  ')}` +
+  (stillDegenerate.length ? `  (of which DEGENERATE-BY-CONSTRUCTION, not fixes: ${stillDegenerate.length})` : ''));
 console.log(bad ? `\nADJUDICATION: ${bad} rule(s) broken — do not ship` : '\nADJUDICATION: R1–R5 hold');
 process.exit(bad ? 1 : 0);

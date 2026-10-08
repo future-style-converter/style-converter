@@ -1,0 +1,124 @@
+ ? L4-oof-layout            oof-containing-block.geometry.py           position-relative-003 web                                  UNMEASURED [control: expected to stay PASS]
+     line: position-relative-003 web MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           position-relative-003 ios                                  UNMEASURED [report: expected WRONG until the target is fixed]
+     line: position-relative-003 ios MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           position-relative-003 android                              UNMEASURED [report: expected WRONG until the target is fixed]
+     line: position-relative-003 android MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           abspos/static-fixed-inside-abspos web                      UNMEASURED [control: expected to stay PASS]
+     line: abspos/static-fixed-inside-abspos web MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           abspos/static-fixed-inside-abspos ios                      UNMEASURED [GATING -> revert OOF-ios]
+     line: abspos/static-fixed-inside-abspos ios MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           abspos/static-fixed-inside-abspos android                  UNMEASURED [GATING -> revert OOF-android]
+     line: abspos/static-fixed-inside-abspos android MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           position-relative-004 web                                  UNMEASURED [control: expected to stay PASS]
+     line: position-relative-004 web MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           position-relative-004 ios                                  UNMEASURED [GATING -> revert OOF-ios]
+     line: position-relative-004 ios MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           position-relative-004 android                              UNMEASURED [GATING -> revert OOF-android]
+     line: position-relative-004 android MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           change-insets-inside-strict-containment-nested web         UNMEASURED [control: expected to stay PASS]
+     line: change-insets-inside-strict-containment-nested web MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           change-insets-inside-strict-containment-nested ios         UNMEASURED [GATING -> revert OOF-ios]
+     line: change-insets-inside-strict-containment-nested ios MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           change-insets-inside-strict-containment-nested android     UNMEASURED [GATING -> revert OOF-android]
+     line: change-insets-inside-strict-containment-nested android MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           contain-content-003 web                                    UNMEASURED [control: expected to stay PASS]
+     line: contain-content-003 web MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           contain-content-003 ios                                    UNMEASURED [control: expected to stay PASS]
+     line: contain-content-003 ios MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           contain-content-003 android                                UNMEASURED [GATING -> revert OOF-android]
+     line: contain-content-003 android MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           contain-content-011 web                                    UNMEASURED [control: expected to stay PASS]
+     line: contain-content-011 web MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           contain-content-011 ios                                    UNMEASURED [control: expected to stay PASS]
+     line: contain-content-011 ios MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           contain-content-011 android                                UNMEASURED [GATING -> revert OOF-android]
+     line: contain-content-011 android MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           backdrop-filter-containing-block web                       UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-containing-block web MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           backdrop-filter-containing-block ios                       UNMEASURED [report: expected WRONG until the target is fixed]
+     line: backdrop-filter-containing-block ios MISSING
+ ? L4-oof-layout            oof-containing-block.geometry.py           backdrop-filter-containing-block android                   UNMEASURED [report: expected WRONG until the target is fixed]
+     line: backdrop-filter-containing-block android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr web                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-htb-ltr web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr android                      UNMEASURED [GATING -> revert CBB-android]
+     line: abspos/abspos-autopos-htb-ltr android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr web                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vlr-ltr web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr android                      UNMEASURED [GATING -> revert CBB-android]
+     line: abspos/abspos-autopos-vlr-ltr android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr web                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vrl-ltr web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr android                      UNMEASURED [GATING -> revert CBB-android]
+     line: abspos/abspos-autopos-vrl-ltr android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl web                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-htb-rtl web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl android                      UNMEASURED [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-htb-rtl android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl web                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vlr-rtl web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl android                      UNMEASURED [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-vlr-rtl android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl web                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vrl-rtl web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl android                      UNMEASURED [report: expected WRONG until the target is fixed]
+     line: abspos/abspos-autopos-vrl-rtl android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-ltr ios                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-htb-ltr ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-ltr ios                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vlr-ltr ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-ltr ios                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vrl-ltr ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-htb-rtl ios                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-htb-rtl ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vlr-rtl ios                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vlr-rtl ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     abspos/abspos-autopos-vrl-rtl ios                          UNMEASURED [control: expected to stay PASS]
+     line: abspos/abspos-autopos-vrl-rtl ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip web              UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip ios              UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip android          UNMEASURED [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 web            UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip-2 web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 ios            UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip-2 ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-2 android        UNMEASURED [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip-2 android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 web            UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip-3 web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 ios            UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip-3 ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-3 android        UNMEASURED [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip-3 android MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 web            UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip-4 web MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 ios            UNMEASURED [control: expected to stay PASS]
+     line: backdrop-filter-nested-border-radius-clip-4 ios MISSING
+ ? L4-oof-layout            compose-wpt-content-box-cb.geometry.py     backdrop-filter-nested-border-radius-clip-4 android        UNMEASURED [GATING -> revert CBB-android]
+     line: backdrop-filter-nested-border-radius-clip-4 android MISSING
+   L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 web                          PASS       [control: expected to stay PASS]
+   L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 ios                          PASS       [GATING -> revert GAP-ios]
+   L4-oof-layout            flex-zero-gap-rules.geometry.py            flex/flex-gap-decorations-033 android                      PASS       [GATING -> revert GAP-android]
+
+geometry-gate ../results/wave54-plan/verify-r3/gap/fake-ref-as-run (base wave54-open): 54 keys — PASS 3 · FAIL 0 (gating 0) · UNMEASURED 51 (gating 15) · probe self-check failures 0
+  by class: gating 17 (PASS 2 FAIL 0) · control 30 (PASS 1 FAIL 0) · report 7 (PASS 0 FAIL 0) · withdrawn 0 (PASS 0 FAIL 0)
+UNMEASURED GATING KEYS (15) — not a pass: re-run the section (R3) or narrow --lanes to the lanes this run covers; exit 3 unless a gating key FAILed (exit 1):
+   L4-oof-layout oof-containing-block.geometry.py abspos/static-fixed-inside-abspos ios [unit OOF-ios]
+   L4-oof-layout oof-containing-block.geometry.py abspos/static-fixed-inside-abspos android [unit OOF-android]
+   L4-oof-layout oof-containing-block.geometry.py position-relative-004 ios [unit OOF-ios]
+   L4-oof-layout oof-containing-block.geometry.py position-relative-004 android [unit OOF-android]
+   L4-oof-layout oof-containing-block.geometry.py change-insets-inside-strict-containment-nested ios [unit OOF-ios]
+   L4-oof-layout oof-containing-block.geometry.py change-insets-inside-strict-containment-nested android [unit OOF-android]
+   L4-oof-layout oof-containing-block.geometry.py contain-content-003 android [unit OOF-android]
+   L4-oof-layout oof-containing-block.geometry.py contain-content-011 android [unit OOF-android]
+   L4-oof-layout compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-htb-ltr android [unit CBB-android]
+   L4-oof-layout compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vlr-ltr android [unit CBB-android]
+   L4-oof-layout compose-wpt-content-box-cb.geometry.py abspos/abspos-autopos-vrl-ltr android [unit CBB-android]
+   L4-oof-layout compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip android [unit CBB-android]
+   L4-oof-layout compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-2 android [unit CBB-android]
+   L4-oof-layout compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-3 android [unit CBB-android]
+   L4-oof-layout compose-wpt-content-box-cb.geometry.py backdrop-filter-nested-border-radius-clip-4 android [unit CBB-android]

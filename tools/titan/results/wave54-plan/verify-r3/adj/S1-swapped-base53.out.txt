@@ -1,0 +1,1 @@
+ORDER: this record is score-gate.mjs wave54-open → wave53-final; adjudication needs wave53-final FIRST (node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt --movers 0 --json tools/titan/results/wave54-gate/score-final.json > tools/titan/results/wave54-gate/score-final.movers0.txt). Refusing.

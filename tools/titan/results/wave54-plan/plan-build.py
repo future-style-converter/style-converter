@@ -382,7 +382,7 @@ L3 = {
     'U3b': {'commit': 'tools/titan/extract-fixture.mjs seam-3b (a line-start br in a host declaring line-height gets that line box, normal = 1.2 x font-size) + its pins in extract-fixture-br-line-context.test.mjs',
             'captures': caps(**{p: [stem(HC[n]) for n in (1, 2, 3, 4)] for p in PLATS}), 'wire': sorted(stem(HC[n]) for n in (1, 2, 3, 4)),
             'revertOrder': ['U3b'],
-            'probeDecided': 'U3b is IN at wave54-probe. It stays iff 001 ios and 003 ios meet their 0.965 floors with no `offset:`/`lines:` reason on any iOS row, and rules 1/2/5 hold on its carriers; else it is reverted FIRST and css-text is re-probed (the brief\'s GBn risk: iOS loses its zero-drift compensation, 0.947-0.958)'},
+            'probeDecided': 'U3b is IN at wave54-probe. It stays iff 001 ios and 003 ios meet their 0.965 floors with no `offset:`/`lines:` reason on THOSE TWO gating iOS rows, and rules 1/2/5 hold on its carriers; else it is reverted FIRST and css-text is re-probed (the brief\'s GBn risk: iOS loses its zero-drift compensation, 0.947-0.958). The report row 004 ios (MED) is read, never a trigger (revertRule tier), and a `lines:` re-wrap there from a glyph-width change is U2-ios\'s (reasonToUnit), not U3b\'s (fix r3, plan-skeptic R3-N2)'},
   },
   'sequencing': 'U3 never lands without U1 + U2-android + U2-ios in the tree before it (U3 alone manufactures a DEGENERATE -003 ios pass, replay B 0.9566); the landing order guarantees it, and a later revert of U1/U2-<p> keeps that platform\'s 001/003/004 flips labelled DEGENERATE by construction',
 }
@@ -476,7 +476,10 @@ L4 = {
     {'cmd': 'python3 tools/titan/results/wave54-plan/flex-zero-gap-rules.geometry.py <run>',
      'expect': {f'flex/flex-gap-decorations-033 {p}': GEO_OK for p in PLATS},
      'gating': {'flex/flex-gap-decorations-033 ios': 'GAP-ios', 'flex/flex-gap-decorations-033 android': 'GAP-android'}, 'report': [],
-     'onWave53Final': 'ios / android WRONG (redPx 0 vs ref 2200); ref / web OK'},
+     'onWave53Final': 'ios / android WRONG (redPx 0 vs ref 2200); ref / web OK',
+     'reads': ('red / blue counts ±2 % and bboxes ±1 px; ±1 px against the ref: the red runs on a row through every flex line (y20 / y95 / y145, '
+               'fix r2 R2-M1), the blue runs on a column through every item column (x40 / x90 / x140), and the red runs on a column through each '
+               'column-rule gap (x65 / x115: every segment\'s vertical extent, flex line by line; fix r3, plan-skeptic R3-S3)')},
   ],
   'revertUnits': {
     'OOF-android': {'commit': 'Compose layout/position/OutOfFlowContainingBlock.kt (new) + CanvasRootHoist.kt call-site lines :222 (one OR), :340 (inset clause), :389 (FIXED joins RC1) + OutOfFlowContainingBlockTest.kt + CanvasRootHoistTest rows',
@@ -889,7 +892,18 @@ expectations = {
   # rows predicted to move < 0.005) and R5 sees a must-not-move move in (0.002, 0.005). R5 keeps its own 0.002 rule.
   'scoreOfRecord': ('node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt'
                     ' --movers 0 --json tools/titan/results/wave54-gate/score-final.json > tools/titan/results/wave54-gate/score-final.movers0.txt'),
-  'adjudicate': 'node tools/titan/results/wave54-gate/adjudicate.mjs tools/titan/results/wave54-gate/score-final.json',
+  # fix r3 (plan-skeptic R3-S1 / R3-S2): adjudicate.mjs refuses (exit 2) a record that is not base-first or not --movers 0,
+  # so the 0.005 JSON written beside it cannot be adjudicated by mistake; --geometry feeds R6's degenerateRetirement read.
+  'adjudicate': ('node tools/titan/results/wave54-gate/adjudicate.mjs tools/titan/results/wave54-gate/score-final.json'
+                 ' --geometry tools/titan/results/wave54-gate/geometry-final.json'),
+  'closingGateFiles': {
+    'tools/titan/results/wave54-gate/score-final.json': ('scoreOfRecord (--movers 0). Read by adjudicate.mjs (R1-R5, R6 read-out) and by nothing else; '
+                                                         'adjudicate.mjs refuses every other record: exit 2 ORDER (prev is not wave54-open) or NOT A --movers 0 RECORD (a cell scored on both sides is missing from every list)'),
+    'tools/titan/results/wave54-gate/score-final.movers0005.json': ('scoreReadout (--movers 0.005). Read by make-corpus.mjs (corpusSnapshotSource) and the PR mover list ONLY; '
+                                                                    'never adjudicated (adjudicate.mjs exits 2 on it: fix r3, R3-S1)'),
+    'tools/titan/results/wave54-gate/geometry-final.json': ('geometryGate.closingCmd. R6 is that command\'s EXIT; adjudicate.mjs --geometry reads its rows only to retire a '
+                                                            'degenerateByConstruction gain (degenerateRetirementCheck), and refuses it (exit 2 GEOMETRY PAIR) unless run/base equal the score record\'s cur/prev'),
+  },
   'scoreReadout': ('node tools/titan/score-gate.mjs wave54-open wave54-final --watch tools/titan/results/wave54-plan/watchlist.txt'
                    ' --movers 0.005 --json tools/titan/results/wave54-gate/score-final.movers0005.json > tools/titan/results/wave54-gate/score-final.txt'
                    '   (the human-readable mover list for the PR; adjudicates nothing)'),
@@ -898,17 +912,32 @@ expectations = {
   # identity pair) — so the snapshot is built from the 0.005 JSON, never from score-final.json.
   'corpusSnapshotSource': ('tools/titan/results/wave54-gate/score-final.movers0005.json (the <record.json> of tools/titan/results/wave52-gate/make-corpus.mjs; '
                            'its perCellDiff.movers then counts |Δ| >= 0.005 exactly as its scorer string says — score-final.json, the --movers 0 record of R4/R5, would publish ≈4000)'),
+  # Re-run at fix r3 (plan-skeptic R3-S1 / R3-S2) with the guarded adjudicate.mjs: a record must be base-first (--base,
+  # default wave54-open) and --movers 0, else exit 2; the fix-r1 inputs are wave53-final-based, so they take --base wave53-final.
   'adjudicateCalibrations': [
     {'input': 'skeptic-r1/synth-score.json (every gating row at its predicted value, built with the old --movers 0.005 rule)',
-     'expect': 'FAIL R4 missed 4 (abspos-autopos-{htb,vlr,vrl}-ltr android, s-11-1-1b-006 android): the defect, reproduced', 'out': 'fix-r1/pre-M1.adjudicate-synth.out.txt'},
-    {'input': 'fix-r1/synth-movers0-allmet.json (score-gate diffRuns, moverThreshold 0, over the 4096 wave53-final cells with every gating row at its predicted value)',
-     'expect': 'R1-R5 hold, exit 0', 'out': 'fix-r1/post-M1.adjudicate-allmet.out.txt'},
-    {'input': 'fix-r1/synth-movers0-floor.json (as all-met, counter-suffix ios exactly at its floor 0.985, delta +0.0048)',
-     'expect': 'R1-R5 hold, exit 0', 'out': 'fix-r1/post-M1.adjudicate-floor.out.txt'},
-    {'input': 'fix-r1/synth-movers0-mnm3.json (as all-met, one must-not-move cell +0.003)',
-     'expect': 'FAIL R5 moved 1 (the (0.002, 0.005) hole is closed)', 'out': 'fix-r1/post-M1.adjudicate-mnm3.out.txt'},
+     'expect': 'exit 2 ORDER (its prev is "wave54-open(=wave53-final)"); with --base "wave54-open(=wave53-final)" exit 2 NOT A --movers 0 RECORD (30 listed vs 0). Was FAIL R4 missed 4 (fix r1): the thresholded input is now refused instead of mis-read',
+     'out': 'fix-r3/post-S1.skeptic-r1-synth.out.txt, fix-r3/post-S1.skeptic-r1-synth-based.out.txt'},
+    {'input': 'fix-r1/synth-movers0-allmet.json --base wave53-final (score-gate diffRuns, moverThreshold 0, over the 4096 wave53-final cells with every gating row at its predicted value)',
+     'expect': 'R1-R5 hold, exit 0 (R6 read-out: 001 / 003 ios DEGENERATE, "not read: no --geometry JSON")', 'out': 'fix-r3/post-cal.fix-r1-allmet.out.txt'},
+    {'input': 'fix-r1/synth-movers0-floor.json --base wave53-final (as all-met, counter-suffix ios exactly at its floor 0.985, delta +0.0048)',
+     'expect': 'R1-R5 hold, exit 0', 'out': 'fix-r3/post-cal.fix-r1-floor.out.txt'},
+    {'input': 'fix-r1/synth-movers0-mnm3.json --base wave53-final (as all-met, one must-not-move cell +0.003)',
+     'expect': 'FAIL R5 moved 1, exit 1 (the (0.002, 0.005) hole is closed)', 'out': 'fix-r3/post-cal.fix-r1-mnm3.out.txt'},
+    {'input': 'fix-r1/synth-movers0-mnm3-old.json --base wave53-final (the same picture written with --movers 0.005)',
+     'expect': 'exit 2 NOT A --movers 0 RECORD (30 listed vs 4096): fix r1 printed R5 moved 0 on it', 'out': 'fix-r3/post-cal.fix-r1-mnm3-old.out.txt'},
     {'input': 'fix-r1/score-identity-movers0.json (score-gate.mjs wave53-final wave54-open --movers 0: nothing moved)',
-     'expect': 'FAIL R4 missed 31 = 34 gating rows minus the 3 autopos-ltr rows whose floor 0.995 sits below today\'s 0.9966 (their gate is geometry alone: PLAN §6)', 'out': 'fix-r1/post-M1.adjudicate-identity.out.txt'},
+     'expect': 'exit 2 ORDER with the default --base wave54-open; with --base wave53-final FAIL R4 missed 31 = 34 gating rows minus the 3 autopos-ltr rows whose floor 0.995 sits below today\'s 0.9966 (their gate is geometry alone: PLAN §6); the same record with prev / cur swapped exits 2 ORDER',
+     'out': 'fix-r3/post-S1.identity-unbased.out.txt, fix-r3/post-S1.identity-base53.out.txt, fix-r3/post-S1.reversed-identity.out.txt'},
+    {'input': 'fix-r3/synth/{installed,abc}-{allmet,mnm3}.{m0,m0005}.json (fix-r3/synth-closing-r3.mjs: the identity record relabelled wave54-open -> wave54-final, every gating row of the installed / the Mprime + TB-android + CBB-android-reverted (fix-r3/hooks/abc) expectations at its prediction; mnm3 moves css-cascade/all-prop-001.html ios by -0.003; m0005 = the same picture as score-gate --movers 0.005 writes it)',
+     'expect': 'm0: allmet R1-R5 hold exit 0, mnm3 FAIL R5 moved 1 exit 1 (both expectations; abc with --exp fix-r3/hooks/abc/expectations.json). m0005: exit 2 NOT A --movers 0 RECORD ×4 — the abc mnm3 picture used to print R1-R5 hold, exit 0 (the move unseen: plan-skeptic R3-S1)',
+     'out': 'fix-r3/post-S1.{installed,abc}-{allmet,mnm3}.{m0,m0005}.out.txt'},
+    {'input': 'fix-r3/synth/installed-allmet.m0.json with --geometry fix-r3/geometry-{allmet,u3only,otherpair}.json and without (fix-r3/synth-geometry.py: geometry-gate JSONs whose hyphenate-character.geometry.py rows are the probe\'s own lines on replay GB = U1+U2+U3, or B = U3 alone)',
+     'expect': 'allmet geometry: RETIRED 2 (001 / 003 ios: gains), no DEGENERATE line; no --geometry: DEGENERATE 2 "not read"; U3-only geometry: DEGENERATE 2 (geometry FAIL: glyph); a geometry JSON of another pair: exit 2 GEOMETRY PAIR. R1-R5 hold, exit 0, in the first three (plan-skeptic R3-S2)',
+     'out': 'fix-r3/post-S2.allmet-{geometry,nogeometry,geometry-u3only,geometry-otherpair}.out.txt'},
+    {'input': 'fix-r3/synth/u2ios-closing.m0.json --exp fix-r3/hooks/u2ios/expectations.json (U2-ios reverted at wave54-probe; 003 ios at the replay-B DEGENERATE pass 0.9566) with --geometry fix-r3/geometry-u2ios.json, and with the all-OK geometry',
+     'expect': 'R4 gating predictions 32, missed 0; R1-R5 hold; DEGENERATE 1: 003 ios "unit U2-ios reverted" in both (units are read before the picture)',
+     'out': 'fix-r3/post-S2.u2ios-closing-geometry.out.txt, fix-r3/post-S2.u2ios-closing-geometry-allmet.out.txt'},
   ],
   'openingGate': {
     'cmd': 'node tools/titan/score-gate.mjs wave53-final wave54-open --watch tools/titan/results/wave53-plan/watchlist.txt',
@@ -932,10 +961,12 @@ expectations = {
                                  'css-view-transitions': 'two L4 fixed controls (content-with-child-with-transparent-background, content-with-transparent-background, P x3) — replaced by the L4 skeptic\'s P3 pure-walk census over all 26 fixedControls payloads (JVM + Catalyst) and the closing gate R4/R7; the section runs 8-30 min under swap'}[s]
                              for s in NOT_PROBED}},
   'geometryGate': {'cmd': 'python3 tools/titan/results/wave54-plan/geometry-gate.py <run> --base wave54-open',
-                   'what': 'runs every lane\'s geometryProbes, prints one PASS/FAIL per expect key, names the unit each failing gating row reverts (rule 4), exits 1 on a gating FAIL or a probe self-check failure, 2 on a STALE json, 3 when no gating key FAILs but one is UNMEASURED (fix r2, R2-S2: never a silent pass); R6 = exit 0'},
+                   'closingCmd': ('python3 tools/titan/results/wave54-plan/geometry-gate.py wave54-final --base wave54-open'
+                                  ' --json tools/titan/results/wave54-gate/geometry-final.json > tools/titan/results/wave54-gate/geometry-final.out.txt'),
+                   'what': 'runs every lane\'s geometryProbes, prints one PASS/FAIL per expect key, names the unit each failing gating row reverts (rule 4), exits 1 on a gating FAIL or a probe self-check failure, 2 on a STALE json, 3 when no gating key FAILs but one is UNMEASURED (fix r2, R2-S2: never a silent pass); R6 = exit 0. A CONTROL FAIL never changes the exit (it is diagnosed through R4 / R7) — but 9 control keys sit on CARRIERS, where R4 and R7 cannot see them (U3\'s 8 block-ellipsis-002/-004/-005/-006 ios/android freeze keys; RS\'s ua-heading-face block-in-inline-015-print web): at the closing gate they are gated by NOTHING automatic, so the cell review reads every control FAIL and names it in the PR (fix r3, plan-skeptic R3-N4; at the probes revert rules 1 / 2 bind their scores)'},
   'revertRule': [
     '1 lost: a carrier cell (any lane, any tier, predicted or not) that is P on wave54-open and f on the probe reverts the commit that carries it (R1\'s empty lost list applied at the probe)',
-    '2 moved down: delta <= -0.002 wave54-open -> probe on any prediction row whose direction is "up-or-stay" (any tier) reverts the commit that carries it. A row with direction "undirected" (a move whose sign is not pre-registered; lanes.*.predictions[].directionWhy) is EXEMPT from rule 2: its fall is looked at against the ref and named with its cause in the probe read-out and the PR, never a revert by itself; rules 1 and 5 still bind it',
+    '2 moved down: delta <= -0.002 wave54-open -> probe on any prediction row whose direction is "up-or-stay" (any tier) reverts the commit that carries it. A row with direction "undirected" (a move whose sign is not pre-registered; lanes.*.predictions[].directionWhy) is EXEMPT from rule 2: its fall is looked at against the ref and named with its cause in the probe read-out and the PR, never a revert by itself; rules 1 and 5 still bind it. Rule 2 is read AT THE PROBES ONLY (probe-readout.mjs): at the closing gate adjudicate.mjs prints every prediction row\'s measured value but enforces only the gating floors (its R4) and must-not-move (its R5), so a directed non-gating row that falls between wave54-probe and wave54-final (on a byte-deterministic host it should not move at all) is named in the cell review and the PR, not a ship-stopper by itself (fix r3, plan-skeptic R3-N5)',
     '3 floor: a gating prediction (every HIGH / MED-HIGH row) below its floor reverts the commit that carries it. Read by probe-readout.mjs over the --movers 0 probe record (stage1Probe.readOut / probeRun.readOut). A row demoted by a probe decision (probeDecisions.reverted[].demotedPredictions: a required unit is gone) has no floor',
     '4 geometry: a geometryProbes gating key whose line does not end in its exact expect string (or lacks its contains string) reverts the unit geometry-gate.py names; an UNMEASURED gating key is not a pass (geometry-gate.py exit 3: re-run the section)',
     '5 leak: a composed capture outside every carrier set that differs in decoded pixels (R4), or a per-test IR document outside the wire carriers that differs in bytes and is not "renumbered" (R4b), reverts the commit it is bisected to (one re-probe of the leaked section per step; never guessed)',
@@ -975,13 +1006,27 @@ expectations = {
     {'arm': 'drop-U3b', 'lane': 'L3-hyphenate-character', 'sections': ['css-text'], 'platforms': ['web', 'ios', 'android'],
      'when': 'only if U3b is on the closing tree', 'expect': 'hyphenate-character-001..004 return to the U3-only values (web/android ≈0.95-0.96; iOS unchanged or up)'},
   ],
+  # fix r3 (plan-skeptic R3-N6): the A/B read-out order, pre-registered after R2-M2. ab-diff.mjs is <excludeRun> <includeRun>
+  # and prints Δ = include − exclude, so the ARM (the unit dropped) goes FIRST and the closing gate second: Δ = final − arm is
+  # the mechanism's share, a gain the unit made prints "+" / "flip f→P".
+  'abRead': {'runId': 'wave54-ab-<arm>   (e.g. wave54-ab-drop-W1)',
+             'cmd': 'node tools/titan/results/wave52-gate/ab-diff.mjs wave54-ab-<arm> wave54-final --threshold 0.002 --platforms <arm.platforms>',
+             'order': 'arm (exclude) first, wave54-final (include) second: Δ = wave54-final − arm = what the dropped unit does on device'},
   'unionCaptureCarriers': union,
   'unionWireCarriers': sorted(wire_owner),
-  # Kept conservative (honest by default): adjudicate.mjs prints a gain on these as "DEGENERATE-BY-CONSTRUCTION, not a fix".
-  # The cell review may relabel a cell faithful ONLY under degenerateRetirement, recorded per cell in the gate note.
+  # Kept conservative (honest by default): adjudicate.mjs prints a gain on these as "DEGENERATE-BY-CONSTRUCTION, not a fix"
+  # unless degenerateRetirementCheck holds for that cell on the --geometry JSON of the same run pair (fix r3, R3-S2); the
+  # cell review still LOOKS at every retired cell, recorded per cell in the gate note.
   'degenerateByConstruction': [HC[1], HC[3], HC[4]],
   'degenerateRetirement': ('a hyphenate-character-001/003/004 cell on platform p is faithful only when U1, U2-p (none needed on web) and U3 are all on the '
                            'closing tree AND hyphenate-character.geometry.py prints "→ GEOMETRY OK" on its row; anything else stays DEGENERATE'),
+  # fix r3 (plan-skeptic R3-S2): the same rule in the form adjudicate.mjs reads (its R6 line printed the plan's own iOS
+  # gains "not fixes" on a fully correct tree). A degenerate gain is RETIRED (a gain) iff no unit of units[<platform>] is in
+  # probeDecisions.reverted for `lane` AND the --geometry JSON's `script` row "<keys[test]> <platform>" is PASS and ends in
+  # `lineEndsWith`; with no --geometry JSON nothing is retired.
+  'degenerateRetirementCheck': {'lane': 'L3-hyphenate-character', 'script': 'hyphenate-character.geometry.py', 'lineEndsWith': '→ GEOMETRY OK',
+                                'units': {'web': ['U1', 'U3'], 'ios': ['U1', 'U2-ios', 'U3'], 'android': ['U1', 'U2-android', 'U3']},
+                                'keys': {HC[n]: f'hyphenate-character-00{n}' for n in (1, 3, 4)}},
   'stayDegenerateEvenIfPass': [f'{BL2} android (orange "!" on the left: bake measurement)', f'{CS} ios (rows 3-6)', f'{CS} android (rows 5-6)',
                                f'{BE[2]} ios (Line 4 painted and no "…": the iOS clamp is not applied; U3 only removes the stray blank lines)'],
   'recordedWall': ['css-anchor-position/anchor-position-multicol-007.html android'],
@@ -1028,6 +1073,16 @@ for ln, l in lanes.items():
             assert all(u in l['revertUnits'] for u in pr['requires'][k]), f'{ln}: requires names an unknown unit'
         for k, v in pr.get('gating', {}).items():
             assert all(u in l['revertUnits'] for u in v.split('|')), f'{ln}: gating key {k} names an unknown unit {v}'
+
+# fix r3 (plan-skeptic R3-S2): the machine form of degenerateRetirement names exactly the degenerate cells, known units
+# of its lane, and a geometry key of that lane's probe for every (cell, platform) — so adjudicate.mjs can always read it.
+_rc = expectations['degenerateRetirementCheck']
+assert set(_rc['keys']) == set(expectations['degenerateByConstruction']), 'degenerateRetirementCheck.keys != degenerateByConstruction'
+assert all(u in lanes[_rc['lane']]['revertUnits'] for us in _rc['units'].values() for u in us), 'degenerateRetirementCheck names an unknown unit'
+assert set(_rc['units']) == set(PLATS), 'degenerateRetirementCheck.units must name every platform'
+_rcp = [pr for pr in lanes[_rc['lane']]['geometryProbes'] if os.path.basename(pr['cmd'].split()[1]) == _rc['script']]
+assert len(_rcp) == 1 and all(f'{k} {p}' in _rcp[0]['expect'] for k in _rc['keys'].values() for p in PLATS), 'degenerateRetirementCheck key missing from its probe'
+assert all(_rcp[0]['expect'][f'{k} {p}'] == _rc['lineEndsWith'].lstrip('→ ') for k in _rc['keys'].values() for p in PLATS), 'retirement verdict string differs from the probe expect'
 
 _pd = probe_decisions()                     # None at planning: no unit has been reverted yet
 if _pd:

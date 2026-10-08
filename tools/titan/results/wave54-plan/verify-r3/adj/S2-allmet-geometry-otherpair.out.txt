@@ -1,0 +1,1 @@
+GEOMETRY PAIR: tools/titan/results/wave54-plan/verify-r3/geo/geometry-otherpair.json is geometry-gate.py wave53-final --base wave53-open; the score record is wave54-open → wave54-final. Refusing.
