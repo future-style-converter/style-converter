@@ -67,5 +67,14 @@ with every capture and wire document byte-identical.** The reading of the net la
   absolute one; result below. Noted for the lane's script: it prints `exit 0` with 30 one-sided sections, which should be a
   failure.
 
-WL3_PLACEHOLDER
+### [W-L3] result (`wl3-diff.out.txt`; the per-test IR trees of both sides parked, gitignored, at `tools/titan/runs/wave54-wl3-diff/`)
+
+30 sections × 48 tests extracted with the gate's own flags (`POST_LOAD_EXTRACT=1 BIDI_BAKE=1 VT_BAKE=1`), combined, converted and
+split on BOTH trees: **1397 identical · 23 content-changed · 15 renumbered · 0 one-sided**. The 23 content-changed documents are
+EXACTLY `expectations.unionWireCarriers` (set equality checked programmatically): L1's 4 (counter-suffix, bidi-lines-001/-002,
+anchor-center-safe-rtl) and L3's 19 (hyphenate-character-001…005 — U1's value change inside the existing string variant —
+plus the 18 U3 documents, four of them the same hyphenate-character files). The 15 renumbered are the css-counter-styles
+`cssom/*` documents (+6 after counter-suffix: M′'s six root-owned runs). The three zero-padding selectors documents are
+byte-identical. **R4b holds on the landed tree before any device run; no bisection needed.** (The lane's static differential
+without the bake flags had predicted the same 19 for L3 — the flags did not widen the radius.)
 
