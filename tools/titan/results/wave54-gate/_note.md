@@ -33,3 +33,18 @@ with every capture and wire document byte-identical.** The reading of the net la
 "read right after provisioning" holds for the corpus launch only; on the net launch the record of value is the corpus launch's
 (same tree) plus the post-net iOS re-read.
 
+### Plan checks after the opening gate (PLAN.md §8 step 1; 2026-10-08)
+
+- `watchlist-check.mjs` with the wave-54 watchlist over `wave54-open` → see `watchlist-check.wave54-open.txt` (expected `unmatched 0`).
+- Per-test IR `wave53-final` → `wave54-open`: 1435 / 1435 byte-identical (the control above).
+- `snapshot-cells.mjs wave54-open` → `wave54-plan/cells-wave54-open.json`: `cells` and `totals` equal to `cells-wave53-final.json`
+  (only the `run` name differs) — every prediction's "from" value reads the same against `wave54-open`.
+- `adjudicate.mjs` / `control-check.mjs` copied from `wave53-gate/` with only the expectations path changed. The four
+  pre-registered `controlCalibrations`: **C2** `wave53-final → wave54-open` HOLDS, 0 changed / 0 wire / 0 renumbered
+  (`control-calib-identity.json`); **C3** `wave53-open → wave53-final` under the wave-54 carriers FAILS — 25 capture + 1 wire
+  leaks, wave 53's landed changes (`control-calib-wave53pair.json`); **C4** `--lane L7-label-chrome` (empty carrier set) HOLDS
+  on the identity pair and FAILS on the wave-53 pair (28 + 1); **C1** the wave-53 original on its own pair reproduces its
+  closing verdict (HOLDS; capture totals identical to the copy's — 5 / 10 / 13 changed, wire 1 + 10 — only the carrier
+  attribution differs). The instrument is calibrated both ways before any lane lands.
+- **No divergence from `wave53-final`, so PLAN.md §10 needs no restated prediction**; it records that reading.
+
